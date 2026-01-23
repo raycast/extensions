@@ -9,10 +9,14 @@ A Raycast extension to search and browse [Remix Icon](https://remixicon.com/) li
 - **Search & Browse**: Instantly search through icons by name
 - **Category Filtering**: Filter icons by 19 categories (Arrows, Buildings, Business, Communication, Design, Development, Device, Document, Editor, Finance, Food, Health & Medical, Logos, Map, Media, Others, System, User & Faces, Weather)
 - **Recent Icons**: Quick access to your last 8 used icons
-- **Multiple Copy Formats**:
-  - Copy as SVG (raw SVG code)
-  - Copy as Webfont (`<i class="icon-name"></i>`)
-  - Copy as Data URI (base64 encoded for inline use)
+- **Multiple Export Formats**:
+  - **SVG**: Raw SVG code for direct use
+  - **React Component**: Ready-to-use component tags (e.g., `<RiHeartFill size={24} />`)
+  - **Data URI**: Base64 encoded for inline use
+  - **Webfont**: HTML tag (`<i class="ri-heart-fill"></i>`)
+  - **CDN Link**: Versioned webfont CDN link
+  - **NPM Install**: Command to install Remix Icon package
+  - **React Import**: Import statement for React components
 - **Quick Links**: Direct access to Remix Icon homepage and GitHub repository
 
 ## Installation
@@ -59,6 +63,24 @@ The update script:
 - **Official releases**: Downloads the `RemixIcon_Svg_*.zip` asset from GitHub releases
 - **Smart updates**: Only updates when a new version is available (tracked in `scripts/.remix-version`)
 - **Auto-rebuild**: Regenerates `catalogue.json` from downloaded icons
+- **Metadata generation**: Creates `metadata.json` with version info for CDN links
+
+#### ⚠️ Important: Version Synchronization
+
+When updating icons, ensure the RemixIcon version matches the `@remixicon/react` package version:
+
+```bash
+# After running update-icons.sh, check the downloaded version
+cat assets/metadata.json
+
+# Update @remixicon/react to match (if version 4.8.0)
+npm install -D @remixicon/react@4.8.0
+
+# Validate React component names match the official package
+node scripts/validate-react-names.mjs
+```
+
+This ensures the React component names exported by the extension match the official `@remixicon/react` package.
 
 ### Project Structure
 
@@ -67,26 +89,29 @@ src/
 ├── search.tsx              # Main command with Grid view and filtering
 ├── CategorySection.tsx     # Renders icon grid sections
 ├── IconActionPanel.tsx     # Action menu for copy operations
-├── types.ts               # TypeScript interfaces
-└── utils.tsx              # Helper functions
+├── types.ts                # TypeScript interfaces
+└── utils.ts                # Helper functions (Raycast environment)
 
 assets/
-├── catalogue.json         # Icon metadata
-└── icons/                 # SVG files organized by category
+├── catalogue.json          # Icon metadata
+├── metadata.json           # Version info for CDN links
+├── icons/                  # SVG files organized by category
+└── icons-compressed/       # Compressed JSON files (one per category)
 
 scripts/
-├── update-icons.sh        # Downloads latest release and rebuilds catalogue
-└── .remix-version         # Tracks currently installed version
+├── update-icons.sh         # Downloads latest release and rebuilds catalogue
+├── validate-react-names.mjs # Validates React component name generation
+├── utils.mjs               # Helper functions (Node.js environment)
+└── .remix-version          # Tracks currently installed version
 ```
 
 ## Future Enhancements
 
-- React and Vue component export
-- CDN link export
 - SVG sprite export
 - PNG export support
 - Starred/favorite icons
-- Settings for size, color, palette option and default export format
+- Configurable preferences (default size, color, className)
+- Vue component export
 
 ## License
 

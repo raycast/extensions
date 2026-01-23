@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@remixicon/react": "~4.8.0",
     "@types/node": "^24.10.4",
     "@types/react": "^19.2.8",
     "eslint": "^9.39.2",
@@ -42,6 +43,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "validate": "node scripts/validate-react-names.mjs"
   }
 }

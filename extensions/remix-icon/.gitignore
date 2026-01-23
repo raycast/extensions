@@ -8,5 +8,5 @@
 
 raycast-env.d.ts
 
-index.html
-*.sha
+# Local development files
+.local/

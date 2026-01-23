@@ -1,68 +1,75 @@
-import { ActionPanel, Action, Icon, Clipboard, showHUD } from "@raycast/api";
-import { readAssetFile } from "./utils";
-import { RemixIcon } from "./types";
+import { ActionPanel, Action } from "@raycast/api";
+import { getSvgContent, svgToDataUri, toReactComponentName } from "./utils";
+import metadata from "../assets/metadata.json";
 
 export default function IconActionPanel({
-  icon,
+  category,
+  iconName,
   updateRecentIcons,
 }: Readonly<{
-  icon: RemixIcon;
-  updateRecentIcons: (icon: RemixIcon) => void;
+  category: string;
+  iconName: string;
+  updateRecentIcons: (category: string, iconName: string) => void;
 }>) {
-  const copySVG = () => {
-    try {
-      const content = readAssetFile(icon.path);
-      Clipboard.copy(content);
-      showHUD(`📋 Copied "${icon.name}" (SVG) to your clipboard.`);
-      updateRecentIcons(icon);
-    } catch (error) {
-      console.error(error);
-      showHUD("❌ Could not copy the icon.");
-    }
-  };
-
-  const copyWebfont = () => {
-    const content = `<i class="${icon.name}"></i>`;
-    Clipboard.copy(content);
-    showHUD(`📋 Copied "${icon.name}" (Webfont) to your clipboard.`);
-    updateRecentIcons(icon);
-  };
-
-  const copyDataURI = () => {
-    try {
-      const content = readAssetFile(icon.path);
-      const dataUri = `data:image/svg+xml;base64,${Buffer.from(content).toString("base64")}`;
-      Clipboard.copy(dataUri);
-      showHUD(`📋 Copied "${icon.name}" (Data URI) to your clipboard.`);
-      updateRecentIcons(icon);
-    } catch (error) {
-      console.error(error);
-      showHUD("❌ Could not copy the Data URI.");
-    }
-  };
+  const reactComponentName = toReactComponentName(iconName);
+  const cdnLink = `<link href="https://cdn.jsdelivr.net/npm/remixicon@${metadata.version}/fonts/remixicon.css" rel="stylesheet"/>`;
 
   return (
     <ActionPanel>
-      <Action title="Copy SVG" onAction={copySVG} icon={Icon.CopyClipboard} />
-      <Action
-        title="Copy Webfont"
-        onAction={copyWebfont}
-        icon={Icon.CopyClipboard}
+      <Action.CopyToClipboard
+        title="Copy SVG"
+        content={getSvgContent(category, iconName)}
+        onCopy={() => updateRecentIcons(category, iconName)}
       />
-      <Action
+      <Action.CopyToClipboard
+        title="Copy React Component"
+        content={`<${reactComponentName} size={24} color="currentColor" />`}
+        onCopy={() => updateRecentIcons(category, iconName)}
+      />
+      <Action.CopyToClipboard
         title="Copy Data URI"
-        onAction={copyDataURI}
-        icon={Icon.CopyClipboard}
+        content={svgToDataUri(getSvgContent(category, iconName))}
+        shortcut={{ modifiers: ["cmd"], key: "u" }}
+        onCopy={() => updateRecentIcons(category, iconName)}
       />
-      <Action.OpenInBrowser
-        title="Remix Icon Homepage"
-        url="https://remixicon.com/"
-      />
-      <Action.OpenInBrowser
-        title="Remix Icon GitHub Page"
-        url="https://github.com/Remix-Design/RemixIcon"
-      />
-      {/* TODO - Make "your-path" a preference */}
+      <ActionPanel.Section title="Webfont">
+        <Action.CopyToClipboard
+          title="Copy HTML Tag"
+          content={`<i class="ri-${iconName}"></i>`}
+          shortcut={{ modifiers: ["cmd"], key: "h" }}
+          onCopy={() => updateRecentIcons(category, iconName)}
+        />
+        <Action.CopyToClipboard
+          title="Copy CDN Link"
+          content={cdnLink}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          onCopy={() => updateRecentIcons(category, iconName)}
+        />
+        <Action.CopyToClipboard
+          // eslint-disable-next-line @raycast/prefer-title-case
+          title="Copy NPM Install Command"
+          content={`npm install remixicon --save`}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onCopy={() => updateRecentIcons(category, iconName)}
+        />
+        <Action.CopyToClipboard
+          title="Copy Import Statement"
+          content={"import 'remixicon/fonts/remixicon.css';"}
+          shortcut={{ modifiers: ["cmd"], key: "i" }}
+          onCopy={() => updateRecentIcons(category, iconName)}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Links">
+        <Action.OpenInBrowser
+          title="Open Icon on Remix Icon Website"
+          url={`https://remixicon.com/icon/${iconName}`}
+        />
+        <Action.OpenInBrowser
+          title="Remix Icon GitHub Page"
+          url="https://github.com/Remix-Design/RemixIcon"
+        />
+      </ActionPanel.Section>
+      i{/* TODO SVG Sprite */}
       {/* <Action
         title="Copy SVG Sprite"
         onAction={() => {
@@ -77,20 +84,8 @@ export default function IconActionPanel({
         }}
         icon={Icon.Link}
       /> */}
-
+      {/* TODO - Make "your-path" a preference */}
       {/* TODO - Make size, color, className a preference */}
-      {/* <Action
-        title="Copy React Component"
-        onAction={() => {
-          const componentName = toUpperCamelCase(icon.name);
-          const component = `<${componentName} size={24} color="black" className="my-class"/>`;
-          Clipboard.copy(component);
-          showHUD(
-            `📋 Copied "${icon.name}" (React Component) to your clipboard.`,
-          );
-        }}
-        icon={Icon.Code}
-      /> */}
     </ActionPanel>
   );
 }
