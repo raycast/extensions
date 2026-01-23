@@ -63,9 +63,8 @@ export async function setDesktopWallpaper(url: string) {
   const buffer = new Uint8Array(arrayBuffer);
   fs.writeFileSync(filePath, buffer);
 
-  // AppleScript to set wallpaper on all desktops
   const script = `tell application "System Events" to tell every desktop to set picture to "${filePath}"`;
-  await execPromise(`osascript -e '${script}'`);
+  await runAppleScript(script);
 }
 
 export async function downloadWallpaper(url: string, name: string) {
