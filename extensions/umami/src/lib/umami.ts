@@ -3,17 +3,17 @@ import { getClient } from "@umami/api-client";
 import { handleUmamiError } from "./utils";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 
-const PREFERENCES = getPreferenceValues<Preferences>();
-export const IS_CLOUD = PREFERENCES.UMAMI_API_CLIENT_ENDPOINT.includes("https://api.umami.is/v1");
+const { UMAMI_API_CLIENT_ENDPOINT, UMAMI_API_CLIENT_USER_ID, UMAMI_API_CLIENT_SECRET, UMAMI_API_KEY } =
+  getPreferenceValues<Preferences>();
+export const IS_CLOUD = UMAMI_API_CLIENT_ENDPOINT.includes("https://api.umami.is/v1");
 
 export const umami = getClient({
-  userId: IS_CLOUD ? undefined : PREFERENCES.UMAMI_API_CLIENT_USER_ID,
-  secret: IS_CLOUD ? undefined : PREFERENCES.UMAMI_API_CLIENT_SECRET,
-  apiEndpoint: PREFERENCES.UMAMI_API_CLIENT_ENDPOINT,
-  apiKey: IS_CLOUD ? PREFERENCES.UMAMI_API_KEY : undefined,
+  userId: IS_CLOUD ? undefined : UMAMI_API_CLIENT_USER_ID,
+  secret: IS_CLOUD ? undefined : UMAMI_API_CLIENT_SECRET,
+  apiEndpoint: UMAMI_API_CLIENT_ENDPOINT,
+  apiKey: IS_CLOUD ? UMAMI_API_KEY : "[REDACTED:api-key]",
 });
 
-const { UMAMI_API_CLIENT_USER_ID, UMAMI_API_CLIENT_SECRET, UMAMI_API_KEY } = PREFERENCES;
 export const useValidatePreferences = () =>
   usePromise(
     async () => {
