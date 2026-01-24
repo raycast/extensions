@@ -1,6 +1,6 @@
 # LocalSend Changelog
 
-## [Major Enhancement - Pending Transfer System] - {PR_MERGE_DATE}
+## [Major Enhancement - Pending Transfer System] - 2026-01-24
 
 ### 🎯 Pending Transfer Notifications
 - Added pending transfer system with HTTP connection management
@@ -47,7 +47,7 @@
 - Separated polling logic from server lifecycle
 - Cleaner state management
 
-## [Initial Implementation] - {PR_MERGE_DATE}
+## [Initial Implementation] - 2026-01-24
 
 ### Core Features
 - Discover LocalSend devices on the network using multicast and HTTP
