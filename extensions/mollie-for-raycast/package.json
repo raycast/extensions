@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mollie-for-raycast",
+  "title": "Mollie",
+  "description": "A simple way to access and track Mollie in Raycast",
+  "icon": "mollie-icon.png",
+  "author": "otter",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "transactionsMenuBar",
+      "title": "Show in Menu Bar",
+      "description": "Shows your daily sales revenue in your menubar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "payments-list",
+      "title": "View Payments",
+      "description": "View your latest 250 payments from Mollie",
+      "mode": "view"
+    },
+    {
+      "name": "create-payment-link",
+      "title": "Create Payment Link",
+      "description": "Create a Payment link and copy it to the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "subscriptions-list",
+      "title": "View Subscriptions",
+      "description": "View and manage your Mollie subscriptions",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

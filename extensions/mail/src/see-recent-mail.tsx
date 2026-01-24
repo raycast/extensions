@@ -72,6 +72,10 @@ export default function SeeRecentMail() {
     );
   }, []);
 
+  const handleRefresh = useCallback(() => {
+    mutateAccounts();
+  }, [mutateAccounts]);
+
   const numMessages =
     accounts
       ?.filter((a) => account === undefined || a.id === account.id)
@@ -119,6 +123,7 @@ export default function SeeRecentMail() {
                     onAction={(action) => {
                       handleAction(action, recentMailbox);
                     }}
+                    onRefresh={handleRefresh}
                   />
                 ))}
               </List.Section>

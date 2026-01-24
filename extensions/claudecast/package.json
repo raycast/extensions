@@ -1,0 +1,226 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claudecast",
+  "title": "ClaudeCast",
+  "description": "Claude Code workflows at your fingertips - Quick prompts, session management, and agentic workflows",
+  "icon": "command-icon.png",
+  "author": "qazi0",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-claude",
+      "title": "Ask Claude Code",
+      "description": "Quick prompt with context capture from VS Code",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "claude",
+        "ai",
+        "ask",
+        "code",
+        "prompt"
+      ]
+    },
+    {
+      "name": "browse-sessions",
+      "title": "Browse Sessions",
+      "description": "Find and resume Claude Code sessions",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "sessions",
+        "history",
+        "resume",
+        "conversations"
+      ]
+    },
+    {
+      "name": "launch-project",
+      "title": "Launch Project",
+      "description": "Open Claude Code in a project",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "project",
+        "open",
+        "launch",
+        "workspace"
+      ]
+    },
+    {
+      "name": "quick-continue",
+      "title": "Quick Continue",
+      "description": "Continue last Claude Code session",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "continue",
+        "resume",
+        "last"
+      ]
+    },
+    {
+      "name": "git-actions",
+      "title": "Git Actions",
+      "description": "Git-aware Claude Code workflows",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "git",
+        "commit",
+        "review",
+        "diff"
+      ]
+    },
+    {
+      "name": "prompt-library",
+      "title": "Prompt Library",
+      "description": "Curated agentic workflows and prompts",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "prompts",
+        "workflows",
+        "templates",
+        "tdd",
+        "review"
+      ]
+    },
+    {
+      "name": "transform-selection",
+      "title": "Transform Selection",
+      "description": "Transform selected text with Claude Code",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "transform",
+        "explain",
+        "refactor",
+        "convert"
+      ]
+    },
+    {
+      "name": "menu-bar-monitor",
+      "title": "Claude Code Status",
+      "description": "Monitor Claude Code usage and status",
+      "mode": "menu-bar",
+      "interval": "30s",
+      "icon": "command-icon.png",
+      "keywords": [
+        "status",
+        "monitor",
+        "usage"
+      ]
+    },
+    {
+      "name": "usage-dashboard",
+      "title": "Usage Dashboard",
+      "description": "Detailed Claude Code usage and cost metrics",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "usage",
+        "cost",
+        "tokens",
+        "stats"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultModel",
+      "title": "Default Model",
+      "description": "The default Claude model to use for prompts",
+      "type": "dropdown",
+      "default": "sonnet",
+      "required": false,
+      "data": [
+        {
+          "title": "Sonnet (Balanced)",
+          "value": "sonnet"
+        },
+        {
+          "title": "Opus (Most Capable)",
+          "value": "opus"
+        },
+        {
+          "title": "Haiku (Fastest)",
+          "value": "haiku"
+        }
+      ]
+    },
+    {
+      "name": "terminalApp",
+      "title": "Terminal Application",
+      "description": "The terminal app to use for launching Claude Code sessions",
+      "type": "dropdown",
+      "default": "Terminal",
+      "required": false,
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
+        },
+        {
+          "title": "Kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
+        }
+      ]
+    },
+    {
+      "name": "claudeCodePath",
+      "title": "Claude Code Path",
+      "description": "Path to the claude CLI binary (leave empty for auto-detection)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "oauthToken",
+      "title": "OAuth Token",
+      "description": "Long-lived OAuth token from 'claude setup-token' (required for Raycast integration)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "@types/react": "18.2.79"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -535,17 +535,23 @@ export async function extractFonts(pageUrl: string): Promise<FontInfo[]> {
 
 export async function checkFontAccessibility(
   font: FontInfo,
+  pageUrl?: string,
 ): Promise<FontInfo> {
   if (font.isDataUri) {
     return { ...font, accessible: true };
   }
 
   try {
+    const headers: Record<string, string> = {
+      "User-Agent": USER_AGENT,
+    };
+    if (pageUrl) {
+      headers["Referer"] = pageUrl;
+    }
+
     const response = await fetch(font.url, {
       method: "HEAD",
-      headers: {
-        "User-Agent": USER_AGENT,
-      },
+      headers,
     });
 
     const size = response.headers.get("content-length");

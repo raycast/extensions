@@ -1,17 +1,17 @@
-import { Action, ActionPanel, Detail, environment, Icon, Image, showToast } from '@raycast/api';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { toDataURL } from 'qrcode';
-import { initQRCode, NextStep, QRCodeStatus, QRCodeUser } from '../../../services/auth';
+import { Action, ActionPanel, Detail, environment, Icon, Image, showToast } from "@raycast/api";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { toDataURL } from "qrcode";
+import { initQRCode, NextStep, QRCodeStatus, QRCodeUser } from "../../../services/auth";
 
 interface QRLoginProps {
   onConfirm: (cookies: string[]) => void;
 }
 
-export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
-  const timer = useRef<NodeJS.Timeout>();
+export function QRLogin({ onConfirm }: QRLoginProps) {
+  const timer = useRef<NodeJS.Timeout | undefined>(undefined);
   const unmountedRef = useRef(false);
-  const tokenRef = useRef('');
-  const userRef = useRef<QRCodeUser | null>();
+  const tokenRef = useRef("");
+  const userRef = useRef<QRCodeUser | null>(null);
   const [markdown, setMarkdown] = useState<string>();
   const [status, setStatus] = useState(QRCodeStatus.Init);
 
@@ -30,7 +30,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
       userRef.current = null;
       setMarkdown(qrCodeMarkdown);
       setStatus(QRCodeStatus.NotScanned);
-      showToast({ title: 'QR Code is refreshed' });
+      showToast({ title: "QR Code is refreshed" });
 
       const polling = async () => {
         const result = await qrCode.polling();
@@ -57,7 +57,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
         timer.current = setTimeout(polling, 500);
       }
     } else {
-      setMarkdown('Failed to load QR code');
+      setMarkdown("Failed to load QR code");
     }
   }, []);
 
@@ -74,7 +74,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
   return (
     <Detail
       navigationTitle="Login"
-      markdown={markdown || 'Loading...'}
+      markdown={markdown || "Loading..."}
       metadata={
         markdown ? (
           <Detail.Metadata>
@@ -105,7 +105,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
       }
     />
   );
-};
+}
 
 async function getQRCodeMarkdownContent(token: string): Promise<string> {
   const qrCodeData = await toDataURL(
@@ -116,12 +116,12 @@ async function getQRCodeMarkdownContent(token: string): Promise<string> {
       margin: 2,
       width: 300,
       color:
-        environment.appearance === 'light'
+        environment.appearance === "light"
           ? {
-              light: '#0000',
-              dark: '#262426',
+              light: "#0000",
+              dark: "#262426",
             }
-          : { light: '#0000', dark: '#dedede' },
+          : { light: "#0000", dark: "#dedede" },
     },
   );
   return `![](${qrCodeData})`;

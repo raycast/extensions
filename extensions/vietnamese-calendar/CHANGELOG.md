@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.3.1] - 2026-01-20
+
+- feat: Add "Văn hoá VN" event (Nov 24) starting from 2026.
+
 ## [1.3.0] - 2026-01-15
 
 - feat: Add Solar/Lunar date cycle switch in Day Detail view to track recurring events.

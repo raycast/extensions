@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "word-count",
   "title": "Word Count",
-  "description": "Count the number of characters, words, sentences, and paragraphs in some text.",
+  "description": "Count characters, words, sentences, and paragraphs in text.",
   "icon": "word-count.png",
   "access": "public",
   "author": "itsmingjie",
   "contributors": [
-    "koayon"
+    "koayon",
+    "chrismessina"
   ],
   "pastContributors": [
     "danulqua"
@@ -16,12 +17,19 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "crossExtensions": [
+    "huzef44/screenocr"
+  ],
   "commands": [
     {
       "name": "count",
       "title": "Count",
       "subtitle": "Word Count",
-      "description": "Count the number of characters, words, sentences, and paragraphs in some text.",
+      "description": "Count characters, words, sentences, and paragraphs in text.",
       "mode": "view",
       "keywords": [
         "word",
@@ -29,23 +37,43 @@
         "sentence",
         "paragraph"
       ]
+    },
+    {
+      "name": "count-screenshot",
+      "title": "Count from Screenshot",
+      "subtitle": "Word Count",
+      "description": "Capture a screenshot and count words, characters, sentences, and paragraphs using OCR.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "ocr",
+        "word",
+        "character",
+        "sentence",
+        "paragraph",
+        "capture"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.3",
-    "@raycast/utils": "^1.4.16",
-    "react": "^18.2.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "raycast-cross-extension": "^0.2.3",
+    "react": "^19.2.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "jest": "^29.7.0",
-    "prettier": "^2.5.1",
-    "ts-jest": "^29.3.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "js-yaml": "4.1.1"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -54,9 +82,5 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "test": "jest"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ]
+  }
 }

@@ -10,6 +10,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getAllDrives } from "../api/drives";
 import {
@@ -40,6 +41,7 @@ export function useSearchFiles() {
   const [nextLink, setNextLink] = useState<string | undefined>(undefined);
   const [installedOfficeApps, setInstalledOfficeApps] = useState<Map<string, Application>>(new Map());
   const [sortConfig, setSortConfig] = useState<SortConfig>({ field: "relevance", direction: "desc" });
+  const [selectedDriveId, setSelectedDriveId] = useCachedState<string | null>("selectedDriveId", null);
 
   // Load saved sort preference on mount
   useEffect(() => {
@@ -156,31 +158,39 @@ export function useSearchFiles() {
     }
   }, [breadcrumbs, currentDrive, currentFolderItem]);
 
-  // Initialize: authorize and load drives
+  // Initialize: authorize and load drives + files in parallel
   useEffect(() => {
     async function initialize() {
       try {
         await authorize();
         setIsAuthorized(true);
 
-        const [allDrives, initialFiles] = await Promise.all([getAllDrives(), searchFiles("")]);
-
+        // Load drives first to know what's available
+        const allDrives = await getAllDrives();
         setDrives(allDrives);
 
-        if (allDrives.length > 0) {
-          const firstDrive = allDrives[0];
-          setCurrentDrive(firstDrive);
-          setBreadcrumbs([{ id: "root", name: firstDrive.name }]);
-
-          if (!firstDrive.siteDisplayName) {
-            setItems(initialFiles.items);
-            setNextLink(initialFiles.nextLink);
-          } else {
-            const result = await searchFiles("", firstDrive.id);
-            setItems(result.items);
-            setNextLink(result.nextLink);
-          }
+        if (allDrives.length === 0) {
+          setInitialLoadDone(true);
+          setIsLoading(false);
+          return;
         }
+
+        // Determine which drive to load: persisted selection or first drive
+        const targetDriveId = selectedDriveId ?? allDrives[0].id;
+        const targetDrive = allDrives.find((d) => d.id === targetDriveId) ?? allDrives[0];
+
+        // Update persisted selection if it was invalid or missing
+        if (!selectedDriveId || !allDrives.find((d) => d.id === selectedDriveId)) {
+          setSelectedDriveId(targetDrive.id);
+        }
+
+        // Load files for the target drive
+        const result = await searchFiles("", targetDrive.id);
+
+        setCurrentDrive(targetDrive);
+        setBreadcrumbs([{ id: "root", name: targetDrive.name }]);
+        setItems(result.items);
+        setNextLink(result.nextLink);
         setInitialLoadDone(true);
       } catch (error) {
         console.error("Authorization error:", error);
@@ -247,15 +257,15 @@ export function useSearchFiles() {
     };
   }, [searchText, isAuthorized, initialLoadDone, currentDrive?.id, currentFolder, sortConfig]);
 
-  // Handle drive change
+  // Handle drive change from dropdown
   const handleDriveChange = useCallback(
     async (driveId: string) => {
       const selectedDrive = drives.find((d) => d.id === driveId);
       if (!selectedDrive) return;
-
       if (currentDrive?.id === driveId) return;
 
       setIsLoading(true);
+      setSelectedDriveId(driveId);
       setCurrentDrive(selectedDrive);
       setSearchText("");
       setCurrentFolder(null);
@@ -272,7 +282,7 @@ export function useSearchFiles() {
         setIsLoading(false);
       }
     },
-    [drives, currentDrive],
+    [drives, currentDrive, setSelectedDriveId],
   );
 
   // Load more items (pagination)
@@ -385,6 +395,7 @@ export function useSearchFiles() {
     items,
     currentFolder,
     currentDrive,
+    selectedDriveId,
     nextLink,
     installedOfficeApps,
     oneDriveDrives,
