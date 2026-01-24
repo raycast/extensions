@@ -22,12 +22,18 @@ import {
   useProjects,
   useDeployments,
 } from "./hooks/useConvexData";
-import { getDocuments, type Document, type TableInfo } from "./lib/api";
+import {
+  getDocuments,
+  type Document,
+  type TableInfo,
+  type AuthOptions,
+} from "./lib/api";
 
 type ViewState = "tables" | "documents";
 
 export default function BrowseTablesCommand() {
-  const { session, selectedContext } = useConvexAuth();
+  const { session, selectedContext, isDeployKeyMode, deployKeyConfig } =
+    useConvexAuth();
   const [viewState, setViewState] = useState<ViewState>("tables");
   const [selectedTable, setSelectedTable] = useState<TableInfo | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -41,11 +47,14 @@ export default function BrowseTablesCommand() {
   const accessToken = session?.accessToken ?? null;
   const deploymentName = selectedContext.deploymentName;
 
-  // Fetch context data
-  const { data: teams } = useTeams(accessToken);
-  const { data: projects } = useProjects(accessToken, selectedContext.teamId);
+  // Fetch context data (only in OAuth mode - not available with deploy keys)
+  const { data: teams } = useTeams(isDeployKeyMode ? null : accessToken);
+  const { data: projects } = useProjects(
+    isDeployKeyMode ? null : accessToken,
+    selectedContext.teamId,
+  );
   const { data: deployments } = useDeployments(
-    accessToken,
+    isDeployKeyMode ? null : accessToken,
     selectedContext.projectId,
   );
 
@@ -57,27 +66,42 @@ export default function BrowseTablesCommand() {
     (d) => d.name === deploymentName,
   );
 
-  // Fetch tables
+  // Fetch tables (supports both OAuth and deploy key modes)
   const { data: tables, isLoading: tablesLoading } = useTables(
     accessToken,
     deploymentName,
+    deployKeyConfig,
   );
 
   // Fetch documents when table is selected
   useEffect(() => {
-    if (!selectedTable || !accessToken || !deploymentName) return;
+    // Need either deploy key or OAuth credentials
+    const canFetch = deployKeyConfig
+      ? !!selectedTable
+      : !!selectedTable && !!accessToken && !!deploymentName;
+
+    if (!canFetch) return;
 
     async function fetchDocuments() {
       setDocumentsLoading(true);
       try {
-        const result = await getDocuments(
-          deploymentName!,
-          accessToken!,
-          selectedTable!.name,
-          {
-            limit: 50,
-          },
-        );
+        let result;
+        if (deployKeyConfig) {
+          // Deploy key mode
+          const auth: AuthOptions = {
+            deployKey: deployKeyConfig.deployKey,
+            deploymentUrl: deployKeyConfig.deploymentUrl,
+          };
+          result = await getDocuments(auth, selectedTable!.name, { limit: 50 });
+        } else {
+          // OAuth mode
+          result = await getDocuments(
+            deploymentName!,
+            accessToken!,
+            selectedTable!.name,
+            { limit: 50 },
+          );
+        }
         setDocuments(result.documents);
         setNextCursor(result.nextCursor);
       } catch (error) {
@@ -93,24 +117,42 @@ export default function BrowseTablesCommand() {
     }
 
     fetchDocuments();
-  }, [selectedTable, accessToken, deploymentName]);
+  }, [selectedTable, accessToken, deploymentName, deployKeyConfig]);
 
   // Load more documents
   const loadMore = async () => {
-    if (!nextCursor || !selectedTable || !accessToken || !deploymentName)
-      return;
+    if (!nextCursor || !selectedTable) return;
+
+    // Need either deploy key or OAuth credentials
+    const canFetch = deployKeyConfig ? true : !!accessToken && !!deploymentName;
+
+    if (!canFetch) return;
 
     setDocumentsLoading(true);
     try {
-      const result = await getDocuments(
-        deploymentName,
-        accessToken,
-        selectedTable.name,
-        {
+      let result;
+      if (deployKeyConfig) {
+        // Deploy key mode
+        const auth: AuthOptions = {
+          deployKey: deployKeyConfig.deployKey,
+          deploymentUrl: deployKeyConfig.deploymentUrl,
+        };
+        result = await getDocuments(auth, selectedTable.name, {
           limit: 50,
           cursor: nextCursor,
-        },
-      );
+        });
+      } else {
+        // OAuth mode
+        result = await getDocuments(
+          deploymentName!,
+          accessToken!,
+          selectedTable.name,
+          {
+            limit: 50,
+            cursor: nextCursor,
+          },
+        );
+      }
       setDocuments((prev) => [...prev, ...result.documents]);
       setNextCursor(result.nextCursor);
     } catch (error) {
@@ -132,7 +174,7 @@ export default function BrowseTablesCommand() {
       <List>
         <List.EmptyView
           title="No Deployment Selected"
-          description="Use 'Switch Project' to select a deployment first"
+          description="Use 'Manage Projects' to select a deployment first"
         />
       </List>
     );

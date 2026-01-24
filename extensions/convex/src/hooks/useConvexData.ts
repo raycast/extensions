@@ -2,6 +2,7 @@
  * useConvexData - Data fetching hooks for Convex
  *
  * Provides hooks for fetching teams, projects, deployments, etc.
+ * Supports both OAuth and deploy key authentication modes.
  */
 
 import { useCachedPromise } from "@raycast/utils";
@@ -21,7 +22,9 @@ import {
   type TableInfo,
   type ModuleFunctions,
   type LogEntry,
+  type AuthOptions,
 } from "../lib/api";
+import { type DeployKeyConfig } from "../lib/deployKeyAuth";
 
 export function useTeams(accessToken: string | null) {
   return useCachedPromise(
@@ -81,14 +84,28 @@ export function useProfile(accessToken: string | null) {
 export function useTables(
   accessToken: string | null,
   deploymentName: string | null,
+  deployKeyConfig?: DeployKeyConfig | null,
 ) {
   return useCachedPromise(
-    async (token: string, deployment: string) => {
+    async (
+      token: string,
+      deployment: string,
+      config: DeployKeyConfig | null,
+    ) => {
+      // Use deploy key auth if available
+      if (config) {
+        const auth: AuthOptions = {
+          deployKey: config.deployKey,
+          deploymentUrl: config.deploymentUrl,
+        };
+        return getTables(auth);
+      }
+      // Otherwise use OAuth token
       return getTables(deployment, token);
     },
-    [accessToken ?? "", deploymentName ?? ""],
+    [accessToken ?? "", deploymentName ?? "", deployKeyConfig ?? null],
     {
-      execute: !!accessToken && !!deploymentName,
+      execute: (!!accessToken && !!deploymentName) || !!deployKeyConfig,
       keepPreviousData: true,
     },
   );
@@ -97,14 +114,28 @@ export function useTables(
 export function useFunctions(
   accessToken: string | null,
   deploymentName: string | null,
+  deployKeyConfig?: DeployKeyConfig | null,
 ) {
   return useCachedPromise(
-    async (token: string, deployment: string) => {
+    async (
+      token: string,
+      deployment: string,
+      config: DeployKeyConfig | null,
+    ) => {
+      // Use deploy key auth if available
+      if (config) {
+        const auth: AuthOptions = {
+          deployKey: config.deployKey,
+          deploymentUrl: config.deploymentUrl,
+        };
+        return getFunctions(auth);
+      }
+      // Otherwise use OAuth token
       return getFunctions(deployment, token);
     },
-    [accessToken ?? "", deploymentName ?? ""],
+    [accessToken ?? "", deploymentName ?? "", deployKeyConfig ?? null],
     {
-      execute: !!accessToken && !!deploymentName,
+      execute: (!!accessToken && !!deploymentName) || !!deployKeyConfig,
       keepPreviousData: true,
     },
   );
@@ -117,6 +148,7 @@ export interface UseLogsOptions {
   functionFilter?: string;
   limit?: number;
   autoRefresh?: boolean;
+  deployKeyConfig?: DeployKeyConfig | null;
 }
 
 export interface UseLogsResult {
@@ -134,7 +166,7 @@ export function useLogs(
   deploymentName: string | null,
   options: UseLogsOptions = {},
 ): UseLogsResult {
-  const { limit = 50, autoRefresh = true } = options;
+  const { limit = 50, autoRefresh = true, deployKeyConfig } = options;
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -145,6 +177,9 @@ export function useLogs(
   const isStreamingRef = useRef(isStreaming);
   const seenIdsRef = useRef(new Set<string>());
 
+  // Determine if we can fetch (either OAuth or deploy key)
+  const canFetch = deployKeyConfig ? true : !!accessToken && !!deploymentName;
+
   // Keep ref in sync with state
   useEffect(() => {
     isStreamingRef.current = isStreaming;
@@ -152,7 +187,7 @@ export function useLogs(
 
   const fetchLogs = useCallback(
     async (reset = false) => {
-      if (!accessToken || !deploymentName) return;
+      if (!canFetch) return;
 
       if (reset) {
         cursorRef.current = 0;
@@ -164,10 +199,24 @@ export function useLogs(
       setError(null);
 
       try {
-        const response = await getLogs(deploymentName, accessToken, {
-          cursor: cursorRef.current,
-          limit,
-        });
+        let response;
+        if (deployKeyConfig) {
+          // Deploy key mode
+          const auth: AuthOptions = {
+            deployKey: deployKeyConfig.deployKey,
+            deploymentUrl: deployKeyConfig.deploymentUrl,
+          };
+          response = await getLogs(auth, {
+            cursor: cursorRef.current,
+            limit,
+          });
+        } else {
+          // OAuth mode
+          response = await getLogs(deploymentName!, accessToken!, {
+            cursor: cursorRef.current,
+            limit,
+          });
+        }
 
         // Filter out duplicates and add new logs
         const newLogs = response.logs.filter((log) => {
@@ -198,12 +247,12 @@ export function useLogs(
         setIsLoading(false);
       }
     },
-    [accessToken, deploymentName, limit],
+    [accessToken, deploymentName, deployKeyConfig, limit, canFetch],
   );
 
   // Initial fetch and polling
   useEffect(() => {
-    if (!accessToken || !deploymentName) return;
+    if (!canFetch) return;
 
     // Initial fetch
     fetchLogs(true);
@@ -218,7 +267,7 @@ export function useLogs(
     return () => {
       clearInterval(intervalId);
     };
-  }, [accessToken, deploymentName, fetchLogs]);
+  }, [canFetch, fetchLogs]);
 
   const toggleStreaming = useCallback(() => {
     setIsStreaming((prev) => !prev);

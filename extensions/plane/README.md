@@ -21,11 +21,13 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
   - Cycle assignment
   - Module assignment
   - Assignee selection
+  - Start date and due date selection
 
 - **Edit Work Items** with:
   - Full form editing for all work item properties
   - Real-time updates
   - Markdown support in descriptions
+  - Start date and due date selection
 
 - **Quick Actions** on work items:
   - Edit work item (⌘⇧E)

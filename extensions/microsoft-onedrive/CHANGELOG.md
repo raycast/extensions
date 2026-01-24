@@ -1,5 +1,16 @@
 # Microsoft OneDrive Changelog
 
+## [Fixes and Improvements] - 2026-01-19
+
+### Changed
+
+- Updated the checkmark icon used in the **Sort Search Results By** action to improve design consistency.
+- Adopted the default icon for the **Create Quicklink** action.
+
+### Fixed
+
+- Fixed an issue where unnecessary API calls were made during initialization when reopening the extension with a previously selected SharePoint library.
+
 ## [Improvement] - 2026-01-15
 
 ### Added

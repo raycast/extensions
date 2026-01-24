@@ -11,6 +11,7 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  /*
   const assignReadyForReviewTo = "pernielsentikaer";
 
   if (context.payload.action === "ready_for_review" && !context.payload.pull_request.draft) {
@@ -24,6 +25,22 @@ export default async ({ github, context }: API) => {
       console.log(`Successfully assigned PR to ${assignReadyForReviewTo}`);
     } catch (error) {
       console.error(`Failed to assign PR to ${assignReadyForReviewTo}:`, error);
+    }
+  }
+  */
+
+  const isDocsPR = await checkForDocsInPullRequestDiff({ github, context });
+  if (isDocsPR) {
+    try {
+      await github.rest.issues.addLabels({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: ["site-documentation"],
+      });
+      console.log("Added documentation label");
+    } catch (error) {
+      console.error("Failed to add documentation label:", error);
     }
   }
 
@@ -336,6 +353,22 @@ async function checkForAiInPullRequestDiff(
   }
 
   return aiFilesOrToolsExist;
+}
+
+async function checkForDocsInPullRequestDiff(
+  { github, context }: Pick<API, "github" | "context">
+): Promise<boolean> {
+  try {
+    const { data: files } = await github.rest.pulls.listFiles({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      pull_number: context.issue.number,
+    });
+    return files.some((file) => file.filename.startsWith("docs/"));
+  } catch (error) {
+    console.error("Failed to check for docs in PR diff:", error);
+    return false;
+  }
 }
 
 async function getPlatformsFromPullRequestDiff(

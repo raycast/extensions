@@ -27,7 +27,6 @@ export const ORGANIZATION_LOGOS: Record<string, Image.Source> = {
   moonshotai: getLobeIconUrl("moonshot", false),
   minimax: getLobeIconUrl("minimax"),
   "zai-org": getLobeIconUrl("zai", false),
-  xiaomi: getLobeIconUrl("xiaomi"),
   nvidia: getLobeIconUrl("nvidia"),
   deepseek: getLobeIconUrl("deepseek"),
   qwen: getLobeIconUrl("qwen"),
@@ -41,6 +40,13 @@ export const ORGANIZATION_LOGOS: Record<string, Image.Source> = {
   elevenlabs: getLobeIconUrl("elevenlabs", false),
   mistral: getLobeIconUrl("mistral"),
   meta: getLobeIconUrl("meta"),
+  microsoft: getLobeIconUrl("microsoft"),
+  ibm: getLobeIconUrl("ibm", false),
+  amazon: getLobeIconUrl("nova"),
+  baidu: getLobeIconUrl("baidu", false),
+  xiaomi: getLobeIconUrl("xiaomimimo", false),
+  cohere: getLobeIconUrl("cohere"),
+  ai21: getLobeIconUrl("ai21", false),
 };
 
 /**
