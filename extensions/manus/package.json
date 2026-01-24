@@ -13,16 +13,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "apiKey",
-      "type": "password",
-      "required": true,
-      "title": "API Key",
-      "description": "Your Manus API key from http://manus.im/app?show_settings=integrations&app_name=api",
-      "placeholder": "See https://open.manus.ai/docs/quickstart"
-    }
-  ],
   "commands": [
     {
       "name": "list-tasks",
@@ -31,6 +21,16 @@
       "description": "List and search Manus tasks",
       "mode": "view",
       "icon": "extension_icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Manus API key from http://manus.im/app?show_settings=integrations&app_name=api",
+      "placeholder": "See https://open.manus.ai/docs/quickstart"
     }
   ],
   "dependencies": {
