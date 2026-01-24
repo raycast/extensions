@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Add Pagination Support to My Starred Repositories] - {PR_MERGE_DATE}
+## [Add Pagination Support to My Starred Repositories] - 2026-01-24
 
 - My Starred Repositories: Migrated from REST API to GraphQL API for better pagination support
 - My Starred Repositories: Added pagination to load all starred repositories beyond initial fetch limit
