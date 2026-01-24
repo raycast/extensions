@@ -1,6 +1,6 @@
 # BPM Calculator Changelog
 
-## [Copy BPM Feature] - {PR_MERGE_DATE}
+## [Copy BPM Feature] - 2026-01-24
 
 ### Changed
 
