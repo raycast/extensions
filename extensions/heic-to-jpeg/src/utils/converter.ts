@@ -42,8 +42,11 @@ export async function convertHeicToJpeg(
     }
 
     // Convert using sips with maximum quality
+    // Escape shell special characters in paths to prevent command injection
+    const escapedInput = inputPath.replace(/"/g, '\\"');
+    const escapedOutput = outputPath.replace(/"/g, '\\"');
     await execAsync(
-      `sips -s format jpeg -s formatOptions 100 "${inputPath}" --out "${outputPath}"`,
+      `sips -s format jpeg -s formatOptions 100 "${escapedInput}" --out "${escapedOutput}"`,
     );
 
     return {
