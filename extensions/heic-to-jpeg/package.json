@@ -10,15 +10,15 @@
   "commands": [
     {
       "name": "convert-heic",
-      "title": "Convert HEIC to JPEG",
-      "subtitle": "Select files to convert",
+      "title": "Select Files to Convert",
+      "subtitle": "HEIC to JPEG",
       "description": "Open file picker to select HEIC files and convert them to JPEG",
       "mode": "view"
     },
     {
       "name": "convert-selected",
       "title": "Convert Selected Files",
-      "subtitle": "Convert Finder selection",
+      "subtitle": "HEIC to JPEG",
       "description": "Convert HEIC files currently selected in Finder to JPEG",
       "mode": "view"
     }
@@ -29,8 +29,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.5.4",
-    "@types/react": "18.3.5",
+    "@types/node": "~20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
