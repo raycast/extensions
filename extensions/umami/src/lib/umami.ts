@@ -11,7 +11,7 @@ export const umami = getClient({
   userId: IS_CLOUD ? undefined : UMAMI_API_CLIENT_USER_ID,
   secret: IS_CLOUD ? undefined : UMAMI_API_CLIENT_SECRET,
   apiEndpoint: UMAMI_API_CLIENT_ENDPOINT,
-  apiKey: IS_CLOUD ? UMAMI_API_KEY : "[REDACTED:api-key]",
+  apiKey: IS_CLOUD ? UMAMI_API_KEY : undefined,
 });
 
 export const useValidatePreferences = () =>
