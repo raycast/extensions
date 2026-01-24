@@ -1,6 +1,6 @@
 # Umami Changelog
 
-## [View Websites (Menu Bar)] - {PR_MERGE_DATE}
+## [View Websites (Menu Bar)] - 2026-01-24
 
 - View Websites (Menu Bar)
 
