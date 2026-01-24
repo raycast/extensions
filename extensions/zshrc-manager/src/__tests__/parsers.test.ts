@@ -410,12 +410,12 @@ fpath+=(/custom/completions)`;
 
       const result = parseKeybindings(content);
 
-      // Note: The parser catches this with both regexes, returning two entries
-      // The string replacement regex specifically catches it with widget marker
-      const stringReplacementEntry = result.find((r) => r.widget === "string-replacement");
-      expect(stringReplacementEntry).toBeDefined();
-      expect(stringReplacementEntry?.key).toBe("^[[Z");
-      expect(stringReplacementEntry?.command).toBe("ls -la");
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        key: "^[[Z",
+        command: "ls -la",
+        widget: "string-replacement",
+      });
     });
 
     it("should parse multiple keybindings", () => {
@@ -468,14 +468,97 @@ export PATH=/usr/bin:$PATH`;
       expect(result[0].key).toBe("^[.");
     });
 
-    // Skip: vi mode keybindings (-M vicmd) require extended regex support
-    // The current parser doesn't handle the -M keymap flag
-    it.skip("should parse vi mode keybindings", () => {
+    it("should parse vi command mode keybindings", () => {
       const content = `bindkey -M vicmd k vi-up-line-or-history`;
 
       const result = parseKeybindings(content);
 
-      expect(result.length).toBeGreaterThanOrEqual(0);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        key: "k",
+        command: "vi-up-line-or-history",
+        keymap: "vicmd",
+      });
+    });
+
+    it("should parse vi insert mode keybindings", () => {
+      const content = `bindkey -M viins '^[[A' history-search-backward`;
+
+      const result = parseKeybindings(content);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        key: "^[[A",
+        command: "history-search-backward",
+        keymap: "viins",
+      });
+    });
+
+    it("should parse emacs mode keybindings", () => {
+      const content = `bindkey -M emacs '^A' beginning-of-line`;
+
+      const result = parseKeybindings(content);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        key: "^A",
+        command: "beginning-of-line",
+        keymap: "emacs",
+      });
+    });
+
+    it("should parse keymap-specific string replacement", () => {
+      const content = `bindkey -M vicmd -s 'q' ':wq'`;
+
+      const result = parseKeybindings(content);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        key: "q",
+        command: ":wq",
+        widget: "string-replacement",
+        keymap: "vicmd",
+      });
+    });
+
+    it("should parse mixed keybindings (with and without keymap)", () => {
+      const content = `bindkey '^R' history-incremental-search-backward
+bindkey -M vicmd k vi-up-line-or-history
+bindkey -M vicmd j vi-down-line-or-history
+bindkey -M viins '^P' up-line-or-history`;
+
+      const result = parseKeybindings(content);
+
+      expect(result).toHaveLength(4);
+
+      const globalBinding = result.find((r) => r.key === "^R" && !r.keymap);
+      expect(globalBinding).toBeDefined();
+      expect(globalBinding?.command).toBe("history-incremental-search-backward");
+
+      const vicmdBindings = result.filter((r) => r.keymap === "vicmd");
+      expect(vicmdBindings).toHaveLength(2);
+
+      const viinsBinding = result.find((r) => r.keymap === "viins");
+      expect(viinsBinding).toBeDefined();
+      expect(viinsBinding?.command).toBe("up-line-or-history");
+    });
+
+    it("should handle custom keymaps", () => {
+      const content = `bindkey -M mymap '^X' custom-widget`;
+
+      const result = parseKeybindings(content);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].keymap).toBe("mymap");
+    });
+
+    it("should not duplicate entries for same binding", () => {
+      const content = `bindkey -M vicmd 'k' vi-up-line-or-history`;
+
+      const result = parseKeybindings(content);
+
+      // Should only have one entry, not duplicated by multiple regex matches
+      expect(result).toHaveLength(1);
     });
   });
 });

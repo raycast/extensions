@@ -250,27 +250,102 @@ export function parseFpathEntries(
 }
 
 /**
- * Parses keybindings (bindkey) from zshrc content
- * @param content The raw content to parse
- * @returns Array of keybinding objects with key and command
+ * Keybinding result type
  */
-export function parseKeybindings(content: string): ReadonlyArray<{ key: string; command: string; widget?: string }> {
-  const result: Array<{ key: string; command: string; widget?: string }> = [];
+export interface KeybindingResult {
+  key: string;
+  command: string;
+  widget?: string;
+  keymap?: string;
+}
 
-  // Match bindkey "key" command
-  const bindkeyRegex = /^(?:\s*)bindkey\s+['"]?([^'"]+)['"]?\s+(.+?)(?:\s*)$/gm;
+/**
+ * Parses keybindings (bindkey) from zshrc content
+ * Supports:
+ * - Basic: bindkey "key" command
+ * - String replacement: bindkey -s "key" "replacement"
+ * - Keymap-specific: bindkey -M keymap "key" command
+ * - Combined: bindkey -M keymap -s "key" "replacement"
+ *
+ * @param content The raw content to parse
+ * @returns Array of keybinding objects with key, command, optional widget, and optional keymap
+ */
+export function parseKeybindings(content: string): ReadonlyArray<KeybindingResult> {
+  const result: Array<KeybindingResult> = [];
+  const seen = new Set<string>();
+
+  // Helper to add unique results (avoid duplicates from multiple regex matches)
+  const addResult = (entry: KeybindingResult) => {
+    const key = `${entry.keymap || ""}:${entry.key}:${entry.command}:${entry.widget || ""}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(entry);
+    }
+  };
+
+  // Match bindkey -M keymap -s "key" "replacement" (keymap-specific string replacement)
+  // Uses separate patterns for quoted and unquoted keys to avoid greedy matching
+  const keymapStringQuotedRegex =
+    /^(?:\s*)bindkey\s+-M\s+(\S+)\s+-s\s+(['"])([^'"]+)\2\s+(['"])([^'"]+)\4(?:\s*)$/gm;
   let match: RegExpExecArray | null;
-  while ((match = bindkeyRegex.exec(content)) !== null) {
-    if (match[1] && match[2]) {
-      result.push({ key: match[1], command: match[2].trim() });
+  while ((match = keymapStringQuotedRegex.exec(content)) !== null) {
+    if (match[1] && match[3] && match[5]) {
+      addResult({
+        key: match[3],
+        command: match[5].trim(),
+        widget: "string-replacement",
+        keymap: match[1],
+      });
     }
   }
 
-  // Match bindkey -s "key" "replacement" (string replacement)
-  const bindkeyStringRegex = /^(?:\s*)bindkey\s+-s\s+['"]?([^'"]+)['"]?\s+['"]?([^'"]+)['"]?(?:\s*)$/gm;
-  while ((match = bindkeyStringRegex.exec(content)) !== null) {
+  // Match bindkey -M keymap "key" command (keymap-specific binding with quoted key)
+  const keymapQuotedRegex = /^(?:\s*)bindkey\s+-M\s+(\S+)\s+(['"])([^'"]+)\2\s+(\S+)(?:\s*)$/gm;
+  while ((match = keymapQuotedRegex.exec(content)) !== null) {
+    if (match[1] && match[3] && match[4]) {
+      addResult({
+        key: match[3],
+        command: match[4].trim(),
+        keymap: match[1],
+      });
+    }
+  }
+
+  // Match bindkey -M keymap key command (keymap-specific binding with unquoted key)
+  // Unquoted key must not start with a quote
+  const keymapUnquotedRegex = /^(?:\s*)bindkey\s+-M\s+(\S+)\s+([^'"\s]\S*)\s+(\S+)(?:\s*)$/gm;
+  while ((match = keymapUnquotedRegex.exec(content)) !== null) {
+    if (match[1] && match[2] && match[3]) {
+      addResult({
+        key: match[2],
+        command: match[3].trim(),
+        keymap: match[1],
+      });
+    }
+  }
+
+  // Match bindkey -s "key" "replacement" (string replacement with quoted args)
+  const bindkeyStringQuotedRegex = /^(?:\s*)bindkey\s+-s\s+(['"])([^'"]+)\1\s+(['"])([^'"]+)\3(?:\s*)$/gm;
+  while ((match = bindkeyStringQuotedRegex.exec(content)) !== null) {
+    if (match[2] && match[4]) {
+      addResult({ key: match[2], command: match[4].trim(), widget: "string-replacement" });
+    }
+  }
+
+  // Match bindkey "key" command (basic with quoted key)
+  const bindkeyQuotedRegex = /^(?:\s*)bindkey\s+(?!-[MsrRLl])(['"])([^'"]+)\1\s+(\S+)(?:\s*)$/gm;
+  while ((match = bindkeyQuotedRegex.exec(content)) !== null) {
+    if (match[2] && match[3]) {
+      addResult({ key: match[2], command: match[3].trim() });
+    }
+  }
+
+  // Match bindkey key command (basic with unquoted key, must not have flags)
+  // Unquoted key must not start with a quote
+  const bindkeyUnquotedRegex = /^(?:\s*)bindkey\s+(?!-[MsrRLl])([^'"\s]\S*)\s+(\S+)(?:\s*)$/gm;
+  while ((match = bindkeyUnquotedRegex.exec(content)) !== null) {
     if (match[1] && match[2]) {
-      result.push({ key: match[1], command: match[2].trim(), widget: "string-replacement" });
+      addResult({ key: match[1], command: match[2].trim() });
     }
   }
 

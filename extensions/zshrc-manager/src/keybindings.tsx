@@ -12,6 +12,7 @@ interface KeybindingItem extends FilterableItem {
   key: string;
   command: string;
   widget?: string;
+  keymap?: string;
 }
 
 interface KeybindingsProps {
@@ -46,9 +47,13 @@ export default function Keybindings({ searchBarAccessory }: KeybindingsProps) {
       itemType="keybinding"
       itemTypePlural="keybindings"
       parser={parseKeybindings}
-      searchFields={["key", "command", "section"]}
+      searchFields={["key", "command", "section", "keymap"]}
       searchBarAccessory={searchBarAccessory}
-      generateTitle={(item) => `${formatKeyDisplay(item.key)} → ${item.command}`}
+      generateTitle={(item) =>
+        item.keymap
+          ? `[${item.keymap}] ${formatKeyDisplay(item.key)} → ${item.command}`
+          : `${formatKeyDisplay(item.key)} → ${item.command}`
+      }
       generateOverviewMarkdown={(_, allItems, grouped) => `
 # Keybindings Summary
 
@@ -78,6 +83,7 @@ ${item.key}
 \`\`\`
 **Display**: ${formatKeyDisplay(item.key)}
 
+${item.keymap ? `## Keymap\n**${item.keymap}**${item.keymap === "vicmd" ? " (Vi command mode)" : item.keymap === "viins" ? " (Vi insert mode)" : item.keymap === "emacs" ? " (Emacs mode)" : ""}\n` : ""}
 ## Widget/Command
 \`\`\`bash
 ${item.command}
@@ -110,6 +116,16 @@ Press the key combination to trigger the bound action.
               tintColor: MODERN_COLORS.neutral,
             }}
           />
+          {item.keymap && (
+            <List.Item.Detail.Metadata.Label
+              title="Keymap"
+              text={item.keymap}
+              icon={{
+                source: Icon.AppWindowGrid3x3,
+                tintColor: MODERN_COLORS.secondary,
+              }}
+            />
+          )}
           <List.Item.Detail.Metadata.Label
             title="Command/Widget"
             text={item.command}
