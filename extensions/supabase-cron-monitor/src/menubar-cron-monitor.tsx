@@ -14,8 +14,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { SupabaseClient } from "@supabase/supabase-js";
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import {
   createSupabaseClient,
   fetchCronJobs,
@@ -70,47 +69,39 @@ export default function MenubarCronMonitor() {
     [preferences.runHistoryLimit],
   );
 
-  const { data, isLoading, revalidate, error } = usePromise(
-    async (
-      supabaseClient: SupabaseClient,
-      historyLimit: number,
-    ): Promise<MenuBarData> => {
-      const { jobs, mode } = await fetchCronJobs(supabaseClient);
-      const enriched = await Promise.all(
-        jobs.map(async (job) => {
-          try {
-            const lastRun = await fetchLastRun(
-              supabaseClient,
-              job.jobname,
-              mode,
-            );
-            return { ...job, lastRun };
-          } catch (err) {
-            return {
-              ...job,
-              lastRun: null,
-              lastRunFetchError: toErrorMessage(err),
-            };
-          }
-        }),
-      );
+  const fetchMenuBarData = useCallback(async (): Promise<MenuBarData> => {
+    const { jobs, mode } = await fetchCronJobs(client);
+    const enriched = await Promise.all(
+      jobs.map(async (job) => {
+        try {
+          const lastRun = await fetchLastRun(client, job.jobname, mode);
+          return { ...job, lastRun };
+        } catch (err) {
+          return {
+            ...job,
+            lastRun: null,
+            lastRunFetchError: toErrorMessage(err),
+          };
+        }
+      }),
+    );
 
-      const recentRunsRaw = await fetchRecentRuns(
-        supabaseClient,
-        historyLimit,
-        mode,
-      );
-      const jobNameMap = new Map<number, string>(
-        jobs.map((job) => [job.jobid, job.jobname]),
-      );
-      const recentRuns = recentRunsRaw.map((run) => ({
-        ...run,
-        jobname: run.jobname ?? jobNameMap.get(run.jobid),
-      }));
-      return { jobs: enriched, recentRuns, mode, lastUpdatedAt: new Date() };
-    },
-    [client, runHistoryLimitValue, refreshMinutes],
-  );
+    const recentRunsRaw = await fetchRecentRuns(
+      client,
+      runHistoryLimitValue,
+      mode,
+    );
+    const jobNameMap = new Map<number, string>(
+      jobs.map((job) => [job.jobid, job.jobname]),
+    );
+    const recentRuns = recentRunsRaw.map((run) => ({
+      ...run,
+      jobname: run.jobname ?? jobNameMap.get(run.jobid),
+    }));
+    return { jobs: enriched, recentRuns, mode, lastUpdatedAt: new Date() };
+  }, [client, runHistoryLimitValue]);
+
+  const { data, isLoading, revalidate, error } = usePromise(fetchMenuBarData);
 
   useEffect(() => {
     const interval = setInterval(
