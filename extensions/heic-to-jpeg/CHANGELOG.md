@@ -1,6 +1,6 @@
 # HEIC to JPEG Changelog
 
-## [Initial Version] - 2025-01-24
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
 - Convert HEIC/HEIF images to JPEG format

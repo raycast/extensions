@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { spawn, exec } from "child_process";
 import { promisify } from "util";
 import { existsSync } from "fs";
 import path from "path";
@@ -10,6 +10,28 @@ export interface ConversionResult {
   outputPath: string;
   success: boolean;
   error?: string;
+}
+
+function runSips(inputPath: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const sips = spawn("sips", [
+      "-s",
+      "format",
+      "jpeg",
+      "-s",
+      "formatOptions",
+      "100",
+      inputPath,
+      "--out",
+      outputPath,
+    ]);
+
+    sips.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`sips exited with code ${code}`));
+    });
+    sips.on("error", reject);
+  });
 }
 
 export async function convertHeicToJpeg(
@@ -41,10 +63,8 @@ export async function convertHeicToJpeg(
       };
     }
 
-    // Convert using sips with maximum quality
-    await execAsync(
-      `sips -s format jpeg -s formatOptions 100 "${inputPath}" --out "${outputPath}"`,
-    );
+    // Convert using sips with maximum quality (using spawn for security)
+    await runSips(inputPath, outputPath);
 
     return {
       inputPath,
