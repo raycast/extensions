@@ -17,12 +17,14 @@
     {
       "name": "list-api-routes",
       "title": "List API Routes",
+      "subtitle": "Next Lens",
       "description": "List all API routes from your Next.js project",
       "mode": "view"
     },
     {
       "name": "list-page-routes",
       "title": "List Page Routes",
+      "subtitle": "Next Lens",
       "description": "List all page routes from your Next.js project",
       "mode": "view"
     }
