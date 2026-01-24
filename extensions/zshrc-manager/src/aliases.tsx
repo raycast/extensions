@@ -48,7 +48,8 @@ function generateAliasWarning(alias: AliasItem, allAliases: AliasItem[]): ItemWa
  * Aliases management command for zshrc content
  */
 export default function Aliases({ searchBarAccessory }: AliasesProps) {
-  const browseAliasesSection = (
+  // Function to generate the browse section with access to refresh callback
+  const getBrowseAliasesSection = (refresh: () => void) => (
     <List.Section title="Discover">
       <List.Item
         title="Alias Collections"
@@ -80,7 +81,11 @@ Collections are framework-agnostic - just plain shell aliases.
         }
         actions={
           <ActionPanel>
-            <Action.Push title="Browse Collections" target={<BrowseAliases />} icon={Icon.Book} />
+            <Action.Push
+              title="Browse Collections"
+              target={<BrowseAliases onDataChange={refresh} />}
+              icon={Icon.Book}
+            />
           </ActionPanel>
         }
       />
@@ -101,7 +106,7 @@ Collections are framework-agnostic - just plain shell aliases.
       searchBarAccessory={searchBarAccessory}
       warningGenerator={generateAliasWarning}
       showWarningFilter={!searchBarAccessory}
-      customHeaderSection={browseAliasesSection}
+      customHeaderSection={getBrowseAliasesSection}
       enableFrecency={true}
       frecencyNamespace="zshrc-aliases"
       frecencyKey={(alias) => alias.name}

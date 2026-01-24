@@ -12,6 +12,8 @@ import CollectionDetail from "./collection-detail";
 interface BrowseAliasesProps {
   searchBarAccessory?: React.ReactElement;
   filterBySection?: string;
+  /** Callback to notify parent view that data has changed */
+  onDataChange?: () => void;
 }
 
 /**
@@ -20,7 +22,7 @@ interface BrowseAliasesProps {
  * Main view for browsing curated alias collections.
  * Framework-agnostic - shows "Git Aliases", not "OMZ Git Plugin".
  */
-export default function BrowseAliases({ searchBarAccessory, filterBySection }: BrowseAliasesProps) {
+export default function BrowseAliases({ searchBarAccessory, filterBySection, onDataChange }: BrowseAliasesProps) {
   const { collections, loadedCollections, loadCollection, isLoading, manifestLoading, error } = useAliasCollections();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -96,6 +98,9 @@ export default function BrowseAliases({ searchBarAccessory, filterBySection }: B
       // Get attribution for the comment
       const attribution = getSourceAttribution(collection as Parameters<typeof getSourceAttribution>[0]);
       const result = await addAliasesToZshrc(collection.name, collection.aliases, attribution);
+
+      // Notify parent view that data changed so it can refresh
+      onDataChange?.();
 
       await showToast({
         style: Toast.Style.Success,
@@ -213,7 +218,7 @@ Select this item to load the alias definitions.
                         <Action.Push
                           title="View Aliases"
                           icon={Icon.List}
-                          target={<CollectionDetail collection={loaded} />}
+                          target={<CollectionDetail collection={loaded} {...(onDataChange && { onDataChange })} />}
                         />
                         <Action
                           title="Apply All to Zshrc"

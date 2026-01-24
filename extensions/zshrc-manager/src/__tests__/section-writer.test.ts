@@ -218,8 +218,8 @@ alias n='node'
   describe("generateSectionHeader", () => {
     it("should generate dashed header", () => {
       const header = generateSectionHeader("Git Aliases", "dashed");
-      expect(header.start).toBe("# --- Git Aliases ---");
-      expect(header.end).toBe("# --- End Git Aliases ---");
+      expect(header.start).toBe("# --- Git Aliases --- #");
+      expect(header.end).toBe("# --- End Git Aliases --- #");
     });
 
     it("should generate bracketed header", () => {
@@ -242,7 +242,7 @@ alias n='node'
 
     it("should default to dashed format", () => {
       const header = generateSectionHeader("Git Aliases");
-      expect(header.start).toBe("# --- Git Aliases ---");
+      expect(header.start).toBe("# --- Git Aliases --- #");
     });
   });
 });

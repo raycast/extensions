@@ -116,8 +116,8 @@ export interface ListViewConfig<T extends FilterableItem> {
   warningGenerator?: WarningGenerator<T>;
   /** Whether to show the warning filter dropdown */
   showWarningFilter?: boolean;
-  /** Custom header section rendered after Overview */
-  customHeaderSection?: React.ReactNode;
+  /** Custom header section rendered after Overview. Can be a ReactNode or a function that receives refresh */
+  customHeaderSection?: React.ReactNode | ((refresh: () => void) => React.ReactNode);
   /** Enable frecency-based sorting (items used more frequently appear first) */
   enableFrecency?: boolean;
   /** Namespace for frecency storage (required if enableFrecency is true) */
@@ -300,7 +300,9 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
         />
       </List.Section>
 
-      {config.customHeaderSection}
+      {typeof config.customHeaderSection === "function"
+        ? config.customHeaderSection(refresh)
+        : config.customHeaderSection}
 
       {Object.entries(grouped).map(([sectionName, items]) => (
         <List.Section key={sectionName} title={sectionName}>
@@ -324,8 +326,9 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
 
             // Generate a stable key using the item's unique identifier
             // This ensures consistent rendering when frecency sorting changes order
+            // Include index to handle duplicate names in the same section
             const itemKey = config.frecencyKey
-              ? `${sectionName}-${config.frecencyKey(item)}`
+              ? `${sectionName}-${config.frecencyKey(item)}-${index}`
               : `${sectionName}-${config.generateTitle(item)}-${index}`;
 
             return (

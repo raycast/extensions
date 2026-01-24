@@ -10,6 +10,7 @@ import { getSectionPrefs } from "./preferences";
 import { analyzeSectionMarkers, type SectionMarker } from "./section-detector";
 import { normalizeSectionName } from "./icons/section-normalizer";
 import type { ParsedAlias } from "./parse-alias-file";
+import { saveToHistory } from "./history";
 
 /**
  * Section format templates for generating headers.
@@ -17,8 +18,8 @@ import type { ParsedAlias } from "./parse-alias-file";
  */
 const SECTION_TEMPLATES: Record<string, (name: string) => { start: string; end?: string }> = {
   dashed: (name) => ({
-    start: `# --- ${name} ---`,
-    end: `# --- End ${name} ---`,
+    start: `# --- ${name} --- #`,
+    end: `# --- End ${name} --- #`,
   }),
   bracketed: (name) => ({
     start: `# [ ${name} ]`,
@@ -298,6 +299,9 @@ export async function addAliasesToZshrc(
     insertContent.push(...aliasLines);
 
     lines.splice(insertLine, 0, ...insertContent);
+
+    // Save to history before writing for undo support
+    await saveToHistory(`Add ${aliases.length} aliases to "${existingSection.marker.name}"`);
     await writeZshrcFile(lines.join("\n"));
 
     return {
@@ -321,6 +325,9 @@ export async function addAliasesToZshrc(
 
     // Append to content and write
     const newContent = content + newSection.join("\n");
+
+    // Save to history before writing for undo support
+    await saveToHistory(`Create section "${displayName}" with ${aliases.length} aliases`);
     await writeZshrcFile(newContent);
 
     return {
@@ -367,6 +374,9 @@ export async function addSingleAliasToZshrc(
       insertContent.push(aliasLine);
 
       lines.splice(insertLine, 0, ...insertContent);
+
+      // Save to history before writing for undo support
+      await saveToHistory(`Add alias "${alias.name}" to "${existingSection.marker.name}"`);
       await writeZshrcFile(lines.join("\n"));
 
       return {
@@ -376,12 +386,43 @@ export async function addSingleAliasToZshrc(
     }
   }
 
-  // No matching section or no collection name - just append
+  // No matching section found - create a new section if collection name provided
   const aliasLine = `alias ${alias.name}='${alias.value.replace(/'/g, "'\\''")}'`;
-  const appendContent = alias.description ? `\n# ${alias.description}\n${aliasLine}\n` : `\n${aliasLine}\n`;
 
-  // Append to content and write
+  if (collectionName) {
+    // Create a new section for this collection
+    const format = detectUserSectionFormat(content);
+    const header = generateSectionHeader(collectionName, format);
+
+    const newSection: string[] = ["", header.start, ""];
+    if (alias.description) {
+      newSection.push(`# ${alias.description}`);
+    }
+    newSection.push(aliasLine);
+
+    if (header.end) {
+      newSection.push("", header.end);
+    }
+    newSection.push("");
+
+    const newContent = content + newSection.join("\n");
+
+    // Save to history before writing for undo support
+    await saveToHistory(`Add alias "${alias.name}" (create "${collectionName}" section)`);
+    await writeZshrcFile(newContent);
+
+    return {
+      success: true,
+      message: `Added "${alias.name}" to new section "${collectionName}"`,
+    };
+  }
+
+  // No collection name - just append to end
+  const appendContent = alias.description ? `\n# ${alias.description}\n${aliasLine}\n` : `\n${aliasLine}\n`;
   const newContent = content + appendContent;
+
+  // Save to history before writing for undo support
+  await saveToHistory(`Add alias "${alias.name}"`);
   await writeZshrcFile(newContent);
 
   return {
