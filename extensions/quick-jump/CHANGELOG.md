@@ -1,6 +1,6 @@
 # Quick Jump Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-01-24
 
 ### Added
 - Nested placeholder expansion: placeholders can now reference other placeholders (e.g., `teamDir: "${baseDir}/team"`)
