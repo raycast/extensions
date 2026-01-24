@@ -24,11 +24,6 @@ interface PaginatedPayments {
   };
 }
 
-interface Settlement {
-  amount: Amount;
-  settlementDate: string;
-}
-
 // Helper to format currency
 const formatCurrency = (value: number, currency: string) => {
   return new Intl.NumberFormat("nl-NL", { style: "currency", currency }).format(value);
@@ -42,18 +37,11 @@ function TransactionsMenuBar({ accessToken }: { accessToken: string }) {
       Authorization: `Bearer ${accessToken}`,
     },
     keepPreviousData: true,
-  });
-
-  // Fetch next settlement data
-  const { data: settlementData, isLoading: isLoadingSettlement } = useFetch<Settlement>(
-    `https://api.mollie.com/v2/settlements/next`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      keepPreviousData: true,
+    // Suppress default error toast - we handle errors gracefully
+    onError: (error) => {
+      console.error("Failed to fetch payments:", error);
     },
-  );
+  });
 
   const { totalAmount, transactionCount } = useMemo(() => {
     if (!data?._embedded?.payments) {
@@ -79,30 +67,12 @@ function TransactionsMenuBar({ accessToken }: { accessToken: string }) {
     };
   }, [data]);
 
-  const hasSettlementData = settlementData?.amount && settlementData?.settlementDate;
-  const settlementAmount = hasSettlementData
-    ? formatCurrency(parseFloat(settlementData.amount.value), settlementData.amount.currency)
-    : null;
-  const settlementDate = hasSettlementData ? new Date(settlementData.settlementDate).toLocaleDateString("nl-NL") : null;
-
   return (
-    <MenuBarExtra title={`Today: ${totalAmount}`} isLoading={isLoading || isLoadingSettlement}>
+    <MenuBarExtra title={`Today: ${totalAmount}`} isLoading={isLoading}>
       <MenuBarExtra.Section title="Today's revenue">
         <MenuBarExtra.Item title={`Total: ${totalAmount}`} />
         <MenuBarExtra.Item title={`Transactions: ${transactionCount}`} />
       </MenuBarExtra.Section>
-      {hasSettlementData ? (
-        <MenuBarExtra.Section title="Estimated next payout">
-          <MenuBarExtra.Item title={`${settlementAmount}`} />
-          <MenuBarExtra.Item title={`${settlementDate}`} />
-        </MenuBarExtra.Section>
-      ) : (
-        !isLoadingSettlement && (
-          <MenuBarExtra.Section title="Next payout">
-            <MenuBarExtra.Item title="No upcoming settlement" />
-          </MenuBarExtra.Section>
-        )
-      )}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Open Mollie"

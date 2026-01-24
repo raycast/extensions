@@ -27,6 +27,12 @@
       "title": "Create Payment Link",
       "description": "Create a Payment link and copy it to the clipboard",
       "mode": "view"
+    },
+    {
+      "name": "subscriptions-list",
+      "title": "View Subscriptions",
+      "description": "View and manage your Mollie subscriptions",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -46,6 +52,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
   }
 }

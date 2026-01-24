@@ -156,7 +156,6 @@ function PaymentLinkForm({ accessToken }: { accessToken: string }) {
         }
       } else {
         body.amount = { currency: "EUR", value: parseFloat(values.amount).toFixed(2) };
-        body.webhookUrl = "https://webshop.example.org/mollie-webhook/";
       }
 
       const response = await fetch(endpoint, {

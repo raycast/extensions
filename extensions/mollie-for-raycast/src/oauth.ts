@@ -1,8 +1,8 @@
 // src/oauth.ts
 import { OAuth } from "@raycast/api";
 
-// --- CONFIGURATIE ---
-// Jouw ingevulde sleutels
+// --- CONFIGURATION ---
+// OAuth credentials
 const clientId = "app_aLGHhWSHe8e3d494VRiNtac2";
 const proxiedAuthorizeUrl =
   "https://oauth.raycast.com/v1/authorize/NxaZKqcp7vp8pAw3Mp8r8UOXy_z3pnka8zfft5NcBEoB09N36m-7Y6r_EBUphunBEkTTec8UnAC_hq1ENW73rgp77by3LF_mXqJ4ct1g9kqbLRe8Hx1ezlHoU2sxnqKZfzHWkdV7hGugdqZksA";
@@ -11,12 +11,12 @@ const proxiedTokenUrl =
 const proxiedRefreshTokenUrl =
   "https://oauth.raycast.com/v1/refresh-token/hiXK17eErlQSoxjH5w0qTI3fjCmQt-Qw7TWqV0PhNEi6xvSqLjnklSkwNy7D0g67FwQAfXV3udahWqjl2tFPa5b7zO_rFNtJQTvPto9gQMrQDdQFFC6VvdGZstEn8K2juivJh2SwmBzBfg";
 
-// Definieer de permissies die je app nodig heeft
+// Define the permissions your app needs
 const SCOPES =
   "organizations.read profiles.read payments.read payments.write sales-invoices.read sales-invoices.write balances.read settlements.read payment-links.read payment-links.write subscriptions.read subscriptions.write refunds.write refunds.read";
 
 // --- OAUTH CLIENT ---
-// We gebruiken Raycast's basis-client en vertrouwen op de ingebouwde logica.
+// Using Raycast's PKCE client with built-in token management
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Mollie",
@@ -24,7 +24,7 @@ export const client = new OAuth.PKCEClient({
   description: "Connect your Mollie account to Raycast.",
 });
 
-// --- KERN AUTHENTICATIE LOGICA ---
+// --- CORE AUTHENTICATION LOGIC ---
 export async function authorize(): Promise<string> {
   const tokenSet = await client.getTokens();
 
@@ -45,10 +45,7 @@ export async function authorize(): Promise<string> {
     return tokenSet.accessToken;
   }
 
-  // Clear any stale tokens before starting new authorization
-  await client.removeTokens();
-
-  // Raycast genereert nu zelf de correcte redirectURI
+  // Raycast generates the correct redirectURI automatically
   const authRequest = await client.authorizationRequest({
     endpoint: proxiedAuthorizeUrl,
     clientId: clientId,
@@ -69,7 +66,7 @@ export async function authorize(): Promise<string> {
   }
 }
 
-// --- HELPER FUNCTIES ---
+// --- HELPER FUNCTIONS ---
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
   console.log("Fetching tokens with redirect_uri:", authRequest.redirectURI);
 
@@ -81,7 +78,7 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
       code: authCode,
       code_verifier: authRequest.codeVerifier,
       grant_type: "authorization_code",
-      // We gebruiken de URI die Raycast zojuist heeft gegenereerd voor 100% consistentie
+      // Use the URI that Raycast just generated for consistency
       redirect_uri: authRequest.redirectURI,
     }),
   });

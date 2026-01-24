@@ -54,47 +54,143 @@ const formatDateTime = (dateString: string) => {
 };
 
 // Helper to get payment method icon
-const getPaymentMethodIcon = (method: string | null): { source: string } | Icon => {
-  if (!method) return Icon.BankNote;
+const getPaymentMethodIcon = (method: string | null): { source: string } => {
+  if (!method) return { source: "payment-methods/Fallback.png" };
 
   switch (method.toLowerCase()) {
+    // Card payments
     case "creditcard":
-      return { source: "payment-methods/creditcard.png" };
-    case "ideal":
-      return { source: "payment-methods/ideal.png" };
-    case "bancontact":
-      return { source: "payment-methods/bancontact.png" };
-    case "banktransfer":
-      return { source: "payment-methods/banktransfer.png" };
-    case "paypal":
-      return { source: "payment-methods/paypal.png" };
+      return { source: "payment-methods/Credit-card.png" };
+    case "americanexpress":
+      return { source: "payment-methods/Amex.png" };
+    case "cartebancaire":
+      return { source: "payment-methods/Carte-Bancaire.png" };
+    case "maestro":
+      return { source: "payment-methods/Maestro.png" };
+    case "mastercard":
+      return { source: "payment-methods/Mastercard.png" };
+    case "visa":
+      return { source: "payment-methods/Visa.png" };
+    case "postepay":
+      return { source: "payment-methods/PostePay.png" };
+
+    // Wallet payments
     case "applepay":
-      return { source: "payment-methods/applepay.png" };
+      return { source: "payment-methods/Apple-Pay.png" };
+    case "googlepay":
+      return { source: "payment-methods/Google-Pay.png" };
+    case "paypal":
+      return { source: "payment-methods/PayPal.png" };
+
+    // iDEAL variants
+    case "ideal":
+      return { source: "payment-methods/iDEAL-Wero.png" };
+    case "idealin3":
+      return { source: "payment-methods/iDEALin3.png" };
+    case "idealqr":
+      return { source: "payment-methods/iDEAL-QR.png" };
+
+    // Klarna variants
+    case "klarna":
     case "klarnapaylater":
-      return { source: "payment-methods/klarna.png" };
     case "klarnasliceit":
-      return { source: "payment-methods/klarna.png" };
-    case "giftcard":
-      return { source: "payment-methods/giftcard.png" };
-    case "voucher":
-      return { source: "payment-methods/voucher.png" };
-    case "sofort":
-      return { source: "payment-methods/sofort.png" };
+    case "klarnapaynow":
+      return { source: "payment-methods/Klarna.png" };
+
+    // Buy now pay later
+    case "alma":
+      return { source: "payment-methods/Alma.png" };
+    case "billie":
+      return { source: "payment-methods/Billie.png" };
+    case "in3":
+      return { source: "payment-methods/in3.png" };
+    case "in3business":
+      return { source: "payment-methods/in3business.png" };
+    case "riverty":
+      return { source: "payment-methods/Riverty.png" };
+
+    // Bank transfers & direct debit
+    case "banktransfer":
+      return { source: "payment-methods/Banktransfer.png" };
+    case "directdebit":
+      return { source: "payment-methods/Direct-debit.png" };
+    case "bacs":
+      return { source: "payment-methods/BACS.png" };
+
+    // Belgian methods
+    case "bancontact":
+      return { source: "payment-methods/Bancontact.png" };
+    case "belfius":
+      return { source: "payment-methods/Belfius.png" };
+    case "kbc":
+      return { source: "payment-methods/KBC.png" };
+    case "payconiq":
+      return { source: "payment-methods/Payconiq.png" };
+
+    // German methods
     case "eps":
-      return { source: "payment-methods/eps.png" };
+      return { source: "payment-methods/EPS.png" };
     case "giropay":
       return { source: "payment-methods/giropay.png" };
-    case "belfius":
-      return { source: "payment-methods/belfius.png" };
-    case "kbc":
-      return { source: "payment-methods/kbc.png" };
-    case "przelewy24":
-      return { source: "payment-methods/przelewy24.png" };
+
+    // Italian methods
+    case "bancomatpay":
+      return { source: "payment-methods/Bancomat.png" };
     case "mybank":
-      return { source: "payment-methods/mybank.png" };
+      return { source: "payment-methods/MyBank.png" };
+    case "satispay":
+      return { source: "payment-methods/Satispay.png" };
+
+    // Portuguese methods
+    case "mbway":
+      return { source: "payment-methods/MB-Way.png" };
+    case "multibanco":
+      return { source: "payment-methods/Multibanco.png" };
+
+    // Polish methods
+    case "blik":
+      return { source: "payment-methods/Blik.png" };
+    case "przelewy24":
+      return { source: "payment-methods/P24.png" };
+
+    // Spanish methods
+    case "bizum":
+      return { source: "payment-methods/Bizum.png" };
+
+    // Nordic methods
+    case "mobilepay":
+      return { source: "payment-methods/MobilePay.png" };
+    case "swish":
+      return { source: "payment-methods/Swish.png" };
+    case "vipps":
+      return { source: "payment-methods/Vipps.png" };
+
+    // Swiss methods
+    case "twint":
+      return { source: "payment-methods/Twint.png" };
+
+    // Other European methods
+    case "trustly":
+      return { source: "payment-methods/Trustly.png" };
+    case "paybybank":
+      return { source: "payment-methods/Pay-By-Bank.png" };
+    case "wero":
+      return { source: "payment-methods/Wero.png" };
+
+    // Vouchers & gift cards
+    case "giftcard":
+      return { source: "payment-methods/Giftcard.png" };
+    case "voucher":
+      return { source: "payment-methods/Voucher.png" };
+    case "paysafecard":
+      return { source: "payment-methods/paysafecard.png" };
+
+    // Point of sale
+    case "pointofsale":
+      return { source: "payment-methods/Point-of-Sale.png" };
+
     default:
-      // Fallback to Raycast icon if no image is found
-      return Icon.BankNote;
+      return { source: "payment-methods/Fallback.png" };
   }
 };
 
