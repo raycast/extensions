@@ -2,9 +2,12 @@
 
 Capture and manage highlights from YouTube videos while you watch. Mark the moments that matter, add notes, and export them for later.
 
+> **Note**
+> This extension is not affiliated with YouTube and is not the YouTube Studio highlight feature. Check our [website](https://youtubehighlightsapp.com/) for more info.
+
 ## The Problem
 
-YouTube is full of valuable content, but finding that one quote or concept you remember from a video can be a pain. Scrubbing through hours of content to rediscover a 30-second insight is not a good use of your time.
+YouTube is full of valuable content, but finding that one quote, concept or moment you remember from a video you recently watched can be a pain. Scrubbing through hours of content to rediscover a 30-second insight is not a good use of your time.
 
 This extension lets you mark those moments as you watch, so you can come back to them without the hunt.
 
