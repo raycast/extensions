@@ -21,7 +21,21 @@ function createSection(overrides: Partial<LogicalSection> = {}): LogicalSection 
     content: "",
     startLine: 1,
     endLine: 10,
-    type: "labeled" as const,
+    aliasCount: 0,
+    exportCount: 0,
+    evalCount: 0,
+    setoptCount: 0,
+    pluginCount: 0,
+    functionCount: 0,
+    sourceCount: 0,
+    autoloadCount: 0,
+    fpathCount: 0,
+    pathCount: 0,
+    themeCount: 0,
+    completionCount: 0,
+    historyCount: 0,
+    keybindingCount: 0,
+    otherCount: 0,
     ...overrides,
   };
 }
@@ -424,7 +438,7 @@ export PATH=/usr/bin`,
       const content = parseSectionContent(section);
 
       expect(content.exports).toHaveLength(1);
-      expect(content.exports[0].value).toContain("$HOME");
+      expect(content.exports[0]!.value).toContain("$HOME");
     });
 
     it("should handle mixed content types", () => {

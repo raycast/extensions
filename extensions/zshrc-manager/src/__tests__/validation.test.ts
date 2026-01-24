@@ -43,10 +43,10 @@ describe("validation.ts", () => {
       const result = detectDuplicates(items, "name");
 
       expect(result.duplicates).toHaveLength(1);
-      expect(result.duplicates[0].name).toBe("ll");
-      expect(result.duplicates[0].count).toBe(2);
-      expect(result.duplicates[0].sections).toContain("General");
-      expect(result.duplicates[0].sections).toContain("Aliases");
+      expect(result.duplicates[0]!.name).toBe("ll");
+      expect(result.duplicates[0]!.count).toBe(2);
+      expect(result.duplicates[0]!.sections).toContain("General");
+      expect(result.duplicates[0]!.sections).toContain("Aliases");
     });
 
     it("should count total duplicates correctly", () => {
@@ -74,16 +74,16 @@ describe("validation.ts", () => {
       const result = detectDuplicates(items, "variable");
 
       expect(result.duplicates).toHaveLength(1);
-      expect(result.duplicates[0].name).toBe("PATH");
+      expect(result.duplicates[0]!.name).toBe("PATH");
     });
 
     it("should handle items without section", () => {
-      const items = [{ name: "test" }, { name: "test" }];
+      const items: { name: string; section?: string }[] = [{ name: "test" }, { name: "test" }];
 
       const result = detectDuplicates(items, "name");
 
       expect(result.duplicates).toHaveLength(1);
-      expect(result.duplicates[0].sections).toContain("Unknown");
+      expect(result.duplicates[0]!.sections).toContain("Unknown");
     });
 
     it("should handle empty input", () => {
@@ -109,8 +109,8 @@ describe("validation.ts", () => {
 
       const result = detectDuplicates(items, "name");
 
-      expect(result.duplicates[0].count).toBe(3);
-      expect(result.duplicates[0].sections).toHaveLength(2); // Unique sections
+      expect(result.duplicates[0]!.count).toBe(3);
+      expect(result.duplicates[0]!.sections).toHaveLength(2); // Unique sections
     });
 
     it("should handle multiple different duplicates", () => {
@@ -162,7 +162,7 @@ describe("validation.ts", () => {
 
       expect(result.brokenSources).toHaveLength(1);
       expect(result.totalBroken).toBe(1);
-      expect(result.brokenSources[0].section).toBe("Test");
+      expect(result.brokenSources[0]!.section).toBe("Test");
     });
 
     it("should expand ~ in paths before checking", async () => {
@@ -179,8 +179,8 @@ describe("validation.ts", () => {
       // Should be broken (file doesn't exist)
       expect(result.brokenSources).toHaveLength(1);
       // Should have expanded ~ to home directory
-      expect(result.brokenSources[0].expandedPath).toBe(`${home}/.this_file_definitely_does_not_exist_zshrc_test`);
-      expect(result.brokenSources[0].path).toBe("~/.this_file_definitely_does_not_exist_zshrc_test");
+      expect(result.brokenSources[0]!.expandedPath).toBe(`${home}/.this_file_definitely_does_not_exist_zshrc_test`);
+      expect(result.brokenSources[0]!.path).toBe("~/.this_file_definitely_does_not_exist_zshrc_test");
     });
 
     it("should expand $HOME in paths before checking", async () => {
@@ -194,7 +194,7 @@ describe("validation.ts", () => {
       const result = await detectBrokenSources(sources);
 
       expect(result.brokenSources).toHaveLength(1);
-      expect(result.brokenSources[0].expandedPath).toBe(`${home}/.this_file_definitely_does_not_exist_zshrc_test`);
+      expect(result.brokenSources[0]!.expandedPath).toBe(`${home}/.this_file_definitely_does_not_exist_zshrc_test`);
     });
 
     it("should handle multiple broken sources", async () => {
@@ -215,7 +215,7 @@ describe("validation.ts", () => {
 
       const result = await detectBrokenSources(sources);
 
-      expect(result.brokenSources[0].section).toBe("Unknown");
+      expect(result.brokenSources[0]!.section).toBe("Unknown");
     });
   });
 

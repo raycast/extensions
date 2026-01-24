@@ -39,15 +39,15 @@ vi.mock("@raycast/utils", () => ({
         const err = e instanceof Error ? e : new Error(String(e));
         setError(err);
         setIsLoading(false);
-        options?.onError?.(err, data);
+        options?.onError?.(err);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- fn and options are closure-captured from mock setup, not reactive values; including them causes infinite loops
+      // fn and options are closure-captured from mock setup, not reactive values; including them causes infinite loops
     }, []);
 
     // Only run once on mount to prevent infinite loops
     useEffect(() => {
       execute();
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- execute is intentionally excluded to run only once on mount, mimicking useCachedPromise behavior
+      // execute is intentionally excluded to run only once on mount, mimicking useCachedPromise behavior
     }, []);
 
     return {

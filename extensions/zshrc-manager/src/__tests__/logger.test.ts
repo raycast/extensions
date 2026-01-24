@@ -97,7 +97,7 @@ describe("logger.ts", () => {
     it("should include timestamp in format", () => {
       debug("test", "message");
 
-      const call = consoleLogSpy.mock.calls[0][0];
+      const call = consoleLogSpy.mock.calls[0]?.[0];
       // ISO timestamp format: YYYY-MM-DDTHH:MM:SS
       expect(call).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
     });
@@ -317,16 +317,16 @@ describe("logger.ts", () => {
       warn("test", "msg");
       error("test", "msg");
 
-      expect(consoleLogSpy.mock.calls[0][0]).toContain("[zshrc-manager]");
-      expect(consoleLogSpy.mock.calls[1][0]).toContain("[zshrc-manager]");
-      expect(consoleWarnSpy.mock.calls[0][0]).toContain("[zshrc-manager]");
-      expect(consoleErrorSpy.mock.calls[0][0]).toContain("[zshrc-manager]");
+      expect(consoleLogSpy.mock.calls[0]?.[0]).toContain("[zshrc-manager]");
+      expect(consoleLogSpy.mock.calls[1]?.[0]).toContain("[zshrc-manager]");
+      expect(consoleWarnSpy.mock.calls[0]?.[0]).toContain("[zshrc-manager]");
+      expect(consoleErrorSpy.mock.calls[0]?.[0]).toContain("[zshrc-manager]");
     });
 
     it("should format messages consistently", () => {
       info("myModule", "my message");
 
-      const formatted = consoleLogSpy.mock.calls[0][0];
+      const formatted = consoleLogSpy.mock.calls[0]?.[0];
 
       // Format: [zshrc-manager] TIMESTAMP [LEVEL] [MODULE] MESSAGE
       expect(formatted).toMatch(/^\[zshrc-manager\] \d{4}-\d{2}-\d{2}T.+ \[INFO\] \[myModule\] my message$/);

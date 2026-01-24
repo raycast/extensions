@@ -376,7 +376,7 @@ describe("HealthCheck", () => {
   describe("error issues display", () => {
     it("should show error section when errors exist", async () => {
       mockDetectBrokenSources.mockResolvedValue({
-        brokenSources: [{ path: "~/.missing", expandedPath: "/test/.missing" }],
+        brokenSources: [{ path: "~/.missing", section: "Sources", expandedPath: "/test/.missing" }],
         totalBroken: 1,
       });
 

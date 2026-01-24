@@ -54,10 +54,10 @@ describe("history.ts", () => {
     mockGetZshrcPath.mockReturnValue(TEST_PATH);
     mockReadZshrcFileRaw.mockResolvedValue(TEST_CONTENT);
     mockWriteZshrcFile.mockResolvedValue(undefined);
-    mockLocalStorage.getItem.mockResolvedValue(null);
+    mockLocalStorage.getItem.mockResolvedValue(undefined);
     mockLocalStorage.setItem.mockResolvedValue(undefined);
     mockLocalStorage.removeItem.mockResolvedValue(undefined);
-    mockShowToast.mockResolvedValue(undefined);
+    mockShowToast.mockResolvedValue({} as unknown as Toast);
   });
 
   afterEach(() => {
@@ -89,7 +89,9 @@ describe("history.ts", () => {
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(HISTORY_KEY, expect.any(String));
 
       // Verify the new entry is first
-      const savedData = JSON.parse((mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1]);
+      const calls = (mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls;
+      expect(calls[0]).toBeDefined();
+      const savedData = JSON.parse(calls[0]![1]);
       expect(savedData).toHaveLength(2);
       expect(savedData[0].description).toBe("New entry");
       expect(savedData[1].description).toBe("Old entry");
@@ -108,7 +110,9 @@ describe("history.ts", () => {
 
       await saveToHistory("New entry that should push out oldest");
 
-      const savedData = JSON.parse((mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1]);
+      const calls = (mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls;
+      expect(calls[0]).toBeDefined();
+      const savedData = JSON.parse(calls[0]![1]);
       expect(savedData).toHaveLength(10);
       expect(savedData[0].description).toBe("New entry that should push out oldest");
     });
@@ -127,7 +131,9 @@ describe("history.ts", () => {
 
       await saveToHistory("Test description");
 
-      const savedData = JSON.parse((mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1]);
+      const calls = (mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls;
+      expect(calls[0]).toBeDefined();
+      const savedData = JSON.parse(calls[0]![1]);
       expect(savedData[0].previousContent).toBe(expectedContent);
     });
 
@@ -137,14 +143,16 @@ describe("history.ts", () => {
 
       await saveToHistory("Test description");
 
-      const savedData = JSON.parse((mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1]);
+      const calls = (mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls;
+      expect(calls[0]).toBeDefined();
+      const savedData = JSON.parse(calls[0]![1]);
       expect(savedData[0].filePath).toBe(customPath);
     });
   });
 
   describe("getHistory", () => {
     it("should return empty array when no history exists", async () => {
-      mockLocalStorage.getItem.mockResolvedValue(null);
+      mockLocalStorage.getItem.mockResolvedValue(undefined);
 
       const history = await getHistory();
 
@@ -186,7 +194,7 @@ describe("history.ts", () => {
 
   describe("undoLastChange", () => {
     it("should return false and show toast when history is empty", async () => {
-      mockLocalStorage.getItem.mockResolvedValue(null);
+      mockLocalStorage.getItem.mockResolvedValue(undefined);
 
       const result = await undoLastChange();
 
@@ -240,7 +248,9 @@ describe("history.ts", () => {
 
       await undoLastChange();
 
-      const savedData = JSON.parse((mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1]);
+      const calls = (mockLocalStorage.setItem as ReturnType<typeof vi.fn>).mock.calls;
+      expect(calls[0]).toBeDefined();
+      const savedData = JSON.parse(calls[0]![1]);
       expect(savedData).toHaveLength(1);
       expect(savedData[0].description).toBe("Entry 2");
     });
@@ -322,7 +332,7 @@ describe("history.ts", () => {
 
   describe("getUndoCount", () => {
     it("should return 0 when history is empty", async () => {
-      mockLocalStorage.getItem.mockResolvedValue(null);
+      mockLocalStorage.getItem.mockResolvedValue(undefined);
 
       const count = await getUndoCount();
 

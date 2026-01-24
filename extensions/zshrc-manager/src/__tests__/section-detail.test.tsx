@@ -43,9 +43,9 @@ vi.mock("../utils/markdown", () => ({
       const aliasMatch = line.match(/^alias\s+(\w+)=['"](.*)['"]/);
       const exportMatch = line.match(/^export\s+(\w+)=(.*)/);
 
-      if (aliasMatch) {
+      if (aliasMatch && aliasMatch[1] && aliasMatch[2]) {
         aliases.push({ name: aliasMatch[1], command: aliasMatch[2] });
-      } else if (exportMatch) {
+      } else if (exportMatch && exportMatch[1] && exportMatch[2]) {
         exports.push({ variable: exportMatch[1], value: exportMatch[2] });
       } else if (line.trim()) {
         otherLines.push(line);
@@ -161,7 +161,7 @@ describe("SectionDetail", () => {
       const lines = content.split("\n");
       lines.forEach((line) => {
         const aliasMatch = line.match(/^alias\s+(\w+)=['"](.*)['"]/);
-        if (aliasMatch) {
+        if (aliasMatch && aliasMatch[1] && aliasMatch[2]) {
           aliases.push({ name: aliasMatch[1], command: aliasMatch[2] });
         }
       });
@@ -178,7 +178,7 @@ describe("SectionDetail", () => {
       const lines = content.split("\n");
       lines.forEach((line) => {
         const exportMatch = line.match(/^export\s+(\w+)=(.*)/);
-        if (exportMatch) {
+        if (exportMatch && exportMatch[1] && exportMatch[2]) {
           exports.push({ variable: exportMatch[1], value: exportMatch[2] });
         }
       });
@@ -231,13 +231,9 @@ describe("SectionDetail", () => {
         otherLines: ["# comment"],
       };
 
-      const filterType = "aliases";
+      const filterType = "aliases" as const;
       const filtered =
-        filterType === "all"
-          ? content
-          : filterType === "aliases"
-            ? { ...content, exports: [], otherLines: [] }
-            : { ...content, aliases: [], otherLines: [] };
+        filterType === "aliases" ? { ...content, exports: [], otherLines: [] } : { ...content, aliases: [] };
 
       expect(filtered.aliases).toHaveLength(1);
       expect(filtered.exports).toHaveLength(0);
@@ -250,13 +246,9 @@ describe("SectionDetail", () => {
         otherLines: ["# comment"],
       };
 
-      const filterType = "exports";
+      const filterType = "exports" as const;
       const filtered =
-        filterType === "all"
-          ? content
-          : filterType === "aliases"
-            ? { ...content, exports: [], otherLines: [] }
-            : { ...content, aliases: [], otherLines: [] };
+        filterType === "exports" ? { ...content, aliases: [], otherLines: [] } : { ...content, exports: [] };
 
       expect(filtered.aliases).toHaveLength(0);
       expect(filtered.exports).toHaveLength(1);

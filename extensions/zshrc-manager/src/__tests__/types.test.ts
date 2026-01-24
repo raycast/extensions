@@ -36,11 +36,11 @@ describe("types/index.ts exports", () => {
   });
 
   describe("error class usage", () => {
-    it("should create ZshManagerError instance", async () => {
-      const { ZshManagerError } = await import("../types/index");
-      const error = new ZshManagerError("Test error");
-      expect(error.message).toBe("Test error");
-      expect(error.name).toBe("ZshManagerError");
+    it("should have FileNotFoundError as ZshManagerError subclass", async () => {
+      const { FileNotFoundError, ZshManagerError } = await import("../types/index");
+      const error = new FileNotFoundError("/path/to/file");
+      expect(error instanceof ZshManagerError).toBe(true);
+      expect(error.name).toBe("FileNotFoundError");
     });
 
     it("should create FileNotFoundError instance", async () => {
@@ -51,13 +51,13 @@ describe("types/index.ts exports", () => {
 
     it("should create PermissionError instance", async () => {
       const { PermissionError } = await import("../types/index");
-      const error = new PermissionError("read", "/path/to/file");
-      expect(error.message).toContain("read");
+      const error = new PermissionError("/path/to/file");
+      expect(error.message).toContain("/path/to/file");
     });
 
     it("should create FileTooLargeError instance", async () => {
       const { FileTooLargeError } = await import("../types/index");
-      const error = new FileTooLargeError("/path/to/file", 10000);
+      const error = new FileTooLargeError("/path/to/file", 10000, 5000);
       expect(error.message).toContain("/path/to/file");
     });
 
@@ -82,8 +82,8 @@ describe("types/index.ts exports", () => {
 
   describe("isZshManagerError utility", () => {
     it("should identify ZshManagerError instances", async () => {
-      const { ZshManagerError, isZshManagerError } = await import("../types/index");
-      const error = new ZshManagerError("Test error");
+      const { FileNotFoundError, isZshManagerError } = await import("../types/index");
+      const error = new FileNotFoundError("/path/to/file");
       expect(isZshManagerError(error)).toBe(true);
     });
 
@@ -112,11 +112,11 @@ describe("types/index.ts exports", () => {
 
   describe("getUserFriendlyErrorMessage utility", () => {
     it("should return user-friendly message for ZshManagerError", async () => {
-      const { ZshManagerError, getUserFriendlyErrorMessage } = await import("../types/index");
-      const error = new ZshManagerError("Test error");
+      const { FileNotFoundError, getUserFriendlyErrorMessage } = await import("../types/index");
+      const error = new FileNotFoundError("/path/to/file");
       const message = getUserFriendlyErrorMessage(error);
-      // Should return string or undefined
-      expect(message === undefined || typeof message === "string").toBe(true);
+      // Should return string
+      expect(typeof message === "string").toBe(true);
     });
 
     it("should return user-friendly message for regular Error", async () => {

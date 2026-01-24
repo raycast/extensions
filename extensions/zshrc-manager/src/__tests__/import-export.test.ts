@@ -45,8 +45,8 @@ describe("import-export.ts", () => {
     vi.clearAllMocks();
     mockGetZshrcPath.mockReturnValue(TEST_PATH);
     mockWriteZshrcFile.mockResolvedValue(undefined);
-    mockSaveToHistory.mockResolvedValue(undefined);
-    mockShowToast.mockResolvedValue(undefined);
+    mockSaveToHistory.mockResolvedValue(true);
+    mockShowToast.mockResolvedValue({} as unknown as Toast);
     mockClipboard.copy.mockResolvedValue(undefined);
     mockReadZshrcFileRaw.mockResolvedValue("# Existing content\nalias existing='test'");
   });
@@ -176,7 +176,9 @@ describe("import-export.ts", () => {
 
       await importAliasesFromJson(json, "Imported Aliases");
 
-      const writeCall = mockWriteZshrcFile.mock.calls[0][0];
+      const calls = mockWriteZshrcFile.mock.calls;
+      expect(calls[0]).toBeDefined();
+      const writeCall = calls[0]![0];
       expect(writeCall).toContain("# --- Imported Aliases ---");
     });
 
@@ -191,7 +193,9 @@ describe("import-export.ts", () => {
 
       await importAliasesFromJson(json);
 
-      const writeCall = mockWriteZshrcFile.mock.calls[0][0];
+      const calls = mockWriteZshrcFile.mock.calls;
+      expect(calls[0]).toBeDefined();
+      const writeCall = calls[0]![0];
       expect(writeCall).toContain("# Existing content");
       expect(writeCall).toContain("alias new='cmd'");
     });
@@ -205,7 +209,9 @@ describe("import-export.ts", () => {
 
       await importAliasesFromJson(json);
 
-      const writeCall = mockWriteZshrcFile.mock.calls[0][0];
+      const calls = mockWriteZshrcFile.mock.calls;
+      expect(calls[0]).toBeDefined();
+      const writeCall = calls[0]![0];
       expect(writeCall).toContain("'\"'\"'");
     });
 
@@ -287,7 +293,9 @@ describe("import-export.ts", () => {
 
       await importExportsFromJson(json, "Environment Variables");
 
-      const writeCall = mockWriteZshrcFile.mock.calls[0][0];
+      const calls = mockWriteZshrcFile.mock.calls;
+      expect(calls[0]).toBeDefined();
+      const writeCall = calls[0]![0];
       expect(writeCall).toContain("# --- Environment Variables ---");
     });
 
@@ -300,7 +308,9 @@ describe("import-export.ts", () => {
 
       await importExportsFromJson(json);
 
-      const writeCall = mockWriteZshrcFile.mock.calls[0][0];
+      const calls = mockWriteZshrcFile.mock.calls;
+      expect(calls[0]).toBeDefined();
+      const writeCall = calls[0]![0];
       expect(writeCall).toContain('\\"');
     });
 

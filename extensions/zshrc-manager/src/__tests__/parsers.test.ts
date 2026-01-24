@@ -302,7 +302,7 @@ export EDITOR=vim`;
       const result = parsePathEntries(content);
 
       expect(result).toHaveLength(1);
-      expect(result[0].entry).toContain("$HOME");
+      expect(result[0]!.entry).toContain("$HOME");
     });
   });
 
@@ -456,7 +456,7 @@ export PATH=/usr/bin:$PATH`;
       const result = parseKeybindings(content);
 
       expect(result).toHaveLength(1);
-      expect(result[0].command).toBe("edit-command-line");
+      expect(result[0]!.command).toBe("edit-command-line");
     });
 
     it("should handle escape sequences in keys", () => {
@@ -465,7 +465,7 @@ export PATH=/usr/bin:$PATH`;
       const result = parseKeybindings(content);
 
       expect(result).toHaveLength(1);
-      expect(result[0].key).toBe("^[.");
+      expect(result[0]!.key).toBe("^[.");
     });
 
     it("should parse vi command mode keybindings", () => {
@@ -549,7 +549,7 @@ bindkey -M viins '^P' up-line-or-history`;
       const result = parseKeybindings(content);
 
       expect(result).toHaveLength(1);
-      expect(result[0].keymap).toBe("mymap");
+      expect(result[0]!.keymap).toBe("mymap");
     });
 
     it("should not duplicate entries for same binding", () => {

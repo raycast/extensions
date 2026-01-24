@@ -37,33 +37,39 @@ describe("toggle-item.ts", () => {
 
   // Create a mock EditItemConfig for testing
   const mockAliasConfig: EditItemConfig = {
+    keyLabel: "Alias Name",
+    valueLabel: "Command",
+    keyPlaceholder: "ll",
+    valuePlaceholder: "ls -la",
+    keyPattern: /^[A-Za-z_][A-Za-z0-9_-]*$/,
+    keyValidationError: "Invalid alias name",
+    generateLine: (key: string, value: string) => `alias ${key}='${value}'`,
+    generatePattern: (key: string) => new RegExp(`^\\s*(?:#\\s*)?alias\\s+${key}=`),
+    generateReplacement: (key: string, value: string) => `alias ${key}='${value}'`,
     itemType: "alias",
     itemTypeCapitalized: "Alias",
-    generatePattern: (key: string) => new RegExp(`^\\s*(?:#\\s*)?alias\\s+${key}=`),
-    parseValue: (line: string) => {
-      const match = line.match(/alias\s+\w+=['"]?(.+?)['"]?$/);
-      return match ? match[1] : "";
-    },
-    formatLine: (key: string, value: string) => `alias ${key}='${value}'`,
   };
 
   const mockExportConfig: EditItemConfig = {
+    keyLabel: "Variable Name",
+    valueLabel: "Value",
+    keyPlaceholder: "PATH",
+    valuePlaceholder: "/usr/bin",
+    keyPattern: /^[A-Za-z_][A-Za-z0-9_]*$/,
+    keyValidationError: "Invalid variable name",
+    generateLine: (key: string, value: string) => `export ${key}=${value}`,
+    generatePattern: (key: string) => new RegExp(`^\\s*(?:#\\s*)?export\\s+${key}=`),
+    generateReplacement: (key: string, value: string) => `export ${key}=${value}`,
     itemType: "export",
     itemTypeCapitalized: "Export",
-    generatePattern: (key: string) => new RegExp(`^\\s*(?:#\\s*)?export\\s+${key}=`),
-    parseValue: (line: string) => {
-      const match = line.match(/export\s+\w+=(.+)$/);
-      return match ? match[1] : "";
-    },
-    formatLine: (key: string, value: string) => `export ${key}=${value}`,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetZshrcPath.mockReturnValue(TEST_PATH);
     mockWriteZshrcFile.mockResolvedValue(undefined);
-    mockSaveToHistory.mockResolvedValue(undefined);
-    mockShowToast.mockResolvedValue(undefined);
+    mockSaveToHistory.mockResolvedValue(true);
+    mockShowToast.mockResolvedValue({} as unknown as Toast);
   });
 
   describe("isCommented", () => {

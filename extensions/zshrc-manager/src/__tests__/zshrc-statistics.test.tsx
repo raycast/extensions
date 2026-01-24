@@ -122,7 +122,6 @@ const createMockStats = (overrides: Partial<StatsType> = {}): StatsType => ({
   plugins: [{ name: "git" }],
   functions: [{ name: "myfunc" }],
   sources: [{ path: "~/.zshrc.local" }],
-  totalEntries: 9,
   ...overrides,
 });
 
@@ -448,11 +447,10 @@ describe("ZshrcStatistics helper functions", () => {
         sources: [],
         evals: [],
         setopts: [],
-        totalEntries: 0,
       });
 
       expect(emptyStats.aliases).toHaveLength(0);
-      expect(emptyStats.totalEntries).toBe(0);
+      expect(emptyStats.sectionCount).toBe(2);
     });
   });
 
