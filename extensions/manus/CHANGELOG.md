@@ -1,6 +1,6 @@
 # Manus Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-24
 
 - Search and filter Manus AI tasks
 - Filter by status (Pending, Running, Completed, Failed)
