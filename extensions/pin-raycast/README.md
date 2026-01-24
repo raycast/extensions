@@ -1,12 +1,12 @@
 # Pin for Raycast
 
-A Raycast extension for controlling [Pin.app](https://github.com/southflowpeak/Pin) from Raycast.
+A simple Raycast extension for pinning any window to stay always on top via [Pin](https://southflowpeak.com/pin).
 
 ## About Pin.app
 
 Pin.app is a macOS application that allows you to pin any window to stay always on top. Using mirror overlay technology, it keeps selected windows visible above all other windows.
 
-For more details, visit the [Pin.app repository](https://github.com/southflowpeak/Pin).
+For more details, visit the [SouthFlowPeak/Pin](https://southflowpeak.com/pin).
 
 ## Commands
 
@@ -20,33 +20,8 @@ For more details, visit the [Pin.app repository](https://github.com/southflowpea
 
 ## Requirements
 
-- [Pin.app](https://github.com/southflowpeak/Pin) installed
+- [Pin.app](https://southflowpeak.com/pin) installed
 - [Raycast](https://raycast.com/) installed
-
-## Installation
-
-1. Clone this repository
-2. Run `npm install` to install dependencies
-3. Run `npm run dev` to start in development mode, or import into Raycast
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start in development mode
-npm run dev
-
-# Run lint check
-npm run lint
-
-# Auto-fix lint issues
-npm run fix-lint
-
-# Build
-npm run build
-```
 
 ## License
 
