@@ -322,9 +322,15 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
               },
             });
 
+            // Generate a stable key using the item's unique identifier
+            // This ensures consistent rendering when frecency sorting changes order
+            const itemKey = config.frecencyKey
+              ? `${sectionName}-${config.frecencyKey(item)}`
+              : `${sectionName}-${config.generateTitle(item)}-${index}`;
+
             return (
               <List.Item
-                key={`${sectionName}-${index}`}
+                key={itemKey}
                 title={config.generateTitle(item)}
                 icon={{ source: config.icon, tintColor: config.tintColor }}
                 accessories={accessories}

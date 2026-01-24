@@ -116,8 +116,9 @@ describe("history.ts", () => {
     it("should handle errors gracefully", async () => {
       mockReadZshrcFileRaw.mockRejectedValue(new Error("Read error"));
 
-      // Should not throw
-      await expect(saveToHistory("Test")).resolves.toBeUndefined();
+      // Should not throw and return false to indicate failure
+      const result = await saveToHistory("Test");
+      expect(result).toBe(false);
     });
 
     it("should store the current file content as previousContent", async () => {

@@ -16,7 +16,7 @@
   <a href="#-features">Features</a> •
   <a href="#-commands">Commands</a> •
   <a href="#-usage">Usage</a> •
-  <a href="#%EF%B8%8F-configuration">Configuration</a> •
+  <a href="#️-configuration">Configuration</a> •
   <a href="#-development">Development</a> •
   <a href="#-contributing">Contributing</a>
 </p>

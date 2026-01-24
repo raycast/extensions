@@ -248,9 +248,9 @@ describe("toggle-item.ts", () => {
 
       expect(mockWriteZshrcFile).not.toHaveBeenCalled();
       expect(mockShowToast).toHaveBeenCalledWith({
-        style: Toast.Style.Success,
-        title: "Already Enabled",
-        message: 'Alias "nonexistent" is already active',
+        style: Toast.Style.Failure,
+        title: "Not Found",
+        message: 'Alias "nonexistent" not found in zshrc',
       });
     });
 
@@ -303,9 +303,9 @@ describe("toggle-item.ts", () => {
 
       expect(mockWriteZshrcFile).not.toHaveBeenCalled();
       expect(mockShowToast).toHaveBeenCalledWith({
-        style: Toast.Style.Success,
-        title: "Already Disabled",
-        message: 'Alias "nonexistent" is already commented out',
+        style: Toast.Style.Failure,
+        title: "Not Found",
+        message: 'Alias "nonexistent" not found in zshrc',
       });
     });
 

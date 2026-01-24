@@ -116,6 +116,8 @@ describe("HealthCheck", () => {
 
     it("should accept searchBarAccessory prop", () => {
       const accessory = <div data-testid="custom-accessory">Custom</div>;
+      // Note: searchBarAccessory is passed to Raycast List component which
+      // doesn't render it in test environment - we just verify prop is accepted
       render(<HealthCheck searchBarAccessory={accessory} />);
 
       expect(screen.getByText("Health Check")).toBeInTheDocument();
@@ -429,7 +431,10 @@ describe("HealthCheck", () => {
 
       render(<HealthCheck />);
 
+      // Verify component renders and refresh function is available
+      expect(screen.getByText("Health Check")).toBeInTheDocument();
       expect(mockRefresh).toBeDefined();
+      expect(typeof mockRefresh).toBe("function");
     });
   });
 

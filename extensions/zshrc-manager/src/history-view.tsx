@@ -63,6 +63,12 @@ export default function HistoryView({ onRefresh }: HistoryViewProps) {
       if (success) {
         await loadHistory();
         onRefresh?.();
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Undo Failed",
+          message: "Unable to restore to this history point",
+        });
       }
     }
   };

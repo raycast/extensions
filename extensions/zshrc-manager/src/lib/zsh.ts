@@ -253,9 +253,12 @@ async function createBackup(filePath: string): Promise<string | null> {
     const backupPath = `${filePath}${BACKUP_EXTENSION}`;
     await copyFile(filePath, backupPath);
     return backupPath;
-  } catch {
-    // File doesn't exist, no backup needed
-    return null;
+  } catch (error) {
+    // Only ignore ENOENT (file doesn't exist), rethrow other errors
+    if (error instanceof Error && (error as Error & { code?: string }).code === "ENOENT") {
+      return null;
+    }
+    throw error;
   }
 }
 

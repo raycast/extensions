@@ -396,13 +396,13 @@ describe("validation.ts", () => {
     it("should warn about PATH duplication pattern", () => {
       const result = validateExportValue("/usr/bin:$PATH:/another/path:$PATH:");
 
-      expect(result.warnings).toContain("PATH appears twice in value - possible duplication");
+      expect(result.warnings).toContain("$PATH appears multiple times in value - possible duplication");
     });
 
     it("should not warn about single $PATH reference", () => {
       const result = validateExportValue("/usr/bin:$PATH");
 
-      expect(result.warnings).not.toContain("PATH appears twice in value - possible duplication");
+      expect(result.warnings).not.toContain("$PATH appears multiple times in value - possible duplication");
     });
 
     it("should include structural validation warnings", () => {

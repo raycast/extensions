@@ -183,6 +183,8 @@ describe("Sections", () => {
 
     it("should accept searchBarAccessory prop", () => {
       const accessory = <div data-testid="custom-accessory">Custom</div>;
+      // Note: searchBarAccessory is passed to Raycast List component which
+      // doesn't render it in test environment - we just verify prop is accepted
       render(<Sections searchBarAccessory={accessory} />);
 
       expect(screen.getByText("Sections")).toBeInTheDocument();

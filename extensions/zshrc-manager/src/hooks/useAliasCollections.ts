@@ -117,7 +117,7 @@ export function useAliasCollections() {
 
             // Update icon synonyms cache from manifest
             if (parsed.data.iconSynonyms) {
-              updateSynonymsCache(parsed.data.iconSynonyms);
+              await updateSynonymsCache(parsed.data.iconSynonyms);
             }
 
             return parsed.data;

@@ -237,7 +237,7 @@ export const OhMyZshExpectedResults = {
   aliases: [
     { name: "..", command: "cd .." },
     { name: "...", command: "cd ../.." },
-    { name: "....", command: "../../.." },
+    { name: "....", command: "cd ../../.." },
     { name: "ll", command: "ls -la" },
     { name: "la", command: "ls -A" },
     { name: "l", command: "ls -CF" },

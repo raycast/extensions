@@ -11,9 +11,17 @@ interface OtherLineListItemProps {
 }
 
 /**
+ * Escapes triple backticks in content to prevent markdown code block issues
+ */
+function escapeBackticks(content: string): string {
+  return content.replace(/```/g, "\\`\\`\\`");
+}
+
+/**
  * Reusable other content list item component with detail view and actions
  */
 export function OtherLineListItem({ line, lineNumber, sectionLabel, index }: OtherLineListItemProps) {
+  const escapedLine = escapeBackticks(line);
   return (
     <List.Item
       key={`other-${index}`}
@@ -29,7 +37,7 @@ export function OtherLineListItem({ line, lineNumber, sectionLabel, index }: Oth
 
 **Content:**
 \`\`\`zsh
-${line}
+${escapedLine}
 \`\`\`
 
 **Context:**
@@ -49,7 +57,7 @@ This line is part of the "${sectionLabel}" section in your zshrc file.
 
 **Content:**
 \`\`\`zsh
-${line}
+${escapedLine}
 \`\`\`
 
 **Context:**

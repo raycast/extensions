@@ -238,9 +238,10 @@ export function validateAliasCommand(command: string): StructuralValidationResul
 export function validateExportValue(value: string): StructuralValidationResult {
   const result = validateStructure(value);
 
-  // Check for common PATH issues
-  if (value.includes("$PATH") && value.includes(":$PATH:")) {
-    result.warnings.push("PATH appears twice in value - possible duplication");
+  // Check for common PATH issues - count $PATH occurrences
+  const pathOccurrences = (value.match(/\$PATH/g) || []).length;
+  if (pathOccurrences > 1) {
+    result.warnings.push("$PATH appears multiple times in value - possible duplication");
   }
 
   return result;

@@ -234,7 +234,6 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
             }
 
             log.edit.info(`Updating ${config.itemType} "${key}" and moving to section "${targetSection}"`);
-            await saveToHistory(`Update ${config.itemType} "${key}" (move to ${targetSection})`);
             await writeZshrcFile(updatedContent);
             clearCache(getZshrcPath());
             const verify = await readZshrcFileRaw();
@@ -242,6 +241,8 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
               log.edit.error(`Write verification failed for ${config.itemType} "${key}"`);
               throw new Error("Write verification failed: content mismatch after save");
             }
+            // Save to history only after successful write verification
+            await saveToHistory(`Update ${config.itemType} "${key}" (move to ${targetSection})`);
             log.edit.info(`Successfully updated ${config.itemType} "${key}"`);
 
             await showToast({
@@ -270,7 +271,6 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
               return `${leadingWhitespace}${replacement.trimStart()}`;
             });
             log.edit.info(`Updating ${config.itemType} "${key}" in place`);
-            await saveToHistory(`Update ${config.itemType} "${key}"`);
             await writeZshrcFile(updatedContent);
             clearCache(getZshrcPath());
             // Verify write by re-reading and comparing
@@ -279,6 +279,8 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
               log.edit.error(`Write verification failed for ${config.itemType} "${key}"`);
               throw new Error("Write verification failed: content mismatch after save");
             }
+            // Save to history only after successful write verification
+            await saveToHistory(`Update ${config.itemType} "${key}"`);
             log.edit.info(`Successfully updated ${config.itemType} "${key}"`);
 
             await showToast({
@@ -334,7 +336,6 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
           }
 
           log.edit.info(`Adding new ${config.itemType} "${key}" to section "${targetSection}"`);
-          await saveToHistory(`Add ${config.itemType} "${key}"`);
           await writeZshrcFile(updatedContent);
           clearCache(getZshrcPath());
           const verify = await readZshrcFileRaw();
@@ -342,6 +343,8 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
             log.edit.error(`Write verification failed for new ${config.itemType} "${key}"`);
             throw new Error("Write verification failed: content mismatch after save");
           }
+          // Save to history only after successful write verification
+          await saveToHistory(`Add ${config.itemType} "${key}"`);
           log.edit.info(`Successfully added ${config.itemType} "${key}"`);
 
           await showToast({

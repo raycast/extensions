@@ -56,7 +56,7 @@ function extractWords(sectionName: string): string[] {
 export function findBestSimpleIcon(
   sectionName: string,
   normalizedName: string,
-): { name: string; icon: { svg: string; hex?: string } } | null {
+): { name: string; icon: { svg: string; hex: string } } | null {
   // Return null for empty normalized names
   if (!normalizedName) {
     return null;

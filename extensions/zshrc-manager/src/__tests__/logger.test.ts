@@ -209,7 +209,7 @@ describe("logger.ts", () => {
       error("test", "message", null);
       error("test", "message", undefined);
 
-      // First call with null, second with undefined (no second arg)
+      // Both calls include an error argument (null and undefined respectively)
       expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
     });
   });

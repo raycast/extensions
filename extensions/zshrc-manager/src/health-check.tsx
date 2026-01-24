@@ -139,18 +139,34 @@ export default function HealthCheck({ searchBarAccessory }: HealthCheckProps) {
 
   const stats = useMemo(() => (sections.length > 0 ? calculateStatistics(sections) : null), [sections]);
 
-  // Synchronous checks
+  // Synchronous checks - preserve original section context from parsed data
   const duplicateAliases = useMemo(() => {
     if (!stats) return { duplicates: [], totalDuplicates: 0 };
-    const aliasesWithSection = stats.aliases.map((a) => ({ ...a, section: "zshrc" }));
-    return detectDuplicates(aliasesWithSection, "name");
-  }, [stats]);
+    // Use section info from the parsed sections if available
+    const aliasesWithSection = sections.flatMap((section) =>
+      stats.aliases
+        .filter((a) => section.content.includes(`alias ${a.name}=`))
+        .map((a) => ({ ...a, section: section.label })),
+    );
+    return detectDuplicates(
+      aliasesWithSection.length > 0 ? aliasesWithSection : stats.aliases.map((a) => ({ ...a, section: "zshrc" })),
+      "name",
+    );
+  }, [stats, sections]);
 
   const duplicateExports = useMemo(() => {
     if (!stats) return { duplicates: [], totalDuplicates: 0 };
-    const exportsWithSection = stats.exports.map((e) => ({ ...e, section: "zshrc" }));
-    return detectDuplicates(exportsWithSection, "variable");
-  }, [stats]);
+    // Use section info from the parsed sections if available
+    const exportsWithSection = sections.flatMap((section) =>
+      stats.exports
+        .filter((e) => section.content.includes(`export ${e.variable}=`) || section.content.includes(`${e.variable}=`))
+        .map((e) => ({ ...e, section: section.label })),
+    );
+    return detectDuplicates(
+      exportsWithSection.length > 0 ? exportsWithSection : stats.exports.map((e) => ({ ...e, section: "zshrc" })),
+      "variable",
+    );
+  }, [stats, sections]);
 
   // Async check for broken sources
   useEffect(() => {
@@ -164,7 +180,9 @@ export default function HealthCheck({ searchBarAccessory }: HealthCheckProps) {
       try {
         const result = await detectBrokenSources(stats.sources.map((s) => ({ path: s.path })));
         setBrokenSources(result);
-      } catch {
+      } catch (error) {
+        // Log the error for debugging purposes
+        console.error("Failed to detect broken sources:", error);
         setBrokenSources({ brokenSources: [], totalBroken: 0 });
       } finally {
         setIsCheckingBroken(false);
@@ -410,9 +428,8 @@ Your \`.zshrc\` configuration passed all health checks:
 - ✅ No duplicate aliases
 - ✅ No duplicate exports
 - ✅ No broken source paths
-- ✅ Command shadow awareness
 
-Keep up the good work! 🎉
+Keep up the good work!
                 `}
               />
             }

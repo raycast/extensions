@@ -4,6 +4,7 @@ import { MODERN_COLORS } from "../constants";
 import { truncateValueMiddle } from "../utils/formatters";
 import EditExport, { exportConfig } from "../edit-export";
 import { deleteItem } from "../lib/delete-item";
+import { shellQuoteDouble } from "../utils/shell-escape";
 
 interface ExportListItemProps {
   exportItem: {
@@ -37,7 +38,7 @@ export function ExportListItem({ exportItem, sectionLabel, index, onDelete }: Ex
 
 **Full Definition:**
 \`\`\`zsh
-export ${exportItem.variable}=${exportItem.value}
+export ${exportItem.variable}="${shellQuoteDouble(exportItem.value)}"
 \`\`\`
           `}
         />
@@ -82,7 +83,7 @@ export ${exportItem.variable}=${exportItem.value}
 
 **Full Definition:**
 \`\`\`zsh
-export ${exportItem.variable}=${exportItem.value}
+export ${exportItem.variable}="${shellQuoteDouble(exportItem.value)}"
 \`\`\`
 
 **Usage:**
@@ -92,7 +93,7 @@ This environment variable will be available to all child processes.
                   <ActionPanel>
                     <Action.CopyToClipboard
                       title="Copy Export"
-                      content={`export ${exportItem.variable}=${exportItem.value}`}
+                      content={`export ${exportItem.variable}="${shellQuoteDouble(exportItem.value)}"`}
                     />
                     <Action.CopyToClipboard title="Copy Value Only" content={exportItem.value} />
                     <Action.CopyToClipboard title="Copy Variable Only" content={exportItem.variable} />
@@ -104,7 +105,7 @@ This environment variable will be available to all child processes.
           />
           <Action.CopyToClipboard
             title="Copy Export"
-            content={`export ${exportItem.variable}=${exportItem.value}`}
+            content={`export ${exportItem.variable}="${shellQuoteDouble(exportItem.value)}"`}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action.CopyToClipboard

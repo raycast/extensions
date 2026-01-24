@@ -13,15 +13,13 @@ const SYNONYMS_CACHE_KEY = "icon-synonyms-cache";
  * In-memory cache of icon synonyms
  */
 let synonymsCache: Record<string, string> = {};
-let initialized = false;
+let initializationPromise: Promise<void> | null = null;
 
 /**
  * Initialize the cache from LocalStorage
  * Called once on module load
  */
 async function initializeCache(): Promise<void> {
-  if (initialized) return;
-
   try {
     const cached = await LocalStorage.getItem<string>(SYNONYMS_CACHE_KEY);
     if (cached) {
@@ -30,19 +28,32 @@ async function initializeCache(): Promise<void> {
   } catch {
     // Ignore errors, use empty cache
   }
+}
 
-  initialized = true;
+/**
+ * Ensures the cache is initialized before use.
+ * Safe to call multiple times - will only initialize once.
+ */
+export async function ensureCacheInitialized(): Promise<void> {
+  if (!initializationPromise) {
+    initializationPromise = initializeCache();
+  }
+  return initializationPromise;
 }
 
 // Initialize cache on module load
-initializeCache();
+ensureCacheInitialized();
 
 /**
  * Update the synonyms cache with new data from manifest
  */
 export async function updateSynonymsCache(synonyms: Record<string, string>): Promise<void> {
   synonymsCache = synonyms;
-  await LocalStorage.setItem(SYNONYMS_CACHE_KEY, JSON.stringify(synonyms));
+  try {
+    await LocalStorage.setItem(SYNONYMS_CACHE_KEY, JSON.stringify(synonyms));
+  } catch {
+    // Ignore LocalStorage errors - in-memory cache is still updated
+  }
 }
 
 /**

@@ -9,6 +9,7 @@ import { Clipboard, showToast, Toast } from "@raycast/api";
 import { readZshrcFileRaw, writeZshrcFile, getZshrcPath } from "./zsh";
 import { clearCache } from "./cache";
 import { saveToHistory } from "./history";
+import { validateAliasName, validateVarName, shellQuoteSingle, shellQuoteDouble } from "../utils/shell-escape";
 
 /**
  * Exported alias format
@@ -105,13 +106,21 @@ export async function importAliasesFromJson(json: string, sectionLabel?: string)
       throw new Error("No aliases found in import data");
     }
 
+    // Validate alias names before proceeding
+    const invalidAliases = data.aliases.filter((a) => !validateAliasName(a.name));
+    if (invalidAliases.length > 0) {
+      throw new Error(
+        `Invalid alias name(s): ${invalidAliases.map((a) => a.name).join(", ")}. Names must start with a letter or underscore and contain only letters, digits, underscores, and hyphens.`,
+      );
+    }
+
     // Save history before modifying
     await saveToHistory(`Import ${data.aliases.length} aliases`);
 
     const zshrcContent = await readZshrcFileRaw();
 
-    // Generate alias lines
-    const aliasLines = data.aliases.map((a) => `alias ${a.name}='${a.command.replace(/'/g, "'\"'\"'")}'`);
+    // Generate alias lines with proper escaping
+    const aliasLines = data.aliases.map((a) => `alias ${a.name}='${shellQuoteSingle(a.command)}'`);
 
     // Add section header if specified
     let insertContent = "";
@@ -163,13 +172,21 @@ export async function importExportsFromJson(json: string, sectionLabel?: string)
       throw new Error("No exports found in import data");
     }
 
+    // Validate variable names before proceeding
+    const invalidExports = data.exports.filter((e) => !validateVarName(e.variable));
+    if (invalidExports.length > 0) {
+      throw new Error(
+        `Invalid variable name(s): ${invalidExports.map((e) => e.variable).join(", ")}. Names must start with a letter or underscore and contain only letters, digits, and underscores.`,
+      );
+    }
+
     // Save history before modifying
     await saveToHistory(`Import ${data.exports.length} exports`);
 
     const zshrcContent = await readZshrcFileRaw();
 
-    // Generate export lines
-    const exportLines = data.exports.map((e) => `export ${e.variable}="${e.value.replace(/"/g, '\\"')}"`);
+    // Generate export lines with proper escaping
+    const exportLines = data.exports.map((e) => `export ${e.variable}="${shellQuoteDouble(e.value)}"`);
 
     // Add section header if specified
     let insertContent = "";

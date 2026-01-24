@@ -26,6 +26,8 @@ vi.mock("@raycast/utils", () => ({
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<Error | undefined>(undefined);
 
+    // Note: Using an empty dependency array for execute to prevent infinite loops
+    // The fn and options are stable references from the test setup
     const execute = useCallback(async () => {
       setIsLoading(true);
       setError(undefined);
@@ -37,13 +39,16 @@ vi.mock("@raycast/utils", () => ({
         const err = e instanceof Error ? e : new Error(String(e));
         setError(err);
         setIsLoading(false);
-        options?.onError?.(err);
+        options?.onError?.(err, data);
       }
-    }, [fn, options]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- fn and options are closure-captured from mock setup, not reactive values; including them causes infinite loops
+    }, []);
 
+    // Only run once on mount to prevent infinite loops
     useEffect(() => {
       execute();
-    }, [execute]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- execute is intentionally excluded to run only once on mount, mimicking useCachedPromise behavior
+    }, []);
 
     return {
       data,
@@ -126,10 +131,11 @@ describe("useZshrcLoader", () => {
       expect(result.current.isLoading).toBe(false);
     });
 
+    // Without cached data, the message only shows the error
     expect(mockShowToast).toHaveBeenCalledWith({
       style: "failure",
       title: "Error Loading Aliases",
-      message: "Using cached data: File not found",
+      message: "File not found",
     });
     expect(result.current.sections).toEqual([]);
   });
@@ -146,10 +152,11 @@ describe("useZshrcLoader", () => {
       expect(result.current.isLoading).toBe(false);
     });
 
+    // Without cached data, the message only shows the error
     expect(mockShowToast).toHaveBeenCalledWith({
       style: "failure",
       title: "Error Loading Exports",
-      message: "Using cached data: Custom error message",
+      message: "Custom error message",
     });
   });
 
@@ -201,10 +208,11 @@ describe("useZshrcLoader", () => {
     renderHook(() => useZshrcLoader("CustomCommand"));
 
     await waitFor(() => {
+      // Without cached data, the message only shows the error
       expect(mockShowToast).toHaveBeenCalledWith({
         style: "failure",
         title: "Error Loading CustomCommand",
-        message: "Using cached data: Test error",
+        message: "Test error",
       });
     });
   });
@@ -221,10 +229,11 @@ describe("useZshrcLoader", () => {
       expect(result.current.isLoading).toBe(false);
     });
 
+    // Without cached data, the message only shows the error
     expect(mockShowToast).toHaveBeenCalledWith({
       style: "failure",
       title: "Error Loading Aliases",
-      message: "Using cached data: Parse error",
+      message: "Parse error",
     });
   });
 

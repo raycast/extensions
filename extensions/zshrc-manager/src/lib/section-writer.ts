@@ -308,9 +308,8 @@ export async function addAliasesToZshrc(
     const newSection: string[] = ["", header.start, "", ...aliasLines];
 
     if (header.end) {
-      // Use original section name for end marker
-      const endHeader = generateSectionHeader(sectionName, format);
-      newSection.push("", endHeader.end || header.end);
+      // Use consistent displayName for end marker (matches start marker)
+      newSection.push("", header.end);
     }
 
     newSection.push("");

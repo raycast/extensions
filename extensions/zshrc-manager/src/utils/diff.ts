@@ -42,7 +42,7 @@ export function computeDiff(original: string, modified: string, contextLines = 3
   const originalLines = original.split("\n");
   const modifiedLines = modified.split("\n");
 
-  // Simple LCS-based diff
+  // Simple positional diff (not LCS-based, but handles duplicates correctly)
   const diff = simpleDiff(originalLines, modifiedLines);
 
   // Generate markdown
@@ -58,7 +58,9 @@ export function computeDiff(original: string, modified: string, contextLines = 3
 }
 
 /**
- * Simple diff algorithm (not LCS, but good enough for single-line changes)
+ * Simple positional diff algorithm.
+ * Uses a greedy approach to find matching lines, handling duplicates correctly
+ * by comparing positions rather than using Sets.
  */
 function simpleDiff(
   original: string[],
@@ -68,16 +70,7 @@ function simpleDiff(
   let additions = 0;
   let deletions = 0;
 
-  // Create maps for quick lookup
-  const originalSet = new Set(original);
-  const modifiedSet = new Set(modified);
-
-  // Find removed lines (in original but not in modified)
-  const removedLines = original.filter((line) => !modifiedSet.has(line));
-  // Find added lines (in modified but not in original)
-  const addedLines = modified.filter((line) => !originalSet.has(line));
-
-  // Build the diff output
+  // Build the diff output using positional comparison
   let origIdx = 0;
   let modIdx = 0;
 
@@ -85,30 +78,47 @@ function simpleDiff(
     const origLine = original[origIdx];
     const modLine = modified[modIdx];
 
-    if (origLine === modLine) {
-      // Unchanged line
+    if (origIdx >= original.length) {
+      // Only modified lines left - all are additions
+      lines.push({ type: "add", content: modLine || "", lineNumber: modIdx + 1 });
+      additions++;
+      modIdx++;
+    } else if (modIdx >= modified.length) {
+      // Only original lines left - all are deletions
+      lines.push({ type: "remove", content: origLine || "" });
+      deletions++;
+      origIdx++;
+    } else if (origLine === modLine) {
+      // Lines match at current position
       lines.push({ type: "unchanged", content: origLine || "", lineNumber: modIdx + 1 });
       origIdx++;
       modIdx++;
-    } else if (origLine && removedLines.includes(origLine)) {
-      // Line was removed
-      lines.push({ type: "remove", content: origLine });
-      deletions++;
-      origIdx++;
-    } else if (modLine && addedLines.includes(modLine)) {
-      // Line was added
-      lines.push({ type: "add", content: modLine, lineNumber: modIdx + 1 });
-      additions++;
-      modIdx++;
     } else {
-      // Changed line - show as remove + add
-      if (origLine !== undefined) {
-        lines.push({ type: "remove", content: origLine });
+      // Lines differ - look ahead to find best match
+      // Check if original line appears later in modified (it was moved/delayed)
+      const origInModified = modified.indexOf(origLine || "", modIdx);
+      // Check if modified line appears later in original (it was inserted)
+      const modInOriginal = original.indexOf(modLine || "", origIdx);
+
+      if (modInOriginal === -1 && origInModified === -1) {
+        // Neither line appears later - treat as replacement
+        lines.push({ type: "remove", content: origLine || "" });
+        deletions++;
+        lines.push({ type: "add", content: modLine || "", lineNumber: modIdx + 1 });
+        additions++;
+        origIdx++;
+        modIdx++;
+      } else if (
+        origInModified === -1 ||
+        (modInOriginal !== -1 && modInOriginal - origIdx <= origInModified - modIdx)
+      ) {
+        // Original line doesn't appear later, or modified line is closer - this is a deletion
+        lines.push({ type: "remove", content: origLine || "" });
         deletions++;
         origIdx++;
-      }
-      if (modLine !== undefined) {
-        lines.push({ type: "add", content: modLine, lineNumber: modIdx + 1 });
+      } else {
+        // Modified line doesn't appear later, or original is closer - this is an addition
+        lines.push({ type: "add", content: modLine || "", lineNumber: modIdx + 1 });
         additions++;
         modIdx++;
       }

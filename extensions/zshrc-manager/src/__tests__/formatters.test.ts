@@ -17,7 +17,9 @@ describe("formatters.ts", () => {
   describe("truncateValueMiddle", () => {
     it("should return original value if under limit", () => {
       expect(truncateValueMiddle("short", 40)).toBe("short");
-      expect(truncateValueMiddle("exactly forty characters here!!", 40)).toBe("exactly forty characters here!!");
+      // String with exactly 40 characters
+      const exactlyForty = "a".repeat(40);
+      expect(truncateValueMiddle(exactlyForty, 40)).toBe(exactlyForty);
     });
 
     it("should truncate long values in the middle", () => {
@@ -117,7 +119,7 @@ describe("formatters.ts", () => {
     });
 
     it("should handle words ending in z", () => {
-      expect(formatCount(2, "quiz")).toBe("2 quizes");
+      expect(formatCount(2, "quiz")).toBe("2 quizzes");
     });
 
     it("should handle words ending in ch", () => {
@@ -197,8 +199,13 @@ describe("formatters.ts", () => {
     });
 
     afterEach(() => {
-      // Restore original environment
-      process.env = { ...originalEnv };
+      // Restore original environment by clearing test keys and restoring originals
+      // First clear any keys added during tests
+      delete process.env["ZDOTDIR"];
+      // Then restore original values
+      Object.keys(originalEnv).forEach((key) => {
+        process.env[key] = originalEnv[key];
+      });
     });
 
     it("should expand ~ at start of path", () => {

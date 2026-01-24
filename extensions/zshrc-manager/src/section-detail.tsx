@@ -92,10 +92,14 @@ export function SectionDetailList({
   const hasExports = exports.length > 0;
   const hasOtherContent = otherLines.length > 0;
 
-  // Shared handler for delete actions - triggers re-render by parent
+  // Shared handler for delete actions
+  // Note: Delete operations are handled by the individual list item components
+  // (AliasListItem, ExportListItem) through their own delete actions.
+  // This callback is passed to enable child components to notify the parent
+  // that a refresh may be needed, but currently the parent doesn't subscribe
+  // to changes dynamically - users refresh manually with Cmd+R.
   const handleDelete = () => {
-    // The parent component should handle refresh
-    // This is a no-op placeholder that can be enhanced
+    // No-op: Parent component handles refresh via manual action
   };
 
   // Build content based on display mode
@@ -198,15 +202,21 @@ ${section.content}
 
             {hasOtherContent && (
               <List.Section title="Other Configuration">
-                {otherLines.map((line, index) => (
-                  <OtherLineListItem
-                    key={`other-${index}`}
-                    line={line}
-                    lineNumber={section.startLine + index}
-                    sectionLabel={section.label}
-                    index={index}
-                  />
-                ))}
+                {otherLines.map((line, index) => {
+                  // Calculate actual line number by finding position in original content
+                  const sectionLines = section.content.split("\n");
+                  const lineIndex = sectionLines.findIndex((l) => l === line);
+                  const actualLineNumber = lineIndex >= 0 ? section.startLine + lineIndex : section.startLine + index;
+                  return (
+                    <OtherLineListItem
+                      key={`other-${index}`}
+                      line={line}
+                      lineNumber={actualLineNumber}
+                      sectionLabel={section.label}
+                      index={index}
+                    />
+                  );
+                })}
               </List.Section>
             )}
           </>
@@ -285,15 +295,21 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
 
             {hasOtherContent && (
               <List.Section title="Other Configuration">
-                {otherLines.map((line, index) => (
-                  <OtherLineListItem
-                    key={`other-${index}`}
-                    line={line}
-                    lineNumber={section.startLine + index}
-                    sectionLabel={section.label}
-                    index={index}
-                  />
-                ))}
+                {otherLines.map((line, index) => {
+                  // Calculate actual line number by finding position in original content
+                  const sectionLines = section.content.split("\n");
+                  const lineIndex = sectionLines.findIndex((l) => l === line);
+                  const actualLineNumber = lineIndex >= 0 ? section.startLine + lineIndex : section.startLine + index;
+                  return (
+                    <OtherLineListItem
+                      key={`other-${index}`}
+                      line={line}
+                      lineNumber={actualLineNumber}
+                      sectionLabel={section.label}
+                      index={index}
+                    />
+                  );
+                })}
               </List.Section>
             )}
           </>

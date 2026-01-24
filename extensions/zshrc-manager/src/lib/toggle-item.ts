@@ -116,18 +116,36 @@ export async function enableItem(key: string, config: EditItemConfig): Promise<v
   const zshrcContent = await readZshrcFileRaw();
   const pattern = config.generatePattern(key);
 
-  // Find if the item is commented
+  // Find if the item exists and check its state
   const lines = zshrcContent.split("\n");
+  let found = false;
+  let isCurrentlyEnabled = false;
+
   for (const line of lines) {
     if (!line) continue;
     const uncommentedLine = line.replace(/^(\s*)#\s*/, "$1");
-    if (pattern.test(uncommentedLine) && isCommented(line)) {
-      await toggleItem(key, config);
-      return;
+    if (pattern.test(line) || pattern.test(uncommentedLine)) {
+      found = true;
+      isCurrentlyEnabled = !isCommented(line);
+      if (!isCurrentlyEnabled) {
+        // Item is commented, enable it
+        await toggleItem(key, config);
+        return;
+      }
+      break;
     }
   }
 
-  // Already enabled or not found
+  if (!found) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Not Found",
+      message: `${config.itemTypeCapitalized} "${key}" not found in zshrc`,
+    });
+    return;
+  }
+
+  // Already enabled
   await showToast({
     style: Toast.Style.Success,
     title: "Already Enabled",
@@ -145,17 +163,36 @@ export async function disableItem(key: string, config: EditItemConfig): Promise<
   const zshrcContent = await readZshrcFileRaw();
   const pattern = config.generatePattern(key);
 
-  // Find if the item is not commented
+  // Find if the item exists and check its state
   const lines = zshrcContent.split("\n");
+  let found = false;
+  let isCurrentlyDisabled = false;
+
   for (const line of lines) {
     if (!line) continue;
-    if (pattern.test(line) && !isCommented(line)) {
-      await toggleItem(key, config);
-      return;
+    const uncommentedLine = line.replace(/^(\s*)#\s*/, "$1");
+    if (pattern.test(line) || pattern.test(uncommentedLine)) {
+      found = true;
+      isCurrentlyDisabled = isCommented(line);
+      if (!isCurrentlyDisabled) {
+        // Item is enabled, disable it
+        await toggleItem(key, config);
+        return;
+      }
+      break;
     }
   }
 
-  // Already disabled or not found
+  if (!found) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Not Found",
+      message: `${config.itemTypeCapitalized} "${key}" not found in zshrc`,
+    });
+    return;
+  }
+
+  // Already disabled
   await showToast({
     style: Toast.Style.Success,
     title: "Already Disabled",

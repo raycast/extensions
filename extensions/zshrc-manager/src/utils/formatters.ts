@@ -39,8 +39,19 @@ export function formatCount(count: number, singular: string): string {
   if (count === 1) {
     return `${count} ${singular}`;
   }
-  // Handle words ending in 's' or 'ss' or 'x' or 'z' or 'ch' or 'sh'
-  const plural = singular.match(/[sxz]$|[cs]h$/) ? `${singular}es` : `${singular}s`;
+  // Handle words ending in 's', 'ss', 'x', 'z', 'ch', 'sh'
+  // Note: words ending in 'z' need 'zz' before 'es' (quiz -> quizzes)
+  let plural: string;
+  if (singular.match(/[sxz]$|[cs]h$/)) {
+    // For words ending in 'z', double the 'z' (quiz -> quizzes)
+    if (singular.endsWith("z") && !singular.endsWith("zz")) {
+      plural = `${singular}zes`;
+    } else {
+      plural = `${singular}es`;
+    }
+  } else {
+    plural = `${singular}s`;
+  }
   return `${count} ${plural}`;
 }
 
@@ -100,8 +111,8 @@ export function expandEnvVars(value: string): string {
   expanded = expanded.replace(/\$USER\b/g, user);
   expanded = expanded.replace(/\$\{USER\}/g, user);
 
-  // Expand $ZSH (common Oh-My-Zsh convention)
-  const zshPath = `${home}/.oh-my-zsh`;
+  // Expand $ZSH - first check process.env, then fall back to common Oh-My-Zsh convention
+  const zshPath = process.env["ZSH"] || `${home}/.oh-my-zsh`;
   expanded = expanded.replace(/\$ZSH\b/g, zshPath);
   expanded = expanded.replace(/\$\{ZSH\}/g, zshPath);
 

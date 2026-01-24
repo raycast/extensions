@@ -16,6 +16,7 @@ import { useZshrcLoader } from "./hooks/useZshrcLoader";
 import { truncateValueMiddle } from "./utils/formatters";
 import { calculateStatistics, hasContent, getTopEntries, type ZshrcStatistics as StatsType } from "./utils/statistics";
 import { StatListItem } from "./components";
+import { shellQuoteSingle, shellQuoteDouble } from "./utils/shell-escape";
 
 interface ZshrcStatisticsProps {
   searchBarAccessory?: React.ReactElement;
@@ -48,7 +49,7 @@ function createSearchResults(stats: StatsType): SearchResult[] {
       subtitle: alias.command,
       keywords: [alias.name.toLowerCase(), alias.command.toLowerCase(), "alias"],
       icon: { source: Icon.Terminal, tintColor: MODERN_COLORS.success },
-      copyValue: `alias ${alias.name}='${alias.command}'`,
+      copyValue: `alias ${alias.name}='${shellQuoteSingle(alias.command)}'`,
     });
   });
 
@@ -60,7 +61,7 @@ function createSearchResults(stats: StatsType): SearchResult[] {
       subtitle: exp.value,
       keywords: [exp.variable.toLowerCase(), exp.value.toLowerCase(), "export", "env"],
       icon: { source: Icon.Upload, tintColor: MODERN_COLORS.primary },
-      copyValue: `export ${exp.variable}=${exp.value}`,
+      copyValue: `export ${exp.variable}="${shellQuoteDouble(exp.value)}"`,
     });
   });
 
@@ -108,7 +109,7 @@ function createSearchResults(stats: StatsType): SearchResult[] {
       subtitle: "eval",
       keywords: [evalCmd.command.toLowerCase(), "eval"],
       icon: { source: Icon.Terminal, tintColor: MODERN_COLORS.error },
-      copyValue: `eval ${evalCmd.command}`,
+      copyValue: `eval "${shellQuoteDouble(evalCmd.command)}"`,
     });
   });
 

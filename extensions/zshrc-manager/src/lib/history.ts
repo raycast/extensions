@@ -34,9 +34,9 @@ interface HistoryEntry {
  * Saves the current state to history before making a change
  *
  * @param description Description of the upcoming change
- * @returns Promise resolving when history is saved
+ * @returns Promise resolving to true if history was saved successfully, false otherwise
  */
-export async function saveToHistory(description: string): Promise<void> {
+export async function saveToHistory(description: string): Promise<boolean> {
   log.history.debug(`Saving to history: "${description}"`);
   try {
     const currentContent = await readZshrcFileRaw();
@@ -62,8 +62,10 @@ export async function saveToHistory(description: string): Promise<void> {
     // Save back to LocalStorage
     await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     log.history.info(`History saved: "${description}" (${history.length} entries total)`);
+    return true;
   } catch (error) {
     log.history.error("Failed to save history entry", error);
+    return false;
   }
 }
 
@@ -122,14 +124,23 @@ export async function undoLastChange(): Promise<boolean> {
       return false;
     }
 
+    // Prepare the new history state first (atomic operation)
+    const newHistory = history.slice(1);
+
+    // Persist the new history state BEFORE modifying the file
+    // This ensures we don't lose history if the file write fails
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+
     // Restore previous content
     log.history.info(`Restoring content from before: "${lastEntry.description}"`);
-    await writeZshrcFile(lastEntry.previousContent);
-    clearCache(currentPath);
-
-    // Remove this entry from history
-    history.shift();
-    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    try {
+      await writeZshrcFile(lastEntry.previousContent);
+      clearCache(currentPath);
+    } catch (writeError) {
+      // File write failed, restore the original history
+      await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      throw writeError;
+    }
     log.history.info(`Undo successful: reverted "${lastEntry.description}"`);
 
     await showToast({

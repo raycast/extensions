@@ -149,12 +149,23 @@ export function parsePathEntries(
   }
 
   // Match path+=(...) - zsh array append
-  const appendRegex = /^(?:\s*)path\+?=\s*\(([^)]+)\)(?:\s*)$/gm;
+  const appendRegex = /^(?:\s*)path\+=\s*\(([^)]+)\)(?:\s*)$/gm;
   while ((match = appendRegex.exec(content)) !== null) {
     if (match[1]) {
       const paths = match[1].split(/\s+/).filter((p) => p.trim());
       paths.forEach((p) => {
         result.push({ entry: p.trim(), type: "append" });
+      });
+    }
+  }
+
+  // Match path=(...) - zsh array set (replaces entire path)
+  const setRegex = /^(?:\s*)path=\s*\(([^)]+)\)(?:\s*)$/gm;
+  while ((match = setRegex.exec(content)) !== null) {
+    if (match[1]) {
+      const paths = match[1].split(/\s+/).filter((p) => p.trim());
+      paths.forEach((p) => {
+        result.push({ entry: p.trim(), type: "set" });
       });
     }
   }
@@ -198,7 +209,7 @@ export function parseFpathEntries(
   }
 
   // Match fpath+=(...) - zsh array append
-  const appendRegex = /^(?:\s*)fpath\+?=\s*\(([^)]+)\)(?:\s*)$/gm;
+  const appendRegex = /^(?:\s*)fpath\+=\s*\(([^)]+)\)(?:\s*)$/gm;
   while ((match = appendRegex.exec(content)) !== null) {
     if (match[1]) {
       const paths = match[1].split(/\s+/).filter((p) => p.trim());
@@ -208,11 +219,30 @@ export function parseFpathEntries(
     }
   }
 
+  // Match fpath=(...) - zsh array set (replaces entire fpath)
+  const setRegex = /^(?:\s*)fpath=\s*\(([^)]+)\)(?:\s*)$/gm;
+  while ((match = setRegex.exec(content)) !== null) {
+    if (match[1]) {
+      const paths = match[1].split(/\s+/).filter((p) => p.trim());
+      paths.forEach((p) => {
+        result.push({ entry: p.trim(), type: "set" });
+      });
+    }
+  }
+
   // Match FPATH="$FPATH:..."
   const fpathModifyRegex = /^(?:\s*)FPATH\s*=\s*["']?\$FPATH:(.+?)["']?(?:\s*)$/gm;
   while ((match = fpathModifyRegex.exec(content)) !== null) {
     if (match[1]) {
       result.push({ entry: match[1], type: "append" });
+    }
+  }
+
+  // Match FPATH="...:$FPATH" - prepend pattern
+  const fpathPrependRegex = /^(?:\s*)FPATH\s*=\s*["']?(.+?):\$FPATH["']?(?:\s*)$/gm;
+  while ((match = fpathPrependRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "prepend" });
     }
   }
 

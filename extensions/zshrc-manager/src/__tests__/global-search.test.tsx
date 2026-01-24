@@ -116,6 +116,8 @@ describe("GlobalSearch", () => {
 
     it("should accept searchBarAccessory prop", () => {
       const accessory = <div data-testid="custom-accessory">Custom</div>;
+      // Note: searchBarAccessory is passed to Raycast List component which
+      // doesn't render it in test environment - we just verify prop is accepted
       render(<GlobalSearch searchBarAccessory={accessory} />);
 
       expect(screen.getByText("Global Search")).toBeInTheDocument();
@@ -175,7 +177,7 @@ describe("GlobalSearch", () => {
       });
     });
 
-    it("should show total entry count", async () => {
+    it("should show overview section with entry information", async () => {
       mockUseZshrcLoader.mockReturnValue({
         sections: mockSections,
         isLoading: false,
@@ -187,8 +189,9 @@ describe("GlobalSearch", () => {
       render(<GlobalSearch />);
 
       await waitFor(() => {
-        // Should show entry count in accessories
+        // Verify Overview section is rendered with search prompt
         expect(screen.getByText("Overview")).toBeInTheDocument();
+        expect(screen.getByText("Start typing to search...")).toBeInTheDocument();
       });
     });
   });
@@ -437,7 +440,10 @@ describe("GlobalSearch", () => {
 
       render(<GlobalSearch />);
 
+      // Verify component renders and refresh function is available
+      expect(screen.getByText("Global Search")).toBeInTheDocument();
       expect(mockRefresh).toBeDefined();
+      expect(typeof mockRefresh).toBe("function");
     });
   });
 

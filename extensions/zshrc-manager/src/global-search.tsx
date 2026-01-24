@@ -12,6 +12,7 @@ import { calculateStatistics, type ZshrcStatistics } from "./utils/statistics";
 import { getZshrcPath } from "./lib/zsh";
 import { truncateValueMiddle } from "./utils/formatters";
 import { MODERN_COLORS } from "./constants";
+import { shellQuoteSingle, shellQuoteDouble } from "./utils/shell-escape";
 
 interface GlobalSearchProps {
   searchBarAccessory?: React.ReactElement;
@@ -45,7 +46,7 @@ function createSearchResults(stats: ZshrcStatistics): SearchResult[] {
       subtitle: alias.command,
       keywords: [alias.name.toLowerCase(), alias.command.toLowerCase(), "alias"],
       icon: { source: Icon.Terminal, tintColor: MODERN_COLORS.success },
-      copyValue: `alias ${alias.name}='${alias.command}'`,
+      copyValue: `alias ${alias.name}='${shellQuoteSingle(alias.command)}'`,
     });
   });
 
@@ -58,7 +59,7 @@ function createSearchResults(stats: ZshrcStatistics): SearchResult[] {
       subtitle: exp.value,
       keywords: [exp.variable.toLowerCase(), exp.value.toLowerCase(), "export", "env"],
       icon: { source: Icon.Upload, tintColor: MODERN_COLORS.primary },
-      copyValue: `export ${exp.variable}=${exp.value}`,
+      copyValue: `export ${exp.variable}="${shellQuoteDouble(exp.value)}"`,
     });
   });
 
@@ -110,7 +111,7 @@ function createSearchResults(stats: ZshrcStatistics): SearchResult[] {
       subtitle: "eval",
       keywords: [evalCmd.command.toLowerCase(), "eval"],
       icon: { source: Icon.Terminal, tintColor: MODERN_COLORS.error },
-      copyValue: `eval ${evalCmd.command}`,
+      copyValue: `eval "${shellQuoteDouble(evalCmd.command)}"`,
     });
   });
 
@@ -240,7 +241,7 @@ export default function GlobalSearch({ searchBarAccessory }: GlobalSearchProps) 
             onAction={refresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
+          <Action.Open title="Open ~/.zshrc" target={getZshrcPath()} icon={Icon.Document} />
         </ActionPanel>
       }
     >
@@ -258,7 +259,11 @@ export default function GlobalSearch({ searchBarAccessory }: GlobalSearchProps) 
       )}
 
       {Array.from(groupedResults.entries()).map(([type, results]) => (
-        <List.Section key={type} title={getTypeDisplayName(type)} subtitle={`${results.length} results`}>
+        <List.Section
+          key={type}
+          title={getTypeDisplayName(type)}
+          subtitle={results.length > 50 ? `${results.length} results (showing first 50)` : `${results.length} results`}
+        >
           {results.slice(0, 50).map((result) => (
             <List.Item
               key={result.id}
@@ -280,7 +285,7 @@ export default function GlobalSearch({ searchBarAccessory }: GlobalSearchProps) 
                     onAction={() => handleCopy(result.title)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
-                  <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
+                  <Action.Open title="Open ~/.zshrc" target={getZshrcPath()} icon={Icon.Document} />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
