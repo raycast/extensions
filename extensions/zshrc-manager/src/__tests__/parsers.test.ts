@@ -560,5 +560,19 @@ bindkey -M viins '^P' up-line-or-history`;
       // Should only have one entry, not duplicated by multiple regex matches
       expect(result).toHaveLength(1);
     });
+
+    it("should ignore bindkey flag-only commands", () => {
+      const content = `bindkey -d '^A'
+bindkey -e
+bindkey -v
+bindkey -a
+bindkey -r '^X'`;
+
+      const result = parseKeybindings(content);
+
+      // These are flag commands (delete, select emacs, select vi, select vicmd, remove)
+      // They should not be parsed as key bindings
+      expect(result).toHaveLength(0);
+    });
   });
 });

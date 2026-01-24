@@ -138,7 +138,11 @@ export async function undoLastChange(): Promise<boolean> {
       clearCache(currentPath);
     } catch (writeError) {
       // File write failed, restore the original history
-      await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      try {
+        await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      } catch (rollbackError) {
+        log.history.error("Failed to restore history after write failure - history may be inconsistent", rollbackError);
+      }
       throw writeError;
     }
     log.history.info(`Undo successful: reverted "${lastEntry.description}"`);

@@ -333,7 +333,9 @@ export function parseKeybindings(content: string): ReadonlyArray<KeybindingResul
   }
 
   // Match bindkey "key" command (basic with quoted key)
-  const bindkeyQuotedRegex = /^(?:\s*)bindkey\s+(?!-[MsrRLl])(['"])([^'"]+)\1\s+(\S+)(?:\s*)$/gm;
+  // Exclude all known bindkey flags: -M (keymap), -s (string), -r (remove), -R (range),
+  // -L (list), -l (widgets), -e (emacs), -v (viins), -a (vicmd), -d (delete), -p (prefix), -N (new widget)
+  const bindkeyQuotedRegex = /^(?:\s*)bindkey\s+(?!-[MsrRLlevaAdpN])(['"])([^'"]+)\1\s+(\S+)(?:\s*)$/gm;
   while ((match = bindkeyQuotedRegex.exec(content)) !== null) {
     if (match[2] && match[3]) {
       addResult({ key: match[2], command: match[3].trim() });
@@ -342,7 +344,8 @@ export function parseKeybindings(content: string): ReadonlyArray<KeybindingResul
 
   // Match bindkey key command (basic with unquoted key, must not have flags)
   // Unquoted key must not start with a quote
-  const bindkeyUnquotedRegex = /^(?:\s*)bindkey\s+(?!-[MsrRLl])([^'"\s]\S*)\s+(\S+)(?:\s*)$/gm;
+  // Exclude all known bindkey flags (same as above)
+  const bindkeyUnquotedRegex = /^(?:\s*)bindkey\s+(?!-[MsrRLlevaAdpN])([^'"\s]\S*)\s+(\S+)(?:\s*)$/gm;
   while ((match = bindkeyUnquotedRegex.exec(content)) !== null) {
     if (match[1] && match[2]) {
       addResult({ key: match[1], command: match[2].trim() });

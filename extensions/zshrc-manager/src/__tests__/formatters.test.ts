@@ -119,7 +119,12 @@ describe("formatters.ts", () => {
     });
 
     it("should handle words ending in z", () => {
+      // Words that need z-doubling
       expect(formatCount(2, "quiz")).toBe("2 quizzes");
+      expect(formatCount(2, "fez")).toBe("2 fezzes");
+      // Words that just add 'es' (no z-doubling)
+      expect(formatCount(2, "waltz")).toBe("2 waltzes");
+      expect(formatCount(2, "topaz")).toBe("2 topazes");
     });
 
     it("should handle words ending in ch", () => {

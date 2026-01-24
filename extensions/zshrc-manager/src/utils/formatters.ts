@@ -39,12 +39,13 @@ export function formatCount(count: number, singular: string): string {
   if (count === 1) {
     return `${count} ${singular}`;
   }
-  // Handle words ending in 's', 'ss', 'x', 'z', 'ch', 'sh'
-  // Note: words ending in 'z' need 'zz' before 'es' (quiz -> quizzes)
+  // Handle words ending in 's', 'x', 'z', 'ch', 'sh' - add 'es'
+  // Note: only specific words need z-doubling (quiz -> quizzes, fez -> fezzes)
+  // Most z-ending words just add 'es' (waltz -> waltzes)
+  const zDoublingWords = new Set(["quiz", "fez", "fizz", "buzz", "fuzz", "jazz", "razz"]);
   let plural: string;
   if (singular.match(/[sxz]$|[cs]h$/)) {
-    // For words ending in 'z', double the 'z' (quiz -> quizzes)
-    if (singular.endsWith("z") && !singular.endsWith("zz")) {
+    if (zDoublingWords.has(singular.toLowerCase())) {
       plural = `${singular}zes`;
     } else {
       plural = `${singular}es`;

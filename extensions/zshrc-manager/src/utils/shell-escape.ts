@@ -127,6 +127,6 @@ export function generateSafeExportLine(variable: string, value: string): string 
   if (!validateVarName(variable)) {
     return null;
   }
-  // Use double quotes for exports to allow variable expansion
+  // Use double quotes for exports to safely handle special characters
   return `export ${variable}="${shellQuoteDouble(value)}"`;
 }
