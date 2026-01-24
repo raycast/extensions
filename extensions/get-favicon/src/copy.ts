@@ -29,21 +29,27 @@ export default async function copyFavicon(props: { arguments: Arguments.Copy }) 
     return;
   }
 
-  const destination = path.join(os.tmpdir(), `${nanoid()}.png`);
-  const favicon = (await getFavicon(url, { size: preferences.defaultIconSize })) as FaviconResult;
+  try {
+    const destination = path.join(os.tmpdir(), `${nanoid()}.png`);
+    const favicon = (await getFavicon(url, { size: preferences.defaultIconSize })) as FaviconResult;
 
-  await download.image({
-    url: favicon.source,
-    dest: destination,
-  });
+    await download.image({
+      url: favicon.source,
+      dest: destination,
+    });
 
-  await Clipboard.copy({
-    file: destination,
-  });
+    await Clipboard.copy({
+      file: destination,
+    });
 
-  toast.title = "Favicon copied";
-  toast.style = Toast.Style.Success;
+    toast.title = "Favicon copied";
+    toast.style = Toast.Style.Success;
 
-  await showHUD("Favicon copied");
-  await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+    await showHUD("Favicon copied");
+    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+  } catch (error) {
+    toast.title = "Failed to copy favicon";
+    toast.message = (error as Error).message;
+    toast.style = Toast.Style.Failure;
+  }
 }
