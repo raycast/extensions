@@ -224,10 +224,8 @@ function AccountItem({
 
   return (
     <List.Item
-      // 如果有 URL 就抓 Favicon，否則用預設圖示
       icon={account.url ? getFavicon(account.url) : Icon.Person}
       title={account.role}
-      // 在列表右側顯示帶顏色的環境標籤，並加入 tooltip 防止過長被截斷
       accessories={[
         {
           tag: { value: account.environment, color: envColor },

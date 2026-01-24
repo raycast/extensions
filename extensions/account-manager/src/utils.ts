@@ -3,6 +3,13 @@ import { showHUD, closeMainWindow } from "@raycast/api";
 import { Account } from "./types";
 
 /**
+ * Escapes a string for safe use in AppleScript double-quoted strings.
+ */
+function escapeForAppleScript(str: string): string {
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+/**
  * Executes the auto-fill logic.
  */
 export async function performAutoFill(account: Account) {
@@ -10,6 +17,9 @@ export async function performAutoFill(account: Account) {
 
   // Wait for the window focus to switch back to the target application
   await new Promise((resolve) => setTimeout(resolve, 300));
+
+  const safeUsername = escapeForAppleScript(account.username);
+  const safePassword = escapeForAppleScript(account.password || "");
 
   const script = `
     try
@@ -19,17 +29,17 @@ export async function performAutoFill(account: Account) {
     end try
 
     -- 1. Enter Username
-    set the clipboard to "${account.username}"
+    set the clipboard to "${safeUsername}"
     delay 0.1
     tell application "System Events" to keystroke "v" using {command down}
-    
+
     -- 2. Switch to Password field
     delay 0.1
     tell application "System Events" to key code 48 -- Tab
-    
+
     -- 3. Enter Password
     delay 0.1
-    set the clipboard to "${account.password || ""}"
+    set the clipboard to "${safePassword}"
     delay 0.1
     tell application "System Events" to keystroke "v" using {command down}
     
