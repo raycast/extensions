@@ -40,6 +40,8 @@ export type WarningGenerator<T extends FilterableItem> = (item: T, allItems: T[]
 export interface FilterableItem {
   section: string;
   sectionStartLine: number;
+  /** Stable unique ID assigned during parsing (used for React keys) */
+  _stableId?: number;
   [key: string]: unknown;
 }
 
@@ -141,7 +143,10 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
   const { sections, isLoading, refresh } = useZshrcLoader(config.commandName);
   const [warningFilter, setWarningFilter] = useState<WarningFilter>("all");
 
-  // Parse items from all sections
+  // Parse items from all sections with stable unique IDs
+  // The _stableId is assigned during initial parsing and remains constant
+  // through frecency sorting, ensuring React keys stay stable across reorders
+  let stableIdCounter = 0;
   const allItemsRaw = (sections || []).flatMap((section: LogicalSection) =>
     config.parser(section.content).map(
       (item) =>
@@ -149,6 +154,7 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
           ...item,
           section: section.label,
           sectionStartLine: section.startLine,
+          _stableId: stableIdCounter++,
         }) as T,
     ),
   );
@@ -306,7 +312,7 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
 
       {Object.entries(grouped).map(([sectionName, items]) => (
         <List.Section key={sectionName} title={sectionName}>
-          {items.map((item, index) => {
+          {items.map((item) => {
             const warningAccessory = getWarningAccessory(item);
             const accessories: List.Item.Accessory[] = [];
 
@@ -324,12 +330,9 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
               },
             });
 
-            // Generate a stable key using the item's unique identifier
-            // This ensures consistent rendering when frecency sorting changes order
-            // Include index to handle duplicate names in the same section
-            const itemKey = config.frecencyKey
-              ? `${sectionName}-${config.frecencyKey(item)}-${index}`
-              : `${sectionName}-${config.generateTitle(item)}-${index}`;
+            // Use the stable ID assigned during parsing for React keys
+            // This ensures items are reordered (not remounted) when frecency changes
+            const itemKey = `${sectionName}-${item._stableId}`;
 
             return (
               <List.Item
