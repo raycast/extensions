@@ -12,6 +12,7 @@ import download from "image-downloader";
 import isUrl from "is-url";
 import { nanoid } from "nanoid";
 import path from "path";
+import type { FaviconResult } from "./types";
 
 export default async function downloadFavicon(props: LaunchProps<{ arguments: Arguments.Download }>) {
   const preferences = await getPreferenceValues();
@@ -35,10 +36,10 @@ export default async function downloadFavicon(props: LaunchProps<{ arguments: Ar
   }
 
   const destination = path.join(preferences.downloadDirectory, `${nanoid()}.png`);
-  const favicon = await getFavicon(url, { size: preferences.defaultIconSize });
+  const favicon = (await getFavicon(url, { size: preferences.defaultIconSize })) as FaviconResult;
 
   await download.image({
-    url: (favicon as any).source,
+    url: favicon.source,
     dest: destination,
   });
 
