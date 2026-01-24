@@ -4,6 +4,23 @@ import { mkdtempSync, writeFileSync, rmSync, existsSync } from "fs";
 import { tmpdir, homedir } from "os";
 import { join } from "path";
 
+const placeholderDescriptions = [
+  "This package name is reserved for future use",
+  "Coming soon - stay tuned!",
+  "Reserved. Something amazing is brewing...",
+  "Claimed and ready for greatness",
+  "Placeholder for an upcoming project",
+  "Reserved by a developer with big plans",
+  "Work in progress - check back later",
+  "The next big thing starts here",
+  "Reserved for future awesomeness",
+  "Under construction - great things ahead",
+];
+
+function getRandomDescription(): string {
+  return placeholderDescriptions[Math.floor(Math.random() * placeholderDescriptions.length)];
+}
+
 function findNodeBinDir(): string | null {
   const paths = [
     "/opt/homebrew/bin",
@@ -43,8 +60,8 @@ export default function Command() {
 
       const packageJson = {
         name: packageName.trim(),
-        version: "0.0.0-reserved",
-        description: "Placeholder package",
+        version: "0.0.1-alpha.1",
+        description: getRandomDescription(),
         main: "index.js",
         license: "MIT",
       };
@@ -69,7 +86,7 @@ export default function Command() {
 
       toast.style = Toast.Style.Success;
       toast.title = "Package claimed!";
-      toast.message = `${packageName}@0.0.0-reserved published`;
+      toast.message = `${packageName}@0.0.1-alpha.1 published`;
 
       await popToRoot();
     } catch (error) {
