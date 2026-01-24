@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import { getBoundedPreferenceNumber } from "./components/Menu";
@@ -21,12 +21,9 @@ function MyStarredRepositories() {
   const [allRepositories, setAllRepositories] = useState<ExtendedRepositoryFieldsFragment[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [cursor, setCursor] = useState<string | null>(null);
+  const [isPendingMutation, setIsPendingMutation] = useState(false);
 
-  const {
-    data,
-    isLoading,
-    mutate: mutateList,
-  } = useCachedPromise(
+  const { data, isLoading, mutate } = useCachedPromise(
     async (sort: string, afterCursor: string | null) => {
       const orderByField = sort.split(":")[0].toUpperCase() as StarOrderField;
       const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
@@ -52,6 +49,11 @@ function MyStarredRepositories() {
     {
       keepPreviousData: true,
       onData: (result) => {
+        // Skip onData updates during mutations to avoid conflicts
+        if (isPendingMutation) {
+          return;
+        }
+
         if (cursor === null) {
           // Initial load or sort change
           setAllRepositories(result.repositories);
@@ -92,6 +94,17 @@ function MyStarredRepositories() {
     }
   };
 
+  const mutateList = useCallback(async () => {
+    setIsPendingMutation(true);
+    try {
+      setCursor(null);
+      setAllRepositories([]);
+      setHasMore(true);
+      await mutate();
+    } finally {
+      setIsPendingMutation(false);
+    }
+  }, [mutate]);
   const isInitialLoading = isLoading && allRepositories.length === 0;
 
   return (
