@@ -3,22 +3,13 @@ import { useState, useEffect } from "react";
 import { Task, Project, getProjectIcon, getNote } from "../api";
 import TaskActions from "./TaskActions";
 import { parseNoteContent } from "../utils/delta-to-markdown";
-
-export function getPriorityIcon(priority: number): { source: Icon; tintColor: Color } {
-  switch (priority) {
-    case 1:
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
-    case 2:
-      return { source: Icon.ArrowDown, tintColor: Color.Blue };
-    default:
-      return { source: Icon.Minus, tintColor: Color.Yellow };
-  }
-}
+import { getPriorityConfig } from "../utils/priorities";
+import { NO_TOKEN_MESSAGE } from "../utils/constants";
 
 export function formatTime(timestamp: string | undefined): string {
   if (!timestamp) return "";
   const date = new Date(timestamp);
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleDateString([], { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
 interface TaskListItemProps {
@@ -81,12 +72,6 @@ export function TaskListItem({ task, project, projects, onTaskUpdated }: TaskLis
   );
 }
 
-const priorityLabels = [
-  { name: "High", color: Color.Red, icon: Icon.ExclamationMark },
-  { name: "Normal", color: Color.Yellow, icon: Icon.Minus },
-  { name: "Low", color: Color.Blue, icon: Icon.ArrowDown },
-];
-
 interface TaskDetailProps {
   task: Task;
   project?: Project;
@@ -100,7 +85,7 @@ export function TaskDetail({ task, project, projects, onTaskUpdated }: TaskDetai
 
   const taskTitle = task.title || "(Untitled task)";
   const isCompleted = task.checked === 1 || task.complete === 1;
-  const priority = priorityLabels[task.priority] || priorityLabels[1];
+  const priority = getPriorityConfig(task.priority);
 
   // Check if note field looks like an ID (starts with N-T- or similar pattern)
   const isNoteId = task.note && /^N-[A-Z]-[a-f0-9-]+$/i.test(task.note);
@@ -214,11 +199,7 @@ export function TaskDetail({ task, project, projects, onTaskUpdated }: TaskDetai
 export function NoTokenView() {
   return (
     <List>
-      <List.EmptyView
-        icon={Icon.Key}
-        title="API Token Not Set"
-        description="Please use the 'Set API Token' command first to configure your SingularityApp API token."
-      />
+      <List.EmptyView icon={Icon.Key} title="API Token Not Set" description={NO_TOKEN_MESSAGE} />
     </List>
   );
 }

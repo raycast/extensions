@@ -1,17 +1,17 @@
 import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { Task, Project, updateTask, deleteTask, completeTask, uncompleteTask, getProjectIcon } from "../api";
+import {
+  Task,
+  Project,
+  updateTask,
+  deleteTask,
+  completeTask,
+  uncompleteTask,
+  getProjectIcon,
+  getAPIDateString,
+} from "../api";
 import TaskUpdater from "./TaskUpdater";
-
-export const priorities = [
-  { value: 0, name: "High", color: Color.Red, icon: Icon.ExclamationMark },
-  { value: 1, name: "Normal", color: Color.Yellow, icon: Icon.Minus },
-  { value: 2, name: "Low", color: Color.Blue, icon: Icon.ArrowDown },
-];
-
-function getAPIDateString(date: Date): string {
-  return date.getTime().toString();
-}
+import { PRIORITIES } from "../utils/priorities";
 
 type TaskActionsProps = {
   task: Task;
@@ -150,7 +150,7 @@ export default function TaskActions({ task, projects, onTaskUpdated }: TaskActio
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           title="Change Priority"
         >
-          {priorities.map(({ value, name, color, icon }) => (
+          {PRIORITIES.map(({ value, name, color, icon }) => (
             <Action
               key={name}
               title={name}

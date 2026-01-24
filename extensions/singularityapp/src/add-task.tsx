@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { createTask, getProjects, Project, withErrorHandling, getApiToken, getProjectIcon } from "./api";
+import { NO_TOKEN_MESSAGE } from "./utils/constants";
 
 export default function Command() {
   const [title, setTitle] = useState("");
@@ -63,7 +64,7 @@ export default function Command() {
   if (!hasToken) {
     return (
       <Form>
-        <Form.Description text="⚠️ API Token not set. Please use the 'Set API Token' command first to configure your SingularityApp API token." />
+        <Form.Description text={`⚠️ API Token not set. ${NO_TOKEN_MESSAGE}`} />
       </Form>
     );
   }

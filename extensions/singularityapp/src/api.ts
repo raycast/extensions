@@ -5,6 +5,10 @@ export const MAX_COUNT_KEY = "singularity-max-count";
 export const DEFAULT_MAX_COUNT = 3000;
 const API_BASE_URL = "https://api.singularity-app.com";
 
+export function getAPIDateString(date: Date): string {
+  return date.toISOString();
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,

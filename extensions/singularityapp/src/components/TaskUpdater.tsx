@@ -9,12 +9,9 @@ import {
   withErrorHandling,
   getApiToken,
   getProjectIcon,
+  getAPIDateString,
 } from "../api";
 import { parseNoteContent } from "../utils/delta-to-markdown";
-
-function getAPIDateString(date: Date): string {
-  return date.toISOString();
-}
 
 type TaskUpdaterProps = {
   task: Task;
