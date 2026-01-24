@@ -1,6 +1,6 @@
 # SingularityApp
 
-Manage your SingularityApp tasks directly from Raycast.
+Manage your [SingularityApp](https://singularity-app.com/) tasks directly from Raycast.
 
 ## Features
 
