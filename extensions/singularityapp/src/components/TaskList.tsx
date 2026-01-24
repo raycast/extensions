@@ -204,7 +204,7 @@ export function TaskDetail({ task, project, projects, onTaskUpdated }: TaskDetai
       }
       actions={
         <ActionPanel>
-          <TaskActions task={task} projects={projects} onTaskUpdated={onTaskUpdated} fromDetail />
+          <TaskActions task={task} projects={projects} onTaskUpdated={onTaskUpdated} />
         </ActionPanel>
       }
     />
