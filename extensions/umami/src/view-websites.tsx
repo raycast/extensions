@@ -11,9 +11,9 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { umami } from "./lib/umami";
+import { umami, useWebsites } from "./lib/umami";
 import { AddWebsiteFormValues } from "./lib/types";
-import { FormValidation, getFavicon, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import WithUmami from "./components/WithUmami";
 import { handleUmamiError } from "./lib/utils";
 
@@ -26,28 +26,7 @@ export default function Main() {
 }
 
 function Websites() {
-  const {
-    isLoading,
-    data: websites = [],
-    mutate,
-  } = useCachedPromise(async () => {
-    const { ok, error, data } = await umami.getWebsites();
-    if (!ok) handleUmamiError(error);
-    const websites = data?.data ?? [];
-    const endAt = Date.now();
-    const pastDate = new Date();
-    pastDate.setDate(pastDate.getDate() - 1); // 1 day ago
-    const startAt = pastDate.getTime();
-
-    const date = new Date();
-    date.setMinutes(date.getMinutes() - 30);
-
-    const statsResponses = await Promise.all(
-      websites.map((website) => umami.getWebsiteStats(website.id, { startAt, endAt })),
-    );
-    const stats = statsResponses.map(({ data }) => data);
-    return websites.map((website, index) => ({ ...website, stats: stats[index] }));
-  });
+  const { isLoading, data: websites = [], mutate } = useWebsites();
 
   return (
     <List isLoading={isLoading} isShowingDetail>

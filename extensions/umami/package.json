@@ -31,6 +31,14 @@
       "subtitle": "Umami",
       "description": "View your users",
       "mode": "view"
+    },
+    {
+      "name": "view-websites-menu-bar",
+      "title": "View Websites (Menu Bar)",
+      "subtitle": "Umami",
+      "description": "View your websites and their stats",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "preferences": [
@@ -69,7 +77,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2",
     "@umami/api-client": "^0.80.0"
   },
