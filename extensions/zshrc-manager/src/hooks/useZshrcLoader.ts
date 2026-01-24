@@ -44,20 +44,17 @@ export function useZshrcLoader(commandName: string): UseZshrcLoaderResult {
     [],
     {
       keepPreviousData: true,
-      onError: (error, cachedData) => {
-        const message = isZshManagerError(error)
-          ? error.userMessage
-          : error instanceof Error
-            ? error.message
+      onError: (err: Error) => {
+        const message = isZshManagerError(err)
+          ? err.userMessage
+          : err instanceof Error
+            ? err.message
             : "Failed to load zshrc file";
-
-        // Only mention cached data if we actually have some
-        const toastMessage = cachedData ? `Using cached data: ${message}` : message;
 
         showToast({
           style: Toast.Style.Failure,
           title: `Error Loading ${commandName}`,
-          message: toastMessage,
+          message,
         });
       },
     },

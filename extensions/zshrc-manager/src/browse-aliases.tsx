@@ -162,7 +162,7 @@ Select this item to load the alias definitions.
 
   if (error) {
     return (
-      <List searchBarAccessory={searchBarAccessory}>
+      <List searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}>
         <List.EmptyView
           title="Error Loading Collections"
           description={error.message}
@@ -176,7 +176,7 @@ Select this item to load the alias definitions.
     <List
       navigationTitle={filterBySection ? `Aliases for ${filterBySection}` : "Browse Alias Collections"}
       searchBarPlaceholder="Search Collections..."
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
       onSearchTextChange={setSearchText}
       isShowingDetail={true}
       onSelectionChange={(id) => setSelectedId(id || null)}

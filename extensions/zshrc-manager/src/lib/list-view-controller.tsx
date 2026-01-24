@@ -111,7 +111,7 @@ export interface ListViewConfig<T extends FilterableItem> {
   /** Custom post-processing of items */
   postProcessItems?: (items: T[]) => T[];
   /** Optional search bar accessory (e.g., dropdown) */
-  searchBarAccessory?: React.ReactElement<object> | null;
+  searchBarAccessory?: React.ReactElement | null | undefined;
   /** Optional warning generator to detect issues with items */
   warningGenerator?: WarningGenerator<T>;
   /** Whether to show the warning filter dropdown */
@@ -236,9 +236,9 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
   };
 
   // Build the search bar accessory with warning filter if enabled
-  const getSearchBarAccessory = (): React.ReactElement | undefined => {
+  const getSearchBarAccessory = (): List.Props["searchBarAccessory"] => {
     if (config.searchBarAccessory) {
-      return config.searchBarAccessory;
+      return config.searchBarAccessory as List.Props["searchBarAccessory"];
     }
     if (config.showWarningFilter && config.warningGenerator) {
       return (

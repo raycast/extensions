@@ -14,21 +14,23 @@ import { parseAliasFile, extractDescription, type ParsedAlias } from "./parse-al
  */
 export interface CollectionSource {
   type: "curated" | "omz-plugin" | "external";
-  path?: string; // For curated
-  pluginId?: string; // For OMZ
-  url?: string; // For external
-  parser?: string; // For external
+  path?: string | undefined; // For curated
+  pluginId?: string | undefined; // For OMZ
+  url?: string | undefined; // For external
+  parser?: string | undefined; // For external
 }
 
 /**
  * Attribution information for a collection
  */
 export interface CollectionAttribution {
-  inspirations?: Array<{
-    name: string;
-    url: string;
-  }>;
-  contributors?: string[];
+  inspirations?:
+    | Array<{
+        name: string;
+        url: string;
+      }>
+    | undefined;
+  contributors?: string[] | undefined;
 }
 
 /**
@@ -38,10 +40,10 @@ export interface ManifestCollection {
   id: string;
   name: string;
   description: string;
-  icon?: string; // Simple Icons slug for display
+  icon?: string | undefined; // Simple Icons slug for display
   category: string;
-  tags?: string[];
-  aliasCount?: number;
+  tags?: string[] | undefined;
+  aliasCount?: number | undefined;
   source: CollectionSource;
 }
 
@@ -53,7 +55,7 @@ export interface CuratedCollectionData {
   name: string;
   description: string;
   version: string;
-  attribution?: CollectionAttribution;
+  attribution?: CollectionAttribution | undefined;
   aliases: ParsedAlias[];
 }
 
@@ -64,13 +66,13 @@ export interface LoadedCollection {
   id: string;
   name: string;
   description: string;
-  icon?: string; // Simple Icons slug for display
+  icon?: string | undefined; // Simple Icons slug for display
   category: string;
   aliases: ParsedAlias[];
   aliasCount: number;
   loadedAt: number;
   source: CollectionSource;
-  attribution?: CollectionAttribution;
+  attribution?: CollectionAttribution | undefined;
 }
 
 /**

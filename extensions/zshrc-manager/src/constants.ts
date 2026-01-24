@@ -141,6 +141,9 @@ export const MODERN_COLORS = {
   error: "#FF3B30",
   neutral: "#8E8E93",
   purple: "#AF52DE",
+  info: "#5AC8FA",
+  accent: "#AF52DE",
+  secondary: "#8E8E93",
 } as const;
 
 // Re-export getSectionFormatsInOrder from preferences for backward compatibility

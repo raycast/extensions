@@ -569,7 +569,7 @@ ${getTopEntries(setopts, 10)
     <List
       navigationTitle={`Zshrc Statistics${isFromCache ? " (Cached)" : ""}`}
       searchBarPlaceholder="Search aliases, exports, functions, plugins, or sections..."
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       isShowingDetail={!isSearching}

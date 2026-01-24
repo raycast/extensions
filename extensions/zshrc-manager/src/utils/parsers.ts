@@ -255,8 +255,8 @@ export function parseFpathEntries(
 export interface KeybindingResult {
   key: string;
   command: string;
-  widget?: string;
-  keymap?: string;
+  widget?: string | undefined;
+  keymap?: string | undefined;
 }
 
 /**
@@ -285,8 +285,7 @@ export function parseKeybindings(content: string): ReadonlyArray<KeybindingResul
 
   // Match bindkey -M keymap -s "key" "replacement" (keymap-specific string replacement)
   // Uses separate patterns for quoted and unquoted keys to avoid greedy matching
-  const keymapStringQuotedRegex =
-    /^(?:\s*)bindkey\s+-M\s+(\S+)\s+-s\s+(['"])([^'"]+)\2\s+(['"])([^'"]+)\4(?:\s*)$/gm;
+  const keymapStringQuotedRegex = /^(?:\s*)bindkey\s+-M\s+(\S+)\s+-s\s+(['"])([^'"]+)\2\s+(['"])([^'"]+)\4(?:\s*)$/gm;
   let match: RegExpExecArray | null;
   while ((match = keymapStringQuotedRegex.exec(content)) !== null) {
     if (match[1] && match[3] && match[5]) {

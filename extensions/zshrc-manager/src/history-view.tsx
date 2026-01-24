@@ -14,7 +14,7 @@ import { getHistory, undoToPoint, clearHistory, type HistoryEntry } from "./lib/
 import { MODERN_COLORS } from "./constants";
 
 interface HistoryViewProps {
-  onRefresh?: () => void;
+  onRefresh?: (() => void) | undefined;
 }
 
 /**

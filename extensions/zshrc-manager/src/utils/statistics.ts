@@ -52,7 +52,7 @@ export interface ZshrcStatistics {
  * const stats = calculateStatistics(sections);
  * console.log(`${stats.aliases.length} aliases found`);
  */
-export function calculateStatistics(sections: LogicalSection[]): ZshrcStatistics {
+export function calculateStatistics(sections: readonly LogicalSection[]): ZshrcStatistics {
   return {
     sectionCount: sections.length,
     aliases: sections.flatMap((section) => parseAliases(section.content)),

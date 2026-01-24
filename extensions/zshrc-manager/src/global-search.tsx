@@ -230,7 +230,7 @@ export default function GlobalSearch({ searchBarAccessory }: GlobalSearchProps) 
     <List
       navigationTitle="Global Search"
       searchBarPlaceholder="Search aliases, exports, functions, plugins..."
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       actions={
@@ -241,7 +241,7 @@ export default function GlobalSearch({ searchBarAccessory }: GlobalSearchProps) 
             onAction={refresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action.Open title="Open ~/.zshrc" target={getZshrcPath()} icon={Icon.Document} />
+          <Action.Open title="Open Zshrc" target={getZshrcPath()} icon={Icon.Document} />
         </ActionPanel>
       }
     >
@@ -285,7 +285,7 @@ export default function GlobalSearch({ searchBarAccessory }: GlobalSearchProps) 
                     onAction={() => handleCopy(result.title)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
-                  <Action.Open title="Open ~/.zshrc" target={getZshrcPath()} icon={Icon.Document} />
+                  <Action.Open title="Open Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}

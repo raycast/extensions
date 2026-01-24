@@ -92,8 +92,8 @@ export function detectUserSectionFormat(content: string): string {
  * Generates a section header (and optional end marker) in the specified format.
  */
 export function generateSectionHeader(name: string, format?: string): { start: string; end?: string } {
-  const templateFn = SECTION_TEMPLATES[format || "dashed"] || SECTION_TEMPLATES["dashed"];
-  return templateFn(name);
+  const templateFn = SECTION_TEMPLATES[format || "dashed"] ?? SECTION_TEMPLATES["dashed"];
+  return templateFn!(name);
 }
 
 /**
@@ -178,6 +178,7 @@ export function findMatchingSection(
 
   for (let i = 0; i < markers.length; i++) {
     const marker = markers[i];
+    if (!marker) continue;
 
     // Skip end markers and function markers
     if (["dashed_end", "custom_end", "function_start", "function_end"].includes(marker.type)) {
@@ -199,11 +200,15 @@ export function findMatchingSection(
   // Pick the best match (highest score, or first if tied)
   matches.sort((a, b) => b.score - a.score);
   const bestMatch = matches[0];
+  if (!bestMatch) {
+    return null;
+  }
 
   // Find the end of this section (next section start or end marker, or EOF)
   let endLine = lines.length;
   for (let j = bestMatch.index + 1; j < markers.length; j++) {
     const nextMarker = markers[j];
+    if (!nextMarker) continue;
     // If it's an end marker or a new section start
     if (
       ["dashed_end", "custom_end"].includes(nextMarker.type) ||

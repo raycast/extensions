@@ -117,7 +117,11 @@ export default function BackupManager({ searchBarAccessory }: BackupManagerProps
   // No backup exists
   if (!isLoading && (!backupInfo || !backupInfo.exists)) {
     return (
-      <List navigationTitle="Backup Manager" isLoading={isLoading} searchBarAccessory={searchBarAccessory}>
+      <List
+        navigationTitle="Backup Manager"
+        isLoading={isLoading}
+        searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
+      >
         <List.EmptyView
           title="No Backup Found"
           description="A backup is created automatically when you make changes to your zshrc file."
@@ -145,7 +149,7 @@ export default function BackupManager({ searchBarAccessory }: BackupManagerProps
       navigationTitle="Backup Manager"
       isLoading={isLoading}
       isShowingDetail
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
     >
       <List.Section title="Backup File">
         <List.Item
@@ -183,12 +187,12 @@ If something goes wrong after making changes, you can restore from this backup t
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label
                     title="Path"
-                    text={backupInfo?.path}
+                    text={backupInfo?.path ?? "Unknown"}
                     icon={{ source: Icon.Document, tintColor: MODERN_COLORS.neutral }}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Size"
-                    text={backupInfo?.sizeFormatted}
+                    text={backupInfo?.sizeFormatted ?? "Unknown"}
                     icon={{ source: Icon.HardDrive, tintColor: MODERN_COLORS.neutral }}
                   />
                   <List.Item.Detail.Metadata.Label
@@ -208,11 +212,7 @@ If something goes wrong after making changes, you can restore from this backup t
           }
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Diff"
-                icon={Icon.ArrowLeftRight}
-                target={<BackupDiffView onRestore={handleRestore} />}
-              />
+              <Action.Push title="View Diff" icon={Icon.Switch} target={<BackupDiffView onRestore={handleRestore} />} />
               <Action
                 title="Restore from Backup"
                 icon={Icon.Undo}

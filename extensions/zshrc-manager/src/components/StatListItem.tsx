@@ -11,11 +11,11 @@ interface StatListItemProps<T> {
   /** Icon tint color */
   tintColor: string;
   /** Array of items to display */
-  items: T[];
+  items: readonly T[];
   /** Function to get display label from item */
   getItemLabel: (item: T) => string;
   /** Function to get secondary label from item (optional) */
-  getItemSubtitle?: (item: T) => string;
+  getItemSubtitle?: ((item: T) => string) | undefined;
   /** Markdown content for the detail panel */
   markdownContent: string;
   /** Component to push when viewing all */
@@ -53,14 +53,23 @@ export function StatListItem<T>({
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title={`${title} Found`} text={`${items.length} total`} />
-              {items.slice(0, 6).map((item, idx) => (
-                <List.Item.Detail.Metadata.Label
-                  key={`${title.toLowerCase()}-${idx}`}
-                  title={getItemLabel(item)}
-                  text={getItemSubtitle ? truncateValueMiddle(getItemSubtitle(item)) : undefined}
-                  icon={{ source: icon, tintColor }}
-                />
-              ))}
+              {items.slice(0, 6).map((item, idx) => {
+                const subtitle = getItemSubtitle ? truncateValueMiddle(getItemSubtitle(item)) : null;
+                return subtitle ? (
+                  <List.Item.Detail.Metadata.Label
+                    key={`${title.toLowerCase()}-${idx}`}
+                    title={getItemLabel(item)}
+                    text={subtitle}
+                    icon={{ source: icon, tintColor }}
+                  />
+                ) : (
+                  <List.Item.Detail.Metadata.Label
+                    key={`${title.toLowerCase()}-${idx}`}
+                    title={getItemLabel(item)}
+                    icon={{ source: icon, tintColor }}
+                  />
+                );
+              })}
             </List.Item.Detail.Metadata>
           }
         />

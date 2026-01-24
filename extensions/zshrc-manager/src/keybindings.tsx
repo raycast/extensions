@@ -11,8 +11,8 @@ import { SharedActionsSection } from "./lib/shared-actions";
 interface KeybindingItem extends FilterableItem {
   key: string;
   command: string;
-  widget?: string;
-  keymap?: string;
+  widget?: string | undefined;
+  keymap?: string | undefined;
 }
 
 interface KeybindingsProps {
@@ -46,7 +46,7 @@ export default function Keybindings({ searchBarAccessory }: KeybindingsProps) {
       tintColor={MODERN_COLORS.accent}
       itemType="keybinding"
       itemTypePlural="keybindings"
-      parser={parseKeybindings}
+      parser={parseKeybindings as (content: string) => readonly Partial<KeybindingItem>[]}
       searchFields={["key", "command", "section", "keymap"]}
       searchBarAccessory={searchBarAccessory}
       generateTitle={(item) =>

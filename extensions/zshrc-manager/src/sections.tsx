@@ -29,7 +29,7 @@ export default function Sections({ searchBarAccessory }: SectionsProps) {
     <List
       navigationTitle="Sections"
       searchBarPlaceholder="Search Sections..."
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       isShowingDetail={true}

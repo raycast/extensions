@@ -215,7 +215,7 @@ export default function HealthCheck({ searchBarAccessory }: HealthCheckProps) {
     <List
       navigationTitle="Health Check"
       searchBarPlaceholder="Filter Issues..."
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
       isLoading={isLoading || isCheckingBroken}
       isShowingDetail
       actions={

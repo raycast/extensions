@@ -504,12 +504,12 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
  * Props for DiffPreviewView
  */
 interface DiffPreviewViewProps {
-  existingKey?: string;
+  existingKey?: string | undefined;
   currentKey: string;
   currentValue: string;
   currentSection: string;
   newSectionName: string;
-  originalSection?: string;
+  originalSection?: string | undefined;
   config: EditItemConfig;
   isEditing: boolean;
 }

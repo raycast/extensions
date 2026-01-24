@@ -30,14 +30,14 @@ export interface CollectionMetadata {
   id: string;
   name: string;
   description: string;
-  icon?: string; // Simple Icons slug for display
+  icon?: string | undefined; // Simple Icons slug for display
   category: string;
-  tags?: string[];
+  tags?: string[] | undefined;
   source: {
     type: "curated" | "omz-plugin" | "external";
-    pluginId?: string;
-    path?: string;
-    url?: string;
+    pluginId?: string | undefined;
+    path?: string | undefined;
+    url?: string | undefined;
   };
 }
 
@@ -48,7 +48,7 @@ export interface AliasCollection extends CollectionMetadata {
   aliases: ParsedAlias[];
   aliasCount: number;
   loadedAt: number;
-  attribution?: CollectionAttribution;
+  attribution?: CollectionAttribution | undefined;
 }
 
 /**

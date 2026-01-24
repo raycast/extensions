@@ -8,7 +8,7 @@
 export interface ParsedAlias {
   name: string;
   value: string;
-  description?: string;
+  description?: string | undefined;
 }
 
 /**
@@ -25,7 +25,9 @@ export function parseAliasFile(content: string): ParsedAlias[] {
   let lastComment = "";
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const rawLine = lines[i];
+    if (rawLine === undefined) continue;
+    const line = rawLine.trim();
 
     // Track comments that might describe the next alias
     if (line.startsWith("#") && !line.startsWith("#!")) {
@@ -47,7 +49,7 @@ export function parseAliasFile(content: string): ParsedAlias[] {
     // - alias -g name='value' (global alias)
     const aliasMatch = line.match(/^alias\s+(?:-[gsS]\s+)?([A-Za-z0-9_.-]+)=(.+)$/);
 
-    if (aliasMatch) {
+    if (aliasMatch && aliasMatch[1] && aliasMatch[2]) {
       const name = aliasMatch[1];
       let value = aliasMatch[2];
 
@@ -120,7 +122,7 @@ export function extractDescription(content: string): string | undefined {
     // OMZ style: # Description: ...
     // Or just: # Some description text
     const descMatch = line.match(/^#\s*(?:Description|Desc):\s*(.+)$/i);
-    if (descMatch) {
+    if (descMatch && descMatch[1]) {
       return descMatch[1].trim();
     }
   }

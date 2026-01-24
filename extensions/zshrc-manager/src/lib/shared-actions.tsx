@@ -126,7 +126,7 @@ export function CopyAction({ value, label = "Copy" }: { value: string; label?: s
 /**
  * View history action - navigates to history view
  */
-export function ViewHistoryAction({ onRefresh }: { onRefresh?: () => void }) {
+export function ViewHistoryAction({ onRefresh }: { onRefresh?: (() => void) | undefined }) {
   return (
     <Action.Push
       title="View Change History"

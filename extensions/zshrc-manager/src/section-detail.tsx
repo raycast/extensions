@@ -322,7 +322,7 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
       navigationTitle={`${section.label} - Section Detail`}
       isShowingDetail={true}
       actions={actions}
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
     >
       {renderContent()}
     </List>
