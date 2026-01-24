@@ -1,5 +1,5 @@
 # Pin Changelog
 
-## [Initial Version] - 2026-01-24
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Control Pin.app via Raycast
