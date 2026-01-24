@@ -24,6 +24,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "claudePath",
+      "type": "textfield",
+      "title": "Claude CLI Path",
+      "description": "The full path to the Claude CLI executable (e.g., /usr/local/bin/claude or ~/local/bin/claude). Leave empty to use 'claude' from system PATH.",
+      "required": false,
+      "default": ""
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.16.0"

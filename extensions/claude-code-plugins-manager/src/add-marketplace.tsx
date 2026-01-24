@@ -11,6 +11,7 @@ import {
   Toast,
   popToRoot,
 } from "@raycast/api";
+import { useClaudeConfig } from "./hooks/useClaudeConfig";
 import { addMarketplace } from "./lib/claude-cli";
 import { invalidateCache, CACHE_KEYS } from "./lib/cache-manager";
 
@@ -21,6 +22,8 @@ interface AddMarketplaceProps {
 export default function AddMarketplace({ onAdded }: AddMarketplaceProps) {
   const [sourceType, setSourceType] = useState<string>("github");
   const [source, setSource] = useState<string>("");
+  // Initialize Claude CLI path from preferences
+  useClaudeConfig();
 
   async function handleSubmit() {
     if (!source.trim()) {

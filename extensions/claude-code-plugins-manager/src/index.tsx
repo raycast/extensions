@@ -15,6 +15,7 @@ import {
   Alert,
 } from "@raycast/api";
 import { usePlugins } from "./hooks/usePlugins";
+import { useClaudeConfig } from "./hooks/useClaudeConfig";
 import {
   installPlugin,
   updatePlugin,
@@ -32,6 +33,8 @@ import type { CLIResult } from "./lib/types";
 
 export default function BrowsePlugins() {
   const { plugins, isLoading, error, refetch } = usePlugins();
+  // Initialize Claude CLI path from preferences
+  useClaudeConfig();
   const [searchText, setSearchText] = useState("");
   const [marketplaceFilter, setMarketplaceFilter] = useState<string>("all");
 

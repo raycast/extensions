@@ -15,6 +15,7 @@ import {
   Color,
 } from "@raycast/api";
 import { useMarketplaces } from "./hooks/useMarketplaces";
+import { useClaudeConfig } from "./hooks/useClaudeConfig";
 import {
   removeMarketplace,
   updateMarketplace,
@@ -28,6 +29,8 @@ import { Marketplace } from "./lib/types";
 
 export default function Marketplaces() {
   const { marketplaces, isLoading, error, refetch } = useMarketplaces();
+  // Initialize Claude CLI path from preferences
+  useClaudeConfig();
 
   if (error) {
     return <ErrorView error={error} />;
