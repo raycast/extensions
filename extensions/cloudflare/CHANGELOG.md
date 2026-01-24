@@ -1,6 +1,6 @@
 # Cloudflare Changelog
 
-## [View Workers Command] - {PR_MERGE_DATE}
+## [View Workers Command] - 2026-01-24
 
 - Added new "View Workers" command to list Cloudflare Workers across all accounts
 - Workers list with configurable sorting (by modified date, created date, or name)
