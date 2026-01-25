@@ -4,6 +4,9 @@
   "description": "Extension for Pin.app. Pin any window to stay always on top using a mirror overlay.",
   "icon": "extension-icon.png",
   "author": "tanb",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "System"
