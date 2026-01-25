@@ -12,9 +12,10 @@ Manage your [Botpress](https://botpress.com) chatbots directly from Raycast.
 ## Setup
 
 1. Get your **Personal Access Token** from [Botpress Cloud](https://app.botpress.cloud):
-   - Click your profile icon (bottom left)
-   - Go to **Personal Access Tokens**
-   - Click **Create Token** and copy it
+   - Click your profile icon (top right)
+   - Go to **Account Settings**
+   - Select the **Access Tokens** tab
+   - Click **Generate new token** and copy it
 
 2. Get your **Workspace ID** from the URL when logged into Botpress Cloud:
    - `https://app.botpress.cloud/workspaces/{workspaceId}/...`
