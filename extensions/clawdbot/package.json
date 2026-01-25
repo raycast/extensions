@@ -21,7 +21,7 @@
     },
     {
       "name": "quick-chat",
-      "title": "Quick Chat",
+      "title": "Quick Message",
       "subtitle": "Clawdbot",
       "description": "Send a quick message and see the response",
       "mode": "view",
@@ -67,7 +67,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.3",
+    "@raycast/api": "^1.95.0",
     "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
