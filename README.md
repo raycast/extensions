@@ -34,7 +34,10 @@ The extension will detect Lunar and offer to install the CLI automatically on fi
 
 Lunar is free for basic brightness control.
 
-## Usage
+## Commands
+
+### Set Brightness
+Adjust brightness to any value between 1-100 with a visual form.
 
 1. Open Raycast (Cmd+Space)
 2. Type "Set Brightness"
@@ -45,6 +48,16 @@ Lunar is free for basic brightness control.
 7. Enter a new brightness value between 1-100
 8. Press Enter to apply
 9. A HUD notification shows the change with the display name
+
+### Max Brightness
+Instantly set brightness to 100% on the active display.
+
+1. Open Raycast (Cmd+Space)
+2. Type "Max Brightness"
+3. The brightness is immediately set to 100% on the display where your cursor is located
+4. A HUD notification confirms the change
+
+**Tip:** Assign a keyboard shortcut to "Max Brightness" in Raycast settings for quick access.
 
 The extension uses retry logic and verification to ensure brightness changes are applied reliably.
 

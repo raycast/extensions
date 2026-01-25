@@ -15,6 +15,12 @@
       "title": "Set Brightness",
       "description": "Set display brightness (shows current value)",
       "mode": "view"
+    },
+    {
+      "name": "max-brightness",
+      "title": "Max Brightness",
+      "description": "Set display brightness to 100%",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

@@ -15,10 +15,14 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `set-brightness` command */
   export type SetBrightness = ExtensionPreferences & {}
+  /** Preferences accessible in the `max-brightness` command */
+  export type MaxBrightness = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
   /** Arguments passed to the `set-brightness` command */
   export type SetBrightness = {}
+  /** Arguments passed to the `max-brightness` command */
+  export type MaxBrightness = {}
 }
 
