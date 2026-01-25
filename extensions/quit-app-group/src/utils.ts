@@ -12,13 +12,23 @@ export async function closeApps(apps: SavedApp[]): Promise<{ failedApps: string[
       // Escape double quotes and backslashes in bundleId to prevent AppleScript injection
       const safeBundleId = app.bundleId.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
       await runAppleScript(`
+        set bundleId to "${safeBundleId}"
+        set isRunning to false
         try
-          ignoring application responses
-            tell application id "${safeBundleId}" to quit
-          end ignoring
-        on error
-          return "error"
+          -- Check if app is running using lsappinfo (avoids launching it)
+          set appInfo to do shell script "/usr/bin/lsappinfo info -app " & quoted form of bundleId
+          if appInfo is not "" then set isRunning to true
         end try
+
+        if isRunning then
+          try
+            ignoring application responses
+              tell application id bundleId to quit
+            end ignoring
+          on error
+            return "error"
+          end try
+        end if
       `);
     } catch (error) {
       const errorMessage = String(error);

@@ -162,18 +162,64 @@ function AddAppView({ currentApps, onAdd }: { currentApps: SavedApp[]; onAdd: (a
         // 1. Get standard apps from Raycast
         const standardApps = await getApplications();
 
-        // 2. Search for external apps (restrict to /Volumes to optimize speed)
-        // We only look in /Volumes because standard locations are covered by getApplications
-        const { stdout } = await execFileAsync("mdfind", [
+        // 2. Search for external apps
+        // Method A: mdfind in /Volumes (fastest, relies on Spotlight)
+        const { stdout: mdfindOut } = await execFileAsync("mdfind", [
           "-onlyin",
           "/Volumes",
           "kMDItemContentType == 'com.apple.application-bundle'",
         ]);
-        const mdfindPaths = stdout.split("\n").filter((p) => {
+        const mdfindPaths = mdfindOut.split("\n").filter((p) => {
           const path = p.trim();
-          // Filter out empty lines, non-app files, and nested apps (helpers inside .app)
           return path.length > 0 && path.endsWith(".app") && !path.includes(".app/");
         });
+
+        // Method B: Manual scan of /Volumes (fallback for non-indexed drives)
+        // This is slower but necessary if Spotlight doesn't index the external drive
+        const manualPaths: string[] = [];
+        try {
+          const { stdout: volumesOut } = await execFileAsync("ls", ["-1", "/Volumes"]);
+          const volumes = volumesOut
+            .split("\n")
+            .map((v) => v.trim())
+            .filter((v) => v.length > 0 && v !== "Macintosh HD");
+
+          for (const vol of volumes) {
+            const volPath = `/Volumes/${vol}`;
+            // Check if volume root has .app files or an Applications folder
+            try {
+              // Limit depth to avoid performance issues
+              // find /Volumes/Drive -maxdepth 5 -name "*.app"
+              const { stdout: findOut } = await execFileAsync("find", [
+                volPath,
+                "-maxdepth",
+                "5",
+                "-name",
+                "*.app",
+                "-not",
+                "-path",
+                "*/.*", // Exclude hidden files/directories
+                "-type",
+                "d",
+                "-prune", // Don't descend into .app bundles
+              ]);
+              const found = findOut.split("\n").filter((p) => p.trim().length > 0);
+              manualPaths.push(...found);
+            } catch (error) {
+              // Even if find fails (e.g. permission denied), it might have output some paths
+              const execError = error as { stdout?: string };
+              if (execError.stdout) {
+                const found = execError.stdout.split("\n").filter((p) => p.trim().length > 0);
+                manualPaths.push(...found);
+              }
+            }
+          }
+        } catch {
+          // Ignore ls errors
+        }
+
+        const allPaths = [...mdfindPaths, ...manualPaths];
+        const uniquePaths = new Set(allPaths);
 
         // Create a map of existing bundle IDs to avoid duplicates
         const appMap = new Map<string, ExtendedApplication>();
@@ -189,7 +235,7 @@ function AddAppView({ currentApps, onAdd }: { currentApps: SavedApp[]; onAdd: (a
         }
 
         const standardPaths = new Set(standardApps.map((a) => a.path));
-        const newPaths = mdfindPaths.filter((p) => !standardPaths.has(p));
+        const newPaths = Array.from(uniquePaths).filter((p) => !standardPaths.has(p));
 
         for (const path of newPaths) {
           try {
