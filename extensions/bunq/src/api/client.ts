@@ -17,14 +17,6 @@ import { createRequestSignature, verifyResponseSignature } from "../lib/crypto";
 import { logger } from "../lib/logger";
 
 /**
- * Extension preferences from Raycast settings.
- */
-interface Preferences {
-  apiKey: string;
-  environment: "sandbox" | "production";
-}
-
-/**
  * Base URLs for the bunq API environments.
  */
 const URLS = {

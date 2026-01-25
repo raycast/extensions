@@ -1,10 +1,5 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-  environment: "sandbox" | "production";
-}
-
 const KEYS = {
   INSTALLATION_TOKEN: "bunq_installation_token",
   SERVER_PUBLIC_KEY: "bunq_server_public_key",

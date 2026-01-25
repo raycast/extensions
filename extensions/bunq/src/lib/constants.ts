@@ -5,15 +5,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
 /**
- * Extension preferences.
- */
-interface Preferences {
-  apiKey: string;
-  environment: "sandbox" | "production";
-  locale?: string;
-}
-
-/**
  * Gets the user's preferred locale from Raycast preferences.
  * Falls back to "nl-NL" if not set.
  *
