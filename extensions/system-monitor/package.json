@@ -42,7 +42,6 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "os-utils": "0.0.14",
     "plist": "^3.1.0",
@@ -50,6 +49,7 @@
     "usehooks-ts": "^3.1.0"
   },
   "devDependencies": {
+    "@raycast/api": "^1.104.3",
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/os-utils": "0.0.4",
@@ -99,11 +99,30 @@
       ]
     },
     {
-      "name": "displayMode",
-      "description": "Select display mode",
+      "name": "displayModeCpu",
+      "description": "Select cpu usage display mode",
       "type": "dropdown",
       "required": false,
-      "title": "Display mode",
+      "title": "CPU usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "used"
+    },
+    {
+      "name": "displayModeBattery",
+      "description": "Select battery usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Battery usage display mode",
       "placeholder": "placeHolder",
       "data": [
         {
@@ -116,6 +135,44 @@
         }
       ],
       "default": "free"
+    },
+    {
+      "name": "displayModeDisk",
+      "description": "Select disk usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Disk usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "free"
+    },
+    {
+      "name": "displayModeMemory",
+      "description": "Select memory usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Memory usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "used"
     }
   ],
   "platforms": [

@@ -14,7 +14,7 @@ import { formatBytes, isObjectEmpty } from "./utils";
 
 export default function Command() {
   const { customIconUrl } = getPreferenceValues<Preferences.MenubarSystemMonitor>();
-  const { displayMode } = getPreferenceValues<ExtensionPreferences>();
+  const { displayModeCpu,displayModeBattery,displayModeDisk,displayModeMemory } = getPreferenceValues<ExtensionPreferences>();
 
   const {
     data: systemInfo,
@@ -109,9 +109,6 @@ export default function Command() {
       tooltip="System Monitor"
       isLoading={isLoading}
     >
-      <MenuBarExtra.Section title="Display Mode">
-        <MenuBarExtra.Item title={displayMode} icon={Icon.PieChart} />
-      </MenuBarExtra.Section>
       <MenuBarExtra.Section title="System Info">
         <MenuBarExtra.Item
           title="macOS"
@@ -127,7 +124,7 @@ export default function Command() {
             key={index}
             title={disk.diskName}
             subtitle={
-              displayMode === "free"
+              displayModeDisk === "free"
                 ? `${disk.totalAvailableStorage} GB available of ${disk.totalSize} GB`
                 : `${disk.usedStorage} GB used of ${disk.totalSize} GB`
             }
@@ -140,7 +137,7 @@ export default function Command() {
       <MenuBarExtra.Section title="CPU">
         <MenuBarExtra.Item
           title="CPU Usage"
-          subtitle={cpuUsage ? `${displayMode === "free" ? 100 - +cpuUsage : cpuUsage} %` : "Loading..."}
+          subtitle={cpuUsage ? `${displayModeCpu === "free" ? 100 - +cpuUsage : cpuUsage} %` : "Loading..."}
           icon={Icon.Monitor}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
         />
@@ -152,7 +149,7 @@ export default function Command() {
           subtitle={
             !memoryUsage
               ? "Loading..."
-              : displayMode === "free"
+              : displayModeMemory === "free"
                 ? `${memoryUsage?.freeMemPercentage} % (~ ${memoryUsage?.freeMem} GB)`
                 : `${100 - +memoryUsage.freeMemPercentage} % (~ ${+memoryUsage.totalMem - +memoryUsage.freeMem} GB)`
           }
@@ -178,7 +175,7 @@ export default function Command() {
           subtitle={
             !batteryData?.batteryData.batteryLevel
               ? "Loading..."
-              : `${displayMode === "free" ? batteryData.batteryData.batteryLevel : 100 - +batteryData.batteryData.batteryLevel} %`
+              : `${displayModeBattery === "free" ? batteryData.batteryData.batteryLevel : 100 - +batteryData.batteryData.batteryLevel} %`
           }
           icon={Icon.Plug}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(3))}
