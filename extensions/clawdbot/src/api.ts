@@ -110,7 +110,7 @@ export async function sendMessage(
     return fullContent;
   } else {
     // Non-streaming response
-    const data: ChatCompletionResponse = await response.json();
+    const data = (await response.json()) as ChatCompletionResponse;
     return data.choices[0]?.message?.content || "";
   }
 }
