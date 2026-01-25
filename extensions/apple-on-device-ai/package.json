@@ -4,10 +4,11 @@
   "title": "Apple On-Device AI",
   "description": "Run Apple On-Device AI directly from Raycast",
   "icon": "command-icon.png",
-  "access": "public",
   "author": "FabyoSK",
-  "owner": "FabyoSK",
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "fix-spelling-and-grammar",
