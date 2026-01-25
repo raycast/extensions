@@ -1,10 +1,7 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
 
-interface Preferences {
-  defaultBrowser: string;
-  showToastMessages: boolean;
-}
+// Remove this interface - use auto-generated Preferences from raycast-env.d.ts
 
 // Map of supported browser bundle IDs to their application names
 const SUPPORTED_BROWSERS: Record<string, string> = {
