@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Improvements] - 2026-01-25
+## [Improvements] - {PR_MERGE_DATE}
 - updated free and used preference to be per-module for cpu, memory, disk and battery usage
 
 ## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
