@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-on-device-ai",
+  "title": "Apple On-Device AI",
+  "description": "Run Apple On-Device AI directly from Raycast",
+  "icon": "command-icon.png",
+  "access": "public",
+  "author": "FabyoSK",
+  "owner": "FabyoSK",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fix-spelling-and-grammar",
+      "title": "Fix Spelling and Grammar",
+      "description": "Fix Spelling and Grammar",
+      "mode": "view"
+    },
+    {
+      "name": "improve-writting",
+      "title": "Improve Writting",
+      "description": "Improve Writting",
+      "mode": "view"
+    },
+    {
+      "name": "change-tone-to-confident",
+      "title": "Change Tone to Confident",
+      "description": "Change the tone of the selected text to confident",
+      "mode": "view"
+    },
+    {
+      "name": "change-tone-to-friendly",
+      "title": "Change Tone to Friendly",
+      "description": "Change the tone of the selected text to friendly",
+      "mode": "view"
+    },
+    {
+      "name": "change-tone-to-professional",
+      "title": "Change Tone to Professional",
+      "description": "Change the tone of the selected text to professional",
+      "mode": "view"
+    },
+    {
+      "name": "change-tone-to-casual",
+      "title": "Change Tone to Casual",
+      "description": "Change the tone of the selected text to casual",
+      "mode": "view"
+    },
+    {
+      "name": "make-longer",
+      "title": "Make Longer",
+      "description": "Expand the selected text while maintaining its essence",
+      "mode": "view"
+    },
+    {
+      "name": "make-shorter",
+      "title": "Make Shorter",
+      "description": "Shorten the selected text while maintaining its essence",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
