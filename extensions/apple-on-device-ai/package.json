@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-on-device-ai",
   "title": "Apple On-Device AI",
-  "description": "Run Apple On-Device AI directly from Raycast",
+  "description": "Run Apple On-Device AI directly from Raycast.",
   "icon": "command-icon.png",
   "author": "FabyoSK",
   "license": "MIT",
@@ -12,50 +12,50 @@
   "commands": [
     {
       "name": "fix-spelling-and-grammar",
-      "title": "Fix Spelling and Grammar",
-      "description": "Fix Spelling and Grammar",
+      "title": "Fix Spelling and Grammar.",
+      "description": "Fix Spelling and Grammar.",
       "mode": "view"
     },
     {
       "name": "improve-writting",
-      "title": "Improve Writting",
-      "description": "Improve Writting",
+      "title": "Improve Writting.",
+      "description": "Improve Writting.",
       "mode": "view"
     },
     {
       "name": "change-tone-to-confident",
-      "title": "Change Tone to Confident",
-      "description": "Change the tone of the selected text to confident",
+      "title": "Change Tone to Confident.",
+      "description": "Change the tone of the selected text to confident.",
       "mode": "view"
     },
     {
       "name": "change-tone-to-friendly",
-      "title": "Change Tone to Friendly",
-      "description": "Change the tone of the selected text to friendly",
+      "title": "Change Tone to Friendly.",
+      "description": "Change the tone of the selected text to friendly.",
       "mode": "view"
     },
     {
       "name": "change-tone-to-professional",
-      "title": "Change Tone to Professional",
-      "description": "Change the tone of the selected text to professional",
+      "title": "Change Tone to Professional.",
+      "description": "Change the tone of the selected text to professional.",
       "mode": "view"
     },
     {
       "name": "change-tone-to-casual",
-      "title": "Change Tone to Casual",
-      "description": "Change the tone of the selected text to casual",
+      "title": "Change Tone to Casual.",
+      "description": "Change the tone of the selected text to casual.",
       "mode": "view"
     },
     {
       "name": "make-longer",
-      "title": "Make Longer",
-      "description": "Expand the selected text while maintaining its essence",
+      "title": "Make Longer.",
+      "description": "Expand the selected text while maintaining its essence.",
       "mode": "view"
     },
     {
       "name": "make-shorter",
       "title": "Make Shorter",
-      "description": "Shorten the selected text while maintaining its essence",
+      "description": "Shorten the selected text while maintaining its essence.",
       "mode": "view"
     }
   ],
