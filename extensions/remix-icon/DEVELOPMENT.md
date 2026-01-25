@@ -95,14 +95,18 @@ src/
 assets/
 ├── catalogue.json          # Icon metadata
 ├── metadata.json           # Version info for CDN links
-├── icons/                  # SVG files organized by category
+├── logo.png                # Extension icon
 └── icons-compressed/       # Compressed JSON files (one per category)
 
 scripts/
 ├── update-icons.sh         # Downloads latest release and rebuilds catalogue
 ├── validate-react-names.mjs # Validates React component name generation
-├── utils.mjs               # Helper functions (Node.js environment)
-└── .remix-version          # Tracks currently installed version
+└── utils.mjs               # Helper functions (Node.js environment)
+
+metadata/
+├── remix-icon-1.png        # Store screenshot 1
+├── remix-icon-2.png        # Store screenshot 2
+└── remix-icon-3.png        # Store screenshot 3
 ```
 
 ## Future Enhancements

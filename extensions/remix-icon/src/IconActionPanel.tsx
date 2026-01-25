@@ -69,7 +69,7 @@ export default function IconActionPanel({
           url="https://github.com/Remix-Design/RemixIcon"
         />
       </ActionPanel.Section>
-      i{/* TODO SVG Sprite */}
+      {/* TODO SVG Sprite */}
       {/* <Action
         title="Copy SVG Sprite"
         onAction={() => {

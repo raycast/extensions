@@ -5,12 +5,12 @@
   "description": "Search and browse icons from Remix Icon library",
   "icon": "logo.png",
   "author": "tristan_heinig",
+  "platforms": ["macOS"],
   "type": "module",
   "categories": [
     "Design Tools",
-    "Media",
     "Developer Tools",
-    "Documentation"
+    "Media"
   ],
   "keywords": [
     "remix-icon",
