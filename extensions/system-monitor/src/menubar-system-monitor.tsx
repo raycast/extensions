@@ -14,7 +14,7 @@ import { formatBytes, isObjectEmpty } from "./utils";
 
 export default function Command() {
   const { customIconUrl } = getPreferenceValues<Preferences.MenubarSystemMonitor>();
-  const { displayModeCpu,displayModeBattery,displayModeDisk,displayModeMemory } = getPreferenceValues<ExtensionPreferences>();
+  const { displayModeCpu, displayModeBattery, displayModeDisk, displayModeMemory } = getPreferenceValues<ExtensionPreferences>();
 
   const {
     data: systemInfo,

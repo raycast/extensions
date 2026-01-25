@@ -1,5 +1,8 @@
 # System Monitor Changelog
 
+## [Improvements] - 2026-01-25
+- updated free and used preference to be per-module for cpu, memory, disk and battery usage
+
 ## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
 
 - Add a preference to toggle between free and used display modes for CPU, Memory and more (ref: [Issue #24612](https://github.com/raycast/extensions/issues/24612)).

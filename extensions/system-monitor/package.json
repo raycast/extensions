@@ -15,7 +15,8 @@
     "pernielsentikaer",
     "lucasmezencio",
     "ridemountainpig",
-    "xmok"
+    "xmok",
+    "jadenmajid"
   ],
   "commands": [
     {
@@ -46,10 +47,10 @@
     "os-utils": "0.0.14",
     "plist": "^3.1.0",
     "systeminformation": "^5.22.7",
-    "usehooks-ts": "^3.1.0"
+    "usehooks-ts": "^3.1.0",
+    "@raycast/api": "^1.104.3"
   },
   "devDependencies": {
-    "@raycast/api": "^1.104.3",
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/os-utils": "0.0.4",

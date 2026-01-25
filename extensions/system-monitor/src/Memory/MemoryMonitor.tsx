@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon, List } from "@raycast/api";
-import {  } from "@raycast/types";
+
 import { useInterval } from "usehooks-ts";
 import { usePromise } from "@raycast/utils";
 
