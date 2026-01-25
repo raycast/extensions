@@ -1,8 +1,9 @@
-import { List, ActionPanel, showHUD, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, showHUD, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
+import EditConnection from "./edit";
 
 interface Preferences {
   terminal: string;
@@ -222,12 +223,18 @@ export default function Command() {
     setConnectionsList(items);
   }
 
+  function updateItem(updatedItem: ISSHConnection) {
+    setConnectionsList((items) =>
+      items.map((item) => (item.id === updatedItem.id ? updatedItem : item))
+    );
+  }
+
   return (
     <List isLoading={loading}>
       {connectionsList.map((item) => {
         return (
           <List.Item
-            actions={<Action item={item} onItemRemove={removeItem} />}
+            actions={<Action item={item} onItemRemove={removeItem} onItemUpdate={updateItem} />}
             id={item.id}
             key={item.name}
             title={item.name}
@@ -242,10 +249,14 @@ export default function Command() {
 function Action({
   item,
   onItemRemove,
+  onItemUpdate,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
+  onItemUpdate: (item: ISSHConnection) => void;
 }) {
+  const { push } = useNavigation();
+
   return (
     <>
       <ActionPanel>
@@ -253,6 +264,12 @@ function Action({
           title="Connect"
           onAction={async () => {
             await runTerminal(item);
+          }}
+        />
+        <ActionPanel.Item
+          title="Edit"
+          onAction={() => {
+            push(<EditConnection connection={item} onConnectionUpdated={onItemUpdate} />);
           }}
         />
         <ActionPanel.Item
