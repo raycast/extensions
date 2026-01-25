@@ -31,7 +31,8 @@
       "name": "list-sources",
       "title": "List Sources",
       "description": "Browse all your available sources.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "menu-bar",
@@ -39,12 +40,6 @@
       "description": "Check all your sessions from your menu bar.",
       "mode": "menu-bar",
       "refreshInterval": 5
-    },
-    {
-      "name": "send-quick-message",
-      "title": "Send Quick Message",
-      "description": "Send a message to a running Jules session.",
-      "mode": "view"
     }
   ],
   "preferences": [

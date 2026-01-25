@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { getLastActivity } from "./hooks";
 import { approvePlan, fetchSessionActivities, useSessions } from "./jules";
 import { useSessionNotifications } from "./notification";
 import { Session, SessionState } from "./types";
@@ -33,10 +34,10 @@ function SessionMenuBarItemWithPlanSteps({ session }: { session: Session }) {
       if (session.state === SessionState.PLANNING || session.state === SessionState.AWAITING_PLAN_APPROVAL) {
         try {
           const activities = await fetchSessionActivities(session.name);
-          const sortedActivities = activities.sort(
-            (a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime(),
-          );
-          const planActivity = sortedActivities.find((a) => a.planGenerated);
+          const lastActivity = getLastActivity(activities);
+          const planActivity = lastActivity?.planGenerated
+            ? lastActivity
+            : activities.reverse().find((a) => a.planGenerated);
           setPlanSteps(planActivity?.planGenerated?.plan?.steps?.length);
         } catch (e) {
           // Silently fail, we don't want to show toasts from the menu bar item
@@ -54,13 +55,6 @@ function SessionMenuBarItem({ session, planSteps }: { session: Session; planStep
   const title = formatSessionTitle(session, 50);
 
   const prUrl = session.outputs?.find((o) => o.pullRequest)?.pullRequest?.url;
-
-  const runningStates = [
-    SessionState.PLANNING,
-    SessionState.AWAITING_PLAN_APPROVAL,
-    SessionState.IN_PROGRESS,
-    SessionState.AWAITING_USER_FEEDBACK,
-  ];
 
   return (
     <>
@@ -118,23 +112,6 @@ function SessionMenuBarItem({ session, planSteps }: { session: Session; planStep
                   await Clipboard.copy(prUrl);
                   await showHUD("Copied PR URL to clipboard");
                   break;
-              }
-            }}
-          />
-        )}
-        {runningStates.includes(session.state) && (
-          <MenuBarExtra.Item
-            title="Send Quick Message"
-            icon={Icon.SpeechBubble}
-            onAction={async () => {
-              try {
-                await launchCommand({
-                  name: "send-quick-message",
-                  type: LaunchType.UserInitiated,
-                  context: { session },
-                });
-              } catch (e) {
-                await showFailureToast(e, { title: "Failed to open quick message form" });
               }
             }}
           />

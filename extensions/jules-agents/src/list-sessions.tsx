@@ -8,8 +8,6 @@ import {
   getPreferenceValues,
   Icon,
   Keyboard,
-  launchCommand,
-  LaunchType,
   List,
   showToast,
   Toast,
@@ -29,14 +27,24 @@ import {
   CopySummaryAction,
   CopyUrlAction,
 } from "./components/CopyActions";
-import { approvePlan, fetchSessionActivities, sendMessage, useSessionActivities, useSessions } from "./jules";
-import { Activity, Plan, Session, SessionState } from "./types";
+import QuickMessageForm from "./components/QuickMessageForm";
+import { useLastActivity } from "./hooks";
 import {
-  formatBashOutputMarkdown,
+  approvePlan,
+  fetchSessionActivities,
+  sendMessage,
+  useSessionActivities,
+  useSessions,
+  useSources,
+} from "./jules";
+import { Plan, Session, SessionState } from "./types";
+import {
   formatRepoName,
   formatSessionState,
   formatSessionTitle,
   getSessionAccessories,
+  getActivityMarkdown,
+  getActivityTitle,
   getStatusIconForSession,
   groupSessions,
 } from "./utils";
@@ -157,8 +165,10 @@ function MergePrAction(props: { prUrl: string }) {
 }
 
 function CodeReviewPage(props: { session: Session }) {
-  const { data: activities, isLoading } = useSessionActivities(props.session.name);
+  const { data: activities, isLoading, revalidate } = useSessionActivities(props.session.name);
   const prUrl = props.session.outputs?.find((o) => o.pullRequest)?.pullRequest?.url;
+
+  const lastActivity = useLastActivity(activities);
 
   const allChanges: FileChange[] = [];
   const seenFiles = new Set<string>();
@@ -210,6 +220,13 @@ function CodeReviewPage(props: { session: Session }) {
         markdown="# No Code Changes\n\nThis session has no code changes to review."
         actions={
           <ActionPanel>
+            <Action.Push
+              title="Send Message"
+              icon={Icon.Envelope}
+              target={
+                <QuickMessageForm session={props.session} lastActivity={lastActivity} onMessageSent={revalidate} />
+              }
+            />
             <Action.OpenInBrowser url={props.session.url} title="Open Session in Browser" />
           </ActionPanel>
         }
@@ -223,6 +240,15 @@ function CodeReviewPage(props: { session: Session }) {
       markdown={markdown}
       actions={
         <ActionPanel>
+          <ActionPanel.Section>
+            <Action.Push
+              title="Send Message"
+              icon={Icon.Envelope}
+              target={
+                <QuickMessageForm session={props.session} lastActivity={lastActivity} onMessageSent={revalidate} />
+              }
+            />
+          </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy All Changes" content={fullDiff} />
             {commitMessage && <Action.CopyToClipboard title="Copy Commit Message" content={commitMessage} />}
@@ -257,35 +283,12 @@ function CodeReviewPage(props: { session: Session }) {
   );
 }
 
-function FollowupInstruction(props: { session: Session }) {
-  const { pop } = useNavigation();
-  const { handleSubmit, itemProps } = useForm<{ prompt: string }>({
-    onSubmit: async (values) => {
-      try {
-        await showToast({ style: Toast.Style.Animated, title: "Sending message" });
-        await sendMessage(props.session.name, values.prompt.trim());
-        await showToast({ style: Toast.Style.Success, title: "Message sent" });
-        pop();
-      } catch (e) {
-        await showFailureToast(e, { title: "Failed sending message" });
-      }
-    },
-    validation: {
-      prompt: FormValidation.Required,
-    },
-  });
+function FollowupInstruction(props: { session: Session; onMessageSent?: () => void }) {
+  const { data: activities } = useSessionActivities(props.session.name);
 
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Send Message" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextArea title="Message" placeholder="Send a message to the session..." {...itemProps.prompt} />
-    </Form>
-  );
+  const lastActivity = useLastActivity(activities);
+
+  return <QuickMessageForm session={props.session} lastActivity={lastActivity} onMessageSent={props.onMessageSent} />;
 }
 
 function ApprovePlanAction(props: { session: Session; onApproved?: () => void }) {
@@ -439,69 +442,6 @@ function SessionConversation(props: { session: Session; mutate: () => Promise<vo
   );
 }
 
-function getActivityTitle(activity: Activity): string {
-  if (activity.userMessaged) return "User Message";
-  if (activity.agentMessaged) return "Agent Message";
-  if (activity.planGenerated) return "Plan Generated";
-  if (activity.planApproved) return "Plan Approved";
-  if (activity.progressUpdated) return activity.progressUpdated.title || "Progress Update";
-  if (activity.sessionCompleted) return "Session Completed";
-  if (activity.sessionFailed) return "Session Failed: " + (activity.sessionFailed.reason || "Unknown reason");
-  return activity.description || "Activity";
-}
-
-function getActivityMarkdown(
-  activity: Activity,
-  options: { includeFullArtifacts?: boolean } = { includeFullArtifacts: true },
-): string {
-  let content = "";
-  if (activity.userMessaged) content = activity.userMessaged.userMessage || "";
-  else if (activity.agentMessaged) content = activity.agentMessaged.agentMessage || "";
-  else if (activity.planGenerated) {
-    const plan = activity.planGenerated.plan;
-    content = `**Plan with ${plan.steps.length} steps:**\n\n`;
-    const stepsToShow = plan.steps.slice(0, 4);
-    stepsToShow.forEach((step, i) => {
-      content += `${i + 1}. ${step.title}\n`;
-    });
-    if (plan.steps.length > 4) {
-      content += `\n_...and ${plan.steps.length - 4} more steps_`;
-    }
-  } else if (activity.progressUpdated) content = activity.progressUpdated.description || "";
-  else if (activity.sessionFailed) content = activity.sessionFailed.reason || "";
-  else content = activity.description || "";
-
-  if (activity.artifacts && activity.artifacts.length > 0) {
-    content += "\n\n### Artifacts\n";
-    activity.artifacts.forEach((artifact) => {
-      if (artifact.changeSet) {
-        content += `\n**Change Set**: ${artifact.changeSet.source}\n`;
-        if (artifact.changeSet.gitPatch) {
-          if (options.includeFullArtifacts) {
-            content += "\n```diff\n" + artifact.changeSet.gitPatch.unidiffPatch + "\n```\n";
-          } else {
-            content += "\n_Git patch omitted_\n";
-          }
-        }
-      }
-      if (artifact.media) {
-        if (options.includeFullArtifacts) {
-          content += `\n![Media](data:${artifact.media.mimeType};base64,${artifact.media.data})\n`;
-        } else {
-          content += `\n_Media artifact (${artifact.media.mimeType}) omitted_\n`;
-        }
-      }
-      if (artifact.bashOutput) {
-        content += formatBashOutputMarkdown(artifact.bashOutput, {
-          includeFullOutput: options.includeFullArtifacts,
-        });
-      }
-    });
-  }
-
-  return content;
-}
-
 function PlanDetailView(props: { plan: Plan; session: Session; mutate: () => Promise<void> }) {
   const { plan, session, mutate } = props;
   const { pop } = useNavigation();
@@ -601,15 +541,26 @@ function SessionListItem(props: {
       detail={<SessionDetail session={props.session} />}
       actions={
         <ActionPanel>
-          {props.session.state === SessionState.COMPLETED && (
-            <ActionPanel.Section>
+          <ActionPanel.Section>
+            {props.session.state === SessionState.COMPLETED && (
               <Action.Push
                 title="View Code Review"
                 icon={Icon.Code}
                 target={<CodeReviewPage session={props.session} />}
               />
-            </ActionPanel.Section>
-          )}
+            )}
+            <Action.Push
+              icon={Icon.SpeechBubble}
+              title="Send Message"
+              target={<FollowupInstruction session={props.session} onMessageSent={props.mutate} />}
+              shortcut={
+                {
+                  macOS: { modifiers: ["cmd", "shift"], key: "n" },
+                  windows: { modifiers: ["ctrl", "shift"], key: "n" },
+                } as Keyboard.Shortcut
+              }
+            />
+          </ActionPanel.Section>
           {props.session.state === SessionState.AWAITING_PLAN_APPROVAL && (
             <ActionPanel.Section>
               <Action
@@ -657,25 +608,6 @@ function SessionListItem(props: {
                 }
               />
             )}
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Edit">
-            <Action
-              title="Launch Session"
-              icon={Icon.PlusCircle}
-              shortcut={Keyboard.Shortcut.Common.New}
-              onAction={() => launchCommand({ name: "launch-session", type: LaunchType.UserInitiated })}
-            />
-            <Action.Push
-              icon={Icon.SpeechBubble}
-              title="Send Message"
-              target={<FollowupInstruction session={props.session} />}
-              shortcut={
-                {
-                  macOS: { modifiers: ["cmd", "shift"], key: "n" },
-                  windows: { modifiers: ["ctrl", "shift"], key: "n" },
-                } as Keyboard.Shortcut
-              }
-            />
           </ActionPanel.Section>
           <ActionPanel.Section title="View">
             <Action
@@ -772,30 +704,26 @@ function SessionListItem(props: {
 
 export default function Command() {
   const { data, isLoading, pagination, mutate } = useSessions();
+  const { data: sources, isLoading: isLoadingSources } = useSources();
   const [isShowingDetail, setIsShowingDetail] = useCachedState("isShowingDetail", false);
-  const [filterStatus, setFilterStatus] = useCachedState("filterStatus", "all");
   const [filterRepo, setFilterRepo] = useCachedState("filterRepo", "all");
 
-  const repositories = Array.from(new Set(data?.map((s) => formatRepoName(s.sourceContext.source)) || [])).sort();
+  const repositories = Array.from(
+    new Set((sources || []).map((source) => formatRepoName(source.name)).filter(Boolean)),
+  ).sort();
 
   const filteredData = data?.filter((session) => {
-    if (filterStatus !== "all" && session.state !== filterStatus) return false;
     if (filterRepo !== "all" && formatRepoName(session.sourceContext.source) !== filterRepo) return false;
     return true;
   });
 
   const { today, yesterday, thisWeek, thisMonth, older } = groupSessions(filteredData);
 
-  let dropdownValue = "all:all";
-  if (filterStatus !== "all") {
-    dropdownValue = `status:${filterStatus}`;
-  } else if (filterRepo !== "all") {
-    dropdownValue = `repo:${filterRepo}`;
-  }
+  const dropdownValue = filterRepo !== "all" ? `repo:${filterRepo}` : "all:all";
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingSources}
       pagination={pagination}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={
@@ -804,24 +732,14 @@ export default function Command() {
           value={dropdownValue}
           onChange={(newValue) => {
             const [type, value] = newValue.split(":");
-            if (type === "status") {
-              setFilterStatus(value);
-              setFilterRepo("all");
-            } else if (type === "repo") {
+            if (type === "repo") {
               setFilterRepo(value);
-              setFilterStatus("all");
             } else {
-              setFilterStatus("all");
               setFilterRepo("all");
             }
           }}
         >
-          <List.Dropdown.Item title="All Sessions" value="all:all" />
-          <List.Dropdown.Section title="Status">
-            {Object.values(SessionState).map((state) => (
-              <List.Dropdown.Item key={state} title={formatSessionState(state)} value={`status:${state}`} />
-            ))}
-          </List.Dropdown.Section>
+          <List.Dropdown.Item title="All Sources" value="all:all" />
           <List.Dropdown.Section title="Repository">
             {repositories.map((repo) => (
               <List.Dropdown.Item key={repo} title={repo} value={`repo:${repo}`} />
@@ -831,12 +749,6 @@ export default function Command() {
       }
       actions={
         <ActionPanel>
-          <Action
-            title="Launch Session"
-            icon={Icon.PlusCircle}
-            shortcut={Keyboard.Shortcut.Common.New}
-            onAction={() => launchCommand({ name: "launch-session", type: LaunchType.UserInitiated })}
-          />
           <Action
             title="Refresh Sessions"
             icon={Icon.ArrowClockwise}
@@ -850,15 +762,6 @@ export default function Command() {
         title="No Sessions Found"
         description="Try changing your filters or launch a new session."
         icon={Icon.EyeDisabled}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Launch Session"
-              icon={Icon.PlusCircle}
-              onAction={() => launchCommand({ name: "launch-session", type: LaunchType.UserInitiated })}
-            />
-          </ActionPanel>
-        }
       />
       <List.Section title="Today">
         {today.map((session) => (

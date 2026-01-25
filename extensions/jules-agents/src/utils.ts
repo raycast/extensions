@@ -1,6 +1,6 @@
 import { Color, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import { addDays, format, isToday, isYesterday, startOfToday } from "date-fns";
-import { BashOutput, Session, SessionState } from "./types";
+import { Activity, BashOutput, Session, SessionState } from "./types";
 
 export function getStatusIconForSession(session: Session) {
   let icon: List.Item.Props["icon"];
@@ -203,6 +203,69 @@ export function formatSessionState(state: SessionState): string {
 export function formatSessionTitle(session: Session, maxLength = 50): string {
   const rawTitle = (session.title || session.id).split("\n")[0].trim();
   return rawTitle.length > maxLength ? rawTitle.substring(0, maxLength) + "..." : rawTitle;
+}
+
+export function getActivityTitle(activity: Activity): string {
+  if (activity.userMessaged) return "User Message";
+  if (activity.agentMessaged) return "Agent Message";
+  if (activity.planGenerated) return "Plan Generated";
+  if (activity.planApproved) return "Plan Approved";
+  if (activity.progressUpdated) return activity.progressUpdated.title || "Progress Update";
+  if (activity.sessionCompleted) return "Session Completed";
+  if (activity.sessionFailed) return "Session Failed: " + (activity.sessionFailed.reason || "Unknown reason");
+  return activity.description || "Activity";
+}
+
+export function getActivityMarkdown(
+  activity: Activity,
+  options: { includeFullArtifacts?: boolean } = { includeFullArtifacts: true },
+): string {
+  let content = "";
+  if (activity.userMessaged) content = activity.userMessaged.userMessage || "";
+  else if (activity.agentMessaged) content = activity.agentMessaged.agentMessage || "";
+  else if (activity.planGenerated) {
+    const plan = activity.planGenerated.plan;
+    content = `**Plan with ${plan.steps.length} steps:**\n\n`;
+    const stepsToShow = plan.steps.slice(0, 4);
+    stepsToShow.forEach((step, i) => {
+      content += `${i + 1}. ${step.title}\n`;
+    });
+    if (plan.steps.length > 4) {
+      content += `\n_...and ${plan.steps.length - 4} more steps_`;
+    }
+  } else if (activity.progressUpdated) content = activity.progressUpdated.description || "";
+  else if (activity.sessionFailed) content = activity.sessionFailed.reason || "";
+  else content = activity.description || "";
+
+  if (activity.artifacts && activity.artifacts.length > 0) {
+    content += "\n\n### Artifacts\n";
+    activity.artifacts.forEach((artifact) => {
+      if (artifact.changeSet) {
+        content += `\n**Change Set**: ${artifact.changeSet.source}\n`;
+        if (artifact.changeSet.gitPatch) {
+          if (options.includeFullArtifacts) {
+            content += "\n```diff\n" + artifact.changeSet.gitPatch.unidiffPatch + "\n```\n";
+          } else {
+            content += "\n_Git patch omitted_\n";
+          }
+        }
+      }
+      if (artifact.media) {
+        if (options.includeFullArtifacts) {
+          content += `\n![Media](data:${artifact.media.mimeType};base64,${artifact.media.data})\n`;
+        } else {
+          content += `\n_Media artifact (${artifact.media.mimeType}) omitted_\n`;
+        }
+      }
+      if (artifact.bashOutput) {
+        content += formatBashOutputMarkdown(artifact.bashOutput, {
+          includeFullOutput: options.includeFullArtifacts,
+        });
+      }
+    });
+  }
+
+  return content;
 }
 
 export function formatPlanToMarkdown(plan: import("./types").Plan): string {
