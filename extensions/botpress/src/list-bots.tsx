@@ -5,7 +5,7 @@ import { Client, ClientOutputs } from "@botpress/client";
 type Bot = ClientOutputs["listBots"]["bots"][number];
 
 export default function Command() {
-  const { pat, workspaceId } = getPreferenceValues<Preferences>();
+  const { pat, workspaceId } = getPreferenceValues<ExtensionPreferences>();
   const [bots, setBots] = useState<Bot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
