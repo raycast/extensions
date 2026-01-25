@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, showToast, Toast, Icon, Color } from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, Toast, Icon, Color, trash, environment } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import {
   generatePreview,
@@ -8,7 +8,6 @@ import {
   getBackgroundDescription,
   getTargetTypeLabel,
 } from "../utils/image-processor";
-import { unlinkSync } from "fs";
 import { TargetType } from "../utils/app-utils";
 
 export interface ApplyIconResult {
@@ -55,9 +54,11 @@ export function IconPreview({
       // Clean up previous preview
       if (previewPath) {
         try {
-          unlinkSync(previewPath);
+          await trash(previewPath);
         } catch {
-          // Ignore cleanup errors
+          if (environment.isDevelopment) {
+            console.warn("Cleanup failed: ", error);
+          }
         }
       }
 
@@ -92,11 +93,11 @@ export function IconPreview({
   useEffect(() => {
     return () => {
       if (previewPath) {
-        try {
-          unlinkSync(previewPath);
-        } catch {
-          // Ignore cleanup errors
-        }
+        trash(previewPath).catch(() => {
+          if (environment.isDevelopment) {
+            console.warn("Cleanup failed: ", error);
+          }
+        });
       }
     };
   }, []);

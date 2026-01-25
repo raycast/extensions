@@ -1,8 +1,7 @@
-import { showToast, Toast, environment, popToRoot } from "@raycast/api";
+import { showToast, Toast, environment, popToRoot, trash } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import { join } from "path";
-import { unlinkSync } from "fs";
 
 export interface ApplyIconParams {
   appPath: string;
@@ -33,12 +32,14 @@ export function useIconApply() {
   /**
    * Cleanup temporary processed icon file
    */
-  const cleanup = useCallback(() => {
+  const cleanup = useCallback(async () => {
     if (processedIconPath) {
       try {
-        unlinkSync(processedIconPath);
+        await trash(processedIconPath);
       } catch {
-        // Ignore cleanup errors
+        if (environment.isDevelopment) {
+          console.warn("Cleanup failed: ", error);
+        }
       }
       setProcessedIconPath(null);
     }
