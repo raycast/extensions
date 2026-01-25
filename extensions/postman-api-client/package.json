@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "postman-api-client",
+  "title": "Postman API Client",
+  "description": "Full-featured API client for Postman. Execute all HTTP methods (GET, POST, PUT, PATCH, DELETE), import cURL commands, manage environments, and track request history—all from Raycast.",
+  "icon": "icon.png",
+  "author": "krishna-kudari",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sendRequest",
+      "title": "Search Collections",
+      "subtitle": "Postman",
+      "description": "Browse collections and execute requests with full HTTP method support (GET, POST, PUT, PATCH, DELETE).",
+      "mode": "view",
+      "keywords": [
+        "postman",
+        "api",
+        "request",
+        "http",
+        "rest",
+        "send",
+        "execute",
+        "collections",
+        "browse",
+        "search"
+      ]
+    },
+    {
+      "name": "makeRequest",
+      "title": "Make Request",
+      "subtitle": "Postman",
+      "description": "Create and execute API requests from scratch or import cURL commands with auto-detection from clipboard.",
+      "mode": "view",
+      "keywords": [
+        "postman",
+        "api",
+        "request",
+        "http",
+        "rest",
+        "create",
+        "scratchpad",
+        "curl",
+        "import"
+      ]
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Postman",
+      "description": "View request history with responses and quickly re-run previous requests.",
+      "mode": "view",
+      "keywords": [
+        "postman",
+        "history",
+        "recent",
+        "requests",
+        "past"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.4.16",
+    "curl-to-postmanv2": "^1.8.3",
+    "node-fetch": "^3.3.0"
+  },
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Your Postman API key.",
+      "placeholder": "Go to your Postman profile to get one."
+    }
+  ],
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "18.8.3",
+    "@types/react": "^19.2.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "jest": "^29.7.0",
+    "prettier": "^2.5.1",
+    "ts-jest": "^29.4.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  }
+}
