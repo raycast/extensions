@@ -18,10 +18,6 @@ import { TaskListItem, NoTokenView, ErrorView } from "./components/TaskList";
 
 export type ViewType = "inbox" | "today" | "upcoming" | "completed" | `project_${string}`;
 
-interface Preferences {
-  view?: ViewType;
-}
-
 interface TaskSection {
   title: string;
   tasks: Task[];
@@ -95,7 +91,7 @@ function groupTasksByDate(
 }
 
 export default function Home({ launchContext }: LaunchProps<{ launchContext?: { view: ViewType } }>) {
-  const { view: preferencesView } = getPreferenceValues<Preferences>();
+  const { view: preferencesView } = getPreferenceValues();
   const [view, setView] = useState<ViewType>(launchContext?.view ?? preferencesView ?? "today");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
