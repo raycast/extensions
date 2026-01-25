@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "better-github-search",
+  "title": "Search GitHub Repositories",
+  "description": "Search all GitHub repositories with local caching and recent items",
+  "icon": "command-icon.png",
+  "author": "utkarsh",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-repos",
+      "title": "Search GitHub Repositories",
+      "description": "Search through all your GitHub repositories",
+      "mode": "view",
+      "keywords": [
+        "github",
+        "repo",
+        "repository",
+        "search"
+      ],
+      "preferences": []
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "type": "password",
+      "required": true,
+      "title": "GitHub Personal Access Token",
+      "description": "PAT with 'repo' and 'read:org' scopes to access private repositories and organizations",
+      "placeholder": "ghp_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.0",
+    "octokit": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\\"prepublishOnly\\\" script and run \\\"npm publish\\\" again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\"npm run publish\\\" instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
