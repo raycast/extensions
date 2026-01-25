@@ -344,6 +344,9 @@ export const Alert = {
 // Mock confirmAlert - returns true by default (confirmed)
 export const confirmAlert = vi.fn().mockResolvedValue(true);
 
+// Mock trash - moves file to trash
+export const trash = vi.fn().mockResolvedValue(undefined);
+
 // Mock Clipboard
 export const Clipboard = {
   copy: vi.fn().mockResolvedValue(undefined),

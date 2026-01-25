@@ -351,13 +351,13 @@ export async function getBackupInfo(): Promise<BackupInfo> {
 /**
  * Reads the backup file content
  *
- * @returns Promise resolving to backup content, or null if not found
+ * @returns Promise resolving to the backup content, or null if not found
  */
 export async function readBackupFile(): Promise<string | null> {
   const backupPath = getBackupPath();
 
   try {
-    await access(backupPath, constants.R_OK);
+    await access(backupPath, constants.F_OK);
     return await readFile(backupPath, { encoding: "utf8" });
   } catch {
     return null;
@@ -365,18 +365,18 @@ export async function readBackupFile(): Promise<string | null> {
 }
 
 /**
- * Deletes the backup file
+ * Deletes the backup file by moving it to trash for safer deletion
  *
  * @returns Promise resolving when deletion is complete
  * @throws {Error} When deletion fails
  */
 export async function deleteBackup(): Promise<void> {
   const backupPath = getBackupPath();
-  const { unlink } = await import("node:fs/promises");
+  const { trash } = await import("@raycast/api");
 
   try {
     await access(backupPath, constants.F_OK);
-    await unlink(backupPath);
+    await trash(backupPath);
   } catch (error) {
     if (error instanceof Error && (error as Error & { code?: string }).code === "ENOENT") {
       throw new Error("No backup file found to delete");
