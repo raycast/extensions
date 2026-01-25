@@ -1,5 +1,13 @@
 # System Monitor Changelog
 
+## [New Additions & Chore] - {PR_MERGE_DATE}
+- Added customisable tags for menubar entries
+    - Universal tags
+        - `<BR>` for line breaks
+        - `<MODE>` for display mode(toggles between "Free" and "Used")
+    - Module specific tags can be seen by hovering over the preferences text box
+- Made Loading tags use `…` consistently instead of `...`
+
 ## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
 
 - Add a preference to toggle between free and used display modes for CPU, Memory and more (ref: [Issue #24612](https://github.com/raycast/extensions/issues/24612)).

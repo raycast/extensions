@@ -15,7 +15,8 @@
     "pernielsentikaer",
     "lucasmezencio",
     "ridemountainpig",
-    "xmok"
+    "xmok",
+    "jadenmajid"
   ],
   "commands": [
     {
@@ -37,6 +38,51 @@
           "required": false,
           "title": "Custom Icon URL",
           "placeholder": "https://example.com/icon.png"
+        },
+        {
+          "name": "cpuMenubarFormat",
+          "description": "Options:<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "Cpu Formatting",
+          "placeholder": "<PERCENT> %",
+          "default": "<PERCENT> %"
+        },    
+        {
+          "name": "memoryMenubarFormat",
+          "description": "Options:<VALUE>,<TOTAL>,<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "Memory Formatting",
+          "placeholder": "<PERCENT> % (<VALUE> GB / <TOTAL> GB)",
+          "default": "<PERCENT> % (<VALUE> GB / <TOTAL> GB)"
+        },
+        {
+          "name": "networkMenubarFormat",
+          "description": "Options:<UP>,<DOWN>",
+          "type": "textfield",
+          "required": false,
+          "title": "Network Formatting",
+          "placeholder": "↓ <DOWN>/s ↑ <UP>/s",
+          "default": "↓ <DOWN>/s ↑ <UP>/s"
+        },
+        {
+          "name": "diskMenubarFormat",
+          "description": "Options:<VALUE>,<TOTAL>",
+          "type": "textfield",
+          "required": false,
+          "title": "Disk Formatting",
+          "placeholder": "<VALUE> GB / <TOTAL> GB",
+          "default": "<VALUE> GB / <TOTAL> GB"
+        },
+        {
+          "name": "powerMenubarFormat",
+          "description": "Options:<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "Power Formatting",
+          "placeholder": "<PERCENT> %",
+          "default": "<PERCENT> %"
         }
       ]
     }
@@ -117,7 +163,7 @@
       ],
       "default": "free"
     }
-  ],
+    ],
   "platforms": [
     "macOS"
   ]
