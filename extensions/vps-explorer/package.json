@@ -42,6 +42,14 @@
       "description": "SSH username"
     },
     {
+      "name": "vps-key-path",
+      "type": "textfield",
+      "required": false,
+      "title": "SSH Private Key Path (Optional)",
+      "placeholder": "~/.ssh/id_rsa",
+      "description": "Path to private key (e.g., ~/.ssh/id_rsa). Leave empty to use default."
+    },
+    {
       "name": "vps-password",
       "type": "password",
       "required": true,
@@ -50,7 +58,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
+    "@raycast/api": "^1.103.6",
     "@raycast/utils": "^1.17.0",
     "date-fns": "^4.1.0",
     "pretty-bytes": "^7.1.0"

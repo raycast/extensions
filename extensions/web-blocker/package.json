@@ -1,17 +1,18 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension",
-  "schemaVersion": 1,
   "name": "web-blocker",
   "title": "Web Blocker",
-  "version": "1.0.0",
   "description": "Stay focused and block distracting websites instantly. Works in all browsers, blocks even open tabs, and can't be easily bypassed.",
   "icon": "icon.png",
   "author": "ahmad_bulbul",
+  "access": "public",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
-  "access": "public",
   "commands": [
     {
       "name": "add-website",
@@ -54,6 +55,22 @@
       "icon": "force_reblock.png"
     }
   ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "2.2.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.4",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "version": "1.0.1",
   "scripts": {
     "build": "ray build",
     "clean": "rm -f *.js *.js.map *.d.ts *.d.ts.map && rm -rf lib/ dist/",
@@ -78,22 +95,5 @@
       "**/?(*.)+(spec|test).ts"
     ]
   },
-  "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "2.2.2"
-  },
-  "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.4.4",
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  "schemaVersion": 1
 }

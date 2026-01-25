@@ -1,5 +1,10 @@
 # Chatwoot Changelog
 
+## [Fix "List Messages"] - 2025-11-17
+
+### Messages
+- `fix` messages not loading when **sender** has no **name** (ref: [Issue #22918](https://github.com/raycast/extensions/issues/22918))
+
 ## [Search "Contacts" + Show Unread Count] - 2025-11-07
 
 ### Contacts
@@ -21,7 +26,7 @@
 - show latest message status
 
 ### Messages
-- `fix` messages not loading when they include an **activity**
+- `fix` messages not loading when they include an **activity** (ref: [Issue #22494](https://github.com/raycast/extensions/issues/22494))
 - show message status
 
 ### Create Message

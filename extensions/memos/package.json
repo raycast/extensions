@@ -6,7 +6,12 @@
   "icon": "logo.png",
   "author": "JakeYu",
   "contributors": [
-    "littlequartz"
+    "littlequartz",
+    "0xdhrv"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -50,31 +55,32 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.2",
-    "@raycast/utils": "^1.15.0",
-    "axios": "^1.8.4",
-    "form-data": "^4.0.0",
-    "mime": "^3.0.0",
-    "qs": "^6.11.0",
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2",
+    "axios": "^1.13.2",
+    "form-data": "^4.0.5",
+    "mime": "^4.1.0",
+    "qs": "^6.14.0",
     "url-parse": "^1.5.10"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/mime": "^3.0.1",
-    "@types/node": "20.8.10",
-    "@types/qs": "^6.9.7",
-    "@types/react": "18.2.27",
-    "@types/url-parse": "^1.4.8",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/mime": "^4.0.0",
+    "@types/node": "24.10.1",
+    "@types/qs": "^6.14.0",
+    "@types/react": "19.2.7",
+    "@types/url-parse": "^1.4.11",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "type-check": "./node_modules/.bin/tsc -p tsconfig.json --noEmit"
   },
   "preferences": [
     {

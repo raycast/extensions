@@ -1,11 +1,13 @@
-import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useFetch, useForm } from "@raycast/utils";
 import { API_HEADERS, API_URL, OpenInUpstash, postUpstash } from "./upstash";
+import DataBrowser from "./redis/data-browser";
 
-interface RedisDatabase {
+export interface RedisDatabase {
   database_id: string;
   database_name: string;
   database_type: string;
+  password: string;
   endpoint: string;
   pinned?: true;
 }
@@ -61,7 +63,17 @@ export default function Redis() {
                   title="View Details & Usage"
                   target={<ViewDetailsAndUsage database={database} />}
                 />
-                <Action.Push icon={Icon.Plus} title="Create Database" target={<CreateDatabase mutate={mutate} />} />
+                <Action.Push
+                  icon={Icon.AppWindowList}
+                  title="Data Browser"
+                  target={<DataBrowser database={database} />}
+                />
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Create Database"
+                  target={<CreateDatabase mutate={mutate} />}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                />
                 <OpenInUpstash route={`redis/${database.database_id}`} />
               </ActionPanel>
             }

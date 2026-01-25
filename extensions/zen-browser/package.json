@@ -16,7 +16,9 @@
     "sjasct",
     "pernielsentikaer",
     "Zheckan",
-    "Diwanshumidha"
+    "Diwanshumidha",
+    "vmrjnvc",
+    "gareth_price"
   ],
   "categories": [
     "Applications",
@@ -48,6 +50,13 @@
       "title": "Create New Window",
       "subtitle": "Zen Browser",
       "description": "Open a new Zen Browser window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-private-window",
+      "title": "Create New Private Window",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser private window.",
       "mode": "no-view"
     },
     {
@@ -97,6 +106,10 @@
         {
           "title": "Qwant",
           "value": "Qwant"
+        },
+        {
+          "title": "Kagi",
+          "value": "Kagi"
         }
       ]
     },

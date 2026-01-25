@@ -1,5 +1,5 @@
 import { List, Icon, ActionPanel, Action, openExtensionPreferences } from "@raycast/api";
-import { createContext, useContext, useState, useCallback, useMemo } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, JSX } from "react";
 
 interface ExtensionContextProps {
   setTokenValidity: (valid: boolean) => void;
@@ -19,7 +19,7 @@ export const ExtensionContextProvider = ({ children }: { children: JSX.Element }
       <List
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       >

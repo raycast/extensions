@@ -66,7 +66,6 @@ export const getACLInfoForApp = async () => {
 export const readFilesFromClipboard = async () => {
   const files: string[] = [];
   let offset = 0;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const cb = await Clipboard.read({ offset });
     if (!cb.file) break;

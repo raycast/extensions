@@ -1,12 +1,13 @@
 import { spawn } from "child_process";
 
-import { isWin, winPrismLauncherPath } from "./prism";
+import { getPrismLauncherPath, isWin } from "./prism";
 import { showToast, Toast } from "@raycast/api";
 
 export const joinServer = async (instanceId: string, serverAddress: string) => {
+  const prismLauncherPath = await getPrismLauncherPath();
   try {
     if (isWin) {
-      spawn(winPrismLauncherPath, ["--launch", instanceId, "--server", serverAddress]);
+      if (prismLauncherPath) spawn(prismLauncherPath, ["--launch", instanceId, "--server", serverAddress]);
     } else {
       spawn("open", [
         "-b",
@@ -24,9 +25,10 @@ export const joinServer = async (instanceId: string, serverAddress: string) => {
 };
 
 export const launchInstance = async (instanceId: string) => {
+  const prismLauncherPath = await getPrismLauncherPath();
   try {
     if (isWin) {
-      spawn(winPrismLauncherPath, ["--launch", instanceId]);
+      if (prismLauncherPath) spawn(prismLauncherPath, ["--launch", instanceId]);
     } else {
       spawn("open", ["-b", "org.prismlauncher.PrismLauncher", "--args", "--launch", instanceId]);
     }
@@ -36,9 +38,10 @@ export const launchInstance = async (instanceId: string) => {
 };
 
 export const showInstance = async (instanceId: string) => {
+  const prismLauncherPath = await getPrismLauncherPath();
   try {
     if (isWin) {
-      spawn(winPrismLauncherPath, ["--show", instanceId]);
+      if (prismLauncherPath) spawn(prismLauncherPath, ["--show", instanceId]);
     } else {
       spawn("open", ["-b", "org.prismlauncher.PrismLauncher", "--args", "--show", instanceId]);
     }

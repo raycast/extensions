@@ -1,4 +1,5 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
+import { RemovePaywallService } from "./constants";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const urlRegex = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
@@ -131,7 +132,7 @@ export async function openURL(url: string): Promise<void> {
 
 export function getRemovePaywallURL(currentURL: string, userPreferredService?: string): string {
   if (currentURL.includes("medium.com")) {
-    return `https://freedium.cfd/${currentURL}`;
+    return `${RemovePaywallService.Freedium}/${currentURL}`;
   } else {
     if (!userPreferredService?.startsWith("https://")) {
       throw new Error("Preferred service must start with https://");

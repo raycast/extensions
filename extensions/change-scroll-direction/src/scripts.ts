@@ -1,5 +1,24 @@
 import os from "os";
 
+export const scriptForTahoe = `
+  tell application "System Settings"
+  activate
+  end tell
+  delay 0.1
+
+  tell application "System Events"
+  tell process "System Settings"
+      click menu item "Trackpad" of menu "View" of menu bar 1
+      delay 0.5
+      click radio button 2 of tab group 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1
+      delay 0.3
+      click checkbox "Natural scrolling" of group 1 of scroll area 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1
+      tell application "System Settings" to quit
+  end tell
+  end tell
+return 1
+`;
+
 export const scriptForVentura = `
   tell application "System Settings"
   activate
@@ -39,11 +58,15 @@ export function fetchAppleScript(): string {
   try {
     // Output of `os.release()` would look like `22.3.0` (Depends on your macOS version)
     const version = Number(os.release().split(".")[0]);
-    // 22 or above refers to MacOS Ventura.
-    if (version < 22) {
-      return scriptForOtherVersions;
+    // 25 and above refers to MacOS Tahoe.
+    if (version >= 25) {
+      return scriptForTahoe;
     }
-    return scriptForVentura;
+    // 22 or above refers to MacOS Ventura.
+    if (version >= 22) {
+      return scriptForVentura;
+    }
+    return scriptForOtherVersions;
   } catch (error) {
     console.error(`Error while checking & parsing system versions ... ${error}`);
     throw error;

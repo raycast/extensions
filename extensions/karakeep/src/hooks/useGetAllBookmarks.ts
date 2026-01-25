@@ -1,101 +1,35 @@
 import { useCachedPromise } from "@raycast/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { fetchGetAllBookmarks } from "../apis";
 import { ApiResponse, Bookmark, GetBookmarksParams } from "../types";
 
-interface BookmarksState {
-  allBookmarks: Bookmark[];
-  isInitialLoad: boolean;
-  cursor?: string;
-}
-
+/**
+ * Hook to fetch all bookmarks with native Raycast pagination support.
+ * Eliminates manual state management and cursor tracking.
+ */
 export function useGetAllBookmarks({ favourited, archived }: GetBookmarksParams = {}) {
-  const [state, setState] = useState<BookmarksState>({
-    allBookmarks: [],
-    isInitialLoad: true,
-    cursor: undefined,
-  });
+  const abortable = useRef<AbortController | null>(null);
 
-  const { isLoading, data, error, revalidate } = useCachedPromise(
-    async (cursor: string | undefined, favourited, archived) => {
+  const { isLoading, data, error, revalidate, pagination } = useCachedPromise(
+    (favourited, archived) => async (options) => {
       const result = (await fetchGetAllBookmarks({
-        cursor,
+        cursor: options.cursor,
         favourited,
         archived,
       })) as ApiResponse<Bookmark>;
 
-      const { bookmarks = [], nextCursor } = result;
       return {
-        bookmarks,
-        hasMore: nextCursor !== null,
-        nextCursor,
+        data: result.bookmarks || [],
+        hasMore: result.nextCursor !== null,
+        cursor: result.nextCursor,
       };
     },
-    [state.cursor, favourited, archived],
+    [favourited, archived],
     {
-      execute: true,
-      keepPreviousData: true,
+      initialData: [],
+      abortable,
     },
   );
-
-  const removeDuplicates = useCallback(
-    (bookmarks: Bookmark[]) => Array.from(new Map(bookmarks.map((b) => [b.id, b])).values()),
-    [],
-  );
-
-  const shouldResetCache = useCallback((newBookmarks: Bookmark[], cachedBookmarks: Bookmark[]) => {
-    if (cachedBookmarks.length === 0) return false;
-
-    const newIds = new Set(newBookmarks.map((b) => b.id));
-    const cachedIds = new Set(cachedBookmarks.slice(0, newBookmarks.length).map((b) => b.id));
-
-    if (newIds.size !== cachedIds.size) return true;
-
-    for (const id of newIds) {
-      if (!cachedIds.has(id)) return true;
-    }
-    for (const id of cachedIds) {
-      if (!newIds.has(id)) return true;
-    }
-
-    const cachedFirstPage = cachedBookmarks.slice(0, newBookmarks.length);
-    return !newBookmarks.every((bookmark, index) => bookmark.id === cachedFirstPage[index]?.id);
-  }, []);
-
-  useEffect(() => {
-    if (!data?.bookmarks) return;
-
-    setState((prev) => {
-      if (prev.isInitialLoad) {
-        return {
-          allBookmarks: data.bookmarks,
-          isInitialLoad: false,
-          cursor: undefined,
-        };
-      }
-
-      if (!state.cursor) {
-        const needsReset = shouldResetCache(data.bookmarks, prev.allBookmarks);
-        if (needsReset) {
-          return {
-            allBookmarks: data.bookmarks,
-            isInitialLoad: false,
-            cursor: undefined,
-          };
-        }
-      }
-
-      if (state.cursor) {
-        return {
-          allBookmarks: removeDuplicates([...prev.allBookmarks, ...data.bookmarks]),
-          isInitialLoad: false,
-          cursor: state.cursor,
-        };
-      }
-
-      return prev;
-    });
-  }, [data, removeDuplicates, shouldResetCache]);
 
   useEffect(() => {
     if (error) {
@@ -103,30 +37,11 @@ export function useGetAllBookmarks({ favourited, archived }: GetBookmarksParams 
     }
   }, [error]);
 
-  const loadNextPage = useCallback(() => {
-    if (!data?.nextCursor || isLoading || !data.hasMore) return;
-
-    setState((prev) => ({
-      ...prev,
-      cursor: data.nextCursor ?? undefined,
-    }));
-  }, [data, isLoading]);
-
-  const refresh = useCallback(async () => {
-    setState({
-      allBookmarks: [],
-      isInitialLoad: true,
-      cursor: undefined,
-    });
-    await revalidate();
-  }, [revalidate]);
-
   return {
     isLoading,
-    bookmarks: state.allBookmarks,
-    hasMore: data?.hasMore ?? false,
+    bookmarks: data || [],
     error,
-    revalidate: refresh,
-    loadNextPage,
+    revalidate,
+    pagination,
   };
 }

@@ -21,10 +21,26 @@
           "title": "12-Hour (e.g. 11:05 PM)"
         }
       ]
+    },
+    {
+      "name": "menuBarTitleGroupCount",
+      "title": "Number of times in menu bar title",
+      "description": "How many time groups to display in the menu bar title (starting from the selected one).",
+      "required": false,
+      "type": "textfield",
+      "placeholder": "1",
+      "default": "1"
     }
   ],
   "icon": "icon.png",
   "author": "david_nakhapetian",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -50,22 +66,31 @@
       "description": "Displays the current time across selected team time zones.",
       "mode": "no-view",
       "interval": "1m"
+    },
+    {
+      "name": "teamTimeMenuBar",
+      "title": "Team Time Menu Bar",
+      "subtitle": "Team Time",
+      "description": "Show team flags and current times in the macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.91.2",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "nanoid": "^5.0.9"
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@eslint/eslintrc": "^2.1.1",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.4",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -73,6 +98,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module"
 }

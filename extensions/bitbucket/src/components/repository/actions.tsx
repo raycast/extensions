@@ -9,7 +9,10 @@ export function ShowPipelinesActions(props: { repo: any }) {
       title="Show Pipelines"
       target={<PipelinesList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "p" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+      }}
     />
   );
 }
@@ -21,7 +24,10 @@ export function ShowPullRequestsActions(props: { repo: any }) {
       title="Show Pull Requests"
       target={<PullRequestsList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "r" },
+        Windows: { modifiers: ["ctrl"], key: "r" },
+      }}
     />
   );
 }
@@ -31,7 +37,10 @@ export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageN
   return (
     <Action
       title="Goes to Next Page"
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "n" },
+        Windows: { modifiers: ["ctrl"], key: "n" },
+      }}
       onAction={() => setPageNumber(pageNumber + 1)}
     />
   );
@@ -42,7 +51,10 @@ export function GoesToPreviousPipelinePage({ setPageNumber, pageNumber }: { setP
   return (
     <Action
       title="Goes to Previous Page"
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "p" },
+        Windows: { modifiers: ["ctrl"], key: "p" },
+      }}
       onAction={() => setPageNumber(pageNumber - 1)}
     />
   );

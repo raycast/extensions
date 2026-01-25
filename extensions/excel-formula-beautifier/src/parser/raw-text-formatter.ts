@@ -117,11 +117,13 @@ export class ExcelRawTextFormatter {
 
       if (!isLast) {
         result += ";";
+        result += "\n";
+      } else {
+        // Last parameter - add closing paren on same line
+        result += ")";
       }
-      result += "\n";
     }
 
-    result += this.indent(depth) + ")";
     return result;
   }
 
@@ -189,6 +191,7 @@ export class ExcelRawTextFormatter {
 
     // Add space before operator (except for certain cases)
     const prevSibling = index > 0 ? siblings[index - 1] : null;
+    const nextSibling = index + 1 < siblings.length ? siblings[index + 1] : null;
 
     const shouldSpaceBefore = this.shouldSpaceBeforeOperator(op, prevSibling);
     const shouldSpaceAfter = this.shouldSpaceAfterOperator(op);
@@ -201,6 +204,11 @@ export class ExcelRawTextFormatter {
 
     if (shouldSpaceAfter) {
       result += " ";
+    }
+
+    // If next sibling is a multi-line function, add line break (no extra indent, formatFunction handles it)
+    if (nextSibling instanceof FormulaExpr && !this.shouldFormatInline(nextSibling)) {
+      result += "\n";
     }
 
     return result;

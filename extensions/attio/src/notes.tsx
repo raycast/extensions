@@ -18,7 +18,11 @@ export default function Notes() {
   return (
     <List isLoading={isLoading}>
       {!isLoading && !notes.length && !error ? (
-        <List.EmptyView icon="empty/note.svg" title="Notes" description="No notes yet!" />
+        <List.EmptyView
+          icon={{ source: { dark: "empty/note@dark.svg", light: "empty/note.svg" } }}
+          title="Notes"
+          description="No notes yet!"
+        />
       ) : (
         notes.map((note) => <List.Item key={note.id.noteId} title={note.title} />)
       )}

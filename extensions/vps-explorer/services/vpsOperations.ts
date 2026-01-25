@@ -23,28 +23,31 @@ export class VPSOperations implements VPSConnection {
       try {
         // Create expect script that reads password from environment variable
         const expectScript = `#!/usr/bin/expect -f
-set timeout 120
-set password $env(VPS_SSH_PASSWORD)
-spawn ${command}
-expect {
-    "password:" {
-        send "$password\\r"
-        exp_continue
-    }
-    "Password:" {
-        send "$password\\r"
-        exp_continue
-    }
-    "(yes/no)?" {
-        send "yes\\r"
-        exp_continue
-    }
-    timeout {
-        exit 1
-    }
-    eof
-}
-`;
+  set timeout 120
+  set password $env(VPS_SSH_PASSWORD)
+  spawn sh -c "${command.replace(/"/g, '\\"')}"
+  expect {
+      "password:" {
+          send "$password\\r"
+          exp_continue
+      }
+      "Password:" {
+          send "$password\\r"
+          exp_continue
+      }
+      "(yes/no)?" {
+          send "yes\\r"
+          exp_continue
+      }
+      timeout {
+          exit 1
+      }
+      eof {
+          catch wait result
+          exit [lindex \$result 3]
+      }
+  }
+  `;
 
         scriptPath = join(tmpdir(), `ssh_${Date.now()}.exp`);
         writeFileSync(scriptPath, expectScript, { mode: 0o700 });
@@ -52,7 +55,7 @@ expect {
         const child = spawn("expect", [scriptPath], {
           env: {
             ...process.env,
-            VPS_SSH_PASSWORD: this.config.password || "", // Pass via environment
+            VPS_SSH_PASSWORD: this.config.password || "",
           },
           stdio: ["ignore", "pipe", "pipe"],
         });

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast, Alert, confirmAlert, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Alert, confirmAlert, Color, Keyboard } from "@raycast/api";
 import { useAliases } from "../hooks/useAliases";
 import { AliasDetail } from "../components/AliasDetail";
 import { AliasRule } from "../types";
@@ -148,7 +148,7 @@ export default function ListAliases() {
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => handleDelete(alias)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
                 <Action
                   title="Toggle Detail"

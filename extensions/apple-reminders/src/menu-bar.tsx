@@ -22,7 +22,7 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../swift/AppleReminders";
 
-import { getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
+import { getAttachedUrls, getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 import { sortByDate } from "./hooks/useViewReminders";
 
@@ -213,6 +213,8 @@ export default function Command() {
       {sections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
           {section.items.map((reminder) => {
+            const attachedUrls = getAttachedUrls(reminder);
+
             return (
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
@@ -231,6 +233,31 @@ export default function Command() {
                   onAction={() => open(reminder.openUrl, "com.apple.reminders")}
                   icon={{ fileIcon: REMINDERS_FILE_ICON }}
                 />
+                {attachedUrls.length ? (
+                  <MenuBarExtra.Item
+                    title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
+                    icon={Icon.Link}
+                    onAction={async () => {
+                      let failedCount = 0;
+                      for (const url of attachedUrls) {
+                        try {
+                          await open(url);
+                        } catch (error) {
+                          console.error("Failed to open URL", url, error);
+                          failedCount++;
+                        }
+                      }
+
+                      if (failedCount > 0) {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
+                          message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
+                        });
+                      }
+                    }}
+                  />
+                ) : null}
 
                 <MenuBarExtra.Item
                   title={reminder.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}

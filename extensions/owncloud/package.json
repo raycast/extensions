@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "owncloud",
+  "title": "ownCloud",
+  "description": "share files and folders, easy and secure",
+  "icon": "owncloud.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "url",
+      "type": "textfield",
+      "required": true,
+      "title": "URL",
+      "description": "URL of ownCloud instance",
+      "placeholder": "https://cloud.example.com"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "Your username",
+      "placeholder": "akira"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your password",
+      "placeholder": "hunter2"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Search for files and folders in your ownCloud instance",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2",
+    "fast-xml-parser": "^5.3.2",
+    "filesize": "^11.0.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

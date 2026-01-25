@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 import { APIOpt, IGif, IGifAPI, slugify } from "./gif";
 
 export interface FinerGifsClubResults {
@@ -95,7 +93,7 @@ export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
     slug,
     download_url: gifUrl.toString(),
     download_name: `${slug}.gif`,
-    preview_gif_url: gifUrl.toString(),
+    small_preview_gif_url: gifUrl.toString(),
     gif_url: gifUrl.toString(),
     metadata:
       season || episode

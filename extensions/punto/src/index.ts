@@ -4,7 +4,14 @@ import {
   getSelectedText,
   getPreferenceValues,
 } from "@raycast/api";
-import { en_ru, ru_en } from "./Dict";
+import {
+  en_ru,
+  ru_en,
+  ru_en_phonetic,
+  en_ru_phonetic,
+  uk_en_phonetic,
+  en_uk_phonetic,
+} from "./Dict";
 import {
   getAvailableInputSourceIds,
   selectInputSource,
@@ -36,17 +43,17 @@ export default async function main() {
     return;
   }
 
-  const switchedText = switchStringLayout(input);
+  const preferences = getPreferenceValues<Preferences>();
+  const switchedText = switchStringLayout(input, preferences);
   // console.log(switchedText);
   await Clipboard.paste(switchedText);
 
-  const preferences = getPreferenceValues<Preferences>();
   await switchKeyboardLayout(preferences, detectLayout(switchedText));
 }
 
-function switchStringLayout(string: string): string {
+function switchStringLayout(string: string, preferences: Preferences): string {
   const chars: string[] = string.split("");
-  return chars.map((ch) => switchCharacterLayout(ch)).join("");
+  return chars.map((ch) => switchCharacterLayout(ch, preferences)).join("");
 }
 
 async function switchKeyboardLayout(
@@ -80,17 +87,32 @@ async function switchKeyboardLayout(
 
 function detectLayout(input: string): Layout {
   const array = input.split("");
-  const enChars = array.filter((c) => en_ru.has(c)).length;
-  const ruChars = array.filter((c) => ru_en.has(c)).length;
-  return enChars > ruChars ? Layout.LAT : Layout.CYR;
+
+  const latChars = array.filter((c) => /[a-zA-Z]/.test(c)).length;
+  const cyrChars = array.filter((c) => /[а-яА-ЯёЁіІїЇєЄґҐ]/.test(c)).length;
+
+  return latChars > cyrChars ? Layout.LAT : Layout.CYR;
 }
 
-function switchCharacterLayout(char: string): string {
-  if (en_ru.has(char)) {
+function switchCharacterLayout(char: string, preferences: Preferences): string {
+  let cyrToLatMap = ru_en;
+  let latToCyrMap = en_ru;
+
+  if (preferences.cyrLayoutID === "com.apple.keylayout.Russian-Phonetic") {
+    cyrToLatMap = ru_en_phonetic;
+    latToCyrMap = en_ru_phonetic;
+  } else if (
+    preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-QWERTY"
+  ) {
+    cyrToLatMap = uk_en_phonetic;
+    latToCyrMap = en_uk_phonetic;
+  }
+
+  if (latToCyrMap.has(char)) {
     // console.log(char + " detected in en dict")
-    return en_ru.get(char) ?? char;
+    return latToCyrMap.get(char) ?? char;
   } else {
     // console.log(char + " is probably detected in ru dict"),
-    return ru_en.get(char) ?? char;
+    return cyrToLatMap.get(char) ?? char;
   }
 }

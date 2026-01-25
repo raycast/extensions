@@ -1,0 +1,38 @@
+// Known text file extensions for fast path detection
+export const KNOWN_TEXT_EXTENSIONS = new Set([
+  ".txt",
+  ".md",
+  ".json",
+  ".xml",
+  ".html",
+  ".css",
+  ".js",
+  ".ts",
+  ".tsx",
+  ".jsx",
+  ".log",
+  ".yaml",
+  ".yml",
+  ".toml",
+  ".ini",
+  ".cfg",
+  ".py",
+  ".java",
+  ".c",
+  ".cpp",
+  ".h",
+  ".php",
+  ".rb",
+  ".go",
+  ".rs",
+  ".sh",
+  ".bat",
+  ".ps1",
+  ".sql",
+  ".csv",
+  ".conf",
+  ".properties",
+]);
+
+// Known executable file extensions for fast path detection
+export const KNOWN_EXECUTABLE_EXTENSIONS = new Set([".com", ".exe", ".bat", ".cmd", ".vbs", ".msi"]);

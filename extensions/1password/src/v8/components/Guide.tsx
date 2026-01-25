@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Detail, Icon, environment, openExtensionPreferences } from "@raycast/api";
-import { join } from "path";
+import { Action, ActionPanel, Detail, environment, Icon, openExtensionPreferences } from "@raycast/api";
+import { join } from "node:path";
+
 import resetCache from "../../reset-cache";
 
 const binary = join(environment.assetsPath, "binary-instruction.png");
 const settings = join(environment.assetsPath, "1password-settings.png");
-
 const INSTRUCTION = `
 # You will need the following to run the extension
 
@@ -32,14 +32,14 @@ You can also unlock 1Password CLI with your [Apple Watch](https://support.1passw
 export function Guide() {
   return (
     <Detail
-      markdown={INSTRUCTION}
       actions={
         <ActionPanel>
-          <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          <Action.Open title="Open 1Password Settings" target="onepassword://settings" />
-          <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
+          <Action icon={Icon.Gear} onAction={openExtensionPreferences} title="Open Extension Preferences" />
+          <Action.Open target="onepassword://settings" title="Open 1Password Settings" />
+          <Action icon={Icon.Trash} onAction={() => resetCache()} title="Reset Cache"></Action>
         </ActionPanel>
       }
+      markdown={INSTRUCTION}
     />
   );
 }

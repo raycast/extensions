@@ -3,6 +3,7 @@
 /**
  * Backend API base URL
  */
+// export const BACKEND_API_URL = "http://bold_wilbur.orb.local/";
 // export const BACKEND_API_URL = "http://localhost:3003/";
 // export const BACKEND_API_URL = "https://api-pre.webbites.io/";
 export const BACKEND_API_URL = "https://api.webbites.io/";
@@ -11,7 +12,6 @@ export const BACKEND_API_URL = "https://api.webbites.io/";
  * API endpoints
  */
 export const API_ENDPOINTS = {
-  // LOGIN: "raycast/raycast-login",
   LOGIN: "v1/auth/login",
   LOGOUT: "v1/auth/logout",
   USER: "v1/raycast/raycast-user",
@@ -25,8 +25,6 @@ export const API_ENDPOINTS = {
  * @param endpoint - The API endpoint (must be one of the defined API_ENDPOINTS values)
  * @returns Full URL for the API endpoint
  */
-export const buildApiUrl = (
-  endpoint: (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS],
-): string => {
+export const buildApiUrl = (endpoint: (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS]): string => {
   return `${BACKEND_API_URL}${endpoint}`;
 };

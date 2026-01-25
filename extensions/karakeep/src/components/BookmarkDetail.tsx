@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
 import {
   ARCHIVED_COLOR,
@@ -35,7 +36,7 @@ function useBookmarkImages(bookmark: Bookmark) {
         try {
           newImages.screenshot = await getScreenshot(screenshot.id);
         } catch (error) {
-          console.error("Failed to get screenshot:", error);
+          logger.error("Failed to get screenshot", { screenshotId: screenshot.id, error });
         }
       }
 
@@ -43,7 +44,7 @@ function useBookmarkImages(bookmark: Bookmark) {
         try {
           newImages.asset = await getScreenshot(bookmark.content.assetId);
         } catch (error) {
-          console.error("Failed to get asset image:", error);
+          logger.error("Failed to get asset image", { assetId: bookmark.content.assetId, error });
         }
       }
 
@@ -71,6 +72,7 @@ function useToastHandler() {
       toast.title = t(`bookmark.toast.${action}.success`);
       return true;
     } catch (error) {
+      logger.error(`Bookmark action '${action}' failed`, error);
       toast.style = Toast.Style.Failure;
       toast.message = String(error);
       return false;
@@ -98,7 +100,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
         setBookmark(latest as Bookmark);
       }
     } catch (error) {
-      console.error("Failed to fetch latest bookmark:", error);
+      logger.error("Failed to fetch latest bookmark", { bookmarkId: bookmark.id, error });
     }
   }, [bookmark.id]);
 
@@ -158,13 +160,19 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
 
     switch (bookmark.content.type) {
       case "link":
-        images.screenshot && parts.push(`![${bookmark.content.title}](${images.screenshot})`);
+        if (images.screenshot) {
+          parts.push(`![${bookmark.content.title}](${images.screenshot})`);
+        }
         addTitle(displayTitle);
         break;
 
       case "text":
-        customTitle && addTitle(displayTitle);
-        bookmark.content.text && parts.push(`\n${bookmark.content.text}`);
+        if (customTitle) {
+          addTitle(displayTitle);
+        }
+        if (bookmark.content.text) {
+          parts.push(`\n${bookmark.content.text}`);
+        }
         break;
 
       case "asset": {
@@ -172,7 +180,9 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
         const assetDisplayTitle = customTitle ? bookmark.title : fileName || t("bookmark.untitledImage");
 
         if (assetType === "image") {
-          images.asset && parts.push(`\n![${fileName}](${images.asset})`);
+          if (images.asset) {
+            parts.push(`\n![${fileName}](${images.asset})`);
+          }
           addTitle(assetDisplayTitle || "");
           addFileName(fileName || "", "🖼️");
         } else if (assetType === "pdf") {
@@ -183,8 +193,12 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
       }
     }
 
-    bookmark.summary && parts.push(`\n### ${t("bookmark.sections.summary")}\n${bookmark.summary}`);
-    bookmark.note && parts.push(`\n### ${t("bookmark.sections.note")}\n${bookmark.note}`);
+    if (bookmark.summary) {
+      parts.push(`\n### ${t("bookmark.sections.summary")}\n${bookmark.summary}`);
+    }
+    if (bookmark.note) {
+      parts.push(`\n### ${t("bookmark.sections.note")}\n${bookmark.note}`);
+    }
 
     return parts.join("\n");
   }

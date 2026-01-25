@@ -115,7 +115,7 @@ const getMessageIcon = (message: Message) => {
     case MessageType.Bot:
       return getAvatarIcon("B");
     default:
-      return getAvatarIcon(message.sender.name);
+      return getAvatarIcon(message.sender?.name || "?");
   }
 };
 function ListMessages({ conversation }: { conversation: Conversation }) {

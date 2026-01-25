@@ -1,5 +1,9 @@
 # Bitbucket Changelog
 
+## [Update] - 2025-11-17
+
+- Update shortcuts to be consistent across MacOS and Windows
+
 ## [Update] - 2025-11-07
 
 - Bump dependencies to latest versions

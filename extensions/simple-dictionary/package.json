@@ -5,6 +5,7 @@
   "description": "A simple dictionary to look up words and save your favourites",
   "icon": "extension-icon.png",
   "author": "CT-7567",
+  "contributors": ["xmok"],
   "license": "MIT",
   "categories": [
     "Productivity"
@@ -14,26 +15,156 @@
       "name": "history",
       "title": "View History",
       "description": "View your search history",
-      "mode": "view",
-      "arguments": []
+      "mode": "view"
     },
     {
       "name": "list",
       "title": "View Favorites",
       "description": "View your favourite words",
-      "mode": "view",
-      "arguments": []
+      "mode": "view"
     },
     {
       "name": "search",
       "title": "Search Word",
       "description": "Looks up a word",
       "mode": "view",
+      "preferences": [
+        {
+          "name": "default_language",
+          "title": "Default Language",
+          "description": "Select a default language",
+          "placeholder": "language",
+          "required": false,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Select a default language",
+              "value": ""
+            },
+            {
+              "title": "Catalan",
+              "value": "ca"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Czech",
+              "value": "cs"
+            },
+            {
+              "title": "Dutch",
+              "value": "nl"
+            },
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Esperanto",
+              "value": "eo"
+            },
+            {
+              "title": "Finnish",
+              "value": "fi"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "Galician",
+              "value": "gl"
+            },
+            {
+              "title": "German",
+              "value": "de"
+            },
+            {
+              "title": "Greek",
+              "value": "el"
+            },
+            {
+              "title": "Hungarian",
+              "value": "hu"
+            },
+            {
+              "title": "Italian",
+              "value": "it"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            },
+            {
+              "title": "Latin",
+              "value": "la"
+            },
+            {
+              "title": "Latvian",
+              "value": "lv"
+            },
+            {
+              "title": "Macedonian",
+              "value": "mk"
+            },
+            {
+              "title": "Mandarin",
+              "value": "cmn"
+            },
+            {
+              "title": "Norwegian Bokmål",
+              "value": "nb"
+            },
+            {
+              "title": "Norwegian Nynorsk",
+              "value": "nn"
+            },
+            {
+              "title": "Old English",
+              "value": "ang"
+            },
+            {
+              "title": "Polish",
+              "value": "pl"
+            },
+            {
+              "title": "Portuguese",
+              "value": "pt"
+            },
+            {
+              "title": "Romanian",
+              "value": "ro"
+            },
+            {
+              "title": "Russian",
+              "value": "ru"
+            },
+            {
+              "title": "Serbo-Croatian",
+              "value": "sh"
+            },
+            {
+              "title": "Spanish",
+              "value": "es"
+            },
+            {
+              "title": "Swedish",
+              "value": "sv"
+            },
+            {
+              "title": "Translingual",
+              "value": "mul"
+            }
+          ]
+        }
+      ],
       "arguments": [
         {
           "name": "language",
           "placeholder": "language",
-          "required": true,
+          "required": false,
           "type": "dropdown",
           "data": [
             {
@@ -164,8 +295,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.2",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

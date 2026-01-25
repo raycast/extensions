@@ -27,6 +27,51 @@ type PullRequestFormProps = {
   draftValues?: PullRequestFormValues;
 };
 
+type BranchOption = {
+  id: string;
+  name: string;
+};
+
+type BranchNodesInput = ReadonlyArray<{ id?: string; name?: string | null } | null> | null | undefined;
+
+const normalizeBranches = (nodes: BranchNodesInput): BranchOption[] => {
+  if (!nodes) {
+    return [];
+  }
+
+  return nodes.reduce<BranchOption[]>((acc, node) => {
+    if (node?.id && node?.name) {
+      acc.push({ id: node.id, name: node.name });
+    }
+
+    return acc;
+  }, []);
+};
+
+const ensureBranchPresence = (
+  branches: BranchOption[],
+  fallbackBranches: BranchOption[],
+  currentValue: string,
+): BranchOption[] => {
+  if (!currentValue) {
+    return branches;
+  }
+
+  const alreadyPresent = branches.some((branch) => branch.name === currentValue);
+
+  if (alreadyPresent) {
+    return branches;
+  }
+
+  const fallbackBranch = fallbackBranches.find((branch) => branch.name === currentValue);
+
+  if (fallbackBranch) {
+    return [...branches, fallbackBranch];
+  }
+
+  return [...branches, { id: `virtual-${currentValue}`, name: currentValue }];
+};
+
 export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const { push } = useNavigation();
   const { data: repositories } = useMyRepositories();
@@ -140,6 +185,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   );
 
   const defaultBranch = data?.repository?.defaultBranchRef;
+  const defaultBranchName = defaultBranch?.name ?? "";
 
   const collaborators = data?.repository?.collaborators?.nodes;
 
@@ -177,12 +223,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     { execute: !!values.repository && intoQuery.trim().length > 0 },
   );
 
-  const fromBranches = (fromData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes)?.filter(
-    (node) => defaultBranch?.id !== node?.id && !!node?.name,
-  );
+  const repositoryBranches = normalizeBranches(data?.repository?.refs?.nodes);
 
-  const intoBranches = (intoData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes)?.filter(
-    (node) => node?.name !== values.from,
+  const fromBranchResults = normalizeBranches(fromData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes);
+  const fromBranches = ensureBranchPresence(fromBranchResults, repositoryBranches, values.from);
+
+  const intoBranchResults = normalizeBranches(intoData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes);
+  const intoBranches = ensureBranchPresence(
+    intoBranchResults.filter((branch) => branch.name !== values.from),
+    repositoryBranches,
+    values.into,
   );
 
   useEffect(() => {
@@ -196,6 +246,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       setValue("into", defaultBranch.name);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (values.from && values.into && values.from === values.into) {
+      if (defaultBranchName && defaultBranchName !== values.from) {
+        setValue("into", defaultBranchName);
+      } else {
+        setValue("into", "");
+      }
+    }
+  }, [values.from, values.into, defaultBranchName]);
 
   useEffect(() => {
     setValue("from", "");

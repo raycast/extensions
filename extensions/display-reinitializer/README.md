@@ -9,6 +9,7 @@ A Raycast extension to force re-detection and reinitialization of connected disp
 - 🎯 Smart auto-selection of best method per display
 - 📊 Shows display resolution, type, refresh rate capability, and recommended method
 - ⚡ Fast native Swift implementation using CoreGraphics APIs
+- ⌨️ Assign global hotkeys to reinitialize specific displays via Quicklinks
 
 ## Reinitialization Methods
 
@@ -71,6 +72,26 @@ The extension will automatically choose the best method for that specific displa
   - Method descriptions and disruption levels
   - Display capabilities (resolution, refresh rates, etc.)
 
+### Quick Reinitialize with Hotkeys
+
+You can assign global hotkeys to instantly reinitialize specific displays using the **Quick Reinitialize Display** command with Raycast Quicklinks:
+
+1. Open Raycast and search for **"Quick Reinitialize Display"**
+2. Enter your display name (e.g., `LG` or `Dell U2723QE`)
+   - Matching is flexible: partial names, case-insensitive, or display ID
+3. Press `Cmd + K` and select **"Copy Deeplink"**
+4. Open Raycast and run the **"Create Quicklink"** command
+5. Paste the deeplink and give it a name (e.g., "Reinit LG Monitor")
+6. Go to **Raycast Settings > Extensions > Quicklinks**
+7. Find your quicklink and assign a hotkey (e.g., `Cmd + Shift + 1`)
+
+Now pressing that hotkey will instantly reinitialize that specific display without opening any UI.
+
+**Display Matching:**
+- `"LG"` matches `"LG 27UK850-W"` (partial match)
+- `"dell"` matches `"Dell U2723QE"` (case-insensitive)
+- `"2"` matches display with ID 2
+
 ## Display Information
 
 For each display, the extension shows:
@@ -103,7 +124,7 @@ These methods can fix issues like:
 ### Required
 - macOS (this extension only works on macOS)
 - Raycast app installed
-- Xcode Command Line Tools (for Swift compiler)
+- Xcode (for Swift compilation during build)
 
 ### Optional
 - **m1ddc** (for DDC power cycle on external displays)
@@ -118,7 +139,7 @@ These methods can fix issues like:
 
 - macOS
 - Node.js 20+
-- Xcode Command Line Tools
+- Xcode
 - Raycast app
 
 ### Setup
@@ -128,14 +149,12 @@ These methods can fix issues like:
    ```bash
    npm install
    ```
-3. Compile the Swift helper (done automatically with prebuild script):
-   ```bash
-   npm run compile-swift
-   ```
-4. Run in development mode:
+3. Run in development mode:
    ```bash
    npm run dev
    ```
+
+   Swift code is automatically compiled by Raycast's build system.
 
 ### Build
 
@@ -143,22 +162,19 @@ These methods can fix issues like:
 npm run build
 ```
 
-The build process automatically compiles the Swift binary before building the extension.
+The build process automatically compiles the Swift package using Raycast's Swift Tools integration.
 
 ## Technical Details
 
-The extension consists of two parts:
+The extension consists of two integrated parts:
 
-### 1. Swift Helper Binary (`scripts/DisplayHelper.swift`)
-Compiles to a native executable that provides:
+### 1. Swift Package (`swift/display-helper/`)
+A Swift package using [Raycast's Swift Tools](https://github.com/raycast/extensions-swift-tools) that provides:
 
-**Commands:**
-- `list` - Returns JSON array of all displays with metadata
-- `redetect-auto <displayID>` - Auto-selects best method
-- `redetect-ddc <displayID>` - DDC power cycle
-- `redetect-refresh <displayID>` - Refresh rate toggle
-- `redetect-resolution <displayID>` - Resolution cycle
-- `redetect-soft <displayID>` - Soft reset
+**Exported Functions:**
+- `getAllDisplays()` - Returns array of all displays with metadata
+- `reinitializeDisplay(displayId, method)` - Reinitializes a specific display
+  - Methods: `auto`, `ddc`, `refresh`, `resolution`, `soft`
 
 **Display Metadata:**
 - Available reinitialization methods
@@ -166,11 +182,23 @@ Compiles to a native executable that provides:
 - Whether display has multiple refresh rates
 - Standard display info (ID, name, resolution, etc.)
 
-### 2. Raycast Extension (`src/reinitialize-displays.tsx`)
+**Implementation:**
+- Uses macOS CoreGraphics and IOKit frameworks
+- Compiled automatically during build via Raycast's Swift plugin system
+- Functions are marked with `@raycast` macro for TypeScript integration
+
+### 2. Raycast Extension
+**`src/reinitialize-displays.tsx`** - Main UI command
 - TypeScript/React UI
-- Calls Swift binary for all display operations
+- Direct Swift function imports using `swift:` module specifier
+- Type-safe integration with auto-generated TypeScript definitions
 - Handles user interaction and feedback
 - Provides method selection interface
+
+**`src/quick-reinitialize.ts`** - Background command for hotkeys
+- No-view command that accepts display name argument
+- Flexible display matching (partial, case-insensitive, by ID)
+- Designed for use with Raycast Quicklinks and hotkeys
 
 ## Troubleshooting
 
@@ -196,12 +224,21 @@ Compiles to a native executable that provides:
 - Only refresh rate toggle, resolution cycle, and soft reset available
 - This is a hardware limitation
 
+### Quick Reinitialize "Display not found"
+- The display name didn't match any connected display
+- Try a more specific name, or check available displays with the main command
+- You can also use the display ID number instead of name
+
 ## Keyboard Shortcuts
 
+### Reinitialize Displays (Main Command)
 - `Enter` - Reinitialize with auto-selected method
 - `Cmd + K` - Open action menu
 - `1-4` - Quick select specific method (when action menu is open)
 - `Cmd + R` - Refresh display list
+
+### Quick Reinitialize Display
+- Assign custom hotkeys via Raycast Quicklinks (see [Quick Reinitialize with Hotkeys](#quick-reinitialize-with-hotkeys))
 
 ## License
 
@@ -211,6 +248,7 @@ MIT
 
 Built using:
 - [Raycast API](https://developers.raycast.com/)
+- [Raycast Swift Tools](https://github.com/raycast/extensions-swift-tools)
 - macOS CoreGraphics framework
 - IOKit framework
 - [m1ddc](https://github.com/waydabber/m1ddc) (optional dependency)

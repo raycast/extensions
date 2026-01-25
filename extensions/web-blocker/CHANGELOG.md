@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.1] - 2025-11-15
+
+### Added screenshots 
+
 ## [1.0.0] - 2025-11-14
 
 ### Added

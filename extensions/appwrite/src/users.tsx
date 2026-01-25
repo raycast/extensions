@@ -2,6 +2,8 @@ import { FormValidation, getAvatarIcon, MutatePromise, useCachedPromise, useForm
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useContext } from "react";
 import { sdk, SDKContext } from "./sdk";
+import { sortItems } from "./utils";
+import CopyIDAction from "./common/CopyIDAction";
 
 export default function Users() {
   const sdks = useContext(SDKContext);
@@ -13,7 +15,7 @@ export default function Users() {
   } = useCachedPromise(
     async () => {
       const res = await sdks.users.list();
-      return res.users;
+      return sortItems(res.users);
     },
     [],
     {
@@ -43,11 +45,12 @@ export default function Users() {
             key={user.$id}
             icon={getAvatarIcon(user.name)}
             title={user.name}
-            subtitle={user.targets[0].identifier}
+            subtitle={user.targets[0]?.identifier}
             accessories={[{ tag: user.emailVerification ? "Verified" : "Unverified" }]}
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.AddPerson} title="Create User" target={<CreateUser mutate={mutate} />} />
+                <CopyIDAction item={user} />
               </ActionPanel>
             }
           />

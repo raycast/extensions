@@ -1,5 +1,15 @@
 # Google Chrome Changelog
 
+## [Fixes] - 2026-01-05
+
+- Fix infinite rendering with depth bug in new tab `Action`
+- Handle error in "new tab" `Command`
+
+## [Support for Guest Profile] - 2025-11-17
+
+- Add support for Guest profile in all commands
+- Update dependencies to latest versions
+
 ## [Add Exclude Search Feature] - 2025-11-05
 
 - Add support for excluding search terms using " -" (space + dash) prefix

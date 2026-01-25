@@ -25,18 +25,18 @@
     {
       "name": "username",
       "title": "Username",
-      "description": "Your Product Hunt username",
+      "description": "Your Product Hunt username.",
       "type": "textfield",
       "required": false,
       "default": ""
     },
     {
       "name": "verboseLogging",
-      "title": "Verbose Logging",
-      "description": "Enable detailed console logging for debugging purposes",
+      "title": "Debug Logging",
       "type": "checkbox",
       "required": false,
-      "label": "Enable",
+      "description": "Show detailed logs in the console for debugging.",
+      "label": "Enable extra diagnostics in the console",
       "default": false
     }
   ],
@@ -168,9 +168,9 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1",
-    "cheerio": "^1.0.0"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "cheerio": "^1.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -178,7 +178,7 @@
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.12",
     "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.7.4",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -187,5 +187,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "evals": "npx ray evals"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,14 @@
 import { LinearClient } from "@linear/sdk";
-import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, showHUD } from "@raycast/api";
+import {
+  Clipboard,
+  closeMainWindow,
+  getPreferenceValues,
+  open,
+  Toast,
+  showToast,
+  showHUD,
+  Keyboard,
+} from "@raycast/api";
 import { getAccessToken, withAccessToken } from "@raycast/utils";
 
 import { linear } from "./api/linearClient";
@@ -43,7 +52,7 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
       if (newComment) {
         toast.primaryAction = {
           title: "Open Comment",
-          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+          shortcut: Keyboard.Shortcut.Common.OpenWith,
           onAction: async () => {
             await open(newComment.url);
             await toast.hide();
@@ -61,7 +70,7 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
       toast.title = failureTitle;
       toast.primaryAction = {
         title: "Copy Error Log",
-        shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+        shortcut: Keyboard.Shortcut.Common.Copy,
         onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
       };
     }

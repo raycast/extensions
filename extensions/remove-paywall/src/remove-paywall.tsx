@@ -1,4 +1,5 @@
 import { Toast, getPreferenceValues, LaunchProps, open, showToast } from "@raycast/api";
+import { DEFAULT_REMOVE_PAYWALL_SERVICE } from "./constants";
 import { getUrl } from "./utils";
 
 export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
@@ -7,7 +8,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>
     service = props.arguments.service;
   } else {
     const preferences = getPreferenceValues<Preferences>();
-    service = preferences.service;
+    service = preferences.service || DEFAULT_REMOVE_PAYWALL_SERVICE;
   }
 
   const urlArgument = props.arguments.url;

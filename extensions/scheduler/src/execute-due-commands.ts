@@ -81,6 +81,11 @@ async function disableCommand(command: ScheduledCommand): Promise<void> {
 export default async function ExecuteDueCommands() {
   console.log(LOG_MESSAGES.CHECKING);
 
+  setStoredData(STORAGE_KEYS.BACKGROUND_REFRESH_STATUS, {
+    enabled: true,
+    lastBackgroundRun: new Date().toISOString(),
+  });
+
   try {
     const commands = await getCommands();
     if (commands.length === 0) {

@@ -6,11 +6,13 @@
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [
-    "thomaslombart",
     "lukaszmtw",
     "erics118",
     "mlnchk",
     "pernielsentikaer"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
   "commands": [
@@ -432,5 +434,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,4 +1,5 @@
 import { Clipboard, closeMainWindow, showHUD, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { DEFAULT_REMOVE_PAYWALL_SERVICE } from "./constants";
 import { showFailureToast } from "@raycast/utils";
 import { getRemovePaywallURL } from "./utils";
 
@@ -19,7 +20,10 @@ export default async function Command() {
     }
 
     if (clipboardText.startsWith("http://") || clipboardText.startsWith("https://")) {
-      const removedPaywallURL = getRemovePaywallURL(clipboardText, preferences.service || "https://12ft.io");
+      const removedPaywallURL = getRemovePaywallURL(
+        clipboardText,
+        preferences.service || DEFAULT_REMOVE_PAYWALL_SERVICE,
+      );
       await closeMainWindow();
       await Clipboard.copy(removedPaywallURL);
       await showHUD("URL copied to clipboard!");

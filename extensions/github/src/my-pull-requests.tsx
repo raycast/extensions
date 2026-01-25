@@ -22,6 +22,7 @@ function MyPullRequests() {
     includeReviewed,
     includeReviewRequests,
     includeRecentlyClosed,
+    includeDrafts,
     repositoryFilterMode,
     repositoryList,
   } = getPreferenceValues<Preferences.MyPullRequests>();
@@ -35,6 +36,7 @@ function MyPullRequests() {
     includeAssigned,
     includeMentioned,
     includeRecentlyClosed,
+    includeDrafts,
     includeReviewRequests,
     includeReviewed,
     filterMode: repositoryFilterMode,

@@ -26,6 +26,20 @@
       "title": "Reinitialize Displays",
       "description": "View and reinitialize connected displays",
       "mode": "view"
+    },
+    {
+      "name": "quick-reinitialize",
+      "title": "Quick Reinitialize Display",
+      "description": "Instantly reinitialize a specific display by name (use with Quicklinks for hotkeys)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "displayName",
+          "placeholder": "Display name (e.g., LG 27UK850)",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
