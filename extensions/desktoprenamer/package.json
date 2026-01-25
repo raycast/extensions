@@ -16,10 +16,12 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "toggle-menubar-item",
-      "title": "Toggle Menubar Item",
-      "description": "Toggle the visibility of the menubar item.",
-      "mode": "no-view"
+      "name": "current-desktop",
+      "title": "Current Desktop",
+      "subtitle": "DesktopRenamer",
+      "description": "Show the currently active desktop with live status.",
+      "mode": "no-view",
+      "interval": "2s"
     },
     {
       "name": "toggle-space-label-windows",
@@ -62,6 +64,18 @@
       "subtitle": "Visibility on Desktop",
       "description": "Show/hide the Active Label Window from the desktop.",
       "mode": "no-view"
+    },
+    {
+      "name": "current-desktop",
+      "title": "Current Desktop",
+      "description": "Show the name of the current desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-to-desktop",
+      "title": "Switch Desktop",
+      "description": "List all desktops and switch to one",
+      "mode": "view"
     }
   ],
   "dependencies": {
