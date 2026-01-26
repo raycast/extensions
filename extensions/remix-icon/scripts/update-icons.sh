@@ -12,7 +12,6 @@ ASSETS_DIR="${PROJECT_DIR}/assets"
 COMPRESSED_DIR="${ASSETS_DIR}/icons-compressed"
 CATALOGUE_FILE="${ASSETS_DIR}/catalogue.json"
 METADATA_FILE="${ASSETS_DIR}/metadata.json"
-VERSION_FILE="${LOCAL_DIR}/.remix-version"
 
 echo "Checking for updates..."
 echo "Fetching: https://api.github.com/repos/Remix-Design/RemixIcon/releases/latest"
@@ -28,8 +27,8 @@ echo "Latest: ${LATEST_VERSION}"
 echo "Download URL: ${SVG_ASSET_URL}"
 
 # Check if already up to date
-if [[ -f "${VERSION_FILE}" ]]; then
-  CURRENT_VERSION=$(cat "${VERSION_FILE}")
+if [[ -f "${METADATA_FILE}" ]]; then
+  CURRENT_VERSION=$(jq -r '.version' "${METADATA_FILE}")
   echo "Current: ${CURRENT_VERSION}"
 
   if [[ "${CURRENT_VERSION}" == "${LATEST_VERSION}" ]]; then
@@ -117,9 +116,6 @@ echo "${catalogue}" | jq '.' >"${CATALOGUE_FILE}"
 TOTAL_ICONS=$(echo "${catalogue}" | jq '[.categories[].icons | length] | add')
 TOTAL_CATEGORIES=$(echo "${catalogue}" | jq '.categories | length')
 COMPRESSED_FILES=$(ls -1 "${COMPRESSED_DIR}" | wc -l | xargs)
-
-# Save version
-echo "${LATEST_VERSION}" >"${VERSION_FILE}"
 
 # Save metadata with version
 cat > "${METADATA_FILE}" <<EOF

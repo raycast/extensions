@@ -60,14 +60,8 @@ export default function IconActionPanel({
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Links">
-        <Action.OpenInBrowser
-          title="Open Icon on Remix Icon Website"
-          url={`https://remixicon.com/icon/${iconName}`}
-        />
-        <Action.OpenInBrowser
-          title="Remix Icon GitHub Page"
-          url="https://github.com/Remix-Design/RemixIcon"
-        />
+        <Action.OpenInBrowser title="Open Icon on Remix Icon Website" url={`https://remixicon.com/icon/${iconName}`} />
+        <Action.OpenInBrowser title="Remix Icon GitHub Page" url="https://github.com/Remix-Design/RemixIcon" />
       </ActionPanel.Section>
       {/* TODO SVG Sprite */}
       {/* <Action

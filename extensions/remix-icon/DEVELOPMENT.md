@@ -47,6 +47,12 @@ npm run lint
 
 # Fix linting issues
 npm run fix-lint
+
+# Update to latest Remix Icon release
+npm run update-icons
+
+# Validate React component names
+npm run validate
 ```
 
 ### Updating Icons
@@ -54,6 +60,8 @@ npm run fix-lint
 To sync with the latest Remix Icon release from GitHub:
 
 ```bash
+npm run update-icons
+# or directly:
 ./scripts/update-icons.sh
 ```
 
@@ -61,23 +69,25 @@ The update script:
 
 - **Version checking**: Automatically detects and downloads new releases
 - **Official releases**: Downloads the `RemixIcon_Svg_*.zip` asset from GitHub releases
-- **Smart updates**: Only updates when a new version is available (tracked in `scripts/.remix-version`)
+- **Smart updates**: Only updates when a new version is available (tracked in `assets/metadata.json`)
 - **Auto-rebuild**: Regenerates `catalogue.json` from downloaded icons
-- **Metadata generation**: Creates `metadata.json` with version info for CDN links
+- **Metadata generation**: Updates `metadata.json` with version info for CDN links
+
+**Requirements**: `jq`, `curl`, `unzip` (pre-installed on macOS)
 
 #### ⚠️ Important: Version Synchronization
 
 When updating icons, ensure the RemixIcon version matches the `@remixicon/react` package version:
 
 ```bash
-# After running update-icons.sh, check the downloaded version
+# After running update-icons, check the downloaded version
 cat assets/metadata.json
 
 # Update @remixicon/react to match (if version 4.8.0)
 npm install -D @remixicon/react@4.8.0
 
 # Validate React component names match the official package
-node scripts/validate-react-names.mjs
+npm run validate
 ```
 
 This ensures the React component names exported by the extension match the official `@remixicon/react` package.

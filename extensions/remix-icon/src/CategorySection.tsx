@@ -30,19 +30,12 @@ export default function CategorySection({
                 tintColor: Color.PrimaryText,
               }}
               actions={
-                <IconActionPanel
-                  category={iconCategory}
-                  iconName={iconName}
-                  updateRecentIcons={updateRecentIcons}
-                />
+                <IconActionPanel category={iconCategory} iconName={iconName} updateRecentIcons={updateRecentIcons} />
               }
             />
           );
         } catch (error) {
-          console.error(
-            `Error loading icon ${iconCategory}/${iconName}:`,
-            error,
-          );
+          console.error(`Error loading icon ${iconCategory}/${iconName}:`, error);
           return null;
         }
       })}

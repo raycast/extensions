@@ -44,6 +44,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
+    "update-icons": "./scripts/update-icons.sh",
     "validate": "node scripts/validate-react-names.mjs"
   }
 }

@@ -13,46 +13,53 @@ function loadRecentIcons(): Icon[] {
   try {
     const parsed = JSON.parse(recent);
     // Validate that each item has category and name properties
-    return parsed.filter(
-      (icon: unknown) =>
-        icon &&
-        typeof icon === "object" &&
-        "category" in icon &&
-        "name" in icon,
-    );
+    return parsed.filter((icon: unknown) => icon && typeof icon === "object" && "category" in icon && "name" in icon);
   } catch (e: unknown) {
     console.error("Error parsing recent icons from cache:", e);
     return [];
   }
 }
 
+// Pure function outside component - no need to recreate on each render
+function matchesSearch(iconName: string, search: string): boolean {
+  if (!search) return true;
+  return iconName.toLowerCase().includes(search.toLowerCase());
+}
+
 export default function IconsCommand() {
   const [isLoading, setIsLoading] = useState(true);
   const [catalogue, setCatalogue] = useState<Catalog>({ categories: [] });
   const [category, setCategory] = useState<string>("All");
-  const [recentIcons, setRecentIcons] = useState<Icon[]>(loadRecentIcons());
+  const [searchText, setSearchText] = useState<string>("");
+  const [recentIcons, setRecentIcons] = useState<Icon[]>(() => loadRecentIcons());
 
   const filteredCatalogue = useMemo<Catalog>(() => {
+    // First, select which categories to show based on dropdown
+    let categories: IconCategory[];
+
     const recentCategory: IconCategory = {
       name: "Recent",
       icons: recentIcons,
     };
 
-    switch (category) {
-      case "All":
-        return {
-          categories: [recentCategory, ...catalogue.categories],
-        };
-      case "Recent":
-        return {
-          categories: [recentCategory],
-        };
-      default:
-        return {
-          categories: catalogue.categories.filter((c) => c.name === category),
-        };
+    if (category === "All") {
+      categories = [recentCategory, ...catalogue.categories];
+    } else if (category === "Recent") {
+      categories = [recentCategory];
+    } else {
+      categories = catalogue.categories.filter((c) => c.name === category);
     }
-  }, [category, catalogue.categories, recentIcons]);
+
+    // Then apply search filtering to all selected categories
+    const filteredCategories = categories
+      .map((cat) => ({
+        ...cat,
+        icons: cat.icons.filter((icon) => matchesSearch(icon.name, searchText)),
+      }))
+      .filter((cat) => cat.icons.length > 0);
+
+    return { categories: filteredCategories };
+  }, [category, catalogue.categories, recentIcons, searchText]);
 
   useEffect(() => {
     async function loadCategories() {
@@ -80,45 +87,30 @@ export default function IconsCommand() {
     loadCategories();
   }, []);
 
-  const updateRecentIcons = useCallback(
-    (category: string, iconName: string) => {
-      setRecentIcons((prev) => {
-        const updatedRecentIcons = [
-          { category, name: iconName },
-          ...prev.filter((i) => i.name !== iconName),
-        ].slice(0, 8);
-        cache.set(CACHE_KEY_RECENT_ICONS, JSON.stringify(updatedRecentIcons));
-        return updatedRecentIcons;
-      });
-    },
-    [],
-  );
+  const updateRecentIcons = useCallback((category: string, iconName: string) => {
+    setRecentIcons((prev) => {
+      const updatedRecentIcons = [{ category, name: iconName }, ...prev.filter((i) => i.name !== iconName)].slice(0, 8);
+      cache.set(CACHE_KEY_RECENT_ICONS, JSON.stringify(updatedRecentIcons));
+      return updatedRecentIcons;
+    });
+  }, []);
 
   return (
     <Grid
       isLoading={isLoading}
-      filtering={{ keepSectionOrder: true }}
+      filtering={false}
+      onSearchTextChange={setSearchText}
       navigationTitle="Search Remix Icon Library"
       searchBarPlaceholder="Search icons..."
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Select category"
-          storeValue={true}
-          onChange={(category) => setCategory(category)}
-        >
+        <Grid.Dropdown tooltip="Select category" storeValue={true} onChange={(category) => setCategory(category)}>
           <Grid.Dropdown.Section title="General">
             <Grid.Dropdown.Item title="All" value="All" key="All" />
-            {recentIcons.length > 0 && (
-              <Grid.Dropdown.Item title="Recent" value="Recent" key="Recent" />
-            )}
+            {recentIcons.length > 0 && <Grid.Dropdown.Item title="Recent" value="Recent" key="Recent" />}
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Categories">
             {catalogue.categories.map((category) => (
-              <Grid.Dropdown.Item
-                title={category.name}
-                value={category.name}
-                key={category.name}
-              />
+              <Grid.Dropdown.Item title={category.name} value={category.name} key={category.name} />
             ))}
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
@@ -127,11 +119,7 @@ export default function IconsCommand() {
       inset={Grid.Inset.Large}
     >
       {filteredCatalogue.categories.map((category) => (
-        <CategorySection
-          key={category.name}
-          category={category}
-          updateRecentIcons={updateRecentIcons}
-        />
+        <CategorySection key={category.name} category={category} updateRecentIcons={updateRecentIcons} />
       ))}
     </Grid>
   );
