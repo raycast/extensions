@@ -117,6 +117,144 @@
       "subtitle": "Proxyman",
       "description": "Clear the current session in Proxyman",
       "mode": "no-view"
+    },
+    {
+      "name": "open-map-local",
+      "title": "Open Map Local",
+      "subtitle": "Proxyman",
+      "description": "Open the Map Local window in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-map-remote",
+      "title": "Open Map Remote",
+      "subtitle": "Proxyman",
+      "description": "Open the Map Remote window in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-breakpoint",
+      "title": "Open Breakpoint",
+      "subtitle": "Proxyman",
+      "description": "Open the Breakpoint window in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-blocklist",
+      "title": "Open Blocklist",
+      "subtitle": "Proxyman",
+      "description": "Open the Blocklist window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-allowlist",
+      "title": "Open Allowlist",
+      "subtitle": "Proxyman",
+      "description": "Open the Allowlist window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-scripting",
+      "title": "Open Scripting",
+      "subtitle": "Proxyman",
+      "description": "Open the Scripting window in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-network-condition",
+      "title": "Open Network Condition",
+      "subtitle": "Proxyman",
+      "description": "Open the Network Condition window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-ssl-proxying-list",
+      "title": "Open SSL Proxying List",
+      "subtitle": "Proxyman",
+      "description": "Open the SSL Proxying List window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-external-proxy",
+      "title": "Open External Proxy",
+      "subtitle": "Proxyman",
+      "description": "Open the External Proxy window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-socks-proxy",
+      "title": "Open SOCKS Proxy",
+      "subtitle": "Proxyman",
+      "description": "Open the SOCKS Proxy window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-dns-spoofing",
+      "title": "Open DNS Spoofing",
+      "subtitle": "Proxyman",
+      "description": "Open the DNS Spoofing window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-protobuf",
+      "title": "Open Protobuf",
+      "subtitle": "Proxyman",
+      "description": "Open the Protobuf window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-reverse-proxy",
+      "title": "Open Reverse Proxy",
+      "subtitle": "Proxyman",
+      "description": "Open the Reverse Proxy window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-access-control",
+      "title": "Open Access Control",
+      "subtitle": "Proxyman",
+      "description": "Open the Access Control window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-custom-column",
+      "title": "Open Custom Column",
+      "subtitle": "Proxyman",
+      "description": "Open the Custom Column window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-custom-previewer",
+      "title": "Open Custom Previewer",
+      "subtitle": "Proxyman",
+      "description": "Open the Custom Previewer window in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-diff",
+      "title": "Open Diff",
+      "subtitle": "Proxyman",
+      "description": "Open the Diff window in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-compose",
+      "title": "Open Compose",
+      "subtitle": "Proxyman",
+      "description": "Open the Compose window in Proxyman",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

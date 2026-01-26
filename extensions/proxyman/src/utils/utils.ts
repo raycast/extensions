@@ -15,9 +15,9 @@ export async function checkProxymanAppInstallation(): Promise<boolean> {
       title: "Proxyman is not installed.",
       message: "Download it from Proxyman Website",
       primaryAction: {
-        title: "Go to https://proxyman.io/",
+        title: "Go to https://proxyman.com/",
         onAction: (toast) => {
-          open("https://proxyman.io/");
+          open("https://proxyman.com/");
           toast.hide();
         },
       },

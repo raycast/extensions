@@ -2,6 +2,7 @@
 
 ![Proxyman with Raycast Extension](./assets/raycast_and_proxyman.jpeg)
 
+## Toggle Commands
 - Toggle System Proxy
 - Toggle Map Local Tool
 - Toggle Breakpoint
@@ -16,13 +17,33 @@
 - Toggle Record Traffic
 - Clear Session
 
-# ⚠️ Requirements
-- Required Proxyman macOS 5.10.0 or later
+## Open Window Commands
+- Open Map Local
+- Open Map Remote
+- Open Breakpoint
+- Open Blocklist
+- Open Allowlist
+- Open Scripting
+- Open Network Condition
+- Open SSL Proxying List
+- Open External Proxy
+- Open SOCKS Proxy
+- Open DNS Spoofing
+- Open Protobuf
+- Open Reverse Proxy
+- Open Access Control
+- Open Custom Column
+- Open Custom Previewer
+- Open Diff
+- Open Compose
+
+# Requirements
+- Proxyman macOS 5.10.0 or later
 
 # Installation and Setup
 Before using the Proxyman Extension:
 
-1. Make sure Raycast and Proxman is installed. [Download Proxyman](https://proxyman.io/)
+1. Make sure Raycast and Proxman is installed. [Download Proxyman](https://proxyman.com/)
 2. Start Proxyman at least once to setup all the settings.
 3. Install This Extension from Raycast Extension Marketplace.
 4. Open Raycast Extension Preferences and enter your Proxyman license key.
@@ -73,6 +94,6 @@ If you encounter issues:
 4. If problems persist, create an issue on the Proxyman GitHub repository or reach out via the Proxyman Discord channel.
 
 # Contact
-For additional support or inquiries, please contact the Proxyman team at support@proxyman.io.
+For additional support or inquiries, please contact the Proxyman team at support@proxyman.com.
 
-- 🌐 Website: [https://proxyman.io](https://proxyman.io)
+- 🌐 Website: [https://proxyman.com](https://proxyman.com)

@@ -15,6 +15,26 @@ export const ProxymanActions = {
   ToggleSSLProxyingList: "ToggleSSLProxyingList",
   ToggleRecordTraffic: "ToggleRecordTraffic",
   ClearSession: "ClearSession",
+
+  // Open Windows
+  OpenMapLocal: "OpenMapLocal",
+  OpenMapRemote: "OpenMapRemote",
+  OpenBreakpoint: "OpenBreakpoint",
+  OpenBlocklist: "OpenBlocklist",
+  OpenAllowlist: "OpenAllowlist",
+  OpenScripting: "OpenScripting",
+  OpenNetworkCondition: "OpenNetworkCondition",
+  OpenSSLProxyingList: "OpenSSLProxyingList",
+  OpenExternalProxy: "OpenExternalProxy",
+  OpenSOCKSProxy: "OpenSOCKSProxy",
+  OpenDNSSpoofing: "OpenDNSSpoofing",
+  OpenProtobuf: "OpenProtobuf",
+  OpenReverseProxy: "OpenReverseProxy",
+  OpenAccessControl: "OpenAccessControl",
+  OpenCustomColumn: "OpenCustomColumn",
+  OpenCustomPreviewer: "OpenCustomPreviewer",
+  OpenDiff: "OpenDiff",
+  OpenCompose: "OpenCompose",
 } as const;
 
 export type ProxymanActionType = (typeof ProxymanActions)[keyof typeof ProxymanActions];
