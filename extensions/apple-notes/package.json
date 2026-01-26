@@ -13,7 +13,6 @@
     "StevenRCE0",
     "HelloImSteven",
     "tylerwince",
-    "thomaslombart",
     "xilopaint",
     "ridemountainpig",
     "teemu_suvinen",
@@ -21,6 +20,9 @@
     "andreaselia",
     "fhf1121",
     "charlesharries"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
   "commands": [

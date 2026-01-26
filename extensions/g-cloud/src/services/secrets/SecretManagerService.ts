@@ -3,7 +3,6 @@
  * Uses REST APIs for improved performance (no CLI subprocess overhead)
  */
 
-import { showFailureToast } from "@raycast/utils";
 import {
   listSecrets as apiListSecrets,
   getSecret as apiGetSecret,
@@ -131,207 +130,105 @@ export class SecretManagerService {
       }
     }
 
-    try {
-      // Use REST API instead of gcloud CLI
-      const apiSecrets = await apiListSecrets(this.gcloudPath, this.projectId);
-      const secrets = apiSecrets.map((s) => this.convertSecret(s));
+    // Use REST API instead of gcloud CLI
+    const apiSecrets = await apiListSecrets(this.gcloudPath, this.projectId);
+    const secrets = apiSecrets.map((s) => this.convertSecret(s));
 
-      // Cache the results
-      this.secretsCache.set(cacheKey, { data: secrets, timestamp: Date.now() });
+    // Cache the results
+    this.secretsCache.set(cacheKey, { data: secrets, timestamp: Date.now() });
 
-      return secrets;
-    } catch (error) {
-      console.error("Failed to list secrets:", error);
-      showFailureToast({
-        title: "Failed to list secrets",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return [];
-    }
+    return secrets;
   }
 
   /**
    * Get detailed information about a specific secret
    */
-  async describeSecret(secretId: string): Promise<Secret | null> {
-    try {
-      // Use REST API instead of gcloud CLI
-      const apiSecret = await apiGetSecret(this.gcloudPath, this.projectId, secretId);
-      return this.convertSecret(apiSecret);
-    } catch (error) {
-      console.error("Failed to describe secret:", error);
-      showFailureToast({
-        title: "Failed to get secret details",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return null;
-    }
+  async describeSecret(secretId: string): Promise<Secret> {
+    // Use REST API instead of gcloud CLI
+    const apiSecret = await apiGetSecret(this.gcloudPath, this.projectId, secretId);
+    return this.convertSecret(apiSecret);
   }
 
   /**
    * List all versions of a secret
    */
   async listVersions(secretId: string): Promise<SecretVersion[]> {
-    try {
-      // Use REST API instead of gcloud CLI
-      const apiVersions = await apiListVersions(this.gcloudPath, this.projectId, secretId);
-      return apiVersions.map((v) => this.convertVersion(v));
-    } catch (error) {
-      console.error("Failed to list secret versions:", error);
-      showFailureToast({
-        title: "Failed to list versions",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return [];
-    }
+    // Use REST API instead of gcloud CLI
+    const apiVersions = await apiListVersions(this.gcloudPath, this.projectId, secretId);
+    return apiVersions.map((v) => this.convertVersion(v));
   }
 
   /**
    * Create a new secret with initial value
    * SECURITY: Never log the data parameter
    */
-  async createSecret(secretId: string, data: string): Promise<boolean> {
-    try {
-      // Use REST API instead of gcloud CLI
-      await apiCreateSecret(this.gcloudPath, this.projectId, secretId, data);
+  async createSecret(secretId: string, data: string): Promise<void> {
+    // Use REST API instead of gcloud CLI
+    await apiCreateSecret(this.gcloudPath, this.projectId, secretId, data);
 
-      // Clear cache
-      this.clearCache();
-
-      return true;
-    } catch (error) {
-      console.error("Failed to create secret");
-      showFailureToast({
-        title: "Failed to create secret",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return false;
-    }
+    // Clear cache
+    this.clearCache();
   }
 
   /**
    * Add a new version to an existing secret
    * SECURITY: Never log the data parameter
    */
-  async addVersion(secretId: string, data: string): Promise<boolean> {
-    try {
-      // Use REST API to add version
-      const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}:addVersion`;
-      await gcpPost(this.gcloudPath, url, {
-        payload: {
-          data: Buffer.from(data).toString("base64"),
-        },
-      });
-
-      return true;
-    } catch (error) {
-      console.error("Failed to add secret version");
-      showFailureToast({
-        title: "Failed to add version",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return false;
-    }
+  async addVersion(secretId: string, data: string): Promise<void> {
+    // Use REST API to add version
+    const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}:addVersion`;
+    await gcpPost(this.gcloudPath, url, {
+      payload: {
+        data: Buffer.from(data).toString("base64"),
+      },
+    });
   }
 
   /**
    * Access a secret version's value
    * SECURITY: This method returns sensitive data - handle with care
    */
-  async accessVersion(secretId: string, version: string = "latest"): Promise<string | null> {
-    try {
-      // Use REST API instead of gcloud CLI
-      return await apiAccessVersion(this.gcloudPath, this.projectId, secretId, version);
-    } catch (error) {
-      console.error("Failed to access secret version");
-      showFailureToast({
-        title: "Failed to access secret",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return null;
-    }
+  async accessVersion(secretId: string, version: string = "latest"): Promise<string> {
+    // Use REST API instead of gcloud CLI
+    return await apiAccessVersion(this.gcloudPath, this.projectId, secretId, version);
   }
 
   /**
    * Delete a secret
    */
-  async deleteSecret(secretId: string): Promise<boolean> {
-    try {
-      // Use REST API instead of gcloud CLI
-      await apiDeleteSecret(this.gcloudPath, this.projectId, secretId);
+  async deleteSecret(secretId: string): Promise<void> {
+    // Use REST API instead of gcloud CLI
+    await apiDeleteSecret(this.gcloudPath, this.projectId, secretId);
 
-      // Clear cache
-      this.clearCache();
-
-      return true;
-    } catch (error) {
-      console.error("Failed to delete secret:", error);
-      showFailureToast({
-        title: "Failed to delete secret",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return false;
-    }
+    // Clear cache
+    this.clearCache();
   }
 
   /**
    * Destroy a specific version of a secret
    */
-  async destroyVersion(secretId: string, version: string): Promise<boolean> {
-    try {
-      // Use REST API
-      const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:destroy`;
-      await gcpPost(this.gcloudPath, url, {});
-
-      return true;
-    } catch (error) {
-      console.error("Failed to destroy version:", error);
-      showFailureToast({
-        title: "Failed to destroy version",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return false;
-    }
+  async destroyVersion(secretId: string, version: string): Promise<void> {
+    // Use REST API
+    const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:destroy`;
+    await gcpPost(this.gcloudPath, url, {});
   }
 
   /**
    * Disable a specific version of a secret
    */
-  async disableVersion(secretId: string, version: string): Promise<boolean> {
-    try {
-      // Use REST API
-      const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:disable`;
-      await gcpPost(this.gcloudPath, url, {});
-
-      return true;
-    } catch (error) {
-      console.error("Failed to disable version:", error);
-      showFailureToast({
-        title: "Failed to disable version",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return false;
-    }
+  async disableVersion(secretId: string, version: string): Promise<void> {
+    // Use REST API
+    const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:disable`;
+    await gcpPost(this.gcloudPath, url, {});
   }
 
   /**
    * Enable a specific version of a secret
    */
-  async enableVersion(secretId: string, version: string): Promise<boolean> {
-    try {
-      // Use REST API
-      const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:enable`;
-      await gcpPost(this.gcloudPath, url, {});
-
-      return true;
-    } catch (error) {
-      console.error("Failed to enable version:", error);
-      showFailureToast({
-        title: "Failed to enable version",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-      return false;
-    }
+  async enableVersion(secretId: string, version: string): Promise<void> {
+    // Use REST API
+    const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:enable`;
+    await gcpPost(this.gcloudPath, url, {});
   }
 
   /**

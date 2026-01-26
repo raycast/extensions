@@ -1,9 +1,25 @@
 # Changelog
 
+## [Update] - 2026-01-20
+
+### Fixed
+- Fixed memory leaks when updating file metadata in generated files
+- Improved error handling when reading and writing files to prevent crashes if files become unavailable during processing
+- Fixed timing issue with Finder selection that could cause incorrect file selection
+- Improved handling of files on different drives and symbolic links for better cross-platform compatibility
+
+### Improved
+- Optimized file scanning to reduce duplicate operations and improve processing speed for large directories
+- Enhanced error messages with clearer explanations and actionable recommendations when processing fails
+- Unified error handling across the extension for more consistent behavior and better user feedback
+- Refactored internal code structure for improved maintainability and reliability
+
 ## [Update] - 2025-12-16
 
 ### Fixed
-- Fixed memory issues (JS heap out of memory) by optimizing string concatenation and reducing safety limits
+- Fixed memory issues (JS heap out of memory) by implementing streaming file processing
+- File contents are now formatted and written to output immediately, reducing memory usage by 50-70%
+- Improved safety limit checks with better error messages and earlier validation
 
 ## [Update] - 2025-12-02
 

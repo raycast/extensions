@@ -11,7 +11,12 @@
     "vimtor",
     "j3lte",
     "stefanmatar",
-    "YourMCGeek"
+    "YourMCGeek",
+    "xilopaint"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "categories": [
@@ -57,8 +62,8 @@
     }
   ],
   "dependencies": {
-    "@faker-js/faker": "^10.1.0",
-    "@raycast/api": "^1.103.4",
+    "@faker-js/faker": "^10.2.0",
+    "@raycast/api": "^1.104.1",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21"
   },
@@ -79,9 +84,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ]
+  }
 }

@@ -1,5 +1,10 @@
 # QR Code Generator Changelog
 
+## [Improve UX] - 2025-12-27
+
+- Persist the selected format in the dropdown
+- Allow users to return to QR editing in inline mode
+
 ## [Maintenance] - 2025-12-12
 
 - Add support for Windows platform.

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Grid, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Grid, Icon, Keyboard } from "@raycast/api";
 import { PathLike } from "fs";
 import { useState } from "react";
 import {
@@ -31,22 +31,22 @@ function Command() {
         <Action.CopyToClipboard
           title="Copy File"
           content={{ file: download.path }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
         <Action
           title="Reload Downloads"
           icon={Icon.RotateAntiClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={handleReload}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.OpenWith path={download.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-        <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+        <Action.OpenWith path={download.path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
+        <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
         <Action
           title="Toggle Layout"
           icon={downloadsLayout === "list" ? Icon.AppWindowGrid3x3 : Icon.AppWindowList}
-          shortcut={{ modifiers: ["cmd"], key: "l" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
           onAction={() => setDownloadsLayout(downloadsLayout === "list" ? "grid" : "list")}
         />
       </ActionPanel.Section>
@@ -54,13 +54,13 @@ function Command() {
         <Action.Trash
           title="Delete Download"
           paths={download.path}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           onTrash={handleTrash}
         />
         <Action.Trash
           title="Delete All Downloads"
           paths={downloads.map((d) => d.path)}
-          shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.RemoveAll}
           onTrash={handleTrash}
         />
       </ActionPanel.Section>

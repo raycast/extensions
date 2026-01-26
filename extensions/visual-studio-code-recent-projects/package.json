@@ -30,7 +30,8 @@
     "pascal_burkhard",
     "roberto.cinetto",
     "emiliocantuc",
-    "raxityo"
+    "raxityo",
+    "yusifaliyevpro"
   ],
   "keywords": [
     "vscode",
@@ -203,20 +204,19 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.101.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^2.2.2",
     "cache-func": "^1.0.2",
     "lodash.get": "^4.4.2",
     "prettier": "^3.5.3",
-    "run-applescript": "^6.1.0",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/lodash.get": "^4.4.7",
     "@types/node": "22.13.10",
     "@types/react": "^19.0.10",
     "@types/sql.js": "^1.4.3",
-    "eslint": "9.22.0",
+    "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.26.1",
     "react": "^19.0.10",
     "typescript": "^5.8.2"

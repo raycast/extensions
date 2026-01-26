@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] - 2025-12-19
+
+### Improved
+- Check Text Instant now prioritizes selected text over clipboard content for better workflow integration
+- Newline preservation: When LanguageTool API includes newlines in match intervals, they are now preserved in corrected text
+- Smart replacement adjustment: Trailing spaces in replacements are automatically replaced with newlines when the original text ends with a newline
+- Match filtering: Invalid matches (with empty or whitespace-only replacements) are filtered out before display
+- Display normalization: Both original text and replacements in metadata are normalized for cleaner display (newlines removed)
+
+### Changed
+- Improved code organization and readability in text correction utilities
+
 ## [Initial Version] - 2025-12-15
 
 - Interactive form with text checking and detailed results

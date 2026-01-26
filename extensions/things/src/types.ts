@@ -28,7 +28,7 @@ export type Project = {
 export type Area = {
   id: string;
   name: string;
-  tags: string;
+  tags?: string;
   todos?: Todo[];
 };
 

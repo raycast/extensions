@@ -2,10 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sql-format",
   "title": "Format SQL",
-  "description": "Format a SQL cluase use standard SQL format",
+  "description": "Format a SQL clause use standard SQL format",
   "icon": "extension-icon.png",
   "author": "tonngw",
-  "contributors": ["stelo"],
+  "contributors": [
+    "stelo",
+    "harold_han"
+  ],
   "categories": [
     "Data",
     "Developer Tools"
@@ -15,7 +18,7 @@
     {
       "name": "formatClipboard",
       "title": "Format Clipboard SQL",
-      "description": "Formats a SQL cluase string stored in clipboard and copies/pastes it back",
+      "description": "Formats a SQL clause string stored in clipboard and copies/pastes it back",
       "mode": "no-view"
     },
     {
@@ -40,9 +43,9 @@
   "preferences": [
     {
       "default": false,
-      "description": "Paste the formatted JSON to an active app",
-      "label": "Automatically paste the formatted JSON",
-      "name": "autopaste",
+      "description": "Paste the formatted SQL to an active app",
+      "label": "Automatically paste the formatted SQL",
+      "name": "autoPaste",
       "required": false,
       "title": "Auto Paste",
       "type": "checkbox"
@@ -90,12 +93,102 @@
       "title": "Keyword Case",
       "default": "preserve",
       "type": "dropdown"
+    },
+    {
+      "data": [
+        {
+          "title": "Standard SQL",
+          "value": "sql"
+        },
+        {
+          "title": "BigQuery",
+          "value": "bigquery"
+        },
+        {
+          "title": "ClickHouse",
+          "value": "clickhouse"
+        },
+        {
+          "title": "DB2",
+          "value": "db2"
+        },
+        {
+          "title": "DB2i",
+          "value": "db2i"
+        },
+        {
+          "title": "DuckDB",
+          "value": "duckdb"
+        },
+        {
+          "title": "Apache Hive",
+          "value": "hive"
+        },
+        {
+          "title": "MariaDB",
+          "value": "mariadb"
+        },
+        {
+          "title": "MySQL",
+          "value": "mysql"
+        },
+        {
+          "title": "TiDB",
+          "value": "tidb"
+        },
+        {
+          "title": "Couchbase N1QL",
+          "value": "n1ql"
+        },
+        {
+          "title": "Oracle PL/SQL",
+          "value": "plsql"
+        },
+        {
+          "title": "PostgreSQL",
+          "value": "postgresql"
+        },
+        {
+          "title": "Amazon Redshift",
+          "value": "redshift"
+        },
+        {
+          "title": "SingleStoreDB",
+          "value": "singlestoredb"
+        },
+        {
+          "title": "Snowflake",
+          "value": "snowflake"
+        },
+        {
+          "title": "Spark",
+          "value": "spark"
+        },
+        {
+          "title": "SQLite",
+          "value": "sqlite"
+        },
+        {
+          "title": "SQL Server Transact-SQL",
+          "value": "transactsql"
+        },
+        {
+          "title": "Trino",
+          "value": "trino"
+        }
+      ],
+      "description": "SQL Dialect for formatting",
+      "name": "language",
+      "required": false,
+      "title": "SQL Dialect",
+      "default": "sql",
+      "type": "dropdown"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
-    "sql-formatter": "^15.4.0"
+    "sql-formatter": "^15.7.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -112,5 +205,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

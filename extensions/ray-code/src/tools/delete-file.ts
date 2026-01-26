@@ -1,5 +1,5 @@
-import { unlink } from "node:fs/promises";
-import { resolveAndValidatePath } from "../utils/workspace";
+import { trash } from "@raycast/api";
+import { resolveAndValidatePath, isAutoEditEnabled } from "../utils/workspace";
 import { existsSync } from "node:fs";
 
 type Input = {
@@ -10,6 +10,10 @@ type Input = {
 };
 
 export async function confirmation({ path }: Input) {
+  if (isAutoEditEnabled()) {
+    return undefined;
+  }
+
   const filePath = resolveAndValidatePath(path);
 
   // Check if file exists
@@ -18,11 +22,10 @@ export async function confirmation({ path }: Input) {
   }
 
   return {
-    message: `Are you sure you want to delete this file?`,
+    message: `Are you sure you want to move this file to trash?`,
     info: [
       { name: "File Path", value: path },
-      { name: "Action", value: "Delete File" },
-      { name: "Warning", value: "This action cannot be undone" },
+      { name: "Action", value: "Move to Trash" },
     ],
   };
 }
@@ -35,8 +38,8 @@ export default async function ({ path }: Input) {
     throw new Error(`File does not exist: ${path}`);
   }
 
-  // Delete the file
-  await unlink(filePath);
+  // Delete the file (moves to trash for safer deletion)
+  await trash(filePath);
 
   return {
     success: true,

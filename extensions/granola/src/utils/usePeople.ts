@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Person, Company, Attendee, Creator, Document } from "./types";
-import getCache from "./getCache";
+import { Person, Company, Attendee, Creator } from "./types";
+import { getDocumentsList } from "./fetchData";
 
 // Helper function to safely compare dates
 function compareDates(date1: string | undefined, date2: string | undefined): number {
@@ -17,6 +17,14 @@ function compareDates(date1: string | undefined, date2: string | undefined): num
   if (isNaN(time2)) return 1;
 
   return time1 - time2;
+}
+
+function isAttendee(value: unknown): value is Attendee {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Record<string, unknown>;
+  if ("email" in record && record.email !== undefined && typeof record.email !== "string") return false;
+  if ("name" in record && record.name !== undefined && typeof record.name !== "string") return false;
+  return true;
 }
 
 // Helper function to process a person (creator or attendee)
@@ -84,56 +92,43 @@ export function usePeople() {
     const fetchPeople = async () => {
       try {
         setIsLoading(true);
-        const cacheData = await getCache();
+        const documents = await getDocumentsList();
 
         const peopleMap = new Map<string, Person>();
         const companyMap = new Map<string, Company>();
 
         // Extract people from documents (meeting attendees)
-        if (cacheData?.state?.documents) {
-          const documents = cacheData.state.documents;
+        documents.forEach((document) => {
+          if (document?.people) {
+            const meetingDate = document.created_at || "";
+            const meetingId = document.id || "";
 
-          Object.values(documents).forEach((doc: unknown) => {
-            const document = doc as Document;
-            if (document?.people) {
-              const meetingDate = document.created_at || "";
-              const meetingId = document.id || "";
-
-              // Add creator
-              if (document.people.creator) {
-                const creator = document.people.creator;
-                const email = creator.email || "";
-                processPerson(creator, email, meetingId, meetingDate, document.created_at || "", peopleMap, "Unknown");
-              }
-
-              // Add attendees
-              if (document.people.attendees && Array.isArray(document.people.attendees)) {
-                document.people.attendees.forEach((attendee: unknown) => {
-                  const attendeeData = attendee as Attendee;
-                  const email = attendeeData.email || "";
-                  processPerson(
-                    attendeeData,
-                    email,
-                    meetingId,
-                    meetingDate,
-                    document.created_at || "",
-                    peopleMap,
-                    email.split("@")[0],
-                  );
-                });
-              }
+            // Add creator
+            if (document.people.creator) {
+              const creator = document.people.creator;
+              const email = creator.email || "";
+              processPerson(creator, email, meetingId, meetingDate, document.created_at || "", peopleMap, "Unknown");
             }
-          });
-        }
 
-        // Also add people from the global people array (if exists)
-        if (cacheData?.state?.people && Array.isArray(cacheData.state.people)) {
-          cacheData.state.people.forEach((person: Person) => {
-            if (person.email && !peopleMap.has(person.email)) {
-              peopleMap.set(person.email, person);
+            // Add attendees
+            if (document.people.attendees && Array.isArray(document.people.attendees)) {
+              document.people.attendees.forEach((attendee: unknown) => {
+                if (!isAttendee(attendee)) return;
+                const attendeeData = attendee;
+                const email = attendeeData.email || "";
+                processPerson(
+                  attendeeData,
+                  email,
+                  meetingId,
+                  meetingDate,
+                  document.created_at || "",
+                  peopleMap,
+                  email.split("@")[0],
+                );
+              });
             }
-          });
-        }
+          }
+        });
 
         const allPeople = Array.from(peopleMap.values());
         setPeople(allPeople);
