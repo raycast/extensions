@@ -1,5 +1,10 @@
 # NixPkgs Search Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add "Open Package Details" action to open the package on search.nixos.org
+- **Updated available branches**: Removed unsupported branch (25.05) and kept only working versions (unstable, 25.11)
+
 ## [Update] - 2025-12-07
 
 - Update shortcuts to use Raycast's common keyboard shortcuts

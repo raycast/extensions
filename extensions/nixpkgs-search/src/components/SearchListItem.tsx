@@ -4,9 +4,10 @@ import type { SearchResult } from "../types";
 
 interface SearchListItemProps {
   searchResult: SearchResult;
+  channel: string;
 }
 
-export function SearchListItem({ searchResult }: SearchListItemProps) {
+export function SearchListItem({ searchResult, channel }: SearchListItemProps) {
   return (
     <List.Item
       title={searchResult.attrName}
@@ -14,6 +15,10 @@ export function SearchListItem({ searchResult }: SearchListItemProps) {
         <ActionPanel>
           <ActionPanel.Section>
             <ActionPanel.Submenu icon={Icon.Globe} title="Open…" shortcut={Keyboard.Shortcut.Common.Open}>
+              <Action.OpenInBrowser
+                title="Open Package Details"
+                url={`https://search.nixos.org/packages?channel=${channel}&show=${encodeURIComponent(searchResult.attrName)}&query=${encodeURIComponent(searchResult.attrName)}`}
+              />
               {searchResult.source && (
                 <Action.OpenInBrowser title="Open Package Source Code" url={searchResult.source} />
               )}
