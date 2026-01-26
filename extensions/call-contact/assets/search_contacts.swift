@@ -1,14 +1,6 @@
 import Foundation
 import Contacts
 
-// Check arguments
-guard CommandLine.arguments.count > 1 else {
-    print("[]")
-    exit(0)
-}
-
-let query = CommandLine.arguments[1]
-
 // Setup Contact Store
 let store = CNContactStore()
 let keys = [
@@ -20,31 +12,35 @@ let keys = [
     CNContactIdentifierKey
 ] as [CNKeyDescriptor]
 
+struct ContactResult: Codable {
+    let id: String
+    let name: String
+    let phone: String
+    let image: String?
+}
+
+var results: [ContactResult] = []
+let tempDir = URL(fileURLWithPath: "/tmp/raycast-contact-images")
+try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+
+// Check Authorization Status
+let status = CNContactStore.authorizationStatus(for: .contacts)
+if status == .denied || status == .restricted {
+    print("{\"error\": \"permission_denied\"}")
+    exit(0)
+}
+
 do {
-    // We can use a predicate for name matching
-    let predicate = CNContact.predicateForContacts(matchingName: query)
-    let contacts = try store.unifiedContacts(matching: predicate, keysToFetch: keys)
+    let request = CNContactFetchRequest(keysToFetch: keys)
     
-    // Also fetch strictly by name to get partials? 
-    // predicateForContacts(matchingName:) is prefix/fuzzy matching usually.
-    // If we want more robust matching like "contains", we might need to fetch all and filter?
-    // But fetching ALL is slow.
-    // Let's rely on Apple's matching for now, which is usually decent.
+    // Note: CNContact doesn't expose a 'isFavorite' property.
+    // Favorites are typically managed by the Phone/Contacts app in a private group.
     
-    struct ContactResult: Codable {
-        let name: String
-        let phone: String
-        let image: String?
-    }
-    
-    var results: [ContactResult] = []
-    let tempDir = URL(fileURLWithPath: "/tmp/raycast-contact-images")
-    try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-    
-    for contact in contacts {
+    try store.enumerateContacts(with: request) { (contact, _) in
         let fullName = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespaces)
         
-        // Write image if available
+        if fullName.isEmpty && contact.phoneNumbers.isEmpty { return }
+        
         var imagePath: String? = nil
         if contact.imageDataAvailable, let imageData = contact.thumbnailImageData {
             let fileURL = tempDir.appendingPathComponent("\(contact.identifier).jpg")
@@ -53,19 +49,22 @@ do {
         }
         
         for phone in contact.phoneNumbers {
-            results.append(ContactResult(name: fullName, phone: phone.value.stringValue, image: imagePath))
+            results.append(ContactResult(
+                id: contact.identifier,
+                name: fullName.isEmpty ? "Unknown" : fullName,
+                phone: phone.value.stringValue,
+                image: imagePath
+            ))
         }
     }
     
     let encoder = JSONEncoder()
-    let data = try encoder.encode(results)
-    if let string = String(data: data, encoding: .utf8) {
+    if let data = try? encoder.encode(results), let string = String(data: data, encoding: .utf8) {
         print(string)
     } else {
         print("[]")
     }
 
 } catch {
-    // print("Error: \(error)") // Debug only
     print("[]")
 }

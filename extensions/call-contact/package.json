@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "call-contact",
   "title": "Call Contact",
-  "description": "Can call any contact from your mac.",
+  "description": "Quickly search, find, and call your macOS contacts. Features smart sorting based on your most frequent calls.",
   "icon": "icon.png",
   "author": "chanjot_nanda",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -15,6 +19,16 @@
       "title": "Call",
       "description": "Search and call contacts",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "priorityMessage",
+      "type": "textfield",
+      "required": false,
+      "title": "Priority Message Template",
+      "description": "Message to pre-fill when using Priority Call",
+      "default": "Urgent: Please pick up! 🚨"
     }
   ],
   "dependencies": {
