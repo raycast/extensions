@@ -5,6 +5,10 @@
   "description": "Full-featured API client for Postman. Execute all HTTP methods (GET, POST, PUT, PATCH, DELETE), import cURL commands, manage environments, and track request history—all from Raycast.",
   "icon": "icon.png",
   "author": "krishna-kudari",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Applications",
     "Developer Tools",
