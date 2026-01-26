@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "better-github-search",
   "title": "Search GitHub Repositories",
-  "description": "Search all GitHub repositories with local caching and recent items",
+  "description": "Fast search across all your GitHub repositories with smart local caching. Requires GitHub Personal Access Token.",
   "icon": "command-icon.png",
   "author": "utkarshbhimte",
   "categories": [
