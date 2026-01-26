@@ -155,7 +155,7 @@ export default function Command() {
       <MenuBarExtra.Section title="CPU">
         <MenuBarExtra.Item
           title="CPU Usage"
-          subtitle={cpuUsage ? formatTags(cpuMenubarFormat, "", "", cpuUsage as string) : "Loading..."}
+          subtitle={cpuUsage ? formatTags(cpuMenubarFormat, "", "", cpuUsage as string) : "Loading…"}
           icon={Icon.Monitor}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
         />
