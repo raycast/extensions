@@ -1,5 +1,11 @@
 # Linkding Changelog
 
+## [Frecency + Refactor] - {PR_MERGE_DATE}
+
+- chore: npm audit fix
+- feat: implement frecency sorting
+- refactor: use context for state management
+
 ## [Refactor + Features] - 2025-11-26
 
 - feat: add archive action
