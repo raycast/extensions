@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api"
 import { useMemo } from "react"
 import React from "react"
 import { RequestDetailsType } from "../types"
@@ -25,11 +15,7 @@ type CollectionListItemProps = {
   collectionId?: string
 }
 
-export const CollectionListItem: React.FC<CollectionListItemProps> = ({
-  requestDetails,
-  isLoading,
-  collectionId,
-}) => {
+export const CollectionListItem: React.FC<CollectionListItemProps> = ({ requestDetails, isLoading, collectionId }) => {
   const { push } = useNavigation()
 
   if ("item" in requestDetails && requestDetails.item) {
@@ -42,10 +28,7 @@ export const CollectionListItem: React.FC<CollectionListItemProps> = ({
           <List.Item.Detail
             metadata={
               <Detail.Metadata>
-                <Detail.Metadata.Label
-                  title="Folder Name"
-                  text={requestDetails.name}
-                />
+                <Detail.Metadata.Label title="Folder Name" text={requestDetails.name} />
                 <Detail.Metadata.Separator />
               </Detail.Metadata>
             }
@@ -57,12 +40,7 @@ export const CollectionListItem: React.FC<CollectionListItemProps> = ({
               title="Open Folder"
               icon={Icon.List}
               onAction={() =>
-                push(
-                  <CollectionList
-                    id={collectionId}
-                    item={requestDetails.item as RequestDetailsType[]}
-                  />
-                )
+                push(<CollectionList id={collectionId} item={requestDetails.item as RequestDetailsType[]} />)
               }
             />
           </ActionPanel>
@@ -71,36 +49,24 @@ export const CollectionListItem: React.FC<CollectionListItemProps> = ({
     )
   }
 
-  const urlInfo = useMemo(
-    () => parseRequest(requestDetails.request),
-    [requestDetails]
-  )
+  const urlInfo = useMemo(() => parseRequest(requestDetails.request), [requestDetails])
 
   return (
     <List.Item
-      title={
-        (requestDetails.request.method || "GET") + "  " + requestDetails.name
-      }
+      title={(requestDetails.request.method || "GET") + "  " + requestDetails.name}
       key={requestDetails.id}
       icon={{
         source: Icon.Document,
         tintColor: Color.Orange,
       }}
-      detail={
-        <CollectionItemDetails isLoading={isLoading} data={requestDetails} />
-      }
+      detail={<CollectionItemDetails isLoading={isLoading} data={requestDetails} />}
       actions={
         <Actions
           urlInfo={urlInfo}
           requestDetails={requestDetails}
           collectionId={collectionId}
           onViewDetails={() => {
-            push(
-              <RequestDetailView
-                requestDetails={requestDetails}
-                collectionId={collectionId}
-              />
-            )
+            push(<RequestDetailView requestDetails={requestDetails} collectionId={collectionId} />)
           }}
         />
       }

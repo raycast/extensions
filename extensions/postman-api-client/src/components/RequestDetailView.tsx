@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  Clipboard,
-} from "@raycast/api"
+import { Action, ActionPanel, Detail, Icon, showToast, Toast, useNavigation, Clipboard } from "@raycast/api"
 import React, { useEffect, useState } from "react"
 import { RequestDetailsType, MethodsType } from "../types"
 import { RequestBuilder } from "./RequestBuilder"
@@ -15,10 +6,7 @@ import { ResponseDetails } from "./ResponseDetails"
 import { EnvironmentManager } from "./EnvironmentManager"
 import { parseRequest, getURL } from "../utils"
 import { generateCurl } from "../utils/curlGenerator"
-import {
-  getActiveEnvironment,
-  substituteVariables,
-} from "../utils/environmentStorage"
+import { getActiveEnvironment, substituteVariables } from "../utils/environmentStorage"
 
 type RequestDetailViewProps = {
   requestDetails: RequestDetailsType
@@ -26,16 +14,10 @@ type RequestDetailViewProps = {
   collectionName?: string
 }
 
-export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
-  requestDetails,
-  collectionId,
-}) => {
+export const RequestDetailView: React.FC<RequestDetailViewProps> = ({ requestDetails, collectionId }) => {
   const { push } = useNavigation()
-  const [activeEnvironment, setActiveEnvironment] = useState<string | null>(
-    null
-  )
-  const [environmentName, setEnvironmentName] =
-    useState<string>("No Environment")
+  const [activeEnvironment, setActiveEnvironment] = useState<string | null>(null)
+  const [environmentName, setEnvironmentName] = useState<string>("No Environment")
 
   useEffect(() => {
     const loadEnvironment = async () => {
@@ -184,9 +166,7 @@ ${
 
 ${
   urlInfo?.variables && urlInfo.variables.length > 0
-    ? `**Path Variables:**\n${urlInfo.variables
-        .map((v) => `- \`${v}\``)
-        .join("\n")}\n`
+    ? `**Path Variables:**\n${urlInfo.variables.map((v) => `- \`${v}\``).join("\n")}\n`
     : ""
 }
 `
@@ -197,15 +177,9 @@ ${
       <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="Method" text={method} />
       <Detail.Metadata.Label title="URL" text={displayUrl} />
-      <Detail.Metadata.Label
-        title="Active Environment"
-        text={environmentName}
-      />
+      <Detail.Metadata.Label title="Active Environment" text={environmentName} />
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Label
-        title="Last Updated"
-        text={new Date().toLocaleString()}
-      />
+      <Detail.Metadata.Label title="Last Updated" text={new Date().toLocaleString()} />
     </Detail.Metadata>
   )
 

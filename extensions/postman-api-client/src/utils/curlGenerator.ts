@@ -32,10 +32,7 @@ export const generateCurl = (request: RequestType): string => {
     } else if (body.mode === "urlencoded" && body.urlencoded) {
       const params = body.urlencoded
         .filter((p) => !p.disabled && p.key)
-        .map(
-          (p) =>
-            `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value || "")}`
-        )
+        .map((p) => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value || "")}`)
         .join("&")
       if (params) {
         curl += ` -d "${params}"`

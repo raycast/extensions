@@ -1,34 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api"
 import { useEffect, useState } from "react"
 import React from "react"
-import {
-  FormPayloadType,
-  HeaderType,
-  MethodsType,
-  URLType,
-  BodyType,
-  RequestType,
-} from "../types"
+import { FormPayloadType, HeaderType, MethodsType, URLType, BodyType, RequestType } from "../types"
 import fetch from "node-fetch"
 import { prepareFinalURL } from "../utils"
-import {
-  saveHistoryEntry,
-  getHistory,
-  deleteHistoryEntry,
-} from "../utils/historyStorage"
-import {
-  getActiveEnvironment,
-  substituteVariables,
-} from "../utils/environmentStorage"
+import { saveHistoryEntry, getHistory, deleteHistoryEntry } from "../utils/historyStorage"
+import { getActiveEnvironment, substituteVariables } from "../utils/environmentStorage"
 import { generateCurl } from "../utils/curlGenerator"
 import { useFetch } from "../fetch/useFetch"
 import { CollectionsResponseType } from "../types"
@@ -73,13 +50,11 @@ export const ResponseDetails: React.FC<ResponseDetailsType> = ({
   canSave = false,
 }) => {
   const { data: collectionsData } = useFetch("listCollections")
-  const collections =
-    (collectionsData as CollectionsResponseType)?.collections || []
+  const collections = (collectionsData as CollectionsResponseType)?.collections || []
   const [isRequestLoading, setIsRequestLoading] = useState(false)
   const [content, setContent] = useState<string>()
   const [statusCode, setStatusCode] = useState<number>()
-  const [responseHeaders, setResponseHeaders] =
-    useState<Record<string, string>>()
+  const [responseHeaders, setResponseHeaders] = useState<Record<string, string>>()
   const [finalURL, setFinalURL] = useState<string>()
 
   const sendRequest = async () => {
@@ -117,10 +92,7 @@ export const ResponseDetails: React.FC<ResponseDetailsType> = ({
     if (hasBody) {
       if (body?.mode === "raw" && payload?.body) {
         requestBody = payload.body as string
-        contentType =
-          body.options?.raw?.language === "json"
-            ? "application/json"
-            : "text/plain"
+        contentType = body.options?.raw?.language === "json" ? "application/json" : "text/plain"
       } else if (body?.mode === "urlencoded" && body.urlencoded) {
         const urlencoded = new URLSearchParams()
         body.urlencoded.forEach((item) => {
@@ -191,22 +163,16 @@ export const ResponseDetails: React.FC<ResponseDetailsType> = ({
       let isBinary = false
 
       // Check if response is binary
-      const binaryTypes = [
-        "image/",
-        "application/pdf",
-        "application/octet-stream",
-        "video/",
-        "audio/",
-      ]
+      const binaryTypes = ["image/", "application/pdf", "application/octet-stream", "video/", "audio/"]
       isBinary = binaryTypes.some((type) => contentTypeHeader.includes(type))
 
       if (isBinary) {
         // For binary responses, show info message
         const buffer = await res.arrayBuffer()
         const size = buffer.byteLength
-        responseText = `[Binary Response]\n\nContent-Type: ${contentTypeHeader}\nSize: ${(
-          size / 1024
-        ).toFixed(2)} KB\n\nBinary content cannot be displayed as text.`
+        responseText = `[Binary Response]\n\nContent-Type: ${contentTypeHeader}\nSize: ${(size / 1024).toFixed(
+          2
+        )} KB\n\nBinary content cannot be displayed as text.`
       } else if (contentTypeHeader.includes("application/json")) {
         try {
           const json = await res.json()
@@ -245,8 +211,7 @@ export const ResponseDetails: React.FC<ResponseDetailsType> = ({
         }
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error"
+      const errorMessage = error instanceof Error ? error.message : "Unknown error"
       setContent(`Error: ${errorMessage}`)
       showToast({
         title: "Request failed",
@@ -262,18 +227,9 @@ export const ResponseDetails: React.FC<ResponseDetailsType> = ({
     sendRequest()
   }, [url])
 
-  const statusEmoji = statusCode
-    ? statusCode >= 200 && statusCode < 300
-      ? "✅"
-      : statusCode >= 400
-      ? "❌"
-      : "⚠️"
-    : ""
+  const statusEmoji = statusCode ? (statusCode >= 200 && statusCode < 300 ? "✅" : statusCode >= 400 ? "❌" : "⚠️") : ""
 
-  const handleSaveToCollection = async (formValues: {
-    collectionId: string
-    requestName: string
-  }) => {
+  const handleSaveToCollection = async (formValues: { collectionId: string; requestName: string }) => {
     let requestToSave: RequestType
 
     if (originalRequest) {
@@ -347,15 +303,10 @@ export const ResponseDetails: React.FC<ResponseDetailsType> = ({
       url: finalUrl,
     }
 
-    const savedRequestName =
-      formValues.requestName || name || "Untitled Request"
+    const savedRequestName = formValues.requestName || name || "Untitled Request"
 
     try {
-      const result = await createRequest(
-        formValues.collectionId,
-        savedRequestName,
-        requestToSave
-      )
+      const result = await createRequest(formValues.collectionId, savedRequestName, requestToSave)
 
       if (result.success) {
         // Update history entry with the saved request name
@@ -365,8 +316,7 @@ export const ResponseDetails: React.FC<ResponseDetailsType> = ({
             const history = await getHistory()
             // Find entries matching this request (by URL and method)
             const matchingEntries = history.filter(
-              (entry) =>
-                entry.url === finalURL && entry.method === (method || "GET")
+              (entry) => entry.url === finalURL && entry.method === (method || "GET")
             )
 
             if (matchingEntries.length > 0) {
@@ -409,28 +359,15 @@ export const ResponseDetails: React.FC<ResponseDetailsType> = ({
   }
 
   const isBinaryResponse = content?.includes("[Binary Response]")
-  const contentTypeHeader =
-    responseHeaders?.["content-type"] || responseHeaders?.["Content-Type"] || ""
+  const contentTypeHeader = responseHeaders?.["content-type"] || responseHeaders?.["Content-Type"] || ""
 
   const markdown = `# Response ${statusEmoji}
 
 ${statusCode ? `**Status Code:** ${statusCode}` : ""}
 
-${
-  responseHeaders
-    ? `**Headers:**\n\`\`\`json\n${JSON.stringify(
-        responseHeaders,
-        null,
-        2
-      )}\n\`\`\`\n`
-    : ""
-}
+${responseHeaders ? `**Headers:**\n\`\`\`json\n${JSON.stringify(responseHeaders, null, 2)}\n\`\`\`\n` : ""}
 
-${
-  isBinaryResponse && contentTypeHeader.includes("image/")
-    ? `**Preview:**\n![Response](${finalURL})\n\n`
-    : ""
-}
+${isBinaryResponse && contentTypeHeader.includes("image/") ? `**Preview:**\n![Response](${finalURL})\n\n` : ""}
 
 **Body:**
 \`\`\`
@@ -460,12 +397,7 @@ ${content || "Loading Response..."}
             {finalURL && (
               <Action.CopyToClipboard
                 title="Copy cURL"
-                content={generateCurlFromResponse(
-                  finalURL,
-                  method,
-                  header,
-                  body
-                )}
+                content={generateCurlFromResponse(finalURL, method, header, body)}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 onCopy={() => {
                   showToast({
@@ -478,12 +410,7 @@ ${content || "Loading Response..."}
             )}
             {canSave && (
               <Action.Push
-                target={
-                  <SaveToCollectionForm
-                    collections={collections}
-                    onSave={handleSaveToCollection}
-                  />
-                }
+                target={<SaveToCollectionForm collections={collections} onSave={handleSaveToCollection} />}
                 title="Save to Collection"
                 icon={Icon.SaveDocument}
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
@@ -498,16 +425,10 @@ ${content || "Loading Response..."}
 
 type SaveToCollectionFormProps = {
   collections: Array<{ id: string; name: string }>
-  onSave: (values: {
-    collectionId: string
-    requestName: string
-  }) => Promise<void>
+  onSave: (values: { collectionId: string; requestName: string }) => Promise<void>
 }
 
-const SaveToCollectionForm: React.FC<SaveToCollectionFormProps> = ({
-  collections,
-  onSave,
-}) => {
+const SaveToCollectionForm: React.FC<SaveToCollectionFormProps> = ({ collections, onSave }) => {
   const { pop } = useNavigation()
   const [isSaving, setIsSaving] = useState(false)
   const [createNewCollection, setCreateNewCollection] = useState(false)
@@ -524,10 +445,7 @@ const SaveToCollectionForm: React.FC<SaveToCollectionFormProps> = ({
 
       // If creating a new collection, create it first
       if (createNewCollection && formValues.newCollectionName) {
-        const createResult = await createCollection(
-          formValues.newCollectionName,
-          formValues.newCollectionDescription
-        )
+        const createResult = await createCollection(formValues.newCollectionName, formValues.newCollectionDescription)
 
         if (!createResult.success) {
           showToast({
@@ -580,11 +498,7 @@ const SaveToCollectionForm: React.FC<SaveToCollectionFormProps> = ({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={
-              createNewCollection
-                ? "Create Collection & Save Request"
-                : "Save Request"
-            }
+            title={createNewCollection ? "Create Collection & Save Request" : "Save Request"}
             icon={Icon.SaveDocument}
             onSubmit={handleSubmit}
           />
@@ -617,17 +531,9 @@ const SaveToCollectionForm: React.FC<SaveToCollectionFormProps> = ({
       ) : (
         <>
           {collections.length > 0 ? (
-            <Form.Dropdown
-              id="collectionId"
-              title="Collection"
-              defaultValue={collections[0]?.id}
-            >
+            <Form.Dropdown id="collectionId" title="Collection" defaultValue={collections[0]?.id}>
               {collections.map((collection) => (
-                <Form.Dropdown.Item
-                  key={collection.id}
-                  value={collection.id}
-                  title={collection.name}
-                />
+                <Form.Dropdown.Item key={collection.id} value={collection.id} title={collection.name} />
               ))}
             </Form.Dropdown>
           ) : (

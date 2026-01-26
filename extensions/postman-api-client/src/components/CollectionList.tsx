@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api"
 import { useEffect, useState } from "react"
 import React from "react"
 import { useFetch } from "../fetch/useFetch"
@@ -20,8 +12,7 @@ export const CollectionList = (props: {
   collectionName?: string
 }) => {
   const { push } = useNavigation()
-  const [requests, setRequests] =
-    useState<CollectionDetailType["collection"]["item"]>()
+  const [requests, setRequests] = useState<CollectionDetailType["collection"]["item"]>()
 
   const { data, isLoading, error } = props.item
     ? { data: props.item, isLoading: false, error: undefined }
@@ -60,12 +51,7 @@ export const CollectionList = (props: {
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               onAction={() => {
                 if (props.id) {
-                  push(
-                    <CreateRequest
-                      collectionId={props.id}
-                      collectionName={props.collectionName}
-                    />
-                  )
+                  push(<CreateRequest collectionId={props.id} collectionName={props.collectionName} />)
                 }
               }}
             />
@@ -83,10 +69,7 @@ export const CollectionList = (props: {
           />
         ))
       ) : (
-        <List.EmptyView
-          icon={Icon.QuestionMark}
-          description="No Requests Found"
-        />
+        <List.EmptyView icon={Icon.QuestionMark} description="No Requests Found" />
       )}
     </List>
   )

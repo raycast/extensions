@@ -78,9 +78,7 @@ describe("parseCurl", () => {
 
       expect(result.headers).toBeDefined()
       expect(result.headers?.length).toBeGreaterThanOrEqual(2)
-      const authHeader = result.headers?.find(
-        (h) => h.key.toLowerCase() === "authorization"
-      )
+      const authHeader = result.headers?.find((h) => h.key.toLowerCase() === "authorization")
       expect(authHeader).toBeDefined()
       expect(authHeader?.value).toContain("Bearer")
     })

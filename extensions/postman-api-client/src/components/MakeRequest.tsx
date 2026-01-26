@@ -1,22 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  Clipboard,
-} from "@raycast/api"
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation, Clipboard } from "@raycast/api"
 import React, { useEffect, useState } from "react"
 import { parseCurl } from "../utils/curlParser"
-import {
-  MethodsType,
-  HeaderType,
-  URLType,
-  BodyType,
-  RequestType,
-} from "../types"
+import { MethodsType, HeaderType, URLType, BodyType, RequestType } from "../types"
 import { ResponseDetails } from "./ResponseDetails"
 import { RequestBuilder } from "./RequestBuilder"
 import { parseRequest } from "../utils"
@@ -30,15 +15,12 @@ export const MakeRequest: React.FC = () => {
   const [curlCommand, setCurlCommand] = useState("")
   const [method, setMethod] = useState<MethodsType>("GET")
   const [url, setUrl] = useState("")
-  const [headers, setHeaders] = useState<Array<{ key: string; value: string }>>(
-    [{ key: "", value: "" }]
-  )
+  const [headers, setHeaders] = useState<Array<{ key: string; value: string }>>([{ key: "", value: "" }])
   const [body, setBody] = useState("")
 
   // Load collections for save workflow
   const { data: collectionsData } = useFetch("listCollections")
-  const collections =
-    (collectionsData as CollectionsResponseType)?.collections || []
+  const collections = (collectionsData as CollectionsResponseType)?.collections || []
 
   useEffect(() => {
     // Try to get cURL from clipboard on mount
@@ -106,20 +88,13 @@ export const MakeRequest: React.FC = () => {
       if (parsed.body) {
         if (parsed.body.mode === "raw" && parsed.body.raw) {
           setBody(parsed.body.raw)
-        } else if (
-          parsed.body.mode === "urlencoded" &&
-          parsed.body.urlencoded
-        ) {
+        } else if (parsed.body.mode === "urlencoded" && parsed.body.urlencoded) {
           // Convert urlencoded to raw string for display
-          const urlencodedString = parsed.body.urlencoded
-            .map((item) => `${item.key}=${item.value || ""}`)
-            .join("&")
+          const urlencodedString = parsed.body.urlencoded.map((item) => `${item.key}=${item.value || ""}`).join("&")
           setBody(urlencodedString)
         } else if (parsed.body.mode === "formdata" && parsed.body.formdata) {
           // Convert formdata to raw string for display
-          const formdataString = parsed.body.formdata
-            .map((item) => `${item.key}=${item.value || ""}`)
-            .join("&")
+          const formdataString = parsed.body.formdata.map((item) => `${item.key}=${item.value || ""}`).join("&")
           setBody(formdataString)
         } else {
           setBody("")
@@ -136,10 +111,7 @@ export const MakeRequest: React.FC = () => {
     } catch (error) {
       showToast({
         title: "Parse error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to parse cURL command",
+        message: error instanceof Error ? error.message : "Failed to parse cURL command",
         style: Toast.Style.Failure,
       })
     }
@@ -178,14 +150,12 @@ export const MakeRequest: React.FC = () => {
         protocol: urlObj.protocol.replace(":", "") as "https" | "http",
         host: urlObj.hostname.split("."),
         path: urlObj.pathname.split("/").filter((p) => p),
-        query: Array.from(urlObj.searchParams.entries()).map(
-          ([key, value]) => ({
-            key,
-            value,
-            type: "text",
-            disabled: false,
-          })
-        ),
+        query: Array.from(urlObj.searchParams.entries()).map(([key, value]) => ({
+          key,
+          value,
+          type: "text",
+          disabled: false,
+        })),
       }
 
       // Ensure raw URL is set
@@ -313,11 +283,7 @@ export const MakeRequest: React.FC = () => {
     }
 
     try {
-      const result = await createRequest(
-        formValues.collectionId,
-        formValues.requestName || "Untitled Request",
-        request
-      )
+      const result = await createRequest(formValues.collectionId, formValues.requestName || "Untitled Request", request)
 
       if (result.success) {
         showToast({
@@ -360,12 +326,7 @@ export const MakeRequest: React.FC = () => {
           />
           {collections.length > 0 && (
             <Action.Push
-              target={
-                <SaveToCollectionForm
-                  collections={collections}
-                  onSave={handleSaveToCollection}
-                />
-              }
+              target={<SaveToCollectionForm collections={collections} onSave={handleSaveToCollection} />}
               title="Save to Collection"
               icon={Icon.SaveDocument}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
@@ -374,10 +335,7 @@ export const MakeRequest: React.FC = () => {
         </ActionPanel>
       }
     >
-      <Form.Description
-        title="Import cURL"
-        text="Paste a cURL command to auto-fill the form below"
-      />
+      <Form.Description title="Import cURL" text="Paste a cURL command to auto-fill the form below" />
       <Form.TextArea
         id="curlCommand"
         title="cURL Command"
@@ -390,12 +348,7 @@ export const MakeRequest: React.FC = () => {
 
       <Form.Separator />
 
-      <Form.Dropdown
-        id="method"
-        title="Method"
-        value={method}
-        onChange={(value) => setMethod(value as MethodsType)}
-      >
+      <Form.Dropdown id="method" title="Method" value={method} onChange={(value) => setMethod(value as MethodsType)}>
         <Form.Dropdown.Item value="GET" title="GET" />
         <Form.Dropdown.Item value="POST" title="POST" />
         <Form.Dropdown.Item value="PUT" title="PUT" />
@@ -443,17 +396,12 @@ export const MakeRequest: React.FC = () => {
           {index < headers.length - 1 && <Form.Separator />}
         </React.Fragment>
       ))}
-      <Form.Description
-        text={`${headers.length} header(s). Add more by editing this form.`}
-      />
+      <Form.Description text={`${headers.length} header(s). Add more by editing this form.`} />
 
       {["POST", "PUT", "PATCH"].includes(method) && (
         <>
           <Form.Separator />
-          <Form.Description
-            title="Request Body"
-            text="Enter the request body (JSON, XML, or plain text)"
-          />
+          <Form.Description title="Request Body" text="Enter the request body (JSON, XML, or plain text)" />
           <Form.TextArea
             id="body"
             title="Body"
@@ -470,24 +418,14 @@ export const MakeRequest: React.FC = () => {
 
 type SaveToCollectionFormProps = {
   collections: Array<{ id: string; name: string }>
-  onSave: (values: {
-    collectionId: string
-    folderId?: string
-    requestName: string
-  }) => Promise<void>
+  onSave: (values: { collectionId: string; folderId?: string; requestName: string }) => Promise<void>
 }
 
-const SaveToCollectionForm: React.FC<SaveToCollectionFormProps> = ({
-  collections,
-  onSave,
-}) => {
+const SaveToCollectionForm: React.FC<SaveToCollectionFormProps> = ({ collections, onSave }) => {
   const { pop } = useNavigation()
   const [isSaving, setIsSaving] = useState(false)
 
-  const handleSubmit = async (formValues: {
-    collectionId: string
-    requestName: string
-  }) => {
+  const handleSubmit = async (formValues: { collectionId: string; requestName: string }) => {
     setIsSaving(true)
     try {
       await onSave({
@@ -508,25 +446,13 @@ const SaveToCollectionForm: React.FC<SaveToCollectionFormProps> = ({
       isLoading={isSaving}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Request"
-            icon={Icon.SaveDocument}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Save Request" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="collectionId"
-        title="Collection"
-        defaultValue={collections[0]?.id}
-      >
+      <Form.Dropdown id="collectionId" title="Collection" defaultValue={collections[0]?.id}>
         {collections.map((collection) => (
-          <Form.Dropdown.Item
-            key={collection.id}
-            value={collection.id}
-            title={collection.name}
-          />
+          <Form.Dropdown.Item key={collection.id} value={collection.id} title={collection.name} />
         ))}
       </Form.Dropdown>
       <Form.TextField

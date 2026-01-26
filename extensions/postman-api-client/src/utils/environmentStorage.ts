@@ -27,14 +27,10 @@ export const getEnvironments = async (): Promise<Environment[]> => {
   }
 }
 
-export const saveEnvironment = async (
-  environment: Environment
-): Promise<void> => {
+export const saveEnvironment = async (environment: Environment): Promise<void> => {
   try {
     const environments = await getEnvironments()
-    const existingIndex = environments.findIndex(
-      (env) => env.id === environment.id
-    )
+    const existingIndex = environments.findIndex((env) => env.id === environment.id)
 
     if (existingIndex >= 0) {
       environments[existingIndex] = { ...environment, updatedAt: Date.now() }
@@ -75,9 +71,7 @@ export const getActiveEnvironmentId = async (): Promise<string | null> => {
   }
 }
 
-export const setActiveEnvironment = async (
-  id: string | null
-): Promise<void> => {
+export const setActiveEnvironment = async (id: string | null): Promise<void> => {
   try {
     if (id) {
       await LocalStorage.setItem(ACTIVE_ENVIRONMENT_KEY, id)
@@ -103,10 +97,7 @@ export const getActiveEnvironment = async (): Promise<Environment | null> => {
   }
 }
 
-export const substituteVariables = (
-  text: string,
-  environment: Environment | null
-): string => {
+export const substituteVariables = (text: string, environment: Environment | null): string => {
   if (!environment) return text
 
   let result = text

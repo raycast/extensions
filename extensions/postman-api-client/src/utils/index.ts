@@ -1,13 +1,9 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api"
+import { getPreferenceValues } from "@raycast/api"
 import { FormPayloadType, RequestType, URLType } from "../types"
 import { getActiveEnvironment, substituteVariables } from "./environmentStorage"
-import Values = LocalStorage.Values
 
 export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()))
-  return {
-    accessToken: preferencesMap.get("accessToken") as string,
-  }
+  return getPreferenceValues<Preferences>()
 }
 
 import { reconstructUrlFromPostman } from "./urlBuilder"
@@ -32,8 +28,7 @@ export const requestHasVariables = (url: URLType) => {
 export const requestHasParams = (url: URLType) => {
   if (!url.path) return undefined
 
-  const params =
-    url.query?.length && url.query?.length > 0 ? url.query : undefined
+  const params = url.query?.length && url.query?.length > 0 ? url.query : undefined
 
   return params
 }
@@ -83,18 +78,10 @@ const parsePath = (payload?: FormPayloadType, path?: Array<string>) => {
     }
   }
 
-  return (
-    result +
-    (unmatchedParams.length > 1
-      ? unmatchedParams.substring(0, unmatchedParams.length - 1)
-      : "")
-  )
+  return result + (unmatchedParams.length > 1 ? unmatchedParams.substring(0, unmatchedParams.length - 1) : "")
 }
 
-export const prepareFinalURL = async (
-  url: URLType,
-  payload?: FormPayloadType
-): Promise<string | undefined> => {
+export const prepareFinalURL = async (url: URLType, payload?: FormPayloadType): Promise<string | undefined> => {
   const { host, path, protocol, raw } = url
   if (!raw || !host || !protocol) {
     return

@@ -1,10 +1,5 @@
 import { LocalStorage } from "@raycast/api"
-import {
-  saveHistoryEntry,
-  getHistory,
-  clearHistory,
-  deleteHistoryEntry,
-} from "../historyStorage"
+import { saveHistoryEntry, getHistory, clearHistory, deleteHistoryEntry } from "../historyStorage"
 import { HistoryEntry } from "../../types"
 
 // Mock LocalStorage
@@ -67,9 +62,7 @@ describe("historyStorage", () => {
         response: { statusCode: 201 },
       }
 
-      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify([existingEntry])
-      )
+      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify([existingEntry]))
 
       const newEntry = {
         name: "New Request",
@@ -89,22 +82,17 @@ describe("historyStorage", () => {
     })
 
     it("should limit history to 20 entries", async () => {
-      const existingEntries: HistoryEntry[] = Array.from(
-        { length: 20 },
-        (_, i) => ({
-          id: `id-${i}`,
-          timestamp: Date.now() - i * 1000,
-          name: `Request ${i}`,
-          method: "GET",
-          url: `https://api.example.com/${i}`,
-          request: { headers: [] },
-          response: { statusCode: 200 },
-        })
-      )
+      const existingEntries: HistoryEntry[] = Array.from({ length: 20 }, (_, i) => ({
+        id: `id-${i}`,
+        timestamp: Date.now() - i * 1000,
+        name: `Request ${i}`,
+        method: "GET",
+        url: `https://api.example.com/${i}`,
+        request: { headers: [] },
+        response: { statusCode: 200 },
+      }))
 
-      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify(existingEntries)
-      )
+      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(existingEntries))
 
       const newEntry = {
         name: "New Request",
@@ -155,9 +143,7 @@ describe("historyStorage", () => {
         },
       ]
 
-      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify(entries)
-      )
+      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(entries))
 
       const history = await getHistory()
 
@@ -166,11 +152,9 @@ describe("historyStorage", () => {
     })
 
     it("should return empty array on parse error", async () => {
-      const consoleErrorSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {
-          // Suppress console.error output in tests
-        })
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {
+        // Suppress console.error output in tests
+      })
       ;(LocalStorage.getItem as jest.Mock).mockResolvedValue("invalid json")
 
       const history = await getHistory()
@@ -211,9 +195,7 @@ describe("historyStorage", () => {
         },
       ]
 
-      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify(entries)
-      )
+      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(entries))
 
       await deleteHistoryEntry("1")
 
@@ -237,9 +219,7 @@ describe("historyStorage", () => {
         },
       ]
 
-      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify(entries)
-      )
+      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(entries))
 
       await deleteHistoryEntry("non-existent")
 

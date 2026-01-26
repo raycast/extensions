@@ -4,9 +4,7 @@ import { HistoryEntry } from "../types"
 const HISTORY_KEY = "request_history"
 const MAX_HISTORY_ENTRIES = 20
 
-export const saveHistoryEntry = async (
-  entry: Omit<HistoryEntry, "id" | "timestamp">
-): Promise<void> => {
+export const saveHistoryEntry = async (entry: Omit<HistoryEntry, "id" | "timestamp">): Promise<void> => {
   try {
     const history = await getHistory()
     const newEntry: HistoryEntry = {

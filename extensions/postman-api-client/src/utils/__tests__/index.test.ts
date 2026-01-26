@@ -1,10 +1,4 @@
-import {
-  parseRequest,
-  prepareFinalURL,
-  prettifyPathVariables,
-  requestHasParams,
-  requestHasVariables,
-} from "../index"
+import { parseRequest, prepareFinalURL, prettifyPathVariables, requestHasParams, requestHasVariables } from "../index"
 import { RequestType, URLType } from "../../types"
 
 describe("parseRequest", () => {

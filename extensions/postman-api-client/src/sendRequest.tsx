@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api"
 import React from "react"
 import { useFetch } from "./fetch/useFetch"
 import { CollectionList } from "./components/CollectionList"
@@ -60,14 +51,7 @@ export default function Command() {
                 <Action
                   title="Open Collection"
                   icon={Icon.List}
-                  onAction={() =>
-                    push(
-                      <CollectionList
-                        id={collection.id}
-                        collectionName={collection.name}
-                      />
-                    )
-                  }
+                  onAction={() => push(<CollectionList id={collection.id} collectionName={collection.name} />)}
                 />
               </ActionPanel>
             }
@@ -78,11 +62,7 @@ export default function Command() {
           />
         ))
       ) : (
-        <List.EmptyView
-          icon={Icon.Folder}
-          title="No Collections"
-          description="No Postman collections found"
-        />
+        <List.EmptyView icon={Icon.Folder} title="No Collections" description="No Postman collections found" />
       )}
     </List>
   )

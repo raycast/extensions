@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api"
 import React, { useState } from "react"
 import { RequestType, MethodsType, URLType } from "../types"
 import { createRequest } from "../fetch/useCreateRequest"
@@ -16,18 +8,11 @@ type CreateRequestProps = {
   collectionName?: string
 }
 
-export const CreateRequest: React.FC<CreateRequestProps> = ({
-  collectionId,
-  collectionName,
-}) => {
+export const CreateRequest: React.FC<CreateRequestProps> = ({ collectionId, collectionName }) => {
   const { pop } = useNavigation()
   const [isCreating, setIsCreating] = useState(false)
 
-  const handleSubmit = async (formValues: {
-    name: string
-    method: MethodsType
-    url: string
-  }) => {
+  const handleSubmit = async (formValues: { name: string; method: MethodsType; url: string }) => {
     if (!formValues.name.trim() || !formValues.url.trim()) {
       showToast({
         title: "Validation error",
@@ -102,17 +87,11 @@ export const CreateRequest: React.FC<CreateRequestProps> = ({
 
   return (
     <Form
-      navigationTitle={`Create Request${
-        collectionName ? ` in ${collectionName}` : ""
-      }`}
+      navigationTitle={`Create Request${collectionName ? ` in ${collectionName}` : ""}`}
       isLoading={isCreating}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Request"
-            icon={Icon.Plus}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Create Request" icon={Icon.Plus} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

@@ -396,9 +396,7 @@ describe("generateCurl", () => {
           protocol: "https",
           host: ["api", "example", "com"],
           path: ["users", "123", "posts"],
-          query: [
-            { key: "published", value: "true", type: "text", disabled: false },
-          ],
+          query: [{ key: "published", value: "true", type: "text", disabled: false }],
         },
         header: [
           {
@@ -432,9 +430,7 @@ describe("generateCurl", () => {
       expect(curl).toContain('"Content-Type: application/json"')
       expect(curl).toContain("-d")
       expect(curl).toContain("title")
-      expect(curl).toContain(
-        "https://api.example.com/users/123/posts?published=true"
-      )
+      expect(curl).toContain("https://api.example.com/users/123/posts?published=true")
     })
   })
 })

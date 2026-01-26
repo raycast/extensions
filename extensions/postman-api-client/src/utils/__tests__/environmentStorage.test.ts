@@ -44,9 +44,7 @@ describe("environmentStorage", () => {
           updatedAt: Date.now(),
         },
       ]
-      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify(storedEnvs)
-      )
+      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(storedEnvs))
 
       const environments = await getEnvironments()
       expect(environments).toEqual(storedEnvs)
@@ -89,9 +87,7 @@ describe("environmentStorage", () => {
         variables: { base_url: "https://updated.com" },
       }
 
-      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify([existingEnv])
-      )
+      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify([existingEnv]))
 
       await saveEnvironment(updatedEnv)
 
@@ -122,9 +118,7 @@ describe("environmentStorage", () => {
         },
       ]
 
-      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify(envs)
-      )
+      ;(LocalStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(envs))
 
       await deleteEnvironment("1")
 
@@ -161,10 +155,7 @@ describe("environmentStorage", () => {
     it("should set active environment", async () => {
       await setActiveEnvironment("env-id")
 
-      expect(LocalStorage.setItem).toHaveBeenCalledWith(
-        "active_environment",
-        "env-id"
-      )
+      expect(LocalStorage.setItem).toHaveBeenCalledWith("active_environment", "env-id")
     })
 
     it("should clear active environment when null", async () => {

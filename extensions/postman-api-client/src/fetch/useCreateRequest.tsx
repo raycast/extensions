@@ -61,21 +61,17 @@ export const createRequest = async (
       if (completeUrl.raw && (!completeUrl.protocol || !completeUrl.host)) {
         try {
           const urlObj = new URL(completeUrl.raw)
-          completeUrl.protocol = urlObj.protocol.replace(":", "") as
-            | "https"
-            | "http"
+          completeUrl.protocol = urlObj.protocol.replace(":", "") as "https" | "http"
           completeUrl.host = urlObj.hostname.split(".")
           completeUrl.path = urlObj.pathname.split("/").filter((p) => p)
 
           if (urlObj.search) {
-            completeUrl.query = Array.from(urlObj.searchParams.entries()).map(
-              ([key, value]) => ({
-                key,
-                value,
-                type: "text",
-                disabled: false,
-              })
-            )
+            completeUrl.query = Array.from(urlObj.searchParams.entries()).map(([key, value]) => ({
+              key,
+              value,
+              type: "text",
+              disabled: false,
+            }))
           }
         } catch (e) {
           // If parsing fails, at least ensure we have raw
@@ -87,8 +83,7 @@ export const createRequest = async (
       if (!completeUrl.raw) {
         return {
           success: false,
-          error:
-            "Request URL is missing or invalid. The URL must have a 'raw' field.",
+          error: "Request URL is missing or invalid. The URL must have a 'raw' field.",
         }
       }
 
@@ -121,9 +116,7 @@ export const createRequest = async (
 
       // Only add query if it exists and has items - format: [{key, value}] not [{key, value, type, disabled}]
       if (completeUrl.query && completeUrl.query.length > 0) {
-        const activeParams = completeUrl.query.filter(
-          (q) => !q.disabled && q.value
-        )
+        const activeParams = completeUrl.query.filter((q) => !q.disabled && q.value)
         if (activeParams.length > 0) {
           cleanUrl.query = activeParams.map((q) => ({
             key: q.key,
@@ -188,8 +181,7 @@ export const createRequest = async (
     if (!collection.info) {
       collection.info = {
         name: collection.name || "Collection",
-        schema:
-          "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
       }
     }
 
@@ -229,9 +221,7 @@ export const createRequest = async (
       collection?: { item?: RequestDetailsType[] }
     }
     // Find the newly added request in the response
-    const addedRequest = result.collection?.item?.find(
-      (item: RequestDetailsType) => item.name === name
-    )
+    const addedRequest = result.collection?.item?.find((item: RequestDetailsType) => item.name === name)
 
     return {
       success: true,

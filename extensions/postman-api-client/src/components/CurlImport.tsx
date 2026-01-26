@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  Clipboard,
-} from "@raycast/api"
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation, Clipboard } from "@raycast/api"
 import React, { useEffect, useState } from "react"
 import { parseCurl } from "../utils/curlParser"
 import { RequestBuilder } from "./RequestBuilder"
@@ -15,9 +6,7 @@ import { RequestBuilder } from "./RequestBuilder"
 export const CurlImport: React.FC = () => {
   const { push } = useNavigation()
   const [curlCommand, setCurlCommand] = useState("")
-  const [parsedRequest, setParsedRequest] = useState<Awaited<
-    ReturnType<typeof parseCurl>
-  > | null>(null)
+  const [parsedRequest, setParsedRequest] = useState<Awaited<ReturnType<typeof parseCurl>> | null>(null)
 
   useEffect(() => {
     // Try to get cURL from clipboard on mount
@@ -62,10 +51,7 @@ export const CurlImport: React.FC = () => {
     } catch (error) {
       showToast({
         title: "Parse error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to parse cURL command",
+        message: error instanceof Error ? error.message : "Failed to parse cURL command",
         style: Toast.Style.Failure,
       })
     }
@@ -105,17 +91,9 @@ export const CurlImport: React.FC = () => {
       navigationTitle="Import cURL"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Parse cURL"
-            icon={Icon.Eye}
-            onSubmit={handleParse}
-          />
+          <Action.SubmitForm title="Parse cURL" icon={Icon.Eye} onSubmit={handleParse} />
           {parsedRequest && !("error" in parsedRequest) && (
-            <Action
-              title="Send Request"
-              icon={Icon.Upload}
-              onAction={handleSendRequest}
-            />
+            <Action title="Send Request" icon={Icon.Upload} onAction={handleSendRequest} />
           )}
         </ActionPanel>
       }
@@ -138,15 +116,9 @@ export const CurlImport: React.FC = () => {
           <Form.Description text={`Method: ${parsedRequest.method}`} />
           <Form.Description text={`URL: ${parsedRequest.url.raw}`} />
           {parsedRequest.headers && parsedRequest.headers.length > 0 && (
-            <Form.Description
-              text={`Headers: ${parsedRequest.headers.length} header(s)`}
-            />
+            <Form.Description text={`Headers: ${parsedRequest.headers.length} header(s)`} />
           )}
-          {parsedRequest.body && (
-            <Form.Description
-              text={`Body: ${parsedRequest.body.mode || "raw"}`}
-            />
-          )}
+          {parsedRequest.body && <Form.Description text={`Body: ${parsedRequest.body.mode || "raw"}`} />}
         </>
       )}
       {parsedRequest && "error" in parsedRequest && (

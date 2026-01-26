@@ -23,14 +23,7 @@ export type RequestType = {
   body?: BodyType
 }
 
-export type MethodsType =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "PATCH"
-  | "DELETE"
-  | "HEAD"
-  | "OPTIONS"
+export type MethodsType = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS"
 
 export type HeaderType = {
   key: string

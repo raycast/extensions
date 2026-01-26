@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  useNavigation,
-  showToast,
-  Toast,
-} from "@raycast/api"
+import { Action, ActionPanel, Form, Icon, useNavigation, showToast, Toast } from "@raycast/api"
 import React, { useState } from "react"
 import {
   HeaderType,
@@ -56,9 +48,7 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
   const bodyMode = body?.mode || "raw"
   const canSave = canSaveFromProps || (collectionId && requestId)
 
-  const buildRequestFromForm = async (
-    formValues: FormPayloadType
-  ): Promise<RequestType> => {
+  const buildRequestFromForm = async (formValues: FormPayloadType): Promise<RequestType> => {
     const updatedUrl: URLType = { ...rest.url }
 
     // Update path variables
@@ -217,11 +207,7 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
       {variables ? (
         <>
           {variables.map((pathVariable, idx) => (
-            <Form.TextField
-              key={idx}
-              id={pathVariable}
-              title={prettifyPathVariables(pathVariable)}
-            />
+            <Form.TextField key={idx} id={pathVariable} title={prettifyPathVariables(pathVariable)} />
           ))}
         </>
       ) : (
@@ -237,9 +223,7 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
               id={param.key}
               title={param.key}
               defaultValue={param.value}
-              info={
-                "You can leave this field blank if you don't want to send this param."
-              }
+              info={"You can leave this field blank if you don't want to send this param."}
             />
           ))}
         </>
@@ -267,9 +251,7 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
                   id={`body_${item.key}`}
                   title={item.key}
                   defaultValue={item.disabled ? "" : item.value}
-                  info={
-                    "You can leave this field blank if you don't want to send this field."
-                  }
+                  info={"You can leave this field blank if you don't want to send this field."}
                 />
               ))}
             </>
@@ -282,9 +264,7 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
                   id={`body_${item.key}`}
                   title={item.key}
                   defaultValue={item.disabled ? "" : item.value}
-                  info={
-                    "You can leave this field blank if you don't want to send this field."
-                  }
+                  info={"You can leave this field blank if you don't want to send this field."}
                 />
               ))}
             </>

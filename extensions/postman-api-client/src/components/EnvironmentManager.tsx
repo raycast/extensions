@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Form,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api"
 import { useEffect, useState } from "react"
 import React from "react"
 import {
@@ -24,9 +14,7 @@ type EnvironmentManagerProps = {
   onEnvironmentChange?: () => void
 }
 
-export const EnvironmentManager: React.FC<EnvironmentManagerProps> = ({
-  onEnvironmentChange,
-}) => {
+export const EnvironmentManager: React.FC<EnvironmentManagerProps> = ({ onEnvironmentChange }) => {
   const { push, pop } = useNavigation()
   const [environments, setEnvironments] = useState<Environment[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -130,24 +118,13 @@ export const EnvironmentManager: React.FC<EnvironmentManagerProps> = ({
             key={env.id}
             title={env.name}
             subtitle={`${Object.keys(env.variables).length} variable(s)`}
-            icon={
-              activeId === env.id
-                ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                : Icon.Circle
-            }
-            accessories={[
-              activeId === env.id
-                ? { text: "Active", icon: Icon.Checkmark }
-                : {},
-            ]}
+            icon={activeId === env.id ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
+            accessories={[activeId === env.id ? { text: "Active", icon: Icon.Checkmark } : {}]}
             detail={
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Name"
-                      text={env.name}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Name" text={env.name} />
                     <List.Item.Detail.Metadata.Label
                       title="Variables"
                       text={Object.keys(env.variables).length.toString()}
@@ -155,10 +132,7 @@ export const EnvironmentManager: React.FC<EnvironmentManagerProps> = ({
                     <List.Item.Detail.Metadata.Separator />
                     {Object.entries(env.variables).map(([key, value]) => (
                       <React.Fragment key={key}>
-                        <List.Item.Detail.Metadata.Label
-                          title={key}
-                          text={value}
-                        />
+                        <List.Item.Detail.Metadata.Label title={key} text={value} />
                       </React.Fragment>
                     ))}
                   </List.Item.Detail.Metadata>
@@ -168,11 +142,7 @@ export const EnvironmentManager: React.FC<EnvironmentManagerProps> = ({
             actions={
               <ActionPanel>
                 {activeId !== env.id && (
-                  <Action
-                    title="Set as Active"
-                    icon={Icon.CheckCircle}
-                    onAction={() => handleSetActive(env.id)}
-                  />
+                  <Action title="Set as Active" icon={Icon.CheckCircle} onAction={() => handleSetActive(env.id)} />
                 )}
                 <Action
                   title="Edit Environment"
@@ -215,14 +185,9 @@ type EnvironmentFormProps = {
   onSave: () => void
 }
 
-const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
-  environment,
-  onSave,
-}) => {
+const EnvironmentForm: React.FC<EnvironmentFormProps> = ({ environment, onSave }) => {
   const { pop } = useNavigation()
-  const [variables, setVariables] = useState<
-    Array<{ key: string; value: string }>
-  >(
+  const [variables, setVariables] = useState<Array<{ key: string; value: string }>>(
     environment
       ? Object.entries(environment.variables).map(([key, value]) => ({
           key,
@@ -231,10 +196,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
       : [{ key: "", value: "" }]
   )
 
-  const handleSubmit = async (formValues: {
-    name: string
-    [key: string]: string
-  }) => {
+  const handleSubmit = async (formValues: { name: string; [key: string]: string }) => {
     try {
       const envVariables: Record<string, string> = {}
       variables.forEach(({ key, value }) => {
@@ -244,9 +206,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
       })
 
       const env: Environment = {
-        id:
-          environment?.id ||
-          `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: environment?.id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name: formValues.name,
         variables: envVariables,
         createdAt: environment?.createdAt || Date.now(),
@@ -316,9 +276,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
           {index < variables.length - 1 && <Form.Separator />}
         </React.Fragment>
       ))}
-      <Form.Description
-        text={`You have ${variables.length} variable(s). Add more by editing this form.`}
-      />
+      <Form.Description text={`You have ${variables.length} variable(s). Add more by editing this form.`} />
     </Form>
   )
 }

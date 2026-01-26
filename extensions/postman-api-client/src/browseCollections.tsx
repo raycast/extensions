@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api"
 import React from "react"
 import { useFetch } from "./fetch/useFetch"
 import { CollectionList } from "./components/CollectionList"
@@ -27,10 +18,7 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search in your collections"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search in your collections">
       {data ? (
         (data as CollectionsResponseType).collections.map((collection) => (
           <List.Item
@@ -53,11 +41,7 @@ export default function Command() {
           />
         ))
       ) : (
-        <List.EmptyView
-          icon={Icon.Folder}
-          title="No Collections"
-          description="No Postman collections found"
-        />
+        <List.EmptyView icon={Icon.Folder} title="No Collections" description="No Postman collections found" />
       )}
     </List>
   )

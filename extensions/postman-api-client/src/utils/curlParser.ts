@@ -16,9 +16,7 @@ const convertAsync = promisify(convert)
  * Parses a cURL command string and converts it to Postman request format
  * Uses the official Postman Labs curl-to-postmanv2 library
  */
-export const parseCurl = async (
-  curlCommand: string
-): Promise<ParsedCurl | { error: string }> => {
+export const parseCurl = async (curlCommand: string): Promise<ParsedCurl | { error: string }> => {
   try {
     // Validate the cURL command first
     const validation = validate(curlCommand.trim())
@@ -46,10 +44,7 @@ export const parseCurl = async (
       return { error: "No URL found in cURL command" }
     }
 
-    const urlString =
-      typeof postmanRequest.url === "string"
-        ? postmanRequest.url
-        : postmanRequest.url.raw || ""
+    const urlString = typeof postmanRequest.url === "string" ? postmanRequest.url : postmanRequest.url.raw || ""
 
     let url: URLType
     try {
@@ -135,9 +130,7 @@ export const parseCurl = async (
 /**
  * Parses query string into Postman query parameter format
  */
-function parseQueryString(
-  search: string
-): Array<{ key: string; value: string; type: string; disabled: boolean }> {
+function parseQueryString(search: string): Array<{ key: string; value: string; type: string; disabled: boolean }> {
   if (!search || search === "?") {
     return []
   }

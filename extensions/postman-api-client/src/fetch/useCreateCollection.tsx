@@ -16,8 +16,7 @@ export const createCollection = async (
         info: {
           name: name,
           description: description || "",
-          schema:
-            "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+          schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         },
         item: [], // Empty array of items - requests will be added separately
       },
@@ -46,8 +45,7 @@ export const createCollection = async (
       id?: string
     }
     // Postman API returns collection with uid field
-    const collectionId =
-      result.collection?.uid || result.collection?.id || result.uid || result.id
+    const collectionId = result.collection?.uid || result.collection?.id || result.uid || result.id
 
     if (!collectionId) {
       return {

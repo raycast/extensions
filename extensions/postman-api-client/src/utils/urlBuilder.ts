@@ -4,9 +4,7 @@ import { URLType } from "../types"
  * Reconstructs raw URL from Postman API response
  * Postman API might return URL without raw field, so we need to build it
  */
-export const reconstructUrlFromPostman = (
-  url: URLType | undefined
-): URLType | undefined => {
+export const reconstructUrlFromPostman = (url: URLType | undefined): URLType | undefined => {
   if (!url) return undefined
 
   // If raw exists, ensure it's complete
@@ -24,15 +22,7 @@ export const reconstructUrlFromPostman = (
       const activeParams = url.query.filter((q) => !q.disabled && q.value)
       if (activeParams.length > 0) {
         queryString =
-          "?" +
-          activeParams
-            .map(
-              (q) =>
-                `${encodeURIComponent(q.key)}=${encodeURIComponent(
-                  q.value || ""
-                )}`
-            )
-            .join("&")
+          "?" + activeParams.map((q) => `${encodeURIComponent(q.key)}=${encodeURIComponent(q.value || "")}`).join("&")
       }
     }
 
@@ -81,15 +71,7 @@ export const buildCompleteUrl = (url: URLType): URLType => {
       const activeParams = url.query.filter((q) => !q.disabled && q.value)
       if (activeParams.length > 0) {
         queryString =
-          "?" +
-          activeParams
-            .map(
-              (q) =>
-                `${encodeURIComponent(q.key)}=${encodeURIComponent(
-                  q.value || ""
-                )}`
-            )
-            .join("&")
+          "?" + activeParams.map((q) => `${encodeURIComponent(q.key)}=${encodeURIComponent(q.value || "")}`).join("&")
       }
     }
 
@@ -118,14 +100,12 @@ export const ensureCompleteUrl = (urlString: string): URLType => {
     const urlObj = new URL(urlString)
     const pathParts = urlObj.pathname.split("/").filter((p) => p)
 
-    const queryParams = Array.from(urlObj.searchParams.entries()).map(
-      ([key, value]) => ({
-        key,
-        value,
-        type: "text",
-        disabled: false,
-      })
-    )
+    const queryParams = Array.from(urlObj.searchParams.entries()).map(([key, value]) => ({
+      key,
+      value,
+      type: "text",
+      disabled: false,
+    }))
 
     return {
       raw: urlString,

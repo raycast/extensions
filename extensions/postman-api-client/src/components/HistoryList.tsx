@@ -1,22 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api"
 import { useEffect, useState } from "react"
 import React from "react"
 import { HistoryEntry, URLType } from "../types"
-import {
-  getHistory,
-  deleteHistoryEntry,
-  clearHistory,
-} from "../utils/historyStorage"
+import { getHistory, deleteHistoryEntry, clearHistory } from "../utils/historyStorage"
 import { ResponseDetails } from "./ResponseDetails"
 import { RequestBuilder } from "./RequestBuilder"
 import { parseRequest } from "../utils"
@@ -91,14 +77,12 @@ export const HistoryList: React.FC = () => {
         protocol: urlObj.protocol.replace(":", "") as "https" | "http",
         host: urlObj.hostname.split("."),
         path: urlObj.pathname.split("/").filter(Boolean),
-        query: Array.from(urlObj.searchParams.entries()).map(
-          ([key, value]) => ({
-            key,
-            value,
-            type: "text",
-            disabled: false,
-          })
-        ),
+        query: Array.from(urlObj.searchParams.entries()).map(([key, value]) => ({
+          key,
+          value,
+          type: "text",
+          disabled: false,
+        })),
       }
 
       const urlInfo = parseRequest({
@@ -123,12 +107,7 @@ export const HistoryList: React.FC = () => {
         )
       } else if (urlInfo) {
         push(
-          <ResponseDetails
-            url={urlInfo.url}
-            header={entry.request.headers}
-            method={entry.method}
-            name={entry.name}
-          />
+          <ResponseDetails url={urlInfo.url} header={entry.request.headers} method={entry.method} name={entry.name} />
         )
       }
     } catch (error) {
@@ -190,11 +169,7 @@ export const HistoryList: React.FC = () => {
       }
     >
       {history.length === 0 ? (
-        <List.EmptyView
-          icon={Icon.Clock}
-          title="No History"
-          description="Your executed requests will appear here"
-        />
+        <List.EmptyView icon={Icon.Clock} title="No History" description="Your executed requests will appear here" />
       ) : (
         history.map((entry) => (
           <List.Item
@@ -223,28 +198,18 @@ export const HistoryList: React.FC = () => {
                     {entry.response.statusCode && (
                       <>
                         <Detail.Metadata.Separator />
-                        <Detail.Metadata.Label
-                          title="Status Code"
-                          text={entry.response.statusCode.toString()}
-                        />
+                        <Detail.Metadata.Label title="Status Code" text={entry.response.statusCode.toString()} />
                       </>
                     )}
                     <Detail.Metadata.Separator />
-                    <Detail.Metadata.Label
-                      title="Executed"
-                      text={new Date(entry.timestamp).toLocaleString()}
-                    />
+                    <Detail.Metadata.Label title="Executed" text={new Date(entry.timestamp).toLocaleString()} />
                   </Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Repeat Request"
-                  icon={Icon.ArrowClockwise}
-                  onAction={() => handleRepeatRequest(entry)}
-                />
+                <Action title="Repeat Request" icon={Icon.ArrowClockwise} onAction={() => handleRepeatRequest(entry)} />
                 <Action
                   title="View Response"
                   icon={Icon.Eye}
