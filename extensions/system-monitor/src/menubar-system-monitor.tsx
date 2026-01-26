@@ -126,7 +126,7 @@ export default function Command() {
       <MenuBarExtra.Section title="System Info">
         <MenuBarExtra.Item
           title="macOS"
-          subtitle={`${systemInfo?.osInfo.release}` || "Loading..."}
+          subtitle={`${systemInfo?.osInfo.release}` || "Loading…"}
           icon={Icon.Finder}
           onAction={() => runAppleScript(openActivityMonitorAppleScript())}
         />
