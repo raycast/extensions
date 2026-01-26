@@ -1,6 +1,6 @@
 # Fork Repositories Changelog
 
-## [Bug Fix] - 2026-01-26
+## [Bug Fix] - {PR_MERGE_DATE}
 
 - Added support for Fork's `repositories.toml` file with fallback to `repositories.json`.
 
