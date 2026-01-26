@@ -125,7 +125,7 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
   }
 
   const handleSave = async (formValues: FormPayloadType) => {
-    if (!canSave) {
+    if (!canSave || !collectionId || !requestId) {
       showToast({
         title: "Cannot save",
         message: "Collection ID or Request ID missing",
@@ -143,7 +143,7 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
         updatedRequest.url = buildCompleteUrl(updatedRequest.url)
       }
 
-      const result = await updateRequest(collectionId!, requestId!, {
+      const result = await updateRequest(collectionId, requestId, {
         request: updatedRequest,
       })
 

@@ -9,6 +9,46 @@ export interface ParsedCurl {
   body?: BodyType
 }
 
+// Types for the curl-to-postmanv2 library output
+interface PostmanHeader {
+  key: string
+  value: string
+  type?: string
+  disabled?: boolean
+}
+
+interface PostmanUrlEncodedItem {
+  key: string
+  value: string
+  disabled?: boolean
+}
+
+interface PostmanFormDataItem {
+  key: string
+  value: string
+  type?: string
+  disabled?: boolean
+}
+
+interface PostmanBody {
+  mode?: "raw" | "urlencoded" | "formdata"
+  raw?: string
+  urlencoded?: PostmanUrlEncodedItem[]
+  formdata?: PostmanFormDataItem[]
+  options?: {
+    raw?: {
+      language?: string
+    }
+  }
+}
+
+interface PostmanRequest {
+  method?: string
+  url?: string | { raw?: string }
+  header?: PostmanHeader[]
+  body?: PostmanBody
+}
+
 // Promisify the callback-based convert function
 const convertAsync = promisify(convert)
 
@@ -34,7 +74,7 @@ export const parseCurl = async (curlCommand: string): Promise<ParsedCurl | { err
       return { error: "Failed to convert cURL command" }
     }
 
-    const postmanRequest = result.output[0].data
+    const postmanRequest = result.output[0].data as PostmanRequest
 
     // Extract method
     const method = (postmanRequest.method || "GET").toUpperCase() as MethodsType
@@ -63,7 +103,7 @@ export const parseCurl = async (curlCommand: string): Promise<ParsedCurl | { err
     // Extract headers
     const headers: HeaderType[] = []
     if (postmanRequest.header && Array.isArray(postmanRequest.header)) {
-      postmanRequest.header.forEach((header: any) => {
+      postmanRequest.header.forEach((header: PostmanHeader) => {
         if (header.key && header.value) {
           headers.push({
             key: header.key,
@@ -94,7 +134,7 @@ export const parseCurl = async (curlCommand: string): Promise<ParsedCurl | { err
         body = {
           mode: "urlencoded",
           urlencoded: Array.isArray(postmanBody.urlencoded)
-            ? postmanBody.urlencoded.map((item: any) => ({
+            ? postmanBody.urlencoded.map((item: PostmanUrlEncodedItem) => ({
                 key: item.key || "",
                 value: item.value || "",
                 disabled: item.disabled || false,
@@ -105,7 +145,7 @@ export const parseCurl = async (curlCommand: string): Promise<ParsedCurl | { err
         body = {
           mode: "formdata",
           formdata: Array.isArray(postmanBody.formdata)
-            ? postmanBody.formdata.map((item: any) => ({
+            ? postmanBody.formdata.map((item: PostmanFormDataItem) => ({
                 key: item.key || "",
                 value: item.value || "",
                 type: item.type || "text",
@@ -122,8 +162,9 @@ export const parseCurl = async (curlCommand: string): Promise<ParsedCurl | { err
       headers: headers.length > 0 ? headers : undefined,
       body,
     }
-  } catch (error: any) {
-    return { error: error.message || "Failed to parse cURL command" }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Failed to parse cURL command"
+    return { error: errorMessage }
   }
 }
 
