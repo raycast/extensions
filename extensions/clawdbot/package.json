@@ -45,7 +45,7 @@
     {
       "name": "endpoint",
       "title": "API Endpoint",
-      "description": "Clawdbot gateway URL",
+      "description": "Clawdbot gateway URL. Use http://127.0.0.1:18789 for local, or your Tailscale serve URL (e.g., https://machine-name.tailnet.ts.net) for remote access.",
       "type": "textfield",
       "default": "http://127.0.0.1:18789",
       "required": true
@@ -53,7 +53,7 @@
     {
       "name": "token",
       "title": "API Token",
-      "description": "Gateway authentication token",
+      "description": "Find in ~/.clawdbot/clawdbot.json under gateway.auth.token",
       "type": "password",
       "required": true
     },
