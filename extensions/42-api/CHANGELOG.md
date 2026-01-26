@@ -1,6 +1,6 @@
 # 42 API Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-26
 
 ### Features
 - Find User: Search for 42 users and view their current cluster location
