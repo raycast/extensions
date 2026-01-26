@@ -530,7 +530,7 @@ export function getResourceIcon(resourceType: string): string {
     case "instances":
       return "💻";
     case "routers":
-      return "🛣️";
+      return "📡";
     default:
       return "🔍";
   }
