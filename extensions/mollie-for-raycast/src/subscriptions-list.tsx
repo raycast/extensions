@@ -298,12 +298,12 @@ function SubscriptionsList({ accessToken }: { accessToken: string }) {
                   />
                 )}
                 <Action.CopyToClipboard
-                  title="Copy Subscription Id"
+                  title="Copy Subscription ID"
                   content={subscription.id}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
                 <Action.CopyToClipboard
-                  title="Copy Customer Id"
+                  title="Copy Customer ID"
                   content={subscription.customerId}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
