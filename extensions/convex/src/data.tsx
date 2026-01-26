@@ -290,11 +290,11 @@ export default function BrowseTablesCommand() {
                     showingDetail
                       ? undefined
                       : [
-                        {
-                          date: new Date(doc._creationTime),
-                          tooltip: "Created",
-                        },
-                      ]
+                          {
+                            date: new Date(doc._creationTime),
+                            tooltip: "Created",
+                          },
+                        ]
                   }
                   detail={
                     <DocumentDetailPanel

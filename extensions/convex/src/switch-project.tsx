@@ -243,28 +243,28 @@ export default function SwitchProjectCommand() {
   // Filter items based on search text
   const filteredTeams = Array.isArray(teams)
     ? teams.filter(
-      (team) =>
-        team.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        team.slug.toLowerCase().includes(searchText.toLowerCase()),
-    )
+        (team) =>
+          team.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          team.slug.toLowerCase().includes(searchText.toLowerCase()),
+      )
     : [];
 
   const filteredProjects = Array.isArray(projects)
     ? projects.filter(
-      (project) =>
-        project.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        project.slug.toLowerCase().includes(searchText.toLowerCase()),
-    )
+        (project) =>
+          project.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          project.slug.toLowerCase().includes(searchText.toLowerCase()),
+      )
     : [];
 
   const filteredDeployments = Array.isArray(deployments)
     ? deployments.filter(
-      (deployment) =>
-        deployment.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        deployment.deploymentType
-          .toLowerCase()
-          .includes(searchText.toLowerCase()),
-    )
+        (deployment) =>
+          deployment.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          deployment.deploymentType
+            .toLowerCase()
+            .includes(searchText.toLowerCase()),
+      )
     : [];
 
   // Current selection subtitle
