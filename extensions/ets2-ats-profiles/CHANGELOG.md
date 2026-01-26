@@ -1,6 +1,6 @@
 # ETS2-ATS Profiles Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-26
 
 - Added commands to manage Euro Truck Simulator 2 profiles
 - Added commands to manage American Truck Simulator profiles
