@@ -87,9 +87,9 @@ export default function Command() {
     return formatString
       .replaceAll("<BR>", `\n`)
       .replaceAll("<MODE>", displayMode === "free" ? "Free" : "Used")
-      .replace("<VALUE>", value)
-      .replace("<TOTAL>", total)
-      .replace("<PERCENT>", percent);
+      .replaceAll("<VALUE>", value)
+      .replaceAll("<TOTAL>", total)
+      .replaceAll("<PERCENT>", percent);
   };
 
   const { data: batteryData, revalidate: revalidateBattery } = usePromise(async () => {
