@@ -6,7 +6,8 @@ import { usePromise } from "@raycast/utils";
 import { Actions } from "../components/Actions";
 import { getTopRamProcess, getMemoryUsage } from "./MemoryUtils";
 
-const { displayModeMemory } = getPreferenceValues<ExtensionPreferences>();
+export default function MemoryMonitor() {
+  const { displayModeMemory } = getPreferenceValues<ExtensionPreferences>();
 
 export default function MemoryMonitor() {
   const { data, revalidate } = usePromise(async () => {
