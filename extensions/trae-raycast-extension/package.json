@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "trae-raycast-extension",
+  "title": "Trae Raycast Extension",
+  "description": "Search and open recent projects in Trae",
+  "icon": "command-icon.png",
+  "author": "djl159159",
+  "version": "1.0.0",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Recent Projects",
+      "subtitle": "Trae",
+      "description": "Search and open recent projects in Trae",
+      "mode": "view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "subtitle": "Trae",
+      "description": "Open a new empty Trae window",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "git": {
+    "url": "https://github.com/djl15915999/raycast-trae"
+  }
+}
