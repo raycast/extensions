@@ -341,7 +341,7 @@ function ContactItem({
         <ActionPanel>
           <Action
             title="Call"
-            icon={Icon.Phone}
+            icon={{ source: Icon.Phone, tintColor: "#127A33" }} // Darker Green
             onAction={async () => {
               await onCall(contact);
               await open(`tel://${contact.phone.replace(/\s/g, "")}`);
@@ -349,7 +349,7 @@ function ContactItem({
           />
           <Action
             title={contact.isFavorite ? "Unfavorite" : "Favorite"}
-            icon={contact.isFavorite ? Icon.StarDisabled : Icon.Star}
+            icon={contact.isFavorite ? Icon.StarDisabled : "⭐️"}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             onAction={() => onToggleFavorite(contact)}
           />
@@ -378,7 +378,7 @@ function ContactItem({
           />
           <Action
             title="FaceTime Audio"
-            icon={Icon.Phone}
+            icon={{ source: Icon.Phone, tintColor: "#34C759" }} // FaceTime Green
             onAction={async () => {
               await onCall(contact);
               await open(`facetime-audio://${contact.phone.replace(/\s/g, "")}`);
@@ -386,7 +386,7 @@ function ContactItem({
           />
           <Action
             title="FaceTime Video"
-            icon={Icon.Video}
+            icon={{ source: Icon.Video, tintColor: "#34C759" }} // FaceTime Green
             onAction={async () => {
               await onCall(contact);
               await open(`facetime://${contact.phone.replace(/\s/g, "")}`);
@@ -394,7 +394,7 @@ function ContactItem({
           />
           <Action
             title="Message"
-            icon={Icon.Message}
+            icon={{ source: Icon.Message, tintColor: "#34C759" }} // Green Message
             onAction={async () => {
               await onCall(contact); // Log as interaction
               await open(`sms:${contact.phone.replace(/\s/g, "")}`);
@@ -402,7 +402,7 @@ function ContactItem({
           />
           <Action
             title="WhatsApp Message"
-            icon={Icon.Message}
+            icon={{ source: `${environment.assetsPath}/whatsapp.svg` }}
             onAction={async () => {
               await onCall(contact);
               const cleanPhone = contact.phone.replace(/[^\d]/g, "");
