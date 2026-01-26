@@ -5,7 +5,8 @@ import os from "node:os";
 import { Actions } from "../components/Actions";
 import { calculateDiskStorage, getOSInfo, getSerialNumber } from "./SystemUtils";
 
-const { displayModeDisk } = getPreferenceValues<ExtensionPreferences>();
+function SystemInfoDetail() {
+  const { displayModeDisk } = getPreferenceValues<ExtensionPreferences>();
 
 export default function SystemInfo() {
   return (
