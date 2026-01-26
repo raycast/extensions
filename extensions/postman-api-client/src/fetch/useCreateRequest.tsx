@@ -1,5 +1,4 @@
 import { commonPreferences } from "../utils"
-import fetch from "node-fetch"
 import { RequestType, URLType, RequestDetailsType } from "../types"
 import { buildCompleteUrl } from "../utils/urlBuilder"
 

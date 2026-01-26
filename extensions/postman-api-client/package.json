@@ -71,8 +71,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.3",
     "@raycast/utils": "^1.4.16",
-    "curl-to-postmanv2": "^1.8.3",
-    "node-fetch": "^3.3.0"
+    "curl-to-postmanv2": "^1.8.3"
   },
   "preferences": [
     {

@@ -1,5 +1,4 @@
 import { commonPreferences } from "../utils"
-import fetch from "node-fetch"
 import { RequestDetailsType } from "../types"
 
 export const updateRequest = async (

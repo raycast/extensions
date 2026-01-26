@@ -1,5 +1,4 @@
 import { commonPreferences } from "../utils"
-import fetch from "node-fetch"
 
 export const createCollection = async (
   name: string,

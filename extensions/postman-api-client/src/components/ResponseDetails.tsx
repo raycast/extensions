@@ -2,7 +2,6 @@ import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigatio
 import { useEffect, useState } from "react"
 import React from "react"
 import { FormPayloadType, HeaderType, MethodsType, URLType, BodyType, RequestType } from "../types"
-import fetch from "node-fetch"
 import { prepareFinalURL } from "../utils"
 import { saveHistoryEntry, getHistory, deleteHistoryEntry } from "../utils/historyStorage"
 import { getActiveEnvironment, substituteVariables } from "../utils/environmentStorage"
