@@ -44,7 +44,7 @@
           "description": "Options:<PERCENT>",
           "type": "textfield",
           "required": false,
-          "title": "Cpu Formatting",
+          "title": "CPU Formatting",
           "placeholder": "<PERCENT> %",
           "default": "<PERCENT> %"
         },    
