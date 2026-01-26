@@ -4,7 +4,7 @@
   "title": "Search GitHub Repositories",
   "description": "Search all GitHub repositories with local caching and recent items",
   "icon": "command-icon.png",
-  "author": "utkarsh",
+  "author": "utkarshbhimte",
   "categories": [
     "Developer Tools",
     "Productivity"

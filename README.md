@@ -13,29 +13,33 @@ Search your GitHub repositories with speed, auto-discovery, and smart recent ite
 
 ## Setup
 
-1. **Create a GitHub Personal Access Token (PAT)**
-   - Go to [GitHub Settings > Developer settings > Personal access tokens > Tokens (classic)](https://github.com/settings/tokens).
-   - Click "Generate new token (classic)".
-   - Select these scopes:
-     - `repo` - Full control of private repositories
-     - `read:org` - Read access to organizations (required for auto-discovery)
-   - Generate and copy the token.
+### 1. Create a GitHub Personal Access Token (PAT)
 
-2. **Install Extension**
-   - Run `npm install` to install dependencies.
-   - Run `npm run build` to build the extension.
+This extension requires a GitHub Personal Access Token to access your repositories.
 
-3. **Configure Extension**
-   - Open Raycast and search for "Search GitHub Repositories".
-   - Press `Cmd + ,` to open Preferences.
-   - Paste your PAT into the "GitHub Personal Access Token" field.
-   - That's it! The extension will automatically discover all your organizations.
+1. Go to [GitHub Settings > Developer settings > Personal access tokens > Tokens (classic)](https://github.com/settings/tokens)
+2. Click **"Generate new token (classic)"**
+3. Give it a descriptive name (e.g., "Raycast GitHub Search")
+4. Select the following scopes:
+   - ✅ `repo` - Full control of private repositories
+   - ✅ `read:org` - Read access to organizations (required for auto-discovery)
+5. Click **"Generate token"**
+6. **Copy the token** (you won't be able to see it again!)
 
-4. **Setup Keybinding (Optional)**
-   - In Raycast, search for "Search GitHub Repositories".
-   - Press `Cmd + K` and select "Record Hotkey".
-   - Press your desired keybinding (e.g., `Cmd + Shift + G`).
-   - The command will now be accessible via this hotkey.
+### 2. Configure the Extension
+
+1. Open Raycast and search for **"Search GitHub Repositories"**
+2. When prompted, paste your Personal Access Token
+3. That's it! The extension will automatically discover all your organizations
+
+### 3. Setup Keybinding (Optional)
+
+For faster access:
+
+1. In Raycast, search for **"Search GitHub Repositories"**
+2. Press `⌘K` and select **"Record Hotkey"**
+3. Press your desired keybinding (e.g., `⌘⇧G`)
+4. The command will now be accessible via this hotkey
 
 ## Usage
 
@@ -44,3 +48,27 @@ Search your GitHub repositories with speed, auto-discovery, and smart recent ite
 - **Copy URL**: Press `Cmd + .` to copy the repository URL.
 - **Refresh**: Press `Cmd + R` to manually refresh all repositories.
 - **Auto-Refresh**: Repositories automatically refresh every 5 minutes in the background.
+
+## Privacy & Security
+
+- Your GitHub token is stored securely in Raycast's encrypted storage
+- All API calls are made directly to GitHub's API
+- Repository data is cached locally on your machine
+- No data is sent to third-party servers
+
+## Troubleshooting
+
+### Extension shows "No results"
+
+- Make sure your GitHub token is valid and has the correct scopes
+- Try pressing `⌘R` to manually refresh repositories
+- Check your internet connection
+
+### Organizations not showing up
+
+- Ensure your token has the `read:org` scope
+- Press `⌘R` to refresh - organization discovery happens on refresh
+
+### Need Help?
+
+Open an issue on [GitHub](https://github.com/raycast/extensions) or reach out on the [Raycast Community](https://raycast.com/community).
