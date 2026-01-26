@@ -20,6 +20,10 @@ export default function EditPresetForm({ preset, onUpdated }: Props) {
   const [nameError, setNameError] = useState<string | undefined>();
 
   const availablePlugins = getAvailablePlugins();
+  // Include plugins from the preset that might not be in current settings
+  const allPlugins = Array.from(
+    new Set([...availablePlugins, ...Object.keys(preset.plugins)]),
+  );
 
   const handleSubmit = async (values: Record<string, boolean | string>) => {
     const name = values.name as string;
@@ -31,7 +35,7 @@ export default function EditPresetForm({ preset, onUpdated }: Props) {
     }
 
     const plugins: Record<string, boolean> = {};
-    availablePlugins.forEach((p) => {
+    allPlugins.forEach((p) => {
       plugins[p] = values[p] as boolean;
     });
 
@@ -78,7 +82,7 @@ export default function EditPresetForm({ preset, onUpdated }: Props) {
         title="Plugins"
         text="Toggle which MCP plugins to enable"
       />
-      {availablePlugins.map((plugin) => (
+      {allPlugins.map((plugin) => (
         <Form.Checkbox
           key={plugin}
           id={plugin}
