@@ -54,7 +54,29 @@ export default function Command() {
               }
             });
 
-            resolve(Array.from(uniqueContacts.values()));
+            const results = Array.from(uniqueContacts.values());
+
+            // Sort results: Exact match > Starts with > Contains
+            const lowerQuery = query.toLowerCase();
+            results.sort((a, b) => {
+              const nameA = a.name.toLowerCase();
+              const nameB = b.name.toLowerCase();
+
+              // 1. Exact Name Match
+              if (nameA === lowerQuery && nameB !== lowerQuery) return -1;
+              if (nameA !== lowerQuery && nameB === lowerQuery) return 1;
+
+              // 2. Starts with Query
+              const aStarts = nameA.startsWith(lowerQuery);
+              const bStarts = nameB.startsWith(lowerQuery);
+              if (aStarts && !bStarts) return -1;
+              if (!aStarts && bStarts) return 1;
+
+              // 3. Alphabetical fallback
+              return nameA.localeCompare(nameB);
+            });
+
+            resolve(results);
           } catch (e) {
             console.error("JSON parse failed", e);
             resolve([]);

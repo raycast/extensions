@@ -3,7 +3,7 @@
   "name": "call-contact",
   "title": "Call Contact",
   "description": "Can call any contact from your mac.",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "chanjot_nanda",
   "platforms": [
     "macOS"
