@@ -1,6 +1,6 @@
 # Convex Changelog
 
-## [Fix TypeError Crashes] - 2026-01-26
+## [Fix TypeError Crashes] - {PR_MERGE_DATE}
 
 - Fix TypeError crashes when API returns non-array responses
 - Add defensive Array.isArray checks in data hooks and components
