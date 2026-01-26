@@ -1,6 +1,6 @@
 # Linkwarden Changelog
 
-## [Add Helium Browser Support] - {PR_MERGE_DATE}
+## [Add Helium Browser Support] - 2026-01-26
 
 - Added Helium to the list of supported Chromium browsers
 
