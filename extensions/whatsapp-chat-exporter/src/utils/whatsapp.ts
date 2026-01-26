@@ -96,17 +96,23 @@ export class WhatsAppClient {
       const columns = result[0].columns;
       const values = result[0].values;
 
-      return values.map((row: (string | number | null)[]) => {
-        const rowObj: Record<string, string | number | null> = {};
+      return values.map((row) => {
+        const rowObj: Record<string, unknown> = {};
         columns.forEach((col: string, idx: number) => {
           rowObj[col] = row[idx];
         });
 
+        const pk = rowObj.Z_PK;
+        const partnerName = rowObj.ZPARTNERNAME;
+        const contactJid = rowObj.ZCONTACTJID;
+        const unreadCount = rowObj.ZUNREADCOUNT;
+        const lastMessageDate = rowObj.ZLASTMESSAGEDATE;
+
         return {
-          id: String(rowObj.Z_PK), // We use the internal PK for joining with messages
-          name: rowObj.ZPARTNERNAME || rowObj.ZCONTACTJID,
-          unreadCount: rowObj.ZUNREADCOUNT || 0,
-          lastMessageDate: (rowObj.ZLASTMESSAGEDATE + CORE_DATA_OFFSET) * 1000,
+          id: String(pk),
+          name: String(partnerName || contactJid || "Unknown"),
+          unreadCount: typeof unreadCount === "number" ? unreadCount : 0,
+          lastMessageDate: (Number(lastMessageDate) + CORE_DATA_OFFSET) * 1000,
         };
       });
     } catch (e) {
@@ -251,53 +257,89 @@ export class WhatsAppClient {
     const columns = result[0].columns;
     const values = result[0].values;
 
-    return values.map((row: (string | number | null)[]) => {
-      const rowObj: Record<string, string | number | null> = {};
+    return values.map((row) => {
+      const rowObj: Record<string, unknown> = {};
       columns.forEach((col: string, idx: number) => {
         rowObj[col] = row[idx];
       });
 
-      // Determine sender name with priority:
-      // 1. For group chats: Profile push name from group member's JID
-      // 2. For direct chats: Profile push name from message's ZFROMJID
-      // 3. Decoded message push name
-      // 4. Extract from member JID or message JID as fallback
+      // Extract and type-cast values
+      const messageDate = Number(rowObj.ZMESSAGEDATE);
+      const text = rowObj.ZTEXT != null ? String(rowObj.ZTEXT) : "";
+      const isFromMe = rowObj.ZISFROMME === 1;
+      const hasMedia = !!rowObj.ZMEDIAITEM;
+
+      // Determine sender name with priority
+      const profilePushName = rowObj.ZPROFILEPUSHNAME
+        ? String(rowObj.ZPROFILEPUSHNAME)
+        : undefined;
+      const directPushName = rowObj.ZDIRECTPUSHNAME
+        ? String(rowObj.ZDIRECTPUSHNAME)
+        : undefined;
+      const pushName = rowObj.ZPUSHNAME ? String(rowObj.ZPUSHNAME) : undefined;
+      const groupMemberJid = rowObj.ZGROUPMEMBERJID
+        ? String(rowObj.ZGROUPMEMBERJID)
+        : undefined;
+      const fromJid = rowObj.ZFROMJID ? String(rowObj.ZFROMJID) : undefined;
+
       const senderName =
-        rowObj.ZPROFILEPUSHNAME ||
-        rowObj.ZDIRECTPUSHNAME ||
-        this.decodePushName(rowObj.ZPUSHNAME) ||
-        this.extractNameFromJID(rowObj.ZGROUPMEMBERJID) ||
-        this.extractNameFromJID(rowObj.ZFROMJID);
+        profilePushName ||
+        directPushName ||
+        this.decodePushName(pushName) ||
+        this.extractNameFromJID(groupMemberJid) ||
+        this.extractNameFromJID(fromJid);
 
       const baseMessage: Message = {
-        id: `${chatPk}-${rowObj.ZMESSAGEDATE}`,
-        text: rowObj.ZTEXT,
-        date: (rowObj.ZMESSAGEDATE + CORE_DATA_OFFSET) * 1000,
-        isFromMe: rowObj.ZISFROMME === 1,
-        hasMedia: !!rowObj.ZMEDIAITEM,
+        id: `${chatPk}-${messageDate}`,
+        text: text,
+        date: (messageDate + CORE_DATA_OFFSET) * 1000,
+        isFromMe: isFromMe,
+        hasMedia: hasMedia,
         senderName: senderName,
       };
 
       if (includeMediaInfo && rowObj.ZMEDIAITEM) {
         // Build MediaInfo object
+        const localPath = rowObj.ZMEDIALOCALPATH
+          ? String(rowObj.ZMEDIALOCALPATH)
+          : undefined;
+        const thumbnailPath = rowObj.ZTHUMBNAILLOCALPATH
+          ? String(rowObj.ZTHUMBNAILLOCALPATH)
+          : undefined;
+        const url = rowObj.ZMEDIAURL ? String(rowObj.ZMEDIAURL) : undefined;
+        const fileSize =
+          typeof rowObj.ZFILESIZE === "number" ? rowObj.ZFILESIZE : undefined;
+        const title = rowObj.ZTITLE
+          ? String(rowObj.ZTITLE)
+          : rowObj.ZVCARDNAME
+            ? String(rowObj.ZVCARDNAME)
+            : undefined;
+        const duration =
+          typeof rowObj.ZMOVIEDURATION === "number"
+            ? rowObj.ZMOVIEDURATION
+            : undefined;
+        const vcardString = rowObj.ZVCARDSTRING
+          ? String(rowObj.ZVCARDSTRING)
+          : undefined;
+
         const mediaInfo: MediaInfo = {
-          localPath: rowObj.ZMEDIALOCALPATH || undefined,
-          thumbnailPath: rowObj.ZTHUMBNAILLOCALPATH || undefined,
-          url: rowObj.ZMEDIAURL || undefined,
-          fileSize: rowObj.ZFILESIZE || undefined,
-          title: rowObj.ZTITLE || rowObj.ZVCARDNAME || undefined,
-          duration: rowObj.ZMOVIEDURATION || undefined,
-          mediaType: rowObj.ZVCARDSTRING
+          localPath: localPath,
+          thumbnailPath: thumbnailPath,
+          url: url,
+          fileSize: fileSize,
+          title: title,
+          duration: duration,
+          mediaType: vcardString
             ? MediaType.VCARD
-            : this.getMediaType(rowObj.ZMEDIALOCALPATH || ""),
+            : this.getMediaType(localPath || ""),
           isAvailable: false, // Will be checked during export
         };
 
         baseMessage.mediaInfo = mediaInfo;
 
         // Set mediaPath for backward compatibility
-        if (rowObj.ZMEDIALOCALPATH) {
-          baseMessage.mediaPath = rowObj.ZMEDIALOCALPATH;
+        if (localPath) {
+          baseMessage.mediaPath = localPath;
         }
       }
 
