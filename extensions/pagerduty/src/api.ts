@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, ErrorResponse, GetMeError } from "./types";
+import { ErrorResponse, GetMeError } from "./types";
 
-const { apiKey } = getPreferenceValues<Preferences>();
+const { apiKey } = getPreferenceValues<{ apiKey: string }>();
 
 export const API_URL = "https://api.pagerduty.com";
 export const API_HEADERS = {

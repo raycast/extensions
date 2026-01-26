@@ -40,10 +40,6 @@ export interface IncidentItem {
 
 export type Filter = "all" | IncidentStatus;
 
-export interface Preferences {
-  apiKey: string;
-}
-
 export interface OncallShift {
   escalation_policy: {
     id: string;

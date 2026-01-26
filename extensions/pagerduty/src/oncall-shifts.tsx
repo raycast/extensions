@@ -2,12 +2,12 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast 
 import { useFetch } from "@raycast/utils";
 import { addDays, differenceInHours, differenceInMinutes, format, isAfter, isBefore, parseISO } from "date-fns";
 import { useEffect, useMemo } from "react";
-import { GetMeResponse, ListOncallsResponse, OncallShift, Preferences } from "./types";
+import { GetMeResponse, ListOncallsResponse, OncallShift } from "./types";
 
 const BASE_URL = "https://api.pagerduty.com";
 
 export default function Command() {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
 
   // Fetch current user
   const {
