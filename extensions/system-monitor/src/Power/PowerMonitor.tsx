@@ -7,7 +7,8 @@ import { BatteryDataInterface } from "../Interfaces";
 import { convertMinutesToHours } from "../utils";
 import { getBatteryData, getTimeOnBattery } from "./PowerUtils";
 
-const { displayModeBattery } = getPreferenceValues<ExtensionPreferences>();
+export default function PowerMonitor() {
+  const { displayModeBattery } = getPreferenceValues<ExtensionPreferences>();
 
 export default function PowerMonitor() {
   const { revalidate, data } = usePromise(async () => {
