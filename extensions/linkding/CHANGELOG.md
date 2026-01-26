@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Frecency + Refactor] - {PR_MERGE_DATE}
+## [Frecency + Refactor] - 2026-01-26
 
 - chore: npm audit fix
 - feat: implement frecency sorting
