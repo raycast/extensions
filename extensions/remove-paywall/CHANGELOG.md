@@ -1,6 +1,6 @@
 # Remove Paywall Changelog
 
-## [Dia browser support] - {PR_MERGE_DATE}
+## [Dia browser support] - 2026-01-26
 
 - Added support for Dia browser in "Remove Paywall from Current Tab" command
 
