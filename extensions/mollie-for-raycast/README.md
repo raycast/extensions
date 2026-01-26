@@ -1,3 +1,5 @@
+# Mollie
+
 Stay on top of your Mollie Business with Raycast. Check your latest revenue, see upcoming payouts, manage subscriptions, and generate payment links without opening the dashboard.
 
 ## Features

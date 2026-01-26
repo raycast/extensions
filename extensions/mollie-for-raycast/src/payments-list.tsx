@@ -356,7 +356,7 @@ function PaymentsList({ accessToken }: { accessToken: string }) {
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />
                 )}
-                <Action.CopyToClipboard title="Copy Payment Id to Clipboard" content={payment.id} />
+                <Action.CopyToClipboard title="Copy Payment ID to Clipboard" content={payment.id} />
                 <Action.CopyToClipboard
                   title="Copy Amount to Clipboard"
                   content={formatCurrency(payment.amount.value, payment.amount.currency)}
