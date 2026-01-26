@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "call-contact",
   "title": "Call Contact",
-  "description": "Quickly search, find, and call your macOS contacts. Features smart sorting based on your most frequent calls.",
+  "description": "Instant, zero-latency search for your Apple Contacts. Call, Message, FaceTime, or WhatsApp directly from Raycast with smart frequency sorting.",
   "icon": "icon.png",
   "author": "chanjot_nanda",
   "categories": [
@@ -29,6 +29,14 @@
       "title": "Priority Message Template",
       "description": "Message to pre-fill when using Priority Call",
       "default": "Urgent: Please pick up! 🚨"
+    },
+    {
+      "name": "hideRecents",
+      "type": "checkbox",
+      "required": false,
+      "label": "Hide Recently Contacted",
+      "description": "Only show Favorites in the empty state",
+      "default": false
     }
   ],
   "dependencies": {

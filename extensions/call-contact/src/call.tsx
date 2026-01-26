@@ -179,8 +179,13 @@ export default function Command() {
 
     // Empty state: Favorites > Recently Contacted
     if (!lowerQuery) {
+      const { hideRecents } = getPreferenceValues<{ hideRecents: boolean }>();
+
       return deduped
-        .filter((c) => c.isFavorite || (c.frequency || 0) > 0)
+        .filter((c) => {
+          if (hideRecents) return c.isFavorite;
+          return c.isFavorite || (c.frequency || 0) > 0;
+        })
         .sort((a, b) => {
           if (a.isFavorite && !b.isFavorite) return -1;
           if (!a.isFavorite && b.isFavorite) return 1;
