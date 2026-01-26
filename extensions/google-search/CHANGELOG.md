@@ -1,6 +1,6 @@
 # Google Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-26
 
 - Fix issue with search text containing special characters
 
