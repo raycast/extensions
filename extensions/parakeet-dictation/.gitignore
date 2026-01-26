@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Environment and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Raycast
+.raycast/
+
+# Project Specific (Audio/Transcription)
+temp/
+*.wav
+# Note: Be careful with *.json as it might ignore config files. 
+# Transcriptions are usually generated alongside wav files.
+src/**/*.json
+!src/**/package.json
+!assets/**/*.json
+
+# Debug and Workarounds
+test-env.js
+tsconfig.json.backup
+tsconfig.build.json
+
+# Tooling
+.eslintcache

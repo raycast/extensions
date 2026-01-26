@@ -1,0 +1,151 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "parakeet-dictation",
+  "title": "Parakeet Dictation",
+  "description": "Offline voice-to-text dictation using NVIDIA Parakeet model on Apple Silicon",
+  "icon": "command-symbol.png",
+  "author": "krlcto",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dictate",
+      "title": "Start Dictation",
+      "subtitle": "Record and Transcribe",
+      "description": "Start voice recording and transcribe using Parakeet",
+      "mode": "view",
+      "icon": "microphone.png"
+    },
+    {
+      "name": "setup",
+      "title": "Setup Dependencies",
+      "subtitle": "Check Installation",
+      "description": "Check and install required dependencies for Parakeet dictation",
+      "mode": "view",
+      "icon": "gear.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "maxRecordingDuration",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Recording Duration",
+      "description": "Maximum recording duration in seconds",
+      "default": "600",
+      "placeholder": "600"
+    },
+    {
+      "name": "audioQuality",
+      "type": "dropdown",
+      "required": false,
+      "title": "Audio Quality",
+      "description": "Sample rate for audio recording",
+      "default": "16kHz",
+      "data": [
+        {
+          "title": "16 kHz (Recommended)",
+          "value": "16kHz"
+        },
+        {
+          "title": "44.1 kHz",
+          "value": "44kHz"
+        }
+      ]
+    },
+    {
+      "name": "chunkDuration",
+      "type": "textfield",
+      "required": false,
+      "title": "Chunk Duration",
+      "description": "Audio chunk duration for Parakeet processing (seconds)",
+      "default": "120",
+      "placeholder": "120"
+    },
+    {
+      "name": "decodingMethod",
+      "type": "dropdown",
+      "required": false,
+      "title": "Decoding Method",
+      "description": "Transcription decoding method",
+      "default": "greedy",
+      "data": [
+        {
+          "title": "Greedy (Fast)",
+          "value": "greedy"
+        },
+        {
+          "title": "Beam (Accurate)",
+          "value": "beam"
+        }
+      ]
+    },
+    {
+      "name": "autoCapitalize",
+      "type": "checkbox",
+      "required": false,
+      "label": "Auto-capitalize sentences",
+      "description": "Automatically capitalize the first letter of sentences",
+      "default": true
+    },
+    {
+      "name": "autoPunctuation",
+      "type": "checkbox",
+      "required": false,
+      "label": "Auto-punctuation",
+      "description": "Enable automatic punctuation in transcriptions",
+      "default": true
+    },
+    {
+      "name": "addSpaceAfter",
+      "type": "checkbox",
+      "required": false,
+      "label": "Add space after pasted text",
+      "description": "Add a space after the pasted transcription",
+      "default": true
+    },
+    {
+      "name": "showProgressBar",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show progress bar",
+      "description": "Show progress indicator for long transcriptions",
+      "default": true
+    },
+    {
+      "name": "debugMode",
+      "type": "checkbox",
+      "required": false,
+      "label": "Debug mode",
+      "description": "Enable verbose logging for troubleshooting",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "eslint": "^8.57.1",
+    "globals": "^17.1.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.3.0",
+    "typescript-eslint": "^8.54.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
