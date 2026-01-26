@@ -43,7 +43,7 @@
       "type": "textfield",
       "required": false,
       "title": "Recent Contacts Limit",
-      "description": "Max number of recent contacts to show (Default: 20)",
+      "description": "Max number of recent contacts to show (Default: 15, Max: 100)",
       "default": "15"
     }
   ],

@@ -180,7 +180,8 @@ export default function Command() {
     // Empty state logic: Split into Favorites and Recents
     if (!lowerQuery) {
       const { hideRecents, recentLimit } = getPreferenceValues<{ hideRecents: boolean; recentLimit: string }>();
-      const limit = parseInt(recentLimit) || 20;
+      const parsedLimit = parseInt(recentLimit) || 15;
+      const limit = Math.min(parsedLimit, 100); // Hard cap at 100 (Settings UI allows more, but we ignore it)
 
       const favs = deduped
         .filter((c) => c.isFavorite)
