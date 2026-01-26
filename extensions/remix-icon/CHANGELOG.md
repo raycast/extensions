@@ -1,6 +1,6 @@
 # Remix Icon Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-01-26
 
 - **3000+ Icons**: Complete Remix Icon library (v4.8.0) across 20 categories
 - **Instant Search**: Search icons by name across the entire collection
