@@ -1,5 +1,9 @@
 # Google Search Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Fix issue with search text containing special characters
+
 ## [Windows] - 2025-11-06
 
 - Release extension for Windows
