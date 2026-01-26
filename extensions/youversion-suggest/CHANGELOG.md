@@ -1,6 +1,6 @@
 # YouVersion Bible Suggest Changelog
 
-## [v3.8.0] - {PR_MERGE_DATE}
+## [v3.8.0] - 2026-01-26
 
 - Fixed a bug where the "Search the Bible by Phrase" command would fail with the error `Cannot read properties of undefined (reading 'toLowerCase')`
 - Updated Bible data store to the latest version
