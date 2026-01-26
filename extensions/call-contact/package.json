@@ -37,6 +37,14 @@
       "label": "Hide Recently Contacted",
       "description": "Only show Favorites in the empty state",
       "default": false
+    },
+    {
+      "name": "recentLimit",
+      "type": "textfield",
+      "required": false,
+      "title": "Recent Contacts Limit",
+      "description": "Max number of recent contacts to show (Default: 20)",
+      "default": "15"
     }
   ],
   "dependencies": {

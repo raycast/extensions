@@ -44,8 +44,12 @@ do {
         var imagePath: String? = nil
         if contact.imageDataAvailable, let imageData = contact.thumbnailImageData {
             let fileURL = tempDir.appendingPathComponent("\(contact.identifier).jpg")
-            try? imageData.write(to: fileURL)
             imagePath = fileURL.path
+            
+            // Optimization: Only write if file doesn't exist
+            if !FileManager.default.fileExists(atPath: fileURL.path) {
+                try? imageData.write(to: fileURL)
+            }
         }
         
         for phone in contact.phoneNumbers {

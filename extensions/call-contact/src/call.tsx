@@ -144,7 +144,7 @@ export default function Command() {
   );
 
   const filteredContacts = useMemo(() => {
-    if (!contacts || !userData) return [];
+    if (!contacts || !userData) return { favorites: [], recents: [], isSearch: false };
 
     const { frequencies, favorites } = userData;
     const lowerQuery = searchText.toLowerCase().trim();
@@ -177,28 +177,36 @@ export default function Command() {
 
     const deduped = Array.from(uniqueMap.values());
 
-    // Empty state: Favorites > Recently Contacted
+    // Empty state logic: Split into Favorites and Recents
     if (!lowerQuery) {
-      const { hideRecents } = getPreferenceValues<{ hideRecents: boolean }>();
+      const { hideRecents, recentLimit } = getPreferenceValues<{ hideRecents: boolean; recentLimit: string }>();
+      const limit = parseInt(recentLimit) || 20;
 
-      return deduped
-        .filter((c) => {
-          if (hideRecents) return c.isFavorite;
-          return c.isFavorite || (c.frequency || 0) > 0;
-        })
+      const favs = deduped
+        .filter((c) => c.isFavorite)
         .sort((a, b) => {
-          if (a.isFavorite && !b.isFavorite) return -1;
-          if (!a.isFavorite && b.isFavorite) return 1;
-
-          // Sort by Recency (Last Contacted) first, then Frequency
+          // Sort favorites by recency too
           const timeA = a.lastContacted || 0;
           const timeB = b.lastContacted || 0;
-          if (timeA !== timeB) return timeB - timeA;
+          return timeB - timeA;
+        });
 
-          return (b.frequency || 0) - (a.frequency || 0);
-        })
-        .slice(0, 20);
+      const recents = hideRecents
+        ? []
+        : deduped
+            .filter((c) => !c.isFavorite && (c.frequency || 0) > 0)
+            .sort((a, b) => {
+              const timeA = a.lastContacted || 0;
+              const timeB = b.lastContacted || 0;
+              if (timeA !== timeB) return timeB - timeA;
+              return (b.frequency || 0) - (a.frequency || 0);
+            })
+            .slice(0, limit);
+
+      return { favorites: favs, recents: recents, isSearch: false };
     }
+
+    // Search Mode
     const matching = deduped.filter((c) => {
       return c.name.toLowerCase().includes(lowerQuery) || c.phone.includes(lowerQuery);
     });
@@ -219,12 +227,14 @@ export default function Command() {
       return freq;
     };
 
-    return matching.sort((a, b) => {
+    const sortedSearch = matching.sort((a, b) => {
       const scoreA = getScore(a);
       const scoreB = getScore(b);
       if (scoreA !== scoreB) return scoreB - scoreA;
       return a.name.localeCompare(b.name);
     });
+
+    return { favorites: [], recents: sortedSearch, isSearch: true };
   }, [contacts, userData, searchText]);
 
   const handleCall = useCallback(async (contact: Contact) => {
@@ -290,6 +300,12 @@ export default function Command() {
     );
   }
 
+  const { favorites, recents, isSearch } = filteredContacts as {
+    favorites: (Contact & { isFavorite: boolean })[];
+    recents: (Contact & { isFavorite: boolean })[];
+    isSearch: boolean;
+  };
+
   return (
     <List
       isLoading={loading}
@@ -297,26 +313,49 @@ export default function Command() {
       searchBarPlaceholder="Search contacts (instant)..."
       throttle={false} // Disable throttle for liquid-fast filtering!
     >
-      {!searchText && filteredContacts.length > 0 ? (
-        <List.Section title="Favorites & Recent">
-          {filteredContacts.map((contact, index) => (
+      {/* Search Result Mode */}
+      {isSearch && (
+        <List.Section title="Results">
+          {recents.map((contact, index) => (
             <ContactItem
-              key={`recent-${contact.id}-${index}`}
-              contact={contact as Contact & { isFavorite: boolean }}
+              key={`search-${contact.id}-${index}`}
+              contact={contact}
               onCall={handleCall}
               onToggleFavorite={toggleFavorite}
             />
           ))}
         </List.Section>
-      ) : (
-        filteredContacts.map((contact, index) => (
-          <ContactItem
-            key={`search-${contact.id}-${index}`}
-            contact={contact as Contact & { isFavorite: boolean }}
-            onCall={handleCall}
-            onToggleFavorite={toggleFavorite}
-          />
-        ))
+      )}
+
+      {/* Empty State Mode */}
+      {!isSearch && (
+        <>
+          {favorites.length > 0 && (
+            <List.Section title="Favorites">
+              {favorites.map((contact, index) => (
+                <ContactItem
+                  key={`fav-${contact.id}-${index}`}
+                  contact={contact}
+                  onCall={handleCall}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
+            </List.Section>
+          )}
+
+          {recents.length > 0 && (
+            <List.Section title="Recents">
+              {recents.map((contact, index) => (
+                <ContactItem
+                  key={`recent-${contact.id}-${index}`}
+                  contact={contact}
+                  onCall={handleCall}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );
