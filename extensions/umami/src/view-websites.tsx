@@ -53,17 +53,11 @@ function Websites() {
                   {website.stats && (
                     <>
                       <List.Item.Detail.Metadata.Label title="Stats" />
-                      <List.Item.Detail.Metadata.Label title="Bounces" text={`${website.stats.bounces.value || 0}`} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Page Views"
-                        text={`${website.stats.pageviews.value || 0}`}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Total Time"
-                        text={`${website.stats.totaltime.value || 0}`}
-                      />
-                      <List.Item.Detail.Metadata.Label title="Visitors" text={`${website.stats.visitors.value || 0}`} />
-                      <List.Item.Detail.Metadata.Label title="Visits" text={`${website.stats.visits.value || 0}`} />
+                      <List.Item.Detail.Metadata.Label title="Bounces" text={`${website.stats.bounces}`} />
+                      <List.Item.Detail.Metadata.Label title="Page Views" text={`${website.stats.pageviews}`} />
+                      <List.Item.Detail.Metadata.Label title="Total Time" text={`${website.stats.totaltime}`} />
+                      <List.Item.Detail.Metadata.Label title="Visitors" text={`${website.stats.visitors}`} />
+                      <List.Item.Detail.Metadata.Label title="Visits" text={`${website.stats.visits}`} />
                     </>
                   )}
                 </List.Item.Detail.Metadata>

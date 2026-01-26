@@ -635,6 +635,7 @@
 /extensions/ethereum-gas-tracker                                    @vinch @xmok
 /extensions/ethereum-price                                          @peduarte
 /extensions/ethereum-utils                                          @Destiner @jeremyHD @Phillip-Kemper
+/extensions/ets2-ats-profiles                                       @Yugveer06
 /extensions/eudic                                                   @tears330
 /extensions/eurovision-song-contest                                 @jacpd
 /extensions/evaluate-math-expression                                @DervexDev
@@ -752,6 +753,7 @@
 /extensions/fuelix                                                  @jfernandogt
 /extensions/fuelx                                                   @naz3eh
 /extensions/fullscreentext                                          @Nenuial
+/extensions/fumadocs                                                @ridemountainpig
 /extensions/fuzzy-file-search                                       @erykksc
 /extensions/fvm                                                     @leoafarias
 /extensions/g-cloud                                                 @ojowwalker77 @bselleslagh
@@ -1319,7 +1321,7 @@
 /extensions/modrinth                                                @soradotwav @MuhammadrizoDeveloper
 /extensions/modrinth-search                                         @MagnusHJensen
 /extensions/moji                                                    @Kasper4649
-/extensions/mollie-for-raycast                                      
+/extensions/mollie-for-raycast                                      @thomasotter
 /extensions/momentum                                                @LeOndaz
 /extensions/monday                                                  @freak4pc @xmok @xmok
 /extensions/moneybird                                               @janyksteenbeek

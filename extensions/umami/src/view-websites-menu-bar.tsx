@@ -32,7 +32,7 @@ function Websites() {
             key={website.id}
             icon={getFavicon(`https://${website.domain}`, { fallback: Icon.Globe })}
             title={website.name}
-            subtitle={`• ${website.stats?.pageviews.value || 0} pageviews • ${website.stats?.visitors.value || 0} visitors`}
+            subtitle={`• ${website.stats.pageviews} pageviews • ${website.stats.visitors} visitors`}
           />
         ))}
       </MenuBarExtra.Section>
