@@ -6,8 +6,9 @@ import { usePromise } from "@raycast/utils";
 
 import { Actions } from "../components/Actions";
 import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
-import { getPreferenceValues } from "@raycast/api";
-const { displayModeCpu } = getPreferenceValues<ExtensionPreferences>();
+export default function CpuMonitor() {
+  const { displayModeCpu } = getPreferenceValues<ExtensionPreferences>();
+  const { revalidate, data: cpu } = usePromise(() => {
 
 export default function CpuMonitor() {
   const { revalidate, data: cpu } = usePromise(() => {
