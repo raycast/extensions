@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDependencyCheck } from "../hooks/useDependencyCheck";
 import { useIndexingState } from "../hooks/useIndexingState";
 import { useSearchHistory } from "../hooks/useSearchHistory";
-import type { ExtensionPreferences, QmdCollection, QmdSearchResult, SearchMode } from "../types";
+import type { QmdCollection, QmdSearchResult, SearchMode } from "../types";
 import { searchLogger } from "../utils/logger";
 import { getCollectionPaths, getCollections, runQmd, validateCollectionPath } from "../utils/qmd";
 import { SearchResultItem } from "./SearchResultItem";
@@ -59,7 +59,7 @@ export function SearchView({ searchMode }: SearchViewProps) {
   const searchRequestId = useRef(0);
 
   // Extract preference values once to avoid re-creating on every render
-  const { defaultResultCount, defaultMinScore } = getPreferenceValues<ExtensionPreferences>();
+  const { defaultResultCount, defaultMinScore } = getPreferenceValues<Preferences>();
 
   // Load collections on mount
   useEffect(() => {

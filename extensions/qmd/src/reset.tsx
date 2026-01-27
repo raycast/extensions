@@ -1,5 +1,5 @@
-import { existsSync, unlinkSync } from "node:fs";
-import { Alert, closeMainWindow, confirmAlert, showToast, Toast } from "@raycast/api";
+import { existsSync } from "node:fs";
+import { Alert, closeMainWindow, confirmAlert, showToast, Toast, trash } from "@raycast/api";
 import { getQmdDatabasePath } from "./utils/qmd";
 
 export default async function Command() {
@@ -47,7 +47,7 @@ export default async function Command() {
     const dbPath = getQmdDatabasePath();
 
     if (existsSync(dbPath)) {
-      unlinkSync(dbPath);
+      await trash(dbPath);
       toast.style = Toast.Style.Success;
       toast.title = "QMD Reset Complete";
       toast.message = "All data has been deleted";

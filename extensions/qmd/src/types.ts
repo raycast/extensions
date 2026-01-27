@@ -80,11 +80,6 @@ export interface SearchHistoryItem {
   timestamp: number;
 }
 
-export interface ExtensionPreferences {
-  defaultResultCount: string; // "5" | "10" | "20" | "50"
-  defaultMinScore: string; // Numeric string
-}
-
 export type ScoreColor = "green" | "yellow" | "red";
 
 // Dependency check result

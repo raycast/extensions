@@ -1,5 +1,5 @@
 # QMD Changelog
 
-## [Added QMD] - 2026-01-26
+## [Added QMD] - {PR_MERGE_DATE}
 
 - Initial version code
