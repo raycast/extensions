@@ -2,26 +2,31 @@ import { ActionPanel, Detail, List, Action, open } from "@raycast/api";
 import { dirname } from "node:path";
 import tildify from "./vendor/tildify";
 import { useRepos, useHasApplication } from "./hooks";
-import { FORK_BUNDLE_ID, REPO_FILE_PATHS } from "./constants";
+import { FORK_APP_IDENTIFIER, REPO_FILE_PATHS } from "./constants";
 
 const Command = () => {
-  const [hasFork, isHasForkLoading] = useHasApplication(FORK_BUNDLE_ID);
+  const [hasFork, isHasForkLoading] = useHasApplication(FORK_APP_IDENTIFIER);
   const [repos, isReposLoading] = useRepos(REPO_FILE_PATHS);
   const isLoading = isHasForkLoading || isReposLoading;
 
   if (!isLoading && !hasFork) {
+    const installInstructions =
+      process.platform === "win32"
+        ? `You can download it [here](https://fork.dev/), or install using [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/):
+\`\`\`
+winget install Fork.Fork
+\`\`\``
+        : `You can download it [here](https://fork.dev/), or install using [Homebrew](https://brew.sh/):
+\`\`\`
+brew install --cask fork
+\`\`\``;
+
     return (
       <Detail
-        navigationTitle="Fork.app not found"
-        markdown={`
-  # Fork.app not found
+        navigationTitle="Fork not found"
+        markdown={`# Fork not found
 
-  You need to have Fork to use this extension. You can download it [here](https://fork.dev/), or alternatively using
-  [Homebrew](https://brew.sh/):
-  \`\`\`
-  brew install --cask fork
-  \`\`\`
-      `}
+You need to have Fork installed to use this extension. ${installInstructions}`}
       />
     );
   }
@@ -64,8 +69,8 @@ const Command = () => {
                           // For some reason, if this action is used when Fork isn't running, it'll result in
                           // the app being started, but not the repo actually being opened.
                           // So to work around that, we call `open` twice 🤷
-                          await open(path, FORK_BUNDLE_ID);
-                          await open(path, FORK_BUNDLE_ID);
+                          await open(path, FORK_APP_IDENTIFIER);
+                          await open(path, FORK_APP_IDENTIFIER);
                         }}
                       />
                       <Action.OpenWith path={path} />
