@@ -9,6 +9,8 @@ import {
   ru_en,
   ru_en_phonetic,
   en_ru_phonetic,
+  en_uk,
+  uk_en,
   uk_en_phonetic,
   en_uk_phonetic,
 } from "./Dict";
@@ -101,11 +103,12 @@ function switchCharacterLayout(char: string, preferences: Preferences): string {
   if (preferences.cyrLayoutID === "com.apple.keylayout.Russian-Phonetic") {
     cyrToLatMap = ru_en_phonetic;
     latToCyrMap = en_ru_phonetic;
-  } else if (
-    preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-QWERTY"
-  ) {
+  } else if (preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-QWERTY") {
     cyrToLatMap = uk_en_phonetic;
     latToCyrMap = en_uk_phonetic;
+  } else if (preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-PC") {
+    cyrToLatMap = uk_en;
+    latToCyrMap = en_uk;
   }
 
   if (latToCyrMap.has(char)) {

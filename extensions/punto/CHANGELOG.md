@@ -1,5 +1,9 @@
 # Punto Changelog
 
+## [Ukrainian layouts fixes] - {PR_MERGE_DATE}
+
+- Fixed mapping for Ukrainian ISO layout
+
 ## [Phonetic layouts support] - 2025-11-21
 
 - Fixed mapping for phonetic keyboard layouts
