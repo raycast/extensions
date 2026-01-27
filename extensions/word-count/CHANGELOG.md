@@ -1,5 +1,9 @@
 # Word Count Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add Raycast Cross-Extension badge to readme
+
 ## [New Feature] - 2026-01-19
 
 - **Added screenshot-based word counting** - Capture any text on screen and get instant counts using OCR
