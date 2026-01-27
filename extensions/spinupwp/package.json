@@ -17,31 +17,36 @@
   "commands": [
     {
       "name": "spinupwp-dashboard",
-      "title": "SpinupWP Dashboard",
+      "title": "Open Dashboard",
+      "subtitle": "SpinupWP",
       "description": "Open the SpinupWP dashboard in your browser",
       "mode": "no-view"
     },
     {
       "name": "spinupwp-servers",
-      "title": "SpinupWP Servers",
+      "title": "View Servers",
+      "subtitle": "SpinupWP",
       "description": "List and manage SpinupWP servers",
       "mode": "view"
     },
     {
       "name": "spinupwp-sites",
-      "title": "SpinupWP Sites",
+      "title": "View Sites",
+      "subtitle": "SpinupWP",
       "description": "List and manage SpinupWP sites",
       "mode": "view"
     },
     {
       "name": "spinupwp-events",
-      "title": "SpinupWP Events",
+      "title": "View Events",
+      "subtitle": "SpinupWP",
       "description": "View SpinupWP events history",
       "mode": "view"
     },
     {
       "name": "spinupwp-accounts",
-      "title": "SpinupWP Accounts",
+      "title": "Manage Accounts",
+      "subtitle": "SpinupWP",
       "description": "Manage SpinupWP API accounts",
       "mode": "view"
     }
@@ -58,10 +63,10 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",

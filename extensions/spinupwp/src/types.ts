@@ -125,10 +125,6 @@ export interface Site {
   status: "deploying" | "deployed" | "failed";
 }
 
-export interface Preferences {
-  apiToken?: string;
-}
-
 // Account types for multi-account support
 
 export interface Account {

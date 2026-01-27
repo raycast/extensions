@@ -1,5 +1,5 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { Preferences, Account } from "./types";
+import { Account } from "./types";
 import { isDemoMode, mockAccounts } from "./mock-data";
 
 const ACCOUNTS_KEY = "spinupwp_accounts";
