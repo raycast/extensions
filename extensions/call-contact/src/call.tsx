@@ -386,7 +386,7 @@ function ContactItem({
         <ActionPanel>
           <Action
             title="Call"
-            icon={{ source: Icon.Phone, tintColor: "#127A33" }} // Darker Green
+            icon={{ source: Icon.PhoneRinging, tintColor: "#127A33" }} // Darker Green
             onAction={async () => {
               await onCall(contact);
               await open(`tel://${contact.phone.replace(/\s/g, "")}`);
