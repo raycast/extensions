@@ -1,5 +1,11 @@
 # Coolify Changelog
 
+## [Delete Project + Better Error Message] - 2025-11-11
+
+- Better Error Messages are shown
+- In `Projects`:
+    - Delete Project
+
 ## [Add Windows Support] - 2025-11-03
 
 ## [View Environment Variable + Fix DB Deletion] - 2025-06-23

@@ -1,5 +1,4 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -72,7 +71,8 @@ export default function CreateBucketForm({
   }) {
     const validation = validateBucketName(values.name);
     if (!validation.isValid) {
-      showFailureToast("Validation Error", {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid Bucket Name",
         message: validation.error || "Please check bucket name requirements",
       });
@@ -107,9 +107,10 @@ export default function CreateBucketForm({
       onBucketCreated();
     } catch (error) {
       console.error("Error creating bucket:", error);
-      showFailureToast("Failed to create bucket", {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to create bucket",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsSubmitting(false);

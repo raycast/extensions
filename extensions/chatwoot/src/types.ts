@@ -44,6 +44,7 @@ export type Conversation = {
   snoozed_until: string | null;
   status: "open" | "resolved" | "pending" | "snoozed";
   created_at: number;
+  unread_count: number;
   last_activity_at: number;
 };
 export type Inbox = {

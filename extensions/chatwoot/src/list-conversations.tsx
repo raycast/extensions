@@ -66,6 +66,10 @@ export default function ListConversations() {
                     ? `Snoozed until ${conversation.snoozed_until ? formatDistanceToNow(conversation.snoozed_until) : "next reply"}`
                     : "",
               },
+              {
+                icon: `number-${String(conversation.unread_count > 99 ? 99 : conversation.unread_count).padStart(2, "0")}-16`,
+                tooltip: `${conversation.unread_count} unread`,
+              },
               conversation.meta.sender.email
                 ? {}
                 : {
@@ -111,7 +115,7 @@ const getMessageIcon = (message: Message) => {
     case MessageType.Bot:
       return getAvatarIcon("B");
     default:
-      return getAvatarIcon(message.sender.name);
+      return getAvatarIcon(message.sender?.name || "?");
   }
 };
 function ListMessages({ conversation }: { conversation: Conversation }) {

@@ -2,11 +2,21 @@ import { GraphQLClient, RequestOptions } from "graphql-request";
 import gql from "graphql-tag";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>;
+};
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
-export type Incremental<T> = T | { [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never };
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
+    };
 type GraphQLClientRequestHeaders = RequestOptions["requestHeaders"];
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -36301,7 +36311,10 @@ export type DeleteLinkedBranchMutationVariables = Exact<{
 
 export type DeleteLinkedBranchMutation = {
   __typename?: "Mutation";
-  deleteLinkedBranch?: { __typename?: "DeleteLinkedBranchPayload"; clientMutationId?: string | null } | null;
+  deleteLinkedBranch?: {
+    __typename?: "DeleteLinkedBranchPayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type DiscussionFieldsFragment = {
@@ -36335,7 +36348,12 @@ export type DiscussionFieldsFragment = {
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
   };
-  category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+  category: {
+    __typename?: "DiscussionCategory";
+    name: string;
+    emoji: string;
+    emojiHTML: any;
+  };
   comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
   answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
   author?:
@@ -36389,12 +36407,27 @@ export type SearchDiscussionsQuery = {
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
           };
-          category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
-          comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
-          answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
+          category: {
+            __typename?: "DiscussionCategory";
+            name: string;
+            emoji: string;
+            emojiHTML: any;
+          };
+          comments: {
+            __typename?: "DiscussionCommentConnection";
+            totalCount: number;
+          };
+          answer?: {
+            __typename?: "DiscussionComment";
+            bodyText: string;
+          } | null;
           author?:
             | { __typename?: "Bot"; login: string; avatarUrl: any }
-            | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
+            | {
+                __typename?: "EnterpriseUserAccount";
+                login: string;
+                avatarUrl: any;
+              }
             | { __typename?: "Mannequin"; login: string; avatarUrl: any }
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any }
@@ -36444,12 +36477,27 @@ export type SearchDiscussionsQuery = {
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
           };
-          category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
-          comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
-          answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
+          category: {
+            __typename?: "DiscussionCategory";
+            name: string;
+            emoji: string;
+            emojiHTML: any;
+          };
+          comments: {
+            __typename?: "DiscussionCommentConnection";
+            totalCount: number;
+          };
+          answer?: {
+            __typename?: "DiscussionComment";
+            bodyText: string;
+          } | null;
           author?:
             | { __typename?: "Bot"; login: string; avatarUrl: any }
-            | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
+            | {
+                __typename?: "EnterpriseUserAccount";
+                login: string;
+                avatarUrl: any;
+              }
             | { __typename?: "Mannequin"; login: string; avatarUrl: any }
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any }
@@ -36500,10 +36548,29 @@ export type IssueFieldsFragment = {
   updatedAt: any;
   author?:
     | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+    | {
+        __typename?: "EnterpriseUserAccount";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
     | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-    | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+    | {
+        __typename?: "Organization";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
+    | {
+        __typename?: "User";
+        id: string;
+        avatarUrl: any;
+        name?: string | null;
+        login: string;
+        isViewer: boolean;
+      }
     | null;
   linkedBranches: {
     __typename?: "LinkedBranchConnection";
@@ -36599,7 +36666,12 @@ export type RepositoryProjectsForIssuesQuery = {
     projectsV2: {
       __typename?: "ProjectV2Connection";
       totalCount: number;
-      nodes?: Array<{ __typename?: "ProjectV2"; id: string; title: string; number: number } | null> | null;
+      nodes?: Array<{
+        __typename?: "ProjectV2";
+        id: string;
+        title: string;
+        number: number;
+      } | null> | null;
     };
     issue?: {
       __typename?: "Issue";
@@ -36625,15 +36697,40 @@ export type IssueDetailFieldsFragment = {
   updatedAt: any;
   author?:
     | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+    | {
+        __typename?: "EnterpriseUserAccount";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
     | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-    | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+    | {
+        __typename?: "Organization";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
+    | {
+        __typename?: "User";
+        id: string;
+        avatarUrl: any;
+        name?: string | null;
+        login: string;
+        isViewer: boolean;
+      }
     | null;
   labels?: {
     __typename?: "LabelConnection";
     totalCount: number;
-    nodes?: Array<{ __typename?: "Label"; id: string; name: string; color: string; isDefault: boolean } | null> | null;
+    nodes?: Array<{
+      __typename?: "Label";
+      id: string;
+      name: string;
+      color: string;
+      isDefault: boolean;
+    } | null> | null;
   } | null;
   linkedBranches: {
     __typename?: "LinkedBranchConnection";
@@ -36683,7 +36780,11 @@ export type IssueDetailFieldsFragment = {
   projectsV2: {
     __typename?: "ProjectV2Connection";
     totalCount: number;
-    nodes?: Array<{ __typename?: "ProjectV2"; id: string; title: string } | null> | null;
+    nodes?: Array<{
+      __typename?: "ProjectV2";
+      id: string;
+      title: string;
+    } | null> | null;
   };
 };
 
@@ -36777,10 +36878,34 @@ export type IssueDetailsQuery = {
         updatedAt: any;
         author?:
           | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | {
+              __typename?: "EnterpriseUserAccount";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Mannequin";
+              id: string;
+              login: string;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Organization";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "User";
+              id: string;
+              avatarUrl: any;
+              name?: string | null;
+              login: string;
+              isViewer: boolean;
+            }
           | null;
         labels?: {
           __typename?: "LabelConnection";
@@ -36802,7 +36927,11 @@ export type IssueDetailsQuery = {
             ref?: { __typename?: "Ref"; name: string } | null;
           } | null> | null;
         };
-        milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+        milestone?: {
+          __typename?: "Milestone";
+          id: string;
+          title: string;
+        } | null;
         repository: {
           __typename?: "Repository";
           id: string;
@@ -36841,7 +36970,11 @@ export type IssueDetailsQuery = {
         projectsV2: {
           __typename?: "ProjectV2Connection";
           totalCount: number;
-          nodes?: Array<{ __typename?: "ProjectV2"; id: string; title: string } | null> | null;
+          nodes?: Array<{
+            __typename?: "ProjectV2";
+            id: string;
+            title: string;
+          } | null> | null;
         };
       }
     | { __typename?: "IssueComment" }
@@ -37059,9 +37192,26 @@ export type SearchIssuesQuery = {
           updatedAt: any;
           author?:
             | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+            | {
+                __typename?: "EnterpriseUserAccount";
+                id: string;
+                login: string;
+                name?: string | null;
+                avatarUrl: any;
+              }
+            | {
+                __typename?: "Mannequin";
+                id: string;
+                login: string;
+                avatarUrl: any;
+              }
+            | {
+                __typename?: "Organization";
+                id: string;
+                login: string;
+                name?: string | null;
+                avatarUrl: any;
+              }
             | {
                 __typename?: "User";
                 id: string;
@@ -37080,7 +37230,11 @@ export type SearchIssuesQuery = {
               ref?: { __typename?: "Ref"; id: string; name: string } | null;
             } | null> | null;
           };
-          milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+          milestone?: {
+            __typename?: "Milestone";
+            id: string;
+            title: string;
+          } | null;
           repository: {
             __typename?: "Repository";
             id: string;
@@ -37104,7 +37258,10 @@ export type SearchIssuesQuery = {
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
           };
-          comments: { __typename?: "IssueCommentConnection"; totalCount: number };
+          comments: {
+            __typename?: "IssueCommentConnection";
+            totalCount: number;
+          };
           assignees: {
             __typename?: "UserConnection";
             totalCount: number;
@@ -37135,7 +37292,10 @@ export type CloseIssueMutationVariables = Exact<{
 
 export type CloseIssueMutation = {
   __typename?: "Mutation";
-  closeIssue?: { __typename?: "CloseIssuePayload"; issue?: { __typename?: "Issue"; id: string } | null } | null;
+  closeIssue?: {
+    __typename?: "CloseIssuePayload";
+    issue?: { __typename?: "Issue"; id: string } | null;
+  } | null;
 };
 
 export type ReopenIssueMutationVariables = Exact<{
@@ -37144,7 +37304,10 @@ export type ReopenIssueMutationVariables = Exact<{
 
 export type ReopenIssueMutation = {
   __typename?: "Mutation";
-  reopenIssue?: { __typename?: "ReopenIssuePayload"; issue?: { __typename?: "Issue"; id: string } | null } | null;
+  reopenIssue?: {
+    __typename?: "ReopenIssuePayload";
+    issue?: { __typename?: "Issue"; id: string } | null;
+  } | null;
 };
 
 export type ChangeIssueAssigneesMutationVariables = Exact<{
@@ -37154,7 +37317,10 @@ export type ChangeIssueAssigneesMutationVariables = Exact<{
 
 export type ChangeIssueAssigneesMutation = {
   __typename?: "Mutation";
-  updateIssue?: { __typename?: "UpdateIssuePayload"; clientMutationId?: string | null } | null;
+  updateIssue?: {
+    __typename?: "UpdateIssuePayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type ChangeIssueMilestoneMutationVariables = Exact<{
@@ -37164,7 +37330,10 @@ export type ChangeIssueMilestoneMutationVariables = Exact<{
 
 export type ChangeIssueMilestoneMutation = {
   __typename?: "Mutation";
-  updateIssue?: { __typename?: "UpdateIssuePayload"; clientMutationId?: string | null } | null;
+  updateIssue?: {
+    __typename?: "UpdateIssuePayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type AddIssueToProjectMutationVariables = Exact<{
@@ -37174,7 +37343,10 @@ export type AddIssueToProjectMutationVariables = Exact<{
 
 export type AddIssueToProjectMutation = {
   __typename?: "Mutation";
-  addProjectV2ItemById?: { __typename?: "AddProjectV2ItemByIdPayload"; clientMutationId?: string | null } | null;
+  addProjectV2ItemById?: {
+    __typename?: "AddProjectV2ItemByIdPayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type CreateIssueMutationVariables = Exact<{
@@ -37203,10 +37375,34 @@ export type CreateIssueMutation = {
       updatedAt: any;
       author?:
         | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-        | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-        | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-        | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-        | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+        | {
+            __typename?: "EnterpriseUserAccount";
+            id: string;
+            login: string;
+            name?: string | null;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "Mannequin";
+            id: string;
+            login: string;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "Organization";
+            id: string;
+            login: string;
+            name?: string | null;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "User";
+            id: string;
+            avatarUrl: any;
+            name?: string | null;
+            login: string;
+            isViewer: boolean;
+          }
         | null;
       linkedBranches: {
         __typename?: "LinkedBranchConnection";
@@ -37217,7 +37413,11 @@ export type CreateIssueMutation = {
           ref?: { __typename?: "Ref"; id: string; name: string } | null;
         } | null> | null;
       };
-      milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+      milestone?: {
+        __typename?: "Milestone";
+        id: string;
+        title: string;
+      } | null;
       repository: {
         __typename?: "Repository";
         id: string;
@@ -37265,7 +37465,10 @@ export type ChangeProjectStatusMutationVariables = Exact<{
 
 export type ChangeProjectStatusMutation = {
   __typename?: "Mutation";
-  updateProjectV2?: { __typename?: "UpdateProjectV2Payload"; clientMutationId?: string | null } | null;
+  updateProjectV2?: {
+    __typename?: "UpdateProjectV2Payload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type ProjectFieldsFragment = {
@@ -37285,15 +37488,39 @@ export type ProjectFieldsFragment = {
   viewerCanReopen: boolean;
   creator?:
     | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+    | {
+        __typename?: "EnterpriseUserAccount";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
     | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-    | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+    | {
+        __typename?: "Organization";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
+    | {
+        __typename?: "User";
+        id: string;
+        avatarUrl: any;
+        name?: string | null;
+        login: string;
+        isViewer: boolean;
+      }
     | null;
   views: {
     __typename?: "ProjectV2ViewConnection";
     totalCount: number;
-    nodes?: Array<{ __typename?: "ProjectV2View"; id: string; name: string; number: number } | null> | null;
+    nodes?: Array<{
+      __typename?: "ProjectV2View";
+      id: string;
+      name: string;
+      number: number;
+    } | null> | null;
   };
 };
 
@@ -37469,15 +37696,44 @@ export type ProjectDetailsQuery = {
         viewerCanReopen: boolean;
         creator?:
           | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | {
+              __typename?: "EnterpriseUserAccount";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Mannequin";
+              id: string;
+              login: string;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Organization";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "User";
+              id: string;
+              avatarUrl: any;
+              name?: string | null;
+              login: string;
+              isViewer: boolean;
+            }
           | null;
         views: {
           __typename?: "ProjectV2ViewConnection";
           totalCount: number;
-          nodes?: Array<{ __typename?: "ProjectV2View"; id: string; name: string; number: number } | null> | null;
+          nodes?: Array<{
+            __typename?: "ProjectV2View";
+            id: string;
+            name: string;
+            number: number;
+          } | null> | null;
         };
       }
     | { __typename?: "ProjectV2Field" }
@@ -37636,10 +37892,29 @@ export type PullRequestFieldsFragment = {
   headRef?: { __typename?: "Ref"; name: string } | null;
   author?:
     | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+    | {
+        __typename?: "EnterpriseUserAccount";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
     | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-    | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+    | {
+        __typename?: "Organization";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
+    | {
+        __typename?: "User";
+        id: string;
+        avatarUrl: any;
+        name?: string | null;
+        login: string;
+        isViewer: boolean;
+      }
     | null;
   comments: { __typename?: "IssueCommentConnection"; totalCount: number };
   reviewThreads: {
@@ -37647,13 +37922,19 @@ export type PullRequestFieldsFragment = {
     totalCount: number;
     nodes?: Array<{
       __typename?: "PullRequestReviewThread";
-      comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+      comments: {
+        __typename?: "PullRequestReviewCommentConnection";
+        totalCount: number;
+      };
     } | null> | null;
   };
   reviews?: {
     __typename?: "PullRequestReviewConnection";
     totalCount: number;
-    nodes?: Array<{ __typename?: "PullRequestReview"; bodyText: string } | null> | null;
+    nodes?: Array<{
+      __typename?: "PullRequestReview";
+      bodyText: string;
+    } | null> | null;
   } | null;
   commits: {
     __typename?: "PullRequestCommitConnection";
@@ -37661,7 +37942,10 @@ export type PullRequestFieldsFragment = {
       __typename?: "PullRequestCommit";
       commit: {
         __typename?: "Commit";
-        statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
+        statusCheckRollup?: {
+          __typename?: "StatusCheckRollup";
+          state: StatusState;
+        } | null;
       };
     } | null> | null;
   };
@@ -37677,7 +37961,10 @@ export type PullRequestFieldsFragment = {
       isViewer: boolean;
     } | null> | null;
   };
-  autoMergeRequest?: { __typename?: "AutoMergeRequest"; enabledAt?: any | null } | null;
+  autoMergeRequest?: {
+    __typename?: "AutoMergeRequest";
+    enabledAt?: any | null;
+  } | null;
 };
 
 export type SearchPullRequestsQueryVariables = Exact<{
@@ -37713,7 +38000,11 @@ export type SearchPullRequestsQuery = {
             isMergeQueueEnabled: boolean;
             isInMergeQueue: boolean;
             mergeStateStatus: MergeStateStatus;
-            milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+            milestone?: {
+              __typename?: "Milestone";
+              id: string;
+              title: string;
+            } | null;
             repository: {
               __typename?: "Repository";
               id: string;
@@ -37739,7 +38030,12 @@ export type SearchPullRequestsQuery = {
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
-              | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+              | {
+                  __typename?: "Bot";
+                  id: string;
+                  login: string;
+                  avatarUrl: any;
+                }
               | {
                   __typename?: "EnterpriseUserAccount";
                   id: string;
@@ -37747,8 +38043,19 @@ export type SearchPullRequestsQuery = {
                   name?: string | null;
                   avatarUrl: any;
                 }
-              | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-              | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+              | {
+                  __typename?: "Mannequin";
+                  id: string;
+                  login: string;
+                  avatarUrl: any;
+                }
+              | {
+                  __typename?: "Organization";
+                  id: string;
+                  login: string;
+                  name?: string | null;
+                  avatarUrl: any;
+                }
               | {
                   __typename?: "User";
                   id: string;
@@ -37758,19 +38065,28 @@ export type SearchPullRequestsQuery = {
                   isViewer: boolean;
                 }
               | null;
-            comments: { __typename?: "IssueCommentConnection"; totalCount: number };
+            comments: {
+              __typename?: "IssueCommentConnection";
+              totalCount: number;
+            };
             reviewThreads: {
               __typename?: "PullRequestReviewThreadConnection";
               totalCount: number;
               nodes?: Array<{
                 __typename?: "PullRequestReviewThread";
-                comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+                comments: {
+                  __typename?: "PullRequestReviewCommentConnection";
+                  totalCount: number;
+                };
               } | null> | null;
             };
             reviews?: {
               __typename?: "PullRequestReviewConnection";
               totalCount: number;
-              nodes?: Array<{ __typename?: "PullRequestReview"; bodyText: string } | null> | null;
+              nodes?: Array<{
+                __typename?: "PullRequestReview";
+                bodyText: string;
+              } | null> | null;
             } | null;
             commits: {
               __typename?: "PullRequestCommitConnection";
@@ -37778,7 +38094,10 @@ export type SearchPullRequestsQuery = {
                 __typename?: "PullRequestCommit";
                 commit: {
                   __typename?: "Commit";
-                  statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
+                  statusCheckRollup?: {
+                    __typename?: "StatusCheckRollup";
+                    state: StatusState;
+                  } | null;
                 };
               } | null> | null;
             };
@@ -37794,7 +38113,10 @@ export type SearchPullRequestsQuery = {
                 isViewer: boolean;
               } | null> | null;
             };
-            autoMergeRequest?: { __typename?: "AutoMergeRequest"; enabledAt?: any | null } | null;
+            autoMergeRequest?: {
+              __typename?: "AutoMergeRequest";
+              enabledAt?: any | null;
+            } | null;
           }
         | { __typename?: "Repository" }
         | { __typename?: "User" }
@@ -37823,7 +38145,10 @@ export type PullRequestDetailsFieldsFragment = {
   mergeStateStatus: MergeStateStatus;
   baseRefName: string;
   headRefName: string;
-  autoMergeRequest?: { __typename?: "AutoMergeRequest"; enabledAt?: any | null } | null;
+  autoMergeRequest?: {
+    __typename?: "AutoMergeRequest";
+    enabledAt?: any | null;
+  } | null;
   milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
   repository: {
     __typename?: "Repository";
@@ -37853,14 +38178,38 @@ export type PullRequestDetailsFieldsFragment = {
   labels?: {
     __typename?: "LabelConnection";
     totalCount: number;
-    nodes?: Array<{ __typename?: "Label"; id: string; name: string; color: string } | null> | null;
+    nodes?: Array<{
+      __typename?: "Label";
+      id: string;
+      name: string;
+      color: string;
+    } | null> | null;
   } | null;
   author?:
     | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+    | {
+        __typename?: "EnterpriseUserAccount";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
     | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-    | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-    | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+    | {
+        __typename?: "Organization";
+        id: string;
+        login: string;
+        name?: string | null;
+        avatarUrl: any;
+      }
+    | {
+        __typename?: "User";
+        id: string;
+        avatarUrl: any;
+        name?: string | null;
+        login: string;
+        isViewer: boolean;
+      }
     | null;
   comments: { __typename?: "IssueCommentConnection"; totalCount: number };
   reviewRequests?: {
@@ -37870,9 +38219,25 @@ export type PullRequestDetailsFieldsFragment = {
       __typename?: "ReviewRequest";
       requestedReviewer?:
         | { __typename?: "Bot" }
-        | { __typename?: "Mannequin"; id: string; githubUsername: string; userAvatarURL: any }
-        | { __typename?: "Team"; id: string; teamName: string; teamAvatarURL?: any | null }
-        | { __typename?: "User"; id: string; githubUsername: string; userName?: string | null; userAvatarURL: any }
+        | {
+            __typename?: "Mannequin";
+            id: string;
+            githubUsername: string;
+            userAvatarURL: any;
+          }
+        | {
+            __typename?: "Team";
+            id: string;
+            teamName: string;
+            teamAvatarURL?: any | null;
+          }
+        | {
+            __typename?: "User";
+            id: string;
+            githubUsername: string;
+            userName?: string | null;
+            userAvatarURL: any;
+          }
         | null;
     } | null> | null;
   } | null;
@@ -37884,10 +38249,34 @@ export type PullRequestDetailsFieldsFragment = {
       state: PullRequestReviewState;
       author?:
         | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-        | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-        | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-        | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-        | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+        | {
+            __typename?: "EnterpriseUserAccount";
+            id: string;
+            login: string;
+            name?: string | null;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "Mannequin";
+            id: string;
+            login: string;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "Organization";
+            id: string;
+            login: string;
+            name?: string | null;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "User";
+            id: string;
+            avatarUrl: any;
+            name?: string | null;
+            login: string;
+            isViewer: boolean;
+          }
         | null;
     } | null> | null;
   } | null;
@@ -37906,7 +38295,11 @@ export type PullRequestDetailsFieldsFragment = {
   projectsV2: {
     __typename?: "ProjectV2Connection";
     totalCount: number;
-    nodes?: Array<{ __typename?: "ProjectV2"; id: string; title: string } | null> | null;
+    nodes?: Array<{
+      __typename?: "ProjectV2";
+      id: string;
+      title: string;
+    } | null> | null;
   };
 };
 
@@ -38099,8 +38492,15 @@ export type PullRequestDetailsQuery = {
         mergeStateStatus: MergeStateStatus;
         baseRefName: string;
         headRefName: string;
-        autoMergeRequest?: { __typename?: "AutoMergeRequest"; enabledAt?: any | null } | null;
-        milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+        autoMergeRequest?: {
+          __typename?: "AutoMergeRequest";
+          enabledAt?: any | null;
+        } | null;
+        milestone?: {
+          __typename?: "Milestone";
+          id: string;
+          title: string;
+        } | null;
         repository: {
           __typename?: "Repository";
           id: string;
@@ -38129,14 +38529,43 @@ export type PullRequestDetailsQuery = {
         labels?: {
           __typename?: "LabelConnection";
           totalCount: number;
-          nodes?: Array<{ __typename?: "Label"; id: string; name: string; color: string } | null> | null;
+          nodes?: Array<{
+            __typename?: "Label";
+            id: string;
+            name: string;
+            color: string;
+          } | null> | null;
         } | null;
         author?:
           | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | {
+              __typename?: "EnterpriseUserAccount";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Mannequin";
+              id: string;
+              login: string;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Organization";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "User";
+              id: string;
+              avatarUrl: any;
+              name?: string | null;
+              login: string;
+              isViewer: boolean;
+            }
           | null;
         comments: { __typename?: "IssueCommentConnection"; totalCount: number };
         reviewRequests?: {
@@ -38146,8 +38575,18 @@ export type PullRequestDetailsQuery = {
             __typename?: "ReviewRequest";
             requestedReviewer?:
               | { __typename?: "Bot" }
-              | { __typename?: "Mannequin"; id: string; githubUsername: string; userAvatarURL: any }
-              | { __typename?: "Team"; id: string; teamName: string; teamAvatarURL?: any | null }
+              | {
+                  __typename?: "Mannequin";
+                  id: string;
+                  githubUsername: string;
+                  userAvatarURL: any;
+                }
+              | {
+                  __typename?: "Team";
+                  id: string;
+                  teamName: string;
+                  teamAvatarURL?: any | null;
+                }
               | {
                   __typename?: "User";
                   id: string;
@@ -38165,7 +38604,12 @@ export type PullRequestDetailsQuery = {
             __typename?: "PullRequestReview";
             state: PullRequestReviewState;
             author?:
-              | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+              | {
+                  __typename?: "Bot";
+                  id: string;
+                  login: string;
+                  avatarUrl: any;
+                }
               | {
                   __typename?: "EnterpriseUserAccount";
                   id: string;
@@ -38173,8 +38617,19 @@ export type PullRequestDetailsQuery = {
                   name?: string | null;
                   avatarUrl: any;
                 }
-              | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-              | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+              | {
+                  __typename?: "Mannequin";
+                  id: string;
+                  login: string;
+                  avatarUrl: any;
+                }
+              | {
+                  __typename?: "Organization";
+                  id: string;
+                  login: string;
+                  name?: string | null;
+                  avatarUrl: any;
+                }
               | {
                   __typename?: "User";
                   id: string;
@@ -38201,7 +38656,11 @@ export type PullRequestDetailsQuery = {
         projectsV2: {
           __typename?: "ProjectV2Connection";
           totalCount: number;
-          nodes?: Array<{ __typename?: "ProjectV2"; id: string; title: string } | null> | null;
+          nodes?: Array<{
+            __typename?: "ProjectV2";
+            id: string;
+            title: string;
+          } | null> | null;
         };
       }
     | { __typename?: "PullRequestCommit" }
@@ -38350,7 +38809,12 @@ export type RepositoryProjectsForPullRequestsQuery = {
     projectsV2: {
       __typename?: "ProjectV2Connection";
       totalCount: number;
-      nodes?: Array<{ __typename?: "ProjectV2"; id: string; title: string; number: number } | null> | null;
+      nodes?: Array<{
+        __typename?: "ProjectV2";
+        id: string;
+        title: string;
+        number: number;
+      } | null> | null;
     };
     pullRequest?: {
       __typename?: "PullRequest";
@@ -38379,8 +38843,15 @@ export type PullRequestCommitFieldsFragment = {
         abbreviatedOid: string;
         url: any;
         treeUrl: any;
-        author?: { __typename?: "GitActor"; avatarUrl: any; name?: string | null } | null;
-        statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
+        author?: {
+          __typename?: "GitActor";
+          avatarUrl: any;
+          name?: string | null;
+        } | null;
+        statusCheckRollup?: {
+          __typename?: "StatusCheckRollup";
+          state: StatusState;
+        } | null;
       };
     } | null> | null;
   };
@@ -38571,8 +39042,15 @@ export type PullRequestCommitsQuery = {
               abbreviatedOid: string;
               url: any;
               treeUrl: any;
-              author?: { __typename?: "GitActor"; avatarUrl: any; name?: string | null } | null;
-              statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
+              author?: {
+                __typename?: "GitActor";
+                avatarUrl: any;
+                name?: string | null;
+              } | null;
+              statusCheckRollup?: {
+                __typename?: "StatusCheckRollup";
+                state: StatusState;
+              } | null;
             };
           } | null> | null;
         };
@@ -38676,7 +39154,12 @@ export type PullRequestCommitsQuery = {
     | null;
 };
 
-export type CommitFieldsFragment = { __typename?: "Commit"; authoredDate: any; oid: any; message: string };
+export type CommitFieldsFragment = {
+  __typename?: "Commit";
+  authoredDate: any;
+  oid: any;
+  message: string;
+};
 
 export type ClosePullRequestMutationVariables = Exact<{
   nodeId: Scalars["ID"]["input"];
@@ -38723,7 +39206,10 @@ export type ChangePullRequestAssigneesMutationVariables = Exact<{
 
 export type ChangePullRequestAssigneesMutation = {
   __typename?: "Mutation";
-  updatePullRequest?: { __typename?: "UpdatePullRequestPayload"; clientMutationId?: string | null } | null;
+  updatePullRequest?: {
+    __typename?: "UpdatePullRequestPayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type ChangePullRequestMilestoneMutationVariables = Exact<{
@@ -38733,7 +39219,10 @@ export type ChangePullRequestMilestoneMutationVariables = Exact<{
 
 export type ChangePullRequestMilestoneMutation = {
   __typename?: "Mutation";
-  updatePullRequest?: { __typename?: "UpdatePullRequestPayload"; clientMutationId?: string | null } | null;
+  updatePullRequest?: {
+    __typename?: "UpdatePullRequestPayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type AddPullRequestToProjectMutationVariables = Exact<{
@@ -38743,7 +39232,10 @@ export type AddPullRequestToProjectMutationVariables = Exact<{
 
 export type AddPullRequestToProjectMutation = {
   __typename?: "Mutation";
-  addProjectV2ItemById?: { __typename?: "AddProjectV2ItemByIdPayload"; clientMutationId?: string | null } | null;
+  addProjectV2ItemById?: {
+    __typename?: "AddProjectV2ItemByIdPayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type RequestReviewMutationVariables = Exact<{
@@ -38753,7 +39245,10 @@ export type RequestReviewMutationVariables = Exact<{
 
 export type RequestReviewMutation = {
   __typename?: "Mutation";
-  requestReviews?: { __typename?: "RequestReviewsPayload"; clientMutationId?: string | null } | null;
+  requestReviews?: {
+    __typename?: "RequestReviewsPayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type MergePullRequestMutationVariables = Exact<{
@@ -38843,7 +39338,10 @@ export type InitPullRequestMutation = {
     pullRequest?: {
       __typename?: "PullRequest";
       id: string;
-      reviewRequests?: { __typename?: "ReviewRequestConnection"; totalCount: number } | null;
+      reviewRequests?: {
+        __typename?: "ReviewRequestConnection";
+        totalCount: number;
+      } | null;
     } | null;
   } | null;
   updatePullRequest?: {
@@ -38864,7 +39362,11 @@ export type InitPullRequestMutation = {
       isMergeQueueEnabled: boolean;
       isInMergeQueue: boolean;
       mergeStateStatus: MergeStateStatus;
-      milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+      milestone?: {
+        __typename?: "Milestone";
+        id: string;
+        title: string;
+      } | null;
       repository: {
         __typename?: "Repository";
         id: string;
@@ -38891,10 +39393,34 @@ export type InitPullRequestMutation = {
       headRef?: { __typename?: "Ref"; name: string } | null;
       author?:
         | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-        | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-        | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-        | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-        | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+        | {
+            __typename?: "EnterpriseUserAccount";
+            id: string;
+            login: string;
+            name?: string | null;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "Mannequin";
+            id: string;
+            login: string;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "Organization";
+            id: string;
+            login: string;
+            name?: string | null;
+            avatarUrl: any;
+          }
+        | {
+            __typename?: "User";
+            id: string;
+            avatarUrl: any;
+            name?: string | null;
+            login: string;
+            isViewer: boolean;
+          }
         | null;
       comments: { __typename?: "IssueCommentConnection"; totalCount: number };
       reviewThreads: {
@@ -38902,13 +39428,19 @@ export type InitPullRequestMutation = {
         totalCount: number;
         nodes?: Array<{
           __typename?: "PullRequestReviewThread";
-          comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
+          comments: {
+            __typename?: "PullRequestReviewCommentConnection";
+            totalCount: number;
+          };
         } | null> | null;
       };
       reviews?: {
         __typename?: "PullRequestReviewConnection";
         totalCount: number;
-        nodes?: Array<{ __typename?: "PullRequestReview"; bodyText: string } | null> | null;
+        nodes?: Array<{
+          __typename?: "PullRequestReview";
+          bodyText: string;
+        } | null> | null;
       } | null;
       commits: {
         __typename?: "PullRequestCommitConnection";
@@ -38916,7 +39448,10 @@ export type InitPullRequestMutation = {
           __typename?: "PullRequestCommit";
           commit: {
             __typename?: "Commit";
-            statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
+            statusCheckRollup?: {
+              __typename?: "StatusCheckRollup";
+              state: StatusState;
+            } | null;
           };
         } | null> | null;
       };
@@ -38932,7 +39467,10 @@ export type InitPullRequestMutation = {
           isViewer: boolean;
         } | null> | null;
       };
-      autoMergeRequest?: { __typename?: "AutoMergeRequest"; enabledAt?: any | null } | null;
+      autoMergeRequest?: {
+        __typename?: "AutoMergeRequest";
+        enabledAt?: any | null;
+      } | null;
     } | null;
   } | null;
 };
@@ -38984,7 +39522,12 @@ export type ExtendedRepositoryFieldsFragment = {
   owner:
     | { __typename?: "Organization"; login: string; avatarUrl: any }
     | { __typename?: "User"; login: string; avatarUrl: any };
-  primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
+  primaryLanguage?: {
+    __typename?: "Language";
+    id: string;
+    name: string;
+    color?: string | null;
+  } | null;
   releases: { __typename?: "ReleaseConnection"; totalCount: number };
 };
 
@@ -39027,7 +39570,12 @@ export type SearchRepositoriesQuery = {
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
-          primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
+          primaryLanguage?: {
+            __typename?: "Language";
+            id: string;
+            name: string;
+            color?: string | null;
+          } | null;
           releases: { __typename?: "ReleaseConnection"; totalCount: number };
         }
       | { __typename?: "User" }
@@ -39071,7 +39619,12 @@ export type MyLatestRepositoriesQuery = {
         owner:
           | { __typename?: "Organization"; login: string; avatarUrl: any }
           | { __typename?: "User"; login: string; avatarUrl: any };
-        primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
+        primaryLanguage?: {
+          __typename?: "Language";
+          id: string;
+          name: string;
+          color?: string | null;
+        } | null;
         releases: { __typename?: "ReleaseConnection"; totalCount: number };
       } | null> | null;
     };
@@ -39090,7 +39643,12 @@ export type MilestonesForRepositoryQuery = {
     milestones?: {
       __typename?: "MilestoneConnection";
       totalCount: number;
-      nodes?: Array<{ __typename?: "Milestone"; id: string; title: string; number: number } | null> | null;
+      nodes?: Array<{
+        __typename?: "Milestone";
+        id: string;
+        title: string;
+        number: number;
+      } | null> | null;
     } | null;
   } | null;
 };
@@ -39140,7 +39698,12 @@ export type DataForRepositoryQuery = {
       name: string;
       target?:
         | { __typename?: "Blob" }
-        | { __typename?: "Commit"; authoredDate: any; oid: any; message: string }
+        | {
+            __typename?: "Commit";
+            authoredDate: any;
+            oid: any;
+            message: string;
+          }
         | { __typename?: "Tag" }
         | { __typename?: "Tree" }
         | null;
@@ -39165,7 +39728,12 @@ export type DataForRepositoryQuery = {
         name: string;
         target?:
           | { __typename?: "Blob" }
-          | { __typename?: "Commit"; authoredDate: any; oid: any; message: string }
+          | {
+              __typename?: "Commit";
+              authoredDate: any;
+              oid: any;
+              message: string;
+            }
           | { __typename?: "Tag" }
           | { __typename?: "Tree" }
           | null;
@@ -39197,14 +39765,39 @@ export type DataForRepositoryQuery = {
     projectsV2: {
       __typename?: "ProjectV2Connection";
       totalCount: number;
-      nodes?: Array<{ __typename?: "ProjectV2"; id: string; title: string } | null> | null;
+      nodes?: Array<{
+        __typename?: "ProjectV2";
+        id: string;
+        title: string;
+      } | null> | null;
     };
     milestones?: {
       __typename?: "MilestoneConnection";
       totalCount: number;
-      nodes?: Array<{ __typename?: "Milestone"; id: string; title: string } | null> | null;
+      nodes?: Array<{
+        __typename?: "Milestone";
+        id: string;
+        title: string;
+      } | null> | null;
     } | null;
-    pullRequestTemplates?: Array<{ __typename?: "PullRequestTemplate"; body?: string | null }> | null;
+    owner:
+      | {
+          __typename?: "Organization";
+          projectsV2: {
+            __typename?: "ProjectV2Connection";
+            totalCount: number;
+            nodes?: Array<{
+              __typename?: "ProjectV2";
+              id: string;
+              title: string;
+            } | null> | null;
+          };
+        }
+      | { __typename?: "User" };
+    pullRequestTemplates?: Array<{
+      __typename?: "PullRequestTemplate";
+      body?: string | null;
+    }> | null;
     issueTemplates?: Array<{
       __typename?: "IssueTemplate";
       name: string;
@@ -39233,7 +39826,12 @@ export type SearchRepositoryBranchesQuery = {
         name: string;
         target?:
           | { __typename?: "Blob" }
-          | { __typename?: "Commit"; authoredDate: any; oid: any; message: string }
+          | {
+              __typename?: "Commit";
+              authoredDate: any;
+              oid: any;
+              message: string;
+            }
           | { __typename?: "Tag" }
           | { __typename?: "Tree" }
           | null;
@@ -39277,10 +39875,34 @@ export type RepositoryIssuesQuery = {
         updatedAt: any;
         author?:
           | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | {
+              __typename?: "EnterpriseUserAccount";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Mannequin";
+              id: string;
+              login: string;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Organization";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "User";
+              id: string;
+              avatarUrl: any;
+              name?: string | null;
+              login: string;
+              isViewer: boolean;
+            }
           | null;
         linkedBranches: {
           __typename?: "LinkedBranchConnection";
@@ -39291,7 +39913,11 @@ export type RepositoryIssuesQuery = {
             ref?: { __typename?: "Ref"; id: string; name: string } | null;
           } | null> | null;
         };
-        milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+        milestone?: {
+          __typename?: "Milestone";
+          id: string;
+          title: string;
+        } | null;
         repository: {
           __typename?: "Repository";
           id: string;
@@ -39375,7 +40001,10 @@ export type AddStarMutationVariables = Exact<{
 
 export type AddStarMutation = {
   __typename?: "Mutation";
-  addStar?: { __typename?: "AddStarPayload"; clientMutationId?: string | null } | null;
+  addStar?: {
+    __typename?: "AddStarPayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type RemoveStarMutationVariables = Exact<{
@@ -39384,7 +40013,10 @@ export type RemoveStarMutationVariables = Exact<{
 
 export type RemoveStarMutation = {
   __typename?: "Mutation";
-  removeStar?: { __typename?: "RemoveStarPayload"; clientMutationId?: string | null } | null;
+  removeStar?: {
+    __typename?: "RemoveStarPayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
 export type MyStarredRepositoriesQueryVariables = Exact<{
@@ -39423,10 +40055,19 @@ export type MyStarredRepositoriesQuery = {
         owner:
           | { __typename?: "Organization"; login: string; avatarUrl: any }
           | { __typename?: "User"; login: string; avatarUrl: any };
-        primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
+        primaryLanguage?: {
+          __typename?: "Language";
+          id: string;
+          name: string;
+          color?: string | null;
+        } | null;
         releases: { __typename?: "ReleaseConnection"; totalCount: number };
       } | null> | null;
-      pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; endCursor?: string | null };
+      pageInfo: {
+        __typename?: "PageInfo";
+        hasNextPage: boolean;
+        endCursor?: string | null;
+      };
     };
   };
 };
@@ -39440,7 +40081,12 @@ export type UserFieldsFragment = {
   isViewer: boolean;
 };
 
-type AuthorFields_Bot_Fragment = { __typename?: "Bot"; id: string; login: string; avatarUrl: any };
+type AuthorFields_Bot_Fragment = {
+  __typename?: "Bot";
+  id: string;
+  login: string;
+  avatarUrl: any;
+};
 
 type AuthorFields_EnterpriseUserAccount_Fragment = {
   __typename?: "EnterpriseUserAccount";
@@ -39450,7 +40096,12 @@ type AuthorFields_EnterpriseUserAccount_Fragment = {
   avatarUrl: any;
 };
 
-type AuthorFields_Mannequin_Fragment = { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any };
+type AuthorFields_Mannequin_Fragment = {
+  __typename?: "Mannequin";
+  id: string;
+  login: string;
+  avatarUrl: any;
+};
 
 type AuthorFields_Organization_Fragment = {
   __typename?: "Organization";
@@ -39476,7 +40127,12 @@ export type AuthorFieldsFragment =
   | AuthorFields_Organization_Fragment
   | AuthorFields_User_Fragment;
 
-export type ProjectViewerFieldsFragment = { __typename?: "ProjectV2View"; id: string; name: string; number: number };
+export type ProjectViewerFieldsFragment = {
+  __typename?: "ProjectV2View";
+  id: string;
+  name: string;
+  number: number;
+};
 
 export type GetViewerQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -39492,7 +40148,11 @@ export type GetViewerQuery = {
     organizations: {
       __typename?: "OrganizationConnection";
       totalCount: number;
-      nodes?: Array<{ __typename?: "Organization"; avatarUrl: any; login: string } | null> | null;
+      nodes?: Array<{
+        __typename?: "Organization";
+        avatarUrl: any;
+        login: string;
+      } | null> | null;
     };
     projectsV2: {
       __typename?: "ProjectV2Connection";
@@ -39514,15 +40174,44 @@ export type GetViewerQuery = {
         viewerCanReopen: boolean;
         creator?:
           | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | {
+              __typename?: "EnterpriseUserAccount";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Mannequin";
+              id: string;
+              login: string;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "Organization";
+              id: string;
+              login: string;
+              name?: string | null;
+              avatarUrl: any;
+            }
+          | {
+              __typename?: "User";
+              id: string;
+              avatarUrl: any;
+              name?: string | null;
+              login: string;
+              isViewer: boolean;
+            }
           | null;
         views: {
           __typename?: "ProjectV2ViewConnection";
           totalCount: number;
-          nodes?: Array<{ __typename?: "ProjectV2View"; id: string; name: string; number: number } | null> | null;
+          nodes?: Array<{
+            __typename?: "ProjectV2View";
+            id: string;
+            name: string;
+            number: number;
+          } | null> | null;
         };
       } | null> | null;
     };
@@ -40559,6 +41248,18 @@ export const DataForRepositoryDocument = gql`
           title
         }
       }
+      owner {
+        __typename
+        ... on Organization {
+          projectsV2(first: 50) {
+            totalCount
+            nodes {
+              id
+              title
+            }
+          }
+        }
+      }
       pullRequestTemplates {
         body
       }
@@ -41363,7 +42064,10 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     ): Promise<AddStarMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<AddStarMutation>(AddStarDocument, variables, { ...requestHeaders, ...wrappedRequestHeaders }),
+          client.request<AddStarMutation>(AddStarDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
         "addStar",
         "mutation",
         variables,
@@ -41405,7 +42109,10 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     ): Promise<GetViewerQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<GetViewerQuery>(GetViewerDocument, variables, { ...requestHeaders, ...wrappedRequestHeaders }),
+          client.request<GetViewerQuery>(GetViewerDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
         "getViewer",
         "query",
         variables,

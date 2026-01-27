@@ -2,12 +2,18 @@ import { useExec } from "@raycast/utils";
 import { MonthlyUsageCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { preferences } from "../preferences";
 
 /**
  * Hook for executing `ccusage monthly --json` command
  */
 export const useCCUsageMonthlyCli = () => {
-  const result = useExec("npx", ["ccusage@latest", "monthly", "--json"], {
+  const useDirectCommand = preferences.useDirectCcusageCommand;
+
+  const command = useDirectCommand ? "ccusage" : "npx";
+  const args = useDirectCommand ? ["monthly", "--json"] : ["ccusage@latest", "monthly", "--json"];
+
+  const result = useExec(command, args, {
     ...getExecOptions(),
     parseOutput: ({ stdout }) => {
       if (!stdout) {

@@ -1,6 +1,10 @@
+<p align="center">
+    <img src="./assets/notion-logo.png" width="150" height="150" />
+</p>
+
 # Notion
 
-The fastest way to search and create Notion pages.
+The fastest way to search and create [Notion](https://notion.com) pages.
 
 ## Using internal integration
 

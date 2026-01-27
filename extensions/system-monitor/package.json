@@ -14,7 +14,8 @@
     "crehan144",
     "pernielsentikaer",
     "lucasmezencio",
-    "ridemountainpig"
+    "ridemountainpig",
+    "xmok"
   ],
   "commands": [
     {
@@ -41,28 +42,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.13.6",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "os-utils": "0.0.14",
     "plist": "^3.1.0",
     "systeminformation": "^5.22.7",
     "usehooks-ts": "^3.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
     "@types/os-utils": "0.0.4",
     "@types/plist": "^3.0.5",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "preferences": [
@@ -95,6 +97,25 @@
           "value": "network"
         }
       ]
+    },
+    {
+      "name": "displayMode",
+      "description": "Select display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "free"
     }
   ],
   "platforms": [

@@ -4,7 +4,19 @@ import * as OTPAuth from "otpauth";
 import { STORAGE_KEY } from "../constants/secrets";
 import { Secret } from "./types";
 
+// Secrets from Blesta seem to end up malformed at times
+const sanitizeURL = (url: string): string => {
+	// Fix HTML entity + URL encoding corruption (&amp%3B → &)
+	url = url.replace(/&amp%3B/g, "&");
+
+	// Fix double URL encoding (%25XX → %XX)
+	url = url.replace(/%25([0-9A-Fa-f]{2})/g, "%$1");
+
+	return url;
+};
+
 const parseSecretURL = (url: string): Secret => {
+	url = sanitizeURL(url);
 	const totp = OTPAuth.URI.parse(url);
 	const getExtraInfo = new URL(url).searchParams;
 	const codeDisplay = getExtraInfo.get("codeDisplay");
@@ -34,7 +46,7 @@ export const parseSecrets = (rawSecretsURLs: string[]): Secret[] => {
 		if (line) {
 			try {
 				secretsList.push(parseSecretURL(line));
-			} catch (error) {
+			} catch {
 				console.error("Error parsing line:", line);
 			}
 		}

@@ -29,7 +29,10 @@ export const HistoryListItem = ({ item, setHistory, setSearchTerm }: HistoryList
           />
           <Action
             title="Clear All Items from History"
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "backspace" },
+              Windows: { modifiers: ["ctrl"], key: "backspace" },
+            }}
             onAction={async () => {
               await removeAllItemsFromHistory();
               const history = await getHistory();

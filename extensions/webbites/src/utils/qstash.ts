@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { buildApiUrl, API_ENDPOINTS } from "./env";
 
+const isDev = process.env.NODE_ENV !== "production";
 // URL validation helper
 export const isValidUrl = (text: string): boolean => {
   try {
@@ -32,19 +33,18 @@ export const saveTabToQstash = async (data: {
   try {
     const { url, textNote, title, siteNotes, tags, customId } = data;
 
-    console.log("Saving bookmark to backend API:", {
-      url,
-      textNote,
-      title,
-      siteNotes,
-      tags,
-      customId,
-    });
+    if (isDev)
+      console.log("Saving bookmark to backend API:", {
+        url,
+        textNote,
+        title,
+        siteNotes,
+        tags,
+        customId,
+      });
 
     // Get session token from local storage
-    const sessionToken = await LocalStorage.getItem<string>(
-      "webbites_session_token",
-    );
+    const sessionToken = await LocalStorage.getItem<string>("webbites_session_token");
     if (!sessionToken) {
       throw new Error("No session token available. Please log in first.");
     }
@@ -88,13 +88,8 @@ export const saveTabToQstash = async (data: {
     });
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ statusMessage: "Unknown error" }));
-      throw new Error(
-        errorData.statusMessage ||
-          `HTTP ${response.status}: ${response.statusText}`,
-      );
+      const errorData = await response.json().catch(() => ({ statusMessage: "Unknown error" }));
+      throw new Error(errorData.statusMessage || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     const result = await response.json();
@@ -103,7 +98,6 @@ export const saveTabToQstash = async (data: {
       throw new Error(result.message || "Failed to save bookmark");
     }
 
-    const isDev = process.env.NODE_ENV !== "production";
     if (isDev) console.log("Bookmark saved successfully:", result);
     return result;
   } catch (error) {

@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { URL } from "url";
 import { GetBookmarksParams } from "../types";
 import { getApiConfig } from "../utils/config";
@@ -56,11 +55,12 @@ export async function fetchSummarizeBookmark(bookmarkId: string) {
   });
 }
 
-export async function fetchGetAllBookmarks({ cursor, favourited, archived }: GetBookmarksParams = {}) {
+export async function fetchGetAllBookmarks({ cursor, favourited, archived, limit = 10 }: GetBookmarksParams = {}) {
   const params = new URLSearchParams();
   if (cursor) params.append("cursor", cursor);
   if (favourited) params.append("favourited", favourited.toString());
   if (archived) params.append("archived", archived.toString());
+  if (limit) params.append("limit", limit.toString());
 
   const queryString = params.toString();
   return fetchWithAuth(`/api/v1/bookmarks${queryString ? `?${queryString}` : ""}`);
@@ -104,8 +104,12 @@ export async function fetchAddBookmarkToList(listId: string, bookmarkId: string)
   });
 }
 
-export async function fetchGetSingleListBookmarks(id: string, cursor?: string) {
-  return fetchWithAuth(`/api/v1/lists/${id}/bookmarks${cursor ? `?cursor=${cursor}` : ""}`);
+export async function fetchGetSingleListBookmarks(id: string, cursor?: string, limit: number = 10) {
+  const params = new URLSearchParams();
+  if (cursor) params.append("cursor", cursor);
+  if (limit) params.append("limit", limit.toString());
+  const queryString = params.toString();
+  return fetchWithAuth(`/api/v1/lists/${id}/bookmarks${queryString ? `?${queryString}` : ""}`);
 }
 
 export async function fetchDeleteList(id: string) {
@@ -118,8 +122,12 @@ export async function fetchGetAllTags() {
   return fetchWithAuth("/api/v1/tags");
 }
 
-export async function fetchGetSingleTagBookmarks(id: string, cursor?: string) {
-  return fetchWithAuth(`/api/v1/tags/${id}/bookmarks${cursor ? `?cursor=${cursor}` : ""}`);
+export async function fetchGetSingleTagBookmarks(id: string, cursor?: string, limit: number = 10) {
+  const params = new URLSearchParams();
+  if (cursor) params.append("cursor", cursor);
+  if (limit) params.append("limit", limit.toString());
+  const queryString = params.toString();
+  return fetchWithAuth(`/api/v1/tags/${id}/bookmarks${queryString ? `?${queryString}` : ""}`);
 }
 
 export async function fetchDeleteTag(id: string) {

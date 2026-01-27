@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type { RuntimeCompat } from "@/types";
 
 import { runtimeFilterValues, runtimeFilters } from "@/lib/filters";
@@ -12,6 +14,8 @@ export type ParsedQuery = {
   scope: string | null;
   /** The query. This is used to add the query in the body of the Orama search. */
   query: string;
+  /** The search query url as used on the website */
+  searchQueryURL: string;
   /** The trigger query. This is used to trigger the search (internal) */
   triggerQuery: string;
 };
@@ -52,10 +56,24 @@ export const useQueryParser = (queryString: string, scoped: string | null): Pars
       ? filteredQuery.replace("@", "").replace("/", "")
       : scoped;
 
+  const searchQueryURL = useMemo(() => {
+    let query = queryValue;
+    if (scopeValue) {
+      query += ` scope:${scopeValue}`;
+    }
+    Object.entries(runtimes).forEach(([key, value]) => {
+      if (value) {
+        query += ` runtime:${key}`;
+      }
+    });
+    return `https://jsr.io/packages?search=${encodeURIComponent(query.trim())}`;
+  }, [queryValue, scopeValue, runtimes]);
+
   return {
     runtimes,
     scope: scopeValue,
     query: queryValue,
+    searchQueryURL,
     // The trigger query is only used to determine if we need to fetch
     triggerQuery: `${scopeValue ? `@${scopeValue}/` : ""}${queryValue}${runtimeTerms.length > 0 ? ` ${runtimeTerms.join("|")}` : ""}`,
   };

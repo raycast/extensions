@@ -1,5 +1,9 @@
 # Cloudflare WARP Changelog
 
+## [Add MDM Profile Switching] - 2025-11-09
+
+- Add the ability to switch between MDM profiles
+
 ## [Update warp-cli version] - 2024-10-29
 
 - Update to support new warp-cli version

@@ -8,6 +8,7 @@ import type { HistoryItem } from "@/utils/history-storage";
 import { useFavorites } from "@/hooks/useFavorites";
 import { HistoryListItem } from "@/components/HistoryListItem";
 import { PackageListItem } from "@/components/PackagListItem";
+import type { ExtensionPreferences } from "@/types";
 
 const API_PATH = "https://registry.npmjs.org/-/v1/search?text=";
 

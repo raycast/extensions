@@ -1,44 +1,77 @@
 import { exec } from "child_process";
 import { Process } from "../types";
-import { getProcessListCommand, parseProcessLine, getProcessType, getAppName } from "./platform";
+import {
+  isWindows,
+  getProcessListCommand,
+  getProcessPerformanceCommand,
+  parseProcessLine,
+  parseWindowsProcesses,
+  parseWindowsPerformanceData,
+  getProcessType,
+  getAppName,
+} from "./platform";
+
+const EXEC_OPTIONS = { maxBuffer: 10 * 1024 * 1024 };
 
 /**
- * Get all processes from the system
- * @returns Promise<Process[]> List of processes
+ * Fetch all running processes
+ * On Windows, CPU values are placeholders (0) until fetchProcessPerformance() is called
  */
 export async function fetchRunningProcesses(): Promise<Process[]> {
   return new Promise((resolve, reject) => {
-    const command = getProcessListCommand();
-
-    exec(command, (err, stdout) => {
-      if (err != null) {
+    exec(getProcessListCommand(), EXEC_OPTIONS, (err, stdout) => {
+      if (err) {
         reject(err);
         return;
       }
 
-      const processes = stdout
-        .split("\n")
-        .map((line) => {
-          const parsed = parseProcessLine(line);
-          if (!parsed || !parsed.processName) return null;
+      const parsed = isWindows
+        ? parseWindowsProcesses(stdout)
+        : (stdout.split("\n").map(parseProcessLine).filter(Boolean) as Partial<Process>[]);
 
-          const type = getProcessType(parsed.path || "");
-          const appName = type === "app" ? getAppName(parsed.path || "", parsed.processName || "") : undefined;
+      const processes = parsed
+        .filter((p) => p?.processName)
+        .map((p) => {
+          const path = p.path || "";
+          const processName = p.processName || "";
+          const type = getProcessType(path);
 
           return {
-            id: parsed.id || 0,
-            pid: parsed.pid || 0,
-            cpu: parsed.cpu || 0,
-            mem: parsed.mem || 0,
+            id: p.id || 0,
+            pid: p.pid || 0,
+            cpu: p.cpu || 0,
+            mem: p.mem || 0,
             type,
-            path: parsed.path || "",
-            processName: parsed.processName || "",
-            appName,
+            path,
+            processName,
+            appName: type === "app" ? getAppName(path, processName) : undefined,
           } as Process;
         })
-        .filter((process): process is Process => process !== null && process.processName !== "");
+        .filter((p) => p.processName !== "");
 
       resolve(processes);
+    });
+  });
+}
+
+/**
+ * Fetch CPU usage for all processes (Windows only)
+ * Uses WMI performance counters for accurate real-time CPU percentage
+ * Returns empty map on macOS (CPU is already included in fetchRunningProcesses)
+ */
+export async function fetchProcessPerformance(): Promise<Map<number, number>> {
+  if (!isWindows) {
+    return new Map();
+  }
+
+  return new Promise((resolve) => {
+    exec(getProcessPerformanceCommand(), EXEC_OPTIONS, (err, stdout) => {
+      if (err) {
+        console.error("Failed to fetch CPU performance data:", err);
+        resolve(new Map());
+        return;
+      }
+      resolve(parseWindowsPerformanceData(stdout));
     });
   });
 }

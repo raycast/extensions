@@ -56,14 +56,10 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
         const cached = await cacheManager.loadCache();
         setCachedMeetings(cached);
 
-        // Only fetch from API if cache is empty or stale
-        if (cached.length === 0) {
-          logger.log("[useCachedMeetings] Cache empty, fetching from API");
-          await cacheManager.fetchAndCache(filter);
-        } else {
-          logger.log(`[useCachedMeetings] Using cached data (${cached.length} meetings`);
-          setIsLoading(false);
-        }
+        // Always check for new meetings on mount to ensure fresh data
+        // This ensures new meetings appear even if cache exists
+        logger.log(`[useCachedMeetings] Loaded ${cached.length} cached meetings, checking for updates`);
+        await cacheManager.fetchAndCache(filter);
       } catch (err) {
         logger.error("[useCachedMeetings] Error loading cache:", err);
         setError(err instanceof Error ? err : new Error(String(err)));

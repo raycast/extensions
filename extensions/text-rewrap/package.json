@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-rewrap",
+  "title": "Text Rewrap",
+  "version": "0.0.0",
+  "description": "Rewraps Text at a given width",
+  "icon": "text-rewrap.png",
+  "author": "rembridge",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultWidth",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Width",
+      "description": "Default width for text wrapping (leave blank for no wrapping)",
+      "default": "80"
+    },
+    {
+      "name": "defaultCopyToClipboard",
+      "type": "checkbox",
+      "required": false,
+      "label": "Default Copy to Clipboard",
+      "description": "Whether to copy the result to clipboard by default",
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "text-rewrap-form",
+      "title": "Text Rewrap from Form",
+      "description": "Rewraps Text provided in the form at the chosen width",
+      "icon": "text-rewrap-form.png",
+      "mode": "view"
+    },
+    {
+      "name": "text-rewrap-clipboard",
+      "title": "Text Rewrap from Clipboard",
+      "description": "Rewraps text from clipboard at the chosen width",
+      "icon": "text-rewrap-clipboard.png",
+      "mode": "view"
+    },
+    {
+      "name": "text-rewrap-selection",
+      "title": "Text Rewrap from Selection",
+      "description": "Rewraps text from currently highlighted selection at the chosen width",
+      "icon": "text-rewrap-clipboard.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.8",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/wordwrap": "^1.0.3",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.14"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
+  }
+}

@@ -4,7 +4,7 @@ import { formatDate, formatDuration } from "../utils/dates";
 import { MeetingActions } from "../actions/MeetingActions";
 import { useTeamColor } from "../hooks/useTeamColor";
 
-export function MeetingListItem({ meeting }: { meeting: Meeting }) {
+export function MeetingListItem({ meeting, onRefresh }: { meeting: Meeting; onRefresh?: () => Promise<void> }) {
   const createdDate = meeting.createdAt ? formatDate(meeting.createdAt) : "";
   const duration = meeting.durationSeconds ? formatDuration(meeting.durationSeconds) : "";
 
@@ -27,7 +27,7 @@ export function MeetingListItem({ meeting }: { meeting: Meeting }) {
         // Show duration
         duration ? { text: duration, icon: Icon.Clock } : undefined,
       ].filter((x): x is NonNullable<typeof x> => x !== undefined)}
-      actions={<MeetingActions meeting={meeting} />}
+      actions={<MeetingActions meeting={meeting} onRefresh={onRefresh} />}
     />
   );
 }

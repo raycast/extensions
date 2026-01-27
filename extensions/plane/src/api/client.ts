@@ -28,10 +28,11 @@ export class PlaneClient {
   modulesApi: ModulesApi;
   cyclesApi: CyclesApi;
 
-  constructor(accessToken: string, workspaceSlug: string) {
-    this.accessToken = accessToken;
+  constructor(workspaceSlug: string, accessToken?: string, apiKey?: string) {
+    this.accessToken = accessToken || "";
     this.config = new Configuration({
-      accessToken,
+      ...(accessToken ? { accessToken } : {}),
+      ...(apiKey ? { apiKey } : {}),
       basePath: preferences.API_BASE_PATH,
     });
 

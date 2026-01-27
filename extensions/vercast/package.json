@@ -14,7 +14,9 @@
     "samuelkraft",
     "xmok",
     "ridemountainpig",
-    "sebdanielsson"
+    "sebdanielsson",
+    "1weiho",
+    "thomas-forbes"
   ],
   "commands": [
     {
@@ -28,6 +30,23 @@
       "title": "Search Deployments",
       "description": "Explore your Vercel deployments",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar-deployments",
+      "title": "Menu Bar Deployments",
+      "description": "View recent deployments in the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxDeployments",
+          "title": "Max Deployments",
+          "description": "The maximum number of deployments to show",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "10"
+        }
+      ]
     },
     {
       "name": "search-components",
@@ -53,6 +72,32 @@
           "type": "text",
           "placeholder": "example.com",
           "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-latest-deployment",
+      "title": "Open Latest Deployment",
+      "description": "Open your latest deployment in the browser",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openTarget",
+          "title": "Open Target",
+          "description": "Choose where to open the latest deployment",
+          "type": "dropdown",
+          "required": false,
+          "default": "vercel",
+          "data": [
+            {
+              "title": "Vercel Dashboard",
+              "value": "vercel"
+            },
+            {
+              "title": "Deploy URL",
+              "value": "deployUrl"
+            }
+          ]
         }
       ]
     }
@@ -369,7 +414,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "~1.102.3",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.0",
     "swr": "^2.3.4"
   },

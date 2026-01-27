@@ -1,4 +1,5 @@
 import { List, Image } from "@raycast/api";
+import { JSX } from "react";
 
 import { notionColorToTintColor, isType, Page, DatabaseProperty, PropertyConfig, User } from "../utils/notion";
 import type { DatabaseView } from "../utils/types";
@@ -181,7 +182,10 @@ export function DatabaseView(props: DatabaseViewProps) {
                 pageId={p.id}
                 pageProperty={p.properties[propertyId]}
                 icon="./icon/kanban_status_started.png"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                }}
                 mutate={mutate}
               />,
             ]}

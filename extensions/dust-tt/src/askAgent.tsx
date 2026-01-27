@@ -1,5 +1,6 @@
-import data from "@emoji-mart/data";
+import { DustAPI } from "@dust-tt/client";
 import type { EmojiMartData as EmojiData } from "@emoji-mart/data";
+import data from "@emoji-mart/data";
 import {
   Action,
   ActionPanel,
@@ -13,12 +14,11 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { AgentConfigurationType, AgentType, getAgentScopeConfig } from "./utils";
-import AskDustCommand from "./ask";
 import { useCachedPromise, useForm, useFrecencySorting } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
+import AskDustCommand from "./ask";
 import { getDustClient, withPickedWorkspace } from "./dust_api/oauth";
-import { DustAPI } from "@dust-tt/client";
+import { AgentConfigurationType, AgentType, getAgentScopeConfig } from "./utils";
 
 interface AskAgentQuestionFormValues {
   question: string;
@@ -142,36 +142,42 @@ export default withPickedWorkspace(function AskDustAgentCommand() {
     showToast({ style: Toast.Style.Success, title: `Loaded ${Object.values(agents).length} agents` });
   }
 
-  const saveFavoriteAgent = useCallback(async (agent: { sId: string; name: string }) => {
-    const r = await dustClient.request({
-      method: "PATCH",
-      path: `/assistant/agent_configurations/${agent.sId}/`,
-      body: { userFavorite: true },
-    });
-    if (r.isOk()) {
-      void mutateAgents();
-      showToast({ style: Toast.Style.Success, title: `${agent.name} added as favorite` });
-    } else {
-      showToast({ style: Toast.Style.Failure, title: `Could not add ${agent.name} as favorite: ${r.error.message}` });
-    }
-  }, []);
-
-  const removeFavoriteAgent = useCallback(async (agent: { sId: string; name: string }) => {
-    const r = await dustClient.request({
-      method: "PATCH",
-      path: `/assistant/agent_configurations/${agent.sId}/`,
-      body: { userFavorite: false },
-    });
-    if (r.isOk()) {
-      void mutateAgents();
-      showToast({ style: Toast.Style.Success, title: `${agent.name} removed as favorite` });
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Could not remove ${agent.name} as favorite: ${r.error.message}`,
+  const saveFavoriteAgent = useCallback(
+    async (agent: { sId: string; name: string }) => {
+      const r = await dustClient.request({
+        method: "PATCH",
+        path: `/assistant/agent_configurations/${agent.sId}/`,
+        body: { userFavorite: true },
       });
-    }
-  }, []);
+      if (r.isOk()) {
+        void mutateAgents();
+        showToast({ style: Toast.Style.Success, title: `${agent.name} added as favorite` });
+      } else {
+        showToast({ style: Toast.Style.Failure, title: `Could not add ${agent.name} as favorite: ${r.error.message}` });
+      }
+    },
+    [dustClient],
+  );
+
+  const removeFavoriteAgent = useCallback(
+    async (agent: { sId: string; name: string }) => {
+      const r = await dustClient.request({
+        method: "PATCH",
+        path: `/assistant/agent_configurations/${agent.sId}/`,
+        body: { userFavorite: false },
+      });
+      if (r.isOk()) {
+        void mutateAgents();
+        showToast({ style: Toast.Style.Success, title: `${agent.name} removed as favorite` });
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: `Could not remove ${agent.name} as favorite: ${r.error.message}`,
+        });
+      }
+    },
+    [dustClient],
+  );
 
   const { data: sortedAgents, visitItem } = useFrecencySorting(agents, {
     key: (agent) => agent.sId,

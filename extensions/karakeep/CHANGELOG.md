@@ -1,5 +1,29 @@
 # Karakeep Changelog
 
+## [2.1.0] 2025-11-21
+
+### Big changes
+
+- **Separated Create Bookmark and Create Note commands**: Split bookmark creation into two dedicated commands for better UX
+  - `Create Bookmark` now focuses exclusively on URL bookmarks
+  - New `Create Note` command for text-only notes
+- **Browser Extension Integration**: Automatically prefill URL field from active browser tab
+  - Uses Raycast Browser Extension API to fetch current tab URL
+  - New preference to toggle automatic URL prefilling (enabled by default)
+  - Gracefully handles cases where browser extension is unavailable
+- **Raycast API Optimization**: Migrated to native Raycast pagination
+  - Replaced manual pagination state management with Raycast's native `useCachedPromise` pagination
+  - Eliminated rendering loop bug caused by stale closures
+  - Optimized memory usage by removing data accumulation across pages
+  - Bookmarks display in reverse chronological order (newest first)
+  - **Code reduction**: 65% fewer lines across pagination hooks (384 → 136 lines)
+
+### Chores
+
+- Updated dependencies
+- Updated ESLint configuration
+- Refactored pagination hooks to use Raycast utilities
+
 ## [2.0.1] - 2025-06-28
 
 ### Major Changes

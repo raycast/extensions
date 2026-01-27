@@ -1,5 +1,10 @@
 # Summarize YouTube Video Changelog
 
+## [Fix] - 2026-01-27
+
+- 🔧 Fix transcript fetching using ANDROID client API
+- ⬆️ Upgraded dependencies
+
 ## [Feat] - 2025-10-28
 
 - 🖼️ Added Support for Windows

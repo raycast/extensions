@@ -1,20 +1,20 @@
 import { Color, Icon, List } from '@raycast/api'
-import type { Registry } from '@scaleway/sdk'
+import type { Registryv1 } from '@scaleway/sdk'
 import { bytesToSize } from '../../../../helpers/bytesToSize'
 import { getIconFromLocality } from '../../../../helpers/locality'
 import { getImageStatusIcon } from '../../status'
 
 type ImageDetailProps = {
-  image: Registry.v1.Image
-  namespaces: Registry.v1.Namespace[]
+  image: Registryv1.Image
+  namespaces: Registryv1.Namespace[]
 }
 
 export const getPrivacyAccessory = ({
   image,
   namespace,
 }: {
-  image: Registry.v1.Image
-  namespace: Registry.v1.Namespace
+  image: Registryv1.Image
+  namespace: Registryv1.Namespace
 }) => {
   switch (image.visibility) {
     case 'public':

@@ -1,5 +1,9 @@
 # Fork Repositories Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Added support for Fork's `repositories.toml` file with fallback to `repositories.json`.
+
 ## [Bug Fix] - 2024-04-05
 
 - Fixed an issue where `Open in Fork` would properly open Fork, but not the the target repository.

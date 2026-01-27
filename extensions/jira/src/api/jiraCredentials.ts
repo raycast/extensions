@@ -18,7 +18,7 @@ export const jiraWithApiToken = {
     let hostname;
     try {
       hostname = new URL(siteUrl).host;
-    } catch (error) {
+    } catch {
       // If the URL isn't valid, assume a hostname was entered directly
       hostname = siteUrl;
     }
@@ -38,7 +38,7 @@ export const jiraWithApiToken = {
         authorizationHeader: authorizationHeader,
         myself: myself,
       };
-    } catch (error) {
+    } catch {
       throw new Error(
         `Error authenticating with Jira. Error code: ${myselfResponse.status}. Please check your credentials in the extension preferences.`,
       );

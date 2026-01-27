@@ -1,152 +1,108 @@
 # Keeper Security Raycast Extension
 
-![Keeper Security Raycast Extension Header](https://github.com/user-attachments/assets/6839171a-23c8-47d4-99d7-8bd3f9097100)
+![Keeper Security Raycast Extension Header](https://images.gitbook.com/__img/dpr=2,width=760,onerror=redirect,format=auto,signature=-129497934/https%3A%2F%2Ffiles.gitbook.com%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MJXOXEifAmpyvNVL1to%252Fuploads%252Fa5BTzmhaI0rvabqQXJDv%252Fkeeper%252Braycast.png%3Falt%3Dmedia%26token%3D5031f39c-6ef2-4046-9b88-24e0a8ebb27a)
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
 - [Prerequisites](#prerequisites)
-- [Setup](#setup)
+- [Quick Setup](#quick-setup)
 - [Usage](#usage)
-- [Publishing](#publishing)
-- [Troubleshooting](#troubleshooting)
 - [Support](#support)
-- [License](#license)
 
 ## Overview
 
-A comprehensive Raycast extension that provides seamless access to your Keeper Security vault directly to your macOS desktop through Raycast. Manage records, generate secure credentials, and access your vault records without leaving your workflow.
+A comprehensive [Raycast](https://www.raycast.com/) extension that provides seamless access to your Keeper Security vault directly to your macOS desktop. Manage records, generate secure credentials, and access your vault records without leaving your workflow.
 
 ## Features
 
-- **Record Management**: Browse your entire Keeper vault with a clean, searchable, filterable interface and perform different actions
+- **Record Management**: Browse your Keeper vault with a clean, searchable, filterable interface and perform different actions
 - **Password Generation**: Generate secure passwords with custom options or instantly with defaults, automatically copied to clipboard
 - **Passphrase Generation**: Generate 24-word passphrase, automatically copied to clipboard
 
 ## Prerequisites
 
-- Keeper Commander CLI: Must be globally installed using binary and authenticated on your system
-   - You can install [Keeper Commander](https://docs.keeper.io/en/keeperpam/commander-cli/overview) as a binary, docker container or run from source
-   - Authenticated using [Persistent login](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup/logging-in#persistent-login-sessions-stay-logged-in)
-   - Start up the [Commander Service Mode](https://docs.keeper.io/en/keeperpam/commander-cli/service-mode-rest-api) to interact with the local Raycast app
+- **Keeper Commander CLI**: Must be installed and authenticated on your system
+- **Keeper Security Account**: Active subscription with vault access (Consumer, B2B, MSP)
 
-- **Keeper Security Account**: Active subscription with vault access
+## Quick Setup
 
-- **Docker Desktop**: Download & [install docker desktop](https://docs.docker.com/desktop/setup/install/mac-install/) for your system, must be accessible in terminal.
+### Step 1: Install the Keeper Security Extension
 
-## Setup
+You can install the Keeper Security extension directly from the Raycast website:
 
-### **Install from Raycast Store**:
+- https://www.raycast.com/keepersecurity/keeper-security
 
-- Open Raycast Settings
-- Go to Extensions → Click `+` button -> `Install From Store`
-  ![](./media/setup-install-raycast-extension.png)
-- Search for `Keeper Security`
-- Click Install
+Or, open **Raycast Settings > Extensions > Click "+" button > Install from Store** and search for "**Keeper Security**".
 
-### Start Keeper Commander Service Mode
+### Step 2: Install the Keeper Commander CLI
 
-In order to preserve zero knowledge and provide all of the full Raycast integration capabilities, you need to run the Keeper Commander service on your local machine, or any server that can be accessed over an HTTPS connection.
+Follow the [Keeper Commander Installation Guide](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup) to download and install the binary for your operating system. For macOS, you have 2 options:
 
-Choose the setup option that best fits your Keeper Security account type:
+- [Install the Commander CLI using pip3](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup/installation-on-mac#python-pip3-installation-method)
+- [Install in developer mode](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup/developer-mode)
 
-#### **Option 1: KSM Configuration (PAM users Only)**
+### Step 3: Authenticate with Keeper Commander CLI
 
-- Follow the steps under [Using Base64-Encoded KSM Config](https://docs.keeper.io/en/keeperpam/commander-cli/service-mode-rest-api#run-docker-container) method
-  in the official Keeper documentation to perform the initial configuration.
-- When running the Docker container:
-  - Replace the `'<commands>'` placeholder in the `-c `argument with the following command list: <br>
-  `"generate,get,list,this-device,sync-down,share,totp,server"` and at the end add `-q n` argument
+1. Open your Terminal app.
+2. Run the following command: `keeper shell`
+3. If you're not already logged in, type `login youremail@company.com` and you'll be asked to enter your Keeper credentials.
+4. After login, we recommend activating "**persistent login**" mode:
 
-  **Example**:
+```bash
+this-device register
+this-device persistent-login on
+this-device timeout 43200
+```
 
-  ```bash
-  docker run --name keeper-service-mode -d -p 9007:9007 \
-  keeper/commander \
-  service-create -p 9007 -c "generate,get,list,this-device,sync-down,share,totp,server" -f json \
-  --ksm-config XXXXXXXXXXYOUR_BASE64_CONFIGXXXXXXXX \
-  --record ABC123-DEF456-GHI789 -q n
-  ```
+There are several other authentication methods, including biometric login. See the [Logging In](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup/logging-in) documentation for more info.
 
-#### **Option 2: Config File Authentication (All Other Users)**
+### Step 4: Start Keeper Commander Service Mode
 
-- Follow the steps under [With Config File Authentication](https://docs.keeper.io/en/keeperpam/commander-cli/service-mode-rest-api#run-docker-container) method
-  in the official Keeper documentation to perform the initial configuration.
-- When running the Docker container:
-  - Replace the `/path/to/local/config.json` in the `-v` argument with YOUR_LOCAL_CONFIG_FILE_PATH
-  - Replace the `'<commands>'` placeholder in the `-c ` argument with the following command list: <br>
-  `"generate,get,list,this-device,sync-down,share,totp,server"` and at the end add `-q n` argument
+In order to preserve zero knowledge and provide all of the full Raycast integration capabilities, you need to run the Keeper Commander service on your local machine, or any server that can be accessed over an HTTPS connection. To keep things simple, a quick command for Keeper Commander that is compatible with the Raycast integration looks like this:
 
-  **Example**:
+```bash
+service-create -p 9007 -q n -c "generate,get,list,this-device,sync-down,share,totp,server"
+```
 
-  ```bash
-  docker run --name keeper-service-mode -d -p 9007:9007 \
-  -v /path/to/local/config.json:/home/commander/.keeper/config.json \
-  keeper/commander \
-  service-create -p 9007 -c "generate,get,list,this-device,sync-down,share,totp,server" -f json \
-  -q n
-  ```
+This will produce some output like below:
 
-  > **Note**: If port (eg: **9007**) is already in use, replace all its occurrences with an available port (e.g. **9008**).
+```bash
+Generated API key: XXXXXXXXXXXXXX
+...
+Commander Service starting on http://localhost:9007/api/v1/
+...
+...
+```
 
-### Getting Your API URL and API Key
+After you type this, you'll need to save two pieces of information:
 
-Once the container starts:
+- API URL: This looks like `http://localhost:9007`
+- API Key: This looks like `abcdefghi123456==`
 
-1. Open Docker Desktop.
-2. Locate the container named **`keeper-service-mode`**.
-3. Click on the container and go to the Logs tab.
-4. In the logs, locate and copy the following latest values:
-   - Keeper Service Mode **API Key**:<br>
-     Look for a log line starting with `Generated API key:` and **copy the value that comes after it** — this is your **API Key**.<br>
+> ⓘ Keep the Commander CLI running in order to stay connected
 
-   - Keeper Service Mode **API URL**:<br>
-     Look for a log line starting with `Commander Service starting on:` and **copy the URL that comes after it** — this is your **API URL**.
-
-     > **Note**: If the API URL includes /api/v1, you can ignore or remove it.
-
-     **Example**: `http://localhost:8080` or your `NGROK URL`.
-
-> **Important**: If the container restarts (e.g. due to a laptop reboot or manual restart), the API key may change.<br>
->
-> To retrieve the API key:
->
-> - Locate the `Commander Service Mode` record in your Keeper Vault.
-> - Download and open the `config.json` file to copy the API key, OR
-> - Check the container logs for the newly generated API key.
-
-Example:
-![](./media/setup-docker-desktop.png)
-
-### Authenticate the Extension
+### Step 5. Authenticate the Extension
 
 1. Open **Raycast** using your configured hotkey.
 2. Search for **"Keeper Security"** and run any `keeper security` command from the extension.
 
    If you're not authenticated, the extension will prompt you to enter the **API URL** and **API Key**.
 
-3. Paste the values you copied from the Docker container logs.
-4. Click **Continue** to complete the setup.
+Note: remove `/api/v1` from the API URL, so it looks like below.
 
-Example:
 ![](./media/setup-extension-auth.png)
 
-> **Note: Need to update preferences later?**
->
-> You can update the extension settings anytime:
->
-> 1. Open **Raycast Settings** and go to the **Extensions** tab.
-> 2. Search for **"Keeper Security"** in the list.
-> 3. On the right-side panel, update the required preferences:
->    - **API URL** — Your Keeper Service Mode URL (eg: `http://localhost:8080`)
->    - **API Key** — Your Keeper Service Mode API Key
+Setup is now complete.
+
+---
 
 ## Usage
 
-### Open **Raycast** using your configured hotkey to run below commands:
+Open Raycast using your configured hotkey to run below commands:
 
-- ### My Vault Command
+- ### `My Vault` Command
   - **Purpose**: View and interact with all your vault records.
 
   - **Available Actions**:
@@ -158,60 +114,32 @@ Example:
     - **Copy Two Factor Code** – Copies the TOTP code (if available)
     - **Sync Records** – Fetches the latest vault records from the server
 
-- ### Generate Password Command
+- ### `Generate Password` Command
   - **Purpose**: Generate a random password with custom options and automatically copy it to the clipboard.
 
-- ### Generate Password (Quick) Command
+- ### `Generate Password (Quick)` Command
   - **Purpose**: Generate a random password using default options and automatically copy it to the clipboard.
 
-- ### Generate Passphrase Command
+- ### `Generate Passphrase` Command
   - **Purpose**: Generate a random 24-word passphrase and automatically copy it to the clipboard.
 
-## Publishing
+### Restarting the Service Mode
 
-- To publish the extension, follow the official Raycast documentation here:<br>
-  [Publishing an Extension – Raycast Docs](https://developers.raycast.com/basics/publish-an-extension)
+Commander Service Mode needs to be running in order for the Raycast extension to communicate with Keeper. If the Terminal app closes, you can easily start Commander Service Mode using this one-line command from your terminal:
 
-## Troubleshooting
+```bash
+keeper service-start
+```
 
-### Common Issues
+Assuming that you followed the above [Quick Setup](#quick-setup) instructions, this should immediately login to Keeper and start up the service inside your Terminal app.
 
-- **"Authentication failed"**
-  - Restart Keeper Service Mode Docker container to get a fresh API key
-  - Verify your API key is correct in extension preferences (get the latest key from Docker service mode container logs) <br>
+## Learn More
 
-    OR
+This document has covered the basic use cases to integrate Keeper Commander with Raycast. Many more advanced options exist. To learn more, see the below helpful documents:
 
-  - To retrieve the API key:
-  - Locate the `Commander Service Mode` record in your Keeper Vault.
-  - Download and open the `config.json` file to copy the API key
-
-- **"Server not running / Service unavailable"**
-  - Confirm Keeper Service Mode in is running on the correct url and port
-  - Check your API URL in preferences matches the service URL (except `/api/v1` or `/api/v2`)
-  - Verify your internet connection
-
-- **"Rate limit exceeded"**
-  - Wait a minute before retrying operations
-
-- **"No records found"**
-  - Ensure you have records in your Keeper vault
-  - Try syncing records using the "Sync Records" action
-  - Check your Keeper account is properly set up
-
-- **"Service won't start"**
-  - Follow correct steps for [Setup](#setup), Ensure you run the correct Docker service create command with available ports and correct user credentials
-
-- **"Docker not found"**
-  - Ensure you have completed the Docker Desktop installation steps for your machine (Ref. Prerequisites section)
-- **Port Conflict: "PORT already in use"**
-  - If you encounter a "PORT already in use" error when starting the Docker container (default is **9007**), update all instances of port `9007` to an available alternative, such as `9008`.
-### For more information, refer to the [Service Mode documentation](https://docs.keeper.io/en/keeperpam/commander-cli/service-mode-rest-api)
+- [Logging In](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup/logging-in) to Commander
+- [Service Mode REST API](https://docs.keeper.io/en/keeperpam/commander-cli/service-mode-rest-api)
 
 ## Support
 
-For support, Bugs or feature requests, please open a [Github issue](https://github.com/raycast/extensions/issues/new/choose).
-
-## License
-
-MIT License
+For support, bugs or feature requests, please email `commander@keepersecurity.com`.

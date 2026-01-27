@@ -33,7 +33,10 @@ export default function PlaylistLikedTracksItem({ type }: PlaylistLikedTracksIte
             <Action.Push
               title="Show Songs"
               icon={{ source: Icon.AppWindowList }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "a" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+              }}
               target={<TracksList tracks={myLibraryData.tracks?.items} />}
             />
           )}

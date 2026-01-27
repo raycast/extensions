@@ -15,7 +15,8 @@
     "j3lte",
     "litomore",
     "ridemountainpig",
-    "dbrooks"
+    "dbrooks",
+    "YourMCGeek"
   ],
   "license": "MIT",
   "categories": [
@@ -57,6 +58,10 @@
         {
           "title": "pnpm",
           "value": "pnpm"
+        },
+        {
+          "title": "bun",
+          "value": "bun"
         }
       ],
       "title": "Default Package Manager",
@@ -80,6 +85,10 @@
         {
           "title": "pnpm",
           "value": "pnpm"
+        },
+        {
+          "title": "bun",
+          "value": "bun"
         }
       ],
       "title": "Secondary Package Manager",
@@ -136,8 +145,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
     "dedupe": "^4.0.3",
     "git-url-parse": "^16.1.0",
     "tiny-relative-date": "^2.0.2",
@@ -145,10 +154,10 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.37.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.39.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
   },

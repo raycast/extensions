@@ -43,7 +43,11 @@ export function useFrecencySortingExtended<T extends { id?: string }>(
     resetRanking: _resetRanking,
   } = useFrecencySorting<T>(data, options as any);
 
-  const key: (item: T) => string = options?.key || ((item: any) => (item.id !== undefined ? String(item.id) : ""));
+  const key = (item: T) => {
+    if (options?.key) return options.key(item);
+    if (!("id" in item)) throw new Error(`property "id" expected in item`);
+    return String(item.id);
+  };
 
   const [visitItemSignal, triggerVisitItemSignal] = useReducer((cur) => cur + 1, 0);
   const visitItem = async (item: T) => {

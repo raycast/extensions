@@ -37,6 +37,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
   const preferences = getPreferenceValues();
   const filterSpam = preferences.filterSpam ?? false;
   const filterUnknownSenders = preferences.filterUnknownSenders ?? false;
+  const loadContactPhotos = preferences.loadContactPhotos ?? true;
 
   const filterClause = (() => {
     switch (filter) {
@@ -134,13 +135,13 @@ export function useMessages(searchText?: string, filter?: Filter) {
   });
 
   const { data, isLoading: isLoadingContacts } = usePromise(
-    async (rawMessages) => {
+    async (rawMessages, loadPhotos) => {
       if (!rawMessages) return [];
 
       const messages = rawMessages as SQLMessage[];
 
       const uniqueChatIdentifiers = [...new Set(messages.map((m) => m.chat_identifier))];
-      const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers);
+      const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, loadPhotos);
       const contactMap = createContactMap(contacts);
 
       return messages.map((m) => {
@@ -168,7 +169,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
         };
       });
     },
-    [rawData],
+    [rawData, loadContactPhotos],
     { execute: !!rawData },
   );
 

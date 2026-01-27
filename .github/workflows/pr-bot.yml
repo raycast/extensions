@@ -4,6 +4,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "extensions/**"
+      - "docs/**"
     branches: [main, master]
 
 jobs:

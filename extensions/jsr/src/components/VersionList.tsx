@@ -39,11 +39,20 @@ export const VersionList = (props: NameAndScope) => {
           ]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Specific Version (JSR)"
-                icon={{ source: "jsr.svg" }}
-                url={`https://jsr.io/@${result.scope}/${result.package}@${result.version}`}
-              />
+              <ActionPanel.Section title="Open">
+                <Action.OpenInBrowser
+                  title="Open Specific Version (JSR)"
+                  icon={{ source: "jsr.svg" }}
+                  url={`https://jsr.io/@${result.scope}/${result.package}@${result.version}`}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Import Command">
+                <Action.CopyToClipboard
+                  title="ESM.sh (Deno)"
+                  content={`import {  } from "https://esm.sh/jsr/@${result.scope}/${result.package}@${result.version}"`}
+                  icon={{ source: "deno.svg" }}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

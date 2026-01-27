@@ -15,9 +15,10 @@ type ListItemProps = {
   toggleDetails: () => void;
   isShowingDetails: boolean;
   extraActions?: ReactNode;
+  searchQueryURL?: string;
 };
 
-const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions }: ListItemProps) => {
+const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQueryURL }: ListItemProps) => {
   const { openWebsiteByDefault } = getPreferenceValues<Preferences>();
   const progress = item.score ?? 0;
   const iconColor = progress >= 80 ? Color.Green : progress >= 50 ? Color.Yellow : Color.Red;
@@ -72,6 +73,16 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions }: ListI
             {extraActions ? <>{extraActions}</> : null}
           </ActionPanel.Section>
           <CopyActions item={item} />
+          {searchQueryURL ? (
+            <ActionPanel.Section title="Search">
+              <Action.OpenInBrowser
+                title="Open Search (JSR)"
+                icon={{ source: "jsr.svg" }}
+                url={searchQueryURL}
+                shortcut={{ key: "w", modifiers: ["cmd", "shift"] }}
+              />
+            </ActionPanel.Section>
+          ) : null}
         </ActionPanel>
       }
     />

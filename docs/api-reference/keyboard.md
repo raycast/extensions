@@ -60,7 +60,7 @@ If the shortcut contains some "ambiguous" modifiers (eg. `ctrl`, or `cmd`, or `w
 ```js
 {
   macOS: { modifiers: ["cmd", "shift"], key: "c" },
-  windows: { modifiers: ["ctrl", "shift"], key: "c" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "c" },
 }
 ```
 

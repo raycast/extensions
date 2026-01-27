@@ -11,7 +11,8 @@
     "kmizzi",
     "arpitdalal",
     "litomore",
-    "AaronMoat"
+    "AaronMoat",
+    "0xdhrv"
   ],
   "license": "MIT",
   "commands": [
@@ -57,29 +58,31 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.2",
+    "@raycast/api": "^1.103.6",
     "bitbucket": "^2.12.0",
     "dot-object": "^2.1.5",
     "node-fetch": "^3.3.2",
     "node-localstorage": "^3.0.5",
-    "swr": "2.3.3",
-    "zod": "^4.1.5"
+    "swr": "2.3.6",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.0.3",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.0",
     "@types/node-localstorage": "^1.3.3",
-    "eslint": "^9.29.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

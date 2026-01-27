@@ -7,6 +7,7 @@ import { MeetingDetailActions } from "./actions/MeetingActions";
 import { useCachedMeetings } from "./hooks/useCachedMeetings";
 import { getUserFriendlyError } from "./utils/errorHandling";
 import { MeetingListItem } from "./components/MeetingListItem";
+import { RefreshCacheAction } from "./actions/RefreshCacheAction";
 import { getDateRanges } from "./utils/dates";
 
 export default function Command() {
@@ -134,6 +135,11 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       navigationTitle={filterDisplayName ? `Meetings: ${filterDisplayName}` : "Search Meetings"}
+      actions={
+        <ActionPanel>
+          <RefreshCacheAction onRefresh={refreshCache} />
+        </ActionPanel>
+      }
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Team" value={filterType} onChange={setFilterType}>
           <List.Dropdown.Item title="All Meetings" value="all" />
@@ -197,7 +203,7 @@ export default function Command() {
           {thisWeekMeetings.length > 0 && (
             <List.Section title="This Week" subtitle={`${thisWeekMeetings.length} meetings`}>
               {thisWeekMeetings.map((meeting) => (
-                <MeetingListItem key={meeting.id} meeting={meeting} />
+                <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
             </List.Section>
           )}
@@ -205,7 +211,7 @@ export default function Command() {
           {lastWeekMeetings.length > 0 && (
             <List.Section title="Last Week" subtitle={`${lastWeekMeetings.length} meetings`}>
               {lastWeekMeetings.map((meeting) => (
-                <MeetingListItem key={meeting.id} meeting={meeting} />
+                <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
             </List.Section>
           )}
@@ -213,7 +219,7 @@ export default function Command() {
           {previousMonthMeetings.length > 0 && (
             <List.Section title="Previous Month" subtitle={`${previousMonthMeetings.length} meetings`}>
               {previousMonthMeetings.map((meeting) => (
-                <MeetingListItem key={meeting.id} meeting={meeting} />
+                <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
             </List.Section>
           )}
@@ -222,7 +228,7 @@ export default function Command() {
         // Flat chronological list (when filtered)
         <List.Section title={filterDisplayName || "Filtered Meetings"} subtitle={`${totalMeetings} meetings`}>
           {allFilteredMeetings.map((meeting) => (
-            <MeetingListItem key={meeting.id} meeting={meeting} />
+            <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
           ))}
         </List.Section>
       )}

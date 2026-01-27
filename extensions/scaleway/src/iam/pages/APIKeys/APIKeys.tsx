@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 import { useReducer, useState } from 'react'
 import { useAllApiKeysQuery } from '../../queries'
 import { APIkey, DropDownOrderBy } from './components'
@@ -7,7 +7,7 @@ import { APIkey, DropDownOrderBy } from './components'
 export const APIkeys = () => {
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, false)
 
-  const [orderBy, setOrderBy] = useState<IAM.v1alpha1.ListAPIKeysRequestOrderBy>('access_key_asc')
+  const [orderBy, setOrderBy] = useState<Iamv1alpha1.ListAPIKeysRequestOrderBy>('access_key_asc')
 
   const { data: apiKeys = [], isLoading } = useAllApiKeysQuery({
     orderBy,
@@ -22,7 +22,7 @@ export const APIkeys = () => {
       searchBarPlaceholder="Search API Keys …"
       searchBarAccessory={
         <DropDownOrderBy
-          setOrderBy={(str) => setOrderBy(str as IAM.v1alpha1.ListAPIKeysRequestOrderBy)}
+          setOrderBy={(str) => setOrderBy(str as Iamv1alpha1.ListAPIKeysRequestOrderBy)}
         />
       }
     >

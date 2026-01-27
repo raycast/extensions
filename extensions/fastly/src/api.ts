@@ -1,10 +1,8 @@
-import fetch, { RequestInit } from "node-fetch";
 import {
   FastlyCustomer,
   FastlyService,
   FastlyServiceDetails,
   FastlyStats,
-  Preferences,
   FastlyInvitationResponse,
   FastlyInvitationRequest,
   InviteTeamMemberParams,
@@ -18,10 +16,6 @@ let cachedCustomerId: string | null = null;
 
 async function fastlyFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const preferences = getPreferenceValues<Preferences>();
-
-  if (!preferences.apiToken) {
-    throw new Error("Fastly API token not configured. Please set it in preferences.");
-  }
 
   try {
     const response = await fetch(`${FASTLY_API_ENDPOINT}${path}`, {
@@ -53,7 +47,7 @@ async function fastlyFetch<T>(path: string, options: RequestInit = {}): Promise<
     // Only try to parse JSON if we're expecting a response body
     if (response.status !== 204) {
       const data = await response.json();
-      return data;
+      return data as T;
     }
     return {} as T;
   } catch (error) {

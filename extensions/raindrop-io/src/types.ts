@@ -54,12 +54,27 @@ export interface CollectionsResponse {
   items: Collection[];
 }
 
+export interface CollectionResponse {
+  result: boolean;
+  item: Collection;
+}
+
 export interface CollectionCreationResponse {
   result: boolean;
   item: Collection;
 }
 
 export interface BookmarksResponse {
+  items: Bookmark[];
+}
+
+export interface BookmarkDetailResponse {
+  result: boolean;
+  item: Bookmark;
+}
+
+export interface CreateBookmarksResponse {
+  result: boolean;
   items: Bookmark[];
 }
 

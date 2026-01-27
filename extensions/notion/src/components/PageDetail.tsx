@@ -1,7 +1,7 @@
 import { ActionPanel, Detail, Action, Icon, Image, Color, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 
 import { fetchPageContent, getPageName, notionColorToTintColor, PageProperty, Page, User } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
@@ -157,7 +157,10 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
               <Action.Push
                 title="Append Content to Page"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "n" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+                }}
                 target={<AppendToPageForm page={page} onContentUpdate={mutate} />}
               />
             </ActionPanel.Section>
@@ -165,12 +168,18 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
               <Action.CopyToClipboard
                 title="Copy Page URL"
                 content={page.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                }}
               />
               <Action.Paste
                 title="Paste Page URL"
                 content={page.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+                }}
               />
             </ActionPanel.Section>
           </ActionPanel>

@@ -12,6 +12,7 @@ import {
   LaunchProps,
   openCommandPreferences,
   Image,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { pause } from "./api/pause";
@@ -340,7 +341,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           title="Copy URL"
           icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "c" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+          }}
           onAction={async () => {
             await Clipboard.copy({
               html: `<a href=${external_urls?.spotify}>${title}</a>`,
@@ -352,7 +356,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           icon="spotify-icon.svg"
           title="Open on Spotify"
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() =>
             isSpotifyInstalled ? open(uri || "spotify") : open(external_urls?.spotify || "https://play.spotify.com")
           }
@@ -361,7 +365,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>
@@ -387,7 +391,7 @@ function OpenSpotify({ isLoading }: { title?: string; isLoading: boolean }) {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>
@@ -424,7 +428,7 @@ function NothingPlaying({ title = "Nothing is playing right now", isLoading }: {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>

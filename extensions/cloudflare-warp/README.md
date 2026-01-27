@@ -6,6 +6,7 @@ This extensions allows you to manage Cloudflare WARP connection
 
 - Connect/Disconnect
 - Switch between VirtualNetworks
+- Switch between MDM profiles
 
 ## Requirements
 

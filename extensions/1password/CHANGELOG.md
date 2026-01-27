@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Chore] - 2025-11-15
+
+- Add stricter, opinionated eslint rules for clarity
+
 ## [Chore] - 2025-10-14
 
 - Adopt the latest available extension template

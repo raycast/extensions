@@ -90,7 +90,6 @@ jobs:
             platforms_added=true
           fi
           echo "platforms_added=$platforms_added" >> $GITHUB_OUTPUT
-
       - name: Optimise images
         id: optimise_images
         run: |
@@ -108,18 +107,18 @@ jobs:
           count=${#images_array[@]}
           echo "Found images: $count"
           if [ $count -gt 0 ]; then
-            brew update
-            brew install imageoptim
-            npm install -g imageoptim-cli
-            batch_size=30
-            batch_number=1
-            total_batches=$(( (count + batch_size - 1) / batch_size ))
-            for ((i = 0; i < count; i += batch_size)); do
-                batch=("${images_array[@]:i:batch_size}")
-                echo "Processing batch: $batch_number / $total_batches"
-                imageoptim "${batch[@]}"
-                ((batch_number++))
+            brew install oxipng jpegoptim
+            
+            for image in "${images_array[@]}"; do
+              echo "Processing: $image"
+              if [[ "$image" == *.png ]]; then
+                oxipng -o 6 --strip safe "$image"
+              fi
+              if [[ "$image" == *.jpg ]] || [[ "$image" == *.jpeg ]]; then
+                jpegoptim --max=85 --strip-all "$image"
+              fi
             done
+            
             images_optimized=true
           fi
           echo "images_optimized=$images_optimized" >> $GITHUB_OUTPUT

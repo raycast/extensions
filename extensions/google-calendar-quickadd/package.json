@@ -5,6 +5,9 @@
   "description": "Create Google Calendar events using natural language powered by Raycast AI",
   "icon": "gcal-icon1.png",
   "author": "ben_aguirre",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "commands": [
     {

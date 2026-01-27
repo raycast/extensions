@@ -1,5 +1,5 @@
 import { Alert, Toast, confirmAlert, showToast } from '@raycast/api'
-import type { Container } from '@scaleway/sdk'
+import type { Containerv1beta1 } from '@scaleway/sdk'
 import ActionStyle = Alert.ActionStyle
 import Style = Toast.Style
 
@@ -10,8 +10,8 @@ const getErrorMessage = (e: unknown) => {
 }
 
 export type ActionProps = {
-  containerV1Beta1: Container.v1beta1.API
-  container: Container.v1beta1.Container
+  containerV1Beta1: Containerv1beta1.API
+  container: Containerv1beta1.Container
   onSuccess: () => Promise<void>
 }
 

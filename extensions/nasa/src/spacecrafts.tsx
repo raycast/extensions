@@ -1,9 +1,10 @@
 import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ENDPOINTS, HEADERS } from "./constants/prefrences";
-import { SpaceCraftsResponse } from "./types/spacecrafts";
-import SpacecraftDetail from "./componenets/spacecraft";
-import ErrorDetail from "./componenets/error";
+
+import { SpaceCraftsResponse } from "@/types";
+import { ENDPOINTS, HEADERS } from "@/constants/preferences";
+import ErrorDetail from "@/components/error";
+import SpacecraftDetail from "@/components/spacecraft";
 
 export default function SPACECRAFTS() {
   const { isLoading, data, error } = useFetch(ENDPOINTS.SPACECRAFTS, {

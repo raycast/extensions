@@ -1,8 +1,8 @@
 import type { Keyboard } from "@raycast/api";
 import { Action, getPreferenceValues } from "@raycast/api";
+import type { ExtensionPreferences } from "@/types";
 
-type Registries = "yarn" | "npm" | "pnpm";
-
+type Registries = "yarn" | "npm" | "pnpm" | "bun";
 interface RegistryItem {
   name: string;
   registry: Registries;
@@ -24,22 +24,39 @@ const registries: RegistryItem[] = [
     registry: "pnpm",
     installCommand: "install",
   },
+  {
+    name: "bun",
+    registry: "bun",
+    installCommand: "add",
+  },
 ];
 
 const defaultShortcut: Keyboard.Shortcut = {
-  key: "c",
-  modifiers: ["shift", "cmd"],
+  macOS: {
+    key: "c",
+    modifiers: ["shift", "cmd"],
+  },
+  Windows: {
+    key: "c",
+    modifiers: ["shift", "ctrl"],
+  },
 };
 const alternateShortcut: Keyboard.Shortcut = {
-  key: "c",
-  modifiers: ["opt", "cmd"],
+  macOS: {
+    key: "c",
+    modifiers: ["opt", "cmd"],
+  },
+  Windows: {
+    key: "c",
+    modifiers: ["alt", "ctrl"],
+  },
 };
 
 interface CopyInstallCommandActionsProps {
   packageName: string;
 }
 export const CopyInstallCommandActions = ({ packageName }: CopyInstallCommandActionsProps) => {
-  const { defaultCopyAction, secondaryCopyAction }: Preferences = getPreferenceValues<ExtensionPreferences>();
+  const { defaultCopyAction, secondaryCopyAction } = getPreferenceValues<ExtensionPreferences>();
 
   const copyActions = registries
     .sort((a) => {

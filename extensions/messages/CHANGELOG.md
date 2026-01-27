@@ -1,5 +1,12 @@
 # Messages Changelog
 
+## [Performance Optimizations] - 2025-11-05
+
+- Added "Load Contact Photos" preference to disable contact photo loading
+- Optimized contact fetching to use a single batch query instead of per-phone-number queries
+- Added phone number normalization for better matching
+- Removed email addresses from Contact type
+
 ## [Spam and Unknown Sender Filtering] - 2025-10-03
 
 - Added backward-compatible support for the `is_filtered` field to filter spam and unknown sender messages
@@ -10,7 +17,7 @@
 
 ## [Start New Chat on No Results] - 2025-07-09
 
-When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number. 
+When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number.
 
 ## [Support for Hyphenated OTP Codes] - 2025-07-09
 

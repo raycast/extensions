@@ -110,3 +110,29 @@ export async function switchVirtualNetwork(id: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function getMDMProfiles(): Promise<{ available: string[]; active: string }> {
+  const result = await execCommand<{ available: string[]; active: string }>("mdm get-configs");
+  return { available: result.available, active: result.active };
+}
+
+export async function setMDMProfile(profile: string): Promise<boolean> {
+  try {
+    const disconnected = await disconnectFromWarp();
+    if (!disconnected) {
+      throw new Error("Failed to disconnect");
+    }
+    const { status } = await execCommand<{ status: string }>(`mdm set-config ${profile}`);
+    if (status !== "Success") {
+      throw new Error("Failed to set MDM profile");
+    }
+    const connectStatus = await connectToWarp();
+    if (!connectStatus) {
+      throw new Error("Failed to connect");
+    }
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}

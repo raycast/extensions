@@ -316,8 +316,6 @@ export default function Command() {
       newBuddies[index] = newBuddies[index + 1];
       newBuddies[index + 1] = buddy;
       await updateBuddies(newBuddies);
-
-      await updateBuddies(newBuddies);
     }
   }
 

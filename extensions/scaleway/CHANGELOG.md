@@ -1,5 +1,9 @@
 # Scaleway Changelog
 
+## [Improvement] - 2025-11-11
+
+- Update SDK Scaleway and dependencies.
+
 ## [Improvement] - 2024-04-09
 
 - Update SDK Scaleway and dependencies.

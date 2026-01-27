@@ -1,5 +1,10 @@
 # JSR Changelog
 
+## [Improvements] - 2025-11-06
+
+- Add link to search page (open in browser action)
+- Add option to copy a [esm/sh](https://esm.sh/) import command
+
 ## [Improvements] - 2025-10-29
 
 - Refactored components, make the code more maintainable
