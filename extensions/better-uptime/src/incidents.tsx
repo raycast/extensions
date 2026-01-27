@@ -73,14 +73,14 @@ export default function IncidentsCommand() {
 
   return (
     <List isShowingDetail isLoading={isLoading} pagination={pagination}>
-      {unresolvedIncidents?.length && (
+      {!!unresolvedIncidents?.length && (
         <List.Section title="Unresolved">
           {unresolvedIncidents?.map((item) => (
             <Incident key={item.id} item={item} onDeleted={revalidateUnresolvedIncidents} />
           ))}
         </List.Section>
       )}
-      {resolvedIncidents?.length && (
+      {!!resolvedIncidents?.length && (
         <List.Section title="Resolved">
           {resolvedIncidents?.map((item) => (
             <Incident key={item.id} item={item} onDeleted={revalidateResolvedIncidents} />
