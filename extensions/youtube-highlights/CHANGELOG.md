@@ -1,6 +1,6 @@
 # YouTube Highlights Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-27
 
 - Create highlights from YouTube videos playing in Arc browser
 - Capture configurable duration before current timestamp
