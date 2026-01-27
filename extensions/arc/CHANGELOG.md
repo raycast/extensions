@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fixed an issue where selecting a tab would not open it due to a timing issue with closing the Raycast window.
+
 ## [New Features] - 2025-10-27
 
 - Added `Search Space Tabs` command to search and select tabs in the current space only.
