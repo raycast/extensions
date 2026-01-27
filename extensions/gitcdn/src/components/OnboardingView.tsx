@@ -30,7 +30,6 @@ Set your default GitHub repository to view files from.
   return (
     <Detail
       markdown={markdown}
-      icon={{ source: "extension-icon-small.png" }}
       actions={
         <ActionPanel>
           <Action
