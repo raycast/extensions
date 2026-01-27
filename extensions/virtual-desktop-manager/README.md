@@ -1,8 +1,12 @@
-# Virtual Desktop Manager
+<h1 align="center"><img src="assets/extension-icon.png" width="48" height="48" align="absmiddle" /> Virtual Desktop Manager</h1>
 
 Manage Windows virtual desktops directly from Raycast using AutoHotkey. Brings a hyprland-like experience to Windows.
 
-![Virtual Desktop Manager](metadata/virtual-desktop-manager-1.png)
+## Screenshots
+
+![Virtual Desktop](metadata/vd.png)
+![Edit Keybindings](metadata/edit_keybindings.png)
+![View Keybindings](metadata/view_keybindings.png)
 
 ## Requirements
 

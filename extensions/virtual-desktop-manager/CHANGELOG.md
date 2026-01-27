@@ -2,7 +2,7 @@
 
 All notable changes to the Virtual Desktop Manager extension will be documented in this file.
 
-## [1.0.0] - 2026-01-27
+## [1.0.0] - {PR_MERGED_DATE}
 
 ### Added
 
