@@ -72,7 +72,7 @@ export async function getDefaultBranch(owner: string, repo: string, githubToken?
   return data.default_branch || "main";
 }
 
-export async function uploadImageToRepo(
+export async function uploadFileToRepo(
   repoInfo: RepoInfo,
   filePath: string,
   targetPath: string,
@@ -93,7 +93,7 @@ export async function uploadImageToRepo(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      message: `Add image: ${targetPath}`,
+      message: `Add file: ${targetPath}`,
       content: base64Content,
       branch: branch,
     }),
@@ -103,13 +103,13 @@ export async function uploadImageToRepo(
     const error = await response.json();
     if (response.status === 422 && error.message?.includes("already exists")) {
       // File exists, try to update it
-      return updateImageInRepo(repoInfo, filePath, targetPath, githubToken);
+      return updateFileInRepo(repoInfo, filePath, targetPath, githubToken);
     }
     throw new Error(error.message || `Failed to upload: ${response.statusText}`);
   }
 }
 
-export async function updateImageInRepo(
+export async function updateFileInRepo(
   repoInfo: RepoInfo,
   filePath: string,
   targetPath: string,
@@ -145,7 +145,7 @@ export async function updateImageInRepo(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      message: `Update image: ${targetPath}`,
+      message: `Update file: ${targetPath}`,
       content: base64Content,
       branch: branch,
       sha: sha,
@@ -158,14 +158,14 @@ export async function updateImageInRepo(
   }
 }
 
-export async function deleteImageFromRepo(
+export async function deleteFileFromRepo(
   repoInfo: RepoInfo,
-  imagePath: string,
+  filePath: string,
   sha: string,
   githubToken: string,
 ): Promise<void> {
   const { owner, repo, branch } = repoInfo;
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${imagePath}`;
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
 
   const response = await fetch(apiUrl, {
     method: "DELETE",
@@ -175,7 +175,7 @@ export async function deleteImageFromRepo(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      message: `Delete image: ${imagePath}`,
+      message: `Delete file: ${filePath}`,
       branch: branch,
       sha: sha,
     }),

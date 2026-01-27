@@ -18,32 +18,33 @@ import * as path from "path";
 import {
   parseRepoUrl,
   isImageFile,
-  uploadImageToRepo,
-  deleteImageFromRepo,
+  uploadFileToRepo,
+  deleteFileFromRepo,
   getDefaultBranch,
   validateGitHubToken,
   type RepoInfo,
 } from "./utils/github";
-import OnboardingView from "./components/OnboardingView";
 
 interface Preferences {
   defaultRepo?: string;
   githubToken?: string;
 }
 
-interface CachedImages {
-  images: ImageFile[];
+interface CachedFiles {
+  files: RepoFile[];
   timestamp: number;
   repoKey: string;
 }
 
-interface ImageFile {
+interface RepoFile {
   name: string;
   path: string;
   url: string;
   cdnUrl: string;
+  githubUrl?: string; // Optional for backward compatibility with cached data
   size: number;
   sha: string;
+  isImage?: boolean; // Optional for backward compatibility with cached data
 }
 
 function generateCDNUrl(owner: string, repo: string, branch: string, path: string): string {
@@ -55,12 +56,16 @@ function generateRawUrl(owner: string, repo: string, branch: string, path: strin
   return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
 }
 
-async function fetchImagesFromRepo(
+function generateGitHubUrl(owner: string, repo: string, branch: string, path: string): string {
+  return `https://github.com/${owner}/${repo}/blob/${branch}/${path}`;
+}
+
+async function fetchFilesFromRepo(
   repoInfo: RepoInfo,
   path: string = "",
   tryFallbackBranch: boolean = true,
   githubToken?: string,
-): Promise<ImageFile[]> {
+): Promise<RepoFile[]> {
   const { owner, repo, branch } = repoInfo;
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
 
@@ -77,9 +82,9 @@ async function fetchImagesFromRepo(
     if (response.status === 404) {
       // Try fallback branch if main/master mismatch
       if (tryFallbackBranch && branch === "main") {
-        return fetchImagesFromRepo({ ...repoInfo, branch: "master" }, path, false, githubToken);
+        return fetchFilesFromRepo({ ...repoInfo, branch: "master" }, path, false, githubToken);
       } else if (tryFallbackBranch && branch === "master") {
-        return fetchImagesFromRepo({ ...repoInfo, branch: "main" }, path, false, githubToken);
+        return fetchFilesFromRepo({ ...repoInfo, branch: "main" }, path, false, githubToken);
       }
 
       // Provide helpful error message about which branches were tried
@@ -111,29 +116,32 @@ async function fetchImagesFromRepo(
   }
 
   const data = await response.json();
-  const images: ImageFile[] = [];
+  const files: RepoFile[] = [];
 
   // Handle both single file and directory responses
   const items = Array.isArray(data) ? data : [data];
 
   for (const item of items) {
-    if (item.type === "file" && isImageFile(item.name)) {
-      images.push({
+    if (item.type === "file") {
+      const isImage = isImageFile(item.name);
+      files.push({
         name: item.name,
         path: item.path,
         url: item.download_url || generateRawUrl(owner, repo, branch, item.path),
         cdnUrl: generateCDNUrl(owner, repo, branch, item.path),
+        githubUrl: generateGitHubUrl(owner, repo, branch, item.path),
         size: item.size || 0,
         sha: item.sha,
+        isImage,
       });
     } else if (item.type === "dir") {
-      // Recursively fetch images from subdirectories
-      const subImages = await fetchImagesFromRepo(repoInfo, item.path, true, githubToken);
-      images.push(...subImages);
+      // Recursively fetch files from subdirectories
+      const subFiles = await fetchFilesFromRepo(repoInfo, item.path, true, githubToken);
+      files.push(...subFiles);
     }
   }
 
-  return images;
+  return files;
 }
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -142,11 +150,11 @@ export default function ViewImages() {
   const preferences = getPreferenceValues<Preferences>();
   const defaultRepo = preferences.defaultRepo?.trim() || "";
   const githubToken = preferences.githubToken?.trim();
-  const [images, setImages] = useState<ImageFile[]>([]);
+  const [files, setFiles] = useState<RepoFile[]>([]);
   const [isLoading, setIsLoading] = useState(true); // Start with loading to prevent empty state flash
   const [error, setError] = useState<string | null>(null);
   const [repoInfo, setRepoInfo] = useState<RepoInfo | null>(null);
-  const [cachedData, setCachedData] = useCachedState<CachedImages | null>("cached-images", null);
+  const [cachedData, setCachedData] = useCachedState<CachedFiles | null>("cached-files", null);
 
   // Listen for cache invalidation from upload/delete commands
   useEffect(() => {
@@ -160,11 +168,11 @@ export default function ViewImages() {
         // Immediately trigger a refresh if we have repo info
         if (repoInfo) {
           setIsLoading(true);
-          fetchImagesFromRepo(repoInfo, "", true, githubToken)
-            .then((fetchedImages) => {
-              setImages(fetchedImages);
+          fetchFilesFromRepo(repoInfo, "", true, githubToken)
+            .then((fetchedFiles) => {
+              setFiles(fetchedFiles);
               setCachedData({
-                images: fetchedImages,
+                files: fetchedFiles,
                 timestamp: Date.now(),
                 repoKey: `${repoInfo.owner}/${repoInfo.repo}@${repoInfo.branch}`,
               });
@@ -183,11 +191,11 @@ export default function ViewImages() {
     return () => clearInterval(interval);
   }, [setCachedData, defaultRepo, githubToken, repoInfo]);
 
-  // Load images from configured repository
+  // Load files from configured repository
   useEffect(() => {
     if (!defaultRepo) {
       setError("No repository configured. Please set a default repository in extension preferences.");
-      setImages([]);
+      setFiles([]);
       setIsLoading(false);
       setRepoInfo(null);
       return;
@@ -196,7 +204,7 @@ export default function ViewImages() {
     const parsed = parseRepoUrl(defaultRepo);
     if (!parsed) {
       setError("Invalid repository URL in preferences. Use format: owner/repo or https://github.com/owner/repo");
-      setImages([]);
+      setFiles([]);
       setIsLoading(false);
       setRepoInfo(null);
       return;
@@ -223,32 +231,32 @@ export default function ViewImages() {
       const cacheCleared = await LocalStorage.getItem("cache-cleared");
       if (cacheCleared) {
         // Cache was cleared, fetch fresh data
-        // Keep showing old images while loading new ones
+        // Keep showing old files while loading new ones
         await LocalStorage.removeItem("cache-cleared");
         setCachedData(null);
-        fetchImagesFromRepo(repoInfoWithBranch, "", true, githubToken)
-          .then((fetchedImages) => {
-            setImages(fetchedImages);
+        fetchFilesFromRepo(repoInfoWithBranch, "", true, githubToken)
+          .then((fetchedFiles) => {
+            setFiles(fetchedFiles);
             setCachedData({
-              images: fetchedImages,
+              files: fetchedFiles,
               timestamp: Date.now(),
               repoKey,
             });
             setIsLoading(false);
-            if (fetchedImages.length === 0) {
+            if (fetchedFiles.length === 0) {
               showToast({
                 style: Toast.Style.Failure,
-                title: "No images found",
-                message: "No image files found in this repository",
+                title: "No files found",
+                message: "No files found in this repository",
               });
             }
           })
           .catch((err) => {
             setError(err.message);
             setIsLoading(false);
-            // Only clear images on error if we don't have cached data to show
+            // Only clear files on error if we don't have cached data to show
             if (!cachedData || cachedData.repoKey !== repoKey) {
-              setImages([]);
+              setFiles([]);
             }
             showToast({
               style: Toast.Style.Failure,
@@ -264,40 +272,40 @@ export default function ViewImages() {
         const cacheAge = Date.now() - cachedData.timestamp;
         if (cacheAge < CACHE_DURATION) {
           // Show cached data immediately (no loading flicker)
-          setImages(cachedData.images);
+          setFiles(cachedData.files);
           setIsLoading(false);
           setError(null);
           return;
         }
       }
 
-      // If we have images from cache but they're stale, keep showing them while loading
-      if (cachedData && cachedData.repoKey === repoKey && cachedData.images.length > 0) {
-        setImages(cachedData.images);
+      // If we have files from cache but they're stale, keep showing them while loading
+      if (cachedData && cachedData.repoKey === repoKey && cachedData.files.length > 0) {
+        setFiles(cachedData.files);
       }
 
       // No valid cache, fetch fresh
-      fetchImagesFromRepo(repoInfoWithBranch, "", true, githubToken)
-        .then((fetchedImages) => {
-          setImages(fetchedImages);
+      fetchFilesFromRepo(repoInfoWithBranch, "", true, githubToken)
+        .then((fetchedFiles) => {
+          setFiles(fetchedFiles);
           setCachedData({
-            images: fetchedImages,
+            files: fetchedFiles,
             timestamp: Date.now(),
             repoKey,
           });
           setIsLoading(false);
-          if (fetchedImages.length === 0) {
+          if (fetchedFiles.length === 0) {
             showToast({
               style: Toast.Style.Failure,
-              title: "No images found",
-              message: "No image files found in this repository",
+              title: "No files found",
+              message: "No files found in this repository",
             });
           }
         })
         .catch((err) => {
           setError(err.message);
           setIsLoading(false);
-          setImages([]);
+          setFiles([]);
           showToast({
             style: Toast.Style.Failure,
             title: "Error",
@@ -309,18 +317,18 @@ export default function ViewImages() {
     checkCacheAndLoad();
   }, [defaultRepo, githubToken, cachedData, setCachedData]);
 
-  const refreshImages = () => {
+  const refreshFiles = () => {
     setCachedData(null);
     if (defaultRepo) {
       const parsed = parseRepoUrl(defaultRepo);
       if (parsed) {
         setIsLoading(true);
         setError(null);
-        fetchImagesFromRepo(parsed, "", true, githubToken)
-          .then((fetchedImages) => {
-            setImages(fetchedImages);
+        fetchFilesFromRepo(parsed, "", true, githubToken)
+          .then((fetchedFiles) => {
+            setFiles(fetchedFiles);
             setCachedData({
-              images: fetchedImages,
+              files: fetchedFiles,
               timestamp: Date.now(),
               repoKey: `${parsed.owner}/${parsed.repo}@${parsed.branch}`,
             });
@@ -329,7 +337,7 @@ export default function ViewImages() {
           .catch((err) => {
             setError(err.message);
             setIsLoading(false);
-            setImages([]);
+            setFiles([]);
             showToast({
               style: Toast.Style.Failure,
               title: "Error",
@@ -340,12 +348,12 @@ export default function ViewImages() {
     }
   };
 
-  const handleUploadImages = async () => {
+  const handleUploadFiles = async () => {
     if (!githubToken) {
       showToast({
         style: Toast.Style.Failure,
         title: "GitHub Token Required",
-        message: "Please add a GitHub token in preferences to upload images.",
+        message: "Please add a GitHub token in preferences to upload files.",
       });
       return;
     }
@@ -371,15 +379,12 @@ export default function ViewImages() {
 
     try {
       const selectedItems = await getSelectedFinderItems();
-      const imageFiles = selectedItems.filter((item) => {
-        return isImageFile(item.path);
-      });
 
-      if (imageFiles.length === 0) {
+      if (selectedItems.length === 0) {
         showToast({
           style: Toast.Style.Failure,
-          title: "No Images Selected",
-          message: "Please select image files in Finder first.",
+          title: "No Files Selected",
+          message: "Please select files in Finder first.",
         });
         return;
       }
@@ -387,24 +392,25 @@ export default function ViewImages() {
       setIsLoading(true);
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Uploading images...",
-        message: `Uploading ${imageFiles.length} image${imageFiles.length !== 1 ? "s" : ""}`,
+        title: "Uploading files...",
+        message: `Uploading ${selectedItems.length} file${selectedItems.length !== 1 ? "s" : ""}`,
       });
 
-      const uploadPromises = imageFiles.map(async (file) => {
-        const fileName = file.path.split("/").pop() || "image";
+      const uploadPromises = selectedItems.map(async (file) => {
+        const fileName = file.path.split("/").pop() || "file";
         const targetPath = fileName;
-        await uploadImageToRepo(repoInfo, file.path, targetPath, githubToken);
+        await uploadFileToRepo(repoInfo, file.path, targetPath, githubToken);
       });
 
       await Promise.all(uploadPromises);
 
       // Clear cache and refresh
+      await LocalStorage.setItem("cache-cleared", Date.now().toString());
       setCachedData(null);
       toast.style = Toast.Style.Success;
       toast.title = "Upload Complete";
-      toast.message = `Uploaded ${imageFiles.length} image${imageFiles.length !== 1 ? "s" : ""}`;
-      refreshImages();
+      toast.message = `Uploaded ${selectedItems.length} file${selectedItems.length !== 1 ? "s" : ""}`;
+      refreshFiles();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -415,12 +421,12 @@ export default function ViewImages() {
     }
   };
 
-  const handleDeleteImage = async (image: ImageFile) => {
+  const handleDeleteFile = async (file: RepoFile) => {
     if (!githubToken) {
       showToast({
         style: Toast.Style.Failure,
         title: "GitHub Token Required",
-        message: "Please add a GitHub token in preferences to delete images.",
+        message: "Please add a GitHub token in preferences to delete files.",
       });
       return;
     }
@@ -443,19 +449,20 @@ export default function ViewImages() {
       setIsLoading(true);
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Deleting image...",
-        message: image.name,
+        title: "Deleting file...",
+        message: file.name,
       });
 
-      await deleteImageFromRepo(repoInfo, image.path, image.sha, githubToken);
+      await deleteFileFromRepo(repoInfo, file.path, file.sha, githubToken);
 
       // Clear cache and refresh
+      await LocalStorage.setItem("cache-cleared", Date.now().toString());
       setCachedData(null);
       setIsLoading(false);
       toast.style = Toast.Style.Success;
-      toast.title = "Image Deleted";
-      toast.message = image.name;
-      refreshImages();
+      toast.title = "File Deleted";
+      toast.message = file.name;
+      refreshFiles();
     } catch (error) {
       setIsLoading(false);
       showToast({
@@ -466,16 +473,16 @@ export default function ViewImages() {
     }
   };
 
-  const handleDownloadImage = async (image: ImageFile) => {
+  const handleDownloadFile = async (file: RepoFile) => {
     try {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Downloading image...",
-        message: image.name,
+        title: "Downloading file...",
+        message: file.name,
       });
 
-      // Fetch the image
-      const response = await fetch(image.cdnUrl);
+      // Fetch the file
+      const response = await fetch(file.cdnUrl);
       if (!response.ok) {
         throw new Error(`Failed to download: ${response.statusText}`);
       }
@@ -485,14 +492,14 @@ export default function ViewImages() {
 
       // Save to Downloads folder
       const downloadsPath = path.join(process.env.HOME || "", "Downloads");
-      const filePath = path.join(downloadsPath, image.name);
+      const filePath = path.join(downloadsPath, file.name);
 
       // Handle file name conflicts
       let finalPath = filePath;
       let counter = 1;
       while (fs.existsSync(finalPath)) {
-        const ext = path.extname(image.name);
-        const nameWithoutExt = path.basename(image.name, ext);
+        const ext = path.extname(file.name);
+        const nameWithoutExt = path.basename(file.name, ext);
         finalPath = path.join(downloadsPath, `${nameWithoutExt} ${counter}${ext}`);
         counter++;
       }
@@ -511,10 +518,6 @@ export default function ViewImages() {
     }
   };
 
-  if (!defaultRepo) {
-    return <OnboardingView hasToken={!!githubToken} />;
-  }
-
   return (
     <Grid
       columns={5}
@@ -522,8 +525,8 @@ export default function ViewImages() {
       isLoading={isLoading}
       searchBarPlaceholder={
         repoInfo
-          ? `Search ${images.length} image${images.length !== 1 ? "s" : ""} in ${repoInfo.owner}/${repoInfo.repo}...`
-          : "Search images..."
+          ? `Search ${files.length} file${files.length !== 1 ? "s" : ""} in ${repoInfo.owner}/${repoInfo.repo}...`
+          : "Search files..."
       }
       searchBarAccessory={
         repoInfo ? (
@@ -534,17 +537,17 @@ export default function ViewImages() {
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Manage Images">
+          <ActionPanel.Section title="Manage Files">
             <Action
-              title="Upload Images from Finder"
+              title="Upload Files from Finder"
               icon={Icon.Plus}
-              onAction={handleUploadImages}
+              onAction={handleUploadFiles}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
             />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
-              onAction={refreshImages}
+              onAction={refreshFiles}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
           </ActionPanel.Section>
@@ -562,32 +565,32 @@ export default function ViewImages() {
           actions={
             <ActionPanel>
               <Action
-                title="Upload Images from Finder"
+                title="Upload Files from Finder"
                 icon={Icon.Plus}
-                onAction={handleUploadImages}
+                onAction={handleUploadFiles}
                 shortcut={{ modifiers: ["cmd"], key: "u" }}
               />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
-      ) : images.length === 0 && !isLoading ? (
+      ) : files.length === 0 && !isLoading ? (
         <Grid.EmptyView
-          icon={Icon.Image}
-          title="No images found"
-          description={`No image files found in ${repoInfo?.owner}/${repoInfo?.repo}`}
+          icon={Icon.Document}
+          title="No files found"
+          description={`No files found in ${repoInfo?.owner}/${repoInfo?.repo}`}
           actions={
             <ActionPanel>
               <Action
-                title="Upload Images from Finder"
+                title="Upload Files from Finder"
                 icon={Icon.Plus}
-                onAction={handleUploadImages}
+                onAction={handleUploadFiles}
                 shortcut={{ modifiers: ["cmd"], key: "u" }}
               />
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
-                onAction={refreshImages}
+                onAction={refreshFiles}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
@@ -595,43 +598,45 @@ export default function ViewImages() {
           }
         />
       ) : (
-        images.map((image) => (
+        files.map((file) => (
           <Grid.Item
-            key={image.sha}
-            content={image.cdnUrl}
-            title={image.name}
-            subtitle={`${(image.size / 1024).toFixed(1)} KB`}
-            keywords={[image.name, image.path]}
-            quickLook={{ name: image.name, path: image.cdnUrl }}
+            key={file.sha}
+            content={
+              (file.isImage ?? isImageFile(file.name))
+                ? { source: file.cdnUrl }
+                : Icon.Document
+            }
+            title={file.name}
+            subtitle={`${(file.size / 1024).toFixed(1)} KB`}
+            keywords={[file.name, file.path]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser url={image.cdnUrl} title="Open in Browser" />
+                  <Action.OpenInBrowser url={file.githubUrl || file.cdnUrl} title="Open in Browser" />
                   <Action
-                    title="Download Image"
+                    title="Download File"
                     icon={Icon.Download}
-                    onAction={() => handleDownloadImage(image)}
+                    onAction={() => handleDownloadFile(file)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   />
                   <Action.CopyToClipboard
-                    content={image.cdnUrl}
+                    content={file.cdnUrl}
                     title="Copy CDN URL"
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
                   <Action.CopyToClipboard
-                    content={image.url}
+                    content={file.url}
                     title="Copy Raw URL"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
-                  <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
                 </ActionPanel.Section>
                 {githubToken && (
                   <ActionPanel.Section>
                     <Action
-                      title="Delete Image"
+                      title="Delete File"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      onAction={() => handleDeleteImage(image)}
+                      onAction={() => handleDeleteFile(file)}
                     />
                   </ActionPanel.Section>
                 )}
@@ -641,23 +646,30 @@ export default function ViewImages() {
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   target={
                     <Detail
-                      markdown={`![${image.name}](${image.cdnUrl})`}
-                      navigationTitle={image.name}
+                      markdown={(file.isImage ?? isImageFile(file.name)) ? `![${file.name}](${file.cdnUrl})` : `# ${file.name}\n\nFile: ${file.name}`}
+                      navigationTitle={file.name}
                       metadata={
                         <Detail.Metadata>
-                          <Detail.Metadata.Label title="File Name" text={image.name} />
-                          <Detail.Metadata.Label title="Path" text={image.path} />
-                          <Detail.Metadata.Label title="Size" text={`${(image.size / 1024).toFixed(2)} KB`} />
+                          <Detail.Metadata.Label title="File Name" text={file.name} />
+                          <Detail.Metadata.Label title="Path" text={file.path} />
+                          <Detail.Metadata.Label title="Size" text={`${(file.size / 1024).toFixed(2)} KB`} />
+                          <Detail.Metadata.Label title="Type" text={(file.isImage ?? isImageFile(file.name)) ? "Image" : "File"} />
                           <Detail.Metadata.Separator />
-                          <Detail.Metadata.Link title="CDN URL" target={image.cdnUrl} text={image.cdnUrl} />
-                          <Detail.Metadata.Link title="Raw URL" target={image.url} text={image.url} />
+                          {file.githubUrl && (
+                            <Detail.Metadata.Link title="GitHub URL" target={file.githubUrl} text={file.githubUrl} />
+                          )}
+                          <Detail.Metadata.Link title="CDN URL" target={file.cdnUrl} text={file.cdnUrl} />
+                          <Detail.Metadata.Link title="Raw URL" target={file.url} text={file.url} />
                         </Detail.Metadata>
                       }
                       actions={
                         <ActionPanel>
-                          <Action.OpenInBrowser url={image.cdnUrl} />
-                          <Action.CopyToClipboard content={image.cdnUrl} title="Copy CDN URL" />
-                          <Action.CopyToClipboard content={image.url} title="Copy Raw URL" />
+                          <Action.OpenInBrowser url={file.githubUrl || file.cdnUrl} title="Open in Browser" />
+                          <Action.CopyToClipboard content={file.cdnUrl} title="Copy CDN URL" />
+                          <Action.CopyToClipboard content={file.url} title="Copy Raw URL" />
+                          {file.githubUrl && (
+                            <Action.CopyToClipboard content={file.githubUrl} title="Copy GitHub URL" />
+                          )}
                         </ActionPanel>
                       }
                     />

@@ -1,12 +1,12 @@
 import { getPreferenceValues, showToast, Toast, getSelectedFinderItems, LocalStorage } from "@raycast/api";
-import { parseRepoUrl, isImageFile, uploadImageToRepo, validateGitHubToken } from "./utils/github";
+import { parseRepoUrl, uploadFileToRepo, validateGitHubToken } from "./utils/github";
 
 interface Preferences {
   defaultRepo?: string;
   githubToken?: string;
 }
 
-export default async function UploadImages() {
+export default async function UploadFiles() {
   const preferences = getPreferenceValues<Preferences>();
   const defaultRepo = preferences.defaultRepo?.trim() || "";
   const githubToken = preferences.githubToken?.trim();
@@ -15,7 +15,7 @@ export default async function UploadImages() {
     showToast({
       style: Toast.Style.Failure,
       title: "GitHub Token Required",
-      message: "Please add a GitHub token in extension preferences to upload images.",
+      message: "Please add a GitHub token in extension preferences to upload files.",
     });
     return;
   }
@@ -51,41 +51,38 @@ export default async function UploadImages() {
 
   try {
     const selectedItems = await getSelectedFinderItems();
-    const imageFiles = selectedItems.filter((item) => {
-      return isImageFile(item.path);
-    });
 
-    if (imageFiles.length === 0) {
+    if (selectedItems.length === 0) {
       showToast({
         style: Toast.Style.Failure,
-        title: "No Images Selected",
-        message: "Please select image files in Finder first.",
+        title: "No Files Selected",
+        message: "Please select files in Finder first.",
       });
       return;
     }
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Uploading images...",
-      message: `Uploading ${imageFiles.length} image${imageFiles.length !== 1 ? "s" : ""}`,
+      title: "Uploading files...",
+      message: `Uploading ${selectedItems.length} file${selectedItems.length !== 1 ? "s" : ""}`,
     });
 
-    const uploadPromises = imageFiles.map(async (file) => {
-      const fileName = file.path.split("/").pop() || "image";
+    const uploadPromises = selectedItems.map(async (file) => {
+      const fileName = file.path.split("/").pop() || "file";
       const targetPath = fileName;
-      await uploadImageToRepo(parsed, file.path, targetPath, githubToken);
+      await uploadFileToRepo(parsed, file.path, targetPath, githubToken);
     });
 
     await Promise.all(uploadPromises);
 
     // Signal to view component that cache was cleared (set before clearing)
     await LocalStorage.setItem("cache-cleared", Date.now().toString());
-    // Clear cache so the view refreshes with new images
-    await LocalStorage.removeItem("cached-images");
+    // Clear cache so the view refreshes with new files
+    await LocalStorage.removeItem("cached-files");
 
     toast.style = Toast.Style.Success;
     toast.title = "Upload Complete";
-    toast.message = `Uploaded ${imageFiles.length} image${imageFiles.length !== 1 ? "s" : ""}`;
+    toast.message = `Uploaded ${selectedItems.length} file${selectedItems.length !== 1 ? "s" : ""}`;
   } catch (error) {
     showToast({
       style: Toast.Style.Failure,
