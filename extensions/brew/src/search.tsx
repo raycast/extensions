@@ -3,13 +3,17 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
 import type { FileDownloadProgress } from "./hooks/useBrewSearch";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
+
+interface SearchPreferences {
+  showMetadataPanel?: boolean;
+}
 
 /**
  * Format bytes to human-readable string (e.g., "12.5 MB")
@@ -109,6 +113,7 @@ function getDownloadIcon(progress: FileDownloadProgress, isProcessing = false) {
 export default function SearchView() {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState(InstallableFilterType.all);
+  const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
 
   const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
 
@@ -269,6 +274,7 @@ export default function SearchView() {
       isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => revalidateInstalled()}
       dataFetched={loadingState.phase === "complete"}
+      showMetadataPanel={showMetadataPanel}
     />
   );
 }
