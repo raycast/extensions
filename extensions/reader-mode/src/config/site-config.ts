@@ -419,6 +419,20 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     },
   ],
 
+  // BBC
+  [
+    /^(.*\.)?bbc\.com$/i,
+    {
+      name: "BBC",
+      articleSelector: "article",
+      removeSelectors: [
+        '[data-testid="hero-image"]',
+        '[data-component="image-block"]',
+        '[data-component="byline-block"]',
+      ],
+    },
+  ],
+
   // Bloomberg
   [
     /^(.*\.)?bloomberg\.com$/i,
@@ -472,6 +486,7 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
       },
     },
   ],
+
   // Atlantic
   [
     /^(.*\.)?theatlantic\.com$/i,
