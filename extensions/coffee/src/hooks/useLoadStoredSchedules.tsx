@@ -26,10 +26,15 @@ export function useLoadStoredSchedules(
   });
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadSchedulesFromLocalStorage() {
       setIsLoadingRef.current(true);
 
       const allStoredItems = await LocalStorage.allItems();
+
+      if (!isMounted) return;
+
       const schedules: Schedule[] = Object.values(allStoredItems).map((item) => JSON.parse(item) as Schedule);
 
       if (schedules.length > 0) {
@@ -42,5 +47,9 @@ export function useLoadStoredSchedules(
     }
 
     void loadSchedulesFromLocalStorage();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 }
