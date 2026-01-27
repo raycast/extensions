@@ -237,6 +237,9 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
         '[data-component="links-block"]',
         ".ssrcss-1q0x1qg-Promo",
         ".ssrcss-1mrs5ns-PromoLink",
+        '[data-testid="hero-image"]',
+        '[data-component="image-block"]',
+        '[data-component="byline-block"]',
       ],
     },
   ],
@@ -416,20 +419,6 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
       name: "IETF",
       articleSelector: "div.content",
       removeSelectors: [".nav", ".sidebar"],
-    },
-  ],
-
-  // BBC
-  [
-    /^(.*\.)?bbc\.com$/i,
-    {
-      name: "BBC",
-      articleSelector: "article",
-      removeSelectors: [
-        '[data-testid="hero-image"]',
-        '[data-component="image-block"]',
-        '[data-component="byline-block"]',
-      ],
     },
   ],
 
