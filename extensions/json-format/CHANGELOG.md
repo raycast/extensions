@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+- Fix: Improve performance for large JSON rendering to prevent CPU freeze
+- Add configurable "Max Initial Lines" preference (default: 10000) to limit initial rendering
+- Add "Load All Lines" action (⌘+L) for viewing truncated content
+- Show loading state instead of error during JSON parsing
+
 ## [Adds formatToJsonValue] - 2025-01-10
 
 - Add a new command to format text into a valid JSON value with double quotes and escapes
