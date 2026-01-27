@@ -12,6 +12,7 @@ struct Location: Codable {
 struct Reminder: Codable {
   let id: String
   let openUrl: String
+  let attachedUrls: [String]
   let title: String
   let notes: String
   let dueDate: String?
@@ -270,6 +271,28 @@ struct SetTitleAndNotesPayload: Decodable {
   if let notes = payload.notes {
     item.notes = notes
   }
+
+  try eventStore.save(item, commit: true)
+}
+
+struct MoveToListPayload: Decodable {
+  let reminderId: String
+  let listId: String
+}
+
+@raycast func moveToList(payload: MoveToListPayload) throws {
+  let eventStore = EKEventStore()
+
+  guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
+    throw RemindersError.noReminderFound
+  }
+
+  let calendars = eventStore.calendars(for: .reminder)
+  guard let newCalendar = (calendars.first { $0.calendarIdentifier == payload.listId }) else {
+    throw RemindersError.noReminderFound
+  }
+
+  item.calendar = newCalendar
 
   try eventStore.save(item, commit: true)
 }

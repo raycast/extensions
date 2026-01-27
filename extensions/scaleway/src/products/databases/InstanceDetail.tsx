@@ -1,14 +1,14 @@
 import { Icon, List } from '@raycast/api'
-import type { RDB } from '@scaleway/sdk'
+import type { Rdbv1 } from '@scaleway/sdk'
 import { bytesToSize } from '../../helpers/bytesToSize'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getInstanceStatusIcon } from './status'
 
 type ServerProps = {
-  instance: RDB.v1.Instance
+  instance: Rdbv1.Instance
 }
 
-const getVolumeType = (volumeType?: RDB.v1.VolumeType) => {
+const getVolumeType = (volumeType?: Rdbv1.VolumeType) => {
   if (volumeType === 'bssd') {
     return 'Block'
   }

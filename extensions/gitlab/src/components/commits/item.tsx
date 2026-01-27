@@ -6,7 +6,7 @@ import { getCIJobStatusIcon } from "../jobs";
 import { Commit } from "./list";
 import { useCommitStatus } from "./utils";
 
-export function CommitListItem(props: { commit: Commit; projectID: number }): JSX.Element {
+export function CommitListItem(props: { commit: Commit; projectID: number }) {
   const commit = props.commit;
   const projectID = props.projectID;
   const { commitStatus: status } = useCommitStatus(projectID, commit.id);

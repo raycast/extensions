@@ -11,6 +11,8 @@ import {
   getSelectedFinderItems,
   Icon,
 } from "@raycast/api";
+import { statSync } from "fs";
+import { basename, extname } from "path";
 
 export default function Command() {
   const [files, setFiles] = useState<string[]>([]);
@@ -52,16 +54,22 @@ export default function Command() {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const lastSlashIndex = file.lastIndexOf("/");
-        const lastDotIndex = file.lastIndexOf(".");
-        const fileName = file.substring(lastSlashIndex + 1, lastDotIndex);
-        const extension = lastDotIndex >= 0 ? file.substring(lastDotIndex + 1) : "";
-        const newNameWithExtension = `${fileName.replaceAll(replaceCharacter, newCharacter)}.${extension}`;
+        const isDirectory = statSync(file).isDirectory();
+
+        const fullName = basename(file);
+        const extension = isDirectory ? "" : extname(file);
+        const fileName = isDirectory ? fullName : basename(file, extension);
+
+        const newFileName = fileName.replaceAll(replaceCharacter, newCharacter);
+        const newNameWithExtension = isDirectory || !extension ? newFileName : `${newFileName}${extension}`;
+
+        const escapedFilePath = file.replaceAll('"', '\\"');
+        const escapedNewName = newNameWithExtension.replaceAll('"', '\\"');
 
         await runAppleScript(`
           tell application "Finder"
-            set theItem to POSIX file "${file}" as alias
-            set name of theItem to "${newNameWithExtension}"
+            set theItem to POSIX file "${escapedFilePath}" as alias
+            set name of theItem to "${escapedNewName}"
           end tell
         `);
       }

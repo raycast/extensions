@@ -5,6 +5,9 @@
   "description": "Open Rewind AI at a specific timestamp",
   "icon": "rewind-ai.png",
   "author": "haseab_",
+  "contributors": [
+    "Maclean"
+  ],
   "categories": [
     "Applications"
   ],

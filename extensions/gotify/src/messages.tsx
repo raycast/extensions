@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  Color,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useApplication } from "./hooks/useApplication";
 import { useMessage } from "./hooks/useMessage";
 import dayjs from "dayjs";
@@ -12,11 +22,33 @@ dayjs.extend(relativeTime);
 export default function Command() {
   const [selectApp, setSelectApp] = useCachedState("select-app", "all");
 
-  const { applications, applicationLoading } = useApplication();
+  const { messages, messageLoading, messagePagination, revalidate, deleteMessage, deleteAll, handleRead, error } =
+    useMessage({
+      id: selectApp,
+    });
 
-  const { messages, messageLoading, messagePagination, revalidate, deleteMessage, deleteAll, handleRead } = useMessage({
-    id: selectApp,
-  });
+  if (error) {
+    return (
+      <List
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      >
+        <List.EmptyView
+          icon={{
+            source: Icon.Important,
+            tintColor: Color.Red,
+          }}
+          title="Invalid Preferences"
+          description={error}
+        />
+      </List>
+    );
+  }
+
+  const { applications, applicationLoading } = useApplication();
 
   const getAppName = useCallback(
     (appid: number) => {
@@ -40,7 +72,7 @@ export default function Command() {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      revalidate();
+      revalidate?.();
     }, 30000);
     return () => {
       clearInterval(interval);
@@ -65,7 +97,7 @@ export default function Command() {
           <Action
             title={"Refresh"}
             icon={Icon.ArrowClockwise}
-            onAction={() => revalidate()}
+            onAction={() => revalidate?.()}
             shortcut={Shortcut.Common.Refresh}
           />
         </ActionPanel>

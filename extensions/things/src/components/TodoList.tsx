@@ -2,12 +2,13 @@ import { List, Detail } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useState } from 'react';
 
-import { CommandListName, Todo, getListTodos, getLists, getTags } from '../api';
+import { getListTodos, getLists, getTags } from '../api';
 import { plural } from '../utils';
 
 import TodoListEmptyView from './TodoListEmptyView';
 import TodoListItem from './TodoListItem';
 import ErrorView from './ErrorView';
+import { CommandListName, Todo } from '../types';
 
 type TodoListProps = {
   commandListName: CommandListName;
@@ -28,7 +29,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
 
   if (!todos && !isLoading) {
     return (
-      <Detail markdown="## No Data\n\nNo todos found and no error occurred. This might indicate an issue with the Things connection." />
+      <Detail markdown="## No Data\n\nNo to-dos found and no error occurred. This might indicate an issue with the Things connection." />
     );
   }
 
@@ -68,7 +69,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
         }
 
         return (
-          <List.Section key={key} title={section.title} subtitle={plural(section.todos.length, 'todo')}>
+          <List.Section key={key} title={section.title} subtitle={plural(section.todos.length, 'to-do')}>
             {section.todos.map((todo) => (
               <TodoListItem
                 key={todo.id}

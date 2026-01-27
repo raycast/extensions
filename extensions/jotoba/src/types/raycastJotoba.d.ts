@@ -66,7 +66,7 @@ interface JotobaWord {
     {
       part: string;
       high: boolean;
-    }
+    },
   ];
   url: string;
 }

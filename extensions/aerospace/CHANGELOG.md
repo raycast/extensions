@@ -1,5 +1,17 @@
 # aerospace Changelog
 
+## [Improvement] - 2026-01-22
+
+- Add LaunchContext support for programmatic integration
+- Enable external tools to trigger app switcher without UI prompts
+- Add Integration documentation to README with deeplink format
+
+## [Improvements] - 2025-08-11
+
+- Render config using TOML, fixing display issues with malformed config
+- Add action to open the config in your editor from the Config view
+- Add "View Config" screenshot to README
+
 ## [Improvements] - 2025-07-09
 
 - Added the new `Aerospace` Icon to the extension commands

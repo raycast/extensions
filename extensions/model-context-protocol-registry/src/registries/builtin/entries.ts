@@ -3,6 +3,26 @@ import type { RegistryEntry } from "./types";
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "atono",
+    title: "Atono",
+    description:
+      "AI-powered project management for product teams. Connect your AI assistant to Atono's workflow platform to create and update stories, track bugs, manage team assignments, and document fixes—all through natural language commands.",
+    icon: {
+      source: {
+        light: "https://atono-test.directus.app/assets/feaa7f21-4bbe-4164-b725-ff2729725cbf",
+        dark: "https://atono-test.directus.app/assets/869c76cd-bb5f-459c-88d1-2315a7b8a545",
+      },
+    },
+    homepage: "https://docs.atono.io/docs/mcp-server-for-atono/",
+    configuration: {
+      command: "docker",
+      args: ["run", "-i", "--rm", "-e", "X_API_KEY", "atonoai/atono-mcp-server"],
+      env: {
+        X_API_KEY: "<YOUR_API_KEY_HERE>",
+      },
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
@@ -37,6 +57,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         "--api-key",
         "YOUR_API_KEY_HERE",
       ],
+    },
+  },
+  {
+    name: "circleback",
+    title: "Circleback",
+    description:
+      "Circleback's Model Context Protocol (MCP) server provides AI agents access to your Circleback data. It has tools available for searching and accessing meetings, transcripts, calendar events, emails, people, companies, and more.",
+    icon: "circleback.svg",
+    homepage: "https://circleback.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
     },
   },
   {
@@ -266,6 +298,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.prisma.io/mcp"],
+    },
+  },
+  {
+    name: "Rube",
+    title: "Rube - by Composio",
+    description:
+      "Rube is a MCP server that connects your AI tools to 500+ apps like Gmail, Slack, GitHub, and Notion. Simply install it in your AI client, authenticate once with your apps, and start asking your AI to perform real actions like 'Send an email' or 'Create a task.'",
+    icon: "https://files.buildwithfern.com/v3composio.docs.buildwithfern.com/2025-08-25T08:13:31.781Z/assets/logo.svg",
+    homepage: "https://rube.composio.dev",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://rube.composio.dev/mcp"],
+      env: {
+        npm_config_yes: "true",
+      },
     },
   },
   {
@@ -500,19 +547,31 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@apify/actors-mcp-server"],
       env: {
-        APIFY_API_TOKEN: "YOUR_API_TOKEN_HERE",
+        APIFY_TOKEN: "YOUR_API_TOKEN_HERE",
       },
     },
   },
   {
     name: "nuxt",
     title: "Nuxt",
-    description: "Access Nuxt documentation and modules with the public Nuxt MCP server",
+    description: "Access Nuxt documentation, migration guide, modules, and blog posts with the public Nuxt MCP server",
     icon: "nuxt.svg",
-    homepage: "https://mcp.nuxt.com/",
+    homepage: "https://nuxt.com/mcp",
     configuration: {
       command: "npx",
-      args: ["mcp-remote", "https://mcp.nuxt.space/sse"],
+      args: ["mcp-remote", "https://nuxt.com/mcp"],
+    },
+  },
+  {
+    name: "nuxt-ui",
+    title: "Nuxt UI",
+    description:
+      "Access Nuxt UI documentation, components, and configuration with the official Nuxt UI Model Context Protocol (MCP) server.",
+    icon: "nuxt.svg",
+    homepage: "https://ui.nuxt.com/docs/getting-started/ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["mcp-remote", "https://ui.nuxt.com/mcp"],
     },
   },
   {
@@ -550,14 +609,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "anytype",
     title: "Anytype",
     description:
-      "A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base.",
+      "An MCP server enabling AI assistants to interact with Anytype - your safe haven for digital collaboration - to organize channels, pages, lists, and more through natural language.",
     icon: "anytype.png",
     homepage: "https://github.com/anyproto/anytype-mcp",
     configuration: {
       command: "npx",
       args: ["-y", "@anyproto/anytype-mcp"],
       env: {
-        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-05-20"}',
+        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-11-08"}',
       },
     },
   },
@@ -571,6 +630,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://gen-pdf.com/mcp"],
+    },
+  },
+  {
+    name: "linear",
+    title: "Linear",
+    description:
+      "The Model Context Protocol (MCP) server provides a standardized interface that allows any compatible AI model or agent to access your Linear data in a simple and secure way. The Linear MCP server has tools available for finding, creating, and updating objects in Linear like issues, projects, and comments.",
+    icon: "https://svgl.app/library/linear.svg",
+    homepage: "https://linear.app/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
     },
   },
 ];

@@ -204,7 +204,7 @@ export default function IssueActions({
         <ChangeAssigneeSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
         <Action
-          title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
+          title={isAssignedToMe ? "Un-Assign from Me" : "Assign to Me"}
           icon={getUserAvatar(myself)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onAction={assignToMe}
@@ -355,7 +355,7 @@ function ChangePrioritySubmenu({ issue, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         priorities?.map((priority) => {
           return (
@@ -429,7 +429,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
 
   return (
     <ActionPanel.Submenu
-      title="Assign To"
+      title="Assign to"
       icon={Icon.AddPerson}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onOpen={() => setLoad(true)}
@@ -515,7 +515,7 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         transitions?.map((transition) => {
           if (transition.to.id === issue.fields.status.id) {

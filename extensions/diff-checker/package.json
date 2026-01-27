@@ -5,7 +5,10 @@
   "description": "Compare content of two texts",
   "icon": "icon.png",
   "author": "destiner",
-  "categories": ["Data", "Developer Tools"],
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -28,7 +31,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

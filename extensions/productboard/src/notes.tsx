@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import useProductboard from "./lib/hooks/useProductboard";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import useProductboardPaginated from "./lib/hooks/useProductboardPaginated";
 import { Note } from "./lib/types";
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
@@ -7,10 +7,15 @@ import AddNote from "./lib/components/AddNote";
 
 export default function Notes() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const { isLoading, data: notes, pagination, revalidate } = useProductboard<Note>("notes");
+  const { isLoading, data: notes, pagination, revalidate } = useProductboardPaginated<Note>("notes");
 
   return (
-    <List isLoading={isLoading} pagination={pagination} isShowingDetail={isShowingDetail}>
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      isShowingDetail={isShowingDetail}
+      searchBarPlaceholder="Search notes"
+    >
       {notes.map((note) => {
         const color = note.state === "processed" ? Color.Green : Color.Red;
         return (
@@ -57,7 +62,7 @@ export default function Notes() {
                 <ActionPanel.Section>
                   <Action.Push
                     title="Add Note"
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     icon={Icon.Plus}
                     target={<AddNote onNoteAdded={revalidate} />}
                   />

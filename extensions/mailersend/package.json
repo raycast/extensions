@@ -54,6 +54,10 @@
       "mode": "view"
     }
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^1.17.0",

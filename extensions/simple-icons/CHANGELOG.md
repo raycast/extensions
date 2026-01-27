@@ -1,5 +1,37 @@
 # Brand Icons Changelog
 
+## [New Feature] - 2025-12-07
+
+- Add support for shuffling icons on start
+
+## [Enhancement] - 2025-12-04
+
+- Add Windows support
+- Use default AI model for searching icons
+- Add affiliate parameter to Raycast links
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-11-03
+
+- Fix typos
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-10-13
+
+- Fix useEffect dependencies
+- Bump all dependencies to the latest
+
+## [Improvements] - 2025-08-12
+
+- Add support for creating social badges through cross-extension
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2025-08-04
+
+- Handle error when reading a non-existent file in `makeCopyToDownload`
+- Fix `titleToSlug` logics for legacy Simple Icons versions
+- Bump all dependencies to the latest
+
 ## [Bugfix & Enhancement] - 2025-07-29
 
 - Fix a bug which cannot update icon packs

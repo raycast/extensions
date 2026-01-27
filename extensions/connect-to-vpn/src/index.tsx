@@ -83,7 +83,7 @@ export default function Command() {
             {service.favorite && (
               <>
                 <Action
-                  title="Move Up in Favorites"
+                  title="Move up in Favorites"
                   onAction={() => moveFavoriteUp(service)}
                   icon={Icon.ArrowUp}
                   shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}

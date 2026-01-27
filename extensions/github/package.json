@@ -17,7 +17,6 @@
     "LunaticMuch",
     "aeorge",
     "daquinoaldo",
-    "ppy",
     "lin",
     "marcotf",
     "qeude",
@@ -37,7 +36,17 @@
     "luarmr",
     "nicolas-marien",
     "iontea",
-    "ridemountainpig"
+    "ridemountainpig",
+    "kud",
+    "MartinGonzalez",
+    "brndnly",
+    "oscmarb",
+    "emergerrrd",
+    "ryo."
+  ],
+  "pastContributors": [
+    "Lemon",
+    "ppy"
   ],
   "categories": [
     "Developer Tools",
@@ -91,6 +100,14 @@
           "default": false,
           "label": "Recently Closed",
           "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the list."
         }
       ]
     },
@@ -216,6 +233,12 @@
       "name": "my-latest-repositories",
       "title": "My Latest Repositories",
       "description": "List your repositories by latest updated",
+      "mode": "view"
+    },
+    {
+      "name": "my-starred-repositories",
+      "title": "My Starred Repositories",
+      "description": "List repositories you have starred",
       "mode": "view"
     },
     {
@@ -409,6 +432,14 @@
           "default": false,
           "label": "Recently Closed",
           "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the menu list."
         },
         {
           "name": "maxitems",

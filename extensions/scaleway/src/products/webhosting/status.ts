@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { Webhosting } from '@scaleway/sdk'
+import { Webhostingv1 } from '@scaleway/sdk'
 
-export const HOSTING_STATUSES = Webhosting.v1alpha1.HOSTING_TRANSIENT_STATUSES.reduce(
+export const HOSTING_STATUSES = Webhostingv1.HOSTING_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -11,6 +11,7 @@ export const HOSTING_STATUSES = Webhosting.v1alpha1.HOSTING_TRANSIENT_STATUSES.r
     },
   }),
   {
+    updating: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     delivering: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     migrating: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     deleting: { source: Icon.CircleProgress100, tintColor: Color.Blue },
@@ -21,7 +22,8 @@ export const HOSTING_STATUSES = Webhosting.v1alpha1.HOSTING_TRANSIENT_STATUSES.r
   }
 )
 
-export const getHostingStatusIcon = (hosting: Webhosting.v1alpha1.Hosting) =>
+export const getHostingStatusIcon = (hosting: Webhostingv1.Hosting | Webhostingv1.HostingSummary) =>
   HOSTING_STATUSES[hosting.status]
-export const isHostingTransient = (hosting?: Webhosting.v1alpha1.Hosting) =>
-  hosting ? Webhosting.v1alpha1.HOSTING_TRANSIENT_STATUSES.includes(hosting.status) : false
+
+export const isHostingTransient = (hosting?: Webhostingv1.Hosting | Webhostingv1.HostingSummary) =>
+  hosting ? Webhostingv1.HOSTING_TRANSIENT_STATUSES.includes(hosting.status) : false

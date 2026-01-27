@@ -1,4 +1,6 @@
 import { Color, Detail, Icon } from "@raycast/api";
+import { JSX } from "react";
+
 import { DISPLAY_VALUES, LUNA_LOGO_IMG } from "../constants";
 import { GameSummary } from "../models";
 import { SearchCallback } from "..";

@@ -1,4 +1,6 @@
 import { ActionPanel } from "@raycast/api";
+import { JSX } from "react";
+
 import { GameSummary } from "../../models";
 import { SearchCallback } from "../..";
 import { OpenDetailAction } from "./OpenDetailAction";

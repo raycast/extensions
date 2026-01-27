@@ -8,7 +8,11 @@
   "contributors": [
     "GLaDO8",
     "danielferguson",
-    "ridemountainpig"
+    "ridemountainpig",
+    "yusifaliyevpro",
+    "xmok",
+    "j3lte",
+    "hellonicolas"
   ],
   "categories": [
     "Design Tools",
@@ -29,7 +33,7 @@
       "type": "password",
       "required": false,
       "title": "API Token (For Font Awesome Pro Accounts)",
-      "description": "Optionally Use Font Awesome Pro icons by providing an API Token, not necessary to access free icons."
+      "description": "Optionally use Font Awesome Pro icons and custom kits by providing an API Token. Not necessary to access free icons."
     },
     {
       "name": "STYLE_PREFERENCE",
@@ -110,29 +114,47 @@
       ],
       "title": "Icon primary action",
       "description": "Choose which action to perform when selecting an icon."
+    },
+    {
+      "name": "REMEMBER_LAST_KIT",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Remember Last Used Kit",
+      "description": "When enabled, the extension will open with your previously selected icon style or custom kit."
+    },
+    {
+      "name": "KIT_FILTER",
+      "type": "textfield",
+      "required": false,
+      "title": "Filter Custom Kits",
+      "description": "Limit which custom kits appear in the dropdown. Enter kit names or IDs separated by commas (e.g., \"My Icons, abc123\"). Leave empty to show all kits."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.4.8",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "change-case": "^4.1.2",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "svg-to-png": "^4.0.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "^22.18.3",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

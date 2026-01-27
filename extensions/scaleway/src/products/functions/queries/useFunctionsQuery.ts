@@ -1,12 +1,12 @@
-import type { Function } from '@scaleway/sdk'
+import type { Functionv1beta1 } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
 import { useAPI } from 'helpers/useAPI'
 
 type DataLoaderOptions<T> = Parameters<typeof useDataLoader<T>>[2]
 
 export const useAllFunctionsQuery = (
-  params: Function.v1beta1.ListFunctionsRequest,
-  dataloaderOptions: DataLoaderOptions<Function.v1beta1.ListFunctionsResponse['functions']> = {}
+  params: Functionv1beta1.ListFunctionsRequest,
+  dataloaderOptions: DataLoaderOptions<Functionv1beta1.ListFunctionsResponse['functions']> = {}
 ) => {
   const { functionV1beta1 } = useAPI()
 

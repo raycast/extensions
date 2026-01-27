@@ -1,5 +1,19 @@
 # Ship24 Package Tracker Changelog
 
+## [1.1.2] - 2025-12-01
+
+### Fixed
+- Improved error messages for Ship24 API errors (422 responses)
+- Added user-friendly message for missing subscription error with link to activate plan
+- Better handling of validation errors from Ship24 API
+
+## [1.1.1] - 2025-08-20
+
+### Fixed
+- Fixed 404 error when adding new packages for tracking
+- Improved package creation flow by properly initializing trackers before searching
+- Enhanced error handling for existing trackers
+
 ## [1.1.0] - 2025-07-09
 
 ### Changed

@@ -1,5 +1,9 @@
 # dict.cc Changelog
 
+## [v.1.4.0] - 2025-12-07
+
+- Added support for Windows
+
 ## [v.1.3.0] - 2025-04-09
 
 - Introducing `Translate from Selection` command.

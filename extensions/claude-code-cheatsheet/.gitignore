@@ -4,6 +4,7 @@ _docs/
 .coderabbit.yaml
 .claude/
 CLAUDE.md
+.mcp.json
 
 # Raycast specific files
 raycast-env.d.ts

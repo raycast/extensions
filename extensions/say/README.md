@@ -1,6 +1,6 @@
 # Say - Text to Speech
 
-This extension uses the macOS built-in TTS ([Spoken Content](https://www.youtube.com/watch?v=yiZzm24uSsE)) feature to say the text you provide. No network connection is needed.
+This extension uses the macOS built-in TTS ([Live Speech](https://www.youtube.com/watch?v=yiZzm24uSsE)) feature to say the text you provide. No network connection is needed.
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
@@ -9,6 +9,8 @@ This extension uses the macOS built-in TTS ([Spoken Content](https://www.youtube
 - **Type to Say** - Quick type your text and say
 - **Text to Say** - Input your text or paragraph and say
 - **Selected Text to Say** - Say the selected text on any application
+- **Stop Running Say** - Stop the current running Say process
+- **Configure Say** - Configure the voice, rate, and output device
 
 ## Configurations
 
@@ -19,7 +21,7 @@ See https://support.apple.com/en-us/guide/mac-help/spch638/mac.
 
 ## Recommended Voices
 
-Siri is the closest thing to a real human voice. You can go to `System Settings -> Accessibility -> Spoken Content`. Pick your favorite Siri voice for the best experience.
+Siri is the closest thing to a real human voice. You can go to `System Settings -> Accessibility -> Live Speech`. Pick your favorite Siri voice for the best experience.
 
 ## API
 
@@ -27,7 +29,7 @@ With this extension, users can use this extension's configuration page for more 
 
 ### Use `raycast-cross-extension`
 
-This is the most recommended way, `raycast-corss-extension` will verify the `corssExtensions` field in the `package.json`.
+This is the most recommended way, `raycast-cross-extension` will verify the `crossExtensions` field in the `package.json`.
 This helps your upstream extension provider to get to know who is using their extension. For more details, see [Raycast Cross Extension Conventsions][raycast-cross-extension-link].
 
 ```javascript

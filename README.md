@@ -8,7 +8,7 @@
     <img alt="" src="https://img.shields.io/badge/Follow%20@raycast-black.svg?style=for-the-badge&logo=X">
   </a>
   <a aria-label="Join the community on Slack" href="https://raycast.com/community">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Slack">
+    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Raycast&logoColor=fff">
   </a>
 </p>
 
@@ -20,7 +20,7 @@
 
 Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API. If you want to discover and install extensions, check out [our Store](https://raycast.com/store).
 
-Be sure to read and follow our [Community](https://manual.raycast.com/community-guidelines) and [Extension](https://manual.raycast.com/extensions) guidelines when submitting your extension and interacting with other folks in this repository.
+Be sure to read and follow our [Community](https://manual.raycast.com/community-guidelines) and [Extension](https://manual.raycast.com/extensions) guidelines and [Acceptable Use Policy](https://www.raycast.com/aup) when submitting your extension and interacting with other folks in this repository.
 
 ## Feedback
 

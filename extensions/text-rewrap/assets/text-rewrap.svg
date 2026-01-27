@@ -1,0 +1,15 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Oblong 1 -->
+    <rect x="50" y="50" width="280" height="80" rx="40" fill="#a9a9a9" />
+
+    <!-- Oblong 2 -->
+    <rect x="50" y="160" width="200" height="80" rx="40" fill="#a9a9a9" />
+
+    <!-- Oblong 3 -->
+    <rect x="50" y="270" width="350" height="80" rx="40" fill="#a9a9a9" />
+
+    <!-- Oblong 4 -->
+    <rect x="50" y="380" width="400" height="80" rx="40" fill="#a9a9a9" />
+
+</svg>

@@ -1,10 +1,10 @@
 import { Action, ActionPanel, List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 import { useReducer } from 'react'
 import { useAllGroupsQuery } from '../../queries'
 import { Group } from './Group'
 
-const countMembers = (group: IAM.v1alpha1.Group) =>
+const countMembers = (group: Iamv1alpha1.Group) =>
   (group.applicationIds.length || 0) + (group.userIds.length || 0)
 
 export const Groups = () => {

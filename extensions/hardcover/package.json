@@ -71,7 +71,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.4.5"
   },
   "scripts": {

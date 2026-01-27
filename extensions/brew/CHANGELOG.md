@@ -1,5 +1,32 @@
 # Brew Changelog
 
+## [Improvements] - 2026-01-05
+
+- Add a toggle to filter installed packages, allowing users to hide dependencies and show only those explicitly "installed on request".
+
+## [Homebrew 5.0 Support] - 2025-12-16
+
+- Added compatibility with Homebrew 5.0
+  - Added preference to disable concurrent downloads (enabled by default in Homebrew 5.0)
+  - Added preference to opt-in to Homebrew's new internal API (96% smaller downloads)
+  - Updated documentation with Homebrew 5.0 compatibility information
+- Improved first-run experience with download progress indicators for large downloads (30 MB+)
+- Added hidden-by-default "Clear Cache" command for troubleshooting
+- Reordered Casks over Formulae in Search for better readability and discoverability
+- Optimized package loading with two-phase strategy (fast list, then full metadata)
+- Added lazy loading for package details to reduce initial load time
+- Added Upgrade view with clearer progress indicators and easier cancellation
+- Refactored codebase with improved error handling and logging
+
+## [Improvements] - 2025-12-01
+
+- Update dependencies and replace node-fetch with native fetch API
+- Upgrade react to 19.0.10
+
+## [Bug Fix] - 2025-11-03
+
+- Fixed an issue where the the terminal command may be mis-typed in the Raycast window
+
 ## [Improvements] - 2025-02-17
 
 - Add a new action to open the Brew formula/cask page in the browser

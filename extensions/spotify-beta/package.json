@@ -11,8 +11,7 @@
     "dillionverma",
     "andreaselia",
     "stuart",
-    "tonka3000",
-    "dancannon"
+    "tonka3000"
   ],
   "license": "MIT",
   "commands": [
@@ -36,7 +35,6 @@
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.8.0",
     "prettier": "^2.8.7",
-    "react-devtools": "^4.27.4",
     "typescript": "^5.0.2"
   },
   "scripts": {

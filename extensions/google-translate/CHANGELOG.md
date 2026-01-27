@@ -1,5 +1,16 @@
 # Google Translate Changelog
 
+## [Cross Platform Shortcuts + Modernize] - 2025-12-24
+
+- Make `Shortcut`s cross-platform
+- Modernize to latest Raycast configuration with updated `React` (ref: [Issue #23410](https://github.com/raycast/extensions/issues/23410))
+- Fix "Javanese" language code
+- Add README.md
+
+## [Feature] - 2025-10-02
+
+ - Added hotkey to switch between language sets quickly with `CMD+SHIFT+↑` and `CMD+SHIFT+↓`
+
 ## [Feature] - 2025-07-01
 
 - Added instant translate commands for selected text translation

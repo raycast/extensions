@@ -69,40 +69,21 @@
             },
             "name": "get-issues"
           }
-        },
-        {
-          "callsTool": {
-            "arguments": {
-              "project": "demo"
-            },
-            "name": "get-projects"
-          }
         }
       ]
     },
     {
-      "input": "@youtrack create issue in demo project and add 1h work, assign to admin",
+      "input": "@youtrack create issue 'my issue' in demo project, add 1h work, and assign to admin",
       "mocks": {
-        "apply-command": "Successfully called \"apply-command\"",
         "create-issue": {
-          "$type": "Issue",
-          "description": "Add 1 hour of work",
-          "id": "3-74",
-          "idReadable": "DEMO-66",
-          "numberInProject": 66,
+          "idReadable": "DEMO-27",
           "project": {
-            "$type": "Project",
+            "name": "Demo project",
             "shortName": "DEMO"
           },
-          "summary": "Work Assignment",
-          "tags": []
+          "summary": "my issue"
         },
         "get-projects": [
-          {
-            "id": "0-1",
-            "name": "aaaaaa",
-            "shortName": "AAA"
-          },
           {
             "id": "0-0",
             "name": "Demo project",
@@ -111,34 +92,33 @@
         ],
         "get-self": {
           "$type": "Me",
-          "avatarUrl": "/hub/api/rest/avatar/2e7b17f1-4cdc-4d74-8f3e-eea7d928ddb5?s=48",
+          "avatarUrl": "/hub/api/rest/avatar/d626e133-84a9-4371-bda1-187999b5fce0?s=48",
           "email": null,
           "fullName": "admin",
           "id": "2-1",
           "login": "admin"
+        },
+        "get-users": [
+          {
+            "avatarUrl": "/hub/api/rest/avatar/d626e133-84a9-4371-bda1-187999b5fce0?s=48",
+            "email": null,
+            "fullName": "admin",
+            "id": "2-1",
+            "login": "admin"
+          }
+        ],
+        "apply-command": {
+          "command": "work 1h",
+          "idReadable": "DEMO-27",
+          "comment": ""
         }
       },
       "expected": [
         {
           "callsTool": {
             "arguments": {
-              "project": "demo"
-            },
-            "name": "get-projects"
-          }
-        },
-        {
-          "callsTool": {
-            "arguments": {},
-            "name": "get-self"
-          }
-        },
-        {
-          "callsTool": {
-            "arguments": {
-              "description": "Add 1 hour of work",
               "project": "DEMO",
-              "summary": "Work Assignment"
+              "summary": "my issue"
             },
             "name": "create-issue"
           }
@@ -148,7 +128,7 @@
             "arguments": {
               "command": "work 1h",
               "comment": "",
-              "idReadable": "DEMO-66"
+              "idReadable": "DEMO-27"
             },
             "name": "apply-command"
           }
@@ -158,7 +138,7 @@
             "arguments": {
               "command": "for admin",
               "comment": "",
-              "idReadable": "DEMO-66"
+              "idReadable": "DEMO-27"
             },
             "name": "apply-command"
           }

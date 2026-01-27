@@ -8,7 +8,7 @@ import { OllamaApiModelCapability } from "./lib/ollama/enum";
 const pref = getPreferenceValues<Preferences>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-export default function Command(props: RaycastArgumentsOllamaCommandTranslate): JSX.Element {
+export default function Command(props: RaycastArgumentsOllamaCommandTranslate) {
   const c = CommandAnswer.TRANSLATE;
   const p = `Translate the text in ${props.arguments.language}.
 

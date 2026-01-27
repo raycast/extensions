@@ -22,7 +22,7 @@ export const searchEngines: SearchEngine[] = ${JSON.stringify(filteredBangs, nul
 `;
 
     fs.writeFileSync(
-      path.join(__dirname, '../src/data/search-engines.ts'),
+      path.join(__dirname, '../src/data/builtin-search-engines.ts'),
       tsContent
     );
 

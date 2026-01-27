@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Update] - 2025-10-01
+
+Update dependencies and allow for multiple card assignees.
+
 ## [Update] - 2025-05-30
 
 Update dependencies and allow for card assignee to be empty.

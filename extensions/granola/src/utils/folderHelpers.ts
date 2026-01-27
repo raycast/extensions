@@ -1,77 +1,31 @@
 import { Folder } from "./types";
-import getCache from "./getCache";
 import { getFolders } from "./fetchData";
 
 export interface FolderServiceOptions {
   includeDocumentIds?: boolean;
+  signal?: AbortSignal;
 }
 
 /**
- * Get folders using cache-first approach with document ID filtering
- * Consolidates the duplicated logic across multiple files
+ * Get folders from API endpoint (get-document-lists-metadata)
+ * Only uses fields we need: id, title, icon, document_ids
+ * Counts are computed from document_ids array length
  */
-export async function getFoldersWithCache(options: FolderServiceOptions = {}): Promise<Folder[]> {
-  const { includeDocumentIds = true } = options;
+export async function getFoldersFromAPI(options: FolderServiceOptions = {}): Promise<Folder[]> {
+  const { includeDocumentIds = true, signal } = options;
   let folders: Folder[] = [];
 
-  // Try cache first
   try {
-    const cacheData = getCache();
-    const { documentListsMetadata, documentLists, documents } = cacheData?.state || {};
-
-    if (documentListsMetadata && documentLists && documents) {
-      const actualDocuments = new Set(Object.keys(documents));
-
-      folders = Object.entries(documentListsMetadata).map(([folderId, metadata]) => {
-        const allDocumentIds = documentLists[folderId] || [];
-        const actualDocumentIds = includeDocumentIds
-          ? allDocumentIds.filter((docId: string) => actualDocuments.has(docId))
-          : [];
-
-        return {
-          ...(metadata as Omit<Folder, "document_ids">),
-          id: folderId,
-          document_ids: actualDocumentIds,
-        };
-      });
-
-      return folders;
-    }
-  } catch (error) {
-    // Cache failed, continue to API fallback
-  }
-
-  // Fall back to API
-  try {
-    const response = await getFolders();
+    const response = await getFolders(signal);
 
     if (!response || !response.lists || typeof response.lists !== "object") {
       return [];
     }
 
-    let actualDocuments: Set<string>;
-    if (includeDocumentIds) {
-      try {
-        const cacheData = getCache();
-        actualDocuments = new Set(Object.keys(cacheData?.state?.documents || {}));
-      } catch {
-        actualDocuments = new Set();
-      }
-    } else {
-      actualDocuments = new Set();
-    }
-
     folders = Object.values(response.lists).map((folder: Folder) => {
-      const filteredDocumentIds =
-        includeDocumentIds && actualDocuments.size > 0
-          ? folder.document_ids.filter((docId: string) => actualDocuments.has(docId))
-          : includeDocumentIds
-            ? folder.document_ids
-            : [];
-
       return {
         ...folder,
-        document_ids: filteredDocumentIds,
+        document_ids: includeDocumentIds ? folder.document_ids || [] : [],
       };
     });
 
@@ -82,10 +36,16 @@ export async function getFoldersWithCache(options: FolderServiceOptions = {}): P
 }
 
 /**
- * Create a mapping of document ID to folder name using cache-first approach
+ * @deprecated Use getFoldersFromAPI instead. Kept for backward compatibility.
+ */
+export const getFoldersWithCache = getFoldersFromAPI;
+
+/**
+ * Create a mapping of document ID to folder name
+ * Uses API endpoint to get folders with document_ids
  */
 export async function getDocumentToFolderMapping(): Promise<Record<string, string>> {
-  const folders = await getFoldersWithCache({ includeDocumentIds: true });
+  const folders = await getFoldersFromAPI({ includeDocumentIds: true });
   const mapping: Record<string, string> = {};
 
   folders.forEach((folder) => {
@@ -98,7 +58,8 @@ export async function getDocumentToFolderMapping(): Promise<Record<string, strin
 }
 
 /**
- * Get folder info for AI tools with note counts and metadata
+ * Get folder info for AI tools with note counts computed from document_ids
+ * Uses API endpoint to get folders
  */
 export async function getFolderInfoForAI(): Promise<
   Array<{
@@ -110,7 +71,7 @@ export async function getFolderInfoForAI(): Promise<
     noteIds: string[];
   }>
 > {
-  const folders = await getFoldersWithCache({ includeDocumentIds: true });
+  const folders = await getFoldersFromAPI({ includeDocumentIds: true });
 
   return folders.map((folder) => ({
     id: folder.id,

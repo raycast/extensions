@@ -115,7 +115,7 @@ export async function getFormattedList() {
   const now = new Date().getTime();
   const dates = [];
 
-  const futureDates = items.filter((item) => Date.parse(item.date) > now);
+  const futureDates = items.filter((item) => Date.parse(item.date) >= now);
   futureDates.sort(function (a, b) {
     return a.date > b.date ? 1 : a.date < b.date ? -1 : 0;
   });

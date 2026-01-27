@@ -1,4 +1,3 @@
-import got from "got";
 import showdown from "showdown";
 import EmailValidator from "email-validator";
 import {
@@ -11,6 +10,7 @@ import {
   Action,
   Clipboard,
   useNavigation,
+  Icon,
 } from "@raycast/api";
 import { type AddNote, POSTResponse } from "../types";
 import { FormValidation, useForm } from "@raycast/utils";
@@ -33,18 +33,19 @@ export default function AddNote({ onNoteAdded }: AddNoteProps) {
         const markdownConverter = new showdown.Converter();
         const htmlContent = markdownConverter.makeHtml(values.content);
 
-        const { body } = await got.post(API_URL + "notes", {
-          json: {
+        const response = await fetch(API_URL + "notes", {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify({
             title: values.title,
             content: htmlContent,
             customer_email: values.saidBy,
             tags: tags,
-          },
-          headers: API_HEADERS,
-          responseType: "json",
+          }),
         });
+        const result = (await response.json()) as POSTResponse;
 
-        await Clipboard.copy((body as POSTResponse).links.html);
+        await Clipboard.copy(result.links.html);
         toast.style = Toast.Style.Success;
         toast.title = "Note created";
         toast.message = "Copied link to clipboard";
@@ -77,7 +78,7 @@ export default function AddNote({ onNoteAdded }: AddNoteProps) {
       navigationTitle="Notes / Add"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Note" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Create Note" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

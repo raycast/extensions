@@ -1,5 +1,13 @@
 # Summarize YouTube Video Changelog
 
+## [Feat] - 2025-10-28
+
+- 🖼️ Added Support for Windows
+
+## [Fix] - 2025-10-10
+
+- Update the way transscriptions is handled
+
 ## [Fixes] - 2025-06-27
 
 - 📚 Remove `youtube-transcript` package and install `youtube-transcript-api`

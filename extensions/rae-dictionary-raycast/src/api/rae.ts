@@ -92,26 +92,57 @@ export interface Meaning {
 export interface WordEntry {
   word: string;
   meanings: Meaning[];
+  suggestions: string[];
 }
 
 export interface Word {
   word: string;
 }
 
+export interface SearchDoc {
+  id: string;
+  raw: string;
+}
+
+export interface SearchResult {
+  doc: SearchDoc;
+  hits: number;
+}
+
 export interface ApiResponse<T = unknown> {
   ok: boolean;
   data: T;
   error?: string;
+  suggestions: string[];
 }
 
 export type WordOnlyResponse = ApiResponse<Word>;
 export type WordEntryResponse = ApiResponse<WordEntry>;
+
+export class ApiError extends Error {
+  suggestions: string[];
+  constructor(message: string, suggestions: string[]) {
+    super(message);
+    this.suggestions = suggestions;
+    Object.setPrototypeOf(this, ApiError.prototype);
+  }
+}
 
 // Helper function to make API requests and handle errors
 async function makeApiRequest<T>(url: string): Promise<T> {
   const response = await fetch(url);
 
   if (!response.ok) {
+    try {
+      const errorData = (await response.json()) as ApiResponse<T>;
+      if (errorData.error === "NOT_FOUND") {
+        throw new ApiError("Word not found", errorData.suggestions);
+      }
+    } catch (parseError) {
+      if (parseError instanceof ApiError) {
+        throw parseError;
+      }
+    }
     throw new Error(`Request error: ${response.statusText}`);
   }
 
@@ -119,7 +150,7 @@ async function makeApiRequest<T>(url: string): Promise<T> {
 
   if (!res.ok) {
     const errorMsg = res.error === "NOT_FOUND" ? "Word not found" : res.error;
-    throw new Error(`API response error: ${errorMsg}`);
+    throw new ApiError(`API response error: ${errorMsg}`, res.suggestions);
   }
 
   return res.data;
@@ -147,4 +178,27 @@ export const getRandomWord = async (minLength?: number, maxLength?: number): Pro
 
   const res = await makeApiRequest<Word>(url);
   return searchWord(res.word);
+};
+
+// Search for suggestions when a word is not found
+export const searchSuggestions = async (query: string, limit = 5): Promise<string[]> => {
+  try {
+    const url = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const results = (await response.json()) as SearchResult[];
+
+    if (!Array.isArray(results)) {
+      return [];
+    }
+
+    // Extract word IDs and return top results
+    return results.slice(0, limit).map((result) => result.doc.id);
+  } catch {
+    return [];
+  }
 };

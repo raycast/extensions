@@ -22,7 +22,6 @@ function CloudwatchLogs({
     logGroupStreamPrefix,
     logGroupStreamName ? [logGroupStreamName] : undefined,
   ]);
-  ``;
 
   return (
     <Detail

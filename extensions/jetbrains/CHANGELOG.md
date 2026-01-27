@@ -1,5 +1,10 @@
 # Jetbrains Changelog
 
+## [Bugfix] - 2025-10-20
+
+- Added support for JetBrains Toolbox version 3 and improved handling of unsupported versions.
+- Updated extension messages for clarity and easier future version upgrades.
+
 ## [Bugfix] - 2025-04-14
 - Fix sorting projects which doesn't have a opened value
 - Fix crashing when `projects` field in `settings.json` is not present

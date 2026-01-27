@@ -12,7 +12,7 @@ type Input = {
    */
   notes?: string;
   /**
-   * The due date. Can either be a full day date (YYYY-MM-DD) or an ISO date if the time is specified (YYYY-MM-DDTHH:mm:ss.sssZ). Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. If the user didn't include a specific time, assume it's a full day reminder.
+   * The due date. Must include a calendar date. Use YYYY-MM-DD for full-day reminders or ISO with time (YYYY-MM-DDTHH:mm:ss.sssZ). Time-only values (e.g. "10:00:00") are invalid and will fail. Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. If the user didn't include a specific time, assume it's a full day reminder.
    */
   dueDate?: string;
   /**

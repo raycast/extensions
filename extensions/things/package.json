@@ -2,22 +2,27 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "things",
   "title": "Things",
-  "version": "1.0.0",
   "description": "Search and manage your Things to-dos from Raycast",
   "icon": "things-icon.png",
   "author": "loris",
   "contributors": [
     "andreaselia",
     "stelo",
-    "thomaslombart",
     "srikirank",
     "vimtor",
     "samuelkraft",
     "bendrucker",
     "vmrjnvc",
-    "dinocosta"
+    "dinocosta",
+    "janosorcsik"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "show-today-list",
@@ -115,7 +120,7 @@
           "name": "dontUseAI",
           "type": "checkbox",
           "label": "Don't use AI",
-          "description": "When enabled, the todo is simply added to your inbox with the input as the title.",
+          "description": "When enabled, the to-do is simply added to your inbox with the input as the title.",
           "default": false,
           "required": false
         }
@@ -145,8 +150,8 @@
   "tools": [
     {
       "name": "get-list-todos",
-      "title": "Get List Todos",
-      "description": "Get all the todos from a list in Things"
+      "title": "Get List To-Dos",
+      "description": "Get all the to-dos from a list in Things"
     },
     {
       "name": "get-projects",
@@ -170,35 +175,45 @@
     },
     {
       "name": "delete-todo",
-      "title": "Delete Todo",
-      "description": "Delete a todo in Things"
+      "title": "Delete To-Do",
+      "description": "Delete a to-do in Things"
     },
     {
       "name": "update-todo",
-      "title": "Update Todo",
-      "description": "Update a todo in Things"
+      "title": "Update To-Do",
+      "description": "Update a to-do in Things"
     },
     {
       "name": "set-todo-property",
-      "title": "Set Todo Property",
-      "description": "Set a property of a todo in Things"
+      "title": "Set To-Do Property",
+      "description": "Set a property of a to-do in Things"
     },
     {
       "name": "add-todo",
-      "title": "Add Todo",
-      "description": "Add a todo in Things"
+      "title": "Add To-Do",
+      "description": "Add a to-do in Things"
     },
     {
       "name": "add-project",
       "title": "Add Project",
       "description": "Add a project in Things"
+    },
+    {
+      "name": "update-project",
+      "title": "Update Project",
+      "description": "Update a project in Things"
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "description": "Delete a project in Things"
     }
   ],
   "ai": {
-    "instructions": "Moving a todo means changing its list. For example, moving \"buy milk\" from inbox to today means changing its list to today. Only update the when property of the todo when referring to a date.",
+    "instructions": "Moving a to-do means changing its list. For example, moving \"buy milk\" from inbox to today means changing its list to today. Only update the when property of the to-do when referring to a date.",
     "evals": [
       {
-        "input": "@things what are my todos for today?",
+        "input": "@things what are my to-dos for today?",
         "mocks": {
           "get-list-todos": [
             {
@@ -314,7 +329,7 @@
         ]
       },
       {
-        "input": "@things move all todos from my inbox to today",
+        "input": "@things move all to-dos from my inbox to today",
         "mocks": {
           "update-todo": "Successfully called \"update-todo\"",
           "get-list-todos": [
@@ -413,27 +428,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.2",
-    "dayjs": "^1.11.12",
-    "qs": "^6.12.3"
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.1",
+    "dayjs": "^1.11.18",
+    "query-string": "^9.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.0.0",
-    "@types/qs": "^6.9.15",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "typescript": "^5.5.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.9.2",
+    "@types/qs": "^6.14.0",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.38.0",
+    "typescript": "^5.9.3"
   },
+  "version": "1.0.0",
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

@@ -105,12 +105,17 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
     setHistory(nextRepositories);
   }
 
-  // Converting query filter string to regexp:
-  const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
+  let data = history;
 
-  const data = history
-    .filter((r) => r.nameWithOwner.toLowerCase().includes(searchText?.toLowerCase() ?? ""))
-    .filter((r) => r.nameWithOwner.match(repositoryFilter));
+  if (searchText) {
+    data = data.filter((r) => r.nameWithOwner.toLowerCase().includes(searchText.toLowerCase()));
+  }
+
+  if (searchFilter) {
+    // Converting query filter string to regexp:
+    const repositoryFilter = `${searchFilter.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
+    data = data.filter((r) => r.nameWithOwner.match(repositoryFilter));
+  }
 
   return { data, visitRepository };
 }
@@ -126,8 +131,13 @@ export const MY_REPO_SORT_TYPES_TO_QUERIES = [
   { title: "Name", value: "name:asc" },
   { title: "Stars", value: "stargazers:desc" },
 ];
+export const STARRED_REPO_SORT_TYPES_TO_QUERIES = [
+  { title: "Recently Starred", value: "starred_at:desc" },
+  { title: "Oldest Starred", value: "starred_at:asc" },
+];
 export const REPO_DEFAULT_SORT_QUERY = REPO_SORT_TYPES_TO_QUERIES[0].value;
 export const MY_REPO_DEFAULT_SORT_QUERY = MY_REPO_SORT_TYPES_TO_QUERIES[0].value;
+export const STARRED_REPO_DEFAULT_SORT_QUERY = STARRED_REPO_SORT_TYPES_TO_QUERIES[0].value;
 
 export const ACCEPTABLE_CLONE_PROTOCOLS = ["https", "ssh"] as const;
 export type AcceptableCloneProtocol = (typeof ACCEPTABLE_CLONE_PROTOCOLS)[number];
@@ -148,10 +158,16 @@ export const buildCloneCommand = (
   options?: Partial<AdditionalCloneFormatOptions>,
 ): string => {
   const gitFlag = options?.gitFlags?.join(" ") ?? "";
-  const targetDir = options?.targetDir ?? "";
+  const targetDir = (options?.targetDir ?? "").replace(/"/g, '\\"');
 
   const cloneUrl = formatRepositoryUrl(repoNameWithOwner, cloneProtocol);
-  return `git clone ${gitFlag} ${cloneUrl} ${targetDir}`;
+  let cloneCmd = `git clone ${gitFlag} ${cloneUrl}`;
+
+  if (targetDir) {
+    cloneCmd += ` "${targetDir}"`;
+  }
+
+  return cloneCmd;
 };
 
 type AdditionalCloneFormatOptions = {

@@ -1,5 +1,4 @@
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch, { Headers } from "node-fetch";
 import type {
   Team,
   Deployment,
@@ -14,11 +13,11 @@ import type {
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
-const headers = new Headers({
+const headers = {
   Authorization: "Bearer " + token,
-});
+};
 
-export const FetchHeaders = [...headers];
+export const FetchHeaders = Object.entries(headers);
 
 const apiURL = "https://api.vercel.com/";
 
@@ -140,6 +139,25 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
       title: "Failed to fetch deployments",
     });
     throw new Error("Failed to fetch deployments");
+  }
+}
+
+export async function fetchLatestDeployment(teamId?: string): Promise<Deployment | null> {
+  try {
+    const fetchURL = getFetchDeploymentsURL(teamId, undefined, 1);
+    const response = await fetch(fetchURL, {
+      method: "get",
+      headers: headers,
+    });
+    const json = (await response.json()) as { deployments: Deployment[] };
+    return json.deployments[0] ?? null;
+  } catch (err) {
+    console.error(err);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to fetch latest deployment",
+    });
+    throw new Error("Failed to fetch latest deployment");
   }
 }
 
@@ -323,13 +341,21 @@ export async function fetchDomains(teamId?: string, limit = 100) {
 }
 
 export async function checkDomainAvailability(domain: string) {
-  const response = await fetch(apiURL + `v4/domains/status?name=${domain}`, {
+  const response = await fetch(apiURL + `v1/registrar/domains/${domain}/availability`, {
     method: "get",
     headers: headers,
   });
-  const json = (await response.json()) as { available: string; error?: { code: string; message: string } };
-  if (json.error) {
-    return "Check domain availability failed. Please verify that the domain is valid or try again later.";
+
+  if (!response.ok) {
+    const errorJson = (await response.json()) as { code: string; message: string };
+    return {
+      available: false,
+      error:
+        errorJson.message ||
+        "Check domain availability failed. Please verify that the domain is valid or try again later.",
+    };
   }
-  return json.available;
+
+  const json = (await response.json()) as { available: boolean };
+  return { available: json.available };
 }

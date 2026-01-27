@@ -1,15 +1,32 @@
-import { List, ActionPanel, Action, Icon, confirmAlert, Alert, Keyboard, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, confirmAlert, Alert, Keyboard, Color, showToast, Toast } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
-import type { Link } from "../types";
+import type { Link, SortOption } from "../types";
 import { LinkDetail } from "./LinkDetail";
 import { deleteLink } from "../services/api";
 
 interface LinkItemProps {
   link: Link;
   onRefresh: () => void;
+  currentSort?: SortOption;
+  onSortChange?: (sort: SortOption) => void;
+  isPinned?: boolean;
+  onPin?: (slug: string) => void;
+  onUnpin?: (slug: string) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }
 
-export const LinkItem = ({ link, onRefresh }: LinkItemProps) => {
+export const LinkItem = ({
+  link,
+  onRefresh,
+  currentSort,
+  onSortChange,
+  isPinned = false,
+  onPin,
+  onUnpin,
+  onMoveUp,
+  onMoveDown,
+}: LinkItemProps) => {
   const BASE_URL = getPreferenceValues<Preferences>().host;
   const shortUrl = `${BASE_URL}/${link.short_code}`;
 
@@ -33,6 +50,21 @@ export const LinkItem = ({ link, onRefresh }: LinkItemProps) => {
     }
   };
 
+  // Backend returns UTC timestamps in the fixed format
+  // "YYYY-MM-DD HH:MM:SS" (no T/Z/offset).
+  // Always parse as UTC by converting to ISO 8601:
+  // replace the space with 'T' and append 'Z', then
+  // render with toLocaleString() for local time.
+  const formatLocalDateTime = (value: string | null): string => {
+    if (!value) return "Never";
+    const raw = value.trim();
+    const isoUTC = `${raw.includes("T") ? raw : raw.replace(" ", "T")}Z`;
+    const d = new Date(isoUTC);
+    if (Number.isNaN(d.getTime())) return "Never";
+    return d.toLocaleString();
+  };
+  const lastVisitedLabel = formatLocalDateTime(link.last_visited_at);
+
   const accessories: List.Item.Accessory[] = [];
   if (link.description) {
     accessories.push({
@@ -54,15 +86,124 @@ export const LinkItem = ({ link, onRefresh }: LinkItemProps) => {
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard icon={Icon.Clipboard} title="Copy Short Link" content={shortUrl} />
-          <Action.Push icon={Icon.Paragraph} title="Edit" target={<LinkDetail link={link} onRefresh={onRefresh} />} />
-          <Action
-            icon={Icon.Trash}
-            title="Delete Link"
-            style={Action.Style.Destructive}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-            onAction={handleDelete}
-          />
+          <ActionPanel.Section>
+            <Action.CopyToClipboard icon={Icon.Clipboard} title="Copy Short Link" content={shortUrl} />
+            <Action.Push
+              icon={Icon.Pencil}
+              title="Edit"
+              shortcut={Keyboard.Shortcut.Common.Edit}
+              target={<LinkDetail link={link} onRefresh={onRefresh} />}
+            />
+            <Action
+              icon={Icon.Trash}
+              title="Delete Link"
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={handleDelete}
+            />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Last Visited: ">
+            <Action
+              icon={Icon.Clock}
+              title={lastVisitedLabel}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              onAction={async () => {
+                await showToast({ style: Toast.Style.Success, title: "Last Visited", message: lastVisitedLabel });
+              }}
+            />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section>
+            {isPinned ? (
+              <>
+                <Action
+                  icon={Icon.Pin}
+                  title="Unpin"
+                  shortcut={Keyboard.Shortcut.Common.Pin}
+                  onAction={() => onUnpin?.(link.short_code)}
+                />
+                {onMoveUp && (
+                  <Action
+                    icon={Icon.ArrowUp}
+                    title="Move up"
+                    shortcut={Keyboard.Shortcut.Common.MoveUp}
+                    onAction={onMoveUp}
+                  />
+                )}
+                {onMoveDown && (
+                  <Action
+                    icon={Icon.ArrowDown}
+                    title="Move Down"
+                    shortcut={Keyboard.Shortcut.Common.MoveDown}
+                    onAction={onMoveDown}
+                  />
+                )}
+              </>
+            ) : (
+              <Action
+                icon={Icon.Pin}
+                title="Pin"
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={() => onPin?.(link.short_code)}
+              />
+            )}
+          </ActionPanel.Section>
+
+          {onSortChange && (
+            <ActionPanel.Section title="Sort Options">
+              <ActionPanel.Submenu
+                title="Sort by Created Time"
+                icon={Icon.Calendar}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              >
+                <Action
+                  title="Newest First"
+                  icon={currentSort === "created_desc" ? Icon.Checkmark : Icon.Calendar}
+                  onAction={() => onSortChange("created_desc")}
+                />
+                <Action
+                  title="Oldest First"
+                  icon={currentSort === "created_asc" ? Icon.Checkmark : Icon.Calendar}
+                  onAction={() => onSortChange("created_asc")}
+                />
+              </ActionPanel.Submenu>
+
+              <ActionPanel.Submenu
+                title="Sort by Last Visited"
+                icon={Icon.Clock}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              >
+                <Action
+                  title="Recently Visited"
+                  icon={currentSort === "visited_desc" ? Icon.Checkmark : Icon.Clock}
+                  onAction={() => onSortChange("visited_desc")}
+                />
+                <Action
+                  title="Least Recently Visited"
+                  icon={currentSort === "visited_asc" ? Icon.Checkmark : Icon.Clock}
+                  onAction={() => onSortChange("visited_asc")}
+                />
+              </ActionPanel.Submenu>
+
+              <ActionPanel.Submenu
+                title="Sort by Visit Count"
+                icon={Icon.BarChart}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+              >
+                <Action
+                  title="Most Visited"
+                  icon={currentSort === "visits_desc" ? Icon.Checkmark : Icon.BarChart}
+                  onAction={() => onSortChange("visits_desc")}
+                />
+                <Action
+                  title="Least Visited"
+                  icon={currentSort === "visits_asc" ? Icon.Checkmark : Icon.BarChart}
+                  onAction={() => onSortChange("visits_asc")}
+                />
+              </ActionPanel.Submenu>
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />

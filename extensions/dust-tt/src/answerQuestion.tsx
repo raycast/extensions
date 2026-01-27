@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { addDustHistory } from "./history";
-import { ConnectorProviders, DUST_AGENT, AgentType, getUser } from "./utils";
+import { AgentActionPublicType, DataSourceViewType, DustAPI } from "@dust-tt/client";
+import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { AskAgentQuestionForm } from "./askAgent";
 import { getDustClient, withPickedWorkspace } from "./dust_api/oauth";
-import { AgentActionPublicType, DataSourceViewType, DustAPI, isRetrievalActionType } from "@dust-tt/client";
-import { usePromise } from "@raycast/utils";
+import { addDustHistory } from "./history";
+import { AgentType, ConnectorProviders, DUST_AGENT, getUser } from "./utils";
 
 type DustDocument = {
   documentId: string;
@@ -25,47 +25,19 @@ type ConversationContext = {
 };
 
 const useConversationContext = () => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const isOauth = preferences.connexionFlow === "oauth";
-
-  const formatUsername = useCallback((email: string) => {
-    return email
-      .split("@")[0]
-      .split(".")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
+  const { data: user, isLoading } = usePromise(async () => {
+    return await getUser();
   }, []);
-
-  const { data: user, isLoading } = usePromise(
-    async (isOauth) => {
-      if (isOauth) {
-        return await getUser();
-      }
-      return undefined;
-    },
-    [isOauth],
-  );
 
   let context: ConversationContext | undefined = undefined;
 
-  if (isOauth) {
-    if (user && !isLoading) {
-      context = {
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-        username: user.firstName,
-        email: user.email,
-        fullName: user.fullName,
-        profilePictureUrl: user.image,
-        origin: "raycast",
-      };
-    }
-  } else {
+  if (user && !isLoading) {
     context = {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-      username: formatUsername(preferences.userEmail || "Raycast"),
-      email: preferences.userEmail ?? null,
-      fullName: formatUsername(preferences.userEmail || "Raycast"),
-      profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
+      username: user.firstName,
+      email: user.email,
+      fullName: user.fullName,
+      profilePictureUrl: user.image,
       origin: "raycast",
     };
   }
@@ -101,7 +73,6 @@ async function answerQuestion({
 
   function processAction({
     content,
-    action,
     setDustDocuments,
   }: {
     content: string;
@@ -109,11 +80,13 @@ async function answerQuestion({
     setDustDocuments: (documents: DustDocument[]) => void;
   }): string {
     const referencedDocuments: Map<string, DustDocument> = new Map();
-    if (action && isRetrievalActionType(action) && action.documents) {
-      action.documents.forEach((d) => {
-        referencedDocuments.set(d.reference, { ...d, referenceCount: 0 });
-      });
-    }
+    /**
+     * if (action && action.documents) {
+     *   action.documents.forEach((d) => {
+     *     referencedDocuments.set(d.reference, { ...d, referenceCount: 0 });
+     *   });
+     * }
+     */
     const documents: DustDocument[] = [];
     if (referencedDocuments.size > 0) {
       let counter = 0;
@@ -306,7 +279,7 @@ export const AskDustQuestion = withPickedWorkspace(
     const dustApi = getDustClient();
 
     useEffect(() => {
-      if (question && !conversationId && !isLoadingContext && context) {
+      if (question && !conversationId && !isLoadingContext && context && dustApi) {
         const asyncAnswer = async () => {
           await answerQuestion({
             question,
@@ -396,7 +369,7 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
             icon={{
               source:
                 (document.dataSourceView?.dataSource.connectorProvider &&
-                  ConnectorProviders[document.dataSourceView?.dataSource.connectorProvider].icon) ??
+                  ConnectorProviders[document.dataSourceView?.dataSource.connectorProvider]?.icon) ??
                 Icon.Globe,
             }}
             accessories={[
@@ -404,11 +377,11 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
                 tag: {
                   color:
                     (document.dataSourceView?.dataSource.connectorProvider &&
-                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider].color) ??
+                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider]?.color) ??
                     Color.SecondaryText,
                   value:
                     (document.dataSourceView?.dataSource.connectorProvider &&
-                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider].name) ??
+                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider]?.name) ??
                     "Unknown",
                 },
               },

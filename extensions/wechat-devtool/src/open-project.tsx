@@ -1,21 +1,21 @@
 import { showFailureToast } from "@raycast/utils";
 import { useNavigation, showToast, Toast, showHUD } from "@raycast/api";
 
-import ProjectList from "./components/project-list";
-import { openProject } from "./utils/cli";
-import { Project, ExtensionConfig } from "./types";
+import { ProjectList } from "@/components";
+import { openProject } from "@/utils";
+import type { Project } from "@/types";
 
 export default function OpenProject() {
   const { pop } = useNavigation();
 
-  async function handleOpenProject(project: Project, config: ExtensionConfig) {
+  async function handleOpenProject(project: Project) {
     showToast({
       style: Toast.Style.Animated,
       title: "Opening project...",
     });
 
     try {
-      await openProject(config.cliPath, project.path);
+      await openProject(project.path);
       showHUD("✅ Project opened successfully");
       pop();
     } catch (error) {

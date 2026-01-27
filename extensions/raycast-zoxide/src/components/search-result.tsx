@@ -11,11 +11,12 @@ import {
 } from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
 import { AddFromFinderAction } from "@components/add-from-finder-action";
+import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-action";
 import { useZoxide } from "@hooks/use-zoxide";
 import { basename, dirname } from "path";
 import { base64ShellSanitize } from "@utils/misc";
 
-export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) => {
+export const SearchResult = ({ searchResult, searchText }: { searchResult: SearchResult; searchText?: string }) => {
   const [, setRemovedKeys] = useCachedState<string[]>("removed-keys", []);
   const { "open-in": openIn } = getPreferenceValues<{ "open-in": Application }>();
 
@@ -66,6 +67,7 @@ export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) =
         <ActionPanel>
           <ActionPanel.Section>
             <Action title="Open Folder" onAction={openResult} />
+            <SearchUsingSpotlightAction searchText={searchText || ""} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard

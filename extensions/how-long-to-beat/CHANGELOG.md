@@ -1,5 +1,19 @@
 # Howlongtobeat Changelog
 
+## [Fixes] - 2026-01-22
+
+- Fix: search error when fetching games by search
+- Fix: detail page not loading
+
+## [Fixes] - 2025-10-13
+
+- Fix: Hash not found error when fetching games by search
+
+## [Maintenance] - 2025-09-18
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Fixes] - 2025-05-12
 
 - Fix: Hash not found error when fetching games by search

@@ -7,6 +7,7 @@ export async function getTypes(
   options: {
     offset: number;
     limit: number;
+    name?: string;
   },
 ): Promise<{
   types: Type[];

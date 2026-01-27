@@ -1,5 +1,18 @@
 # Bitwarden Changelog
 
+## [Added PasteUsernameAction] - 2026-01-01
+
+## [Added support for Windows] - 2025-10-15
+
+## [New Command] - 2025-10-07
+
+- Add Create Login command to create new login items
+
+## [Improvements] - 2025-09-02
+
+- Sync vault on command launch
+- Reorganize preferences
+
 ## [Fix] - 2025-06-26
 
 - Catch any errors caused by `OTPAuth.TOTP` constructor

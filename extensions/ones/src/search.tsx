@@ -103,7 +103,7 @@ export function Search(props: Props) {
       fn();
       return () => abortCtrl.abort();
     },
-    [setSearchResult, setLoading, setUsers, setTasks, setSpaces, setProjects, setSearchText]
+    [setSearchResult, setLoading, setUsers, setTasks, setSpaces, setProjects, setSearchText],
   );
 
   useEffect(() => {
@@ -240,7 +240,9 @@ export function Search(props: Props) {
               key={index}
               title={item.fields.name}
               subtitle={
-                props.product === Product.WIKI ? item.fields.page_title : projects[item.fields.project_uuid]?.name ?? ""
+                props.product === Product.WIKI
+                  ? item.fields.page_title
+                  : (projects[item.fields.project_uuid]?.name ?? "")
               }
               accessories={[
                 {

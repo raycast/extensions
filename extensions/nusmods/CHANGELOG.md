@@ -1,5 +1,13 @@
 # NUSMods Changelog
 
+## [Reviews & Comments] - 2026-01-01
+
+- Added feature to view reviews and comments for NUS courses via Disqus API.
+
+## [Better Prereq Rendering] - 2025-08-04
+
+- Improved rendering logic for module prerequisites
+
 ## [Windows Support] - 2025-07-24
 
 - Added support for Raycast Windows

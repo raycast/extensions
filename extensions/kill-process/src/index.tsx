@@ -7,6 +7,7 @@ import {
   confirmAlert,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   open,
   popToRoot,
@@ -18,6 +19,8 @@ import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
+import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
+import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
@@ -37,36 +40,47 @@ export default function ProcessList() {
   const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
+  // Cache CPU data from WMI queries (persists across refreshes)
+  const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
+
   const fetchProcesses = () => {
-    exec(`ps -eo pid,ppid,pcpu,rss,comm`, (err, stdout) => {
-      if (err != null) {
-        return;
-      }
+    fetchRunningProcesses()
+      .then((processes) => {
+        // Apply cached CPU values to new process list
+        if (isWindows && cpuCache.size > 0) {
+          processes = processes.map((proc) => {
+            const cachedCpu = cpuCache.get(proc.id);
+            return cachedCpu !== undefined ? { ...proc, cpu: cachedCpu } : proc;
+          });
+        }
 
-      const processes = stdout
-        .split("\n")
-        .map((line) => {
-          const defaultValue = ["", "", "", "", "", ""];
-          const regex = /(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/;
-          const [, id, pid, cpu, mem, path] = line.match(regex) ?? defaultValue;
-          const processName = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
-          const isPrefPane = path.includes(".prefPane");
-          const isApp = path.includes(".app/");
+        setFetchResult(processes);
 
-          return {
-            id: parseInt(id),
-            pid: parseInt(pid),
-            cpu: parseFloat(cpu),
-            mem: parseInt(mem),
-            type: isPrefPane ? "prefPane" : isApp ? "app" : "binary",
-            path,
-            processName,
-          } as Process;
-        })
-        .filter((process) => process.processName !== "");
-
-      setFetchResult(processes);
-    });
+        // On Windows, fetch accurate CPU data in the background
+        if (isWindows) {
+          fetchProcessPerformance().then((cpuData) => {
+            if (cpuData.size > 0) {
+              // Update cache with new CPU data
+              setCpuCache(cpuData);
+              // Update displayed processes
+              setFetchResult((currentProcesses) =>
+                currentProcesses.map((proc) => {
+                  const cpu = cpuData.get(proc.id);
+                  return cpu !== undefined ? { ...proc, cpu } : proc;
+                }),
+              );
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch processes:", err);
+        showToast({
+          title: "Failed to fetch processes",
+          style: Toast.Style.Failure,
+          message: err instanceof Error ? err.message : "Unknown error",
+        });
+      });
   };
 
   useInterval(fetchProcesses, refreshDuration);
@@ -86,17 +100,7 @@ export default function ProcessList() {
   }, [fetchResult, sortBy, aggregateApps]);
 
   const fileIcon = (process: Process) => {
-    if (process.type === "prefPane") {
-      return {
-        fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "",
-      };
-    }
-
-    if (process.type === "app" || process.type === "aggregatedApp") {
-      return { fileIcon: process.path?.replace(/(.+\.app)(.+)/, "$1") ?? "" };
-    }
-
-    return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
+    return getFileIcon(process);
   };
 
   const killProcess = async (process: Process, force: boolean = false) => {
@@ -113,32 +117,37 @@ export default function ProcessList() {
       });
       return;
     }
-    exec(`zsh -c '${force ? "sudo " : ""}kill -9 ${process.id}'`, (error) => {
+
+    const command = getKillCommand(process.id, force);
+    exec(command, (error) => {
       if (error) {
-        if (force) {
+        const errorHelp = getPlatformSpecificErrorHelp(force);
+
+        if (force && errorHelp.helpUrl) {
           confirmAlert({
-            title: `Failed Killing ${processName}`,
-            message:
-              "Please ensure that touch id/password prompt is enabled for sudo: https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28",
+            title: errorHelp.title,
+            message: errorHelp.message,
             primaryAction: {
-              title: "Open Link",
-              onAction: () =>
-                open("https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28"),
+              title: "Open Help",
+              onAction: () => open(errorHelp.helpUrl!),
             },
           });
         } else {
           showToast({
-            title: `Failed Killing ${processName}`,
+            title: errorHelp.title,
+            message: errorHelp.message,
             style: Toast.Style.Failure,
           });
         }
         return;
       }
+
       showToast({
         title: `Killed ${processName}`,
         style: Toast.Style.Success,
       });
     });
+
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
       closeMainWindow();
@@ -319,17 +328,23 @@ export default function ProcessList() {
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                     <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
-                    {process.path == null ? null : <Action.CopyToClipboard title="Copy Path" content={process.path} />}
+                    {process.path == null ? null : (
+                      <Action.CopyToClipboard
+                        title="Copy Path"
+                        content={process.path}
+                        shortcut={Keyboard.Shortcut.Common.CopyPath}
+                      />
+                    )}
                     <Action
                       title="Reload"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ key: "r", modifiers: ["cmd"] }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={() => fetchProcesses()}
                     />
                     <Action
                       title={`${aggregateApps ? "Disable" : "Enable"} Aggregating Apps`}
                       icon={Icon.AppWindow}
-                      shortcut={{ key: "tab", modifiers: ["shift"] }}
+                      shortcut={{ modifiers: ["shift"], key: "tab" }}
                       onAction={() => {
                         setAggregateApps(!aggregateApps);
                         showToast({

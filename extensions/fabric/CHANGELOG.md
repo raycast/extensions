@@ -1,5 +1,9 @@
 # Fabric Changelog
 
+## [Windows Support] - 2025-09-22
+
+- Enabled support for Windows platform.
+
 ## [Location and Tag Selection] - 2025-05-28
 
 - Allow assigning existing tags, and create new ones, when saving an item.

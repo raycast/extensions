@@ -27,10 +27,14 @@ export function WindowsList(): React.ReactElement {
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       <List.Section title="Open Windows" subtitle={`${updateRequiredStates?.length}`}>
-        {updateRequiredStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+        {updateRequiredStates?.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
       </List.Section>
       <List.Section title="Closed Windows" subtitle={`${otherStates?.length}`}>
-        {otherStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+        {otherStates?.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
       </List.Section>
     </List>
   );

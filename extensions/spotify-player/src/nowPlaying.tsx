@@ -12,6 +12,7 @@ import {
   launchCommand,
   LaunchType,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
@@ -34,6 +35,7 @@ import { StartRadioAction } from "./components/StartRadioAction";
 import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
 import { getErrorMessage } from "./helpers/getError";
+import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
@@ -74,7 +76,7 @@ function NowPlayingCommand() {
                 onAction={async () => {
                   currentlyPlayingRevalidate();
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
@@ -94,16 +96,17 @@ function NowPlayingCommand() {
   if (isTrack) {
     const { album, artists, id: trackId, duration_ms } = item as TrackObject;
     const albumName = album?.name;
-    const albumImage = album?.images[0].url;
+    const albumImage = album?.images[0]?.url;
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
     title = `${name} · ${artistName}`;
 
-    markdown = `# ${name}
-by ${artistName}
-
-![${name}](${albumImage}?raycast-width=250&raycast-height=250)
-`;
+    markdown = [
+      `# ${name}`,
+      `by ${artistName}`,
+      "",
+      albumImage ? `![${name}](${albumImage}?raycast-width=250&raycast-height=250)` : "",
+    ].join("\n");
 
     metadata = (
       <Detail.Metadata>
@@ -193,11 +196,14 @@ by ${artistName}
         <Action
           icon={Icon.Forward}
           title="Next"
-          shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "arrowRight" },
+            Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+          }}
           onAction={async () => {
             try {
               await skipToNext();
-              await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+              await triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to next");
                 await popToRoot();
@@ -220,11 +226,14 @@ by ${artistName}
         <Action
           icon={Icon.Rewind}
           title="Previous"
-          shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+            Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+          }}
           onAction={async () => {
             try {
               await skipToPrevious();
-              await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+              await triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to previous");
                 await popToRoot();
@@ -254,16 +263,17 @@ by ${artistName}
   } else {
     const { images, description, show } = item as EpisodeObject;
     const showName = show.name;
-    const image = images[0].url;
+    const image = images[0]?.url;
     title = `${name} · ${showName}`;
 
-    markdown = `# ${showName}
-${name}
-
-![${name}](${image}?raycast-width=250&raycast-height=250)
-
-${description}
-`;
+    markdown = [
+      `# ${showName}`,
+      name,
+      "",
+      image ? `![${name}](${image}?raycast-width=250&raycast-height=250)` : "",
+      "",
+      description,
+    ].join("\n");
 
     metadata = (
       <Detail.Metadata>

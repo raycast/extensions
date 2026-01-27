@@ -57,13 +57,7 @@ export default function ConvertColor(props: LaunchProps) {
   return (
     <List>
       {format.map((item) => (
-        <ColorConvertListItem
-          key={item.value}
-          text={colorText}
-          title={item.title}
-          subtitle={item.subtitle}
-          value={item.value}
-        />
+        <ColorConvertListItem key={item.value} text={colorText} title={item.title} value={item.value} />
       ))}
     </List>
   );

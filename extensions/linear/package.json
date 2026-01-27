@@ -14,13 +14,16 @@
     "clemb8",
     "stelo",
     "fil",
-    "joeb"
+    "joeb",
+    "itsmingjie",
+    "xmok"
   ],
   "pastContributors": [
     "mathieudutour",
     "mil3na"
   ],
   "categories": [
+    "Developer Tools",
     "Productivity"
   ],
   "license": "MIT",
@@ -162,6 +165,14 @@
           "title": "Preferred Team",
           "placeholder": "RAY",
           "description": "Specify the Key (e.g. RAY) of the preferred team. If not specified, the first team is used.",
+          "required": false
+        },
+        {
+          "name": "preferredStatusName",
+          "type": "textfield",
+          "title": "Preferred Status",
+          "placeholder": "Todo",
+          "description": "Specify the name of the preferred status for new issues (e.g. Todo, Backlog). If not specified, uses Linear's default.",
           "required": false
         },
         {
@@ -1578,9 +1589,9 @@
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^39.0.0",
-    "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^1.0.0",
+    "@linear/sdk": "^61.0.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0",
     "file-type": "^20.4.1",
     "lodash": "^4.17.21",
@@ -1600,10 +1611,11 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [

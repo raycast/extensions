@@ -2,6 +2,7 @@ import { environment, showToast, trash } from "@raycast/api";
 import { Note, Sort, Tag } from "../services/atoms";
 import slugify from "slugify";
 import fs from "fs";
+import path from "path";
 import { TODO_FILE_PATH } from "../services/config";
 import { marked } from "marked";
 import striptags from "striptags";
@@ -53,14 +54,14 @@ export const getSyncWithDirectory = async (dirPath?: string): Promise<Note[]> =>
 
         // add markdown files to Notes
         const filePromises = markdownFiles.map((file) => {
-          const notePath = `${dirPath}/${file}`;
+          const notePath = path.join(dirPath, file);
           return new Promise<Note>((resolve, reject) => {
             fs.readFile(notePath, (err: NodeJS.ErrnoException | null, data: Buffer) => {
               if (err) {
                 reject(`Error reading file: ${file}`);
               } else {
                 // if it's an existing note, only update the body
-                const existingNote = notes.find((note) => slugify(note.title) === file.split(".md")[0]);
+                const existingNote = notes.find((note) => slugify(note.title) === path.basename(file, ".md"));
                 if (existingNote) {
                   existingNote.body = data.toString();
                   resolve(existingNote);
@@ -69,7 +70,7 @@ export const getSyncWithDirectory = async (dirPath?: string): Promise<Note[]> =>
 
                 // new note
                 const body = data.toString();
-                const title = file.split(".md")[0];
+                const title = path.basename(file, ".md");
                 const createdAt = fs.statSync(notePath).birthtime;
                 const updatedAt = fs.statSync(notePath).mtime;
                 const noteData: Note = {
@@ -113,7 +114,7 @@ export const exportNotes = async (filePath: string, notes: Note[]) => {
 
   await Promise.all(
     notes.map(async (note) => {
-      const notePath = `${filePath}/${slugify(note.title)}.md`;
+      const notePath = path.join(filePath, `${slugify(note.title)}.md`);
       const noteBody = `${note.body}`;
       await fs.promises.writeFile(notePath, noteBody);
     }),
@@ -124,7 +125,7 @@ export const deleteNotesInFolder = async (dirPath: string, filenames: string[]):
   if (!fs.existsSync(dirPath) || !fs.lstatSync(dirPath).isDirectory()) {
     return Promise.reject(`Invalid Folder: ${dirPath}`);
   }
-  await trash(filenames.map((file) => `${dirPath}/${slugify(file)}.md`));
+  await trash(filenames.map((file) => path.join(dirPath, `${slugify(file)}.md`)));
 };
 
 export const getOldRenamedTitles = (oldNotes: Note[], newNotes: Note[]): string[] => {

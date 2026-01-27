@@ -3,7 +3,7 @@ import { gitlab } from "../common";
 import { getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
 import { Job } from "./jobs";
 
-export function RefreshJobsAction(props: { onRefreshJobs?: () => void }): JSX.Element {
+export function RefreshJobsAction(props: { onRefreshJobs?: () => void }) {
   const handle = () => {
     if (props.onRefreshJobs) {
       props.onRefreshJobs();
@@ -19,7 +19,7 @@ export function RefreshJobsAction(props: { onRefreshJobs?: () => void }): JSX.El
   );
 }
 
-export function RetryJobAction(props: { job: Job }): JSX.Element {
+export function RetryJobAction(props: { job: Job }) {
   async function handle() {
     try {
       console.log("job_actions:25");

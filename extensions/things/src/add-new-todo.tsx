@@ -13,18 +13,19 @@ import {
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addTodo, CommandListName, getLists, getTags } from './api';
+import { addTodo, getListsAndTags } from './api';
 import TodoList from './components/TodoList';
 import ErrorView from './components/ErrorView';
 import { getChecklistItemsWithAI, listItems } from './helpers';
 import { getDateString } from './utils';
+import { CommandListName } from './types';
 
 type FormValues = {
   title: string;
   notes: string;
   tags: string[];
   listId: string;
-  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday';
+  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday' | 'logbook' | 'trash';
   when: string;
   date: Date | null;
   'checklist-items': string;
@@ -39,8 +40,9 @@ type AddNewTodoProps = {
 
 export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoProps) {
   const { push } = useNavigation();
-  const { data: tags, isLoading: isLoadingTags, error: tagsError } = useCachedPromise(getTags);
-  const { data: lists, isLoading: isLoadingLists, error: listsError } = useCachedPromise(getLists);
+  const { data, isLoading, error } = useCachedPromise(getListsAndTags);
+  const tags = data?.tags;
+  const lists = data?.lists;
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit() {
       const json = {
@@ -72,6 +74,10 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               name = 'anytime';
             } else if (values.when === 'someday') {
               name = 'someday';
+            } else if (values.when === 'logbook') {
+              name = 'logbook';
+            } else if (values.when === 'trash') {
+              name = 'trash';
             } else {
               name = 'inbox';
             }
@@ -118,12 +124,10 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
       focus('checklist-items');
       await toast.hide();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list' });
+      const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error);
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list', message: errorMessage });
     }
   }
-
-  const isLoading = isLoadingTags || isLoadingLists;
-  const error = tagsError || listsError;
 
   if (error) {
     return <ErrorView error={error} />;

@@ -1,5 +1,30 @@
 # Apple Reminders Changelog
 
+## [Fix crash when attachedUrls is undefined] - 2026-01-13
+
+- Handle reminders where `attachedUrls` may be undefined to prevent runtime errors
+
+## [Open all attached reminder URLs] - 2026-01-13
+
+- Detect all URLs in reminder notes (and Reminder URL when available) and expose an “Open Attached URL(s)” action in the list and menu bar.
+
+## [Simplify AI schema for locations] - 2026-01-09
+
+- Constrain location icons to a small string enum and map back to Raycast icons to reduce AI tool schema branching (Gemini 2.5 fix)
+- Tighten proximity/icon enums for the location tool while keeping legacy values falling back to default icons
+- Resolves: [apple-reminders] Apple Reminders Extension Fails with Gemini 2.5 Pro #20635
+
+## [Fix Day Grouping option displays duplicate days] - 2025-11-30
+
+- Fix an issue where enabling `Use Time of Day Grouping` would cause duplicate day sections to appear in the `My Reminders` view (Today and Scheduled)
+
+## [Add ability to move reminders between lists] - 2025-10-17
+
+- Add list selection dropdown in the Edit Reminder form
+- Implement `moveToList` function to change reminder's list
+- Allow users to move reminders to different lists when editing
+- Added logic to only update title/notes and list if they have changed
+
 ## [Add Creation Date option for sorting] - 2025-06-13
 
 - Retrieve the Creation Date from the EventKit API
@@ -38,7 +63,7 @@ The Create Reminder command will automatically pre-fill the title with the initi
 
 ## [Change AI model for Quick Add Reminder] - 2024-05-23
 
-Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 
+Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo.
 
 ## [Add Saved Locations] - 2024-04-16
 

@@ -1,5 +1,5 @@
 import { Action, Icon } from "@raycast/api";
-import { GitCommit } from "../GitCommit.js";
+import { GitCommit } from "../forms/GitCommit.js";
 import { useCheckStatus } from "../../hooks/useCheckStatus.js";
 
 export function CommitMessage() {

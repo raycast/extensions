@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
 import { useState } from "react";
 import urljoin from "url-join";
 import { useCache } from "../../cache";
-import { gitlab } from "../../common";
+import { getCIRefreshInterval, gitlab } from "../../common";
 import { Project, User } from "../../gitlabapi";
 import { GitLabIcons } from "../../icons";
 import { capitalizeFirstLetter, showErrorToast } from "../../utils";
@@ -12,8 +12,10 @@ import { getCIJobStatusIcon, PipelineJobsListByCommit } from "../jobs";
 import { MyProjectsDropdown } from "../project";
 import { CommitListItem } from "./item";
 import { useCommitStatus } from "./utils";
+import { RefreshCommitsAction } from "./actions";
+import useInterval from "use-interval";
 
-function EventCommitListItem(props: { event: Event }): JSX.Element {
+function EventCommitListItem(props: { event: Event; onRefresh?: () => void }) {
   const e = props.event;
   const commit = e.push_data?.commit_to;
   const ref = e.push_data?.ref;
@@ -27,10 +29,10 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     {
       deps: [e.project_id],
       secondsToRefetch: 15 * 60,
-    }
+    },
   );
   const { commitStatus: status } = useCommitStatus(e.project_id, commit);
-  const webAction = (): JSX.Element | undefined => {
+  const webAction = (): React.ReactNode | undefined => {
     if (project) {
       const proUrl = project.web_url;
       if (proUrl && commit) {
@@ -41,7 +43,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     return undefined;
   };
 
-  const action = (): JSX.Element | undefined | null => {
+  const action = (): React.ReactNode | undefined | null => {
     if (project && commit && status?.status) {
       return (
         <Action.Push
@@ -73,19 +75,22 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
             {action()}
             {webAction()}
           </ActionPanel.Section>
+          <ActionPanel.Section>
+            <RefreshCommitsAction onRefreshJobs={props.onRefresh} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 }
 
-function RecentCommitsListEmptyView(): JSX.Element {
+function RecentCommitsListEmptyView() {
   return <List.EmptyView title="No Commits" icon={{ source: GitLabIcons.commit, tintColor: Color.PrimaryText }} />;
 }
 
-export function RecentCommitsList(): JSX.Element {
+export function RecentCommitsList() {
   const [project, setProject] = useState<Project>();
-  const { data, error, isLoading } = useCache<Event[]>(
+  const { data, error, isLoading, performRefetch } = useCache<Event[]>(
     "events_pushed",
     async (): Promise<Event[]> => {
       const events: Event[] = await gitlab.fetch("events", { action: "pushed" }).then((d) => {
@@ -98,8 +103,11 @@ export function RecentCommitsList(): JSX.Element {
     {
       deps: [],
       secondsToRefetch: 5,
-    }
+    },
   );
+  useInterval(() => {
+    performRefetch();
+  }, getCIRefreshInterval());
   if (error) {
     showErrorToast(error, "Could not fetch Events");
   }
@@ -111,7 +119,7 @@ export function RecentCommitsList(): JSX.Element {
   return (
     <List isLoading={isLoading} searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}>
       {commits?.map((e) => (
-        <EventCommitListItem event={e} key={`${e.id}`} />
+        <EventCommitListItem event={e} key={`${e.id}`} onRefresh={performRefetch} />
       ))}
       <RecentCommitsListEmptyView />
     </List>
@@ -151,11 +159,7 @@ async function getProjectCommits(projectID: number, refName?: string): Promise<C
   return commits;
 }
 
-export function ProjectCommitList(props: {
-  projectID: number;
-  refName?: string;
-  navigationTitle?: string;
-}): JSX.Element {
+export function ProjectCommitList(props: { projectID: number; refName?: string; navigationTitle?: string }) {
   const projectID = props.projectID;
   const refName = props.refName;
   let cacheKey = `project_commits_${projectID}`;
@@ -170,7 +174,7 @@ export function ProjectCommitList(props: {
     {
       deps: [projectID, refName],
       secondsToRefetch: 60,
-    }
+    },
   );
   if (error) {
     showErrorToast(error, "Could not fetch commits from Project");
