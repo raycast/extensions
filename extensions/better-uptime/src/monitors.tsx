@@ -91,7 +91,7 @@ export default function MonitorsCommand() {
 function Monitor({ item, onDeleted }: { item: MonitorItem; onDeleted: () => void }) {
   return (
     <List.Item
-      icon={statusMap[item.attributes.status]}
+      icon={statusMap[item.attributes.status] ?? statusMap.pending}
       title={item.attributes.pronounceable_name}
       detail={
         <List.Item.Detail

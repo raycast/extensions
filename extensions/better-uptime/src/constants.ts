@@ -27,7 +27,7 @@ export const statusMap = {
     source: Icon.XMarkCircle,
     tintColor: Color.Red,
   },
-} as { [key: string]: string | { source: Icon; tintColor: Color } };
+} as { [key: string]: { source: Icon; tintColor: Color } };
 
 export const incidentStatusMap = {
   Unconfirmed: {

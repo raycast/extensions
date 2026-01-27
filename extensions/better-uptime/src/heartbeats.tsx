@@ -93,7 +93,7 @@ export default function HeartbeatsCommand() {
 function Heartbeat({ item, onDeleted }: { item: HeartbeatItem; onDeleted: () => void }) {
   return (
     <List.Item
-      icon={statusMap[item.attributes.status] ?? "🔍"}
+      icon={statusMap[item.attributes.status] ?? statusMap.pending}
       title={item.attributes.name}
       detail={
         <List.Item.Detail
