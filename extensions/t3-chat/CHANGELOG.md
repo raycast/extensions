@@ -1,6 +1,6 @@
 # T3 Chat Changelog
 
-## [v1.4.0] - {PR_MERGE_DATE}
+## [v1.4.0] - 2026-01-27
 
 - Added support for latest AI models
 - Removed beta preference (no longer supported)
