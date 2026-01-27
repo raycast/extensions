@@ -3,7 +3,7 @@ import { promisify } from 'util';
 
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
 import { runAppleScript } from '@raycast/utils';
-import qs from 'qs';
+import queryString from 'query-string';
 import {
   Area,
   CommandListName,
@@ -106,34 +106,50 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
 
-  return todos.map(todo => ({
-    id: todo.id(),
-    name: todo.name(),
-    status: todo.status(),
-    notes: todo.notes(),
-    tags: todo.tagNames(),
-    dueDate: todo.dueDate() && todo.dueDate().toISOString(),
-    activationDate: todo.activationDate() && todo.activationDate().toISOString(),
-    isProject: todo.properties().pcls === "project",
-    project: todo.project() && {
-      id: todo.project().id(),
-      name: todo.project().name(),
-      status: todo.project().status(),
-      tags: todo.project().tagNames(),
-      dueDate: todo.project().dueDate() && todo.project().dueDate().toISOString(),
-      activationDate: todo.project().activationDate() && todo.project().activationDate().toISOString(),
-      area: todo.project().area() && {
-        id: todo.project().area().id(),
-        name: todo.project().area().name(),
-        tags: todo.project().area().tagNames(),
-      },
-    },
-    area: todo.area() && {
-      id: todo.area().id(),
-      name: todo.area().name(),
-      tags: todo.area().tagNames(),
-    },
-  }));
+  return todos.map(todo => {
+    const props = todo.properties();
+
+    let project = null;
+    const projectRef = props.project;
+    if (projectRef) {
+      const projectProps = projectRef.properties();
+      let projectArea = null;
+      const projectAreaRef = projectProps.area;
+      if (projectAreaRef) {
+        const areaProps = projectAreaRef.properties();
+        projectArea = { id: areaProps.id, name: areaProps.name };
+      }
+      project = {
+        id: projectProps.id,
+        name: projectProps.name,
+        status: projectProps.status,
+        tags: projectRef.tagNames(),
+        dueDate: projectProps.dueDate ? projectProps.dueDate.toISOString() : null,
+        activationDate: projectProps.activationDate ? projectProps.activationDate.toISOString() : null,
+        area: projectArea,
+      };
+    }
+
+    let area = null;
+    const areaRef = props.area;
+    if (areaRef && !projectRef) {
+      const areaProps = areaRef.properties();
+      area = { id: areaProps.id, name: areaProps.name };
+    }
+
+    return {
+      id: props.id,
+      name: props.name,
+      status: props.status,
+      notes: props.notes,
+      tags: todo.tagNames(),
+      dueDate: props.dueDate ? props.dueDate.toISOString() : null,
+      activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+      isProject: props.pcls === "project",
+      project,
+      area,
+    };
+  });
 `,
     `Get ${commandListName} list`,
   );
@@ -189,51 +205,66 @@ export const deleteProject = (projectId: string) =>
   );
 
 // JXA mapping templates - reusable across individual and combined queries
+// Uses properties() batching to minimize Apple Event overhead
 const mapTagJxa = `tag => tag.name()`;
 
-const mapProjectTodoJxa = `todo => ({
-  id: todo.id(),
-  name: todo.name(),
-  status: todo.status(),
-  notes: todo.notes(),
-  tags: todo.tagNames(),
-  dueDate: todo.dueDate() && todo.dueDate().toISOString(),
-  activationDate: todo.activationDate() && todo.activationDate().toISOString(),
-})`;
+const mapProjectTodoJxa = `todo => {
+  const props = todo.properties();
+  return {
+    id: props.id,
+    name: props.name,
+    status: props.status,
+    notes: props.notes,
+    tags: todo.tagNames(),
+    dueDate: props.dueDate ? props.dueDate.toISOString() : null,
+    activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+  };
+}`;
 
-const mapProjectJxa = `project => ({
-  id: project.id(),
-  name: project.name(),
-  status: project.status(),
-  notes: project.notes(),
-  tags: project.tagNames(),
-  dueDate: project.dueDate() && project.dueDate().toISOString(),
-  activationDate: project.activationDate() && project.activationDate().toISOString(),
-  area: project.area() && {
-    id: project.area().id(),
-    name: project.area().name(),
-    tags: project.area().tagNames(),
-  },
-  todos: project.toDos().map(${mapProjectTodoJxa})
-})`;
+const mapProjectJxa = `project => {
+  const props = project.properties();
+  const areaRef = props.area;
+  let area = null;
+  if (areaRef) {
+    const areaProps = areaRef.properties();
+    area = { id: areaProps.id, name: areaProps.name, tags: areaRef.tagNames() };
+  }
+  return {
+    id: props.id,
+    name: props.name,
+    status: props.status,
+    notes: props.notes,
+    tags: project.tagNames(),
+    dueDate: props.dueDate ? props.dueDate.toISOString() : null,
+    activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+    area,
+    todos: project.toDos().map(${mapProjectTodoJxa})
+  };
+}`;
 
-const mapAreaTodoJxa = `todo => ({
-  id: todo.id(),
-  name: todo.name(),
-  status: todo.status(),
-  notes: todo.notes(),
-  tags: todo.tagNames(),
-  dueDate: todo.dueDate() && todo.dueDate().toISOString(),
-  activationDate: todo.activationDate() && todo.activationDate().toISOString(),
-  isProject: todo.properties().pcls === "project",
-})`;
+const mapAreaTodoJxa = `todo => {
+  const props = todo.properties();
+  return {
+    id: props.id,
+    name: props.name,
+    status: props.status,
+    notes: props.notes,
+    tags: todo.tagNames(),
+    dueDate: props.dueDate ? props.dueDate.toISOString() : null,
+    activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+    isProject: props.pcls === "project",
+  };
+}`;
 
-const mapAreaJxa = `area => ({
-  id: area.id(),
-  name: area.name(),
-  tags: area.tagNames(),
-  todos: area.toDos().map(${mapAreaTodoJxa})
-})`;
+const mapAreaJxa = `area => {
+  const props = area.properties();
+  return {
+    id: props.id,
+    name: props.name,
+    tags: area.tagNames(),
+    todos: area.toDos().map(${mapAreaTodoJxa})
+  };
+}`;
 
 export const getTags = (): Promise<string[]> =>
   executeJxa(
@@ -343,13 +374,21 @@ export async function silentlyOpenThingsURL(url: string) {
   await asyncExec(`open -g "${url}"`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateQueryString(params: Record<string, any>): string {
+  return queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+}
+
 export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
   const { authToken } = getPreferenceValues<Preferences>();
 
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update?${qs.stringify({
+    `things:///update?${generateQueryString({
       'auth-token': authToken,
       id,
       ...todoParams,
@@ -363,7 +402,7 @@ export async function updateProject(id: string, projectParams: UpdateProjectPara
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update-project?${qs.stringify({
+    `things:///update-project?${generateQueryString({
       'auth-token': authToken,
       id,
       ...projectParams,
@@ -372,11 +411,11 @@ export async function updateProject(id: string, projectParams: UpdateProjectPara
 }
 
 export async function addTodo(todoParams: AddTodoParams) {
-  await silentlyOpenThingsURL(`things:///add?${qs.stringify(todoParams)}`);
+  await silentlyOpenThingsURL(`things:///add?${generateQueryString(todoParams)}`);
 }
 
 export async function addProject(projectParams: AddProjectParams) {
-  await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(projectParams)}`);
+  await silentlyOpenThingsURL(`things:///add-project?${generateQueryString(projectParams)}`);
 }
 
 export function handleError(error: unknown, title?: string) {

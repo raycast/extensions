@@ -5,11 +5,17 @@
  * detect aliases and exports, and categorize entries by type.
  */
 
-import { PARSING_CONSTANTS } from "../constants";
+import { PARSING_CONSTANTS, FILE_CONSTANTS } from "../constants";
 import { countAllPatterns } from "./pattern-registry";
 import { detectSectionMarker, updateSectionContext, type SectionContext } from "./section-detector";
 
 import { EntryType } from "../types/enums";
+
+/**
+ * Maximum line length to process with regex.
+ * Lines longer than this are skipped to prevent ReDoS attacks.
+ */
+const MAX_SAFE_LINE_LENGTH = FILE_CONSTANTS.MAX_LINE_LENGTH;
 
 /**
  * Strategy for parsing an entry type
@@ -41,137 +47,93 @@ export interface BaseEntry {
   readonly sectionLabel: string | undefined;
 }
 
-/**
- * Represents an alias entry in zshrc
- */
-export interface AliasEntry extends BaseEntry {
-  readonly type: EntryType.ALIAS;
-  /** The alias name */
+// ============================================================================
+// Generic Entry Types - reduce duplication for common field patterns
+// ============================================================================
+
+/** Generic entry with a `name` field (Plugin, Function, Theme) */
+interface NamedEntry<T extends EntryType> extends BaseEntry {
+  readonly type: T;
   readonly name: string;
-  /** The command the alias points to */
+}
+
+/** Generic entry with a `command` field (Eval, Completion, Keybinding) */
+interface CommandEntry<T extends EntryType> extends BaseEntry {
+  readonly type: T;
   readonly command: string;
 }
 
-/**
- * Represents an export entry in zshrc
- */
-export interface ExportEntry extends BaseEntry {
-  readonly type: EntryType.EXPORT;
-  /** The environment variable name */
+/** Generic entry with `variable` and `value` fields (Export, History) */
+interface VariableValueEntry<T extends EntryType> extends BaseEntry {
+  readonly type: T;
   readonly variable: string;
-  /** The environment variable value */
   readonly value: string;
 }
 
-/**
- * Represents an eval entry in zshrc
- */
-export interface EvalEntry extends BaseEntry {
-  readonly type: EntryType.EVAL;
-  /** The command to evaluate */
+// ============================================================================
+// Concrete Entry Types
+// ============================================================================
+
+/** Alias: name + command */
+export interface AliasEntry extends BaseEntry {
+  readonly type: EntryType.ALIAS;
+  readonly name: string;
   readonly command: string;
 }
 
-/**
- * Represents a setopt entry in zshrc
- */
+/** Export: variable + value */
+export type ExportEntry = VariableValueEntry<EntryType.EXPORT>;
+
+/** Eval: command */
+export type EvalEntry = CommandEntry<EntryType.EVAL>;
+
+/** Setopt: option */
 export interface SetoptEntry extends BaseEntry {
   readonly type: EntryType.SETOPT;
-  /** The option name */
   readonly option: string;
 }
 
-/**
- * Represents a plugin entry in zshrc
- */
-export interface PluginEntry extends BaseEntry {
-  readonly type: EntryType.PLUGIN;
-  /** The plugin name */
-  readonly name: string;
-}
+/** Plugin: name */
+export type PluginEntry = NamedEntry<EntryType.PLUGIN>;
 
-/**
- * Represents a function entry in zshrc
- */
-export interface FunctionEntry extends BaseEntry {
-  readonly type: EntryType.FUNCTION;
-  /** The function name */
-  readonly name: string;
-}
+/** Function: name */
+export type FunctionEntry = NamedEntry<EntryType.FUNCTION>;
 
-/**
- * Represents a source entry in zshrc
- */
+/** Source: path */
 export interface SourceEntry extends BaseEntry {
   readonly type: EntryType.SOURCE;
-  /** The file path being sourced */
   readonly path: string;
 }
 
-/**
- * Represents an autoload entry in zshrc
- */
+/** Autoload: function name */
 export interface AutoloadEntry extends BaseEntry {
   readonly type: EntryType.AUTOLOAD;
-  /** The function to autoload */
   readonly function: string;
 }
 
-/**
- * Represents an fpath entry in zshrc
- */
+/** Fpath: directories array */
 export interface FpathEntry extends BaseEntry {
   readonly type: EntryType.FPATH;
-  /** The fpath directories */
   readonly directories: string[];
 }
 
-/**
- * Represents a PATH entry in zshrc
- */
+/** Path: value */
 export interface PathEntry extends BaseEntry {
   readonly type: EntryType.PATH;
-  /** The PATH value */
   readonly value: string;
 }
 
-/**
- * Represents a theme entry in zshrc
- */
-export interface ThemeEntry extends BaseEntry {
-  readonly type: EntryType.THEME;
-  /** The theme name */
-  readonly name: string;
-}
+/** Theme: name */
+export type ThemeEntry = NamedEntry<EntryType.THEME>;
 
-/**
- * Represents a completion entry in zshrc
- */
-export interface CompletionEntry extends BaseEntry {
-  readonly type: EntryType.COMPLETION;
-  /** The completion command */
-  readonly command: string;
-}
+/** Completion: command */
+export type CompletionEntry = CommandEntry<EntryType.COMPLETION>;
 
-/**
- * Represents a history entry in zshrc
- */
-export interface HistoryEntry extends BaseEntry {
-  readonly type: EntryType.HISTORY;
-  /** The history variable name */
-  readonly variable: string;
-  /** The history value */
-  readonly value: string;
-}
+/** History config: variable + value */
+export type HistoryEntry = VariableValueEntry<EntryType.HISTORY>;
 
-/**
- * Represents a keybinding entry in zshrc
- */
-export interface KeybindingEntry extends BaseEntry {
-  readonly type: EntryType.KEYBINDING;
-  /** The keybinding command */
-  readonly command: string;
-}
+/** Keybinding: command */
+export type KeybindingEntry = CommandEntry<EntryType.KEYBINDING>;
 
 /**
  * Union type for all possible zshrc entries
@@ -238,21 +200,97 @@ export interface LogicalSection {
 }
 
 /**
- * Creates a base entry with common fields
+ * Base entry data without the type discriminant
  */
-function createBaseEntry(
-  type: EntryType,
-  lineNumber: number,
-  rawLine: string,
-  sectionLabel: string | undefined,
-): Record<string, unknown> {
+interface BaseEntryData {
+  readonly lineNumber: number;
+  readonly originalLine: string;
+  readonly sectionLabel: string | undefined;
+}
+
+/**
+ * Creates base entry data with common fields
+ */
+function createBaseEntryData(lineNumber: number, rawLine: string, sectionLabel: string | undefined): BaseEntryData {
   return {
-    type,
     lineNumber,
     originalLine: rawLine,
     sectionLabel,
   };
 }
+
+// ============================================================================
+// Generic Factory Helpers - reduce factory duplication
+// ============================================================================
+
+/** Factory for NamedEntry types (Plugin, Function, Theme) */
+const createNamedEntry =
+  <T extends EntryType>(type: T) =>
+  (base: BaseEntryData, data: { name: string }) => ({ type, ...base, name: data.name });
+
+/** Factory for CommandEntry types (Eval, Completion, Keybinding) */
+const createCommandEntry =
+  <T extends EntryType>(type: T) =>
+  (base: BaseEntryData, data: { command: string }) => ({ type, ...base, command: data.command });
+
+/** Factory for VariableValueEntry types (Export, History) */
+const createVariableValueEntry =
+  <T extends EntryType>(type: T) =>
+  (base: BaseEntryData, data: { variable: string; value: string }) => ({
+    type,
+    ...base,
+    variable: data.variable,
+    value: data.value,
+  });
+
+/**
+ * Type-safe factory functions for creating entry types
+ */
+const entryFactories = {
+  [EntryType.ALIAS]: (base: BaseEntryData, data: { name: string; command: string }): AliasEntry => ({
+    type: EntryType.ALIAS,
+    ...base,
+    name: data.name,
+    command: data.command,
+  }),
+  [EntryType.EXPORT]: createVariableValueEntry(EntryType.EXPORT),
+  [EntryType.EVAL]: createCommandEntry(EntryType.EVAL),
+  [EntryType.SETOPT]: (base: BaseEntryData, data: { option: string }): SetoptEntry => ({
+    type: EntryType.SETOPT,
+    ...base,
+    option: data.option,
+  }),
+  [EntryType.PLUGIN]: createNamedEntry(EntryType.PLUGIN),
+  [EntryType.FUNCTION]: createNamedEntry(EntryType.FUNCTION),
+  [EntryType.SOURCE]: (base: BaseEntryData, data: { path: string }): SourceEntry => ({
+    type: EntryType.SOURCE,
+    ...base,
+    path: data.path,
+  }),
+  [EntryType.AUTOLOAD]: (base: BaseEntryData, data: { function: string }): AutoloadEntry => ({
+    type: EntryType.AUTOLOAD,
+    ...base,
+    function: data.function,
+  }),
+  [EntryType.FPATH]: (base: BaseEntryData, data: { directories: string[] }): FpathEntry => ({
+    type: EntryType.FPATH,
+    ...base,
+    directories: data.directories,
+  }),
+  [EntryType.PATH]: (base: BaseEntryData, data: { value: string }): PathEntry => ({
+    type: EntryType.PATH,
+    ...base,
+    value: data.value,
+  }),
+  [EntryType.THEME]: createNamedEntry(EntryType.THEME),
+  [EntryType.COMPLETION]: createCommandEntry(EntryType.COMPLETION),
+  [EntryType.HISTORY]: createVariableValueEntry(EntryType.HISTORY),
+  [EntryType.KEYBINDING]: createCommandEntry(EntryType.KEYBINDING),
+  [EntryType.OTHER]: (base: BaseEntryData): BaseEntry => ({
+    type: EntryType.OTHER,
+    ...base,
+  }),
+} as const;
 
 /**
  * Defines all entry parsing strategies
@@ -391,6 +429,18 @@ export function parseZshrc(content: string): ReadonlyArray<ZshEntry> {
       continue;
     }
 
+    // Skip extremely long lines to prevent ReDoS attacks
+    if (rawLine.length > MAX_SAFE_LINE_LENGTH) {
+      // Still add as OTHER entry to track the line exists
+      const baseData = createBaseEntryData(
+        index + 1,
+        rawLine.slice(0, 100) + "... (truncated)",
+        context.currentSection,
+      );
+      entries.push(entryFactories[EntryType.OTHER](baseData));
+      continue;
+    }
+
     // Check for section markers using enhanced detection
     const marker = detectSectionMarker(rawLine, index + 1);
     if (marker) {
@@ -403,28 +453,26 @@ export function parseZshrc(content: string): ReadonlyArray<ZshEntry> {
     for (const parser of ENTRY_PARSERS) {
       const match = rawLine.match(parser.pattern);
       if (match && parser.validate(match)) {
-        const baseEntry = createBaseEntry(parser.type, index + 1, rawLine, context.currentSection);
+        const baseData = createBaseEntryData(index + 1, rawLine, context.currentSection);
         const specificData = parser.extract(match, rawLine);
 
-        // Handle multi-entry types (plugins, fpath)
+        // Handle multi-entry types (plugins, fpath) with type-safe factories
         if (parser.multiEntry && parser.type === EntryType.PLUGIN && match[1]) {
           const pluginList = match[1].split(/\s+/).filter((p) => p.trim());
-          pluginList.forEach((plugin) => {
-            entries.push({
-              ...baseEntry,
-              name: plugin.trim(),
-            } as unknown as ZshEntry);
-          });
+          for (const plugin of pluginList) {
+            entries.push(entryFactories[EntryType.PLUGIN](baseData, { name: plugin.trim() }));
+          }
         } else if (parser.multiEntry && parser.type === EntryType.FPATH && match[1]) {
           const directories = match[1].split(/\s+/).filter((d) => d.trim());
-          directories.forEach((dir) => {
-            entries.push({
-              ...baseEntry,
-              directories: [dir.trim()],
-            } as unknown as ZshEntry);
-          });
+          for (const dir of directories) {
+            entries.push(entryFactories[EntryType.FPATH](baseData, { directories: [dir.trim()] }));
+          }
         } else {
-          entries.push({ ...baseEntry, ...specificData } as unknown as ZshEntry);
+          // Use type-safe factory based on entry type
+          const factory = entryFactories[parser.type];
+          if (factory) {
+            entries.push(factory(baseData, specificData as never));
+          }
         }
 
         matched = true;
@@ -432,14 +480,10 @@ export function parseZshrc(content: string): ReadonlyArray<ZshEntry> {
       }
     }
 
-    // If no parser matched, add as OTHER
+    // If no parser matched, add as OTHER using type-safe factory
     if (!matched) {
-      entries.push({
-        type: EntryType.OTHER,
-        lineNumber: index + 1,
-        originalLine: rawLine,
-        sectionLabel: context.currentSection,
-      });
+      const baseData = createBaseEntryData(index + 1, rawLine, context.currentSection);
+      entries.push(entryFactories[EntryType.OTHER](baseData));
     }
   }
 
@@ -538,7 +582,6 @@ export function toLogicalSections(content: string): ReadonlyArray<LogicalSection
         currentLabel = marker.name;
         currentStart = index + 2;
         context = updateSectionContext(marker, context);
-        continue;
       }
     }
   }

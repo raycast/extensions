@@ -17,7 +17,8 @@ Included case transformations:
 - `PascalCase`
 - `Pascal_Snake_Case`
 - `path/case`
-- `rAndOm cAsE` (aka `sPonGE cAsE`)
+- `AlTeRnAtInG cAsE`
+- `rAndOm cAsE`
 - `Sentence case`
 - `snake_case`
 - `sWAP cASE`

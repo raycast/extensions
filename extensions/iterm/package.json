@@ -76,6 +76,12 @@
           ]
         }
       ]
+    },
+    {
+      "name": "open-iterm-profile",
+      "title": "Open iTerm Profile",
+      "description": "Open a specific iTerm profile in a new window or tab",
+      "mode": "view"
     }
   ],
   "tools": [

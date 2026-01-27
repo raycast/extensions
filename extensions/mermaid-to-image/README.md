@@ -5,7 +5,8 @@ A Raycast extension that instantly converts Mermaid diagram code from your clipb
 ## Features
 
 - **Instant Conversion**: Copy Mermaid code and run the extension to immediately generate an image
-- **Multiple Formats**: Generate diagrams in PNG or SVG format
+- **AI Integration**: Use in Raycast AI chat to generate diagrams that automatically appear inline in the conversation
+- **Multiple Formats**: Generate diagrams in PNG or SVG format (AI Tool always uses PNG)
 - **Theme Options**: Choose from Default, Forest, Dark, or Neutral themes
 - **Easy Sharing**: Copy the generated image directly to your clipboard
 - **Custom Save Location**: Save images to your preferred directory
@@ -24,6 +25,8 @@ npm install -g @mermaid-js/mermaid-cli
 - [@mermaid-js/mermaid-cli](https://github.com/mermaid-js/mermaid-cli) (must be installed globally using ⁠npm install -g @mermaid-js/mermaid-cli)
 
 ## Usage
+
+### Manual Mode
 
 1. **Prepare Mermaid Code**: 
    - **Option 1**: Select text containing Mermaid diagram code in any application
@@ -46,6 +49,29 @@ npm install -g @mermaid-js/mermaid-cli
    - **Copy Image** (⌘⇧C): Copy the generated image to your clipboard
    - **Save Image** (⌘S): Save the image to your specified location
    - **Open in Default App** (⌘O): Open the image in your default image viewer
+
+### AI Chat Mode
+
+Use the extension directly in Raycast AI conversations:
+
+1. **Start a conversation**: Open Raycast AI chat
+2. **Request a diagram**: Ask the AI to create any type of Mermaid diagram
+   - Example: "@mermaid-to-image Draw a flowchart showing the user login process"
+   - Example: "@mermaid-to-image Create a sequence diagram for API authentication"
+3. **Automatic display**: The generated diagram will automatically appear inline in the conversation and be copied to your clipboard
+
+**Where are AI-generated diagrams stored?**
+- Location: `~/Downloads/MermaidDiagrams/`
+- Format: PNG (optimized for AI chat display)
+- Retention: Diagrams are kept permanently for future reference
+- Easy access: Open in Finder to view all generated diagrams
+
+**Manual Mode File Management:**
+- **Storage**: Temporary files are stored in a hidden system directory (`environment.supportPath`)
+- **Automatic Cleanup**: Files are automatically deleted when you close the preview
+- **Old File Cleanup**: Files older than 1 hour are automatically cleaned up on each launch to prevent disk space accumulation
+- **No Manual Intervention**: You don't need to worry about temporary files - they're managed automatically
+- **Saving**: Use the "Save Image" action (⌘S) to explicitly save diagrams to your preferred location
 
 ## Preferences
 

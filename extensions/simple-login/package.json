@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-login",
+  "title": "SimpleLogin",
+  "description": "Create and manage email aliases with SimpleLogin to protect your inbox from spam and trackers",
+  "icon": "icon.png",
+  "author": "ciko",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Security",
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "email",
+    "alias",
+    "privacy",
+    "spam",
+    "simplelogin"
+  ],
+  "commands": [
+    {
+      "name": "create-random-alias",
+      "title": "Create Random Alias",
+      "subtitle": "SimpleLogin",
+      "description": "Create a new random email alias and copy it to clipboard",
+      "mode": "no-view",
+      "keywords": [
+        "email",
+        "alias",
+        "random",
+        "generate"
+      ]
+    },
+    {
+      "name": "create-custom-alias",
+      "title": "Create Custom Alias",
+      "subtitle": "SimpleLogin",
+      "description": "Create a new custom email alias with a prefix of your choice",
+      "mode": "view",
+      "keywords": [
+        "email",
+        "alias",
+        "custom",
+        "create"
+      ]
+    },
+    {
+      "name": "my-aliases",
+      "title": "My Aliases",
+      "subtitle": "SimpleLogin",
+      "description": "View and search your email aliases",
+      "mode": "view",
+      "keywords": [
+        "email",
+        "alias",
+        "search",
+        "list",
+        "view"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your SimpleLogin API key",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your SimpleLogin API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

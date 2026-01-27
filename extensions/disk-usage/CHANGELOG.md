@@ -1,5 +1,13 @@
 # Disk Usage Changelog
 
+## [Bug Fix] - 2026-01-21
+- Fix file deletion if they have already been deleted. `Error: ENOENT: no such file or directory, realpath`
+
+## [Improvements] - 2026-01-04
+
+- Optimized scanning speed using streams and lightweight objects on the heap.
+- Fixed [Error: Scan failed with code null](https://www.raycast.com/extension-issues/easymikey/disk-usage/7157549154)
+
 ## [Improvements] - 2025-12-16
 
 - Completely rewrote the scanning architecture to use file-based caching.

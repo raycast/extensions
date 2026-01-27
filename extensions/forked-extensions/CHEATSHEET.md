@@ -5,7 +5,7 @@
 ### Clone a repository with `blob:none` filter
 
 ```shell
-git clone --filter=blob:none --no-checkout <fork-repository-url>
+git clone --filter=tree:0 --no-checkout <fork-repository-url>
 ```
 
 ### Convert full checkout to sparse checkout with cone mode
@@ -24,7 +24,7 @@ git remote add upstream <upstream-repository-url>
 ### Sync the forked repository with the upstream on local
 
 ```shell
-git fetch --prune --filter=blob:none upstream
+git fetch --prune --filter=tree:0 upstream
 git checkout main
 git merge --ff-only upstream/main
 ```

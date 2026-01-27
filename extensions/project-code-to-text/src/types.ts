@@ -1,8 +1,11 @@
 // src/types.ts
 import ignore from "ignore";
+import { WriteStream } from "fs";
 
 /**
  * Represents a file or directory within the project structure.
+ * Note: When using streaming processing, file content is not stored in this structure
+ * but is formatted and written to output immediately to reduce memory usage.
  */
 export interface ProjectEntry {
   /** The name of the file or directory. */
@@ -15,7 +18,9 @@ export interface ProjectEntry {
   size?: number;
   /** The programming language of the file, if applicable. */
   language?: string;
-  /** The content of the file, or a message indicating why content is not included. */
+  /** The content of the file, or a message indicating why content is not included.
+   * Used only for error messages or when content cannot be read.
+   * In streaming mode, file content is not stored here to reduce memory usage. */
   content?: string;
   /** For directories, an array of child entries. */
   children?: ProjectEntry[];
@@ -49,6 +54,7 @@ export interface ProcessDirectoryOptions {
     filesProcessed: number;
     totalSize: number;
   };
+  writeStream?: WriteStream;
 }
 
 /**
@@ -82,6 +88,7 @@ export interface FinderSelectionInfo {
   suggestedDirectory: string;
   /** Display names for UI */
   fileNames: string[];
+  /** Name of the suggested directory, if available. */
   directoryName?: string;
 }
 

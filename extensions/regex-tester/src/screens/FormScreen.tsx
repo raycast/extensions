@@ -1,6 +1,6 @@
-import { FC, useCallback, useEffect, useState } from "react";
-import { Action, ActionPanel, Form, LocalStorage } from "@raycast/api";
-import { useAsync } from "react-async-hook";
+import { FC, useEffect, useState } from "react";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 
 export type TestStringFormValues = {
   text: string;
@@ -18,14 +18,13 @@ type TestStringHistory = {
 
 const FormScreen: FC<Props> = ({ onSubmit }) => {
   const [text, setText] = useState("");
-  const [pastStrings, setPastStrings] = useState<TestStringHistory[] | undefined>();
   const [source, setSource] = useState("new");
 
-  useAsync(async () => {
-    const item = await LocalStorage.getItem<string>("test-string-history");
-    if (!item) return;
-    setPastStrings(JSON.parse(item));
-  }, []);
+  const {
+    isLoading,
+    value: pastStrings,
+    removeValue: clearPreviousStrings,
+  } = useLocalStorage<TestStringHistory[]>("test-string-history");
 
   useEffect(() => {
     if (sources[source]) {
@@ -35,20 +34,20 @@ const FormScreen: FC<Props> = ({ onSubmit }) => {
     }
   }, [source]);
 
-  const clearPreviousStrings = useCallback(() => {
-    LocalStorage.removeItem("test-string-history");
-    setPastStrings(undefined);
-  }, []);
-
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Test Regex" onSubmit={onSubmit} />
+          <Action.SubmitForm icon={Icon.Check} title="Test Regex" onSubmit={onSubmit} />
           <Action
+            icon={Icon.ClearFormatting}
             title="Clear Previous Test Strings"
             onAction={clearPreviousStrings}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "backspace" },
+              Windows: { modifiers: ["ctrl"], key: "backspace" },
+            }}
           />
         </ActionPanel>
       }
