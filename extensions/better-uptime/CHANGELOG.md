@@ -1,6 +1,6 @@
 # Better Uptime Changelog
 
-## [Extension overhaul] - {PR_MERGE_DATE}
+## [Extension overhaul] - 2026-01-27
 
 - Add grouping support for monitors, heartbeats, and incidents with group names from API
 - Add pagination for incidents with separate unresolved/resolved sections
