@@ -368,7 +368,7 @@ Or run this command manually:
               </>
             )}
             {lunarStatus.app && !lunarStatus.cli && (
-              <Action title="Install Lunar Cli" onAction={handleInstallCLI} />
+              <Action title="Install Lunar CLI" onAction={handleInstallCLI} />
             )}
           </ActionPanel>
         }
