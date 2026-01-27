@@ -12,12 +12,17 @@ import { toScenarioEditUrl } from "./make-browser-url";
 import { ScenarioDetail } from "./scenario-detail";
 import { SelectOrgTeam } from "./select-org-team";
 import {
+  addFavorite,
   clearSelection,
+  getFavorites,
   getSelection,
+  isFavorite,
+  removeFavorite,
   setSelection as setStoredSelection,
 } from "./storage";
 import type {
   GetOrganizationResponse,
+  GetScenarioResponse,
   ListScenariosResponse,
   ListScenarioConsumptionsResponse,
   MakeScenario,
@@ -107,6 +112,8 @@ export default function ListScenariosCommand() {
     useState<Awaited<ReturnType<typeof getSelection>>>(null);
   const [isLoadingSelection, setIsLoadingSelection] = useState(true);
 
+  const [favorites, setFavorites] = useState<number[]>([]);
+
   const [isLoadingScenarios, setIsLoadingScenarios] = useState(false);
   const [scenarios, setScenarios] = useState<MakeScenario[]>([]);
 
@@ -130,8 +137,11 @@ export default function ListScenariosCommand() {
     async function loadSelection() {
       setIsLoadingSelection(true);
       try {
-        const sel = await getSelection();
-        if (!cancelled) setSelectionState(sel);
+        const [sel, favs] = await Promise.all([getSelection(), getFavorites()]);
+        if (!cancelled) {
+          setSelectionState(sel);
+          setFavorites(favs);
+        }
       } finally {
         if (!cancelled) setIsLoadingSelection(false);
       }
@@ -228,6 +238,26 @@ export default function ListScenariosCommand() {
       try {
         // Configure rate limiting *in the background*; don't block first paint.
         void ensureRateLimitConfigured(selection);
+
+        // Fast-path: fetch favorite scenarios individually so the Favorites
+        // section renders before the full paginated list arrives.
+        if (favorites.length > 0) {
+          const favResults = await Promise.allSettled(
+            favorites.map((id) =>
+              client.getJson<GetScenarioResponse>(`/api/v2/scenarios/${id}`),
+            ),
+          );
+          if (cancelled) return;
+          const favScenarios: MakeScenario[] = [];
+          for (const r of favResults) {
+            if (r.status === "fulfilled" && r.value.scenario) {
+              favScenarios.push(r.value.scenario);
+            }
+          }
+          if (favScenarios.length > 0) {
+            setScenarios(favScenarios);
+          }
+        }
 
         const cols = [
           "id",
@@ -360,7 +390,7 @@ export default function ListScenariosCommand() {
     };
   }, [client, selection]);
 
-  const filteredAndSorted = useMemo(() => {
+  const { favoriteItems, otherItems } = useMemo(() => {
     const filtered = scenarios.filter((s) => {
       if (statusFilter === "all") return true;
       if (statusFilter === "live") return s.isActive;
@@ -372,24 +402,38 @@ export default function ListScenariosCommand() {
       ops: consumptionsByScenarioId[s.id]?.operations,
     }));
 
-    if (sortMode === "name") {
-      return withOps.sort((a, b) => a.s.name.localeCompare(b.s.name));
+    function sortItems(items: typeof withOps) {
+      if (sortMode === "name") {
+        return items.sort((a, b) => a.s.name.localeCompare(b.s.name));
+      }
+      if (sortMode === "lastEdit") {
+        return items.sort((a, b) =>
+          (b.s.lastEdit ?? "").localeCompare(a.s.lastEdit ?? ""),
+        );
+      }
+      return items.sort((a, b) => {
+        const ao = typeof a.ops === "number" ? a.ops : -1;
+        const bo = typeof b.ops === "number" ? b.ops : -1;
+        if (bo !== ao) return bo - ao;
+        return a.s.name.localeCompare(b.s.name);
+      });
     }
 
-    if (sortMode === "lastEdit") {
-      return withOps.sort((a, b) =>
-        (b.s.lastEdit ?? "").localeCompare(a.s.lastEdit ?? ""),
-      );
-    }
+    const favs = withOps.filter((i) => isFavorite(i.s.id, favorites));
+    const rest = withOps.filter((i) => !isFavorite(i.s.id, favorites));
 
-    // ops (desc), unknown at bottom
-    return withOps.sort((a, b) => {
-      const ao = typeof a.ops === "number" ? a.ops : -1;
-      const bo = typeof b.ops === "number" ? b.ops : -1;
-      if (bo !== ao) return bo - ao;
-      return a.s.name.localeCompare(b.s.name);
-    });
-  }, [scenarios, consumptionsByScenarioId, statusFilter, sortMode]);
+    return { favoriteItems: sortItems(favs), otherItems: sortItems(rest) };
+  }, [scenarios, consumptionsByScenarioId, statusFilter, sortMode, favorites]);
+
+  async function toggleFavorite(id: number) {
+    if (isFavorite(id, favorites)) {
+      await removeFavorite(id);
+      setFavorites((prev) => prev.filter((f) => f !== id));
+    } else {
+      await addFavorite(id);
+      setFavorites((prev) => [...prev, id]);
+    }
+  }
 
   async function onChangeOrgTeam() {
     await clearSelection();
@@ -442,6 +486,90 @@ export default function ListScenariosCommand() {
     return parts.length ? parts.join(" • ") : undefined;
   })();
 
+  function renderScenarioItem(
+    s: MakeScenario,
+    ops: number | undefined,
+    starred: boolean,
+  ) {
+    const opsText = typeof ops === "number" ? `${ops}` : "—";
+    const statusText = s.isActive ? "Live" : "Disabled";
+    const browserScenarioUrl = toScenarioEditUrl(
+      prefs.baseUrl,
+      selection!.teamId,
+      s.id,
+    );
+
+    return (
+      <List.Item
+        key={s.id}
+        title={s.name}
+        subtitle={statusText}
+        icon={s.isActive ? Icon.Play : Icon.Pause}
+        accessories={[
+          ...(starred ? [{ icon: Icon.Star }] : []),
+          { text: opsText },
+          ...(s.lastEdit ? [{ date: new Date(s.lastEdit) }] : []),
+        ]}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Show Details"
+              target={
+                <ScenarioDetail
+                  client={client}
+                  baseUrl={prefs.baseUrl}
+                  teamId={selection!.teamId}
+                  scenarioId={s.id}
+                  initialScenario={s}
+                  consumptionOperations={typeof ops === "number" ? ops : null}
+                  lastReset={lastReset}
+                />
+              }
+            />
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              url={browserScenarioUrl}
+            />
+            <Action
+              title={starred ? "Remove from Favorites" : "Add to Favorites"}
+              icon={starred ? Icon.StarDisabled : Icon.Star}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              onAction={() => void toggleFavorite(s.id)}
+            />
+            <ActionPanel.Section>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={() => setSelectionKey((k) => k + 1)}
+              />
+              <ActionPanel.Submenu title="Sort" icon={Icon.ArrowUpCircle}>
+                <Action
+                  title="Operations Used"
+                  onAction={() => setSortMode("ops")}
+                />
+                <Action title="Name" onAction={() => setSortMode("name")} />
+                <Action
+                  title="Last Edit"
+                  onAction={() => setSortMode("lastEdit")}
+                />
+              </ActionPanel.Submenu>
+              <Action
+                title="Change Organization/team"
+                icon={Icon.Switch}
+                onAction={() => void onChangeOrgTeam()}
+              />
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   return (
     <List
       isLoading={isLoadingScenarios}
@@ -458,91 +586,20 @@ export default function ListScenariosCommand() {
         </List.Dropdown>
       }
     >
+      {favoriteItems.length > 0 && (
+        <List.Section
+          title="Favorites"
+          subtitle={`${favoriteItems.length} scenario${favoriteItems.length === 1 ? "" : "s"}`}
+        >
+          {favoriteItems.map(({ s, ops }) => renderScenarioItem(s, ops, true))}
+        </List.Section>
+      )}
+
       <List.Section
         title={`${selection.organizationName} → ${selection.teamName}`}
         subtitle={headerSummary}
       >
-        {filteredAndSorted.map(({ s, ops }) => {
-          const opsText = typeof ops === "number" ? `${ops}` : "—";
-          const statusText = s.isActive ? "Live" : "Disabled";
-          const browserScenarioUrl = toScenarioEditUrl(
-            prefs.baseUrl,
-            selection.teamId,
-            s.id,
-          );
-
-          return (
-            <List.Item
-              key={s.id}
-              title={s.name}
-              subtitle={statusText}
-              icon={s.isActive ? Icon.Play : Icon.Pause}
-              accessories={[
-                { text: opsText },
-                ...(s.lastEdit ? [{ date: new Date(s.lastEdit) }] : []),
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Show Details"
-                    target={
-                      <ScenarioDetail
-                        client={client}
-                        baseUrl={prefs.baseUrl}
-                        teamId={selection.teamId}
-                        scenarioId={s.id}
-                        initialScenario={s}
-                        consumptionOperations={
-                          typeof ops === "number" ? ops : null
-                        }
-                        lastReset={lastReset}
-                      />
-                    }
-                  />
-
-                  <Action.OpenInBrowser
-                    title="Open in Browser"
-                    url={browserScenarioUrl}
-                  />
-
-                  <ActionPanel.Section>
-                    <Action
-                      title="Refresh"
-                      icon={Icon.ArrowClockwise}
-                      onAction={() => setSelectionKey((k) => k + 1)}
-                    />
-                    <ActionPanel.Submenu title="Sort" icon={Icon.ArrowUpCircle}>
-                      <Action
-                        title="Operations Used"
-                        onAction={() => setSortMode("ops")}
-                      />
-                      <Action
-                        title="Name"
-                        onAction={() => setSortMode("name")}
-                      />
-                      <Action
-                        title="Last Edit"
-                        onAction={() => setSortMode("lastEdit")}
-                      />
-                    </ActionPanel.Submenu>
-
-                    <Action
-                      title="Change Organization/team"
-                      icon={Icon.Switch}
-                      onAction={() => void onChangeOrgTeam()}
-                    />
-
-                    <Action
-                      title="Open Extension Preferences"
-                      icon={Icon.Gear}
-                      onAction={openExtensionPreferences}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+        {otherItems.map(({ s, ops }) => renderScenarioItem(s, ops, false))}
       </List.Section>
 
       <List.EmptyView
