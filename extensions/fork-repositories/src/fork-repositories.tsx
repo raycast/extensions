@@ -2,11 +2,11 @@ import { ActionPanel, Detail, List, Action, open } from "@raycast/api";
 import { dirname } from "node:path";
 import tildify from "./vendor/tildify";
 import { useRepos, useHasApplication } from "./hooks";
-import { FORK_BUNDLE_ID, REPO_FILE_PATH } from "./constants";
+import { FORK_BUNDLE_ID, REPO_FILE_PATHS } from "./constants";
 
 const Command = () => {
   const [hasFork, isHasForkLoading] = useHasApplication(FORK_BUNDLE_ID);
-  const [repos, isReposLoading] = useRepos(REPO_FILE_PATH);
+  const [repos, isReposLoading] = useRepos(REPO_FILE_PATHS);
   const isLoading = isHasForkLoading || isReposLoading;
 
   if (!isLoading && !hasFork) {
@@ -14,7 +14,7 @@ const Command = () => {
       <Detail
         navigationTitle="Fork.app not found"
         markdown={`
-  # Fork.app not found 
+  # Fork.app not found
 
   You need to have Fork to use this extension. You can download it [here](https://fork.dev/), or alternatively using
   [Homebrew](https://brew.sh/):

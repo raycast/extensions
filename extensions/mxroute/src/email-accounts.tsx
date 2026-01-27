@@ -57,7 +57,21 @@ export default function EmailAccounts({
       }
     >
       {!isLoading && !accounts.length ? (
-        <List.EmptyView icon="📨" title="No email accounts found for this domain." />
+        <List.EmptyView
+          icon="📨"
+          title="No email accounts found for this domain."
+          description={`"Add New Email Account" below`}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                icon={Icon.Plus}
+                title="Add New Email Account"
+                target={<AddEmailAccount domain={domain} />}
+                onPop={mutate}
+              />
+            </ActionPanel>
+          }
+        />
       ) : (
         accounts.map((account) => (
           <List.Item
@@ -78,6 +92,7 @@ export default function EmailAccounts({
                   icon={Icon.Plus}
                   title="Add New Email Account"
                   target={<AddEmailAccount domain={domain} />}
+                  onPop={mutate}
                 />
                 <Action
                   icon={Icon.Trash}

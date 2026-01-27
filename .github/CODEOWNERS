@@ -151,6 +151,7 @@
 /extensions/barcuts-companion                                       @czottmann
 /extensions/bark                                                    @koinzhang
 /extensions/bartender                                               @kmusick
+/extensions/basalt-wallpapers                                       @nurel07
 /extensions/base-stats                                              @0xOsprey
 /extensions/base64                                                  @DanielSinclair @jfkisafk @sammarks @ridemountainpig
 /extensions/base64-to-file                                          @iamforrest
@@ -1164,7 +1165,7 @@
 /extensions/linkace                                                 @jaspermayone
 /extensions/linkding                                                @InteractiveNinja @xmok @jose-elias-alvarez
 /extensions/linkinize                                               @NaderIkladious @NaderIkladious
-/extensions/linkwarden                                              @leodbrs @xmok
+/extensions/linkwarden                                              @leodbrs @xmok @trucke
 /extensions/linux-command                                           @jaywcjlove
 /extensions/lipsum                                                  @seita1996
 /extensions/liquipedia-matches                                      @EemilSuo @pernielsentikaer
