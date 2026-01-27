@@ -58,7 +58,7 @@ export function ActionShowDetails({ show }: { show: SearchResult }) {
   return (
     <Action.Push
       title="Show Details"
-      icon={Icon.Sidebar}
+      icon={Icon.AppWindow}
       target={<ShowDetail show={show} originalTitle={show.originalTitle} />}
     />
   );

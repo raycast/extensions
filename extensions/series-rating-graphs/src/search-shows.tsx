@@ -29,6 +29,7 @@ export default function Command() {
     `${API_BASE_URL}/search/titles?query=${searchText ? searchText : `""`}`,
     {
       keepPreviousData: true,
+      execute: searchText.length > 0,
     },
   );
   const filteredShows = res.data?.titles?.filter((item) => item.type === "tvSeries") || [];
@@ -49,6 +50,7 @@ export default function Command() {
         isLoading={res.isLoading}
         searchText={searchText}
         onSearchTextChange={setSearchText}
+        fit={Grid.Fit.Fill}
         aspectRatio="2/3"
         columns={columns}
         searchBarAccessory={
