@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
-import { Schedule } from "./utils";
+import { Schedule } from "../interfaces";
 
 type ActionPanelProps = {
   searchText: string;
