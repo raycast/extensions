@@ -3,7 +3,6 @@ import { Alert, closeMainWindow, confirmAlert, showToast, Toast } from "@raycast
 import { getQmdDatabasePath } from "./utils/qmd";
 
 export default async function Command() {
-  // First confirmation
   const firstConfirm = await confirmAlert({
     title: "Reset QMD?",
     message: "This will delete all collections, contexts, and embeddings. The database file will be removed.",
@@ -20,7 +19,6 @@ export default async function Command() {
     return;
   }
 
-  // Second confirmation
   const secondConfirm = await confirmAlert({
     title: "Are you absolutely sure?",
     message: "This action cannot be undone. All QMD data will be permanently deleted.",
@@ -37,10 +35,8 @@ export default async function Command() {
     return;
   }
 
-  // Close the main window
   await closeMainWindow();
 
-  // Show initial toast
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Resetting QMD...",

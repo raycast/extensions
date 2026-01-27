@@ -299,10 +299,26 @@ export async function runQmd<T>(
     };
   } catch (error) {
     const execError = error as {
+      stdout?: string;
       stderr?: string;
       message?: string;
-      code?: string;
+      code?: string | number;
     };
+
+    // Recover stdout from non-zero exit codes
+    if (includeJson && execError.stdout?.trim()) {
+      const trimmed = execError.stdout.trim();
+      if (trimmed.startsWith("No results")) {
+        return { success: true, data: [] as unknown as T, stderr: execError.stderr };
+      }
+      try {
+        const data = JSON.parse(trimmed) as T;
+        return { success: true, data, stderr: execError.stderr };
+      } catch {
+        // ignore
+      }
+    }
+
     return {
       success: false,
       error: execError.message || "Command execution failed",
@@ -326,7 +342,13 @@ export async function runQmdRaw(args: string[], options: { timeout?: number } = 
 
     return { success: true, data: stdout, stderr: stderr || undefined };
   } catch (error) {
-    const execError = error as { stderr?: string; message?: string };
+    const execError = error as { stdout?: string; stderr?: string; message?: string };
+
+    // Recover stdout from non-zero exit codes
+    if (execError.stdout?.trim()) {
+      return { success: true, data: execError.stdout, stderr: execError.stderr };
+    }
+
     return {
       success: false,
       error: execError.message || "Command execution failed",

@@ -137,7 +137,6 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search status...">
-      {/* Index Overview */}
       <List.Section title="Index">
         <List.Item
           accessories={[{ text: healthText }]}
@@ -167,7 +166,6 @@ export default function Command() {
         )}
       </List.Section>
 
-      {/* Documents */}
       <List.Section title="Documents">
         <List.Item
           accessories={[{ text: `${status?.totalDocuments ?? 0}` }]}
@@ -193,7 +191,6 @@ export default function Command() {
         )}
       </List.Section>
 
-      {/* Collections */}
       <List.Section title={`Collections (${status?.collections.length ?? 0})`}>
         {status?.collections.map((collection) => (
           <List.Item
@@ -380,7 +377,6 @@ function CollectionDetail({ collectionName, onRefresh }: CollectionDetailProps) 
 
   return (
     <List isLoading={isLoading} navigationTitle={collectionName}>
-      {/* Collection Info */}
       <List.Section title="Collection">
         <List.Item
           accessories={[{ text: `${collection?.documentCount ?? 0} docs` }]}
@@ -396,7 +392,6 @@ function CollectionDetail({ collectionName, onRefresh }: CollectionDetailProps) 
         />
       </List.Section>
 
-      {/* Actions */}
       <List.Section title="Actions">
         <List.Item
           actions={
@@ -445,7 +440,6 @@ function CollectionDetail({ collectionName, onRefresh }: CollectionDetailProps) 
         />
       </List.Section>
 
-      {/* Files */}
       <List.Section title={`Files (${files.length})`}>
         {files.map((file) => {
           const fullPath = collectionPath ? `${collectionPath}/${file.path}` : file.path;

@@ -120,7 +120,6 @@ export default function Command() {
       searchBarPlaceholder="Enter path or #docid..."
       searchText={searchText}
     >
-      {/* Show suggestions if we have them */}
       {suggestions.length > 0 && (
         <List.Section title="Did you mean?">
           {suggestions.map((suggestion, index) => (
@@ -138,12 +137,10 @@ export default function Command() {
         </List.Section>
       )}
 
-      {/* Show error if we have one */}
       {error && !suggestions.length && searchText && (
         <List.EmptyView description={error} icon={Icon.Warning} title="Document Not Found" />
       )}
 
-      {/* Initial state - show instructions */}
       {!(searchText || suggestions.length) && (
         <List.EmptyView
           description="Enter a file path or #docid to retrieve a document"
@@ -152,7 +149,6 @@ export default function Command() {
         />
       )}
 
-      {/* Searching state */}
       {searchText && !suggestions.length && !error && !isLoading && (
         <List.EmptyView
           actions={

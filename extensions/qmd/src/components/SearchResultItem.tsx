@@ -52,13 +52,10 @@ export function SearchResultItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {/* Primary action: Open file in editor */}
             {fullPath && fileExists && <Action.Open icon={Icon.Document} target={fullPath} title="Open in Editor" />}
-            {/* Show in Finder */}
             {fullPath && fileExists && <Action.ShowInFinder path={fullPath} />}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            {/* Copy Path - Cmd+C */}
             {fullPath && (
               <Action.CopyToClipboard
                 content={fullPath}
@@ -66,7 +63,6 @@ export function SearchResultItem({
                 title="Copy Path"
               />
             )}
-            {/* Copy Content - Cmd+Shift+C */}
             <Action
               icon={Icon.Clipboard}
               onAction={async () => {
@@ -90,7 +86,6 @@ export function SearchResultItem({
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               title="Copy Content"
             />
-            {/* Copy DocID - Cmd+Option+C */}
             <Action.CopyToClipboard
               content={result.docid}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}

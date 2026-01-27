@@ -2,17 +2,14 @@ import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { runQmdRaw } from "./utils/qmd";
 
 export default async function Command() {
-  // Close the main window
   await closeMainWindow();
 
-  // Show initial toast
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Cleaning up...",
     message: "Removing orphaned data",
   });
 
-  // Run cleanup
   const result = await runQmdRaw(["cleanup"]);
 
   if (result.success) {

@@ -329,7 +329,6 @@ export function SearchView({ searchMode }: SearchViewProps) {
       searchBarPlaceholder={getPlaceholder()}
       searchText={searchText}
     >
-      {/* Indexing warning banner */}
       {isIndexing && (
         <List.Section title="⚠️ Embedding in Progress">
           <List.Item
@@ -340,7 +339,6 @@ export function SearchView({ searchMode }: SearchViewProps) {
         </List.Section>
       )}
 
-      {/* Pending search prompt for expensive search modes */}
       {pendingSearch && !isSearching && (
         <List.Section title="Ready to Search">
           <List.Item
@@ -356,7 +354,6 @@ export function SearchView({ searchMode }: SearchViewProps) {
         </List.Section>
       )}
 
-      {/* Debouncing state - show while waiting for user to stop typing (keyword search only) */}
       {searchText.trim() && isDebouncing && !isSearching && results.length === 0 && (
         <List.Section>
           <List.Item
@@ -370,7 +367,6 @@ export function SearchView({ searchMode }: SearchViewProps) {
         </List.Section>
       )}
 
-      {/* Searching state - show while actively searching */}
       {searchText.trim() && isSearching && results.length === 0 && (
         <List.Section>
           <List.Item
@@ -387,7 +383,6 @@ export function SearchView({ searchMode }: SearchViewProps) {
         </List.Section>
       )}
 
-      {/* Search results */}
       {searchText.trim() && results.length > 0 && (
         <List.Section title={`Results (${results.length})`}>
           {results.map((result, index) => (
@@ -407,7 +402,6 @@ export function SearchView({ searchMode }: SearchViewProps) {
         </List.Section>
       )}
 
-      {/* Empty state with query - no results (only show after search completes with no results) */}
       {searchText.trim() &&
         results.length === 0 &&
         !isSearching &&
@@ -421,7 +415,6 @@ export function SearchView({ searchMode }: SearchViewProps) {
           />
         )}
 
-      {/* Empty state without query - show recent searches */}
       {!searchText.trim() && (
         <>
           {history.length > 0 && (
