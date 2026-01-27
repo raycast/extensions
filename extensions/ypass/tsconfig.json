@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "ES2022",
+    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "noEmit": true
+  },
+  "include": ["src/**/*"]
+}

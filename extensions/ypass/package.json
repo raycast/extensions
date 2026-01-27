@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ypass",
+  "title": "Password Generator",
+  "description": "Generate passwords with YubiKey",
+  "icon": "icon.png",
+  "author": "elli",
+  "license": "MIT",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "keywords": [
+    "password",
+    "yubikey",
+    "security",
+    "generator",
+    "deterministic"
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "title": "Binary Path",
+      "description": "Path to ypass binary (leave empty to use PATH)",
+      "type": "textfield",
+      "required": false,
+      "default": "ypass"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Get Password",
+      "subtitle": "YubiKey",
+      "description": "Get a password using your YubiKey",
+      "mode": "view"
+    },
+    {
+      "name": "quick-generate",
+      "title": "Quick Generate",
+      "subtitle": "YubiKey",
+      "description": "Generate password with domain and username pre-filled",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "type": "text",
+          "placeholder": "Domain",
+          "required": true
+        },
+        {
+          "name": "username",
+          "type": "text",
+          "placeholder": "Username (optional)",
+          "required": false
+        },
+        {
+          "name": "version",
+          "type": "text",
+          "placeholder": "Version (optional, enables single-touch)",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.8.10",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "^18.2.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
