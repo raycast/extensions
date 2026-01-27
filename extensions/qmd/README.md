@@ -2,6 +2,12 @@
 
 A Raycast extension for [QMD](https://github.com/tobi/qmd) - an on-device search engine for markdown files.
 
+## Screenshots
+
+![Search results](media/qmd-1.png)
+![Add collection](media/qmd-2.png)
+![Index status](media/qmd-3.png)
+
 ## Prerequisites
 
 1. **Bun**: Install from [bun.sh](https://bun.sh)
