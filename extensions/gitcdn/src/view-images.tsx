@@ -24,6 +24,7 @@ import {
   validateGitHubToken,
   type RepoInfo,
 } from "./utils/github";
+import OnboardingView from "./components/OnboardingView";
 
 interface Preferences {
   defaultRepo?: string;
@@ -510,21 +511,8 @@ export default function ViewImages() {
     }
   };
 
-  if (error && !defaultRepo) {
-    return (
-      <Grid columns={5} inset={Grid.Inset.Large} searchBarPlaceholder="Search images...">
-        <Grid.EmptyView
-          icon={Icon.ExclamationMark}
-          title="No Repository Configured"
-          description={error}
-          actions={
-            <ActionPanel>
-              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
-      </Grid>
-    );
+  if (!defaultRepo) {
+    return <OnboardingView hasToken={!!githubToken} />;
   }
 
   return (
