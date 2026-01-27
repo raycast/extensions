@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2026-01-27
 
 - Added optional split-view metadata panel for search results
 - Enable "Show metadata panel in search results" in Search command preferences (default true)
