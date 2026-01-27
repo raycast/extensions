@@ -3,7 +3,6 @@ import { UsageLimitData } from "../types/usage-types";
 import { getClaudeAccessToken } from "./keychain-access";
 import { fetchClaudeUsageLimits } from "./claude-api-client";
 
-
 interface CacheState {
   data: UsageLimitData | null;
   isLoading: boolean;
