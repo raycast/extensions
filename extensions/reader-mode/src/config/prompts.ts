@@ -112,11 +112,11 @@ Summarize this article with:
 2. Three bullet points highlighting the key information
 
 Format your response EXACTLY like this:
-[one-liner summary]
+One-liner summary here.
 
-- [key point 1]
-- [key point 2]
-- [key point 3]${getLanguageInstruction(options?.language)}`,
+- First key point
+- Second key point
+- Third key point${getLanguageInstruction(options?.language)}`,
   },
 
   "at-a-glance": {
