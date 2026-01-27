@@ -1,6 +1,6 @@
 # NixPkgs Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-27
 
 - Add "Open Package Details" action to open the package on search.nixos.org
 - **Updated available branches**: Removed unsupported branch (25.05) and kept only working versions (unstable, 25.11)
