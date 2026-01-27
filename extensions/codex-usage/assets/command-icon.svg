@@ -1,0 +1,21 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="#1a1a1a"/>
+  
+  <!-- Abstract circular flow representing usage/consumption -->
+  <circle cx="256" cy="256" r="120" stroke="white" stroke-width="16" fill="none" opacity="0.15"/>
+  <circle cx="256" cy="256" r="90" stroke="white" stroke-width="16" fill="none" opacity="0.25"/>
+  
+  <!-- Animated arc suggesting usage/depletion (270 degrees) -->
+  <path d="M 256 136 A 120 120 0 1 1 136 256" stroke="white" stroke-width="16" stroke-linecap="round" fill="none"/>
+  
+  <!-- Central geometric element - abstract "C" -->
+  <circle cx="256" cy="256" r="50" fill="white"/>
+  <circle cx="256" cy="256" r="30" fill="#1a1a1a"/>
+  <rect x="256" y="226" width="50" height="60" fill="#1a1a1a"/>
+  
+  <!-- Usage indicators - dots -->
+  <circle cx="256" cy="136" r="8" fill="white"/>
+  <circle cx="136" cy="256" r="8" fill="white" opacity="0.6"/>
+  <circle cx="256" cy="376" r="8" fill="white" opacity="0.3"/>
+</svg>
