@@ -1,0 +1,76 @@
+{
+  "name": "codexbar",
+  "title": "CodexUsage",
+  "description": "Track AI usage statistics from Codex CLI",
+  "icon": "command-icon.png",
+  "author": "gleve",
+  "owner": "gleve",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "package": "ray build --export",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.15.0",
+    "date-fns": "^3.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.3.0"
+  },
+  "commands": [
+    {
+      "name": "see-usage",
+      "title": "See Usage",
+      "subtitle": "CodexUsage",
+      "description": "View Codex usage statistics",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "manage-providers",
+      "title": "Manage Providers",
+      "subtitle": "CodexUsage",
+      "description": "Open extension settings",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "colorCoding",
+      "title": "Color coded usage warnings",
+      "description": "Show color-coded usage warnings",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable"
+    },
+    {
+      "name": "codexEnabled",
+      "title": "Codex",
+      "description": "Track usage from OpenAI Codex CLI",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enabled"
+    }
+  ]
+}
