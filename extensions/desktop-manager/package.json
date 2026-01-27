@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "desktop-manager",
+  "type": "module",
   "title": "Desktop Manager",
   "description": "Search and organize your desktop files",
   "icon": "icon.png",
@@ -14,6 +15,7 @@
     {
       "name": "manage-desktop",
       "title": "Manage Desktop",
+      "subtitle": "File Manager",
       "description": "Search and organize your desktop files",
       "mode": "view",
       "preferences": [
@@ -89,7 +91,7 @@
       "title": "Desktop Folder",
       "description": "The folder where your desktop files are stored",
       "default": "~/Desktop",
-      "required": true
+      "required": false
     },
     {
       "type": "dropdown",

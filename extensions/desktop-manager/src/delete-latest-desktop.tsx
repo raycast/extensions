@@ -11,8 +11,10 @@ export default async function Command() {
       return;
     }
 
-    await deleteFileOrFolder(latestFile.path);
-    await showHUD(`Deleted: ${latestFile.file}`);
+    const deleted = await deleteFileOrFolder(latestFile.path);
+    if (deleted) {
+      await showHUD(`Deleted: ${latestFile.file}`);
+    }
   } catch (error) {
     await showFailureToast(error, { title: "Failed to delete latest desktop file" });
   }

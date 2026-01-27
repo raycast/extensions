@@ -1,7 +1,13 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
 import { PathLike } from "fs";
 import { useState } from "react";
-import { desktopFolder, getDesktopFiles, withAccessToDesktopFolder } from "./utils";
+import {
+  desktopFolder,
+  getDesktopFiles,
+  withAccessToDesktopFolder,
+  deleteFileOrFolder,
+  deleteMultipleFilesOrFolders,
+} from "./utils";
 
 function Command() {
   const [desktopFiles, setDesktopFiles] = useState(getDesktopFiles());
@@ -46,12 +52,12 @@ function Command() {
                 <Action.CopyToClipboard
                   title="Copy File"
                   content={{ file: file.path }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action
                   title="Reload Desktop"
                   icon={Icon.RotateAntiClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={handleReload}
                 />
               </ActionPanel.Section>
@@ -60,17 +66,29 @@ function Command() {
                 <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <Action.Trash
+                <Action
                   title="Delete File"
-                  paths={file.path}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  onTrash={handleTrash}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={async () => {
+                    const deleted = await deleteFileOrFolder(file.path);
+                    if (deleted) {
+                      handleTrash(file.path);
+                    }
+                  }}
                 />
-                <Action.Trash
+                <Action
                   title="Delete All Desktop Files"
-                  paths={desktopFiles.map((f) => f.path)}
-                  shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                  onTrash={handleTrash}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                  onAction={async () => {
+                    const deleted = await deleteMultipleFilesOrFolders(desktopFiles.map((f) => f.path));
+                    if (deleted) {
+                      handleTrash(desktopFiles.map((f) => f.path));
+                    }
+                  }}
                 />
               </ActionPanel.Section>
             </ActionPanel>
