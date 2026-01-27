@@ -57,52 +57,84 @@
           "required": true,
           "data": [
             {
-              "title": "Claude 3.5",
-              "value": "claude-3.5"
-            },
-            {
-              "title": "Claude 3.7",
+              "title": "Claude 3.7 Sonnet",
               "value": "claude-3.7"
             },
             {
-              "title": "Claude 3.7 Reasoning",
+              "title": "Claude 3.7 Sonnet (Reasoning)",
               "value": "claude-3.7-reasoning"
             },
             {
-              "title": "Claude 4",
+              "title": "Claude 4 Sonnet",
               "value": "claude-4-sonnet"
             },
             {
-              "title": "Claude 4 Reasoning",
+              "title": "Claude 4 Sonnet (Reasoning)",
               "value": "claude-4-sonnet-reasoning"
             },
             {
-              "title": "Claude 4.5",
+              "title": "Claude 4.1 Opus",
+              "value": "claude-4.1-opus"
+            },
+            {
+              "title": "Claude Haiku 4.5",
+              "value": "claude-4.5-haiku"
+            },
+            {
+              "title": "Claude Haiku 4.5 (Reasoning)",
+              "value": "claude-4.5-haiku-reasoning"
+            },
+            {
+              "title": "Claude Opus 4.5",
+              "value": "claude-4.5-opus"
+            },
+            {
+              "title": "Claude Sonnet 4.5",
               "value": "claude-4.5-sonnet"
             },
             {
-              "title": "Claude 4.5 Reasoning",
+              "title": "Claude Sonnet 4.5 (Reasoning)",
               "value": "claude-4.5-sonnet-reasoning"
             },
             {
-              "title": "DeepSeek R1 (Llama Distilled)",
-              "value": "deepseek-r1-groq"
+              "title": "DeepSeek R1 (0528)",
+              "value": "deepseek-r1-0528"
             },
             {
-              "title": "DeepSeek R1 (OpenRouter)",
+              "title": "DeepSeek R1 (Original)",
               "value": "deepseek-r1-openrouter"
             },
             {
               "title": "DeepSeek R1 (Qwen Distilled)",
-              "value": "deepseek-r1-distill-qwen-32b-groq"
+              "value": "deepseek-r1-distill-qwen-32b"
             },
             {
               "title": "DeepSeek v3 (0324)",
-              "value": "deepseek-v3-0324"
+              "value": "deepseek-chat-v3-0324"
             },
             {
-              "title": "DeepSeek v3 (Fireworks)",
-              "value": "deepseek-v3-fireworks"
+              "title": "DeepSeek v3.1",
+              "value": "deepseek-v3.1"
+            },
+            {
+              "title": "DeepSeek v3.1 (Thinking)",
+              "value": "deepseek-v3.1-thinking"
+            },
+            {
+              "title": "DeepSeek v3.1 Terminus",
+              "value": "deepseek-v3.1-terminus"
+            },
+            {
+              "title": "DeepSeek v3.1 Terminus (Thinking)",
+              "value": "deepseek-v3.1-terminus-thinking"
+            },
+            {
+              "title": "DeepSeek v3.2",
+              "value": "deepseek-v-3.2"
+            },
+            {
+              "title": "DeepSeek v3.2 (Thinking)",
+              "value": "deepseek-v-3.2-thinking"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -133,8 +165,16 @@
               "value": "gemini-2.5-pro"
             },
             {
-              "title": "Gemini 2.5 Flash Image",
-              "value": "gemini-2.5-flash-image-preview"
+              "title": "Gemini 3 Flash",
+              "value": "gemini-3-flash"
+            },
+            {
+              "title": "Gemini 3 Flash (Thinking)",
+              "value": "gemini-3-flash-thinking"
+            },
+            {
+              "title": "Gemini 3 Pro",
+              "value": "gemini-3-pro"
             },
             {
               "title": "Gemini Imagen 4",
@@ -145,8 +185,64 @@
               "value": "gemini-imagen-4-ultra"
             },
             {
+              "title": "GLM 4.5",
+              "value": "glm-4.5"
+            },
+            {
+              "title": "GLM 4.5 (Thinking)",
+              "value": "glm-4.5-thinking"
+            },
+            {
+              "title": "GLM 4.5 Air",
+              "value": "glm-4.5-air"
+            },
+            {
+              "title": "GLM 4.5 Air (Thinking)",
+              "value": "glm-4.5-air-thinking"
+            },
+            {
+              "title": "GLM 4.5V",
+              "value": "glm-4.5v"
+            },
+            {
+              "title": "GLM 4.5V (Thinking)",
+              "value": "glm-4.5v-thinking"
+            },
+            {
+              "title": "GLM 4.6",
+              "value": "glm-4.6"
+            },
+            {
+              "title": "GLM 4.6 (Thinking)",
+              "value": "glm-4.6-thinking"
+            },
+            {
+              "title": "GLM 4.6V",
+              "value": "glm-4.6v"
+            },
+            {
+              "title": "GLM 4.7",
+              "value": "glm-4.7"
+            },
+            {
+              "title": "GLM 4.7 (Thinking)",
+              "value": "glm-4.7-thinking"
+            },
+            {
               "title": "GPT ImageGen",
               "value": "gpt-image-1"
+            },
+            {
+              "title": "GPT ImageGen 1.5",
+              "value": "gpt-image-1.5"
+            },
+            {
+              "title": "GPT OSS 120B",
+              "value": "gpt-oss-120b"
+            },
+            {
+              "title": "GPT OSS 20B",
+              "value": "gpt-oss-20b"
             },
             {
               "title": "GPT-4.1",
@@ -161,15 +257,7 @@
               "value": "gpt-4.1-nano"
             },
             {
-              "title": "GPT-4.5",
-              "value": "gpt-4.5"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o Mini",
+              "title": "GPT-4o-mini",
               "value": "gpt-4o-mini"
             },
             {
@@ -177,24 +265,36 @@
               "value": "gpt-5-chat"
             },
             {
-              "title": "GPT-5 Reasoning",
+              "title": "GPT-5 (Reasoning)",
               "value": "gpt-5-reasoning"
             },
             {
-              "title": "GPT-5 Mini",
+              "title": "GPT-5 mini",
               "value": "gpt-5-mini"
             },
             {
-              "title": "GPT-5 Nano",
+              "title": "GPT-5 nano",
               "value": "gpt-5-nano"
             },
             {
-              "title": "GPT-o3 Mini",
-              "value": "gpt-o3-mini"
+              "title": "GPT-5.1 (Instant)",
+              "value": "gpt-5.1-instant"
             },
             {
-              "title": "GPT-o4 Mini",
-              "value": "gpt-o4-mini"
+              "title": "GPT-5.1 (Reasoning)",
+              "value": "gpt-5.1-thinking"
+            },
+            {
+              "title": "GPT-5.2 (Instant)",
+              "value": "gpt-5.2-instant"
+            },
+            {
+              "title": "GPT-5.2 (Reasoning)",
+              "value": "gpt-5.2-reasoning"
+            },
+            {
+              "title": "GPT-5.2 Pro",
+              "value": "gpt-5.2-pro"
             },
             {
               "title": "Grok 3",
@@ -213,8 +313,28 @@
               "value": "grok-v4-fast"
             },
             {
-              "title": "Grok 4 Fast Reasoning",
+              "title": "Grok 4 Fast (Reasoning)",
               "value": "grok-v4-fast-reasoning"
+            },
+            {
+              "title": "Grok 4.1 Fast",
+              "value": "grok-4.1-fast"
+            },
+            {
+              "title": "Grok 4.1 Fast (Reasoning)",
+              "value": "grok-4.1-fast-reasoning"
+            },
+            {
+              "title": "Kimi K2 (0711)",
+              "value": "kimi-k2"
+            },
+            {
+              "title": "Kimi K2 (0905)",
+              "value": "kimi-k2-0905"
+            },
+            {
+              "title": "Kimi K2 (Thinking)",
+              "value": "kimi-k2-thinking"
             },
             {
               "title": "Llama 3.3 70B",
@@ -229,23 +349,58 @@
               "value": "llama-4-scout"
             },
             {
+              "title": "MiniMax M2",
+              "value": "minimax-m2"
+            },
+            {
+              "title": "MiniMax M2.1",
+              "value": "minimax-m2.1"
+            },
+            {
+              "title": "Nano Banana",
+              "value": "gemini-2.5-flash-image-preview"
+            },
+            {
+              "title": "Nano Banana Pro",
+              "value": "gemini-3-pro-image-preview"
+            },
+            {
+              "title": "o3",
+              "value": "o3-full"
+            },
+            {
+              "title": "o3 Pro",
+              "value": "o3-pro"
+            },
+            {
+              "title": "o3-mini",
+              "value": "gpt-o3-mini"
+            },
+            {
+              "title": "o4-mini",
+              "value": "gpt-o4-mini"
+            },
+            {
               "title": "Qwen 2.5 32B",
               "value": "qwen-2.5-32b"
             },
             {
-              "title": "Qwen qwq 32B",
-              "value": "qwq-32b"
+              "title": "Qwen 3 235B",
+              "value": "qwen3-235b-2507"
+            },
+            {
+              "title": "Qwen 3 235B (Thinking)",
+              "value": "qwen3-235b-thinking-2507"
+            },
+            {
+              "title": "Qwen 3 32B",
+              "value": "qwen3-32b"
+            },
+            {
+              "title": "Qwen 3 Coder",
+              "value": "qwen3-coder"
             }
           ]
-        },
-        {
-          "name": "useBeta",
-          "title": "Beta Features",
-          "label": "Use Beta",
-          "description": "Use the beta version of t3.chat (beta.t3.chat)",
-          "type": "checkbox",
-          "required": false,
-          "default": false
         }
       ]
     }
