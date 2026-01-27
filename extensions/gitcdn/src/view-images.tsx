@@ -601,11 +601,7 @@ export default function ViewImages() {
         files.map((file) => (
           <Grid.Item
             key={file.sha}
-            content={
-              (file.isImage ?? isImageFile(file.name))
-                ? { source: file.cdnUrl }
-                : Icon.Document
-            }
+            content={(file.isImage ?? isImageFile(file.name)) ? { source: file.cdnUrl } : Icon.Document}
             title={file.name}
             subtitle={`${(file.size / 1024).toFixed(1)} KB`}
             keywords={[file.name, file.path]}
@@ -646,14 +642,21 @@ export default function ViewImages() {
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   target={
                     <Detail
-                      markdown={(file.isImage ?? isImageFile(file.name)) ? `![${file.name}](${file.cdnUrl})` : `# ${file.name}\n\nFile: ${file.name}`}
+                      markdown={
+                        (file.isImage ?? isImageFile(file.name))
+                          ? `![${file.name}](${file.cdnUrl})`
+                          : `# ${file.name}\n\nFile: ${file.name}`
+                      }
                       navigationTitle={file.name}
                       metadata={
                         <Detail.Metadata>
                           <Detail.Metadata.Label title="File Name" text={file.name} />
                           <Detail.Metadata.Label title="Path" text={file.path} />
                           <Detail.Metadata.Label title="Size" text={`${(file.size / 1024).toFixed(2)} KB`} />
-                          <Detail.Metadata.Label title="Type" text={(file.isImage ?? isImageFile(file.name)) ? "Image" : "File"} />
+                          <Detail.Metadata.Label
+                            title="Type"
+                            text={(file.isImage ?? isImageFile(file.name)) ? "Image" : "File"}
+                          />
                           <Detail.Metadata.Separator />
                           {file.githubUrl && (
                             <Detail.Metadata.Link title="GitHub URL" target={file.githubUrl} text={file.githubUrl} />
