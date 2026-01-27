@@ -52,7 +52,7 @@ export async function execWithCleanEnv(command: string, args: string[]): Promise
   // Use env -i to start with empty environment, then login shell for user's profile
   // -l = login shell (sources profile), -c = execute command
   // This works for bash, zsh, fish, and most POSIX shells
-  await execFilePromise("env", ["-i", `HOME=${process.env.HOME}`, userShell, "-lc", shellCommand]);
+  await execFilePromise("env", ["-i", `HOME=${process.env.HOME || require('os').homedir()}`, userShell, "-lc", shellCommand]);
 }
 
 export function exists(p: string) {
