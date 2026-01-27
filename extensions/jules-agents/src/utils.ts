@@ -242,7 +242,7 @@ export function getActivityMarkdown(
     activity.artifacts.forEach((artifact) => {
       if (artifact.changeSet) {
         content += `\n**Change Set**: ${artifact.changeSet.source}\n`;
-        if (artifact.changeSet.gitPatch) {
+        if (artifact.changeSet.gitPatch?.unidiffPatch) {
           if (options.includeFullArtifacts) {
             content += "\n```diff\n" + artifact.changeSet.gitPatch.unidiffPatch + "\n```\n";
           } else {

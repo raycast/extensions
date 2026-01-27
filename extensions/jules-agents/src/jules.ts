@@ -70,7 +70,7 @@ export function useSession(sessionId: string) {
 
 // --- Activities ---
 
-export function useSessionActivities(sessionId: string, config?: { pageSize?: number }) {
+export function useSessionActivities(sessionId: string | undefined, config?: { pageSize?: number }) {
   return useFetch(
     (options) => {
       const params = new URLSearchParams({
@@ -93,11 +93,15 @@ export function useSessionActivities(sessionId: string, config?: { pageSize?: nu
         };
       },
       keepPreviousData: true,
+      execute: !!sessionId,
     },
   );
 }
 
-export async function fetchSessionActivities(sessionId: string) {
+export async function fetchSessionActivities(sessionId: string | undefined) {
+  if (!sessionId) {
+    return [];
+  }
   const params = new URLSearchParams({ pageSize: "100" });
   const response = await fetch(`${BASE_URL}/${sessionId}/activities?${params.toString()}`, {
     headers: getHeaders(),
@@ -112,7 +116,10 @@ export async function fetchSessionActivities(sessionId: string) {
   return result.activities || [];
 }
 
-export async function sendMessage(sessionId: string, prompt: string) {
+export async function sendMessage(sessionId: string | undefined, prompt: string) {
+  if (!sessionId) {
+    throw new Error("Cannot send message: session ID is missing");
+  }
   const response = await fetch(`${BASE_URL}/${sessionId}:sendMessage`, {
     method: "POST",
     headers: getHeaders(),
@@ -127,7 +134,10 @@ export async function sendMessage(sessionId: string, prompt: string) {
   // Response is empty definition for sendMessage
 }
 
-export async function approvePlan(sessionId: string) {
+export async function approvePlan(sessionId: string | undefined) {
+  if (!sessionId) {
+    throw new Error("Cannot approve plan: session ID is missing");
+  }
   const response = await fetch(`${BASE_URL}/${sessionId}:approvePlan`, {
     method: "POST",
     headers: getHeaders(),

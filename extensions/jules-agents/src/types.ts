@@ -1,5 +1,5 @@
 export interface Session {
-  name: string;
+  name?: string;
   id: string;
   prompt: string;
   sourceContext: SourceContext;
@@ -119,9 +119,9 @@ export interface ChangeSet {
 }
 
 export interface GitPatch {
-  unidiffPatch: string;
-  baseCommitId: string;
-  suggestedCommitMessage: string;
+  unidiffPatch?: string;
+  baseCommitId?: string;
+  suggestedCommitMessage?: string;
 }
 
 export interface Media {

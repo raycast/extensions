@@ -16,7 +16,6 @@ interface BranchDropdownProps {
 export function BranchDropdown({ selectedSource, itemProps }: BranchDropdownProps) {
   const githubRepo = selectedSource?.githubRepo;
   const branches = githubRepo?.branches;
-  const defaultBranch = githubRepo?.defaultBranch?.displayName;
 
   if (branches && branches.length > 0) {
     return (
@@ -24,7 +23,6 @@ export function BranchDropdown({ selectedSource, itemProps }: BranchDropdownProp
         title="Starting Branch"
         info="The branch to base the feature branch on. If not provided, the default branch will be used."
         {...itemProps.startingBranch}
-        defaultValue={defaultBranch}
       >
         {branches.map((branch) => (
           <Form.Dropdown.Item key={branch.name} value={branch.displayName} title={branch.displayName} />

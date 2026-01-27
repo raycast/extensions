@@ -57,29 +57,26 @@ interface FileChange {
   source: string;
   commitMessage?: string;
   gitDiffCommand?: string;
-  hunks: string[];
 }
 
-function stripDiffHeader(patch: string): { displayPatch: string; hunks: string[] } {
+function stripDiffHeader(patch: string): string {
   const lines = patch.split("\n");
-  const hunks: string[] = [];
   const filtered = lines.filter((line) => {
     if (line.startsWith("diff --git ")) return false;
     if (line.startsWith("index ")) return false;
     if (line.startsWith("--- ")) return false;
     if (line.startsWith("+++ ")) return false;
-    // Extract hunk headers but don't display them in the code
-    if (line.startsWith("@@ ")) {
-      // Extract just the @@ ... @@ part
-      const hunkMatch = line.match(/^(@@ -\d+,?\d* \+\d+,?\d* @@)/);
-      if (hunkMatch) {
-        hunks.push(hunkMatch[1]);
-      }
-      return false;
-    }
     return true;
   });
-  return { displayPatch: filtered.join("\n").trim(), hunks };
+
+  const formatted = filtered.map((line) => {
+    if (line.startsWith("@@ ")) {
+      return line.replace(/^(@@ .+? @@) (.+)$/, "$1\n$2");
+    }
+    return line;
+  });
+
+  return formatted.join("\n").trim();
 }
 
 function parseUnidiffToFiles(unidiffPatch: string, source: string, commitMessage?: string): FileChange[] {
@@ -93,7 +90,7 @@ function parseUnidiffToFiles(unidiffPatch: string, source: string, commitMessage
       const indexMatch = patch.match(/^index ([a-f0-9]+)\.\.([a-f0-9]+)/m);
       const gitDiffCommand = indexMatch ? `git diff ${indexMatch[1]}..${indexMatch[2]} -- ${match[2]}` : undefined;
 
-      const { displayPatch, hunks } = stripDiffHeader(patch);
+      const displayPatch = stripDiffHeader(patch);
 
       files.push({
         filename: match[2],
@@ -102,21 +99,19 @@ function parseUnidiffToFiles(unidiffPatch: string, source: string, commitMessage
         source,
         commitMessage,
         gitDiffCommand,
-        hunks,
       });
     }
   }
 
   // If no files found, treat entire patch as single file
   if (files.length === 0 && unidiffPatch.trim()) {
-    const { displayPatch, hunks } = stripDiffHeader(unidiffPatch);
+    const displayPatch = stripDiffHeader(unidiffPatch);
     files.push({
       filename: "Changes",
       patch: unidiffPatch.trim(),
       displayPatch,
       source,
       commitMessage,
-      hunks,
     });
   }
 
@@ -125,11 +120,10 @@ function parseUnidiffToFiles(unidiffPatch: string, source: string, commitMessage
 
 function FileDetailView(props: { file: FileChange; session: Session }) {
   const lineCount = props.file.displayPatch.split("\n").length;
-  const hunksDisplay = props.file.hunks.length > 0 ? ` · ${props.file.hunks.join(" ")}` : "";
   return (
     <Detail
       navigationTitle={props.file.filename}
-      markdown={`# ${props.file.filename} [${lineCount} lines]${hunksDisplay}\n\n\`\`\`diff\n${props.file.displayPatch}\n\`\`\``}
+      markdown={`# ${props.file.filename} [${lineCount} lines]\n\n\`\`\`diff\n${props.file.displayPatch}\n\`\`\``}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy File Diff" content={props.file.patch} />
@@ -175,7 +169,7 @@ function CodeReviewPage(props: { session: Session }) {
 
   activities?.forEach((activity) => {
     activity.artifacts?.forEach((artifact) => {
-      if (artifact.changeSet?.gitPatch) {
+      if (artifact.changeSet?.gitPatch?.unidiffPatch) {
         const files = parseUnidiffToFiles(
           artifact.changeSet.gitPatch.unidiffPatch,
           artifact.changeSet.source,
@@ -205,8 +199,7 @@ function CodeReviewPage(props: { session: Session }) {
   markdown += `## ${allChanges.length} Files Changed\n\n`;
   allChanges.forEach((change) => {
     const lineCount = change.displayPatch.split("\n").length;
-    const hunksDisplay = change.hunks.length > 0 ? ` · ${change.hunks.join(" ")}` : "";
-    markdown += `### ${change.filename} [${lineCount} lines]${hunksDisplay}\n\n\`\`\`diff\n${change.displayPatch}\n\`\`\`\n\n`;
+    markdown += `### ${change.filename} [${lineCount} lines]\n\n\`\`\`diff\n${change.displayPatch}\n\`\`\`\n\n`;
   });
 
   if (isLoading) {
@@ -217,7 +210,9 @@ function CodeReviewPage(props: { session: Session }) {
     return (
       <Detail
         navigationTitle={`Code Review: ${props.session.title || props.session.id}`}
-        markdown="# No Code Changes\n\nThis session has no code changes to review."
+        markdown={`# No Code Changes
+
+This session has no code changes to review.`}
         actions={
           <ActionPanel>
             <Action.Push

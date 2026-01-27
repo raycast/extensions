@@ -133,7 +133,11 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       <SourceDropdown
         onSelectionChange={(value) => {
           itemProps.sourceId.onChange?.(value);
-          setSelectedSource(sources?.find((s) => s.name === value));
+          const source = sources?.find((s) => s.name === value);
+          setSelectedSource(source);
+          if (source?.githubRepo?.defaultBranch?.displayName) {
+            setValue("startingBranch", source.githubRepo.defaultBranch.displayName);
+          }
         }}
         value={itemProps.sourceId.value}
       />
