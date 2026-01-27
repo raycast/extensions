@@ -25,11 +25,6 @@ import {
   type RepoInfo,
 } from "./utils/github";
 
-interface Preferences {
-  defaultRepo?: string;
-  githubToken?: string;
-}
-
 interface CachedFiles {
   files: RepoFile[];
   timestamp: number;

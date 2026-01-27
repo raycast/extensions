@@ -1,11 +1,6 @@
 import { getPreferenceValues, showToast, Toast, getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import { parseRepoUrl, uploadFileToRepo, validateGitHubToken } from "./utils/github";
 
-interface Preferences {
-  defaultRepo?: string;
-  githubToken?: string;
-}
-
 export default async function UploadFiles() {
   const preferences = getPreferenceValues<Preferences>();
   const defaultRepo = preferences.defaultRepo?.trim() || "";
