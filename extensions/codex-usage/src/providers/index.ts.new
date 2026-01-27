@@ -1,0 +1,21 @@
+// Provider registry - exports all providers
+
+import { codexProvider } from "./codex";
+import { claudeProvider } from "./claude";
+import { cursorProvider } from "./cursor";
+import { copilotProvider } from "./copilot";
+import { kimiProvider } from "./kimi";
+import { geminiProvider } from "./gemini";
+import { kiroProvider } from "./kiro";
+
+export const providers = [
+  codexProvider,
+  claudeProvider,
+  cursorProvider,
+  copilotProvider,
+  kimiProvider,
+  geminiProvider,
+  kiroProvider,
+];
+
+export * from "./types";
