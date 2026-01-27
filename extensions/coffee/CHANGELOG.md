@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-01-27
 
 - Fixed memory leak caused by zombie processes when starting caffeination.
 - Fixed argument parsing bug in `generateArgs()`.
