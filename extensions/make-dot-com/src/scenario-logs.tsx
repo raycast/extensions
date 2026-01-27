@@ -235,7 +235,6 @@ export function ScenarioLogs(props: Props) {
       const res = await props.client.getJson<ListWebhookQueueResponse>(
         `/api/v2/hooks/${props.hookId}/incomings`,
       );
-      console.log("Webhook queue items:", JSON.stringify(res));
       setWebhookQueueItems(res.incomings ?? []);
     } catch (e) {
       console.error("Failed to load webhook queue items:", e);

@@ -81,11 +81,6 @@ export function ScenarioDetail(props: Props) {
         `/api/v2/scenarios/${props.scenarioId}`,
       );
 
-      // Debug logging
-      console.log("Scenario response:", JSON.stringify(scenarioRes.scenario));
-      console.log("dlqCount:", scenarioRes.scenario?.dlqCount);
-      console.log("hookId:", scenarioRes.scenario?.hookId);
-
       setScenario(scenarioRes.scenario);
 
       // Fetch hook details if scenario has a webhook
@@ -94,7 +89,6 @@ export function ScenarioDetail(props: Props) {
           const hookRes = await props.client.getJson<GetHookResponse>(
             `/api/v2/hooks/${scenarioRes.scenario.hookId}`,
           );
-          console.log("Hook response:", JSON.stringify(hookRes.hook));
           setHook(hookRes.hook);
         } catch (err) {
           console.error("Failed to fetch hook:", err);
