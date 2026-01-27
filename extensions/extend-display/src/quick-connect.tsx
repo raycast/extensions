@@ -4,9 +4,6 @@ import { connectToDisplay } from "./utils/connect";
 export default async function Command() {
   const prefs = getPreferenceValues<Preferences>();
 
-export default async function Command() {
-  const prefs = getPreferenceValues<Preferences>();
-
   if (!prefs.displayName) {
     await showToast({
       style: Toast.Style.Failure,
