@@ -15,16 +15,16 @@ export function SearchListItem({ searchResult, channel }: SearchListItemProps) {
         <ActionPanel>
           <ActionPanel.Section>
             <ActionPanel.Submenu icon={Icon.Globe} title="Open…" shortcut={Keyboard.Shortcut.Common.Open}>
-              <Action.OpenInBrowser
-                title="Open Package Details"
-                url={`https://search.nixos.org/packages?channel=${channel}&show=${encodeURIComponent(searchResult.attrName)}&query=${encodeURIComponent(searchResult.attrName)}`}
-              />
               {searchResult.source && (
                 <Action.OpenInBrowser title="Open Package Source Code" url={searchResult.source} />
               )}
               {searchResult.homepage[0] && (
                 <Action.OpenInBrowser title="Open Package Homepage" url={searchResult.homepage[0]} />
               )}
+              <Action.OpenInBrowser
+                title="Open Package Details"
+                url={`https://search.nixos.org/packages?channel=${channel}&show=${encodeURIComponent(searchResult.attrName)}&query=${encodeURIComponent(searchResult.attrName)}`}
+              />
             </ActionPanel.Submenu>
 
             <ActionPanel.Submenu icon={Icon.Clipboard} title="Copy…" shortcut={Keyboard.Shortcut.Common.Copy}>
