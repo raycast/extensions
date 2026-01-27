@@ -45,6 +45,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       sourceId: initialSource,
       requirePlanApproval: preferences.requirePlanApproval,
       autoCreatePR: preferences.autoCreatePR,
+      startingBranch: "",
     },
     onSubmit: async (values) => {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Launching Jules Session" });

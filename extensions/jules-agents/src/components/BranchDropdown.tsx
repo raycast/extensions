@@ -24,8 +24,8 @@ export function BranchDropdown({ selectedSource, itemProps }: BranchDropdownProp
         info="The branch to base the feature branch on. If not provided, the default branch will be used."
         {...itemProps.startingBranch}
       >
-        {branches.map((branch) => (
-          <Form.Dropdown.Item key={branch.name} value={branch.displayName} title={branch.displayName} />
+        {branches.map((branch, index) => (
+          <Form.Dropdown.Item key={`${branch.name}-${index}`} value={branch.displayName} title={branch.displayName} />
         ))}
       </Form.Dropdown>
     );
