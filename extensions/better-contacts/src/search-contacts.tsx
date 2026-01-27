@@ -227,7 +227,7 @@ function ContactListItem({ contact, onRefresh }: { contact: Contact; onRefresh: 
               <Action
                 title="Copy Email"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
                 onAction={async () => {
                   await Clipboard.copy(contact.emailAddresses[0].value);
                   await showToast({ style: Toast.Style.Success, title: "Copied email" });
@@ -238,7 +238,7 @@ function ContactListItem({ contact, onRefresh }: { contact: Contact; onRefresh: 
               <ActionPanel.Submenu
                 title="Copy Email…"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
               >
                 {contact.emailAddresses.map((email, idx) => (
                   <Action
