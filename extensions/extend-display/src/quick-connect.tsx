@@ -1,9 +1,8 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { connectToDisplay } from "./utils/connect";
 
-interface Preferences {
-  displayName?: string;
-}
+export default async function Command() {
+  const prefs = getPreferenceValues<Preferences>();
 
 export default async function Command() {
   const prefs = getPreferenceValues<Preferences>();
