@@ -3,9 +3,6 @@ import { UsageLimitData } from "../types/usage-types";
 import { getClaudeAccessToken } from "./keychain-access";
 import { fetchClaudeUsageLimits } from "./claude-api-client";
 
-interface Preferences {
-  usageLimitsRefreshInterval?: string;
-}
 
 interface CacheState {
   data: UsageLimitData | null;
