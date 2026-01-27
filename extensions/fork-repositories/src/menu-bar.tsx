@@ -2,12 +2,12 @@ import { getPreferenceValues, MenuBarExtra, open, openCommandPreferences } from 
 import { dirname } from "node:path";
 import tildify from "./vendor/tildify";
 import { useRepos, useHasApplication } from "./hooks";
-import { FORK_BUNDLE_ID, REPO_FILE_PATH } from "./constants";
+import { FORK_BUNDLE_ID, REPO_FILE_PATHS } from "./constants";
 
 const icon = { source: { light: "icon.png", dark: "icon@dark.png" } };
 const Command = () => {
   const [hasFork, isHasForkLoading] = useHasApplication(FORK_BUNDLE_ID);
-  const [repos, isReposLoading] = useRepos(REPO_FILE_PATH);
+  const [repos, isReposLoading] = useRepos(REPO_FILE_PATHS);
 
   const isLoading = isHasForkLoading || isReposLoading;
 

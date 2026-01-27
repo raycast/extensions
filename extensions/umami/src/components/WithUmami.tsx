@@ -1,29 +1,10 @@
-import { Detail, getPreferenceValues } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Detail } from "@raycast/api";
 import { FC, PropsWithChildren } from "react";
-import { IS_CLOUD, umami } from "../lib/umami";
+import { useValidatePreferences } from "../lib/umami";
 import ErrorComponent from "./ErrorComponent";
-import { handleUmamiError } from "../lib/utils";
 
 const WithUmami: FC<PropsWithChildren<object>> = ({ children }) => {
-  const { UMAMI_API_CLIENT_USER_ID, UMAMI_API_CLIENT_SECRET, UMAMI_API_KEY } = getPreferenceValues<Preferences>();
-  const { isLoading, error } = usePromise(
-    async () => {
-      if (IS_CLOUD) {
-        if (!UMAMI_API_KEY) throw new Error("Missing Preference");
-      } else {
-        if (!UMAMI_API_CLIENT_USER_ID || !UMAMI_API_CLIENT_SECRET) throw new Error("Missing Preferences");
-      }
-      const { ok, error } = await umami.getMe();
-      if (!ok) handleUmamiError(error);
-    },
-    [],
-    {
-      failureToastOptions: {
-        title: "Invalid Preference(s) detected.",
-      },
-    },
-  );
+  const { isLoading, error } = useValidatePreferences();
 
   if (isLoading) return <Detail isLoading />;
 
