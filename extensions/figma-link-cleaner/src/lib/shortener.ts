@@ -6,12 +6,6 @@
 
 import { getPreferenceValues } from "@raycast/api";
 
-/** Preferences from Raycast extension settings */
-interface Preferences {
-  shortenerEnabled: boolean;
-  apiKey: string;
-}
-
 /** Response from the shortener API */
 interface ShortenResponse {
   shortUrl: string;

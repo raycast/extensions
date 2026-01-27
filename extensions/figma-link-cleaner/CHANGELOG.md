@@ -1,6 +1,6 @@
 # Figma Link Cleaner Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-01-19
 
 ### Added
 
@@ -13,5 +13,3 @@
 - Default hotkey: Control+L
 - Graceful error handling with helpful toast messages
 - Accessibility permission guidance
-
-
