@@ -23,8 +23,62 @@
       "subtitle": "U301.com",
       "description": "Shorten selected URL to u301.com",
       "mode": "no-view"
+    },
+    {
+      "name": "shorten-url",
+      "title": "Shorten URL",
+      "subtitle": "U301.com",
+      "description": "Shorten original URL using U301 URL Shortener",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "key",
+          "placeholder": "Key",
+          "type": "text"
+        },
+        {
+          "name": "comment",
+          "placeholder": "Comment",
+          "type": "text"
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "create-short-link",
+      "title": "Create Short Link",
+      "description": "Create a new shortened link with u301.com"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@u301 create shortlink for www.raycast.com/core-features/ai",
+        "mocks": {
+          "create-short-link": "https://u301.co/ai"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": {
+                  "includes": "www.raycast.com/core-features/ai"
+                }
+              },
+              "name": "create-short-link"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "accessToken",
@@ -43,12 +97,31 @@
       "required": false,
       "default": "u301.co",
       "placeholder": "Leave empty to use default domain"
+    },
+    {
+      "name": "workspaceId",
+      "title": "Workspace ID",
+      "description": "Workspace ID for shortened URL",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "Leave empty to use your default workspace"
+    },
+    {
+      "name": "generateShortKeyByAI",
+      "title": "AI",
+      "description": "Slow down the process, but generate a more meaningful short key",
+      "label": "Generate default short key by AI",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.0",
-    "@raycast/utils": "^1.16.1",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.2",
+    "u301": "^0.0.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

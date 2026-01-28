@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Clipboard, showToast, Toast, open } from "@raycast/api";
 import { isValidURL, shortenURL, uniqueArray } from "./util";
+import { getFavicon } from "@raycast/utils";
 
 interface Result {
   status: "init" | "shortened" | "error";
@@ -31,14 +32,9 @@ export default function Command() {
       for (const i in lines) {
         lines[i].status = "shortened";
         try {
-          const { shortened, message } = await shortenURL(lines[i].url);
-          if (shortened) {
-            lines[i].status = "shortened";
-            lines[i].shortened = shortened;
-          } else {
-            lines[i].status = "error";
-            lines[i].errorMessage = message;
-          }
+          const shortened = await shortenURL({ url: lines[i].url });
+          lines[i].status = "shortened";
+          lines[i].shortened = shortened;
         } catch (error) {
           lines[i].status = "error";
           lines[i].errorMessage = (error as Error).message;
@@ -79,7 +75,7 @@ export default function Command() {
                 />
               </ActionPanel>
             }
-            icon={Icon.Link}
+            icon={item.status === "shortened" ? getFavicon(item.url) : Icon.Link}
             key={index}
             subtitle={item.status === "shortened" ? item.url : item.errorMessage}
             title={item.status === "shortened" ? item.shortened : item.url}
