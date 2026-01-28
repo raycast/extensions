@@ -1,6 +1,6 @@
 # Aegis Extension Changelog
 
-## [Aegis Windows Support] - {PR_MERGE_DATE}
+## [Aegis Windows Support] - 2026-01-28
 
 - Update `@raycast/api` and `@raycast/utils` to support Windows
 - Add Windows to supported platforms
