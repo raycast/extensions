@@ -1,0 +1,44 @@
+# cURL Changelog
+
+## [Fix: Valid POST Failing] - 2026-01-05
+
+- Fixed an issue where valid POST requests were failing (ref: [Issue #24065](https://github.com/raycast/extensions/issues/24065))
+- Updated more shortcuts
+
+## [Fix: Windows Shortcuts] - 2025-09-18
+
+- Updated `@raycast/api` to the latest version
+- Added cross-platform shortcut support for Windows
+
+## [Feat: Add Windows Support] - 2025-09-09
+
+- Added support for Windows
+- Bumped dependencies
+
+## [Enhancement] - 2025-07-07
+
+- Enhanced the request form to allow users to select and modify parameters for their requests
+
+## [Enhancement] - 2025-05-20
+
+- Enhanced the detail of the request error message displayed in the toast
+
+## [Allow JSONPath copy] - 2025-03-10
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Bug fix] - 2024-11-28
+
+- Allow the request history to store different body requests for the same URL
+
+## [Bug fix] - 2024-08-05
+
+- The "Copy Headers" button now copies the request's headers instead of copying the body
+
+## [Allow custom headers] - 2023-08-15
+
+## [Add PATCH method and change methods icons] - 2023-01-18
+
+## [Add requests metadata title and description + small fixes] - 2022-09-29
+
+## [Initial Version] - 2022-08-17

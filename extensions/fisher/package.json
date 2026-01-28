@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fisher",
+  "title": "Fisher",
+  "description": "Manage Fisher plugins for Fish Shell directly from Raycast",
+  "icon": "fisher-icon.png",
+  "author": "matheuschein",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-installed-plugins",
+      "title": "List Installed Plugins",
+      "subtitle": "List your installed plugins",
+      "description": "This command will list all your installed plugins",
+      "mode": "view"
+    },
+    {
+      "name": "search-plugins",
+      "title": "Search Plugins",
+      "subtitle": "Search for plugins to install",
+      "description": "This command will search for plugins to install from popular Fisher compatible repositories",
+      "mode": "view"
+    },
+    {
+      "name": "remove-plugin",
+      "title": "Remove Plugin",
+      "subtitle": "Select a plugin that you want to remove",
+      "description": "This command will remove the selected plugin from your system",
+      "mode": "view"
+    },
+    {
+      "name": "update-plugins",
+      "title": "Update Plugins",
+      "subtitle": "Update your installed plugins",
+      "description": "This command will update the selected plugin or all installed plugins to the latest version",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "githubToken",
+      "type": "password",
+      "title": "GitHub API Token",
+      "description": "Optional. Used to increase rate limits for GitHub API requests."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

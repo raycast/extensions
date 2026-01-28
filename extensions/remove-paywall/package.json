@@ -1,0 +1,170 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remove-paywall",
+  "title": "Remove Paywall",
+  "description": "Remove the paywall from the selected or clipboard URL.",
+  "icon": "command-icon.png",
+  "author": "tegola",
+  "contributors": [
+    "Whitespace",
+    "DannySeidel",
+    "artivilla",
+    "maxoliinyk",
+    "0xdhrv",
+    "xilopaint"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "remove-paywall",
+      "title": "Remove Paywall",
+      "description": "Remove the paywall from the selected or clipboard URL.",
+      "shortcut": {
+        "macOS": {
+          "modifiers": [
+            "cmd"
+          ],
+          "key": "o"
+        },
+        "Windows": {
+          "modifiers": [
+            "ctrl"
+          ],
+          "key": "o"
+        }
+      },
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (or selection/clipboard)",
+          "required": false
+        },
+        {
+          "name": "service",
+          "type": "dropdown",
+          "placeholder": "Service",
+          "required": false,
+          "data": [
+            {
+              "title": "12ft.io",
+              "value": "https://12ft.io"
+            },
+            {
+              "title": "archive.is",
+              "value": "https://archive.is"
+            },
+            {
+              "title": "removepaywall.com",
+              "value": "https://www.removepaywall.com"
+            },
+            {
+              "title": "freedium-mirror.cfd",
+              "value": "https://freedium-mirror.cfd"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "remove-paywall-current-tab",
+      "title": "Remove Paywall from Current Tab",
+      "description": "Remove the paywall from the URL in your active browser tab.",
+      "shortcut": {
+        "macOS": {
+          "modifiers": [
+            "cmd",
+            "shift"
+          ],
+          "key": "o"
+        },
+        "Windows": {
+          "modifiers": [
+            "ctrl",
+            "shift"
+          ],
+          "key": "o"
+        }
+      },
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-paywall-clipboard",
+      "title": "Remove Paywall from Clipboard",
+      "description": "Remove the paywall from a clipboard URL.",
+      "shortcut": {
+        "macOS": {
+          "modifiers": [
+            "cmd",
+            "shift"
+          ],
+          "key": "c"
+        },
+        "Windows": {
+          "modifiers": [
+            "ctrl",
+            "shift"
+          ],
+          "key": "c"
+        }
+      },
+      "mode": "no-view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "service",
+      "title": "Service",
+      "description": "The default service to use to remove the paywall.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "12ft (12ft.io)",
+          "value": "https://12ft.io"
+        },
+        {
+          "title": "Archive (archive.is)",
+          "value": "https://archive.is"
+        },
+        {
+          "title": "RemovePaywall (removepaywall.com)",
+          "value": "https://www.removepaywall.com"
+        },
+        {
+          "title": "Freedium (freedium-mirror.cfd)",
+          "value": "https://freedium-mirror.cfd"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.5",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module"
+}

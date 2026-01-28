@@ -1,0 +1,67 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "memo",
+    "title": "Memo",
+    "description": "All your bookmarks and notes in 1 Notion",
+    "icon": "memo_icon.png",
+    "author": "mt40",
+    "categories": [
+        "Productivity"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "Save to Notion",
+            "description": "Save copied text to Notion",
+            "mode": "view",
+            "keywords": [
+                "save",
+                "note",
+                "notion",
+                "save to"
+            ]
+        },
+        {
+            "name": "save_to_last",
+            "title": "Save to Last Notion Page",
+            "description": "Save copied text to the last selected Notion page",
+            "mode": "view",
+            "keywords": [
+                "save",
+                "note",
+                "notion",
+                "save to",
+                "save last",
+                "repeat"
+            ]
+        }
+    ],
+    "dependencies": {
+        "@notionhq/client": "^2.2.0",
+        "@raycast/api": "^1.39.3",
+        "@types/node-fetch": "^2.6.2",
+        "html-metadata-parser": "^2.0.4",
+        "node-fetch": "^2.6.7",
+        "validator": "^13.7.0"
+    },
+    "devDependencies": {
+        "@types/jest": "^29.1.1",
+        "@types/validator": "^13.7.0",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "prettier": "^2.5.1",
+        "ts-jest": "^29.0.3",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "test": "jest",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "ray publish"
+    }
+}

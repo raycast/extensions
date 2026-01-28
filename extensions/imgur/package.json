@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "imgur",
+  "title": "Imgur",
+  "description": "Upload Media & View Images directly from Raycast",
+  "icon": "imgur.png",
+  "author": "BalliAsghar",
+  "contributors": [
+    "pernielsentikaer",
+    "Cau",
+    "j3lte"
+  ],
+  "categories": [
+    "Applications",
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Upload",
+      "subtitle": "Imgur",
+      "description": "Upload Images",
+      "mode": "view"
+    },
+    {
+      "name": "view-images",
+      "title": "View Images",
+      "subtitle": "Imgur",
+      "description": "View Uploaded Images",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": "aee191b1f4042c1",
+      "description": "You can get your own Client ID from https://api.imgur.com/oauth2/addclient",
+      "name": "clientID",
+      "required": false,
+      "title": "Client ID",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "form-data": "^4.0.5",
+    "imgur": "^2.5.0",
+    "mime-types": "^3.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

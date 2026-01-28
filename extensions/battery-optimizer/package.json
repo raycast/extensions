@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "battery-optimizer",
+  "title": "Battery Optimizer",
+  "description": "Keep the battery healthy by limiting the charging capacity.",
+  "icon": "icon.png",
+  "categories": [
+    "System"
+  ],
+  "author": "Qetesh",
+  "contributors": [
+    "vatsalsanjay",
+    "justin0u0"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "battery_optimizer",
+      "title": "Battery Optimizer",
+      "description": "Set battery charging limit to prevent overcharging",
+      "mode": "view"
+    },
+    {
+      "name": "reset_battery_optimizer",
+      "title": "Reset Battery Optimizer",
+      "description": "Allow charging to continue to 100%",
+      "mode": "no-view"
+    },
+    {
+      "name": "get_battery_threshold",
+      "title": "Get Battery Threshold (bclm)",
+      "description": "Check the current battery charging limit using BCLM",
+      "mode": "no-view"
+    },
+    {
+      "name": "battery_status_view",
+      "title": "Battery Status View (batt)",
+      "description": "Detailed view of battery status and charging settings using BATT",
+      "mode": "view"
+    },
+    {
+      "name": "battery_optimizer_menu_bar",
+      "title": "Battery Optimizer Menu Bar",
+      "description": "Show the current battery charging threshold and enable/disable the Battery Optimizer in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "batteryTool",
+      "type": "dropdown",
+      "required": true,
+      "title": "Battery Management Tool",
+      "description": "Choose between BCLM (older macOS) or BATT (macOS 15+)",
+      "data": [
+        {
+          "title": "BCLM",
+          "value": "bclm"
+        },
+        {
+          "title": "BATT",
+          "value": "batt"
+        }
+      ],
+      "default": "batt"
+    },
+    {
+      "name": "customBCLMPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom BCLM Executable Path",
+      "description": "Set this if your BCLM executable is in a non-standard location. Find by running `which bclm` in the terminal."
+    },
+    {
+      "name": "customBattPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom BATT Executable Path",
+      "description": "Set this if your BATT executable is in a non-standard location. Find by running `which batt` in the terminal."
+    },
+    {
+      "name": "add_system_service",
+      "description": "Persistence through system services",
+      "type": "checkbox",
+      "required": false,
+      "title": "Takes effect after restart.",
+      "label": "Enable persist"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "prettier": "^3.2.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

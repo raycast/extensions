@@ -1,0 +1,218 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "repository-manager",
+  "title": "Repository Manager",
+  "description": "Project Manager for local git repositories",
+  "icon": "extension-icon.png",
+  "author": "francesco_mecchi",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "type": "directory",
+      "name": "projectsPath",
+      "title": "Projects Path",
+      "description": "The path to the folder containing your projects",
+      "required": true,
+      "default": "~/dev",
+      "placeholder": "~/dev"
+    },
+    {
+      "type": "dropdown",
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "The primary action to perform when pressing Enter on a project",
+      "required": false,
+      "default": "open-in-editor",
+      "placeholder": "open-in-editor",
+      "data": [
+        {
+          "title": "Open in Editor",
+          "value": "open-in-editor"
+        },
+        {
+          "title": "Open in Terminal",
+          "value": "open-in-terminal"
+        },
+        {
+          "title": "Start Development",
+          "value": "start-development"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "open-url"
+        },
+        {
+          "title": "Open Git Remotes",
+          "value": "open-git-remotes"
+        }
+      ]
+    },
+    {
+      "type": "textfield",
+      "name": "maxScanningLevels",
+      "title": "Max Scanning Levels (folder recursion)",
+      "description": "The max number of levels to scan for projects",
+      "required": false,
+      "default": "3",
+      "placeholder": "3"
+    },
+    {
+      "type": "checkbox",
+      "label": "Enable Projects Caching",
+      "name": "enableProjectsCaching",
+      "title": "Enable Projects Caching",
+      "description": "Enable caching of projects to avoid scanning directories every time (you can clear it by using the \"Clear Cache\" command)",
+      "required": true,
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "label": "Group projects by folder",
+      "name": "enableProjectsGrouping",
+      "title": "Group projects by folder",
+      "description": "Group projects by folder",
+      "required": true,
+      "default": true
+    },
+    {
+      "type": "appPicker",
+      "name": "editorApp",
+      "title": "Editor App",
+      "description": "The editor app to use",
+      "required": true,
+      "default": "Visual Studio Code"
+    },
+    {
+      "type": "appPicker",
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "description": "The terminal app to use",
+      "required": true,
+      "default": "Terminale"
+    },
+    {
+      "type": "appPicker",
+      "name": "browserApp",
+      "title": "Browser App",
+      "description": "The browser app to use",
+      "required": true,
+      "default": "Google Chrome"
+    },
+    {
+      "type": "textfield",
+      "name": "localProjectUrlTemplate",
+      "title": "Local Project URL Template",
+      "description": "The template for the URL of your projects (use {project} as placeholder for the project name, additionally you can use any placeholder defined in the project config file)",
+      "required": false,
+      "default": "{project}.test",
+      "placeholder": "{project}.test | local{dynamicPlaceholder}.{project}"
+    },
+    {
+      "type": "checkbox",
+      "label": "Resize Editor Window After Launch",
+      "name": "resizeEditorWindowAfterLaunch",
+      "title": "Resize Editor Window After Launch",
+      "description": "Resize the editor window after launching a project",
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "name": "windowResizeMode",
+      "title": "Resize Mode",
+      "description": "The mode to use when resizing the editor window",
+      "required": false,
+      "default": "almost-maximize",
+      "placeholder": "almost-maximize",
+      "data": [
+        {
+          "title": "Reasonable Size",
+          "value": "reasonable-size"
+        },
+        {
+          "title": "Almost Maximize",
+          "value": "almost-maximize"
+        },
+        {
+          "title": "Toggle Fullscreen",
+          "value": "toggle-fullscreen"
+        },
+        {
+          "title": "Maximize",
+          "value": "maximize"
+        },
+        {
+          "title": "Left Half",
+          "value": "left-half"
+        },
+        {
+          "title": "Center Half",
+          "value": "center-half"
+        },
+        {
+          "title": "Right Half",
+          "value": "right-half"
+        },
+        {
+          "title": "Top Half",
+          "value": "top-half"
+        },
+        {
+          "title": "Bottom Half",
+          "value": "bottom-half"
+        },
+        {
+          "title": "Previous Display",
+          "value": "previous-display"
+        },
+        {
+          "title": "Next Display",
+          "value": "next-display"
+        },
+        {
+          "title": "Previous Desktop",
+          "value": "previous-desktop"
+        },
+        {
+          "title": "Next Desktop",
+          "value": "next-desktop"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "list",
+      "title": "List Repositories",
+      "description": "List all repositories found in the projects path",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.19.1",
+    "parse-git-config": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.15.29",
+    "@types/parse-git-config": "^3.0.4",
+    "@types/react": "^19.1.6",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

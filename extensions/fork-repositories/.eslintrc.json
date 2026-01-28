@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "plugins": [
+    "react-hooks"
+  ],
+  "extends": [
+    "@raycast"
+  ],
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  }
+}

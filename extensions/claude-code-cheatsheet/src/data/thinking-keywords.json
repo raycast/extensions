@@ -1,0 +1,43 @@
+{
+  "id": "thinking",
+  "title": "Extended Thinking Keywords",
+  "description": "Keywords to enable Claude Code's extended thinking feature (by budget tier)",
+  "commands": [],
+  "thinkingKeywords": [
+    {
+      "keyword": "ultrathink",
+      "budget": "max",
+      "tokens": 31999,
+      "description": "Allocates the maximum token budget, triggering the deepest level of extended thinking for highly complex problems. (Claude Code only)",
+      "example": "Design a scalable microservices architecture for this e-commerce platform, considering all edge cases, security implications, and performance optimizations ultrathink"
+    },
+    {
+      "keyword": "think harder",
+      "budget": "max",
+      "tokens": 31999,
+      "description": "Also allocates the maximum budget, equivalent to 'ultrathink', for comprehensive problem-solving and analysis. (Claude Code only)",
+      "example": "Debug this complex memory leak in our React application and refactor the entire state management system for better performance think harder"
+    },
+    {
+      "keyword": "think hard",
+      "budget": "mid",
+      "tokens": 10000,
+      "description": "Allocates a medium token budget, suitable for tasks that require significant but not exhaustive thought. (Claude Code only)",
+      "example": "Implement a robust authentication system with JWT tokens, refresh mechanisms, and proper error handling think hard"
+    },
+    {
+      "keyword": "think deeply",
+      "budget": "mid",
+      "tokens": 10000,
+      "description": "Equivalent to 'think hard', this allocates a medium budget for moderately complex requests. (Claude Code only)",
+      "example": "Review this API design and suggest improvements for better RESTful practices and data validation think deeply"
+    },
+    {
+      "keyword": "think",
+      "budget": "min",
+      "tokens": 4000,
+      "description": "Allocates the minimum extended thinking budget, providing a small boost for straightforward problems. (Claude Code only)",
+      "example": "Explain how this sorting algorithm works and fix the edge case bug think"
+    }
+  ]
+}

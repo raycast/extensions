@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hiit",
+  "title": "HIIT",
+  "description": "High Intensity Interval Training directly from Raycast",
+  "icon": "extension-icon.png",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "andreaselia"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Interval List",
+      "subtitle": "HIIT",
+      "description": "Shows a list of HIIT intervals",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16",
+    "nanoid": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "preferences": [
+    {
+      "name": "beep",
+      "description": "Enable countdown beeps (last 3 seconds)",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "title": "Countdown Beeps",
+      "label": "Enable countdown beeps (last 3 seconds)"
+    },
+    {
+      "name": "intervalbeep",
+      "description": "Interval Change Sound",
+      "type": "dropdown",
+      "required": true,
+      "title": "Interval Change Sound",
+      "default": "pronounce",
+      "placeholder": "Interval Change Sound",
+      "data": [
+        {
+          "title": "Beep",
+          "value": "beep"
+        },
+        {
+          "title": "Pronounce",
+          "value": "pronounce"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ]
+    }
+  ]
+}

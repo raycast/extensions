@@ -1,0 +1,174 @@
+{
+  "enes": {
+    "from": "English",
+    "to": "Spanish"
+  },
+  "esen": {
+    "from": "Spanish",
+    "to": "English"
+  },
+  "esfr": {
+    "from": "Spanish",
+    "to": "French"
+  },
+  "espt": {
+    "from": "Spanish",
+    "to": "Portuguese"
+  },
+  "esit": {
+    "from": "Spanish",
+    "to": "Italian"
+  },
+  "esde": {
+    "from": "Spanish",
+    "to": "German"
+  },
+  "enfr": {
+    "from": "English",
+    "to": "French"
+  },
+  "fren": {
+    "from": "French",
+    "to": "English"
+  },
+  "fres": {
+    "from": "French",
+    "to": "Spanish"
+  },
+  "enit": {
+    "from": "English",
+    "to": "Italian"
+  },
+  "iten": {
+    "from": "Italian",
+    "to": "English"
+  },
+  "ites": {
+    "from": "Italian",
+    "to": "Spanish"
+  },
+  "ende": {
+    "from": "English",
+    "to": "German"
+  },
+  "deen": {
+    "from": "German",
+    "to": "English"
+  },
+  "dees": {
+    "from": "German",
+    "to": "Spanish"
+  },
+  "ennl": {
+    "from": "English",
+    "to": "Dutch"
+  },
+  "nlen": {
+    "from": "Dutch",
+    "to": "English"
+  },
+  "ensv": {
+    "from": "English",
+    "to": "Swedish"
+  },
+  "sven": {
+    "from": "Swedish",
+    "to": "English"
+  },
+  "enis": {
+    "from": "English",
+    "to": "Icelandic"
+  },
+  "enru": {
+    "from": "English",
+    "to": "Russian"
+  },
+  "ruen": {
+    "from": "Russian",
+    "to": "English"
+  },
+  "enpt": {
+    "from": "English",
+    "to": "Portuguese"
+  },
+  "pten": {
+    "from": "Portuguese",
+    "to": "English"
+  },
+  "ptes": {
+    "from": "Portuguese",
+    "to": "Spanish"
+  },
+  "enpl": {
+    "from": "English",
+    "to": "Polish"
+  },
+  "plen": {
+    "from": "Polish",
+    "to": "English"
+  },
+  "enro": {
+    "from": "English",
+    "to": "Romanian"
+  },
+  "roen": {
+    "from": "Romanian",
+    "to": "English"
+  },
+  "encz": {
+    "from": "English",
+    "to": "Czech"
+  },
+  "czen": {
+    "from": "Czech",
+    "to": "English"
+  },
+  "engr": {
+    "from": "English",
+    "to": "Greek"
+  },
+  "gren": {
+    "from": "Greek",
+    "to": "English"
+  },
+  "entr": {
+    "from": "English",
+    "to": "Turkish"
+  },
+  "tren": {
+    "from": "Turkish",
+    "to": "English"
+  },
+  "enzh": {
+    "from": "English",
+    "to": "Chinese"
+  },
+  "zhen": {
+    "from": "Chinese",
+    "to": "English"
+  },
+  "enja": {
+    "from": "English",
+    "to": "Japanese"
+  },
+  "jaen": {
+    "from": "Japanese",
+    "to": "English"
+  },
+  "enko": {
+    "from": "English",
+    "to": "Korean"
+  },
+  "koen": {
+    "from": "Korean",
+    "to": "English"
+  },
+  "enar": {
+    "from": "English",
+    "to": "Arabic"
+  },
+  "aren": {
+    "from": "Arabic",
+    "to": "English"
+  }
+}

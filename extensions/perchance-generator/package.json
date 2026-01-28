@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "perchance-generator",
+  "title": "Perchance Generator",
+  "description": "Input the generator name and receive the generated text.",
+  "icon": "command-icon.png",
+  "author": "Visual-Studio-Coder",
+  "categories": [
+    "Fun"
+  ],
+  "keywords": [
+    "perchance",
+    "generator",
+    "text",
+    "text-generator",
+    "random",
+    "randomizer",
+    "random-text",
+    "random-text-generator",
+    "keyboard",
+    "words"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Using Perchance",
+      "description": "Get the generated text using perchance by inputting the generator name. If a generator name isn't inputted, the default generator will be used.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "project",
+          "type": "text",
+          "placeholder": "Generator Name",
+          "required": false
+          
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "project",
+      "title": "Default Generator Name",
+      "description": "When you don't enter the argument for the generator name, this will be the default generation. The way you can find the name of the generator is by looking at the endpoint of the perchance generator's url.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Enter the name of the desired default generator name from perchance."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.2",
+    "@raycast/utils": "1.10.0",
+    "jsdom": "^22.1.0",
+    "node-fetch": "^3.3.2"  
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/jsdom": "^21.1.2",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+    "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

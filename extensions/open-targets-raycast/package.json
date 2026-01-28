@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open_targets",
+  "title": "Open Targets",
+  "description": "An (unofficial) entry point to the Open Targets ecosystem.",
+  "categories": [
+    "Data",
+    "Applications",
+    "Documentation"
+  ],
+  "icon": "ot-icon.png",
+  "author": "ireneisdoomed",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "platform",
+      "title": "Search the Platform",
+      "description": "Use the search function within Raycast to have a more inmediate access to the Open Targets Platform.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "Enter a term",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "genetics",
+      "title": "Search Genetics",
+      "description": "Use the search function within Raycast to have a more inmediate access to Open Targets Genetics.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "Enter a term",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "genetics_docs",
+      "title": "Open Genetics Docs",
+      "description": "Search the Open Targets Genetics documentation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "platform_docs",
+      "title": "Open Platform Docs",
+      "description": "Search the Open Targets Platform documentation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "inspect_schema",
+      "title": "Browse Datasets",
+      "description": "Look up the schemas of the Open Targets datasets.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1",
+    "@raycast/utils": "^1.4.16",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.3",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

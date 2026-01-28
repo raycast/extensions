@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "incognito-clone",
+  "title": "Incognito Clone",
+  "description": "Open the URL of the currently active tab in an Incognito (Chromium-based) or private (Webkit-based) browser window.",
+  "author": "kgrhartlage",
+  "license": "MIT",
+  "icon": "icon.png",
+  "categories": [
+    "Web",
+    "Applications",
+    "Productivity"
+  ],
+  "keywords": [
+    "clone",
+    "incognito",
+    "private",
+    "tab"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write 'src/**/*.{ts,tsx}'",
+    "lint": "ray lint && eslint --fix 'src/**/*.{ts,tsx}'",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "importSort": {
+    ".ts, .tsx": {
+      "style": "@labforward/config/import-sort",
+      "parser": "typescript"
+    }
+  },
+  "dependencies": {
+    "@raycast/api": "^1.50.2",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@labforward/config": "^0.1.1",
+    "@labforward/eslint-config-node": "^0.1.1",
+    "@raycast/eslint-config": "1.0.5",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "commands": [
+    {
+      "name": "clone",
+      "title": "Clone Tab",
+      "subtitle": "Incognito",
+      "description": "Open the URL of the currently active tab in an Incognito window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clone-and-close",
+      "title": "Clone and Close Tab",
+      "subtitle": "Incognito",
+      "description": "Close the currently active tab and open its URL in an Incognito window.",
+      "mode": "no-view"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

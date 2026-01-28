@@ -1,0 +1,179 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remember-this",
+  "title": "Remember This",
+  "description": "Remember This is an app designed to help you stay motivated and focused on completing your work by its due date. Simply enter any information, such as tasks, notes, or reminders, and set a due date. After the due date passes, the app automatically forgets the information, creating a sense of urgency to complete the task before it's lost forever. This unique feature inspires you to work efficiently and stay on top of your deadlines. With Remember This, you can say goodbye to forgotten tasks and missed deadlines, and hello to increased productivity.",
+  "icon": "command_icon.png",
+  "author": "Ek217",
+  "contributors": [
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Remember This",
+      "subtitle": "Add something for the extension to remember!",
+      "description": "Add something for the extension to remember!",
+      "mode": "view",
+      "arguments": [
+        {
+          "type": "text",
+          "placeholder": "With Remember This",
+          "name": "thingtor"
+        }
+      ]
+    },
+    {
+      "name": "menu",
+      "title": "Menubar",
+      "subtitle": "A countdown to your next activity!",
+      "description": "Show a countdown in your menubar which will countdown to the next thing in you todo!",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "view",
+      "title": "List of Reminders",
+      "subtitle": "View a list of all the items being remembered.",
+      "description": "View a list of all the items being remembered.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rfd",
+      "description": "Rmemember This For Dropdown Default Item",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Remember For",
+      "placeholder": "Placeholder",
+      "default": "2day",
+      "data": [
+        {
+          "title": "30 Minutes",
+          "value": "30min"
+        },
+        {
+          "title": "1 Hour",
+          "value": "1h"
+        },
+        {
+          "title": "2 Hours",
+          "value": "2h"
+        },
+        {
+          "title": "6 Hours",
+          "value": "6h"
+        },
+        {
+          "title": "12 Hours",
+          "value": "12h"
+        },
+        {
+          "title": "1 Day",
+          "value": "1day"
+        },
+        {
+          "title": "2 Days",
+          "value": "2day"
+        },
+        {
+          "title": "1 Week",
+          "value": "1week"
+        },
+        {
+          "title": "2 Weeks",
+          "value": "2week"
+        },
+        {
+          "title": "1 Month",
+          "value": "1month"
+        },
+        {
+          "title": "3 Months",
+          "value": "3month"
+        },
+        {
+          "title": "6 Months",
+          "value": "6month"
+        },
+        {
+          "title": "1 Year",
+          "value": "1year"
+        },
+        {
+          "title": "2 Years",
+          "value": "2year"
+        },
+        {
+          "title": "5 Years",
+          "value": "5year"
+        },
+        {
+          "title": "Forever",
+          "value": "Forever"
+        }
+      ]
+    },
+    {
+      "name": "size",
+      "description": "Size of the menubar command",
+      "type": "dropdown",
+      "required": true,
+      "title": "Menubar Command Format",
+      "placeholder": "Placeholder",
+      "default": "normal",
+      "data": [
+        {
+          "title": "Compact",
+          "value": "compact"
+        },
+        {
+          "title": "Normal",
+          "value": "normal"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "name": "webhookurl",
+      "description": "WebhookURL",
+      "type": "password",
+      "required": false,
+      "title": "WebhookURL",
+      "placeholder": "WebhookURL"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "axios": "^1.11.0",
+    "node-notifier": "^10.0.1",
+    "node-telegram-bot-api": "^0.66.0",
+    "open": "^10.2.0",
+    "run-applescript": "^7.0.0",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.3.0",
+    "@types/node-fetch": "^2.6.4",
+    "@types/react": "19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

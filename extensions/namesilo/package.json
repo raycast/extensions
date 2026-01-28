@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "namesilo",
+  "title": "NameSilo",
+  "description": "View your Domains, Orders, Whois Info and Account Balance",
+  "icon": "namesilo.png",
+  "author": "xmok",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxx",
+      "required": true,
+      "description": "API Key from NameSilo Dashboard",
+      "type": "password"
+    },
+    {
+      "name": "ote_api_key",
+      "title": "OTE API Key",
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxx",
+      "required": false,
+      "description": "OTE API Key from NameSilo Team",
+      "type": "password"
+    },
+    {
+      "name": "use_ote",
+      "label": "Use OTE",
+      "required": false,
+      "description": "Specify whether to use OTE or Live",
+      "type": "checkbox",
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "domains",
+      "title": "Domains",
+      "description": "View Domains and Domain Info",
+      "mode": "view"
+    },
+    {
+      "name": "whois",
+      "title": "Whois",
+      "description": "View Whois Info for any domain",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "DOMAIN",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "orders",
+      "title": "Orders",
+      "description": "View your Orders and Order Details",
+      "mode": "view"
+    },
+    {
+      "name": "prices",
+      "title": "Prices",
+      "description": "View Prices by TLD",
+      "mode": "view"
+    },
+    {
+      "name": "account-balance",
+      "title": "Account Balance",
+      "description": "View your Account Balance",
+      "mode": "no-view"
+    },
+    {
+      "name": "auctions",
+      "title": "Auctions",
+      "description": "View Public Auctions",
+      "mode": "view"
+    },
+    {
+      "name": "contacts",
+      "title": "Contacts",
+      "description": "View Contact Profiles",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "dayjs": "^1.11.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

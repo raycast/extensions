@@ -1,0 +1,19 @@
+name: "Changelog Enforcer"
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+    paths:
+      - "extensions/**"
+    branches: [main, master]
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Changelog enforce
+        id: enforce
+        uses: raycast/github-actions/changelog-enforcer@master
+        continue-on-error: true
+      - name: Fail if changelog missing
+        if: steps.enforce.outcome == 'failure'
+        run: exit 1

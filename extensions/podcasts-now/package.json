@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "podcasts-now",
+  "title": "Podcasts Now",
+  "description": "Manage, explore, and listen to podcasts all in one place through Raycast.",
+  "icon": "command-icon.png",
+  "author": "cloudy9101",
+  "categories": [
+    "Fun",
+    "Media",
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "podcast-list",
+      "title": "Podcasts",
+      "description": "List all subscribed podcasts",
+      "mode": "view"
+    },
+    {
+      "name": "podcasts-menubar",
+      "title": "Show Player in Menu Bar",
+      "description": "Enable the menu bar to display the podcast player's state",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1",
+    "@raycast/utils": "^1.4.8",
+    "cross-fetch": "^3.1.5",
+    "fast-xml-parser": "^4.0.15",
+    "lodash": "^4.17.21",
+    "rss-parser": "^3.12.0",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.191",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

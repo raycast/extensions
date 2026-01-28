@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bmrks",
+  "title": "(Basic) Bookmarks",
+  "description": "Companion bookmarking utility for bmrks.com",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "icon": "icon.png",
+  "author": "rauno",
+  "contributors": [
+    "peduarte",
+    "almoce",
+    "xmok"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-bookmark",
+      "title": "Create Bookmark",
+      "subtitle": "(Basic) Bookmarks",
+      "description": "Create a new bookmark",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "(Basic) Bookmarks",
+      "description": "Search your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "manage-groups",
+      "title": "Manage Groups",
+      "subtitle": "(Basic) Bookmarks",
+      "description": "Manage groups of bookmarks",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Your email on bmrks.com",
+      "placeholder": "joe@doe.com"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your password on bmrks.com",
+      "placeholder": "********"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "@supabase/supabase-js": "^2.90.1",
+    "color-string": "^2.1.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/color-string": "^1.5.5",
+    "@types/node": "^25.0.8",
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

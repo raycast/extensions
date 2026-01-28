@@ -1,0 +1,171 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-npm",
+  "title": "Search npm Packages",
+  "description": "Search for npm package information",
+  "subtitle": "npm",
+  "icon": "command-icon.png",
+  "author": "mrmartineau",
+  "contributors": [
+    "reloadedhead",
+    "Timon",
+    "luisFilipePT",
+    "LunaticMuch",
+    "jomifepe",
+    "j3lte",
+    "litomore",
+    "ridemountainpig",
+    "dbrooks",
+    "YourMCGeek"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Packages",
+      "subtitle": "npm",
+      "description": "Search for npm package information. Also view bundlephobia.com cost, the package's README and Snyk vulnerability info",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "View Favorites",
+      "subtitle": "npm",
+      "description": "View your favorite packages",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCopyAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "yarn",
+          "value": "yarn"
+        },
+        {
+          "title": "npm",
+          "value": "npm"
+        },
+        {
+          "title": "pnpm",
+          "value": "pnpm"
+        },
+        {
+          "title": "bun",
+          "value": "bun"
+        }
+      ],
+      "title": "Default Package Manager",
+      "description": "The package manager to use by default",
+      "required": false,
+      "default": "npm",
+      "value": "npm"
+    },
+    {
+      "name": "secondaryCopyAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "yarn",
+          "value": "yarn"
+        },
+        {
+          "title": "npm",
+          "value": "npm"
+        },
+        {
+          "title": "pnpm",
+          "value": "pnpm"
+        },
+        {
+          "title": "bun",
+          "value": "bun"
+        }
+      ],
+      "title": "Secondary Package Manager",
+      "description": "The secondary package manager to use",
+      "required": false,
+      "default": "yarn",
+      "value": "yarn"
+    },
+    {
+      "name": "defaultOpenAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Open Repository",
+          "value": "openRepository"
+        },
+        {
+          "title": "Open Homepage",
+          "value": "openHomepage"
+        },
+        {
+          "title": "npm Package Page",
+          "value": "npmPackagePage"
+        },
+        {
+          "title": "Skypack.dev Package Page",
+          "value": "skypackPackagePage"
+        }
+      ],
+      "title": "Default Open Action",
+      "description": "How to open the selected package when Enter is pressed",
+      "required": false,
+      "default": "openRepository",
+      "value": "openRepository"
+    },
+    {
+      "name": "historyCount",
+      "type": "textfield",
+      "title": "History Count",
+      "description": "How many items to store in your history",
+      "required": false,
+      "default": "30",
+      "value": "30"
+    },
+    {
+      "name": "showLinkToSearchResultsInListView",
+      "type": "checkbox",
+      "label": "Show link in list view",
+      "title": "Show link to npmjs.com results in list view",
+      "description": "Show link to npmjs.com search results in list view",
+      "required": false,
+      "value": true,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "dedupe": "^4.0.3",
+    "git-url-parse": "^16.1.0",
+    "tiny-relative-date": "^2.0.2",
+    "use-debounce": "^10.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

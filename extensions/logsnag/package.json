@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "logsnag",
+  "title": "LogSnag",
+  "description": "Publish Events and Insights to LogSnag",
+  "icon": "logsnag.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "description": "API Token from LogSnag Dashboard",
+      "placeholder": "9f09f...ace",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "events",
+      "subtitle": "LogSnag",
+      "title": "List Events",
+      "description": "View and Publish events to LogSnag",
+      "mode": "view"
+    },
+    {
+      "name": "insights",
+      "title": "List Insights",
+      "subtitle": "LogSnag",
+      "description": "View and Publish insights to LogSnag",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.3",
+    "@raycast/utils": "^1.8.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

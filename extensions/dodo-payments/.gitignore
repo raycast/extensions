@@ -1,0 +1,9 @@
+node_modules
+.env
+.env.local
+
+# Build Outputs
+dist
+
+# Misc
+.DS_Store

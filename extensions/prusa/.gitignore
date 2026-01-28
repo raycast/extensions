@@ -1,0 +1,75 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# Windsurf files
+.windsurfrules
+global_rules.md
+
+# Cursor.sh files
+.cursor/
+.repomix-output.txt
+.cursorrules
+
+# misc
+.DS_Store
+
+# Project planning
+.Plan
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.raycast/
+.next/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Raycast specific
+.raycast-swift-build/
+.build/
+
+# Testing
+coverage/
+
+# Misc
+.DS_Store
+*.pem
+.vercel

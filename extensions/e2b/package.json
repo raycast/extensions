@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "e2b",
+  "title": "E2B Code Interpreter",
+  "description": "E2B is a tool that allows you to execute code in a secure sandbox withing a Jupyter-like notebook cell and return result",
+  "icon": "icon.png",
+  "author": "mlejva",
+  "owner": "e2b",
+  "access": "public",
+  "contributors": [
+    "thomas"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-code",
+      "title": "Run Code",
+      "description": "Execute code in a Jupyter notebook cell and return result",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "code",
+          "type": "text",
+          "placeholder": "Enter code to execute",
+          "description": "The code to execute"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "run-code",
+      "title": "Run Code",
+      "description": "Allow AI to execute code in a Jupyter notebook cell and return result"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@e2b generate first 10 fibonacci numbers",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": "fibonacci"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@e2b/code-interpreter": "^1.2.0-beta.1",
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.18.1",
+    "cross-fetch": "^4.1.0",
+    "node-fetch": "^3.3.2"
+  }
+}

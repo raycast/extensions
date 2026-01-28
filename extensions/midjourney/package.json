@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "midjourney",
+  "title": "Midjourney",
+  "description": "Interact with Midjourney right from your command bar",
+  "icon": "extension_icon.png",
+  "author": "carter",
+  "categories": [
+    "Applications",
+    "Design Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Midjourney",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view"
+    },
+    {
+      "name": "imagine",
+      "title": "Imagine",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sessionToken",
+      "title": "Session token",
+      "description": "Discord user token",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "serverId",
+      "title": "Server ID",
+      "description": "Discord server id",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "channelId",
+      "title": "Channel ID",
+      "description": "Discord channel id",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "cross-fetch": "^4.0.0",
+    "midjourney": "^4.3.12",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

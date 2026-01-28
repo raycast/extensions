@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kill-node-modules",
+  "title": "Kill Node Modules",
+  "description": "Remove selected node_modules",
+  "icon": "extension-icon.png",
+  "author": "NicolasMontone",
+  "contributors": [
+    "muhammad_subhan_abbas"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "kill-node-modules",
+      "title": "Kill Node Modules",
+      "description": "Remove selected node_modules",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rootFolder",
+      "title": "Folder to scan",
+      "type": "directory",
+      "description": "This is where we will search for node modules.",
+      "placeholder": "Folder to scan",
+      "required": true,
+      "default": ""
+    },
+    {
+      "name": "scanDepth",
+      "title": "Scan Depth",
+      "type": "dropdown",
+      "description": "This is the depth of the scan.",
+      "placeholder": "Scan Depth",
+      "required": true,
+      "default": "3",
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/du": "^1.0.3",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

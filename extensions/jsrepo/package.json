@@ -1,0 +1,158 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "jsrepo",
+	"title": "jsrepo",
+	"description": "Interact with jsrepo registries all without leaving Raycast.",
+	"icon": "jsrepo.png",
+	"author": "ieedan",
+	"categories": [
+		"Developer Tools"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "search-registries",
+			"title": "Search Registries",
+			"description": "Search registries and view their blocks.",
+			"mode": "view"
+		}
+	],
+	"preferences": [
+		{
+			"name": "orderBy",
+			"title": "Sort Registries By",
+			"type": "dropdown",
+			"description": "How should registries be sorted",
+			"data": [
+				{
+					"title": "Alphabetical",
+					"value": "alphabetical"
+				},
+				{
+					"title": "Most Popular",
+					"value": "views"
+				}
+			],
+			"required": false,
+			"default": "alphabetical"
+		},
+		{
+			"name": "github_token",
+			"title": "GitHub Token",
+			"label": "GitHub Token",
+			"type": "password",
+			"description": "Your personal access token used to access registries hosted on GitHub.",
+			"required": false,
+			"placeholder": "Enter your personal access token"
+		},
+		{
+			"name": "gitlab_token",
+			"title": "GitLab Token",
+			"label": "GitLab Token",
+			"type": "password",
+			"description": "Your personal access token used to access registries hosted on GitLab.",
+			"required": false,
+			"placeholder": "Enter your personal access token"
+		},
+		{
+			"name": "bitbucket_token",
+			"title": "BitBucket Token",
+			"label": "BitBucket Token",
+			"type": "password",
+			"description": "Your personal access token used to access registries hosted on BitBucket.",
+			"required": false,
+			"placeholder": "Enter your personal access token"
+		},
+		{
+			"name": "azure_token",
+			"title": "AzureDevops Token",
+			"label": "AzureDevops Token",
+			"type": "password",
+			"description": "Your personal access token used to access registries hosted on AzureDevops.",
+			"required": false,
+			"placeholder": "Enter your personal access token"
+		},
+		{
+			"name": "limitPreviewLOC",
+			"title": "Limit Preview LOC",
+			"label": "Limit Preview LOC",
+			"type": "checkbox",
+			"description": "Should we limit code previews to a specified maximum amount of lines",
+			"default": true,
+			"required": false
+		},
+		{
+			"name": "maximumPreviewLOC",
+			"title": "Maximum Preview LOC",
+			"label": "Maximum Preview LOC",
+			"type": "dropdown",
+			"description": "The maximum lines of code that will be previewed when viewing blocks. (For performance reasons)",
+			"data": [
+				{
+					"title": "100",
+					"value": "100"
+				},
+				{
+					"title": "200",
+					"value": "200"
+				},
+				{
+					"title": "300",
+					"value": "300"
+				},
+				{
+					"title": "400",
+					"value": "400"
+				},
+				{
+					"title": "500",
+					"value": "500"
+				},
+				{
+					"title": "600",
+					"value": "600"
+				},
+				{
+					"title": "700",
+					"value": "700"
+				},
+				{
+					"title": "800",
+					"value": "800"
+				},
+				{
+					"title": "900",
+					"value": "900"
+				},
+				{
+					"title": "1000",
+					"value": "1000"
+				}
+			],
+			"required": false,
+			"default": "400"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.94.3",
+		"@raycast/utils": "^1.17.0",
+		"jsrepo": "^1.45.3"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.0.4",
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.10",
+		"eslint": "^9.22.0",
+		"prettier": "^3.5.3",
+		"typescript": "^5.8.2"
+	},
+	"scripts": {
+		"build": "ray build",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"format": "npx prettier . --write",
+		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+		"publish": "npx @raycast/api@latest publish"
+	}
+}

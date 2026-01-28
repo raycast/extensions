@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "espanso",
+  "title": "Espanso",
+  "description": "The Raycast version of Espanso Search Bar",
+  "type": "module",
+  "icon": "espanso-logo.png",
+  "author": "kud",
+  "contributors": [
+    "nbbaier"
+  ],
+  "categories": [
+    "Applications",
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Matches",
+      "subtitle": "Espanso",
+      "description": "The Raycast version of Espanso Search Bar",
+      "mode": "view"
+    },
+    {
+      "name": "add-match",
+      "title": "Add Match",
+      "subtitle": "Espanso",
+      "description": "Add a match to your Espanso config",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Espanso",
+      "subtitle": "Espanso",
+      "description": "Enable or disable Espanso",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable",
+      "title": "Enable Espanso",
+      "subtitle": "Espanso",
+      "description": "Enable Espanso",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable",
+      "title": "Disable Espanso",
+      "subtitle": "Espanso",
+      "description": "Disable Espanso",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.100.3",
+    "@raycast/utils": "2.1.0",
+    "change-case": "5.4.4",
+    "fs-extra": "11.3.0",
+    "yaml": "2.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/fs-extra": "11.0.4",
+    "@types/node": "24.0.10",
+    "@types/react": "19.1.8",
+    "@types/yaml": "1.9.6",
+    "eslint": "9.30.1",
+    "prettier": "3.6.2",
+    "typescript": "5.8.3"
+  },
+  "preferences": [
+    {
+      "name": "espansoPath",
+      "type": "textfield",
+      "title": "Espanso Binary Path",
+      "description": "Full path to the espanso binary. Leave empty to use the default (espanso in PATH).",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

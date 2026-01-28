@@ -1,0 +1,168 @@
+{
+  "fields": [
+    { "metadata": {}, "name": "id", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "code", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "dbXRefs",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "description",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "name", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "directLocationIds",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "obsoleteTerms",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "parents",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "sko",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "synonyms",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "hasBroadSynonym",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": "string",
+              "type": "array"
+            }
+          },
+          {
+            "metadata": {},
+            "name": "hasExactSynonym",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": "string",
+              "type": "array"
+            }
+          },
+          {
+            "metadata": {},
+            "name": "hasNarrowSynonym",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": "string",
+              "type": "array"
+            }
+          },
+          {
+            "metadata": {},
+            "name": "hasRelatedSynonym",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": "string",
+              "type": "array"
+            }
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "ancestors",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "descendants",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "children",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "therapeuticAreas",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "indirectLocationIds",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "ontology",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "isTherapeuticArea",
+            "nullable": true,
+            "type": "boolean"
+          },
+          {
+            "metadata": {},
+            "name": "leaf",
+            "nullable": true,
+            "type": "boolean"
+          },
+          {
+            "metadata": {},
+            "name": "sources",
+            "nullable": true,
+            "type": {
+              "fields": [
+                {
+                  "metadata": {},
+                  "name": "url",
+                  "nullable": true,
+                  "type": "string"
+                },
+                {
+                  "metadata": {},
+                  "name": "name",
+                  "nullable": true,
+                  "type": "string"
+                }
+              ],
+              "type": "struct"
+            }
+          }
+        ],
+        "type": "struct"
+      }
+    }
+  ],
+  "type": "struct"
+}

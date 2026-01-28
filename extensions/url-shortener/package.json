@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "url-shortener",
+  "title": "URL Shortener",
+  "description": "Experience the joy of shortening URLs to your heart's desire with Raycast's URL Shortener! Enjoy the convenience of free URL shortening, without the need for an API key or any rate limits. The domains you can use are: tinyurl.com, shrtco.de, 9qr.de, and shiny.link",
+  "icon": "command-icon.png",
+  "author": "Visual-Studio-Coder",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shorten-url",
+      "title": "Shorten URL Using Selected Text",
+      "description": "Using your selected text (a valid link), URL Shortener will replace it with a shortened link which redirects to your desired selected URL.",
+      "mode": "no-view"
+    },
+    {
+      "name": "shorten-url-withargs",
+      "title": "Shorten URL Using Argument",
+      "description": "Using the inputted argument (a valid link), URL Shortener will copy a shortened version of the link to the clipboard which redirects to your desired selected URL.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "domain",
+      "title": "Domain",
+      "description": "This is what will be used in your shortened links.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "tinyurl.com",
+          "value": "4"
+        },
+        {
+          "title": "shrtco.de",
+          "value": "1"
+        },
+        {
+          "title": "9qr.de",
+          "value": "2"
+        },
+        {
+          "title": "shiny.link",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "clipboard",
+      "title": "Clipboard",
+      "description": "For the command that converts selected text into a shortened link, choose between copying the shortened link to the clipboard or pasting it to the active window.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Paste to Active Window",
+          "value": "1"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "2"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.0",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^3.0.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

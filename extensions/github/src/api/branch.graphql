@@ -1,0 +1,47 @@
+input CreateLinkedBranchInput {
+  clientMutationId: String
+  issueId: ID!
+  name: String
+  oid: GitObjectID!
+  repositoryId: ID
+}
+
+input CreateRefInput {
+  clientMutationId: String
+  name: String!
+  oid: GitObjectID!
+  repositoryId: ID!
+}
+
+input DeleteLinkedBranchInput {
+  clientMutationId: String
+  linkedBranchId: ID!
+}
+
+mutation createLinkedBranch($input: CreateLinkedBranchInput!) {
+  createLinkedBranch(input: $input) {
+    clientMutationId
+    linkedBranch {
+      ref {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation createRef($input: CreateRefInput!) {
+  createRef(input: $input) {
+    clientMutationId
+    ref {
+      id
+      name
+    }
+  }
+}
+
+mutation deleteLinkedBranch($input: DeleteLinkedBranchInput!) {
+  deleteLinkedBranch(input: $input) {
+    clientMutationId
+  }
+}

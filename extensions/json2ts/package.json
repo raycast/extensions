@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "json2ts",
+  "title": "Json2TS",
+  "version": "0.0.2",
+  "description": "Generate TypeScript interfaces from JSON",
+  "icon": "command-icon.png",
+  "author": "gbarba",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "yusifaliyevpro"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Json2ts",
+      "description": "Generate TypeScript interfaces from JSON",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "json-ts": "^1.6.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.6",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

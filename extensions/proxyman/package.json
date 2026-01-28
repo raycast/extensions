@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "proxyman",
+  "title": "Proxyman",
+  "description": "Navigate and perform common actions in Proxyman faster",
+  "icon": "proxyman-icon.png",
+  "author": "noah_tran",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ],
+  "keywords": [
+    "Proxyman",
+    "Proxy",
+    "HTTP",
+    "HTTPS",
+    "System Proxy",
+    "Debugging",
+    "Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-system-proxy",
+      "title": "Toggle System Proxy",
+      "subtitle": "Proxyman",
+      "description": "Toggle HTTP/HTTPS System Proxy. Same logic with Tools -> Proxy Setting -> Override macOS System",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-map-local-tool",
+      "title": "Toggle Map Local",
+      "subtitle": "Proxyman",
+      "description": "Toggle the Map Local in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-breakpoint",
+      "title": "Toggle Breakpoint",
+      "subtitle": "Proxyman",
+      "description": "Toggle the Breakpoint feature in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-blocklist",
+      "title": "Toggle Blocklist",
+      "subtitle": "Proxyman",
+      "description": "Toggle the Blocklist feature in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-allowlist",
+      "title": "Toggle Allowlist",
+      "subtitle": "Proxyman",
+      "description": "Toggle the Allowlist feature in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-map-remote",
+      "title": "Toggle Map Remote",
+      "subtitle": "Proxyman",
+      "description": "Toggle the Map Remote feature in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-scripting",
+      "title": "Toggle Scripting",
+      "subtitle": "Proxyman",
+      "description": "Toggle the Scripting feature in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-external-proxy",
+      "title": "Toggle External Proxy",
+      "subtitle": "Proxyman",
+      "description": "Toggle the External Proxy feature in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-socks-proxy",
+      "title": "Toggle SOCKS Proxy",
+      "subtitle": "Proxyman",
+      "description": "Toggle the SOCKS Proxy feature in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-network-condition",
+      "title": "Toggle Network Condition",
+      "subtitle": "Proxyman",
+      "description": "Toggle the Network Condition feature in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-ssl-proxying-list",
+      "title": "Toggle SSL Proxying List",
+      "subtitle": "Proxyman",
+      "description": "Toggle the SSL Proxying List feature in Proxyman",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-record-traffic",
+      "title": "Toggle Record Traffic",
+      "subtitle": "Proxyman",
+      "description": "Toggle the Record Traffic feature in Proxyman",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-session",
+      "title": "Clear Session",
+      "subtitle": "Proxyman",
+      "description": "Clear the current session in Proxyman",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

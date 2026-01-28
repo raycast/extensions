@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-apple-intelligence",
+  "title": "Apple Intelligence",
+  "description": "Use Apple Intelligence from the comfort of Raycast.",
+  "icon": "apple-intelligence.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-writing-tools",
+      "title": "List Writing Tools",
+      "description": "List all Writing Tool options in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "show-writing-tools",
+      "title": "Show Writing Tools",
+      "description": "Show Apple Intelligence Writing Tools menu",
+      "mode": "no-view"
+    },
+    {
+      "name": "rewrite",
+      "title": "Rewrite",
+      "description": "Rewrite the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "compose",
+      "title": "Compose",
+      "description": "Compose with ChatGPT",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-image",
+      "title": "Create Image",
+      "description": "Create an image with Image Playground",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "prompt",
+          "placeholder": "Prompt"
+        }
+      ]
+    },
+    {
+      "name": "create-key-points",
+      "title": "Create Key Points",
+      "description": "Create key points from the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-concise",
+      "title": "Make Concise",
+      "description": "Make the selected text concise",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-friendly",
+      "title": "Make Friendly",
+      "description": "Make the selected text friendly",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-list",
+      "title": "Make List",
+      "description": "Convert the selected text into a list",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-professional",
+      "title": "Make Professional",
+      "description": "Make the selected text professional",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-table",
+      "title": "Make Table",
+      "description": "Convert the selected text into a table",
+      "mode": "no-view"
+    },
+    {
+      "name": "proofread",
+      "title": "Proofread",
+      "description": "Proofread the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize the selected text",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "localizedEdit",
+      "title": "Edit Menu Localization",
+      "description": "What is the name of the Edit menu in your language?",
+      "type": "textfield",
+      "required": false,
+      "default": "Edit",
+      "placeholder": "Edit, Bearbeiten, ..."
+    },
+    {
+      "name": "localizedWritingTools",
+      "title": "Writing Tools Localization",
+      "description": "What is the name of the Writing Tools menu item in your language?",
+      "type": "textfield",
+      "required": false,
+      "default": "Writing Tools",
+      "placeholder": "Writing Tools, Schreibtools, ..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.9",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

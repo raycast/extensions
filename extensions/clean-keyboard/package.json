@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clean-keyboard",
+  "title": "Clean Keyboard",
+  "description": "Lock your keyboard to clean it easily",
+  "icon": "extension_icon.png",
+  "author": "ike-gg",
+  "contributors": [
+    "AndersDigital",
+    "xilopaint",
+    "ridemountainpig",
+    "litomore"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Other",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clean-keyboard",
+      "title": "Lock Keyboard",
+      "description": "Lock your keyboard to clean it easily",
+      "mode": "view",
+      "keywords": [
+        "keyboard",
+        "clean",
+        "lock",
+        "freeze",
+        "dirty"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

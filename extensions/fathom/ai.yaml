@@ -1,0 +1,526 @@
+instructions: |
+    You are an AI assistant for Fathom. When you answer, follow these core rules:
+
+    - CRITICAL: When calling `get-meeting-details`, the `includeTranscript` parameter is required. Set it to true ONLY when the user explicitly asks for the transcript text, wants to read what was said verbatim, or asks to "summarize the transcript" or "show me the transcript". For all other queries including "provide a summary of the meeting", "what was discussed", or general summary requests, set it to false because the meeting already has a pre-generated summary. This applies even when you add other parameters like `meetingId`, `title`, or `date`.
+    - CRITICAL: When calling `get-meeting-details`, you MUST provide either `meetingId` OR `title`. Never call it with only `includeTranscript`.
+    - For queries about the "latest" or "most recent" meeting (e.g., "What are the tasks from my most recent meeting", "How long was my last meeting", "Provide a summary of my last meeting"), first call `list-meetings` with `{ "limit": 1, "sortBy": "date" }` to get the meeting ID, then call `get-meeting-details` with that ID by extracting the `id` field from the list-meetings response and passing it as `meetingId`.
+    - Use `list-meetings` when the user wants a list of meetings, when you need IDs before another tool call, or when you must disambiguate multiple candidates. For single-meeting requests based on recency—including "show my latest meeting" or "last meeting about X"—call `get-meeting-details` directly with the appropriate `title` parameter.
+    - Use the `title` parameter for topical queries (e.g., "meeting about the product launch"). Use `participant` for queries about people (e.g., "meetings with Sarah"). Use the `query` parameter for full-text search across meeting titles, summaries, and transcripts when the user wants to search for specific content or keywords. If the user only specifies time ("latest meeting"), avoid extra filters.
+    - For action items queries (e.g., "tasks from my last meeting", "what are my action items"), call `get-meeting-details` with `includeTranscript: false`, then extract action items from the response.
+    - For meeting duration queries, call `get-meeting-details` with `includeTranscript: false` and use the `durationSeconds` field to calculate minutes or hours.
+    - For participant queries (e.g., "Who was in my last meeting"), call `get-meeting-details` with `includeTranscript: false` and use the `calendarInvitees` field.
+    - Use `get-meeting-details` to retrieve transcripts and summaries. Set `includeTranscript: true` when the user asks for the transcript, what was said, or to summarize a transcript; keep it false for summaries unless the transcript is explicitly mentioned.
+    - For cross-meeting analysis (e.g., "Show me all my meetings about X", "Who did I meet with most often"), use `list-meetings` with appropriate filters like `participant`, `title`, or `dateRange`.
+    - For productivity metrics (e.g., "total meeting hours last week", "average meeting length"), call `list-meetings` with date filters, then calculate metrics from the returned meetings' `durationSeconds` values.
+    - When generating follow-up content (e.g., "draft follow-up email from last meeting"), first get the meeting summary with `get-meeting-details`, then synthesize the follow-up based on the summary and action items.
+    - Always respect the user's time context: "today", "yesterday", "this week", "last week", "last month" should be converted to appropriate date ranges in ISO 8601 format.
+    - For team-related queries, use `list-team-members` to get team information.
+
+evals:
+    # Basic Meeting Information
+    - input: "@fathom How long was my last meeting?"
+      mocks:
+        list-meetings:
+          - id: "12345"
+            title: "Product Roadmap Discussion"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            durationSeconds: 3600
+            recordedByName: "John Smith"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              limit: 1
+              sortBy: "date"
+        - includes: "60 minutes"
+
+    - input: "@fathom Who was in my last meeting?"
+      mocks:
+        list-meetings:
+          - id: "12345"
+            title: "Product Roadmap Discussion"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com", "mike@example.com"]
+        get-meeting-details:
+          - id: "12345"
+            title: "Product Roadmap Discussion"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com", "mike@example.com"]
+            recordedByName: "John Smith"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              limit: 1
+              sortBy: "date"
+        - callsTool:
+            name: "get-meeting-details"
+            arguments:
+              meetingId: "12345"
+              includeTranscript: false
+        - includes: "sarah"
+
+    - input: "@fathom When was my last meeting with Sarah?"
+      mocks:
+        list-meetings:
+          - id: "67890"
+            title: "Design Review"
+            startTimeISO: "2025-01-27T10:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com"]
+            durationSeconds: 1800
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              participant: "Sarah"
+              limit: 1
+              sortBy: "date"
+        - includes: "Design Review"
+
+    # Action Items and Tasks
+    - input: "@fathom What are the tasks from my most recent meeting?"
+      mocks:
+        list-meetings:
+          - id: "12345"
+            title: "Product Launch Planning"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            actionItemsCount: 4
+        get-meeting-details:
+          - id: "12345"
+            title: "Product Launch Planning"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            actionItems:
+              - description: "Finalize marketing materials by Friday"
+                userGenerated: false
+                completed: false
+                assignee:
+                  name: "Sarah Johnson"
+                  email: "sarah@example.com"
+              - description: "Schedule demo with engineering team"
+                userGenerated: false
+                completed: false
+                assignee:
+                  name: "Mike Chen"
+                  email: "mike@example.com"
+              - description: "Prepare presentation for stakeholders"
+                userGenerated: false
+                completed: false
+                assignee:
+                  name: "John Smith"
+                  email: "john@example.com"
+              - description: "Review budget allocation for Q2"
+                userGenerated: false
+                completed: false
+                assignee:
+                  name: "Lisa Brown"
+                  email: "lisa@example.com"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              limit: 1
+              sortBy: "date"
+        - callsTool:
+            name: "get-meeting-details"
+            arguments:
+              meetingId: "12345"
+              includeTranscript: false
+        - includes: "marketing materials"
+
+    # Transcript and Summary Queries
+    - input: "@fathom Show me the transcript of my most recent meeting about the product launch"
+      mocks:
+        get-meeting-details:
+          - id: "12345"
+            title: "Product Launch Planning"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            transcriptText: |
+              **John Smith** [00:00:05]
+              Thanks everyone for joining. Let's discuss the product launch timeline.
+              
+              **Sarah Johnson** [00:00:15]
+              I think we should aim for next quarter. We still need to finalize the marketing materials.
+              
+              **Mike Chen** [00:00:30]
+              Agreed. From an engineering perspective, we're on track for a Q2 release.
+      expected:
+        - callsTool:
+            name: "get-meeting-details"
+            arguments:
+              title: "product launch"
+              includeTranscript: true
+        - includes: "John Smith"
+
+    - input: "@fathom Provide a summary of my last meeting"
+      mocks:
+        list-meetings:
+          - id: "12345"
+            title: "Weekly Team Sync"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+        get-meeting-details:
+          - id: "12345"
+            title: "Weekly Team Sync"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            summaryText: |
+              ## Overview
+              Weekly team sync covering sprint progress, blockers, and upcoming priorities.
+              
+              ## Key Points
+              - Sprint 12 is on track with 80% completion
+              - Two blockers identified: API rate limits and design feedback
+              - Q2 planning begins next week
+              
+              ## Action Items
+              - Sarah to finalize design mockups by Friday
+              - Mike to investigate API optimization
+              - Team to prepare Q2 roadmap proposals
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              limit: 1
+              sortBy: "date"
+        - callsTool:
+            name: "get-meeting-details"
+            arguments:
+              meetingId: "12345"
+              includeTranscript: false
+        - includes: "sprint"
+
+    - input: "@fathom Summarize the transcript of my most recent meeting"
+      mocks:
+        list-meetings:
+          - id: "12345"
+            title: "Client Discovery Call"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+        get-meeting-details:
+          - id: "12345"
+            title: "Client Discovery Call"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            transcriptText: |
+              **John Smith** [00:00:05]
+              Thanks for taking the time to meet with us today. I'd love to learn more about your current workflow.
+              
+              **Client** [00:00:20]
+              We're struggling with meeting follow-ups. Too many action items fall through the cracks.
+              
+              **Sarah Johnson** [00:01:00]
+              That's exactly what Fathom helps with. Our AI automatically captures action items and sends follow-ups.
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              limit: 1
+              sortBy: "date"
+        - callsTool:
+            name: "get-meeting-details"
+            arguments:
+              meetingId: "12345"
+              includeTranscript: true
+
+    # Topic-Based Queries
+    - input: "@fathom Who was I talking to about Web3?"
+      mocks:
+        list-meetings:
+          - id: "45678"
+            title: "Web3 Strategy Discussion"
+            startTimeISO: "2025-01-25T11:00:00.000Z"
+            calendarInvitees: ["john@example.com", "alex@example.com"]
+            recordedByName: "John Smith"
+          - id: "45679"
+            title: "Blockchain Integration Planning"
+            startTimeISO: "2025-01-20T15:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com", "mike@example.com"]
+            recordedByName: "John Smith"
+        get-meeting-details:
+          - id: "45678"
+            title: "Web3 Strategy Discussion"
+            startTimeISO: "2025-01-25T11:00:00.000Z"
+            calendarInvitees: ["john@example.com", "alex@example.com"]
+            recordedByName: "John Smith"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              query: "Web3"
+        - includes: "alex"
+
+    - input: "@fathom Show me all my meetings that discussed Raycast"
+      mocks:
+        list-meetings:
+          - id: "11111"
+            title: "Raycast Extension Review"
+            startTimeISO: "2025-01-28T10:00:00.000Z"
+            durationSeconds: 1800
+          - id: "22222"
+            title: "Raycast Integration Planning"
+            startTimeISO: "2025-01-22T14:00:00.000Z"
+            durationSeconds: 2400
+          - id: "33333"
+            title: "Raycast API Discussion"
+            startTimeISO: "2025-01-15T16:00:00.000Z"
+            durationSeconds: 3000
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              query: "Raycast"
+
+    # Cross-Meeting Analysis
+    - input: "@fathom Show me all meetings with recurring attendee Sarah from last month"
+      mocks:
+        list-meetings:
+          - id: "m1"
+            title: "Design Review"
+            startTimeISO: "2025-01-05T10:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com"]
+          - id: "m2"
+            title: "Sprint Planning"
+            startTimeISO: "2025-01-12T14:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com", "mike@example.com"]
+          - id: "m3"
+            title: "Product Sync"
+            startTimeISO: "2025-01-19T11:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com"]
+          - id: "m4"
+            title: "Retrospective"
+            startTimeISO: "2025-01-26T15:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com", "lisa@example.com"]
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              participant: "Sarah"
+
+    - input: "@fathom What topics came up most frequently in my meetings this month?"
+      mocks:
+        list-meetings:
+          - id: "m1"
+            title: "Product Roadmap Q1"
+            startTimeISO: "2025-01-05T10:00:00.000Z"
+            summaryText: "Discussed product priorities for Q1 including new features and bug fixes"
+          - id: "m2"
+            title: "Product Roadmap Q2 Planning"
+            startTimeISO: "2025-01-12T14:00:00.000Z"
+            summaryText: "Planning session for Q2 product roadmap and feature prioritization"
+          - id: "m3"
+            title: "Design System Updates"
+            startTimeISO: "2025-01-19T11:00:00.000Z"
+            summaryText: "Reviewed design system updates and component library changes"
+          - id: "m4"
+            title: "Product Launch Timeline"
+            startTimeISO: "2025-01-26T15:00:00.000Z"
+            summaryText: "Finalized product launch timeline and go-to-market strategy"
+      expected:
+        - callsTool: "list-meetings"
+
+    # Productivity Metrics
+    - input: "@fathom How many hours of meetings did I have last week?"
+      mocks:
+        list-meetings:
+          - id: "m1"
+            title: "Monday Standup"
+            startTimeISO: "2025-01-20T09:00:00.000Z"
+            durationSeconds: 1800
+          - id: "m2"
+            title: "Client Call"
+            startTimeISO: "2025-01-21T14:00:00.000Z"
+            durationSeconds: 3600
+          - id: "m3"
+            title: "Design Review"
+            startTimeISO: "2025-01-22T10:00:00.000Z"
+            durationSeconds: 2700
+          - id: "m4"
+            title: "Sprint Planning"
+            startTimeISO: "2025-01-23T15:00:00.000Z"
+            durationSeconds: 5400
+          - id: "m5"
+            title: "Friday Retrospective"
+            startTimeISO: "2025-01-24T16:00:00.000Z"
+            durationSeconds: 3600
+      expected:
+        - callsTool: "list-meetings"
+
+    - input: "@fathom What was my average meeting length this month?"
+      mocks:
+        list-meetings:
+          - id: "m1"
+            title: "Meeting 1"
+            startTimeISO: "2025-01-05T10:00:00.000Z"
+            durationSeconds: 3600
+          - id: "m2"
+            title: "Meeting 2"
+            startTimeISO: "2025-01-12T14:00:00.000Z"
+            durationSeconds: 2700
+          - id: "m3"
+            title: "Meeting 3"
+            startTimeISO: "2025-01-19T11:00:00.000Z"
+            durationSeconds: 1800
+          - id: "m4"
+            title: "Meeting 4"
+            startTimeISO: "2025-01-26T15:00:00.000Z"
+            durationSeconds: 4500
+      expected:
+        - callsTool: "list-meetings"
+
+    # Follow-up Generation
+    - input: "@fathom Draft a follow-up email from my last meeting"
+      mocks:
+        list-meetings:
+          - id: "12345"
+            title: "Product Launch Planning"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com", "mike@example.com"]
+        get-meeting-details:
+          - id: "12345"
+            title: "Product Launch Planning"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            calendarInvitees: ["john@example.com", "sarah@example.com", "mike@example.com"]
+            summaryText: |
+              ## Meeting Summary
+              Discussed Q2 product launch timeline and key milestones.
+              
+              ## Key Decisions
+              - Launch date: April 15, 2025
+              - Beta testing period: March 1-31
+              - Marketing campaign starts March 15
+              
+              ## Action Items
+              - Sarah: Finalize marketing materials by Feb 15
+              - Mike: Complete beta testing infrastructure by Feb 28
+              - John: Schedule stakeholder presentation for March 1
+            actionItems:
+              - description: "Finalize marketing materials by Feb 15"
+                assignee:
+                  name: "Sarah Johnson"
+                  email: "sarah@example.com"
+              - description: "Complete beta testing infrastructure by Feb 28"
+                assignee:
+                  name: "Mike Chen"
+                  email: "mike@example.com"
+              - description: "Schedule stakeholder presentation for March 1"
+                assignee:
+                  name: "John Smith"
+                  email: "john@example.com"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              limit: 1
+              sortBy: "date"
+        - callsTool:
+            name: "get-meeting-details"
+            arguments:
+              meetingId: "12345"
+              includeTranscript: false
+
+    # Team Queries
+    - input: "@fathom Show me all external meetings from this week"
+      mocks:
+        list-meetings:
+          - id: "e1"
+            title: "Client Discovery Call"
+            startTimeISO: "2025-01-27T10:00:00.000Z"
+            isExternal: true
+            calendarInviteesDomainType: "one_or_more_external"
+          - id: "e2"
+            title: "Partner Integration Discussion"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            isExternal: true
+            calendarInviteesDomainType: "one_or_more_external"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              meetingType: "external"
+
+    - input: "@fathom Who are my team members?"
+      mocks:
+        list-team-members:
+          - id: "tm1"
+            name: "Sarah Johnson"
+            email: "sarah@example.com"
+            team: "Product"
+          - id: "tm2"
+            name: "Mike Chen"
+            email: "mike@example.com"
+            team: "Engineering"
+          - id: "tm3"
+            name: "Lisa Brown"
+            email: "lisa@example.com"
+            team: "Design"
+      expected:
+        - callsTool:
+            name: "list-team-members"
+
+    # Advanced Analytics
+    - input: "@fathom What percentage of my meetings had external participants last month?"
+      mocks:
+        list-meetings:
+          - id: "m1"
+            title: "Internal Standup"
+            startTimeISO: "2025-01-05T09:00:00.000Z"
+            isExternal: false
+          - id: "m2"
+            title: "Client Call"
+            startTimeISO: "2025-01-12T14:00:00.000Z"
+            isExternal: true
+          - id: "m3"
+            title: "Team Sync"
+            startTimeISO: "2025-01-19T10:00:00.000Z"
+            isExternal: false
+          - id: "m4"
+            title: "Partner Meeting"
+            startTimeISO: "2025-01-26T15:00:00.000Z"
+            isExternal: true
+      expected:
+        - callsTool: "list-meetings"
+
+    - input: "@fathom Show me all meetings where Mike was mentioned in the transcript"
+      mocks:
+        list-meetings:
+          - id: "m1"
+            title: "Sprint Planning"
+            startTimeISO: "2025-01-28T10:00:00.000Z"
+        get-meeting-details:
+          - id: "m1"
+            title: "Sprint Planning"
+            startTimeISO: "2025-01-28T10:00:00.000Z"
+            transcriptText: |
+              **Sarah** [00:00:05]
+              We should loop in Mike on the API design discussion.
+              
+              **John** [00:00:15]
+              Agreed, Mike has expertise in this area.
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              query: "Mike"
+
+    # Comparative Analysis
+    - input: "@fathom Compare my meeting load this week vs last week"
+      mocks:
+        list-meetings:
+          - id: "tw1"
+            title: "This Week Meeting 1"
+            startTimeISO: "2025-01-27T09:00:00.000Z"
+            durationSeconds: 1800
+          - id: "tw2"
+            title: "This Week Meeting 2"
+            startTimeISO: "2025-01-28T14:00:00.000Z"
+            durationSeconds: 3600
+          - id: "lw1"
+            title: "Last Week Meeting 1"
+            startTimeISO: "2025-01-20T10:00:00.000Z"
+            durationSeconds: 2700
+          - id: "lw2"
+            title: "Last Week Meeting 2"
+            startTimeISO: "2025-01-21T15:00:00.000Z"
+            durationSeconds: 2700
+          - id: "lw3"
+            title: "Last Week Meeting 3"
+            startTimeISO: "2025-01-22T11:00:00.000Z"
+            durationSeconds: 1800
+      expected:
+        - callsTool: "list-meetings"

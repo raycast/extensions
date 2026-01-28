@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "docker",
+  "title": "Docker",
+  "description": "Manage Docker with Raycast",
+  "icon": "docker-icon.png",
+  "author": "priithaamer",
+  "contributors": [
+    "gebeto",
+    "BalliAsghar",
+    "stelo",
+    "noblecloud",
+    "sebastiankranz",
+    "kosha",
+    "Olivier-OG",
+    "Krosnoz"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "container_list",
+      "title": "Manage Containers",
+      "subtitle": "Docker",
+      "description": "List All Docker Containers",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupContainersByState",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Group containers by state",
+          "description": "Group containers by their state (running, exited, etc.)"
+        }
+      ]
+    },
+    {
+      "name": "projects_list",
+      "title": "Manage Compose Projects",
+      "subtitle": "Docker",
+      "description": "Manage Docker Compose Projects",
+      "mode": "view"
+    },
+    {
+      "name": "image_list",
+      "title": "Manage Images",
+      "subtitle": "Docker",
+      "description": "List Installed Docker images",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Path to Docker socket",
+      "name": "socketPath",
+      "placeholder": "Leave empty for default",
+      "required": false,
+      "title": "Socket path",
+      "type": "textfield",
+      "default": {
+        "macOS": "/var/run/docker.sock",
+        "Windows": "//./pipe/docker_engine"
+      }
+    }
+  ],
+  "dependencies": {
+    "@priithaamer/dockerode": "^3.3.1-priithaamer.1",
+    "@raycast/api": "^1.103.0",
+    "node-fetch": "^3.0.0"
+  },
+  "overrides": {
+    "tar-fs": ">=3.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

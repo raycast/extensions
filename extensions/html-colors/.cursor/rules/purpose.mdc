@@ -1,0 +1,31 @@
+---
+description: Describes what is the purpose of the extension and how users should use it
+globs: *.ts, *.tsx, *.md, package.json
+alwaysApply: true
+---
+# Purpose of the extension
+
+- this extension helps users quickly look up HTML colors by name
+- you don't need to remember the exact name of the color, search can be fuzzy with some amount of typos
+
+## UI
+
+- the main interface is search and list of results
+- user searches by typing into the search area
+- most functionality can be utilized with `<List>` component from Raycast API
+- the results are list of possible matches of the colors
+- results are ordered by relevance of how it matches the user input
+- each result contains the name of the color per standard as individual list item
+- there should be a small rectangle displaying the color next to the name
+- there should be secondary text showing HEX value of the color
+- there should be some icon on each result identifying whether the color belongs to basic or extended set
+- UI should contain select which filters the results
+    - all (default) shows both basic and extended colors
+    - basic color only
+    - extended color only
+- there should be "actions" panel which can be invoked. this actions panel will offer several actions for the user:
+    - copy hex code of the color to clipboard (default)
+    - copy rgba color to clipboard
+    - copy the name to the clipboard
+    - toggle between rgba or hex format in secondary text on search result
+    - toggle the list that separates extended colors into shades of colors as specified in [knowledge.mdc](mdc:extensions/html-colors/.cursor/rules/knowledge.mdc)

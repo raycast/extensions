@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "get-cat-images",
+  "title": "Cat Images",
+  "description": "Fetch random cat images",
+  "icon": "extension-icon.png",
+  "author": "luiggircardoso",
+  "license": "MIT",
+  "categories": [
+    "Fun",
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "get-cat-images",
+      "title": "Search Cat Images",
+      "description": "Fetch a random cat image and add it to your favorites.",
+      "mode": "view"
+    },
+    {
+      "name": "search-favorites",
+      "title": "Search Favorites",
+      "subtitle": "Cat Images",
+      "description": "Search for your favorite cat images.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@eslint/json": "^0.13.1",
+    "@eslint/markdown": "^7.1.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.3.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.39.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
