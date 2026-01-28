@@ -129,7 +129,7 @@ function SiteActions({ site, onDeleted }: { site: Site; onDeleted: () => void })
             <Action
               title="Purge Page Cache"
               icon={Icon.Trash}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               onAction={() => executeAction("Purge Page Cache", () => purgePageCache(site.id))}
             />
           )}

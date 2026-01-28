@@ -9,7 +9,7 @@ function mockEventResponse(): EventResponse {
   return { event_id: Math.floor(Math.random() * 10000) };
 }
 
-async function getHeaders(): Promise<HeadersInit> {
+async function getHeaders(): Promise<Record<string, string>> {
   const token = await getActiveToken();
   return {
     Accept: "application/json",
@@ -35,7 +35,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
     throw new Error(errorMessage);
   }
 
-  return response.json();
+  return (await response.json()) as T;
 }
 
 export async function getServers(): Promise<Server[]> {
