@@ -107,7 +107,10 @@ export async function getVideoTranscript(video: string): Promise<string | undefi
     const transcriptText = segments
       .map((segment: string) => {
         // Strip tags to get text (handles nested elements like <s>)
-        return segment.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        return segment
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
       })
       .filter(Boolean)
       .join(" ")
