@@ -1,5 +1,9 @@
 # Google Meet Changelog
 
+## [Improvement] - 2026-01-28
+
+- Add Helium browser to supported browsers list
+
 ## [Improvement] - 2024-10-22
 
 - Add delay before reading meeting URL from browser

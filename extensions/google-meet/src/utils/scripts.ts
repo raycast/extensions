@@ -71,6 +71,7 @@ const supportedBrowsers = [
   "Firefox",
   "Firefox Developer Edition",
   "Google Chrome",
+  "Helium",
   "Microsoft Edge",
   "Mozilla Firefox",
   "Opera",

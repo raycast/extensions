@@ -7,7 +7,8 @@
   "author": "vitoorgomes",
   "contributors": [
     "hughlaw",
-    "iwex"
+    "iwex",
+    "gustavo_hariel"
   ],
   "license": "MIT",
   "commands": [
@@ -54,7 +55,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"
