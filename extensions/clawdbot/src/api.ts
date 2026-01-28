@@ -118,3 +118,77 @@ export async function sendMessage(
 export async function askQuestion(question: string): Promise<string> {
   return sendMessage([{ role: "user", content: question }]);
 }
+
+// Async/background processing types and functions
+
+interface AsyncSubmitResponse {
+  ok: boolean;
+  runId: string;
+}
+
+export interface AsyncResultResponse {
+  status: "pending" | "complete" | "error";
+  content?: string;
+  error?: string;
+}
+
+/**
+ * Fire-and-forget message submission via hooks endpoint.
+ * Returns immediately with a runId that can be polled for results.
+ */
+export async function submitAsyncMessage(
+  messages: Message[],
+  conversationId: string,
+): Promise<string> {
+  const prefs = getPreferences();
+  const url = `${prefs.endpoint}/hooks/agent`;
+  const agentId = prefs.agentId || "main";
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${prefs.token}`,
+    },
+    body: JSON.stringify({
+      model: `clawdbot:${agentId}`,
+      messages,
+      sessionKey: `raycast:${conversationId}`,
+      user: "raycast-extension",
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Async submit failed: ${response.status} - ${text}`);
+  }
+
+  const data = (await response.json()) as AsyncSubmitResponse;
+  return data.runId;
+}
+
+/**
+ * Poll for the result of an async message submission.
+ */
+export async function pollAsyncResult(
+  runId: string,
+): Promise<AsyncResultResponse> {
+  const prefs = getPreferences();
+  const url = `${prefs.endpoint}/api/runs/${runId}`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${prefs.token}`,
+    },
+  });
+
+  if (!response.ok) {
+    // Not ready yet or error
+    if (response.status === 404) {
+      return { status: "pending" };
+    }
+    return { status: "error", error: `Poll failed: ${response.status}` };
+  }
+
+  return response.json();
+}
