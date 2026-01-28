@@ -3,7 +3,7 @@
 ## [New Feature] - {PR_MERGE_DATE}
 
 - Create new command to show overlay rather than open raycast window
-- Is meant for quickly checking word count without being intrusively, keeping the current app in focus
+- Is meant for quickly checking word count without being intrusive, keeping the current app in focus
 
 ## [Update] - 2026-01-27
 
