@@ -14,8 +14,8 @@ import {
   uk_en_phonetic,
   en_uk_phonetic,
 } from "./Dict";
-import { 
-  getAvailableInputSourceIds, 
+import {
+  getAvailableInputSourceIds,
   selectInputSource,
 } from "swift:../swift/Punto";
 
@@ -60,16 +60,16 @@ function switchStringLayout(string: string, preferences: Preferences): string {
 
 async function switchKeyboardLayout(
   preferences: Preferences,
-  targetLayout: Layout
+  targetLayout: Layout,
 ): Promise<void> {
-  const languageIds = 
+  const languageIds =
     (await getAvailableInputSourceIds()) as unknown as string[];
   // console.log("installed layout names are " + languageIds.join(", "));
   // console.log("target layout is " + targetLayout);
 
   const targetLayoutID =
-    targetLayout === Layout.LAT 
-      ? preferences.latLayoutID 
+    targetLayout === Layout.LAT
+      ? preferences.latLayoutID
       : preferences.cyrLayoutID;
 
   if (!languageIds.includes(targetLayoutID)) {
@@ -77,7 +77,7 @@ async function switchKeyboardLayout(
       "Layout " +
         targetLayoutID +
         " is not installed. Please install it or update the preferences." +
-        ` Available layouts include: ${languageIds.join(", ")}`
+        `Available layouts include: ${languageIds.join(", ")}`,
     );
     return;
   }
@@ -103,7 +103,9 @@ function switchCharacterLayout(char: string, preferences: Preferences): string {
   if (preferences.cyrLayoutID === "com.apple.keylayout.Russian-Phonetic") {
     cyrToLatMap = ru_en_phonetic;
     latToCyrMap = en_ru_phonetic;
-  } else if (preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-QWERTY") {
+  } else if (
+    preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-QWERTY"
+  ) {
     cyrToLatMap = uk_en_phonetic;
     latToCyrMap = en_uk_phonetic;
   } else if (preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-PC") {
@@ -115,7 +117,7 @@ function switchCharacterLayout(char: string, preferences: Preferences): string {
     // console.log(char + " detected in en dict")
     return latToCyrMap.get(char) ?? char;
   } else {
-    // console.log(char + " is probably detected in ru dict")
+    // console.log(char + " is probably detected in ru dict"),
     return cyrToLatMap.get(char) ?? char;
   }
 }
