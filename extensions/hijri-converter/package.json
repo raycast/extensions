@@ -37,7 +37,7 @@
       "title": "Show Hijri Date in Menu Bar",
       "description": "Display the current Hijri date in the menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1h"
     },
     {
       "name": "hijri-calendar",
