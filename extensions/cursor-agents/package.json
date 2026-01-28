@@ -93,17 +93,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0",
     "image-size": "^2.0.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.0.3",
-    "@types/react": "19.2.7",
+    "@types/node": "25.0.10",
+    "@types/react": "19.2.10",
     "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
   "scripts": {
