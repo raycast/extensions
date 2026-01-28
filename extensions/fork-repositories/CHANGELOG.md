@@ -1,6 +1,6 @@
 # Fork Repositories Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-01-28
 
 - Added Windows support with platform-specific Fork data paths and app detection
 
