@@ -1,6 +1,6 @@
 # RayTaskwarrior Changelog
 
-## [Fix] - 2026-01-28
+## [Fix] - {PR_MERGE_DATE}
 
 - Avoid lock errors (`Clear working set query: database is locked: Error code 5: The database file is locked`) due to overlapping `task` invocations.
 
