@@ -37,7 +37,7 @@ export default function Command() {
   const list = data?.lists.find((l) => l.id === listId);
 
   const reminders = useMemo(() => {
-    if (!data) return [];
+    if (!data || !data.reminders || !Array.isArray(data.reminders)) return [];
     return listId ? data.reminders.filter((reminder: Reminder) => reminder.list?.id === listId) : data.reminders;
   }, [data, listId]);
 
