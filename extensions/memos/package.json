@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "memos",
+  "title": "Memos",
+  "description": "Manage Your Memos",
+  "icon": "logo.png",
+  "author": "JakeYu",
+  "contributors": [
+    "littlequartz",
+    "0xdhrv"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sendMemo",
+      "title": "Send Memo",
+      "description": "Send your thoughts to Memos",
+      "mode": "no-view",
+      "subtitle": "Memos",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "sendMemoForm",
+      "title": "Send Memo Form",
+      "description": "Edit memo Detail",
+      "mode": "view",
+      "subtitle": "Memos",
+      "icon": "logo.png"
+    },
+    {
+      "name": "openMemoWebsite",
+      "title": "Open Website",
+      "description": "Open Memos Website",
+      "mode": "no-view",
+      "subtitle": "Memos",
+      "icon": "logo.png"
+    },
+    {
+      "name": "memosList",
+      "title": "Memos List",
+      "description": "Show Memos List",
+      "mode": "view",
+      "subtitle": "Memos"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2",
+    "axios": "^1.13.2",
+    "form-data": "^4.0.5",
+    "mime": "^4.1.0",
+    "qs": "^6.14.0",
+    "url-parse": "^1.5.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/mime": "^4.0.0",
+    "@types/node": "24.10.1",
+    "@types/qs": "^6.14.0",
+    "@types/react": "19.2.7",
+    "@types/url-parse": "^1.4.11",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "type-check": "./node_modules/.bin/tsc -p tsconfig.json --noEmit"
+  },
+  "preferences": [
+    {
+      "name": "host",
+      "description": "Your memo website domain.",
+      "placeholder": "https://demo.usememos.com",
+      "type": "textfield",
+      "required": false,
+      "title": "Host (memo >= 0.22.0)"
+    },
+    {
+      "name": "token",
+      "description": "Your token can be found in memo settings.",
+      "placeholder": "eyJh*******ZNTU",
+      "type": "textfield",
+      "required": false,
+      "title": "Token (memo >= 0.22.0)"
+    }
+  ]
+}

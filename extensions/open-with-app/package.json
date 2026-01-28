@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-with-app",
+  "title": "Open With App",
+  "description": "Choose an application to open the selected Finder items.",
+  "icon": "extension-icon.png",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "author": "fturcheti",
+  "contributors": [
+    "omarshahine",
+    "pernielsentikaer",
+    "Sheraff"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open With…",
+      "subtitle": "Finder",
+      "description": "Choose an application to open the selected Finder items.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "~20.10.2",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

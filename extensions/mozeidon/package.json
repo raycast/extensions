@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mozeidon",
+  "title": "Mozeidon",
+  "description": "Search, open tabs and bookmarks in Firefox via Mozeidon add-on",
+  "icon": "firefox-logo.png",
+  "author": "egovelox",
+  "contributors": [],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "mozeidon",
+      "type": "textfield",
+      "required": false,
+      "title": "Mozeidon CLI filepath",
+      "default": "/opt/homebrew/bin/mozeidon",
+      "description": "The filepath of mozeidon CLI binary",
+      "placeholder": "e.g /opt/homebrew/bin/mozeidon"
+    },
+    {
+      "name": "firefox",
+      "type": "textfield",
+      "required": false,
+      "title": "Firefox command",
+      "default": "open -a firefox",
+      "description": "An optional shell command to customize how Firefox",
+      "placeholder": "e.g open -a firefox"
+    },
+    {
+      "name": "searchEngine",
+      "type": "dropdown",
+      "required": false,
+      "title": "Search Engine",
+      "description": "Search Engine for query (default: Google).",
+      "default": "Google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "Google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "DuckDuckGo"
+        },
+        {
+          "title": "Bing",
+          "value": "Bing"
+        },
+        {
+          "title": "Baidu",
+          "value": "Baidu"
+        },
+        {
+          "title": "Brave",
+          "value": "Brave"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "mozeidon",
+      "title": "Mozeidon",
+      "subtitle": "Mozilla Firefox add-on",
+      "description": "Search and switch to Firefox opened tabs, recently-closed, bookmarks, etc",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.13.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.73",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

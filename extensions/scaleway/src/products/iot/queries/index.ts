@@ -1,0 +1,1 @@
+export { useAllRegionsHubsQuery } from './useHubsQuery'

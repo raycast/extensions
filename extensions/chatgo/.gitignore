@@ -1,0 +1,13 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# misc
+.DS_Store!/.vscode/
+/.idea/codeStyles/
+/.idea/
+.DS_Store
+
+# Raycast specific files
+raycast-env.d.ts

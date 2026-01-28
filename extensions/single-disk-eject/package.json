@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "single-disk-eject",
+  "title": "Single Disk Eject",
+  "description": "List and choose a single disk to eject.",
+  "icon": "main-command.png",
+  "author": "johndturn",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "ignoredVolumes",
+      "title": "Ignored Volumes",
+      "description": "Comma-separated list of volumes to hide from the available list of options to eject.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Macintosh HD,My Other Important Drive,USB Drive"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Eject Disk",
+      "subtitle": "Choose a disk to eject",
+      "description": "Select a disk from all currently mounted volumes to eject.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.4",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.7.4",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "contributors": [
+    "LostViking09"
+  ]
+}

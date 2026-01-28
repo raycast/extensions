@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "steamgriddb",
+  "title": "SteamGridDB",
+  "type": "module",
+  "description": "Download and share custom video game assets and personalize your gaming library.",
+  "icon": "steamgriddb-icon.png",
+  "author": "litomore",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Media"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Browse SteamGridDB",
+      "description": "Search for custom video game assets and personalize your gaming library.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "SteamGridDB API Key",
+      "description": "Get your API key from https://www.steamgriddb.com/profile/preferences/api",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "got": "^14.4.7",
+    "lodash": "^4.17.21",
+    "raycast-cross-extension": "^0.2.3",
+    "steamgriddb": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.0.12",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}

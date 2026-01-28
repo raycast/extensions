@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "worktrees",
+  "title": "Git Worktrees",
+  "description": "View, add, and remove git worktrees.",
+  "icon": "command-icon.png",
+  "author": "canac",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view",
+      "title": "View Worktrees",
+      "description": "View and remove git worktrees",
+      "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Add Worktree",
+      "description": "Add a new git worktree",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rootDir",
+      "description": "Directory where all of your git repos are located",
+      "type": "textfield",
+      "required": true,
+      "title": "Git repo directory"
+    },
+    {
+      "name": "editorApp",
+      "description": "Preferred editor to open repos in",
+      "type": "appPicker",
+      "required": true,
+      "title": "Preferred editor",
+      "default": "Code"
+    },
+    {
+      "name": "terminalApp",
+      "description": "Preferred terminal to open repos in",
+      "type": "appPicker",
+      "required": true,
+      "title": "Preferred terminal",
+      "default": "Terminal"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3", 
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
+ 

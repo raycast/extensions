@@ -1,0 +1,16 @@
+# Node dependencies
+node_modules
+
+# Build artifacts
+dist
+
+# macOS files
+.DS_Store
+
+# VSCode
+.vscode/*
+!.vscode/extensions.json
+
+# Environment variables
+.env*
+!.env.example

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "farcaster",
+  "title": "Farcaster",
+  "description": "Most comprehensive extension for Farcaster. Search for casts, profiles and explore details.",
+  "icon": "command-icon.png",
+  "author": "artivilla",
+  "categories": [
+    "Web",
+    "Media",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-trending-casts",
+      "title": "Search Trending Casts",
+      "description": "Search trending casts filtered by keywords",
+      "mode": "view"
+    },
+    {
+      "name": "search-profiles",
+      "title": "Search Profiles",
+      "description": "Search profiles by fid, username and display names",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "Neynar account API key",
+      "type": "password",
+      "required": true,
+      "title": "Neynar API Key",
+      "placeholder": "Enter your API key",
+      "link": "https://neynar.com/"
+    },
+    {
+      "name": "walletAddressClient",
+      "description": "How to inpsect ethereum address",
+      "type": "dropdown",
+      "required": true,
+      "title": "Account Viewer",
+      "default": "etherscan",
+      "data": [
+        {
+          "title": "Etherscan",
+          "value": "etherscan"
+        },
+        {
+          "title": "Zapper",
+          "value": "zapper"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.15.0",
+    "linkify-it": "^5.0.0",
+    "tlds": "^1.252.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/linkify-it": "^5.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

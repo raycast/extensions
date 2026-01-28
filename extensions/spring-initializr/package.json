@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spring-initializr",
+  "title": "Spring Initializr",
+  "description": "Spring Initializr is a tool that simplifies the creation of Spring Boot projects.",
+  "icon": "spring-leaf.png",
+  "author": "danvega",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "spring-initializr",
+      "title": "Spring Initializr",
+      "subtitle": "Create a new Spring Boot Application",
+      "description": "Create a new Spring Boot Application",
+      "mode": "view",
+      "filename": "index.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "outputDirectory",
+      "type": "directory",
+      "title": "Output Directory",
+      "description": "The directory where the generated project will be saved",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "popToRootAfterGenerate",
+      "type": "checkbox",
+      "title": "Return to Root After Generation",
+      "description": "Return to the Raycast root view after the project is generated",
+      "label": "Pop to Root",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "openOutputDirectory",
+      "type": "checkbox",
+      "title": "Open Output Directory After Generation",
+      "description": "Open the output directory in Finder after generation",
+      "label": "Open Directory",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

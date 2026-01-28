@@ -1,0 +1,115 @@
+[
+  { "id": "a0", "title": "A0", "metric": "841 x 1189 mm", "imperial": "33.1 x 46.8 in", "category": "ISO - A" },
+  { "id": "a1", "title": "A1", "metric": "594 x 841 mm", "imperial": "23.4 x 33.1 in", "category": "ISO - A" },
+  { "id": "a2", "title": "A2", "metric": "420 x 594 mm", "imperial": "16.5 x 23.4 in", "category": "ISO - A" },
+  { "id": "a3", "title": "A3", "metric": "297 x 420 mm", "imperial": "11.7 x 16.5 in", "category": "ISO - A" },
+  { "id": "a4", "title": "A4", "metric": "210 x 297 mm", "imperial": "8.3 x 11.7 in", "category": "ISO - A" },
+  { "id": "a5", "title": "A5", "metric": "148 x 210 mm", "imperial": "5.8 x 8.3 in", "category": "ISO - A" },
+  { "id": "a6", "title": "A6", "metric": "105 x 148 mm", "imperial": "4.1 x 5.8 in", "category": "ISO - A" },
+  { "id": "a7", "title": "A7", "metric": "74 x 105 mm", "imperial": "2.9 x 4.1 in", "category": "ISO - A" },
+  { "id": "a8", "title": "A8", "metric": "52 x 74 mm", "imperial": "2 x 2.9 in", "category": "ISO - A" },
+  { "id": "a9", "title": "A9", "metric": "37 x 52 mm", "imperial": "1.5 x 2 in", "category": "ISO - A" },
+  { "id": "a10", "title": "A10", "metric": "26 x 37 mm", "imperial": "1 x 1.5 in", "category": "ISO - A" },
+
+  { "id": "b0", "title": "B0", "metric": "1000 x 1414 mm", "imperial": "39.4 x 55.7 in", "category": "ISO - B" },
+  { "id": "b1", "title": "B1", "metric": "707 x 1000 mm", "imperial": "27.8 x 39.4 in", "category": "ISO - B" },
+  { "id": "b2", "title": "B2", "metric": "500 x 707 mm", "imperial": "19.7 x 27.8 in", "category": "ISO - B" },
+  { "id": "b3", "title": "B3", "metric": "353 x 500 mm", "imperial": "13.9 x 19.7 in", "category": "ISO - B" },
+  { "id": "b4", "title": "B4", "metric": "250 x 353 mm", "imperial": "9.8 x 13.9 in", "category": "ISO - B" },
+  { "id": "b5", "title": "B5", "metric": "176 x 250 mm", "imperial": "6.9 x 9.8 in", "category": "ISO - B" },
+  { "id": "b6", "title": "B6", "metric": "125 x 176 mm", "imperial": "4.9 x 6.9 in", "category": "ISO - B" },
+  { "id": "b7", "title": "B7", "metric": "88 x 125 mm", "imperial": "3.5 x 4.9 in", "category": "ISO - B" },
+  { "id": "b8", "title": "B8", "metric": "62 x 88 mm", "imperial": "2.4 x 3.5 in", "category": "ISO - B" },
+  { "id": "b9", "title": "B9", "metric": "44 x 62 mm", "imperial": "1.7 x 2.4 in", "category": "ISO - B" },
+  { "id": "b10", "title": "B10", "metric": "31 x 44 mm", "imperial": "1.2 x 1.7 in", "category": "ISO - B" },
+
+  { "id": "c0", "title": "C0", "metric": "917 x 1297 mm", "imperial": "36.1 x 51.1 in", "category": "ISO - C" },
+  { "id": "c1", "title": "C1", "metric": "648 x 917 mm", "imperial": "25.5 x 36.1 in", "category": "ISO - C" },
+  { "id": "c2", "title": "C2", "metric": "458 x 648 mm", "imperial": "18 x 25.5 in", "category": "ISO - C" },
+  { "id": "c3", "title": "C3", "metric": "324 x 458 mm", "imperial": "12.8 x 18 in", "category": "ISO - C" },
+  { "id": "c4", "title": "C4", "metric": "229 x 324 mm", "imperial": "9 x 12.8 in", "category": "ISO - C" },
+  { "id": "c5", "title": "C5", "metric": "162 x 229 mm", "imperial": "6.4 x 9 in", "category": "ISO - C" },
+  { "id": "c6", "title": "C6", "metric": "114 x 162 mm", "imperial": "4.5 x 6.4 in", "category": "ISO - C" },
+
+  {
+    "id": "letter",
+    "title": "Letter",
+    "metric": "216 x 279 mm",
+    "imperial": "8.5 x 11 in",
+    "category": "North American"
+  },
+  {
+    "id": "legal",
+    "title": "Legal",
+    "metric": "216 x 356 mm",
+    "imperial": "8.5 x 14 in",
+    "category": "North American"
+  },
+  {
+    "id": "tabloid",
+    "title": "Tabloid",
+    "metric": "279 x 432 mm",
+    "imperial": "11 x 17 in",
+    "category": "North American"
+  },
+  {
+    "id": "executive",
+    "title": "Executive",
+    "metric": "184 x 267 mm",
+    "imperial": "7.3 x 10.5 in",
+    "category": "North American"
+  },
+
+  { "id": "arch-a", "title": "ARCH A", "metric": "229 x 305 mm", "imperial": "9 x 12 in", "category": "Architectural" },
+  {
+    "id": "arch-b",
+    "title": "ARCH B",
+    "metric": "305 x 457 mm",
+    "imperial": "12 x 18 in",
+    "category": "Architectural"
+  },
+  {
+    "id": "arch-c",
+    "title": "ARCH C",
+    "metric": "457 x 610 mm",
+    "imperial": "18 x 24 in",
+    "category": "Architectural"
+  },
+  {
+    "id": "arch-d",
+    "title": "ARCH D",
+    "metric": "610 x 914 mm",
+    "imperial": "24 x 36 in",
+    "category": "Architectural"
+  },
+  {
+    "id": "arch-e",
+    "title": "ARCH E",
+    "metric": "914 x 1219 mm",
+    "imperial": "36 x 48 in",
+    "category": "Architectural"
+  },
+
+  {
+    "id": "chinese-16k",
+    "title": "Chinese 16K",
+    "metric": "184 x 260 mm",
+    "imperial": "7.2 x 10.2 in",
+    "category": "Chinese"
+  },
+  { "id": "jis-b5", "title": "JIS B5", "metric": "182 x 257 mm", "imperial": "7.2 x 10.1 in", "category": "Japanese" },
+  {
+    "id": "billboard",
+    "title": "Billboard",
+    "metric": "609.6 x 914.4 mm",
+    "imperial": "24 x 36 in",
+    "category": "Billboard"
+  },
+  {
+    "id": "postcard",
+    "title": "Postcard",
+    "metric": "100 x 148 mm",
+    "imperial": "3.9 x 5.8 in",
+    "category": "Postcard"
+  }
+]

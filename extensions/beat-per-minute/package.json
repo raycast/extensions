@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "beat-per-minute",
+  "title": "BPM Calculator",
+  "description": "Calculate BPM for a song by using the enter button on the keyboard",
+  "icon": "metronome.png",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "ethan_anderson"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate-bpm",
+      "title": "BPM Calculator",
+      "description": "Calculate BPM for a song by using enter button on the keyboard",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "seconds",
+      "title": "Reset In Seconds",
+      "default": "8",
+      "required": false,
+      "description": "Beat is calculated by a average of x seconds",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "2 seconds",
+          "value": "2"
+        },
+        {
+          "title": "4 seconds",
+          "value": "4"
+        },
+        {
+          "title": "8 seconds",
+          "value": "8"
+        },
+        {
+          "title": "Until manual reset",
+          "value": "9999999"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.10",
+    "@types/react": "19.2.9",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

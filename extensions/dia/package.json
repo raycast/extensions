@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dia",
+  "title": "Dia",
+  "description": "Search your open tabs and browsing history in Dia",
+  "icon": "appIcon.png",
+  "author": "tleo19",
+  "owner": "the-browser-company",
+  "access": "public",
+  "contributors": [
+    "Daat",
+    "thomas",
+    "pernielsentikaer",
+    "loris",
+    "xmok"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Dia",
+      "subtitle": "Dia",
+      "description": "Search tabs, bookmarks and browsing history in Dia",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Dia",
+      "description": "Search tabs in Dia",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Dia",
+      "description": "Search browsing history in Dia",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Dia",
+      "description": "Search bookmarks in Dia",
+      "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Dia",
+      "description": "Create a new window with an optional profile.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "profile",
+          "placeholder": "Profile",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "New Incognito Window",
+      "subtitle": "Dia",
+      "description": "Create a new incognito window.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "@types/semver": "^7.7.1",
+    "dedent": "^1.7.0",
+    "nanoid": "^3.3.7",
+    "semver": "^7.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

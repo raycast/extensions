@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fastly",
+  "title": "Fastly",
+  "description": "Access your Fastly account from Raycast",
+  "icon": "icon.png",
+  "author": "JonathanSpeek",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Fastly API Token",
+      "description": "Your Fastly API token from https://manage.fastly.com/account/tokens",
+      "placeholder": "Enter your Fastly API token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Services",
+      "description": "View and manage your Fastly services",
+      "mode": "view"
+    },
+    {
+      "name": "invite",
+      "title": "Invite Team Member",
+      "description": "Invite a new member to your Fastly team",
+      "mode": "view"
+    },
+    {
+      "name": "create-service",
+      "title": "Create Service",
+      "description": "Create a new Fastly service",
+      "mode": "view"
+    },
+    {
+      "name": "docs",
+      "title": "Fastly Docs",
+      "description": "Helpful Fastly documentation",
+      "mode": "view"
+    },
+    {
+      "name": "support",
+      "title": "Get Support",
+      "description": "Access Fastly support resources",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

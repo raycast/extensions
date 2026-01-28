@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rick-and-morty",
+  "title": "Rick and Morty",
+  "description": "Access characters, images, locations and episodes from the television show \"Rick and Morty\"",
+  "icon": "icon.png",
+  "author": "xmok",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "characters",
+      "title": "Search Characters",
+      "subtitle": "Rick and Morty",
+      "description": "Search Characters from \"Rick and Morty\"",
+      "mode": "view"
+    },
+    {
+      "name": "locations",
+      "title": "Search Locations",
+      "subtitle": "Rick and Morty",
+      "description": "Search Locations from \"Rick and Morty\"",
+      "mode": "view"
+    },
+    {
+      "name": "episodes",
+      "title": "Search Episodes",
+      "subtitle": "Rick and Morty",
+      "description": "Search Episodes from \"Rick and Morty\"",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3",
+    "cross-fetch": "^4.0.0",
+    "rickmortyapi": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

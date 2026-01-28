@@ -1,0 +1,13 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+<svg xmlns="http://www.w3.org/2000/svg" aria-label="Strava" role="img" viewBox="-87.04 -87.04 686.08 686.08" width="213px" height="213px" fill="#000000">
+<g id="SVGRepo_bgCarrier" stroke-width="0" transform="translate(0,0), scale(1)">
+<rect x="-87.04" y="-87.04" width="686.08" height="686.08" rx="343.04" fill="#FC4C01" strokewidth="0"/>
+</g>
+<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="1.024"/>
+<g id="SVGRepo_iconCarrier">
+<rect width="512" height="512" rx="15%" fill="#fc4c01"/>
+<path fill="#ffffff" d="M120 288L232 56l112 232h-72l-40-96-40 96z"/>
+<path fill="#fda580" d="M280 288l32 72 32-72h48l-80 168-80-168z"/>
+</g>
+</svg>

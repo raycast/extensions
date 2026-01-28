@@ -1,0 +1,134 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Git Client for Raycast: Project Structure
+
+## Description
+This document outlines the file structure for the Git Client Raycast extension, organized by responsibility. It serves as a roadmap for development.
+
+## File Structure
+
+```
+git-client/
+├── package.json                    # Extension configuration, commands, dependencies
+├── package-lock.json               # Locked dependency versions
+├── README.md                       # Extension documentation
+├── CHANGELOG.md                    # Changelog
+│
+├── assets/                         # Extension assets
+│   ├── extension-icon.png          # Extension icon
+│   └── ...                         # Additional icons and resources
+│
+└── src/                            # Source code
+    |
+    ├── manage-repositories.tsx     # Command to list repositories
+    ├── open-repository.tsx         # Command to open a repository with all UIs (branches, status, commits, etc.)
+    ├── clone-repository.tsx        # Command to clone a repository
+    ├── configure-url-trackers.tsx  # Command to configure URL trackers in commit messages
+    ├── manage-ai-message-prompts.tsx # Command to configure AI prompts for commit message generation
+    ├── ...                         # Additional commands as the project evolves
+    |
+    ├── components/                 # Reusable UI components and actions
+    │   ├── actions/                # Reusable Action and ActionPanel components
+    │   │   ├── FileActions.tsx     # Actions for files (stage, unstage, open)
+    │   │   ├── BranchActions.tsx   # Actions for branches (checkout, delete, merge)
+    │   │   └── ...                 # Additional Action components
+    │   │
+    │   ├── views/                  # Reusable view components
+    │   │   ├── BranchesView.tsx    # Branches view
+    │   │   ├── CommitsView.tsx     # Commits view
+    │   │   ├── StatusView.tsx      # File status view
+    │   │   └── ...                 # Additional view components
+    │   │
+    │   └── icons/                  # Semantic icons
+    │       ├── RemoteHostIcons.tsx # Icons for remote hosts
+    │       ├── StatusIcons.tsx     # Icons for file statuses
+    │       └── ...                 # Additional semantic icons
+    │
+    ├── utils/                      # Utilities (only essential)
+    │   ├── git-manager.ts          # Service for Git commands via simple-git
+    │   ├── path-utils.ts           # Utilities for path manipulation
+    │   └── ...                     # Additional utilities as needed
+    │
+    ├── types/                      # TypeScript types and interfaces
+    │   ├── index.ts                # Extension-specific data models
+    │   ├── git-types.ts            # Git-specific data models
+    │   └── ...                     # Additional types as the project evolves
+    │
+    └── hooks/                      # Custom React hooks
+        ├── useGitRepository.ts     # Hook for working with a Git repository
+        ├── useGitStatus.ts         # Hook for file status
+        ├── useGitBranches.ts       # Hook for branches
+        ├── useGitCommits.ts        # Hook for commits
+        └── ...                     # Additional hooks as needed
+```
+
+## Directory Descriptions
+
+### `/src` - Commands
+The root `src` directory contains all Raycast command files. Each command is self-contained and includes all its UI logic.
+- `open-repository.tsx`: Main command for viewing a repository (status, branches, commits, etc.).
+- `manage-repositories.tsx`: Command for adding, removing, and viewing saved repositories.
+- `clone-repository.tsx`: Command for cloning a new repository.
+- `configure-url-trackers.tsx`: Command for configure URL patterns/regexs to extract links from commit messages.
+- `manage-ai-message-prompts.tsx`: Command for configure custom AI prompts for commit message generation.
+
+### `/src/components/actions/` - Action Components
+Reusable `Action`, `ActionPanel.Submenu` and `ActionPanel` components that encapsulate operations related for concrete features.
+- `BranchActions.tsx` for create, delete, merge, rename branches, etc.
+-  `CommitActions.tsx` for checkout, cherry-pick, revert, reset, interactive rebase, patch create, etc.
+- `FileActions.tsx` for stage, unstage, open files, etc.
+- `StashActions.tsx` for create, rename, delete stashes, etc.
+- `TagActions.tsx` for create, rename, delete tags, etc.
+- etc.
+
+### `/src/components/views/` - View Components
+Reusable components that represent different views within a part of some command.
+- `StatusView.tsx` for view status of files in repository
+- `BranchesView.tsx` for view all branches in repository
+- `CommitsView.tsx` for list commit graph in repository
+- `TagsView.tsx` for view all tags in repository
+- `StashesView.tsx` for manage stashes in repository
+- `RemotesView.tsx` for manage remotes in repository
+- etc.
+
+Each view is a React component that is displayed in the Raycast window as a page.
+
+### `/src/hooks/` - Custom React Hooks
+Custom hooks for managing state and logic.
+- `useGitStatus.ts`, `useGitBranches.ts`, `useGitCommits.ts`, `useGitTags.ts`, `useGitStash.ts`: Hooks for specific Git features in a concrete repository.
+- `useRepositoriesList.ts`: Hook for storing paths to repositories and repository metadata.
+
+### `/src/utils/` - Utilities
+Minimal, essential helper functions.
+- `git-manager.ts`: A core service wrapper around `simple-git` for all Git operations.
+- `path-utils.ts`: Path-related utilities.
+- `environment-utils.ts`: Shell environment utilities.
+- `date-utils.ts`, `language-detector.ts`, `remote-host-parser.ts`: Other specific utilities.
+
+### `/src/types/` - TypeScript Definitions
+Contains all TypeScript type definitions and interfaces for the extension that should be available across the all commands/actions/hooks/views.
+- `git-types.ts`: Types for Git entities (Branch, Commit, FileStatus).
+- `index.ts`: Core types for the extension (not related to Git, but relate to extension-specific data models).
+
+## Organizational Principles
+
+- **Commands Own UI**: Command files (`/src/*.tsx`) contain all UI rendering logic. Views from `/src/components/views` are used to compose the final UI.
+- **Reusable Actions**: Standardized `Action` components are in `/src/components/actions/` for use across different commands.
+- **Minimal Utilities**: The `/src/utils/` directory contains only essential, reusable functions.
+- **Native Raycast API**: Use Raycast APIs directly (e.g., `getPreferenceValues()`, `showToast()`) without creating wrappers.
+
+## Dependencies
+
+### Main
+- `@raycast/api` & `@raycast/utils`
+- `simple-git`: For Git operations.
+- `fast-fuzzy`: For fuzzy searching.
+- `nanoid`: For unique ID generation.
+- `react`: For UI components.
+
+### Development
+- `typescript`
+- `eslint` & `@raycast/eslint-config`

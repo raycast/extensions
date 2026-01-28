@@ -1,0 +1,4 @@
+// nwcConfig.json
+{
+  "nostrWalletConnectUrl": "nostr+walletconnect:your_connection_string"
+}

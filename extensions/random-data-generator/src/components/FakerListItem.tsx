@@ -1,0 +1,100 @@
+import isUrl from "is-url";
+import _ from "lodash";
+import { Fragment, useState } from "react";
+
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+
+import fakerClient from "@/faker";
+import usePreferences from "@/hooks/usePreferences";
+
+export type Item = { section: string; id: string; value: string; getValue(): string };
+
+export type Pin = (item: Item) => void;
+
+interface FakerListItemProps {
+  item: Item;
+  pin?: Pin;
+  unpin?: Pin;
+}
+
+function DefaultActions({ value, updateValue }: { value: string; updateValue: () => void }) {
+  const defaultAction = usePreferences("defaultAction");
+
+  if (defaultAction === "paste") {
+    return (
+      <Fragment>
+        <Action.Paste title="Paste in Active App" content={value} onPaste={updateValue} />
+        <Action.CopyToClipboard title="Copy to Clipboard" content={value} onCopy={updateValue} />
+      </Fragment>
+    );
+  }
+  return (
+    <Fragment>
+      <Action.CopyToClipboard title="Copy to Clipboard" content={value} onCopy={updateValue} />
+      <Action.Paste title="Paste in Active App" content={value} onPaste={updateValue} />
+    </Fragment>
+  );
+}
+
+export default function FakerListItem({ item, pin, unpin }: FakerListItemProps) {
+  const [value, setValue] = useState(() => item.value || item.getValue());
+
+  const updateValue = async () => {
+    setValue(item.getValue());
+  };
+
+  return (
+    <List.Item
+      title={_.startCase(item.id)}
+      icon={Icon.Dot}
+      keywords={[item.section]}
+      detail={<List.Item.Detail markdown={value} />}
+      actions={
+        <ActionPanel>
+          <DefaultActions value={value} updateValue={updateValue} />
+          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={Keyboard.Shortcut.Common.Open} />}
+          {pin && (
+            <Action
+              title="Pin Entry"
+              icon={Icon.Pin}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+              onAction={() => pin(item)}
+            />
+          )}
+          {unpin && (
+            <Action
+              title="Unpin Entry"
+              icon={Icon.XMarkCircle}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+              onAction={() => unpin(item)}
+            />
+          )}
+          <Action
+            title="Refresh Value"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={updateValue}
+          />
+          <Action.CreateQuicklink
+            title="Create Copy Quicklink"
+            quicklink={{
+              name: `Copy Random ${_.startCase(item.id)}`,
+              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+                JSON.stringify({ section: item.section, id: item.id, locale: fakerClient.locale, mode: "copy" }),
+              )}`,
+            }}
+          />
+          <Action.CreateQuicklink
+            title="Create Paste Quicklink"
+            quicklink={{
+              name: `Paste Random ${_.startCase(item.id)}`,
+              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+                JSON.stringify({ section: item.section, id: item.id, locale: fakerClient.locale, mode: "paste" }),
+              )}`,
+            }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}

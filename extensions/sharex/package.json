@@ -1,0 +1,154 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sharex",
+  "title": "ShareX",
+  "description": "Browse and create ShareX screenshots, videos, and GIFs from Raycast",
+  "icon": "ShareX_Logo.png",
+  "author": "the_revolution",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-library",
+      "title": "Browse Library",
+      "description": "Access your screenshot library",
+      "mode": "view"
+    },
+    {
+      "name": "capture-screenshot",
+      "title": "Capture Screenshot",
+      "description": "Capture screenshot via ShareX",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-video",
+      "title": "Capture Video",
+      "description": "Capture screen as video via ShareX",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-gif",
+      "title": "Capture GIF",
+      "description": "Capture screen as GIF via ShareX",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "screenshotsPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Screenshots Path",
+      "description": "Path to ShareX screenshots folder",
+      "placeholder": "Leave empty for default path"
+    },
+    {
+      "name": "sharexPath",
+      "type": "textfield",
+      "required": false,
+      "title": "ShareX Executable Path",
+      "description": "Path to ShareX.exe",
+      "default": "C:\\Program Files\\ShareX\\ShareX.exe",
+      "placeholder": "C:\\Program Files\\ShareX\\ShareX.exe"
+    },
+    {
+      "name": "folderLimit",
+      "type": "textfield",
+      "required": false,
+      "title": "Folder Limit",
+      "description": "Number of recently created folders to show",
+      "default": "5",
+      "placeholder": "5"
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Columns",
+      "description": "Number of columns in grid",
+      "default": "5",
+      "data": [
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "name": "aspectRatio",
+      "type": "dropdown",
+      "required": false,
+      "title": "Aspect Ratio",
+      "description": "Grid item aspect ratio",
+      "default": "4/3",
+      "data": [
+        {
+          "title": "1:1",
+          "value": "1/1"
+        },
+        {
+          "title": "3:2",
+          "value": "3/2"
+        },
+        {
+          "title": "4:3",
+          "value": "4/3"
+        },
+        {
+          "title": "16:9",
+          "value": "16/9"
+        }
+      ]
+    },
+    {
+      "name": "mockMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Mock Mode",
+      "description": "Enable mock mode for screenshots",
+      "default": false,
+      "label": "Enable Mock Mode"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}

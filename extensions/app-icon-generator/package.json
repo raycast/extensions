@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-icon-generator",
+  "title": "App Icon Generator",
+  "description": "Generate icons for multiple platforms: iOS, Android, macOS, and more.",
+  "icon": "command-icon.png",
+  "author": "HunterJi",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "version": "1.1.0",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate App Icons",
+      "description": "Create app icons for ICO, iOS, iPad, and macOS from a selected image",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "@types/to-ico": "^1.1.3",
+    "jimp": "^0.22.12",
+    "png-to-ico": "^2.1.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "ico",
+      "description": "Add ICO as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Default Platforms",
+      "placeholder": "Add ICO as default platform",
+      "label": "ICO"
+    },
+    {
+      "name": "ios",
+      "type": "checkbox",
+      "description": "Add iOS as default platform",
+      "required": false,
+      "default": false,
+      "placeholder": "Add iOS as default platform",
+      "label": "iOS"
+    },
+    {
+      "name": "ipad",
+      "description": "Add iPad as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add iPad as default platform",
+      "label": "iPad"
+    },
+    {
+      "name": "macos",
+      "description": "Add macOS as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add macOS as default platform",
+      "label": "macOS"
+    },
+    {
+      "name": "android",
+      "description": "Add Android as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Android as default platform",
+      "label": "Android"
+    },
+    {
+      "name": "watchOS",
+      "description": "Add watchOS as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add watchOS as default platform",
+      "label": "watchOS"
+    },
+    {
+      "name": "tvOS",
+      "description": "Add tvOS as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add tvOS as default platform",
+      "label": "tvOS"
+    },
+    {
+      "name": "chrome",
+      "description": "Add Chrome as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Chrome as default platform",
+      "label": "Chrome"
+    },
+    {
+      "name": "microsoftStore",
+      "description": "Add Microsoft Store as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Microsoft Store as default platform",
+      "label": "Microsoft Store"
+    },
+    {
+      "name": "steam",
+      "description": "Add Steam as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Steam as default platform",
+      "label": "Steam"
+    },
+    {
+      "name": "epic",
+      "description": "Add Epic Games Store as default platform",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "placeholder": "Add Epic Games Store as default platform",
+      "label": "Epic Games Store"
+    }
+  ]
+}

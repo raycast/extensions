@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "say-no-to-notch",
+  "title": "Say No to Notch",
+  "description": "Control MacBook Notch via Say No to Notch",
+  "icon": "icon.png",
+  "author": "honghao",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "System",
+    "Productivity",
+    "Fun"
+  ],
+  "keywords": [
+    "macbook",
+    "notch",
+    "say no to notch",
+    "ibluebox",
+    "topnotch",
+    "menubar",
+    "macos",
+    "fix hidden menu bar icon"
+  ],
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Notch",
+      "subtitle": "Say No to Notch",
+      "description": "Disable or Enable MacBook notch.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable",
+      "title": "Remove Notch",
+      "subtitle": "Say No to Notch",
+      "description": "Disable MacBook notch.",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable",
+      "title": "Restore Notch",
+      "subtitle": "Say No to Notch",
+      "description": "Enable MacBook notch.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

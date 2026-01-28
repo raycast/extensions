@@ -1,0 +1,214 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "harvest",
+  "title": "Harvest",
+  "description": "Access Harvest Time Entries",
+  "icon": "harvest-logo-icon.png",
+  "author": "eluce2",
+  "contributors": [
+    "bchopson",
+    "mrpunkin"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new",
+      "icon": "add.png",
+      "title": "New Time Entry",
+      "subtitle": "Harvest",
+      "description": "Start a new Timer",
+      "mode": "view"
+    },
+    {
+      "name": "listTimeEntries",
+      "icon": "timer.png",
+      "title": "Today's Timesheet",
+      "preferences": [
+        {
+          "name": "sortBy",
+          "title": "Sort By",
+          "description": "How should the time entries in your timesheet be sorted?",
+          "required": false,
+          "default": "updated-desc",
+          "value": "updated-desc",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Updated Time - Newest First",
+              "value": "updated-desc"
+            },
+            {
+              "title": "Updated Time - Oldest First",
+              "value": "updated-asc"
+            },
+            {
+              "title": "Created Time - Newest First",
+              "value": "created-desc"
+            },
+            {
+              "title": "Created Time - Oldest First",
+              "value": "created-asc"
+            },
+            {
+              "title": "No Sorting",
+              "value": "none"
+            }
+          ]
+        }
+      ],
+      "subtitle": "Harvest",
+      "description": "Start a new Timer",
+      "mode": "view"
+    },
+    {
+      "name": "listFavorites",
+      "icon": "favorite.png",
+      "title": "Favorites",
+      "subtitle": "Harvest",
+      "description": "Quick access to favorite time entries",
+      "mode": "view"
+    },
+    {
+      "name": "stopTimer",
+      "icon": "stop.png",
+      "title": "Stop Timer",
+      "subtitle": "Harvest",
+      "description": "Stop your running timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleTimer",
+      "icon": "toggle.png",
+      "title": "Toggle Timer",
+      "subtitle": "Harvest",
+      "description": "Toggles the most recently used Harvest Timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Running Timer",
+      "subtitle": "Harvest",
+      "description": "See your active Harvest timer at a glance",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "showTimerInMenuBar",
+          "label": "Show Timer in Menu Bar",
+          "title": "Options",
+          "description": "Show your running timer in the menu bar",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "statusFolder",
+          "title": "Status Folder",
+          "type": "directory",
+          "description": "Folder to write status files to. See README for more info.",
+          "required": false,
+          "label": "Status Folder",
+          "placeholder": "Select a directory"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Personal Access Token",
+      "description": "Harvest Token",
+      "required": true,
+      "link": "https://id.getharvest.com/developers",
+      "type": "password"
+    },
+    {
+      "name": "accountID",
+      "title": "Harvest Account ID",
+      "required": true,
+      "description": "Harvest Account ID",
+      "link": "https://id.getharvest.com/developers",
+      "type": "textfield"
+    },
+    {
+      "name": "showClient",
+      "description": "in the time entry form",
+      "required": false,
+      "label": "Show Client Name above selected project",
+      "type": "checkbox"
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "required": false,
+      "description": "Time Format",
+      "type": "dropdown",
+      "default": "company",
+      "data": [
+        {
+          "title": "Company Default",
+          "value": "company"
+        },
+        {
+          "title": "Hours/Minutes",
+          "value": "hours_minutes"
+        },
+        {
+          "title": "Decimal",
+          "value": "decimal"
+        }
+      ]
+    },
+    {
+      "name": "titleDisplay",
+      "title": "Title Field",
+      "required": false,
+      "description": "What field to display as the title in a list of tasks. The other field will be shown as an accessory.",
+      "type": "dropdown",
+      "default": "project",
+      "data": [
+        {
+          "title": "Project Name",
+          "value": "project"
+        },
+        {
+          "title": "Task Name",
+          "value": "task"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "axios": "^1.12.2",
+    "dayjs": "^1.11.11",
+    "es-toolkit": "^1.40.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/lodash": "^4.14.175",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.7",
+    "react": "19.0.0",
+    "typescript": "^4.4.3",
+    "vitest": "^4.0.17"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npm run test:run && npx @raycast/api@latest publish",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

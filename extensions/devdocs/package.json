@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "license": "MIT",
+  "name": "devdocs",
+  "title": "DevDocs",
+  "description": "Search through DevDocs documentation sets from Raycast.",
+  "icon": "devdocs.png",
+  "author": "djpowers",
+  "contributors": [
+    "pernielsentikaer",
+    "j3lte",
+    "0xdhrv"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "pastContributors": [
+    "pomdtr"
+  ],
+  "categories": [
+    "Documentation"
+  ],
+  "keywords": [
+    "API",
+    "developer",
+    "development",
+    "docs",
+    "docset",
+    "documentation",
+    "reference"
+  ],
+  "commands": [
+    {
+      "name": "search-docsets",
+      "title": "Search Documentations",
+      "subtitle": "DevDocs",
+      "description": "Search through DevDocs documentations from Raycast",
+      "mode": "view",
+      "keywords": [
+        "search docsets"
+      ]
+    },
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "subtitle": "DevDocs",
+      "description": "Search through DevDocs documentation entries from Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "slug",
+          "description": "The slug of the documentation set",
+          "type": "text",
+          "placeholder": "documentation slug",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "import-docs",
+      "title": "Import Documentation Settings",
+      "subtitle": "DevDocs",
+      "description": "Import your enabled documentation from the DevDocs website",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryOpenInAction",
+      "description": "Select where entries should be opened using the primary action (other option will be secondary action)",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary entries action",
+      "data": [
+        {
+          "title": "Open in browser",
+          "value": "browser"
+        },
+        {
+          "title": "Open in DevDocs app",
+          "value": "app"
+        }
+      ],
+      "default": "browser"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "fuse.js": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "./node_modules/.bin/tsc -p tsconfig.json --noEmit"
+  }
+}

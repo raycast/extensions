@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-copilot",
+  "title": "GitHub Copilot",
+  "description": "Delegate tasks to GitHub Copilot coding agent and track progress from Raycast",
+  "icon": "icon.png",
+  "author": "timrogers",
+  "contributors": [
+    "pernielsentikaer",
+    "thomas",
+    "darchen_gautier",
+    "pedro_dcc"
+  ],
+  "owner": "github",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "copilotAppsJsonPath",
+      "type": "textfield",
+      "title": "Copilot Apps.json Path",
+      "description": "Path to GitHub Copilot's apps.json file (auto-generated when you sign in to Copilot via an IDE extension). Defaults to ~/.config/github-copilot/apps.json",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "subtitle": "GitHub Copilot",
+      "description": "Track Copilot coding agent tasks",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "GitHub Copilot",
+      "description": "Delegate a task to Copilot coding agent to work on in the background",
+      "mode": "view"
+    },
+    {
+      "name": "copilot-usage",
+      "title": "Copilot Usage",
+      "subtitle": "GitHub Copilot",
+      "description": "View your remaining GitHub Copilot usage",
+      "mode": "view"
+    },
+    {
+      "name": "github-copilot-tasks",
+      "title": "Menu Bar Tasks",
+      "subtitle": "GitHub Copilot",
+      "description": "Track Copilot coding agent tasks from the menu bar",
+      "mode": "menu-bar",
+      "interval": "30m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-task",
+      "title": "Create GitHub Copilot Task",
+      "description": "Creates a GitHub Copilot coding task with a prompt, repository, and optional branch. If no branch is provided, uses the default branch of the repository."
+    },
+    {
+      "name": "search-repositories",
+      "title": "Search GitHub Repositories",
+      "description": "Searches for GitHub repositories. Can search recent repositories, repositories by owner, or use a query filter to find repositories."
+    }
+  ],
+  "dependencies": {
+    "@octokit/core": "^7.0.6",
+    "@octokit/rest": "^22.0.1",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kubernetes",
+  "title": "Kubernetes",
+  "description": "Kubernetes Client in Raycast",
+  "icon": "kubernetes.png",
+  "author": "justin0u0",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-pods",
+      "title": "Get Pods",
+      "subtitle": "Kubernetes",
+      "description": "List Pods in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-deployments",
+      "title": "Get Deployments",
+      "subtitle": "Kubernetes",
+      "description": "List Deployments in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-statefulsets",
+      "title": "Get StatefulSets",
+      "subtitle": "Kubernetes",
+      "description": "List StatefulSets in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-nodes",
+      "title": "Get Nodes",
+      "subtitle": "Kubernetes",
+      "description": "Get Nodes in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-daemonsets",
+      "title": "Get Daemonsets",
+      "subtitle": "Kubernetes",
+      "description": "List DaemonSets in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-services",
+      "title": "Get Services",
+      "subtitle": "Kubernetes",
+      "description": "List Services in Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-configmaps",
+      "title": "Get ConfigMaps",
+      "subtitle": "Kubernetes",
+      "description": "List ConfigMaps in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-endpoints",
+      "title": "Get Endpoints",
+      "subtitle": "Kubernetes",
+      "description": "List Endpoints in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-namespaces",
+      "title": "Get Namespaces",
+      "subtitle": "Kubernetes",
+      "description": "List Namespaces in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-persistentvolumes",
+      "title": "Get PersistentVolumes",
+      "subtitle": "Kubernetes",
+      "description": "List PersistentVolumes in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-persistentvolumeclaims",
+      "title": "Get PersistentVolumeClaims",
+      "subtitle": "Kubernetes",
+      "description": "List PersistentVolumeClaims in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-events",
+      "title": "Get Events",
+      "subtitle": "Kubernetes",
+      "description": "List Events in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-limitranges",
+      "title": "Get LimitRanges",
+      "subtitle": "Kubernetes",
+      "description": "List LimitRanges in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-podtemplates",
+      "title": "Get PodTemplates",
+      "subtitle": "Kubernetes",
+      "description": "List PodTemplates in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-replicationcontrollers",
+      "title": "Get ReplicationControllers",
+      "subtitle": "Kubernetes",
+      "description": "List ReplicationControllers in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-resourcequotas",
+      "title": "Get ResourceQuotas",
+      "subtitle": "Kubernetes",
+      "description": "List ResourceQuotas in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-replicasets",
+      "title": "Get ReplicaSets",
+      "subtitle": "Kubernetes",
+      "description": "List ReplicaSets in a Kubernetes Cluster.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "availableNamespaces",
+      "type": "textfield",
+      "required": false,
+      "title": "Available Namespaces",
+      "description": "List of available namespaces for each Kubernetes context. It is useful when there is no permission to list all namespaces in the cluster, or you don't want to have all namespaces displayed in the dropdown menu. It should be a JSON object with the context name as the key and the list of namespaces as the value.",
+      "placeholder": "{\"ctx1\": [\"ns1\", \"ns2\"], \"ctx2\": [\"ns3\"]}"
+    }
+  ],
+  "dependencies": {
+    "@kubernetes/client-node": "^1.0.0",
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.17.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

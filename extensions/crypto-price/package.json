@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "crypto-price",
+  "title": "Crypto Price",
+  "description": "Keep an eye on Bitcoin (BTC), Ethereum (ETH), and other cryptocurrency prices and more directly from your system menu bar",
+  "icon": "command-icon.png",
+  "author": "gutenye",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Crypto Price",
+      "description": "See cryptocurency prices and more",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "currency",
+      "title": "Currency",
+      "description": "Currency to use for the price",
+      "type": "dropdown",
+      "required": false,
+      "default": "USD",
+      "data": [
+        {
+          "title": "🇺🇸 United States dollar",
+          "value": "USD"
+        },
+        {
+          "title": "🇪🇺 Euro",
+          "value": "EUR"
+        },
+        {
+          "title": "🇬🇧 Pound Sterling",
+          "value": "GBP"
+        },
+        {
+          "title": "🇯🇵 Japanese Yen",
+          "value": "JPY"
+        },
+        {
+          "title": "🇧🇷 Brazilian Real",
+          "value": "BRL"
+        }
+      ]
+    },
+    {
+      "name": "style",
+      "title": "Style",
+      "description": "Style to display on the system menubar",
+      "type": "dropdown",
+      "required": false,
+      "default": "price",
+      "data": [
+        {
+          "title": "$1,234",
+          "value": "price"
+        },
+        {
+          "title": "100 $1,234 200",
+          "value": "down24h-price-up24h"
+        },
+        {
+          "title": "1% $1,234 2%",
+          "value": "down24hPercent-price-up24hPercent"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "title": "Source",
+      "description": "Source to use for fetching the price",
+      "type": "dropdown",
+      "required": false,
+      "default": "CryptoCompare",
+      "data": [
+        {
+          "title": "CryptoCompare",
+          "value": "CryptoCompare"
+        },
+        {
+          "title": "Binance",
+          "value": "Binance"
+        }
+      ]
+    },
+    {
+      "title": "Coins",
+      "name": "coins",
+      "description": "Coins to enable, default is BTC | ETH BNB SOL XRP",
+      "type": "textfield",
+      "default": "BTC | ETH BNB SOL XRP",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
+    "jest": "^29.7.0",
+    "lodash": "^4.17.21",
+    "ts-jest": "^29.1.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/lodash": "^4.17.0",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

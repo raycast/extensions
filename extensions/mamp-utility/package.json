@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mamp-utility",
+  "title": "MAMP Utility",
+  "description": "Search and organize your MAMP hosted website.",
+  "icon": "mamp.png",
+  "author": "SuoweiHu",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "command-manage-site",
+      "title": "Manage Website",
+      "subtitle": "MAMP",
+      "description": "Search MAMP's websites (by default are in 'site' folder)",
+      "mode": "view"
+    },
+    {
+      "name": "command-manage-database",
+      "title": "Manage Database",
+      "subtitle": "MAMP",
+      "description": "Manage MAMP's database using list view (by default on port 8889)",
+      "mode": "view"
+    },
+    {
+      "name": "command-open-phpmyadmin",
+      "title": "Open PhpMyAdmin",
+      "subtitle": "MAMP",
+      "description": "Open MAMP's phpMyAdmin in browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "command-open-site-folder",
+      "title": "Open Site Folder",
+      "subtitle": "MAMP",
+      "description": "Open MAMP's site folder in finder",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+        "type":"appPicker",
+        "name": "pref_mamp",
+        "title": "MAMP/MAMP Pro",
+        "description": "The MAMP you are using (MAMP/MAMP Pro)",
+        "default": "/Applications/MAMP PRO.app",
+        "required": true
+      },
+    {
+      "type": "directory",
+      "name": "pref_siteFolder",
+      "title": "Site Folder",
+      "description": "The folder where your MAMP website are stored",
+      "default": "~/Sites",
+      "required": true
+    },
+    {
+        "type":"appPicker",
+        "name": "pref_openWith",
+        "title": "Open Site With...",
+        "description": "Open the website with your preferred application",
+        "default": "/Applications/Visual Studio Code.app",
+        "required": true
+      },
+    {
+      "type": "textfield",
+      "name": "pref_mysqlPort",
+      "description": "The MySQL Port (can be found in \"Port & User\")",
+      "title": "MySQL Port",
+      "default": "8889",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "pref_apachePort",
+      "title": "Apache Port",
+      "description": "The Apache Port (can be found in \"Port & User\")",
+      "default": "8888",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "pref_nginxPort",
+      "description": "The Nginx Port (can be found in \"Port & User\")",
+      "title": "Nginx Port",
+      "default": "7888",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.0",
+    "@raycast/utils": "github:raycast/utils",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.9.7",
+    "untildify": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/mysql": "^2.15.26",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

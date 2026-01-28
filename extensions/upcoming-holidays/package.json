@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "upcoming-holidays",
+  "title": "Upcoming Holidays",
+  "description": "Show upcoming holidays for a country",
+  "icon": "calendar-icon.png",
+  "author": "rodrigouroz",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Upcoming Holidays",
+      "description": "Allows you to see the upcoming holidays for a country",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "country-locale-map": "^1.9.11",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~25.0.3",
+    "@types/react": "^19.2.7",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api publish",
+    "type-check": "tsc -p tsconfig.json --noEmit"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

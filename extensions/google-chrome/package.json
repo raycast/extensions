@@ -1,0 +1,440 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-chrome",
+  "title": "Google Chrome",
+  "description": "Search open tabs, bookmarks and history in Google Chrome.",
+  "icon": "chrome-icon.png",
+  "author": "Codely",
+  "contributors": [
+    "bromanko",
+    "crisboarna",
+    "andreaselia",
+    "rtyke",
+    "KarolRe",
+    "Aiee",
+    "nagauta",
+    "a-laughlin",
+    "tleo19",
+    "Tarocch1",
+    "santiago_perez",
+    "drewbabel",
+    "hayden_barnes",
+    "pernielsentikaer",
+    "j3lte",
+    "0xdhrv",
+    "xmok"
+  ],
+  "pastContributors": [
+    "jonasengelmann"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Google Chrome",
+      "description": "Open a new Google Chrome tab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tab",
+      "title": "Search Tabs",
+      "subtitle": "Google Chrome",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Google Chrome",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Google Chrome",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "search-all",
+      "title": "Search All",
+      "subtitle": "Google Chrome",
+      "description": "Search browser all tabs and history,bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Create New Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Create New Incognito Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Incognito Window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-guest-window",
+      "title": "Create New Guest Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Guest Window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-current-in-guest",
+      "title": "Open Current Tab in Guest",
+      "subtitle": "Google Chrome",
+      "description": "Open the current active tab's URL in a new Chrome Guest window.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a blank new tab or a tab to a given website."
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a blank new window or a window to a given website."
+    },
+    {
+      "name": "new-guest-window",
+      "title": "New Guest Window",
+      "description": "Open a blank new guest window or a guest window to a given website."
+    },
+    {
+      "name": "open-current-in-guest",
+      "title": "Open Current Tab in Guest",
+      "description": "Open the current active tab's URL in a new Chrome Guest window."
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search bookmarks for a given query."
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search history for a given query."
+    },
+    {
+      "name": "get-profiles",
+      "title": "Get Profiles",
+      "description": "Get all Chrome profiles."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@google-chrome open a new tab",
+        "mocks": {
+          "new-tab": "New tab opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opens a new tab"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new tab to raycast.com",
+        "mocks": {
+          "new-tab": "New tab opened to https://raycast.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "website": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new tab to https://raycast.com"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new window",
+        "mocks": {
+          "new-window": "New window opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-window",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new window"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new window to raycast.com",
+        "mocks": {
+          "new-window": "New window opened to https://raycast.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-window",
+              "arguments": {
+                "website": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new window to https://raycast.com"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new guest window",
+        "mocks": {
+          "new-guest-window": "New guest window opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-guest-window",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new guest window"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new guest window to github.com",
+        "mocks": {
+          "new-guest-window": "New guest window opened to https://github.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-guest-window",
+              "arguments": {
+                "website": {
+                  "includes": "github.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new guest window to https://github.com"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open current tab in guest",
+        "mocks": {
+          "open-current-in-guest": "Opened current tab URL in guest window"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-current-in-guest",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opens the current tab in a guest window"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome search bookmarks for raycast",
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "id": "1",
+              "title": "Raycast",
+              "lastVisited": {},
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": "2",
+              "title": "Hacker News",
+              "lastVisited": {},
+              "url": "https://news.ycombinator.com/"
+            },
+            {
+              "id": "3",
+              "title": "Google",
+              "lastVisited": {},
+              "url": "https://www.google.com/"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": "raycast"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the bookmark for Raycast"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome search history for raycast",
+        "mocks": {
+          "search-history": [
+            {
+              "id": 1,
+              "title": "Raycast",
+              "lastVisited": 13383162423527348,
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": 2,
+              "title": "Google",
+              "lastVisited": 13383164857392104,
+              "url": "https://www.google.com/"
+            },
+            {
+              "id": 3,
+              "title": "Reddit",
+              "lastVisited": 13383159901834568,
+              "url": "https://www.reddit.com/"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {
+                "query": "raycast"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Lists history results including Raycast"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome get me my profiles",
+        "mocks": {
+          "get-profiles": [
+            {
+              "id": "Default",
+              "name": "Personal"
+            },
+            {
+              "id": "Profile 1",
+              "name": "Test Profile"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-profiles"
+            }
+          },
+          {
+            "meetsCriteria": "Lists available Chrome profiles"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "description": "Find the full path to the Google Chrome Profile path via chrome://version/. If empty, the default profile will be used.",
+      "label": "Profile",
+      "default": "",
+      "name": "profilePath",
+      "required": false,
+      "title": "Profile Path",
+      "type": "textfield",
+      "placeholder": "/Users/username/Library/Application Support/Google/Chrome/Profile 1"
+    },
+    {
+      "default": false,
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Chrome profile.",
+      "label": "Extract the favicon from every open tab",
+      "name": "useOriginalFavicon",
+      "required": false,
+      "title": "Favicon",
+      "type": "checkbox"
+    },
+    {
+      "data": [
+        {
+          "title": "Default(classic)",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ],
+      "default": "default",
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "name": "openTabInProfile",
+      "required": false,
+      "title": "Open Tab In Profile",
+      "type": "dropdown"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "run-applescript": "^7.1.0",
+    "sql.js": "^1.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.5",
+    "@types/sql.js": "^1.4.9",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "excalidraw",
+  "title": "Excalidraw",
+  "description": "allow easy access to your excalidraw boards from Raycast!",
+  "icon": "icon.png",
+  "author": "slyguy5646",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "commands": [
+    {
+      "name": "import-new",
+      "title": "Import Canvas",
+      "description": "Import a canvas from excalidraw.com or update one that you previously saved but have changed since",
+      "mode": "view"
+    },
+    {
+      "name": "open-saved",
+      "title": "Open Canvas",
+      "description": "Open a saved canvas",
+      "mode": "view"
+    },
+    {
+      "name": "remove-saved",
+      "title": "Remove Canvas",
+      "description": "Remove a saved canvas",
+      "mode": "view"
+    },
+    {
+      "name": "open",
+      "title": "Launch Excalidraw",
+      "description": "Open Excalidraw.com",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
