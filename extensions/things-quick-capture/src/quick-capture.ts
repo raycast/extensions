@@ -1,9 +1,4 @@
-import {
-  closeMainWindow,
-  showHUD,
-  getPreferenceValues,
-  open,
-} from "@raycast/api";
+import { showHUD, getPreferenceValues, open } from "@raycast/api";
 import {
   getFrontmostAppContext,
   formatTitleWithEmoji,
@@ -41,13 +36,11 @@ export default async function Command() {
         preferences.defaultList === "inbox"
           ? undefined
           : preferences.defaultList,
-      showQuickEntry: false, // Never show Things UI for instant capture
+      showQuickEntry: true, // Always open Things Quick Entry
     });
 
-    await closeMainWindow();
     await open(url);
-    await showHUD(`✓ Added: ${context.title}`);
   } catch (error) {
-    await showHUD(`✗ Failed: ${String(error)}`);
+    await showHUD(`Failed: ${String(error)}`);
   }
 }

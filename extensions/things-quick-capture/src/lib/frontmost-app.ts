@@ -12,13 +12,6 @@ const EXCLUDED_APPS = new Set([
   "hyper",
 ]);
 
-export class ExcludedAppError extends Error {
-  constructor(appName: string) {
-    super(`${appName} is excluded from capture`);
-    this.name = "ExcludedAppError";
-  }
-}
-
 export async function getFrontmostAppContext(): Promise<CapturedContext> {
   const appName = await runAppleScript(`
     tell application "System Events"

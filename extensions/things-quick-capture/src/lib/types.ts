@@ -16,6 +16,5 @@ export interface ThingsTaskParams {
 
 export interface Preferences {
   defaultList: "inbox" | "today" | "evening" | "someday";
-  showQuickEntry: boolean;
   urlInNotes: "notes" | "title";
 }

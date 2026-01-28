@@ -12,17 +12,17 @@
       "name": "quick-capture",
       "title": "Quick Capture to Things",
       "subtitle": "Things 3",
-      "description": "Capture current page/email/file to Things with link",
-      "mode": "view",
+      "description": "Capture context and open Things Quick Entry for review",
+      "mode": "no-view",
       "keywords": ["things", "todo", "task", "capture", "add"]
     },
     {
       "name": "quick-capture-silent",
-      "title": "Quick Capture (Silent)",
+      "title": "Instant Capture (No Edit)",
       "subtitle": "Things 3",
-      "description": "Instantly capture to Things inbox without UI",
+      "description": "Instantly save to Things without any UI",
       "mode": "no-view",
-      "keywords": ["things", "todo", "task", "quick"]
+      "keywords": ["things", "todo", "task", "quick", "instant"]
     }
   ],
   "preferences": [
@@ -39,15 +39,6 @@
         { "title": "Evening", "value": "evening" },
         { "title": "Someday", "value": "someday" }
       ]
-    },
-    {
-      "name": "showQuickEntry",
-      "title": "Show Things Quick Entry",
-      "description": "Open Things Quick Entry window after capture",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "label": "Show Quick Entry window"
     },
     {
       "name": "urlInNotes",
