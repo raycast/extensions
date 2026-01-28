@@ -4,6 +4,7 @@ import {
   getPreferenceValues,
   open,
 } from "@raycast/api";
+import { runAppleScript } from "run-applescript";
 import {
   getFrontmostAppContext,
   formatTitleWithEmoji,
@@ -41,12 +42,16 @@ export default async function Command() {
         preferences.defaultList === "inbox"
           ? undefined
           : preferences.defaultList,
-      showQuickEntry: false, // Never show Things UI for instant capture
+      showQuickEntry: false,
     });
 
     await closeMainWindow();
     await open(url);
     await showHUD(`✓ Added: ${context.title}`);
+
+    // Return focus to the original app
+    const escaped = context.appName.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    await runAppleScript(`tell application "${escaped}" to activate`);
   } catch (error) {
     await showHUD(`✗ Failed: ${String(error)}`);
   }
