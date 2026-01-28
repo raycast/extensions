@@ -15,7 +15,7 @@ const Details = (props: { task: Task }) => {
   const { task } = props;
 
   const initialColors = (Object.values(Color) as Color[]).filter(
-    (color) => color !== Color.PrimaryText && color !== Color.SecondaryText
+    (color) => color !== Color.PrimaryText && color !== Color.SecondaryText,
   );
 
   const assignRandomColorsToTags = (tags: string[]): Map<string, Color> => {

@@ -11,7 +11,6 @@ const ListActiveTasks = () => {
   const [projects, setProjects] = useState<Set<string>>(new Set([]));
 
   useEffect(() => {
-
     let stop = false;
     (async () => {
       if (stop) {
