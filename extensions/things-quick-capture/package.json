@@ -12,17 +12,9 @@
       "name": "quick-capture",
       "title": "Quick Capture to Things",
       "subtitle": "Things 3",
-      "description": "Capture context and open Things Quick Entry for review",
+      "description": "Instantly capture current page/email/file to Things inbox. Tip: Map to Option+Q (not Ctrl+Option+Space which conflicts with Things native shortcut)",
       "mode": "no-view",
-      "keywords": ["things", "todo", "task", "capture", "add"]
-    },
-    {
-      "name": "quick-capture-silent",
-      "title": "Instant Capture (No Edit)",
-      "subtitle": "Things 3",
-      "description": "Instantly save to Things without any UI",
-      "mode": "no-view",
-      "keywords": ["things", "todo", "task", "quick", "instant"]
+      "keywords": ["things", "todo", "task", "capture", "add", "quick", "instant"]
     }
   ],
   "preferences": [
