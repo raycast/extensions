@@ -190,5 +190,5 @@ export async function pollAsyncResult(
     return { status: "error", error: `Poll failed: ${response.status}` };
   }
 
-  return response.json();
+  return response.json() as Promise<AsyncResultResponse>;
 }
