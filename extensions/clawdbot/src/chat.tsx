@@ -9,13 +9,19 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { sendMessage } from "./api";
+import {
+  sendMessage,
+  submitAsyncMessage,
+  pollAsyncResult,
+  AsyncResultResponse,
+} from "./api";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: number;
   isStreaming?: boolean;
+  isPending?: boolean;
 }
 
 interface Conversation {
@@ -26,7 +32,14 @@ interface Conversation {
   updatedAt: number;
 }
 
+interface PendingMessage {
+  runId: string;
+  userMessage: Message;
+  submittedAt: number;
+}
+
 const STORAGE_KEY = "clawdbot-conversations";
+const PENDING_KEY = "clawdbot-pending-messages";
 
 async function loadConversations(): Promise<Conversation[]> {
   const data = await LocalStorage.getItem<string>(STORAGE_KEY);
@@ -40,6 +53,32 @@ async function loadConversations(): Promise<Conversation[]> {
 
 async function saveConversations(conversations: Conversation[]): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+}
+
+// Pending message storage for background processing
+async function loadPendingMessages(): Promise<Record<string, PendingMessage>> {
+  const data = await LocalStorage.getItem<string>(PENDING_KEY);
+  if (!data) return {};
+  try {
+    return JSON.parse(data);
+  } catch {
+    return {};
+  }
+}
+
+async function savePendingMessage(
+  convId: string,
+  pending: PendingMessage,
+): Promise<void> {
+  const all = await loadPendingMessages();
+  all[convId] = pending;
+  await LocalStorage.setItem(PENDING_KEY, JSON.stringify(all));
+}
+
+async function clearPendingMessage(convId: string): Promise<void> {
+  const all = await loadPendingMessages();
+  delete all[convId];
+  await LocalStorage.setItem(PENDING_KEY, JSON.stringify(all));
 }
 
 function generateId(): string {
@@ -57,13 +96,138 @@ function ConversationView({
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [currentConv, setCurrentConv] = useState(conversation);
+  const [hasPending, setHasPending] = useState(false);
   const streamingRef = useRef("");
   const lastUpdateRef = useRef(0);
   const streamingTimestamp = useRef(Date.now());
+  const pollingRef = useRef(false);
 
   useEffect(() => {
     setCurrentConv(conversation);
   }, [conversation]);
+
+  // Check for pending responses on mount and poll for completion
+  useEffect(() => {
+    const checkPendingResponse = async () => {
+      const pending = await loadPendingMessages();
+      const myPending = pending[currentConv.id];
+
+      if (myPending) {
+        setHasPending(true);
+
+        // Poll for result
+        const result = await pollAsyncResult(myPending.runId);
+
+        if (result.status === "complete" && result.content) {
+          const assistantMessage: Message = {
+            role: "assistant",
+            content: result.content,
+            timestamp: Date.now(),
+          };
+
+          const updatedConv = {
+            ...currentConv,
+            messages: [...currentConv.messages, assistantMessage],
+            updatedAt: Date.now(),
+          };
+
+          setCurrentConv(updatedConv);
+          onUpdate(updatedConv);
+          await clearPendingMessage(currentConv.id);
+          setHasPending(false);
+
+          showToast({
+            style: Toast.Style.Success,
+            title: "Response received",
+            message: "Clawdbot's response has arrived",
+          });
+        } else if (result.status === "error") {
+          await clearPendingMessage(currentConv.id);
+          setHasPending(false);
+
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: result.error || "Failed to get response",
+          });
+        }
+        // If still pending, keep hasPending true - will check again on next open
+      } else {
+        setHasPending(false);
+      }
+    };
+
+    checkPendingResponse();
+  }, [currentConv.id]);
+
+  // Non-blocking poll with retry for background responses
+  const pollForResponse = useCallback(
+    async (runId: string, convId: string) => {
+      if (pollingRef.current) return;
+      pollingRef.current = true;
+
+      const maxAttempts = 60; // 5 minutes at 5s intervals
+      let attempts = 0;
+
+      const poll = async () => {
+        if (attempts >= maxAttempts) {
+          pollingRef.current = false;
+          return;
+        }
+        attempts++;
+
+        try {
+          const result: AsyncResultResponse = await pollAsyncResult(runId);
+
+          if (result.status === "complete" && result.content) {
+            const assistantMessage: Message = {
+              role: "assistant",
+              content: result.content,
+              timestamp: Date.now(),
+            };
+
+            setCurrentConv((prev) => {
+              const updated = {
+                ...prev,
+                messages: [...prev.messages, assistantMessage],
+                updatedAt: Date.now(),
+              };
+              onUpdate(updated);
+              return updated;
+            });
+
+            await clearPendingMessage(convId);
+            setHasPending(false);
+            setIsLoading(false);
+            pollingRef.current = false;
+
+            showToast({
+              style: Toast.Style.Success,
+              title: "Response received",
+            });
+          } else if (result.status === "error") {
+            await clearPendingMessage(convId);
+            setHasPending(false);
+            setIsLoading(false);
+            pollingRef.current = false;
+
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Error",
+              message: result.error || "Failed to get response",
+            });
+          } else if (result.status === "pending") {
+            setTimeout(poll, 5000); // Retry in 5s
+          }
+        } catch {
+          setTimeout(poll, 5000); // Retry on network error
+        }
+      };
+
+      setTimeout(poll, 2000); // First check after 2s
+    },
+    [onUpdate],
+  );
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -99,37 +263,61 @@ function ConversationView({
         content: m.content,
       }));
 
-      let fullResponse = "";
-      await sendMessage(apiMessages, (chunk) => {
-        fullResponse += chunk;
-        streamingRef.current = fullResponse;
+      // Try async submission first for background processing support
+      try {
+        const runId = await submitAsyncMessage(apiMessages, currentConv.id);
 
-        // Throttle UI updates to every 100ms to prevent flickering
-        const now = Date.now();
-        if (now - lastUpdateRef.current > 100) {
-          lastUpdateRef.current = now;
-          setStreamingContent(fullResponse);
-        }
-      });
+        // Save pending state so response can be retrieved later
+        await savePendingMessage(currentConv.id, {
+          runId,
+          userMessage,
+          submittedAt: Date.now(),
+        });
+        setHasPending(true);
 
-      // Final update to ensure all content is shown
-      setStreamingContent(fullResponse);
+        showToast({
+          style: Toast.Style.Success,
+          title: "Message sent",
+          message: "Clawdbot is thinking... You can close Raycast.",
+        });
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: fullResponse,
-        timestamp: Date.now(),
-      };
+        // Start polling in background (non-blocking)
+        pollForResponse(runId, currentConv.id);
+      } catch {
+        // Fallback to synchronous streaming if async endpoint unavailable
+        let fullResponse = "";
+        await sendMessage(apiMessages, (chunk) => {
+          fullResponse += chunk;
+          streamingRef.current = fullResponse;
 
-      const finalConversation: Conversation = {
-        ...updatedConversation,
-        messages: [...updatedMessages, assistantMessage],
-        updatedAt: Date.now(),
-      };
+          // Throttle UI updates to every 100ms to prevent flickering
+          const now = Date.now();
+          if (now - lastUpdateRef.current > 100) {
+            lastUpdateRef.current = now;
+            setStreamingContent(fullResponse);
+          }
+        });
 
-      setCurrentConv(finalConversation);
-      onUpdate(finalConversation);
-      setStreamingContent("");
+        // Final update to ensure all content is shown
+        setStreamingContent(fullResponse);
+
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: fullResponse,
+          timestamp: Date.now(),
+        };
+
+        const finalConversation: Conversation = {
+          ...updatedConversation,
+          messages: [...updatedMessages, assistantMessage],
+          updatedAt: Date.now(),
+        };
+
+        setCurrentConv(finalConversation);
+        onUpdate(finalConversation);
+        setStreamingContent("");
+        setIsLoading(false);
+      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -137,10 +325,9 @@ function ConversationView({
         message:
           error instanceof Error ? error.message : "Failed to send message",
       });
-    } finally {
       setIsLoading(false);
     }
-  }, [input, currentConv, isLoading, onUpdate]);
+  }, [input, currentConv, isLoading, onUpdate, pollForResponse]);
 
   const lastAssistantMessage = [...currentConv.messages]
     .reverse()
@@ -154,6 +341,9 @@ function ConversationView({
 
   // Memoize the combined messages array
   const allMessages = useMemo(() => {
+    const messages = [...displayMessages];
+
+    // Show streaming content at the top if available
     if (streamingContent) {
       return [
         {
@@ -161,12 +351,29 @@ function ConversationView({
           content: streamingContent,
           timestamp: streamingTimestamp.current,
           isStreaming: true,
+          isPending: false,
         },
-        ...displayMessages,
+        ...messages,
       ];
     }
-    return displayMessages;
-  }, [streamingContent, displayMessages]);
+
+    // Show pending indicator at the top if waiting for background response
+    if (hasPending && !streamingContent) {
+      return [
+        {
+          role: "assistant" as const,
+          content:
+            "⏳ *Awaiting response...*\n\nYou can close Raycast. The response will appear when you return.",
+          timestamp: Date.now(),
+          isStreaming: false,
+          isPending: true,
+        },
+        ...messages,
+      ];
+    }
+
+    return messages;
+  }, [streamingContent, displayMessages, hasPending]);
 
   return (
     <List
@@ -214,13 +421,29 @@ function ConversationView({
       ) : (
         allMessages.map((msg, index) => (
           <List.Item
-            key={msg.isStreaming ? "streaming" : `${msg.timestamp}-${index}`}
-            icon={msg.role === "user" ? Icon.Person : Icon.Stars}
+            key={
+              msg.isPending
+                ? "pending"
+                : msg.isStreaming
+                  ? "streaming"
+                  : `${msg.timestamp}-${index}`
+            }
+            icon={
+              msg.isPending
+                ? Icon.Clock
+                : msg.role === "user"
+                  ? Icon.Person
+                  : Icon.Stars
+            }
             title={msg.role === "user" ? "You" : "Clawdbot"}
-            subtitle={new Date(msg.timestamp).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            subtitle={
+              msg.isPending
+                ? "Thinking..."
+                : new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+            }
             detail={
               <List.Item.Detail
                 markdown={`**${msg.role === "user" ? "You" : "Clawdbot"}**\n\n${msg.content}`}
@@ -233,11 +456,13 @@ function ConversationView({
                   icon={Icon.Message}
                   onAction={handleSend}
                 />
-                <Action.CopyToClipboard
-                  title="Copy This Message"
-                  content={msg.content}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
+                {!msg.isPending && (
+                  <Action.CopyToClipboard
+                    title="Copy This Message"
+                    content={msg.content}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                )}
                 <Action.CopyToClipboard
                   title="Copy Full Conversation"
                   content={currentConv.messages
