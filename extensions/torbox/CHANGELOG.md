@@ -1,6 +1,6 @@
 # TorBox Changelog
 
-## [Added multi-type downloads, file view, and more] - {PR_MERGE_DATE}
+## [Added multi-type downloads, file view, and more] - 2026-01-28
 
 - Add support for web downloads and usenet
 - Add support for queued downloads
