@@ -1,7 +1,6 @@
 import fetch, { Response } from "node-fetch";
 import { MemegenTemplatesResponse } from "./types";
-import { Meme } from "../../types";
-import { ApiModule } from "../types";
+import { ApiModule, Meme } from "../types";
 import { withCache } from "@raycast/utils";
 
 interface GetMemesResult {

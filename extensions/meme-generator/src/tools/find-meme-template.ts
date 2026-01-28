@@ -1,5 +1,5 @@
 import { imgflipApi } from "../api";
-import { Meme } from "../types";
+import { Meme } from "../api/types";
 
 /**
  * Fetches the complete list of available meme templates from Imgflip.

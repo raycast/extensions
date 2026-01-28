@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ApiModule } from "../api/types";
-import { Meme } from "../types";
+import { ApiModule, Meme } from "../api/types";
 import MemeForm from "./MemeForm";
 import MemePreview from "./MemePreview";
 
@@ -70,6 +69,7 @@ export default function MemeGrid({ apiModule }: MemeGridProps) {
             key={`${meme.id}+${index}`}
             content={meme.url}
             title={meme.title}
+            keywords={meme.keywords}
             actions={
               <ActionPanel>
                 <Action.Push

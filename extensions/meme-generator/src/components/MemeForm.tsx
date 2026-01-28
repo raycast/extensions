@@ -1,8 +1,7 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Icon, closeMainWindow } from "@raycast/api";
 import { useState } from "react";
 import { ImgflipCaptionImageBox } from "../api/imgflip/types";
-import { ApiModule } from "../api/types";
-import { Meme } from "../types";
+import { ApiModule, Meme } from "../api/types";
 import MemePreview from "./MemePreview";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 

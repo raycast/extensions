@@ -1,9 +1,8 @@
 import fetch, { Response } from "node-fetch";
 import { ImgflipCaptionImageResponse, ImgflipGetMemesResponse } from "./types";
-import { Meme } from "../../types";
 import { getPreferenceValues, PreferenceValues } from "@raycast/api";
 import { URL } from "url";
-import { ApiModule } from "../types";
+import { ApiModule, Meme } from "../types";
 import { withCache } from "@raycast/utils";
 
 const DEFAULT_IMGFLIP_USERNAME = "raycastapi";
