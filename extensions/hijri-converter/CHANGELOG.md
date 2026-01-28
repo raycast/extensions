@@ -1,6 +1,6 @@
 # Hijri Converter Changelog
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.0.2] - 2026-01-28
 
 - Expanded valid Hijri year range (removed upper cap; now supports any year ≥ 1).
 - Strengthened date validation and error handling for Hijri and Gregorian inputs.
