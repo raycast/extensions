@@ -1,0 +1,86 @@
+{
+  "name": "things-quick-capture",
+  "title": "Things Quick Capture",
+  "description": "Quickly capture tasks to Things 3 with context from the frontmost app",
+  "icon": "command-icon.png",
+  "author": "lucharo",
+  "authorUrl": "https://luischav.es",
+  "categories": ["Productivity", "Applications"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture to Things",
+      "subtitle": "Things 3",
+      "description": "Capture current page/email/file to Things with link",
+      "mode": "view",
+      "keywords": ["things", "todo", "task", "capture", "add"]
+    },
+    {
+      "name": "quick-capture-silent",
+      "title": "Quick Capture (Silent)",
+      "subtitle": "Things 3",
+      "description": "Instantly capture to Things inbox without UI",
+      "mode": "no-view",
+      "keywords": ["things", "todo", "task", "quick"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultList",
+      "title": "Default List",
+      "description": "Where to save tasks by default",
+      "type": "dropdown",
+      "required": false,
+      "default": "inbox",
+      "data": [
+        { "title": "Inbox", "value": "inbox" },
+        { "title": "Today", "value": "today" },
+        { "title": "Evening", "value": "evening" },
+        { "title": "Someday", "value": "someday" }
+      ]
+    },
+    {
+      "name": "showQuickEntry",
+      "title": "Show Things Quick Entry",
+      "description": "Open Things Quick Entry window after capture",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show Quick Entry window"
+    },
+    {
+      "name": "urlInNotes",
+      "title": "URL Placement",
+      "description": "Where to put the captured URL",
+      "type": "dropdown",
+      "required": false,
+      "default": "notes",
+      "data": [
+        { "title": "In Notes", "value": "notes" },
+        { "title": "In Title (appended)", "value": "title" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/bun": "^1.1.0",
+    "@types/node": "20.10.4",
+    "@types/react": "19.0.10",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "bun test"
+  }
+}
