@@ -1,6 +1,6 @@
 # Cursor Agents Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-01-28
 
 - Fix the keyboard shortcut error.
 - Bump all dependencies to the latest.
