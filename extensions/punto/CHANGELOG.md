@@ -2,7 +2,7 @@
 
 ## [Ukrainian layouts fixes] - {PR_MERGE_DATE}
 
-- Fixed mapping for Ukrainian ISO layout
+- Fixed mapping for Ukrainian layout
 
 ## [Phonetic layouts support] - 2025-11-21
 
