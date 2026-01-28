@@ -94,6 +94,50 @@ export function useContacts(query?: string) {
   });
 }
 
+export async function listRecentContacts() {
+  const peopleClient = getPeopleClient();
+
+  // Get contacts you've interacted with (via email, calendar, etc.)
+  const otherContactsResponse = await peopleClient.otherContacts.list({
+    readMask: "names,emailAddresses,photos",
+    pageSize: 100,
+  });
+
+  const otherContacts = otherContactsResponse.data.otherContacts
+    ?.filter((contact) => contact.emailAddresses?.[0]?.value)
+    .filter(Boolean) as people_v1.Schema$Person[];
+
+  // Also get saved contacts
+  const connectionsResponse = await peopleClient.people.connections.list({
+    resourceName: "people/me",
+    personFields: "names,emailAddresses,photos",
+    pageSize: 100,
+    sortOrder: "LAST_MODIFIED_DESCENDING",
+  });
+
+  const connections = connectionsResponse.data.connections
+    ?.filter((contact) => contact.emailAddresses?.[0]?.value)
+    .filter(Boolean) as people_v1.Schema$Person[];
+
+  // Combine and dedupe by email
+  const allContacts = [...(connections ?? []), ...(otherContacts ?? [])];
+  const seen = new Set<string>();
+  const deduped = allContacts.filter((contact) => {
+    const email = contact.emailAddresses?.[0]?.value?.toLowerCase();
+    if (!email || seen.has(email)) return false;
+    seen.add(email);
+    return true;
+  });
+
+  return deduped;
+}
+
+export function useRecentContacts() {
+  return useCachedPromise(listRecentContacts, [], {
+    keepPreviousData: true,
+  });
+}
+
 export function useCalendar(calendarId: string) {
   return useCachedPromise(
     async (calendarId: string) => {

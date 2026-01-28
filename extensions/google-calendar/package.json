@@ -67,6 +67,13 @@
       "description": "View your Google Calendars",
       "mode": "view",
       "subtitle": "Google Calendar"
+    },
+    {
+      "name": "view-teammate-calendar",
+      "title": "View Teammate's Calendar",
+      "description": "View a teammate's calendar events (requires them to share their calendar with you)",
+      "mode": "view",
+      "subtitle": "Google Calendar"
     }
   ],
   "tools": [
