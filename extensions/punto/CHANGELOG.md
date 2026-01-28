@@ -1,6 +1,6 @@
 # Punto Changelog
 
-## [Ukrainian layouts fixes] - {PR_MERGE_DATE}
+## [Ukrainian layouts fixes] - 2026-01-28
 
 - Fixed mapping for Ukrainian layout
 
