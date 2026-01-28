@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch, { Headers } from "node-fetch";
 import type { ShortenOptions } from "u301";
 import { AI, environment } from "@raycast/api";
 

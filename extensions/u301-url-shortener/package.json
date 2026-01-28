@@ -120,7 +120,6 @@
   "dependencies": {
     "@raycast/api": "^1.104.3",
     "@raycast/utils": "^1.19.1",
-    "node-fetch": "^3.3.2",
     "u301": "^0.0.8"
   },
   "devDependencies": {
