@@ -10,8 +10,8 @@ import {
   Alert,
   useNavigation,
 } from "@raycast/api";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 import { useState, useEffect } from "react";
 import CronActions from "./components/CronActions";
 import CronForm from "./components/CronForm";
@@ -50,18 +50,19 @@ export default function Command() {
     }
   };
 
-  const handleUpdateJob = (job: CronJob) => {
+  const handleUpdateJob = async (job: CronJob) => {
+    let updatedJobs: CronJob[] = [];
     setJobs((prev) => {
       const exists = prev.find((j) => j.id === job.id);
-      let newJobs;
       if (exists) {
-        newJobs = prev.map((j) => (j.id === job.id ? job : j));
+        updatedJobs = prev.map((j) => (j.id === job.id ? job : j));
       } else {
-        newJobs = [...prev, job];
+        updatedJobs = [...prev, job];
       }
-      saveToSystem(newJobs);
-      return newJobs;
+      return updatedJobs;
     });
+
+    await saveToSystem(updatedJobs);
     showToast(Toast.Style.Success, "Job Saved", `${job.name} has been saved.`);
   };
 
@@ -72,11 +73,12 @@ export default function Command() {
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
+      let updatedJobs: CronJob[] = [];
       setJobs((prev) => {
-        const newJobs = prev.filter((j) => j.id !== jobId);
-        saveToSystem(newJobs);
-        return newJobs;
+        updatedJobs = prev.filter((j) => j.id !== jobId);
+        return updatedJobs;
       });
+      await saveToSystem(updatedJobs);
       showToast(Toast.Style.Success, "Job Deleted");
     }
   };
@@ -93,7 +95,7 @@ export default function Command() {
       const { stdout } = await execAsync(job.command);
       const time = new Date().toLocaleTimeString();
       const successLog: Log = {
-        id: Date.now(),
+        id: Math.random().toString(36).substring(2, 11),
         jobId: job.id,
         time,
         message: stdout || "Command executed successfully (no output)",
@@ -103,12 +105,12 @@ export default function Command() {
       showToast(Toast.Style.Success, "Job Completed");
 
       // Update last run
-      handleUpdateJob({ ...job, lastRun: "Just now", status: "active" });
+      await handleUpdateJob({ ...job, lastRun: "Just now", status: "active" });
     } catch (error) {
       const err = error as { message: string; stderr?: string };
       const time = new Date().toLocaleTimeString();
       const errorLog: Log = {
-        id: Date.now(),
+        id: Math.random().toString(36).substring(2, 11),
         jobId: job.id,
         time,
         message: err.stderr || err.message,

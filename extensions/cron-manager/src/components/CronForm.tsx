@@ -15,19 +15,38 @@ export default function CronForm({ job, onSave }: CronFormProps) {
   const [name, setName] = useState(job?.name || "");
   const [schedule, setSchedule] = useState(job?.schedule || "* * * * *");
   const [command, setCommand] = useState(job?.command || "");
+  const [nameError, setNameError] = useState<string | undefined>();
   const [scheduleError, setScheduleError] = useState<string | undefined>();
+  const [commandError, setCommandError] = useState<string | undefined>();
 
   const handleSubmit = () => {
-    if (!isValidCron(schedule)) {
-      setScheduleError("Invalid cron expression");
-      return;
+    let hasError = false;
+
+    if (!name.trim()) {
+      setNameError("Name is required");
+      hasError = true;
+    } else if (name.includes("|") || name.includes("\n")) {
+      setNameError("Name cannot contain pipe (|) or newlines");
+      hasError = true;
     }
 
+    if (!isValidCron(schedule)) {
+      setScheduleError("Invalid cron expression");
+      hasError = true;
+    }
+
+    if (!command.trim()) {
+      setCommandError("Command is required");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
     const newJob: CronJob = {
-      id: job?.id || Date.now().toString(),
-      name,
+      id: job?.id || Math.random().toString(36).substring(2, 11),
+      name: name.trim(),
       schedule,
-      command,
+      command: command.trim(),
       lastRun: job?.lastRun || null,
       nextRun: getNextRun(schedule),
       status: job?.status || "active",
@@ -46,7 +65,17 @@ export default function CronForm({ job, onSave }: CronFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" placeholder="Daily Backup" value={name} onChange={setName} />
+      <Form.TextField
+        id="name"
+        title="Name"
+        placeholder="Daily Backup"
+        value={name}
+        onChange={(val) => {
+          setName(val);
+          setNameError(undefined);
+        }}
+        error={nameError}
+      />
 
       <Form.Dropdown
         id="preset"
@@ -83,7 +112,11 @@ export default function CronForm({ job, onSave }: CronFormProps) {
         title="Command"
         placeholder="/bin/bash script.sh"
         value={command}
-        onChange={setCommand}
+        onChange={(val) => {
+          setCommand(val);
+          setCommandError(undefined);
+        }}
+        error={commandError}
       />
     </Form>
   );

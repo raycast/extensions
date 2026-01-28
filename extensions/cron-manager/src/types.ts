@@ -10,7 +10,7 @@ export interface CronJob {
 }
 
 export interface Log {
-  id: number;
+  id: string;
   jobId: string;
   time: string;
   message: string;
