@@ -5,6 +5,7 @@
   "description": "Quickly manage your SpinupWP servers and websites.",
   "icon": "extension-icon.png",
   "author": "damiengorin",
+  "version": "1.0.1",
   "platforms": [
     "macOS",
     "Windows"
