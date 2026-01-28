@@ -39,7 +39,7 @@ export async function shortenURL(options: ShortenOptions) {
       `Generate a key for ${options.url} for shorten URL. The key should be meaningful and easy to remember, only contain letters and numbers, prefer lowercase and can't be too long. Output ONLY the key itself, nothing else.`,
     );
     console.log(generatedSlug);
-    if (generatedSlug.match(/^[a-zA-Z0-9\_\-]+$/)) {
+    if (generatedSlug.match(/^[a-zA-Z0-9_-]+$/)) {
       URL += `&slug=${encodeURIComponent(generatedSlug)}`;
     }
   }
