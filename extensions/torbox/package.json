@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "torbox",
   "title": "TorBox",
-  "description": "Search downloads in your TorBox",
+  "description": "Control downloads in your TorBox",
   "icon": "torbox.png",
   "author": "baradusov",
   "platforms": [
