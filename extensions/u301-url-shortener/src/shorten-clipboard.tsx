@@ -30,7 +30,7 @@ export default function Command() {
     if (lines) {
       setLoading(true);
       for (const i in lines) {
-        lines[i].status = "shortened";
+        lines[i].status = "init";
         try {
           const shortened = await shortenURL({ url: lines[i].url });
           lines[i].status = "shortened";
