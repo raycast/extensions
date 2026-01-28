@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-01-28
 
 - Added MP3 format option for audio downloads
 - Fixed slow video info loading for playlist URLs
