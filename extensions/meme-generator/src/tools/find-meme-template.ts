@@ -1,4 +1,4 @@
-import { getMemes } from "../api";
+import { imgflipApi } from "../api";
 import { Meme } from "../types";
 
 /**
@@ -11,7 +11,7 @@ async function findMemeTemplate(): Promise<Meme[] | { error: string }> {
 
   try {
     // Call getMemes without forceRefresh
-    const { memes } = await getMemes();
+    const { memes } = await imgflipApi.getMemes();
 
     if (!memes || memes.length === 0) {
       console.log("Failed to fetch meme templates or list is empty.");

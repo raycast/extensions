@@ -1,6 +1,6 @@
-import { imgflipApi } from "./api";
 import MemeGrid from "./components/MemeGrid";
+import { memegenApi } from "./api";
 
 export default function Command() {
-  return <MemeGrid apiModule={imgflipApi} />;
+  return <MemeGrid apiModule={memegenApi} />;
 }
