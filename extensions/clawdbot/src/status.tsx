@@ -35,7 +35,7 @@ async function checkGatewayStatus(): Promise<GatewayStatus> {
       status.healthy = true;
       status.latency = Date.now() - startTime;
       try {
-        const data = await healthResponse.json();
+        const data = (await healthResponse.json()) as { version?: string; sessions?: number };
         status.version = data.version;
         status.sessions = data.sessions;
       } catch {
