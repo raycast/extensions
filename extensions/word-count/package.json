@@ -58,7 +58,7 @@
     },
     {
       "name": "count-overlay",
-      "title": "Word Count shown in Overlay",
+      "title": "Word Count in Overlay",
       "subtitle": "Word Count",
       "description": "Show word count in an overlay on top of other applications.",
       "mode": "no-view",
