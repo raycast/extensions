@@ -3,6 +3,7 @@ import {
   getPreferenceValues,
   open,
   closeMainWindow,
+  PopToRootType,
 } from "@raycast/api";
 import {
   getFrontmostAppContext,
@@ -44,7 +45,7 @@ export default async function Command() {
       showQuickEntry: true, // Always open Things Quick Entry
     });
 
-    await closeMainWindow();
+    await closeMainWindow({ popToRootType: PopToRootType.Suspended });
     await open(url);
   } catch (error) {
     await showHUD(`Failed: ${String(error)}`);
