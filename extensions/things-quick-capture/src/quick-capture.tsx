@@ -32,6 +32,16 @@ export default function Command() {
     async function loadContext() {
       try {
         const ctx = await getFrontmostAppContext();
+
+        if (!ctx.title) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "No context to capture",
+          });
+          popToRoot();
+          return;
+        }
+
         setContext(ctx);
         const formattedTitle = formatTitleWithEmoji(ctx);
         if (preferences.urlInNotes === "notes") {

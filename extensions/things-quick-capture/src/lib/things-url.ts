@@ -8,5 +8,6 @@ export function buildThingsUrl(params: ThingsTaskParams): string {
   if (params.tags?.length) q.set("tags", params.tags.join(","));
   if (params.list) q.set("list", params.list);
   if (params.showQuickEntry) q.set("show-quick-entry", "true");
-  return `things:///add?${q.toString()}`;
+  // URLSearchParams encodes spaces as +, but Things expects %20
+  return `things:///add?${q.toString().replace(/\+/g, "%20")}`;
 }

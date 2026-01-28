@@ -16,6 +16,12 @@ export default async function Command() {
 
   try {
     const context = await getFrontmostAppContext();
+
+    if (!context.title) {
+      await showHUD("No context to capture");
+      return;
+    }
+
     const formattedTitle = formatTitleWithEmoji(context);
 
     const title =

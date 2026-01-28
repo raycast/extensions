@@ -2,12 +2,33 @@ import { runAppleScript } from "run-applescript";
 import { CapturedContext } from "./types";
 import { getAppHandler } from "./app-handlers";
 
+const EXCLUDED_APPS = new Set([
+  "terminal",
+  "iterm2",
+  "ghostty",
+  "alacritty",
+  "kitty",
+  "warp",
+  "hyper",
+]);
+
+export class ExcludedAppError extends Error {
+  constructor(appName: string) {
+    super(`${appName} is excluded from capture`);
+    this.name = "ExcludedAppError";
+  }
+}
+
 export async function getFrontmostAppContext(): Promise<CapturedContext> {
   const appName = await runAppleScript(`
     tell application "System Events"
       return name of first process whose frontmost is true
     end tell
   `);
+
+  if (EXCLUDED_APPS.has(appName.toLowerCase())) {
+    return { appName, title: "", url: null, type: "generic" };
+  }
 
   const handler = getAppHandler(appName);
   if (handler) {
