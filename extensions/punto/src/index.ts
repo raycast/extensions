@@ -14,10 +14,7 @@ import {
   uk_en_phonetic,
   en_uk_phonetic,
 } from "./Dict";
-import {
-  getAvailableInputSourceIds,
-  selectInputSource,
-} from "swift:../swift/Punto";
+import { getAvailableInputSourceIds, selectInputSource } from "swift:../swift/Punto";
 
 interface Preferences {
   latLayoutID: string;
@@ -60,24 +57,21 @@ function switchStringLayout(string: string, preferences: Preferences): string {
 
 async function switchKeyboardLayout(
   preferences: Preferences,
-  targetLayout: Layout,
+  targetLayout: Layout
 ): Promise<void> {
-  const languageIds =
-    (await getAvailableInputSourceIds()) as unknown as string[];
+  const languageIds = (await getAvailableInputSourceIds()) as unknown as string[];
   // console.log("installed layout names are " + languageIds.join(", "));
   // console.log("target layout is " + targetLayout);
 
   const targetLayoutID =
-    targetLayout === Layout.LAT
-      ? preferences.latLayoutID
-      : preferences.cyrLayoutID;
+    targetLayout === Layout.LAT ? preferences.latLayoutID : preferences.cyrLayoutID;
 
   if (!languageIds.includes(targetLayoutID)) {
     await showHUD(
       "Layout " +
         targetLayoutID +
         " is not installed. Please install it or update the preferences." +
-        `Available layouts include: ${languageIds.join(", ")}`,
+        ` Available layouts include: ${languageIds.join(", ")}`
     );
     return;
   }
@@ -115,7 +109,7 @@ function switchCharacterLayout(char: string, preferences: Preferences): string {
     // console.log(char + " detected in en dict")
     return latToCyrMap.get(char) ?? char;
   } else {
-    // console.log(char + " is probably detected in ru dict"),
+    // console.log(char + " is probably detected in ru dict")
     return cyrToLatMap.get(char) ?? char;
   }
 }
