@@ -4,44 +4,41 @@ import {
   getTodayGregorian,
   formatHijriDate,
   formatGregorianDate,
+  formatHijriDateShort,
+  formatGregorianDateShort,
   getDayName,
-  getHijriMonthName,
-  GREGORIAN_MONTHS,
 } from "./utils";
 
 export default function Command() {
   const hijri = getTodayHijri();
   const gregorian = getTodayGregorian();
   const dayName = getDayName(gregorian);
-  const hijriMonth = getHijriMonthName(hijri.month);
-  const gregorianMonth = GREGORIAN_MONTHS[gregorian.month - 1];
 
   const hijriFormatted = formatHijriDate(hijri);
   const gregorianFormatted = formatGregorianDate(gregorian, false);
-
-  const markdown = `
-# ${dayName}
-
----
-
-| Hijri | Gregorian |
-|:---:|:---:|
-| **${hijri.day}** | **${gregorian.day}** |
-| ${hijriMonth} | ${gregorianMonth.name} |
-| ${hijri.year} AH | ${gregorian.year} |
-
----
-
-## Quick Copy
-
-Press **Cmd + H** for Hijri | **Cmd + G** for Gregorian | **Cmd + C** for Both
-`;
+  const hijriShort = formatHijriDateShort(hijri);
+  const gregorianShort = formatGregorianDateShort(gregorian);
 
   async function copyAndClose(text: string, message: string) {
     await Clipboard.copy(text);
     await showHUD(message);
     await popToRoot();
   }
+
+  const markdown = `
+# ${dayName} 
+## • 🌙 ${hijriFormatted}  | \`${hijriShort}\`
+## • 📆 ${gregorianFormatted} | \`${gregorianShort}\`
+
+
+---
+
+**Shortcuts:** 
+- **⌘H** Copy Hijri
+- **⌘G** Copy Gregorian
+- **⌘C** Copy Both
+
+`;
 
   return (
     <Detail
@@ -67,15 +64,6 @@ Press **Cmd + H** for Hijri | **Cmd + G** for Gregorian | **Cmd + C** for Both
             onAction={() => copyAndClose(`${hijriFormatted}\n${gregorianFormatted}`, "Both dates copied!")}
           />
         </ActionPanel>
-      }
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Hijri" text={`${hijri.day} ${hijriMonth} ${hijri.year}`} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Gregorian" text={gregorianFormatted} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Day" text={dayName} />
-        </Detail.Metadata>
       }
     />
   );
