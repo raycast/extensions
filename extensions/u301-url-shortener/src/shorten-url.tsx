@@ -4,12 +4,6 @@ import { Clipboard, showToast, Toast, open } from "@raycast/api";
 import { isValidURL, shortenURL } from "./util";
 import { getFavicon } from "@raycast/utils";
 
-interface Arguments {
-  url: string;
-  key?: string;
-  comment?: string;
-}
-
 interface Result {
   status: "init" | "shortened" | "error";
   url: string;
@@ -17,7 +11,7 @@ interface Result {
   errorMessage?: string;
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.ShortenUrl }>) {
   const { url, key, comment } = props.arguments;
   const [result, setResult] = useState<Result | null>(null);
   const [isLoading, setLoading] = useState(false);
