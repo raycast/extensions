@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fixes and Updates] - {PR_MERGE_DATE}
+## [Fixes and Updates] - 2026-01-28
 
 - Fix: Improve performance for large JSON rendering to prevent CPU freeze
 - Add configurable "Max Initial Lines" preference (default: 10000) to limit initial rendering
