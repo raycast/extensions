@@ -27,7 +27,7 @@ export default function Command() {
   const days = getNextDays(14); // Show 2 weeks
 
   return (
-    <List>
+    <List searchBarPlaceholder="Browse upcoming Hijri dates">
       {days.map((item, index) => {
         const { hijri, dayName } = item;
         const hijriMonth = getHijriMonthName(hijri.month);
@@ -35,25 +35,41 @@ export default function Command() {
         const gregorianMonth = GREGORIAN_MONTHS[gregorian.month - 1];
 
         const isToday = index === 0;
-        const hijriStr = `${hijri.day} ${hijriMonth}`;
-        const gregorianStr = `${gregorian.day} ${gregorianMonth.name}`;
-        const copyText = `${hijri.day} ${hijriMonth} ${hijri.year} (${gregorian.day} ${gregorianMonth.name} ${gregorian.year})`;
+        const hijriStr = `${hijri.day} ${hijriMonth} ${hijri.year} AH`;
+        const gregorianStr = `${gregorian.day} ${gregorianMonth.name} ${gregorian.year}`;
+        const copyText = `${hijri.day} ${hijriMonth} ${hijri.year} AH (${gregorianStr})`;
 
         return (
           <List.Item
             key={index}
             icon={isToday ? Icon.Star : Icon.Calendar}
-            title={`${dayName.substring(0, 3)} ${hijriStr}`}
+            title={`${dayName.substring(0, 3)} ${hijri.day} ${hijriMonth}`}
             subtitle={`${hijri.year} AH`}
-            accessories={[{ text: gregorianStr }]}
+            accessories={[{ text: gregorianStr }, ...(isToday ? [{ text: "Today" }] : [])]}
             actions={
               <ActionPanel>
                 <Action
-                  title="Copy Date"
+                  title="Copy Both Dates"
                   icon={Icon.Clipboard}
                   onAction={async () => {
                     await Clipboard.copy(copyText);
-                    await showHUD(`${copyText} (copied!)`);
+                    await showHUD("Both dates copied!");
+                  }}
+                />
+                <Action
+                  title="Copy Hijri Date"
+                  icon={Icon.Calendar}
+                  onAction={async () => {
+                    await Clipboard.copy(hijriStr);
+                    await showHUD("Hijri date copied!");
+                  }}
+                />
+                <Action
+                  title="Copy Gregorian Date"
+                  icon={Icon.Calendar}
+                  onAction={async () => {
+                    await Clipboard.copy(gregorianStr);
+                    await showHUD("Gregorian date copied!");
                   }}
                 />
               </ActionPanel>
