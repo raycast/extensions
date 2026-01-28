@@ -1,6 +1,6 @@
 # PagerDuty Changelog
 
-## [My Incidents Feature] - {PR_MERGE_DATE}
+## [My Incidents Feature] - 2026-01-28
 
 - Add new "My Incidents" command to filter incidents assigned to current user
 - Extract shared TypeScript types and API client for code reusability
