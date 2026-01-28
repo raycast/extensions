@@ -14,7 +14,10 @@ import {
   uk_en_phonetic,
   en_uk_phonetic,
 } from "./Dict";
-import { getAvailableInputSourceIds, selectInputSource } from "swift:../swift/Punto";
+import { 
+  getAvailableInputSourceIds, 
+  selectInputSource,
+} from "swift:../swift/Punto";
 
 interface Preferences {
   latLayoutID: string;
@@ -59,12 +62,15 @@ async function switchKeyboardLayout(
   preferences: Preferences,
   targetLayout: Layout
 ): Promise<void> {
-  const languageIds = (await getAvailableInputSourceIds()) as unknown as string[];
+  const languageIds = 
+    (await getAvailableInputSourceIds()) as unknown as string[];
   // console.log("installed layout names are " + languageIds.join(", "));
   // console.log("target layout is " + targetLayout);
 
   const targetLayoutID =
-    targetLayout === Layout.LAT ? preferences.latLayoutID : preferences.cyrLayoutID;
+    targetLayout === Layout.LAT 
+      ? preferences.latLayoutID 
+      : preferences.cyrLayoutID;
 
   if (!languageIds.includes(targetLayoutID)) {
     await showHUD(
