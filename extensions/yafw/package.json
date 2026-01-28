@@ -166,5 +166,8 @@
       "default": "/opt/homebrew/bin/ffmpeg",
       "placeholder": "/opt/homebrew/bin/ffmpeg"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
