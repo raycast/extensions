@@ -1,4 +1,9 @@
-import { showHUD, getPreferenceValues, open } from "@raycast/api";
+import {
+  showHUD,
+  getPreferenceValues,
+  open,
+  closeMainWindow,
+} from "@raycast/api";
 import {
   getFrontmostAppContext,
   formatTitleWithEmoji,
@@ -39,6 +44,7 @@ export default async function Command() {
       showQuickEntry: true, // Always open Things Quick Entry
     });
 
+    await closeMainWindow();
     await open(url);
   } catch (error) {
     await showHUD(`Failed: ${String(error)}`);
