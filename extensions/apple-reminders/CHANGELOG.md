@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Fix crashes when reminder data is undefined] - {PR_MERGE_DATE}
+## [Fix crashes when reminder data is undefined] - 2026-01-28
 
 - Fix crash in menu bar when `data.reminders` is undefined or not an array
 - Add defensive checks in `getAttachedUrls` to handle undefined `attachedUrls` property
