@@ -7,7 +7,7 @@ import { SafeOperation } from "./objects/safe.operation";
 import { SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
 
-export default async function Command(props: { arguments: Arguments.Trim; }) {
+export default async function Command(props: { arguments: Arguments.Trim }) {
   const { startTime, endTime, duration } = props.arguments;
   const files = new SelectedFinderFiles();
   const toast = new Toast();
