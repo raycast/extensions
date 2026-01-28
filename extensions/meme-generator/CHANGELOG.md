@@ -1,6 +1,6 @@
 # Meme generator Changelog
 
-## [Added Memegen API provider] - {PR_MERGE_DATE}
+## [Added Memegen API provider] - 2026-01-28
 
 - Refactor Imgflip API provider
 - Add Memegen API provider
