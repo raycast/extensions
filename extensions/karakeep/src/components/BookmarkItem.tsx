@@ -11,6 +11,7 @@ import {
   TAG_HUMAN_COLOR,
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
+import { getScreenshot } from "../utils/screenshot";
 import { Bookmark, Config } from "../types";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
@@ -24,23 +25,47 @@ interface BookmarkItemProps {
 }
 
 function useBookmarkImages(bookmark: Bookmark, config: Config) {
-  // Construct authenticated image URLs using the screenshot utility format
-  // These URLs will work in markdown with Raycast's image handling
-  const images = {
+  const [images, setImages] = useState({
     screenshot: DEFAULT_SCREENSHOT_FILENAME,
     asset: DEFAULT_SCREENSHOT_FILENAME,
-  };
+  });
 
-  const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
-  if (screenshot?.id) {
-    const encodedUrl = encodeURIComponent(`/api/assets/${screenshot.id}`);
-    images.screenshot = `${config.apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
-  }
+  useEffect(() => {
+    let isMounted = true;
+    async function loadImages() {
+      const newImages = {
+        screenshot: DEFAULT_SCREENSHOT_FILENAME,
+        asset: DEFAULT_SCREENSHOT_FILENAME,
+      };
 
-  if (bookmark.content.type === "asset" && bookmark.content.assetType === "image" && bookmark.content.assetId) {
-    const encodedUrl = encodeURIComponent(`/api/assets/${bookmark.content.assetId}`);
-    images.asset = `${config.apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
-  }
+      const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
+      if (screenshot?.id) {
+        try {
+          newImages.screenshot = await getScreenshot(screenshot.id);
+        } catch (error) {
+          logger.error("Failed to load screenshot", error);
+        }
+      }
+
+      if (bookmark.content.type === "asset" && bookmark.content.assetType === "image" && bookmark.content.assetId) {
+        try {
+          newImages.asset = await getScreenshot(bookmark.content.assetId);
+        } catch (error) {
+          logger.error("Failed to load asset image", error);
+        }
+      }
+
+      if (isMounted) {
+        setImages(newImages);
+      }
+    }
+
+    loadImages();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bookmark, config.apiUrl]);
 
   return images;
 }

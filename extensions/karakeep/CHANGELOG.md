@@ -1,5 +1,10 @@
 # Karakeep Changelog
 
+## [2.1.1] 2026-01-29
+
+### Bugfixes
+- Fix failing to display screenshot in list view and WEBP format issues
+
 ## [2.1.0] 2025-11-21
 
 ### Big changes

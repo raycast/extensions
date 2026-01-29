@@ -9,7 +9,7 @@ export async function getScreenshot(id: string) {
   // hack: Make an authenticated image URL request in the background to display the image in Raycast.
   await fetchWithAuth(imageUrl, {
     headers: {
-      Accept: "image/*",
+      Accept: "image/png",
       Authorization: `Bearer ${apiKey}`,
     },
   });
