@@ -64,10 +64,8 @@ function UpdateNameServers({ domain }: { domain: string }) {
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating");
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { type, ...ns } = values;
       try {
-        await updateDomainNameServers(domain, Object.values(ns));
+        await updateDomainNameServers(domain, [values.ns1, values.ns2]);
         toast.style = Toast.Style.Success;
         toast.title = "Updated";
         pop();
@@ -86,7 +84,7 @@ function UpdateNameServers({ domain }: { domain: string }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.List} title="Update Name Servers" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.SaveDocument} title="Save Name Servers" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

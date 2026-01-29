@@ -23,7 +23,4 @@ export const checkDomainAvailability = (domain: string) => callApi<DomainAvailab
 export const listContacts = () => callApi<{ list: Contact[] }>("contact");
 export const listDomains = () => callApi<{ list: OrderDomain[] }>("domain");
 export const updateDomainNameServers = (domain: string, ns: string[]) =>
-  callApi<{ jobId: string } | OrderDomain>(`domain/${domain}/update/ns`, {
-    method: "PATCH",
-    payload: { ns },
-  });
+  callApi<{ jobId: string } | OrderDomain>(`domain/${domain}/update/ns`, { method: "PATCH", payload: { ns } });
