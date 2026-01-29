@@ -1,7 +1,15 @@
 import { Action, ActionPanel, clearSearchBar, Color, Icon, showToast, Toast } from "@raycast/api";
 import { useAtom } from "jotai";
 import _ from "lodash";
-import { ALL_TAG_VALUE, editingAtom, newTodoTextAtom, searchBarTextAtom, searchModeAtom, selectedTagAtom, todoAtom } from "./atoms";
+import {
+  ALL_TAG_VALUE,
+  editingAtom,
+  newTodoTextAtom,
+  searchBarTextAtom,
+  searchModeAtom,
+  selectedTagAtom,
+  todoAtom,
+} from "./atoms";
 import DeleteAllAction from "./delete_all";
 import SearchModeAction from "./search_mode_action";
 import { compare, insertIntoSection, parseTodoItem } from "./utils";
