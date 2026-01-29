@@ -1,6 +1,6 @@
 # Wave Changelog
 
-## [Last Sent, Last Viewed in Invoice] - {PR_MERGE_DATE}
+## [Last Sent, Last Viewed in Invoice] - 2026-01-29
 
 - In **Invoices**, Show "Last Sent" and "Last Viewed"
 
