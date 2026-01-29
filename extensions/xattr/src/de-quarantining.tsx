@@ -71,7 +71,7 @@ export default function Command() {
           icon={{ fileIcon: app.path }}
           actions={
             <ActionPanel>
-              <Action title="Apply" icon={Icon.Checkmark} onAction={() => applyDeQuarantine(app)} />
+              <Action title="Remove Quarantine" icon={Icon.Checkmark} onAction={() => applyDeQuarantine(app)} />
             </ActionPanel>
           }
         />
