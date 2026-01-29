@@ -186,3 +186,7 @@ clawdbot gateway status
 
 ### Token errors
 Verify your token matches `gateway.auth.token` in your Clawdbot config.
+
+## Acknowledgments
+
+Thanks to [@asaphko](https://github.com/asaphko) for the original extension icon and inspiration for the Gateway Status and Open Webchat commands.
