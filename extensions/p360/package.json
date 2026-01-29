@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "p360",
+  "title": "P360 Decision Readiness",
+  "description": "Check your decision readiness based on real-time Oura Ring biometric data. Know when to make important decisions.",
+  "icon": "extension-icon.png",
+  "author": "Seokhee_Lee",
+  "categories": ["Productivity", "Data"],
+  "license": "MIT",
+  "keywords": [
+    "oura",
+    "biometrics",
+    "hrv",
+    "sleep",
+    "decision",
+    "readiness",
+    "health",
+    "productivity",
+    "biohacking",
+    "wellness"
+  ],
+  "commands": [
+    {
+      "name": "check-readiness",
+      "title": "Check Readiness",
+      "subtitle": "P360",
+      "description": "Check your current decision readiness score based on Oura biometrics",
+      "mode": "view",
+      "keywords": ["p360", "oura", "hrv", "sleep", "readiness", "decision"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.10.4",
+    "@types/react": "18.2.45",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
