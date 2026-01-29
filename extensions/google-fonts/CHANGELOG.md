@@ -1,5 +1,9 @@
 # Google Fonts Changelog
 
+## [Cross-Platform Keyboard Shortcuts] - {PR_MERGE_DATE}
+
+- Updated `Keyboard` shortcuts to be cross-platform
+
 ## [Enhancement] - 2023-11-15
 
 - Added the possibility to download the font family from the variants view
