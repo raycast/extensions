@@ -1,6 +1,6 @@
 # SingularityApp Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-01-29
 
 ### Features
 
