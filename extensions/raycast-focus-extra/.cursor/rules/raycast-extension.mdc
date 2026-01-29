@@ -1,0 +1,13 @@
+---
+description: Raycast extension conventions; entry points, UI, API
+globs: "**/*.{ts,tsx}", "package.json"
+alwaysApply: false
+---
+
+# Raycast extension
+
+- Commands: `package.json` `commands[]` → each has `name`, `mode`; entry file under `src/` (e.g. `src/focus-sessions.ts`).
+- Use `@raycast/api` (List, Detail, Grid, ActionPanel, Action) and `@raycast/utils` (useCachedPromise, usePromise, runAppleScript, executeSQL).
+- `mode: "no-view"` = no UI (script); `mode: "view"` (default) = show List/Detail/Grid. For focus sessions UI use view mode + List or Detail.
+- API reference: https://developers.raycast.com/llms.txt (List, Detail, executeSQL, runAppleScript, etc.).
+- Extension metadata: put `CHANGELOG.md` in extension root so the store shows Version History with notable changes per release.

@@ -1,0 +1,12 @@
+---
+description: Project summary for Raycast Focus Extra; apply to all sessions
+alwaysApply: true
+---
+
+# Project overview
+
+**Raycast Focus Extra**: Raycast extension to show Raycast Focus sessions. Planned: table or timeline UI of focus sessions and what’s been done; action to write entries to Apple Calendar.
+
+Data source for Focus sessions is TBD (e.g. `~/Library/Application Support/Raycast/`, SQLite, or plist). Discovering the Focus session data source is an implementation task—do not assume a schema upfront.
+
+**Version history**: Keep `CHANGELOG.md` at extension root; Raycast uses it for Version History. Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/): intro + SemVer link; `[Unreleased]` at top; version headings `## [x.y.z] - YYYY-MM-DD` (ISO date); group changes under `### Added`, `### Changed`, `### Deprecated`, `### Removed`, `### Fixed`, `### Security`. Document notable changes per release.
