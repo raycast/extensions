@@ -242,7 +242,7 @@ function Command() {
 
             return (
               <List.Item
-                key={contact.resourceName ?? email}
+                key={contact.resourceName || email}
                 icon={getContactIcon(contact)}
                 title={name ?? email}
                 subtitle={name ? email : undefined}
@@ -252,7 +252,7 @@ function Command() {
                       title="View Calendar"
                       icon={Icon.Calendar}
                       onAction={() => {
-                        setSelectedContact({ email, name });
+                        setSelectedContact({ email, name: name ?? undefined });
                       }}
                     />
                     <Action.CopyToClipboard title="Copy Email" content={email} />
