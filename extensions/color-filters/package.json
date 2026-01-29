@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "color-filters",
+  "title": "Color Filters",
+  "description": "Toggle macOS Color Filters and switch between filter types (Grayscale, Protanopia, Deuteranopia, Tritanopia, Color Tint)",
+  "icon": "extension-icon.png",
+  "author": "RemarkRemedy",
+  "categories": ["System", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-color-filters",
+      "title": "Toggle Color Filters",
+      "description": "Toggle color filters on/off",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-grayscale",
+      "title": "Set Grayscale Filter",
+      "description": "Enable grayscale color filter",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-protanopia",
+      "title": "Set Protanopia Filter (Red/Green)",
+      "description": "Enable red/green color filter for protanopia",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-deuteranopia",
+      "title": "Set Deuteranopia Filter (Green/Red)",
+      "description": "Enable green/red color filter for deuteranopia",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-tritanopia",
+      "title": "Set Tritanopia Filter (Blue/Yellow)",
+      "description": "Enable blue/yellow color filter for tritanopia",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-color-tint",
+      "title": "Set Color Tint Filter",
+      "description": "Enable color tint filter",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable-color-filters",
+      "title": "Disable Color Filters",
+      "description": "Turn off color filters",
+      "mode": "no-view"
+    },
+    {
+      "name": "select-color-filter",
+      "title": "Select Color Filter",
+      "description": "Choose a color filter from a list",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "intensity",
+      "title": "Default Intensity",
+      "description": "Default intensity for color filters (0.0 to 1.0)",
+      "type": "textfield",
+      "default": "1.0",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
