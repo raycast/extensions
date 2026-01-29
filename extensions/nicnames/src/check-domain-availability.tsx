@@ -4,13 +4,7 @@ import { checkDomainAvailability } from "./nicnames";
 
 export default function CheckDomainAvailability(props: LaunchProps<{ arguments: Arguments.CheckDomainAvailability }>) {
   const { domain } = props.arguments;
-  const { isLoading, data, error } = useCachedPromise(
-    async (domain: string) => {
-      const result = await checkDomainAvailability(domain);
-      return result;
-    },
-    [domain],
-  );
+  const { isLoading, data, error } = useCachedPromise(checkDomainAvailability, [domain]);
 
   return (
     <Detail
