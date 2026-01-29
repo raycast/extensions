@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "dj_z",
   "license": "MIT",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "list-scenarios",
@@ -73,5 +75,8 @@
     "eslint": "^8.57.1",
     "prettier": "^3.5.0",
     "typescript": "^5.7.2"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
