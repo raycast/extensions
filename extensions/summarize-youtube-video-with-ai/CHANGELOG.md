@@ -1,5 +1,10 @@
 # Summarize YouTube Video Changelog
 
+## [Fix] - 2026-01-29
+
+- 🔧 Fix video ID extraction for YouTube URLs with query params (e.g. `?app=desktop&v=...`)
+- 🔧 Fix transcript parsing when caption XML uses nested tags (e.g. `<p><s>text</s></p>`)
+
 ## [Fix] - 2026-01-27
 
 - 🔧 Fix transcript fetching using ANDROID client API
