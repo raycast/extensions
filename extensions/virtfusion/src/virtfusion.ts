@@ -1,4 +1,4 @@
-import { Panel } from "./types";
+import { PaginatedResult, Panel, Server } from "./types";
 
 class VirtFusion {
 private panel: Panel;
@@ -6,7 +6,7 @@ private panel: Panel;
 constructor(panel: Panel) {
     this.panel = panel;
   }
-  private async makeRequest<T>(endpoint: string, options?: RequestInit) {
+  protected async request<T>(endpoint: string, options?: RequestInit) {
     const response = await fetch(new URL(`api/${endpoint}`, this.panel.virtfusion_url), {
       headers: {
         Accept: "application/json",
@@ -16,16 +16,16 @@ constructor(panel: Panel) {
         ...options
     });
     if (!response.ok) throw new Error(response.statusText);
-    const result = await response.json() as {data: T};
-    return result.data;
+    if (response.headers.get("Content-Type")?.includes("text/html")) return undefined as T;
+    const result = await response.json() as T;
+    return result;
   }
-
-  public async getAccount() {
-    return this.makeRequest<{
-    "name": string
-    "email": string
-    "timezone": string
-}>("account");
+  
+  public async connect() {
+    return this.request<void>("connect")
+  }
+  public async listServers() {
+    return this.request<PaginatedResult<Server>>("server")
   }
 }
 

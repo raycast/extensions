@@ -73,7 +73,7 @@ function AddPanel() {
       const toast = await showToast(Toast.Style.Animated, "Adding panel", values.title || values.virtfusion_url);
       try {
         const vf = new VirtFusion(values);
-        await vf.getAccount();
+        await vf.connect();
         await setValue([...value, { ...values, id: crypto.randomUUID() }]);
         toast.style = Toast.Style.Success;
         toast.title = "Added";
