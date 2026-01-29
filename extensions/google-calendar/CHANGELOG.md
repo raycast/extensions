@@ -1,5 +1,10 @@
 # Google Calendar Changelog
 
+## [1.5.0] - 2026-01-29
+
+- Added "View Teammate's Calendar" command to quickly view a colleague's calendar events
+- Shows recent contacts on load with search-as-you-type filtering
+
 ## [1.4.0] - 2026-01-28
 
 - Added options to set default calendar, attendees, description, event duration, and send invitations
