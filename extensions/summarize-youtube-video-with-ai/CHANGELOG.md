@@ -1,6 +1,6 @@
 # Summarize YouTube Video Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-01-29
 
 - Fix transcript XML parsing for YouTube's srv3 format (extract text from `<s>` segments)
 - Remove deprecated "Summarize YouTube Video" command
