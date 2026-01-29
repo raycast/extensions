@@ -1,12 +1,15 @@
-import { useCachedPromise } from "@raycast/utils";
-import { OrderDomain } from "./types";
-import { callApi } from "./nicnames";
-import { Color, Icon, List } from "@raycast/api";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { listDomains, updateDomainNameServers } from "./nicnames";
+import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 
 export default function Domains() {
-  const { isLoading, data: domains } = useCachedPromise(
+  const {
+    isLoading,
+    data: domains,
+    revalidate,
+  } = useCachedPromise(
     async () => {
-      const result = await callApi<{ list: OrderDomain[] }>("domain");
+      const result = await listDomains();
       return result.list;
     },
     [],
@@ -35,8 +38,61 @@ ${domainItem.domain.ns.map((ns) => `| ${ns} |`).join("\n")}
     `}
             />
           }
+          actions={
+            <ActionPanel>
+              <Action.Push
+                icon={Icon.List}
+                title="Update Name Servers"
+                target={<UpdateNameServers domain={domainItem.domain.name} />}
+                onPop={revalidate}
+              />
+            </ActionPanel>
+          }
         />
       ))}
     </List>
+  );
+}
+
+function UpdateNameServers({ domain }: { domain: string }) {
+  const { pop } = useNavigation();
+  type FormValues = {
+    type: string;
+    ns1: string;
+    ns2: string;
+  };
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Updating");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { type, ...ns } = values;
+      try {
+        await updateDomainNameServers(domain, Object.values(ns));
+        toast.style = Toast.Style.Success;
+        toast.title = "Updated";
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = `${error}`;
+      }
+    },
+    validation: {
+      ns1: FormValidation.Required,
+      ns2: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.List} title="Update Name Servers" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Custom Name-Servers" />
+      <Form.TextField title="Name-Server 1" placeholder="ns1.example.com" {...itemProps.ns1} />
+      <Form.TextField title="Name-Server 2" placeholder="ns2.example.com" {...itemProps.ns2} />
+    </Form>
   );
 }

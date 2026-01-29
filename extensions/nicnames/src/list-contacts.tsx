@@ -1,12 +1,11 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Contact } from "./types";
-import { callApi } from "./nicnames";
+import { listContacts } from "./nicnames";
 
 export default function Contacts() {
   const { isLoading, data: contacts } = useCachedPromise(
     async () => {
-      const result = await callApi<{ list: Contact[] }>("contact");
+      const result = await listContacts();
       return result.list;
     },
     [],
