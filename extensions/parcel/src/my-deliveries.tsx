@@ -3,16 +3,16 @@ import {
   ActionPanel,
   Color,
   Icon,
-  List,
-  Toast,
   launchCommand,
   LaunchType,
-  showToast,
+  List,
   open,
+  showToast,
+  Toast
 } from "@raycast/api";
 import { isValid, parse } from "date-fns";
 import { useEffect, useState } from "react";
-import { Delivery, FilterMode, STATUS_DESCRIPTIONS, getStatusIcon } from "./api";
+import { Delivery, FilterMode, getStatusIcon, STATUS_DESCRIPTIONS } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
 import { useCarriers } from "./hooks/useCarriers";
 
@@ -439,7 +439,7 @@ export default function Command() {
                 <ActionPanel>
                   <Action.OpenInBrowser
                     title="Track on Website"
-                    url={`https://parcel.app/webtrack.php?platform=mac&type=${delivery.carrier_code}&code=${delivery.tracking_number}`}
+                    url={`https://parcel.app/webtrack.php?platform=${process.platform === "win32" ? "windows" : "mac"}&type=${delivery.carrier_code}&code=${delivery.tracking_number}`}
                   />
                   <Action.CopyToClipboard title="Copy Tracking Number" content={delivery.tracking_number} />
                   <Action.OpenInBrowser title="Open Parcel Web" url="https://web.parcelapp.net/" />
