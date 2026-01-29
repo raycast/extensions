@@ -20,7 +20,7 @@ export default function Contacts() {
         <List.Item
           key={contact.contactId}
           icon={Icon.Person}
-          title={[contact.firstName, contact.middleName, contact.lastName].join(" ")}
+          title={[contact.firstName, contact.middleName, contact.lastName].filter(Boolean).join(" ")}
           subtitle={contact.email}
         />
       ))}
