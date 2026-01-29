@@ -4,6 +4,8 @@ Do more with Raycast Focus: view your focus sessions and sync them from the syst
 
 **macOS only.**
 
+![Focus Sessions](screenshots/screenshot-1.png)
+
 ## Commands
 
 - **Focus Sessions** – List focus sessions for a date. Default is today. Use **Pick date** (or **Change date** on an item) to choose another day. Data comes from extension storage. On open, a background sync runs (throttled) and refreshes the list.
