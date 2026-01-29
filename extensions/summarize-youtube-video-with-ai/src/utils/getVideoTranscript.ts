@@ -1,8 +1,9 @@
 import { popToRoot, showToast, Toast } from "@raycast/api";
 
 function extractVideoId(video: string): string {
-  if (video.includes("youtube.com/watch?v=")) {
-    return video.split("v=")[1].split("&")[0];
+  if (video.includes("youtube.com/watch")) {
+    const match = video.match(/[?&]v=([^&]+)/);
+    return match ? match[1] : video;
   }
   if (video.includes("youtu.be/")) {
     return video.split("youtu.be/")[1].split("?")[0];
@@ -107,8 +108,11 @@ export async function getVideoTranscript(video: string): Promise<string | undefi
 
     const transcriptText = segments
       .map((segment: string) => {
-        const match = segment.match(/>([^<]*)</);
-        return match ? match[1] : "";
+        // Strip tags to get text (handles nested elements like <s>)
+        return segment
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
       })
       .join("")
       // Decode HTML entities
