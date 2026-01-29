@@ -8,7 +8,7 @@ import {
   List,
   open,
   showToast,
-  Toast
+  Toast,
 } from "@raycast/api";
 import { isValid, parse } from "date-fns";
 import { useEffect, useState } from "react";
