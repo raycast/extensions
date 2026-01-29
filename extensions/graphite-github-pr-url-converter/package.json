@@ -1,0 +1,124 @@
+{
+  "name": "graphite-github-pr-url-converter",
+  "title": "Graphite ↔ GitHub PR URL Converter",
+  "description": "Convert PR URLs between Graphite and GitHub - copy or open in browser",
+  "icon": "extension-icon.png",
+  "author": "virnarula",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "graphite-to-github-copy",
+      "title": "Copy: Graphite → GitHub",
+      "subtitle": "PR Converter",
+      "description": "Convert a Graphite PR URL to GitHub and copy to clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "Graphite PR URL",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "graphite-to-github-open",
+      "title": "Open: Graphite → GitHub",
+      "subtitle": "PR Converter",
+      "description": "Convert a Graphite PR URL to GitHub and open in browser",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "Graphite PR URL",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "github-to-graphite-copy",
+      "title": "Copy: GitHub → Graphite",
+      "subtitle": "PR Converter",
+      "description": "Convert a GitHub PR URL to Graphite and copy to clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "GitHub PR URL",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "github-to-graphite-open",
+      "title": "Open: GitHub → Graphite",
+      "subtitle": "PR Converter",
+      "description": "Convert a GitHub PR URL to Graphite and open in browser",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "GitHub PR URL",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "graphiteHost",
+      "title": "Graphite Host",
+      "description": "The Graphite host URL (for self-hosted instances)",
+      "type": "textfield",
+      "default": "https://app.graphite.dev",
+      "required": false
+    },
+    {
+      "name": "githubHost",
+      "title": "GitHub Host",
+      "description": "The GitHub host URL (for GitHub Enterprise)",
+      "type": "textfield",
+      "default": "https://github.com",
+      "required": false
+    },
+    {
+      "name": "allowlistEnabled",
+      "title": "Enable Org/Repo Allowlist",
+      "description": "Only convert links for specific orgs/repos",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enable allowlist filtering"
+    },
+    {
+      "name": "allowedOrgsRepos",
+      "title": "Allowed Orgs/Repos",
+      "description": "Comma-separated list of allowed orgs or org/repo pairs (e.g., 'myorg,otherorg/specific-repo')",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.10.0",
+    "@types/react": "18.2.38",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
