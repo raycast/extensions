@@ -1,7 +1,7 @@
 /**
- * Quick Ask Inline - Argument-based command for quick AI queries from root search
+ * Fast Ask - Argument-based command for quick AI queries from root search
  *
- * Usage: Type "Ask AI <your question>" in Raycast root search
+ * Usage: Type "Fast Ask <your question>" in Raycast root search
  */
 
 import {
@@ -14,6 +14,7 @@ import {
   LaunchProps,
   Alert,
   confirmAlert,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { ensureServerRunning, getClient } from "./lib/server";
@@ -28,11 +29,26 @@ interface Arguments {
   prompt: string;
 }
 
-// Default model to use for quick queries
-const DEFAULT_MODEL = {
-  providerID: "anthropic",
-  modelID: "claude-sonnet-4-5",
-};
+interface Preferences {
+  defaultModel?: string;
+}
+
+// Get model from preference or use fallback
+function getDefaultModel(): { providerID: string; modelID: string } {
+  const preferences = getPreferenceValues<Preferences>();
+  const modelPref = preferences.defaultModel?.trim();
+
+  if (modelPref && modelPref.includes("/")) {
+    const [providerID, modelID] = modelPref.split("/");
+    return { providerID, modelID };
+  }
+
+  // Fallback to Claude Sonnet 4.5
+  return {
+    providerID: "anthropic",
+    modelID: "claude-sonnet-4-5",
+  };
+}
 
 function formatTokens(tokens: MessageInfo["tokens"]): string {
   const parts = [`In: ${tokens.input}`, `Out: ${tokens.output}`];
@@ -120,6 +136,7 @@ export default function QuickAskInline(
   props: LaunchProps<{ arguments: Arguments }>,
 ) {
   const { prompt } = props.arguments;
+  const model = getDefaultModel();
 
   const [isConnecting, setIsConnecting] = useState(true);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -171,7 +188,7 @@ export default function QuickAskInline(
         // Stream the response
         await streamPrompt({
           sessionId: newSessionId,
-          model: DEFAULT_MODEL,
+          model,
           prompt,
           onDelta: (text) => {
             setResponse(text);
@@ -267,7 +284,7 @@ export default function QuickAskInline(
 
       await streamPrompt({
         sessionId: newSessionId,
-        model: DEFAULT_MODEL,
+        model,
         prompt,
         onDelta: (text) => setResponse(text),
         onComplete: (info) => {
@@ -325,13 +342,13 @@ export default function QuickAskInline(
     (isConnecting
       ? "*Connecting to OpenCode...*"
       : "*Waiting for response...*");
-  const modelDisplay = `${DEFAULT_MODEL.providerID}/${DEFAULT_MODEL.modelID}`;
+  const modelDisplay = `${model.providerID}/${model.modelID}`;
 
   return (
     <Detail
       markdown={displayMarkdown}
       isLoading={isConnecting || isStreaming}
-      navigationTitle={isStreaming ? "Streaming..." : "Quick Ask"}
+      navigationTitle={isStreaming ? "Streaming..." : "Fast Ask"}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard

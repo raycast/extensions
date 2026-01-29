@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import {
   ensureServerRunning,
   checkServerHealth,
@@ -41,6 +41,10 @@ function getProviderDisplayName(providerId: string): string {
     PROVIDER_NAMES[providerId] ||
     providerId.charAt(0).toUpperCase() + providerId.slice(1)
   );
+}
+
+interface Preferences {
+  defaultModel?: string;
 }
 
 export function useOpenCodeServer(): UseOpenCodeServerResult {
@@ -120,14 +124,22 @@ export function useOpenCodeServer(): UseOpenCodeServerResult {
       setModelGroups(groups);
 
       // Determine default model
-      // Preferred default is Claude Sonnet 4.5 latest
-      const preferredDefault = "anthropic/claude-sonnet-4-5";
+      // Priority: 1. Raycast preference, 2. Claude Sonnet 4.5, 3. OpenCode config, 4. First available
+      const preferences = getPreferenceValues<Preferences>();
+      const preferenceModel = preferences.defaultModel?.trim();
+      const fallbackDefault = "anthropic/claude-sonnet-4-5";
 
       // Check if preferred default exists in available models
       let defaultModelId: string | undefined;
 
-      if (availableModels.some((m) => m.id === preferredDefault)) {
-        defaultModelId = preferredDefault;
+      // First check Raycast preference
+      if (
+        preferenceModel &&
+        availableModels.some((m) => m.id === preferenceModel)
+      ) {
+        defaultModelId = preferenceModel;
+      } else if (availableModels.some((m) => m.id === fallbackDefault)) {
+        defaultModelId = fallbackDefault;
       } else {
         // Try to get from config
         const configResult = await serverClient.config.get();

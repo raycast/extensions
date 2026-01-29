@@ -2,19 +2,46 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "opencode-ai",
   "title": "OpenCode AI",
-  "description": "Query AI models through OpenCode using your configured providers",
+  "description": "Query AI models through OpenCode - use your own API keys with Claude, GPT, Gemini, and more. Supports streaming responses, tool execution with permission controls, and multiple providers.",
   "icon": "icon.png",
   "author": "mattietk",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
-    "Productivity",
-    "Developer Tools"
+    "Developer Tools",
+    "Productivity"
   ],
   "license": "MIT",
+  "keywords": [
+    "ai",
+    "opencode",
+    "claude",
+    "gpt",
+    "gemini",
+    "llm",
+    "chatgpt",
+    "anthropic",
+    "openai",
+    "coding",
+    "assistant"
+  ],
+  "preferences": [
+    {
+      "name": "defaultModel",
+      "title": "Default Model",
+      "description": "The default AI model to use for queries (e.g., anthropic/claude-sonnet-4-5)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "anthropic/claude-sonnet-4-5"
+    }
+  ],
   "commands": [
     {
       "name": "ask-opencode",
       "title": "Ask OpenCode",
-      "description": "Ask a question using OpenCode AI",
+      "subtitle": "OpenCode",
+      "description": "Ask a question using OpenCode AI with streaming responses and tool execution",
       "mode": "view",
       "keywords": [
         "ai",
@@ -22,13 +49,15 @@
         "query",
         "opencode",
         "claude",
-        "gpt"
+        "gpt",
+        "chat"
       ]
     },
     {
       "name": "quick-ask-inline",
-      "title": "Ask AI",
-      "description": "Quick AI query from root search",
+      "title": "Fast Ask",
+      "subtitle": "OpenCode",
+      "description": "Quick AI query directly from Raycast root search",
       "mode": "view",
       "arguments": [
         {
@@ -45,7 +74,8 @@
         "opencode",
         "claude",
         "gpt",
-        "quick"
+        "quick",
+        "fast"
       ]
     }
   ],
