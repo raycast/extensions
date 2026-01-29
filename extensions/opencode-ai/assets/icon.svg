@@ -1,0 +1,18 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#1a1a2e"/>
+  
+  <!-- Code brackets representing "code" -->
+  <path d="M140 180 L80 256 L140 332" stroke="#7c3aed" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M372 180 L432 256 L372 332" stroke="#7c3aed" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- AI sparkle/star in center -->
+  <circle cx="256" cy="256" r="60" fill="#7c3aed"/>
+  <circle cx="256" cy="256" r="30" fill="#a78bfa"/>
+  
+  <!-- Small accent dots -->
+  <circle cx="200" cy="200" r="12" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="312" cy="200" r="12" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="200" cy="312" r="12" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="312" cy="312" r="12" fill="#a78bfa" opacity="0.6"/>
+</svg>

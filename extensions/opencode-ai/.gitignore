@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Raycast
+.raycast/
+
+# OpenCode state
+opencode/
+
+# OS files
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Debug logs
+*.log
+npm-debug.log*
+
+# pnpm (not supported by Raycast)
+pnpm-lock.yaml
