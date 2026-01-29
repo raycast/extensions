@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Added Windows Support] - {PR_MERGE_DATE}
+## [Added Windows Support] - 2026-01-29
 
 - Added support for Windows in addition to Mac
 
