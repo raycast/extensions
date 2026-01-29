@@ -47,7 +47,8 @@ export default function Command() {
       })
     ) {
       try {
-        await execAsync(`xattr -r -d com.apple.quarantine "${app.path}"`);
+        const { execSync } = await import("@raycast/utils");
+        await execSync("xattr", ["-r", "-d", "com.apple.quarantine", app.path]);
         await showHUD(`Successfully de-quarantined ${app.name}`);
       } catch (error: unknown) {
         console.error(error);
