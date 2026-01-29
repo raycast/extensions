@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Color, Grid, Icon, Keyboard, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, Icon, List, popToRoot } from "@raycast/api";
 
 import xor from "lodash.xor";
 import startCase from "lodash.startcase";
@@ -44,20 +44,23 @@ const FontVariantsView = (props: { font: Font }) => {
                     onAction={() => handleToggleVariantInSelectedVariants(variant)}
                   />
                   <Action.CopyToClipboard
-                    title="Copy HTML: @import"
+                    title="Copy HTML: @Import"
                     content={handleCopyHTMLContent("import")}
                     onCopy={handleCopiedHTML}
                   />
                   <Action.CopyToClipboard
-                    title="Copy HTML: <link>"
-                    shortcut={{ macOS: {modifiers: ["cmd", "shift"], key: "enter"}, Windows: {modifiers: ["ctrl", "shift"], key: "enter"} }}
+                    title="Copy HTML: <Link>"
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+                    }}
                     content={handleCopyHTMLContent("link")}
                     onCopy={handleCopiedHTML}
                   />
                   <Action.OpenInBrowser
                     title={`Download Family`}
                     url={utils.generateGoogleFontsURL(font, "download")}
-                    shortcut={{macOS: {modifiers: ["cmd"], key: "d"}, Windows: {modifiers: ["ctrl"], key: "d"}}}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
