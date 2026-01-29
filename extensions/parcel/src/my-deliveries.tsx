@@ -3,16 +3,16 @@ import {
   ActionPanel,
   Color,
   Icon,
+  List,
+  Toast,
   launchCommand,
   LaunchType,
-  List,
-  open,
   showToast,
-  Toast,
+  open,
 } from "@raycast/api";
 import { isValid, parse } from "date-fns";
 import { useEffect, useState } from "react";
-import { Delivery, FilterMode, getStatusIcon, STATUS_DESCRIPTIONS } from "./api";
+import { Delivery, FilterMode, STATUS_DESCRIPTIONS, getStatusIcon } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
 import { useCarriers } from "./hooks/useCarriers";
 
