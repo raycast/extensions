@@ -1,7 +1,8 @@
 import { Root, Templateable } from "./types";
+import { detectCircularPlaceholderDependencies, extractPlaceholders } from "./utils";
 
 export interface ValidationError {
-  type: "missing_placeholder" | "invalid_template" | "invalid_url" | "missing_template";
+  type: "missing_placeholder" | "invalid_template" | "invalid_url" | "missing_template" | "circular_dependency";
   message: string;
   location: string;
   severity: "error" | "warning";
@@ -29,6 +30,8 @@ export function validateConfiguration(data: Root): ValidationResult {
     return { isValid: false, errors, warnings };
   }
 
+  validatePlaceholderCircularDependencies(data.globalPlaceholders, errors, "globalPlaceholders");
+
   if (data.templates) {
     validateTemplates(data, errors, warnings);
   }
@@ -41,6 +44,8 @@ export function validateConfiguration(data: Root): ValidationResult {
   if (data.templateGroups) {
     validateTemplateGroups(data, errors);
   }
+
+  validateUnusedGlobalPlaceholders(data, warnings);
 
   return {
     isValid: errors.length === 0,
@@ -192,7 +197,9 @@ function validateTemplateable(
   }
 
   const allRequiredPlaceholders = new Set<string>();
-  const allProvidedPlaceholders = Object.keys(entity.templatePlaceholders || {});
+  const localProvidedPlaceholders = Object.keys(entity.templatePlaceholders || {});
+  const globalProvidedPlaceholders = Object.keys(data.globalPlaceholders || {});
+  const allProvidedPlaceholders = [...localProvidedPlaceholders, ...globalProvidedPlaceholders];
 
   for (const templateKey of allAppliedTemplates) {
     const template = data.templates?.[templateKey];
@@ -202,6 +209,27 @@ function validateTemplateable(
     requiredPlaceholders.forEach((placeholder) => allRequiredPlaceholders.add(placeholder));
   }
 
+  // Also check placeholders used within other placeholder values (nested placeholders)
+  // e.g., projectDirectory: "${teamProjectDirectory}/api/${foo}" uses both teamProjectDirectory and foo
+  const allPlaceholderValues = {
+    ...data.globalPlaceholders,
+    ...entity.templatePlaceholders,
+  };
+  for (const value of Object.values(allPlaceholderValues)) {
+    const referencedPlaceholders = extractPlaceholders(value);
+    referencedPlaceholders.forEach((placeholder) => allRequiredPlaceholders.add(placeholder));
+  }
+
+  // Check placeholders used in otherUrls (for groups)
+  if ("otherUrls" in entity && entity.otherUrls) {
+    for (const url of Object.values(entity.otherUrls)) {
+      if (url?.url) {
+        const referencedPlaceholders = extractPlaceholders(url.url);
+        referencedPlaceholders.forEach((placeholder) => allRequiredPlaceholders.add(placeholder));
+      }
+    }
+  }
+
   for (const placeholder of allRequiredPlaceholders) {
     if (!allProvidedPlaceholders.includes(placeholder)) {
       errors.push({
@@ -209,12 +237,12 @@ function validateTemplateable(
         message: `Template requires placeholder "${placeholder}" but it's not defined`,
         location: `${location}.templatePlaceholders`,
         severity: "error",
-        suggestion: `Add "${placeholder}": "your-value" to templatePlaceholders`,
+        suggestion: `Add "${placeholder}": "your-value" to templatePlaceholders or globalPlaceholders`,
       });
     }
   }
 
-  const unusedPlaceholders = allProvidedPlaceholders.filter((p) => !allRequiredPlaceholders.has(p));
+  const unusedPlaceholders = localProvidedPlaceholders.filter((p) => !allRequiredPlaceholders.has(p));
   if (unusedPlaceholders.length > 0) {
     warnings.push({
       type: "missing_placeholder",
@@ -262,10 +290,125 @@ function validateAppliedTemplates(
   }
 }
 
-function extractPlaceholders(templateUrl: string): string[] {
-  if (!templateUrl) return [];
+function validatePlaceholderCircularDependencies(
+  placeholders: Record<string, string> | undefined,
+  errors: ValidationError[],
+  location: string,
+) {
+  if (!placeholders) return;
 
-  const matches = templateUrl.match(/\$\{([^{}]+)\}/g);
-  if (!matches) return [];
-  return matches.map((match) => match.slice(2, -1));
+  const circularError = detectCircularPlaceholderDependencies(placeholders);
+  if (circularError) {
+    errors.push({
+      type: "circular_dependency",
+      message: circularError,
+      location,
+      severity: "error",
+      suggestion: "Remove the circular reference by ensuring placeholders don't reference each other in a cycle",
+    });
+  }
+}
+
+function validateUnusedGlobalPlaceholders(data: Root, warnings: ValidationError[]) {
+  if (!data.globalPlaceholders) return;
+
+  const globalPlaceholderKeys = Object.keys(data.globalPlaceholders);
+  if (globalPlaceholderKeys.length === 0) return;
+
+  const usedPlaceholders = new Set<string>();
+
+  // Collect all placeholders used in templates
+  if (data.templates) {
+    for (const template of Object.values(data.templates)) {
+      if (!template?.templateUrl) continue;
+      const placeholders = extractPlaceholders(template.templateUrl);
+      placeholders.forEach((p) => usedPlaceholders.add(p));
+    }
+  }
+
+  // Collect all placeholders used in groups
+  if (data.groups) {
+    for (const group of Object.values(data.groups)) {
+      if (!group) continue;
+
+      // Check applied templates
+      const allAppliedTemplates = [
+        ...(group.appliedTemplates || []),
+        ...(group.appliedTemplateGroups?.flatMap((tgKey) => data.templateGroups?.[tgKey]?.appliedTemplates || []) ||
+          []),
+      ];
+
+      for (const templateKey of allAppliedTemplates) {
+        const template = data.templates?.[templateKey];
+        if (!template?.templateUrl) continue;
+        const placeholders = extractPlaceholders(template.templateUrl);
+        placeholders.forEach((p) => usedPlaceholders.add(p));
+      }
+
+      // Check local placeholder values (they might reference global placeholders)
+      if (group.templatePlaceholders) {
+        for (const value of Object.values(group.templatePlaceholders)) {
+          const placeholders = extractPlaceholders(value);
+          placeholders.forEach((p) => usedPlaceholders.add(p));
+        }
+      }
+
+      // Check other URLs
+      if (group.otherUrls) {
+        for (const url of Object.values(group.otherUrls)) {
+          if (url.url) {
+            const placeholders = extractPlaceholders(url.url);
+            placeholders.forEach((p) => usedPlaceholders.add(p));
+          }
+        }
+      }
+    }
+  }
+
+  // Collect all placeholders used in standalone URLs
+  if (data.urls) {
+    for (const url of Object.values(data.urls)) {
+      if (!url) continue;
+
+      // Check applied templates
+      const allAppliedTemplates = [
+        ...(url.appliedTemplates || []),
+        ...(url.appliedTemplateGroups?.flatMap((tgKey) => data.templateGroups?.[tgKey]?.appliedTemplates || []) || []),
+      ];
+
+      for (const templateKey of allAppliedTemplates) {
+        const template = data.templates?.[templateKey];
+        if (!template?.templateUrl) continue;
+        const placeholders = extractPlaceholders(template.templateUrl);
+        placeholders.forEach((p) => usedPlaceholders.add(p));
+      }
+
+      // Check local placeholder values
+      if (url.templatePlaceholders) {
+        for (const value of Object.values(url.templatePlaceholders)) {
+          const placeholders = extractPlaceholders(value);
+          placeholders.forEach((p) => usedPlaceholders.add(p));
+        }
+      }
+    }
+  }
+
+  // Check if global placeholders reference each other
+  for (const value of Object.values(data.globalPlaceholders)) {
+    const placeholders = extractPlaceholders(value);
+    placeholders.forEach((p) => usedPlaceholders.add(p));
+  }
+
+  // Find unused global placeholders
+  const unusedGlobalPlaceholders = globalPlaceholderKeys.filter((key) => !usedPlaceholders.has(key));
+
+  if (unusedGlobalPlaceholders.length > 0) {
+    warnings.push({
+      type: "missing_placeholder",
+      message: `Unused global placeholders: ${unusedGlobalPlaceholders.join(", ")}`,
+      location: "globalPlaceholders",
+      severity: "warning",
+      suggestion: "Consider removing unused global placeholders to keep configuration clean",
+    });
+  }
 }

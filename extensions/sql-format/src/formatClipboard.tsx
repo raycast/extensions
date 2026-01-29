@@ -6,7 +6,7 @@ import { formatSQL, copyFormattedSQL } from "./utils";
  * If the formatted text is empty, a toast message is shown.
  */
 export default async () => {
-  const output = formatSQL((await Clipboard.readText()) || "");
+  const output = await formatSQL((await Clipboard.readText()) || "");
   if (output) {
     await copyFormattedSQL(output);
   }

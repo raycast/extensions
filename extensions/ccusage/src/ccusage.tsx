@@ -3,6 +3,7 @@ import { DailyUsage } from "./components/DailyUsage";
 import { SessionUsage } from "./components/SessionUsage";
 import { CostAnalysis } from "./components/CostAnalysis";
 import { ModelBreakdown } from "./components/ModelBreakdown";
+import { UsageLimits } from "./components/UsageLimits";
 import { preferences } from "./preferences";
 
 export default function CCUsage() {
@@ -14,6 +15,7 @@ export default function CCUsage() {
       <SessionUsage />
       <CostAnalysis />
       <ModelBreakdown />
+      <UsageLimits />
     </List>
   );
 }

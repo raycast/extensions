@@ -12,10 +12,18 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
-import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
-import { dateDiffToString, fetcher, isInProgress, showElapsedTime } from "./utils";
-import { Project, Tag, Task, TimeEntry } from "./types";
+import {
+  isInProgress,
+  getElapsedTime,
+  getTimeEntries,
+  stopCurrentTimer,
+  addNewTimeEntry,
+  getAllTimeEntriesFromLocalStorage,
+  fetcher,
+  dateDiffToString,
+} from "./utils";
+import { TimeEntry, Project, Task, Tag } from "./types";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 
 function OpenWebPage() {
@@ -35,10 +43,10 @@ function ToggleTags() {
 }
 
 function useClock(entry: TimeEntry) {
-  const [time, setTime] = useState(showElapsedTime(entry));
+  const [time, setTime] = useState(getElapsedTime(entry));
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(showElapsedTime(entry)), 1000);
+    const interval = setInterval(() => setTime(getElapsedTime(entry)), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -62,11 +70,7 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
       keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
       actions={
         <ActionPanel>
-          <Action
-            icon={Icon.Stop}
-            title="Stop Timer"
-            onAction={() => stopCurrentTimer().then(() => updateTimeEntries())}
-          />
+          <Action icon={Icon.Stop} title="Stop Timer" onAction={() => stopCurrentTimer(updateTimeEntries)} />
           <Action.Push
             icon={Icon.Clock}
             title="Stop Timer at…"
@@ -93,17 +97,15 @@ export default function Main() {
     async function fetchTimeEntries() {
       setIsLoading(true);
 
-      const storedEntries: string | undefined = await LocalStorage.getItem("entries");
-
-      if (storedEntries) {
-        setEntries(JSON.parse(storedEntries));
+      const storedEntries = getAllTimeEntriesFromLocalStorage();
+      if (storedEntries.length > 0) {
+        setEntries(storedEntries);
       }
 
       const filteredEntries = await getTimeEntries({ onError: setIsValidToken });
 
       if (filteredEntries) {
         setEntries(filteredEntries);
-        LocalStorage.setItem("entries", JSON.stringify(filteredEntries));
       }
 
       setIsLoading(false);
@@ -119,7 +121,6 @@ export default function Main() {
       .then((entries) => {
         if (entries) {
           setEntries(entries);
-          LocalStorage.setItem("entries", JSON.stringify(entries));
         }
 
         setIsLoading(false);
@@ -195,12 +196,7 @@ export default function Main() {
                         icon={Icon.Play}
                         title="Start Timer"
                         onAction={() => {
-                          addNewTimeEntry(
-                            entry.description,
-                            entry.projectId,
-                            entry.taskId,
-                            entry.tags.map((tag) => tag.id),
-                          ).then(() => updateTimeEntries());
+                          addNewTimeEntry(entry.description, entry.projectId, entry.taskId, updateTimeEntries);
                         }}
                       />
                       <OpenWebPage />
@@ -218,7 +214,7 @@ export default function Main() {
 }
 
 function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
-  const { config } = useConfig();
+  const { config, isValidToken } = useConfig();
   const [projects, setProjects] = useState<Project[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -249,7 +245,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   });
 
   useEffect(() => {
-    if (isEmpty(config)) return;
+    if (isEmpty(config) || !isValidToken) return;
 
     async function getAllProjectsAndTagsOnWorkspace(): Promise<void> {
       setIsLoading(true);
@@ -274,7 +270,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
     }
 
     getAllProjectsAndTagsOnWorkspace();
-  }, [config]);
+  }, [config, isValidToken]);
 
   async function fetchTasksForProject(projectId: string): Promise<void> {
     setIsLoading(true);
@@ -584,76 +580,4 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
       </Form.TagPicker>
     </Form>
   );
-}
-
-async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-  const userId = await LocalStorage.getItem("userId");
-
-  const { data, error } = await fetcher(
-    `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`,
-  );
-
-  if (error === "Unauthorized") {
-    onError?.(false);
-    return [];
-  }
-
-  if (data?.length) {
-    return uniqWith(
-      data,
-      (a: TimeEntry, b: TimeEntry) =>
-        a.projectId === b.projectId && a.taskId === b.taskId && a.description === b.description,
-    );
-  } else {
-    return [];
-  }
-}
-
-async function stopCurrentTimer(): Promise<void> {
-  showToast(Toast.Style.Animated, "Stopping…");
-
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-  const userId = await LocalStorage.getItem("userId");
-
-  const { data, error } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries`, {
-    method: "PATCH",
-    body: { end: new Date().toISOString() },
-  });
-
-  if (!error && data) {
-    showToast(Toast.Style.Success, "Timer stopped");
-  } else {
-    showToast(Toast.Style.Failure, "No timer running");
-  }
-}
-
-async function addNewTimeEntry(
-  description: string | undefined | null,
-  projectId: string,
-  taskId: string | undefined | null,
-  tagIds: string[] = [],
-  startTime?: Date,
-): Promise<void> {
-  showToast(Toast.Style.Animated, "Starting…");
-
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-
-  const { data } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
-    method: "POST",
-    body: {
-      start: (startTime || new Date()).toISOString(),
-      description,
-      taskId,
-      projectId,
-      tagIds,
-      customFieldValues: [],
-    },
-  });
-
-  if (data?.id) {
-    showToast(Toast.Style.Success, "Timer is running");
-  } else {
-    showToast(Toast.Style.Failure, "Timer could not be started");
-  }
 }

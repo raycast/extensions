@@ -43,7 +43,7 @@
 
 ## [Bug Fixes] - 2024-08-02
 
-- Resolve issue when stopping a running time entry doesn't work
+- Resolve issue when stopping a running time entry doesn't work.
 
 ## [Bug Fixes] - 2024-07-31
 

@@ -1,5 +1,9 @@
 # Tuya Smart Changelog
 
+## [Enhancement] - 2026-01-15
+
+- Added switches in root search
+
 ## [Fix] - 2026-01-07
 
 Fixed an error that caused the extension to crash

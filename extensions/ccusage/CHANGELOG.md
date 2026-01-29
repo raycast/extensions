@@ -1,5 +1,24 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.1.0] - 2026-01-27
+
+### Added
+
+- Real-time Claude API usage limits monitoring with 5-hour and 7-day utilization tracking
+- AI tool (`get-usage-limits`) for querying usage limits programmatically
+- Secure macOS Keychain integration for Claude Code access token retrieval
+- Stale data handling with visual warnings when API calls fail
+- Usage Limits component in main view with detailed metadata display
+- Menu bar integration showing usage limit percentages and reset times
+- Manual refresh action for usage limits data
+- Usage Limits option in default view preferences
+
+### Changed
+
+- Updated menu bar to include dedicated Usage Limits section
+- Enhanced error handling for credential management and API failures
+- Improved visual consistency with black/white gauge icons
+
 ## [v2.0.3] - 2025-11-07
 
 ### Added
@@ -21,7 +40,7 @@
 
 ### Fixed
 
-- <https://github.com/raycast/extensions/issues/20056>
+- [https://github.com/raycast/extensions/issues/20056](https://github.com/raycast/extensions/issues/20056)
 - Fixed an issue where an unexpected node execution environment was selected depending on the user's environment when the `customNpx` preference was set, causing commands to not run properly.
 
 ## [v2.0.1] - 2025-06-25

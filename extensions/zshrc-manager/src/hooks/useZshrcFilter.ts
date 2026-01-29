@@ -79,7 +79,20 @@ export function useZshrcFilter<T extends FilterableItem>(items: T[], searchField
       }
       result[section]?.push(item);
     });
-    return result;
+
+    // Sort sections alphabetically, but put "Unlabeled" and "Uncategorized" at the end
+    const sortedResult: Record<string, T[]> = {};
+    const sortedKeys = Object.keys(result).sort((a, b) => {
+      const aIsSpecial = a === "Unlabeled" || a === "Uncategorized";
+      const bIsSpecial = b === "Unlabeled" || b === "Uncategorized";
+      if (aIsSpecial && !bIsSpecial) return 1;
+      if (!aIsSpecial && bIsSpecial) return -1;
+      return a.localeCompare(b);
+    });
+    for (const key of sortedKeys) {
+      sortedResult[key] = result[key]!;
+    }
+    return sortedResult;
   }, [filtered]);
 
   return {

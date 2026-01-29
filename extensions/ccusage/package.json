@@ -10,7 +10,8 @@
   "author": "nyatinte",
   "contributors": [
     "bohdan_zhuravel",
-    "zzyfisher"
+    "zzyfisher",
+    "garrick_zhang"
   ],
   "license": "MIT",
   "commands": [
@@ -53,6 +54,40 @@
         {
           "title": "Model Breakdown",
           "value": "model"
+        },
+        {
+          "title": "Usage Limits",
+          "value": "usage-limits"
+        }
+      ]
+    },
+    {
+      "name": "usageLimitsRefreshInterval",
+      "type": "dropdown",
+      "required": false,
+      "title": "Usage Limits Refresh Interval",
+      "description": "How often to refresh usage limits data",
+      "default": "60",
+      "data": [
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "1 minute (Recommended)",
+          "value": "60"
+        },
+        {
+          "title": "2 minutes",
+          "value": "120"
+        },
+        {
+          "title": "5 minutes",
+          "value": "300"
+        },
+        {
+          "title": "10 minutes",
+          "value": "600"
         }
       ]
     },
@@ -93,6 +128,11 @@
       "name": "get-session-usage",
       "title": "Get Session Usage",
       "description": "Get detailed session-by-session Claude Code usage statistics"
+    },
+    {
+      "name": "get-usage-limits",
+      "title": "Get Usage Limits",
+      "description": "Get Claude API usage limits showing 5-hour and 7-day utilization percentages and reset times"
     }
   ],
   "ai": {
@@ -115,7 +155,7 @@
                 "inputTokens": 10000,
                 "outputTokens": 6000,
                 "totalTokens": 16000,
-                "totalCost": 1.80
+                "totalCost": 1.8
               }
             ]
           }
@@ -160,7 +200,7 @@
                 "inputTokens": 35000,
                 "outputTokens": 25000,
                 "totalTokens": 60000,
-                "totalCost": 9.00
+                "totalCost": 9
               }
             ]
           }
@@ -214,7 +254,7 @@
                 "inputTokens": 10000,
                 "outputTokens": 6000,
                 "totalTokens": 16000,
-                "totalCost": 1.80
+                "totalCost": 1.8
               },
               {
                 "modelName": "claude-3-haiku-20240307",
@@ -256,7 +296,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^2.2.2",
     "ccusage": "^0.6.2",
     "date-fns": "^4.1.0",
     "es-toolkit": "^1.39.3",
@@ -265,7 +305,7 @@
     "zod": "^3.25.61"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/semver": "^7.5.8",
