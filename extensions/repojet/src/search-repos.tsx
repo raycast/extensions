@@ -16,7 +16,7 @@ export default function SearchRepositories() {
     new Set(),
   );
 
-  const preferences = getPreferenceValues<PreferencesState>();
+  const preferences = getPreferenceValues<Preferences>();
 
   const orgs = preferences.organizations
     .split(",")
