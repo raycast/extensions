@@ -1,6 +1,6 @@
 # Botpress Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-29
 
 - Added List Bots command to view all bots in your workspace
 - Open bots directly in Botpress Studio
