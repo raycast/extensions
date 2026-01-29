@@ -39,7 +39,7 @@ export default function RepositoryListItem({
       const repoPath = join(cloneDir, repo.name);
 
       // Clone the repository
-      await execAsync(`git clone ${repo.clone_url} "${repoPath}"`);
+      await execAsync(`git clone "${repo.clone_url}" "${repoPath}"`);
 
       toast.style = Toast.Style.Success;
       toast.title = "Repository cloned successfully";
