@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.15] - {PR_MERGE_DATE}
+## [2.15] - 2026-01-29
 
 - Added `Search AI Gateway Models` command
 
