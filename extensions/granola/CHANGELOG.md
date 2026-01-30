@@ -4,7 +4,7 @@
 
 ### ✨ Enhancements
 
-- Show meeting duration in note details and My Notes views when transcript timing is available.
+- Show meeting duration in note details and My notes views when transcript timing is available.
 - Include meeting duration in `get-note-content` and `get-transcript` 
 - Replace "Open in Granola Web" with a direct "Open in Granola" action in **Create Note from Transcript**, using the Granola app deeplink.
 
@@ -26,7 +26,7 @@
 ## 2.0.0 - 2026-01-06
 
 ### 🚀 Exports & Notion
-- Export Notes now streams small batches to disk, writes files immediately, and batches enhanced notes/My Notes retrieval to reduce memory usage and timeouts during large exports.
+- Export Notes now streams small batches to disk, writes files immediately, and batches enhanced notes/My notes retrieval to reduce memory usage and timeouts during large exports.
 - Export Transcripts now exports directly to a ZIP (no intermediate retrieve/results or clipboard flow) with unified progress/ETA messaging.
 - Export and transcript lists now use selection-focused action panels with consistent shortcuts and clearer "Export/Save All" actions.
 - Added batch Save to Notion from Export Notes with a live results list, per-note errors, and quick open/copy actions.
@@ -35,7 +35,7 @@
 - Added configurable "Notion Max Batch Size" preference to control parallel Notion saves.
 
 ### 🧭 Browsing & Details
-- Search Notes, People, and Companies now load panel content and "My Notes" on demand for note details (fixing cases where only raw AI notes showed).
+- Search Notes, People, and Companies now load panel content and "My notes" on demand for note details (fixing cases where only raw AI notes showed).
 - Note list accessories now show date, folder icon (or "not in any folder"), and privacy indicator; folder counts show "..." until document IDs load.
 - Folder filtering now loads document IDs lazily to avoid heavy upfront work.
 
@@ -49,7 +49,7 @@
 
 ### 🔧 Bug Fixes & Performance
 - Fixed `create-note-from-transcript` streaming chunks with improved delimiter and validation.
-- Reduced memory usage by stripping large fields from document fetches before caching, eliminating cache-file reads, and lazy-loading panels/My Notes via new hooks.
+- Reduced memory usage by stripping large fields from document fetches before caching, eliminating cache-file reads, and lazy-loading panels/My notes via new hooks.
 - Replaced cache reads with API-backed document lists in people/company search to avoid loading large local cache files.
 - Added batch panel/notes fetch APIs and on-demand folder ID loading to keep large exports responsive.
 - Create Note from Transcript now supports cancellation and safer streaming cleanup; Create Note uses Raycast `open` instead of shell execution.
