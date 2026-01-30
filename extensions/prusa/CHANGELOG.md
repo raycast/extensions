@@ -1,6 +1,6 @@
 # Prusa Printer Control Changelog
 
-## [Menu Bar Progress] - {PR_MERGE_DATE}
+## [Menu Bar Progress] - 2026-01-30
 
 Added menu bar command to display real-time print progress and time remaining
 
