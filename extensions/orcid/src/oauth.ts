@@ -1,5 +1,11 @@
 import { OAuth, getPreferenceValues, LocalStorage } from "@raycast/api";
-import { OrcidTokenResponse, Preferences } from "./types";
+import { OrcidTokenResponse } from "./types";
+
+interface Preferences {
+  clientId: string;
+  clientSecret: string;
+  useSandbox: boolean;
+}
 
 const SANDBOX_AUTH_URL = "https://sandbox.orcid.org";
 const PRODUCTION_AUTH_URL = "https://orcid.org";

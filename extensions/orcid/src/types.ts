@@ -1,9 +1,3 @@
-export interface Preferences {
-  clientId: string;
-  clientSecret: string;
-  useSandbox: boolean;
-}
-
 export interface OrcidTokenResponse {
   access_token: string;
   token_type: string;

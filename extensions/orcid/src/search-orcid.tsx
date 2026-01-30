@@ -105,7 +105,7 @@ export default function Command() {
                 onAction={() => open(`${getAuthBaseUrl()}/${result.orcidId}`)}
               />
               <Action.CopyToClipboard
-                title="Copy Orcid Id"
+                title="Copy Orcid"
                 content={result.orcidId}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
