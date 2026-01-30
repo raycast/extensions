@@ -22,6 +22,7 @@ import { join, dirname } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { download } from "~/utils/network";
+import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
@@ -352,7 +353,7 @@ export class Bitwarden {
       await this.callActionListeners("login");
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to login", execError);
+      captureException("Failed to login", treatError(execError));
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -406,7 +407,7 @@ export class Bitwarden {
       await this.callActionListeners("unlock", password, sessionToken);
       return { result: sessionToken };
     } catch (execError) {
-      captureException("Failed to unlock vault", execError);
+      captureException("Failed to unlock vault", treatError(execError, { omitSensitiveValue: password }));
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };

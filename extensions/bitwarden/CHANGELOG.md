@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Security & Fixes] - {PR_MERGE_DATE}
+
+- **Security:** Redact master password from error logs so it is never exposed when using "Copy Last Errors" or sharing bug reports (unlock/login failures now store a sanitized message)
+- Fix npm install peer dependency conflict by pinning react-devtools to the version expected by @raycast/api
+
 ## [Added PasteUsernameAction] - 2026-01-01
 
 ## [Added support for Windows] - 2025-10-15

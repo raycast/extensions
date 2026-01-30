@@ -49,7 +49,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
           } = getUsefulError(error, password);
           await showToast(Toast.Style.Failure, "Failed to log in", displayableError);
           setUnlockError(treatedError);
-          captureException("Failed to log in", error);
+          captureException("Failed to log in", treatedError);
           return;
         }
       }
@@ -61,7 +61,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
       const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);
       await showToast(Toast.Style.Failure, "Failed to unlock vault", displayableError);
       setUnlockError(treatedError);
-      captureException("Failed to unlock vault", error);
+      captureException("Failed to unlock vault", treatedError);
     } finally {
       setLoading(false);
     }
@@ -91,7 +91,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}
                 onAction={() => setShowPassword((prev) => !prev)}
-                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, windows: { key: "e", modifiers: ["alt"] } }}
+                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, Windows: { key: "e", modifiers: ["alt"] } }}
               />
             </>
           )}
