@@ -34,7 +34,8 @@
       "description": "From your Yandex OAuth app (oauth.yandex.com). Required for connection.",
       "type": "textfield",
       "required": true,
-      "placeholder": "Paste Client ID from Yandex app settings",
+      "placeholder": "Paste Client ID from Yandex app settings"
+    },
     {
       "name": "clientId",
       "title": "Yandex OAuth Client ID",
