@@ -1,6 +1,6 @@
 # Music Assistant Controls Changelog
 
-## [REST API Migration] - {PR_MERGE_DATE}
+## [REST API Migration] - 2026-01-30
 
 ### 🔧 Technical Improvements
 
