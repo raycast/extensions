@@ -1,12 +1,18 @@
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { Action, ActionPanel, Form, Icon, LaunchProps, Toast, closeMainWindow, showToast } from "@raycast/api";
-import { FormValidation, useForm, withAccessToken } from "@raycast/utils";
+import { FormValidation, useForm } from "@raycast/utils";
 import { markdownToBlocks } from "@tryfabric/martian";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useSearchPages } from "./hooks";
 import { appendBlockToPage, getPageIcon } from "./utils/notion";
-import { notionService } from "./utils/notion/oauth";
+import {
+  getActiveAccountId,
+  getDefaultAccountId,
+  getNotionAccounts,
+  NotionAccountId,
+  setActiveAccountId,
+} from "./utils/notion/oauth";
 
 type AddTextToPageValues = {
   prepend: boolean;
@@ -17,9 +23,11 @@ type AddTextToPageValues = {
 
 function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }>) {
   const [searchText, setSearchText] = useState<string>("");
-  const { data, isLoading } = useSearchPages(searchText);
+  const accounts = getNotionAccounts();
+  const [accountId, setAccountId] = useState<NotionAccountId>(getDefaultAccountId());
+  const { data, isLoading } = useSearchPages(searchText, accountId);
 
-  const { itemProps, handleSubmit } = useForm<AddTextToPageValues>({
+  const { itemProps, handleSubmit, setValue } = useForm<AddTextToPageValues>({
     async onSubmit(values) {
       try {
         await showToast({ style: Toast.Style.Animated, title: "Adding content to the page" });
@@ -37,6 +45,7 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
           children: content,
           prepend: values.prepend,
           addDateDivider: values.addDateDivider,
+          accountId,
         });
         await closeMainWindow();
         await showToast({ style: Toast.Style.Success, title: "Added text to page" });
@@ -55,6 +64,12 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
 
   const searchPages = data?.pages.filter((page) => page.object === "page");
 
+  useEffect(() => {
+    getActiveAccountId()
+      .then(setAccountId)
+      .catch(() => undefined);
+  }, []);
+
   return (
     <Form
       actions={
@@ -63,6 +78,24 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
         </ActionPanel>
       }
     >
+      {accounts.length > 1 ? (
+        <Form.Dropdown
+          id="accountId"
+          title="Account"
+          value={accountId}
+          onChange={(value) => {
+            const nextAccountId = value as NotionAccountId;
+            setAccountId(nextAccountId);
+            setActiveAccountId(nextAccountId);
+            setValue("page", undefined);
+          }}
+          storeValue
+        >
+          {accounts.map((account) => (
+            <Form.Dropdown.Item key={account.id} title={account.label} value={account.id} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
       <Form.Dropdown
         {...itemProps.page}
         title="Notion Page"
@@ -93,4 +126,4 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
     </Form>
   );
 }
-export default withAccessToken(notionService)(AddTextToPage);
+export default AddTextToPage;

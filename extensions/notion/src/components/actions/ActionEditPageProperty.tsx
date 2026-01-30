@@ -11,6 +11,7 @@ import {
   PropertyConfig,
   ReadablePropertyType,
 } from "../../utils/notion";
+import { NotionAccountId } from "../../utils/notion/oauth";
 
 type EditPropertyOptions = PropertyConfig<"select" | "multi_select">["options"][number] & {
   icon?: string;
@@ -24,6 +25,7 @@ export function ActionEditPageProperty({
   mutate,
   icon,
   options,
+  accountId,
 }: {
   databaseProperty: DatabaseProperty;
   pageId: string;
@@ -32,10 +34,11 @@ export function ActionEditPageProperty({
   shortcut?: Keyboard.Shortcut;
   icon?: Image.ImageLike;
   options?: EditPropertyOptions[];
+  accountId?: NotionAccountId;
 }) {
   if (!icon) icon = getPropertyIcon(databaseProperty);
 
-  const { data: users } = useUsers();
+  const { data: users } = useUsers(accountId);
 
   const title = "Set " + databaseProperty.name;
 
@@ -44,7 +47,7 @@ export function ActionEditPageProperty({
       style: Toast.Style.Animated,
       title: "Updating Property",
     });
-    const updatedPage = await patchPage(pageId, patch);
+    const updatedPage = await patchPage(pageId, patch, accountId);
     if (updatedPage && updatedPage.id) {
       showToast({
         title: "Property Updated",

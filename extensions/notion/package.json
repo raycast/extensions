@@ -157,7 +157,7 @@
     }
   ],
   "ai": {
-    "instructions": "-If asked to summarize or view a document, look for pages with the title of the document.\\n - When referring to a page or database, always include a link to the page or database. \\n - When creating a page, always include the database name. Ask for the database name if it's not provided.",
+    "instructions": "-If asked to summarize or view a document, look for pages with the title of the document.\\n - When referring to a page or database, always include a link to the page or database. \\n - When creating a page, always include the database name. Ask for the database name if it's not provided.\\n - If multiple Notion accounts are configured, infer the account from the user's request and the account labels in settings (e.g., Work/Personal).\\n - When calling tools, pass the matching accountLabel.\\n - If the account isn't clear, ask the user which account to use before calling tools.",
     "evals": [
       {
         "input": "@notion Summarize the last marketing meeting notes",
@@ -252,11 +252,47 @@
   },
   "preferences": [
     {
+      "name": "notion_auth_type",
+      "type": "dropdown",
+      "title": "Authentication Type",
+      "required": true,
+      "default": "oauth",
+      "data": [
+        {
+          "title": "OAuth (Recommended)",
+          "value": "oauth"
+        },
+        {
+          "title": "Internal Integration Secret",
+          "value": "internal"
+        }
+      ],
+      "description": "OAuth supports multiple accounts. Internal integrations use a single account."
+    },
+    {
+      "name": "notion_account_1_label",
+      "type": "textfield",
+      "title": "Account 1 Label",
+      "required": false,
+      "default": "",
+      "placeholder": "Work",
+      "description": "Label shown in account selectors and search results. Fill both account labels to enable switching."
+    },
+    {
+      "name": "notion_account_2_label",
+      "type": "textfield",
+      "title": "Account 2 Label",
+      "required": false,
+      "default": "",
+      "placeholder": "Personal",
+      "description": "Leave empty to use a single account. Fill both account labels to enable switching."
+    },
+    {
       "name": "notion_token",
       "type": "password",
       "title": "Internal Integration Secret",
       "required": false,
-      "description": "In Notion, go to Settings & members > My connections > Develop or manage integrations > New integration",
+      "description": "Only used with Authentication Type = Internal Integration Secret. Create an integration at notion.so/my-integrations, copy the Internal Integration Secret under Secrets, and add the integration as a connection to the pages or databases you want to access.",
       "placeholder": "ntn_FGDeSrZNodQuaJEqWzvxcTyrPlpBHYvdLpTZykrWEu"
     },
     {

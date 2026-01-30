@@ -2,6 +2,7 @@ import { List, Image } from "@raycast/api";
 import { JSX } from "react";
 
 import { notionColorToTintColor, isType, Page, DatabaseProperty, PropertyConfig, User } from "../utils/notion";
+import { NotionAccountId } from "../utils/notion/oauth";
 import type { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
@@ -14,7 +15,7 @@ type DatabaseViewProps = {
   databaseView?: DatabaseView;
   setDatabaseView?: (view: DatabaseView) => Promise<void>;
   setRecentPage: (page: Page) => Promise<void>;
-  removeRecentPage: (id: string) => Promise<void>;
+  removeRecentPage: (id: string, accountId?: NotionAccountId) => Promise<void>;
   mutate: () => Promise<void>;
   users?: User[];
   sort?: "last_edited_time" | "created_time";
@@ -182,6 +183,7 @@ export function DatabaseView(props: DatabaseViewProps) {
                 pageId={p.id}
                 pageProperty={p.properties[propertyId]}
                 icon="./icon/kanban_status_started.png"
+                accountId={p.accountId}
                 shortcut={{
                   macOS: { modifiers: ["cmd", "shift"], key: "s" },
                   Windows: { modifiers: ["ctrl", "shift"], key: "s" },

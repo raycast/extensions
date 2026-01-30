@@ -14,17 +14,21 @@ import {
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
+import { getActiveAccountId, getDefaultAccountId, NotionAccountId } from "../utils/notion/oauth";
 import { DatabaseView } from "../utils/types";
 
-export function useUsers() {
-  const value = useCachedPromise(() => fetchUsers());
+export function useUsers(accountId?: NotionAccountId, options?: { enabled?: boolean }) {
+  const { enabled = true } = options ?? {};
+  const value = useCachedPromise((id: NotionAccountId | undefined) => fetchUsers(id), [accountId], {
+    execute: enabled,
+  });
 
   return { ...value, data: value.data ?? [] };
 }
 
-export function useRelations(properties: DatabaseProperty[]) {
+export function useRelations(properties: DatabaseProperty[], accountId?: NotionAccountId) {
   return useCachedPromise(
-    async (properties: DatabaseProperty[]) => {
+    async (properties: DatabaseProperty[], accountId?: NotionAccountId) => {
       const relationPages: Record<string, Page[]> = {};
 
       await Promise.all(
@@ -32,7 +36,7 @@ export function useRelations(properties: DatabaseProperty[]) {
           if (!isType(property, "relation")) return null;
           const relationId = property.config.database_id;
           if (!relationId) return null;
-          const pages = await queryDatabase(relationId, undefined);
+          const pages = await queryDatabase(relationId, undefined, "last_edited_time", accountId);
           relationPages[relationId] = pages;
           return pages;
         }),
@@ -40,26 +44,30 @@ export function useRelations(properties: DatabaseProperty[]) {
 
       return relationPages;
     },
-    [properties],
+    [properties, accountId],
   );
 }
 
-export function useDatabases() {
-  const value = useCachedPromise(() => fetchDatabases());
+export function useDatabases(accountId?: NotionAccountId) {
+  const value = useCachedPromise((id: NotionAccountId | undefined) => fetchDatabases(id), [accountId]);
 
   return { ...value, data: value.data ?? [] };
 }
 
-export function useDatabaseProperties(databaseId: string | null, filter?: (value: DatabaseProperty) => boolean) {
+export function useDatabaseProperties(
+  databaseId: string | null,
+  filter?: (value: DatabaseProperty) => boolean,
+  accountId?: NotionAccountId,
+) {
   const value = useCachedPromise(
-    (id): Promise<DatabaseProperty[]> =>
-      fetchDatabaseProperties(id).then((databaseProperties) => {
+    (id, accountId): Promise<DatabaseProperty[]> =>
+      fetchDatabaseProperties(id, accountId).then((databaseProperties) => {
         if (databaseProperties && filter) {
           return databaseProperties.filter(filter);
         }
         return databaseProperties;
       }),
-    [databaseId],
+    [databaseId, accountId],
     { execute: !!databaseId },
   );
 
@@ -112,11 +120,13 @@ export class RecentPage {
   id: string;
   last_visited_time: number;
   type: Page["object"];
+  accountId?: NotionAccountId;
 
-  constructor(page: Page) {
+  constructor(page: Page, fallbackAccountId?: NotionAccountId) {
     this.id = page.id;
     this.last_visited_time = Date.now();
     this.type = page.object;
+    this.accountId = page.accountId ?? fallbackAccountId;
   }
 
   updateLastVisitedTime() {
@@ -127,6 +137,7 @@ export class RecentPage {
 export function useRecentPages() {
   const { data, isLoading, mutate } = useCachedPromise(async () => {
     let data = await LocalStorage.getItem("RECENT_PAGES");
+    const defaultAccountId = getDefaultAccountId();
 
     // try migrating the old recently opened pages to the new format
     if (!data || typeof data !== "string") {
@@ -137,7 +148,7 @@ export function useRecentPages() {
 
       const oldRecentPages = JSON.parse(oldData) as Page[];
 
-      data = JSON.stringify(oldRecentPages.map((p) => new RecentPage(p)));
+      data = JSON.stringify(oldRecentPages.map((p) => new RecentPage(p, defaultAccountId)));
 
       // save the new data
       await LocalStorage.setItem("RECENT_PAGES", data);
@@ -145,7 +156,12 @@ export function useRecentPages() {
       await LocalStorage.removeItem("RECENTLY_OPENED_PAGES");
     }
 
-    const recentPages = JSON.parse(data) as RecentPage[];
+    const recentPages = (JSON.parse(data) as Array<RecentPage | Page>).map((page) => {
+      if ("object" in page && !("type" in page)) {
+        return new RecentPage(page, defaultAccountId);
+      }
+      return { ...page, accountId: page.accountId ?? defaultAccountId } as RecentPage;
+    });
 
     // for each RecentPage object, turn it into a Page object, and filter out any undefined values
     const recentPagesWithContent: Page[] = (
@@ -153,10 +169,11 @@ export function useRecentPages() {
         recentPages.map((p) => {
           // convert each RecentPage object into a Page object
           // don't error if the page is not found
+          const accountId = p.accountId ?? defaultAccountId;
           if (p.type === "page") {
-            return fetchPage(p.id, true);
+            return fetchPage(p.id, true, accountId);
           } else {
-            return fetchDatabase(p.id, true);
+            return fetchDatabase(p.id, true, accountId);
           }
         }),
       )
@@ -168,17 +185,20 @@ export function useRecentPages() {
   async function setRecentPage(page: Page) {
     if (!data) return;
 
-    let recentPages = [...data].map((p) => new RecentPage(p));
+    const resolvedAccountId = page.accountId ?? (await getActiveAccountId());
+    let recentPages = [...data].map((p) => new RecentPage(p, p.accountId ?? resolvedAccountId));
 
     // check if the page is already in the recent pages
-    const cachedPageIndex = data.findIndex((x) => x.id === page.id);
+    const cachedPageIndex = data.findIndex(
+      (x) => x.id === page.id && (x.accountId ?? resolvedAccountId) === resolvedAccountId,
+    );
 
     if (cachedPageIndex > -1) {
       // if the page is already in the recent pages, update the last visited time
       recentPages[cachedPageIndex].updateLastVisitedTime();
     } else {
       // otherwise, add the page to the recent pages
-      recentPages.push(new RecentPage(page));
+      recentPages.push(new RecentPage({ ...page, accountId: resolvedAccountId }));
     }
 
     // sort by last visited time
@@ -193,13 +213,20 @@ export function useRecentPages() {
     mutate();
   }
 
-  async function removeRecentPage(id: string) {
+  async function removeRecentPage(id: string, accountId?: NotionAccountId) {
     if (!data) return;
 
     // remove the page from the recent pages
-    const updatedPages = data.filter((page) => page.id !== id);
+    const updatedPages = data.filter((page) => {
+      if (!accountId) return page.id !== id;
+      return page.id !== id || page.accountId !== accountId;
+    });
 
-    await LocalStorage.setItem("RECENT_PAGES", JSON.stringify(updatedPages));
+    const defaultAccountId = getDefaultAccountId();
+    await LocalStorage.setItem(
+      "RECENT_PAGES",
+      JSON.stringify(updatedPages.map((page) => new RecentPage(page, page.accountId ?? defaultAccountId))),
+    );
     mutate();
   }
 
@@ -212,8 +239,8 @@ export function useRecentPages() {
   };
 }
 
-export function useSearchPages(query: string) {
-  return useCachedPromise(search, [query], {
+export function useSearchPages(query: string, accountId?: NotionAccountId) {
+  return useCachedPromise((searchText, accountId) => search(searchText, undefined, 25, accountId), [query, accountId], {
     keepPreviousData: true,
   });
 }

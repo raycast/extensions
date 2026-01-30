@@ -24,6 +24,7 @@ import {
   PageProperty,
   User,
 } from "../utils/notion";
+import { NotionAccountId } from "../utils/notion/oauth";
 import { handleOnOpenPage } from "../utils/openPage";
 import { DatabaseView } from "../utils/types";
 
@@ -39,11 +40,12 @@ type PageListItemProps = {
   databaseProperties?: DatabaseProperty[];
   setDatabaseView?: (databaseView: DatabaseView) => Promise<void>;
   setRecentPage: (page: Page) => Promise<void>;
-  removeRecentPage: (id: string) => Promise<void>;
+  removeRecentPage: (id: string, accountId?: NotionAccountId) => Promise<void>;
   mutate: () => Promise<void>;
   users?: User[];
   icon?: Image.ImageLike;
   customActions?: JSX.Element[];
+  accountLabel?: string;
 };
 
 export function PageListItem({
@@ -57,6 +59,7 @@ export function PageListItem({
   icon = getPageIcon(page),
   users,
   mutate,
+  accountLabel,
 }: PageListItemProps) {
   const accessories: List.Item.Accessory[] = [];
 
@@ -87,6 +90,13 @@ export function PageListItem({
       tooltip: `Last Edited: ${format(date, "EEE d MMM yyyy 'at' HH:mm")}${
         lastEditedUser ? ` by ${lastEditedUser.name}` : ""
       }`,
+    });
+  }
+
+  if (accountLabel) {
+    accessories.push({
+      text: accountLabel,
+      tooltip: `Account: ${accountLabel}`,
     });
   }
 
@@ -173,6 +183,7 @@ export function PageListItem({
                     pageId={page.id}
                     pageProperty={page.properties[dp.id]}
                     mutate={mutate}
+                    accountId={page.accountId}
                   />
                 ))}
               </ActionPanel.Submenu>
@@ -192,7 +203,7 @@ export function PageListItem({
                 title="Create New Page"
                 icon={Icon.Plus}
                 shortcut={Keyboard.Shortcut.Common.New}
-                target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} />}
+                target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} accountId={page.accountId} />}
               />
             )}
 
@@ -212,11 +223,11 @@ export function PageListItem({
                   })
                 ) {
                   if (page.object === "database") {
-                    deleteDatabase(page.id);
+                    deleteDatabase(page.id, page.accountId);
                   } else {
-                    deletePage(page.id);
+                    deletePage(page.id, page.accountId);
                   }
-                  await removeRecentPage(page.id);
+                  await removeRecentPage(page.id, page.accountId);
                   await mutate();
                 }
               }}

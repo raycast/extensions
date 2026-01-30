@@ -1,15 +1,16 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { getNotionClient, notionService } from "../utils/notion/oauth";
+import { getNotionClient, resolveAccountIdForTool } from "../utils/notion/oauth";
 
 type Input = {
   /** The ID of the Notion page to fetch */
   pageId: string;
+  /** Optional account label (for example: Work or Personal) */
+  accountLabel?: string;
 };
 
-export default withAccessToken(notionService)(async ({ pageId }: Input) => {
+export default async function getPage({ pageId, accountLabel }: Input) {
   try {
-    const notion = getNotionClient();
+    const accountId = resolveAccountIdForTool(accountLabel);
+    const notion = await getNotionClient(accountId);
     const { results } = await notion.blocks.children.list({
       block_id: pageId,
       page_size: 100,
@@ -27,4 +28,4 @@ export default withAccessToken(notionService)(async ({ pageId }: Input) => {
       content: JSON.stringify(err),
     };
   }
-});
+}

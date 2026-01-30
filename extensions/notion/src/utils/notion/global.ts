@@ -4,6 +4,7 @@ import { showToast, Toast } from "@raycast/api";
 import { standardize } from "./standardize";
 
 import { NotionObject, Page } from ".";
+import { NotionAccountId } from "./oauth";
 
 export function isNotNullOrUndefined<T>(input: null | undefined | T): input is T {
   return input != null;
@@ -25,11 +26,12 @@ export function handleError<T>(err: unknown, title: string, returnValue: T): T {
   return returnValue;
 }
 
-export function pageMapper(notionPage: NotionObject): Page {
+export function pageMapper(notionPage: NotionObject, accountId?: NotionAccountId): Page {
   const page: Page = {
     ...notionPage,
     title: "Untitled",
     properties: {},
+    accountId,
     created_by:
       "created_by" in notionPage && notionPage.created_by.object === "user" ? notionPage.created_by.id : undefined,
     parent_page_id: "parent" in notionPage && "page_id" in notionPage.parent ? notionPage.parent.page_id : undefined,

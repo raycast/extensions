@@ -1,7 +1,5 @@
-import { withAccessToken } from "@raycast/utils";
-
 import { createDatabasePage } from "../utils/notion";
-import { getNotionClient, notionService } from "../utils/notion/oauth";
+import { getNotionClient, resolveAccountIdForTool } from "../utils/notion/oauth";
 
 type Input = {
   /** The database id to create the page in. */
@@ -18,19 +16,26 @@ type Input = {
 
   Please note that HTML tags and thematic breaks are not supported in Notion due to its limitations.*/
   content: string;
+  /** Optional account label (for example: Work or Personal) */
+  accountLabel?: string;
 };
 
-export default withAccessToken(notionService)(async ({ databaseId, title, content }: Input) => {
-  const result = await createDatabasePage({
-    database: databaseId,
-    "property::title::title": title,
-    content,
-  });
+export default async function createPage({ databaseId, title, content, accountLabel }: Input) {
+  const accountId = resolveAccountIdForTool(accountLabel);
+  const result = await createDatabasePage(
+    {
+      database: databaseId,
+      "property::title::title": title,
+      content,
+    },
+    accountId,
+  );
   return result;
-});
+}
 
-export const confirmation = withAccessToken(notionService)(async (params: Input) => {
-  const notion = getNotionClient();
+export async function confirmation(params: Input) {
+  const accountId = resolveAccountIdForTool(params.accountLabel);
+  const notion = await getNotionClient(accountId);
   const database = await notion.databases.retrieve({ database_id: params.databaseId });
 
   let databaseName = params.databaseId;
@@ -46,4 +51,4 @@ export const confirmation = withAccessToken(notionService)(async (params: Input)
       { name: "In database", value: databaseName },
     ],
   };
-});
+}

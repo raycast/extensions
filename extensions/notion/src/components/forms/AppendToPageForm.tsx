@@ -16,7 +16,7 @@ export function AppendToPageForm(props: { page: Page; onContentUpdate?: () => vo
 
         pop();
 
-        await appendToPage(page.id, { content: values.content });
+        await appendToPage(page.id, { content: values.content }, page.accountId);
         onContentUpdate?.();
 
         await showToast({ style: Toast.Style.Success, title: "Added content to the page", message: pageTitle });

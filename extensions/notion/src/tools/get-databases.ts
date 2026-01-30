@@ -1,9 +1,13 @@
-import { withAccessToken } from "@raycast/utils";
-
 import { fetchDatabases } from "../utils/notion/database";
-import { notionService } from "../utils/notion/oauth";
+import { resolveAccountIdForTool } from "../utils/notion/oauth";
 
-export default withAccessToken(notionService)(async () => {
-  const databases = await fetchDatabases();
+type Input = {
+  /** Optional account label (for example: Work or Personal) */
+  accountLabel?: string;
+};
+
+export default async function getDatabases({ accountLabel }: Input = {}) {
+  const accountId = resolveAccountIdForTool(accountLabel);
+  const databases = await fetchDatabases(accountId);
   return databases;
-});
+}

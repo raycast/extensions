@@ -1,11 +1,11 @@
 import { iteratePaginatedAPI } from "@notionhq/client";
 
 import { handleError, isNotNullOrUndefined } from "./global";
-import { getNotionClient } from "./oauth";
+import { getNotionClient, NotionAccountId } from "./oauth";
 
-export async function fetchUsers() {
+export async function fetchUsers(accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const users = [];
     for await (const user of iteratePaginatedAPI(notion.users.list, {})) {
       users.push(user);

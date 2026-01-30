@@ -11,7 +11,7 @@ import {
   AI,
   Icon,
 } from "@raycast/api";
-import { useForm, withAccessToken } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import { parseHTML } from "linkedom";
 import { useState, useEffect } from "react";
 
@@ -26,7 +26,13 @@ import {
   Page,
   PageContent,
 } from "./utils/notion";
-import { notionService } from "./utils/notion/oauth";
+import {
+  getActiveAccountId,
+  getDefaultAccountId,
+  getNotionAccounts,
+  NotionAccountId,
+  setActiveAccountId,
+} from "./utils/notion/oauth";
 import { Quicklink } from "./utils/types";
 
 type QuickCaptureFormValues = {
@@ -40,6 +46,7 @@ type LaunchContext = {
     captureAs?: string;
     pageId?: string;
     objectType?: Page["object"];
+    accountId?: NotionAccountId;
   };
 };
 
@@ -85,8 +92,11 @@ ${content}
 
 function QuickCapture({ launchContext }: QuickCaptureProps) {
   const [searchText, setSearchText] = useState<string>("");
+  const accounts = getNotionAccounts();
+  const initialAccountId = launchContext?.defaults?.accountId ?? getDefaultAccountId();
+  const [accountId, setAccountId] = useState<NotionAccountId>(initialAccountId);
 
-  const { data, isLoading } = useSearchPages(searchText);
+  const { data, isLoading } = useSearchPages(searchText, accountId);
 
   const searchPages = data?.pages;
 
@@ -134,8 +144,12 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         let selectedPage: Page | undefined;
 
         if (launchContext?.defaults?.pageId) {
-          const { pageId, objectType = "page" } = launchContext.defaults;
-          selectedPage = objectType === "page" ? await fetchPage(pageId) : await fetchDatabase(pageId);
+          const { pageId, objectType = "page", accountId: contextAccountId } = launchContext.defaults;
+          const targetAccountId = contextAccountId ?? accountId;
+          selectedPage =
+            objectType === "page"
+              ? await fetchPage(pageId, true, targetAccountId)
+              : await fetchDatabase(pageId, true, targetAccountId);
         } else {
           selectedPage = searchPages?.find((page) => page.id === values.page);
         }
@@ -146,15 +160,18 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         }
 
         if (selectedPage.object === "page") {
-          await appendToPage(selectedPage.id, { content });
+          await appendToPage(selectedPage.id, { content }, accountId);
         }
 
         if (selectedPage.object === "database") {
-          await createDatabasePage({
-            database: selectedPage.id,
-            content,
-            "property::title::title": pageDetail?.title,
-          });
+          await createDatabasePage(
+            {
+              database: selectedPage.id,
+              content,
+              "property::title::title": pageDetail?.title,
+            },
+            accountId,
+          );
         }
 
         await showToast({ style: Toast.Style.Success, title: "Captured content to page" });
@@ -196,6 +213,13 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
     getText();
   }, []);
 
+  useEffect(() => {
+    if (launchContext?.defaults?.accountId) return;
+    getActiveAccountId()
+      .then(setAccountId)
+      .catch(() => undefined);
+  }, [launchContext?.defaults?.accountId]);
+
   function getQuicklink(): Quicklink {
     const url = "raycast://extensions/notion/notion/quick-capture";
     const page = searchPages?.find((page) => page.id === itemProps.page.value);
@@ -204,6 +228,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         captureAs: itemProps.captureAs.value,
         pageId: page?.id,
         objectType: page?.object,
+        accountId,
       },
     };
 
@@ -234,6 +259,25 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         <Form.Dropdown.Item title="Summarize Page with AI" value="ai" icon={Icon.Stars} />
       </Form.Dropdown>
 
+      {accounts.length > 1 && !launchContext?.defaults?.pageId ? (
+        <Form.Dropdown
+          id="accountId"
+          title="Account"
+          value={accountId}
+          onChange={(value) => {
+            const nextAccountId = value as NotionAccountId;
+            setAccountId(nextAccountId);
+            setActiveAccountId(nextAccountId);
+            setValue("page", undefined);
+          }}
+          storeValue
+        >
+          {accounts.map((account) => (
+            <Form.Dropdown.Item key={account.id} title={account.label} value={account.id} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+
       {/*
         When a default page/database is specified in the LaunchContext, we will fetch it directly instead
         of adding an option for it in the dropdown
@@ -262,4 +306,4 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
   );
 }
 
-export default withAccessToken(notionService)(QuickCapture);
+export default QuickCapture;

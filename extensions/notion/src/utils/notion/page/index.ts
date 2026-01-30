@@ -6,28 +6,28 @@ import { NotionToMarkdown } from "notion-to-md";
 import { isMarkdownPageContent, PageContent } from "..";
 import { getDateMention } from "../block";
 import { handleError, pageMapper } from "../global";
-import { getNotionClient } from "../oauth";
+import { getNotionClient, NotionAccountId } from "../oauth";
 
 import { PageProperty } from "./property";
 
 export * from "./property";
 
-export async function fetchPage(pageId: string, silent: boolean = true) {
+export async function fetchPage(pageId: string, silent: boolean = true, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const page = await notion.pages.retrieve({
       page_id: pageId,
     });
 
-    return pageMapper(page);
+    return pageMapper(page, accountId);
   } catch (err) {
     if (!silent) return handleError(err, "Failed to fetch page", undefined);
   }
 }
 
-export async function deletePage(pageId: string) {
+export async function deletePage(pageId: string, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
 
     await showToast({
       style: Toast.Style.Animated,
@@ -48,22 +48,26 @@ export async function deletePage(pageId: string) {
   }
 }
 
-export async function patchPage(pageId: string, properties: UpdatePageParameters["properties"]) {
+export async function patchPage(
+  pageId: string,
+  properties: UpdatePageParameters["properties"],
+  accountId?: NotionAccountId,
+) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const page = await notion.pages.update({
       page_id: pageId,
       properties,
     });
 
-    return pageMapper(page);
+    return pageMapper(page, accountId);
   } catch (err) {
     return handleError(err, "Failed to update page", undefined);
   }
 }
 
-export async function search(query?: string, nextCursor?: string, pageSize: number = 25) {
-  const notion = getNotionClient();
+export async function search(query?: string, nextCursor?: string, pageSize: number = 25, accountId?: NotionAccountId) {
+  const notion = await getNotionClient(accountId);
   const database = await notion.search({
     sort: {
       direction: "descending",
@@ -74,12 +78,16 @@ export async function search(query?: string, nextCursor?: string, pageSize: numb
     ...(nextCursor && { start_cursor: nextCursor }),
   });
 
-  return { pages: database.results.map(pageMapper), hasMore: database.has_more, nextCursor: database.next_cursor };
+  return {
+    pages: database.results.map((page) => pageMapper(page, accountId)),
+    hasMore: database.has_more,
+    nextCursor: database.next_cursor,
+  };
 }
 
-export async function fetchPageContent(pageId: string) {
+export async function fetchPageContent(pageId: string, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const { results } = await notion.blocks.children.list({
       block_id: pageId,
     });
@@ -95,9 +103,9 @@ export async function fetchPageContent(pageId: string) {
   }
 }
 
-export async function fetchPageFirstBlockId(pageId: string) {
+export async function fetchPageFirstBlockId(pageId: string, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const { results } = await notion.blocks.children.list({
       block_id: pageId,
     });
@@ -112,6 +120,7 @@ type AppendBlockToPageParams = {
   children: BlockObjectRequest[];
   prepend?: boolean;
   addDateDivider?: boolean;
+  accountId?: NotionAccountId;
 };
 
 export async function appendBlockToPage({
@@ -119,12 +128,13 @@ export async function appendBlockToPage({
   children,
   prepend = false,
   addDateDivider = false,
+  accountId,
 }: AppendBlockToPageParams) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
 
     const childrenToInsert = addDateDivider ? [{ divider: {} }, getDateMention(), ...children] : children;
-    const insertAfter = prepend ? await fetchPageFirstBlockId(pageId) : undefined;
+    const insertAfter = prepend ? await fetchPageFirstBlockId(pageId, accountId) : undefined;
 
     const { results } = await notion.blocks.children.append({
       block_id: pageId,
@@ -138,9 +148,9 @@ export async function appendBlockToPage({
   }
 }
 
-export async function appendToPage(pageId: string, params: { content: PageContent }) {
+export async function appendToPage(pageId: string, params: { content: PageContent }, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const { content } = params;
 
     const { results } = await notion.blocks.children.append({
@@ -179,6 +189,7 @@ export function getPageName(page: Page): string {
 export interface Page {
   object: "page" | "database";
   id: string;
+  accountId?: NotionAccountId;
   parent_page_id?: string;
   parent_database_id?: string;
   created_by?: string;

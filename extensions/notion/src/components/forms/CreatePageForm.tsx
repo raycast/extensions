@@ -13,7 +13,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useForm, FormValidation, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   useDatabaseProperties,
@@ -24,6 +24,13 @@ import {
   useUsers,
 } from "../../hooks";
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
+import {
+  getActiveAccountId,
+  getDefaultAccountId,
+  getNotionAccounts,
+  NotionAccountId,
+  setActiveAccountId as setStoredActiveAccountId,
+} from "../../utils/notion/oauth";
 import { handleOnOpenPage } from "../../utils/openPage";
 import { Quicklink } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
@@ -41,12 +48,14 @@ export type CreatePageFormValues = {
 type LaunchContext = {
   visiblePropIds?: string[];
   defaults?: CreatePageFormValues;
+  accountId?: NotionAccountId;
 };
 
 type CreatePageFormProps = {
   mutate?: () => Promise<void>;
   launchContext?: LaunchContext;
   defaults?: Partial<CreatePageFormValues>;
+  accountId?: NotionAccountId;
 };
 
 const createPropertyId = (property: DatabaseProperty) => "property::" + property.type + "::" + property.id;
@@ -54,20 +63,24 @@ const createPropertyId = (property: DatabaseProperty) => "property::" + property
 const NON_EDITABLE_PROPETY_TYPES = ["formula"];
 const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
 
-export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
+export function CreatePageForm({ mutate, launchContext, defaults, accountId }: CreatePageFormProps) {
   const preferences = getPreferenceValues<Preferences.CreateDatabasePage>();
+  const accounts = getNotionAccounts();
+  const lockedAccountId = accountId;
   const defaultValues = launchContext?.defaults ?? defaults;
   const initialDatabaseId = defaultValues?.database;
+  const initialAccountId = lockedAccountId ?? launchContext?.accountId ?? getDefaultAccountId();
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
-  const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
+  const [activeAccountId, setActiveAccountId] = useState<NotionAccountId>(initialAccountId);
+  const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties, activeAccountId);
   const { visiblePropIds, setVisiblePropIds } = useVisibleDatabasePropIds(
     databaseId || "__no_id__",
     launchContext?.visiblePropIds,
   );
-  const { data: users } = useUsers();
-  const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
-  const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
+  const { data: users } = useUsers(activeAccountId);
+  const { data: databases, isLoading: isLoadingDatabases } = useDatabases(activeAccountId);
+  const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties, activeAccountId);
   const { setRecentPage } = useRecentPages();
 
   const databasePropertyIds = databaseProperties.map((dp) => dp.id) || [];
@@ -105,6 +118,13 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     },
   );
 
+  useEffect(() => {
+    if (lockedAccountId || launchContext?.accountId || initialDatabaseId) return;
+    getActiveAccountId()
+      .then(setActiveAccountId)
+      .catch(() => undefined);
+  }, [lockedAccountId, launchContext?.accountId, initialDatabaseId]);
+
   const { itemProps, values, handleSubmit, reset, focus, setValue } = useForm<CreatePageFormValues>({
     initialValues,
     validation,
@@ -117,10 +137,13 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
         await showToast({ style: Toast.Style.Animated, title: "Creating page" });
 
-        const page = await createDatabasePage({
-          ...initialValues,
-          ...pageValues,
-        });
+        const page = await createDatabasePage(
+          {
+            ...initialValues,
+            ...pageValues,
+          },
+          activeAccountId,
+        );
 
         await showToast({
           style: Toast.Style.Success,
@@ -178,7 +201,11 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   function getQuicklink(): Quicklink {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
-    const launchContext: LaunchContext = { defaults: values, visiblePropIds: visiblePropIds ?? databasePropertyIds };
+    const launchContext: LaunchContext = {
+      defaults: values,
+      visiblePropIds: visiblePropIds ?? databasePropertyIds,
+      accountId: activeAccountId,
+    };
     let name: string | undefined;
     const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
     if (databaseTitle) name = "Create new page in " + databaseTitle;
@@ -250,6 +277,27 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
         </ActionPanel>
       }
     >
+      {accounts.length > 1 && !lockedAccountId ? (
+        <Form.Dropdown
+          id="accountId"
+          title="Account"
+          value={activeAccountId}
+          onChange={(value) => {
+            const nextAccountId = value as NotionAccountId;
+            setActiveAccountId(nextAccountId);
+            setStoredActiveAccountId(nextAccountId);
+            if (!initialDatabaseId) {
+              setDatabaseId(null);
+              setValue("database", undefined);
+            }
+          }}
+          storeValue
+        >
+          {accounts.map((account) => (
+            <Form.Dropdown.Item key={account.id} title={account.label} value={account.id} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
       {initialDatabaseId ? null : (
         <>
           <Form.Dropdown

@@ -5,7 +5,7 @@ import { markdownToBlocks } from "@tryfabric/martian";
 
 import { isMarkdownPageContent, isReadableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
-import { getNotionClient } from "../oauth";
+import { getNotionClient, NotionAccountId } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
 import { standardize } from "../standardize";
 
@@ -14,22 +14,22 @@ import { DatabaseProperty } from "./property";
 export type { PropertyConfig } from "./property";
 export type { DatabaseProperty };
 
-export async function fetchDatabase(pageId: string, silent: boolean = true) {
+export async function fetchDatabase(pageId: string, silent: boolean = true, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const page = await notion.databases.retrieve({
       database_id: pageId,
     });
 
-    return pageMapper(page);
+    return pageMapper(page, accountId);
   } catch (err) {
     if (!silent) return handleError(err, "Failed to fetch database", undefined);
   }
 }
 
-export async function fetchDatabases() {
+export async function fetchDatabases(accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const databases = await notion.search({
       sort: {
         direction: "descending",
@@ -49,6 +49,7 @@ export async function fetchDatabases() {
             icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
             icon_file: x.icon?.type === "file" ? x.icon.file.url : null,
             icon_external: x.icon?.type === "external" ? x.icon.external.url : null,
+            accountId,
           }) as Database,
       );
   } catch (err) {
@@ -56,9 +57,9 @@ export async function fetchDatabases() {
   }
 }
 
-export async function fetchDatabaseProperties(databaseId: string) {
+export async function fetchDatabaseProperties(databaseId: string, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const database = await notion.databases.retrieve({ database_id: databaseId });
     const propertyNames = Object.keys(database.properties).reverse();
 
@@ -89,9 +90,10 @@ export async function queryDatabase(
   databaseId: string,
   query: string | undefined,
   sort: "last_edited_time" | "created_time" = "last_edited_time",
+  accountId?: NotionAccountId,
 ) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const database = await notion.databases.query({
       database_id: databaseId,
       page_size: 20,
@@ -115,7 +117,7 @@ export async function queryDatabase(
         : undefined,
     });
 
-    return database.results.map(pageMapper);
+    return database.results.map((page) => pageMapper(page, accountId));
   } catch (err) {
     return handleError(err, "Failed to query database", []);
   }
@@ -123,9 +125,9 @@ export async function queryDatabase(
 
 type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
-export async function createDatabasePage(values: Form.Values) {
+export async function createDatabasePage(values: Form.Values, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
     const { database, content, ...props } = values;
 
     const arg: CreateRequest = {
@@ -154,15 +156,15 @@ export async function createDatabasePage(values: Form.Values) {
 
     const page = await notion.pages.create(arg);
 
-    return pageMapper(page);
+    return pageMapper(page, accountId);
   } catch (err) {
     throw new Error("Failed to create page", { cause: err });
   }
 }
 
-export async function deleteDatabase(databaseId: string) {
+export async function deleteDatabase(databaseId: string, accountId?: NotionAccountId) {
   try {
-    const notion = getNotionClient();
+    const notion = await getNotionClient(accountId);
 
     await showToast({
       style: Toast.Style.Animated,
@@ -190,4 +192,5 @@ export interface Database {
   icon_emoji: string | null;
   icon_file: string | null;
   icon_external: string | null;
+  accountId?: NotionAccountId;
 }

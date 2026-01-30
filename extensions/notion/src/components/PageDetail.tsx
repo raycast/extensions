@@ -60,8 +60,8 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
   const pageName = getPageName(page);
 
   const { data, isLoading, mutate } = useCachedPromise(
-    async (id) => {
-      const fetchedPageContent = await fetchPageContent(id);
+    async (id, accountId) => {
+      const fetchedPageContent = await fetchPageContent(id, accountId);
 
       const blocks = [];
 
@@ -84,7 +84,7 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
 
       return { markdown: blocks.join("\n") };
     },
-    [page.id],
+    [page.id, page.accountId],
   );
 
   useEffect(() => {

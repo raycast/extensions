@@ -1,5 +1,8 @@
 # Notion Changelog
 
+## [Multiple Notion accounts support] - {PR_MERGE_DATE}
+- Add support for up to two Notion accounts
+
 ## [Use Clipboard in Create + Update Shortcuts] - 2025-12-01
 
 - New `Preference` allowing to use Clipboard for auto-filling **Name (Title)** or **Content** (ref: [Issue #23086](https://github.com/raycast/extensions/issues/23086))

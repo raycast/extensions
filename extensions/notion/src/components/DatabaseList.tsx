@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabasesView } from "../hooks";
 import { queryDatabase, getPageName, Page, User } from "../utils/notion";
+import { NotionAccountId } from "../utils/notion/oauth";
 
 import { DatabaseView } from "./DatabaseView";
 import { CreatePageForm } from "./forms";
@@ -11,12 +12,13 @@ import { CreatePageForm } from "./forms";
 type DatabaseListProps = {
   databasePage: Page;
   setRecentPage: (page: Page) => Promise<void>;
-  removeRecentPage: (id: string) => Promise<void>;
+  removeRecentPage: (id: string, accountId?: NotionAccountId) => Promise<void>;
   users?: User[];
 };
 
 export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, users }: DatabaseListProps) {
   const databaseId = databasePage.id;
+  const accountId = databasePage.accountId;
   const databaseName = getPageName(databasePage);
   const [searchText, setSearchText] = useState<string>();
   const [sort, setSort] = useState<"last_edited_time" | "created_time">("last_edited_time");
@@ -25,10 +27,14 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
     isLoading,
     mutate,
   } = useCachedPromise(
-    (databaseId, searchText, sort) => queryDatabase(databaseId, searchText, sort),
-    [databaseId, searchText, sort],
+    (databaseId, searchText, sort, accountId) => queryDatabase(databaseId, searchText, sort, accountId),
+    [databaseId, searchText, sort, accountId],
   );
-  const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(databaseId);
+  const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(
+    databaseId,
+    undefined,
+    accountId,
+  );
   const { data: databaseView, isLoading: isLoadingDatabaseViews, setDatabaseView } = useDatabasesView(databaseId);
 
   useEffect(() => {
@@ -83,7 +89,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
               title="Create New Page"
               icon={Icon.Plus}
               shortcut={Keyboard.Shortcut.Common.New}
-              target={<CreatePageForm defaults={{ database: databaseId }} mutate={mutate} />}
+              target={<CreatePageForm defaults={{ database: databaseId }} mutate={mutate} accountId={accountId} />}
             />
           </ActionPanel>
         }

@@ -1,19 +1,20 @@
-import { withAccessToken } from "@raycast/utils";
-
 import { appendToPage } from "../utils/notion";
-import { notionService } from "../utils/notion/oauth";
+import { resolveAccountIdForTool } from "../utils/notion/oauth";
 
 type Input = {
   /** The ID of the page to append the content to. */
   pageId: string;
   /** The content in markdown format to append to the page. */
   content: string;
+  /** Optional account label (for example: Work or Personal) */
+  accountLabel?: string;
 };
 
-export default withAccessToken(notionService)(async ({ pageId, content }: Input) => {
-  const result = await appendToPage(pageId, { content });
+export default async function addToPage({ pageId, content, accountLabel }: Input) {
+  const accountId = resolveAccountIdForTool(accountLabel);
+  const result = await appendToPage(pageId, { content }, accountId);
   return result;
-});
+}
 
 export function confirmation(params: Input) {
   return {
