@@ -1,6 +1,6 @@
 # Cursor Costs Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-01-30
 
 - Add menu bar command showing Cursor API usage and costs in real-time
 - Add list view with detailed model breakdown and statistics
