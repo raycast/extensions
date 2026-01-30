@@ -4,14 +4,6 @@ import { Message } from "../providers/base";
 import { MiniMaxProvider } from "../providers/minimax";
 import { handleError } from "../utils/errors";
 
-export function useChat(): UseChatReturn {
-  const [streamingContent, setStreamingContent] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const abortRef = useRef(false);
-
-  const getProvider = useCallback(() => {
-    const prefs = getPreferenceValues<Preferences>();
-
 interface UseChatReturn {
   streamingContent: string;
   isLoading: boolean;
