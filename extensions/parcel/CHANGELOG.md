@@ -1,5 +1,9 @@
 # Parcel Changelog
 
+## [Fix Carrier Dropdown Default] - {PR_MERGE_DATE}
+
+- Fixed the "Add Delivery" carrier dropdown auto-selecting the first carrier (4PX) instead of starting with no selection
+
 ## [Added Windows Support] - 2026-01-29
 
 - Added support for Windows in addition to Mac
