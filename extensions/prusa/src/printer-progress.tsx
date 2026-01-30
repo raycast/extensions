@@ -1,5 +1,6 @@
-import { MenuBarExtra, Icon, open } from "@raycast/api";
+import { MenuBarExtra, Icon, LaunchType, launchCommand } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { createPrusaClientFromPreferences } from "./api/prusaClient";
 import { PrusaApiError } from "./api/errors";
 import { logger } from "./utils/logger";
@@ -30,9 +31,15 @@ export default function Command() {
     },
   );
 
+  // Log errors only when they change
+  useEffect(() => {
+    if (error) {
+      logger.error("Error fetching printer status:", error);
+    }
+  }, [error]);
+
   // Handle errors
   if (error) {
-    logger.error("Error fetching printer status:", error);
     const errorMessage = error instanceof PrusaApiError ? error.message : "Connection failed";
 
     return (
@@ -98,7 +105,13 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Open Printer Status"
           icon={Icon.Window}
-          onAction={() => open("raycast://extensions/chad_walters/prusa/status")}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "status", type: LaunchType.UserInitiated });
+            } catch (error) {
+              console.error("Failed to launch command:", error);
+            }
+          }}
         />
         <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
       </MenuBarExtra.Section>
