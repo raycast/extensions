@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Fix Carrier Dropdown Default] - {PR_MERGE_DATE}
+## [Fix Carrier Dropdown Default] - 2026-01-30
 
 - Fixed the "Add Delivery" carrier dropdown auto-selecting the first carrier (4PX) instead of starting with no selection
 
