@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { useDependencyCheck } from "./hooks/useDependencyCheck";
+import { useDependencyCheck } from "./hooks/use-dependency-check";
 import type { QmdGetResult } from "./types";
 import { parseGetDocument } from "./utils/parsers";
 import { runQmdRaw } from "./utils/qmd";
@@ -122,7 +122,7 @@ export default function Command() {
     >
       {suggestions.length > 0 && (
         <List.Section title="Did you mean?">
-          {suggestions.map((suggestion, index) => (
+          {suggestions.map((suggestion) => (
             <List.Item
               actions={
                 <ActionPanel>
@@ -130,7 +130,7 @@ export default function Command() {
                 </ActionPanel>
               }
               icon={Icon.Document}
-              key={index}
+              key={suggestion}
               title={suggestion}
             />
           ))}

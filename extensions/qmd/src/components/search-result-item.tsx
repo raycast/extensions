@@ -3,6 +3,8 @@ import { Action, ActionPanel, Clipboard, Color, Icon, List, showToast, Toast } f
 import type { QmdGetResult, QmdSearchResult } from "../types";
 import { formatScorePercentage, getScoreColor, runQmd } from "../utils/qmd";
 
+const CONTEXT_LINE_PATTERN = /^@@\s+[^\n]+/;
+
 interface SearchResultItemProps {
   result: QmdSearchResult;
   showDetail?: boolean;
@@ -14,6 +16,42 @@ interface SearchResultItemProps {
   onToggleFullDocument: () => void;
   onToggleLineNumbers: () => void;
   onToggleAllResults: () => void;
+}
+
+function getTagColor(scoreColor: string): Color {
+  if (scoreColor === "green") {
+    return Color.Green;
+  }
+  if (scoreColor === "yellow") {
+    return Color.Yellow;
+  }
+  return Color.Red;
+}
+
+function parseSnippet(snippet: string) {
+  const contextMatch = snippet.match(CONTEXT_LINE_PATTERN);
+  const contextLine = contextMatch ? contextMatch[0] : null;
+  const contentMarkdown = contextMatch ? snippet.slice(contextMatch[0].length).trim() : snippet;
+  return { contextLine, contentMarkdown };
+}
+
+async function copyDocumentContent(docid: string) {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Fetching content...",
+  });
+
+  const getResult = await runQmd<QmdGetResult>(["get", `#${docid}`, "--full"]);
+
+  if (getResult.success && getResult.data) {
+    await Clipboard.copy(getResult.data.content);
+    toast.style = Toast.Style.Success;
+    toast.title = "Content copied";
+  } else {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to fetch content";
+    toast.message = getResult.error;
+  }
 }
 
 export function SearchResultItem({
@@ -36,15 +74,13 @@ export function SearchResultItem({
   const scorePercentage = formatScorePercentage(result.score);
 
   // Map score color to Raycast Color
-  const tagColor = scoreColor === "green" ? Color.Green : scoreColor === "yellow" ? Color.Yellow : Color.Red;
+  const tagColor = getTagColor(scoreColor);
 
   const accessories: List.Item.Accessory[] = [{ tag: { value: scorePercentage, color: tagColor } }];
 
   // Parse snippet to extract context line (e.g., "@@ -1,3 (0 before, 2 after)")
   const snippet = result.snippet || "";
-  const contextMatch = snippet.match(/^@@\s+[^\n]+/);
-  const contextLine = contextMatch ? contextMatch[0] : null;
-  const contentMarkdown = contextMatch ? snippet.slice(contextMatch[0].length).trim() : snippet;
+  const { contextLine, contentMarkdown } = parseSnippet(snippet);
 
   return (
     <List.Item
@@ -65,24 +101,7 @@ export function SearchResultItem({
             )}
             <Action
               icon={Icon.Clipboard}
-              onAction={async () => {
-                const toast = await showToast({
-                  style: Toast.Style.Animated,
-                  title: "Fetching content...",
-                });
-
-                const getResult = await runQmd<QmdGetResult>(["get", `#${result.docid}`, "--full"]);
-
-                if (getResult.success && getResult.data) {
-                  await Clipboard.copy(getResult.data.content);
-                  toast.style = Toast.Style.Success;
-                  toast.title = "Content copied";
-                } else {
-                  toast.style = Toast.Style.Failure;
-                  toast.title = "Failed to fetch content";
-                  toast.message = getResult.error;
-                }
-              }}
+              onAction={() => copyDocumentContent(result.docid)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               title="Copy Content"
             />

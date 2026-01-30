@@ -1,5 +1,9 @@
 import type { QmdCollection } from "../../types";
 
+const COLLECTION_NAME_PATTERN = /^(\S+)\s+\(qmd:\/\/\S+\)/;
+const PATTERN_LINE_PATTERN = /^\s+Pattern:\s+(.+)$/;
+const FILES_COUNT_PATTERN = /^\s+Files:\s+(\d+)/;
+
 /**
  * Parse collection list text output into structured data
  * Example input:
@@ -18,7 +22,7 @@ export function parseCollectionList(output: string): QmdCollection[] {
 
   for (const line of lines) {
     // Match collection name line: "obsidian (qmd://obsidian/)"
-    const collectionMatch = line.match(/^(\S+)\s+\(qmd:\/\/\S+\)/);
+    const collectionMatch = line.match(COLLECTION_NAME_PATTERN);
     if (collectionMatch) {
       // Save previous collection if exists
       if (currentCollection?.name) {
@@ -36,14 +40,14 @@ export function parseCollectionList(output: string): QmdCollection[] {
 
     if (currentCollection) {
       // Match pattern line
-      const patternMatch = line.match(/^\s+Pattern:\s+(.+)$/);
+      const patternMatch = line.match(PATTERN_LINE_PATTERN);
       if (patternMatch) {
         currentCollection.mask = patternMatch[1].trim();
         continue;
       }
 
       // Match files count line
-      const filesMatch = line.match(/^\s+Files:\s+(\d+)/);
+      const filesMatch = line.match(FILES_COUNT_PATTERN);
       if (filesMatch) {
         currentCollection.documentCount = Number.parseInt(filesMatch[1], 10);
       }

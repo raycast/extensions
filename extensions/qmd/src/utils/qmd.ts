@@ -1,10 +1,11 @@
-import { exec } from "node:child_process";
+import { exec, execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir, platform } from "node:os";
-import { join } from "node:path";
+import { join, dirname as path_dirname } from "node:path";
 import { promisify } from "node:util";
+import { getPreferenceValues } from "@raycast/api";
 import type { DependencyStatus, QmdCollection, QmdContext, QmdFileListItem, QmdResult, ScoreColor } from "../types";
-import { collectionsLogger } from "./logger";
+import { collectionsLogger, qmdLogger } from "./logger";
 import { parseCollectionList, parseContextList, parseFileList } from "./parsers";
 
 const execAsync = promisify(exec);
@@ -12,6 +13,12 @@ const execAsync = promisify(exec);
 // ============================================================================
 // QMD Config
 // ============================================================================
+
+const YAML_COLLECTIONS_SECTION = /^collections:\s*$/;
+const YAML_TOP_LEVEL_KEY = /^\S/;
+const YAML_COLLECTION_NAME = /^ {2}(\S+):\s*$/;
+const YAML_COLLECTION_PATH = /^ {4}path:\s*(.+)$/;
+const PENDING_EMBEDDINGS_PATTERN = /\((\d+) unique hashes? need vectors?\)/;
 
 /**
  * Get the qmd config file path
@@ -45,19 +52,19 @@ export function getCollectionPaths(): Record<string, string> {
 
     for (const line of lines) {
       // Check if we're in the collections section
-      if (line.match(/^collections:\s*$/)) {
+      if (YAML_COLLECTIONS_SECTION.test(line)) {
         inCollections = true;
         continue;
       }
 
       // Check if we've left the collections section (new top-level key)
-      if (inCollections && line.match(/^\S/) && !line.startsWith(" ")) {
+      if (inCollections && YAML_TOP_LEVEL_KEY.test(line) && !line.startsWith(" ")) {
         break;
       }
 
       if (inCollections) {
         // Match collection name (2 spaces indent)
-        const collectionMatch = line.match(/^ {2}(\S+):\s*$/);
+        const collectionMatch = line.match(YAML_COLLECTION_NAME);
         if (collectionMatch) {
           currentCollection = collectionMatch[1];
           continue;
@@ -65,7 +72,7 @@ export function getCollectionPaths(): Record<string, string> {
 
         // Match path line (4 spaces indent)
         if (currentCollection) {
-          const pathMatch = line.match(/^ {4}path:\s*(.+)$/);
+          const pathMatch = line.match(YAML_COLLECTION_PATH);
           if (pathMatch) {
             paths[currentCollection] = pathMatch[1].trim();
             currentCollection = null;
@@ -108,32 +115,85 @@ function getEnvWithPath(): NodeJS.ProcessEnv {
   };
 }
 
+function findInPath(executable: string): string | null {
+  try {
+    const result = execSync(`which ${executable}`, {
+      encoding: "utf-8",
+      env: getEnvWithPath(),
+    }).trim();
+    return result || null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Get the full path to the bun executable
  */
 function getBunExecutable(): string {
+  const preferences = getPreferenceValues<Preferences>();
+
+  if (preferences.bunExecutablePath) {
+    const customPath = expandPath(preferences.bunExecutablePath);
+    if (existsSync(customPath)) {
+      return customPath;
+    }
+    qmdLogger.warn("Custom Bun path not found, falling back to auto-detection", {
+      customPath,
+    });
+  }
+
   const bunInHome = join(homedir(), ".bun", "bin", "bun");
   if (existsSync(bunInHome)) {
     return bunInHome;
   }
-  return "bun"; // fallback to PATH
+
+  const bunInPath = findInPath("bun");
+  if (bunInPath) {
+    return bunInPath;
+  }
+
+  return "bun";
 }
 
 /**
  * Get the full path to the qmd script
  */
 function getQmdScript(): string {
-  return join(homedir(), ".bun", "bin", "qmd");
+  const preferences = getPreferenceValues<Preferences>();
+
+  if (preferences.qmdExecutablePath) {
+    const customPath = expandPath(preferences.qmdExecutablePath);
+    if (existsSync(customPath)) {
+      return customPath;
+    }
+    qmdLogger.warn("Custom QMD path not found, falling back to auto-detection", {
+      customPath,
+    });
+  }
+
+  const qmdInHome = join(homedir(), ".bun", "bin", "qmd");
+  if (existsSync(qmdInHome)) {
+    return qmdInHome;
+  }
+
+  const qmdInPath = findInPath("qmd");
+  if (qmdInPath) {
+    return qmdInPath;
+  }
+
+  return qmdInHome;
 }
 
 /**
  * Build a shell command that sets PATH and runs qmd
  */
 function buildQmdShellCommand(args: string[]): string {
-  const bunBin = join(homedir(), ".bun", "bin");
+  const qmdPath = getQmdScript();
+  const qmdDir = path_dirname(qmdPath);
   // Escape single quotes in args for shell safety
   const escapedArgs = args.map((arg) => `'${arg.replace(/'/g, "'\\''")}'`).join(" ");
-  return `export PATH="${bunBin}:$PATH" && qmd ${escapedArgs}`;
+  return `export PATH="${qmdDir}:$PATH" && qmd ${escapedArgs}`;
 }
 
 /**
@@ -192,10 +252,10 @@ export async function checkBunInstalled(): Promise<{
 /**
  * Check if QMD is installed
  */
-export async function checkQmdInstalled(): Promise<{
+export function checkQmdInstalled(): {
   installed: boolean;
   version?: string;
-}> {
+} {
   const qmdScript = getQmdScript();
 
   if (!existsSync(qmdScript)) {
@@ -466,7 +526,7 @@ export async function runUpdate(collectionName?: string, options: { pullFirst?: 
 
   // Parse the output to find pending embeddings count
   // Format: "Run 'qmd embed' to update embeddings (4 unique hashes need vectors)"
-  const pendingMatch = output.match(/\((\d+) unique hashes? need vectors?\)/);
+  const pendingMatch = output.match(PENDING_EMBEDDINGS_PATTERN);
   const pendingEmbeddings = pendingMatch ? Number.parseInt(pendingMatch[1], 10) : 0;
 
   return {

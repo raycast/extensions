@@ -14,7 +14,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useDependencyCheck } from "./hooks/useDependencyCheck";
+import { useDependencyCheck } from "./hooks/use-dependency-check";
 import type { QmdCollection, QmdFileListItem } from "./types";
 import { collectionsLogger } from "./utils/logger";
 import {

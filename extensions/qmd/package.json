@@ -138,6 +138,22 @@
       "type": "textfield",
       "default": "0",
       "required": false
+    },
+    {
+      "name": "bunExecutablePath",
+      "title": "Custom Bun Executable Path",
+      "description": "Optional: Full path to Bun executable (e.g., /opt/homebrew/bin/bun). Leave empty to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/bun"
+    },
+    {
+      "name": "qmdExecutablePath",
+      "title": "Custom QMD Executable Path",
+      "description": "Optional: Full path to QMD executable (e.g., /opt/homebrew/bin/qmd). Leave empty to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/qmd"
     }
   ],
   "dependencies": {
@@ -157,10 +173,10 @@
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
-    "format": "ultracite fix",
-    "format:ray": "ray lint --fix",
-    "lint": "ultracite check",
-    "lint:ray": "ray lint",
+    "fix": "ultracite fix",
+    "format": "ray lint --fix",
+    "check": "ultracite check",
+    "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "typecheck": "tsc --noEmit"
   },

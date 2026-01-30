@@ -57,21 +57,20 @@ export function useSearchHistory(searchMode: SearchMode): UseSearchHistoryResult
         timestamp: Date.now(),
       };
 
-      setHistory((prev) => {
-        // Remove existing entry with same query
-        const filtered = prev.filter((item) => item.query !== newItem.query);
-        // Add new item at the beginning
-        const newHistory = [newItem, ...filtered].slice(0, MAX_HISTORY_ITEMS);
+      // Create new history synchronously
+      const filtered = history.filter((item) => item.query !== newItem.query);
+      const newHistory = [newItem, ...filtered].slice(0, MAX_HISTORY_ITEMS);
 
-        // Save to storage (fire and forget)
-        LocalStorage.setItem(historyKey, JSON.stringify(newHistory)).catch((error) => {
-          searchLogger.error("Failed to save search history", { error });
-        });
+      setHistory(newHistory);
 
-        return newHistory;
-      });
+      // Save to storage
+      try {
+        await LocalStorage.setItem(historyKey, JSON.stringify(newHistory));
+      } catch (error) {
+        searchLogger.error("Failed to save search history", { error });
+      }
     },
-    [historyKey],
+    [historyKey, history],
   );
 
   const clearHistory = useCallback(async () => {

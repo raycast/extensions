@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { useDependencyCheck } from "./hooks/useDependencyCheck";
+import { useDependencyCheck } from "./hooks/use-dependency-check";
 import type { QmdCollection, QmdFileListItem } from "./types";
 import { collectionsLogger, logger } from "./utils/logger";
 import { type ParsedStatus, parseStatus } from "./utils/parsers";

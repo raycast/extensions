@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { useDependencyCheck } from "./hooks/useDependencyCheck";
+import { useDependencyCheck } from "./hooks/use-dependency-check";
 import { expandPath, runQmdRaw, validateCollectionPath } from "./utils/qmd";
+
+const COLLECTION_NAME_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
 interface FormValues {
   name: string;
@@ -37,7 +39,7 @@ export default function Command() {
       setNameError("Name is required");
       return false;
     }
-    if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
+    if (!COLLECTION_NAME_PATTERN.test(value)) {
       setNameError("Name can only contain letters, numbers, hyphens, and underscores");
       return false;
     }

@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useDependencyCheck } from "./hooks/useDependencyCheck";
+import { useDependencyCheck } from "./hooks/use-dependency-check";
 import type { QmdContext } from "./types";
 import { contextsLogger } from "./utils/logger";
 import { getContexts, runQmdRaw } from "./utils/qmd";
@@ -246,7 +246,7 @@ function EditContextForm({ context, onEdit }: EditContextFormProps) {
     // Treat "No context found" as success - we're replacing it anyway
     const isNotFoundError = removeResult.error?.includes("No context found");
 
-    if (!removeResult.success && !isNotFoundError) {
+    if (!(removeResult.success || isNotFoundError)) {
       contextsLogger.error("Failed to remove context during update", {
         error: removeResult.error,
       });

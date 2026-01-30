@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { useDependencyCheck } from "./hooks/useDependencyCheck";
+import { useDependencyCheck } from "./hooks/use-dependency-check";
 import { getContexts, runQmdRaw } from "./utils/qmd";
 
 export default function Command() {

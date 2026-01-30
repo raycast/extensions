@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDependencyCheck } from "../hooks/useDependencyCheck";
-import { useIndexingState } from "../hooks/useIndexingState";
-import { useSearchHistory } from "../hooks/useSearchHistory";
+import { useDependencyCheck } from "../hooks/use-dependency-check";
+import { useIndexingState } from "../hooks/use-indexing-state";
+import { useSearchHistory } from "../hooks/use-search-history";
 import type { QmdCollection, QmdSearchResult, SearchMode } from "../types";
 import { searchLogger } from "../utils/logger";
 import { getCollectionPaths, getCollections, runQmd, validateCollectionPath } from "../utils/qmd";
-import { SearchResultItem } from "./SearchResultItem";
+import { SearchResultItem } from "./search-result-item";
 
 // Check if search mode requires explicit trigger (expensive AI operations)
 const isExpensiveSearch = (mode: SearchMode) => mode === "vsearch" || mode === "query";

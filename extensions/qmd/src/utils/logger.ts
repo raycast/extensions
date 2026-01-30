@@ -32,3 +32,8 @@ export const contextsLogger = logger.child("[Contexts]");
  * Child logger for embedding operations.
  */
 export const embedLogger = logger.child("[Embed]");
+
+/**
+ * Child logger for QMD binary path resolution.
+ */
+export const qmdLogger = logger.child("[QMD Path]");
