@@ -54,20 +54,20 @@ export default function Command() {
     );
   }
 
-  // Don't show menu bar when idle
-  if (status?.printer.state.toUpperCase() === "IDLE") {
+  // Don't show menu bar when idle or no active job
+  if (!status || !status.job || status.printer.state.toUpperCase() === "IDLE") {
     return null;
   }
 
   // Handle loading state
-  if (isLoading || !status) {
+  if (isLoading) {
     return <MenuBarExtra icon={Icon.CircleProgress} isLoading={true} />;
   }
 
   const state = status.printer.state.toUpperCase();
-  const progress = status.job.progress;
-  const timeRemaining = status.job.time_remaining;
-  const timePrinting = status.job.time_printing;
+  const progress = status.job?.progress ?? 0;
+  const timeRemaining = status.job?.time_remaining ?? 0;
+  const timePrinting = status.job?.time_printing ?? 0;
 
   // Build menu bar title based on state
   let title = "";
