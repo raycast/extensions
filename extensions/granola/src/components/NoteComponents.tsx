@@ -11,6 +11,7 @@ import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "../utils/ic
 import { useDocumentPanels } from "../utils/useDocumentPanels";
 import { useDocumentNotesMarkdown } from "../utils/useDocumentNotesMarkdown";
 import { useTranscriptDuration } from "../utils/useTranscriptDuration";
+import { useSharedBy } from "../utils/useSharedBy";
 import { isAbortError, toError, toErrorMessage } from "../utils/errorUtils";
 
 /**
@@ -420,6 +421,7 @@ function MyNotesDetailView({
 function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitle: string }) {
   const { panels, isLoading: panelsLoading } = useDocumentPanels(doc.id);
   const { duration } = useTranscriptDuration(doc.id);
+  const { sharedBy } = useSharedBy(doc.id, doc.isShared);
 
   const panelId = panels ? getPanelId(panels, doc.id) : undefined;
   const panelData = panels && panels[doc.id] && panelId ? panels[doc.id][panelId] : null;
@@ -435,7 +437,7 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
   }
 
   const createdAt = `Created at: ${new Date(doc.created_at).toLocaleString()}`;
-  const sharedByLine = doc.isShared && doc.sharedBy ? `\n\nShared by: ${doc.sharedBy}` : "";
+  const sharedByLine = doc.isShared && sharedBy ? `\n\nShared by: ${sharedBy}` : "";
   const durationLine = duration ? `\n\nDuration: ${duration}` : "";
   const metadata = `${createdAt}${sharedByLine}${durationLine}`;
 
