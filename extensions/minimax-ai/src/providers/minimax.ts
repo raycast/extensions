@@ -10,6 +10,18 @@ import {
 const MINIMAX_API_URL = "https://api.minimax.io/v1/chat/completions";
 const REQUEST_TIMEOUT_MS = 60000; // 60 seconds timeout
 
+interface MiniMaxChatResponse {
+  choices?: Array<{
+    message?: { content?: string };
+    finish_reason?: string;
+  }>;
+}
+
+interface MiniMaxErrorResponse {
+  error?: { message?: string };
+  message?: string;
+}
+
 export class MiniMaxProvider implements AIProvider {
   name = "MiniMax";
   private apiKey: string;
@@ -66,7 +78,7 @@ export class MiniMaxProvider implements AIProvider {
         throw error;
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as MiniMaxChatResponse;
       const rawContent = data.choices?.[0]?.message?.content ?? "";
       return {
         content: this.removeThinking(rawContent),
@@ -209,7 +221,7 @@ export class MiniMaxProvider implements AIProvider {
     let message = `API Error: ${response.status}`;
 
     try {
-      const data = await response.json();
+      const data = (await response.json()) as MiniMaxErrorResponse;
       message = data.error?.message || data.message || message;
     } catch {
       // Use default message
