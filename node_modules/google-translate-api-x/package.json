@@ -1,0 +1,65 @@
+{
+  "name": "google-translate-api-x",
+  "version": "10.7.2",
+  "description": "A free and unlimited API for Google Translate",
+  "main": "./index.cjs",
+  "module": "./index.cjs",
+  "types": "./index.d.ts",
+  "files": [
+    "lib",
+    "README.md",
+    "index.d.ts",
+    "index.cjs"
+  ],
+  "scripts": {
+    "prepare": "git config core.hooksPath ./.hooks",
+    "lint": "eslint --ext .cjs,.mjs index.cjs lib test tools && tsd -f ./test",
+    "test": "mocha --parallel",
+    "release": "npm run lint && npm t && np --yolo --no-release-draft",
+    "update-langs": "node ./tools/updatelanguages.mjs"
+  },
+  "devDependencies": {
+    "eslint": "^8.25.0",
+    "eslint-plugin-mocha": "^10.1.0",
+    "eslint-plugin-n": "^15.6.0",
+    "mocha": "^10.7.3",
+    "np": "^7.6.2",
+    "tsd": "^0.31.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AidanWelch/google-translate-api.git"
+  },
+  "keywords": [
+    "translate",
+    "translator",
+    "google",
+    "api",
+    "free",
+    "language",
+    "crossplatform",
+    "fetch",
+    "react",
+    "extension",
+    "web",
+    "tts",
+    "text-to-speech",
+    "speak"
+  ],
+  "author": {
+    "name": "Aidan Welch",
+    "email": "aidan@freedwave.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AidanWelch/google-translate-api/issues"
+  },
+  "homepage": "https://github.com/AidanWelch/google-translate-api#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/AidanWelch"
+  }
+}
