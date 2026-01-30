@@ -141,7 +141,7 @@ export default async function tool(input: Input): Promise<Output> {
     const duration = await getMeetingDuration(input.noteId);
 
     return {
-      title: document.title || "Untitled Note",
+      title: document.title || "New note",
       date: formattedDate,
       content,
       folderIds,

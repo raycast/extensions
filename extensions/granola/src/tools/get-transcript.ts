@@ -79,7 +79,7 @@ export default async function tool(input: Input): Promise<Output> {
 
     return {
       transcript,
-      title: document.title || "Untitled Note",
+      title: document.title || "New note",
       date: formattedDate,
       duration,
     };
