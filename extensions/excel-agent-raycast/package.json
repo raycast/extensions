@@ -1,0 +1,121 @@
+{
+  "name": "excel-agent-raycast",
+  "title": "Excel Agent",
+  "description": "Control Microsoft Excel with natural language. Ask questions, format cells, create tables, and more.",
+  "icon": "command-icon.png",
+  "author": "julien1_ja",
+  "version": "1.0.0",
+  "categories": [
+    "Productivity",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-excel",
+      "title": "Ask Excel",
+      "subtitle": "AI Controller",
+      "description": "Quick actions and custom commands for Excel",
+      "mode": "view"
+    },
+    {
+      "name": "read-excel",
+      "title": "Read Excel",
+      "subtitle": "View Data",
+      "description": "Read the current selection and sheet info from Excel",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "execute-excel-command",
+      "title": "Execute Excel Command",
+      "description": "The primary tool for interacting with Excel. Use this for ALL Excel operations: writing data, formatting, reading values, creating formulas,/tables. The tool uses a specialized sub-agent to generate and execute AppleScript.",
+      "input": [
+        {
+          "name": "instruction",
+          "type": "string",
+          "title": "Instruction",
+          "description": "Clear, natural language instruction of what to do in Excel. Can be simple ('Bold A1') or complex ('Create a DCF model').",
+          "required": true
+        }
+      ],
+      "confirmation": false
+    }
+  ],
+  "ai": {
+    "instructions": "You are an expert Excel Agent. You control Microsoft Excel using the 'execute-excel-command' tool.\n\nCRITICAL PERFORMANCE RULE:\n- ALWAYS combine multiple steps into a SINGLE tool call. Do NOT run multiple tool calls in sequence if you can avoid it.\n- Example: Instead of calling tool for 'Write header', then tool for 'Format header', send ONE tool call: 'Write header row with Date, Item, Cost and make it bold with blue background'.\n\nCAPABILITIES:\n- Write Data: 'Set A1 to Revenue', 'Create a table'\n- Format: 'Make headers bold', 'Apply financial formatting'\n- Formulas: 'Add Sum formula'\n- Read: 'Read selection'\n\nRemember: Speed is priority. Do it all in one script."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.12.7",
+    "@types/react": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.3.3",
+    "raycast": "^1.0.8",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "aiProvider",
+      "title": "AI Provider",
+      "description": "Choose which AI provider to use for generating scripts",
+      "type": "dropdown",
+      "required": true,
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast AI (Pro)",
+          "value": "raycast"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Google Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "Anthropic Claude",
+          "value": "claude"
+        }
+      ]
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key (required if using OpenAI)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Google Gemini API Key",
+      "description": "Your Google Gemini API key (required if using Gemini)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "claudeApiKey",
+      "title": "Anthropic Claude API Key",
+      "description": "Your Anthropic API key (required if using Claude)",
+      "type": "password",
+      "required": false
+    }
+  ]
+}
