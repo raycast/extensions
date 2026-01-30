@@ -404,7 +404,7 @@ function MyNotesDetailView({
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
-            title="Copy My notes"
+            title="Copy My Notes"
             content={notesMarkdown || ""}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
@@ -455,7 +455,7 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
               target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
             />
             <Action.Push
-              title="My notes"
+              title="My Notes"
               icon={Icon.Code}
               target={<MyNotesDetailView doc={doc} untitledNoteTitle={untitledNoteTitle} panels={panels} />}
             />
@@ -480,7 +480,7 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
               target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
             />
             <Action.Push
-              title="My notes"
+              title="My Notes"
               icon={Icon.Code}
               target={<MyNotesDetailView doc={doc} untitledNoteTitle={untitledNoteTitle} panels={panels} />}
             />
@@ -503,7 +503,7 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
             target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
           />
           <Action.Push
-            title="My notes"
+            title="My Notes"
             icon={Icon.Code}
             target={<MyNotesDetailView doc={doc} untitledNoteTitle={untitledNoteTitle} panels={panels} />}
           />
