@@ -27,9 +27,15 @@ export const VD_LIBRARY_PATH = path.join(SCRIPTS_DIR, "VD.ahk");
 export const KEYBINDINGS_SCRIPT_PATH = path.join(SCRIPTS_DIR, "keybindings.ahk");
 
 /**
- * Default AutoHotkey v2 installation paths
+ * Default AutoHotkey v2 installation paths (v2.1-alpha prioritized)
  */
 const AHK_PATHS = [
+  // v2.1-alpha paths (required for VD.ahk)
+  "C:\\Program Files\\AutoHotkey\\v2.1-alpha.5\\AutoHotkey64.exe",
+  "C:\\Program Files\\AutoHotkey\\v2.1-alpha.5\\AutoHotkey32.exe",
+  "C:\\Program Files\\AutoHotkey\\v2.1-alpha.14\\AutoHotkey64.exe",
+  "C:\\Program Files\\AutoHotkey\\v2.1-alpha.14\\AutoHotkey32.exe",
+  // Standard v2 paths (may not work with VD.ahk)
   "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe",
   "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey32.exe",
   "C:\\Program Files\\AutoHotkey\\AutoHotkey64.exe",
@@ -68,9 +74,33 @@ export function ensureScriptsDir(): void {
 }
 
 /**
- * Find the AutoHotkey executable path
+ * Find the AutoHotkey executable path (prioritizes v2.1-alpha)
  */
 export function findAhkPath(): string | null {
+  const ahkBaseDir = "C:\\Program Files\\AutoHotkey";
+
+  // First, search for any v2.1-alpha version dynamically
+  if (fs.existsSync(ahkBaseDir)) {
+    try {
+      const dirs = fs.readdirSync(ahkBaseDir);
+      // Sort to get highest alpha version first
+      const alphaDirs = dirs
+        .filter((d) => d.startsWith("v2.1-alpha"))
+        .sort()
+        .reverse();
+
+      for (const alphaDir of alphaDirs) {
+        const exe64 = path.join(ahkBaseDir, alphaDir, "AutoHotkey64.exe");
+        const exe32 = path.join(ahkBaseDir, alphaDir, "AutoHotkey32.exe");
+        if (fs.existsSync(exe64)) return exe64;
+        if (fs.existsSync(exe32)) return exe32;
+      }
+    } catch {
+      // Ignore directory read errors
+    }
+  }
+
+  // Fallback to static paths
   for (const ahkPath of AHK_PATHS) {
     if (fs.existsSync(ahkPath)) {
       return ahkPath;
@@ -226,7 +256,12 @@ export async function executeAhkCommand(ahkCode: string): Promise<boolean> {
 #SingleInstance Force
 #Include ${VD_LIBRARY_PATH.replace(/\\/g, "\\\\")}
 VD.createUntil(3)
-${ahkCode}
+Sleep 150
+try {
+    ${ahkCode}
+} catch as e {
+    ; Silently handle errors - window may not be valid or desktop not found
+}
 ExitApp
 `;
 

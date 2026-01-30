@@ -13,7 +13,7 @@ export default async function main() {
   }
 
   await closeMainWindow();
-  const success = await executeAhkCommand('VD.MoveWindowToDesktopNum("A", 4)');
+  const success = await executeAhkCommand('VD.MoveWindowToDesktopNum("A", 4, true)');
 
   if (success) {
     await showHUD("Moved window to Desktop 4");
