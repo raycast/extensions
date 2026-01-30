@@ -101,18 +101,25 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Task" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit Task" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
           <Action
             title="Improve Prompt"
             icon={Icon.Wand}
             onAction={async () => {
               if (itemProps.prompt.value) {
+                const toast = await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Improving prompt...",
+                });
                 try {
                   const improvedPrompt = await AI.ask(
                     `Refine the following instruction for a helpful AI software engineer named Jules. Return only the refined instruction, nothing else:\n\n${itemProps.prompt.value}`,
                   );
                   setValue("prompt", improvedPrompt);
+                  toast.style = Toast.Style.Success;
+                  toast.title = "Prompt improved";
                 } catch (e) {
+                  toast.hide();
                   showFailureToast(e, { title: "Failed to improve prompt" });
                 }
               } else {

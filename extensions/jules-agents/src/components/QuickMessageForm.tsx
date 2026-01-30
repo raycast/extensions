@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { sendMessage } from "../jules";
 import { Activity, Session } from "../types";
@@ -48,7 +48,7 @@ export default function QuickMessageForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Send Message" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Send Message" icon={Icon.Message} onSubmit={handleSubmit} />
         </ActionPanel>
       }
       navigationTitle={`Message: ${props.session.title || props.session.id}`}

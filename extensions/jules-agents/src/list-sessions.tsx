@@ -217,7 +217,7 @@ This session has no code changes to review.`}
           <ActionPanel>
             <Action.Push
               title="Send Message"
-              icon={Icon.Envelope}
+              icon={Icon.Message}
               target={
                 <QuickMessageForm session={props.session} lastActivity={lastActivity} onMessageSent={revalidate} />
               }
@@ -238,7 +238,7 @@ This session has no code changes to review.`}
           <ActionPanel.Section>
             <Action.Push
               title="Send Message"
-              icon={Icon.Envelope}
+              icon={Icon.Message}
               target={
                 <QuickMessageForm session={props.session} lastActivity={lastActivity} onMessageSent={revalidate} />
               }
@@ -545,7 +545,7 @@ function SessionListItem(props: {
               />
             )}
             <Action.Push
-              icon={Icon.SpeechBubble}
+              icon={Icon.Message}
               title="Send Message"
               target={<FollowupInstruction session={props.session} onMessageSent={props.mutate} />}
               shortcut={
@@ -617,7 +617,7 @@ function SessionListItem(props: {
               }
             />
             <Action.Push
-              icon={Icon.Message}
+              icon={Icon.List}
               title="View Activities"
               target={<SessionConversation session={props.session} mutate={props.mutate} />}
               shortcut={
