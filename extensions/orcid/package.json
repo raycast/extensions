@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orcid",
+  "title": "ORCID",
+  "description": "View your ORCID profile and works",
+  "icon": "orcid-icon.png",
+  "author": "alvgaona",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-orcid",
+      "title": "Copy ORCID",
+      "subtitle": "ORCID",
+      "description": "Copy your ORCID iD to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-name",
+      "title": "Copy Name",
+      "subtitle": "ORCID",
+      "description": "Copy your name from ORCID to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-profile",
+      "title": "Open My Profile",
+      "subtitle": "ORCID",
+      "description": "Open your ORCID profile in browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-orcid",
+      "title": "Find Researchers",
+      "subtitle": "ORCID",
+      "description": "Search for researchers by name",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "Your ORCID Public API Client ID",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "clientSecret",
+      "title": "Client Secret",
+      "description": "Your ORCID Public API Client Secret",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "useSandbox",
+      "title": "Use Sandbox",
+      "description": "Use ORCID sandbox environment for testing",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enable sandbox mode"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
