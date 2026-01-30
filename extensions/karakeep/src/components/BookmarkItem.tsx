@@ -65,7 +65,7 @@ function useBookmarkImages(bookmark: Bookmark, config: Config) {
     return () => {
       isMounted = false;
     };
-  }, [bookmark, config.apiUrl]);
+  }, [bookmark, config.apiUrl, config.apiKey]);
 
   return images;
 }
