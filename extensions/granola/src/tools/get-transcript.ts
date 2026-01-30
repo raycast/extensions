@@ -73,7 +73,7 @@ export default async function tool(input: Input): Promise<Output> {
       } else {
         formattedDate = new Date().toISOString();
       }
-    } catch (dateError) {
+    } catch {
       formattedDate = new Date().toISOString();
     }
 

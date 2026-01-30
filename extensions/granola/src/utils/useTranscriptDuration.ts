@@ -1,9 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  getTranscriptSegments,
-  formatDurationVerbose,
-  calculateDurationFromSegments,
-} from "./fetchData";
+import { getTranscriptSegments, formatDurationVerbose, calculateDurationFromSegments } from "./fetchData";
 
 export function useTranscriptDuration(documentId: string | null | undefined): {
   duration: string | null;

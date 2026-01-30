@@ -12,10 +12,11 @@ export interface FolderNoteFolder {
 export interface FolderNoteResults<T extends { id: string }> {
   filteredNotes: T[];
   notesNotInFolders: T[];
+  sharedNotes: T[];
   folderNoteCounts: Record<string, number>;
 }
 
-export const getFolderNoteResults = <T extends { id: string }>(
+export const getFolderNoteResults = <T extends { id: string; isShared?: boolean }>(
   notes: T[],
   folders: FolderNoteFolder[],
   selectedFolder: string,
@@ -24,27 +25,46 @@ export const getFolderNoteResults = <T extends { id: string }>(
     return {
       filteredNotes: [],
       notesNotInFolders: [],
+      sharedNotes: [],
       folderNoteCounts: {} as Record<string, number>,
     };
   }
 
-  const noteIds = new Set<string>();
-  for (let i = 0; i < notes.length; i++) {
-    noteIds.add(notes[i].id);
+  const ownedNotes: T[] = [];
+  const sharedNotes: T[] = [];
+  for (const note of notes) {
+    if (note.isShared) {
+      sharedNotes.push(note);
+    } else {
+      ownedNotes.push(note);
+    }
+  }
+
+  // Create sets of all note IDs for counting
+  const allNoteIds = new Set<string>();
+  for (const note of notes) {
+    allNoteIds.add(note.id);
+  }
+
+  const ownedNoteIds = new Set<string>();
+  for (const note of ownedNotes) {
+    ownedNoteIds.add(note.id);
   }
 
   const notesInFolders = new Set<string>();
   const counts: Record<string, number> = {};
 
-  for (let i = 0; i < folders.length; i++) {
-    const folder = folders[i];
+  for (const folder of folders) {
     const documentIds = folder.document_ids || [];
     if (documentIds.length > 0) {
       let count = 0;
-      for (let j = 0; j < documentIds.length; j++) {
-        const id = documentIds[j];
-        if (noteIds.has(id)) {
+      for (const id of documentIds) {
+        // Count all notes (owned + shared) for folder counts
+        if (allNoteIds.has(id)) {
           count++;
+        }
+        // Track owned notes in folders for orphan calculation
+        if (ownedNoteIds.has(id)) {
           notesInFolders.add(id);
         }
       }
@@ -55,17 +75,21 @@ export const getFolderNoteResults = <T extends { id: string }>(
   }
 
   const orphanNotes: T[] = [];
-  for (let i = 0; i < notes.length; i++) {
-    if (!notesInFolders.has(notes[i].id)) {
-      orphanNotes.push(notes[i]);
+  for (const note of ownedNotes) {
+    if (!notesInFolders.has(note.id)) {
+      orphanNotes.push(note);
     }
   }
 
   let filtered: T[];
   if (selectedFolder === "all") {
     filtered = notes;
+  } else if (selectedFolder === "my-notes") {
+    filtered = ownedNotes;
   } else if (selectedFolder === "orphans") {
     filtered = orphanNotes;
+  } else if (selectedFolder === "shared") {
+    filtered = sharedNotes;
   } else {
     const folder = folders.find((entry) => entry.id === selectedFolder);
     if (!folder || !folder.document_ids || folder.document_ids.length === 0) {
@@ -73,9 +97,9 @@ export const getFolderNoteResults = <T extends { id: string }>(
     } else {
       filtered = [];
       const folderDocIds = new Set(folder.document_ids);
-      for (let i = 0; i < notes.length; i++) {
-        if (folderDocIds.has(notes[i].id)) {
-          filtered.push(notes[i]);
+      for (const note of notes) {
+        if (folderDocIds.has(note.id)) {
+          filtered.push(note);
         }
       }
     }
@@ -84,6 +108,7 @@ export const getFolderNoteResults = <T extends { id: string }>(
   return {
     filteredNotes: filtered,
     notesNotInFolders: orphanNotes,
+    sharedNotes,
     folderNoteCounts: counts,
   };
 };

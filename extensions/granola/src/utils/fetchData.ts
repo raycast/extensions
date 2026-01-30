@@ -332,6 +332,181 @@ export async function getDocumentsList(): Promise<Document[]> {
 }
 
 /**
+ * Fetch documents shared with the user (not owned by them).
+ * This includes both individually shared documents and documents from shared folders.
+ */
+export async function getSharedDocuments(): Promise<Doc[]> {
+  const token = await getAccessToken();
+
+  // Fetch individually shared documents and shared folder documents in parallel
+  const [individuallyShared, fromSharedFolders] = await Promise.all([
+    getIndividuallySharedDocuments(token),
+    getDocumentsFromSharedFolders(token),
+  ]);
+
+  // Merge and deduplicate by document ID
+  const allSharedDocs = [...individuallyShared, ...fromSharedFolders];
+  const uniqueDocs = new Map<string, Doc>();
+  for (const doc of allSharedDocs) {
+    if (!uniqueDocs.has(doc.id)) {
+      uniqueDocs.set(doc.id, doc);
+    }
+  }
+
+  return Array.from(uniqueDocs.values());
+}
+
+/**
+ * Fetch documents that were individually shared with the user via the "shared with me" feature.
+ */
+async function getIndividuallySharedDocuments(token: string): Promise<Doc[]> {
+  const url = `https://api.granola.ai/v1/get-document-set`;
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const result = (await response.json()) as {
+      documents: Record<string, { shared?: boolean }>;
+    };
+
+    const sharedIds = Object.entries(result.documents || {})
+      .filter(([, meta]) => meta.shared === true)
+      .map(([id]) => id);
+
+    if (sharedIds.length === 0) {
+      return [];
+    }
+
+    const sharedDocuments = await getDocumentsByIds(sharedIds);
+    const docsWithAuthor = await Promise.all(
+      sharedDocuments.map(async (doc) => {
+        let sharedBy: string | undefined;
+        try {
+          const metaResponse = await fetch("https://api.granola.ai/v1/get-document-metadata", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ document_id: doc.id }),
+          });
+          if (metaResponse.ok) {
+            const meta = (await metaResponse.json()) as { creator?: { name?: string } };
+            sharedBy = meta.creator?.name;
+          }
+        } catch {
+          // ignore
+        }
+
+        return {
+          id: doc.id,
+          title: doc.title,
+          created_at: doc.created_at,
+          creation_source: doc.creation_source,
+          public: doc.public,
+          sharing_link_visibility: doc.sharing_link_visibility,
+          isShared: true,
+          sharedBy,
+        };
+      }),
+    );
+
+    return docsWithAuthor;
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+    return [];
+  }
+}
+
+/**
+ * Fetch documents from shared folders (folders where is_shared is true).
+ */
+async function getDocumentsFromSharedFolders(token: string): Promise<Doc[]> {
+  try {
+    // Get all folders including shared ones
+    const foldersResponse = await getFolders();
+
+    if (!foldersResponse?.lists) {
+      return [];
+    }
+
+    // Find shared folders and collect their document IDs
+    const sharedFolderDocIds: string[] = [];
+    const folderNameByDocId: Record<string, string> = {};
+
+    for (const folder of Object.values(foldersResponse.lists)) {
+      if (folder.is_shared && folder.document_ids && folder.document_ids.length > 0) {
+        for (const docId of folder.document_ids) {
+          sharedFolderDocIds.push(docId);
+          folderNameByDocId[docId] = folder.title;
+        }
+      }
+    }
+
+    if (sharedFolderDocIds.length === 0) {
+      return [];
+    }
+
+    // Fetch the documents from shared folders
+    const documents = await getDocumentsByIds(sharedFolderDocIds);
+
+    // Mark them as shared and add folder info
+    const docsWithSharedInfo = await Promise.all(
+      documents.map(async (doc) => {
+        let sharedBy: string | undefined;
+        try {
+          const metaResponse = await fetch("https://api.granola.ai/v1/get-document-metadata", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ document_id: doc.id }),
+          });
+          if (metaResponse.ok) {
+            const meta = (await metaResponse.json()) as { creator?: { name?: string } };
+            sharedBy = meta.creator?.name;
+          }
+        } catch {
+          // ignore
+        }
+
+        const folderName = folderNameByDocId[doc.id];
+        return {
+          id: doc.id,
+          title: doc.title,
+          created_at: doc.created_at,
+          creation_source: doc.creation_source,
+          public: doc.public,
+          sharing_link_visibility: doc.sharing_link_visibility,
+          isShared: true,
+          sharedBy: sharedBy || (folderName ? `Shared folder: ${folderName}` : undefined),
+        };
+      }),
+    );
+
+    return docsWithSharedInfo;
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+    return [];
+  }
+}
+
+/**
  * Fetch documents by a set of IDs with basic caching to avoid repeat requests.
  */
 export async function getDocumentsByIds(documentIds: string[], batchSize: number = 20): Promise<Document[]> {

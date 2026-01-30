@@ -16,7 +16,7 @@ import { ExportService } from "./utils/exportService";
 
 import { Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
-import { sortNotesByDate } from "./components/NoteComponents";
+import { sortNotesByDate, FolderFilterDropdown } from "./components/NoteComponents";
 import { toErrorMessage } from "./utils/errorUtils";
 import { getNotionBatchSize } from "./utils/notionBatching";
 import { getFolderNoteResults } from "./utils/searchUtils";
@@ -49,7 +49,7 @@ export default function Command() {
     return <Unresponsive />;
   }
 
-  const untitledNoteTitle = "Untitled Note";
+  const untitledNoteTitle = "New note";
 
   if (noteData?.data) {
     return (
@@ -141,7 +141,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
 
   // Combine all folder-related computations into a single useMemo (like search-notes.tsx)
   // This reduces memory overhead by computing only what's needed and reusing data structures
-  const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
+  const { filteredNotes, notesNotInFolders, sharedNotes, folderNoteCounts } = useMemo(() => {
     const foldersToProcess = activeFolders.length > 0 ? activeFolders : folders;
     return getFolderNoteResults(notes, foldersToProcess, selectedFolder);
   }, [notes, folders, activeFolders, selectedFolder]);
@@ -487,36 +487,15 @@ ${transcript}
       navigationTitle={navigationTitle}
       searchBarPlaceholder={searchPlaceholder}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={setSelectedFolder}>
-          <List.Dropdown.Section title="All Notes">
-            <List.Dropdown.Item title="All Folders" value="all" icon={Icon.Folder} />
-            {notesNotInFolders.length > 0 && (
-              <List.Dropdown.Item
-                title={`Notes Not in Folders (${notesNotInFolders.length})`}
-                value="orphans"
-                icon={{ source: Icon.Document, tintColor: Color.SecondaryText }}
-              />
-            )}
-          </List.Dropdown.Section>
-
-          {!foldersLoading && folders.length > 0 && (
-            <List.Dropdown.Section title="Folders">
-              {folders
-                .sort((a, b) => a.title.localeCompare(b.title))
-                .map((folder) => (
-                  <List.Dropdown.Item
-                    key={folder.id}
-                    title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
-                    value={folder.id}
-                    icon={{
-                      source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                      tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
-                    }}
-                  />
-                ))}
-            </List.Dropdown.Section>
-          )}
-        </List.Dropdown>
+        <FolderFilterDropdown
+          folders={folders}
+          foldersLoading={foldersLoading}
+          folderNoteCounts={folderNoteCounts}
+          onChange={setSelectedFolder}
+          sharedNotesCount={sharedNotes.length}
+          orphanNotesCount={notesNotInFolders.length}
+          variant="export"
+        />
       }
       actions={
         <ActionPanel>
