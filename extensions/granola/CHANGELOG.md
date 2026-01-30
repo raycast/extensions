@@ -1,11 +1,27 @@
 # Granola Changelog
 
-## [2.0.2] - {PR_MERGE_DATE}
+## [2.1.0] - 2026-01-30
+
+### 🚀 New Features
+
+- **Shared Documents** - View notes shared with you directly in Raycast:
+  - New "Shared with me" section in the folder filter dropdown
+  - Shows who shared each note with a dedicated icon
+  - Access both individually shared notes and notes from shared folders
+
+### ✨ Enhancements
+
+- Lazy-load shared-by metadata for improved performance with shared documents
+
+### 🧹 Cleanup
+
+- Updated terminology: "Untitled Note" → "New note" to match Granola's branding
+- Updated terminology: "My Notes" → "My notes" for consistency
 
 ### ✨ Enhancements
 
 - Show meeting duration in note details and My notes views when transcript timing is available.
-- Include meeting duration in `get-note-content` and `get-transcript` 
+- Include meeting duration in `get-note-content` and `get-transcript`
 - Replace "Open in Granola Web" with a direct "Open in Granola" action in **Create Note from Transcript**, using the Granola app deeplink.
 
 ### 🧹 Cleanup

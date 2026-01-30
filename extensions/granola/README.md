@@ -29,6 +29,7 @@ If you run into any issues, please verify the following:
 - **Save to Notion** - Export one or more notes to Notion with batch processing
 
 ## Features
+- **Shared Documents** - View notes shared with you from teammates and collaborators
 - **Open in Granola** - Open any note directly in the Granola app with ⌘O
 - **YouTube Integration** - Extract transcripts directly from YouTube URLs
 - **Folder Organization** - Browse and filter notes by folders with visual icons and note counts
