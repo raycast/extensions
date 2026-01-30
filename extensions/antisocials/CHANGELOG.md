@@ -1,6 +1,6 @@
 # AntiSocials Changelog
 
-## [Initial Version] - 2026-01-30
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
 - Support for X/Twitter URLs via xcancel.com
