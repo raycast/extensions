@@ -1,6 +1,6 @@
 # Paste as Slack Mrkdwn Changelog
 
-## [Initial Version] - 2025-01-17
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
 - Convert Markdown and rich text to Slack mrkdwn format
