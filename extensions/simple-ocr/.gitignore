@@ -1,0 +1,26 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Raycast
+.raycast/
+dist/
+publish/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs
+*.njsproj
+*.sln
+*.sw?

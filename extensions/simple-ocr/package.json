@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-ocr",
+  "title": "Simple OCR",
+  "description": "Perform OCR on clipboard image or screenshot using macOS Vision framework.",
+  "icon": "command-icon.png",
+  "author": "Matr1x",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clipboard-ocr",
+      "title": "OCR from Clipboard",
+      "description": "Recognize text from the latest image in clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "screenshot-ocr",
+      "title": "OCR from Screenshot",
+      "description": "Take a screenshot and recognize text",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.13.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/react-dom": "18.2.14",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@types/react": "18.2.27",
+    "@types/react-dom": "18.2.14"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
