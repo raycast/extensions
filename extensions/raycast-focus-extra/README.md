@@ -4,7 +4,7 @@ Do more with Raycast Focus: view your focus sessions and sync them from the syst
 
 **macOS only.**
 
-![Focus Sessions](screenshots/screenshot-1.png)
+![Focus Sessions](metadata/screenshot-1.png)
 
 ## Commands
 

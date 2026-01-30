@@ -1,6 +1,0 @@
-# npm Convention
-
-**Always use `npm`**
-
-- Commands: `npm install`, `npm run`, `npm add`, `npm build`, `npm lint`, etc.
-- Package manager is npm; all scripts in package.json are run via npm.
