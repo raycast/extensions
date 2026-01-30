@@ -1,5 +1,5 @@
 import { List, LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getAvailableCountries } from "./api";
 import type { Country } from "./country-detail";
 import { CountryItem } from "./country-item";
@@ -27,17 +27,17 @@ export default function Holidays() {
       .catch(() => setCountries([]));
   }, []);
 
-  const loadCountries = async () => {
+  const loadCountries = useCallback(async () => {
     const pinnedCountriesCodes = await getPinnedCountries();
     setPinnedCountries(countries.filter((country) => pinnedCountriesCodes.includes(country.alpha2)));
     setUnpinnedCountries(countries.filter((country) => !pinnedCountriesCodes.includes(country.alpha2)));
-  };
+  }, [countries]);
 
   useEffect(() => {
     if (countries.length > 0) {
       loadCountries();
     }
-  }, [countries]);
+  }, [countries, loadCountries]);
 
   const pinCountry = async (country: Country) => {
     await LocalStorage.setItem(country.alpha2, true);

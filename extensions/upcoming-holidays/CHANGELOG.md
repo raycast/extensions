@@ -1,6 +1,6 @@
 # Upcoming Holidays Changelog
 
-## [FIxes] - {PR_MERGE_DATE}
+## [Fixes] - {PR_MERGE_DATE}
 
 - Fix holidays not loading (fixes [#24988](https://github.com/raycast/extensions/issues/24988))
 - Switch to Nager.Date API v3 for holiday and country data
