@@ -78,11 +78,13 @@ export default function Command() {
       <List
         isLoading={false}
         searchBarPlaceholder={
-          selectedFolder === "my-notes"
-            ? "Search notes..."
-            : selectedFolder === "shared"
-              ? "Search shared notes..."
-              : `Search notes in ${folders.find((f) => f.id === selectedFolder)?.title || "folder"}...`
+          selectedFolder === "all"
+            ? "Search all notes..."
+            : selectedFolder === "my-notes"
+              ? "Search notes..."
+              : selectedFolder === "shared"
+                ? "Search shared notes..."
+                : `Search notes in ${folders.find((f) => f.id === selectedFolder)?.title || "folder"}...`
         }
         searchBarAccessory={
           <FolderFilterDropdown

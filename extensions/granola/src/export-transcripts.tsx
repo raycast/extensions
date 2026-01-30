@@ -21,6 +21,8 @@ import { toErrorMessage } from "./utils/errorUtils";
 import { getNotionBatchSize } from "./utils/notionBatching";
 import { getFolderNoteResults } from "./utils/searchUtils";
 
+const untitledNoteTitle = "New note";
+
 interface BulkNotionResult {
   noteId: string;
   title: string;
@@ -48,8 +50,6 @@ export default function Command() {
   if (hasError) {
     return <Unresponsive />;
   }
-
-  const untitledNoteTitle = "New note";
 
   if (noteData?.data) {
     return (
@@ -396,7 +396,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
           const source = note.creation_source || "Unknown";
 
           // Format transcript content
-          const transcriptContent = `# ${note.title || "Untitled"}
+          const transcriptContent = `# ${note.title || untitledNoteTitle}
 
 ## Transcript
 
@@ -404,11 +404,11 @@ ${transcript}
 
 ---
 
-*Exported from Granola on ${new Date().toLocaleString()}*  
+*Exported from Granola on ${new Date().toLocaleString()}*
 **Created:** ${createdDate} | **Source:** ${source}
 `;
 
-          const safeTitle = sanitizeFileName(note.title || "Untitled");
+          const safeTitle = sanitizeFileName(note.title || untitledNoteTitle);
           const fileName = `${safeTitle}_${note.id.substring(0, 8)}.md`;
 
           return {

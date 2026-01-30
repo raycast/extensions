@@ -7,7 +7,7 @@ Create, manage, and review Granola notes in Raycast. Start recordings, browse no
 - Keep Granola running while using the extension.
 - Grant Raycast access to your Granola data folder:
   - macOS: `~/Library/Application Support/Granola`
-  - Windows: `%APPDATA%\\Granola`
+  - Windows: `%APPDATA%\Granola`
 
 ## Commands
 - Search Notes

@@ -138,7 +138,12 @@ export default async function tool(input: Input): Promise<Output> {
       formattedDate = new Date().toISOString();
     }
 
-    const duration = await getMeetingDuration(input.noteId);
+    let duration: string | null = null;
+    try {
+      duration = await getMeetingDuration(input.noteId);
+    } catch {
+      // Continue without duration info
+    }
 
     return {
       title: document.title || "New note",
