@@ -35,7 +35,13 @@
       "type": "textfield",
       "required": true,
       "placeholder": "Paste Client ID from Yandex app settings",
-      "default": "f24aeff69f1847198e7685e92befd72d"
+    {
+      "name": "clientId",
+      "title": "Yandex OAuth Client ID",
+      "description": "From your Yandex OAuth app (oauth.yandex.com). Required for connection.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste Client ID from Yandex app settings"
     },
     {
       "name": "redirectUri",
