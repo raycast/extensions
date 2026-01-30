@@ -16,7 +16,7 @@ Control [Music Assistant](https://github.com/music-assistant/server) from anywhe
 
 Works with:
 
-- A standalone Music Assistant server (`ws://HOST:8095/ws`)
+- A standalone Music Assistant server
 - The Home Assistant add-on
 
 ## Configuration
