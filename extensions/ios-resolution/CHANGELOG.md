@@ -1,6 +1,6 @@
 # iOS Resolution Changelog
 
-[Addition of Device Type (MacBook)] - {PR_MERGE_DATE}
+## [Addition of Device Type (MacBook)] - {PR_MERGE_DATE}
 - Addition of New Device type (MacBook)
 - Browse all MacBook models
 - View MacBook specifications: logical/physical resolution, PPI, scale factor, screen diagonal, aspect ratio
