@@ -1,5 +1,14 @@
 # Granola Changelog
 
+## [2.1.1] - {PR_MERGE_DATE}
+
+### 🚀 New Features
+
+- **AI Tools: Shared Documents Support** - Query shared content using AI:
+  - `list-meetings` now supports a `source` parameter to filter by `"my-notes"`, `"shared"`, or `"all"`
+  - `list-meetings` output includes `isShared` field to identify shared documents
+  - `list-folders` now exposes sharing metadata: `isShared`, `userRole`, and `memberCount`
+  
 ## [2.1.0] - 2026-01-30
 
 ### 🚀 New Features

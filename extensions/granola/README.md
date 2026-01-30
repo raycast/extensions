@@ -21,15 +21,15 @@ If you run into any issues, please verify the following:
 - **Create Note from Transcript** - Create a new note from text transcripts or YouTube videos with AI-powered summaries
 
 ## AI Tools
-- **List Meetings** - Get meeting metadata (title, date, folders)
+- **List Meetings** - Get meeting metadata (title, date, folders) with optional source filtering (`my-notes`, `shared`, or `all`)
 - **Get Note Content** - Retrieve note content (original, enhanced, or auto-selected)
 - **Get Transcript** - Retrieve the full transcript for any specific note
-- **List Folders** - Get folder metadata and note counts
+- **List Folders** - Get folder metadata, note counts, and sharing info (`isShared`, `userRole`, `memberCount`)
 - **Recipes** - Search and use Granola recipes within Raycast AI
 - **Save to Notion** - Export one or more notes to Notion with batch processing
 
 ## Features
-- **Shared Documents** - View notes shared with you from teammates and collaborators
+- **Shared Documents** - View and query notes shared with you from teammates and collaborators (both in UI and via AI)
 - **Open in Granola** - Open any note directly in the Granola app with ⌘O
 - **YouTube Integration** - Extract transcripts directly from YouTube URLs
 - **Folder Organization** - Browse and filter notes by folders with visual icons and note counts
