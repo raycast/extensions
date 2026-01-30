@@ -44,7 +44,8 @@ let request = VNRecognizeTextRequest { (request, error) in
 // Configure for accuracy and language
 request.recognitionLevel = .accurate
 request.usesLanguageCorrection = true
-// Automatically detects language, works great for Chinese + English mixed
+// Explicitly support Chinese and English for better accuracy
+request.recognitionLanguages = ["zh-Hans", "en-US"]
 
 do {
     try requestHandler.perform([request])
