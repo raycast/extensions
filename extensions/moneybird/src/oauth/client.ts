@@ -54,7 +54,7 @@ const parseLinkHeader = (linkHeader: string | null) => {
 
 export const fetchPaginated = async <T>(path: string): Promise<T[]> => {
   const results: T[] = [];
-  let nextUrl = new URL(`${apiBaseUrl}/${path}`);
+  let nextUrl: URL | null = new URL(`${apiBaseUrl}/${path}`);
   nextUrl.searchParams.set("per_page", "100");
   if (!nextUrl.searchParams.get("page")) nextUrl.searchParams.set("page", "1");
 
@@ -64,11 +64,7 @@ export const fetchPaginated = async <T>(path: string): Promise<T[]> => {
     if (Array.isArray(data)) results.push(...(data as T[]));
 
     const links = parseLinkHeader(response.headers.get("Link"));
-    if (links.next) {
-      nextUrl = new URL(links.next, apiBaseUrl);
-    } else {
-      break;
-    }
+    nextUrl = links.next ? new URL(links.next, apiBaseUrl) : null;
   }
 
   return results;
