@@ -13,23 +13,6 @@ Control Yandex Smart Home devices and run scenarios from Raycast.
 
 </div>
 
-## Screenshots
-
-<div align="center">
-
-<table>
-  <tr>
-    <td align="center"><img src="metadata/Raycast%202026-01-30%20at%2020.10.44.png" width="400" alt="Search Devices" /></td>
-    <td align="center"><img src="metadata/yandex-smart-home%202026-01-30%20at%2020.11.28.png" width="400" alt="Devices list" /></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="metadata/yandex-smart-home%202026-01-30%20at%2020.12.24.png" width="400" alt="Device detail" /></td>
-    <td align="center"><img src="metadata/yandex-smart-home%202026-01-30%20at%2020.12.48.png" width="400" alt="Scenarios" /></td>
-  </tr>
-</table>
-
-</div>
-
 ## Commands
 
 - **Devices** — List all smart home devices; turn on/off, set brightness where supported.
