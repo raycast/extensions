@@ -1,6 +1,10 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { execFileSync } from "child_process";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, List } from "@raycast/api";
 import { getSafeFavicon } from "../utils";
+import { collectUrlsFromFolder } from "../bookmarks/utils";
 import { BookmarkItem } from "../bookmarks/types";
+
+const DIA_BUNDLE_ID = "company.thebrowser.dia";
 
 export function BookmarkListItem({
   item,
@@ -15,7 +19,10 @@ export function BookmarkListItem({
       return null;
     }
 
-    const childCount = item.children?.length || 0;
+    const children = item.children ?? [];
+    const childCount = children.length;
+    const urlCount = collectUrlsFromFolder(children).length;
+
     return (
       <List.Item
         id={item.id}
@@ -25,6 +32,19 @@ export function BookmarkListItem({
         actions={
           <ActionPanel title={item.name}>
             <Action title="Open Folder" icon={Icon.ArrowRight} onAction={() => onNavigate(item.idPath)} />
+            {urlCount > 0 && (
+              <Action
+                title={`Open All ${urlCount} in Dia`}
+                icon={Icon.Globe}
+                onAction={async () => {
+                  const urls = collectUrlsFromFolder(children);
+                  for (const url of urls) {
+                    execFileSync("open", ["-b", DIA_BUNDLE_ID, url]);
+                  }
+                  await closeMainWindow();
+                }}
+              />
+            )}
           </ActionPanel>
         }
       />
