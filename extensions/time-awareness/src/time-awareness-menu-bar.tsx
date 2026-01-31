@@ -27,7 +27,7 @@ export default function Command() {
       <MenuBarExtra.Section title="Settings">
         <MenuBarExtra.Item
           icon={confettiEnabled ? Icon.Checkmark : Icon.XMarkCircle}
-          title="Enable Confetti"
+          title={`Toggle Confetti (${confettiEnabled ? "On" : "Off"})`}
           onAction={toggleConfetti}
         />
       </MenuBarExtra.Section>
