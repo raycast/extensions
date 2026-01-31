@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tasknotes",
+  "title": "TaskNotes",
+  "description": "Quick task capture for TaskNotes Obsidian plugin",
+  "icon": "extension-icon.png",
+  "author": "mystic",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-connection",
+      "title": "Check TaskNotes Connection",
+      "description": "Verify connection to TaskNotes API",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add Task",
+      "description": "Create a new task in TaskNotes",
+      "mode": "view"
+    },
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "description": "View and manage your TaskNotes tasks",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-tasks",
+      "title": "TaskNotes Menu Bar",
+      "description": "Show open task count in menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiPort",
+      "title": "API Port",
+      "description": "Port number for TaskNotes HTTP API",
+      "type": "textfield",
+      "required": true,
+      "default": "8080"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Authentication token for TaskNotes HTTP API (optional)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.1",
+    "eslint": "^8.57.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
