@@ -2,7 +2,7 @@
 
 ## [Search Bookmarks: Open all in folder] - {PR_MERGE_DATE}
 
-- Added "Open All N in Dia" action on bookmark folders to open all bookmarks in that folder (and subfolders) as tabs in Dia; Raycast window closes after opening
+- Added "Open All # in Dia" action on bookmark folders to open all bookmarks in that folder (and subfolders) as tabs in Dia for quick access to a bookmarked set of tabs; Raycast window closes after opening to keep user in flow.
 
 ## [Handle error in Search History + Fix CHANGELOG Dates] - 2025-12-25
 
