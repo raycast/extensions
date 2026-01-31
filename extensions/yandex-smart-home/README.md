@@ -39,13 +39,14 @@ Control Yandex Smart Home devices and run scenarios from Raycast.
 
 ### 1. Create a Yandex OAuth app
 
-1. Open [Yandex OAuth](https://oauth.yandex.com/) and sign in.
+1. Open [Yandex OAuth](https://oauth.yandex.ru/) and sign in.
 2. Create a new application (or use an existing one).
-3. **Platform**: choose **«Другое»** (Other) or any type that allows **Callback URL** `https://oauth.yandex.ru/verification_code`.
-4. **Callback URL**: set exactly  
+3. **Platform**: choose **Для доступа к API или отладки**.
+4. **Permissions**: enable **iot:view** and **iot:control** (Smart Home).
+5. **Callback URL**: set exactly  
    `https://oauth.yandex.ru/verification_code`  
    (Yandex will show a 7-digit code on this page instead of redirecting.)
-5. **Permissions**: enable **iot:view** and **iot:control** (Smart Home).
+
 6. Save and copy the **Client ID**.
 
 ### 2. Configure the extension
