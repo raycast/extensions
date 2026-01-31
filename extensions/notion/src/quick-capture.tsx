@@ -268,7 +268,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
             const nextAccountId = value as NotionAccountId;
             setAccountId(nextAccountId);
             setActiveAccountId(nextAccountId);
-            setValue("page", undefined);
+            setValue("page", "");
           }}
           storeValue
         >

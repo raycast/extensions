@@ -87,7 +87,7 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
             const nextAccountId = value as NotionAccountId;
             setAccountId(nextAccountId);
             setActiveAccountId(nextAccountId);
-            setValue("page", undefined);
+            setValue("page", "");
           }}
           storeValue
         >
