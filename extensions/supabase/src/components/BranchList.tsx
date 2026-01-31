@@ -43,10 +43,7 @@ export function BranchList({ project, accessToken }: BranchListProps) {
           description="This project doesn't have any branches or branching is not enabled."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Project Dashboard"
-                url={getProjectUrl(project.id)}
-              />
+              <Action.OpenInBrowser title="Open Project Dashboard" url={getProjectUrl(project.id)} />
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
@@ -82,10 +79,7 @@ export function BranchList({ project, accessToken }: BranchListProps) {
           actions={
             <ActionPanel>
               <ActionPanel.Section title="Open">
-                <Action.OpenInBrowser
-                  title="Open Project Dashboard"
-                  url={getProjectUrl(branch.project_ref)}
-                />
+                <Action.OpenInBrowser title="Open Project Dashboard" url={getProjectUrl(branch.project_ref)} />
               </ActionPanel.Section>
               <ActionPanel.Section title="Copy">
                 <Action.CopyToClipboard
@@ -96,7 +90,7 @@ export function BranchList({ project, accessToken }: BranchListProps) {
                 <Action.CopyToClipboard
                   title="Copy Project Ref"
                   content={branch.project_ref}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>

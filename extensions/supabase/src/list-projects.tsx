@@ -1,21 +1,13 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { supabaseFetch } from "./lib/api";
-import type { Preferences, Project, Organization } from "./lib/types";
+import type { Project, Organization } from "./lib/types";
 import { getProjectUrl, getStatusColor, groupProjectsByOrg } from "./lib/utils";
 import { BranchList } from "./components/BranchList";
 import { MOCK_ENABLED, mockProjects, mockOrganizations } from "./lib/mock-data";
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const { accessToken } = getPreferenceValues<ExtensionPreferences>();
   const [projects, setProjects] = useState<Project[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,13 +16,12 @@ export default function Command() {
     setIsLoading(true);
     try {
       if (MOCK_ENABLED) {
-        // Use mock data for screenshots
         setProjects(mockProjects);
         setOrganizations(mockOrganizations);
       } else {
         const [projectsData, orgsData] = await Promise.all([
-          supabaseFetch<Project[]>("/projects", prefs.accessToken),
-          supabaseFetch<Organization[]>("/organizations", prefs.accessToken),
+          supabaseFetch<Project[]>("/projects", accessToken),
+          supabaseFetch<Organization[]>("/organizations", accessToken),
         ]);
         setProjects(projectsData);
         setOrganizations(orgsData);
@@ -44,7 +35,7 @@ export default function Command() {
     } finally {
       setIsLoading(false);
     }
-  }, [prefs.accessToken]);
+  }, [accessToken]);
 
   useEffect(() => {
     loadData();
@@ -60,10 +51,7 @@ export default function Command() {
           description="You don't have any Supabase projects yet."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Create Project in Supabase"
-                url="https://supabase.com/dashboard/new"
-              />
+              <Action.OpenInBrowser title="Create Project in Supabase" url="https://supabase.com/dashboard/new" />
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
@@ -103,7 +91,7 @@ export default function Command() {
                     <Action.Push
                       title="View Branches"
                       icon={Icon.Tree}
-                      target={<BranchList project={project} accessToken={prefs.accessToken} />}
+                      target={<BranchList project={project} accessToken={accessToken} />}
                     />
                     <Action.OpenInBrowser
                       title="Open Project Dashboard"
@@ -120,7 +108,7 @@ export default function Command() {
                     <Action.CopyToClipboard
                       title="Copy Project URL"
                       content={getProjectUrl(project.id)}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section>

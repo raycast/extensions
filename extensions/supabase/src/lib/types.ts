@@ -1,7 +1,3 @@
-export type Preferences = {
-  accessToken: string;
-};
-
 export type Project = {
   id: string;
   organization_id: string;
