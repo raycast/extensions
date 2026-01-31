@@ -37,14 +37,6 @@
       "placeholder": "Paste Client ID from Yandex app settings"
     },
     {
-      "name": "clientId",
-      "title": "Yandex OAuth Client ID",
-      "description": "From your Yandex OAuth app (oauth.yandex.com). Required for connection.",
-      "type": "password",
-      "required": true,
-      "placeholder": "Paste Client ID from Yandex app settings"
-    },
-    {
       "name": "redirectUri",
       "title": "Callback URL",
       "description": "Must match the Callback URL in your Yandex app. Leave default unless you use a different one.",
