@@ -79,17 +79,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Prisma
               } else if (data.chunk.type === "relevant_sources") {
                 let uniqueRelevantSources: RelevantSource[] = Array.from(
                   new Map(
-                    data.chunk.content.relevant_sources.map((item: RelevantSource) => [
-                      JSON.stringify(item),
-                      item,
-                    ]),
+                    data.chunk.content.relevant_sources.map((item: RelevantSource) => [JSON.stringify(item), item]),
                   ).values(),
                 ) as RelevantSource[];
                 uniqueRelevantSources = uniqueRelevantSources
                   .filter(
                     (source: unknown) =>
-                      (source as RelevantSource).source_url &&
-                      (source as RelevantSource).source_url.length > 5,
+                      (source as RelevantSource).source_url && (source as RelevantSource).source_url.length > 5,
                   )
                   .map((source: RelevantSource) => {
                     let titleParts = source.title.split("|");
@@ -188,10 +184,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Prisma
       metadata={
         showMetadata && (
           <Detail.Metadata>
-            <Detail.Metadata.Label
-              title="Time to Answer"
-              text={timeToAnswer ? `${timeToAnswer / 1000}s` : "..."}
-            />
+            <Detail.Metadata.Label title="Time to Answer" text={timeToAnswer ? `${timeToAnswer / 1000}s` : "..."} />
             <Detail.Metadata.Label title="Character Count" text={`${answer.length} characters`} />
             <Detail.Metadata.Label
               title="Word Count"
