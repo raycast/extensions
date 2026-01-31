@@ -1,9 +1,42 @@
-import { type LaunchProps, LaunchType, launchCommand, showToast, Toast } from "@raycast/api";
+import { type LaunchProps, LaunchType, launchCommand, open, showToast, Toast } from "@raycast/api";
+import { execSync } from "child_process";
 import * as fs from "fs";
 import { homedir } from "os";
 import * as path from "path";
-import { syncFocusMode, updateCounter } from "./lib/storage";
+import { startFocusMode } from "./lib/focus";
+import { getStateFilePath, initializeAgentsCounter } from "./lib/state";
 import type { ClaudeSettings, CursorHooks, OpencodeConfig } from "./types";
+
+const STATE_FILE = getStateFilePath();
+
+/**
+ * Check if jq is installed on the system.
+ * @returns True if jq is available, false otherwise
+ */
+function isJqInstalled(): boolean {
+  try {
+    execSync("jq --version", { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Generates the jq command to increment the counter.
+ * Uses atomic write pattern with temp file.
+ */
+function getIncrementCommand(): string {
+  return `echo "$(jq '.agentsCounter += 1' "${STATE_FILE}")" > "${STATE_FILE}"`;
+}
+
+/**
+ * Generates the jq command to decrement the counter.
+ * Uses atomic write pattern with temp file.
+ */
+function getDecrementCommand(): string {
+  return `echo "$(jq '.agentsCounter = ([0, .agentsCounter - 1] | max)' "${STATE_FILE}")" > "${STATE_FILE}"`;
+}
 
 function readJsonFile<T>(filePath: string, defaultValue: T): T {
   if (!fs.existsSync(filePath)) return defaultValue;
@@ -38,7 +71,11 @@ async function setupClaudeHooks(startCommand: string, endCommand: string) {
       matcher: "",
       hooks: [{ type: "command", command: startCommand }],
     });
-  } else if (!settings.hooks.SessionStart[startIdx].hooks.some((h) => h.command.includes("increment-counter"))) {
+  } else {
+    // Remove old increment commands and add new one
+    settings.hooks.SessionStart[startIdx].hooks = settings.hooks.SessionStart[startIdx].hooks.filter(
+      (h) => !h.command.includes("increment-counter") && !h.command.includes("jq"),
+    );
     settings.hooks.SessionStart[startIdx].hooks.push({
       type: "command",
       command: startCommand,
@@ -53,7 +90,11 @@ async function setupClaudeHooks(startCommand: string, endCommand: string) {
       matcher: "",
       hooks: [{ type: "command", command: endCommand }],
     });
-  } else if (!settings.hooks.SessionEnd[endIdx].hooks.some((h) => h.command.includes("decrement-counter"))) {
+  } else {
+    // Remove old decrement commands and add new one
+    settings.hooks.SessionEnd[endIdx].hooks = settings.hooks.SessionEnd[endIdx].hooks.filter(
+      (h) => !h.command.includes("decrement-counter") && !h.command.includes("jq"),
+    );
     settings.hooks.SessionEnd[endIdx].hooks.push({
       type: "command",
       command: endCommand,
@@ -71,19 +112,23 @@ async function setupCursorHooks(startCommand: string, endCommand: string) {
   });
 
   if (!config.hooks.beforeSubmitPrompt) config.hooks.beforeSubmitPrompt = [];
-  if (!config.hooks.beforeSubmitPrompt.some((h) => h.command.includes("increment-counter"))) {
-    config.hooks.beforeSubmitPrompt.push({ command: startCommand });
-  }
+  // Remove old commands and add new one
+  config.hooks.beforeSubmitPrompt = config.hooks.beforeSubmitPrompt.filter(
+    (h) => !h.command.includes("increment-counter") && !h.command.includes("jq"),
+  );
+  config.hooks.beforeSubmitPrompt.push({ command: startCommand });
 
   if (!config.hooks.stop) config.hooks.stop = [];
-  if (!config.hooks.stop.some((h) => h.command.includes("decrement-counter"))) {
-    config.hooks.stop.push({ command: endCommand });
-  }
+  // Remove old commands and add new one
+  config.hooks.stop = config.hooks.stop.filter(
+    (h) => !h.command.includes("decrement-counter") && !h.command.includes("jq"),
+  );
+  config.hooks.stop.push({ command: endCommand });
 
   writeJsonFile(hooksPath, config);
 }
 
-async function setupOpencodeHooks(startCommand: string, endCommand: string) {
+async function setupOpencodeHooks() {
   const configDir = path.join(homedir(), ".config", "opencode");
   const pluginDir = path.join(configDir, "plugin");
   const configPath = path.join(configDir, "opencode.json");
@@ -92,18 +137,29 @@ async function setupOpencodeHooks(startCommand: string, endCommand: string) {
 import type { Plugin } from "@opencode-ai/plugin";
 
 export const RaycastTracker: Plugin = async ({ $ }) => {
+  const STATE_FILE = "${STATE_FILE}";
+
+  const incrementCounter = async () => {
+    await $\`echo "$(jq '.agentsCounter += 1' "\${STATE_FILE}")" > "\${STATE_FILE}"\`;
+  };
+
+  const decrementCounter = async () => {
+    await $\`echo "$(jq '.agentsCounter = ([0, .agentsCounter - 1] | max)' "\${STATE_FILE}")" > "\${STATE_FILE}"\`;
+  };
+
   return {
     event: async ({ event }) => {
       if (event.type === "session.created") {
-        await $\`${startCommand}\`;
+        await incrementCounter();
       }
       if (event.type === "session.idle") {
-        await $\`${endCommand}\`;
+        await decrementCounter();
       }
     }
   };
 };
 `;
+
   if (!fs.existsSync(pluginDir)) {
     fs.mkdirSync(pluginDir, { recursive: true });
   }
@@ -119,14 +175,20 @@ export const RaycastTracker: Plugin = async ({ $ }) => {
 async function setupCodexAlias(startCommand: string, endCommand: string) {
   const zshrcPath = path.join(homedir(), ".zshrc");
   const bashrcPath = path.join(homedir(), ".bashrc");
-  const aliasLine = `\n# Raycast Codex Tracker\nalias codex='${startCommand} && command codex "$@"; ${endCommand}'\n`;
+
+  // New alias that uses jq commands directly
+  const aliasLine = `\n# Raycast Codex Tracker (State File Version)\nalias codex='(${startCommand}) && command codex "$@"; (${endCommand})'\n`;
 
   const targetFiles = [zshrcPath, bashrcPath];
 
   for (const filePath of targetFiles) {
     if (fs.existsSync(filePath)) {
       let content = fs.readFileSync(filePath, "utf-8");
-      if (!content.includes("alias codex=")) {
+      // Remove old aliases
+      content = content.replace(/\n# Raycast Codex Tracker.*?alias codex=.*?\n/gs, "\n");
+      content = content.replace(/\nalias codex=.*raycast.*?\n/gs, "\n");
+
+      if (!content.includes("# Raycast Codex Tracker (State File Version)")) {
         content += aliasLine;
         fs.writeFileSync(filePath, content);
       }
@@ -134,12 +196,56 @@ async function setupCodexAlias(startCommand: string, endCommand: string) {
   }
 }
 
+/**
+ * Validates that the state file is set up correctly and writable.
+ * @returns Object containing success status and any error message
+ */
+function validateSetup(): { success: boolean; error?: string } {
+  try {
+    // Initialize state file
+    initializeAgentsCounter();
+
+    // Check if state file exists and is writable
+    if (!fs.existsSync(STATE_FILE)) {
+      return { success: false, error: "State file was not created" };
+    }
+
+    // Test write access
+    try {
+      fs.accessSync(STATE_FILE, fs.constants.W_OK);
+    } catch {
+      return { success: false, error: "State file is not writable" };
+    }
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error during setup validation",
+    };
+  }
+}
+
 export default async function Command(props: LaunchProps<{ arguments: Arguments.SetupAiAgent }>) {
   const { agent } = props.arguments;
 
+  // Check jq dependency first
+  if (!isJqInstalled()) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "jq is not installed",
+      message: "Install with: brew install jq",
+    });
+
+    // Show installation instructions
+    await open("https://jqlang.github.io/jq/download/");
+    return;
+  }
+
   try {
-    const startCommand = "open -g raycast://extensions/alexi.build/fifteen-million-merits/increment-counter";
-    const endCommand = "open -g raycast://extensions/alexi.build/fifteen-million-merits/decrement-counter";
+    // Use jq-based commands instead of deep links
+    const startCommand = getIncrementCommand();
+    const endCommand = getDecrementCommand();
 
     const agents: string[] = [];
 
@@ -152,7 +258,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       agents.push("Cursor");
     }
     if (agent === "opencode" || agent === "all") {
-      await setupOpencodeHooks(startCommand, endCommand);
+      await setupOpencodeHooks();
       agents.push("Opencode");
     }
     if (agent === "codex" || agent === "all") {
@@ -160,9 +266,21 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       agents.push("Codex CLI");
     }
 
-    const { currentCount, newCount } = await updateCounter(0);
-    await syncFocusMode(currentCount, newCount);
+    // Validate setup
+    const validation = validateSetup();
+    if (!validation.success) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Setup validation failed",
+        message: validation.error || "Unknown error",
+      });
+      return;
+    }
 
+    // Initialize focus mode sync
+    startFocusMode();
+
+    // Try to launch menu bar command
     try {
       await launchCommand({
         name: "show-ai-agent-sessions-counter",
@@ -175,6 +293,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     await showToast({
       style: Toast.Style.Success,
       title: `Successfully configured: ${agents.join(", ")}`,
+      message: "State file hooks are now active",
     });
   } catch (error) {
     console.error("Setup failed", error);

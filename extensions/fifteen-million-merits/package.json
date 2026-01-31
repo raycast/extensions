@@ -53,19 +53,6 @@
           ]
         }
       ]
-    },
-    {
-      "name": "increment-counter",
-      "title": "Increment AI Agent Count",
-      "subtitle": "Fifteen Million Merits",
-      "description": "Increments the persistent counter and triggers Focus if count is 0.",
-      "mode": "no-view"
-    },
-    {
-      "name": "decrement-counter",
-      "title": "Decrement AI Agent Count",
-      "description": "Decrements the persistent counter.",
-      "mode": "no-view"
     }
   ],
   "preferences": [
