@@ -21,6 +21,7 @@
     {
       "name": "setup-ai-agent",
       "title": "Setup AI Agent Hooks",
+      "subtitle": "Fifteen Million Merits",
       "description": "Configures Claude and Cursor to trigger counter when sessions start or end.",
       "mode": "no-view",
       "arguments": [
