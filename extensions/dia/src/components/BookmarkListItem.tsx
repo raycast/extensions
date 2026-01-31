@@ -1,5 +1,4 @@
-import { execFileSync } from "child_process";
-import { Action, ActionPanel, closeMainWindow, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open } from "@raycast/api";
 import { getSafeFavicon } from "../utils";
 import { collectUrlsFromFolder } from "../bookmarks/utils";
 import { BookmarkItem } from "../bookmarks/types";
@@ -21,7 +20,8 @@ export function BookmarkListItem({
 
     const children = item.children ?? [];
     const childCount = children.length;
-    const urlCount = collectUrlsFromFolder(children).length;
+    const urls = collectUrlsFromFolder(children);
+    const urlCount = urls.length;
 
     return (
       <List.Item
@@ -37,9 +37,8 @@ export function BookmarkListItem({
                 title={`Open All ${urlCount} in Dia`}
                 icon={Icon.Globe}
                 onAction={async () => {
-                  const urls = collectUrlsFromFolder(children);
                   for (const url of urls) {
-                    execFileSync("open", ["-b", DIA_BUNDLE_ID, url]);
+                    await open(url, DIA_BUNDLE_ID);
                   }
                   await closeMainWindow();
                 }}
