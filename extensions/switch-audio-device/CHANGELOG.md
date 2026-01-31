@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 - 2026-01-30
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release
 - List and switch audio input/output devices

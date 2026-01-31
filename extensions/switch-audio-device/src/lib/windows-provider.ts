@@ -15,9 +15,9 @@ type PowerShellDeviceType = "Playback" | "Recording";
 export class WindowsAudioProvider implements AudioProvider {
   private async listDevices(type: PowerShellDeviceType): Promise<AudioDevice[]> {
     const audioType: DeviceType = type === "Playback" ? "output" : "input";
-    const script = `Get-AudioDevice -List | Where-Object { $_.Type -eq '${type}' } | Select-Object ID, Name, Default | ConvertTo-Json -Compress`;
+    const script = `& { $t = $args[0]; Get-AudioDevice -List | Where-Object { $_.Type -eq $t } | Select-Object ID, Name, Default | ConvertTo-Json -Compress } @args`;
 
-    const { stdout } = await execFileAsync("powershell", ["-NoProfile", "-Command", script], {
+    const { stdout } = await execFileAsync("powershell", ["-NoProfile", "-Command", script, type], {
       encoding: "utf-8",
     });
 
@@ -42,7 +42,9 @@ export class WindowsAudioProvider implements AudioProvider {
   }
 
   private async setDevice(deviceId: string): Promise<void> {
-    const script = `Set-AudioDevice -ID '${deviceId}'`;
+    // Escape single quotes for PowerShell single-quoted string
+    const escapedId = deviceId.replace(/'/g, "''");
+    const script = `Set-AudioDevice -ID '${escapedId}'`;
     await execFileAsync("powershell", ["-NoProfile", "-Command", script], {
       encoding: "utf-8",
     });
