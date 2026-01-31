@@ -1,6 +1,6 @@
 # Raycast Zoxide Changelog
 
-## [Added Additional Open With Action] - 2026-01-30
+## [Added Additional Open With Action] - {PR_MERGE_DATE}
 
 - Added "Open With" action to the actions pane that allows opening the directory in a different app not set in the Zoxide settings.
 
