@@ -1,5 +1,11 @@
 # Obsidian Changelog
 
+## [AI Search Tool Content Search Parameter] - {PR_MERGE_DATE}
+
+- Add searchContent parameter to searchNote AI tool for controlling search mode
+- Enable content and tag search capabilities in AI tools
+- Default searchContent to true for comprehensive search including file content and tag filtering
+
 ## [New Open Workspace command, Callout Support, Copy Files Action] - 2025-12-25
 
 - Adds new Open Workspace command that shows a list of all workspaces in your vault. Requires advanced URI plugin and workspaces core plugin to be enabled

@@ -1,24 +1,19 @@
 import { Logger } from "../api/logger/logger.service";
 import { filterNotesFuzzy } from "../api/search/search.service";
+import { searchNotesWithContent } from "../api/search/simple-content-search.service";
 import { Note, Obsidian, ObsidianVault } from "@/obsidian";
 import { getNotesWithCache } from "../utils/hooks";
 
 type Input = {
-  /**
-   * The search term for the note to find
-   */
   searchTerm: string;
-  /**
-   * If the user provides a vault name or hints towards one, ALWAYS use it here.
-   */
   vaultName?: string;
+  searchContent?: boolean;
 };
 
 const logger = new Logger("Tool SearchNote");
 
-/**
- * Search for notes in Obsidian vaults and return a list of matching notes with their title, vault, and path
- */
+const MAX_RESULTS = 50;
+
 export default async function tool(input: Input) {
   const vaults = await Obsidian.getVaultsFromPreferencesOrObsidianJson();
 
@@ -34,28 +29,45 @@ export default async function tool(input: Input) {
     return `Vault "${input.vaultName}" not found. Available vaults: ${vaults.map((v) => v.name).join(", ")}`;
   }
 
+  const useContentSearch = input.searchContent !== false;
+
+  logger.info(`Searching with ${useContentSearch ? "content search" : "title/path only"} for "${input.searchTerm}"`);
+
   // Search across all target vaults
-  let allFilteredNotes: { note: Note; vault: ObsidianVault }[] = [];
+  const allFilteredNotes: { note: Note; vault: ObsidianVault }[] = [];
+
   for (const vault of targetVaults) {
     const notes = await getNotesWithCache(vault.path);
-    const filtered = filterNotesFuzzy(notes, input.searchTerm);
+
+    const filtered: Note[] = useContentSearch
+      ? await searchNotesWithContent(notes, input.searchTerm)
+      : filterNotesFuzzy(notes, input.searchTerm);
+
+    logger.info(
+      `${useContentSearch ? "Content" : "Title/path"} search found ${filtered.length} notes in ${vault.name}`
+    );
 
     allFilteredNotes.push(...filtered.map((note) => ({ note, vault })));
   }
 
   if (allFilteredNotes.length === 0) {
     logger.warning(`No notes found matching ${input.searchTerm}`);
-    return `No notes found matching "${input.searchTerm}".`;
+    const searchTypeInfo = useContentSearch
+      ? " (searched title, path, and content)"
+      : " (searched title and path only - set searchContent=true for full-text and tag search)";
+    return `No notes found matching "${input.searchTerm}"${searchTypeInfo}.`;
   }
 
-  if (allFilteredNotes.length >= 10) {
-    allFilteredNotes = allFilteredNotes.slice(0, 10);
-  }
+  const limitedNotes = allFilteredNotes.slice(0, MAX_RESULTS);
+  const hasMore = allFilteredNotes.length > MAX_RESULTS;
 
   // Return list of all matching notes
-  let result = `Found ${allFilteredNotes.length} note(s) matching "${input.searchTerm}":\n\n`;
+  const searchTypeLabel = useContentSearch ? "content search" : "title/path search";
+  let result = `Found ${allFilteredNotes.length} note(s) matching "${input.searchTerm}" (${searchTypeLabel})${
+    hasMore ? `, showing first ${MAX_RESULTS}` : ""
+  }:\n\n`;
 
-  allFilteredNotes.forEach(({ note, vault }, index) => {
+  limitedNotes.forEach(({ note, vault }, index) => {
     result += `${index + 1}. **${note.title}**\n`;
     result += `   - Vault: ${vault.name}\n`;
     result += `   - Path: ${note.path}\n\n`;
