@@ -254,6 +254,8 @@ export function SearchView({ searchMode }: SearchViewProps) {
         return "Semantic Search";
       case "query":
         return "Hybrid Search";
+      default:
+        return "Search";
     }
   };
 
@@ -282,6 +284,11 @@ export function SearchView({ searchMode }: SearchViewProps) {
         return {
           title: "No Results Found",
           description: "No matches found with hybrid search. Check your collections or try broader terms.",
+        };
+      default:
+        return {
+          title: "No Results Found",
+          description: "No matches found. Try different search terms.",
         };
     }
   };
@@ -371,13 +378,15 @@ export function SearchView({ searchMode }: SearchViewProps) {
         <List.Section>
           <List.Item
             icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Blue }}
-            subtitle={
-              searchMode === "search"
-                ? "Finding keyword matches"
-                : searchMode === "vsearch"
-                  ? "Running semantic analysis"
-                  : "Running hybrid search"
-            }
+            subtitle={(() => {
+              if (searchMode === "search") {
+                return "Finding keyword matches";
+              }
+              if (searchMode === "vsearch") {
+                return "Running semantic analysis";
+              }
+              return "Running hybrid search";
+            })()}
             title="Searching..."
           />
         </List.Section>
@@ -419,13 +428,15 @@ export function SearchView({ searchMode }: SearchViewProps) {
         <>
           {history.length > 0 && (
             <List.Section
-              title={
-                searchMode === "search"
-                  ? "Recent Keyword Searches"
-                  : searchMode === "vsearch"
-                    ? "Recent Semantic Searches"
-                    : "Recent Hybrid Searches"
-              }
+              title={(() => {
+                if (searchMode === "search") {
+                  return "Recent Keyword Searches";
+                }
+                if (searchMode === "vsearch") {
+                  return "Recent Semantic Searches";
+                }
+                return "Recent Hybrid Searches";
+              })()}
             >
               {history.map((item) => (
                 <List.Item
@@ -470,13 +481,16 @@ export function SearchView({ searchMode }: SearchViewProps) {
 
           {collections.length > 0 && history.length === 0 && (
             <List.EmptyView
-              description={
-                searchMode === "search"
-                  ? `Fast keyword matching across ${collections.length} collection${collections.length === 1 ? "" : "s"}`
-                  : searchMode === "vsearch"
-                    ? `AI-powered meaning-based search across ${collections.length} collection${collections.length === 1 ? "" : "s"}`
-                    : `Combined keyword + semantic search across ${collections.length} collection${collections.length === 1 ? "" : "s"}`
-              }
+              description={(() => {
+                const plural = collections.length === 1 ? "" : "s";
+                if (searchMode === "search") {
+                  return `Fast keyword matching across ${collections.length} collection${plural}`;
+                }
+                if (searchMode === "vsearch") {
+                  return `AI-powered meaning-based search across ${collections.length} collection${plural}`;
+                }
+                return `Combined keyword + semantic search across ${collections.length} collection${plural}`;
+              })()}
               icon={Icon.MagnifyingGlass}
               title={getSearchModeTitle()}
             />

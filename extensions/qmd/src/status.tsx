@@ -128,12 +128,15 @@ export default function Command() {
       ? { source: Icon.CheckCircle, tintColor: Color.Green }
       : { source: Icon.Warning, tintColor: Color.Yellow };
 
-  const healthText =
-    status?.indexHealth === "healthy"
-      ? "Healthy"
-      : status?.indexHealth === "needs-embedding"
-        ? "Needs Embedding"
-        : "Needs Update";
+  const healthText = (() => {
+    if (status?.indexHealth === "healthy") {
+      return "Healthy";
+    }
+    if (status?.indexHealth === "needs-embedding") {
+      return "Needs Embedding";
+    }
+    return "Needs Update";
+  })();
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search status...">

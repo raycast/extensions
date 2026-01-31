@@ -580,6 +580,8 @@ export function getScoreRaycastColor(score: number): string {
       return "#FF9500";
     case "red":
       return "#FF3B30";
+    default:
+      return "#FF3B30";
   }
 }
 

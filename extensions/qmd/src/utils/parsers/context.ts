@@ -18,9 +18,7 @@ export function parseContextList(output: string): QmdContext[] {
   let currentCollection: string | null = null;
   let currentPath: string | null = null;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
+  for (const line of lines) {
     // Skip header line
     if (line.startsWith("Configured Contexts") || line.trim() === "") {
       continue;

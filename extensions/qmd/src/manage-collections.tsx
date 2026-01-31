@@ -13,7 +13,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDependencyCheck } from "./hooks/use-dependency-check";
 import type { QmdCollection, QmdFileListItem } from "./types";
 import { collectionsLogger } from "./utils/logger";
@@ -31,7 +31,7 @@ export default function Command() {
   const [collections, setCollections] = useState<QmdCollection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadCollections = async () => {
+  const loadCollections = useCallback(async () => {
     if (!isReady) {
       return;
     }
@@ -41,7 +41,6 @@ export default function Command() {
     const result = await getCollections();
 
     if (result.success && result.data) {
-      // Validate paths and sort alphabetically
       const validated = result.data
         .map((col) => ({
           ...col,
@@ -57,11 +56,11 @@ export default function Command() {
       setCollections([]);
     }
     setIsLoading(false);
-  };
+  }, [isReady]);
 
   useEffect(() => {
     loadCollections();
-  }, [isReady]);
+  }, [loadCollections]);
 
   if (isDepsLoading) {
     return <List isLoading={true} searchBarPlaceholder="Checking dependencies..." />;

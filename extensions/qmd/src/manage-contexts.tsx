@@ -12,7 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDependencyCheck } from "./hooks/use-dependency-check";
 import type { QmdContext } from "./types";
 import { contextsLogger } from "./utils/logger";
@@ -23,7 +23,7 @@ export default function Command() {
   const [contexts, setContexts] = useState<QmdContext[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadContexts = async () => {
+  const loadContexts = useCallback(async () => {
     if (!isReady) {
       return;
     }
@@ -40,11 +40,11 @@ export default function Command() {
       setContexts([]);
     }
     setIsLoading(false);
-  };
+  }, [isReady]);
 
   useEffect(() => {
     loadContexts();
-  }, [isReady]);
+  }, [loadContexts]);
 
   if (isDepsLoading) {
     return <List isLoading={true} searchBarPlaceholder="Checking dependencies..." />;
