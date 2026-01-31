@@ -1,6 +1,6 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { AudioDevice, AudioProvider } from "./types";
+import { AudioDevice, AudioProvider, DeviceType } from "./types";
 
 const execFileAsync = promisify(execFile);
 
@@ -10,11 +10,11 @@ interface PowerShellDevice {
   Default: boolean;
 }
 
-type DeviceType = "Playback" | "Recording";
+type PowerShellDeviceType = "Playback" | "Recording";
 
 export class WindowsAudioProvider implements AudioProvider {
-  private async listDevices(type: DeviceType): Promise<AudioDevice[]> {
-    const audioType = type === "Playback" ? "output" : "input";
+  private async listDevices(type: PowerShellDeviceType): Promise<AudioDevice[]> {
+    const audioType: DeviceType = type === "Playback" ? "output" : "input";
     const script = `Get-AudioDevice -List | Where-Object { $_.Type -eq '${type}' } | Select-Object ID, Name, Default | ConvertTo-Json -Compress`;
 
     const { stdout } = await execFileAsync("powershell", ["-NoProfile", "-Command", script], {
@@ -37,12 +37,13 @@ export class WindowsAudioProvider implements AudioProvider {
       id: d.ID,
       name: d.Name,
       isDefault: d.Default,
-      type: audioType as const,
+      type: audioType,
     }));
   }
 
   private async setDevice(deviceId: string): Promise<void> {
-    await execFileAsync("powershell", ["-NoProfile", "-Command", "Set-AudioDevice", "-ID", deviceId], {
+    const script = `Set-AudioDevice -ID '${deviceId}'`;
+    await execFileAsync("powershell", ["-NoProfile", "-Command", script], {
       encoding: "utf-8",
     });
   }

@@ -126,6 +126,8 @@ export default function Command() {
 
   const handleSetDefault = useCallback(
     async (device: AudioDevice) => {
+      if (device.isDefault) return;
+
       const isOutput = device.type === "output";
       const label = isOutput ? "Output" : "Input";
       console.log(`Setting default audio ${label.toLowerCase()}: ${device.name} (${device.id})`);
