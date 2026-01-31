@@ -14,29 +14,21 @@ import {
 import got from "got";
 import { randomUUID } from "crypto";
 
-interface Preferences {
-  showMetadata: boolean;
-}
-
-interface RelevantSource {
+type RelevantSource = {
   source_url: string;
   title: string;
-}
+};
 
-export default function Command(
-  props: LaunchProps<{ arguments: { query: string } }>,
-) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.PrismaDocsSearch }>) {
   const { query } = props.arguments;
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.PrismaDocsSearch>();
   const [answer, setAnswer] = useState("");
   const [relevantSources, setRelevantSources] = useState<RelevantSource[]>([]);
-  const [isAnswerUncertain, setIsAnswerUncertain] = useState();
+  const [isAnswerUncertain, setIsAnswerUncertain] = useState<boolean | undefined>();
   const [showMetadata, setShowMetadata] = useState(preferences.showMetadata);
   const [isLoading, setIsLoading] = useState(true);
   const [timeToAnswer, setTimeToAnswer] = useState<number>();
-  const [questionAnswerId, setQuestionAnswerId] = useState<
-    string | undefined
-  >();
+  const [questionAnswerId, setQuestionAnswerId] = useState<string | undefined>();
   const isMounted = useRef(false);
 
   function showError(error: Error) {
@@ -87,9 +79,10 @@ export default function Command(
               } else if (data.chunk.type === "relevant_sources") {
                 let uniqueRelevantSources: RelevantSource[] = Array.from(
                   new Map(
-                    data.chunk.content.relevant_sources.map(
-                      (item: RelevantSource) => [JSON.stringify(item), item],
-                    ),
+                    data.chunk.content.relevant_sources.map((item: RelevantSource) => [
+                      JSON.stringify(item),
+                      item,
+                    ]),
                   ).values(),
                 ) as RelevantSource[];
                 uniqueRelevantSources = uniqueRelevantSources
@@ -100,18 +93,12 @@ export default function Command(
                   )
                   .map((source: RelevantSource) => {
                     let titleParts = source.title.split("|");
-                    titleParts = Array.from(
-                      new Map(
-                        titleParts.map((item: string) => [item, item]),
-                      ).values(),
-                    );
+                    titleParts = Array.from(new Map(titleParts.map((item: string) => [item, item])).values());
                     source.title = titleParts.join(" | ");
                     return source;
                   });
                 setRelevantSources(uniqueRelevantSources as RelevantSource[]);
-                uniqueRelevantSources.forEach((s) =>
-                  console.log("Relevant source:", s),
-                );
+                uniqueRelevantSources.forEach((s) => console.log("Relevant source:", s));
               } else if (data.chunk.type === "metadata") {
                 setIsAnswerUncertain(data.chunk.content.is_uncertain);
               } else if (data.chunk.type === "identifiers") {
@@ -150,17 +137,14 @@ export default function Command(
     const userId = await getUserId();
 
     try {
-      await got.post(
-        `https://ask-ai-proxy.raycast-0ef.workers.dev/query/v1/feedback/upsert/`,
-        {
-          headers: { "X-UUID": userId },
-          json: {
-            user_identifier: userId,
-            reaction: reaction,
-            question_answer: questionAnswerId,
-          },
+      await got.post(`https://ask-ai-proxy.raycast-0ef.workers.dev/query/v1/feedback/upsert/`, {
+        headers: { "X-UUID": userId },
+        json: {
+          user_identifier: userId,
+          reaction: reaction,
+          question_answer: questionAnswerId,
         },
-      );
+      });
 
       showToast({
         title: reaction === "upvote" ? "Upvoted" : "Downvoted",
@@ -187,7 +171,7 @@ export default function Command(
       message: "Change default in preferences",
       primaryAction: {
         title: "Open preferences",
-        shortcut: { modifiers: ["cmd"], key: "o" },
+        shortcut: { macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } },
         onAction: (toast) => {
           openCommandPreferences();
           toast.hide();
@@ -208,10 +192,7 @@ export default function Command(
               title="Time to Answer"
               text={timeToAnswer ? `${timeToAnswer / 1000}s` : "..."}
             />
-            <Detail.Metadata.Label
-              title="Character Count"
-              text={`${answer.length} characters`}
-            />
+            <Detail.Metadata.Label title="Character Count" text={`${answer.length} characters`} />
             <Detail.Metadata.Label
               title="Word Count"
               text={`${answer.split(/\s+/).filter((word) => word.length > 0).length} words`}
@@ -229,47 +210,44 @@ export default function Command(
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy answer" content={answer} />
+          <Action.CopyToClipboard title="Copy Answer" content={answer} />
           <ActionPanel.Submenu
-            title="Sources considered for response"
+            title="Sources Considered for Response"
             icon={Icon.Globe}
-            shortcut={{ modifiers: ["cmd"], key: "/" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "/" },
+              Windows: { modifiers: ["ctrl"], key: "/" },
+            }}
           >
             {relevantSources.map((source) => (
-              <Action.OpenInBrowser
-                key={source.source_url}
-                title={source.title}
-                url={source.source_url}
-              />
+              <Action.OpenInBrowser key={source.source_url} title={source.title} url={source.source_url} />
             ))}
           </ActionPanel.Submenu>
           <ActionPanel.Section>
             <Action
               title={(!showMetadata ? "Show" : "Hide") + " info panel"}
               icon={Icon.Info}
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "i" },
+                Windows: { modifiers: ["ctrl"], key: "i" },
+              }}
               onAction={toggleMetadataPanel}
             />
             <Action
               title="Open Preferences"
               onAction={openCommandPreferences}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "," },
+                Windows: { modifiers: ["ctrl", "shift"], key: "," },
+              }}
               icon={Icon.Cog}
             />
           </ActionPanel.Section>
 
           {questionAnswerId && (
             <ActionPanel.Section title="Feedback">
-              <Action
-                title="Good answer"
-                onAction={() => submitFeedback("upvote")}
-                icon={Icon.ThumbsUp}
-              />
-              <Action
-                title="Bad answer"
-                onAction={() => submitFeedback("downvote")}
-                icon={Icon.ThumbsDown}
-              />
+              <Action title="Good Answer" onAction={() => submitFeedback("upvote")} icon={Icon.ThumbsUp} />
+              <Action title="Bad Answer" onAction={() => submitFeedback("downvote")} icon={Icon.ThumbsDown} />
             </ActionPanel.Section>
           )}
         </ActionPanel>
