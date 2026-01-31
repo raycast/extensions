@@ -4,10 +4,10 @@ Open social media links via privacy-friendly alternative frontends. Just copy a 
 
 ## Supported Platforms
 
-| Platform | Frontend |
-|----------|----------|
+| Platform    | Frontend                           |
+| ----------- | ---------------------------------- |
 | X / Twitter | [xcancel.com](https://xcancel.com) |
-| Instagram | [Imginn](https://imginn.com) |
+| Instagram   | [Imginn](https://imginn.com)       |
 
 ## Usage
 

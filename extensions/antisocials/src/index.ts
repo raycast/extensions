@@ -11,12 +11,9 @@ const platforms: Platform[] = [
   {
     name: "X/Twitter",
     pattern:
-      /^https?:\/\/(www\.)?(twitter\.com|x\.com|mobile\.twitter\.com)(\/.*)?$/i,
+      /^https?:\/\/(www\.)?(twitter\.com|x\.com|mobile\.twitter\.com)\/.*$/i,
     convert: (url) =>
-      url.replace(
-        /^https?:\/\/(www\.)?(twitter\.com|x\.com|mobile\.twitter\.com)/i,
-        "https://xcancel.com",
-      ),
+      url.replace(/(twitter\.com|x\.com|mobile\.twitter\.com)/i, "xcancel.com"),
     frontend: "xcancel.com",
   },
   {
@@ -58,6 +55,14 @@ export default async function Command() {
 
   const convertedUrl = platform.convert(clipboard);
 
-  await open(convertedUrl);
-  await showHUD(`Opened via ${platform.frontend}`);
+  try {
+    await open(convertedUrl);
+    await showHUD(`Opened via ${platform.frontend}`);
+  } catch {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to open URL",
+      message: convertedUrl,
+    });
+  }
 }
