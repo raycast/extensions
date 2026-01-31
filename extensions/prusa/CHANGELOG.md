@@ -1,6 +1,6 @@
 # Prusa Printer Control Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-01-31
 
 Fixed error when accessing job progress while printer is idle
 
