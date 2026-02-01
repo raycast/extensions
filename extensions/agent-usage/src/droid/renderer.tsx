@@ -5,11 +5,11 @@ import { renderErrorDetail, renderNoDataDetail, getLoadingAccessory, getNoDataAc
 function formatDate(timestamp: number): string {
   if (!timestamp) return "N/A";
   const date = new Date(timestamp);
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
 function formatNumber(num: number): string {
-  return num.toLocaleString("en-US");
+  return num.toLocaleString();
 }
 
 export function formatDroidUsageText(usage: DroidUsage | null, error: DroidError | null): string {

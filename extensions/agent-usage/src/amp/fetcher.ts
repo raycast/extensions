@@ -1,26 +1,48 @@
 import { useExec } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import { execSync } from "child_process";
+import * as os from "os";
+import * as path from "path";
+import * as fs from "fs";
 import { AmpUsage, AmpError } from "./types";
 import { parseAmpUsage } from "./parser";
 
-const DEFAULT_AMP_PATH = "/Users/spike/.local/bin/amp";
-
 function detectAmpPath(): string {
+  // Try PATH first using 'which' (macOS/Linux) or 'where' (Windows)
+  const isWindows = process.platform === "win32";
+  const whichCommand = isWindows ? "where amp" : "which amp";
+
   try {
-    const result = execSync("which amp", { encoding: "utf-8", timeout: 5000 });
-    const path = result.trim();
-    if (path) {
-      return path;
+    const result = execSync(whichCommand, { encoding: "utf-8", timeout: 5000 });
+    const detectedPath = result.trim().split("\n")[0]; // 'where' may return multiple lines
+    if (detectedPath && fs.existsSync(detectedPath)) {
+      return detectedPath;
     }
   } catch {
-    // Fallback to default path
+    // Command failed, try common locations
   }
-  return DEFAULT_AMP_PATH;
+
+  // Fallback to common installation paths
+  const homeDir = os.homedir();
+  const commonPaths = isWindows
+    ? [
+        path.join(homeDir, ".local", "bin", "amp.exe"),
+        path.join(homeDir, "AppData", "Local", "Programs", "amp", "amp.exe"),
+      ]
+    : [path.join(homeDir, ".local", "bin", "amp"), "/usr/local/bin/amp", "/opt/homebrew/bin/amp"];
+
+  for (const p of commonPaths) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+
+  // Last resort: rely on PATH
+  return "amp";
 }
 
 export function useAmpUsage() {
-  const [ampPath, setAmpPath] = useState<string>(DEFAULT_AMP_PATH);
+  const [ampPath, setAmpPath] = useState<string>("amp");
   const [pathDetected, setPathDetected] = useState(false);
   const [shouldExecute, setShouldExecute] = useState(false);
   const [hasInitialFetch, setHasInitialFetch] = useState(false);

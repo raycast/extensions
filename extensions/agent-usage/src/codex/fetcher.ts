@@ -5,9 +5,7 @@ import { CodexUsage, CodexError } from "./types";
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 const REQUEST_TIMEOUT = 10000;
 
-interface Preferences {
-  codexAuthToken?: string;
-}
+type Preferences = Preferences.AgentUsage;
 
 async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
   try {

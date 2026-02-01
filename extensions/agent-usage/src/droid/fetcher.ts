@@ -5,9 +5,7 @@ import { DroidUsage, DroidUsageTier, DroidError } from "./types";
 const DROID_USAGE_API = "https://api.factory.ai/api/organization/subscription/schedule";
 const REQUEST_TIMEOUT = 10000;
 
-interface Preferences {
-  droidAuthToken?: string;
-}
+type Preferences = Preferences.AgentUsage;
 
 async function fetchDroidUsage(token: string): Promise<{ usage: DroidUsage | null; error: DroidError | null }> {
   try {

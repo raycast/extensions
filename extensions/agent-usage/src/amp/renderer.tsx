@@ -16,7 +16,7 @@ export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | nul
 
   const { email, nickname, ampFree, individualCredits } = usage;
   const ampFreeRemaining = ampFree.total - ampFree.used;
-  const ampFreePercent = (ampFreeRemaining / ampFree.total) * 100;
+  const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
 
   let text = `Amp Usage\nEmail: ${email}`;
   if (nickname) text += `\nNickname: ${nickname}`;
@@ -55,7 +55,7 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
 
   const { email, nickname, ampFree, individualCredits } = usage;
   const ampFreeRemaining = ampFree.total - ampFree.used;
-  const ampFreePercent = (ampFreeRemaining / ampFree.total) * 100;
+  const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
 
   return (
     <List.Item.Detail.Metadata>
@@ -124,7 +124,7 @@ export function getAmpAccessory(
 
   const { ampDisplayMode = "amount" } = getPreferenceValues<AmpPreferences>();
   const remaining = usage.ampFree.total - usage.ampFree.used;
-  const percent = (remaining / usage.ampFree.total) * 100;
+  const percent = usage.ampFree.total > 0 ? (remaining / usage.ampFree.total) * 100 : 0;
 
   if (ampDisplayMode === "percentage") {
     return {

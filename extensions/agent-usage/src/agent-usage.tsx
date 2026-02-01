@@ -9,21 +9,14 @@ import { renderDroidDetail, getDroidAccessory, formatDroidUsageText } from "./dr
 import { useGeminiUsage } from "./gemini/fetcher";
 import { renderGeminiDetail, getGeminiAccessory, formatGeminiUsageText } from "./gemini/renderer";
 import { AgentDefinition, Accessory, UsageState } from "./agents/types";
-
-const AGENT_ORDER_KEY = "agent-order";
-
-interface Preferences {
-  showAmp: boolean;
-  showCodex: boolean;
-  showDroid: boolean;
-  showGemini: boolean;
-  codexAuthToken?: string;
-  droidAuthToken?: string;
-}
 import { AmpError, AmpUsage } from "./amp/types";
 import { CodexError, CodexUsage } from "./codex/types";
 import { DroidError, DroidUsage } from "./droid/types";
 import { GeminiError, GeminiUsage } from "./gemini/types";
+
+const AGENT_ORDER_KEY = "agent-order";
+
+type Preferences = Preferences.AgentUsage;
 
 // Agent 配置定义
 const AGENTS: AgentDefinition[] = [
