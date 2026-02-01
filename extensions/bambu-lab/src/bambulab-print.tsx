@@ -18,7 +18,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { Client as FTPClient, FileInfo } from "basic-ftp";
 import { Preferences, SDFile } from "./utils/types";
-import { getTranslations } from "./utils/translations";
 import { useMQTT } from "./utils/mqtt";
 import { formatBytes } from "./utils/format";
 import { isPrintableFile, isProjectFile } from "./utils/fileUtils";
@@ -26,7 +25,6 @@ import { FTP_CONFIG, SD_CARD_PATHS } from "./utils/constants";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const t = getTranslations();
 
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState("");
@@ -74,7 +72,7 @@ export default function Command() {
 
   const refreshSdFiles = async () => {
     setIsLoading(true);
-    setProgress(t.progress_analyzing_sd);
+    setProgress("Analyzing SD card...");
 
     const ftp = new FTPClient();
     ftp.ftp.verbose = false;
@@ -130,14 +128,14 @@ export default function Command() {
       if (printableFiles.length > 0) {
         showToast({
           style: Toast.Style.Success,
-          title: t.toast_sd_loaded,
-          message: `${printableFiles.length} ${t.toast_files_count}`,
+          title: "SD loaded",
+          message: `${printableFiles.length} files`,
         });
       } else {
-        showToast({ style: Toast.Style.Failure, title: t.toast_no_files, message: t.toast_no_printable_files });
+        showToast({ style: Toast.Style.Failure, title: "No files", message: "No printable files found" });
       }
     } catch (e) {
-      showToast({ style: Toast.Style.Failure, title: t.toast_ftp_error, message: String(e) });
+      showToast({ style: Toast.Style.Failure, title: "FTP Error", message: String(e) });
     } finally {
       ftp.close();
       setIsLoading(false);
@@ -150,20 +148,20 @@ export default function Command() {
 
     const fileName = path.basename(filePath);
     setIsLoading(true);
-    setProgress(`${t.progress_upload} ${fileName}...`);
+    setProgress(`Upload: ${fileName}...`);
 
     const ftp = new FTPClient();
     ftp.trackProgress((info) => {
-      setProgress(`${t.progress_upload_percent} ${Math.round((info.bytes / info.bytesOverall) * 100)}%`);
+      setProgress(`Upload ${Math.round((info.bytes / info.bytesOverall) * 100)}%`);
     });
 
     try {
       await connectFtp(ftp);
       await ftp.uploadFrom(filePath, `/${fileName}`);
-      showToast({ style: Toast.Style.Success, title: t.toast_upload_complete });
+      showToast({ style: Toast.Style.Success, title: "Upload complete!" });
       await refreshSdFiles();
     } catch (e) {
-      showToast({ style: Toast.Style.Failure, title: t.toast_upload_error, message: String(e) });
+      showToast({ style: Toast.Style.Failure, title: "Upload Error", message: String(e) });
     } finally {
       ftp.close();
       setIsLoading(false);
@@ -173,7 +171,7 @@ export default function Command() {
 
   const startPrint = async (fileName: string, useAmsOverride?: boolean) => {
     if (!client || !isConnected) {
-      showToast({ style: Toast.Style.Failure, title: t.toast_error, message: t.toast_printer_disconnected });
+      showToast({ style: Toast.Style.Failure, title: "Error", message: "Printer disconnected" });
       return;
     }
     const shouldUseAms = useAmsOverride !== undefined ? useAmsOverride : preferences.useAmsDefault;
@@ -198,7 +196,7 @@ export default function Command() {
     };
 
     client.publish(`device/${preferences.serialNumber}/request`, JSON.stringify(payload));
-    showToast({ style: Toast.Style.Success, title: t.toast_print_started, message: baseName });
+    showToast({ style: Toast.Style.Success, title: "Print started 🚀", message: baseName });
   };
 
   const getFileSizeSafe = (path: string) => {
@@ -218,20 +216,20 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.SubmitForm
-              title={t.form_submit_upload}
+              title="Send to Printer"
               icon={Icon.Upload}
               onSubmit={(values) => {
                 const files = values.files as string[];
 
                 if (!files || files.length === 0) {
-                  setFileError(t.error_no_file);
+                  setFileError("Please select a file.");
                   return;
                 }
 
                 const file = files[0];
 
                 if (!isPrintableFile(file)) {
-                  setFileError(t.error_wrong_ext);
+                  setFileError("Only .3mf and .gcode files are accepted!");
                   return;
                 }
 
@@ -245,9 +243,9 @@ export default function Command() {
       >
         <Form.FilePicker
           id="files"
-          title={t.form_file_label}
+          title="File"
           allowMultipleSelection={false}
-          info={t.form_file_info}
+          info=".3mf or .gcode"
           error={fileError}
           onChange={() => setFileError(undefined)}
         />
@@ -256,9 +254,9 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={t.search_placeholder_sd}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search file on SD...">
       <List.Item
-        title={isConnected ? t.status_connected : t.status_disconnected}
+        title={isConnected ? "Connected" : "Disconnected"}
         subtitle={progress || preferences.ipAddress}
         icon={
           isConnected
@@ -267,45 +265,45 @@ export default function Command() {
         }
       />
 
-      <List.Section title={t.section_upload}>
+      <List.Section title="Upload">
         {selectedLocalFile ? (
           <List.Item
-            title={`${t.upload_selected_prefix} ${path.basename(selectedLocalFile)}`}
+            title={`Upload: ${path.basename(selectedLocalFile)}`}
             subtitle={getFileSizeSafe(selectedLocalFile)}
             icon={Icon.Finder}
             actions={
               <ActionPanel>
                 <Action
-                  title={t.action_send_printer}
+                  title="Send to Printer"
                   icon={Icon.Upload}
                   onAction={() => uploadToPrinter(selectedLocalFile)}
                 />
-                <Action.Push title={t.action_choose_other} icon={Icon.Folder} target={<ManualUploadForm />} />
+                <Action.Push title="Choose Another File…" icon={Icon.Folder} target={<ManualUploadForm />} />
               </ActionPanel>
             }
           />
         ) : (
           <List.Item
-            title={t.upload_manual_title}
-            subtitle={t.upload_manual_subtitle}
+            title="Manual Upload"
+            subtitle="Upload a file directly to the printer"
             icon={Icon.Upload}
             actions={
               <ActionPanel>
-                <Action.Push title={t.action_choose_file} icon={Icon.Folder} target={<ManualUploadForm />} />
+                <Action.Push title="Choose File" icon={Icon.Folder} target={<ManualUploadForm />} />
               </ActionPanel>
             }
           />
         )}
       </List.Section>
 
-      <List.Section title={t.section_sd}>
+      <List.Section title="SD Card">
         {sdFiles.length === 0 && !isLoading && (
           <List.Item
-            title={t.sd_load_title}
+            title="Load files"
             icon={Icon.Download}
             actions={
               <ActionPanel>
-                <Action title={t.action_load} onAction={refreshSdFiles} />
+                <Action title="Load" onAction={refreshSdFiles} />
               </ActionPanel>
             }
           />
@@ -320,14 +318,14 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title={t.action_print}
+                  title="Print"
                   icon={Icon.Print}
                   onAction={async () => {
                     if (
                       await confirmAlert({
-                        title: t.confirm_print_title,
-                        message: `${t.alert_file_label} ${file.name}\nAMS: ${preferences.useAmsDefault ? t.ams_status_on : t.ams_status_off}\n\n${t.confirm_print_msg}`,
-                        primaryAction: { title: t.alert_print_btn, style: Alert.ActionStyle.Destructive },
+                        title: "Start Print?",
+                        message: `File: ${file.name}\nAMS: ${preferences.useAmsDefault ? "ON" : "OFF"}\n\nAre you sure you want to start printing this file?`,
+                        primaryAction: { title: "Print", style: Alert.ActionStyle.Destructive },
                       })
                     ) {
                       await startPrint(file.name);
@@ -336,29 +334,29 @@ export default function Command() {
                 />
 
                 <Action
-                  title={t.action_print_without_ams}
+                  title="Print WITHOUT AMS"
                   icon={Icon.Circle}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={async () => {
-                    if (await confirmAlert({ title: t.alert_mode_standard, message: t.alert_print_without_ams_msg })) {
+                    if (await confirmAlert({ title: "Standard Mode", message: "Print without using AMS?" })) {
                       await startPrint(file.name, false);
                     }
                   }}
                 />
 
                 <Action
-                  title={t.action_print_with_ams}
+                  title="Print with AMS"
                   icon={Icon.Circle}
                   shortcut={{ modifiers: ["cmd"], key: "y" }}
                   onAction={async () => {
-                    if (await confirmAlert({ title: t.alert_mode_ams, message: t.alert_print_with_ams_msg })) {
+                    if (await confirmAlert({ title: "AMS Mode", message: "Force AMS usage?" })) {
                       await startPrint(file.name, true);
                     }
                   }}
                 />
 
                 <Action
-                  title={t.action_refresh}
+                  title="Refresh"
                   icon={Icon.RotateClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={refreshSdFiles}

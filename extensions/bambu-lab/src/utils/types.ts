@@ -1,10 +1,3 @@
-export interface Preferences {
-  ipAddress: string;
-  accessCode: string;
-  serialNumber: string;
-  useAmsDefault: boolean;
-}
-
 export interface LightReport {
   node: string;
   mode: "on" | "off";

@@ -38,19 +38,6 @@
       "type": "checkbox",
       "required": false,
       "default": false
-    },
-    {
-      "name": "language",
-      "title": "Language",
-      "description": "Force interface language",
-      "type": "dropdown",
-      "required": false,
-      "default": "auto",
-      "data": [
-        { "title": "Auto", "value": "auto" },
-        { "title": "English", "value": "en" },
-        { "title": "Français", "value": "fr" }
-      ]
     }
   ],
   "platforms": [

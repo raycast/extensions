@@ -12,7 +12,6 @@ import {
   Detail,
 } from "@raycast/api";
 import { useState } from "react";
-import { getTranslations } from "./utils/translations";
 import { Preferences, PrinterStatus, LightReport } from "./utils/types";
 import { useMQTT } from "./utils/mqtt";
 import { formatTime } from "./utils/format";
@@ -21,7 +20,6 @@ import { SEQUENCE_IDS, FTP_CONFIG } from "./utils/constants";
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [status, setStatus] = useState<PrinterStatus>({});
-  const t = getTranslations();
 
   const { client, isConnecting, waitForConnection } = useMQTT(preferences, {
     subscribeToReports: true,
@@ -85,9 +83,9 @@ export default function Command() {
         JSON.stringify({ print: { sequence_id: SEQUENCE_IDS.PRINT_CONTROL, command: action } }),
       );
 
-      showToast({ style: Toast.Style.Success, title: t.toast_command_sent });
+      showToast({ style: Toast.Style.Success, title: "Command sent" });
     } catch {
-      showToast({ style: Toast.Style.Failure, title: t.toast_error });
+      showToast({ style: Toast.Style.Failure, title: "Error" });
     }
   };
 
@@ -122,18 +120,18 @@ export default function Command() {
         );
       }
 
-      showToast({ style: Toast.Style.Success, title: t.toast_preheat_started });
+      showToast({ style: Toast.Style.Success, title: "Preheating started" });
     } catch {
-      showToast({ style: Toast.Style.Failure, title: t.toast_error });
+      showToast({ style: Toast.Style.Failure, title: "Error" });
     }
   };
 
   const getAMSMarkdown = () => {
-    let md = `## ${t.ams_title}\n\n| ${t.ams_header_slot} | ${t.ams_header_material} | ${t.ams_header_color} | ${t.ams_header_remain} |\n| --- | --- | --- | --- |\n`;
+    let md = `## AMS Content\n\n| Slot | Material | Color | Remaining |\n| --- | --- | --- | --- |\n`;
 
     status.ams?.ams[0]?.tray?.forEach((tray, index) => {
       const hex = tray.tray_color ? tray.tray_color.substring(0, 6) : "888888";
-      md += `| A${index + 1} | ${tray.tray_type || t.ams_status_empty} | #${hex} | ${tray.remain || 0}% |\n`;
+      md += `| A${index + 1} | ${tray.tray_type || "Empty"} | #${hex} | ${tray.remain || 0}% |\n`;
     });
     return md;
   };
@@ -153,75 +151,73 @@ export default function Command() {
   }
 
   function AMSView() {
-    return <Detail markdown={getAMSMarkdown()} navigationTitle={t.ams_view_title} />;
+    return <Detail markdown={getAMSMarkdown()} navigationTitle="AMS Details" />;
   }
 
   return (
     <List isLoading={isConnecting}>
-      <List.Section title={t.printer_status}>
+      <List.Section title="Printer Status">
         <List.Item
           icon={
             isPrinting
               ? { source: Icon.Print, tintColor: Color.Blue }
               : { source: Icon.CheckCircle, tintColor: Color.Green }
           }
-          title={
-            isPrinting ? status.subtask_name?.replace(/\.(gcode\.)?3mf$/i, "") || `${t.printing}...` : t.printer_ready
-          }
+          title={isPrinting ? status.subtask_name?.replace(/\.(gcode\.)?3mf$/i, "") || "Printing..." : "Printer Ready"}
           subtitle={
             isPrinting
-              ? `${t.subtitle_progress} ${status.total_layer_num && status.total_layer_num > 0 ? Math.round(((status.layer_num || 0) / status.total_layer_num) * 100) : 0}%`
+              ? `Progress: ${status.total_layer_num && status.total_layer_num > 0 ? Math.round(((status.layer_num || 0) / status.total_layer_num) * 100) : 0}%`
               : ""
           }
           accessories={[
-            { text: `${status.nozzle_temper || 0}°C`, icon: Icon.Temperature, tooltip: t.tooltip_nozzle },
-            { text: `${status.bed_temper || 0}°C`, icon: Icon.Layers, tooltip: t.tooltip_bed },
+            { text: `${status.nozzle_temper || 0}°C`, icon: Icon.Temperature, tooltip: "Nozzle" },
+            { text: `${status.bed_temper || 0}°C`, icon: Icon.Layers, tooltip: "Bed" },
 
-            ...(isPrinting ? [{ text: `⏳ ${formatTime(status.mc_remaining_time)}`, tooltip: t.tooltip_time }] : []),
+            ...(isPrinting ? [{ text: `⏳ ${formatTime(status.mc_remaining_time)}`, tooltip: "Time remaining" }] : []),
 
             ...(isPrinting
-              ? [{ text: `L ${status.layer_num}/${status.total_layer_num}`, tooltip: t.tooltip_layer }]
+              ? [{ text: `L ${status.layer_num}/${status.total_layer_num}`, tooltip: "Current layer" }]
               : []),
 
             {
               tag: isPaused
-                ? { value: t.tag_pause, color: Color.Yellow }
+                ? { value: "PAUSE", color: Color.Yellow }
                 : isPrinting
-                  ? { value: t.tag_run, color: Color.Green }
-                  : { value: t.tag_idle, color: Color.SecondaryText },
+                  ? { value: "RUN", color: Color.Green }
+                  : { value: "IDLE", color: Color.SecondaryText },
             },
           ]}
           actions={
             <ActionPanel>
               {isPrinting && (
                 <Action
-                  title={isPaused ? t.resume_action : t.pause_print}
+                  title={isPaused ? "Resume" : "Pause Printing"}
                   icon={isPaused ? Icon.Play : Icon.Pause}
                   onAction={() => controlPrint(isPaused ? "resume" : "pause")}
                 />
               )}
-              <Action.Push title={t.action_view_ams} icon={Icon.Circle} target={<AMSView />} />
+              <Action.Push title="View AMS Content" icon={Icon.Circle} target={<AMSView />} />
             </ActionPanel>
           }
         />
       </List.Section>
 
-      <List.Section title={t.section_steering}>
+      <List.Section title="Steering">
         <List.Item
           icon={
             !isPrinting ? { source: Icon.Pause, tintColor: Color.SecondaryText } : isPaused ? Icon.Play : Icon.Pause
           }
-          title={!isPrinting ? t.pause_inactive : isPaused ? t.resume_print : t.pause_print}
+          title={!isPrinting ? "Pause (Inactive)" : isPaused ? "Resume Printing" : "Pause Printing"}
           actions={
             <ActionPanel>
               {isPrinting ? (
                 <Action
-                  title={isPaused ? t.resume_action : t.pause_print}
+                  title={isPaused ? "Resume" : "Pause Printing"}
                   icon={isPaused ? Icon.Play : Icon.Pause}
                   onAction={() => controlPrint(isPaused ? "resume" : "pause")}
                 />
               ) : (
-                <Action title={t.action_inactive} onAction={() => {}} />
+                <Action title="Inactive" onAction={() => {}} />
               )}
             </ActionPanel>
           }
@@ -229,20 +225,20 @@ export default function Command() {
 
         <List.Item
           icon={{ source: Icon.Stop, tintColor: !isPrinting ? Color.SecondaryText : Color.Red }}
-          title={!isPrinting ? t.stop_inactive : t.stop_emergency}
+          title={!isPrinting ? "Emergency Stop (Inactive)" : "EMERGENCY STOP"}
           actions={
             <ActionPanel>
               {isPrinting ? (
                 <Action
-                  title={t.stop_action}
+                  title="Stop Printing"
                   icon={Icon.Stop}
                   style={Action.Style.Destructive}
                   onAction={async () => {
                     if (
                       await confirmAlert({
-                        title: t.alert_stop_short_title,
+                        title: "Stop?",
                         primaryAction: {
-                          title: t.alert_stop_btn,
+                          title: "Stop",
                           style: Alert.ActionStyle.Destructive,
                         },
                       })
@@ -252,40 +248,38 @@ export default function Command() {
                   }}
                 />
               ) : (
-                <Action title={t.action_inactive} onAction={() => {}} />
+                <Action title="Inactive" onAction={() => {}} />
               )}
             </ActionPanel>
           }
         />
       </List.Section>
 
-      <List.Section title={t.section_tools}>
+      <List.Section title="Tools">
         <List.Item
           icon={isLightOn ? { source: Icon.LightBulb, tintColor: Color.Yellow } : Icon.LightBulbOff}
-          title={isLightOn ? t.light_off_action : t.light_on_action}
+          title={isLightOn ? "Turn Light Off" : "Turn Light On"}
           accessories={[
             {
-              tag: isLightOn
-                ? { value: t.light_on_status, color: Color.Green }
-                : { value: t.light_off_status, color: Color.Red },
+              tag: isLightOn ? { value: "ON", color: Color.Green } : { value: "OFF", color: Color.Red },
             },
           ]}
           actions={
             <ActionPanel>
-              <Action title={t.action_toggle} onAction={toggleLight} />
+              <Action title="Toggle" onAction={toggleLight} />
             </ActionPanel>
           }
         />
 
         <List.Item
           icon={Icon.Temperature}
-          title={t.preheat_title}
+          title="Preheat"
           actions={
             <ActionPanel>
-              <ActionPanel.Submenu title={t.submenu_material} icon={Icon.Temperature}>
-                <Action title={t.action_preheat_pla} onAction={() => preheat(60, 220)} />
-                <Action title={t.action_preheat_petg} onAction={() => preheat(80, 250)} />
-                <Action title={t.action_cooldown} icon={Icon.Snowflake} onAction={() => preheat(0, 0)} />
+              <ActionPanel.Submenu title="Material" icon={Icon.Temperature}>
+                <Action title="PLA (60°C / 220°C)" onAction={() => preheat(60, 220)} />
+                <Action title="PETG (80°C / 250°C)" onAction={() => preheat(80, 250)} />
+                <Action title="Cooldown (0°C)" icon={Icon.Snowflake} onAction={() => preheat(0, 0)} />
               </ActionPanel.Submenu>
             </ActionPanel>
           }
