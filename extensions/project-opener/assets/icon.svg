@@ -1,0 +1,41 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Dark sleek gradient for folder back -->
+    <linearGradient id="folderBackGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#374151"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+
+    <!-- Dark sleek gradient for folder front -->
+    <linearGradient id="folderFrontGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4B5563"/>
+      <stop offset="50%" stop-color="#374151"/>
+      <stop offset="100%" stop-color="#1F2937"/>
+    </linearGradient>
+
+    <!-- Blue gradient for code brackets -->
+    <linearGradient id="bracketGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="50%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Folder back - scaled up -->
+  <path d="M24 56C24 38.327 38.327 24 56 24H168L208 80H456C473.673 80 488 94.327 488 112V440C488 457.673 473.673 472 456 472H56C38.327 472 24 457.673 24 440V56Z" fill="url(#folderBackGradient)"/>
+
+  <!-- Folder front - scaled up -->
+  <path d="M24 128C24 110.327 38.327 96 56 96H456C473.673 96 488 110.327 488 128V440C488 457.673 473.673 472 456 472H56C38.327 472 24 457.673 24 440V128Z" fill="url(#folderFrontGradient)"/>
+
+  <!-- Code brackets </> - scaled up and centered -->
+  <g>
+    <!-- Left bracket < -->
+    <path d="M120 380L180 276L120 172" stroke="url(#bracketGradient)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Right bracket > -->
+    <path d="M392 172L332 276L392 380" stroke="url(#bracketGradient)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Forward slash / -->
+    <path d="M296 172L216 380" stroke="url(#bracketGradient)" stroke-width="32" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

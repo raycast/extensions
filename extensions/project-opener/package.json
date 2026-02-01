@@ -1,0 +1,79 @@
+{
+  "name": "project-opener",
+  "title": "Project Opener",
+  "description": "Quickly open projects from your projects directory in your preferred IDE",
+  "icon": "icon.png",
+  "author": "mark_minkoff",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "description": "Browse and open projects in your IDE",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ide",
+      "title": "IDE Application",
+      "description": "The application to open projects with",
+      "type": "appPicker",
+      "required": true
+    },
+    {
+      "name": "projectsDirectory",
+      "title": "Projects Directory",
+      "description": "The root directory containing your projects",
+      "type": "directory",
+      "required": true,
+      "default": "~/Documents/projects"
+    },
+    {
+      "name": "searchDepth",
+      "title": "Search Depth",
+      "description": "How many levels deep to search for projects",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "1 level",
+          "value": "1"
+        },
+        {
+          "title": "2 levels",
+          "value": "2"
+        },
+        {
+          "title": "3 levels",
+          "value": "3"
+        },
+        {
+          "title": "4 levels",
+          "value": "4"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/bun": "^1.3.8",
+    "@types/node": "^25.1.0",
+    "@types/react": "^19.2.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "bun test"
+  }
+}
