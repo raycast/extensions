@@ -22,12 +22,12 @@ Prompt Optimizer is a Raycast extension that helps you turn rough ideas into cle
 - You have a vague or messy prompt and want a cleaner version
 - You need consistent output format for tooling or automation
 - You want to reduce back-and-forth with AI assistants
-- You want the same request tailored to a specific target model
+- You want the same request tailored to a specific execution mode
 
 ## Usage
 
 - Run the command `Optimize Prompt`
-- Choose a target model and paste the prompt you want to optimize
+- Choose an execution mode and paste the prompt you want to optimize
 - Submit to receive an optimized prompt
 - You can improve the optimized prompt further by answering clarifying questions (⌘+Enter)
 - You can retry optimization if the result is not satisfactory (⌘+K → Retry Optimization)

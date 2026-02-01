@@ -1,7 +1,7 @@
 import React from "react";
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { TARGET_MODELS } from "shared/constants";
+import { TARGET_MODES } from "shared/constants";
 import { OptimizePromptFormErrorState, OptimizePromptFormValues } from "../types";
 
 type OptimizePromptFormProps = {
@@ -11,8 +11,9 @@ type OptimizePromptFormProps = {
 };
 
 export const OptimizePromptForm: React.FC<OptimizePromptFormProps> = ({ isOptimizing, errorState, onSubmit }) => {
-  const defaultTargetModel = TARGET_MODELS[0]?.key ?? "";
-  const [targetModel, setTargetModel] = useCachedState("optimizePrompt.targetModel", defaultTargetModel);
+  const defaultTargetMode = TARGET_MODES[0]?.key ?? "";
+  const [targetMode, setTargetMode] = useCachedState("optimizePrompt.mode", defaultTargetMode);
+  const selectedMode = TARGET_MODES.find((mode) => mode.key === targetMode);
 
   return (
     <Form
@@ -27,9 +28,15 @@ export const OptimizePromptForm: React.FC<OptimizePromptFormProps> = ({ isOptimi
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="targetModel" title="Model" value={targetModel} onChange={setTargetModel}>
-        {TARGET_MODELS.map((modelType) => (
-          <Form.Dropdown.Item key={modelType.key} value={modelType.key} title={modelType.title} />
+      <Form.Dropdown
+        id="targetMode"
+        title="Mode"
+        value={targetMode}
+        onChange={setTargetMode}
+        info={selectedMode?.description}
+      >
+        {TARGET_MODES.map((mode) => (
+          <Form.Dropdown.Item key={mode.key} value={mode.key} icon={mode.icon} title={mode.title} />
         ))}
       </Form.Dropdown>
 

@@ -1,8 +1,6 @@
-import { TargetModelInfo } from "shared/types";
-
 export type OptimizePromptFormValues = {
   prompt: string;
-  targetModel: string;
+  targetMode: string;
 };
 
 export type ImproveOptimizedPromptFormValues = {
@@ -55,8 +53,8 @@ export type OptimizerInputPayload = {
   /** The original prompt to optimize. */
   initialPrompt: string;
 
-  /** The target model info (the model for which the prompt is being optimized) */
-  targetModel: TargetModelInfo;
+  /** The target mode info (the execution scenario for the optimized prompt) */
+  targetMode: { title: string; executionContext: string };
 
   /** An optional current optimized prompt to provide as context. */
   currentOptimizedPrompt?: string;

@@ -1,7 +1,7 @@
 import { stripIndent } from "common-tags";
 import { createOpenAIResponse } from "shared/lib/openapi";
-import { TARGET_MODELS } from "shared/constants";
-import { OpenaiApiKey, TargetModelKey } from "shared/types";
+import { TARGET_MODES } from "shared/constants";
+import { OpenaiApiKey, TargetModeKey } from "shared/types";
 import {
   OptimizerClarificationInput,
   OptimizerInputPayload,
@@ -9,27 +9,7 @@ import {
   OptimizerResult,
 } from "commands/optimize-prompt/types";
 
-// ROLE
-// You are Prompt Optimizer. Your only job is to rewrite the provided prompt(s) into an optimized prompt for a downstream LLM.
-
-// HARD RULES (non-negotiable)
-// - Do NOT answer or execute the user’s underlying task, directly or indirectly.
-// - Output ONLY the optimized prompt. No commentary, no prefaces, no analysis.
-// - Preserve intent and facts exactly. Do not add new goals, constraints, deliverables, or preferences that the user did not provide.
-// - Do not invent missing details. If essential information is missing, keep explicit placeholders (e.g., <TODO: ...>) or add a short “Questions for the user” section ONLY if the original prompt already implied the need for clarification. Otherwise, proceed with minimal assumptions.
-// - Remove contradictions and ambiguity; if conflict cannot be resolved without new info, reflect it as an explicit choice point or placeholder.
-// - Keep the language of the optimized prompt the same as the input.
-
-// OPTIMIZATION TARGETS
-// - Make the prompt unambiguous and executable by a downstream LLM.
-// - Add structure: Goal, Context, Inputs, Output format, Constraints, Done criteria.
-// - Add anti-scope-drift constraints: “do exactly and only what is requested”, “do not invent”.
-// - If and only if the prompt is for an agent/tool-using LLM, add: tool-use boundaries, stop conditions, and safe/unsafe actions.
-
-// OUTPUT FORMAT
-// Return the optimized prompt as plain text. No Markdown unless the original prompt used it or the target environment expects it.
-
-export const SYSTEM_PROMPT = stripIndent`
+const SYSTEM_PROMPT = stripIndent`
   ## ROLE AND OBJECTIVE
 
   You are a Prompt Optimizer, equivalent in behavior to OpenAI Prompt Editor
@@ -63,9 +43,8 @@ export const SYSTEM_PROMPT = stripIndent`
     to the input or explicit clarifications.
   - Output must be self-contained, copy-paste ready, and in the same language
     as the input prompt.
-  - Optimize with awareness of targetModel capabilities, without introducing
-    model-specific requirements not implied by the prompt.
-
+  - Optimize with awareness of targetMode execution context, in which the prompt will be used,
+    without introducing context-specific assumptions or requirements not implied by the prompt.
   ---
 
   ## OPTIMIZATION RULES
@@ -142,7 +121,7 @@ export const SYSTEM_PROMPT = stripIndent`
 
   User input is a JSON object with:
   - initialPrompt (required)
-  - targetModel (required)
+  - targetMode (required)
   - currentOptimizedPrompt (optional)
   - clarifications (optional)
   - requestedChanges (optional)
@@ -150,6 +129,8 @@ export const SYSTEM_PROMPT = stripIndent`
   Guidance:
   - If currentOptimizedPrompt exists, refine it — do NOT restart.
   - Apply requestedChanges literally unless they conflict with intent preservation.
+  - targetMode provides execution context and may be used to align structure
+    without adding new goals.
   - Use clarifications only to reduce ambiguity.
 
   ---
@@ -253,13 +234,13 @@ export const OPTIMIZER_RESPONSE_SCHEMA = {
 type OptimizePromptProps = {
   apiKey: OpenaiApiKey;
   initialPrompt: string;
-  targetModel: TargetModelKey;
+  targetMode: TargetModeKey;
 };
 
 export async function optimizePrompt(props: OptimizePromptProps): Promise<OptimizerResult> {
   const userPayload: OptimizerInputPayload = {
     initialPrompt: props.initialPrompt,
-    targetModel: getTargetModelInfo(props.targetModel),
+    targetMode: toTargetModePayload(props.targetMode),
   };
 
   const response = await createOpenAIResponse<OptimizerResponseDTO>({
@@ -275,7 +256,7 @@ export async function optimizePrompt(props: OptimizePromptProps): Promise<Optimi
 type ImproveOptimizedPromptProps = {
   apiKey: OpenaiApiKey;
   initialPrompt: string;
-  targetModel: TargetModelKey;
+  targetMode: TargetModeKey;
   currentOptimizedPrompt: string;
   clarifications: OptimizerClarificationInput[];
 };
@@ -283,7 +264,7 @@ type ImproveOptimizedPromptProps = {
 export async function improveOptimizedPrompt(props: ImproveOptimizedPromptProps): Promise<OptimizerResult> {
   const userPayload: OptimizerInputPayload = {
     initialPrompt: props.initialPrompt,
-    targetModel: getTargetModelInfo(props.targetModel),
+    targetMode: toTargetModePayload(props.targetMode),
     currentOptimizedPrompt: props.currentOptimizedPrompt,
     clarifications: props.clarifications,
   };
@@ -301,14 +282,14 @@ export async function improveOptimizedPrompt(props: ImproveOptimizedPromptProps)
 type RetryOptimizePromptProps = {
   apiKey: OpenaiApiKey;
   initialPrompt: string;
-  targetModel: TargetModelKey;
+  targetMode: TargetModeKey;
   currentOptimizedPrompt: string;
 };
 
 export async function retryOptimizePrompt(props: RetryOptimizePromptProps): Promise<OptimizerResult> {
   const userPayload: OptimizerInputPayload = {
     initialPrompt: props.initialPrompt,
-    targetModel: getTargetModelInfo(props.targetModel),
+    targetMode: toTargetModePayload(props.targetMode),
     currentOptimizedPrompt: props.currentOptimizedPrompt,
     requestedChanges: RETRY_REQUESTED_CHANGE,
   };
@@ -340,8 +321,16 @@ function optimizerResponseDtoToResult(dto: OptimizerResponseDTO): OptimizerResul
   }
 }
 
-function getTargetModelInfo(targetModel: TargetModelKey) {
-  const info = TARGET_MODELS.find((m) => m.key === targetModel);
-  if (!info) throw new Error(`Unknown targetModel: ${targetModel}`);
+function getTargetModeInfo(targetMode: TargetModeKey) {
+  const info = TARGET_MODES.find((mode) => mode.key === targetMode);
+  if (!info) throw new Error(`Unknown targetMode: ${targetMode}`);
   return info;
+}
+
+function toTargetModePayload(targetMode: TargetModeKey) {
+  const info = getTargetModeInfo(targetMode);
+  return {
+    title: info.title,
+    executionContext: info.executionContext,
+  };
 }

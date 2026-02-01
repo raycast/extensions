@@ -12,7 +12,7 @@ import {
   OptimizePromptFormValues,
   OptimizerSuccessResult,
 } from "../types";
-import { TargetModelKey } from "shared/types";
+import { TargetModeKey } from "shared/types";
 
 type Preferences = {
   openaiApiKey?: string;
@@ -21,7 +21,7 @@ type Preferences = {
 
 type OptimizationSession = {
   initialPrompt: string;
-  targetModel: TargetModelKey;
+  targetMode: TargetModeKey;
   optimizedPrompt: string;
   clarifyingQuestions: string[];
 };
@@ -127,12 +127,12 @@ export const OptimizePromptCommand: React.FC = () => {
           optimizePrompt({
             apiKey,
             initialPrompt: values.prompt,
-            targetModel: values.targetModel,
+            targetMode: values.targetMode,
           }),
         onSuccess: (response) => {
           setSession({
             initialPrompt: values.prompt,
-            targetModel: values.targetModel,
+            targetMode: values.targetMode,
             optimizedPrompt: response.optimizedPrompt,
             clarifyingQuestions: response.clarifyingQuestions,
           });
@@ -159,7 +159,7 @@ export const OptimizePromptCommand: React.FC = () => {
           improveOptimizedPrompt({
             apiKey,
             initialPrompt: session.initialPrompt,
-            targetModel: session.targetModel,
+            targetMode: session.targetMode,
             currentOptimizedPrompt: session.optimizedPrompt,
             clarifications: values.clarifications,
           }),
@@ -190,7 +190,7 @@ export const OptimizePromptCommand: React.FC = () => {
         retryOptimizePrompt({
           apiKey,
           initialPrompt: session.initialPrompt,
-          targetModel: session.targetModel,
+          targetMode: session.targetMode,
           currentOptimizedPrompt: session.optimizedPrompt,
         }),
       onSuccess: (response) => {
