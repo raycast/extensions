@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@raycast/api": "^1.102.6",
-    "codex": "^0.2.3",
     "execa": "^8.0.1",
     "pidusage": "^3.0.2"
   },
@@ -34,7 +33,8 @@
   "title": "Localhost Manager",
   "icon": "extension-icon.png",
   "categories": [
-    "Other"
+    "Developer Tools",
+    "System"
   ],
   "commands": [
     {
