@@ -45,5 +45,15 @@ Prompt Optimizer is a Raycast extension that helps you turn rough ideas into cle
 
 ## Requirements
 
-- The optimizer uses OpenAI Responses API with a system prompt and user payload, openai API key is required.
+- The optimizer uses an OpenAI-compatible API. An API key is required.
 - Use of OpenAI APIs must comply with OpenAI's Terms of Use.
+
+## Configuration
+
+Set these in the extension preferences:
+
+- API Provider: `OpenAI` or `OpenAI Compatible`
+- API Key: required
+- API Base URL: required only for `OpenAI Compatible`
+- Default Headers: optional; key-value pairs for API requests
+- Model: optional; for OpenAI defaults to `gpt-5.2` if empty

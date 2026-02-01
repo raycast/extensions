@@ -52,7 +52,6 @@ export class LLMProvider {
       apiKey: params.apiKey,
       baseURL: params.apiBaseUrl,
       defaultHeaders: params.defaultHeaders,
-      logLevel: "debug",
     });
   }
 
