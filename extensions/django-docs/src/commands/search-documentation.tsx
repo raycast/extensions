@@ -1,6 +1,7 @@
 import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
+import Fuse from "fuse.js";
 import { fetchDocEntries } from "../services/django-docs";
 import { writeCache, readCache } from "../services/cache";
 import { DocDetail } from "../components/DocDetail";
@@ -26,7 +27,28 @@ async function loadDocEntries(version: DjangoVersion): Promise<SerializableEntry
   return serializeEntries(docEntries);
 }
 
+function VersionDropdown({
+  version,
+  onVersionChange,
+}: {
+  version: DjangoVersion;
+  onVersionChange: (v: DjangoVersion) => void;
+}) {
+  return (
+    <List.Dropdown
+      tooltip="Select a version"
+      value={version}
+      onChange={(newValue: string) => onVersionChange(newValue as DjangoVersion)}
+    >
+      {DJANGO_VERSIONS.map((ver: string) => (
+        <List.Dropdown.Item key={ver} title={ver === "dev" ? "Development (unstable)" : `v${ver}`} value={ver} />
+      ))}
+    </List.Dropdown>
+  );
+}
+
 export default function SearchDocumentationCommand() {
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [version, setVersion] = useState<DjangoVersion>("6.0");
 
   const { data: serializedEntries = [], isLoading } = useCachedPromise(loadDocEntries, [version], {
@@ -40,27 +62,38 @@ export default function SearchDocumentationCommand() {
   // Reconstruct circular references from serialized data
   const entries = useMemo(() => deserializeEntries(serializedEntries), [serializedEntries]);
 
-  const VersionDropdown = () => {
-    return (
-      <List.Dropdown
-        tooltip="Select a version"
-        value={version}
-        onChange={(newValue: string) => setVersion(newValue as DjangoVersion)}
-      >
-        {DJANGO_VERSIONS.map((ver: string) => (
-          <List.Dropdown.Item key={ver} title={ver} value={ver} />
-        ))}
-      </List.Dropdown>
-    );
-  };
+  // Memoize Fuse instance separately to avoid recreation on every search
+  const fuse = useMemo(() => {
+    return new Fuse(entries, {
+      keys: [
+        { name: "title", weight: 2 }, // Page title most important
+        { name: "headings", weight: 1 }, // Section headings for better relevance
+      ],
+      threshold: 0.4, // 0 = perfect match, 1 = match anything
+      ignoreLocation: true, // Search entire string, not just beginning
+      minMatchCharLength: 2, // Require at least 2 characters to match
+    });
+  }, [entries]);
+
+  // Filter entries using Fuse.js fuzzy search
+  const filteredEntries = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return entries;
+    }
+
+    const results = fuse.search(searchTerm);
+    return results.map((result) => result.item);
+  }, [searchTerm, fuse, entries]);
 
   return (
     <List
+      filtering={false}
+      onSearchTextChange={setSearchTerm}
       isLoading={isLoading}
       searchBarPlaceholder="Search Django Documentation..."
-      searchBarAccessory={<VersionDropdown />}
+      searchBarAccessory={<VersionDropdown version={version} onVersionChange={setVersion} />}
     >
-      {entries.map((entry) => (
+      {filteredEntries.map((entry) => (
         <List.Item
           key={entry.url}
           id={entry.url}

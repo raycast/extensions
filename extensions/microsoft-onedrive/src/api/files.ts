@@ -131,14 +131,16 @@ export async function getRootFiles(driveId?: string): Promise<PaginatedResult> {
 
 /**
  * Search for files across OneDrive and SharePoint
+ * @param folderId - Optional folder ID to limit search scope to that folder and its subfolders
  */
 export async function searchFiles(
   query: string,
   driveId?: string,
+  folderId?: string,
   sortOption: "relevance" | "lastModifiedDateTime" = "relevance",
 ): Promise<PaginatedResult> {
   if (!query || query.trim().length === 0) {
-    return getRootFiles(driveId);
+    return folderId ? getFolderContents(folderId, driveId) : getRootFiles(driveId);
   }
 
   try {
@@ -146,7 +148,9 @@ export async function searchFiles(
     const orderByParam = sortOption === "relevance" ? "" : "$orderby=lastModifiedDateTime desc&";
     // Escape single quotes for OData syntax before encoding
     const escapedQuery = encodeURIComponent(query.replace(/'/g, "''"));
-    const endpoint = `${getDrivePrefix(driveId)}/root/search(q='${escapedQuery}')?${orderByParam}${DRIVE_ITEM_SELECT}`;
+    // Use folder-scoped search when folderId is provided, otherwise search from root
+    const searchRoot = folderId ? `items/${folderId}` : "root";
+    const endpoint = `${getDrivePrefix(driveId)}/${searchRoot}/search(q='${escapedQuery}')?${orderByParam}${DRIVE_ITEM_SELECT}`;
     const response = await graphRequest(endpoint);
     const data = (await response.json()) as SearchResult;
 

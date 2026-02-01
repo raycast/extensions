@@ -1,8 +1,10 @@
 /**
- * Switch Convex Project Command
+ * Manage Projects Command
  *
- * Allows users to switch between their Convex projects and deployments.
+ * Allows users to manage and switch between their Convex projects and deployments.
  * This is the foundational command that sets the active deployment for other commands.
+ *
+ * Note: This command is not available in deploy key mode since it requires BigBrain API access.
  */
 
 import {
@@ -31,6 +33,8 @@ export default function SwitchProjectCommand() {
     session,
     isLoading: authLoading,
     isAuthenticated,
+    isDeployKeyMode,
+    deployKeyConfig,
     login,
     logout,
     selectedContext,
@@ -44,20 +48,22 @@ export default function SwitchProjectCommand() {
 
   const accessToken = session?.accessToken ?? null;
 
-  const { data: profile } = useProfile(accessToken);
-  const { data: teams, isLoading: teamsLoading } = useTeams(accessToken);
+  const { data: profile } = useProfile(isDeployKeyMode ? null : accessToken);
+  const { data: teams, isLoading: teamsLoading } = useTeams(
+    isDeployKeyMode ? null : accessToken,
+  );
   const { data: projects, isLoading: projectsLoading } = useProjects(
-    accessToken,
+    isDeployKeyMode ? null : accessToken,
     selectedTeam?.id ?? null,
   );
   const { data: deployments, isLoading: deploymentsLoading } = useDeployments(
-    accessToken,
+    isDeployKeyMode ? null : accessToken,
     selectedProject?.id ?? null,
   );
 
   // Restore selection from context
   useEffect(() => {
-    if (teams && selectedContext.teamId) {
+    if (Array.isArray(teams) && selectedContext.teamId) {
       const team = teams.find((t) => t.id === selectedContext.teamId);
       if (team) {
         setSelectedTeam(team);
@@ -67,7 +73,7 @@ export default function SwitchProjectCommand() {
   }, [teams, selectedContext.teamId]);
 
   useEffect(() => {
-    if (projects && selectedContext.projectId) {
+    if (Array.isArray(projects) && selectedContext.projectId) {
       const project = projects.find((p) => p.id === selectedContext.projectId);
       if (project) {
         setSelectedProject(project);
@@ -79,6 +85,66 @@ export default function SwitchProjectCommand() {
   // Handle authentication - show sign in prompt if not authenticated
   if (authLoading) {
     return <List isLoading={true} searchBarPlaceholder="Loading..." />;
+  }
+
+  // Deploy key mode - show locked deployment info
+  if (isDeployKeyMode && deployKeyConfig) {
+    return (
+      <List>
+        <List.Section title="Deploy Key Mode">
+          <List.Item
+            title={deployKeyConfig.deploymentName}
+            subtitle="Locked deployment (using deploy key)"
+            icon={Icon.Lock}
+            accessories={[{ text: "Active" }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard
+                  title="Copy Deployment URL"
+                  content={deployKeyConfig.deploymentUrl}
+                />
+                <Action
+                  title="Open Preferences"
+                  icon={Icon.Gear}
+                  onAction={openExtensionPreferences}
+                  shortcut={{ modifiers: ["cmd"], key: "," }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+        <List.Section title="Information">
+          <List.Item
+            title="Switching Projects is Disabled"
+            subtitle="Deploy key mode locks you to a single deployment"
+            icon={Icon.Info}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Open Preferences"
+                  icon={Icon.Gear}
+                  onAction={openExtensionPreferences}
+                />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title="To switch projects, remove the deploy key"
+            subtitle="Open Preferences and clear the deploy key fields"
+            icon={Icon.QuestionMark}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Open Preferences"
+                  icon={Icon.Gear}
+                  onAction={openExtensionPreferences}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      </List>
+    );
   }
 
   if (!isAuthenticated) {
@@ -175,25 +241,31 @@ export default function SwitchProjectCommand() {
         : `${selectedProject?.name} - Deployments`;
 
   // Filter items based on search text
-  const filteredTeams = teams?.filter(
-    (team) =>
-      team.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      team.slug.toLowerCase().includes(searchText.toLowerCase()),
-  );
+  const filteredTeams = Array.isArray(teams)
+    ? teams.filter(
+        (team) =>
+          team.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          team.slug.toLowerCase().includes(searchText.toLowerCase()),
+      )
+    : [];
 
-  const filteredProjects = projects?.filter(
-    (project) =>
-      project.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      project.slug.toLowerCase().includes(searchText.toLowerCase()),
-  );
+  const filteredProjects = Array.isArray(projects)
+    ? projects.filter(
+        (project) =>
+          project.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          project.slug.toLowerCase().includes(searchText.toLowerCase()),
+      )
+    : [];
 
-  const filteredDeployments = deployments?.filter(
-    (deployment) =>
-      deployment.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      deployment.deploymentType
-        .toLowerCase()
-        .includes(searchText.toLowerCase()),
-  );
+  const filteredDeployments = Array.isArray(deployments)
+    ? deployments.filter(
+        (deployment) =>
+          deployment.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          deployment.deploymentType
+            .toLowerCase()
+            .includes(searchText.toLowerCase()),
+      )
+    : [];
 
   // Current selection subtitle
   const currentSelection = selectedContext.deploymentName

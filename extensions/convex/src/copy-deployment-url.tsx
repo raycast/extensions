@@ -16,7 +16,7 @@ export default async function CopyDeploymentUrlCommand() {
     await showToast({
       style: Toast.Style.Failure,
       title: "Not signed in",
-      message: "Use 'Switch Project' to sign in first",
+      message: "Use 'Manage Projects' to sign in first",
     });
     return;
   }
@@ -25,7 +25,7 @@ export default async function CopyDeploymentUrlCommand() {
     await showToast({
       style: Toast.Style.Failure,
       title: "No deployment selected",
-      message: "Use 'Switch Project' to select a deployment first",
+      message: "Use 'Manage Projects' to select a deployment first",
     });
     return;
   }

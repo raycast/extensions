@@ -16,7 +16,9 @@ export function useVideoData(videoURL: string | null | undefined) {
         setVideoData(data);
         return getVideoTranscript(videoURL);
       })
-      .then(setTranscript)
+      .then((t) => {
+        setTranscript(t);
+      })
       .catch((error: Error) => {
         showToast({
           style: Toast.Style.Failure,

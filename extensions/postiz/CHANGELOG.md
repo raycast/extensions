@@ -1,8 +1,14 @@
 # Postiz Changelog
 
+## [Date, X Settings in New Post] - 2026-01-24
+
+In Create Post:
+- Added date picker for post date
+- Added provider settings for _X_ (**v2**)
+
 ## [Character Counter in New Post] - 2026-01-19
 
-In **Create Post**:
+In Create Post:
 - Added character counter for content based on selected channel
 
 ## [Jump to Today + Filter by State] - 2026-01-19

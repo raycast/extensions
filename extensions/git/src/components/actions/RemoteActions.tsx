@@ -16,6 +16,7 @@ export function RemoteFetchAction(context: RepositoryContext & { remotesHosts?: 
       context.branches.revalidate();
       context.commits.revalidate();
       context.status.revalidate();
+      context.tags.revalidate();
     } catch {
       // Git error is already shown by GitManager
     }

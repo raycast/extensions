@@ -1,5 +1,18 @@
 # Changelog
 
+## [Update] - 2026-01-21
+
+### Added
+- **Commands**: Add "Open Last Visited Git Repository" command
+- **Repository Navigation**: Add "Switch Repository" action
+  - Introduce `SwitchRepositoryAction` component with keyboard shortcut (Ctrl+R)
+  - Enable quick switching between repositories without leaving the current view
+
+### Changed
+- **Commits**: Improve error handling in `useGitCommits` hook
+  - Add try-catch block to prevent crashes when fetching commits fails
+  - Return empty data gracefully on errors instead of throwing exceptions
+
 ## [Update] - 2026-01-17
 
 ### Added

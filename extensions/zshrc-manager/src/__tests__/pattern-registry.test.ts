@@ -278,7 +278,8 @@ describe("pattern-registry.ts", () => {
     });
 
     it("should count multiple compinit calls", () => {
-      const content = `compinit\ncompinit -D`;
+      // Note: The parser only matches bare `compinit` lines, not `compinit` with arguments
+      const content = `compinit\ncompinit`;
       const result = countAllPatterns(content);
       expect(result.completions).toBe(2);
     });

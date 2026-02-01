@@ -1,5 +1,14 @@
 # Mermaid to Image Changelog
 
+## [AI Tool Output & Preferences Update] - 2026-01-21
+### Added
+- **Scale Preference (Dropdown)**: Users can choose scale 2/3/4 with default 2 for AI-generated images.
+
+### Changed
+- **AI Tool Response Format**: Returns a minimal success message with a Preview link (no inline markdown image rendering in AI chat).
+- **AI Tool Parameter Schema**: Updated JSDoc to ensure `mermaidSyntax` is passed correctly.
+- **AI Generation Scale**: Uses the user-selected scale from preferences (default 2).
+
 ## [AI Chat Integration Enhancement] - 2026-01-17
 ### Added
 - **Inline Image Display in AI Chat**: Generated diagrams now automatically appear as inline images in Raycast AI conversations

@@ -1,5 +1,11 @@
 # Brew Changelog
 
+## [New Feature] - 2026-01-27
+
+- Added optional split-view metadata panel for search results
+- Enable "Show metadata panel in search results" in Search command preferences (default true)
+- Displays package description and metadata alongside the search list
+
 ## [Improvements] - 2026-01-05
 
 - Add a toggle to filter installed packages, allowing users to hide dependencies and show only those explicitly "installed on request".

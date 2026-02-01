@@ -12,7 +12,7 @@ export default function ProjectWorkItemsList({ projectItem }: { projectItem: Pro
       {workItems.map((workItem, i) => (
         <List.Item
           key={i}
-          icon={Icon.BullsEye}
+          icon={{ source: Icon.BullsEye, tintColor: workItem.state.color, tooltip: workItem.state.name }}
           title={workItem.name}
           subtitle={`${projectItem.identifier} ${workItem.sequenceId}`}
           detail={
@@ -23,7 +23,10 @@ export default function ProjectWorkItemsList({ projectItem }: { projectItem: Pro
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                url={getWorkItemBrowseUrl(planeClient?.workspaceSlug ?? "", projectItem, workItem)}
+                url={getWorkItemBrowseUrl(planeClient?.workspaceSlug ?? "", projectItem, {
+                  ...workItem,
+                  state: workItem.state.id,
+                })}
               />
             </ActionPanel>
           }

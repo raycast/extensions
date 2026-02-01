@@ -1,5 +1,13 @@
 # Parcel Changelog
 
+## [Fix Carrier Dropdown Default] - 2026-01-30
+
+- Fixed the "Add Delivery" carrier dropdown auto-selecting the first carrier (4PX) instead of starting with no selection
+
+## [Added Windows Support] - 2026-01-29
+
+- Added support for Windows in addition to Mac
+
 ## [Internationalization and Carrier Name Display] - 2026-01-13
 
 - Removed hardcoded locale value introduced in a previous change - dates now display correctly for all international users

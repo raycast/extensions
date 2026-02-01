@@ -24,7 +24,7 @@ export default function Sources({ searchBarAccessory }: SourcesProps) {
     <ListViewController<SourceItem>
       commandName="Sources"
       navigationTitle="Sources"
-      searchPlaceholder="Search source commands..."
+      searchPlaceholder="Search Source Commands..."
       icon={Icon.Document}
       tintColor={MODERN_COLORS.primary}
       itemType="source"

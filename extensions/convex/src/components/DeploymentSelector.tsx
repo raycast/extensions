@@ -1,5 +1,7 @@
 /**
  * DeploymentSelector - Quick deployment selection dropdown
+ *
+ * In deploy key mode, this shows a static badge indicating the locked deployment.
  */
 
 import { Icon, List } from "@raycast/api";
@@ -11,6 +13,7 @@ import {
   type Project,
   type Deployment,
 } from "../hooks";
+import { type DeployKeyConfig } from "../lib/deployKeyAuth";
 
 interface DeploymentSelectorProps {
   accessToken: string;
@@ -18,6 +21,8 @@ interface DeploymentSelectorProps {
   selectedProjectId: number | null;
   selectedDeploymentName: string | null;
   onSelect: (deployment: Deployment, project: Project, team: Team) => void;
+  /** If provided, indicates deploy key mode - deployment switching is disabled */
+  deployKeyConfig?: DeployKeyConfig | null;
 }
 
 export function DeploymentSelector({
@@ -26,7 +31,29 @@ export function DeploymentSelector({
   selectedProjectId,
   selectedDeploymentName,
   onSelect,
+  deployKeyConfig,
 }: DeploymentSelectorProps) {
+  // In deploy key mode, show a static dropdown with just the locked deployment
+  if (deployKeyConfig) {
+    return (
+      <List.Dropdown
+        tooltip="Deployment (Deploy Key Mode)"
+        value={deployKeyConfig.deploymentName}
+        onChange={() => {
+          // No-op in deploy key mode
+        }}
+      >
+        <List.Dropdown.Section title="Deploy Key Mode">
+          <List.Dropdown.Item
+            title={`${deployKeyConfig.deploymentName} (locked)`}
+            value={deployKeyConfig.deploymentName}
+            icon={Icon.Lock}
+          />
+        </List.Dropdown.Section>
+      </List.Dropdown>
+    );
+  }
+
   const { data: teams, isLoading: teamsLoading } = useTeams(accessToken);
   const { data: projects, isLoading: projectsLoading } = useProjects(
     accessToken,
@@ -89,7 +116,13 @@ export function DeploymentSelector({
 export function getDeploymentSubtitle(
   deployment: Deployment | null,
   project: Project | null,
+  deployKeyConfig?: DeployKeyConfig | null,
 ): string {
+  // Deploy key mode
+  if (deployKeyConfig) {
+    return `${deployKeyConfig.deploymentName} (deploy key)`;
+  }
+
   if (!deployment || !project) return "No deployment selected";
   return `${project.name} / ${deployment.deploymentType}`;
 }

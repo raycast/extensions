@@ -1,5 +1,12 @@
 # Apple Reminders Changelog
 
+## [Fix crashes when reminder data is undefined] - 2026-01-28
+
+- Fix crash in menu bar when `data.reminders` is undefined or not an array
+- Add defensive checks in `getAttachedUrls` to handle undefined `attachedUrls` property
+- Resolves: https://github.com/raycast/extensions/issues/24450
+- Resolves: https://github.com/raycast/extensions/issues/24454
+
 ## [Fix crash when attachedUrls is undefined] - 2026-01-13
 
 - Handle reminders where `attachedUrls` may be undefined to prevent runtime errors

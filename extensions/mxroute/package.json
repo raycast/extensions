@@ -21,28 +21,94 @@
       "description": "Your MXroute server",
       "type": "dropdown",
       "data": [
-        {"title": "arrow.mxrouting.net", "value": "arrow.mxrouting.net"},
-        {"title": "blizzard.mxrouting.net", "value": "blizzard.mxrouting.net"},
-        {"title": "eagle.mxlogin.com", "value": "eagle.mxlogin.com"},
-        {"title": "echo.mxrouting.net", "value": "echo.mxrouting.net"},
-        {"title": "everest.mxrouting.net", "value": "everest.mxrouting.net"},
-        {"title": "fusion.mxrouting.net", "value": "fusion.mxrouting.net"},
-        {"title": "glacier.mxrouting.net", "value": "glacier.mxrouting.net"},
-        {"title": "heracles.mxrouting.net", "value": "heracles.mxrouting.net"},
-        {"title": "london.mxroute.com", "value": "london.mxroute.com"},
-        {"title": "longhorn.mxrouting.net", "value": "longhorn.mxrouting.net"},
-        {"title": "lucy.mxrouting.net", "value": "lucy.mxrouting.net"},
-        {"title": "monday.mxrouting.net", "value": "monday.mxrouting.net"},
-        {"title": "moose.mxrouting.net", "value": "moose.mxrouting.net"},
-        {"title": "pixel.mxrouting.net", "value": "pixel.mxrouting.net"},
-        {"title": "redbull.mxrouting.net", "value": "redbull.mxrouting.net"},
-        {"title": "safari.mxrouting.net", "value": "safari.mxrouting.net"},
-        {"title": "shadow.mxrouting.net", "value": "shadow.mxrouting.net"},
-        {"title": "sunfire.mxrouting.net", "value": "sunfire.mxrouting.net"},
-        {"title": "taylor.mxrouting.net", "value": "taylor.mxrouting.net"},
-        {"title": "tuesday.mxrouting.net", "value": "tuesday.mxrouting.net"},
-        {"title": "wednesday.mxrouting.net", "value": "wednesday.mxrouting.net"},
-        {"title": "witcher.mxrouting.net", "value": "witcher.mxrouting.net"}
+        {
+          "title": "arrow.mxrouting.net",
+          "value": "arrow.mxrouting.net"
+        },
+        {
+          "title": "blizzard.mxrouting.net",
+          "value": "blizzard.mxrouting.net"
+        },
+        {
+          "title": "eagle.mxlogin.com",
+          "value": "eagle.mxlogin.com"
+        },
+        {
+          "title": "echo.mxrouting.net",
+          "value": "echo.mxrouting.net"
+        },
+        {
+          "title": "everest.mxrouting.net",
+          "value": "everest.mxrouting.net"
+        },
+        {
+          "title": "fusion.mxrouting.net",
+          "value": "fusion.mxrouting.net"
+        },
+        {
+          "title": "glacier.mxrouting.net",
+          "value": "glacier.mxrouting.net"
+        },
+        {
+          "title": "heracles.mxrouting.net",
+          "value": "heracles.mxrouting.net"
+        },
+        {
+          "title": "london.mxroute.com",
+          "value": "london.mxroute.com"
+        },
+        {
+          "title": "longhorn.mxrouting.net",
+          "value": "longhorn.mxrouting.net"
+        },
+        {
+          "title": "lucy.mxrouting.net",
+          "value": "lucy.mxrouting.net"
+        },
+        {
+          "title": "monday.mxrouting.net",
+          "value": "monday.mxrouting.net"
+        },
+        {
+          "title": "moose.mxrouting.net",
+          "value": "moose.mxrouting.net"
+        },
+        {
+          "title": "pixel.mxrouting.net",
+          "value": "pixel.mxrouting.net"
+        },
+        {
+          "title": "redbull.mxrouting.net",
+          "value": "redbull.mxrouting.net"
+        },
+        {
+          "title": "safari.mxrouting.net",
+          "value": "safari.mxrouting.net"
+        },
+        {
+          "title": "shadow.mxrouting.net",
+          "value": "shadow.mxrouting.net"
+        },
+        {
+          "title": "sunfire.mxrouting.net",
+          "value": "sunfire.mxrouting.net"
+        },
+        {
+          "title": "taylor.mxrouting.net",
+          "value": "taylor.mxrouting.net"
+        },
+        {
+          "title": "tuesday.mxrouting.net",
+          "value": "tuesday.mxrouting.net"
+        },
+        {
+          "title": "wednesday.mxrouting.net",
+          "value": "wednesday.mxrouting.net"
+        },
+        {
+          "title": "witcher.mxrouting.net",
+          "value": "witcher.mxrouting.net"
+        }
       ],
       "required": true
     },
@@ -72,7 +138,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
