@@ -37,6 +37,14 @@
       "placeholder": "agentbox"
     },
     {
+      "name": "sshArgs",
+      "type": "textfield",
+      "required": false,
+      "title": "SSH Args",
+      "description": "Optional extra SSH args (e.g., -i ~/.ssh/hetzner -o IdentitiesOnly=yes).",
+      "placeholder": "-i ~/.ssh/hetzner -o IdentitiesOnly=yes"
+    },
+    {
       "name": "tmuxSocket",
       "type": "textfield",
       "required": false,

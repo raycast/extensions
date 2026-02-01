@@ -31,6 +31,11 @@ describe("buildListCommand", () => {
     const cmd = buildListCommand("local", "", "/tmp/custom.sock");
     expect(cmd).toContain("tmux -S '/tmp/custom.sock'");
   });
+
+  it("includes ssh args when provided", () => {
+    const cmd = buildListCommand("ssh", "agentbox", undefined, "-i ~/.ssh/key");
+    expect(cmd.startsWith("ssh -i ~/.ssh/key agentbox")).toBe(true);
+  });
 });
 
 describe("parseSessionOutput", () => {
@@ -130,6 +135,17 @@ describe("buildAttachCommand", () => {
       "/tmp/custom.sock",
     );
     expect(cmd).toContain("tmux -S '/tmp/custom.sock' new -A -s 'my-session'");
+  });
+
+  it("includes ssh args when provided", () => {
+    const cmd = buildAttachCommand(
+      "my-session",
+      "ssh",
+      "agentbox",
+      undefined,
+      "-i ~/.ssh/key",
+    );
+    expect(cmd.startsWith("ssh -i ~/.ssh/key agentbox -t")).toBe(true);
   });
 });
 

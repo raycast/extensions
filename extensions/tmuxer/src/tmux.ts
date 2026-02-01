@@ -25,6 +25,11 @@ function buildTmuxBase(socketPath?: string): string {
   return `${PATH_PREFIX} tmux -S '${escapedSocket}'`;
 }
 
+function buildSshPrefix(sshHost: string, sshArgs?: string): string {
+  const trimmed = sshArgs?.trim();
+  return trimmed ? `ssh ${trimmed} ${sshHost}` : `ssh ${sshHost}`;
+}
+
 function getGhosttyBinary(): string {
   const override = process.env.GHOSTTY_BIN?.trim();
   if (override) return override;
@@ -46,10 +51,13 @@ export function buildListCommand(
   mode: "local" | "ssh",
   sshHost: string,
   socketPath?: string,
+  sshArgs?: string,
 ): string {
   const tmuxBase = buildTmuxBase(socketPath);
   const listCmd = `${tmuxBase} list-sessions -F '#S|#{session_windows}|#{session_attached}|#{session_created_string}' 2>/dev/null || true`;
-  return mode === "ssh" ? `ssh ${sshHost} "${listCmd}"` : listCmd;
+  return mode === "ssh"
+    ? `${buildSshPrefix(sshHost, sshArgs)} "${listCmd}"`
+    : listCmd;
 }
 
 export function parseSessionOutput(stdout: string): TmuxSession[] {
@@ -74,8 +82,9 @@ export async function listSessions(
   mode: "local" | "ssh",
   sshHost: string,
   socketPath?: string,
+  sshArgs?: string,
 ): Promise<TmuxSession[]> {
-  const cmd = buildListCommand(mode, sshHost, socketPath);
+  const cmd = buildListCommand(mode, sshHost, socketPath, sshArgs);
   try {
     const { stdout } = await execAsync(cmd);
     return parseSessionOutput(stdout);
@@ -89,12 +98,15 @@ export function buildAttachCommand(
   mode: "local" | "ssh",
   sshHost: string,
   socketPath?: string,
+  sshArgs?: string,
 ): string {
   // Escape session name for shell safety
   const escapedSession = escapeShellSingleQuotes(session);
   const tmuxBase = buildTmuxBase(socketPath);
   const tmuxCmd = `${tmuxBase} new -A -s '${escapedSession}'`;
-  return mode === "ssh" ? `ssh ${sshHost} -t "${tmuxCmd}"` : tmuxCmd;
+  return mode === "ssh"
+    ? `${buildSshPrefix(sshHost, sshArgs)} -t "${tmuxCmd}"`
+    : tmuxCmd;
 }
 
 export function buildRenameCommand(
@@ -103,12 +115,15 @@ export function buildRenameCommand(
   mode: "local" | "ssh",
   sshHost: string,
   socketPath?: string,
+  sshArgs?: string,
 ): string {
   const escapedSession = escapeShellSingleQuotes(session);
   const escapedNewName = escapeShellSingleQuotes(newName);
   const tmuxBase = buildTmuxBase(socketPath);
   const tmuxCmd = `${tmuxBase} rename-session -t '${escapedSession}' '${escapedNewName}'`;
-  return mode === "ssh" ? `ssh ${sshHost} "${tmuxCmd}"` : tmuxCmd;
+  return mode === "ssh"
+    ? `${buildSshPrefix(sshHost, sshArgs)} "${tmuxCmd}"`
+    : tmuxCmd;
 }
 
 export function buildKillCommand(
@@ -116,11 +131,14 @@ export function buildKillCommand(
   mode: "local" | "ssh",
   sshHost: string,
   socketPath?: string,
+  sshArgs?: string,
 ): string {
   const escapedSession = escapeShellSingleQuotes(session);
   const tmuxBase = buildTmuxBase(socketPath);
   const tmuxCmd = `${tmuxBase} kill-session -t '${escapedSession}'`;
-  return mode === "ssh" ? `ssh ${sshHost} "${tmuxCmd}"` : tmuxCmd;
+  return mode === "ssh"
+    ? `${buildSshPrefix(sshHost, sshArgs)} "${tmuxCmd}"`
+    : tmuxCmd;
 }
 
 export function buildTerminalLaunchCommand(
@@ -159,8 +177,16 @@ export async function renameSession(
   mode: "local" | "ssh",
   sshHost: string,
   socketPath?: string,
+  sshArgs?: string,
 ): Promise<void> {
-  const cmd = buildRenameCommand(session, newName, mode, sshHost, socketPath);
+  const cmd = buildRenameCommand(
+    session,
+    newName,
+    mode,
+    sshHost,
+    socketPath,
+    sshArgs,
+  );
   await execAsync(cmd);
 }
 
@@ -169,7 +195,8 @@ export async function killSession(
   mode: "local" | "ssh",
   sshHost: string,
   socketPath?: string,
+  sshArgs?: string,
 ): Promise<void> {
-  const cmd = buildKillCommand(session, mode, sshHost, socketPath);
+  const cmd = buildKillCommand(session, mode, sshHost, socketPath, sshArgs);
   await execAsync(cmd);
 }

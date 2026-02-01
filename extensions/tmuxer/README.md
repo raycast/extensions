@@ -15,6 +15,7 @@ Manage tmux sessions locally or over SSH directly from Raycast.
 ## Preferences
 - Mode: Local or SSH
 - SSH Host: host alias or `user@host` (used when Mode = SSH)
+- SSH Args: optional extra SSH flags (e.g., `-i ~/.ssh/hetzner -o IdentitiesOnly=yes`)
 - Tmux Socket: optional socket path for `tmux -S`
 - Terminal: Ghostty or iTerm2
 - Optional: `GHOSTTY_BIN` to override the Ghostty binary path

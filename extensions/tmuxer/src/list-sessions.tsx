@@ -25,6 +25,7 @@ interface Preferences {
   sshHost: string;
   terminal: "ghostty" | "iterm";
   tmuxSocket?: string;
+  sshArgs?: string;
 }
 
 export default function Command() {
@@ -35,7 +36,8 @@ export default function Command() {
     isLoading,
     revalidate,
   } = useCachedPromise(
-    async () => listSessions(prefs.mode, prefs.sshHost, prefs.tmuxSocket),
+    async () =>
+      listSessions(prefs.mode, prefs.sshHost, prefs.tmuxSocket, prefs.sshArgs),
     [],
     {
       keepPreviousData: true,
@@ -49,6 +51,7 @@ export default function Command() {
         prefs.mode,
         prefs.sshHost,
         prefs.tmuxSocket,
+        prefs.sshArgs,
       );
       await openInTerminal(cmd, prefs.terminal);
       showToast({
@@ -78,7 +81,13 @@ export default function Command() {
         style: Toast.Style.Animated,
         title: `Killing ${session}...`,
       });
-      await killSession(session, prefs.mode, prefs.sshHost, prefs.tmuxSocket);
+      await killSession(
+        session,
+        prefs.mode,
+        prefs.sshHost,
+        prefs.tmuxSocket,
+        prefs.sshArgs,
+      );
       showToast({ style: Toast.Style.Success, title: `Killed ${session}` });
       revalidate();
     } catch (error) {
@@ -207,6 +216,7 @@ function RenameSessionForm(props: { session: string; onRenamed: () => void }) {
         prefs.mode,
         prefs.sshHost,
         prefs.tmuxSocket,
+        prefs.sshArgs,
       );
       showToast({ style: Toast.Style.Success, title: `Renamed to ${newName}` });
       props.onRenamed();
