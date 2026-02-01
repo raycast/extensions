@@ -93,7 +93,7 @@ export function collectUrlsFromFolder(children: BookmarkDirectory[]): string[] {
   for (const child of children) {
     if (child.type === "url" && child.url) {
       urls.push(child.url);
-    } else if (child.type === "folder") {
+    } else if (child.type === "folder" && child.children) {
       urls.push(...collectUrlsFromFolder(child.children));
     }
   }
