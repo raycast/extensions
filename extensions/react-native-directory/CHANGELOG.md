@@ -1,6 +1,6 @@
 # React Native Directory Changelog
 
-## [Added] - 2025-02-01
+## [Added] - 2026-02-01
 
 - Added popularity/trending indicator with HOT label
 - Added module type badges (Expo, Turbo, Nitro) and Config Plugin indicator
@@ -18,7 +18,7 @@
 - Enhanced library details with new tags
 - Updated platform options
 
-## [Changed] - 2025-009-13
+## [Changed] - 2025-09-13
 
 - Upgraded Raycast dependencies to latest versions:
   - `@raycast/api`: `^1.100.3` → `^1.102.0`
