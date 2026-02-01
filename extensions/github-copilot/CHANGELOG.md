@@ -2,6 +2,10 @@
 
 ## [Copilot usage auth] - 2026-02-01
 
+- Add Assign Issue to Copilot command
+
+## [Copilot usage auth] - 2026-02-01
+
 - Fix auth for Copilot usage command using existing OAuth
 - Remove apps.json preference (no longer needed)
 

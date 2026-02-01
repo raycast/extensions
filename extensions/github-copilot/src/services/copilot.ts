@@ -5,6 +5,17 @@ import { AI, environment } from "@raycast/api";
 import { parseUsageData } from "../tools/parse-copilot-usage";
 import { sleep } from "../utils";
 
+type AssignIssueToCopilotOptions = {
+  issueId: string;
+  repositoryId: string;
+  copilotBotId: string;
+  baseRef?: string;
+};
+
+type AssignIssueToCopilotResult = {
+  issueId: string;
+};
+
 // The state of an agent session returned from Copilot API
 enum AgentSessionState {
   QUEUED = "queued",
@@ -389,13 +400,52 @@ const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
   return parseUsageData(data);
 };
 
+const ASSIGN_ISSUE_MUTATION = `
+  mutation AssignIssueToCopilot($issueId: ID!, $repositoryId: ID!, $copilotBotId: ID!, $baseRef: String) {
+    updateIssue(input: {
+      id: $issueId,
+      assigneeIds: [$copilotBotId],
+      agentAssignment: {
+        targetRepositoryId: $repositoryId,
+        baseRef: $baseRef
+      }
+    }) {
+      issue {
+        id
+      }
+    }
+  }
+`;
+
+async function assignIssueToCopilot(options: AssignIssueToCopilotOptions): Promise<AssignIssueToCopilotResult> {
+  const octokit = getOctokit();
+
+  try {
+    const response = await octokit.graphql<{ updateIssue: { issue: { id: string } } }>(ASSIGN_ISSUE_MUTATION, {
+      issueId: options.issueId,
+      repositoryId: options.repositoryId,
+      copilotBotId: options.copilotBotId,
+      baseRef: options.baseRef || "main",
+      headers: {
+        "GraphQL-Features": "issues_copilot_assignment_api_support,coding_agent_model_selection",
+      },
+    });
+
+    return { issueId: response.updateIssue.issue.id };
+  } catch (error) {
+    throw handleGitHubError(error);
+  }
+}
+
 export {
   AgentSessionState,
   createTask,
   fetchSessions,
   fetchCopilotUsage,
+  assignIssueToCopilot,
   type PullRequestWithAgentSessions,
   type CopilotUsage,
   type CopilotInternalUserResponse,
   type QuotaSnapshot,
+  type AssignIssueToCopilotOptions,
 };
