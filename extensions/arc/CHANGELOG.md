@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-02-01
 
 - Fixed an issue where selecting a tab would not open it due to a timing issue with closing the Raycast window.
 
