@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "proj",
+  "title": "Proj",
+  "description": "Quickly open and organize your dev projects",
+  "icon": "icon.png",
+  "author": "mark_minkoff",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Productivity"],
+  "keywords": ["projects", "ide", "vscode", "cursor", "developer", "workspace", "collections"],
+  "screenshots": [
+    { "path": "assets/1-projects-blank.png" },
+    { "path": "assets/2-search-work.png" },
+    { "path": "assets/3-manage-collections.png" },
+    { "path": "assets/4-add-collection.png" },
+    { "path": "assets/5-add-projects.png" },
+    { "path": "assets/6-project-settings.png" }
+  ],
+  "commands": [
+    {
+      "name": "projects",
+      "title": "Projects",
+      "description": "Browse and open projects in your IDE",
+      "mode": "view"
+    },
+    {
+      "name": "project-collections",
+      "title": "Project Collections",
+      "description": "Create, edit, and organize project collections",
+      "mode": "view"
+    },
+    {
+      "name": "add-projects",
+      "title": "Add Projects",
+      "description": "Add a single project or a source folder containing multiple projects",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ide",
+      "title": "Default IDE",
+      "description": "Your default editor (VS Code, Cursor, JetBrains, etc). You can override this per-project later.",
+      "type": "appPicker",
+      "required": true
+    },
+    {
+      "name": "showStaleIndicator",
+      "title": "Show Stale Indicator",
+      "description": "Show red dot for projects not opened in 90+ days",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enabled"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/bun": "^1.3.8",
+    "@types/node": "^25.1.0",
+    "@types/react": "^19.2.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "bun test"
+  }
+}

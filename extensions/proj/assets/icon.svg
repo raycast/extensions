@@ -1,0 +1,48 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="electric" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="50%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono"/>
+      <feBlend in="SourceGraphic" in2="mono" mode="overlay"/>
+    </filter>
+
+    <clipPath id="bgClip">
+      <rect x="32" y="32" width="448" height="448" rx="96" ry="96"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background with gradient -->
+  <rect x="32" y="32" width="448" height="448" rx="96" ry="96" fill="url(#electric)"/>
+
+  <!-- Grain overlay -->
+  <g clip-path="url(#bgClip)">
+    <rect x="32" y="32" width="448" height="448" filter="url(#grain)" fill="url(#electric)" opacity="0.5"/>
+  </g>
+
+  <!-- Clean P -->
+  <path d="
+    M 152 96
+    L 296 96
+    C 368 96 404 148 404 204
+    C 404 260 368 304 296 304
+    L 224 304
+    L 224 416
+    L 160 416
+    L 160 96
+    L 152 96
+    Z
+    M 224 160
+    L 224 240
+    L 288 240
+    C 324 240 348 224 348 204
+    C 348 184 324 168 288 168
+    L 224 168
+    Z
+  " fill="white" fill-rule="evenodd"/>
+</svg>
