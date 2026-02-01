@@ -96,7 +96,7 @@ const Actions = ({
           url={`https://bundlephobia.com/package/${library.npmPkg}`}
         />
         <Action.OpenInBrowser
-          title="pkg-size.dev"
+          title="Pkg-Size.dev"
           icon={{ source: Icon.HardDrive, tintColor: Color.Green }}
           url={`https://pkg-size.dev/${library.npmPkg}`}
         />
