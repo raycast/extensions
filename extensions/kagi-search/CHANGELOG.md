@@ -1,6 +1,6 @@
 # Kagi Search Changelog
 
-## [1.2.3] - {PR_MERGE_DATE}
+## [1.2.3] - 2026-02-01
 
 * Add `Action` to Remove History (ref: [Issue #24958](https://github.com/raycast/extensions/issues/24958))
 * Made all `shortcut` cross-platform
