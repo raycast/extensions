@@ -1,0 +1,28 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="#6366F1"/>
+  
+  <!-- Image stack icon -->
+  <g transform="translate(128, 128)">
+    <!-- Back rectangle -->
+    <rect x="30" y="30" width="226" height="226" rx="20" fill="#818CF8" opacity="0.6"/>
+    
+    <!-- Middle rectangle -->
+    <rect x="15" y="15" width="226" height="226" rx="20" fill="#A5B4FC" opacity="0.8"/>
+    
+    <!-- Front rectangle (main) -->
+    <rect x="0" y="0" width="226" height="226" rx="20" fill="#E0E7FF"/>
+    
+    <!-- Magic wand sparkle -->
+    <g transform="translate(170, 170)">
+      <!-- Wand -->
+      <line x1="0" y1="0" x2="40" y2="40" stroke="#FCD34D" stroke-width="8" stroke-linecap="round"/>
+      
+      <!-- Stars -->
+      <circle cx="5" cy="5" r="4" fill="#FCD34D"/>
+      <circle cx="15" cy="-5" r="3" fill="#FCD34D"/>
+      <circle cx="-5" cy="15" r="3" fill="#FCD34D"/>
+      <circle cx="45" cy="45" r="5" fill="#FCD34D"/>
+    </g>
+  </g>
+</svg>
