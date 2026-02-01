@@ -4,14 +4,11 @@ Visualize and scrub time across multiple time zones. Perfect for coordinating me
 
 ## Features
 
-- **Timeline View** - See all your time zones at once with color-coded working hours
-- **Time Scrubbing** - Use arrow keys to shift time and see how it affects all zones
-- **City Search** - Add any city in the world by searching
-- **Sunrise/Sunset** - See sun times for each city
-- **Working Hours Legend**:
-  - Green: 9AM-5PM (working hours)
-  - Yellow: 7-9AM, 5PM-12AM (marginal hours)
-  - Red: 12AM-7AM (sleeping hours)
+- **Timeline View** — See all your cities at once with working hours highlighted
+- **Time Scrubbing** — Use arrow keys to shift time and instantly see how it affects everyone
+- **Smart Colors** — Green (9-5 working), Yellow (7-9, 5-12 marginal), Red (12-7 sleeping)
+- **Sunrise/Sunset** — Know when the sun rises and sets in each city
+- **Any City** — Search and add any city in the world
 
 ## Usage
 
