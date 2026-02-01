@@ -104,6 +104,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
             clearInterval(updateIntervalRef.current);
             updateIntervalRef.current = null;
           }
+          // Flush any pending update to ensure last chunk is rendered
+          if (pendingUpdate) {
+            setStreamData({ ...streamedChat });
+          }
           // Final update with complete answer
           setData((prev) => prev.map((a) => (a.id === chat.id ? { ...streamedChat } : a)));
           setStreamData(undefined);
