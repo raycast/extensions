@@ -1,6 +1,6 @@
 # In The (Time) Zone Changelog
 
-## [Initial Version] - 2025-01-31
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
 - Timeline view with color-coded working hours
