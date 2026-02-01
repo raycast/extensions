@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "in-the-time-zone",
+  "title": "In The (Time) Zone",
+  "description": "Scrub time and see multiple time zones update",
+  "icon": "icon.png",
+  "author": "i_idz",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "in-the-time-zone",
+      "title": "In The (Time) Zone",
+      "description": "Scrub time across time zones",
+      "mode": "view",
+      "src": "src/time-slider.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultScrubMinutes",
+      "type": "dropdown",
+      "title": "Default Scrub Minutes",
+      "description": "Arrow keys scrub this many minutes.",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        }
+      ],
+      "default": "30",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "city-timezones": "^1.3.3",
+    "luxon": "^3.0.0",
+    "suncalc": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/luxon": "^3.7.1",
+    "@types/node": "18.18.4",
+    "@types/suncalc": "^1.8.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
