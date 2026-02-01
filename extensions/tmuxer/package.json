@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tmuxer",
+  "title": "Tmux Sessions",
+  "description": "Manage tmux sessions locally and remotely",
+  "icon": "extension-icon.png",
+  "author": "jai",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-sessions",
+      "title": "List Tmux Sessions",
+      "description": "List and attach to tmux sessions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Mode",
+      "description": "Local or SSH mode",
+      "default": "local",
+      "data": [
+        { "title": "Local", "value": "local" },
+        { "title": "SSH", "value": "ssh" }
+      ]
+    },
+    {
+      "name": "sshHost",
+      "type": "textfield",
+      "required": false,
+      "title": "SSH Host",
+      "description": "SSH host (e.g., agentbox). Only used in SSH mode.",
+      "placeholder": "agentbox"
+    },
+    {
+      "name": "tmuxSocket",
+      "type": "textfield",
+      "required": false,
+      "title": "Tmux Socket",
+      "description": "Optional tmux socket path (uses tmux -S).",
+      "placeholder": "/tmp/openclaw-tmux-sockets/openclaw.sock"
+    },
+    {
+      "name": "terminal",
+      "type": "dropdown",
+      "required": true,
+      "title": "Terminal",
+      "description": "Terminal application to use",
+      "default": "ghostty",
+      "data": [
+        { "title": "Ghostty", "value": "ghostty" },
+        { "title": "iTerm2", "value": "iterm" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.0",
+    "@types/react": "19.1.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
