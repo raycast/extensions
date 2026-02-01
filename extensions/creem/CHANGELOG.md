@@ -1,6 +1,6 @@
 # Creem Changelog
 
-## [List Customers + Update SDK] - {PR_MERGE_DATE}
+## [List Customers + Update SDK] - 2026-02-01
 
 - List Customers
 - Update SDK
