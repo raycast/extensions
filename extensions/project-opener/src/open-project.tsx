@@ -10,8 +10,18 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
-import { findProjects, Project } from "./utils";
-import { loadAllSettings, ProjectSettings } from "./settings";
+import {
+  findProjects,
+  Project,
+  getProjectInitials,
+  generateInitialsIcon,
+  getRandomIconColor,
+} from "./utils";
+import {
+  loadAllSettings,
+  saveProjectSettings,
+  ProjectSettings,
+} from "./settings";
 import ProjectSettingsForm, { iconFromString } from "./ProjectSettingsForm";
 
 interface Preferences {
@@ -38,10 +48,22 @@ export default function Command() {
       const allSettings = loadAllSettings();
 
       const projectsWithSettings: ProjectWithSettings[] = found.map(
-        (project) => ({
-          ...project,
-          settings: allSettings[project.path] || {},
-        }),
+        (project) => {
+          const existingSettings = allSettings[project.path] || {};
+
+          // Assign a random color if none exists
+          if (!existingSettings.iconColor) {
+            const newColor = getRandomIconColor();
+            const updatedSettings = {
+              ...existingSettings,
+              iconColor: newColor,
+            };
+            saveProjectSettings(project.path, updatedSettings);
+            return { ...project, settings: updatedSettings };
+          }
+
+          return { ...project, settings: existingSettings };
+        },
       );
 
       setProjects(projectsWithSettings);
@@ -77,7 +99,15 @@ export default function Command() {
                 ? project.relativePath
                 : undefined
             }
-            icon={iconFromString(project.settings.icon) || Icon.Folder}
+            icon={
+              iconFromString(project.settings.icon) ||
+              generateInitialsIcon(
+                getProjectInitials(
+                  project.settings.displayName || project.name,
+                ),
+                project.settings.iconColor || "#546E7A",
+              )
+            }
             keywords={[project.name, project.settings.displayName || ""].filter(
               Boolean,
             )}

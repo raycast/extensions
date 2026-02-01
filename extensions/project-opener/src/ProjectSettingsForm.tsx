@@ -13,6 +13,7 @@ import {
   saveProjectSettings,
   ProjectIDE,
 } from "./settings";
+import { ICON_COLORS, generateInitialsIcon, getProjectInitials } from "./utils";
 import { basename } from "path";
 
 interface ProjectSettingsFormProps {
@@ -80,6 +81,9 @@ export default function ProjectSettingsForm({
     existingSettings.displayName || "",
   );
   const [icon, setIcon] = useState(existingSettings.icon || "");
+  const [iconColor, setIconColor] = useState(
+    existingSettings.iconColor || ICON_COLORS[0].value,
+  );
   const [ideApp, setIdeApp] = useState<string[]>(
     existingSettings.ide?.path ? [existingSettings.ide.path] : [],
   );
@@ -99,6 +103,7 @@ export default function ProjectSettingsForm({
     saveProjectSettings(projectPath, {
       displayName: displayName.trim() || undefined,
       icon: icon || undefined,
+      iconColor: iconColor || undefined,
       ide,
     });
 
@@ -135,6 +140,25 @@ export default function ProjectSettingsForm({
             value={item.value}
             title={item.title}
             icon={item.icon}
+          />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown
+        id="iconColor"
+        title="Icon Color"
+        info="Background color for the initials icon (only applies when using default icon)"
+        value={iconColor}
+        onChange={setIconColor}
+      >
+        {ICON_COLORS.map((color) => (
+          <Form.Dropdown.Item
+            key={color.value}
+            value={color.value}
+            title={color.name}
+            icon={generateInitialsIcon(
+              getProjectInitials(displayName || projectName),
+              color.value,
+            )}
           />
         ))}
       </Form.Dropdown>

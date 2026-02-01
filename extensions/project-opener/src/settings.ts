@@ -10,6 +10,7 @@ export interface ProjectIDE {
 export interface ProjectSettings {
   displayName?: string;
   icon?: string;
+  iconColor?: string;
   ide?: ProjectIDE;
 }
 
@@ -51,7 +52,12 @@ export function saveProjectSettings(
   const store = loadAllSettings();
 
   // Remove empty settings
-  if (!settings.displayName && !settings.icon && !settings.ide) {
+  if (
+    !settings.displayName &&
+    !settings.icon &&
+    !settings.iconColor &&
+    !settings.ide
+  ) {
     delete store[projectPath];
   } else {
     store[projectPath] = settings;
