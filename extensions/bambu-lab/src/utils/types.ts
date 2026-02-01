@@ -7,7 +7,18 @@ export interface Preferences {
 
 export interface LightReport {
   node: string;
-  mode: string;
+  mode: "on" | "off";
+}
+
+export interface AMSTray {
+  id: string;
+  tray_type?: string;
+  tray_color?: string;
+  remain?: number;
+}
+
+export interface AMSUnit {
+  tray: AMSTray[];
 }
 
 export interface PrinterStatus {
@@ -18,16 +29,9 @@ export interface PrinterStatus {
   subtask_name?: string;
   nozzle_temper?: number;
   bed_temper?: number;
-  lights_report?: number | string | Array<LightReport>;
+  lights_report?: number | string | LightReport[];
   ams?: {
-    ams: Array<{
-      tray: Array<{
-        id: string;
-        tray_type?: string;
-        tray_color?: string;
-        remain?: number;
-      }>;
-    }>;
+    ams: AMSUnit[];
   };
 }
 

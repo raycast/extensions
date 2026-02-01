@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import mqtt, { MqttClient } from "mqtt";
 import { Preferences } from "./types";
+import { MQTT_CONFIG, SEQUENCE_IDS } from "./constants";
 
 export interface UseMQTTOptions {
   onConnect?: (client: MqttClient) => void;
@@ -26,11 +27,11 @@ export function useMQTT(preferences: Preferences, options: UseMQTTOptions = {}) 
   }, [onConnect, onMessage]);
 
   useEffect(() => {
-    const host = `mqtts://${preferences.ipAddress}:8883`;
+    const host = `mqtts://${preferences.ipAddress}:${MQTT_CONFIG.PORT}`;
     setIsConnecting(true);
 
     const mqttClient = mqtt.connect(host, {
-      username: "bblp",
+      username: MQTT_CONFIG.USERNAME,
       password: preferences.accessCode,
       rejectUnauthorized: false,
     });
@@ -46,7 +47,7 @@ export function useMQTT(preferences: Preferences, options: UseMQTTOptions = {}) 
       if (pushAllOnConnect) {
         const payload = {
           pushing: {
-            sequence_id: "0",
+            sequence_id: SEQUENCE_IDS.PUSH_ALL,
             command: "pushall",
             version: 1,
             push_target: 1,
@@ -82,8 +83,8 @@ export function useMQTT(preferences: Preferences, options: UseMQTTOptions = {}) 
   const waitForConnection = async (): Promise<boolean> => {
     if (isConnected && clientRef.current?.connected) return true;
     let attempts = 0;
-    while (attempts < 50) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    while (attempts < MQTT_CONFIG.MAX_CONNECTION_ATTEMPTS) {
+      await new Promise((resolve) => setTimeout(resolve, MQTT_CONFIG.CONNECTION_CHECK_INTERVAL_MS));
       attempts++;
       if (clientRef.current?.connected) {
         setIsConnected(true);

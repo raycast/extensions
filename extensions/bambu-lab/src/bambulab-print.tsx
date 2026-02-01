@@ -22,6 +22,7 @@ import { getTranslations } from "./utils/translations";
 import { useMQTT } from "./utils/mqtt";
 import { formatBytes } from "./utils/format";
 import { isPrintableFile, isProjectFile } from "./utils/fileUtils";
+import { FTP_CONFIG, SD_CARD_PATHS } from "./utils/constants";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -54,19 +55,19 @@ export default function Command() {
     try {
       await ftpClient.access({
         host: preferences.ipAddress,
-        user: "bblp",
+        user: FTP_CONFIG.USERNAME,
         password: preferences.accessCode,
         secure: "implicit",
-        port: 990,
+        port: FTP_CONFIG.SECURE_PORT,
         secureOptions: { rejectUnauthorized: false },
       });
     } catch {
       await ftpClient.access({
         host: preferences.ipAddress,
-        user: "bblp",
+        user: FTP_CONFIG.USERNAME,
         password: preferences.accessCode,
         secure: false,
-        port: 21,
+        port: FTP_CONFIG.INSECURE_PORT,
       });
     }
   };
@@ -81,14 +82,14 @@ export default function Command() {
     try {
       await connectFtp(ftp);
 
-      const folders = ["/", "/cache", "/model"];
+      const folders = [SD_CARD_PATHS.ROOT, SD_CARD_PATHS.CACHE, SD_CARD_PATHS.MODEL];
       let allFiles: FileInfo[] = [];
 
       for (const folder of folders) {
         try {
           const list = await ftp.list(folder);
           const filesInFolder = list.map((f) => {
-            if (folder !== "/") {
+            if (folder !== SD_CARD_PATHS.ROOT) {
               const folderName = folder.replace("/", "");
               f.name = `${folderName}/${f.name}`;
             }
@@ -96,7 +97,7 @@ export default function Command() {
           });
           allFiles = [...allFiles, ...filesInFolder];
         } catch {
-          // Ignore folder if access denied or empty
+          // Silently ignore folders that cannot be accessed
         }
       }
 
@@ -310,9 +311,9 @@ export default function Command() {
           />
         )}
 
-        {sdFiles.map((file, idx) => (
+        {sdFiles.map((file, index) => (
           <List.Item
-            key={idx}
+            key={index}
             title={file.name}
             icon={isProjectFile(file.name) ? { source: Icon.Box, tintColor: Color.Blue } : Icon.Document}
             accessories={[{ text: formatBytes(file.size) }, { date: file.date }]}

@@ -13,9 +13,10 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { getTranslations } from "./utils/translations";
-import { Preferences, PrinterStatus } from "./utils/types";
+import { Preferences, PrinterStatus, LightReport } from "./utils/types";
 import { useMQTT } from "./utils/mqtt";
 import { formatTime } from "./utils/format";
+import { SEQUENCE_IDS, FTP_CONFIG } from "./utils/constants";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -32,7 +33,7 @@ export default function Command() {
           setStatus((prev) => ({ ...prev, ...data.print }));
         }
       } catch {
-        // Ignore JSON parse errors
+        // Silently ignore malformed MQTT messages
       }
     },
   });
@@ -41,21 +42,25 @@ export default function Command() {
     let currentLightState = false;
     if (status.lights_report) {
       if (Array.isArray(status.lights_report)) {
-        const cam = status.lights_report.find((l) => l.node === "camera_light");
+        const cam = status.lights_report.find((light: LightReport) => light.node === "camera_light");
         currentLightState = cam ? cam.mode === "on" : false;
       } else {
         currentLightState = status.lights_report === "on" || status.lights_report === 1;
       }
     }
     const newState = !currentLightState;
+    const previousState = status.lights_report;
     setStatus((prev) => ({ ...prev, lights_report: newState ? "on" : "off" }));
 
     try {
       const connected = await waitForConnection();
-      if (!connected || !client) return;
+      if (!connected || !client) {
+        setStatus((prev) => ({ ...prev, lights_report: previousState }));
+        return;
+      }
       const payload = {
         system: {
-          sequence_id: "2000",
+          sequence_id: SEQUENCE_IDS.LIGHT_CONTROL,
           command: "ledctrl",
           led_node: "camera_light",
           led_mode: newState ? "on" : "off",
@@ -67,7 +72,7 @@ export default function Command() {
       };
       client.publish(`device/${preferences.serialNumber}/request`, JSON.stringify(payload));
     } catch {
-      // Revert state on error
+      setStatus((prev) => ({ ...prev, lights_report: previousState }));
     }
   };
 
@@ -77,12 +82,12 @@ export default function Command() {
       if (!connected || !client) return;
       client.publish(
         `device/${preferences.serialNumber}/request`,
-        JSON.stringify({ print: { sequence_id: "6000", command: action } }),
+        JSON.stringify({ print: { sequence_id: SEQUENCE_IDS.PRINT_CONTROL, command: action } }),
       );
 
       showToast({ style: Toast.Style.Success, title: t.toast_command_sent });
     } catch {
-      // Ignore errors
+      showToast({ style: Toast.Style.Failure, title: t.toast_error });
     }
   };
 
@@ -93,30 +98,42 @@ export default function Command() {
 
       client.publish(
         `device/${preferences.serialNumber}/request`,
-        JSON.stringify({ print: { sequence_id: "2002", command: "gcode_line", param: `M140 S${bedTemp}\n` } }),
+        JSON.stringify({
+          print: {
+            sequence_id: SEQUENCE_IDS.BED_PREHEAT,
+            command: "gcode_line",
+            param: `M140 S${bedTemp}\n`,
+          },
+        }),
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, FTP_CONFIG.PREHEAT_DELAY_MS));
 
       if (client && client.connected) {
         client.publish(
           `device/${preferences.serialNumber}/request`,
-          JSON.stringify({ print: { sequence_id: "2003", command: "gcode_line", param: `M104 S${nozzleTemp}\n` } }),
+          JSON.stringify({
+            print: {
+              sequence_id: SEQUENCE_IDS.NOZZLE_PREHEAT,
+              command: "gcode_line",
+              param: `M104 S${nozzleTemp}\n`,
+            },
+          }),
         );
       }
 
       showToast({ style: Toast.Style.Success, title: t.toast_preheat_started });
     } catch {
-      // Ignore errors
+      showToast({ style: Toast.Style.Failure, title: t.toast_error });
     }
   };
 
   const getAMSMarkdown = () => {
-    let md = `## 🎨 ${t.ams_title}\n\n| ${t.ams_header_slot} | ${t.ams_header_material} | ${t.ams_header_color} | ${t.ams_header_remain} |\n| --- | --- | --- | --- |\n`;
+    let md = `## ${t.ams_title}\n\n| ${t.ams_header_slot} | ${t.ams_header_material} | ${t.ams_header_color} | ${t.ams_header_remain} |\n| --- | --- | --- | --- |\n`;
 
-    status.ams?.ams[0]?.tray?.forEach((tray, idx) => {
+    status.ams?.ams[0]?.tray?.forEach((tray, index) => {
       const hex = tray.tray_color ? tray.tray_color.substring(0, 6) : "888888";
-      md += `| A${idx + 1} | ${tray.tray_type || t.ams_status_empty} | #${hex} | ${tray.remain || 0}% |\n`;
+      md += `| A${index + 1} | ${tray.tray_type || t.ams_status_empty} | #${hex} | ${tray.remain || 0}% |\n`;
     });
     return md;
   };
@@ -127,7 +144,9 @@ export default function Command() {
   let isLightOn = false;
   if (status.lights_report) {
     if (Array.isArray(status.lights_report)) {
-      isLightOn = status.lights_report.some((l) => l.node === "camera_light" && l.mode === "on");
+      isLightOn = status.lights_report.some(
+        (light: LightReport) => light.node === "camera_light" && light.mode === "on",
+      );
     } else {
       isLightOn = status.lights_report === "on" || status.lights_report === 1;
     }
@@ -181,16 +200,13 @@ export default function Command() {
                   onAction={() => controlPrint(isPaused ? "resume" : "pause")}
                 />
               )}
-              {/* AMS button */}
               <Action.Push title={t.action_view_ams} icon={Icon.Circle} target={<AMSView />} />
             </ActionPanel>
           }
         />
       </List.Section>
 
-      {/* --- STEERING / PILOTAGE --- */}
       <List.Section title={t.section_steering}>
-        {/* PAUSE / RESUME */}
         <List.Item
           icon={
             !isPrinting ? { source: Icon.Pause, tintColor: Color.SecondaryText } : isPaused ? Icon.Play : Icon.Pause
@@ -211,7 +227,6 @@ export default function Command() {
           }
         />
 
-        {/* STOP */}
         <List.Item
           icon={{ source: Icon.Stop, tintColor: !isPrinting ? Color.SecondaryText : Color.Red }}
           title={!isPrinting ? t.stop_inactive : t.stop_emergency}
@@ -244,7 +259,6 @@ export default function Command() {
         />
       </List.Section>
 
-      {/* --- TOOLS --- */}
       <List.Section title={t.section_tools}>
         <List.Item
           icon={isLightOn ? { source: Icon.LightBulb, tintColor: Color.Yellow } : Icon.LightBulbOff}
