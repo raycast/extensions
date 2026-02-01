@@ -1,0 +1,90 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "raycast-gh-copilot-usage",
+    "title": "GitHub Copilot Usage",
+    "description": "View your GitHub Copilot Premium request usage directly in Raycast",
+    "icon": "extension_icon.png",
+    "author": "TechSupportz",
+    "license": "MIT",
+    "version": "1.0.0",
+    "keywords": [
+        "github",
+        "copilot",
+        "usage",
+        "billing",
+        "premium",
+        "ai",
+        "quota",
+        "tracking",
+        "analytics"
+    ],
+    "categories": [
+        "Developer Tools",
+        "Productivity"
+    ],
+    "commands": [
+        {
+            "name": "view-copilot-usage",
+            "title": "View Copilot Usage",
+            "description": "View your GitHub Copilot Premium request usage",
+            "mode": "view"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "githubToken",
+            "type": "password",
+            "required": true,
+            "title": "GitHub Personal Access Token",
+            "description": "Personal Access Token with 'Plan' read permissions",
+            "placeholder": "github_pat_..."
+        },
+        {
+            "name": "copilotPlan",
+            "type": "dropdown",
+            "required": false,
+            "title": "GitHub Copilot Plan",
+            "description": "Select your Copilot plan to track premium request quota",
+            "default": "pro",
+            "data": [
+                {
+                    "title": "Copilot Free (50 requests/month)",
+                    "value": "free"
+                },
+                {
+                    "title": "Copilot Pro (300 requests/month)",
+                    "value": "pro"
+                },
+                {
+                    "title": "Copilot Pro+ (1,500 requests/month)",
+                    "value": "pro-plus"
+                },
+                {
+                    "title": "Copilot Business (300 requests/month)",
+                    "value": "business"
+                },
+                {
+                    "title": "Copilot Enterprise (1,000 requests/month)",
+                    "value": "enterprise"
+                }
+            ]
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.104.2",
+        "@raycast/utils": "^2.2.2"
+    },
+    "devDependencies": {
+        "@types/node": "^25.0.9",
+        "@types/react": "^19.2.9",
+        "prettier": "3.8.1",
+        "typescript": "^5.9.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "lint": "ray lint",
+        "fix-lint": "ray lint --fix",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

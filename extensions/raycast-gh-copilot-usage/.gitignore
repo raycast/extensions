@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Lock files (keep pnpm-lock.yaml, ignore npm/yarn)
+package-lock.json
+yarn.lock
+
+# Build output
+dist/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+.cache/
