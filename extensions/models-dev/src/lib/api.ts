@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+import { withCache } from "@raycast/utils";
 import { RawApiResponse, RawModel, Model, Provider, ModelsData, InputModality, OutputModality } from "./types";
 
 export const API_URL = "https://models.dev/api.json";
@@ -32,6 +33,17 @@ export function setCachedData(data: ModelsData): void {
   };
   cache.set(CACHE_KEY, JSON.stringify(cacheEntry));
 }
+
+export const fetchModelsData = withCache(
+  async () => {
+    const response = await fetch(API_URL);
+    const raw = (await response.json()) as RawApiResponse;
+    const transformed = transformApiResponse(raw);
+    setCachedData(transformed);
+    return transformed;
+  },
+  { maxAge: 5 * 60 * 1000 },
+);
 
 export function getProviderLogoUrl(providerId: string): string {
   return `${LOGO_BASE_URL}/${providerId}.svg`;

@@ -1,16 +1,21 @@
 import { List, Icon } from "@raycast/api";
+import type { ActionPanel } from "@raycast/api";
 import { Model } from "../lib/types";
 import { formatPriceFixed } from "../lib/formatters";
 import { ModelActions } from "./ModelActions";
 import { STATUS_COLORS } from "../lib/constants";
 import { getCapabilityAccessories } from "../lib/accessories";
 
+type ActionPanelChildren = Parameters<typeof ActionPanel>[0]["children"];
+
 interface ModelListItemProps {
   model: Model;
   onAddToComparison?: (model: Model) => void;
+  primaryAction?: ActionPanelChildren;
+  extraActions?: ActionPanelChildren;
 }
 
-export function ModelListItem({ model, onAddToComparison }: ModelListItemProps) {
+export function ModelListItem({ model, onAddToComparison, primaryAction, extraActions }: ModelListItemProps) {
   const accessories: List.Item.Accessory[] = [];
 
   // Status indicator (alpha, beta, deprecated)
@@ -45,6 +50,7 @@ export function ModelListItem({ model, onAddToComparison }: ModelListItemProps) 
     model.providerId,
     model.providerName,
     model.family ?? "",
+    `${model.name} ${model.providerName}`,
     model.reasoning ? "reasoning" : "",
     model.tool_call ? "tool calling function" : "",
     model.modalities.input.includes("image") ? "vision image" : "",
@@ -59,7 +65,14 @@ export function ModelListItem({ model, onAddToComparison }: ModelListItemProps) 
       icon={{ source: model.providerLogo, fallback: Icon.Globe }}
       accessories={accessories}
       keywords={keywords}
-      actions={<ModelActions model={model} onAddToComparison={onAddToComparison} />}
+      actions={
+        <ModelActions
+          model={model}
+          onAddToComparison={onAddToComparison}
+          primaryAction={primaryAction}
+          extraActions={extraActions}
+        />
+      }
     />
   );
 }

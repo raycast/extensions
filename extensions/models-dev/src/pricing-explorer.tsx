@@ -1,10 +1,7 @@
-import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { useModelsData } from "./hooks/useModelsData";
-import { ModelDetail } from "./components";
-import { Model } from "./lib/types";
-import { formatPrice, estimateCost } from "./lib/formatters";
-import { getCapabilityAccessories } from "./lib/accessories";
+import { ModelListSection } from "./components";
 
 type PriceFilter =
   | "all"
@@ -36,24 +33,12 @@ const PRICE_FILTERS: { id: PriceFilter; label: string }[] = [
 export default function PricingExplorer() {
   const { data, isLoading } = useModelsData();
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
-  const [searchText, setSearchText] = useState("");
 
   const filteredModels = useMemo(() => {
     if (!data?.models) return [];
 
     // Only include models with output pricing
     let models = data.models.filter((m) => m.cost?.output !== undefined);
-
-    // Filter by search text
-    if (searchText) {
-      const search = searchText.toLowerCase();
-      models = models.filter(
-        (m) =>
-          m.name.toLowerCase().includes(search) ||
-          m.id.toLowerCase().includes(search) ||
-          m.providerName.toLowerCase().includes(search),
-      );
-    }
 
     // Apply price filter based on output price
     switch (priceFilter) {
@@ -97,14 +82,12 @@ export default function PricingExplorer() {
     });
 
     return models;
-  }, [data?.models, priceFilter, searchText]);
+  }, [data?.models, priceFilter]);
 
   return (
     <List
       isLoading={isLoading}
-      filtering={false}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search models by price..."
+      searchBarPlaceholder="Search models..."
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Price"
@@ -123,58 +106,7 @@ export default function PricingExplorer() {
         icon={Icon.MagnifyingGlass}
       />
 
-      <List.Section title={`${filteredModels.length} models`}>
-        {filteredModels.map((model) => (
-          <PricingListItem key={`${model.providerId}-${model.id}`} model={model} />
-        ))}
-      </List.Section>
+      <ModelListSection models={filteredModels} />
     </List>
-  );
-}
-
-function PricingListItem({ model }: { model: Model }) {
-  const accessories: List.Item.Accessory[] = [
-    // Capability icons first
-    ...getCapabilityAccessories(model),
-    {
-      text: formatPrice(model.cost?.input),
-      tooltip: "Input price",
-    },
-    {
-      text: formatPrice(model.cost?.output),
-      tooltip: "Output price",
-    },
-  ];
-
-  return (
-    <List.Item
-      title={model.name}
-      subtitle={model.providerName}
-      icon={{ source: model.providerLogo, fallback: Icon.Globe }}
-      accessories={accessories}
-      keywords={[model.providerId, model.providerName, model.family ?? ""]}
-      actions={
-        <ActionPanel>
-          <Action.Push title="View Details" icon={Icon.Eye} target={<ModelDetail model={model} />} />
-          <Action.CopyToClipboard
-            title="Copy Model ID"
-            content={model.id}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-          <ActionPanel.Section title="Cost Estimates">
-            <Action.CopyToClipboard
-              title="Copy 1M Token Cost"
-              content={`Input: ${formatPrice(model.cost?.input)}, Output: ${formatPrice(model.cost?.output)}`}
-            />
-            {model.cost?.input !== undefined && (
-              <Action.CopyToClipboard
-                title="Copy 100K Token Estimate"
-                content={`100K tokens: Input ${estimateCost(100_000, model.cost.input)}, Output ${estimateCost(100_000, model.cost?.output ?? 0)}`}
-              />
-            )}
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
   );
 }

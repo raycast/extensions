@@ -1,6 +1,7 @@
-import { List, Color, Detail, Icon, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { List, Detail, Icon, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { useModelsData } from "./hooks/useModelsData";
+import { ModelListItem, ModelListSection } from "./components";
 import { Model } from "./lib/types";
 import { formatPrice, formatContextWindow } from "./lib/formatters";
 
@@ -56,25 +57,13 @@ export default function CompareModels() {
   const { data, isLoading } = useModelsData();
   const { push } = useNavigation();
   const [selectedModels, setSelectedModels] = useState<Model[]>([]);
-  const [searchText, setSearchText] = useState("");
 
   const selectedIds = useMemo(() => new Set(selectedModels.map((m) => `${m.providerId}-${m.id}`)), [selectedModels]);
 
-  const filteredModels = useMemo(() => {
+  const availableModels = useMemo(() => {
     if (!data?.models) return [];
-    let models = data.models.filter((m) => !selectedIds.has(`${m.providerId}-${m.id}`));
-    if (searchText) {
-      const search = searchText.toLowerCase();
-      models = models.filter(
-        (m) =>
-          m.name.toLowerCase().includes(search) ||
-          m.id.toLowerCase().includes(search) ||
-          m.providerName.toLowerCase().includes(search) ||
-          (m.family && m.family.toLowerCase().includes(search)),
-      );
-    }
-    return models;
-  }, [data?.models, selectedIds, searchText]);
+    return data.models.filter((m) => !selectedIds.has(`${m.providerId}-${m.id}`));
+  }, [data?.models, selectedIds]);
 
   const handleToggleModel = (model: Model) => {
     const modelKey = `${model.providerId}-${model.id}`;
@@ -98,7 +87,7 @@ export default function CompareModels() {
       showToast({
         style: Toast.Style.Failure,
         title: "Select at least 2 models",
-        message: "Choose 2-4 models to compare",
+        message: "Choose 2-3 models to compare",
       });
       return;
     }
@@ -108,9 +97,6 @@ export default function CompareModels() {
   return (
     <List
       isLoading={isLoading}
-      filtering={false}
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search models to compare..."
       searchBarAccessory={
         <List.Dropdown
@@ -137,68 +123,51 @@ export default function CompareModels() {
       {selectedModels.length > 0 && (
         <List.Section title={`Selected (${selectedModels.length}/3)`}>
           {selectedModels.map((model) => (
-            <List.Item
+            <ModelListItem
               key={`selected-${model.providerId}-${model.id}`}
-              title={model.name}
-              subtitle={model.providerName}
-              icon={{ source: model.providerLogo, fallback: Icon.Globe }}
-              accessories={[{ icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Selected" }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Remove from Comparison"
-                    icon={Icon.MinusCircle}
-                    onAction={() => handleToggleModel(model)}
-                  />
-                  {selectedModels.length >= 2 && (
+              model={model}
+              primaryAction={
+                <Action
+                  title="Remove from Comparison"
+                  icon={Icon.MinusCircle}
+                  onAction={() => handleToggleModel(model)}
+                />
+              }
+              extraActions={
+                selectedModels.length >= 2 ? (
+                  <ActionPanel.Section>
                     <Action
                       title="Compare Selected Models"
                       icon={Icon.Switch}
                       onAction={handleCompare}
                       shortcut={{ modifiers: ["cmd"], key: "return" }}
                     />
-                  )}
-                </ActionPanel>
+                  </ActionPanel.Section>
+                ) : null
               }
             />
           ))}
         </List.Section>
       )}
 
-      <List.Section title={`${filteredModels.length} models`}>
-        {filteredModels.map((model) => (
-          <List.Item
-            key={`${model.providerId}-${model.id}`}
-            title={model.name}
-            subtitle={model.providerName}
-            icon={{ source: model.providerLogo, fallback: Icon.Globe }}
-            accessories={
-              [
-                model.limit?.context
-                  ? { text: formatContextWindow(model.limit.context), tooltip: "Context" }
-                  : undefined,
-                model.cost?.input !== undefined
-                  ? { text: formatPrice(model.cost.input), tooltip: "Input price" }
-                  : undefined,
-              ].filter(Boolean) as List.Item.Accessory[]
-            }
-            keywords={[model.providerId, model.providerName, model.family ?? ""]}
-            actions={
-              <ActionPanel>
-                <Action title="Add to Comparison" icon={Icon.PlusCircle} onAction={() => handleToggleModel(model)} />
-                {selectedModels.length >= 2 && (
-                  <Action
-                    title="Compare Selected Models"
-                    icon={Icon.Switch}
-                    onAction={handleCompare}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
-                  />
-                )}
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      <ModelListSection
+        models={availableModels}
+        getPrimaryAction={(model) => (
+          <Action title="Add to Comparison" icon={Icon.PlusCircle} onAction={() => handleToggleModel(model)} />
+        )}
+        extraActions={
+          selectedModels.length >= 2 ? (
+            <ActionPanel.Section>
+              <Action
+                title="Compare Selected Models"
+                icon={Icon.Switch}
+                onAction={handleCompare}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+              />
+            </ActionPanel.Section>
+          ) : null
+        }
+      />
     </List>
   );
 }
