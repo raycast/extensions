@@ -1,6 +1,6 @@
 # TorBox Changelog
 
-## [Add Torrent and Web Download commands] - {PR_MERGE_DATE}
+## [Add Torrent and Web Download commands] - 2026-02-01
 
 - Add "Add Torrent" command for magnet links and .torrent files
 - Add "Add Web Download" command for supported hosters
