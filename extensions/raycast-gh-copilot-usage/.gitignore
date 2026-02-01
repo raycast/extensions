@@ -1,10 +1,6 @@
 # Dependencies
 node_modules/
 
-# Lock files (keep pnpm-lock.yaml, ignore npm/yarn)
-package-lock.json
-yarn.lock
-
 # Build output
 dist/
 
