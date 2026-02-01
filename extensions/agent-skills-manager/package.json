@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agent-skills-manager",
+  "title": "Agent Skills Manager",
+  "version": "1.0.0",
+  "description": "Manage agent skills across multiple AI coding assistants (Cursor, Continue, Cline, and 40+ others). Browse, install, update, and manage skills from skills.sh or GitHub repositories.",
+  "icon": "icon.png",
+  "author": "krishna-kudari",
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Developer Tools", "Productivity"],
+  "keywords": [
+    "raycast",
+    "agent-skills",
+    "skills",
+    "ai",
+    "coding-assistant",
+    "cursor",
+    "continue",
+    "cline",
+    "github-copilot",
+    "skills.sh",
+    "ai-assistant",
+    "developer-tools"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "simple-git": "^3.22.0",
+    "gray-matter": "^4.0.3",
+    "picocolors": "^1.0.1",
+    "xdg-basedir": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.0.0"
+  },
+  "commands": [
+    {
+      "name": "index",
+      "title": "Browse Skills",
+      "subtitle": "Agent Skills",
+      "description": "Search and install skills from skills.sh catalog or GitHub repositories. Supports 40+ AI coding assistants.",
+      "mode": "view",
+      "keywords": [
+        "skills",
+        "install",
+        "browse",
+        "skills.sh",
+        "github",
+        "ai",
+        "agent",
+        "cursor",
+        "continue",
+        "cline"
+      ]
+    },
+    {
+      "name": "list-installed",
+      "title": "Installed Skills",
+      "subtitle": "Agent Skills",
+      "description": "View and manage installed skills across all agents. Check for updates, reinstall, or delete skills.",
+      "mode": "view",
+      "keywords": [
+        "installed",
+        "list",
+        "manage",
+        "update",
+        "delete",
+        "skills",
+        "installed-skills"
+      ]
+    }
+  ],
+  "screenshots": [
+    "metadata/browse-skills.png",
+    "metadata/skills-metadata.png",
+    "metadata/select-agent.png",
+    "metadata/select-install-type.png",
+    "metadata/installation-summary.png",
+    "metadata/installed-skills.png"
+  ]
+}
