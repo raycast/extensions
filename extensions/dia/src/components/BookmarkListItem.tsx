@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open } from "@raycast/api";
 import { getSafeFavicon } from "../utils";
 import { collectUrlsFromFolder } from "../bookmarks/utils";
@@ -20,7 +21,7 @@ export function BookmarkListItem({
 
     const children = item.children ?? [];
     const childCount = children.length;
-    const urls = collectUrlsFromFolder(children);
+    const urls = useMemo(() => collectUrlsFromFolder(children), [children]);
     const urlCount = urls.length;
 
     return (
@@ -36,6 +37,7 @@ export function BookmarkListItem({
               <Action
                 title={`Open All ${urlCount} in Dia`}
                 icon={Icon.Globe}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
                 onAction={async () => {
                   for (const url of urls) {
                     await open(url, DIA_BUNDLE_ID);
