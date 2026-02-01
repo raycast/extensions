@@ -1,6 +1,6 @@
 # React Native Directory Changelog
 
-## [Added] - 2026-02-01
+## [Added] - {PR_MERGE_DATE}
 
 - Added popularity/trending indicator with HOT label
 - Added module type badges (Expo, Turbo, Nitro) and Config Plugin indicator
