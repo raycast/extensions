@@ -1,10 +1,16 @@
-/// <reference path="../raycast-env.d.ts" />
-/// <reference path="./types.d.ts" />
-
 import { Action, ActionPanel, Icon, List, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
 import { execa } from "execa";
 import pidusage from "pidusage";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+// =====================
+// Error helper
+// =====================
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "object" && err !== null && "stderr" in err) return String((err as { stderr: unknown }).stderr);
+  return String(err);
+}
 
 // =====================
 // System binary paths for macOS
@@ -411,11 +417,11 @@ export default function Command() {
       } else {
         setContainers([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Refresh failed",
-        message: err?.stderr || err?.message,
+        message: getErrorMessage(err),
       });
     } finally {
       setIsLoading(false);
@@ -624,11 +630,11 @@ function HostActions({ listener, onRefresh }: { listener: Listener; onRefresh: (
       await execa(KILL_PATH, ["-" + sig, String(listener.pid)]);
       await showToast({ style: Toast.Style.Success, title: `Sent SIG${sig} to PID ${listener.pid}` });
       onRefresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: `Failed to kill PID ${listener.pid}`,
-        message: err?.stderr || err?.message,
+        message: getErrorMessage(err),
       });
     }
   }
@@ -640,48 +646,48 @@ function HostActions({ listener, onRefresh }: { listener: Listener; onRefresh: (
         title: `Sent SIG${sig} to ${count} owner(s) of :${listener.port}`,
       });
       onRefresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `Kill-by-port failed`,
-        message: err?.stderr || err?.message,
+        title: "Kill-by-Port Failed",
+        message: getErrorMessage(err),
       });
     }
   }
   return (
     <ActionPanel>
       <Action.OpenInBrowser url={url} title={`Open ${url}`} />
-      <Action.CopyToClipboard title="Copy address" content={`${listener.address}:${listener.port}`} />
+      <Action.CopyToClipboard title="Copy Address" content={`${listener.address}:${listener.port}`} />
       <Action.CopyToClipboard title="Copy PID" content={String(listener.pid)} />
-      <Action.CopyToClipboard title="Copy command" content={listener.cmdline || listener.execPath || listener.cmd} />
-      {listener.execPath ? <Action.ShowInFinder path={listener.execPath} title="Reveal app in Finder" /> : null}
-      {listener.cwd ? <Action.Open title="Open working folder" target={listener.cwd} /> : null}
+      <Action.CopyToClipboard title="Copy Command" content={listener.cmdline || listener.execPath || listener.cmd} />
+      {listener.execPath ? <Action.ShowInFinder path={listener.execPath} title="Reveal App in Finder" /> : null}
+      {listener.cwd ? <Action.Open title="Open Working Folder" target={listener.cwd} /> : null}
       <ActionPanel.Section title="Stop App (by PID)">
         <Action
-          title="Stop nicely — recommended"
+          title="Stop Nicely — Recommended"
           icon={Icon.XMarkCircle}
           onAction={() => kill("TERM")}
           shortcut={{ modifiers: ["cmd"], key: "backspace" }}
         />
         <Action
-          title="Force stop — if stuck"
+          title="Force Stop — If Stuck"
           style={Action.Style.Destructive}
           icon={Icon.Trash}
           onAction={() => kill("KILL")}
           shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
         />
       </ActionPanel.Section>
-      <ActionPanel.Section title={`Stop whoever uses :${listener.port}`}>
-        <Action title="Stop by port (nice)" icon={Icon.XMarkCircle} onAction={() => killByPort("TERM")} />
+      <ActionPanel.Section title={`Stop Whoever Uses :${listener.port}`}>
+        <Action title="Stop by Port (Nice)" icon={Icon.XMarkCircle} onAction={() => killByPort("TERM")} />
         <Action
-          title="Stop by port (force)"
+          title="Stop by Port (Force)"
           style={Action.Style.Destructive}
           icon={Icon.Trash}
           onAction={() => killByPort("KILL")}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.Push title="Help & glossary" icon={Icon.QuestionMark} target={<Help />} />
+        <Action.Push title="Help & Glossary" icon={Icon.QuestionMark} target={<Help />} />
         <Action title="Refresh" icon={Icon.RotateClockwise} onAction={onRefresh} />
       </ActionPanel.Section>
     </ActionPanel>
@@ -697,11 +703,11 @@ function DockerActions({ container, onRefresh }: { container: DockerContainer; o
       await execa(dockerPath, ["stop", container.id]);
       await showToast({ style: Toast.Style.Success, title: `Stopped ${container.name}` });
       onRefresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: `Failed to stop ${container.name}`,
-        message: err?.stderr || err?.message,
+        message: getErrorMessage(err),
       });
     }
   }
@@ -713,11 +719,11 @@ function DockerActions({ container, onRefresh }: { container: DockerContainer; o
       await execa(dockerPath, ["start", container.id]);
       await showToast({ style: Toast.Style.Success, title: `Started ${container.name}` });
       onRefresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: `Failed to start ${container.name}`,
-        message: err?.stderr || err?.message,
+        message: getErrorMessage(err),
       });
     }
   }
@@ -729,11 +735,11 @@ function DockerActions({ container, onRefresh }: { container: DockerContainer; o
       await execa(dockerPath, ["restart", container.id]);
       await showToast({ style: Toast.Style.Success, title: `Restarted ${container.name}` });
       onRefresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: `Failed to restart ${container.name}`,
-        message: err?.stderr || err?.message,
+        message: getErrorMessage(err),
       });
     }
   }
