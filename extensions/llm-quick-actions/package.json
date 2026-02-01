@@ -461,7 +461,7 @@
     {
       "name": "execute",
       "title": "Execute",
-      "description": "Replace selected text with LLM output",
+      "description": "Process selected text with LLM and paste output",
       "mode": "no-view",
       "preferences": [
         {
@@ -663,7 +663,7 @@
     {
       "name": "transform",
       "title": "Transform",
-      "description": "Replace selected text with LLM output, based on a prompt entered when the command is run",
+      "description": "Transform selected text with LLM based on a prompt and paste output",
       "mode": "no-view",
       "arguments": [
         {
