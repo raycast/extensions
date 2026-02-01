@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Fix memory leak] - {PR_MERGE_DATE}
+## [Fix memory leak] - 2026-02-01
 
 - Fix: Resolved JS heap out of memory error by throttling UI updates during streaming responses
 - Fix: Removed duplicate history entries that were being created when streaming was enabled
