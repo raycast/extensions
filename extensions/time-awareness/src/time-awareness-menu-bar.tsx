@@ -28,6 +28,7 @@ export default function Command() {
         <MenuBarExtra.Item
           icon={confettiEnabled ? Icon.Checkmark : Icon.XMarkCircle}
           title={`Toggle Confetti (${confettiEnabled ? "On" : "Off"})`}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
           onAction={toggleConfetti}
         />
       </MenuBarExtra.Section>
@@ -45,8 +46,18 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
           onAction={session.actions.resetSessionTime}
         />
-        <MenuBarExtra.Item icon={Icon.Hashtag} title="Reset Stats" onAction={session.actions.resetStats} />
-        <MenuBarExtra.Item icon={Icon.Trash} title="Reset All" onAction={session.actions.resetAll} />
+        <MenuBarExtra.Item
+          icon={Icon.Hashtag}
+          title="Reset Stats"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          onAction={session.actions.resetStats}
+        />
+        <MenuBarExtra.Item
+          icon={Icon.Trash}
+          title="Reset All"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          onAction={session.actions.resetAll}
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
