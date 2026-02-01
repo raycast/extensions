@@ -1,15 +1,16 @@
 import { stripIndent } from "common-tags";
-import { createOpenAIResponse } from "shared/lib/openapi";
-import { TARGET_MODES } from "shared/constants";
-import { OpenaiApiKey, TargetModeKey } from "shared/types";
+import { TARGET_EXECUTION_MODES } from "shared/constants";
+import { TargetExecutionModeKey } from "shared/types";
 import {
   OptimizerClarificationInput,
   OptimizerInputPayload,
   OptimizerResponseDTO,
   OptimizerResult,
 } from "commands/optimize-prompt/types";
+import { LLMProvider } from "shared/lib/llm-provider";
+import { resolveLlmApiProviderPreferences } from "shared/lib/preferences";
 
-const SYSTEM_PROMPT = stripIndent`
+const INSTRUCTIONS_PROMPT = stripIndent`
   ## ROLE AND OBJECTIVE
 
   You are a Prompt Optimizer, equivalent in behavior to OpenAI Prompt Editor
@@ -32,6 +33,8 @@ const SYSTEM_PROMPT = stripIndent`
     as closely as possible.
   - Do NOT reinterpret the task category.
     Never turn content into a meta-task unless explicitly requested.
+  - Do NOT remove or alter artifacts (e.g., code snippets, logs, or other structured content)
+    present in the input. These must remain intact and unmodified in the optimized prompt.
   - Resolve ambiguity primarily by wording normalization.
     Limited, domain-neutral guidance on answer structure is allowed
     only under STANDARDIZED RESPONSE SCAFFOLDING rules.
@@ -45,6 +48,9 @@ const SYSTEM_PROMPT = stripIndent`
     as the input prompt.
   - Optimize with awareness of targetMode execution context, in which the prompt will be used,
     without introducing context-specific assumptions or requirements not implied by the prompt.
+  - You MUST always provide an optimizedPrompt, unless the input is fundamentally non-interpretable.
+    Never reject due to vagueness, missing details, or required assumptions.
+
   ---
 
   ## OPTIMIZATION RULES
@@ -137,7 +143,7 @@ const SYSTEM_PROMPT = stripIndent`
 
   ## CLARIFYING QUESTIONS
 
-  You MAY generate clarifyingQuestions ONLY if missing information would lead
+  You MAY generate clarifyingQuestions if missing information would lead
   to multiple materially different optimized prompts and choosing one would
   irreversibly alter interpretation.
 
@@ -172,6 +178,10 @@ const SYSTEM_PROMPT = stripIndent`
   5.  Minimal change
       Ensure changes are limited to clarity, disambiguation, or error correction.
       Add structure only if required to prevent misinterpretation or misexecution.
+
+  6.  Artifact preservation
+      Ensure all artifacts (e.g., code snippets, logs, or other structured content) 
+      remain intact and unaltered unless explicitly requested otherwise.
       
   If any check fails, revise and re-check.
 
@@ -212,7 +222,7 @@ const SYSTEM_PROMPT = stripIndent`
   No additional text.
 `;
 
-const RETRY_REQUESTED_CHANGE = stripIndent`
+const RETRY_REQUESTED_CHANGE_INSTRUCTIONS_PROMPT = stripIndent`
   Re-optimize the original prompt, improving upon the previous attempt (currentOptimizedPrompt).
   Address likely reasons a user would reject it: over-structuring, added assumptions,
   or changed intent.
@@ -232,21 +242,21 @@ export const OPTIMIZER_RESPONSE_SCHEMA = {
 };
 
 type OptimizePromptProps = {
-  apiKey: OpenaiApiKey;
   initialPrompt: string;
-  targetMode: TargetModeKey;
+  targetMode: TargetExecutionModeKey;
 };
 
 export async function optimizePrompt(props: OptimizePromptProps): Promise<OptimizerResult> {
+  const llm = LLMProvider.fromPreferences(resolveLlmApiProviderPreferences());
+
   const userPayload: OptimizerInputPayload = {
     initialPrompt: props.initialPrompt,
     targetMode: toTargetModePayload(props.targetMode),
   };
 
-  const response = await createOpenAIResponse<OptimizerResponseDTO>({
-    apiKey: props.apiKey,
-    systemInput: SYSTEM_PROMPT,
-    userInput: JSON.stringify(userPayload),
+  const response = await llm.request<OptimizerResponseDTO>({
+    instructions: INSTRUCTIONS_PROMPT,
+    input: JSON.stringify(userPayload),
     responseJsonSchema: OPTIMIZER_RESPONSE_SCHEMA,
   });
 
@@ -254,14 +264,15 @@ export async function optimizePrompt(props: OptimizePromptProps): Promise<Optimi
 }
 
 type ImproveOptimizedPromptProps = {
-  apiKey: OpenaiApiKey;
   initialPrompt: string;
-  targetMode: TargetModeKey;
+  targetMode: TargetExecutionModeKey;
   currentOptimizedPrompt: string;
   clarifications: OptimizerClarificationInput[];
 };
 
 export async function improveOptimizedPrompt(props: ImproveOptimizedPromptProps): Promise<OptimizerResult> {
+  const llm = LLMProvider.fromPreferences(resolveLlmApiProviderPreferences());
+
   const userPayload: OptimizerInputPayload = {
     initialPrompt: props.initialPrompt,
     targetMode: toTargetModePayload(props.targetMode),
@@ -269,10 +280,9 @@ export async function improveOptimizedPrompt(props: ImproveOptimizedPromptProps)
     clarifications: props.clarifications,
   };
 
-  const response = await createOpenAIResponse<OptimizerResponseDTO>({
-    apiKey: props.apiKey,
-    systemInput: SYSTEM_PROMPT,
-    userInput: JSON.stringify(userPayload),
+  const response = await llm.request<OptimizerResponseDTO>({
+    instructions: INSTRUCTIONS_PROMPT,
+    input: JSON.stringify(userPayload),
     responseJsonSchema: OPTIMIZER_RESPONSE_SCHEMA,
   });
 
@@ -280,24 +290,24 @@ export async function improveOptimizedPrompt(props: ImproveOptimizedPromptProps)
 }
 
 type RetryOptimizePromptProps = {
-  apiKey: OpenaiApiKey;
   initialPrompt: string;
-  targetMode: TargetModeKey;
+  targetMode: TargetExecutionModeKey;
   currentOptimizedPrompt: string;
 };
 
 export async function retryOptimizePrompt(props: RetryOptimizePromptProps): Promise<OptimizerResult> {
+  const llm = LLMProvider.fromPreferences(resolveLlmApiProviderPreferences());
+
   const userPayload: OptimizerInputPayload = {
     initialPrompt: props.initialPrompt,
     targetMode: toTargetModePayload(props.targetMode),
     currentOptimizedPrompt: props.currentOptimizedPrompt,
-    requestedChanges: RETRY_REQUESTED_CHANGE,
+    requestedChanges: RETRY_REQUESTED_CHANGE_INSTRUCTIONS_PROMPT,
   };
 
-  const response = await createOpenAIResponse<OptimizerResponseDTO>({
-    apiKey: props.apiKey,
-    systemInput: SYSTEM_PROMPT,
-    userInput: JSON.stringify(userPayload),
+  const response = await llm.request<OptimizerResponseDTO>({
+    instructions: INSTRUCTIONS_PROMPT,
+    input: JSON.stringify(userPayload),
     responseJsonSchema: OPTIMIZER_RESPONSE_SCHEMA,
   });
 
@@ -321,13 +331,13 @@ function optimizerResponseDtoToResult(dto: OptimizerResponseDTO): OptimizerResul
   }
 }
 
-function getTargetModeInfo(targetMode: TargetModeKey) {
-  const info = TARGET_MODES.find((mode) => mode.key === targetMode);
+function getTargetModeInfo(targetMode: TargetExecutionModeKey) {
+  const info = TARGET_EXECUTION_MODES.find((mode) => mode.key === targetMode);
   if (!info) throw new Error(`Unknown targetMode: ${targetMode}`);
   return info;
 }
 
-function toTargetModePayload(targetMode: TargetModeKey) {
+function toTargetModePayload(targetMode: TargetExecutionModeKey) {
   const info = getTargetModeInfo(targetMode);
   return {
     title: info.title,

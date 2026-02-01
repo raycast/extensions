@@ -23,19 +23,49 @@
   ],
   "preferences": [
     {
-      "name": "openaiApiKey",
-      "type": "password",
-      "title": "OpenAI API Key",
-      "description": "API key used to call the OpenAI Responses API.",
+      "name": "apiProviderType",
+      "type": "dropdown",
+      "title": "API Provider",
+      "description": "Select the API provider to use for prompt optimization.",
+      "data": [
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "OpenAI Compatible",
+          "value": "openai-compatible"
+        }
+      ],
+      "default": "openai",
       "required": true
     },
     {
-      "name": "saveHistory",
-      "type": "checkbox",
-      "title": "Save History",
-      "description": "Store optimized prompts locally for later reuse.",
-      "label": "Store optimized prompts locally",
-      "default": false,
+      "name": "apiKey",
+      "type": "password",
+      "title": "API Key",
+      "description": "API key used to call the selected provider.",
+      "required": true
+    },
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "title": "API Base URL",
+      "description": "Required only for OpenAI Compatible providers.",
+      "required": false
+    },
+    {
+      "name": "defaultHeaders",
+      "type": "textfield",
+      "title": "Default Headers",
+      "description": "Optional key-value pairs to include in every API request header, formatted as: key1: value; key2:value; key3:value",
+      "required": false
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "title": "Model",
+      "description": "Optional model name. OpenAI defaults to gpt-5.2 if empty.",
       "required": false
     }
   ],

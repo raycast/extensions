@@ -1,10 +1,20 @@
 import { Image } from "@raycast/api";
 
-export type TargetModeKey = string;
-export type OpenaiApiKey = string;
+export type LLMApiKey = string;
+export type LLMApiProviderType = "openai" | "openai-compatible";
 
-export type TargetModeInfo = {
-  key: TargetModeKey;
+export type LLMProviderPreferences = {
+  apiProviderType: LLMApiProviderType;
+  apiKey: LLMApiKey;
+  apiBaseUrl?: string;
+  defaultHeaders?: string;
+  model?: string;
+};
+
+export type TargetExecutionModeKey = string;
+
+export type TargetExecutionModeInfo = {
+  key: TargetExecutionModeKey;
   title: string;
   icon: Image.ImageLike;
   description: string;

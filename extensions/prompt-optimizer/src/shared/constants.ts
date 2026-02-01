@@ -1,10 +1,10 @@
 import { Icon } from "@raycast/api";
-import { TargetModeInfo } from "./types";
+import { TargetExecutionModeInfo } from "./types";
 
-export const DEFAULT_EXECUTION_MODEL = "gpt-5.2";
+export const DEFAULT_OPENAI_EXECUTION_MODEL = "gpt-5.2";
 export const OPENAI_API_KEYS_URL = "https://platform.openai.com/api-keys";
 
-export const TARGET_MODES: TargetModeInfo[] = [
+export const TARGET_EXECUTION_MODES: TargetExecutionModeInfo[] = [
   {
     key: "chat",
     title: "Chat",

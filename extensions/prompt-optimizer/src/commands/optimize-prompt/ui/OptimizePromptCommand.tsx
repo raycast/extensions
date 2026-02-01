@@ -1,8 +1,7 @@
 import React, { useCallback, useState } from "react";
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { toOpenAIErrorInfo } from "shared/lib/openapi";
+import { Toast, showToast } from "@raycast/api";
+import { LLMProviderError } from "shared/lib/llm-provider";
 import { improveOptimizedPrompt, optimizePrompt, retryOptimizePrompt } from "../lib/optimize-prompt";
-import { MissingApiKeyView } from "./MissingApiKeyView";
 import { OptimizedPromptDetail } from "./OptimizedPromptDetail";
 import { OptimizePromptForm } from "./OptimizePromptForm";
 import { ImproveOptimizedPromptForm } from "./ImproveOptimizedPromptForm";
@@ -12,16 +11,11 @@ import {
   OptimizePromptFormValues,
   OptimizerSuccessResult,
 } from "../types";
-import { TargetModeKey } from "shared/types";
-
-type Preferences = {
-  openaiApiKey?: string;
-  saveHistory?: boolean;
-};
+import { TargetExecutionModeKey } from "shared/types";
 
 type OptimizationSession = {
   initialPrompt: string;
-  targetMode: TargetModeKey;
+  targetMode: TargetExecutionModeKey;
   optimizedPrompt: string;
   clarifyingQuestions: string[];
 };
@@ -47,9 +41,6 @@ type RunRequestOptions<T extends RequestSuccessResult> = {
 };
 
 export const OptimizePromptCommand: React.FC = () => {
-  const preferences = getPreferenceValues<Preferences>();
-  const apiKey = preferences.openaiApiKey?.trim() ?? "";
-
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [session, setSession] = useState<OptimizationSession | null>(null);
   const [errorState, setErrorState] = useState<OptimizePromptFormErrorState | null>(null);
@@ -85,7 +76,7 @@ export const OptimizePromptCommand: React.FC = () => {
       toast.style = Toast.Style.Success;
       toast.title = options.successTitle;
     } catch (error) {
-      const info = toOpenAIErrorInfo(error);
+      const info = toErrorInfo(error);
       if (options.errorStateTitle) {
         setErrorState({
           title: options.errorStateTitle,
@@ -111,21 +102,12 @@ export const OptimizePromptCommand: React.FC = () => {
         return;
       }
 
-      if (!apiKey) {
-        setErrorState({
-          title: "OpenAI API Key Required",
-          message: "Add your OpenAI API key in the extension preferences to start optimizing prompts.",
-        });
-        return;
-      }
-
       setSession(null);
       setView("form");
 
       await runRequest<OptimizerSuccessResult>({
         execute: () =>
           optimizePrompt({
-            apiKey,
             initialPrompt: values.prompt,
             targetMode: values.targetMode,
           }),
@@ -144,7 +126,7 @@ export const OptimizePromptCommand: React.FC = () => {
         errorStateTitle: "Optimization Failed",
       });
     },
-    [apiKey, runRequest],
+    [runRequest],
   );
 
   const handleImproveOptimizedPrompt = useCallback(
@@ -157,7 +139,6 @@ export const OptimizePromptCommand: React.FC = () => {
       await runRequest<OptimizerSuccessResult>({
         execute: () =>
           improveOptimizedPrompt({
-            apiKey,
             initialPrompt: session.initialPrompt,
             targetMode: session.targetMode,
             currentOptimizedPrompt: session.optimizedPrompt,
@@ -176,7 +157,7 @@ export const OptimizePromptCommand: React.FC = () => {
         failureTitle: "Improvement Failed",
       });
     },
-    [apiKey, session, runRequest],
+    [session, runRequest],
   );
 
   const handleRetryOptimizePrompt = useCallback(async () => {
@@ -188,7 +169,6 @@ export const OptimizePromptCommand: React.FC = () => {
     await runRequest<OptimizerSuccessResult>({
       execute: () =>
         retryOptimizePrompt({
-          apiKey,
           initialPrompt: session.initialPrompt,
           targetMode: session.targetMode,
           currentOptimizedPrompt: session.optimizedPrompt,
@@ -205,11 +185,7 @@ export const OptimizePromptCommand: React.FC = () => {
       successTitle: "Prompt optimized",
       failureTitle: "Optimization Failed",
     });
-  }, [apiKey, session, runRequest]);
-
-  if (!apiKey) {
-    return <MissingApiKeyView />;
-  }
+  }, [session, runRequest]);
 
   if (view === "clarify" && session) {
     return (
@@ -234,3 +210,15 @@ export const OptimizePromptCommand: React.FC = () => {
 
   return <OptimizePromptForm isOptimizing={isOptimizing} errorState={errorState} onSubmit={handleOptimizePrompt} />;
 };
+
+function toErrorInfo(error: unknown): { status?: number; message: string } {
+  if (error instanceof LLMProviderError) {
+    return { status: error.status, message: error.message };
+  }
+
+  if (error instanceof Error) {
+    return { message: error.message };
+  }
+
+  return { message: "API request failed" };
+}
