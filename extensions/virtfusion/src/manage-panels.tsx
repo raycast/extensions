@@ -1,9 +1,23 @@
 import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
 import { Panel } from "./types";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, Keyboard, List, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import crypto from "crypto";
 import Servers from "./servers";
 import VirtFusion from "./virtfusion";
+import SSHKeys from "./ssh-keys";
 
 export default function ManagePanels() {
   const { isLoading, value: panels = [], setValue: setPanels } = useLocalStorage<Panel[]>("virtfusion-panels");
@@ -29,34 +43,35 @@ export default function ManagePanels() {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.HardDrive} title="Servers" target={<Servers panel={panel} />} />
-                {/* <Action.Push icon={Icon.Text} title="Logs" target={<Logs panel={panel} />} />
-                <Action.Push icon={Icon.CheckList} title="Tasks" target={<Tasks panel={panel} />} /> */}
-                <Action.Push
-                  icon={Icon.Plus}
-                  title="Add Panel"
-                  target={<AddPanel />}
-                  shortcut={Keyboard.Shortcut.Common.New}
-                />
-                <Action
-                  icon={Icon.Trash}
-                  title="Remove Panel"
-                  onAction={() =>
-                    confirmAlert({
-                      icon: { source: Icon.Trash, tintColor: Color.Red },
-                      title: "Remove Panel?",
-                      message: panel.title || panel.virtfusion_url,
-                      primaryAction: {
-                        style: Alert.ActionStyle.Destructive,
-                        title: "Remove",
-                        async onAction() {
-                          await setPanels(panels.filter((p) => p.id !== panel.id));
+                <Action.Push icon={Icon.Key} title="SSH Keys" target={<SSHKeys panel={panel} />} />
+                <ActionPanel.Section>
+                  <Action.Push
+                    icon={Icon.Plus}
+                    title="Add Panel"
+                    target={<AddPanel />}
+                    shortcut={Keyboard.Shortcut.Common.New}
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    title="Remove Panel"
+                    onAction={() =>
+                      confirmAlert({
+                        icon: { source: Icon.Trash, tintColor: Color.Red },
+                        title: "Remove Panel?",
+                        message: panel.title || panel.virtfusion_url,
+                        primaryAction: {
+                          style: Alert.ActionStyle.Destructive,
+                          title: "Remove",
+                          async onAction() {
+                            await setPanels(panels.filter((p) => p.id !== panel.id));
+                          },
                         },
-                      },
-                    })
-                  }
-                  style={Action.Style.Destructive}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                />
+                      })
+                    }
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
