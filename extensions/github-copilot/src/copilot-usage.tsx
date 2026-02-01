@@ -1,53 +1,10 @@
-import { List, Icon, Color, Action, ActionPanel, showToast, Toast, Clipboard, open } from "@raycast/api";
-import { useState } from "react";
+import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
 import { useCopilotUsage } from "./hooks/useCopilotUsage";
-import { UsageActionPanel } from "./components/UsageActionPanel";
-import { clearCopilotToken, initiateDeviceFlow, pollForAccessToken } from "./services/copilot";
+import { provider, reauthorize } from "./lib/oauth";
 
 function Command() {
   const { isLoading, usage, error, revalidate } = useCopilotUsage();
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [userCode, setUserCode] = useState<string | null>(null);
-
-  const needsAuth = error instanceof Error && error.name === "AuthenticationRequiredError";
-
-  const handleAuthenticate = async () => {
-    setIsAuthenticating(true);
-    setUserCode(null);
-
-    try {
-      const deviceFlow = await initiateDeviceFlow();
-      setUserCode(deviceFlow.user_code);
-
-      await Clipboard.copy(deviceFlow.user_code);
-      await open(deviceFlow.verification_uri);
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Code copied to clipboard",
-        message: `Enter ${deviceFlow.user_code} at github.com/login/device`,
-      });
-
-      await pollForAccessToken({ deviceCode: deviceFlow.device_code, interval: deviceFlow.interval });
-
-      await showToast({ style: Toast.Style.Success, title: "Authenticated successfully" });
-      setUserCode(null);
-      revalidate();
-    } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Authentication failed",
-        message: err instanceof Error ? err.message : "Unknown error",
-      });
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
-
-  const handleLogOut = async () => {
-    await clearCopilotToken();
-    await showToast({ style: Toast.Style.Success, title: "Logged out" });
-    revalidate();
-  };
 
   const formatUsage = (percentageUsed: number, limit: number | null): string => {
     if (limit === null) {
@@ -80,28 +37,12 @@ function Command() {
     });
   };
 
-  if ((needsAuth && !isLoading) || isAuthenticating) {
-    return (
-      <List isLoading={isAuthenticating}>
-        <List.Item
-          icon={{ source: "github-logo.png" }}
-          title={userCode ? `Enter code: ${userCode}` : "Sign in with GitHub"}
-          subtitle={
-            userCode
-              ? "Enter this code at github.com/login/device"
-              : "Log in with your GitHub account to view your Copilot usage."
-          }
-          actions={
-            isAuthenticating ? undefined : (
-              <ActionPanel>
-                <Action title="Sign in with GitHub" icon={Icon.Globe} onAction={handleAuthenticate} />
-              </ActionPanel>
-            )
-          }
-        />
-      </List>
-    );
-  }
+  const UsageActions = (
+    <ActionPanel>
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+      <Action title="Log out" icon={Icon.Logout} onAction={reauthorize} />
+    </ActionPanel>
+  );
 
   if (!usage && !isLoading) {
     return (
@@ -110,7 +51,7 @@ function Command() {
           icon={{ source: "copilot.svg", tintColor: Color.PrimaryText }}
           title="Usage Data Not Available"
           description={error ? error.message : "Failed to fetch usage data. Please check your connection."}
-          actions={<UsageActionPanel onRefresh={revalidate} onLogOut={handleLogOut} />}
+          actions={UsageActions}
         />
       </List>
     );
@@ -133,7 +74,7 @@ function Command() {
                 },
               ]}
               icon={{ source: Icon.Code, tintColor: Color.PrimaryText }}
-              actions={<UsageActionPanel onRefresh={revalidate} onLogOut={handleLogOut} />}
+              actions={UsageActions}
             />
             <List.Item
               title="Chat messages"
@@ -147,7 +88,7 @@ function Command() {
                 },
               ]}
               icon={{ source: Icon.Message, tintColor: Color.PrimaryText }}
-              actions={<UsageActionPanel onRefresh={revalidate} onLogOut={handleLogOut} />}
+              actions={UsageActions}
             />
             <List.Item
               title="Premium requests"
@@ -161,7 +102,7 @@ function Command() {
                 },
               ]}
               icon={{ source: Icon.Star, tintColor: Color.PrimaryText }}
-              actions={<UsageActionPanel onRefresh={revalidate} onLogOut={handleLogOut} />}
+              actions={UsageActions}
             />
           </List.Section>
 
@@ -170,12 +111,12 @@ function Command() {
               <List.Item
                 title="Additional paid premium requests enabled."
                 icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
-                actions={<UsageActionPanel onRefresh={revalidate} onLogOut={handleLogOut} />}
+                actions={UsageActions}
               />
               <List.Item
                 title={`Allowance resets ${formatResetDate(usage.allowanceResetAt)}.`}
                 icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
-                actions={<UsageActionPanel onRefresh={revalidate} onLogOut={handleLogOut} />}
+                actions={UsageActions}
               />
             </List.Section>
           )}
@@ -185,4 +126,4 @@ function Command() {
   );
 }
 
-export default Command;
+export default withAccessToken(provider)(Command);

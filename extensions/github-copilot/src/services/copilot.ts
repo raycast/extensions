@@ -1,12 +1,8 @@
 import { getAccessToken } from "@raycast/utils";
 import { getOctokit } from "../lib/oauth";
 import { handleGitHubError } from "../lib/github-client";
-import { AI, environment, getPreferenceValues } from "@raycast/api";
+import { AI, environment } from "@raycast/api";
 import { parseUsageData } from "../tools/parse-copilot-usage";
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
-import { homedir } from "node:os";
-import { getCachedGitHubToken, clearCopilotToken, AuthenticationRequiredError } from "./copilot-auth";
 import { sleep } from "../utils";
 
 // The state of an agent session returned from Copilot API
@@ -272,61 +268,6 @@ const pollJobUntilPullRequestReady = async ({
   }
 };
 
-/**
- * Try to get token from apps.json (legacy fallback for users who have it)
- */
-const getAppsJsonToken = (): string | null => {
-  const prefs = getPreferenceValues<{ copilotAppsJsonPath?: string }>();
-  const appsJsonPath = prefs.copilotAppsJsonPath?.trim()
-    ? prefs.copilotAppsJsonPath.trim()
-    : join(homedir(), ".config", "github-copilot", "apps.json");
-
-  if (!existsSync(appsJsonPath)) {
-    return null;
-  }
-
-  try {
-    const appsJsonContent = readFileSync(appsJsonPath, "utf-8");
-    const appsJson = JSON.parse(appsJsonContent) as Record<string, Record<string, unknown>>;
-
-    for (const appKey in appsJson) {
-      const appData = appsJson[appKey];
-      if (appData && typeof appData === "object" && "oauth_token" in appData) {
-        const token = appData.oauth_token;
-        if (typeof token === "string" && token.length > 0) {
-          return token;
-        }
-      }
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
-};
-
-/**
- * Get a valid Copilot token using the following priority:
- * 1. Cached GitHub access token (from device flow)
- * 2. apps.json fallback (for users with IDE extensions)
- */
-const getCopilotToken = async (): Promise<string> => {
-  // 1. Try cached GitHub access token (from device flow)
-  const cachedGitHubToken = await getCachedGitHubToken();
-  if (cachedGitHubToken) {
-    return cachedGitHubToken;
-  }
-
-  // 2. Try apps.json fallback
-  const appsJsonToken = getAppsJsonToken();
-  if (appsJsonToken) {
-    return appsJsonToken;
-  }
-
-  // Need device flow authentication
-  throw new AuthenticationRequiredError("Please authenticate with GitHub Copilot");
-};
-
 const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> => {
   const { token } = getAccessToken();
 
@@ -434,32 +375,19 @@ const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> => {
 };
 
 const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
-  const makeRequest = async (token: string): Promise<Response> =>
-    fetch("https://api.github.com/copilot_internal/user", {
-      headers: { authorization: `Bearer ${token}` },
-    });
+  const { token } = getAccessToken();
 
-  let token = await getCopilotToken();
-  let response = await makeRequest(token);
-
-  if (!response.ok && (response.status === 401 || response.status === 403)) {
-    await clearCopilotToken();
-    token = await getCopilotToken();
-    response = await makeRequest(token);
-  }
+  const response = await fetch("https://api.github.com/copilot_internal/user", {
+    headers: { authorization: `Bearer ${token}` },
+  });
 
   if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
-      throw new AuthenticationRequiredError("Authentication failed. Please re-authenticate.");
-    }
     throw new Error(`Failed to fetch Copilot usage: ${response.status} ${response.statusText}`);
   }
 
   const data = JSON.parse(await response.text()) as CopilotInternalUserResponse;
   return parseUsageData(data);
 };
-
-export { AuthenticationRequiredError, clearCopilotToken, initiateDeviceFlow, pollForAccessToken } from "./copilot-auth";
 
 export {
   AgentSessionState,

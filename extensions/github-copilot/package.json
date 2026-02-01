@@ -18,15 +18,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "copilotAppsJsonPath",
-      "type": "textfield",
-      "title": "Copilot Apps.json Path",
-      "description": "Path to GitHub Copilot's apps.json file (auto-generated when you sign in to Copilot via an IDE extension). Defaults to ~/.config/github-copilot/apps.json",
-      "required": false
-    }
-  ],
   "commands": [
     {
       "name": "view-tasks",
