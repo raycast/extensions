@@ -1,0 +1,287 @@
+import { List, Action, ActionPanel, Icon, showToast, Toast, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { useEffect, useState, useCallback } from "react";
+import { useAmpUsage } from "./amp/fetcher";
+import { renderAmpDetail, getAmpAccessory, formatAmpUsageText } from "./amp/renderer";
+import { useCodexUsage } from "./codex/fetcher";
+import { renderCodexDetail, getCodexAccessory, formatCodexUsageText } from "./codex/renderer";
+import { useDroidUsage } from "./droid/fetcher";
+import { renderDroidDetail, getDroidAccessory, formatDroidUsageText } from "./droid/renderer";
+import { useGeminiUsage } from "./gemini/fetcher";
+import { renderGeminiDetail, getGeminiAccessory, formatGeminiUsageText } from "./gemini/renderer";
+import { AgentDefinition, Accessory, UsageState } from "./agents/types";
+
+const AGENT_ORDER_KEY = "agent-order";
+
+interface Preferences {
+  showAmp: boolean;
+  showCodex: boolean;
+  showDroid: boolean;
+  showGemini: boolean;
+  codexAuthToken?: string;
+  droidAuthToken?: string;
+}
+import { AmpError, AmpUsage } from "./amp/types";
+import { CodexError, CodexUsage } from "./codex/types";
+import { DroidError, DroidUsage } from "./droid/types";
+import { GeminiError, GeminiUsage } from "./gemini/types";
+
+// Agent 配置定义
+const AGENTS: AgentDefinition[] = [
+  {
+    id: "amp",
+    name: "Amp",
+    icon: "amp-icon.svg",
+    description: "Amp Code AI Assistant",
+    isSupported: true,
+    settingsUrl: "https://ampcode.com/settings",
+  },
+  {
+    id: "codex",
+    name: "Codex",
+    icon: "codex-icon.svg",
+    description: "OpenAI Codex CLI",
+    isSupported: true,
+    settingsUrl: "https://chatgpt.com/codex/settings",
+  },
+  {
+    id: "droid",
+    name: "Droid",
+    icon: "droid-icon.svg",
+    description: "Factory AI Droid",
+    isSupported: true,
+    settingsUrl: "https://api.factory.ai",
+  },
+  {
+    id: "gemini",
+    name: "Gemini",
+    icon: "gemini-icon.png",
+    description: "Google Gemini CLI",
+    isSupported: true,
+  },
+];
+
+function renderUnsupportedDetail(agent: AgentDefinition): React.ReactNode {
+  return (
+    <List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.Label title="Agent" text={agent.name} />
+      <List.Item.Detail.Metadata.Label title="Status" text="Coming Soon" />
+      <List.Item.Detail.Metadata.Separator />
+      <List.Item.Detail.Metadata.Label title="Description" text={agent.description} />
+    </List.Item.Detail.Metadata>
+  );
+}
+
+interface UsageStates {
+  amp: UsageState<AmpUsage, AmpError>;
+  codex: UsageState<CodexUsage, CodexError>;
+  droid: UsageState<DroidUsage, DroidError>;
+  gemini: UsageState<GeminiUsage, GeminiError>;
+}
+
+function getAgentAccessory(agent: AgentDefinition, states: UsageStates): Accessory {
+  const { amp, codex, droid, gemini } = states;
+
+  if (agent.id === "amp") {
+    return getAmpAccessory(amp.usage, amp.error, amp.isLoading);
+  }
+
+  if (agent.id === "codex") {
+    return getCodexAccessory(codex.usage, codex.error, codex.isLoading);
+  }
+
+  if (agent.id === "droid") {
+    return getDroidAccessory(droid.usage, droid.error, droid.isLoading);
+  }
+
+  if (agent.id === "gemini") {
+    return getGeminiAccessory(gemini.usage, gemini.error, gemini.isLoading);
+  }
+
+  return { text: "—", tooltip: "Not supported yet" };
+}
+
+function renderAgentDetail(agent: AgentDefinition, states: UsageStates): React.ReactNode {
+  const { amp, codex, droid, gemini } = states;
+
+  if (agent.id === "amp" && agent.isSupported) {
+    return renderAmpDetail(amp.usage, amp.error);
+  }
+
+  if (agent.id === "codex" && agent.isSupported) {
+    return renderCodexDetail(codex.usage, codex.error);
+  }
+
+  if (agent.id === "droid" && agent.isSupported) {
+    return renderDroidDetail(droid.usage, droid.error);
+  }
+
+  if (agent.id === "gemini" && agent.isSupported) {
+    return renderGeminiDetail(gemini.usage, gemini.error);
+  }
+
+  return renderUnsupportedDetail(agent);
+}
+
+function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
+  const { amp, codex, droid, gemini } = states;
+
+  if (agent.id === "amp") {
+    return formatAmpUsageText(amp.usage, amp.error);
+  }
+  if (agent.id === "codex") {
+    return formatCodexUsageText(codex.usage, codex.error);
+  }
+  if (agent.id === "droid") {
+    return formatDroidUsageText(droid.usage, droid.error);
+  }
+  if (agent.id === "gemini") {
+    return formatGeminiUsageText(gemini.usage, gemini.error);
+  }
+  return `${agent.name}\nStatus: Not supported yet`;
+}
+
+export default function Command() {
+  const prefs = getPreferenceValues<Preferences>();
+  const ampState: UsageState<AmpUsage, AmpError> = useAmpUsage();
+  const codexState: UsageState<CodexUsage, CodexError> = useCodexUsage();
+  const droidState: UsageState<DroidUsage, DroidError> = useDroidUsage();
+  const geminiState: UsageState<GeminiUsage, GeminiError> = useGeminiUsage();
+
+  const [agentOrder, setAgentOrder] = useState<string[]>(AGENTS.map((a) => a.id));
+
+  useEffect(() => {
+    LocalStorage.getItem<string>(AGENT_ORDER_KEY).then((stored) => {
+      if (stored) {
+        try {
+          const order = JSON.parse(stored) as string[];
+          const validOrder = order.filter((id) => AGENTS.some((a) => a.id === id));
+          const missingIds = AGENTS.map((a) => a.id).filter((id) => !validOrder.includes(id));
+          setAgentOrder([...validOrder, ...missingIds]);
+        } catch {
+          setAgentOrder(AGENTS.map((a) => a.id));
+        }
+      }
+    });
+  }, []);
+
+  const saveOrder = useCallback(async (newOrder: string[]) => {
+    setAgentOrder(newOrder);
+    await LocalStorage.setItem(AGENT_ORDER_KEY, JSON.stringify(newOrder));
+  }, []);
+
+  const visibilityMap: Record<string, boolean> = {
+    amp: prefs.showAmp,
+    codex: prefs.showCodex,
+    droid: prefs.showDroid,
+    gemini: prefs.showGemini,
+  };
+
+  const sortedAgents = agentOrder
+    .map((id) => AGENTS.find((a) => a.id === id))
+    .filter((a): a is AgentDefinition => a !== undefined);
+  const visibleAgents = sortedAgents.filter((agent) => visibilityMap[agent.id]);
+
+  const isLoading = ampState.isLoading || codexState.isLoading || droidState.isLoading || geminiState.isLoading;
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      ampState.revalidate(),
+      codexState.revalidate(),
+      droidState.revalidate(),
+      geminiState.revalidate(),
+    ]);
+    await showToast({
+      title: "Refreshed",
+      style: Toast.Style.Success,
+    });
+  };
+
+  const moveAgent = useCallback(
+    async (agentId: string, direction: "up" | "down") => {
+      const currentIndex = agentOrder.indexOf(agentId);
+      if (currentIndex === -1) return;
+
+      const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+      if (newIndex < 0 || newIndex >= agentOrder.length) return;
+
+      const newOrder = [...agentOrder];
+      [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+      await saveOrder(newOrder);
+    },
+    [agentOrder, saveOrder],
+  );
+
+  return (
+    <List isLoading={isLoading} isShowingDetail>
+      {visibleAgents.map((agent, index) => {
+        const accessory = getAgentAccessory(agent, {
+          amp: ampState,
+          codex: codexState,
+          droid: droidState,
+          gemini: geminiState,
+        });
+        const detail = renderAgentDetail(agent, {
+          amp: ampState,
+          codex: codexState,
+          droid: droidState,
+          gemini: geminiState,
+        });
+
+        const canMoveUp = index > 0;
+        const canMoveDown = index < visibleAgents.length - 1;
+
+        return (
+          <List.Item
+            key={agent.id}
+            id={agent.id}
+            icon={agent.icon}
+            title={agent.name}
+            subtitle={agent.isSupported ? undefined : "(Coming Soon)"}
+            accessories={[{ text: accessory.text, tooltip: accessory.tooltip }]}
+            detail={<List.Item.Detail metadata={detail} />}
+            actions={
+              <ActionPanel>
+                {agent.isSupported && (
+                  <>
+                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+                    <Action.CopyToClipboard
+                      title="Copy Usage Details"
+                      content={getAgentCopyText(agent, {
+                        amp: ampState,
+                        codex: codexState,
+                        droid: droidState,
+                        gemini: geminiState,
+                      })}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                    {agent.settingsUrl && (
+                      <Action.OpenInBrowser title={`Open ${agent.name} Settings`} url={agent.settingsUrl} />
+                    )}
+                  </>
+                )}
+                <ActionPanel.Section title="Reorder">
+                  {canMoveUp && (
+                    <Action
+                      title="Move up"
+                      icon={Icon.ArrowUp}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                      onAction={() => moveAgent(agent.id, "up")}
+                    />
+                  )}
+                  {canMoveDown && (
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                      onAction={() => moveAgent(agent.id, "down")}
+                    />
+                  )}
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
+  );
+}
