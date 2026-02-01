@@ -21,15 +21,17 @@ async function ensureAppRunning(): Promise<void> {
     for (let i = 0; i < 20; i++) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       try {
-        const state = await NeteaseMusicController.getPlayState();
-        if (state !== NeteaseMusic.PlayState.Exit) {
-          return; // App is ready
-        }
-        // State is still Exit; continue waiting
+    for (let i = 0; i < 20; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      try {
+        await NeteaseMusicController.getPlayState();
+        return; // App is ready
       } catch {
         // App not ready yet, continue waiting
       }
     }
+    throw new Error("NeteaseMusic failed to launch within 10 seconds");
+  }
     throw new Error("Timed out waiting for NeteaseMusic to be ready");
   }
 }
