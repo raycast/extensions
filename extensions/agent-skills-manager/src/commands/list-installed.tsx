@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react"
-import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Alert } from "@raycast/api"
+import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Alert, trash } from "@raycast/api"
 import { listInstalledSkills, removeSkillFromLock, addSkillToLock } from "../skill-registry"
 import { detectInstalledAgents, getAgentConfig } from "../agents"
-import { rm, lstat } from "fs/promises"
+import { lstat } from "fs/promises"
 import { join } from "path"
 import { sanitizeName, installSkillForAgent } from "../installer"
 import { checkForUpdates } from "../update-detector"
@@ -140,7 +140,7 @@ export default function ListInstalled() {
         const agentSkillDir = join(agentBase, sanitizedName)
 
         try {
-          await rm(agentSkillDir, { recursive: true, force: true })
+          await trash(agentSkillDir)
         } catch {
           // Ignore errors
         }
@@ -149,7 +149,7 @@ export default function ListInstalled() {
       // If deleting from all agents, remove canonical location and lock file entry
       if (!agentType) {
         try {
-          await rm(skill.canonicalPath, { recursive: true, force: true })
+          await trash(skill.canonicalPath)
         } catch {
           // Ignore errors
         }
