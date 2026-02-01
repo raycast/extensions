@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-02-01
 - Improved history chart contrast (axis labels and grid lines) for Raycast light/dark appearance
 
 ## [Update] - 2026-01-09
