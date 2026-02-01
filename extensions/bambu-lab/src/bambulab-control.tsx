@@ -12,7 +12,7 @@ import {
   Detail,
 } from "@raycast/api";
 import { useState } from "react";
-import { Preferences, PrinterStatus, LightReport } from "./utils/types";
+import { PrinterStatus, LightReport } from "./utils/types";
 import { useMQTT } from "./utils/mqtt";
 import { formatTime } from "./utils/format";
 import { SEQUENCE_IDS, FTP_CONFIG } from "./utils/constants";

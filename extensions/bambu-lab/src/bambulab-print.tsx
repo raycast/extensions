@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import * as fs from "fs";
 import * as path from "path";
 import { Client as FTPClient, FileInfo } from "basic-ftp";
-import { Preferences, SDFile } from "./utils/types";
+import { SDFile } from "./utils/types";
 import { useMQTT } from "./utils/mqtt";
 import { formatBytes } from "./utils/format";
 import { isPrintableFile, isProjectFile } from "./utils/fileUtils";

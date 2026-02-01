@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import mqtt, { MqttClient } from "mqtt";
-import { Preferences } from "./types";
 import { MQTT_CONFIG, SEQUENCE_IDS } from "./constants";
 
 export interface UseMQTTOptions {
