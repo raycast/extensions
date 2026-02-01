@@ -15,7 +15,7 @@
       "title": "In The (Time) Zone",
       "description": "Scrub time across time zones",
       "mode": "view",
-      "src": "src/time-slider.tsx"
+      "src": "src/in-the-time-zone.tsx"
     }
   ],
   "preferences": [
