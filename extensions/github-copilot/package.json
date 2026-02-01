@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-copilot",
   "title": "GitHub Copilot",
-  "description": "Delegate tasks to GitHub Copilot coding agent and track progress from Raycast",
+  "description": "Delegate tasks to GitHub Copilot coding agent",
   "icon": "icon.png",
   "author": "timrogers",
   "contributors": [
