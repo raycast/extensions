@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Fix import deleting export file] - {PR_MERGE_DATE}
+## [Fix import deleting export file] - 2026-02-01
 
 - Fixed import command deleting the export file before re-exporting, causing ENOENT if export fails
 - Added missing return in export command error handling
