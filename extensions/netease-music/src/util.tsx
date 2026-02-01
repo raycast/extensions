@@ -1,9 +1,9 @@
 import NeteaseMusicController, { NeteaseMusic } from "@chyroc/netease-music-controller";
 import { showHUD } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 async function ensureAppRunning(): Promise<void> {
   let needsLaunch = false;
@@ -16,17 +16,21 @@ async function ensureAppRunning(): Promise<void> {
   }
 
   if (needsLaunch) {
-    await execAsync("open -a 'NeteaseMusic'");
+    await execFileAsync("open", ["-a", "NeteaseMusic"]);
     // Wait for the app to be fully ready (retry until menu bar is accessible)
     for (let i = 0; i < 20; i++) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       try {
-        await NeteaseMusicController.getPlayState();
-        return; // App is ready
+        const state = await NeteaseMusicController.getPlayState();
+        if (state !== NeteaseMusic.PlayState.Exit) {
+          return; // App is ready
+        }
+        // State is still Exit; continue waiting
       } catch {
         // App not ready yet, continue waiting
       }
     }
+    throw new Error("Timed out waiting for NeteaseMusic to be ready");
   }
 }
 
