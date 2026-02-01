@@ -4,13 +4,13 @@
 
 # Terminal Finder
 
-Open currently selected Finder (or Path Finder) window in Terminal<sup>*</sup>
+Open currently selected Finder (or Path Finder) window in **Terminal**<sup>*</sup>
 
 ### <sup>*</sup> Supported:
 
-- Ghostty
-- iTerm2
-- Kitty
+- [Ghostty](https://ghostty.org/)
+- [iTerm2](https://iterm2.com/)
+- [kitty](https://sw.kovidgoyal.net/kitty/)
 - Terminal
-- Warp
-- WezTerm
+- [Warp](https://www.warp.dev/)
+- [WezTerm](https://wezterm.org/index.html)

@@ -171,6 +171,15 @@ function GitRepoListItem(props: {
               }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             />
+            <Action.CreateQuicklink
+              title="Create Quicklink"
+              quicklink={{
+                link: repo.fullPath,
+                name: repo.name,
+                application: preferences.openWith1.bundleId,
+              }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             {repo.remotes.map((remote) => {

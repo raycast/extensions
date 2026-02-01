@@ -11,7 +11,6 @@ interface DuplicateTranslationFormProps {
 }
 
 export function DuplicateTranslationForm({ keyId, keyData }: DuplicateTranslationFormProps) {
-  // If keyData is provided, use it directly. Otherwise, fetch from database
   const { data: fetchedKey, isLoading } = useCachedPromise(
     async (id: number) => {
       return await client.getKeyFromDatabase(id);
@@ -31,7 +30,6 @@ export function DuplicateTranslationForm({ keyId, keyData }: DuplicateTranslatio
 
   const fullKey = keyData || fetchedKey;
 
-  // Don't render anything while loading - wait for data
   if (isLoading || !fullKey) {
     return null;
   }

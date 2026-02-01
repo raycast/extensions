@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yandex-smart-home",
+  "version": "1.0.1",
+  "title": "Yandex Smart Home",
+  "description": "Control Yandex Smart Home devices and run scenarios from Raycast.",
+  "icon": "icon.png",
+  "author": "devall",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "devices",
+      "title": "Search Devices",
+      "subtitle": "Yandex Smart Home",
+      "description": "List and control smart home devices (on/off, brightness).",
+      "mode": "view"
+    },
+    {
+      "name": "scenarios",
+      "title": "Run Scenarios",
+      "subtitle": "Yandex Smart Home",
+      "description": "Run smart home scenarios.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Yandex OAuth Client ID",
+      "description": "From your Yandex OAuth app (oauth.yandex.com). Required for connection.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Paste Client ID from Yandex app settings"
+    },
+    {
+      "name": "redirectUri",
+      "title": "Callback URL",
+      "description": "Must match the Callback URL in your Yandex app. Leave default unless you use a different one.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://oauth.yandex.ru/verification_code",
+      "default": "https://oauth.yandex.ru/verification_code"
+    },
+    {
+      "name": "debugLogs",
+      "title": "Debug Logs",
+      "description": "Log API and auth details to Raycast development console",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Debug Logs"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "eslint": "^9.22.0",
+    "prettier": "3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "publish": "npx @raycast/api@latest publish",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
