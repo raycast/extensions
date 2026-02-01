@@ -10,9 +10,15 @@ interface DownloadListItemProps {
   onRefresh: () => void;
 }
 
+const isFailed = (state: string): boolean => state.toLowerCase().startsWith("failed");
+
 const getStatus = (download: Download): { label: string; color: Color } => {
   if (download.isQueued) {
     return { label: "Queued", color: Color.Blue };
+  }
+
+  if (download.download_state && isFailed(download.download_state)) {
+    return { label: "Failed", color: Color.Red };
   }
 
   if (download.download_finished || download.progress >= 1) {

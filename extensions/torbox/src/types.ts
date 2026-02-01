@@ -14,6 +14,7 @@ export interface Download {
   type: DownloadType;
   created_at: string;
   progress: number;
+  download_state: string;
   download_finished: boolean;
   isQueued: boolean;
   files: DownloadFile[];
