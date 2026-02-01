@@ -1,15 +1,19 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { existsSync, readdirSync, unlinkSync, statSync } from "fs";
+import { existsSync, unlinkSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
+import { createHash } from "crypto";
 
 const execAsync = promisify(exec);
 
 // Safari cache directories
 const TOUCH_ICONS_CACHE = join(homedir(), "Library/Safari/Touch Icons Cache");
+const TOUCH_ICONS_IMAGES = join(TOUCH_ICONS_CACHE, "Images");
 const FAVICON_CACHE = join(homedir(), "Library/Safari/Favicon Cache");
+const FAVICON_DB = join(FAVICON_CACHE, "favicons.db");
+const FAVICON_IMAGES = join(FAVICON_CACHE, "favicons");
 
 // AppleScript to get the current Safari tab URL
 const GET_SAFARI_URL_SCRIPT = `
@@ -37,53 +41,113 @@ async function runAppleScript(script: string): Promise<string> {
   return stdout.trim();
 }
 
-function extractDomain(url: string): string | null {
+/**
+ * Calculate MD5 hash of a string (uppercase, matching Safari's format)
+ */
+function md5(str: string): string {
+  return createHash("md5").update(str).digest("hex").toUpperCase();
+}
+
+/**
+ * Parse URL to extract host info
+ */
+function parseUrl(
+  url: string,
+): { hostOnly: string; hostWithPort: string } | null {
   try {
     const urlObj = new URL(url);
-    return urlObj.hostname;
+    const hostWithPort = urlObj.port
+      ? `${urlObj.hostname}:${urlObj.port}`
+      : urlObj.hostname;
+    return {
+      hostOnly: urlObj.hostname.toLowerCase(),
+      hostWithPort: hostWithPort.toLowerCase(),
+    };
   } catch {
     return null;
   }
 }
 
-function deleteFaviconFromCache(cacheDir: string, domain: string): number {
-  let deletedCount = 0;
-
-  if (!existsSync(cacheDir)) {
-    return 0;
+/**
+ * Delete Touch Icon (Start Page favicon) using MD5 hash of domain
+ */
+function deleteTouchIcon(hostOnly: string): boolean {
+  if (!existsSync(TOUCH_ICONS_IMAGES)) {
+    return false;
   }
 
-  const entries = readdirSync(cacheDir);
+  const hash = md5(hostOnly);
+  const iconPath = join(TOUCH_ICONS_IMAGES, `${hash}.png`);
 
-  for (const entry of entries) {
-    const entryPath = join(cacheDir, entry);
-    const stat = statSync(entryPath);
-
-    if (stat.isDirectory()) {
-      // Check files inside subdirectories
-      const subEntries = readdirSync(entryPath);
-      for (const subEntry of subEntries) {
-        if (subEntry.toLowerCase().includes(domain.toLowerCase())) {
-          const filePath = join(entryPath, subEntry);
-          try {
-            unlinkSync(filePath);
-            deletedCount++;
-          } catch {
-            // Ignore errors
-          }
-        }
-      }
-    } else if (entry.toLowerCase().includes(domain.toLowerCase())) {
-      try {
-        unlinkSync(entryPath);
-        deletedCount++;
-      } catch {
-        // Ignore errors
-      }
+  if (existsSync(iconPath)) {
+    try {
+      unlinkSync(iconPath);
+      return true;
+    } catch {
+      return false;
     }
   }
+  return false;
+}
 
-  return deletedCount;
+/**
+ * Clear Favicon Cache (Tab Bar) entries using SQLite
+ */
+async function clearFaviconCache(hostWithPort: string): Promise<void> {
+  if (!existsSync(FAVICON_DB)) {
+    return;
+  }
+
+  const pattern = `%${hostWithPort}%`;
+  const dbPath = FAVICON_DB.replace(/'/g, "'\"'\"'");
+
+  try {
+    // Get UUIDs and icon URLs for entries matching the host
+    const selectCmd = `sqlite3 '${dbPath}' "SELECT DISTINCT p.uuid, i.url FROM page_url p LEFT JOIN icon_info i ON p.uuid = i.uuid WHERE p.url LIKE '${pattern}';"`;
+    const { stdout } = await execAsync(selectCmd);
+
+    const uuidsToDelete: Set<string> = new Set();
+    const iconURLsToDelete: Set<string> = new Set();
+
+    for (const line of stdout.trim().split("\n")) {
+      if (!line) continue;
+      const parts = line.split("|");
+      if (parts[0]) uuidsToDelete.add(parts[0]);
+      if (parts[1]) iconURLsToDelete.add(parts[1]);
+    }
+
+    // Delete from page_url table
+    await execAsync(
+      `sqlite3 '${dbPath}' "DELETE FROM page_url WHERE url LIKE '${pattern}';"`,
+    ).catch(() => {});
+
+    // Delete from icon_info table
+    for (const uuid of uuidsToDelete) {
+      await execAsync(
+        `sqlite3 '${dbPath}' "DELETE FROM icon_info WHERE uuid = '${uuid}';"`,
+      ).catch(() => {});
+    }
+
+    // Delete from rejected_resources table
+    await execAsync(
+      `sqlite3 '${dbPath}' "DELETE FROM rejected_resources WHERE page_url LIKE '${pattern}';"`,
+    ).catch(() => {});
+
+    // Delete actual favicon files
+    for (const iconURL of iconURLsToDelete) {
+      const hash = md5(iconURL);
+      const faviconPath = join(FAVICON_IMAGES, hash);
+      if (existsSync(faviconPath)) {
+        try {
+          unlinkSync(faviconPath);
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  } catch {
+    // SQLite operations failed, likely permission issue
+  }
 }
 
 async function isSafariRunning(): Promise<boolean> {
@@ -126,11 +190,13 @@ export default async function Command() {
       return;
     }
 
-    const domain = extractDomain(url);
-    if (!domain) {
-      await showHUD("Could not extract domain from URL");
+    const parsed = parseUrl(url);
+    if (!parsed) {
+      await showHUD("Could not parse URL");
       return;
     }
+
+    const { hostOnly, hostWithPort } = parsed;
 
     // Quit Safari
     await showToast({
@@ -154,8 +220,12 @@ export default async function Command() {
       style: Toast.Style.Animated,
       title: "Clearing favicon cache...",
     });
-    deleteFaviconFromCache(TOUCH_ICONS_CACHE, domain);
-    deleteFaviconFromCache(FAVICON_CACHE, domain);
+
+    // Delete Touch Icon (Start Page) using MD5 hash
+    deleteTouchIcon(hostOnly);
+
+    // Clear Favicon Cache (Tab Bar) using SQLite
+    await clearFaviconCache(hostWithPort);
 
     // Reopen Safari
     await showToast({
@@ -165,7 +235,7 @@ export default async function Command() {
     await execAsync("open -a Safari");
 
     // Show success message
-    await showHUD(`Refreshed favicon for ${domain}`);
+    await showHUD(`Refreshed favicon for ${hostOnly}`);
   } catch (error) {
     console.error("Error:", error);
     await showHUD(
