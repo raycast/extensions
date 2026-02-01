@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yandex-smart-home",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "title": "Yandex Smart Home",
   "description": "Control Yandex Smart Home devices and run scenarios from Raycast.",
   "icon": "icon.png",
@@ -73,6 +73,7 @@
     "lint": "ray lint"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

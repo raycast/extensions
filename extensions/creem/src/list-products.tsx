@@ -2,14 +2,14 @@ import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation 
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
 import { CreateProductRequestEntity, ProductEntity } from "creem/dist/commonjs/models/components";
 import { useState } from "react";
-import { API_KEY, creem } from "./creem";
+import { creem } from "./creem";
 
 export default function ListProducts() {
   const [filterStatus, setFilterStatus] = useState("");
 
   const { isLoading, data, mutate } = useCachedPromise(
     async () => {
-      const res = await creem.searchProducts({ xApiKey: API_KEY });
+      const res = await creem.products.search();
       return res.items;
     },
     [],
@@ -104,19 +104,14 @@ function CreateProduct({ mutate }: { mutate: MutatePromise<ProductEntity[]> }) {
   const { handleSubmit, itemProps, values } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating Product", values.name);
-      const createProductRequestEntity: CreateProductRequestEntity = {
+      const createProductRequestEntity = {
         ...values,
         price: +values.price,
         taxMode: values.taxMode ? "inclusive" : "exclusive",
-      };
+      } as CreateProductRequestEntity;
 
       try {
-        await mutate(
-          creem.createProduct({
-            xApiKey: API_KEY,
-            createProductRequestEntity,
-          }),
-        );
+        await mutate(creem.products.create(createProductRequestEntity));
         toast.style = Toast.Style.Success;
         toast.title = "Created Product";
         pop();

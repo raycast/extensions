@@ -1,5 +1,10 @@
 # GitHub Copilot Changelog
 
+## [Copilot usage auth] - 2026-02-01
+
+- Fix auth for Copilot usage command using existing OAuth
+- Remove apps.json preference (no longer needed)
+
 ## [Menu bar command] - 2026-01-09
 
 - Hide the menu bar command when there are no open pull requests
