@@ -45,14 +45,15 @@ function generateHourBlocks(startHour: number): string {
 }
 
 function getDayDiff(localTime: DateTime, baseTime: DateTime): string {
-  const localDay = localTime.startOf("day");
-  const baseDay = baseTime.startOf("day");
-  const diff = localDay.diff(baseDay, "days").days;
-  const rounded = Math.round(diff);
+  // Compare calendar dates in their respective timezones
+  // Using ordinal (day-of-year) ensures we compare calendar days, not absolute timestamps
+  const localDays = localTime.year * 365 + localTime.ordinal;
+  const baseDays = baseTime.year * 365 + baseTime.ordinal;
+  const diff = localDays - baseDays;
 
-  if (rounded === 0) return "";
-  if (rounded > 0) return ` +${rounded}`;
-  return ` ${rounded}`;
+  if (diff === 0) return "";
+  if (diff > 0) return ` +${diff}`;
+  return ` ${diff}`;
 }
 
 export function generateTimelineMarkdown(config: TimelineConfig): string {
