@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Development files
+*.log
+.DS_Store
+
+# Icon creation scripts
+create-icon.js
+icon-template.svg

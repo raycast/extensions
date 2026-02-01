@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openclaw-chat",
+  "title": "OpenClaw Chat",
+  "description": "Chat with your OpenClaw agent",
+  "icon": "command-icon.png",
+  "author": "seo_jeong",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "API URL",
+      "description": "Your OpenClaw API URL",
+      "default": "http://localhost:18789",
+      "placeholder": "http://localhost:18789"
+    },
+    {
+      "name": "gatewayToken",
+      "type": "password",
+      "required": false,
+      "title": "Gateway Token",
+      "description": "Optional: Your gateway authentication token",
+      "placeholder": "Enter your token if gateway auth is enabled"
+    },
+    {
+      "name": "agentName",
+      "type": "textfield",
+      "required": true,
+      "title": "Agent Name",
+      "description": "The name of your OpenClaw agent",
+      "default": "main",
+      "placeholder": "main"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Ask OpenClaw",
+      "subtitle": "OpenClaw",
+      "description": "Send a message to your OpenClaw agent",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.2.0",
+    "esbuild": "^0.27.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist --skip-types",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
