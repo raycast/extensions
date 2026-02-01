@@ -393,33 +393,13 @@ export function InstallFlow({
     // Step: Agent selection
     if (step === "agent-selection") {
       const allAgents = getAllAgents()
-      const allSelected = allAgents.length > 0 && selectedAgents.length === allAgents.length
 
       return (
         <List searchBarPlaceholder="Search agents... (space to toggle)" filtering>
           <List.Section
             title={`Select agents (${selectedAgents.length} selected)`}
-            subtitle={allSelected ? "All agents selected" : undefined}
+            subtitle={selectedAgents.length > 0 ? "Press ⌘+Enter to continue" : undefined}
           >
-            <List.Item
-              title={allSelected ? "Deselect All" : "Select All"}
-              icon={allSelected ? Icon.Circle : Icon.CheckCircle}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title={allSelected ? "Deselect All" : "Select All"}
-                    icon={allSelected ? Icon.Circle : Icon.CheckCircle}
-                    onAction={() => {
-                      if (allSelected) {
-                        setState((prev) => ({ ...prev, selectedAgents: [] }))
-                      } else {
-                        setState((prev) => ({ ...prev, selectedAgents: allAgents.map((a) => a.name as AgentType) }))
-                      }
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
             {allAgents.map((agent) => {
               const isSelected = selectedAgents.includes(agent.name as AgentType)
               return (
