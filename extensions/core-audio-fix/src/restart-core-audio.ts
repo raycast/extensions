@@ -15,7 +15,7 @@ function errorMessage(err: unknown): string {
 }
 
 export default async function main() {
-  await showToast(ToastStyle.Animated, "Restarting Core Audio…");
+  await showToast(ToastStyle.Animated, "Restarting Core Audio...");
 
   try {
     const script = 'do shell script "killall coreaudiod" with administrator privileges';
