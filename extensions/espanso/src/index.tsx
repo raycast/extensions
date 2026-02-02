@@ -43,12 +43,19 @@ export default function Command() {
             if (!category) {
               const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
               category = pathParts[0]?.replace(".yml", "") ?? "";
-              subcategory = pathParts[1]?.replace(".yml", "");
+              const subcategoryParts = pathParts
+                .slice(1)
+                .map((part) => part.replace(".yml", ""))
+                .filter(Boolean);
+              subcategory = subcategoryParts.length > 0 ? subcategoryParts.join(" > ") : "";
             }
             if (subcategory?.toLowerCase() === "index" || subcategory === category) {
               subcategory = "";
-            } else {
-              subcategory = kebabCase(subcategory ?? "");
+            } else if (subcategory) {
+              subcategory = subcategory
+                .split(" > ")
+                .map((part) => part.toLowerCase())
+                .join(" > ");
             }
             category = kebabCase(category);
             categoriesSet.add(category);

@@ -58,6 +58,20 @@ const ACRONYMS = [
 ];
 
 export function formatCategoryName(category: string): string {
+  if (category.includes(" > ")) {
+    return category
+      .split(" > ")
+      .map((part) => {
+        let formatted = capitalCase(part);
+        ACRONYMS.forEach((acronym) => {
+          const regex = new RegExp(`\\b${acronym}\\b`, "gi");
+          formatted = formatted.replace(regex, acronym);
+        });
+        return formatted;
+      })
+      .join(" > ");
+  }
+
   let formatted = capitalCase(category);
   ACRONYMS.forEach((acronym) => {
     const regex = new RegExp(`\\b${acronym}\\b`, "gi");
