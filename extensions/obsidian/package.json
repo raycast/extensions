@@ -20,7 +20,8 @@
     "sapoepsilon",
     "theherk",
     "chris_van_es",
-    "ErBlack"
+    "ErBlack",
+    "vicampuzano"
   ],
   "license": "MIT",
   "preferences": [
@@ -623,6 +624,13 @@
           "type": "checkbox"
         }
       ]
+    },
+    {
+      "name": "runActionCommand",
+      "title": "Custom Actions",
+      "subtitle": "Obsidian",
+      "description": "Manage and run custom append actions",
+      "mode": "view"
     }
   ],
   "tools": [
