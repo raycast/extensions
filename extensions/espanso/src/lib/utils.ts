@@ -57,17 +57,18 @@ const ACRONYMS = [
   "IaaS",
 ];
 
-export function formatCategoryName(category: string): string {
-  const { breadcrumbSeparator = "·" } = getPreferenceValues<{ breadcrumbSeparator?: string }>();
-  const separator = ` ${breadcrumbSeparator.trim()} `;
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
+export function formatCategoryName(category: string, separator: string = " · "): string {
   if (category.includes(separator)) {
     return category
       .split(separator)
       .map((part) => {
         let formatted = capitalCase(part);
         ACRONYMS.forEach((acronym) => {
-          const regex = new RegExp(`\\b${acronym}\\b`, "gi");
+          const regex = new RegExp(`\\b${escapeRegex(acronym)}\\b`, "gi");
           formatted = formatted.replace(regex, acronym);
         });
         return formatted;
@@ -77,7 +78,7 @@ export function formatCategoryName(category: string): string {
 
   let formatted = capitalCase(category);
   ACRONYMS.forEach((acronym) => {
-    const regex = new RegExp(`\\b${acronym}\\b`, "gi");
+    const regex = new RegExp(`\\b${escapeRegex(acronym)}\\b`, "gi");
     formatted = formatted.replace(regex, acronym);
   });
   return formatted;
