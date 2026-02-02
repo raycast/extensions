@@ -38,17 +38,15 @@ export default function Command() {
         const formattedMatches: FormattedMatch[] = sortedMatches
           .filter((match) => !match.form)
           .map((match, index) => {
-            let category = match.category;
-            let subcategory = "";
-            if (!category) {
-              const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
-              category = pathParts[0]?.replace(".yml", "") ?? "";
-              const subcategoryParts = pathParts
-                .slice(1)
-                .map((part) => part.replace(".yml", ""))
-                .filter(Boolean);
-              subcategory = subcategoryParts.length > 0 ? subcategoryParts.join(" > ") : "";
-            }
+            const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
+            let category = match.category || pathParts[0]?.replace(".yml", "") || "";
+
+            const subcategoryParts = pathParts
+              .slice(1)
+              .map((part) => part.replace(".yml", ""))
+              .filter(Boolean);
+            let subcategory = subcategoryParts.length > 0 ? subcategoryParts.join(" > ") : "";
+
             if (subcategory?.toLowerCase() === "index" || subcategory === category) {
               subcategory = "";
             } else if (subcategory) {
