@@ -1,4 +1,4 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { ReactNode, useMemo } from "react";
 import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 import {
@@ -109,7 +109,6 @@ export function CostAnalysis() {
         <List.Item.Detail.Metadata.Label
           title="Projected Monthly"
           text={formatCost(projectedMonthlyCost)}
-          icon={projectedMonthlyCost > 100 ? { source: Icon.ExclamationMark, tintColor: Color.Red } : undefined}
         />
         <List.Item.Detail.Metadata.Separator />
 
