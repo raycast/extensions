@@ -1,4 +1,5 @@
 import { List, Action, ActionPanel, Icon, showToast, Toast, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { execSync } from "child_process";
 import { useEffect, useState, useCallback } from "react";
 import { useAmpUsage } from "./amp/fetcher";
 import { renderAmpDetail, getAmpAccessory, formatAmpUsageText } from "./amp/renderer";
@@ -247,6 +248,29 @@ export default function Command() {
                       })}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
+                    {agent.id === "gemini" && geminiState.error?.type === "unauthorized" && (
+                      <Action
+                        title="Re-Authenticate Gemini"
+                        icon={Icon.Key}
+                        onAction={async () => {
+                          try {
+                            execSync("gemini", { timeout: 30000 });
+                          } catch {
+                            // gemini CLI may exit with non-zero, ignore
+                          }
+                          await geminiState.revalidate();
+                          if (geminiState.error?.type === "unauthorized") {
+                            await showToast({
+                              title: "Authentication Failed",
+                              message: "Run 'gemini' in terminal to re-authenticate",
+                              style: Toast.Style.Failure,
+                            });
+                          } else {
+                            await showToast({ title: "Re-authenticated", style: Toast.Style.Success });
+                          }
+                        }}
+                      />
+                    )}
                     {agent.settingsUrl && (
                       <Action.OpenInBrowser title={`Open ${agent.name} Settings`} url={agent.settingsUrl} />
                     )}
