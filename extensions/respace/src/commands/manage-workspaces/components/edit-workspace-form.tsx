@@ -1,13 +1,5 @@
 import { randomUUID } from "node:crypto";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { updateWorkspace } from "../../../core/storage/storage";
 import type { Workspace, WorkspaceItem } from "../../../types/workspace";
@@ -21,10 +13,7 @@ interface EditWorkspaceFormProps {
   onWorkspaceUpdated: () => void;
 }
 
-export function EditWorkspaceForm({
-  workspace,
-  onWorkspaceUpdated,
-}: EditWorkspaceFormProps) {
+export function EditWorkspaceForm({ workspace, onWorkspaceUpdated }: EditWorkspaceFormProps) {
   const { pop } = useNavigation();
   const [name, setName] = useState(workspace.name);
   const [description, setDescription] = useState(workspace.description || "");
@@ -82,20 +71,11 @@ export function EditWorkspaceForm({
       navigationTitle={`Edit: ${workspace.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Changes"
-            icon={Icon.Check}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Save Changes" icon={Icon.Check} onSubmit={handleSubmit} />
           <Action.Push
             title="Manage Items"
             icon={Icon.List}
-            target={
-              <ManageItemsView
-                workspace={{ ...workspace, items }}
-                onWorkspaceUpdated={onWorkspaceUpdated}
-              />
-            }
+            target={<ManageItemsView workspace={{ ...workspace, items }} onWorkspaceUpdated={onWorkspaceUpdated} />}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
           />
           <Action.Push
@@ -118,13 +98,7 @@ export function EditWorkspaceForm({
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="My Workspace"
-        value={name}
-        onChange={setName}
-      />
+      <Form.TextField id="name" title="Name" placeholder="My Workspace" value={name} onChange={setName} />
       <Form.Dropdown id="icon" title="Icon" value={icon} onChange={setIcon}>
         {Object.entries(iconsByCategory).map(([category, icons]) => (
           <Form.Dropdown.Section key={category} title={category}>

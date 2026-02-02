@@ -1,18 +1,7 @@
 import type { Application } from "@raycast/api";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  Toast,
-  getApplications,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, getApplications, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import type {
-  WorkspaceItem,
-  WorkspaceItemType,
-} from "../../../types/workspace";
+import type { WorkspaceItem, WorkspaceItemType } from "../../../types/workspace";
 import { getPathLabel, getPathPlaceholder } from "../utils/workspace-helpers";
 
 interface AddItemFormProps {
@@ -31,9 +20,7 @@ export function AddItemForm({ onItemAdded }: AddItemFormProps) {
     async function loadApps() {
       try {
         const installedApps = await getApplications();
-        const sorted = installedApps
-          .filter((app) => app.name && app.path)
-          .sort((a, b) => a.name.localeCompare(b.name));
+        const sorted = installedApps.filter((app) => app.name && app.path).sort((a, b) => a.name.localeCompare(b.name));
         setApplications(sorted);
       } catch (error) {
         console.error("Failed to load applications", error);
@@ -79,41 +66,18 @@ export function AddItemForm({ onItemAdded }: AddItemFormProps) {
       navigationTitle="Add Item"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Add Item"
-            icon={Icon.Check}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Add Item" icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="type"
-        title="Type"
-        value={type}
-        onChange={(value) => setType(value as WorkspaceItemType)}
-      >
-        <Form.Dropdown.Item
-          value="app"
-          title="Application"
-          icon={Icon.AppWindow}
-        />
+      <Form.Dropdown id="type" title="Type" value={type} onChange={(value) => setType(value as WorkspaceItemType)}>
+        <Form.Dropdown.Item value="app" title="Application" icon={Icon.AppWindow} />
         <Form.Dropdown.Item value="folder" title="Folder" icon={Icon.Folder} />
         <Form.Dropdown.Item value="file" title="File" icon={Icon.Document} />
         <Form.Dropdown.Item value="url" title="URL" icon={Icon.Globe} />
-        <Form.Dropdown.Item
-          value="terminal"
-          title="Terminal Command"
-          icon={Icon.Terminal}
-        />
+        <Form.Dropdown.Item value="terminal" title="Terminal Command" icon={Icon.Terminal} />
       </Form.Dropdown>
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Item name"
-        value={name}
-        onChange={setName}
-      />
+      <Form.TextField id="name" title="Name" placeholder="Item name" value={name} onChange={setName} />
       {type === "app" && applications.length > 0 ? (
         <Form.Dropdown
           id="path"
@@ -133,12 +97,7 @@ export function AddItemForm({ onItemAdded }: AddItemFormProps) {
           <Form.Dropdown.Item value="" title="Select an application" />
           <Form.Dropdown.Section title="Installed Applications">
             {applications.map((app) => (
-              <Form.Dropdown.Item
-                key={app.path}
-                value={app.path}
-                title={app.name}
-                icon={{ fileIcon: app.path }}
-              />
+              <Form.Dropdown.Item key={app.path} value={app.path} title={app.name} icon={{ fileIcon: app.path }} />
             ))}
           </Form.Dropdown.Section>
         </Form.Dropdown>

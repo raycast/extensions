@@ -4,16 +4,10 @@ import { launchWorkspace } from "../../core/launcher/launcher";
 import { getAllWorkspaces } from "../../core/storage/storage";
 import type { Workspace } from "../../types/workspace";
 
-export default async function QuickOpen(
-  props: LaunchProps<{ arguments: Arguments.QuickOpen }>,
-
 /**
  * Finds a workspace by name (exact match first, then partial match)
  */
-function findWorkspaceByName(
-  workspaces: Workspace[],
-  name: string,
-): Workspace | undefined {
+function findWorkspaceByName(workspaces: Workspace[], name: string): Workspace | undefined {
   const lowerName = name.toLowerCase();
 
   // Try exact match first
@@ -27,9 +21,7 @@ function findWorkspaceByName(
 /**
  * Quick Open command - opens a workspace by name argument
  */
-export default async function QuickOpen(
-  props: LaunchProps<{ arguments: Arguments }>,
-) {
+export default async function QuickOpen(props: LaunchProps<{ arguments: Arguments.QuickOpen }>) {
   const { workspaceName } = props.arguments;
 
   if (!workspaceName) {

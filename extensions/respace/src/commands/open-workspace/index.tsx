@@ -1,16 +1,7 @@
 import { Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  closeWorkspace,
-  launchWorkspace,
-  verifyAllWindows,
-} from "../../core/launcher/launcher";
-import {
-  createSession,
-  deleteSession,
-  getAllSessions,
-  updateSession,
-} from "../../core/storage/session-storage";
+import { closeWorkspace, launchWorkspace, verifyAllWindows } from "../../core/launcher/launcher";
+import { createSession, deleteSession, getAllSessions, updateSession } from "../../core/storage/session-storage";
 import { getAllWorkspaces } from "../../core/storage/storage";
 import type { Workspace, WorkspaceSession } from "../../types/workspace";
 import { WorkspaceListItem } from "./components/workspace-list-item";
@@ -43,10 +34,7 @@ export default function OpenWorkspace() {
         if (verifiedWindows.length > 0) {
           // Update session with verified windows if any were removed
           if (verifiedWindows.length < session.windows.length) {
-            const updatedSession = updateSession(
-              session.workspaceId,
-              verifiedWindows,
-            );
+            const updatedSession = updateSession(session.workspaceId, verifiedWindows);
             if (updatedSession) {
               verifiedSessions.push(updatedSession);
             }
@@ -70,10 +58,7 @@ export default function OpenWorkspace() {
   async function handleOpen(workspace: Workspace) {
     try {
       // Launch workspace and get tracked windows
-      const trackedWindows = await launchWorkspace(
-        workspace.items,
-        workspace.name,
-      );
+      const trackedWindows = await launchWorkspace(workspace.items, workspace.name);
 
       // Create session in persistent storage
       const session = createSession(workspace.id, trackedWindows);
@@ -107,9 +92,7 @@ export default function OpenWorkspace() {
   }
 
   const openedWorkspaceIds = sessions.map((s) => s.workspaceId);
-  const openedWorkspaces = workspaces.filter((w) =>
-    openedWorkspaceIds.includes(w.id),
-  );
+  const openedWorkspaces = workspaces.filter((w) => openedWorkspaceIds.includes(w.id));
   const hasOpenedWorkspaces = openedWorkspaces.length > 0;
 
   return (
@@ -140,11 +123,7 @@ export default function OpenWorkspace() {
           {/* All Workspaces Section */}
           <List.Section title="All Workspaces">
             {workspaces.map((workspace) => (
-              <WorkspaceListItem
-                key={workspace.id}
-                workspace={workspace}
-                onOpen={handleOpen}
-              />
+              <WorkspaceListItem key={workspace.id} workspace={workspace} onOpen={handleOpen} />
             ))}
           </List.Section>
         </>

@@ -1,30 +1,12 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  deleteWorkspace,
-  duplicateWorkspace,
-  getAllWorkspaces,
-} from "../../core/storage/storage";
+import { deleteWorkspace, duplicateWorkspace, getAllWorkspaces } from "../../core/storage/storage";
 import type { Workspace, WorkspaceItemType } from "../../types/workspace";
 import { CreateWorkspaceForm } from "./components/create-workspace-form";
 import { EditWorkspaceForm } from "./components/edit-workspace-form";
 import { ManageItemsView } from "./components/manage-items-view";
 import { getWorkspaceIcon } from "./constants/workspace-icons";
-import {
-  getItemColor,
-  getItemIcon,
-  getTypeName,
-} from "./utils/workspace-helpers";
+import { getItemColor, getItemIcon, getTypeName } from "./utils/workspace-helpers";
 
 export default function ManageWorkspaces() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -101,11 +83,7 @@ export default function ManageWorkspaces() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search workspaces..."
-      isShowingDetail
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search workspaces..." isShowingDetail>
       <List.EmptyView
         icon={Icon.Tray}
         title="No Workspaces"
@@ -115,9 +93,7 @@ export default function ManageWorkspaces() {
             <Action.Push
               title="Create Workspace"
               icon={Icon.Plus}
-              target={
-                <CreateWorkspaceForm onWorkspaceCreated={loadWorkspaces} />
-              }
+              target={<CreateWorkspaceForm onWorkspaceCreated={loadWorkspaces} />}
             />
           </ActionPanel>
         }
@@ -140,10 +116,7 @@ export default function ManageWorkspaces() {
               tintColor: Color.PrimaryText,
             }}
             title={workspace.name}
-            keywords={[
-              workspace.description || "",
-              ...workspace.items.map((i) => i.name),
-            ]}
+            keywords={[workspace.description || "", ...workspace.items.map((i) => i.name)]}
             detail={
               <List.Item.Detail
                 metadata={
@@ -154,10 +127,7 @@ export default function ManageWorkspaces() {
                       icon={{ source: getWorkspaceIcon(workspace.icon) }}
                     />
                     {workspace.description && (
-                      <List.Item.Detail.Metadata.Label
-                        title="Description"
-                        text={workspace.description}
-                      />
+                      <List.Item.Detail.Metadata.Label title="Description" text={workspace.description} />
                     )}
                     <List.Item.Detail.Metadata.Separator />
 
@@ -166,10 +136,7 @@ export default function ManageWorkspaces() {
                       text={`${workspace.items.length} item${workspace.items.length !== 1 ? "s" : ""}`}
                     />
                     {Object.entries(itemCounts).map(([type, count]) => (
-                      <List.Item.Detail.Metadata.TagList
-                        key={type}
-                        title={getTypeName(type as WorkspaceItemType)}
-                      >
+                      <List.Item.Detail.Metadata.TagList key={type} title={getTypeName(type as WorkspaceItemType)}>
                         <List.Item.Detail.Metadata.TagList.Item
                           text={String(count)}
                           color={getItemColor(type as WorkspaceItemType)}
@@ -180,20 +147,13 @@ export default function ManageWorkspaces() {
 
                     <List.Item.Detail.Metadata.Label title="Items" />
                     {workspace.items.length === 0 ? (
-                      <List.Item.Detail.Metadata.Label
-                        title=""
-                        text="No items yet"
-                      />
+                      <List.Item.Detail.Metadata.Label title="" text="No items yet" />
                     ) : (
                       workspace.items.map((item, index) => (
                         <List.Item.Detail.Metadata.Label
                           key={item.id}
                           title={`${index + 1}. ${item.name}`}
-                          text={
-                            item.type === "url" || item.type === "terminal"
-                              ? item.path
-                              : undefined
-                          }
+                          text={item.type === "url" || item.type === "terminal" ? item.path : undefined}
                           icon={{
                             source: getItemIcon(item.type),
                             tintColor: getItemColor(item.type),
@@ -221,32 +181,18 @@ export default function ManageWorkspaces() {
                   <Action.Push
                     title="Edit Workspace"
                     icon={Icon.Pencil}
-                    target={
-                      <EditWorkspaceForm
-                        workspace={workspace}
-                        onWorkspaceUpdated={loadWorkspaces}
-                      />
-                    }
+                    target={<EditWorkspaceForm workspace={workspace} onWorkspaceUpdated={loadWorkspaces} />}
                   />
                   <Action.Push
                     title="Manage Items"
                     icon={Icon.List}
-                    target={
-                      <ManageItemsView
-                        workspace={workspace}
-                        onWorkspaceUpdated={loadWorkspaces}
-                      />
-                    }
+                    target={<ManageItemsView workspace={workspace} onWorkspaceUpdated={loadWorkspaces} />}
                     shortcut={{ modifiers: ["cmd"], key: "i" }}
                   />
                   <Action.Push
                     title="Create New Workspace"
                     icon={Icon.Plus}
-                    target={
-                      <CreateWorkspaceForm
-                        onWorkspaceCreated={loadWorkspaces}
-                      />
-                    }
+                    target={<CreateWorkspaceForm onWorkspaceCreated={loadWorkspaces} />}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
                   <Action
