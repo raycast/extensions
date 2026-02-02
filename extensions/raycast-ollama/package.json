@@ -168,10 +168,4668 @@
       "mode": "view",
       "arguments": [
         {
-          "name": "language",
-          "placeholder": "To Language",
-          "type": "text",
-          "required": true
+          "name": "source",
+          "placeholder": "Source Language",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Afar (aa)",
+              "value": "Afar (aa)"
+            },
+            {
+              "title": "Afar (aa-DJ)",
+              "value": "Afar (aa-DJ)"
+            },
+            {
+              "title": "Afar (aa-ER)",
+              "value": "Afar (aa-ER)"
+            },
+            {
+              "title": "Abkhazian (ab)",
+              "value": "Abkhazian (ab)"
+            },
+            {
+              "title": "Afrikaans (af)",
+              "value": "Afrikaans (af)"
+            },
+            {
+              "title": "Afrikaans (af-NA)",
+              "value": "Afrikaans (af-NA)"
+            },
+            {
+              "title": "Akan (ak)",
+              "value": "Akan (ak)"
+            },
+            {
+              "title": "Amharic (am)",
+              "value": "Amharic (am)"
+            },
+            {
+              "title": "Aragonese (an)",
+              "value": "Aragonese (an)"
+            },
+            {
+              "title": "Arabic (ar)",
+              "value": "Arabic (ar)"
+            },
+            {
+              "title": "Arabic (ar-AE)",
+              "value": "Arabic (ar-AE)"
+            },
+            {
+              "title": "Arabic (ar-BH)",
+              "value": "Arabic (ar-BH)"
+            },
+            {
+              "title": "Arabic (ar-DJ)",
+              "value": "Arabic (ar-DJ)"
+            },
+            {
+              "title": "Arabic (ar-DZ)",
+              "value": "Arabic (ar-DZ)"
+            },
+            {
+              "title": "Arabic (ar-EG)",
+              "value": "Arabic (ar-EG)"
+            },
+            {
+              "title": "Arabic (ar-EH)",
+              "value": "Arabic (ar-EH)"
+            },
+            {
+              "title": "Arabic (ar-ER)",
+              "value": "Arabic (ar-ER)"
+            },
+            {
+              "title": "Arabic (ar-IL)",
+              "value": "Arabic (ar-IL)"
+            },
+            {
+              "title": "Arabic (ar-IQ)",
+              "value": "Arabic (ar-IQ)"
+            },
+            {
+              "title": "Arabic (ar-JO)",
+              "value": "Arabic (ar-JO)"
+            },
+            {
+              "title": "Arabic (ar-KM)",
+              "value": "Arabic (ar-KM)"
+            },
+            {
+              "title": "Arabic (ar-KW)",
+              "value": "Arabic (ar-KW)"
+            },
+            {
+              "title": "Arabic (ar-LB)",
+              "value": "Arabic (ar-LB)"
+            },
+            {
+              "title": "Arabic (ar-LY)",
+              "value": "Arabic (ar-LY)"
+            },
+            {
+              "title": "Arabic (ar-MA)",
+              "value": "Arabic (ar-MA)"
+            },
+            {
+              "title": "Arabic (ar-MR)",
+              "value": "Arabic (ar-MR)"
+            },
+            {
+              "title": "Arabic (ar-OM)",
+              "value": "Arabic (ar-OM)"
+            },
+            {
+              "title": "Arabic (ar-PS)",
+              "value": "Arabic (ar-PS)"
+            },
+            {
+              "title": "Arabic (ar-QA)",
+              "value": "Arabic (ar-QA)"
+            },
+            {
+              "title": "Arabic (ar-SA)",
+              "value": "Arabic (ar-SA)"
+            },
+            {
+              "title": "Arabic (ar-SD)",
+              "value": "Arabic (ar-SD)"
+            },
+            {
+              "title": "Arabic (ar-SO)",
+              "value": "Arabic (ar-SO)"
+            },
+            {
+              "title": "Arabic (ar-SS)",
+              "value": "Arabic (ar-SS)"
+            },
+            {
+              "title": "Arabic (ar-SY)",
+              "value": "Arabic (ar-SY)"
+            },
+            {
+              "title": "Arabic (ar-TD)",
+              "value": "Arabic (ar-TD)"
+            },
+            {
+              "title": "Arabic (ar-TN)",
+              "value": "Arabic (ar-TN)"
+            },
+            {
+              "title": "Arabic (ar-YE)",
+              "value": "Arabic (ar-YE)"
+            },
+            {
+              "title": "Assamese (as)",
+              "value": "Assamese (as)"
+            },
+            {
+              "title": "Azerbaijani (az)",
+              "value": "Azerbaijani (az)"
+            },
+            {
+              "title": "Azerbaijani (az-Arab)",
+              "value": "Azerbaijani (az-Arab)"
+            },
+            {
+              "title": "Azerbaijani (az-Arab-IQ)",
+              "value": "Azerbaijani (az-Arab-IQ)"
+            },
+            {
+              "title": "Azerbaijani (az-Arab-TR)",
+              "value": "Azerbaijani (az-Arab-TR)"
+            },
+            {
+              "title": "Azerbaijani (az-Cyrl)",
+              "value": "Azerbaijani (az-Cyrl)"
+            },
+            {
+              "title": "Azerbaijani (az-Latn)",
+              "value": "Azerbaijani (az-Latn)"
+            },
+            {
+              "title": "Bashkir (ba)",
+              "value": "Bashkir (ba)"
+            },
+            {
+              "title": "Belarusian (be)",
+              "value": "Belarusian (be)"
+            },
+            {
+              "title": "Belarusian (be-tarask)",
+              "value": "Belarusian (be-tarask)"
+            },
+            {
+              "title": "Bulgarian (bg)",
+              "value": "Bulgarian (bg)"
+            },
+            {
+              "title": "Bulgarian (bg-BG)",
+              "value": "Bulgarian (bg-BG)"
+            },
+            {
+              "title": "Bambara (bm)",
+              "value": "Bambara (bm)"
+            },
+            {
+              "title": "Bambara (bm-Nkoo)",
+              "value": "Bambara (bm-Nkoo)"
+            },
+            {
+              "title": "Bengali (bn)",
+              "value": "Bengali (bn)"
+            },
+            {
+              "title": "Bengali (bn-IN)",
+              "value": "Bengali (bn-IN)"
+            },
+            {
+              "title": "Tibetan (bo)",
+              "value": "Tibetan (bo)"
+            },
+            {
+              "title": "Tibetan (bo-IN)",
+              "value": "Tibetan (bo-IN)"
+            },
+            {
+              "title": "Breton (br)",
+              "value": "Breton (br)"
+            },
+            {
+              "title": "Bosnian (bs)",
+              "value": "Bosnian (bs)"
+            },
+            {
+              "title": "Bosnian (bs-Cyrl)",
+              "value": "Bosnian (bs-Cyrl)"
+            },
+            {
+              "title": "Bosnian (bs-Latn)",
+              "value": "Bosnian (bs-Latn)"
+            },
+            {
+              "title": "Catalan (ca)",
+              "value": "Catalan (ca)"
+            },
+            {
+              "title": "Catalan (ca-AD)",
+              "value": "Catalan (ca-AD)"
+            },
+            {
+              "title": "Catalan (ca-ES)",
+              "value": "Catalan (ca-ES)"
+            },
+            {
+              "title": "Catalan (ca-FR)",
+              "value": "Catalan (ca-FR)"
+            },
+            {
+              "title": "Catalan (ca-IT)",
+              "value": "Catalan (ca-IT)"
+            },
+            {
+              "title": "Chechen (ce)",
+              "value": "Chechen (ce)"
+            },
+            {
+              "title": "Corsican (co)",
+              "value": "Corsican (co)"
+            },
+            {
+              "title": "Czech (cs)",
+              "value": "Czech (cs)"
+            },
+            {
+              "title": "Czech (cs-CZ)",
+              "value": "Czech (cs-CZ)"
+            },
+            {
+              "title": "Chuvash (cv)",
+              "value": "Chuvash (cv)"
+            },
+            {
+              "title": "Welsh (cy)",
+              "value": "Welsh (cy)"
+            },
+            {
+              "title": "Danish (da)",
+              "value": "Danish (da)"
+            },
+            {
+              "title": "Danish (da-DK)",
+              "value": "Danish (da-DK)"
+            },
+            {
+              "title": "Danish (da-GL)",
+              "value": "Danish (da-GL)"
+            },
+            {
+              "title": "German (de)",
+              "value": "German (de)"
+            },
+            {
+              "title": "German (de-AT)",
+              "value": "German (de-AT)"
+            },
+            {
+              "title": "German (de-BE)",
+              "value": "German (de-BE)"
+            },
+            {
+              "title": "German (de-CH)",
+              "value": "German (de-CH)"
+            },
+            {
+              "title": "German (de-DE)",
+              "value": "German (de-DE)"
+            },
+            {
+              "title": "German (de-IT)",
+              "value": "German (de-IT)"
+            },
+            {
+              "title": "German (de-LI)",
+              "value": "German (de-LI)"
+            },
+            {
+              "title": "German (de-LU)",
+              "value": "German (de-LU)"
+            },
+            {
+              "title": "Divehi (dv)",
+              "value": "Divehi (dv)"
+            },
+            {
+              "title": "Dzongkha (dz)",
+              "value": "Dzongkha (dz)"
+            },
+            {
+              "title": "Ewe (ee)",
+              "value": "Ewe (ee)"
+            },
+            {
+              "title": "Ewe (ee-TG)",
+              "value": "Ewe (ee-TG)"
+            },
+            {
+              "title": "Greek (el)",
+              "value": "Greek (el)"
+            },
+            {
+              "title": "Greek (el-CY)",
+              "value": "Greek (el-CY)"
+            },
+            {
+              "title": "Greek (el-GR)",
+              "value": "Greek (el-GR)"
+            },
+            {
+              "title": "Greek (el-polyton)",
+              "value": "Greek (el-polyton)"
+            },
+            {
+              "title": "English (en)",
+              "value": "English (en)"
+            },
+            {
+              "title": "English (en-AE)",
+              "value": "English (en-AE)"
+            },
+            {
+              "title": "English (en-AG)",
+              "value": "English (en-AG)"
+            },
+            {
+              "title": "English (en-AI)",
+              "value": "English (en-AI)"
+            },
+            {
+              "title": "English (en-AS)",
+              "value": "English (en-AS)"
+            },
+            {
+              "title": "English (en-AT)",
+              "value": "English (en-AT)"
+            },
+            {
+              "title": "English (en-AU)",
+              "value": "English (en-AU)"
+            },
+            {
+              "title": "English (en-BB)",
+              "value": "English (en-BB)"
+            },
+            {
+              "title": "English (en-BE)",
+              "value": "English (en-BE)"
+            },
+            {
+              "title": "English (en-BI)",
+              "value": "English (en-BI)"
+            },
+            {
+              "title": "English (en-BM)",
+              "value": "English (en-BM)"
+            },
+            {
+              "title": "English (en-BS)",
+              "value": "English (en-BS)"
+            },
+            {
+              "title": "English (en-BW)",
+              "value": "English (en-BW)"
+            },
+            {
+              "title": "English (en-BZ)",
+              "value": "English (en-BZ)"
+            },
+            {
+              "title": "English (en-CA)",
+              "value": "English (en-CA)"
+            },
+            {
+              "title": "English (en-CC)",
+              "value": "English (en-CC)"
+            },
+            {
+              "title": "English (en-CH)",
+              "value": "English (en-CH)"
+            },
+            {
+              "title": "English (en-CK)",
+              "value": "English (en-CK)"
+            },
+            {
+              "title": "English (en-CM)",
+              "value": "English (en-CM)"
+            },
+            {
+              "title": "English (en-CX)",
+              "value": "English (en-CX)"
+            },
+            {
+              "title": "English (en-CY)",
+              "value": "English (en-CY)"
+            },
+            {
+              "title": "English (en-CZ)",
+              "value": "English (en-CZ)"
+            },
+            {
+              "title": "English (en-DE)",
+              "value": "English (en-DE)"
+            },
+            {
+              "title": "English (en-DG)",
+              "value": "English (en-DG)"
+            },
+            {
+              "title": "English (en-DK)",
+              "value": "English (en-DK)"
+            },
+            {
+              "title": "English (en-DM)",
+              "value": "English (en-DM)"
+            },
+            {
+              "title": "English (en-ER)",
+              "value": "English (en-ER)"
+            },
+            {
+              "title": "English (en-ES)",
+              "value": "English (en-ES)"
+            },
+            {
+              "title": "English (en-FI)",
+              "value": "English (en-FI)"
+            },
+            {
+              "title": "English (en-FJ)",
+              "value": "English (en-FJ)"
+            },
+            {
+              "title": "English (en-FK)",
+              "value": "English (en-FK)"
+            },
+            {
+              "title": "English (en-FM)",
+              "value": "English (en-FM)"
+            },
+            {
+              "title": "English (en-FR)",
+              "value": "English (en-FR)"
+            },
+            {
+              "title": "English (en-GB)",
+              "value": "English (en-GB)"
+            },
+            {
+              "title": "English (en-GD)",
+              "value": "English (en-GD)"
+            },
+            {
+              "title": "English (en-GG)",
+              "value": "English (en-GG)"
+            },
+            {
+              "title": "English (en-GH)",
+              "value": "English (en-GH)"
+            },
+            {
+              "title": "English (en-GI)",
+              "value": "English (en-GI)"
+            },
+            {
+              "title": "English (en-GM)",
+              "value": "English (en-GM)"
+            },
+            {
+              "title": "English (en-GS)",
+              "value": "English (en-GS)"
+            },
+            {
+              "title": "English (en-GU)",
+              "value": "English (en-GU)"
+            },
+            {
+              "title": "English (en-GY)",
+              "value": "English (en-GY)"
+            },
+            {
+              "title": "English (en-HK)",
+              "value": "English (en-HK)"
+            },
+            {
+              "title": "English (en-HU)",
+              "value": "English (en-HU)"
+            },
+            {
+              "title": "English (en-ID)",
+              "value": "English (en-ID)"
+            },
+            {
+              "title": "English (en-IE)",
+              "value": "English (en-IE)"
+            },
+            {
+              "title": "English (en-IL)",
+              "value": "English (en-IL)"
+            },
+            {
+              "title": "English (en-IM)",
+              "value": "English (en-IM)"
+            },
+            {
+              "title": "English (en-IN)",
+              "value": "English (en-IN)"
+            },
+            {
+              "title": "English (en-IO)",
+              "value": "English (en-IO)"
+            },
+            {
+              "title": "English (en-IT)",
+              "value": "English (en-IT)"
+            },
+            {
+              "title": "English (en-JE)",
+              "value": "English (en-JE)"
+            },
+            {
+              "title": "English (en-JM)",
+              "value": "English (en-JM)"
+            },
+            {
+              "title": "English (en-KE)",
+              "value": "English (en-KE)"
+            },
+            {
+              "title": "English (en-KI)",
+              "value": "English (en-KI)"
+            },
+            {
+              "title": "English (en-KN)",
+              "value": "English (en-KN)"
+            },
+            {
+              "title": "English (en-KY)",
+              "value": "English (en-KY)"
+            },
+            {
+              "title": "English (en-LC)",
+              "value": "English (en-LC)"
+            },
+            {
+              "title": "English (en-LR)",
+              "value": "English (en-LR)"
+            },
+            {
+              "title": "English (en-LS)",
+              "value": "English (en-LS)"
+            },
+            {
+              "title": "English (en-MG)",
+              "value": "English (en-MG)"
+            },
+            {
+              "title": "English (en-MH)",
+              "value": "English (en-MH)"
+            },
+            {
+              "title": "English (en-MO)",
+              "value": "English (en-MO)"
+            },
+            {
+              "title": "English (en-MP)",
+              "value": "English (en-MP)"
+            },
+            {
+              "title": "English (en-MS)",
+              "value": "English (en-MS)"
+            },
+            {
+              "title": "English (en-MT)",
+              "value": "English (en-MT)"
+            },
+            {
+              "title": "English (en-MU)",
+              "value": "English (en-MU)"
+            },
+            {
+              "title": "English (en-MV)",
+              "value": "English (en-MV)"
+            },
+            {
+              "title": "English (en-MW)",
+              "value": "English (en-MW)"
+            },
+            {
+              "title": "English (en-MY)",
+              "value": "English (en-MY)"
+            },
+            {
+              "title": "English (en-NA)",
+              "value": "English (en-NA)"
+            },
+            {
+              "title": "English (en-NF)",
+              "value": "English (en-NF)"
+            },
+            {
+              "title": "English (en-NG)",
+              "value": "English (en-NG)"
+            },
+            {
+              "title": "English (en-NL)",
+              "value": "English (en-NL)"
+            },
+            {
+              "title": "English (en-NO)",
+              "value": "English (en-NO)"
+            },
+            {
+              "title": "English (en-NR)",
+              "value": "English (en-NR)"
+            },
+            {
+              "title": "English (en-NU)",
+              "value": "English (en-NU)"
+            },
+            {
+              "title": "English (en-NZ)",
+              "value": "English (en-NZ)"
+            },
+            {
+              "title": "English (en-PG)",
+              "value": "English (en-PG)"
+            },
+            {
+              "title": "English (en-PH)",
+              "value": "English (en-PH)"
+            },
+            {
+              "title": "English (en-PK)",
+              "value": "English (en-PK)"
+            },
+            {
+              "title": "English (en-PL)",
+              "value": "English (en-PL)"
+            },
+            {
+              "title": "English (en-PN)",
+              "value": "English (en-PN)"
+            },
+            {
+              "title": "English (en-PR)",
+              "value": "English (en-PR)"
+            },
+            {
+              "title": "English (en-PT)",
+              "value": "English (en-PT)"
+            },
+            {
+              "title": "English (en-PW)",
+              "value": "English (en-PW)"
+            },
+            {
+              "title": "English (en-RO)",
+              "value": "English (en-RO)"
+            },
+            {
+              "title": "English (en-RW)",
+              "value": "English (en-RW)"
+            },
+            {
+              "title": "English (en-SB)",
+              "value": "English (en-SB)"
+            },
+            {
+              "title": "English (en-SC)",
+              "value": "English (en-SC)"
+            },
+            {
+              "title": "English (en-SD)",
+              "value": "English (en-SD)"
+            },
+            {
+              "title": "English (en-SE)",
+              "value": "English (en-SE)"
+            },
+            {
+              "title": "English (en-SG)",
+              "value": "English (en-SG)"
+            },
+            {
+              "title": "English (en-SH)",
+              "value": "English (en-SH)"
+            },
+            {
+              "title": "English (en-SI)",
+              "value": "English (en-SI)"
+            },
+            {
+              "title": "English (en-SK)",
+              "value": "English (en-SK)"
+            },
+            {
+              "title": "English (en-SL)",
+              "value": "English (en-SL)"
+            },
+            {
+              "title": "English (en-SS)",
+              "value": "English (en-SS)"
+            },
+            {
+              "title": "English (en-SX)",
+              "value": "English (en-SX)"
+            },
+            {
+              "title": "English (en-SZ)",
+              "value": "English (en-SZ)"
+            },
+            {
+              "title": "English (en-TC)",
+              "value": "English (en-TC)"
+            },
+            {
+              "title": "English (en-TK)",
+              "value": "English (en-TK)"
+            },
+            {
+              "title": "English (en-TO)",
+              "value": "English (en-TO)"
+            },
+            {
+              "title": "English (en-TT)",
+              "value": "English (en-TT)"
+            },
+            {
+              "title": "English (en-TV)",
+              "value": "English (en-TV)"
+            },
+            {
+              "title": "English (en-TZ)",
+              "value": "English (en-TZ)"
+            },
+            {
+              "title": "English (en-UG)",
+              "value": "English (en-UG)"
+            },
+            {
+              "title": "English (en-UM)",
+              "value": "English (en-UM)"
+            },
+            {
+              "title": "English (en-VC)",
+              "value": "English (en-VC)"
+            },
+            {
+              "title": "English (en-VG)",
+              "value": "English (en-VG)"
+            },
+            {
+              "title": "English (en-VI)",
+              "value": "English (en-VI)"
+            },
+            {
+              "title": "English (en-VU)",
+              "value": "English (en-VU)"
+            },
+            {
+              "title": "English (en-WS)",
+              "value": "English (en-WS)"
+            },
+            {
+              "title": "English (en-ZA)",
+              "value": "English (en-ZA)"
+            },
+            {
+              "title": "English (en-ZM)",
+              "value": "English (en-ZM)"
+            },
+            {
+              "title": "English (en-ZW)",
+              "value": "English (en-ZW)"
+            },
+            {
+              "title": "Esperanto (eo)",
+              "value": "Esperanto (eo)"
+            },
+            {
+              "title": "Spanish (es)",
+              "value": "Spanish (es)"
+            },
+            {
+              "title": "Spanish (es-AR)",
+              "value": "Spanish (es-AR)"
+            },
+            {
+              "title": "Spanish (es-BO)",
+              "value": "Spanish (es-BO)"
+            },
+            {
+              "title": "Spanish (es-BR)",
+              "value": "Spanish (es-BR)"
+            },
+            {
+              "title": "Spanish (es-BZ)",
+              "value": "Spanish (es-BZ)"
+            },
+            {
+              "title": "Spanish (es-CL)",
+              "value": "Spanish (es-CL)"
+            },
+            {
+              "title": "Spanish (es-CO)",
+              "value": "Spanish (es-CO)"
+            },
+            {
+              "title": "Spanish (es-CR)",
+              "value": "Spanish (es-CR)"
+            },
+            {
+              "title": "Spanish (es-CU)",
+              "value": "Spanish (es-CU)"
+            },
+            {
+              "title": "Spanish (es-DO)",
+              "value": "Spanish (es-DO)"
+            },
+            {
+              "title": "Spanish (es-EA)",
+              "value": "Spanish (es-EA)"
+            },
+            {
+              "title": "Spanish (es-EC)",
+              "value": "Spanish (es-EC)"
+            },
+            {
+              "title": "Spanish (es-ES)",
+              "value": "Spanish (es-ES)"
+            },
+            {
+              "title": "Spanish (es-GQ)",
+              "value": "Spanish (es-GQ)"
+            },
+            {
+              "title": "Spanish (es-GT)",
+              "value": "Spanish (es-GT)"
+            },
+            {
+              "title": "Spanish (es-HN)",
+              "value": "Spanish (es-HN)"
+            },
+            {
+              "title": "Spanish (es-IC)",
+              "value": "Spanish (es-IC)"
+            },
+            {
+              "title": "Spanish (es-MX)",
+              "value": "Spanish (es-MX)"
+            },
+            {
+              "title": "Spanish (es-NI)",
+              "value": "Spanish (es-NI)"
+            },
+            {
+              "title": "Spanish (es-PA)",
+              "value": "Spanish (es-PA)"
+            },
+            {
+              "title": "Spanish (es-PE)",
+              "value": "Spanish (es-PE)"
+            },
+            {
+              "title": "Spanish (es-PH)",
+              "value": "Spanish (es-PH)"
+            },
+            {
+              "title": "Spanish (es-PR)",
+              "value": "Spanish (es-PR)"
+            },
+            {
+              "title": "Spanish (es-PY)",
+              "value": "Spanish (es-PY)"
+            },
+            {
+              "title": "Spanish (es-SV)",
+              "value": "Spanish (es-SV)"
+            },
+            {
+              "title": "Spanish (es-US)",
+              "value": "Spanish (es-US)"
+            },
+            {
+              "title": "Spanish (es-UY)",
+              "value": "Spanish (es-UY)"
+            },
+            {
+              "title": "Spanish (es-VE)",
+              "value": "Spanish (es-VE)"
+            },
+            {
+              "title": "Estonian (et)",
+              "value": "Estonian (et)"
+            },
+            {
+              "title": "Estonian (et-EE)",
+              "value": "Estonian (et-EE)"
+            },
+            {
+              "title": "Basque (eu)",
+              "value": "Basque (eu)"
+            },
+            {
+              "title": "Persian (fa)",
+              "value": "Persian (fa)"
+            },
+            {
+              "title": "Persian (fa-AF)",
+              "value": "Persian (fa-AF)"
+            },
+            {
+              "title": "Persian (fa-IR)",
+              "value": "Persian (fa-IR)"
+            },
+            {
+              "title": "Fulah (ff)",
+              "value": "Fulah (ff)"
+            },
+            {
+              "title": "Fulah (ff-Adlm)",
+              "value": "Fulah (ff-Adlm)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-BF)",
+              "value": "Fulah (ff-Adlm-BF)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-CM)",
+              "value": "Fulah (ff-Adlm-CM)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-GH)",
+              "value": "Fulah (ff-Adlm-GH)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-GM)",
+              "value": "Fulah (ff-Adlm-GM)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-GW)",
+              "value": "Fulah (ff-Adlm-GW)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-LR)",
+              "value": "Fulah (ff-Adlm-LR)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-MR)",
+              "value": "Fulah (ff-Adlm-MR)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-NE)",
+              "value": "Fulah (ff-Adlm-NE)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-NG)",
+              "value": "Fulah (ff-Adlm-NG)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-SL)",
+              "value": "Fulah (ff-Adlm-SL)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-SN)",
+              "value": "Fulah (ff-Adlm-SN)"
+            },
+            {
+              "title": "Fulah (ff-Latn)",
+              "value": "Fulah (ff-Latn)"
+            },
+            {
+              "title": "Fulah (ff-Latn-BF)",
+              "value": "Fulah (ff-Latn-BF)"
+            },
+            {
+              "title": "Fulah (ff-Latn-CM)",
+              "value": "Fulah (ff-Latn-CM)"
+            },
+            {
+              "title": "Fulah (ff-Latn-GH)",
+              "value": "Fulah (ff-Latn-GH)"
+            },
+            {
+              "title": "Fulah (ff-Latn-GM)",
+              "value": "Fulah (ff-Latn-GM)"
+            },
+            {
+              "title": "Fulah (ff-Latn-GN)",
+              "value": "Fulah (ff-Latn-GN)"
+            },
+            {
+              "title": "Fulah (ff-Latn-GW)",
+              "value": "Fulah (ff-Latn-GW)"
+            },
+            {
+              "title": "Fulah (ff-Latn-LR)",
+              "value": "Fulah (ff-Latn-LR)"
+            },
+            {
+              "title": "Fulah (ff-Latn-MR)",
+              "value": "Fulah (ff-Latn-MR)"
+            },
+            {
+              "title": "Fulah (ff-Latn-NE)",
+              "value": "Fulah (ff-Latn-NE)"
+            },
+            {
+              "title": "Fulah (ff-Latn-NG)",
+              "value": "Fulah (ff-Latn-NG)"
+            },
+            {
+              "title": "Fulah (ff-Latn-SL)",
+              "value": "Fulah (ff-Latn-SL)"
+            },
+            {
+              "title": "Finnish (fi)",
+              "value": "Finnish (fi)"
+            },
+            {
+              "title": "Finnish (fi-FI)",
+              "value": "Finnish (fi-FI)"
+            },
+            {
+              "title": "Filipino (fil-PH)",
+              "value": "Filipino (fil-PH)"
+            },
+            {
+              "title": "Faroese (fo)",
+              "value": "Faroese (fo)"
+            },
+            {
+              "title": "Faroese (fo-DK)",
+              "value": "Faroese (fo-DK)"
+            },
+            {
+              "title": "French (fr)",
+              "value": "French (fr)"
+            },
+            {
+              "title": "French (fr-BE)",
+              "value": "French (fr-BE)"
+            },
+            {
+              "title": "French (fr-BF)",
+              "value": "French (fr-BF)"
+            },
+            {
+              "title": "French (fr-BI)",
+              "value": "French (fr-BI)"
+            },
+            {
+              "title": "French (fr-BJ)",
+              "value": "French (fr-BJ)"
+            },
+            {
+              "title": "French (fr-BL)",
+              "value": "French (fr-BL)"
+            },
+            {
+              "title": "French (fr-CA)",
+              "value": "French (fr-CA)"
+            },
+            {
+              "title": "French (fr-CD)",
+              "value": "French (fr-CD)"
+            },
+            {
+              "title": "French (fr-CF)",
+              "value": "French (fr-CF)"
+            },
+            {
+              "title": "French (fr-CG)",
+              "value": "French (fr-CG)"
+            },
+            {
+              "title": "French (fr-CH)",
+              "value": "French (fr-CH)"
+            },
+            {
+              "title": "French (fr-CI)",
+              "value": "French (fr-CI)"
+            },
+            {
+              "title": "French (fr-CM)",
+              "value": "French (fr-CM)"
+            },
+            {
+              "title": "French (fr-DJ)",
+              "value": "French (fr-DJ)"
+            },
+            {
+              "title": "French (fr-DZ)",
+              "value": "French (fr-DZ)"
+            },
+            {
+              "title": "French (fr-FR)",
+              "value": "French (fr-FR)"
+            },
+            {
+              "title": "French (fr-GA)",
+              "value": "French (fr-GA)"
+            },
+            {
+              "title": "French (fr-GF)",
+              "value": "French (fr-GF)"
+            },
+            {
+              "title": "French (fr-GN)",
+              "value": "French (fr-GN)"
+            },
+            {
+              "title": "French (fr-GP)",
+              "value": "French (fr-GP)"
+            },
+            {
+              "title": "French (fr-GQ)",
+              "value": "French (fr-GQ)"
+            },
+            {
+              "title": "French (fr-HT)",
+              "value": "French (fr-HT)"
+            },
+            {
+              "title": "French (fr-KM)",
+              "value": "French (fr-KM)"
+            },
+            {
+              "title": "French (fr-LU)",
+              "value": "French (fr-LU)"
+            },
+            {
+              "title": "French (fr-MA)",
+              "value": "French (fr-MA)"
+            },
+            {
+              "title": "French (fr-MC)",
+              "value": "French (fr-MC)"
+            },
+            {
+              "title": "French (fr-MF)",
+              "value": "French (fr-MF)"
+            },
+            {
+              "title": "French (fr-MG)",
+              "value": "French (fr-MG)"
+            },
+            {
+              "title": "French (fr-ML)",
+              "value": "French (fr-ML)"
+            },
+            {
+              "title": "French (fr-MQ)",
+              "value": "French (fr-MQ)"
+            },
+            {
+              "title": "French (fr-MR)",
+              "value": "French (fr-MR)"
+            },
+            {
+              "title": "French (fr-MU)",
+              "value": "French (fr-MU)"
+            },
+            {
+              "title": "French (fr-NC)",
+              "value": "French (fr-NC)"
+            },
+            {
+              "title": "French (fr-NE)",
+              "value": "French (fr-NE)"
+            },
+            {
+              "title": "French (fr-PF)",
+              "value": "French (fr-PF)"
+            },
+            {
+              "title": "French (fr-PM)",
+              "value": "French (fr-PM)"
+            },
+            {
+              "title": "French (fr-RE)",
+              "value": "French (fr-RE)"
+            },
+            {
+              "title": "French (fr-RW)",
+              "value": "French (fr-RW)"
+            },
+            {
+              "title": "French (fr-SC)",
+              "value": "French (fr-SC)"
+            },
+            {
+              "title": "French (fr-SN)",
+              "value": "French (fr-SN)"
+            },
+            {
+              "title": "French (fr-SY)",
+              "value": "French (fr-SY)"
+            },
+            {
+              "title": "French (fr-TD)",
+              "value": "French (fr-TD)"
+            },
+            {
+              "title": "French (fr-TG)",
+              "value": "French (fr-TG)"
+            },
+            {
+              "title": "French (fr-TN)",
+              "value": "French (fr-TN)"
+            },
+            {
+              "title": "French (fr-VU)",
+              "value": "French (fr-VU)"
+            },
+            {
+              "title": "French (fr-WF)",
+              "value": "French (fr-WF)"
+            },
+            {
+              "title": "French (fr-YT)",
+              "value": "French (fr-YT)"
+            },
+            {
+              "title": "Western Frisian (fy)",
+              "value": "Western Frisian (fy)"
+            },
+            {
+              "title": "Irish (ga)",
+              "value": "Irish (ga)"
+            },
+            {
+              "title": "Irish (ga-GB)",
+              "value": "Irish (ga-GB)"
+            },
+            {
+              "title": "Scottish Gaelic (gd)",
+              "value": "Scottish Gaelic (gd)"
+            },
+            {
+              "title": "Galician (gl)",
+              "value": "Galician (gl)"
+            },
+            {
+              "title": "Guarani (gn)",
+              "value": "Guarani (gn)"
+            },
+            {
+              "title": "Gujarati (gu)",
+              "value": "Gujarati (gu)"
+            },
+            {
+              "title": "Gujarati (gu-IN)",
+              "value": "Gujarati (gu-IN)"
+            },
+            {
+              "title": "Manx (gv)",
+              "value": "Manx (gv)"
+            },
+            {
+              "title": "Hausa (ha)",
+              "value": "Hausa (ha)"
+            },
+            {
+              "title": "Hausa (ha-Arab)",
+              "value": "Hausa (ha-Arab)"
+            },
+            {
+              "title": "Hausa (ha-Arab-SD)",
+              "value": "Hausa (ha-Arab-SD)"
+            },
+            {
+              "title": "Hausa (ha-GH)",
+              "value": "Hausa (ha-GH)"
+            },
+            {
+              "title": "Hausa (ha-NE)",
+              "value": "Hausa (ha-NE)"
+            },
+            {
+              "title": "Hebrew (he)",
+              "value": "Hebrew (he)"
+            },
+            {
+              "title": "Hebrew (he-IL)",
+              "value": "Hebrew (he-IL)"
+            },
+            {
+              "title": "Hindi (hi)",
+              "value": "Hindi (hi)"
+            },
+            {
+              "title": "Hindi (hi-IN)",
+              "value": "Hindi (hi-IN)"
+            },
+            {
+              "title": "Hindi (hi-Latn)",
+              "value": "Hindi (hi-Latn)"
+            },
+            {
+              "title": "Croatian (hr)",
+              "value": "Croatian (hr)"
+            },
+            {
+              "title": "Croatian (hr-BA)",
+              "value": "Croatian (hr-BA)"
+            },
+            {
+              "title": "Croatian (hr-HR)",
+              "value": "Croatian (hr-HR)"
+            },
+            {
+              "title": "Haitian (ht)",
+              "value": "Haitian (ht)"
+            },
+            {
+              "title": "Hungarian (hu)",
+              "value": "Hungarian (hu)"
+            },
+            {
+              "title": "Hungarian (hu-HU)",
+              "value": "Hungarian (hu-HU)"
+            },
+            {
+              "title": "Armenian (hy)",
+              "value": "Armenian (hy)"
+            },
+            {
+              "title": "Interlingua (ia)",
+              "value": "Interlingua (ia)"
+            },
+            {
+              "title": "Indonesian (id)",
+              "value": "Indonesian (id)"
+            },
+            {
+              "title": "Indonesian (id-ID)",
+              "value": "Indonesian (id-ID)"
+            },
+            {
+              "title": "Interlingue (ie)",
+              "value": "Interlingue (ie)"
+            },
+            {
+              "title": "Igbo (ig)",
+              "value": "Igbo (ig)"
+            },
+            {
+              "title": "Sichuan Yi (ii)",
+              "value": "Sichuan Yi (ii)"
+            },
+            {
+              "title": "Inupiaq (ik)",
+              "value": "Inupiaq (ik)"
+            },
+            {
+              "title": "Ido (io)",
+              "value": "Ido (io)"
+            },
+            {
+              "title": "Icelandic (is)",
+              "value": "Icelandic (is)"
+            },
+            {
+              "title": "Italian (it)",
+              "value": "Italian (it)"
+            },
+            {
+              "title": "Italian (it-CH)",
+              "value": "Italian (it-CH)"
+            },
+            {
+              "title": "Italian (it-IT)",
+              "value": "Italian (it-IT)"
+            },
+            {
+              "title": "Italian (it-SM)",
+              "value": "Italian (it-SM)"
+            },
+            {
+              "title": "Italian (it-VA)",
+              "value": "Italian (it-VA)"
+            },
+            {
+              "title": "Inuktitut (iu)",
+              "value": "Inuktitut (iu)"
+            },
+            {
+              "title": "Inuktitut (iu-Latn)",
+              "value": "Inuktitut (iu-Latn)"
+            },
+            {
+              "title": "Japanese (ja)",
+              "value": "Japanese (ja)"
+            },
+            {
+              "title": "Japanese (ja-JP)",
+              "value": "Japanese (ja-JP)"
+            },
+            {
+              "title": "Javanese (jv)",
+              "value": "Javanese (jv)"
+            },
+            {
+              "title": "Georgian (ka)",
+              "value": "Georgian (ka)"
+            },
+            {
+              "title": "Kikuyu (ki)",
+              "value": "Kikuyu (ki)"
+            },
+            {
+              "title": "Kazakh (kk)",
+              "value": "Kazakh (kk)"
+            },
+            {
+              "title": "Kazakh (kk-Arab)",
+              "value": "Kazakh (kk-Arab)"
+            },
+            {
+              "title": "Kazakh (kk-Cyrl)",
+              "value": "Kazakh (kk-Cyrl)"
+            },
+            {
+              "title": "Kazakh (kk-KZ)",
+              "value": "Kazakh (kk-KZ)"
+            },
+            {
+              "title": "Kalaallisut (kl)",
+              "value": "Kalaallisut (kl)"
+            },
+            {
+              "title": "Central Khmer (km)",
+              "value": "Central Khmer (km)"
+            },
+            {
+              "title": "Kannada (kn)",
+              "value": "Kannada (kn)"
+            },
+            {
+              "title": "Kannada (kn-IN)",
+              "value": "Kannada (kn-IN)"
+            },
+            {
+              "title": "Korean (ko)",
+              "value": "Korean (ko)"
+            },
+            {
+              "title": "Korean (ko-CN)",
+              "value": "Korean (ko-CN)"
+            },
+            {
+              "title": "Korean (ko-KP)",
+              "value": "Korean (ko-KP)"
+            },
+            {
+              "title": "Korean (ko-KR)",
+              "value": "Korean (ko-KR)"
+            },
+            {
+              "title": "Kashmiri (ks)",
+              "value": "Kashmiri (ks)"
+            },
+            {
+              "title": "Kashmiri (ks-Arab)",
+              "value": "Kashmiri (ks-Arab)"
+            },
+            {
+              "title": "Kashmiri (ks-Deva)",
+              "value": "Kashmiri (ks-Deva)"
+            },
+            {
+              "title": "Kurdish (ku)",
+              "value": "Kurdish (ku)"
+            },
+            {
+              "title": "Cornish (kw)",
+              "value": "Cornish (kw)"
+            },
+            {
+              "title": "Kyrgyz (ky)",
+              "value": "Kyrgyz (ky)"
+            },
+            {
+              "title": "Latin (la)",
+              "value": "Latin (la)"
+            },
+            {
+              "title": "Luxembourgish (lb)",
+              "value": "Luxembourgish (lb)"
+            },
+            {
+              "title": "Ganda (lg)",
+              "value": "Ganda (lg)"
+            },
+            {
+              "title": "Lingala (ln)",
+              "value": "Lingala (ln)"
+            },
+            {
+              "title": "Lingala (ln-AO)",
+              "value": "Lingala (ln-AO)"
+            },
+            {
+              "title": "Lingala (ln-CF)",
+              "value": "Lingala (ln-CF)"
+            },
+            {
+              "title": "Lingala (ln-CG)",
+              "value": "Lingala (ln-CG)"
+            },
+            {
+              "title": "Lao (lo)",
+              "value": "Lao (lo)"
+            },
+            {
+              "title": "Lithuanian (lt)",
+              "value": "Lithuanian (lt)"
+            },
+            {
+              "title": "Lithuanian (lt-LT)",
+              "value": "Lithuanian (lt-LT)"
+            },
+            {
+              "title": "Luba-Katanga (lu)",
+              "value": "Luba-Katanga (lu)"
+            },
+            {
+              "title": "Latvian (lv)",
+              "value": "Latvian (lv)"
+            },
+            {
+              "title": "Latvian (lv-LV)",
+              "value": "Latvian (lv-LV)"
+            },
+            {
+              "title": "Malagasy (mg)",
+              "value": "Malagasy (mg)"
+            },
+            {
+              "title": "Maori (mi)",
+              "value": "Maori (mi)"
+            },
+            {
+              "title": "Macedonian (mk)",
+              "value": "Macedonian (mk)"
+            },
+            {
+              "title": "Malayalam (ml)",
+              "value": "Malayalam (ml)"
+            },
+            {
+              "title": "Malayalam (ml-IN)",
+              "value": "Malayalam (ml-IN)"
+            },
+            {
+              "title": "Mongolian (mn)",
+              "value": "Mongolian (mn)"
+            },
+            {
+              "title": "Mongolian (mn-Mong)",
+              "value": "Mongolian (mn-Mong)"
+            },
+            {
+              "title": "Mongolian (mn-Mong-MN)",
+              "value": "Mongolian (mn-Mong-MN)"
+            },
+            {
+              "title": "Marathi (mr)",
+              "value": "Marathi (mr)"
+            },
+            {
+              "title": "Marathi (mr-IN)",
+              "value": "Marathi (mr-IN)"
+            },
+            {
+              "title": "Malay (ms)",
+              "value": "Malay (ms)"
+            },
+            {
+              "title": "Malay (ms-Arab)",
+              "value": "Malay (ms-Arab)"
+            },
+            {
+              "title": "Malay (ms-Arab-BN)",
+              "value": "Malay (ms-Arab-BN)"
+            },
+            {
+              "title": "Malay (ms-BN)",
+              "value": "Malay (ms-BN)"
+            },
+            {
+              "title": "Malay (ms-ID)",
+              "value": "Malay (ms-ID)"
+            },
+            {
+              "title": "Malay (ms-SG)",
+              "value": "Malay (ms-SG)"
+            },
+            {
+              "title": "Maltese (mt)",
+              "value": "Maltese (mt)"
+            },
+            {
+              "title": "Burmese (my)",
+              "value": "Burmese (my)"
+            },
+            {
+              "title": "Norwegian Bokm\u00e5l (nb)",
+              "value": "Norwegian Bokm\u00e5l (nb)"
+            },
+            {
+              "title": "Norwegian Bokm\u00e5l (nb-SJ)",
+              "value": "Norwegian Bokm\u00e5l (nb-SJ)"
+            },
+            {
+              "title": "North Ndebele (nd)",
+              "value": "North Ndebele (nd)"
+            },
+            {
+              "title": "Nepali (ne)",
+              "value": "Nepali (ne)"
+            },
+            {
+              "title": "Nepali (ne-IN)",
+              "value": "Nepali (ne-IN)"
+            },
+            {
+              "title": "Dutch (nl)",
+              "value": "Dutch (nl)"
+            },
+            {
+              "title": "Dutch (nl-AW)",
+              "value": "Dutch (nl-AW)"
+            },
+            {
+              "title": "Dutch (nl-BE)",
+              "value": "Dutch (nl-BE)"
+            },
+            {
+              "title": "Dutch (nl-BQ)",
+              "value": "Dutch (nl-BQ)"
+            },
+            {
+              "title": "Dutch (nl-CW)",
+              "value": "Dutch (nl-CW)"
+            },
+            {
+              "title": "Dutch (nl-NL)",
+              "value": "Dutch (nl-NL)"
+            },
+            {
+              "title": "Dutch (nl-SR)",
+              "value": "Dutch (nl-SR)"
+            },
+            {
+              "title": "Dutch (nl-SX)",
+              "value": "Dutch (nl-SX)"
+            },
+            {
+              "title": "Norwegian Nynorsk (nn)",
+              "value": "Norwegian Nynorsk (nn)"
+            },
+            {
+              "title": "Norwegian (no)",
+              "value": "Norwegian (no)"
+            },
+            {
+              "title": "Norwegian (no-NO)",
+              "value": "Norwegian (no-NO)"
+            },
+            {
+              "title": "South Ndebele (nr)",
+              "value": "South Ndebele (nr)"
+            },
+            {
+              "title": "Navajo (nv)",
+              "value": "Navajo (nv)"
+            },
+            {
+              "title": "Chichewa (ny)",
+              "value": "Chichewa (ny)"
+            },
+            {
+              "title": "Occitan (oc)",
+              "value": "Occitan (oc)"
+            },
+            {
+              "title": "Occitan (oc-ES)",
+              "value": "Occitan (oc-ES)"
+            },
+            {
+              "title": "Oromo (om)",
+              "value": "Oromo (om)"
+            },
+            {
+              "title": "Oromo (om-KE)",
+              "value": "Oromo (om-KE)"
+            },
+            {
+              "title": "Oriya (or)",
+              "value": "Oriya (or)"
+            },
+            {
+              "title": "Ossetian (os)",
+              "value": "Ossetian (os)"
+            },
+            {
+              "title": "Ossetian (os-RU)",
+              "value": "Ossetian (os-RU)"
+            },
+            {
+              "title": "Punjabi (pa)",
+              "value": "Punjabi (pa)"
+            },
+            {
+              "title": "Punjabi (pa-IN)",
+              "value": "Punjabi (pa-IN)"
+            },
+            {
+              "title": "Punjabi (pa-Arab)",
+              "value": "Punjabi (pa-Arab)"
+            },
+            {
+              "title": "Punjabi (pa-Guru)",
+              "value": "Punjabi (pa-Guru)"
+            },
+            {
+              "title": "Polish (pl)",
+              "value": "Polish (pl)"
+            },
+            {
+              "title": "Polish (pl-PL)",
+              "value": "Polish (pl-PL)"
+            },
+            {
+              "title": "Pashto (ps)",
+              "value": "Pashto (ps)"
+            },
+            {
+              "title": "Pashto (ps-PK)",
+              "value": "Pashto (ps-PK)"
+            },
+            {
+              "title": "Portuguese (pt)",
+              "value": "Portuguese (pt)"
+            },
+            {
+              "title": "Portuguese (pt-AO)",
+              "value": "Portuguese (pt-AO)"
+            },
+            {
+              "title": "Portuguese (pt-BR)",
+              "value": "Portuguese (pt-BR)"
+            },
+            {
+              "title": "Portuguese (pt-CH)",
+              "value": "Portuguese (pt-CH)"
+            },
+            {
+              "title": "Portuguese (pt-CV)",
+              "value": "Portuguese (pt-CV)"
+            },
+            {
+              "title": "Portuguese (pt-GQ)",
+              "value": "Portuguese (pt-GQ)"
+            },
+            {
+              "title": "Portuguese (pt-GW)",
+              "value": "Portuguese (pt-GW)"
+            },
+            {
+              "title": "Portuguese (pt-LU)",
+              "value": "Portuguese (pt-LU)"
+            },
+            {
+              "title": "Portuguese (pt-MO)",
+              "value": "Portuguese (pt-MO)"
+            },
+            {
+              "title": "Portuguese (pt-MZ)",
+              "value": "Portuguese (pt-MZ)"
+            },
+            {
+              "title": "Portuguese (pt-PT)",
+              "value": "Portuguese (pt-PT)"
+            },
+            {
+              "title": "Portuguese (pt-ST)",
+              "value": "Portuguese (pt-ST)"
+            },
+            {
+              "title": "Portuguese (pt-TL)",
+              "value": "Portuguese (pt-TL)"
+            },
+            {
+              "title": "Quechua (qu)",
+              "value": "Quechua (qu)"
+            },
+            {
+              "title": "Quechua (qu-BO)",
+              "value": "Quechua (qu-BO)"
+            },
+            {
+              "title": "Quechua (qu-EC)",
+              "value": "Quechua (qu-EC)"
+            },
+            {
+              "title": "Romansh (rm)",
+              "value": "Romansh (rm)"
+            },
+            {
+              "title": "Rundi (rn)",
+              "value": "Rundi (rn)"
+            },
+            {
+              "title": "Romanian (ro)",
+              "value": "Romanian (ro)"
+            },
+            {
+              "title": "Romanian (ro-MD)",
+              "value": "Romanian (ro-MD)"
+            },
+            {
+              "title": "Romanian (ro-RO)",
+              "value": "Romanian (ro-RO)"
+            },
+            {
+              "title": "Russian (ru)",
+              "value": "Russian (ru)"
+            },
+            {
+              "title": "Russian (ru-BY)",
+              "value": "Russian (ru-BY)"
+            },
+            {
+              "title": "Russian (ru-KG)",
+              "value": "Russian (ru-KG)"
+            },
+            {
+              "title": "Russian (ru-KZ)",
+              "value": "Russian (ru-KZ)"
+            },
+            {
+              "title": "Russian (ru-MD)",
+              "value": "Russian (ru-MD)"
+            },
+            {
+              "title": "Russian (ru-RU)",
+              "value": "Russian (ru-RU)"
+            },
+            {
+              "title": "Russian (ru-UA)",
+              "value": "Russian (ru-UA)"
+            },
+            {
+              "title": "Kinyarwanda (rw)",
+              "value": "Kinyarwanda (rw)"
+            },
+            {
+              "title": "Sanskrit (sa)",
+              "value": "Sanskrit (sa)"
+            },
+            {
+              "title": "Sardinian (sc)",
+              "value": "Sardinian (sc)"
+            },
+            {
+              "title": "Sindhi (sd)",
+              "value": "Sindhi (sd)"
+            },
+            {
+              "title": "Sindhi (sd-Arab)",
+              "value": "Sindhi (sd-Arab)"
+            },
+            {
+              "title": "Sindhi (sd-Deva)",
+              "value": "Sindhi (sd-Deva)"
+            },
+            {
+              "title": "Northern Sami (se)",
+              "value": "Northern Sami (se)"
+            },
+            {
+              "title": "Northern Sami (se-FI)",
+              "value": "Northern Sami (se-FI)"
+            },
+            {
+              "title": "Northern Sami (se-SE)",
+              "value": "Northern Sami (se-SE)"
+            },
+            {
+              "title": "Sango (sg)",
+              "value": "Sango (sg)"
+            },
+            {
+              "title": "Sinhala (si)",
+              "value": "Sinhala (si)"
+            },
+            {
+              "title": "Slovak (sk)",
+              "value": "Slovak (sk)"
+            },
+            {
+              "title": "Slovak (sk-SK)",
+              "value": "Slovak (sk-SK)"
+            },
+            {
+              "title": "Slovenian (sl)",
+              "value": "Slovenian (sl)"
+            },
+            {
+              "title": "Slovenian (sl-SI)",
+              "value": "Slovenian (sl-SI)"
+            },
+            {
+              "title": "Shona (sn)",
+              "value": "Shona (sn)"
+            },
+            {
+              "title": "Somali (so)",
+              "value": "Somali (so)"
+            },
+            {
+              "title": "Somali (so-DJ)",
+              "value": "Somali (so-DJ)"
+            },
+            {
+              "title": "Somali (so-ET)",
+              "value": "Somali (so-ET)"
+            },
+            {
+              "title": "Somali (so-KE)",
+              "value": "Somali (so-KE)"
+            },
+            {
+              "title": "Albanian (sq)",
+              "value": "Albanian (sq)"
+            },
+            {
+              "title": "Albanian (sq-MK)",
+              "value": "Albanian (sq-MK)"
+            },
+            {
+              "title": "Albanian (sq-XK)",
+              "value": "Albanian (sq-XK)"
+            },
+            {
+              "title": "Serbian (sr)",
+              "value": "Serbian (sr)"
+            },
+            {
+              "title": "Serbian (sr-RS)",
+              "value": "Serbian (sr-RS)"
+            },
+            {
+              "title": "Serbian (sr-Cyrl)",
+              "value": "Serbian (sr-Cyrl)"
+            },
+            {
+              "title": "Serbian (sr-Cyrl-BA)",
+              "value": "Serbian (sr-Cyrl-BA)"
+            },
+            {
+              "title": "Serbian (sr-Cyrl-ME)",
+              "value": "Serbian (sr-Cyrl-ME)"
+            },
+            {
+              "title": "Serbian (sr-Cyrl-XK)",
+              "value": "Serbian (sr-Cyrl-XK)"
+            },
+            {
+              "title": "Serbian (sr-Latn)",
+              "value": "Serbian (sr-Latn)"
+            },
+            {
+              "title": "Serbian (sr-Latn-BA)",
+              "value": "Serbian (sr-Latn-BA)"
+            },
+            {
+              "title": "Serbian (sr-Latn-ME)",
+              "value": "Serbian (sr-Latn-ME)"
+            },
+            {
+              "title": "Serbian (sr-Latn-XK)",
+              "value": "Serbian (sr-Latn-XK)"
+            },
+            {
+              "title": "Swati (ss)",
+              "value": "Swati (ss)"
+            },
+            {
+              "title": "Swati (ss-SZ)",
+              "value": "Swati (ss-SZ)"
+            },
+            {
+              "title": "Southern Sotho (st)",
+              "value": "Southern Sotho (st)"
+            },
+            {
+              "title": "Southern Sotho (st-LS)",
+              "value": "Southern Sotho (st-LS)"
+            },
+            {
+              "title": "Sundanese (su)",
+              "value": "Sundanese (su)"
+            },
+            {
+              "title": "Sundanese (su-Latn)",
+              "value": "Sundanese (su-Latn)"
+            },
+            {
+              "title": "Swedish (sv)",
+              "value": "Swedish (sv)"
+            },
+            {
+              "title": "Swedish (sv-AX)",
+              "value": "Swedish (sv-AX)"
+            },
+            {
+              "title": "Swedish (sv-FI)",
+              "value": "Swedish (sv-FI)"
+            },
+            {
+              "title": "Swedish (sv-SE)",
+              "value": "Swedish (sv-SE)"
+            },
+            {
+              "title": "Swahili (sw)",
+              "value": "Swahili (sw)"
+            },
+            {
+              "title": "Swahili (sw-CD)",
+              "value": "Swahili (sw-CD)"
+            },
+            {
+              "title": "Swahili (sw-KE)",
+              "value": "Swahili (sw-KE)"
+            },
+            {
+              "title": "Swahili (sw-TZ)",
+              "value": "Swahili (sw-TZ)"
+            },
+            {
+              "title": "Swahili (sw-UG)",
+              "value": "Swahili (sw-UG)"
+            },
+            {
+              "title": "Tamil (ta)",
+              "value": "Tamil (ta)"
+            },
+            {
+              "title": "Tamil (ta-IN)",
+              "value": "Tamil (ta-IN)"
+            },
+            {
+              "title": "Tamil (ta-LK)",
+              "value": "Tamil (ta-LK)"
+            },
+            {
+              "title": "Tamil (ta-MY)",
+              "value": "Tamil (ta-MY)"
+            },
+            {
+              "title": "Tamil (ta-SG)",
+              "value": "Tamil (ta-SG)"
+            },
+            {
+              "title": "Telugu (te)",
+              "value": "Telugu (te)"
+            },
+            {
+              "title": "Telugu (te-IN)",
+              "value": "Telugu (te-IN)"
+            },
+            {
+              "title": "Tajik (tg)",
+              "value": "Tajik (tg)"
+            },
+            {
+              "title": "Thai (th)",
+              "value": "Thai (th)"
+            },
+            {
+              "title": "Thai (th-TH)",
+              "value": "Thai (th-TH)"
+            },
+            {
+              "title": "Tigrinya (ti)",
+              "value": "Tigrinya (ti)"
+            },
+            {
+              "title": "Tigrinya (ti-ER)",
+              "value": "Tigrinya (ti-ER)"
+            },
+            {
+              "title": "Turkmen (tk)",
+              "value": "Turkmen (tk)"
+            },
+            {
+              "title": "Tagalog (tl)",
+              "value": "Tagalog (tl)"
+            },
+            {
+              "title": "Tswana (tn)",
+              "value": "Tswana (tn)"
+            },
+            {
+              "title": "Tswana (tn-BW)",
+              "value": "Tswana (tn-BW)"
+            },
+            {
+              "title": "Tonga (to)",
+              "value": "Tonga (to)"
+            },
+            {
+              "title": "Turkish (tr)",
+              "value": "Turkish (tr)"
+            },
+            {
+              "title": "Turkish (tr-CY)",
+              "value": "Turkish (tr-CY)"
+            },
+            {
+              "title": "Turkish (tr-TR)",
+              "value": "Turkish (tr-TR)"
+            },
+            {
+              "title": "Tsonga (ts)",
+              "value": "Tsonga (ts)"
+            },
+            {
+              "title": "Tatar (tt)",
+              "value": "Tatar (tt)"
+            },
+            {
+              "title": "Uyghur (ug)",
+              "value": "Uyghur (ug)"
+            },
+            {
+              "title": "Ukrainian (uk)",
+              "value": "Ukrainian (uk)"
+            },
+            {
+              "title": "Ukrainian (uk-UA)",
+              "value": "Ukrainian (uk-UA)"
+            },
+            {
+              "title": "Urdu (ur)",
+              "value": "Urdu (ur)"
+            },
+            {
+              "title": "Urdu (ur-IN)",
+              "value": "Urdu (ur-IN)"
+            },
+            {
+              "title": "Urdu (ur-PK)",
+              "value": "Urdu (ur-PK)"
+            },
+            {
+              "title": "Uzbek (uz)",
+              "value": "Uzbek (uz)"
+            },
+            {
+              "title": "Uzbek (uz-Arab)",
+              "value": "Uzbek (uz-Arab)"
+            },
+            {
+              "title": "Uzbek (uz-Cyrl)",
+              "value": "Uzbek (uz-Cyrl)"
+            },
+            {
+              "title": "Uzbek (uz-Latn)",
+              "value": "Uzbek (uz-Latn)"
+            },
+            {
+              "title": "Venda (ve)",
+              "value": "Venda (ve)"
+            },
+            {
+              "title": "Vietnamese (vi)",
+              "value": "Vietnamese (vi)"
+            },
+            {
+              "title": "Vietnamese (vi-VN)",
+              "value": "Vietnamese (vi-VN)"
+            },
+            {
+              "title": "Volap\u00fck (vo)",
+              "value": "Volap\u00fck (vo)"
+            },
+            {
+              "title": "Walloon (wa)",
+              "value": "Walloon (wa)"
+            },
+            {
+              "title": "Wolof (wo)",
+              "value": "Wolof (wo)"
+            },
+            {
+              "title": "Xhosa (xh)",
+              "value": "Xhosa (xh)"
+            },
+            {
+              "title": "Yiddish (yi)",
+              "value": "Yiddish (yi)"
+            },
+            {
+              "title": "Yoruba (yo)",
+              "value": "Yoruba (yo)"
+            },
+            {
+              "title": "Yoruba (yo-BJ)",
+              "value": "Yoruba (yo-BJ)"
+            },
+            {
+              "title": "Zhuang (za)",
+              "value": "Zhuang (za)"
+            },
+            {
+              "title": "Chinese (zh)",
+              "value": "Chinese (zh)"
+            },
+            {
+              "title": "Chinese (zh-CH)",
+              "value": "Chinese (zh-CH)"
+            },
+            {
+              "title": "Chinese (zh-TW)",
+              "value": "Chinese (zh-TW)"
+            },
+            {
+              "title": "Chinese (zh-Hans)",
+              "value": "Chinese (zh-Hans)"
+            },
+            {
+              "title": "Chinese (zh-Hans-HK)",
+              "value": "Chinese (zh-Hans-HK)"
+            },
+            {
+              "title": "Chinese (zh-Hans-MO)",
+              "value": "Chinese (zh-Hans-MO)"
+            },
+            {
+              "title": "Chinese (zh-Hans-MY)",
+              "value": "Chinese (zh-Hans-MY)"
+            },
+            {
+              "title": "Chinese (zh-Hans-SG)",
+              "value": "Chinese (zh-Hans-SG)"
+            },
+            {
+              "title": "Chinese (zh-Hant)",
+              "value": "Chinese (zh-Hant)"
+            },
+            {
+              "title": "Chinese (zh-Hant-HK)",
+              "value": "Chinese (zh-Hant-HK)"
+            },
+            {
+              "title": "Chinese (zh-Hant-MO)",
+              "value": "Chinese (zh-Hant-MO)"
+            },
+            {
+              "title": "Chinese (zh-Hant-MY)",
+              "value": "Chinese (zh-Hant-MY)"
+            },
+            {
+              "title": "Chinese (zh-Latn)",
+              "value": "Chinese (zh-Latn)"
+            },
+            {
+              "title": "Zulu (zu)",
+              "value": "Zulu (zu)"
+            },
+            {
+              "title": "Zulu (zu-ZA)",
+              "value": "Zulu (zu-ZA)"
+            }
+          ]
+        },
+        {
+          "name": "target",
+          "placeholder": "Target Language",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Afar (aa)",
+              "value": "Afar (aa)"
+            },
+            {
+              "title": "Afar (aa-DJ)",
+              "value": "Afar (aa-DJ)"
+            },
+            {
+              "title": "Afar (aa-ER)",
+              "value": "Afar (aa-ER)"
+            },
+            {
+              "title": "Abkhazian (ab)",
+              "value": "Abkhazian (ab)"
+            },
+            {
+              "title": "Afrikaans (af)",
+              "value": "Afrikaans (af)"
+            },
+            {
+              "title": "Afrikaans (af-NA)",
+              "value": "Afrikaans (af-NA)"
+            },
+            {
+              "title": "Akan (ak)",
+              "value": "Akan (ak)"
+            },
+            {
+              "title": "Amharic (am)",
+              "value": "Amharic (am)"
+            },
+            {
+              "title": "Aragonese (an)",
+              "value": "Aragonese (an)"
+            },
+            {
+              "title": "Arabic (ar)",
+              "value": "Arabic (ar)"
+            },
+            {
+              "title": "Arabic (ar-AE)",
+              "value": "Arabic (ar-AE)"
+            },
+            {
+              "title": "Arabic (ar-BH)",
+              "value": "Arabic (ar-BH)"
+            },
+            {
+              "title": "Arabic (ar-DJ)",
+              "value": "Arabic (ar-DJ)"
+            },
+            {
+              "title": "Arabic (ar-DZ)",
+              "value": "Arabic (ar-DZ)"
+            },
+            {
+              "title": "Arabic (ar-EG)",
+              "value": "Arabic (ar-EG)"
+            },
+            {
+              "title": "Arabic (ar-EH)",
+              "value": "Arabic (ar-EH)"
+            },
+            {
+              "title": "Arabic (ar-ER)",
+              "value": "Arabic (ar-ER)"
+            },
+            {
+              "title": "Arabic (ar-IL)",
+              "value": "Arabic (ar-IL)"
+            },
+            {
+              "title": "Arabic (ar-IQ)",
+              "value": "Arabic (ar-IQ)"
+            },
+            {
+              "title": "Arabic (ar-JO)",
+              "value": "Arabic (ar-JO)"
+            },
+            {
+              "title": "Arabic (ar-KM)",
+              "value": "Arabic (ar-KM)"
+            },
+            {
+              "title": "Arabic (ar-KW)",
+              "value": "Arabic (ar-KW)"
+            },
+            {
+              "title": "Arabic (ar-LB)",
+              "value": "Arabic (ar-LB)"
+            },
+            {
+              "title": "Arabic (ar-LY)",
+              "value": "Arabic (ar-LY)"
+            },
+            {
+              "title": "Arabic (ar-MA)",
+              "value": "Arabic (ar-MA)"
+            },
+            {
+              "title": "Arabic (ar-MR)",
+              "value": "Arabic (ar-MR)"
+            },
+            {
+              "title": "Arabic (ar-OM)",
+              "value": "Arabic (ar-OM)"
+            },
+            {
+              "title": "Arabic (ar-PS)",
+              "value": "Arabic (ar-PS)"
+            },
+            {
+              "title": "Arabic (ar-QA)",
+              "value": "Arabic (ar-QA)"
+            },
+            {
+              "title": "Arabic (ar-SA)",
+              "value": "Arabic (ar-SA)"
+            },
+            {
+              "title": "Arabic (ar-SD)",
+              "value": "Arabic (ar-SD)"
+            },
+            {
+              "title": "Arabic (ar-SO)",
+              "value": "Arabic (ar-SO)"
+            },
+            {
+              "title": "Arabic (ar-SS)",
+              "value": "Arabic (ar-SS)"
+            },
+            {
+              "title": "Arabic (ar-SY)",
+              "value": "Arabic (ar-SY)"
+            },
+            {
+              "title": "Arabic (ar-TD)",
+              "value": "Arabic (ar-TD)"
+            },
+            {
+              "title": "Arabic (ar-TN)",
+              "value": "Arabic (ar-TN)"
+            },
+            {
+              "title": "Arabic (ar-YE)",
+              "value": "Arabic (ar-YE)"
+            },
+            {
+              "title": "Assamese (as)",
+              "value": "Assamese (as)"
+            },
+            {
+              "title": "Azerbaijani (az)",
+              "value": "Azerbaijani (az)"
+            },
+            {
+              "title": "Azerbaijani (az-Arab)",
+              "value": "Azerbaijani (az-Arab)"
+            },
+            {
+              "title": "Azerbaijani (az-Arab-IQ)",
+              "value": "Azerbaijani (az-Arab-IQ)"
+            },
+            {
+              "title": "Azerbaijani (az-Arab-TR)",
+              "value": "Azerbaijani (az-Arab-TR)"
+            },
+            {
+              "title": "Azerbaijani (az-Cyrl)",
+              "value": "Azerbaijani (az-Cyrl)"
+            },
+            {
+              "title": "Azerbaijani (az-Latn)",
+              "value": "Azerbaijani (az-Latn)"
+            },
+            {
+              "title": "Bashkir (ba)",
+              "value": "Bashkir (ba)"
+            },
+            {
+              "title": "Belarusian (be)",
+              "value": "Belarusian (be)"
+            },
+            {
+              "title": "Belarusian (be-tarask)",
+              "value": "Belarusian (be-tarask)"
+            },
+            {
+              "title": "Bulgarian (bg)",
+              "value": "Bulgarian (bg)"
+            },
+            {
+              "title": "Bulgarian (bg-BG)",
+              "value": "Bulgarian (bg-BG)"
+            },
+            {
+              "title": "Bambara (bm)",
+              "value": "Bambara (bm)"
+            },
+            {
+              "title": "Bambara (bm-Nkoo)",
+              "value": "Bambara (bm-Nkoo)"
+            },
+            {
+              "title": "Bengali (bn)",
+              "value": "Bengali (bn)"
+            },
+            {
+              "title": "Bengali (bn-IN)",
+              "value": "Bengali (bn-IN)"
+            },
+            {
+              "title": "Tibetan (bo)",
+              "value": "Tibetan (bo)"
+            },
+            {
+              "title": "Tibetan (bo-IN)",
+              "value": "Tibetan (bo-IN)"
+            },
+            {
+              "title": "Breton (br)",
+              "value": "Breton (br)"
+            },
+            {
+              "title": "Bosnian (bs)",
+              "value": "Bosnian (bs)"
+            },
+            {
+              "title": "Bosnian (bs-Cyrl)",
+              "value": "Bosnian (bs-Cyrl)"
+            },
+            {
+              "title": "Bosnian (bs-Latn)",
+              "value": "Bosnian (bs-Latn)"
+            },
+            {
+              "title": "Catalan (ca)",
+              "value": "Catalan (ca)"
+            },
+            {
+              "title": "Catalan (ca-AD)",
+              "value": "Catalan (ca-AD)"
+            },
+            {
+              "title": "Catalan (ca-ES)",
+              "value": "Catalan (ca-ES)"
+            },
+            {
+              "title": "Catalan (ca-FR)",
+              "value": "Catalan (ca-FR)"
+            },
+            {
+              "title": "Catalan (ca-IT)",
+              "value": "Catalan (ca-IT)"
+            },
+            {
+              "title": "Chechen (ce)",
+              "value": "Chechen (ce)"
+            },
+            {
+              "title": "Corsican (co)",
+              "value": "Corsican (co)"
+            },
+            {
+              "title": "Czech (cs)",
+              "value": "Czech (cs)"
+            },
+            {
+              "title": "Czech (cs-CZ)",
+              "value": "Czech (cs-CZ)"
+            },
+            {
+              "title": "Chuvash (cv)",
+              "value": "Chuvash (cv)"
+            },
+            {
+              "title": "Welsh (cy)",
+              "value": "Welsh (cy)"
+            },
+            {
+              "title": "Danish (da)",
+              "value": "Danish (da)"
+            },
+            {
+              "title": "Danish (da-DK)",
+              "value": "Danish (da-DK)"
+            },
+            {
+              "title": "Danish (da-GL)",
+              "value": "Danish (da-GL)"
+            },
+            {
+              "title": "German (de)",
+              "value": "German (de)"
+            },
+            {
+              "title": "German (de-AT)",
+              "value": "German (de-AT)"
+            },
+            {
+              "title": "German (de-BE)",
+              "value": "German (de-BE)"
+            },
+            {
+              "title": "German (de-CH)",
+              "value": "German (de-CH)"
+            },
+            {
+              "title": "German (de-DE)",
+              "value": "German (de-DE)"
+            },
+            {
+              "title": "German (de-IT)",
+              "value": "German (de-IT)"
+            },
+            {
+              "title": "German (de-LI)",
+              "value": "German (de-LI)"
+            },
+            {
+              "title": "German (de-LU)",
+              "value": "German (de-LU)"
+            },
+            {
+              "title": "Divehi (dv)",
+              "value": "Divehi (dv)"
+            },
+            {
+              "title": "Dzongkha (dz)",
+              "value": "Dzongkha (dz)"
+            },
+            {
+              "title": "Ewe (ee)",
+              "value": "Ewe (ee)"
+            },
+            {
+              "title": "Ewe (ee-TG)",
+              "value": "Ewe (ee-TG)"
+            },
+            {
+              "title": "Greek (el)",
+              "value": "Greek (el)"
+            },
+            {
+              "title": "Greek (el-CY)",
+              "value": "Greek (el-CY)"
+            },
+            {
+              "title": "Greek (el-GR)",
+              "value": "Greek (el-GR)"
+            },
+            {
+              "title": "Greek (el-polyton)",
+              "value": "Greek (el-polyton)"
+            },
+            {
+              "title": "English (en)",
+              "value": "English (en)"
+            },
+            {
+              "title": "English (en-AE)",
+              "value": "English (en-AE)"
+            },
+            {
+              "title": "English (en-AG)",
+              "value": "English (en-AG)"
+            },
+            {
+              "title": "English (en-AI)",
+              "value": "English (en-AI)"
+            },
+            {
+              "title": "English (en-AS)",
+              "value": "English (en-AS)"
+            },
+            {
+              "title": "English (en-AT)",
+              "value": "English (en-AT)"
+            },
+            {
+              "title": "English (en-AU)",
+              "value": "English (en-AU)"
+            },
+            {
+              "title": "English (en-BB)",
+              "value": "English (en-BB)"
+            },
+            {
+              "title": "English (en-BE)",
+              "value": "English (en-BE)"
+            },
+            {
+              "title": "English (en-BI)",
+              "value": "English (en-BI)"
+            },
+            {
+              "title": "English (en-BM)",
+              "value": "English (en-BM)"
+            },
+            {
+              "title": "English (en-BS)",
+              "value": "English (en-BS)"
+            },
+            {
+              "title": "English (en-BW)",
+              "value": "English (en-BW)"
+            },
+            {
+              "title": "English (en-BZ)",
+              "value": "English (en-BZ)"
+            },
+            {
+              "title": "English (en-CA)",
+              "value": "English (en-CA)"
+            },
+            {
+              "title": "English (en-CC)",
+              "value": "English (en-CC)"
+            },
+            {
+              "title": "English (en-CH)",
+              "value": "English (en-CH)"
+            },
+            {
+              "title": "English (en-CK)",
+              "value": "English (en-CK)"
+            },
+            {
+              "title": "English (en-CM)",
+              "value": "English (en-CM)"
+            },
+            {
+              "title": "English (en-CX)",
+              "value": "English (en-CX)"
+            },
+            {
+              "title": "English (en-CY)",
+              "value": "English (en-CY)"
+            },
+            {
+              "title": "English (en-CZ)",
+              "value": "English (en-CZ)"
+            },
+            {
+              "title": "English (en-DE)",
+              "value": "English (en-DE)"
+            },
+            {
+              "title": "English (en-DG)",
+              "value": "English (en-DG)"
+            },
+            {
+              "title": "English (en-DK)",
+              "value": "English (en-DK)"
+            },
+            {
+              "title": "English (en-DM)",
+              "value": "English (en-DM)"
+            },
+            {
+              "title": "English (en-ER)",
+              "value": "English (en-ER)"
+            },
+            {
+              "title": "English (en-ES)",
+              "value": "English (en-ES)"
+            },
+            {
+              "title": "English (en-FI)",
+              "value": "English (en-FI)"
+            },
+            {
+              "title": "English (en-FJ)",
+              "value": "English (en-FJ)"
+            },
+            {
+              "title": "English (en-FK)",
+              "value": "English (en-FK)"
+            },
+            {
+              "title": "English (en-FM)",
+              "value": "English (en-FM)"
+            },
+            {
+              "title": "English (en-FR)",
+              "value": "English (en-FR)"
+            },
+            {
+              "title": "English (en-GB)",
+              "value": "English (en-GB)"
+            },
+            {
+              "title": "English (en-GD)",
+              "value": "English (en-GD)"
+            },
+            {
+              "title": "English (en-GG)",
+              "value": "English (en-GG)"
+            },
+            {
+              "title": "English (en-GH)",
+              "value": "English (en-GH)"
+            },
+            {
+              "title": "English (en-GI)",
+              "value": "English (en-GI)"
+            },
+            {
+              "title": "English (en-GM)",
+              "value": "English (en-GM)"
+            },
+            {
+              "title": "English (en-GS)",
+              "value": "English (en-GS)"
+            },
+            {
+              "title": "English (en-GU)",
+              "value": "English (en-GU)"
+            },
+            {
+              "title": "English (en-GY)",
+              "value": "English (en-GY)"
+            },
+            {
+              "title": "English (en-HK)",
+              "value": "English (en-HK)"
+            },
+            {
+              "title": "English (en-HU)",
+              "value": "English (en-HU)"
+            },
+            {
+              "title": "English (en-ID)",
+              "value": "English (en-ID)"
+            },
+            {
+              "title": "English (en-IE)",
+              "value": "English (en-IE)"
+            },
+            {
+              "title": "English (en-IL)",
+              "value": "English (en-IL)"
+            },
+            {
+              "title": "English (en-IM)",
+              "value": "English (en-IM)"
+            },
+            {
+              "title": "English (en-IN)",
+              "value": "English (en-IN)"
+            },
+            {
+              "title": "English (en-IO)",
+              "value": "English (en-IO)"
+            },
+            {
+              "title": "English (en-IT)",
+              "value": "English (en-IT)"
+            },
+            {
+              "title": "English (en-JE)",
+              "value": "English (en-JE)"
+            },
+            {
+              "title": "English (en-JM)",
+              "value": "English (en-JM)"
+            },
+            {
+              "title": "English (en-KE)",
+              "value": "English (en-KE)"
+            },
+            {
+              "title": "English (en-KI)",
+              "value": "English (en-KI)"
+            },
+            {
+              "title": "English (en-KN)",
+              "value": "English (en-KN)"
+            },
+            {
+              "title": "English (en-KY)",
+              "value": "English (en-KY)"
+            },
+            {
+              "title": "English (en-LC)",
+              "value": "English (en-LC)"
+            },
+            {
+              "title": "English (en-LR)",
+              "value": "English (en-LR)"
+            },
+            {
+              "title": "English (en-LS)",
+              "value": "English (en-LS)"
+            },
+            {
+              "title": "English (en-MG)",
+              "value": "English (en-MG)"
+            },
+            {
+              "title": "English (en-MH)",
+              "value": "English (en-MH)"
+            },
+            {
+              "title": "English (en-MO)",
+              "value": "English (en-MO)"
+            },
+            {
+              "title": "English (en-MP)",
+              "value": "English (en-MP)"
+            },
+            {
+              "title": "English (en-MS)",
+              "value": "English (en-MS)"
+            },
+            {
+              "title": "English (en-MT)",
+              "value": "English (en-MT)"
+            },
+            {
+              "title": "English (en-MU)",
+              "value": "English (en-MU)"
+            },
+            {
+              "title": "English (en-MV)",
+              "value": "English (en-MV)"
+            },
+            {
+              "title": "English (en-MW)",
+              "value": "English (en-MW)"
+            },
+            {
+              "title": "English (en-MY)",
+              "value": "English (en-MY)"
+            },
+            {
+              "title": "English (en-NA)",
+              "value": "English (en-NA)"
+            },
+            {
+              "title": "English (en-NF)",
+              "value": "English (en-NF)"
+            },
+            {
+              "title": "English (en-NG)",
+              "value": "English (en-NG)"
+            },
+            {
+              "title": "English (en-NL)",
+              "value": "English (en-NL)"
+            },
+            {
+              "title": "English (en-NO)",
+              "value": "English (en-NO)"
+            },
+            {
+              "title": "English (en-NR)",
+              "value": "English (en-NR)"
+            },
+            {
+              "title": "English (en-NU)",
+              "value": "English (en-NU)"
+            },
+            {
+              "title": "English (en-NZ)",
+              "value": "English (en-NZ)"
+            },
+            {
+              "title": "English (en-PG)",
+              "value": "English (en-PG)"
+            },
+            {
+              "title": "English (en-PH)",
+              "value": "English (en-PH)"
+            },
+            {
+              "title": "English (en-PK)",
+              "value": "English (en-PK)"
+            },
+            {
+              "title": "English (en-PL)",
+              "value": "English (en-PL)"
+            },
+            {
+              "title": "English (en-PN)",
+              "value": "English (en-PN)"
+            },
+            {
+              "title": "English (en-PR)",
+              "value": "English (en-PR)"
+            },
+            {
+              "title": "English (en-PT)",
+              "value": "English (en-PT)"
+            },
+            {
+              "title": "English (en-PW)",
+              "value": "English (en-PW)"
+            },
+            {
+              "title": "English (en-RO)",
+              "value": "English (en-RO)"
+            },
+            {
+              "title": "English (en-RW)",
+              "value": "English (en-RW)"
+            },
+            {
+              "title": "English (en-SB)",
+              "value": "English (en-SB)"
+            },
+            {
+              "title": "English (en-SC)",
+              "value": "English (en-SC)"
+            },
+            {
+              "title": "English (en-SD)",
+              "value": "English (en-SD)"
+            },
+            {
+              "title": "English (en-SE)",
+              "value": "English (en-SE)"
+            },
+            {
+              "title": "English (en-SG)",
+              "value": "English (en-SG)"
+            },
+            {
+              "title": "English (en-SH)",
+              "value": "English (en-SH)"
+            },
+            {
+              "title": "English (en-SI)",
+              "value": "English (en-SI)"
+            },
+            {
+              "title": "English (en-SK)",
+              "value": "English (en-SK)"
+            },
+            {
+              "title": "English (en-SL)",
+              "value": "English (en-SL)"
+            },
+            {
+              "title": "English (en-SS)",
+              "value": "English (en-SS)"
+            },
+            {
+              "title": "English (en-SX)",
+              "value": "English (en-SX)"
+            },
+            {
+              "title": "English (en-SZ)",
+              "value": "English (en-SZ)"
+            },
+            {
+              "title": "English (en-TC)",
+              "value": "English (en-TC)"
+            },
+            {
+              "title": "English (en-TK)",
+              "value": "English (en-TK)"
+            },
+            {
+              "title": "English (en-TO)",
+              "value": "English (en-TO)"
+            },
+            {
+              "title": "English (en-TT)",
+              "value": "English (en-TT)"
+            },
+            {
+              "title": "English (en-TV)",
+              "value": "English (en-TV)"
+            },
+            {
+              "title": "English (en-TZ)",
+              "value": "English (en-TZ)"
+            },
+            {
+              "title": "English (en-UG)",
+              "value": "English (en-UG)"
+            },
+            {
+              "title": "English (en-UM)",
+              "value": "English (en-UM)"
+            },
+            {
+              "title": "English (en-VC)",
+              "value": "English (en-VC)"
+            },
+            {
+              "title": "English (en-VG)",
+              "value": "English (en-VG)"
+            },
+            {
+              "title": "English (en-VI)",
+              "value": "English (en-VI)"
+            },
+            {
+              "title": "English (en-VU)",
+              "value": "English (en-VU)"
+            },
+            {
+              "title": "English (en-WS)",
+              "value": "English (en-WS)"
+            },
+            {
+              "title": "English (en-ZA)",
+              "value": "English (en-ZA)"
+            },
+            {
+              "title": "English (en-ZM)",
+              "value": "English (en-ZM)"
+            },
+            {
+              "title": "English (en-ZW)",
+              "value": "English (en-ZW)"
+            },
+            {
+              "title": "Esperanto (eo)",
+              "value": "Esperanto (eo)"
+            },
+            {
+              "title": "Spanish (es)",
+              "value": "Spanish (es)"
+            },
+            {
+              "title": "Spanish (es-AR)",
+              "value": "Spanish (es-AR)"
+            },
+            {
+              "title": "Spanish (es-BO)",
+              "value": "Spanish (es-BO)"
+            },
+            {
+              "title": "Spanish (es-BR)",
+              "value": "Spanish (es-BR)"
+            },
+            {
+              "title": "Spanish (es-BZ)",
+              "value": "Spanish (es-BZ)"
+            },
+            {
+              "title": "Spanish (es-CL)",
+              "value": "Spanish (es-CL)"
+            },
+            {
+              "title": "Spanish (es-CO)",
+              "value": "Spanish (es-CO)"
+            },
+            {
+              "title": "Spanish (es-CR)",
+              "value": "Spanish (es-CR)"
+            },
+            {
+              "title": "Spanish (es-CU)",
+              "value": "Spanish (es-CU)"
+            },
+            {
+              "title": "Spanish (es-DO)",
+              "value": "Spanish (es-DO)"
+            },
+            {
+              "title": "Spanish (es-EA)",
+              "value": "Spanish (es-EA)"
+            },
+            {
+              "title": "Spanish (es-EC)",
+              "value": "Spanish (es-EC)"
+            },
+            {
+              "title": "Spanish (es-ES)",
+              "value": "Spanish (es-ES)"
+            },
+            {
+              "title": "Spanish (es-GQ)",
+              "value": "Spanish (es-GQ)"
+            },
+            {
+              "title": "Spanish (es-GT)",
+              "value": "Spanish (es-GT)"
+            },
+            {
+              "title": "Spanish (es-HN)",
+              "value": "Spanish (es-HN)"
+            },
+            {
+              "title": "Spanish (es-IC)",
+              "value": "Spanish (es-IC)"
+            },
+            {
+              "title": "Spanish (es-MX)",
+              "value": "Spanish (es-MX)"
+            },
+            {
+              "title": "Spanish (es-NI)",
+              "value": "Spanish (es-NI)"
+            },
+            {
+              "title": "Spanish (es-PA)",
+              "value": "Spanish (es-PA)"
+            },
+            {
+              "title": "Spanish (es-PE)",
+              "value": "Spanish (es-PE)"
+            },
+            {
+              "title": "Spanish (es-PH)",
+              "value": "Spanish (es-PH)"
+            },
+            {
+              "title": "Spanish (es-PR)",
+              "value": "Spanish (es-PR)"
+            },
+            {
+              "title": "Spanish (es-PY)",
+              "value": "Spanish (es-PY)"
+            },
+            {
+              "title": "Spanish (es-SV)",
+              "value": "Spanish (es-SV)"
+            },
+            {
+              "title": "Spanish (es-US)",
+              "value": "Spanish (es-US)"
+            },
+            {
+              "title": "Spanish (es-UY)",
+              "value": "Spanish (es-UY)"
+            },
+            {
+              "title": "Spanish (es-VE)",
+              "value": "Spanish (es-VE)"
+            },
+            {
+              "title": "Estonian (et)",
+              "value": "Estonian (et)"
+            },
+            {
+              "title": "Estonian (et-EE)",
+              "value": "Estonian (et-EE)"
+            },
+            {
+              "title": "Basque (eu)",
+              "value": "Basque (eu)"
+            },
+            {
+              "title": "Persian (fa)",
+              "value": "Persian (fa)"
+            },
+            {
+              "title": "Persian (fa-AF)",
+              "value": "Persian (fa-AF)"
+            },
+            {
+              "title": "Persian (fa-IR)",
+              "value": "Persian (fa-IR)"
+            },
+            {
+              "title": "Fulah (ff)",
+              "value": "Fulah (ff)"
+            },
+            {
+              "title": "Fulah (ff-Adlm)",
+              "value": "Fulah (ff-Adlm)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-BF)",
+              "value": "Fulah (ff-Adlm-BF)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-CM)",
+              "value": "Fulah (ff-Adlm-CM)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-GH)",
+              "value": "Fulah (ff-Adlm-GH)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-GM)",
+              "value": "Fulah (ff-Adlm-GM)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-GW)",
+              "value": "Fulah (ff-Adlm-GW)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-LR)",
+              "value": "Fulah (ff-Adlm-LR)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-MR)",
+              "value": "Fulah (ff-Adlm-MR)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-NE)",
+              "value": "Fulah (ff-Adlm-NE)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-NG)",
+              "value": "Fulah (ff-Adlm-NG)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-SL)",
+              "value": "Fulah (ff-Adlm-SL)"
+            },
+            {
+              "title": "Fulah (ff-Adlm-SN)",
+              "value": "Fulah (ff-Adlm-SN)"
+            },
+            {
+              "title": "Fulah (ff-Latn)",
+              "value": "Fulah (ff-Latn)"
+            },
+            {
+              "title": "Fulah (ff-Latn-BF)",
+              "value": "Fulah (ff-Latn-BF)"
+            },
+            {
+              "title": "Fulah (ff-Latn-CM)",
+              "value": "Fulah (ff-Latn-CM)"
+            },
+            {
+              "title": "Fulah (ff-Latn-GH)",
+              "value": "Fulah (ff-Latn-GH)"
+            },
+            {
+              "title": "Fulah (ff-Latn-GM)",
+              "value": "Fulah (ff-Latn-GM)"
+            },
+            {
+              "title": "Fulah (ff-Latn-GN)",
+              "value": "Fulah (ff-Latn-GN)"
+            },
+            {
+              "title": "Fulah (ff-Latn-GW)",
+              "value": "Fulah (ff-Latn-GW)"
+            },
+            {
+              "title": "Fulah (ff-Latn-LR)",
+              "value": "Fulah (ff-Latn-LR)"
+            },
+            {
+              "title": "Fulah (ff-Latn-MR)",
+              "value": "Fulah (ff-Latn-MR)"
+            },
+            {
+              "title": "Fulah (ff-Latn-NE)",
+              "value": "Fulah (ff-Latn-NE)"
+            },
+            {
+              "title": "Fulah (ff-Latn-NG)",
+              "value": "Fulah (ff-Latn-NG)"
+            },
+            {
+              "title": "Fulah (ff-Latn-SL)",
+              "value": "Fulah (ff-Latn-SL)"
+            },
+            {
+              "title": "Finnish (fi)",
+              "value": "Finnish (fi)"
+            },
+            {
+              "title": "Finnish (fi-FI)",
+              "value": "Finnish (fi-FI)"
+            },
+            {
+              "title": "Filipino (fil-PH)",
+              "value": "Filipino (fil-PH)"
+            },
+            {
+              "title": "Faroese (fo)",
+              "value": "Faroese (fo)"
+            },
+            {
+              "title": "Faroese (fo-DK)",
+              "value": "Faroese (fo-DK)"
+            },
+            {
+              "title": "French (fr)",
+              "value": "French (fr)"
+            },
+            {
+              "title": "French (fr-BE)",
+              "value": "French (fr-BE)"
+            },
+            {
+              "title": "French (fr-BF)",
+              "value": "French (fr-BF)"
+            },
+            {
+              "title": "French (fr-BI)",
+              "value": "French (fr-BI)"
+            },
+            {
+              "title": "French (fr-BJ)",
+              "value": "French (fr-BJ)"
+            },
+            {
+              "title": "French (fr-BL)",
+              "value": "French (fr-BL)"
+            },
+            {
+              "title": "French (fr-CA)",
+              "value": "French (fr-CA)"
+            },
+            {
+              "title": "French (fr-CD)",
+              "value": "French (fr-CD)"
+            },
+            {
+              "title": "French (fr-CF)",
+              "value": "French (fr-CF)"
+            },
+            {
+              "title": "French (fr-CG)",
+              "value": "French (fr-CG)"
+            },
+            {
+              "title": "French (fr-CH)",
+              "value": "French (fr-CH)"
+            },
+            {
+              "title": "French (fr-CI)",
+              "value": "French (fr-CI)"
+            },
+            {
+              "title": "French (fr-CM)",
+              "value": "French (fr-CM)"
+            },
+            {
+              "title": "French (fr-DJ)",
+              "value": "French (fr-DJ)"
+            },
+            {
+              "title": "French (fr-DZ)",
+              "value": "French (fr-DZ)"
+            },
+            {
+              "title": "French (fr-FR)",
+              "value": "French (fr-FR)"
+            },
+            {
+              "title": "French (fr-GA)",
+              "value": "French (fr-GA)"
+            },
+            {
+              "title": "French (fr-GF)",
+              "value": "French (fr-GF)"
+            },
+            {
+              "title": "French (fr-GN)",
+              "value": "French (fr-GN)"
+            },
+            {
+              "title": "French (fr-GP)",
+              "value": "French (fr-GP)"
+            },
+            {
+              "title": "French (fr-GQ)",
+              "value": "French (fr-GQ)"
+            },
+            {
+              "title": "French (fr-HT)",
+              "value": "French (fr-HT)"
+            },
+            {
+              "title": "French (fr-KM)",
+              "value": "French (fr-KM)"
+            },
+            {
+              "title": "French (fr-LU)",
+              "value": "French (fr-LU)"
+            },
+            {
+              "title": "French (fr-MA)",
+              "value": "French (fr-MA)"
+            },
+            {
+              "title": "French (fr-MC)",
+              "value": "French (fr-MC)"
+            },
+            {
+              "title": "French (fr-MF)",
+              "value": "French (fr-MF)"
+            },
+            {
+              "title": "French (fr-MG)",
+              "value": "French (fr-MG)"
+            },
+            {
+              "title": "French (fr-ML)",
+              "value": "French (fr-ML)"
+            },
+            {
+              "title": "French (fr-MQ)",
+              "value": "French (fr-MQ)"
+            },
+            {
+              "title": "French (fr-MR)",
+              "value": "French (fr-MR)"
+            },
+            {
+              "title": "French (fr-MU)",
+              "value": "French (fr-MU)"
+            },
+            {
+              "title": "French (fr-NC)",
+              "value": "French (fr-NC)"
+            },
+            {
+              "title": "French (fr-NE)",
+              "value": "French (fr-NE)"
+            },
+            {
+              "title": "French (fr-PF)",
+              "value": "French (fr-PF)"
+            },
+            {
+              "title": "French (fr-PM)",
+              "value": "French (fr-PM)"
+            },
+            {
+              "title": "French (fr-RE)",
+              "value": "French (fr-RE)"
+            },
+            {
+              "title": "French (fr-RW)",
+              "value": "French (fr-RW)"
+            },
+            {
+              "title": "French (fr-SC)",
+              "value": "French (fr-SC)"
+            },
+            {
+              "title": "French (fr-SN)",
+              "value": "French (fr-SN)"
+            },
+            {
+              "title": "French (fr-SY)",
+              "value": "French (fr-SY)"
+            },
+            {
+              "title": "French (fr-TD)",
+              "value": "French (fr-TD)"
+            },
+            {
+              "title": "French (fr-TG)",
+              "value": "French (fr-TG)"
+            },
+            {
+              "title": "French (fr-TN)",
+              "value": "French (fr-TN)"
+            },
+            {
+              "title": "French (fr-VU)",
+              "value": "French (fr-VU)"
+            },
+            {
+              "title": "French (fr-WF)",
+              "value": "French (fr-WF)"
+            },
+            {
+              "title": "French (fr-YT)",
+              "value": "French (fr-YT)"
+            },
+            {
+              "title": "Western Frisian (fy)",
+              "value": "Western Frisian (fy)"
+            },
+            {
+              "title": "Irish (ga)",
+              "value": "Irish (ga)"
+            },
+            {
+              "title": "Irish (ga-GB)",
+              "value": "Irish (ga-GB)"
+            },
+            {
+              "title": "Scottish Gaelic (gd)",
+              "value": "Scottish Gaelic (gd)"
+            },
+            {
+              "title": "Galician (gl)",
+              "value": "Galician (gl)"
+            },
+            {
+              "title": "Guarani (gn)",
+              "value": "Guarani (gn)"
+            },
+            {
+              "title": "Gujarati (gu)",
+              "value": "Gujarati (gu)"
+            },
+            {
+              "title": "Gujarati (gu-IN)",
+              "value": "Gujarati (gu-IN)"
+            },
+            {
+              "title": "Manx (gv)",
+              "value": "Manx (gv)"
+            },
+            {
+              "title": "Hausa (ha)",
+              "value": "Hausa (ha)"
+            },
+            {
+              "title": "Hausa (ha-Arab)",
+              "value": "Hausa (ha-Arab)"
+            },
+            {
+              "title": "Hausa (ha-Arab-SD)",
+              "value": "Hausa (ha-Arab-SD)"
+            },
+            {
+              "title": "Hausa (ha-GH)",
+              "value": "Hausa (ha-GH)"
+            },
+            {
+              "title": "Hausa (ha-NE)",
+              "value": "Hausa (ha-NE)"
+            },
+            {
+              "title": "Hebrew (he)",
+              "value": "Hebrew (he)"
+            },
+            {
+              "title": "Hebrew (he-IL)",
+              "value": "Hebrew (he-IL)"
+            },
+            {
+              "title": "Hindi (hi)",
+              "value": "Hindi (hi)"
+            },
+            {
+              "title": "Hindi (hi-IN)",
+              "value": "Hindi (hi-IN)"
+            },
+            {
+              "title": "Hindi (hi-Latn)",
+              "value": "Hindi (hi-Latn)"
+            },
+            {
+              "title": "Croatian (hr)",
+              "value": "Croatian (hr)"
+            },
+            {
+              "title": "Croatian (hr-BA)",
+              "value": "Croatian (hr-BA)"
+            },
+            {
+              "title": "Croatian (hr-HR)",
+              "value": "Croatian (hr-HR)"
+            },
+            {
+              "title": "Haitian (ht)",
+              "value": "Haitian (ht)"
+            },
+            {
+              "title": "Hungarian (hu)",
+              "value": "Hungarian (hu)"
+            },
+            {
+              "title": "Hungarian (hu-HU)",
+              "value": "Hungarian (hu-HU)"
+            },
+            {
+              "title": "Armenian (hy)",
+              "value": "Armenian (hy)"
+            },
+            {
+              "title": "Interlingua (ia)",
+              "value": "Interlingua (ia)"
+            },
+            {
+              "title": "Indonesian (id)",
+              "value": "Indonesian (id)"
+            },
+            {
+              "title": "Indonesian (id-ID)",
+              "value": "Indonesian (id-ID)"
+            },
+            {
+              "title": "Interlingue (ie)",
+              "value": "Interlingue (ie)"
+            },
+            {
+              "title": "Igbo (ig)",
+              "value": "Igbo (ig)"
+            },
+            {
+              "title": "Sichuan Yi (ii)",
+              "value": "Sichuan Yi (ii)"
+            },
+            {
+              "title": "Inupiaq (ik)",
+              "value": "Inupiaq (ik)"
+            },
+            {
+              "title": "Ido (io)",
+              "value": "Ido (io)"
+            },
+            {
+              "title": "Icelandic (is)",
+              "value": "Icelandic (is)"
+            },
+            {
+              "title": "Italian (it)",
+              "value": "Italian (it)"
+            },
+            {
+              "title": "Italian (it-CH)",
+              "value": "Italian (it-CH)"
+            },
+            {
+              "title": "Italian (it-IT)",
+              "value": "Italian (it-IT)"
+            },
+            {
+              "title": "Italian (it-SM)",
+              "value": "Italian (it-SM)"
+            },
+            {
+              "title": "Italian (it-VA)",
+              "value": "Italian (it-VA)"
+            },
+            {
+              "title": "Inuktitut (iu)",
+              "value": "Inuktitut (iu)"
+            },
+            {
+              "title": "Inuktitut (iu-Latn)",
+              "value": "Inuktitut (iu-Latn)"
+            },
+            {
+              "title": "Japanese (ja)",
+              "value": "Japanese (ja)"
+            },
+            {
+              "title": "Japanese (ja-JP)",
+              "value": "Japanese (ja-JP)"
+            },
+            {
+              "title": "Javanese (jv)",
+              "value": "Javanese (jv)"
+            },
+            {
+              "title": "Georgian (ka)",
+              "value": "Georgian (ka)"
+            },
+            {
+              "title": "Kikuyu (ki)",
+              "value": "Kikuyu (ki)"
+            },
+            {
+              "title": "Kazakh (kk)",
+              "value": "Kazakh (kk)"
+            },
+            {
+              "title": "Kazakh (kk-Arab)",
+              "value": "Kazakh (kk-Arab)"
+            },
+            {
+              "title": "Kazakh (kk-Cyrl)",
+              "value": "Kazakh (kk-Cyrl)"
+            },
+            {
+              "title": "Kazakh (kk-KZ)",
+              "value": "Kazakh (kk-KZ)"
+            },
+            {
+              "title": "Kalaallisut (kl)",
+              "value": "Kalaallisut (kl)"
+            },
+            {
+              "title": "Central Khmer (km)",
+              "value": "Central Khmer (km)"
+            },
+            {
+              "title": "Kannada (kn)",
+              "value": "Kannada (kn)"
+            },
+            {
+              "title": "Kannada (kn-IN)",
+              "value": "Kannada (kn-IN)"
+            },
+            {
+              "title": "Korean (ko)",
+              "value": "Korean (ko)"
+            },
+            {
+              "title": "Korean (ko-CN)",
+              "value": "Korean (ko-CN)"
+            },
+            {
+              "title": "Korean (ko-KP)",
+              "value": "Korean (ko-KP)"
+            },
+            {
+              "title": "Korean (ko-KR)",
+              "value": "Korean (ko-KR)"
+            },
+            {
+              "title": "Kashmiri (ks)",
+              "value": "Kashmiri (ks)"
+            },
+            {
+              "title": "Kashmiri (ks-Arab)",
+              "value": "Kashmiri (ks-Arab)"
+            },
+            {
+              "title": "Kashmiri (ks-Deva)",
+              "value": "Kashmiri (ks-Deva)"
+            },
+            {
+              "title": "Kurdish (ku)",
+              "value": "Kurdish (ku)"
+            },
+            {
+              "title": "Cornish (kw)",
+              "value": "Cornish (kw)"
+            },
+            {
+              "title": "Kyrgyz (ky)",
+              "value": "Kyrgyz (ky)"
+            },
+            {
+              "title": "Latin (la)",
+              "value": "Latin (la)"
+            },
+            {
+              "title": "Luxembourgish (lb)",
+              "value": "Luxembourgish (lb)"
+            },
+            {
+              "title": "Ganda (lg)",
+              "value": "Ganda (lg)"
+            },
+            {
+              "title": "Lingala (ln)",
+              "value": "Lingala (ln)"
+            },
+            {
+              "title": "Lingala (ln-AO)",
+              "value": "Lingala (ln-AO)"
+            },
+            {
+              "title": "Lingala (ln-CF)",
+              "value": "Lingala (ln-CF)"
+            },
+            {
+              "title": "Lingala (ln-CG)",
+              "value": "Lingala (ln-CG)"
+            },
+            {
+              "title": "Lao (lo)",
+              "value": "Lao (lo)"
+            },
+            {
+              "title": "Lithuanian (lt)",
+              "value": "Lithuanian (lt)"
+            },
+            {
+              "title": "Lithuanian (lt-LT)",
+              "value": "Lithuanian (lt-LT)"
+            },
+            {
+              "title": "Luba-Katanga (lu)",
+              "value": "Luba-Katanga (lu)"
+            },
+            {
+              "title": "Latvian (lv)",
+              "value": "Latvian (lv)"
+            },
+            {
+              "title": "Latvian (lv-LV)",
+              "value": "Latvian (lv-LV)"
+            },
+            {
+              "title": "Malagasy (mg)",
+              "value": "Malagasy (mg)"
+            },
+            {
+              "title": "Maori (mi)",
+              "value": "Maori (mi)"
+            },
+            {
+              "title": "Macedonian (mk)",
+              "value": "Macedonian (mk)"
+            },
+            {
+              "title": "Malayalam (ml)",
+              "value": "Malayalam (ml)"
+            },
+            {
+              "title": "Malayalam (ml-IN)",
+              "value": "Malayalam (ml-IN)"
+            },
+            {
+              "title": "Mongolian (mn)",
+              "value": "Mongolian (mn)"
+            },
+            {
+              "title": "Mongolian (mn-Mong)",
+              "value": "Mongolian (mn-Mong)"
+            },
+            {
+              "title": "Mongolian (mn-Mong-MN)",
+              "value": "Mongolian (mn-Mong-MN)"
+            },
+            {
+              "title": "Marathi (mr)",
+              "value": "Marathi (mr)"
+            },
+            {
+              "title": "Marathi (mr-IN)",
+              "value": "Marathi (mr-IN)"
+            },
+            {
+              "title": "Malay (ms)",
+              "value": "Malay (ms)"
+            },
+            {
+              "title": "Malay (ms-Arab)",
+              "value": "Malay (ms-Arab)"
+            },
+            {
+              "title": "Malay (ms-Arab-BN)",
+              "value": "Malay (ms-Arab-BN)"
+            },
+            {
+              "title": "Malay (ms-BN)",
+              "value": "Malay (ms-BN)"
+            },
+            {
+              "title": "Malay (ms-ID)",
+              "value": "Malay (ms-ID)"
+            },
+            {
+              "title": "Malay (ms-SG)",
+              "value": "Malay (ms-SG)"
+            },
+            {
+              "title": "Maltese (mt)",
+              "value": "Maltese (mt)"
+            },
+            {
+              "title": "Burmese (my)",
+              "value": "Burmese (my)"
+            },
+            {
+              "title": "Norwegian Bokm\u00e5l (nb)",
+              "value": "Norwegian Bokm\u00e5l (nb)"
+            },
+            {
+              "title": "Norwegian Bokm\u00e5l (nb-SJ)",
+              "value": "Norwegian Bokm\u00e5l (nb-SJ)"
+            },
+            {
+              "title": "North Ndebele (nd)",
+              "value": "North Ndebele (nd)"
+            },
+            {
+              "title": "Nepali (ne)",
+              "value": "Nepali (ne)"
+            },
+            {
+              "title": "Nepali (ne-IN)",
+              "value": "Nepali (ne-IN)"
+            },
+            {
+              "title": "Dutch (nl)",
+              "value": "Dutch (nl)"
+            },
+            {
+              "title": "Dutch (nl-AW)",
+              "value": "Dutch (nl-AW)"
+            },
+            {
+              "title": "Dutch (nl-BE)",
+              "value": "Dutch (nl-BE)"
+            },
+            {
+              "title": "Dutch (nl-BQ)",
+              "value": "Dutch (nl-BQ)"
+            },
+            {
+              "title": "Dutch (nl-CW)",
+              "value": "Dutch (nl-CW)"
+            },
+            {
+              "title": "Dutch (nl-NL)",
+              "value": "Dutch (nl-NL)"
+            },
+            {
+              "title": "Dutch (nl-SR)",
+              "value": "Dutch (nl-SR)"
+            },
+            {
+              "title": "Dutch (nl-SX)",
+              "value": "Dutch (nl-SX)"
+            },
+            {
+              "title": "Norwegian Nynorsk (nn)",
+              "value": "Norwegian Nynorsk (nn)"
+            },
+            {
+              "title": "Norwegian (no)",
+              "value": "Norwegian (no)"
+            },
+            {
+              "title": "Norwegian (no-NO)",
+              "value": "Norwegian (no-NO)"
+            },
+            {
+              "title": "South Ndebele (nr)",
+              "value": "South Ndebele (nr)"
+            },
+            {
+              "title": "Navajo (nv)",
+              "value": "Navajo (nv)"
+            },
+            {
+              "title": "Chichewa (ny)",
+              "value": "Chichewa (ny)"
+            },
+            {
+              "title": "Occitan (oc)",
+              "value": "Occitan (oc)"
+            },
+            {
+              "title": "Occitan (oc-ES)",
+              "value": "Occitan (oc-ES)"
+            },
+            {
+              "title": "Oromo (om)",
+              "value": "Oromo (om)"
+            },
+            {
+              "title": "Oromo (om-KE)",
+              "value": "Oromo (om-KE)"
+            },
+            {
+              "title": "Oriya (or)",
+              "value": "Oriya (or)"
+            },
+            {
+              "title": "Ossetian (os)",
+              "value": "Ossetian (os)"
+            },
+            {
+              "title": "Ossetian (os-RU)",
+              "value": "Ossetian (os-RU)"
+            },
+            {
+              "title": "Punjabi (pa)",
+              "value": "Punjabi (pa)"
+            },
+            {
+              "title": "Punjabi (pa-IN)",
+              "value": "Punjabi (pa-IN)"
+            },
+            {
+              "title": "Punjabi (pa-Arab)",
+              "value": "Punjabi (pa-Arab)"
+            },
+            {
+              "title": "Punjabi (pa-Guru)",
+              "value": "Punjabi (pa-Guru)"
+            },
+            {
+              "title": "Polish (pl)",
+              "value": "Polish (pl)"
+            },
+            {
+              "title": "Polish (pl-PL)",
+              "value": "Polish (pl-PL)"
+            },
+            {
+              "title": "Pashto (ps)",
+              "value": "Pashto (ps)"
+            },
+            {
+              "title": "Pashto (ps-PK)",
+              "value": "Pashto (ps-PK)"
+            },
+            {
+              "title": "Portuguese (pt)",
+              "value": "Portuguese (pt)"
+            },
+            {
+              "title": "Portuguese (pt-AO)",
+              "value": "Portuguese (pt-AO)"
+            },
+            {
+              "title": "Portuguese (pt-BR)",
+              "value": "Portuguese (pt-BR)"
+            },
+            {
+              "title": "Portuguese (pt-CH)",
+              "value": "Portuguese (pt-CH)"
+            },
+            {
+              "title": "Portuguese (pt-CV)",
+              "value": "Portuguese (pt-CV)"
+            },
+            {
+              "title": "Portuguese (pt-GQ)",
+              "value": "Portuguese (pt-GQ)"
+            },
+            {
+              "title": "Portuguese (pt-GW)",
+              "value": "Portuguese (pt-GW)"
+            },
+            {
+              "title": "Portuguese (pt-LU)",
+              "value": "Portuguese (pt-LU)"
+            },
+            {
+              "title": "Portuguese (pt-MO)",
+              "value": "Portuguese (pt-MO)"
+            },
+            {
+              "title": "Portuguese (pt-MZ)",
+              "value": "Portuguese (pt-MZ)"
+            },
+            {
+              "title": "Portuguese (pt-PT)",
+              "value": "Portuguese (pt-PT)"
+            },
+            {
+              "title": "Portuguese (pt-ST)",
+              "value": "Portuguese (pt-ST)"
+            },
+            {
+              "title": "Portuguese (pt-TL)",
+              "value": "Portuguese (pt-TL)"
+            },
+            {
+              "title": "Quechua (qu)",
+              "value": "Quechua (qu)"
+            },
+            {
+              "title": "Quechua (qu-BO)",
+              "value": "Quechua (qu-BO)"
+            },
+            {
+              "title": "Quechua (qu-EC)",
+              "value": "Quechua (qu-EC)"
+            },
+            {
+              "title": "Romansh (rm)",
+              "value": "Romansh (rm)"
+            },
+            {
+              "title": "Rundi (rn)",
+              "value": "Rundi (rn)"
+            },
+            {
+              "title": "Romanian (ro)",
+              "value": "Romanian (ro)"
+            },
+            {
+              "title": "Romanian (ro-MD)",
+              "value": "Romanian (ro-MD)"
+            },
+            {
+              "title": "Romanian (ro-RO)",
+              "value": "Romanian (ro-RO)"
+            },
+            {
+              "title": "Russian (ru)",
+              "value": "Russian (ru)"
+            },
+            {
+              "title": "Russian (ru-BY)",
+              "value": "Russian (ru-BY)"
+            },
+            {
+              "title": "Russian (ru-KG)",
+              "value": "Russian (ru-KG)"
+            },
+            {
+              "title": "Russian (ru-KZ)",
+              "value": "Russian (ru-KZ)"
+            },
+            {
+              "title": "Russian (ru-MD)",
+              "value": "Russian (ru-MD)"
+            },
+            {
+              "title": "Russian (ru-RU)",
+              "value": "Russian (ru-RU)"
+            },
+            {
+              "title": "Russian (ru-UA)",
+              "value": "Russian (ru-UA)"
+            },
+            {
+              "title": "Kinyarwanda (rw)",
+              "value": "Kinyarwanda (rw)"
+            },
+            {
+              "title": "Sanskrit (sa)",
+              "value": "Sanskrit (sa)"
+            },
+            {
+              "title": "Sardinian (sc)",
+              "value": "Sardinian (sc)"
+            },
+            {
+              "title": "Sindhi (sd)",
+              "value": "Sindhi (sd)"
+            },
+            {
+              "title": "Sindhi (sd-Arab)",
+              "value": "Sindhi (sd-Arab)"
+            },
+            {
+              "title": "Sindhi (sd-Deva)",
+              "value": "Sindhi (sd-Deva)"
+            },
+            {
+              "title": "Northern Sami (se)",
+              "value": "Northern Sami (se)"
+            },
+            {
+              "title": "Northern Sami (se-FI)",
+              "value": "Northern Sami (se-FI)"
+            },
+            {
+              "title": "Northern Sami (se-SE)",
+              "value": "Northern Sami (se-SE)"
+            },
+            {
+              "title": "Sango (sg)",
+              "value": "Sango (sg)"
+            },
+            {
+              "title": "Sinhala (si)",
+              "value": "Sinhala (si)"
+            },
+            {
+              "title": "Slovak (sk)",
+              "value": "Slovak (sk)"
+            },
+            {
+              "title": "Slovak (sk-SK)",
+              "value": "Slovak (sk-SK)"
+            },
+            {
+              "title": "Slovenian (sl)",
+              "value": "Slovenian (sl)"
+            },
+            {
+              "title": "Slovenian (sl-SI)",
+              "value": "Slovenian (sl-SI)"
+            },
+            {
+              "title": "Shona (sn)",
+              "value": "Shona (sn)"
+            },
+            {
+              "title": "Somali (so)",
+              "value": "Somali (so)"
+            },
+            {
+              "title": "Somali (so-DJ)",
+              "value": "Somali (so-DJ)"
+            },
+            {
+              "title": "Somali (so-ET)",
+              "value": "Somali (so-ET)"
+            },
+            {
+              "title": "Somali (so-KE)",
+              "value": "Somali (so-KE)"
+            },
+            {
+              "title": "Albanian (sq)",
+              "value": "Albanian (sq)"
+            },
+            {
+              "title": "Albanian (sq-MK)",
+              "value": "Albanian (sq-MK)"
+            },
+            {
+              "title": "Albanian (sq-XK)",
+              "value": "Albanian (sq-XK)"
+            },
+            {
+              "title": "Serbian (sr)",
+              "value": "Serbian (sr)"
+            },
+            {
+              "title": "Serbian (sr-RS)",
+              "value": "Serbian (sr-RS)"
+            },
+            {
+              "title": "Serbian (sr-Cyrl)",
+              "value": "Serbian (sr-Cyrl)"
+            },
+            {
+              "title": "Serbian (sr-Cyrl-BA)",
+              "value": "Serbian (sr-Cyrl-BA)"
+            },
+            {
+              "title": "Serbian (sr-Cyrl-ME)",
+              "value": "Serbian (sr-Cyrl-ME)"
+            },
+            {
+              "title": "Serbian (sr-Cyrl-XK)",
+              "value": "Serbian (sr-Cyrl-XK)"
+            },
+            {
+              "title": "Serbian (sr-Latn)",
+              "value": "Serbian (sr-Latn)"
+            },
+            {
+              "title": "Serbian (sr-Latn-BA)",
+              "value": "Serbian (sr-Latn-BA)"
+            },
+            {
+              "title": "Serbian (sr-Latn-ME)",
+              "value": "Serbian (sr-Latn-ME)"
+            },
+            {
+              "title": "Serbian (sr-Latn-XK)",
+              "value": "Serbian (sr-Latn-XK)"
+            },
+            {
+              "title": "Swati (ss)",
+              "value": "Swati (ss)"
+            },
+            {
+              "title": "Swati (ss-SZ)",
+              "value": "Swati (ss-SZ)"
+            },
+            {
+              "title": "Southern Sotho (st)",
+              "value": "Southern Sotho (st)"
+            },
+            {
+              "title": "Southern Sotho (st-LS)",
+              "value": "Southern Sotho (st-LS)"
+            },
+            {
+              "title": "Sundanese (su)",
+              "value": "Sundanese (su)"
+            },
+            {
+              "title": "Sundanese (su-Latn)",
+              "value": "Sundanese (su-Latn)"
+            },
+            {
+              "title": "Swedish (sv)",
+              "value": "Swedish (sv)"
+            },
+            {
+              "title": "Swedish (sv-AX)",
+              "value": "Swedish (sv-AX)"
+            },
+            {
+              "title": "Swedish (sv-FI)",
+              "value": "Swedish (sv-FI)"
+            },
+            {
+              "title": "Swedish (sv-SE)",
+              "value": "Swedish (sv-SE)"
+            },
+            {
+              "title": "Swahili (sw)",
+              "value": "Swahili (sw)"
+            },
+            {
+              "title": "Swahili (sw-CD)",
+              "value": "Swahili (sw-CD)"
+            },
+            {
+              "title": "Swahili (sw-KE)",
+              "value": "Swahili (sw-KE)"
+            },
+            {
+              "title": "Swahili (sw-TZ)",
+              "value": "Swahili (sw-TZ)"
+            },
+            {
+              "title": "Swahili (sw-UG)",
+              "value": "Swahili (sw-UG)"
+            },
+            {
+              "title": "Tamil (ta)",
+              "value": "Tamil (ta)"
+            },
+            {
+              "title": "Tamil (ta-IN)",
+              "value": "Tamil (ta-IN)"
+            },
+            {
+              "title": "Tamil (ta-LK)",
+              "value": "Tamil (ta-LK)"
+            },
+            {
+              "title": "Tamil (ta-MY)",
+              "value": "Tamil (ta-MY)"
+            },
+            {
+              "title": "Tamil (ta-SG)",
+              "value": "Tamil (ta-SG)"
+            },
+            {
+              "title": "Telugu (te)",
+              "value": "Telugu (te)"
+            },
+            {
+              "title": "Telugu (te-IN)",
+              "value": "Telugu (te-IN)"
+            },
+            {
+              "title": "Tajik (tg)",
+              "value": "Tajik (tg)"
+            },
+            {
+              "title": "Thai (th)",
+              "value": "Thai (th)"
+            },
+            {
+              "title": "Thai (th-TH)",
+              "value": "Thai (th-TH)"
+            },
+            {
+              "title": "Tigrinya (ti)",
+              "value": "Tigrinya (ti)"
+            },
+            {
+              "title": "Tigrinya (ti-ER)",
+              "value": "Tigrinya (ti-ER)"
+            },
+            {
+              "title": "Turkmen (tk)",
+              "value": "Turkmen (tk)"
+            },
+            {
+              "title": "Tagalog (tl)",
+              "value": "Tagalog (tl)"
+            },
+            {
+              "title": "Tswana (tn)",
+              "value": "Tswana (tn)"
+            },
+            {
+              "title": "Tswana (tn-BW)",
+              "value": "Tswana (tn-BW)"
+            },
+            {
+              "title": "Tonga (to)",
+              "value": "Tonga (to)"
+            },
+            {
+              "title": "Turkish (tr)",
+              "value": "Turkish (tr)"
+            },
+            {
+              "title": "Turkish (tr-CY)",
+              "value": "Turkish (tr-CY)"
+            },
+            {
+              "title": "Turkish (tr-TR)",
+              "value": "Turkish (tr-TR)"
+            },
+            {
+              "title": "Tsonga (ts)",
+              "value": "Tsonga (ts)"
+            },
+            {
+              "title": "Tatar (tt)",
+              "value": "Tatar (tt)"
+            },
+            {
+              "title": "Uyghur (ug)",
+              "value": "Uyghur (ug)"
+            },
+            {
+              "title": "Ukrainian (uk)",
+              "value": "Ukrainian (uk)"
+            },
+            {
+              "title": "Ukrainian (uk-UA)",
+              "value": "Ukrainian (uk-UA)"
+            },
+            {
+              "title": "Urdu (ur)",
+              "value": "Urdu (ur)"
+            },
+            {
+              "title": "Urdu (ur-IN)",
+              "value": "Urdu (ur-IN)"
+            },
+            {
+              "title": "Urdu (ur-PK)",
+              "value": "Urdu (ur-PK)"
+            },
+            {
+              "title": "Uzbek (uz)",
+              "value": "Uzbek (uz)"
+            },
+            {
+              "title": "Uzbek (uz-Arab)",
+              "value": "Uzbek (uz-Arab)"
+            },
+            {
+              "title": "Uzbek (uz-Cyrl)",
+              "value": "Uzbek (uz-Cyrl)"
+            },
+            {
+              "title": "Uzbek (uz-Latn)",
+              "value": "Uzbek (uz-Latn)"
+            },
+            {
+              "title": "Venda (ve)",
+              "value": "Venda (ve)"
+            },
+            {
+              "title": "Vietnamese (vi)",
+              "value": "Vietnamese (vi)"
+            },
+            {
+              "title": "Vietnamese (vi-VN)",
+              "value": "Vietnamese (vi-VN)"
+            },
+            {
+              "title": "Volap\u00fck (vo)",
+              "value": "Volap\u00fck (vo)"
+            },
+            {
+              "title": "Walloon (wa)",
+              "value": "Walloon (wa)"
+            },
+            {
+              "title": "Wolof (wo)",
+              "value": "Wolof (wo)"
+            },
+            {
+              "title": "Xhosa (xh)",
+              "value": "Xhosa (xh)"
+            },
+            {
+              "title": "Yiddish (yi)",
+              "value": "Yiddish (yi)"
+            },
+            {
+              "title": "Yoruba (yo)",
+              "value": "Yoruba (yo)"
+            },
+            {
+              "title": "Yoruba (yo-BJ)",
+              "value": "Yoruba (yo-BJ)"
+            },
+            {
+              "title": "Zhuang (za)",
+              "value": "Zhuang (za)"
+            },
+            {
+              "title": "Chinese (zh)",
+              "value": "Chinese (zh)"
+            },
+            {
+              "title": "Chinese (zh-CH)",
+              "value": "Chinese (zh-CH)"
+            },
+            {
+              "title": "Chinese (zh-TW)",
+              "value": "Chinese (zh-TW)"
+            },
+            {
+              "title": "Chinese (zh-Hans)",
+              "value": "Chinese (zh-Hans)"
+            },
+            {
+              "title": "Chinese (zh-Hans-HK)",
+              "value": "Chinese (zh-Hans-HK)"
+            },
+            {
+              "title": "Chinese (zh-Hans-MO)",
+              "value": "Chinese (zh-Hans-MO)"
+            },
+            {
+              "title": "Chinese (zh-Hans-MY)",
+              "value": "Chinese (zh-Hans-MY)"
+            },
+            {
+              "title": "Chinese (zh-Hans-SG)",
+              "value": "Chinese (zh-Hans-SG)"
+            },
+            {
+              "title": "Chinese (zh-Hant)",
+              "value": "Chinese (zh-Hant)"
+            },
+            {
+              "title": "Chinese (zh-Hant-HK)",
+              "value": "Chinese (zh-Hant-HK)"
+            },
+            {
+              "title": "Chinese (zh-Hant-MO)",
+              "value": "Chinese (zh-Hant-MO)"
+            },
+            {
+              "title": "Chinese (zh-Hant-MY)",
+              "value": "Chinese (zh-Hant-MY)"
+            },
+            {
+              "title": "Chinese (zh-Latn)",
+              "value": "Chinese (zh-Latn)"
+            },
+            {
+              "title": "Zulu (zu)",
+              "value": "Zulu (zu)"
+            },
+            {
+              "title": "Zulu (zu-ZA)",
+              "value": "Zulu (zu-ZA)"
+            }
+          ]
         }
       ]
     },
