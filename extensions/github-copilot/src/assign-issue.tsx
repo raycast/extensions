@@ -30,16 +30,15 @@ function Command() {
       if (isSubmitting) {
         return;
       }
-      
+
       if (!repositoryId || !copilotBotId) {
-        const errorMessage = !copilotBotId 
-          ? "Copilot coding agent is not available for this repository"
-          : "Repository information is not available";
+        const errorMessage = copilotBotId
+          ? "Repository information is not available"
+          : "Copilot coding agent is not available for this repository";
         await showFailureToast(new Error(errorMessage), {
           title: "Cannot assign issue",
         });
         return;
-      }
       }
 
       setIsSubmitting(true);
