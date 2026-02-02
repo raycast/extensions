@@ -57,6 +57,24 @@
       ]
     },
     {
+      "name": "showImportantFirst",
+      "type": "dropdown",
+      "required": false,
+      "title": "Event Sorting",
+      "description": "How to sort upcoming events",
+      "default": "chronological",
+      "data": [
+        {
+          "title": "Chronological",
+          "value": "chronological"
+        },
+        {
+          "title": "Important First",
+          "value": "important"
+        }
+      ]
+    },
+    {
       "name": "externalEditor",
       "type": "appPicker",
       "required": false,

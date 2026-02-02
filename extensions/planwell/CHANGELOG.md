@@ -1,5 +1,12 @@
 # PlanWell Changelog
 
+## [1.2.0] - {PR_MERGE_DATE}
+
+### Added
+- Mark events as important with red dot indicator (`Ctrl+I`)
+- Toggle sort order between chronological and important first (`Ctrl+S`)
+- Event Sorting preference for default sort order
+
 ## [1.1.0] - 2025-12-04
 
 ### Changed

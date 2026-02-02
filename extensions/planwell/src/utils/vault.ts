@@ -44,10 +44,18 @@ export function getClasses(): Class[] {
       }
     });
 
+    const isRecurring =
+      data.isRecurring === true || data.isRecurring === "true";
+    const startDate = data.startDate;
+    const endDate = data.endDate;
+
     return {
       id: file.replace(".md", ""),
       name: data.name || file.replace(".md", ""),
       occurrences,
+      isRecurring,
+      startDate,
+      endDate,
       content,
     };
   });
@@ -112,8 +120,25 @@ export function getEvents(): Event[] {
       startDate: data.startDate,
       endDate: data.endDate || data.startDate,
       content,
+      isImportant: data.isImportant === true || data.isImportant === "true",
     };
   });
+}
+
+export function toggleEventImportant(eventId: string): void {
+  const vaultPath = getVaultPath();
+  if (!vaultPath) throw new Error("Vault path not set");
+
+  const eventPath = path.join(vaultPath, "events", `${eventId}.md`);
+  if (!fs.existsSync(eventPath)) throw new Error("Event not found");
+
+  const fileContent = fs.readFileSync(eventPath, "utf8");
+  const { data, content } = matter(fileContent);
+
+  data.isImportant = !data.isImportant;
+
+  const newContent = matter.stringify(content, data);
+  fs.writeFileSync(eventPath, newContent);
 }
 
 export function getTodos(): Todo[] {
