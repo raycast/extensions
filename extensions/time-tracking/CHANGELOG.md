@@ -1,5 +1,9 @@
 # Time Tracking Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Add Windows support
+
 ## [Add Tags] - 2025-12-05
 
 - Add support for tagging timers (ref: [Issue #23323](https://github.com/raycast/extensions/issues/23323))
