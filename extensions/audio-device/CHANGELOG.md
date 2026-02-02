@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-02
 
 - Added auto-switch commands with device order customization and toggles
 
