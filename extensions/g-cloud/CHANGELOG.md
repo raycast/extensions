@@ -1,5 +1,10 @@
 # Google Cloud CLI Changelog
 
+## [1.0.3] - 2026-01-13
+- Added Cloud Shell SSH connection action across all views
+- Added keyboard shortcut (Cmd+Opt+S) to copy Cloud Shell connection command
+- Improved action component error handling and input validation
+
 ## [1.0.2] - 2026-01-05
 - Added Cloud Functions v2 service with Gen 2 support
 - Added function invocation from Raycast with live response

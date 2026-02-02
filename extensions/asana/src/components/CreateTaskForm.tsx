@@ -22,6 +22,7 @@ import { useTags } from "../hooks/useTags";
 import { getErrorMessage } from "../helpers/errors";
 import { TaskFormValues } from "../create-task";
 import { getProjectIcon } from "../helpers/project";
+import { escapeHtml } from "../helpers/task";
 import TaskDetail from "./TaskDetail";
 import { createTask, TaskPayload } from "../api/tasks";
 import { asanaToRaycastColor } from "../helpers/colors";
@@ -42,7 +43,7 @@ export default function CreateTaskForm(props: {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
 
       try {
-        const htmlNotes = `<body>${values.description}</body>`;
+        const htmlNotes = `<body>${escapeHtml(values.description)}</body>`;
 
         const customFieldsEntries = Object.entries(values).filter(
           ([key, value]) => key.startsWith("field-") && value !== "",

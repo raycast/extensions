@@ -10,7 +10,8 @@
     "markusjura",
     "fabitosh",
     "geekyed",
-    "dangkhoipro"
+    "dangkhoipro",
+    "0xdhrv"
   ],
   "categories": [
     "Productivity",
@@ -156,6 +157,28 @@
         }
       ],
       "default": "30",
+      "required": false
+    },
+    {
+      "name": "sendInvitations",
+      "title": "Send Invitations",
+      "description": "Whether to send email invitations (including meeting links) to guests when creating or editing events",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "All Guests",
+          "value": "all"
+        },
+        {
+          "title": "External Guests Only",
+          "value": "externalOnly"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ],
+      "default": "all",
       "required": false
     }
   ],

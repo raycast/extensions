@@ -1,5 +1,9 @@
 # Remove Paywall Changelog
 
+## [Dia browser support] - 2026-01-26
+
+- Added support for Dia browser in "Remove Paywall from Current Tab" command
+
 ## [Update and fixes] - 2025-11-21
 
 - Fixed issue with freedium.cfd not working to use updated freedium-mirror.cfd URL

@@ -11,6 +11,8 @@ instructions: |
     - If the user asks for available recipes or to search recipes, call `recipes` with action `"list"` or `"search"` and the query.
     - Any `/slug` token (for example `/tldr`) is a recipe; call `recipes` first with that slug and do not treat it as a title.
     - Use `save-to-notion` only after you have the note IDs, pass them as `noteIds`, and preserve the order returned by `list-meetings`.
+    - For shared documents queries ("shared with me", "team notes", etc.), use `list-meetings` with `source: "shared"`.
+    - To identify team vs private folders, use `list-folders` and check the `isShared` and `userRole` fields.
 
 evals:
     - input: "@granola Please summarize my last note"
@@ -545,3 +547,120 @@ evals:
             arguments:
               title: "hiring"
               date: "last week"
+
+    - input: "@granola show me notes shared with me"
+      mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+            isShared: false
+            userRole: "OWNER"
+            memberCount: 1
+        list-meetings:
+          - id: "shared-note-1"
+            title: "Team Standup"
+            date: "2025-03-15T10:00:00.000Z"
+            isShared: true
+          - id: "shared-note-2"
+            title: "Project Review"
+            date: "2025-03-14T14:00:00.000Z"
+            isShared: true
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              source: "shared"
+
+    - input: "@granola list my team folders"
+      mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Team Projects"
+            description: "Shared team project notes"
+            noteCount: 25
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2", "note-3"]
+            isShared: true
+            userRole: "MEMBER"
+            memberCount: 5
+          - id: "folder-456"
+            name: "Personal Notes"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-4", "note-5"]
+            isShared: false
+            userRole: "OWNER"
+            memberCount: 1
+      expected:
+        - callsTool:
+            name: "list-folders"
+            arguments: {}
+
+    - input: "@granola what meetings are in shared folders?"
+      mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-shared-1"
+            name: "Team Meetings"
+            description: "Shared team meeting notes"
+            noteCount: 10
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["shared-meeting-1", "shared-meeting-2"]
+            isShared: true
+            userRole: "MEMBER"
+            memberCount: 4
+          - id: "folder-private-1"
+            name: "My Notes"
+            noteCount: 5
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["private-note-1"]
+            isShared: false
+            userRole: "OWNER"
+            memberCount: 1
+        list-meetings:
+          - id: "shared-meeting-1"
+            title: "Weekly Sync"
+            date: "2025-03-15T10:00:00.000Z"
+            isShared: true
+          - id: "shared-meeting-2"
+            title: "Sprint Planning"
+            date: "2025-03-14T09:00:00.000Z"
+            isShared: true
+      expected:
+        - callsTool:
+            name: "list-folders"
+            arguments: {}
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              folderId: "folder-shared-1"

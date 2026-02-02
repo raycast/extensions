@@ -2,7 +2,7 @@
  * Test fixtures for creating mock sections
  */
 
-import { LogicalSection } from "../../lib/parse-zshrc";
+import type { LogicalSection } from "../../lib/parse-zshrc";
 
 /**
  * Creates a mock section with sensible defaults

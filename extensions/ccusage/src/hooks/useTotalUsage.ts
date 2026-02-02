@@ -1,8 +1,10 @@
 import { useCCUsageTotalCli } from "./useCCUsageTotalCli";
 import { TotalUsageData } from "../types/usage-types";
+import { getCurrentLocalMonth } from "../utils/date-formatter";
 
 export const useTotalUsage = (): {
   data: TotalUsageData | undefined;
+  monthlyCost: number;
   isLoading: boolean;
   error: Error | undefined;
   revalidate: () => void;
@@ -20,8 +22,14 @@ export const useTotalUsage = (): {
       }
     : undefined;
 
+  const currentMonth = getCurrentLocalMonth();
+  const monthlyCost =
+    rawData?.daily?.filter((day) => day.date.startsWith(currentMonth)).reduce((sum, day) => sum + day.totalCost, 0) ??
+    0;
+
   return {
     data,
+    monthlyCost,
     isLoading,
     error,
     revalidate,

@@ -2286,7 +2286,7 @@ occupy
 occur
 occur_to
 ocean
-o’clock 点钟
+o’clock
 October
 odd
 oddly

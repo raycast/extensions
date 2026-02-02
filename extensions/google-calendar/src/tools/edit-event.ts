@@ -2,6 +2,7 @@ import humanizeDuration from "humanize-duration";
 import { withGoogleAPIs, getCalendarClient } from "../lib/google";
 import { addSignature, toISO8601WithTimezoneOffset } from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
+import { getPreferenceValues } from "@raycast/api";
 
 type Input = {
   /**
@@ -99,6 +100,7 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
 });
 
 const tool = async (input: Input) => {
+  const preferences = getPreferenceValues<Preferences>();
   const calendar = getCalendarClient();
 
   const existingEvent = await calendar.events.get({
@@ -140,6 +142,7 @@ const tool = async (input: Input) => {
     calendarId: input.calendarId ?? "primary",
     eventId: input.eventId,
     requestBody,
+    sendUpdates: preferences.sendInvitations as "all" | "externalOnly" | "none",
   });
 };
 

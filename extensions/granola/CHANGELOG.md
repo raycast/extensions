@@ -1,5 +1,42 @@
 # Granola Changelog
 
+## [2.1.1] - 2026-01-30
+
+### 🚀 New Features
+
+- **AI Tools: Shared Documents Support** - Query shared content using AI:
+  - `list-meetings` now supports a `source` parameter to filter by `"my-notes"`, `"shared"`, or `"all"`
+  - `list-meetings` output includes `isShared` field to identify shared documents
+  - `list-folders` now exposes sharing metadata: `isShared`, `userRole`, and `memberCount`
+  
+## [2.1.0] - 2026-01-30
+
+### 🚀 New Features
+
+- **Shared Documents** - View notes shared with you directly in Raycast:
+  - New "Shared with me" section in the folder filter dropdown
+  - Shows who shared each note with a dedicated icon
+  - Access both individually shared notes and notes from shared folders
+
+### ✨ Enhancements
+
+- Lazy-load shared-by metadata for improved performance with shared documents
+
+### 🧹 Cleanup
+
+- Updated terminology: "Untitled Note" → "New note" to match Granola's branding
+- Updated terminology: "My Notes" → "My notes" for consistency
+
+### ✨ Enhancements
+
+- Show meeting duration in note details and My notes views when transcript timing is available.
+- Include meeting duration in `get-note-content` and `get-transcript`
+- Replace "Open in Granola Web" with a direct "Open in Granola" action in **Create Note from Transcript**, using the Granola app deeplink.
+
+### 🧹 Cleanup
+
+- Refresh extension store metadata, README, and screenshots to better describe current Granola capabilities and setup.
+
 ## [2.0.1] - 2026-01-06
 
 ### ✨ Enhancements
@@ -14,7 +51,7 @@
 ## 2.0.0 - 2026-01-06
 
 ### 🚀 Exports & Notion
-- Export Notes now streams small batches to disk, writes files immediately, and batches enhanced notes/My Notes retrieval to reduce memory usage and timeouts during large exports.
+- Export Notes now streams small batches to disk, writes files immediately, and batches enhanced notes/My notes retrieval to reduce memory usage and timeouts during large exports.
 - Export Transcripts now exports directly to a ZIP (no intermediate retrieve/results or clipboard flow) with unified progress/ETA messaging.
 - Export and transcript lists now use selection-focused action panels with consistent shortcuts and clearer "Export/Save All" actions.
 - Added batch Save to Notion from Export Notes with a live results list, per-note errors, and quick open/copy actions.
@@ -23,7 +60,7 @@
 - Added configurable "Notion Max Batch Size" preference to control parallel Notion saves.
 
 ### 🧭 Browsing & Details
-- Search Notes, People, and Companies now load panel content and "My Notes" on demand for note details (fixing cases where only raw AI notes showed).
+- Search Notes, People, and Companies now load panel content and "My notes" on demand for note details (fixing cases where only raw AI notes showed).
 - Note list accessories now show date, folder icon (or "not in any folder"), and privacy indicator; folder counts show "..." until document IDs load.
 - Folder filtering now loads document IDs lazily to avoid heavy upfront work.
 
@@ -37,7 +74,7 @@
 
 ### 🔧 Bug Fixes & Performance
 - Fixed `create-note-from-transcript` streaming chunks with improved delimiter and validation.
-- Reduced memory usage by stripping large fields from document fetches before caching, eliminating cache-file reads, and lazy-loading panels/My Notes via new hooks.
+- Reduced memory usage by stripping large fields from document fetches before caching, eliminating cache-file reads, and lazy-loading panels/My notes via new hooks.
 - Replaced cache reads with API-backed document lists in people/company search to avoid loading large local cache files.
 - Added batch panel/notes fetch APIs and on-demand folder ID loading to keep large exports responsive.
 - Create Note from Transcript now supports cancellation and safer streaming cleanup; Create Note uses Raycast `open` instead of shell execution.

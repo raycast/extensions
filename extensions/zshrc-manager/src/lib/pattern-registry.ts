@@ -4,13 +4,31 @@
  * This module provides a single source of truth for all regex patterns
  * used throughout the application, eliminating duplication and ensuring
  * consistency across parsing functions.
+ *
+ * All patterns are derived from PARSING_CONSTANTS.PATTERNS to ensure
+ * consistency with the main parser.
  */
 
 import { PARSING_CONSTANTS } from "../constants";
 
 /**
+ * Creates a global regex from a source pattern for counting matches
+ */
+function createGlobalPattern(pattern: RegExp): RegExp {
+  return new RegExp(pattern.source, "gm");
+}
+
+/**
+ * Counts matches of a pattern in content
+ */
+function countMatches(content: string, pattern: RegExp): number {
+  const matches = content.match(createGlobalPattern(pattern));
+  return matches ? matches.length : 0;
+}
+
+/**
  * Pattern registry for counting entries in content
- * Uses the same patterns as the main parser but optimized for counting
+ * Uses the same patterns as the main parser to ensure consistency
  */
 const PATTERN_REGISTRY = {
   /**
@@ -19,8 +37,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of alias declarations found
    */
   countAliases: (content: string): number => {
-    const matches = content.match(new RegExp(PARSING_CONSTANTS.PATTERNS.ALIAS.source, "gm"));
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.ALIAS);
   },
 
   /**
@@ -29,8 +46,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of export declarations found
    */
   countExports: (content: string): number => {
-    const matches = content.match(/^\s*(?:export|typeset\s+-x)\s+/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.EXPORT);
   },
 
   /**
@@ -39,8 +55,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of eval commands found
    */
   countEvals: (content: string): number => {
-    const matches = content.match(/^\s*eval\s+/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.EVAL);
   },
 
   /**
@@ -49,8 +64,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of setopt commands found
    */
   countSetopts: (content: string): number => {
-    const matches = content.match(/^\s*setopt\s+/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.SETOPT);
   },
 
   /**
@@ -59,8 +73,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of plugin declarations found
    */
   countPlugins: (content: string): number => {
-    const matches = content.match(/^\s*plugins\s*=/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.PLUGIN);
   },
 
   /**
@@ -69,8 +82,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of function definitions found
    */
   countFunctions: (content: string): number => {
-    const matches = content.match(/^\s*[A-Za-z_][A-Za-z0-9_]*\s*\(\s*\)\s*\{/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.FUNCTION);
   },
 
   /**
@@ -79,8 +91,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of source commands found
    */
   countSources: (content: string): number => {
-    const matches = content.match(/^\s*source\s+/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.SOURCE);
   },
 
   /**
@@ -89,8 +100,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of autoload commands found
    */
   countAutoloads: (content: string): number => {
-    const matches = content.match(/^\s*autoload\s+/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.AUTOLOAD);
   },
 
   /**
@@ -99,8 +109,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of fpath declarations found
    */
   countFpaths: (content: string): number => {
-    const matches = content.match(/^\s*fpath\s*=/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.FPATH);
   },
 
   /**
@@ -109,8 +118,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of PATH declarations found
    */
   countPaths: (content: string): number => {
-    const matches = content.match(/^\s*PATH\s*=/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.PATH);
   },
 
   /**
@@ -119,8 +127,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of theme declarations found
    */
   countThemes: (content: string): number => {
-    const matches = content.match(/^\s*ZSH_THEME\s*=/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.THEME);
   },
 
   /**
@@ -129,8 +136,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of completion commands found
    */
   countCompletions: (content: string): number => {
-    const matches = content.match(/^\s*compinit/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.COMPLETION);
   },
 
   /**
@@ -139,8 +145,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of history settings found
    */
   countHistory: (content: string): number => {
-    const matches = content.match(/^\s*HIST[A-Z_]*\s*=/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.HISTORY);
   },
 
   /**
@@ -149,8 +154,7 @@ const PATTERN_REGISTRY = {
    * @returns Number of keybinding commands found
    */
   countKeybindings: (content: string): number => {
-    const matches = content.match(/^\s*bindkey\s+/gm);
-    return matches ? matches.length : 0;
+    return countMatches(content, PARSING_CONSTANTS.PATTERNS.KEYBINDING);
   },
 } as const;
 

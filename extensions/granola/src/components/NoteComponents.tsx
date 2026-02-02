@@ -1,6 +1,6 @@
 import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, open, Color } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactElement } from "react";
 
 import { getPanelId } from "../utils/getPanelId";
 import { getTranscript } from "../utils/fetchData";
@@ -10,7 +10,192 @@ import { Doc, NoteActionsProps, PanelsByDocId, Folder } from "../utils/types";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "../utils/iconMapper";
 import { useDocumentPanels } from "../utils/useDocumentPanels";
 import { useDocumentNotesMarkdown } from "../utils/useDocumentNotesMarkdown";
+import { useTranscriptDuration } from "../utils/useTranscriptDuration";
+import { useSharedBy } from "../utils/useSharedBy";
 import { isAbortError, toError, toErrorMessage } from "../utils/errorUtils";
+
+/**
+ * Props for FolderFilterDropdown component
+ */
+export interface FolderFilterDropdownProps {
+  folders: Folder[];
+  foldersLoading: boolean;
+  folderNoteCounts: Record<string, number | undefined>;
+  onChange: (value: string) => void;
+  /** Optional count of shared notes (for showing "Shared with me" option in export views) */
+  sharedNotesCount?: number;
+  /** Optional count of orphan notes (for showing "Notes Not in Folders" option in export views) */
+  orphanNotesCount?: number;
+  /** Variant determines the dropdown structure. "search" uses My notes/Shared sections, "export" uses All Folders option */
+  variant?: "search" | "export";
+}
+
+/**
+ * Centralized folder filter dropdown component
+ * Used across search-notes, export-notes, and export-transcripts commands
+ */
+export function FolderFilterDropdown({
+  folders,
+  foldersLoading,
+  folderNoteCounts,
+  onChange,
+  sharedNotesCount,
+  orphanNotesCount,
+  variant = "search",
+}: FolderFilterDropdownProps): ReactElement {
+  if (variant === "export") {
+    return (
+      <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={onChange}>
+        <List.Dropdown.Section>
+          <List.Dropdown.Item title="All Folders" value="all" icon={Icon.Folder} />
+          <List.Dropdown.Item title="My notes" value="my-notes" icon={Icon.House} />
+          {sharedNotesCount !== undefined && sharedNotesCount > 0 && (
+            <List.Dropdown.Item
+              title={`Shared with me (${sharedNotesCount})`}
+              value="shared"
+              icon={{ source: Icon.TwoPeople, tintColor: Color.Blue }}
+            />
+          )}
+          {orphanNotesCount !== undefined && orphanNotesCount > 0 && (
+            <List.Dropdown.Item
+              title={`Notes Not in Folders (${orphanNotesCount})`}
+              value="orphans"
+              icon={{ source: Icon.Document, tintColor: Color.SecondaryText }}
+            />
+          )}
+        </List.Dropdown.Section>
+
+        {!foldersLoading && folders.filter((f) => f.is_shared && f.user_role === "OWNER").length > 0 && (
+          <List.Dropdown.Section title="Team">
+            {folders
+              .filter((f) => f.is_shared && f.user_role === "OWNER")
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map((folder) => (
+                <List.Dropdown.Item
+                  key={folder.id}
+                  title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                  value={folder.id}
+                  icon={{
+                    source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                  }}
+                />
+              ))}
+          </List.Dropdown.Section>
+        )}
+
+        {!foldersLoading && folders.filter((f) => !f.is_shared).length > 0 && (
+          <List.Dropdown.Section title="Private">
+            {folders
+              .filter((f) => !f.is_shared)
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map((folder) => (
+                <List.Dropdown.Item
+                  key={folder.id}
+                  title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                  value={folder.id}
+                  icon={{
+                    source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                  }}
+                />
+              ))}
+          </List.Dropdown.Section>
+        )}
+
+        {!foldersLoading && folders.filter((f) => f.is_shared && f.user_role !== "OWNER").length > 0 && (
+          <List.Dropdown.Section title="External">
+            {folders
+              .filter((f) => f.is_shared && f.user_role !== "OWNER")
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map((folder) => (
+                <List.Dropdown.Item
+                  key={folder.id}
+                  title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                  value={folder.id}
+                  icon={{
+                    source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                  }}
+                />
+              ))}
+          </List.Dropdown.Section>
+        )}
+      </List.Dropdown>
+    );
+  }
+
+  // Default "search" variant
+  return (
+    <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={onChange}>
+      <List.Dropdown.Section>
+        <List.Dropdown.Item title="My notes" value="my-notes" icon={Icon.House} />
+        <List.Dropdown.Item
+          title="Shared with me"
+          value="shared"
+          icon={{ source: Icon.TwoPeople, tintColor: Color.Blue }}
+        />
+      </List.Dropdown.Section>
+
+      {!foldersLoading && folders.filter((f) => f.is_shared && f.user_role === "OWNER").length > 0 && (
+        <List.Dropdown.Section title="Team">
+          {folders
+            .filter((f) => f.is_shared && f.user_role === "OWNER")
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((folder) => (
+              <List.Dropdown.Item
+                key={folder.id}
+                title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                value={folder.id}
+                icon={{
+                  source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                }}
+              />
+            ))}
+        </List.Dropdown.Section>
+      )}
+
+      {!foldersLoading && folders.filter((f) => !f.is_shared).length > 0 && (
+        <List.Dropdown.Section title="Private">
+          {folders
+            .filter((f) => !f.is_shared)
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((folder) => (
+              <List.Dropdown.Item
+                key={folder.id}
+                title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                value={folder.id}
+                icon={{
+                  source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                }}
+              />
+            ))}
+        </List.Dropdown.Section>
+      )}
+
+      {!foldersLoading && folders.filter((f) => f.is_shared && f.user_role !== "OWNER").length > 0 && (
+        <List.Dropdown.Section title="External">
+          {folders
+            .filter((f) => f.is_shared && f.user_role !== "OWNER")
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((folder) => (
+              <List.Dropdown.Item
+                key={folder.id}
+                title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                value={folder.id}
+                icon={{
+                  source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                }}
+              />
+            ))}
+        </List.Dropdown.Section>
+      )}
+    </List.Dropdown>
+  );
+}
 
 const NOTION_SAVE_TIMEOUT_MS = 120000;
 
@@ -189,7 +374,7 @@ export function FullTranscriptDetail({ docId, title }: { docId: string; title: s
 }
 
 /**
- * Component to display "My Notes" with lazy-loaded notes_markdown
+ * Component to display "My notes" with lazy-loaded notes_markdown
  */
 function MyNotesDetailView({
   doc,
@@ -201,11 +386,16 @@ function MyNotesDetailView({
   panels: PanelsByDocId | null;
 }) {
   const { notesMarkdown, isLoading } = useDocumentNotesMarkdown(doc.id);
+  const { duration } = useTranscriptDuration(doc.id);
+
+  const createdAt = `Created at: ${new Date(doc.created_at).toLocaleString()}`;
+  const durationLine = duration ? `\n\nDuration: ${duration}` : "";
+  const metadata = `${createdAt}${durationLine}`;
 
   const markdown =
     notesMarkdown && notesMarkdown.trim()
-      ? `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${notesMarkdown}`
-      : `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo My Notes available for this note.`;
+      ? `# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\n${notesMarkdown}`
+      : `# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\nNo My notes available for this note.`;
 
   return (
     <Detail
@@ -230,6 +420,8 @@ function MyNotesDetailView({
  */
 function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitle: string }) {
   const { panels, isLoading: panelsLoading } = useDocumentPanels(doc.id);
+  const { duration } = useTranscriptDuration(doc.id);
+  const { sharedBy } = useSharedBy(doc.id, doc.isShared);
 
   const panelId = panels ? getPanelId(panels, doc.id) : undefined;
   const panelData = panels && panels[doc.id] && panelId ? panels[doc.id][panelId] : null;
@@ -243,6 +435,11 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
   if (content) {
     content = convertHtmlToMarkdown(content);
   }
+
+  const createdAt = `Created at: ${new Date(doc.created_at).toLocaleString()}`;
+  const sharedByLine = doc.isShared && sharedBy ? `\n\nShared by: ${sharedBy}` : "";
+  const durationLine = duration ? `\n\nDuration: ${duration}` : "";
+  const metadata = `${createdAt}${sharedByLine}${durationLine}`;
 
   // Special handling for iOS-created notes that haven't synced yet
   if (!content.trim() && doc.creation_source === "iOS") {
@@ -274,7 +471,7 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
     return (
       <Detail
         isLoading={panelsLoading}
-        markdown={`# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`}
+        markdown={`# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\nNo content available for this note.`}
         actions={
           <ActionPanel>
             <Action.Push
@@ -297,7 +494,7 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
   return (
     <Detail
       isLoading={panelsLoading}
-      markdown={`# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${content}`}
+      markdown={`# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\n${content}`}
       actions={
         <ActionPanel>
           <Action.Push
@@ -323,22 +520,25 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
  */
 export function NoteListItem({
   doc,
-  untitledNoteTitle = "Untitled Note",
+  untitledNoteTitle = "New note",
   folders = [],
 }: {
   doc: Doc;
   untitledNoteTitle?: string;
   folders?: Folder[]; // Expected to contain accurate document_ids (from API)
 }) {
-  // Find which folder this note belongs to
-
   const noteFolder = folders.find((folder) => folder.document_ids.includes(doc.id));
 
-  // Build accessories array
   const accessories: List.Item.Accessory[] = [{ text: formatDate(doc.created_at) }];
 
-  // Add folder icon if note is in a folder
-  if (noteFolder) {
+  if (doc.isShared) {
+    // Shared notes: TwoPeople icon only
+    accessories.push({
+      icon: { source: Icon.TwoPeople, tintColor: Color.Blue },
+      tooltip: doc.sharedBy ? `Shared by ${doc.sharedBy}` : "Shared with you",
+    });
+  } else if (noteFolder) {
+    // Your notes in folders: folder icon only
     accessories.push({
       icon: {
         source: noteFolder.icon ? mapIconToHeroicon(noteFolder.icon.value) : getDefaultIconUrl(),
@@ -347,17 +547,12 @@ export function NoteListItem({
       tooltip: `In folder: ${noteFolder.title}`,
     });
   } else {
-    // Show "No folder" indicator for orphaned notes
+    // Your notes not in folders: document icon only
     accessories.push({
       icon: { source: Icon.Document, tintColor: Color.SecondaryText },
       tooltip: "Not in any folder",
     });
   }
-
-  // Add privacy indicator
-  accessories.push({
-    text: doc.public ? "Public" : "Private",
-  });
 
   return (
     <List.Item
