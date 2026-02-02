@@ -10,4 +10,4 @@ This is a [Raycast](https://raycast.com/) extension that allows you to monitor y
 
 ## Custom Menubar Text
 
-❕ You can customise the menubar dropdown text in `Preferences`. Hover over the textbox to see what fields are available for each module.`<BR>` adds a linebreak, and `<MODE>` shows "Free" and "Used" depending on display mode.
+❕ You can customise the menubar dropdown text in `Preferences`. Hover over the textbox to see what tags are available for each module. There are two tags that are always available: `<BR>` adds a linebreak, and `<MODE>` shows "Free" and "Used" depending on display mode.
