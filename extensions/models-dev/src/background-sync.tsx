@@ -1,9 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { fetchModelsData } from "./lib/api";
 
-interface Preferences {
-  enableBackgroundSync: boolean;
-}
+export default async function BackgroundSync() {
+  const { enableBackgroundSync } = getPreferenceValues<Preferences>();
 
 export default async function BackgroundSync() {
   const { enableBackgroundSync } = getPreferenceValues<Preferences>();
