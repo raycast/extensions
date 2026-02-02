@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [New Additions & Chore] - {PR_MERGE_DATE}
+## [New Additions & Chore] - 2026-02-02
 - Added customisable tags for menubar entries
     - Universal tags
         - `<BR>` for line breaks
