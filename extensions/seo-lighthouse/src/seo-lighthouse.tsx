@@ -633,12 +633,14 @@ function ReportLoader({ options }: { options: LighthouseOptions }) {
   const [progressPct, setProgressPct] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressTexts = [
-    { upTo: 20, text: 'Preparando entorno y resolviendo DNS...' },
-    { upTo: 45, text: 'Midiendo rendimiento y tiempos críticos...' },
-    { upTo: 70, text: 'Auditando accesibilidad y mejores prácticas...' },
-    { upTo: 90, text: 'Evaluando SEO y metadatos...' },
-    { upTo: 99, text: 'Generando reporte enriquecido...' },
-    { upTo: 100, text: 'Listo: presentando resultados.' },
+  const progressTexts = [
+    { upTo: 20, text: t('progress_preparing') },
+    { upTo: 45, text: t('progress_measuring') },
+    { upTo: 70, text: t('progress_auditing') },
+    { upTo: 90, text: t('progress_evaluating_seo') },
+    { upTo: 99, text: t('progress_generating') },
+    { upTo: 100, text: t('progress_ready') },
+  ];
   ];
 
   const { isLoading, data, error, revalidate } = usePromise(
