@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@r
 import { FormValidation, showFailureToast, useForm, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { BranchDropdown, IssueDropdown, RepositoryDropdown } from "./components";
+import { BranchDropdown, CustomAgentsDropdown, IssueDropdown, RepositoryDropdown } from "./components";
 import { useRepositoryMetadata } from "./hooks/useRepositoryMetadata";
 import { useViewer } from "./hooks/useViewer";
 import { provider, reauthorize } from "./lib/oauth";
@@ -12,12 +12,14 @@ type FormValues = {
   repository: string;
   issue: string;
   branch: string;
+  customAgent: string;
 };
 
 function Command() {
   const [isRepositoryLoading, setIsRepositoryLoading] = useState(false);
   const [isIssueLoading, setIsIssueLoading] = useState(false);
   const [isBranchLoading, setIsBranchLoading] = useState(false);
+  const [isCustomAgentsLoading, setIsCustomAgentsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { itemProps, handleSubmit, values } = useForm<FormValues>({
@@ -53,6 +55,7 @@ function Command() {
           repositoryId,
           copilotBotId,
           baseRef: formValues.branch,
+          customAgent: formValues.customAgent,
         });
 
         await showToast({
@@ -71,7 +74,13 @@ function Command() {
   const { repositoryId, copilotBotId } = useRepositoryMetadata(values.repository);
   const { data, isLoading: isViewerLoading } = useViewer();
 
-  const isLoading = isViewerLoading || isRepositoryLoading || isIssueLoading || isBranchLoading || isSubmitting;
+  const isLoading =
+    isViewerLoading ||
+    isRepositoryLoading ||
+    isIssueLoading ||
+    isBranchLoading ||
+    isCustomAgentsLoading ||
+    isSubmitting;
 
   return (
     <Form
@@ -98,6 +107,11 @@ function Command() {
         repository={itemProps.repository.value}
         itemProps={itemProps.branch}
         onLoadingChange={setIsBranchLoading}
+      />
+      <CustomAgentsDropdown
+        repository={itemProps.repository.value}
+        itemProps={itemProps.customAgent}
+        onLoadingChange={setIsCustomAgentsLoading}
       />
     </Form>
   );
