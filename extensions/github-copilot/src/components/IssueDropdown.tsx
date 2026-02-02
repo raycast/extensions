@@ -50,18 +50,21 @@ export function IssueDropdown(props: Readonly<IssueDropdownProps>) {
       throttle
       {...restItemProps}
     >
-      {!data?.issues || data.issues.length === 0 ? (
+      {isLoading && issues.length === 0 && (
+        <Form.Dropdown.Item title="Searching..." value="" icon={Icon.MagnifyingGlass} />
+      )}
+      {!isLoading && issues.length === 0 && (
         <Form.Dropdown.Item title="No open issues found" value="" icon={Icon.XMarkCircle} />
-      ) : (
-        data.issues.map((issue) => (
+      )}
+      {issues.length > 0 &&
+        issues.map((issue) => (
           <Form.Dropdown.Item
             key={issue.id}
             title={`#${issue.number} ${issue.title}`}
             value={issue.id}
             icon={Icon.Circle}
           />
-        ))
-      )}
+        ))}
     </Form.Dropdown>
   );
 }
