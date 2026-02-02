@@ -1,6 +1,6 @@
 # Prisma Docs Search Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-02-02
 
 - Add Windows support
 - Update dependencies
