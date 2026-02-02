@@ -72,7 +72,7 @@ const EncryptMessage = () => {
       }
     } catch (err) {
       toast.style = Toast.Style.Failure;
-      toast.title = "An error occured";
+      toast.title = "An error occurred";
       toast.message = `${err}`;
     }
   };
