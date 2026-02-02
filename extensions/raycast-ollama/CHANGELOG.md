@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Improvement and Fix] - {PR_MERGE_DATE}
+## [Improvement and Fix] - 2026-02-02
 
 - [Improvement] Command "Manage Models": added "Load Model on Memory" action, which loads the model on memory with no expiration date.
 - [Improvement] Command "Manage Models" and "Loaded Models": added "Unload Model From Memory" action, which unload the model from memory.
