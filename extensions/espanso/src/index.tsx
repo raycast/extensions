@@ -39,28 +39,14 @@ export default function Command() {
           .filter((match) => !match.form)
           .map((match, index) => {
             const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
-            let category = match.category || pathParts[0]?.replace(".yml", "") || "";
+            const categoryParts = pathParts.map((part) => part.replace(".yml", "")).filter(Boolean);
+            const category = categoryParts.map((part) => part.toLowerCase()).join(" > ");
 
-            const subcategoryParts = pathParts
-              .slice(1)
-              .map((part) => part.replace(".yml", ""))
-              .filter(Boolean);
-            let subcategory = subcategoryParts.length > 0 ? subcategoryParts.join(" > ") : "";
-
-            if (subcategory?.toLowerCase() === "index" || subcategory === category) {
-              subcategory = "";
-            } else if (subcategory) {
-              subcategory = subcategory
-                .split(" > ")
-                .map((part) => part.toLowerCase())
-                .join(" > ");
-            }
-            category = kebabCase(category);
             categoriesSet.add(category);
             return {
               ...match,
               category,
-              subcategory,
+              subcategory: "",
               triggers: match.triggers,
               replace: match.replace,
               label: match.label,
@@ -70,8 +56,8 @@ export default function Command() {
           });
 
         const sortedCategories = Array.from(categoriesSet).sort((a, b) => {
-          if (a === "base") return -1;
-          if (b === "base") return 1;
+          if (a.startsWith("base")) return -1;
+          if (b.startsWith("base")) return 1;
           return a.localeCompare(b);
         });
 
@@ -114,19 +100,13 @@ export default function Command() {
   const sections = groupByCategory(filteredItems);
 
   const sortedSectionKeys = Object.keys(sections).sort((a, b) => {
-    if (a === "base") return -1;
-    if (b === "base") return 1;
+    if (a.startsWith("base")) return -1;
+    if (b.startsWith("base")) return 1;
     return a.localeCompare(b);
   });
 
   const sortItems = (items: FormattedMatch[]) => {
     return items.sort((a, b) => {
-      if (!a.subcategory && b.subcategory) return -1;
-      if (a.subcategory && !b.subcategory) return 1;
-      if (a.subcategory && b.subcategory) {
-        const subcategoryCompare = a.subcategory.localeCompare(b.subcategory);
-        if (subcategoryCompare !== 0) return subcategoryCompare;
-      }
       const labelA = a.label ?? a.replace;
       const labelB = b.label ?? b.replace;
       return labelA.localeCompare(labelB);
