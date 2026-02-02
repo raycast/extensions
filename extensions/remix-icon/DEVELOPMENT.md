@@ -12,11 +12,12 @@ A Raycast extension to search and browse [Remix Icon](https://remixicon.com/) li
 - **Multiple Export Formats**:
   - **SVG**: Raw SVG code for direct use
   - **React Component**: Ready-to-use component tags (e.g., `<RiHeartFill size={24} />`)
+  - **Vue Component**: Ready-to-use Vue 3 component tags (e.g., `<RiHeartFill size="24px" />`)
   - **Data URI**: Base64 encoded for inline use
   - **Webfont**: HTML tag (`<i class="ri-heart-fill"></i>`)
   - **CDN Link**: Versioned webfont CDN link
-  - **NPM Install**: Command to install Remix Icon package
-  - **React Import**: Import statement for React components
+  - **NPM Install**: Commands to install React and Vue packages
+  - **React/Vue Import**: Import statements for React and Vue components
 - **Quick Links**: Direct access to Remix Icon homepage and GitHub repository
 
 ## Installation
@@ -51,7 +52,7 @@ npm run fix-lint
 # Update to latest Remix Icon release
 npm run update-icons
 
-# Validate React component names
+# Validate React and Vue component names
 npm run validate
 ```
 
@@ -77,20 +78,20 @@ The update script:
 
 #### ⚠️ Important: Version Synchronization
 
-When updating icons, ensure the RemixIcon version matches the `@remixicon/react` package version:
+When updating icons, ensure the RemixIcon version matches both `@remixicon/react` and `@remixicon/vue` package versions:
 
 ```bash
 # After running update-icons, check the downloaded version
 cat assets/metadata.json
 
-# Update @remixicon/react to match (if version 4.8.0)
-npm install -D @remixicon/react@4.8.0
+# Update @remixicon/react and @remixicon/vue to match (if version 4.8.0)
+npm install -D @remixicon/react@4.8.0 @remixicon/vue@4.8.0
 
-# Validate React component names match the official package
+# Validate React and Vue component names match the official packages
 npm run validate
 ```
 
-This ensures the React component names exported by the extension match the official `@remixicon/react` package.
+This ensures the React and Vue component names exported by the extension match the official `@remixicon/react` and `@remixicon/vue` packages.
 
 ### Project Structure
 
@@ -109,9 +110,9 @@ assets/
 └── icons-compressed/       # Compressed JSON files (one per category)
 
 scripts/
-├── update-icons.sh         # Downloads latest release and rebuilds catalogue
-├── validate-react-names.mjs # Validates React component name generation
-└── utils.mjs               # Helper functions (Node.js environment)
+├── update-icons.sh            # Downloads latest release and rebuilds catalogue
+├── validate-component-names.mjs # Validates React and Vue component name generation
+└── utils.mjs                  # Helper functions (Node.js environment)
 
 metadata/
 ├── remix-icon-1.png        # Store screenshot 1
@@ -125,7 +126,6 @@ metadata/
 - PNG export support
 - Starred/favorite icons
 - Configurable preferences (default size, color, className)
-- Vue component export
 
 ## License
 

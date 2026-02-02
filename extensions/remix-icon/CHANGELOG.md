@@ -1,5 +1,13 @@
 # Remix Icon Changelog
 
+## [Added Vue Component Support] - {PR_MERGE_DATE}
+
+- Add Vue component export format
+- Add Vue import statements
+- Add Vue NPM install command
+- Update validation script to check both React and Vue components
+- Add AGENTS.md file and symbolic links
+
 ## [Initial Release] - 2026-01-26
 
 - **3000+ Icons**: Complete Remix Icon library (v4.8.0) across 20 categories

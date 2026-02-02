@@ -8,7 +8,7 @@ export function toUpperCamelCase(string: string) {
   return camelCaseString.charAt(0).toUpperCase() + camelCaseString.slice(1);
 }
 
-export function toReactComponentName(iconName: string): string {
+export function toComponentName(iconName: string): string {
   return "Ri" + toUpperCamelCase(iconName);
 }
 

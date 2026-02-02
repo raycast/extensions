@@ -5,7 +5,9 @@
   "description": "Search and browse icons from Remix Icon library",
   "icon": "logo.png",
   "author": "tristan_heinig",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "type": "module",
   "categories": [
     "Design Tools",
@@ -31,7 +33,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@remixicon/react": "~4.8.0",
+    "@remixicon/react": "4.8.0",
+    "@remixicon/vue": "4.8.0",
     "@types/node": "^24.10.4",
     "@types/react": "^19.2.8",
     "eslint": "^9.39.2",
@@ -45,6 +48,6 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "update-icons": "./scripts/update-icons.sh",
-    "validate": "node scripts/validate-react-names.mjs"
+    "validate": "node scripts/validate-component-names.mjs"
   }
 }

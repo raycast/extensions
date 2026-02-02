@@ -19,16 +19,16 @@ export function toUpperCamelCase(string) {
 }
 
 /**
- * Converts an icon name to its React component name.
- * Follows the official @remixicon/react naming convention: "Ri" prefix + PascalCase.
+ * Converts an icon name to its React/Vue component name.
+ * Follows the official @remixicon/react and @remixicon/vue naming convention: "Ri" prefix + PascalCase.
  * Examples:
  *   - "heart-fill" → "RiHeartFill"
  *   - "24-hours-fill" → "Ri24HoursFill"
  *   - "arrow-down-line" → "RiArrowDownLine"
  * 
  * @param {string} iconName - The kebab-case icon name
- * @returns {string} React component name with "Ri" prefix
+ * @returns {string} Component name with "Ri" prefix
  */
-export function toReactComponentName(iconName) {
+export function toComponentName(iconName) {
   return "Ri" + toUpperCamelCase(iconName);
 }
