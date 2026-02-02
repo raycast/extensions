@@ -2,8 +2,8 @@
 
 ## [Improvement and Fix] - {PR_MERGE_DATE}
 
-- [Improvement] Command "Manage Models": added "Load Model on Memory" action, whitch loads the model on memory with no expiration date.
-- [Improvement] Command "Manage Models" and "Loaded Models": added "Unload Model From Memory" action, whitch unload the model from memory.
+- [Improvement] Command "Manage Models": added "Load Model on Memory" action, which loads the model on memory with no expiration date.
+- [Improvement] Command "Manage Models" and "Loaded Models": added "Unload Model From Memory" action, which unload the model from memory.
 - [Improvement] Command "Manage Models" and "Loaded Models": added "Context Length" information for loaded models.
 - [Improvement] Command "Manage Models" and "Loaded Models": dates are now formatted according to user locale.
 - [Improvement] Command "Manage Models" and "Loaded Models": implemented minor UI enhancements.
