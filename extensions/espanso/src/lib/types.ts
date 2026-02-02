@@ -49,9 +49,11 @@ export type FormattedMatch = NormalizedEspansoMatch & {
 export type CategoryDropdownProps = {
   readonly categories: string[];
   readonly onCategoryChange: (newValue: string) => void;
+  readonly separator: string;
 };
 
 export type ProfileDropdownProps = {
   readonly profiles: string[];
   readonly onProfileChange: (newValue: string) => void;
+  readonly separator: string;
 };
