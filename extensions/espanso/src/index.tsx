@@ -52,12 +52,10 @@ export default function Command() {
             let category = "";
             let subcategory = "";
 
-            // Check if path contains profiles folder
             if (allParts[0] === "profiles" && allParts.length > 1) {
-              profile = allParts[1]; // Extract profile name (e.g., "work", "home")
+              profile = allParts[1];
               profilesSet.add(profile);
 
-              // Remove "profiles" and profile name from path for category extraction
               const remainingParts = allParts.slice(2);
 
               if (remainingParts.length > 1) {
@@ -70,7 +68,6 @@ export default function Command() {
                 subcategory = "";
               }
             } else {
-              // Non-profile path - use existing logic
               if (allParts.length > 1) {
                 const folderParts = allParts.slice(0, -1);
                 const fileName = allParts[allParts.length - 1];
@@ -120,12 +117,10 @@ export default function Command() {
   useEffect(() => {
     let filtered = items;
 
-    // Filter by profile
     if (selectedProfile !== "all") {
       filtered = filtered.filter((item) => item.profile === selectedProfile);
     }
 
-    // Filter by category
     if (selectedCategory !== "all") {
       filtered = filtered.filter((item) => item.category === selectedCategory);
     }

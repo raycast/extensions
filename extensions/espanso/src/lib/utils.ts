@@ -174,7 +174,6 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
       }
     }
 
-    // Derive category from relative path, matching UI logic
     const relPath = path.relative(espansoMatchDir, filePath);
     const category =
       relPath && !relPath.startsWith("..") && relPath !== ""
