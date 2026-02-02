@@ -23,9 +23,9 @@ export const useTotalUsage = (): {
     : undefined;
 
   const currentMonth = getCurrentLocalMonth();
-  const monthlyCost = rawData?.daily
-    ?.filter((day) => day.date.startsWith(currentMonth))
-    .reduce((sum, day) => sum + day.totalCost, 0) ?? 0;
+  const monthlyCost =
+    rawData?.daily?.filter((day) => day.date.startsWith(currentMonth)).reduce((sum, day) => sum + day.totalCost, 0) ??
+    0;
 
   return {
     data,

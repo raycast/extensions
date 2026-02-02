@@ -44,8 +44,7 @@ export function CostAnalysis() {
   );
 
   const { dailyAverage, projectedMonthlyCost } = useMemo(
-    () =>
-      monthlyCost > 0 ? calculateMonthlyProjection(monthlyCost) : { dailyAverage: 0, projectedMonthlyCost: 0 },
+    () => (monthlyCost > 0 ? calculateMonthlyProjection(monthlyCost) : { dailyAverage: 0, projectedMonthlyCost: 0 }),
     [monthlyCost],
   );
 
@@ -106,10 +105,7 @@ export function CostAnalysis() {
 
         <List.Item.Detail.Metadata.Label title="Projections" />
         <List.Item.Detail.Metadata.Label title="Daily Average" text={formatCost(dailyAverage)} />
-        <List.Item.Detail.Metadata.Label
-          title="Projected Monthly"
-          text={formatCost(projectedMonthlyCost)}
-        />
+        <List.Item.Detail.Metadata.Label title="Projected Monthly" text={formatCost(projectedMonthlyCost)} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Cost by Model" />
