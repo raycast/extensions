@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.1.2] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Monthly cost projection now uses current month data instead of all-time totals
+
 ## [v2.1.1] - 2026-01-30
 
 ### Added

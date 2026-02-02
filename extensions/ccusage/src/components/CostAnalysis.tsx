@@ -28,7 +28,7 @@ const MAX_COST_MODELS_DISPLAY = 5;
 const MAX_TOKEN_MODELS_DISPLAY = 3;
 
 export function CostAnalysis() {
-  const { data: totalUsage, isLoading: totalLoading, error: totalError } = useTotalUsage();
+  const { data: totalUsage, monthlyCost, isLoading: totalLoading, error: totalError } = useTotalUsage();
   const { data: dailyUsage, isLoading: dailyLoading, error: dailyError } = useDailyUsage();
   const { topModels: models, isLoading: modelsLoading, error: modelsError } = useSessionUsage();
 
@@ -45,8 +45,8 @@ export function CostAnalysis() {
 
   const { dailyAverage, projectedMonthlyCost } = useMemo(
     () =>
-      totalUsage ? calculateMonthlyProjection(totalUsage.totalCost) : { dailyAverage: 0, projectedMonthlyCost: 0 },
-    [totalUsage?.totalCost],
+      monthlyCost > 0 ? calculateMonthlyProjection(monthlyCost) : { dailyAverage: 0, projectedMonthlyCost: 0 },
+    [monthlyCost],
   );
 
   const accessories: List.Item.Accessory[] = error
