@@ -46,8 +46,9 @@ export default function Command() {
 
             if (allParts.length > 1) {
               const folderParts = allParts.slice(0, -1);
+              const fileName = allParts[allParts.length - 1];
               category = folderParts.map((part) => part.toLowerCase()).join(" > ");
-              subcategory = allParts[allParts.length - 1].toLowerCase();
+              subcategory = fileName.toLowerCase() === "index" ? "" : fileName.toLowerCase();
             } else {
               category = allParts[0]?.toLowerCase() || "";
               subcategory = "";
