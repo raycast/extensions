@@ -1,6 +1,6 @@
 import { Application, Action, ActionPanel, Clipboard, Icon, List } from "@raycast/api";
-import { capitalCase } from "change-case";
 import { FormattedMatch } from "../../lib/types";
+import { formatCategoryName } from "../../lib/utils";
 
 interface MatchItemProps {
   match: FormattedMatch;
@@ -14,7 +14,7 @@ export default function MatchItem({ match, sectionKey, application }: MatchItemP
   return (
     <List.Item
       title={label ?? triggers.join(", ")}
-      subtitle={subcategory ? capitalCase(subcategory) : ""}
+      subtitle={subcategory ? formatCategoryName(subcategory) : ""}
       detail={
         <List.Item.Detail
           markdown={form ? "`form` is not supported yet." : replace}
@@ -31,11 +31,11 @@ export default function MatchItem({ match, sectionKey, application }: MatchItemP
                 </List.Item.Detail.Metadata.TagList>
               )}
               <List.Item.Detail.Metadata.TagList title="Category">
-                <List.Item.Detail.Metadata.TagList.Item text={capitalCase(sectionKey)} color="#8da0cb" />
+                <List.Item.Detail.Metadata.TagList.Item text={formatCategoryName(sectionKey)} color="#8da0cb" />
               </List.Item.Detail.Metadata.TagList>
               {subcategory && (
                 <List.Item.Detail.Metadata.TagList title="Subcategory">
-                  <List.Item.Detail.Metadata.TagList.Item text={capitalCase(subcategory)} color="#fc8d62" />
+                  <List.Item.Detail.Metadata.TagList.Item text={formatCategoryName(subcategory)} color="#fc8d62" />
                 </List.Item.Detail.Metadata.TagList>
               )}
               <List.Item.Detail.Metadata.Label title="File" text={filePath} />

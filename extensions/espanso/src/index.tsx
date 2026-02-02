@@ -1,10 +1,10 @@
 import type { Application } from "@raycast/api";
 import { Detail, List, getFrontmostApplication } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { capitalCase, kebabCase } from "change-case";
+import { kebabCase } from "change-case";
 import { commandNotFoundMd, noContentMd } from "./content/messages";
 import type { FormattedMatch } from "./lib/types";
-import { getEspansoConfig, getMatches, sortMatches } from "./lib/utils";
+import { getEspansoConfig, getMatches, sortMatches, formatCategoryName } from "./lib/utils";
 import CategoryDropdown from "./components/category-dropdown";
 import MatchItem from "./components/match-item";
 
@@ -137,7 +137,7 @@ export default function Command() {
       {sortedSectionKeys.map((sectionKey) => {
         const sortedItems = sortItems(sections[sectionKey]);
         return (
-          <List.Section key={sectionKey} title={capitalCase(sectionKey)}>
+          <List.Section key={sectionKey} title={formatCategoryName(sectionKey)}>
             {sortedItems.map((match, index) => (
               <MatchItem key={match.filePath + index} match={match} sectionKey={sectionKey} application={application} />
             ))}
