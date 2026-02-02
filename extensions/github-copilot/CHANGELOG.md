@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Manage Paid Premium Requests action] - {PR_MERGE_DATE}
+## [Manage Paid Premium Requests action] - 2026-02-02
 
 - Add "Manage Paid Premium Requests" action to the "Copilot Usage" command
 - Fix title casing for "Log Out" action
