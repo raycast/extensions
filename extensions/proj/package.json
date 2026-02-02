@@ -7,6 +7,7 @@
   "author": "mark_minkoff",
   "license": "MIT",
   "categories": ["Developer Tools", "Productivity"],
+  "platforms": ["macOS"],
   "keywords": ["projects", "ide", "vscode", "cursor", "developer", "workspace", "collections"],
   "screenshots": [
     { "path": "media/1-search-projects.png" },
