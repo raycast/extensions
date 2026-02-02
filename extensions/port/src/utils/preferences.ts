@@ -1,13 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface PortPreferences {
-  clientId: string;
-  clientSecret: string;
-  baseUrl?: string;
-}
-
-export function getPortPreferences(): PortPreferences {
-  return getPreferenceValues<PortPreferences>();
+export function getPortPreferences() {
+  return getPreferenceValues<Preferences>();
 }
 
 export function getBaseUrl(): string {
