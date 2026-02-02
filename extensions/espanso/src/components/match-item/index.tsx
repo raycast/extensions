@@ -9,12 +9,12 @@ interface MatchItemProps {
 }
 
 export default function MatchItem({ match, sectionKey, application }: MatchItemProps) {
-  const { triggers, replace, form, label, filePath, subcategory } = match;
+  const { triggers, replace, form, label, filePath, profile } = match;
 
   return (
     <List.Item
       title={label ?? triggers.join(", ")}
-      subtitle={subcategory ? formatCategoryName(subcategory) : ""}
+      subtitle={profile ? formatCategoryName(profile) : ""}
       detail={
         <List.Item.Detail
           markdown={form ? "`form` is not supported yet." : replace}
@@ -30,14 +30,14 @@ export default function MatchItem({ match, sectionKey, application }: MatchItemP
                   <List.Item.Detail.Metadata.TagList.Item text={label} color="#d7d0d1" />
                 </List.Item.Detail.Metadata.TagList>
               )}
+              {profile && (
+                <List.Item.Detail.Metadata.TagList title="Profile">
+                  <List.Item.Detail.Metadata.TagList.Item text={formatCategoryName(profile)} color="#66c2a5" />
+                </List.Item.Detail.Metadata.TagList>
+              )}
               <List.Item.Detail.Metadata.TagList title="Category">
                 <List.Item.Detail.Metadata.TagList.Item text={formatCategoryName(sectionKey)} color="#8da0cb" />
               </List.Item.Detail.Metadata.TagList>
-              {subcategory && (
-                <List.Item.Detail.Metadata.TagList title="Subcategory">
-                  <List.Item.Detail.Metadata.TagList.Item text={formatCategoryName(subcategory)} color="#fc8d62" />
-                </List.Item.Detail.Metadata.TagList>
-              )}
               <List.Item.Detail.Metadata.Label title="File" text={filePath} />
             </List.Item.Detail.Metadata>
           }

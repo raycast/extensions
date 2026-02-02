@@ -76,6 +76,14 @@
       "title": "Espanso Binary Path",
       "description": "Full path to the espanso binary. Leave empty to use the default (espanso in PATH).",
       "required": false
+    },
+    {
+      "name": "breadcrumbSeparator",
+      "type": "textfield",
+      "title": "Breadcrumb Separator",
+      "description": "Character(s) to use for separating category levels (e.g., · / > →)",
+      "default": "·",
+      "required": false
     }
   ],
   "scripts": {

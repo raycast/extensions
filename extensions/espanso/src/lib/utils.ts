@@ -58,9 +58,12 @@ const ACRONYMS = [
 ];
 
 export function formatCategoryName(category: string): string {
-  if (category.includes(" > ")) {
+  const { breadcrumbSeparator = "·" } = getPreferenceValues<{ breadcrumbSeparator?: string }>();
+  const separator = ` ${breadcrumbSeparator.trim()} `;
+
+  if (category.includes(separator)) {
     return category
-      .split(" > ")
+      .split(separator)
       .map((part) => {
         let formatted = capitalCase(part);
         ACRONYMS.forEach((acronym) => {
@@ -69,7 +72,7 @@ export function formatCategoryName(category: string): string {
         });
         return formatted;
       })
-      .join(" > ");
+      .join(separator);
   }
 
   let formatted = capitalCase(category);
@@ -184,7 +187,7 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
           return [{ triggers: [trigger], replace, form, label, filePath, category }];
         } else if ("triggers" in obj) {
           const { triggers, replace, form, label } = obj;
-          return triggers.map((trigger: string) => ({ triggers: [trigger], replace, form, label, filePath, category }));
+          return [{ triggers, replace, form, label, filePath, category }];
         } else if ("regex" in obj) {
           const { regex, replace, form, label } = obj;
           return [{ triggers: [regex], replace, form, label, filePath, category }];
