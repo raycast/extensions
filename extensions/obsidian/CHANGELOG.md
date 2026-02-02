@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Custom Append Actions] - {PR_MERGE_DATE}
+## [Custom Append Actions] - 2026-02-02
 
 - Added "Run Custom Action" command to create reusable append templates
 - Added support for dynamic date variables (e.g. `{year}`, `{date}`) in file paths
