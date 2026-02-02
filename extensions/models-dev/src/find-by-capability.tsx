@@ -29,12 +29,10 @@ function CapabilityResultsView({ models, isLoading, selectedCapabilities }: Capa
     return sortByProviderThenName(filtered);
   }, [models, selectedCapabilities]);
 
-  const navigationTitle = "AI Models by Capability";
-
   return (
     <List
       isLoading={isLoading && !models?.length}
-      navigationTitle={navigationTitle}
+      navigationTitle={selectedLabels || "All Models"}
       searchBarPlaceholder="Search models..."
     >
       <List.EmptyView
@@ -65,7 +63,6 @@ function CapabilitySelectionView({
   onShowResults,
 }: CapabilitySelectionViewProps) {
   const selectedSet = useMemo(() => new Set(selectedCapabilities), [selectedCapabilities]);
-  const navigationTitle = "AI Models by Capability";
   const selectedCount = selectedCapabilities.length;
 
   const renderCapabilityItem = (capability: Capability) => {
@@ -106,7 +103,7 @@ function CapabilitySelectionView({
   };
 
   return (
-    <List isLoading={isLoading} navigationTitle={navigationTitle} searchBarPlaceholder="Search capabilities...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search capabilities...">
       {selectedCount > 0 && (
         <List.Section title={`Selected (${selectedCount})`}>
           {ALL_CAPABILITIES.filter((capability) => selectedSet.has(capability)).map(renderCapabilityItem)}

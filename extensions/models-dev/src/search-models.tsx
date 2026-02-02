@@ -9,7 +9,6 @@ import { ALL_CAPABILITIES, CAPABILITIES } from "./lib/constants";
 export default function SearchAIModels() {
   const { data, isLoading } = useModelsData();
   const [capability, setCapability] = useState<Capability | "all">("all");
-  const navigationTitle = "Search AI Models";
   const sectionTitle = "Models";
 
   const filteredModels = useMemo(() => {
@@ -34,7 +33,6 @@ export default function SearchAIModels() {
   return (
     <List
       isLoading={isLoading && !data?.models?.length}
-      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search models by name, provider, or capability..."
       searchBarAccessory={
         <List.Dropdown

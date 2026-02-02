@@ -57,7 +57,6 @@ export default function CompareAIModels() {
   const { data, isLoading } = useModelsData();
   const { push } = useNavigation();
   const [selectedModels, setSelectedModels] = useState<Model[]>([]);
-  const navigationTitle = "Compare AI Models";
   const availableTitle = selectedModels.length > 0 ? "Available" : "Models";
 
   const selectedIds = useMemo(() => new Set(selectedModels.map((m) => `${m.providerId}-${m.id}`)), [selectedModels]);
@@ -99,7 +98,6 @@ export default function CompareAIModels() {
   return (
     <List
       isLoading={isLoading && !data?.models?.length}
-      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search models to compare..."
       searchBarAccessory={
         <List.Dropdown
@@ -123,6 +121,7 @@ export default function CompareAIModels() {
         </List.Dropdown>
       }
     >
+      <List.EmptyView title="No Models Found" description="No models match your search" icon={Icon.MagnifyingGlass} />
       {selectedModels.length > 0 && (
         <List.Section title={`Selected (${selectedModels.length}/3)`}>
           {selectedModels.map((model) => (

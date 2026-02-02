@@ -56,7 +56,6 @@ function ProviderModels({ providerId, providerName }: { providerId: string; prov
 export default function SearchAIProviders() {
   const { data, isLoading } = useModelsData();
   const { push } = useNavigation();
-  const navigationTitle = "Search AI Providers";
   const sectionTitle = "Providers";
 
   const modelsByProvider = useMemo(() => {
@@ -77,11 +76,7 @@ export default function SearchAIProviders() {
   };
 
   return (
-    <List
-      isLoading={isLoading && !data?.providers?.length}
-      navigationTitle={navigationTitle}
-      searchBarPlaceholder="Search providers..."
-    >
+    <List isLoading={isLoading && !data?.providers?.length} searchBarPlaceholder="Search providers...">
       <List.EmptyView
         title="No Providers Found"
         description="No providers match your search"

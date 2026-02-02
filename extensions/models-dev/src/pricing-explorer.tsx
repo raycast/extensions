@@ -33,7 +33,6 @@ const PRICE_FILTERS: { id: PriceFilter; label: string }[] = [
 export default function AIModelsByPrice() {
   const { data, isLoading } = useModelsData();
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
-  const navigationTitle = "AI Models by Price";
   const sectionTitle = "Models";
 
   const filteredModels = useMemo(() => {
@@ -89,7 +88,6 @@ export default function AIModelsByPrice() {
   return (
     <List
       isLoading={isLoading && !data?.models?.length}
-      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search models..."
       searchBarAccessory={
         <List.Dropdown
