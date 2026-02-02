@@ -10,12 +10,12 @@
   "platforms": ["macOS"],
   "keywords": ["projects", "ide", "vscode", "cursor", "developer", "workspace", "collections"],
   "screenshots": [
-    { "path": "media/1-search-projects.png" },
-    { "path": "media/2-search-collections.png" },
-    { "path": "media/3-project-settings.png" },
-    { "path": "media/4-manage-collections.png" },
-    { "path": "media/5-new-collection.png" },
-    { "path": "media/6-add-projects.png" }
+    { "path": "metadata/1-search-projects.png" },
+    { "path": "metadata/2-search-collections.png" },
+    { "path": "metadata/3-project-settings.png" },
+    { "path": "metadata/4-manage-collections.png" },
+    { "path": "metadata/5-new-collection.png" },
+    { "path": "metadata/6-add-projects.png" }
   ],
   "commands": [
     {

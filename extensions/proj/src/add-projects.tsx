@@ -16,10 +16,6 @@ import { getAllCollections } from "./collections";
 import { findProjects, isProject, expandPath } from "./utils";
 import type { ProjectIDE } from "./settings";
 
-interface Preferences {
-  ide: { path: string; name: string };
-}
-
 const DEPTH_OPTIONS = [
   { title: "1 level", value: "1" },
   { title: "2 levels", value: "2" },

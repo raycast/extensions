@@ -3,11 +3,6 @@ import type { EnhancedProject } from "../types";
 import type { ProjectSettings } from "../settings";
 import { Icon } from "@raycast/api";
 
-export interface Preferences {
-  ide: { path: string; name: string };
-  showStaleIndicator: boolean;
-}
-
 export interface ProjectWithSettings extends EnhancedProject {
   settings: ProjectSettings;
   missing: boolean;

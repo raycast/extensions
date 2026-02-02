@@ -52,7 +52,9 @@ export default function Command() {
           onApply={applySuggestion}
         />
       )}
-      {!isGlobalIdeValid && <GlobalIdeWarning ideName={preferences.ide.name} />}
+      {!isGlobalIdeValid && preferences.ide && (
+        <GlobalIdeWarning ideName={preferences.ide.name} />
+      )}
       {groupedProjects.length === 0 &&
       searchSuggestions.length === 0 &&
       !isLoading ? (

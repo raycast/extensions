@@ -77,10 +77,6 @@ function getAppName(appPath: string): string {
 
 type IconMode = "initials" | "raycast" | "custom";
 
-interface Preferences {
-  ide: { path: string; name: string };
-}
-
 function deriveIconMode(settings: {
   customIcon?: string;
   icon?: string;

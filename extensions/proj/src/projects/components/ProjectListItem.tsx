@@ -16,7 +16,7 @@ import { isProject } from "../../utils";
 import { formatRelativeTime } from "../../recency";
 import ProjectSettingsForm from "../../ProjectSettingsForm";
 import AddToCollectionForm from "../../AddToCollectionForm";
-import type { ProjectWithSettings, Preferences, Accessory } from "../types";
+import type { ProjectWithSettings, Accessory } from "../types";
 
 interface ProjectListItemProps {
   project: ProjectWithSettings;
@@ -221,7 +221,7 @@ export function ProjectListItem({
         <ActionPanel>
           <ActionPanel.Section>
             <Action
-              title={`Open in ${project.settings.ide?.name || preferences.ide.name}`}
+              title={`Open in ${project.settings.ide?.name || preferences.ide?.name || "IDE"}`}
               icon={Icon.ArrowRight}
               onAction={handleOpen}
             />

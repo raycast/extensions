@@ -8,8 +8,8 @@ import {
   confirmAlert,
   Alert,
   open,
+  trash,
 } from "@raycast/api";
-import { rmSync } from "fs";
 import {
   findProjects,
   Project,
@@ -30,7 +30,6 @@ import { parseSearchQuery, matchesSearch } from "../../search";
 import { updateLastOpened, isRecentProject } from "../../recency";
 import { isValidIde, LANGUAGE_OPTIONS } from "../constants";
 import type {
-  Preferences,
   ProjectWithSettings,
   GroupingMode,
   SearchSuggestion,
@@ -48,7 +47,9 @@ export function useProjects() {
 
   const loadProjects = useCallback(async () => {
     try {
-      setIsGlobalIdeValid(isValidIde(preferences.ide.path));
+      setIsGlobalIdeValid(
+        preferences.ide ? isValidIde(preferences.ide.path) : false,
+      );
 
       const sources = loadSources();
       const allSettings = loadAllSettings();
@@ -146,7 +147,7 @@ export function useProjects() {
     } finally {
       setIsLoading(false);
     }
-  }, [preferences.ide.path]);
+  }, [preferences.ide?.path]);
 
   useEffect(() => {
     loadProjects();
@@ -368,7 +369,7 @@ export function useProjects() {
         if (useDefault) {
           clearProjectIde(project.path);
           await updateLastOpened(project.path);
-          await open(project.path, preferences.ide.path);
+          await open(project.path, preferences.ide?.path);
           loadProjects();
           return { action: "opened" as const };
         } else {
@@ -376,13 +377,13 @@ export function useProjects() {
         }
       }
 
-      const idePath = project.settings.ide?.path || preferences.ide.path;
+      const idePath = project.settings.ide?.path || preferences.ide?.path;
       await updateLastOpened(project.path);
       await open(project.path, idePath);
       loadProjects();
       return { action: "opened" as const };
     },
-    [isGlobalIdeValid, preferences.ide.path, loadProjects],
+    [isGlobalIdeValid, preferences.ide?.path, loadProjects],
   );
 
   const handleDelete = useCallback(
@@ -398,7 +399,7 @@ export function useProjects() {
 
       if (confirmed) {
         try {
-          rmSync(project.path, { recursive: true, force: true });
+          await trash(project.path);
           if (project.settings.customIcon) {
             deleteCustomIcon(project.settings.customIcon);
           }
