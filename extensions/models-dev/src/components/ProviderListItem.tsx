@@ -1,17 +1,14 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { Provider, Model } from "../lib/types";
-import { filterByProvider } from "../lib/filters";
 import { getProviderCapabilityAccessories } from "../lib/accessories";
 
 interface ProviderListItemProps {
   provider: Provider;
-  models: Model[];
+  providerModels: Model[];
   onSelect: (providerId: string) => void;
 }
 
-export function ProviderListItem({ provider, models, onSelect }: ProviderListItemProps) {
-  const providerModels = filterByProvider(models, provider.id);
-
+export function ProviderListItem({ provider, providerModels, onSelect }: ProviderListItemProps) {
   // Capability indicators
   const accessories: List.Item.Accessory[] = getProviderCapabilityAccessories(providerModels);
 

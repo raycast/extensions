@@ -55,6 +55,8 @@ export function ModelListItem({ model, onAddToComparison, primaryAction, extraAc
     model.tool_call ? "tool calling function" : "",
     model.modalities.input.includes("image") ? "vision image" : "",
     model.modalities.input.includes("audio") ? "audio" : "",
+    model.modalities.input.includes("video") ? "video" : "",
+    model.modalities.input.includes("pdf") ? "pdf" : "",
     model.open_weights ? "open weights" : "",
   ].filter(Boolean);
 

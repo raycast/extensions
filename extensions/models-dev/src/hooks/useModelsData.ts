@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getCachedData, fetchModelsData } from "../lib/api";
 
@@ -9,5 +10,12 @@ export function useModelsData() {
   return useCachedPromise(fetchModelsData, [], {
     initialData: getCachedData() ?? undefined,
     keepPreviousData: true,
+    onError: (error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load models",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    },
   });
 }

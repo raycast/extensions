@@ -76,6 +76,7 @@ export interface Model {
   providerId: string;
   providerName: string;
   providerLogo: string;
+  providerDoc?: string;
 
   // Capabilities
   attachment: boolean;

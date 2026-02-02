@@ -6,9 +6,11 @@ import { Capability, Model } from "./lib/types";
 import { filterByCapability, sortByProviderThenName, filterOutDeprecated } from "./lib/filters";
 import { ALL_CAPABILITIES, CAPABILITIES } from "./lib/constants";
 
-export default function SearchModels() {
+export default function SearchAIModels() {
   const { data, isLoading } = useModelsData();
   const [capability, setCapability] = useState<Capability | "all">("all");
+  const navigationTitle = "Search AI Models";
+  const sectionTitle = "Models";
 
   const filteredModels = useMemo(() => {
     if (!data?.models) return [];
@@ -31,7 +33,8 @@ export default function SearchModels() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading && !data?.models?.length}
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search models by name, provider, or capability..."
       searchBarAccessory={
         <List.Dropdown
@@ -57,7 +60,7 @@ export default function SearchModels() {
         }
         icon={Icon.MagnifyingGlass}
       />
-      <ModelListSection models={filteredModels} />
+      <ModelListSection models={filteredModels} title={sectionTitle} />
     </List>
   );
 }

@@ -57,6 +57,13 @@ export function ModelActions({
 
       <ActionPanel.Section>
         <Action.CopyToClipboard title="Copy as JSON" content={modelJson} />
+        {model.providerDoc && (
+          <Action.OpenInBrowser
+            title="Open Provider Docs"
+            url={model.providerDoc}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          />
+        )}
         <Action.OpenInBrowser
           title="Open Models.dev in Browser"
           url={`https://models.dev`}

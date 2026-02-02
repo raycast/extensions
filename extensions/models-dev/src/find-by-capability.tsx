@@ -1,66 +1,149 @@
 import { List, Icon, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { useMemo, useState } from "react";
 import { useModelsData } from "./hooks/useModelsData";
 import { ModelListSection } from "./components";
-import { filterByCapability, countByCapability } from "./lib/filters";
+import { filterByCapabilities, filterOutDeprecated, sortByProviderThenName } from "./lib/filters";
 import { ALL_CAPABILITIES, CAPABILITIES } from "./lib/constants";
-import { Capability } from "./lib/types";
+import { Capability, Model } from "./lib/types";
 
-import { useMemo } from "react";
+type CapabilityResultsViewProps = {
+  models: Model[];
+  isLoading: boolean;
+  selectedCapabilities: Capability[];
+};
 
-function CapabilityModels({ capability }: { capability: Capability }) {
-  const { data, isLoading } = useModelsData();
-  const capInfo = CAPABILITIES[capability];
+function CapabilityResultsView({ models, isLoading, selectedCapabilities }: CapabilityResultsViewProps) {
+  const selectedLabels = useMemo(
+    () => selectedCapabilities.map((cap) => CAPABILITIES[cap].label).join(" + "),
+    [selectedCapabilities],
+  );
 
-  const models = useMemo(() => {
-    return data?.models ? filterByCapability(data.models, capability) : [];
-  }, [data?.models, capability]);
+  const sectionTitle = useMemo(() => {
+    return selectedCapabilities.length > 0 ? `Models with: ${selectedLabels}` : "All Models";
+  }, [selectedCapabilities, selectedLabels]);
+
+  const filteredModels = useMemo(() => {
+    let filtered: Model[] = models;
+    filtered = filterOutDeprecated(filtered);
+    filtered = filterByCapabilities(filtered, selectedCapabilities);
+    return sortByProviderThenName(filtered);
+  }, [models, selectedCapabilities]);
+
+  const navigationTitle = "AI Models by Capability";
 
   return (
     <List
-      isLoading={isLoading}
-      navigationTitle={capInfo.label}
-      searchBarPlaceholder={`Search models with ${capInfo.label.toLowerCase()}...`}
+      isLoading={isLoading && !models?.length}
+      navigationTitle={navigationTitle}
+      searchBarPlaceholder="Search models..."
     >
       <List.EmptyView
         title="No Models Found"
-        description={`No models found with ${capInfo.label} capability`}
-        icon={Icon.XMarkCircle}
+        description={
+          selectedCapabilities.length > 0 ? `No models match ${selectedLabels}` : "No models match your search"
+        }
+        icon={Icon.MagnifyingGlass}
       />
-      <ModelListSection models={models} />
+      <ModelListSection models={filteredModels} title={sectionTitle} />
     </List>
   );
 }
 
-export default function FindByCapability() {
-  const { data, isLoading } = useModelsData();
-  const { push } = useNavigation();
+type CapabilitySelectionViewProps = {
+  isLoading: boolean;
+  selectedCapabilities: Capability[];
+  onToggle: (capability: Capability) => void;
+  onClear: () => void;
+  onShowResults: () => void;
+};
+
+function CapabilitySelectionView({
+  isLoading,
+  selectedCapabilities,
+  onToggle,
+  onClear,
+  onShowResults,
+}: CapabilitySelectionViewProps) {
+  const selectedSet = useMemo(() => new Set(selectedCapabilities), [selectedCapabilities]);
+  const navigationTitle = "AI Models by Capability";
+  const selectedCount = selectedCapabilities.length;
+
+  const renderCapabilityItem = (capability: Capability) => {
+    const capInfo = CAPABILITIES[capability];
+    const isSelected = selectedSet.has(capability);
+    const accessories: List.Item.Accessory[] = isSelected ? [{ icon: Icon.CheckCircle, tooltip: "Selected" }] : [];
+
+    return (
+      <List.Item
+        key={capability}
+        title={capInfo.label}
+        subtitle={capInfo.description}
+        icon={capInfo.icon}
+        accessories={accessories}
+        keywords={[capability, capInfo.label]}
+        actions={
+          <ActionPanel>
+            <Action
+              title={isSelected ? "Remove Capability" : "Add Capability"}
+              icon={isSelected ? Icon.MinusCircle : Icon.PlusCircle}
+              onAction={() => onToggle(capability)}
+            />
+            {selectedCount > 0 && (
+              <ActionPanel.Section>
+                <Action
+                  title="Show Matching Models"
+                  icon={Icon.ArrowRight}
+                  onAction={onShowResults}
+                  shortcut={{ modifiers: ["cmd"], key: "return" }}
+                />
+                <Action title="Clear Selected Capabilities" icon={Icon.XMarkCircle} onAction={onClear} />
+              </ActionPanel.Section>
+            )}
+          </ActionPanel>
+        }
+      />
+    );
+  };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search capabilities...">
-      <List.EmptyView title="Loading Capabilities" description="Fetching model data..." icon={Icon.Download} />
-      {ALL_CAPABILITIES.map((capability) => {
-        const capInfo = CAPABILITIES[capability];
-        const count = data?.models ? countByCapability(data.models, capability) : 0;
-
-        return (
-          <List.Item
-            key={capability}
-            title={capInfo.label}
-            subtitle={capInfo.description}
-            icon={{ source: capInfo.icon, tintColor: capInfo.color }}
-            accessories={[{ text: `${count} models` }]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="View Models"
-                  icon={Icon.List}
-                  onAction={() => push(<CapabilityModels capability={capability} />)}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+    <List isLoading={isLoading} navigationTitle={navigationTitle} searchBarPlaceholder="Search capabilities...">
+      {selectedCount > 0 && (
+        <List.Section title={`Selected (${selectedCount})`}>
+          {ALL_CAPABILITIES.filter((capability) => selectedSet.has(capability)).map(renderCapabilityItem)}
+        </List.Section>
+      )}
+      <List.Section title="Capabilities">
+        {ALL_CAPABILITIES.filter((capability) => !selectedSet.has(capability)).map(renderCapabilityItem)}
+      </List.Section>
     </List>
+  );
+}
+
+export default function AIModelsByCapability() {
+  const { data, isLoading } = useModelsData();
+  const { push } = useNavigation();
+  const [selectedCapabilities, setSelectedCapabilities] = useState<Capability[]>([]);
+
+  const toggleCapability = (capability: Capability) => {
+    setSelectedCapabilities((current) =>
+      current.includes(capability) ? current.filter((cap) => cap !== capability) : [...current, capability],
+    );
+  };
+
+  const handleShowResults = () => {
+    const models = data?.models ?? [];
+    push(
+      <CapabilityResultsView models={models} isLoading={isLoading} selectedCapabilities={[...selectedCapabilities]} />,
+    );
+  };
+
+  return (
+    <CapabilitySelectionView
+      isLoading={isLoading && !data?.models?.length}
+      selectedCapabilities={selectedCapabilities}
+      onToggle={toggleCapability}
+      onClear={() => setSelectedCapabilities([])}
+      onShowResults={handleShowResults}
+    />
   );
 }

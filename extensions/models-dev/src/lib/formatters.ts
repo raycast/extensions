@@ -78,6 +78,21 @@ export function formatDate(date: string | undefined): string {
 }
 
 /**
+ * Format last updated timestamp
+ */
+export function formatUpdatedAt(timestamp: number | null | undefined): string | null {
+  if (!timestamp) return null;
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(timestamp));
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Format token count with commas
  */
 export function formatTokenCount(count: number): string {

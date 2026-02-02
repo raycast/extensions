@@ -53,10 +53,12 @@ function ComparisonView({ models }: { models: Model[] }) {
   );
 }
 
-export default function CompareModels() {
+export default function CompareAIModels() {
   const { data, isLoading } = useModelsData();
   const { push } = useNavigation();
   const [selectedModels, setSelectedModels] = useState<Model[]>([]);
+  const navigationTitle = "Compare AI Models";
+  const availableTitle = selectedModels.length > 0 ? "Available" : "Models";
 
   const selectedIds = useMemo(() => new Set(selectedModels.map((m) => `${m.providerId}-${m.id}`)), [selectedModels]);
 
@@ -96,7 +98,8 @@ export default function CompareModels() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading && !data?.models?.length}
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search models to compare..."
       searchBarAccessory={
         <List.Dropdown
@@ -152,6 +155,7 @@ export default function CompareModels() {
 
       <ModelListSection
         models={availableModels}
+        title={availableTitle}
         getPrimaryAction={(model) => (
           <Action title="Add to Comparison" icon={Icon.PlusCircle} onAction={() => handleToggleModel(model)} />
         )}

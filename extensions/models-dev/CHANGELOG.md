@@ -4,11 +4,11 @@
 
 ### Added
 
-- **Search Models**: Search across all AI models by name, provider, or capability with filtering options
-- **Browse Providers**: Explore AI providers (OpenAI, Anthropic, Google, etc.) and their model offerings
-- **Find by Capability**: Discover models by specific capabilities (reasoning, vision, audio, tool calling, etc.)
-- **Compare Models**: Select 2-4 models for side-by-side comparison of specs, pricing, and capabilities
-- **Pricing Explorer**: Compare model pricing across providers with tier-based filtering
+- **Search AI Models**: Search across all AI models by name, provider, or capability with filtering options
+- **Search AI Providers**: Explore AI providers (OpenAI, Anthropic, Google, etc.) and their model offerings
+- **AI Models by Capability**: Filter models using multiple capabilities at once
+- **Compare AI Models**: Select 2-3 models for side-by-side comparison of specs, pricing, and capabilities
+- **AI Models by Price**: Compare model pricing across providers with tier-based filtering
 
 ### Features
 

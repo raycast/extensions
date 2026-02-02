@@ -26,6 +26,18 @@ export function getCachedData(): ModelsData | null {
   }
 }
 
+export function getCacheTimestamp(): number | null {
+  const cached = cache.get(CACHE_KEY);
+  if (!cached) return null;
+
+  try {
+    const parsed = JSON.parse(cached) as CachedData;
+    return parsed.timestamp;
+  } catch {
+    return null;
+  }
+}
+
 export function setCachedData(data: ModelsData): void {
   const cacheEntry: CachedData = {
     data,
@@ -37,6 +49,9 @@ export function setCachedData(data: ModelsData): void {
 export const fetchModelsData = withCache(
   async () => {
     const response = await fetch(API_URL);
+    if (!response.ok) {
+      throw new Error(`Models.dev request failed (${response.status})`);
+    }
     const raw = (await response.json()) as RawApiResponse;
     const transformed = transformApiResponse(raw);
     setCachedData(transformed);
@@ -65,7 +80,7 @@ export function transformApiResponse(data: RawApiResponse): ModelsData {
     });
 
     for (const [modelId, rawModel] of modelEntries) {
-      models.push(transformModel(rawModel, modelId, providerId, rawProvider.name));
+      models.push(transformModel(rawModel, modelId, providerId, rawProvider.name, rawProvider.doc));
     }
   }
 
@@ -82,7 +97,13 @@ export function transformApiResponse(data: RawApiResponse): ModelsData {
   return { providers, models };
 }
 
-function transformModel(raw: RawModel, modelId: string, providerId: string, providerName: string): Model {
+function transformModel(
+  raw: RawModel,
+  modelId: string,
+  providerId: string,
+  providerName: string,
+  providerDoc?: string,
+): Model {
   return {
     id: modelId,
     name: raw.name,
@@ -90,6 +111,7 @@ function transformModel(raw: RawModel, modelId: string, providerId: string, prov
     providerId,
     providerName,
     providerLogo: getProviderLogoUrl(providerId),
+    providerDoc,
 
     // Capabilities (default to false if undefined)
     attachment: raw.attachment ?? false,

@@ -30,9 +30,11 @@ const PRICE_FILTERS: { id: PriceFilter; label: string }[] = [
   { id: "over-15", label: "Over $15/M output" },
 ];
 
-export default function PricingExplorer() {
+export default function AIModelsByPrice() {
   const { data, isLoading } = useModelsData();
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
+  const navigationTitle = "AI Models by Price";
+  const sectionTitle = "Models";
 
   const filteredModels = useMemo(() => {
     if (!data?.models) return [];
@@ -86,7 +88,8 @@ export default function PricingExplorer() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading && !data?.models?.length}
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search models..."
       searchBarAccessory={
         <List.Dropdown
@@ -106,7 +109,7 @@ export default function PricingExplorer() {
         icon={Icon.MagnifyingGlass}
       />
 
-      <ModelListSection models={filteredModels} />
+      <ModelListSection models={filteredModels} title={sectionTitle} />
     </List>
   );
 }

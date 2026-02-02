@@ -13,6 +13,17 @@
     "Developer Tools",
     "Data"
   ],
+  "preferences": [
+    {
+      "name": "enableBackgroundSync",
+      "title": "Background Sync",
+      "description": "Allow periodic background refresh of models data",
+      "type": "checkbox",
+      "label": "Enable background sync",
+      "default": false,
+      "required": false
+    }
+  ],
   "license": "MIT",
   "keywords": [
     "ai",
@@ -31,38 +42,82 @@
   "commands": [
     {
       "name": "search-models",
-      "title": "Search Models",
+      "title": "Search AI Models",
       "subtitle": "Models Dev",
       "description": "Search across all AI models by name, provider, or capability",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "llm",
+        "gpt",
+        "claude",
+        "gemini",
+        "search",
+        "find"
+      ]
     },
     {
       "name": "browse-providers",
-      "title": "Browse Providers",
+      "title": "Search AI Providers",
       "subtitle": "Models Dev",
       "description": "Explore AI providers and their model offerings",
-      "mode": "view"
-    },
-    {
-      "name": "pricing-explorer",
-      "title": "Pricing Explorer",
-      "subtitle": "Models Dev",
-      "description": "Compare model pricing across providers",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "openai",
+        "anthropic",
+        "google",
+        "provider",
+        "vendor"
+      ]
     },
     {
       "name": "find-by-capability",
-      "title": "Find by Capability",
+      "title": "AI Models by Capability",
       "subtitle": "Models Dev",
-      "description": "Find models that support specific capabilities",
-      "mode": "view"
+      "description": "Filter models by multiple capabilities",
+      "mode": "view",
+      "keywords": [
+        "reasoning",
+        "vision",
+        "audio",
+        "tools",
+        "filter"
+      ]
+    },
+    {
+      "name": "pricing-explorer",
+      "title": "AI Models by Price",
+      "subtitle": "Models Dev",
+      "description": "Compare model pricing across providers",
+      "mode": "view",
+      "keywords": [
+        "cost",
+        "pricing",
+        "cheap",
+        "expensive",
+        "budget"
+      ]
     },
     {
       "name": "compare-models",
-      "title": "Compare Models",
+      "title": "Compare AI Models",
       "subtitle": "Models Dev",
       "description": "Select models to compare side-by-side",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "compare",
+        "diff",
+        "versus",
+        "side-by-side"
+      ]
+    },
+    {
+      "name": "background-sync",
+      "title": "Background Sync",
+      "subtitle": "Models Dev",
+      "description": "Refresh model data in the background",
+      "mode": "no-view",
+      "interval": "1h",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

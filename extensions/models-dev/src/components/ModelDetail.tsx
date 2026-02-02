@@ -1,6 +1,13 @@
 import { Detail, Icon, Color } from "@raycast/api";
 import { Model } from "../lib/types";
-import { formatPrice, formatContextWindow, formatModalities, formatKnowledgeCutoff } from "../lib/formatters";
+import { getCacheTimestamp } from "../lib/api";
+import {
+  formatPrice,
+  formatContextWindow,
+  formatModalities,
+  formatKnowledgeCutoff,
+  formatUpdatedAt,
+} from "../lib/formatters";
 import { ModelActions } from "./ModelActions";
 
 interface ModelDetailProps {
@@ -8,6 +15,7 @@ interface ModelDetailProps {
 }
 
 export function ModelDetail({ model }: ModelDetailProps) {
+  const lastUpdated = formatUpdatedAt(getCacheTimestamp());
   const capabilities: string[] = [];
   if (model.reasoning) capabilities.push("Reasoning");
   if (model.tool_call) capabilities.push("Tool Calling");
@@ -98,6 +106,8 @@ ${rows.join("\n")}
           )}
 
           {model.release_date && <Detail.Metadata.Label title="Released" text={model.release_date} icon={Icon.Clock} />}
+
+          {lastUpdated && <Detail.Metadata.Label title="Data Updated" text={lastUpdated} icon={Icon.ArrowClockwise} />}
 
           <Detail.Metadata.Separator />
 
