@@ -1,6 +1,7 @@
 import type { Application } from "@raycast/api";
 import { Detail, List, getFrontmostApplication, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
+import path from "node:path";
 import { commandNotFoundMd, noContentMd } from "./content/messages";
 import type { FormattedMatch } from "./lib/types";
 import { getEspansoConfig, getMatches, sortMatches, formatCategoryName } from "./lib/utils";
@@ -45,8 +46,20 @@ export default function Command() {
         const formattedMatches: FormattedMatch[] = sortedMatches
           .filter((match) => !match.form)
           .map((match, index) => {
-            const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
-            const allParts = pathParts.map((part) => part.replace(".yml", "")).filter(Boolean);
+            const matchDirIndex = match.filePath.lastIndexOf(`${path.sep}match${path.sep}`);
+            const packagesDirIndex = match.filePath.lastIndexOf(`${path.sep}packages${path.sep}`);
+            const startIndex = Math.max(matchDirIndex, packagesDirIndex);
+
+            let pathParts: string[] = [];
+            if (startIndex !== -1) {
+              const dirName = matchDirIndex > packagesDirIndex ? "match" : "packages";
+              const relativePath = match.filePath.substring(startIndex + dirName.length + 2);
+              pathParts = relativePath.split(path.sep);
+            } else {
+              pathParts = [path.basename(match.filePath)];
+            }
+
+            const allParts = pathParts.map((part) => part.replace(/\.yml$/i, "")).filter(Boolean);
 
             let profile: string | undefined = undefined;
             let category = "";
@@ -176,17 +189,25 @@ export default function Command() {
       isLoading={isLoading}
       searchBarAccessory={
         <>
-          {profiles.length > 1 && <ProfileDropdown profiles={profiles} onProfileChange={setSelectedProfile} />}
-          <CategoryDropdown categories={categories} onCategoryChange={setSelectedCategory} />
+          {profiles.length > 1 && (
+            <ProfileDropdown profiles={profiles} onProfileChange={setSelectedProfile} separator={separator} />
+          )}
+          <CategoryDropdown categories={categories} onCategoryChange={setSelectedCategory} separator={separator} />
         </>
       }
     >
       {sortedSectionKeys.map((sectionKey) => {
         const sortedItems = sortItems(sections[sectionKey]);
         return (
-          <List.Section key={sectionKey} title={formatCategoryName(sectionKey)}>
+          <List.Section key={sectionKey} title={formatCategoryName(sectionKey, separator)}>
             {sortedItems.map((match, index) => (
-              <MatchItem key={match.filePath + index} match={match} sectionKey={sectionKey} application={application} />
+              <MatchItem
+                key={match.filePath + index}
+                match={match}
+                sectionKey={sectionKey}
+                application={application}
+                separator={separator}
+              />
             ))}
           </List.Section>
         );
