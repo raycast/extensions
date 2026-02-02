@@ -151,8 +151,8 @@ function LighthouseReportView({
       markdown += `> [!NOTE]\n> **AI is analyzing findings...**\n\n---\n\n`;
     }
 
-    markdown += `## Performance & Core Metrics (Críticos)\n\n`;
-    markdown += `| ${t('status')} | Métrica | Valor | Referencia |\n| :---: | :--- | :--- | :--- |\n`;
+    markdown += `## Performance & Core Metrics\n\n`;
+    markdown += `| ${t('status')} | Metric | Value | Reference |\n| :---: | :--- | :--- | :--- |\n`;
     const perfMetrics = [
       {
         id: 'largest-contentful-paint',
@@ -186,7 +186,7 @@ function LighthouseReportView({
     });
 
     markdown += `\n## ${t('seo_accessibility')}\n\n`;
-    markdown += `| ${t('status')} | Campo | Valor |\n|:---:|:---|:---|\n`;
+    markdown += `| ${t('status')} | Field | Value |\n|:---:|:---|:---|\n`;
     const seoScore = report.categories?.seo?.score;
     const accScore = report.categories?.accessibility?.score;
     if (seoScore !== undefined || accScore !== undefined) {
@@ -199,7 +199,7 @@ function LighthouseReportView({
       { id: 'document-title', label: 'Title tag' },
       { id: 'meta-description', label: 'Meta description' },
       { id: 'canonical', label: 'Canonical URL' },
-      { id: 'html-has-lang', label: 'Idioma (html lang)' },
+      { id: 'html-has-lang', label: 'Language (html lang)' },
       { id: 'structured-data', label: 'Structured Data' },
     ];
     seoFields.forEach(f => {
@@ -211,7 +211,7 @@ function LighthouseReportView({
                 (audit.details.items as any[])
                   .map((i: any) => i?.type || i?.name)
                   .filter(Boolean)
-                  .join(', ') || 'sin tipos'
+                  .join(', ') || 'no types'
               })`
             : '';
         markdown += `| ${getStatusIcon(audit.score)} | ${f.label} | ${audit.displayValue || audit.title || '-'}${extra} |\n`;
@@ -222,8 +222,8 @@ function LighthouseReportView({
       .filter(a => a.details && (a.details as any).type === 'opportunity')
       .slice(0, 5);
     if (opportunities.length > 0) {
-      markdown += `\n## Oportunidades Prioritarias (High ROI)\n`;
-      markdown += `| ${t('status')} | Audit | Ahorro estimado | Ítems |\n|:---:|:---|:---|:---|\n`;
+      markdown += `\n## Priority Opportunities (High ROI)\n`;
+      markdown += `| ${t('status')} | Audit | Estimated Savings | Items |\n|:---:|:---|:---|:---|\n`;
       opportunities.forEach(op => {
         const savingsMs = (op.details as any).overallSavingsMs;
         const savingsBytes = (op.details as any).overallSavingsBytes;
@@ -251,7 +251,7 @@ function LighthouseReportView({
       .map(d => ({ ...d, audit: report.audits?.[d.id] }))
       .filter(d => d.audit);
     if (diagAudits.length) {
-      markdown += `\n## Diagnósticos Técnicos (Debugging)\n`;
+      markdown += `\n## Technical Diagnostics (Debugging)\n`;
       diagAudits.forEach(d => {
         const details = (d.audit as any)?.details;
         const blocking =
@@ -264,7 +264,7 @@ function LighthouseReportView({
 
     const warnings = (report as any).runWarnings as string[] | undefined;
     if (warnings && warnings.length) {
-      markdown += `\n### Advertencias de ejecución\n`;
+      markdown += `\n### Runtime Warnings\n`;
       warnings.forEach(w => {
         markdown += `- ⚠️ ${w}\n`;
       });
@@ -345,7 +345,7 @@ function LighthouseReportView({
         ) : null}
         {auditDuration ? (
           <Detail.Metadata.Label
-            title="Duración auditoría"
+            title="Audit Duration"
             text={auditDuration}
             icon={Icon.Clock}
           />
@@ -550,13 +550,13 @@ ${t('email_thanks')}`;
       showToast({
         style: Toast.Style.Success,
         title: t('send_to_developer'),
-        message: 'Borrador creado en Mail',
+        message: 'Draft created in Mail',
       });
     } catch (error: any) {
       showToast({
         style: Toast.Style.Failure,
-        title: 'No se pudo crear el borrador',
-        message: error?.message || 'Revisa que la app Mail esté instalada',
+        title: 'Could not create draft',
+        message: error?.message || 'Make sure Mail app is installed',
       });
     }
   };
@@ -594,8 +594,8 @@ ${t('email_thanks')}`;
                 onAction={() =>
                   showToast({
                     style: Toast.Style.Failure,
-                    title: 'No disponible en Windows',
-                    message: 'El borrador de Mail solo funciona en macOS.',
+                    title: 'Not available on Windows',
+                    message: 'Mail drafts only work on macOS.',
                   })
                 }
               />
@@ -633,14 +633,12 @@ function ReportLoader({ options }: { options: LighthouseOptions }) {
   const [progressPct, setProgressPct] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressTexts = [
-  const progressTexts = [
     { upTo: 20, text: t('progress_preparing') },
     { upTo: 45, text: t('progress_measuring') },
     { upTo: 70, text: t('progress_auditing') },
     { upTo: 90, text: t('progress_evaluating_seo') },
     { upTo: 99, text: t('progress_generating') },
     { upTo: 100, text: t('progress_ready') },
-  ];
   ];
 
   const { isLoading, data, error, revalidate } = usePromise(
