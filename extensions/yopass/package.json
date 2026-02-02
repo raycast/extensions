@@ -5,7 +5,9 @@
   "description": "Secure sharing of secrets and passwords via Yopass",
   "icon": "icon.png",
   "author": "ricoberger",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Security"
   ],
@@ -57,5 +59,8 @@
       "default": "https://api.yopass.se",
       "description": "The API URL of your Yopass instance"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
