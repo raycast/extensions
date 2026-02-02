@@ -3,6 +3,7 @@ import { FormValidation, showFailureToast, useForm, withAccessToken } from "@ray
 import { useState } from "react";
 
 import { BranchDropdown, CustomAgentsDropdown, IssueDropdown, RepositoryDropdown } from "./components";
+import { ModelDropdown } from "./components/ModelDropdown";
 import { useRepositoryMetadata } from "./hooks/useRepositoryMetadata";
 import { useViewer } from "./hooks/useViewer";
 import { provider, reauthorize } from "./lib/oauth";
@@ -13,6 +14,7 @@ type FormValues = {
   issue: string;
   branch: string;
   customAgent: string;
+  model: string;
 };
 
 function Command() {
@@ -20,6 +22,7 @@ function Command() {
   const [isIssueLoading, setIsIssueLoading] = useState(false);
   const [isBranchLoading, setIsBranchLoading] = useState(false);
   const [isCustomAgentsLoading, setIsCustomAgentsLoading] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { itemProps, handleSubmit, values } = useForm<FormValues>({
@@ -56,6 +59,7 @@ function Command() {
           copilotBotId,
           baseRef: formValues.branch,
           customAgent: formValues.customAgent,
+          model: formValues.model,
         });
 
         await showToast({
@@ -80,6 +84,7 @@ function Command() {
     isIssueLoading ||
     isBranchLoading ||
     isCustomAgentsLoading ||
+    isModelLoading ||
     isSubmitting;
 
   return (
@@ -113,6 +118,7 @@ function Command() {
         itemProps={itemProps.customAgent}
         onLoadingChange={setIsCustomAgentsLoading}
       />
+      <ModelDropdown itemProps={itemProps.model} onLoadingChange={setIsModelLoading} />
     </Form>
   );
 }
