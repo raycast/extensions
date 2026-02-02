@@ -1,4 +1,4 @@
-import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { useCopilotUsage } from "./hooks/useCopilotUsage";
 import { provider, reauthorize } from "./lib/oauth";
@@ -39,8 +39,10 @@ function Command() {
 
   const UsageActions = (
     <ActionPanel>
+      <Action.OpenInBrowser title="Manage Paid Premium Requests" url="https://github.com/settings/billing/budgets" />
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
-      <Action title="Log out" icon={Icon.Logout} onAction={reauthorize} />
+      {/* eslint-disable-next-line @raycast/prefer-title-case */}
+      <Action title="Log Out" icon={Icon.Logout} onAction={reauthorize} />
     </ActionPanel>
   );
 

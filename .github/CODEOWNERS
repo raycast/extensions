@@ -801,7 +801,7 @@
 /extensions/github                                                  @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @aeither @marcotf @qeude @nesl247 @xilopaint @antonengelhardt @bangerang @wottpal @LitoMore @d-mitrofanov-v @j3lte @jfkisafk @vlasischar @JavaLangRuntimeException @shyakadavis @sushichan044 @luarmr @nicolas-marien @ionTea @ridemountainpig @kud @MartinGonzalez @brandonnly @oscmarb @emergerrrd @ryo246912
 /extensions/github-cli-manual                                       @demartini
 /extensions/github-codespaces                                       @mkwng
-/extensions/github-copilot                                          @timrogers @pernielsentikaer @thomaspaulmann @gdarchen @pedrocostadev
+/extensions/github-copilot                                          @timrogers @pernielsentikaer @thomaspaulmann @gdarchen @pedrocostadev @xilopaint
 /extensions/github-for-enterprise                                   @Kinbaum @emanguy @LunaticMuch @pernielsentikaer @perat
 /extensions/github-gist                                             @koinzhang @Aayush9029 @LunaticMuch @pernielsentikaer @jfkisafk @nbbaier @ridemountainpig
 /extensions/github-menu-bar                                         @fe9lix
@@ -1687,7 +1687,7 @@
 /extensions/primer                                                  @colebemis
 /extensions/prism-launcher                                          @lockieluke @tomjpeg @pernielsentikaer @TakenMC
 /extensions/prisma-cli-commands                                     @rajmasha
-/extensions/prisma-docs-search                                      @petradonka @petradonka
+/extensions/prisma-docs-search                                      @petradonka @petradonka @yusifaliyevpro
 /extensions/prisma-postgres                                         @AmanVarshney01 @pernielsentikaer
 /extensions/pritunl                                                 @mprokopov
 /extensions/privatebin                                              @sedlacek-martin
@@ -2256,6 +2256,7 @@
 /extensions/tiktoken                                                @Envl
 /extensions/tim                                                     @tmwrnr
 /extensions/time                                                    @devidw
+/extensions/time-awareness                                          @alexibuild
 /extensions/time-calculator                                         @Marceswan
 /extensions/time-converter                                          @alexj
 /extensions/time-logger                                             @aramikuto

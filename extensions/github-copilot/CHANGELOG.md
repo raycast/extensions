@@ -4,6 +4,11 @@
 
 - Add Assign Issue to Copilot command
 
+## [Manage Paid Premium Requests action] - 2026-02-02
+
+- Add "Manage Paid Premium Requests" action to the "Copilot Usage" command
+- Fix title casing for "Log Out" action
+
 ## [Copilot usage auth] - 2026-02-01
 
 - Fix auth for Copilot usage command using existing OAuth
