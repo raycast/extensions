@@ -8,6 +8,8 @@
     - Module specific tags can be seen by hovering over the preferences text box
 - Made Loading tags use `…` consistently instead of `...`
 - Updated free and used preference to be per-module for cpu, memory, disk and battery usage
+- Removed displaymode field from menubar
+
 
 ## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
 
