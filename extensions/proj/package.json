@@ -9,23 +9,23 @@
   "categories": ["Developer Tools", "Productivity"],
   "keywords": ["projects", "ide", "vscode", "cursor", "developer", "workspace", "collections"],
   "screenshots": [
-    { "path": "assets/1-projects-blank.png" },
-    { "path": "assets/2-search-work.png" },
-    { "path": "assets/3-manage-collections.png" },
-    { "path": "assets/4-add-collection.png" },
-    { "path": "assets/5-add-projects.png" },
-    { "path": "assets/6-project-settings.png" }
+    { "path": "media/1-search-projects.png" },
+    { "path": "media/2-search-collections.png" },
+    { "path": "media/3-project-settings.png" },
+    { "path": "media/4-manage-collections.png" },
+    { "path": "media/5-new-collection.png" },
+    { "path": "media/6-add-projects.png" }
   ],
   "commands": [
     {
       "name": "projects",
-      "title": "Projects",
+      "title": "Search Projects",
       "description": "Browse and open projects in your IDE",
       "mode": "view"
     },
     {
       "name": "project-collections",
-      "title": "Project Collections",
+      "title": "Manage Collections",
       "description": "Create, edit, and organize project collections",
       "mode": "view"
     },

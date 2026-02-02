@@ -282,9 +282,9 @@ export function useProjects() {
     }
 
     if (grouping === "recency") {
-      const recent = filteredProjects.filter((p) =>
-        isRecentProject(p.lastOpened),
-      );
+      const recent = filteredProjects
+        .filter((p) => isRecentProject(p.lastOpened))
+        .sort((a, b) => (b.lastOpened ?? 0) - (a.lastOpened ?? 0));
       const rest = filteredProjects.filter(
         (p) => !isRecentProject(p.lastOpened),
       );
@@ -301,9 +301,9 @@ export function useProjects() {
     const groups: GroupedSection[] = [];
     const assigned = new Set<string>();
 
-    const recentProjects = filteredProjects.filter((p) =>
-      isRecentProject(p.lastOpened),
-    );
+    const recentProjects = filteredProjects
+      .filter((p) => isRecentProject(p.lastOpened))
+      .sort((a, b) => (b.lastOpened ?? 0) - (a.lastOpened ?? 0));
     if (recentProjects.length > 0) {
       groups.push({ title: "Recent", projects: recentProjects, isAuto: true });
       recentProjects.forEach((p) => assigned.add(p.path));

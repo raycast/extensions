@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.png" width="128" height="128" alt="Proj Icon">
+  <img src="media/icon.png" width="128" height="128" alt="Proj Icon">
 </p>
 
 <h1 align="center">Proj</h1>
@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/1-projects-blank.png" alt="Proj Screenshot" width="600">
+  <img src="media/1-search-projects.png" alt="Proj Screenshot" width="600">
 </p>
 
 ---
@@ -34,8 +34,8 @@
 
 | Command | Description |
 |---------|-------------|
-| **Projects** | Browse and open projects in your IDE |
-| **Project Collections** | Create, edit, and organize project collections |
+| **Search Projects** | Browse and open projects in your IDE |
+| **Manage Collections** | Create, edit, and organize project collections |
 | **Add Projects** | Add a single project or a source folder containing multiple projects |
 
 ## Search Syntax
