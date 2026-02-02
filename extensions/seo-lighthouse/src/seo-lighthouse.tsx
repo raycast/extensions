@@ -185,7 +185,7 @@ function LighthouseReportView({
       }
     });
 
-    markdown += `\n## SEO & Accessibility (Marketing)\n\n`;
+    markdown += `\n## ${t('seo_accessibility')}\n\n`;
     markdown += `| ${t('status')} | Campo | Valor |\n|:---:|:---|:---|\n`;
     const seoScore = report.categories?.seo?.score;
     const accScore = report.categories?.accessibility?.score;
