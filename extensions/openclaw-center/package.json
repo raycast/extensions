@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openclaw-center",
+  "title": "OpenClaw Center",
+  "description": "Control your OpenClaw bot from Raycast - chat, skills, cron jobs, and status",
+  "icon": "icon.png",
+  "author": "hsztul",
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "keywords": ["openclaw", "ai", "bot", "assistant", "chat", "automation"],
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Chat with OpenClaw",
+      "description": "Send a message to your OpenClaw bot",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "OpenClaw Status",
+      "description": "View gateway and channel status",
+      "mode": "view"
+    },
+    {
+      "name": "skills",
+      "title": "OpenClaw Skills",
+      "description": "View and manage installed skills",
+      "mode": "view"
+    },
+    {
+      "name": "cron-jobs",
+      "title": "OpenClaw Cron Jobs",
+      "description": "View and manage scheduled tasks",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "connectionMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Connection Mode",
+      "description": "How to connect to the OpenClaw gateway",
+      "default": "local",
+      "data": [
+        { "title": "Local (127.0.0.1)", "value": "local" },
+        { "title": "Remote (Tailscale)", "value": "remote" }
+      ]
+    },
+    {
+      "name": "remoteUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Remote URL",
+      "description": "Gateway URL for remote mode (e.g., https://my-mac.tailnet-name.ts.net)",
+      "placeholder": "https://my-mac.tailnet-name.ts.net"
+    },
+    {
+      "name": "localPort",
+      "type": "textfield",
+      "required": false,
+      "title": "Local Port",
+      "description": "Gateway port for local mode (default: 18789)",
+      "default": "18789"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": false,
+      "title": "Password",
+      "description": "Gateway authentication password (if configured)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.0",
+    "@raycast/utils": "^1.18.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.17",
+    "@types/ws": "^8.5.13",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
