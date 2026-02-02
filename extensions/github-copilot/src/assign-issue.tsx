@@ -27,13 +27,19 @@ function Command() {
       branch: FormValidation.Required,
     },
     onSubmit: async (formValues) => {
-      if (isSubmitting || !repositoryId || !copilotBotId) {
-        if (!copilotBotId) {
-          await showFailureToast(new Error("Copilot coding agent is not available for this repository"), {
-            title: "Cannot assign issue",
-          });
-        }
+      if (isSubmitting) {
         return;
+      }
+      
+      if (!repositoryId || !copilotBotId) {
+        const errorMessage = !copilotBotId 
+          ? "Copilot coding agent is not available for this repository"
+          : "Repository information is not available";
+        await showFailureToast(new Error(errorMessage), {
+          title: "Cannot assign issue",
+        });
+        return;
+      }
       }
 
       setIsSubmitting(true);
