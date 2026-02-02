@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [Major Improvements] - PR_MERGE
+## [Major Improvements] - {PR_MERGE}
 
 ### New Features
 
