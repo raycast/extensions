@@ -3,9 +3,6 @@ import { fetchModelsData } from "./lib/api";
 
 export default async function BackgroundSync() {
   const { enableBackgroundSync } = getPreferenceValues<Preferences>();
-
-export default async function BackgroundSync() {
-  const { enableBackgroundSync } = getPreferenceValues<Preferences>();
   if (!enableBackgroundSync) return;
 
   try {
