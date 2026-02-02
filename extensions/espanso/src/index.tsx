@@ -39,14 +39,25 @@ export default function Command() {
           .filter((match) => !match.form)
           .map((match, index) => {
             const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
-            const categoryParts = pathParts.map((part) => part.replace(".yml", "")).filter(Boolean);
-            const category = categoryParts.map((part) => part.toLowerCase()).join(" > ");
+            const allParts = pathParts.map((part) => part.replace(".yml", "")).filter(Boolean);
+
+            let category = "";
+            let subcategory = "";
+
+            if (allParts.length > 1) {
+              const folderParts = allParts.slice(0, -1);
+              category = folderParts.map((part) => part.toLowerCase()).join(" > ");
+              subcategory = allParts[allParts.length - 1].toLowerCase();
+            } else {
+              category = allParts[0]?.toLowerCase() || "";
+              subcategory = "";
+            }
 
             categoriesSet.add(category);
             return {
               ...match,
               category,
-              subcategory: "",
+              subcategory,
               triggers: match.triggers,
               replace: match.replace,
               label: match.label,
@@ -107,6 +118,12 @@ export default function Command() {
 
   const sortItems = (items: FormattedMatch[]) => {
     return items.sort((a, b) => {
+      if (!a.subcategory && b.subcategory) return -1;
+      if (a.subcategory && !b.subcategory) return 1;
+      if (a.subcategory && b.subcategory) {
+        const subcategoryCompare = a.subcategory.localeCompare(b.subcategory);
+        if (subcategoryCompare !== 0) return subcategoryCompare;
+      }
       const labelA = a.label ?? a.replace;
       const labelB = b.label ?? b.replace;
       return labelA.localeCompare(labelB);
