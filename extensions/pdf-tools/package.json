@@ -197,19 +197,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.3",
+    "@libpdf/core": "^0.2.5",
+    "@raycast/api": "^1.104.4",
     "universal-selection": "^0.1.10"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

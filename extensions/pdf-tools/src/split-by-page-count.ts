@@ -1,21 +1,28 @@
-import { closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  closeMainWindow,
+  getPreferenceValues,
+  getSelectedFinderItems,
+  LaunchProps,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import fs from "fs/promises";
 import path from "path";
+import { PDF } from "@libpdf/core";
 import { getSelectedItems } from "universal-selection";
-import { isPDFDocumentLocked, splitByPageCount } from "swift:../swift";
+import { isMac, isWindows, splitByPageCountWindows } from "./lib/utils";
 
-interface Preferences {
-  suffix: string;
-}
-
-export default async function Command(props: { arguments: { pageCount: string } }) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.SplitByPageCount }>) {
   try {
     const pageCount = Number(props.arguments.pageCount);
+    const preferences = getPreferenceValues<Preferences.SplitByPageCount>();
+    const suffix = preferences.suffix || undefined;
 
     if (!Number.isInteger(pageCount) || pageCount <= 0) {
       throw new Error("A positive integer is required");
     }
 
-    const selectedItems = await getSelectedItems();
+    const selectedItems = isMac ? await getSelectedItems() : await getSelectedFinderItems();
 
     if (selectedItems.length === 0) {
       throw new Error("You must select at least one PDF file");
@@ -25,24 +32,60 @@ export default async function Command(props: { arguments: { pageCount: string } 
       if (path.extname(item.path).toLowerCase() !== ".pdf") {
         throw new Error("Only PDF files should be selected");
       }
+    }
 
-      if (await isPDFDocumentLocked(item.path)) {
-        throw new Error(`"${path.basename(item.path)}" is password-protected`);
+    // Mac implementation using Swift
+    if (isMac) {
+      const { isPDFDocumentLocked, splitByPageCount } = await import("swift:../swift");
+
+      for (const item of selectedItems) {
+        if (await isPDFDocumentLocked(item.path)) {
+          throw new Error(`"${path.basename(item.path)}" is password-protected`);
+        }
+      }
+
+      await closeMainWindow();
+
+      for (const item of selectedItems) {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: `Splitting "${path.basename(item.path)}"`,
+        });
+
+        await splitByPageCount(item.path, pageCount, suffix);
       }
     }
 
-    await closeMainWindow();
+    // Windows implementation using @libpdf/core
+    if (isWindows) {
+      await closeMainWindow();
 
-    const preferences = getPreferenceValues<Preferences>();
-    const suffix = preferences.suffix || undefined;
+      for (const item of selectedItems) {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: `Splitting "${path.basename(item.path)}"`,
+        });
 
-    for (const item of selectedItems) {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: `Splitting "${path.basename(item.path)}"`,
-      });
+        const pdfBytes = await fs.readFile(item.path);
+        const pdf = await PDF.load(new Uint8Array(pdfBytes));
 
-      await splitByPageCount(item.path, pageCount, suffix);
+        if (pdf.isEncrypted) {
+          throw new Error(`"${path.basename(item.path)}" is password-protected`);
+        }
+
+        const originalFileName = path.parse(item.path).name;
+        const dirPath = path.dirname(item.path);
+
+        // Split into chunks
+        const chunks = await splitByPageCountWindows(pdf, pageCount);
+
+        // Save each chunk
+        for (let i = 0; i < chunks.length; i++) {
+          const chunkBytes = await chunks[i].save();
+          const chunkFilePath = path.join(dirPath, `${originalFileName} [${suffix} ${i + 1}].pdf`);
+          await fs.writeFile(chunkFilePath, chunkBytes);
+        }
+      }
     }
 
     await showToast({

@@ -1,13 +1,15 @@
-import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getSelectedFinderItems, LaunchProps, showToast, Toast } from "@raycast/api";
+import fs from "fs/promises";
 import path from "path";
+import { PDF } from "@libpdf/core";
 import { getSelectedItems } from "universal-selection";
-import { isPDFDocumentLocked, unlock } from "swift:../swift";
+import { isMac, isWindows } from "./lib/utils";
 
-export default async function Command(props: { arguments: { password: string } }) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Unlock }>) {
   try {
     const { password } = props.arguments;
 
-    const selectedItems = await getSelectedItems();
+    const selectedItems = isMac ? await getSelectedItems() : await getSelectedFinderItems();
 
     if (selectedItems.length === 0) {
       throw new Error("No files have been selected");
@@ -17,21 +19,63 @@ export default async function Command(props: { arguments: { password: string } }
       if (path.extname(item.path).toLowerCase() !== ".pdf") {
         throw new Error("Only PDF files should be selected");
       }
+    }
 
-      if (!(await isPDFDocumentLocked(item.path))) {
-        throw new Error(`"${path.basename(item.path)}" is not password-protected`);
+    // Mac implementation using Swift
+    if (isMac) {
+      const { isPDFDocumentLocked, unlock } = await import("swift:../swift");
+
+      for (const item of selectedItems) {
+        if (!(await isPDFDocumentLocked(item.path))) {
+          throw new Error(`"${path.basename(item.path)}" is not password-protected`);
+        }
+      }
+
+      await closeMainWindow();
+
+      for (const item of selectedItems) {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: `Unlocking "${path.basename(item.path)}"`,
+        });
+
+        await unlock(item.path, password);
       }
     }
 
-    await closeMainWindow();
+    // Windows implementation using @libpdf/core
+    if (isWindows) {
+      await closeMainWindow();
 
-    for (const item of selectedItems) {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: `Unlocking "${path.basename(item.path)}"`,
-      });
+      for (const item of selectedItems) {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: `Unlocking "${path.basename(item.path)}"`,
+        });
 
-      await unlock(item.path, password);
+        const pdfBytes = await fs.readFile(item.path);
+
+        const pdf = await PDF.load(new Uint8Array(pdfBytes), {
+          credentials: password,
+        });
+
+        if (!pdf.isEncrypted) {
+          throw new Error(`"${path.basename(item.path)}" is not password-protected`);
+        }
+
+        if (!pdf.isAuthenticated) {
+          throw new Error(`Failed to unlock "${path.basename(item.path)}". Check if the password is correct.`);
+        }
+
+        pdf.removeProtection();
+
+        const unlockedBytes = await pdf.save();
+        const originalFileName = path.parse(item.path).name;
+        const dirPath = path.dirname(item.path);
+        const newFilePath = path.join(dirPath, `${originalFileName} [unlocked].pdf`);
+
+        await fs.writeFile(newFilePath, unlockedBytes);
+      }
     }
 
     await showToast({
