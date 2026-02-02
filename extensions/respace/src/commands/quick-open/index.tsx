@@ -4,9 +4,8 @@ import { launchWorkspace } from "../../core/launcher/launcher";
 import { getAllWorkspaces } from "../../core/storage/storage";
 import type { Workspace } from "../../types/workspace";
 
-interface Arguments {
-  workspaceName: string;
-}
+export default async function QuickOpen(
+  props: LaunchProps<{ arguments: Arguments.QuickOpen }>,
 
 /**
  * Finds a workspace by name (exact match first, then partial match)
