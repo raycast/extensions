@@ -4,6 +4,6 @@
 
 # Cyberduck
 
-This is a Raycast extension for [FileZilla](https://filezilla-project.org/) - _The free FTP solutions_.
+This is a Raycast extension for [FileZilla](https://filezilla-project.org/) - _The free FTP solution_.
 
 > NOTE: this extension requires the application to be installed in "Applications".
