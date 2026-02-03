@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Assign Issue to Copilot] - {PR_MERGE_DATE}
+## [Assign Issue to Copilot] - 2026-02-03
 
 - Add "Assign Issue to Copilot" command
 
