@@ -7,7 +7,7 @@ const {
   ytdlPath: ytdlPathPreference,
   ffmpegPath: ffmpegPathPreference,
   ffprobePath: ffprobePathPreference,
-} = getPreferenceValues();
+} = getPreferenceValues<Preferences>();
 
 export const MAX_VIDEO_DURATION = 480; // 8 minutes in seconds
 
