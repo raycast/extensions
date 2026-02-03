@@ -2,7 +2,7 @@
 
 ## [Assign Issue to Copilot] - {PR_MERGE_DATE}
 
-- Add Assign Issue to Copilot command
+- Add "Assign Issue to Copilot" command
 
 ## [Manage Paid Premium Requests action] - 2026-02-02
 
