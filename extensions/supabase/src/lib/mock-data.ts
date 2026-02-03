@@ -1,6 +1,6 @@
 import type { Project, Organization, Branch } from "./types";
 
-export const MOCK_ENABLED = false; // Set to true for screenshots
+export const MOCK_ENABLED = true; // Set to true for screenshots
 
 export const mockOrganizations: Organization[] = [
   { id: "org-1", name: "Acme Corporation" },
