@@ -3,7 +3,7 @@ import { LLMProviderPreferences } from "../types";
 import { DEFAULT_OPENAI_EXECUTION_MODEL } from "shared/constants";
 
 export function resolveLlmApiProviderPreferences(): LLMProviderPreferences {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   const apiProviderType = preferences.apiProviderType ?? "openai";
   const apiKey = preferences.apiKey?.trim() ?? "";
