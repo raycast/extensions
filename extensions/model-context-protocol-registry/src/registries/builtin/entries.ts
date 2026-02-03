@@ -316,7 +316,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@razuna/mcp-server-remote"],
       env: {
-        "access-token": "<YOUR_ACCESS_TOKEN_HERE>",
+        "access-token": "YOUR_ACCESS_TOKEN_HERE",
       },
     },
   },
