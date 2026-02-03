@@ -8,16 +8,21 @@ export type Panel = {
 export type Server = {
   id: string;
   name: string;
+  bootOrder: string[]
   memory: string;
   cpu: string;
   storage: Array<{
     capacity: string;
+    "enabled": boolean
+    "primary": boolean
   }>;
   network: {
     primary: {
       limit: string;
       ipv4: Array<{
         address: string;
+        gateway: string
+        netmask: string
       }>;
       ipv6: Array<{
         addresses: string[];
@@ -34,6 +39,16 @@ export type SSHKey = {
   enabled: boolean;
   created: string;
 };
+
+export type Task = {
+  "action": string
+  "started": string
+  "updated": string
+  "finished": string
+  "completed": boolean,
+  "status": string
+  "success": boolean
+}
 
 export type SingleResult<T> = {
   data: T;

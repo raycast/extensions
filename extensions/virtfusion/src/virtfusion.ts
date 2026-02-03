@@ -1,4 +1,4 @@
-import { PaginatedResult, Panel, Server, SSHKey } from "./types";
+import { PaginatedResult, Panel, Server, SSHKey, Task } from "./types";
 
 class VirtFusion {
   private panel: Panel;
@@ -27,6 +27,9 @@ class VirtFusion {
   }
   public async listServers(params: { page: number }) {
     return this.request<PaginatedResult<Server>>(`server?page=${params.page}`);
+  }
+  public async listServerTasks(params: { serverId: string, page: number }) {
+    return this.request<PaginatedResult<Task>>(`server/${params.serverId}/tasks/?page=${params.page}`);
   }
   public async listAccountSSHKeys(params: { page: number }) {
     return this.request<PaginatedResult<SSHKey>>(`account/sshKeys?page=${params.page}`);
