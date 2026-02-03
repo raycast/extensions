@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Open workflow run] - {PR_MERGE_DATE}
+## [Open workflow run] - 2026-02-03
 
 - Add "Open workflow run" menu item to the "View Tasks" command
 
