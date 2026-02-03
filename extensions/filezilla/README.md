@@ -2,7 +2,7 @@
     <img src="./assets/icon.png" width="150" height="150" />
 </p>
 
-# Cyberduck
+# FileZilla
 
 This is a Raycast extension for [FileZilla](https://filezilla-project.org/) - _The free FTP solution_.
 
