@@ -1,0 +1,45 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5AC8FA"/>
+      <stop offset="50%" stop-color="#007AFF"/>
+      <stop offset="100%" stop-color="#5856D6"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  
+  <!-- Stopwatch centered - LARGER -->
+  <g transform="translate(256, 265)">
+    <!-- Main circle - LARGER & THICKER -->
+    <circle r="160" fill="none" stroke="white" stroke-width="14"/>
+    
+    <!-- Hook at top - adjusted for larger circle -->
+    <line x1="0" y1="-160" x2="0" y2="-182" stroke="white" stroke-width="9"/>
+    <rect x="-16" y="-216" width="32" height="36" rx="9" fill="none" stroke="white" stroke-width="7"/>
+    
+    <!-- Hour marks - moved outward, thicker -->
+    <line x1="0" y1="-132" x2="0" y2="-108" stroke="white" stroke-width="9" stroke-linecap="round"/>
+    <line x1="132" y1="0" x2="108" y2="0" stroke="white" stroke-width="9" stroke-linecap="round"/>
+    <line x1="-132" y1="0" x2="-108" y2="0" stroke="white" stroke-width="9" stroke-linecap="round"/>
+    
+    <!-- Clock hands - longer -->
+    <line x1="0" y1="0" x2="-42" y2="-54" stroke="white" stroke-width="11" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="48" y2="-66" stroke="white" stroke-width="9" stroke-linecap="round"/>
+    
+    <!-- Center dot - larger -->
+    <circle r="12" fill="white"/>
+    
+    <!-- Mini calendar - LARGER -->
+    <g transform="translate(-47, 22)">
+      <!-- Calendar body -->
+      <rect width="95" height="75" rx="12" fill="white"/>
+      <!-- Calendar header (coral) -->
+      <rect width="95" height="26" rx="12" fill="#FF6B6B"/>
+      <rect y="14" width="95" height="12" fill="#FF6B6B"/>
+      <!-- Checkmark -->
+      <polyline points="22,52 36,66 73,30" fill="none" stroke="#3B82F6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>
