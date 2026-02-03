@@ -1,6 +1,7 @@
 import { getPreferences } from "./preferences";
 import { handleErrors } from "./error_handler";
-import { getSelectedTextOfFrontmostApplication, MarkdownText, SelectedText, replaceSelectedText } from "./selected_text";
+import { getSelectedTextOfFrontmostApplication, replaceSelectedText } from "./selected_text";
+import { SelectedText, MarkdownText } from "./selected_text";
 
 export default async function Command() {
   return getSelectedTextOfFrontmostApplication()
