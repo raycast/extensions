@@ -28,11 +28,11 @@ import {
   signPayload,
 } from "./device-identity";
 
-import pkg from "../../package.json" with { type: "json" };
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { version: CLIENT_VERSION } = require("../../package.json");
 
 // Client identification - must use schema-valid values
 const CLIENT_ID = "cli";
-const CLIENT_VERSION = pkg.version;
 const CLIENT_MODE = "cli";
 
 interface PendingRequest {
