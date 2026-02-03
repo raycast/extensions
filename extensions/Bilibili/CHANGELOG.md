@@ -1,5 +1,9 @@
 # Bilibili Changelog
 
+## [Windows support] -2026-01-23
+
+- Support Windows platform
+
 ## [Fix Bug] - 2025-09-20
 
 - Fix the issue where the app would crash when opening dynamic post with the description is null.

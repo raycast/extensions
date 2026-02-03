@@ -15,9 +15,12 @@ export const Icon = {
   Terminal: "terminal" as const,
   Code: "code" as const,
   Box: "box" as const,
+  Upload: "upload" as const,
+  Plug: "plug" as const,
   Database: "database" as const,
   Gear: "gear" as const,
   Eye: "eye" as const,
+  EyeDisabled: "eye-disabled" as const,
   Check: "check" as const,
   CheckCircle: "check-circle" as const,
   Text: "text" as const,
@@ -30,12 +33,28 @@ export const Icon = {
   ArrowClockwise: "arrow-clockwise" as const,
   Pencil: "pencil" as const,
   Trash: "trash" as const,
+  Undo: "undo" as const,
+  Clipboard: "clipboard" as const,
+  List: "list" as const,
 };
 
 // Mock ActionPanel component
-export const ActionPanel = ({ children }: { children: React.ReactNode }) => {
+const ActionPanelComponent = ({ children }: { children: React.ReactNode }) => {
   return React.createElement("div", { "data-testid": "action-panel" }, children);
 };
+
+// ActionPanel.Section component
+const ActionPanelSection = ({ children, title }: { children?: React.ReactNode; title?: string }) => {
+  return React.createElement("div", { "data-testid": "action-panel-section" }, [
+    title && React.createElement("div", { key: "title" }, title),
+    children,
+  ]);
+};
+
+// Export ActionPanel with Section sub-component
+export const ActionPanel = Object.assign(ActionPanelComponent, {
+  Section: ActionPanelSection,
+});
 
 // Mock Action components
 const ActionObject = {
@@ -43,8 +62,8 @@ const ActionObject = {
     Destructive: "destructive" as const,
     Regular: "regular" as const,
   },
-  Push: ({ children, ...props }: any) => {
-    return React.createElement("div", { "data-testid": "action-push", ...props }, children);
+  Push: ({ children, title, ...props }: any) => {
+    return React.createElement("div", { "data-testid": "action-push", ...props }, title || children);
   },
   Open: ({ children, ...props }: any) => {
     return React.createElement("div", { "data-testid": "action-open", ...props }, children);
@@ -235,7 +254,20 @@ ListDropdown.Item = ({ title, value, ...props }: any) => {
   return React.createElement("option", { "data-testid": "list-dropdown-item", value, ...props }, title);
 };
 
+ListDropdown.Section = ({ children, title, ...props }: any) => {
+  return React.createElement("optgroup", { "data-testid": "list-dropdown-section", label: title, ...props }, children);
+};
+
 List.Dropdown = ListDropdown;
+
+// Mock List.EmptyView
+List.EmptyView = ({ children, title, description, ...props }: any) => {
+  return React.createElement("div", { "data-testid": "list-empty-view", ...props }, [
+    title && React.createElement("div", { key: "title" }, title),
+    description && React.createElement("div", { key: "description" }, description),
+    children,
+  ]);
+};
 
 // Mock other components
 export const Color = {
@@ -271,7 +303,13 @@ export const Detail = ({ children, markdown, ...props }: any) => {
 // Mock functions
 export const showToast = vi.fn().mockResolvedValue(undefined);
 export const popToRoot = vi.fn().mockResolvedValue(undefined);
-export const getPreferenceValues = vi.fn(() => ({}));
+export const getPreferenceValues = vi.fn(() => ({
+  enableDefaults: true,
+  enableCustomHeaderPattern: false,
+  enableCustomStartEndPatterns: false,
+  enableCustomZshrcPath: false,
+  configFileType: "zshrc",
+}));
 
 // Mock useNavigation hook
 export const useNavigation = vi.fn(() => ({
@@ -293,4 +331,35 @@ export const Keyboard = {
       New: { key: "n", modifiers: ["cmd"] } as const,
     },
   },
+};
+
+// Mock Alert
+export const Alert = {
+  ActionStyle: {
+    Destructive: "destructive" as const,
+    Default: "default" as const,
+  },
+};
+
+// Mock confirmAlert - returns true by default (confirmed)
+export const confirmAlert = vi.fn().mockResolvedValue(true);
+
+// Mock trash - moves file to trash
+export const trash = vi.fn().mockResolvedValue(undefined);
+
+// Mock Clipboard
+export const Clipboard = {
+  copy: vi.fn().mockResolvedValue(undefined),
+  paste: vi.fn().mockResolvedValue(""),
+  read: vi.fn().mockResolvedValue(""),
+  readText: vi.fn().mockResolvedValue(""),
+};
+
+// Mock LocalStorage
+export const LocalStorage = {
+  getItem: vi.fn().mockResolvedValue(null),
+  setItem: vi.fn().mockResolvedValue(undefined),
+  removeItem: vi.fn().mockResolvedValue(undefined),
+  clear: vi.fn().mockResolvedValue(undefined),
+  allItems: vi.fn().mockResolvedValue({}),
 };

@@ -3,9 +3,11 @@ import { PullRequestWithAgentSessions } from "../services/copilot";
 import { getIcon } from "../utils";
 import { reauthorize } from "../lib/oauth";
 
-export function PullRequestWithAgentSessionsItem(props: {
-  pullRequestWithAgentSessions: PullRequestWithAgentSessions;
-}) {
+export function PullRequestWithAgentSessionsItem(
+  props: Readonly<{
+    pullRequestWithAgentSessions: PullRequestWithAgentSessions;
+  }>,
+) {
   return (
     <List.Item
       key={props.pullRequestWithAgentSessions.key}

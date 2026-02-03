@@ -303,8 +303,9 @@ function CreateProject({ onCreate }: { onCreate: () => void }) {
         <Form.Dropdown.Item title="15" value="15" />
         <Form.Dropdown.Item title="16" value="16" />
         <Form.Dropdown.Item title="17" value="17" />
+        <Form.Dropdown.Item title="18 (Preview)" value="18" />
       </Form.Dropdown>
-      <Form.Dropdown title="Region" {...itemProps.region_id}>
+      <Form.Dropdown title="Region" info="Select the region closest to your application." {...itemProps.region_id}>
         <Form.Dropdown.Section title="AWS">
           {regions
             .filter((region) => region.region_id.startsWith("aws-"))

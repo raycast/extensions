@@ -13,8 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import fs from "fs";
-import Gemini from "gemini-ai";
-import fetch from "node-fetch";
+import { GoogleGenAI } from "@google/genai";
 import { useEffect, useState } from "react";
 import { getSafetySettings } from "./safetySettings";
 import { useCommandHistory } from "./useCommandHistory";
@@ -28,8 +27,8 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
   const { apiKey, model, customModel } = getPreferenceValues();
-  // set defaultModel to customModel if customModel is a non-empty string
   const isCustomModelValid = Boolean(customModel && customModel.trim().length > 0);
+  // set defaultModel to customModel if customModel is a non-empty string
   const defaultModel = isCustomModelValid ? customModel : getPreferenceValues().defaultModel;
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
@@ -50,39 +49,52 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
     });
 
     const start = Date.now();
-    const gemini = new Gemini(apiKey, { fetch });
 
     try {
-      let response = await gemini.ask(query, {
-        model: model === "default" ? defaultModel : model,
-        stream: (x) => {
-          try {
-            if (x !== undefined && x !== null) {
-              setMarkdown((markdown) => markdown + x);
-            }
-          } catch (streamError) {
-            console.error("Error in stream callback:", streamError);
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Response Failed",
-              message: streamError.message, // Display the error message in the toast notification
-            });
-          }
-        },
-        data: data ?? buffer,
-        safetySettings: getSafetySettings(),
-      });
-      setMarkdown(response);
-      setLastResponse(response);
+      const genAI = new GoogleGenAI({ apiKey: apiKey });
+      const targetModelName = model === "default" ? defaultModel : model;
+      const promptParts = [];
+      const imagesToProcess = data ?? buffer;
 
-      // Add to history with model information
-      const usedModel = model === "default" ? defaultModel : model;
-      await addToHistory(query, response, usedModel);
+      // Convert images to base64 format for the Gemini API
+      if (imagesToProcess && imagesToProcess.length > 0) {
+        imagesToProcess.forEach((imgBuffer) => {
+          promptParts.push({
+            inlineData: {
+              data: imgBuffer.toString("base64"),
+              mimeType: "image/png",
+            },
+          });
+        });
+      }
+      promptParts.push({ text: query });
+      let fullResponseText = "";
+      const result = await genAI.models.generateContentStream({
+        model: targetModelName,
+        contents: [
+          {
+            role: "user",
+            parts: promptParts,
+          },
+        ],
+        config: {
+          safetySettings: getSafetySettings(),
+        },
+      });
+      for await (const chunk of result) {
+        const chunkText = chunk.text;
+        if (chunkText) {
+          fullResponseText += chunkText;
+          setMarkdown((prev) => prev + chunkText);
+        }
+      }
+      setLastResponse(fullResponseText);
+      await addToHistory(query, fullResponseText, targetModelName);
 
       await showToast({
         style: Toast.Style.Success,
         title: "Response Finished",
-        message: `${(Date.now() - start) / 1000} seconds`,
+        message: `${((Date.now() - start) / 1000).toFixed(1)} seconds`,
       });
     } catch (e) {
       if (e.message.includes("429")) {
@@ -104,7 +116,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
         await showToast({
           style: Toast.Style.Failure,
           title: "Response Failed",
-          // message: `${(Date.now() - start) / 1000} seconds`,
           message: e.message, // Display the error message in the toast notification
         });
         setMarkdown(

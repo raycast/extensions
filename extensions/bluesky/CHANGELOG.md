@@ -1,9 +1,14 @@
 # Bluesky Changelog
 
-## [Maintenance Release] - 2025-03-06
+## [Maintenance Release + Fix Menubar Icon] - 2026-01-20
 
-- in `Notifications`, fix `initialRes.body?.cancel` error (related: [Issue #14814 comment](https://github.com/raycast/extensions/issues/14814#issuecomment-2396432584)) 
-- chore: update `@atproto/api` so we have better TS typing (ref: [@atproto/api v0.14.0 release notes](https://docs.bsky.app/blog/api-v0-14-0-release-notes))
+- fix: menu bar icon was not showing
+- chore: modernize extension to use latest Raycast configuration
+
+## [Maintenance Release + Fix] - 2025-03-06
+
+- in `Notifications`, fix `initialRes.body?.cancel` error (ref: [Issue #14814 comment](https://github.com/raycast/extensions/issues/14814#issuecomment-2396432584)) 
+- chore: update `@atproto/api` so we have better TS typing (related: [@atproto/api v0.14.0 release notes](https://docs.bsky.app/blog/api-v0-14-0-release-notes))
 
 ## [Updated Logo] - 2025-01-10
 

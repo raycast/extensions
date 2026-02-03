@@ -1,5 +1,11 @@
 # Oura Changelog
 
+## [2.0.0] - 2026-02-03
+- Migrated authentication to Oura OAuth2 (client ID/secret + PKCE) as Personal Access Tokens are now deprecated. 
+- Update API requests to use OAuth2 tokens
+- Refresh tokens automatically when expired
+- Update setup instructions and unauthorized messaging for OAuth2
+
 ## [1.1.0] - 2024-11-13
 - Added Oura Stress command: Get the last two week's resilience and contributing factors.
 - Added Oura Resilience command: Get the last two week's stress data: stress high, recovery high, and day summary.

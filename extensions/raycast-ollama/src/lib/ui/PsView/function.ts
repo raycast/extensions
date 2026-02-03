@@ -40,3 +40,30 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
   ).forEach((v) => (o = o.concat(v)));
   return o;
 }
+
+/**
+ * unload Model from Memory.
+ * @param model.
+ * @param revalidate - revalidate function for reload all models.
+ */
+export async function UnloadModel(model: Types.UiModel, revalidate: CallableFunction): Promise<void> {
+  await showToast({
+    style: Toast.Style.Animated,
+    title: `Unloading Model '${model.detail.name}' on '${model.server.name}' Memory`,
+  });
+  await model.server.ollama
+    .OllamaApiGenerateNoStream({
+      model: model.detail.name,
+      keep_alive: 0,
+    })
+    .then(async () => {
+      /* '/api/ps' do not update immidiatly after unloading the model so a delay of 500ms is necessary */
+      await new Promise<void>((res) => setTimeout(res, 500));
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Model '${model.detail.name}' on '${model.server.name}' Unloaded from Memory`,
+      });
+      revalidate();
+    })
+    .catch(async (e) => await showToast({ style: Toast.Style.Failure, title: "Error", message: e }));
+}

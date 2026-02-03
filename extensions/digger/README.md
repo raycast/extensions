@@ -1,0 +1,207 @@
+# Digger
+
+**Like `dig`, but for the web.** Comprehensive website intelligence and metadata extraction for Raycast.
+
+<div align="center">
+  <img src="assets/digger.png" width="128" height="128" alt="Digger icon">
+</div>
+
+<div align="center">
+  <a href="https://www.raycast.com/chrismessina/digger">
+    <img src="https://img.shields.io/badge/Raycast-Store-red.svg" alt="Digger on Raycast Store">
+  </a>
+  <a href="https://github.com/chrismessina/raycast-digger/stargazers">
+    <img src="https://img.shields.io/github/stars/chrismessina/raycast-digger?style=social" alt="Stars">
+  </a>
+  <a href="https://github.com/chrismessina">
+    <img src="https://img.shields.io/github/followers/chrismessina?label=Follow&style=social" alt="Follow @chrismessina">
+  </a>
+</div>
+
+---
+
+Digger surfaces contextual information about any website without needing to open developer tools. Enter a URL and instantly see metadata, SEO signals, security info, DNS records, and more.
+
+## Features
+
+### Overview
+
+- Page title, description, and language
+- Character encoding detection
+- Bot protection/WAF detection (Cloudflare, Akamai, AWS WAF, etc.)
+
+### Metadata & Semantics
+
+- Open Graph tags for social sharing
+- Twitter Card metadata
+- JSON-LD structured data
+- All meta tags at a glance
+
+### Discoverability
+
+- Robots meta directives
+- Canonical URL
+- Sitemap detection and viewer
+- robots.txt and llms.txt detection
+- Alternate/hreflang links
+
+### Resources & Assets
+
+- Stylesheets and scripts
+- Favicon, Apple Touch Icons, and Open Graph images
+- Font detection (Google Fonts, Adobe Fonts, Bunny Fonts, Fontshare, Fonts.com, Font Awesome, custom)
+- Theme color
+
+### HTTP Headers
+
+- View all response headers
+- Security headers audit (CSP, HSTS, X-Frame-Options, etc.)
+- Server identification
+- HTTP status code
+
+### DNS & Certificates
+
+- A, AAAA, MX, TXT, NS, and CNAME records
+- TLS certificate chain information
+- Certificate expiration dates
+
+### Wayback Machine
+
+- Total snapshot count
+- First and last capture dates
+- Quick link to Internet Archive
+- Integration with [Wayback Machine extension](https://www.raycast.com/pernielsentikaer/wayback-machine)
+
+### Data Feeds & API
+
+- RSS, Atom, and JSON feed detection
+- JSON-LD structured data viewer
+- Host metadata discovery (RFC 6415 XRD/JRD)
+
+## Installation
+
+1. [Install Raycast](https://raycast.com)
+
+2. Open Raycast and search for "Digger"
+
+3. Click Install
+
+Or install directly: [Install Digger](https://www.raycast.com/chrismessina/digger)
+
+## Usage
+
+1. Open Raycast (`⌘ Space` by default)
+
+2. Type "Digger" and press Enter
+
+3. Enter a URL (e.g., `raycast.com` or `https://example.com`)
+
+4. Browse the results in the organized sections
+
+### Quick Input Options
+
+Configure these in Raycast preferences (`⌘ ,`):
+
+| Option                           | Description                                                                                                       |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Auto Load from Clipboard**     | Automatically analyze URLs copied to clipboard                                                                    |
+| **Auto Load from Selected Text** | Analyze highlighted URLs in any app                                                                               |
+| **Browser Extension Support**    | Analyze the current browser tab (requires [Raycast Browser Extension](https://www.raycast.com/browser-extension)) |
+
+### Keyboard Shortcuts
+
+| Shortcut  | Action                    |
+| --------- | ------------------------- |
+| `↑` / `↓` | Navigate between sections |
+| `⌘ R`     | Refresh data              |
+| `⌘ C`     | Copy URL                  |
+| `⌘ ⇧ J`   | Copy as JSON              |
+| `⌘ ⇧ M`   | Copy as Markdown          |
+| `⌘ O`     | Open in browser           |
+
+## Examples
+
+Digger is useful for:
+
+- **SEO audits** — Check meta tags, canonical URLs, and structured data
+- **Competitive analysis** — See what technologies competitors use
+- **Debugging** — Inspect headers, redirects, and DNS records
+- **Security research** — View certificate chains and security headers
+- **Content discovery** — Find RSS feeds, sitemaps, and API endpoints
+
+## Preferences
+
+| Preference                   | Description                                | Default |
+| ---------------------------- | ------------------------------------------ | ------- |
+| Auto Load from Clipboard     | Load URLs from clipboard automatically     | Off     |
+| Auto Load from Selected Text | Load URLs from selected text               | Off     |
+| Browser Extension Support    | Load URL from active browser tab           | Off     |
+| Debug Logging                | Enable verbose logging for troubleshooting | Off     |
+
+## Requirements
+
+- macOS 12.0+ or Windows 10+
+- Raycast 1.50.0+
+- Internet connection
+
+## Privacy
+
+Digger fetches websites directly from your machine. No data is sent to third-party servers except:
+
+- **Wayback Machine API** — To retrieve archive history
+- **DNS lookups** — Standard system DNS resolution
+
+No analytics or tracking is included.
+
+## Troubleshooting
+
+### "Failed to fetch website"
+
+- Check your internet connection
+- Verify the URL is accessible in a browser
+- Some sites block automated requests — try again later
+
+### Bot protection detected
+
+Some websites use Cloudflare, Akamai, or similar services that may block or challenge automated requests. Digger will indicate when this happens.
+
+### Slow loading
+
+- Large websites may take longer to analyze
+- Wayback Machine API can be slow or rate-limited during peak times
+
+### Debug mode
+
+Enable "Debug Logging" in preferences to see detailed logs in the Raycast console (`⌘ ,` → Extensions → Digger).
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
+
+For bugs or feature requests, [open an issue](https://github.com/chrismessina/raycast-digger/issues).
+
+## Credits
+
+Built by [Chris Messina](https://github.com/chrismessina).
+
+Uses:
+
+- [Cheerio](https://cheerio.js.org/) for HTML parsing
+- [Wayback Machine API](https://archive.org/help/wayback_api.php) for archive data
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+  <p>If you find Digger helpful, consider supporting development:</p>
+  <a href="https://ko-fi.com/chris">
+    <img src="https://img.shields.io/badge/Ko--fi-Support-ff5f5f?logo=ko-fi&logoColor=white" alt="Support on Ko-fi">
+  </a>
+</div>

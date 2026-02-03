@@ -26,6 +26,7 @@ import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { LogsView } from "../logs-service";
 import { ApiErrorView } from "../../components/ApiErrorView";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 const CLOUD_RUN_REGIONS = [
   { value: "us-central1", title: "Iowa (us-central1)" },
@@ -267,6 +268,9 @@ ${
             title="Open Cloud Run Console"
             url={`https://console.cloud.google.com/run?project=${projectId}`}
           />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -288,6 +292,9 @@ ${
                 url={`https://console.cloud.google.com/run?project=${projectId}`}
               />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchServices} />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -365,6 +372,9 @@ ${
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchServices} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Cloud Shell">
+                    <CloudShellAction projectId={projectId} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }

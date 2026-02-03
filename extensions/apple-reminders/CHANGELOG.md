@@ -1,5 +1,20 @@
 # Apple Reminders Changelog
 
+## [Fix crashes when reminder data is undefined] - 2026-01-28
+
+- Fix crash in menu bar when `data.reminders` is undefined or not an array
+- Add defensive checks in `getAttachedUrls` to handle undefined `attachedUrls` property
+- Resolves: https://github.com/raycast/extensions/issues/24450
+- Resolves: https://github.com/raycast/extensions/issues/24454
+
+## [Fix crash when attachedUrls is undefined] - 2026-01-13
+
+- Handle reminders where `attachedUrls` may be undefined to prevent runtime errors
+
+## [Open all attached reminder URLs] - 2026-01-13
+
+- Detect all URLs in reminder notes (and Reminder URL when available) and expose an “Open Attached URL(s)” action in the list and menu bar.
+
 ## [Simplify AI schema for locations] - 2026-01-09
 
 - Constrain location icons to a small string enum and map back to Raycast icons to reduce AI tool schema branching (Gemini 2.5 fix)

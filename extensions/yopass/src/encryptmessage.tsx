@@ -9,11 +9,10 @@ import {
   useNavigation,
   Icon,
 } from "@raycast/api";
-import fetch from "node-fetch";
+import { FormValidation, useForm } from "@raycast/utils";
 import { encrypt, createMessage, WebStream } from "openpgp";
-import { useState } from "react";
 
-const preferences: { url: string; apiUrl: string } = getPreferenceValues();
+const preferences = getPreferenceValues<Preferences>();
 
 const encryptMessage = async (data: string, passwords: string): Promise<WebStream<string>> => {
   return encrypt({
@@ -42,77 +41,65 @@ type Values = {
 
 const EncryptMessage = () => {
   const { pop } = useNavigation();
-  const [messageError, setMessageError] = useState<string | undefined>();
-
-  const dropMessageErrorIfNeeded = () => {
-    if (messageError && messageError.length > 0) {
-      setMessageError(undefined);
-    }
-  };
 
   const submitEncryptMessage = async (values: Values) => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Encrypting" });
     try {
-      if (values.message.length === 0) {
-        setMessageError("The field should't be empty!");
+      const password = randomString(24);
+
+      const response = await fetch(`${preferences.apiUrl}/secret`, {
+        method: "post",
+        body: JSON.stringify({
+          expiration: parseInt(values.expiration),
+          message: await encryptMessage(values.message, password),
+          one_time: values.onetime,
+        }),
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const json: any = await response.json();
+
+      if (response.status === 200 && json.message) {
+        const url = `${preferences.url}/#/s/${json.message}/${password}`;
+        await Clipboard.copy(url);
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Link copied to clipboard";
+        toast.message = url;
+        pop();
       } else {
-        const password = randomString(24);
-
-        const response = await fetch(`${preferences.apiUrl}/secret`, {
-          method: "post",
-          body: JSON.stringify({
-            expiration: parseInt(values.expiration),
-            message: await encryptMessage(values.message, password),
-            one_time: values.onetime,
-          }),
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const json: any = await response.json();
-
-        if (response.status === 200 && json.message) {
-          const url = `${preferences.url}/#/s/${json.message}/${password}`;
-          await Clipboard.copy(url);
-
-          showToast({ style: Toast.Style.Success, title: "Link copied to clipboard", message: url });
-          pop();
-        } else {
-          throw new Error(JSON.stringify(json));
-        }
+        throw new Error(JSON.stringify(json));
       }
     } catch (err) {
-      showToast({ style: Toast.Style.Failure, title: "An error occured", message: err.message });
+      toast.style = Toast.Style.Failure;
+      toast.title = "An error occurred";
+      toast.message = `${err}`;
     }
   };
+
+  const { handleSubmit, itemProps } = useForm<Values>({
+    onSubmit: submitEncryptMessage,
+    validation: {
+      message: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Encrypt Message" icon={Icon.Fingerprint} onSubmit={submitEncryptMessage} />
+          <Action.SubmitForm title="Encrypt Message" icon={Icon.Fingerprint} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="message"
-        title="Message"
-        placeholder="Enter your secret message"
-        error={messageError}
-        onChange={dropMessageErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setMessageError("The field should't be empty!");
-          } else {
-            dropMessageErrorIfNeeded();
-          }
-        }}
-      />
+      <Form.TextArea title="Message" placeholder="Enter your secret message" {...itemProps.message} />
       <Form.Separator />
-      <Form.Dropdown id="expiration" title="Delete After">
+      <Form.Dropdown title="Delete After" {...itemProps.expiration}>
         <Form.Dropdown.Item value="3600" title="One Hour" />
         <Form.Dropdown.Item value="86400" title="One Day" />
         <Form.Dropdown.Item value="604800" title="One Week" />
       </Form.Dropdown>
-      <Form.Checkbox id="onetime" title="One-Time Download" label="" storeValue />
+      <Form.Checkbox title="One-Time Download" label="" storeValue {...itemProps.onetime} />
     </Form>
   );
 };

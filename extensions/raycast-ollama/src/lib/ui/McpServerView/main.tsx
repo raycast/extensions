@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import React from "react";
+import * as React from "react";
 import { McpServerConfig } from "../../mcp/types";
 import { McpServerFormConfig } from "./form/config";
 import { DeleteMcpServer, GetMcpServerConfig } from "./function";
