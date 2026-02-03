@@ -5,6 +5,7 @@ import type {
   DraftDetail,
   DraftListItem,
   DraftUpdateRequest,
+  MediaStatus,
   PagedResponse,
   SocialSetDetail,
   SocialSetListItem,
@@ -25,10 +26,7 @@ function getAuthHeaders() {
   };
 }
 
-function buildUrl(
-  path: string,
-  params?: Record<string, string | number | undefined>,
-) {
+function buildUrl(path: string, params?: Record<string, string | number | undefined>) {
   const url = new URL(path, API_BASE);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -40,10 +38,7 @@ function buildUrl(
   return url.toString();
 }
 
-async function requestJson<T>(
-  path: string,
-  options: Omit<RequestInit, "body"> & { body?: unknown } = {},
-) {
+async function requestJson<T>(path: string, options: Omit<RequestInit, "body"> & { body?: unknown } = {}) {
   const { body, ...restOptions } = options;
   const headers: Record<string, string> = {
     ...getAuthHeaders(),
@@ -73,9 +68,7 @@ async function requestJson<T>(
 
   if (!response.ok) {
     const apiError = data as ApiErrorResponse | undefined;
-    const message =
-      apiError?.error?.message ||
-      `Request failed with status ${response.status}`;
+    const message = apiError?.error?.message || `Request failed with status ${response.status}`;
     const detailMessages = apiError?.error?.details
       ?.map((detail) => detail.message)
       .filter(Boolean)
@@ -135,7 +128,7 @@ export async function listDrafts(
   if (params.limit) {
     searchParams.append("limit", String(params.limit));
   }
-  if (params.offset) {
+  if (params.offset !== undefined) {
     searchParams.append("offset", String(params.offset));
   }
 
@@ -146,16 +139,10 @@ export async function listDrafts(
 }
 
 export async function getDraft(socialSetId: number, draftId: number) {
-  return requestJson<DraftDetail>(
-    `/v2/social-sets/${socialSetId}/drafts/${draftId}`,
-    { method: "GET" },
-  );
+  return requestJson<DraftDetail>(`/v2/social-sets/${socialSetId}/drafts/${draftId}`, { method: "GET" });
 }
 
-export async function createDraft(
-  socialSetId: number,
-  payload: DraftCreateRequest,
-) {
+export async function createDraft(socialSetId: number, payload: DraftCreateRequest) {
   return requestJson<DraftDetail>(`/v2/social-sets/${socialSetId}/drafts`, {
     method: "POST",
     body: payload,
@@ -168,18 +155,15 @@ export async function deleteDraft(socialSetId: number, draftId: number) {
   });
 }
 
-export async function updateDraft(
-  socialSetId: number,
-  draftId: number,
-  payload: DraftUpdateRequest,
-) {
-  return requestJson<DraftDetail>(
-    `/v2/social-sets/${socialSetId}/drafts/${draftId}`,
-    {
-      method: "PATCH",
-      body: payload,
-    },
-  );
+export async function updateDraft(socialSetId: number, draftId: number, payload: DraftUpdateRequest) {
+  return requestJson<DraftDetail>(`/v2/social-sets/${socialSetId}/drafts/${draftId}`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export async function getMediaStatus(socialSetId: number, mediaId: string) {
+  return requestJson<MediaStatus>(`/v2/social-sets/${socialSetId}/media/${mediaId}`, { method: "GET" });
 }
 
 export async function listTags(socialSetId: number) {

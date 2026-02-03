@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  environment,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, environment, openExtensionPreferences } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { listDrafts, listSocialSets, listTags } from "../lib/api";
@@ -26,25 +19,13 @@ const SOCIAL_SETS_COMMAND_URL = `raycast://extensions/${encodeURIComponent(
   environment.ownerOrAuthorName,
 )}/${encodeURIComponent(environment.extensionName)}/social-sets`;
 
-export function DraftsList(props: {
-  socialSetId?: string;
-  fixedStatus?: DraftStatus;
-}) {
-  const [defaultSocialSetId] = useCachedState<string>(
-    DEFAULT_SOCIAL_SET_STORAGE_KEY,
-  );
-  const [lastSocialSetId, setLastSocialSetId] = useCachedState<string>(
-    LAST_SOCIAL_SET_STORAGE_KEY,
-  );
-  const [selectedSocialSetId, setSelectedSocialSetId] = useState<
-    string | undefined
-  >(props.socialSetId);
+export function DraftsList(props: { socialSetId?: string; fixedStatus?: DraftStatus }) {
+  const [defaultSocialSetId] = useCachedState<string>(DEFAULT_SOCIAL_SET_STORAGE_KEY);
+  const [lastSocialSetId, setLastSocialSetId] = useCachedState<string>(LAST_SOCIAL_SET_STORAGE_KEY);
+  const [selectedSocialSetId, setSelectedSocialSetId] = useState<string | undefined>(props.socialSetId);
   const [statusFilter, setStatusFilter] = useState<"all" | DraftStatus>("all");
   const [isShowingDetail, setIsShowingDetail] = useState(true);
-  const toggleDetail = useCallback(
-    () => setIsShowingDetail((prev) => !prev),
-    [],
-  );
+  const toggleDetail = useCallback(() => setIsShowingDetail((prev) => !prev), []);
 
   const shouldLoadSocialSets = !props.socialSetId;
   const {
@@ -54,10 +35,7 @@ export function DraftsList(props: {
     revalidate: revalidateSocialSets,
   } = usePromise(listSocialSets, [], { execute: shouldLoadSocialSets });
   const socialSetOptions = socialSets ?? [];
-  const groupedSocialSets = useMemo(
-    () => groupSocialSetsByTeam(socialSetOptions),
-    [socialSetOptions],
-  );
+  const groupedSocialSets = useMemo(() => groupSocialSetsByTeam(socialSetOptions), [socialSetOptions]);
 
   useEffect(() => {
     if (props.socialSetId) {
@@ -65,16 +43,9 @@ export function DraftsList(props: {
       return;
     }
     if (!selectedSocialSetId && (defaultSocialSetId || lastSocialSetId)) {
-      setSelectedSocialSetId(
-        defaultSocialSetId || lastSocialSetId || undefined,
-      );
+      setSelectedSocialSetId(defaultSocialSetId || lastSocialSetId || undefined);
     }
-  }, [
-    defaultSocialSetId,
-    lastSocialSetId,
-    props.socialSetId,
-    selectedSocialSetId,
-  ]);
+  }, [defaultSocialSetId, lastSocialSetId, props.socialSetId, selectedSocialSetId]);
 
   useEffect(() => {
     if (!selectedSocialSetId && socialSetOptions.length > 0) {
@@ -87,9 +58,7 @@ export function DraftsList(props: {
     if (!selectedSocialSetId || socialSetOptions.length === 0) {
       return;
     }
-    const isValid = socialSetOptions.some(
-      (socialSet) => String(socialSet.id) === selectedSocialSetId,
-    );
+    const isValid = socialSetOptions.some((socialSet) => String(socialSet.id) === selectedSocialSetId);
     if (!isValid) {
       setSelectedSocialSetId(String(socialSetOptions[0].id));
     }
@@ -102,8 +71,7 @@ export function DraftsList(props: {
   }, [selectedSocialSetId, setLastSocialSetId]);
 
   const socialSetId = props.socialSetId || selectedSocialSetId;
-  const effectiveStatus =
-    props.fixedStatus ?? (statusFilter === "all" ? undefined : statusFilter);
+  const effectiveStatus = props.fixedStatus ?? (statusFilter === "all" ? undefined : statusFilter);
 
   const { data: tagsData } = usePromise(
     async (id?: string) => {
@@ -162,12 +130,9 @@ export function DraftsList(props: {
 
   const showSocialSetDropdown = !props.socialSetId;
   const showStatusDropdown = Boolean(props.socialSetId) && !props.fixedStatus;
-  const isLoading =
-    isLoadingDrafts || (shouldLoadSocialSets && isLoadingSocialSets);
+  const isLoading = isLoadingDrafts || (shouldLoadSocialSets && isLoadingSocialSets);
   const shouldHideStatus =
-    effectiveStatus === "published" ||
-    effectiveStatus === "scheduled" ||
-    effectiveStatus === "draft";
+    effectiveStatus === "published" || effectiveStatus === "scheduled" || effectiveStatus === "draft";
 
   const emptyTitle = props.fixedStatus
     ? {
@@ -202,16 +167,8 @@ export function DraftsList(props: {
         icon={Icon.Warning}
         actions={
           <ActionPanel>
-            <Action
-              title="Retry"
-              icon={Icon.ArrowClockwise}
-              onAction={revalidateSocialSets}
-            />
-            <Action
-              title="Open Extension Preferences"
-              icon={Icon.Gear}
-              onAction={openExtensionPreferences}
-            />
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidateSocialSets} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
@@ -228,11 +185,7 @@ export function DraftsList(props: {
         icon={Icon.Switch}
         actions={
           <ActionPanel>
-            <Action.Open
-              title="Open Social Sets"
-              target={SOCIAL_SETS_COMMAND_URL}
-              icon={Icon.Switch}
-            />
+            <Action.Open title="Open Social Sets" target={SOCIAL_SETS_COMMAND_URL} icon={Icon.Switch} />
           </ActionPanel>
         }
       />
@@ -244,16 +197,8 @@ export function DraftsList(props: {
       icon={Icon.Warning}
       actions={
         <ActionPanel>
-          <Action
-            title="Retry"
-            icon={Icon.ArrowClockwise}
-            onAction={revalidateDrafts}
-          />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidateDrafts} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -264,16 +209,8 @@ export function DraftsList(props: {
       icon={Icon.Pencil}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Create Draft"
-            icon={Icon.Pencil}
-            target={<CreateDraftForm socialSetId={socialSetId} />}
-          />
-          <Action.Open
-            title="Open Social Sets"
-            target={SOCIAL_SETS_COMMAND_URL}
-            icon={Icon.Switch}
-          />
+          <Action.Push title="Create Draft" icon={Icon.Pencil} target={<CreateDraftForm socialSetId={socialSetId} />} />
+          <Action.Open title="Open Social Sets" target={SOCIAL_SETS_COMMAND_URL} icon={Icon.Switch} />
         </ActionPanel>
       }
     />
@@ -292,11 +229,7 @@ export function DraftsList(props: {
             onChange={(value) => setStatusFilter(value as "all" | DraftStatus)}
           >
             {DRAFT_STATUS_OPTIONS.map((option) => (
-              <List.Dropdown.Item
-                key={option.value}
-                value={option.value}
-                title={option.title}
-              />
+              <List.Dropdown.Item key={option.value} value={option.value} title={option.title} />
             ))}
           </List.Dropdown>
         ) : showSocialSetDropdown ? (
@@ -339,10 +272,7 @@ export function DraftsList(props: {
       {orderedDrafts.length === 0 ? (
         emptyView
       ) : (
-        <List.Section
-          title={sectionTitle}
-          subtitle={String(orderedDrafts.length)}
-        >
+        <List.Section title={sectionTitle} subtitle={String(orderedDrafts.length)}>
           {orderedDrafts.map((draft) => (
             <DraftItem
               key={draft.id ?? draft.private_url}

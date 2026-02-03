@@ -1,6 +1,6 @@
 import { Color } from "@raycast/api";
 import { PLATFORM_KEYS, type PlatformKey } from "../lib/constants";
-import type { DraftDetail, DraftListItem } from "../lib/types";
+import type { DraftDetail, DraftListItem, Post } from "../lib/types";
 
 const TAG_COLORS: Color[] = [
   Color.Blue,
@@ -12,15 +12,21 @@ const TAG_COLORS: Color[] = [
   Color.Yellow,
 ];
 
-export function getDetailFullText(detail?: DraftDetail): string | undefined {
+export function getDetailPosts(detail?: DraftDetail): Post[] | undefined {
   if (!detail?.platforms) return undefined;
   for (const key of PLATFORM_KEYS) {
     const platform = detail.platforms[key];
     if (platform && "posts" in platform && platform.posts?.length > 0) {
-      return platform.posts.map((post) => post.text).join("\n\n");
+      return platform.posts;
     }
   }
   return undefined;
+}
+
+export function getDetailFullText(detail?: DraftDetail): string | undefined {
+  const posts = getDetailPosts(detail);
+  if (!posts) return undefined;
+  return posts.map((post) => post.text).join("\n\n");
 }
 
 export function getEnabledPlatforms(detail?: DraftDetail): PlatformKey[] {
@@ -31,9 +37,7 @@ export function getEnabledPlatforms(detail?: DraftDetail): PlatformKey[] {
   });
 }
 
-export function getPublishedLinks(
-  detail?: DraftDetail,
-): Array<{ platform: PlatformKey; url: string }> {
+export function getPublishedLinks(detail?: DraftDetail): Array<{ platform: PlatformKey; url: string }> {
   if (!detail) return [];
   const links: Array<{ platform: PlatformKey; url: string }> = [];
   const urlKeys: Record<PlatformKey, keyof DraftDetail> = {
@@ -58,6 +62,20 @@ export function getTagColor(slug: string): Color {
     hash = (hash * 31 + slug.charCodeAt(i)) | 0;
   }
   return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
+}
+
+export function getDetailMediaIds(detail?: DraftDetail): string[] {
+  const posts = getDetailPosts(detail);
+  if (!posts) return [];
+  const ids = new Set<string>();
+  for (const post of posts) {
+    if (post.media_ids) {
+      for (const id of post.media_ids) {
+        ids.add(id);
+      }
+    }
+  }
+  return Array.from(ids);
 }
 
 export function getScheduledSortTime(draft: DraftListItem) {

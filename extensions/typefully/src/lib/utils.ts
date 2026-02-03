@@ -6,15 +6,10 @@ export type GroupedSocialSets = {
   teamMap: Map<string, { name: string; items: SocialSetListItem[] }>;
 };
 
-export function groupSocialSetsByTeam(
-  items: SocialSetListItem[],
-): GroupedSocialSets {
+export function groupSocialSetsByTeam(items: SocialSetListItem[]): GroupedSocialSets {
   const noTeam: SocialSetListItem[] = [];
   const teamOrder: string[] = [];
-  const teamMap = new Map<
-    string,
-    { name: string; items: SocialSetListItem[] }
-  >();
+  const teamMap = new Map<string, { name: string; items: SocialSetListItem[] }>();
 
   for (const socialSet of items) {
     const team = socialSet.team;
@@ -32,10 +27,7 @@ export function groupSocialSetsByTeam(
   return { noTeam, teamOrder, teamMap };
 }
 
-export function buildPostsFromContent(
-  content: string,
-  splitThread: boolean,
-): Post[] {
+export function buildPostsFromContent(content: string, splitThread: boolean): Post[] {
   const normalized = content.replace(/\r\n/g, "\n").trim();
   if (!normalized) {
     return [];
@@ -74,11 +66,7 @@ export function getDraftSubtitle(draft: DraftListItem) {
 }
 
 export function getDraftDate(draft: DraftListItem) {
-  const dateValue =
-    draft.scheduled_date ||
-    draft.published_at ||
-    draft.updated_at ||
-    draft.created_at;
+  const dateValue = draft.scheduled_date || draft.published_at || draft.updated_at || draft.created_at;
   if (!dateValue) {
     return undefined;
   }
@@ -114,10 +102,7 @@ function normalizeDraftText(text?: string | null) {
   return normalized || undefined;
 }
 
-export function getErrorMessage(
-  error: unknown,
-  fallback = "Something went wrong",
-) {
+export function getErrorMessage(error: unknown, fallback = "Something went wrong") {
   if (error instanceof Error) {
     return error.message || fallback;
   }

@@ -1,24 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Cache,
-  Clipboard,
-  Icon,
-  List,
-  confirmAlert,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Cache, Clipboard, Icon, List, confirmAlert, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { deleteDraft, getDraft, updateDraft } from "../lib/api";
-import {
-  DRAFT_STATUS_LABELS,
-  PLATFORM_LABELS,
-  type DraftStatus,
-} from "../lib/constants";
-import type { DraftDetail, DraftListItem } from "../lib/types";
+import { deleteDraft, getDraft, getMediaStatus, updateDraft } from "../lib/api";
+import { DRAFT_STATUS_LABELS, PLATFORM_LABELS, type DraftStatus } from "../lib/constants";
+import type { DraftDetail, DraftListItem, MediaStatus } from "../lib/types";
 import {
   formatRelativeDate,
   getDraftDate,
@@ -30,6 +15,8 @@ import { CreateDraftForm } from "./create-draft";
 import {
   formatScheduledDateTime,
   getDetailFullText,
+  getDetailMediaIds,
+  getDetailPosts,
   getEnabledPlatforms,
   getPublishedLinks,
   getTagColor,
@@ -58,16 +45,8 @@ type DraftItemProps = {
 };
 
 export function DraftItem(props: DraftItemProps) {
-  const {
-    draft,
-    onRefresh,
-    socialSetId,
-    hideStatus,
-    showScheduledTime,
-    isShowingDetail,
-    onToggleDetail,
-    tagNameMap,
-  } = props;
+  const { draft, onRefresh, socialSetId, hideStatus, showScheduledTime, isShowingDetail, onToggleDetail, tagNameMap } =
+    props;
   const date = useMemo(() => getDraftDate(draft), [draft]);
 
   const accessories: List.Item.Accessory[] = (() => {
@@ -152,11 +131,7 @@ export function DraftItem(props: DraftItemProps) {
       title: "Sharing draft",
     });
     try {
-      const updatedDraft = await updateDraft(
-        Number(socialSetId),
-        Number(draft.id),
-        { share: true },
-      );
+      const updatedDraft = await updateDraft(Number(socialSetId), Number(draft.id), { share: true });
       if (!updatedDraft.share_url) {
         throw new Error("Share URL not returned");
       }
@@ -177,32 +152,15 @@ export function DraftItem(props: DraftItemProps) {
       subtitle={getDraftSubtitle(draft)}
       accessories={accessories}
       keywords={keywords}
-      detail={
-        <DraftDetailView
-          draft={draft}
-          socialSetId={socialSetId}
-          date={date}
-          tagNameMap={tagNameMap}
-        />
-      }
+      detail={<DraftDetailView draft={draft} socialSetId={socialSetId} date={date} tagNameMap={tagNameMap} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open Draft" url={draft.private_url} />
-            {draft.share_url ? (
-              <Action.OpenInBrowser
-                title="Open Share URL"
-                url={draft.share_url}
-              />
-            ) : null}
-            <Action.CopyToClipboard
-              title="Copy Draft URL"
-              content={draft.private_url}
-            />
+            {draft.share_url ? <Action.OpenInBrowser title="Open Share URL" url={draft.share_url} /> : null}
+            <Action.CopyToClipboard title="Copy Draft URL" content={draft.private_url} />
             <Action
-              title={
-                draft.share_url ? "Copy Public URL" : "Share Draft & Copy URL"
-              }
+              title={draft.share_url ? "Copy Public URL" : "Share Draft & Copy URL"}
               icon={Icon.Link}
               onAction={handleCopyPublicUrl}
             />
@@ -243,8 +201,7 @@ type DraftDetailViewProps = {
 function DraftDetailView(props: DraftDetailViewProps) {
   const { draft, socialSetId, date, tagNameMap } = props;
 
-  const cacheKey =
-    socialSetId && draft.id ? `${socialSetId}-${draft.id}` : undefined;
+  const cacheKey = socialSetId && draft.id ? `${socialSetId}-${draft.id}` : undefined;
   const cachedDetail = useMemo(() => {
     if (!cacheKey) return undefined;
     const cached = draftDetailCache.get(cacheKey);
@@ -269,10 +226,7 @@ function DraftDetailView(props: DraftDetailViewProps) {
       if (!setId || !draftId) return undefined;
       const result = await getDraft(Number(setId), draftId);
       if (result) {
-        draftDetailCache.set(
-          `${setId}-${draftId}`,
-          JSON.stringify({ data: result, timestamp: Date.now() }),
-        );
+        draftDetailCache.set(`${setId}-${draftId}`, JSON.stringify({ data: result, timestamp: Date.now() }));
       }
       return result;
     },
@@ -282,11 +236,80 @@ function DraftDetailView(props: DraftDetailViewProps) {
 
   const detail = fetchedDetail || cachedDetail;
 
+  const mediaIds = useMemo(() => getDetailMediaIds(detail), [detail]);
+
+  const { data: mediaStatuses } = usePromise(
+    async (setId?: string, ids?: string[]) => {
+      if (!setId || !ids || ids.length === 0) return [];
+      const mediaCacheKey = `media-${setId}-${ids.join(",")}`;
+      const cachedMedia = draftDetailCache.get(mediaCacheKey);
+      if (cachedMedia) {
+        try {
+          const { data, timestamp } = JSON.parse(cachedMedia) as {
+            data: MediaStatus[];
+            timestamp: number;
+          };
+          if (Date.now() - timestamp < CACHE_TTL_MS) return data;
+        } catch {
+          // ignore
+        }
+      }
+      const results = await Promise.all(ids.map((id) => getMediaStatus(Number(setId), id).catch(() => undefined)));
+      const valid = results.filter((r): r is MediaStatus => r !== undefined && r.status === "ready");
+      draftDetailCache.set(mediaCacheKey, JSON.stringify({ data: valid, timestamp: Date.now() }));
+      return valid;
+    },
+    [socialSetId, mediaIds],
+    {
+      execute: Boolean(socialSetId && mediaIds.length > 0),
+      onError: () => {},
+    },
+  );
+
+  const posts = getDetailPosts(detail);
   const fullText = getDetailFullText(detail);
-  const markdown = fullText || draft.preview || "No content";
   const charCount = fullText ? fullText.length : draft.preview?.length;
   const enabledPlatforms = getEnabledPlatforms(detail);
   const publishedLinks = getPublishedLinks(detail);
+
+  const mediaByIdMap = useMemo(() => {
+    const map = new Map<string, MediaStatus>();
+    if (mediaStatuses) {
+      for (const m of mediaStatuses) {
+        map.set(m.media_id, m);
+      }
+    }
+    return map;
+  }, [mediaStatuses]);
+
+  const markdown = useMemo(() => {
+    if (!posts) return draft.preview || "No content";
+    const sections = posts.map((post) => {
+      let section = post.text;
+      if (post.media_ids && post.media_ids.length > 0 && mediaByIdMap.size > 0) {
+        const images = post.media_ids
+          .map((id) => {
+            const m = mediaByIdMap.get(id);
+            if (!m) return null;
+            if (m.mime.startsWith("video/")) {
+              return "**\ud83c\udfac Video**";
+            }
+            if (m.mime === "application/pdf") {
+              return "**\ud83d\udcc4 PDF**";
+            }
+            const url = m.media_urls?.medium || m.media_urls?.original;
+            if (!url) return null;
+            return `![${m.file_name}](${url})`;
+          })
+          .filter(Boolean);
+        if (images.length > 0) {
+          section += `\n\n${images.join("\n\n")}`;
+        }
+      }
+      return section;
+    });
+    return sections.join("\n\n");
+  }, [posts, draft.preview, mediaByIdMap]);
 
   return (
     <List.Item.Detail
@@ -301,29 +324,15 @@ function DraftDetailView(props: DraftDetailViewProps) {
           />
           {date ? (
             <List.Item.Detail.Metadata.Label
-              title={
-                draft.scheduled_date
-                  ? "Scheduled"
-                  : draft.published_at
-                    ? "Published"
-                    : "Updated"
-              }
+              title={draft.scheduled_date ? "Scheduled" : draft.published_at ? "Published" : "Updated"}
               text={formatRelativeDate(date)}
             />
           ) : null}
-          {charCount ? (
-            <List.Item.Detail.Metadata.Label
-              title="Characters"
-              text={String(charCount)}
-            />
-          ) : null}
+          {charCount ? <List.Item.Detail.Metadata.Label title="Characters" text={String(charCount)} /> : null}
           {enabledPlatforms.length > 0 ? (
             <List.Item.Detail.Metadata.TagList title="Platforms">
               {enabledPlatforms.map((platform) => (
-                <List.Item.Detail.Metadata.TagList.Item
-                  key={platform}
-                  text={PLATFORM_LABELS[platform]}
-                />
+                <List.Item.Detail.Metadata.TagList.Item key={platform} text={PLATFORM_LABELS[platform]} />
               ))}
             </List.Item.Detail.Metadata.TagList>
           ) : null}
@@ -336,11 +345,7 @@ function DraftDetailView(props: DraftDetailViewProps) {
             />
           ))}
           {draft.share_url ? (
-            <List.Item.Detail.Metadata.Link
-              title="Shared"
-              text="Public link"
-              target={draft.share_url}
-            />
+            <List.Item.Detail.Metadata.Link title="Shared" text="Public link" target={draft.share_url} />
           ) : null}
           {draft.tags.length > 0 ? (
             <List.Item.Detail.Metadata.TagList title="Tags">
@@ -354,10 +359,7 @@ function DraftDetailView(props: DraftDetailViewProps) {
             </List.Item.Detail.Metadata.TagList>
           ) : null}
           {detail?.scratchpad_text ? (
-            <List.Item.Detail.Metadata.Label
-              title="Notes"
-              text={detail.scratchpad_text}
-            />
+            <List.Item.Detail.Metadata.Label title="Notes" text={detail.scratchpad_text} />
           ) : null}
         </List.Item.Detail.Metadata>
       }

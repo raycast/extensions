@@ -70,9 +70,7 @@ export type DraftPlatform = {
   settings?: Record<string, unknown> | null;
 };
 
-export type DraftCreatePlatforms = Partial<
-  Record<PlatformKey, DraftPlatform | { enabled: false } | null>
->;
+export type DraftCreatePlatforms = Partial<Record<PlatformKey, DraftPlatform | { enabled: false } | null>>;
 
 export type DraftCreateRequest = {
   platforms: DraftCreatePlatforms;
@@ -118,6 +116,21 @@ export type DraftDetail = {
   threads_published_url?: string | null;
   bluesky_published_url?: string | null;
   mastodon_published_url?: string | null;
+};
+
+export type MediaUrls = {
+  small?: string;
+  medium?: string;
+  large?: string;
+  original?: string;
+};
+
+export type MediaStatus = {
+  media_id: string;
+  file_name: string;
+  mime: string;
+  status: string;
+  media_urls?: MediaUrls;
 };
 
 export type DraftListItem = {

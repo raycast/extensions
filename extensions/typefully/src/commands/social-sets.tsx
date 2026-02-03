@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  Image,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { listSocialSets } from "../lib/api";
@@ -20,15 +11,8 @@ import type { SocialSetListItem } from "../lib/types";
 import { getErrorMessage, groupSocialSetsByTeam } from "../lib/utils";
 
 export function SocialSetsList() {
-  const [defaultSocialSetId, setDefaultSocialSetId] = useCachedState<string>(
-    DEFAULT_SOCIAL_SET_STORAGE_KEY,
-  );
-  const {
-    data: socialSets,
-    isLoading,
-    error,
-    revalidate,
-  } = usePromise(listSocialSets, []);
+  const [defaultSocialSetId, setDefaultSocialSetId] = useCachedState<string>(DEFAULT_SOCIAL_SET_STORAGE_KEY);
+  const { data: socialSets, isLoading, error, revalidate } = usePromise(listSocialSets, []);
   const items = socialSets ?? [];
   const showEmptyState = !isLoading && !error && items.length === 0;
   const grouped = useMemo(() => groupSocialSetsByTeam(items), [items]);
@@ -40,16 +24,8 @@ export function SocialSetsList() {
       icon={Icon.Warning}
       actions={
         <ActionPanel>
-          <Action
-            title="Retry"
-            icon={Icon.ArrowClockwise}
-            onAction={revalidate}
-          />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -127,11 +103,7 @@ export function SocialSetsList() {
           return null;
         }
         return (
-          <List.Section
-            key={teamId}
-            title={teamGroup.name}
-            subtitle={String(teamGroup.items.length)}
-          >
+          <List.Section key={teamId} title={teamGroup.name} subtitle={String(teamGroup.items.length)}>
             {teamGroup.items.map(renderSocialSetItem)}
           </List.Section>
         );

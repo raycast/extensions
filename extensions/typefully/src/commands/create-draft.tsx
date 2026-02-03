@@ -1,26 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import {
-  FormValidation,
-  useCachedState,
-  useForm,
-  usePromise,
-} from "@raycast/utils";
+import { Action, ActionPanel, Clipboard, Form, Icon, LaunchProps, open, showToast, Toast } from "@raycast/api";
+import { FormValidation, useCachedState, useForm, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  createDraft,
-  getSocialSetDetail,
-  listSocialSets,
-  listTags,
-} from "../lib/api";
+import { createDraft, getSocialSetDetail, listSocialSets, listTags } from "../lib/api";
 import {
   DEFAULT_SOCIAL_SET_STORAGE_KEY,
   LAST_SOCIAL_SET_STORAGE_KEY,
@@ -33,11 +14,7 @@ import {
 import { ApiKeyRequiredView } from "../components/api-key-required";
 import { getPreferences } from "../lib/preferences";
 import type { DraftCreatePlatforms, Tag } from "../lib/types";
-import {
-  buildPostsFromContent,
-  getErrorMessage,
-  groupSocialSetsByTeam,
-} from "../lib/utils";
+import { buildPostsFromContent, getErrorMessage, groupSocialSetsByTeam } from "../lib/utils";
 
 type PublishOption = "draft" | "now" | "next-free-slot" | "schedule";
 type ShareOption = "yes" | "no";
@@ -70,9 +47,7 @@ function buildTimeOptions(stepMinutes: number): TimeOption[] {
   for (let minutes = 0; minutes < 24 * 60; minutes += stepMinutes) {
     const hours = Math.floor(minutes / 60);
     const remainder = minutes % 60;
-    const label = `${String(hours).padStart(2, "0")}:${String(
-      remainder,
-    ).padStart(2, "0")}`;
+    const label = `${String(hours).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
     options.push({ value: label, title: label });
   }
   return options;
@@ -83,71 +58,44 @@ function buildScheduledDate(date: Date, time: string) {
   if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
     return undefined;
   }
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    hours,
-    minutes,
-    0,
-    0,
-  );
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0, 0);
 }
 
-export function CreateDraftForm(props: { socialSetId?: string }) {
-  const [defaultSocialSetId] = useCachedState<string>(
-    DEFAULT_SOCIAL_SET_STORAGE_KEY,
+export function CreateDraftForm(props: { socialSetId?: string; draftValues?: Form.Values }) {
+  const [defaultSocialSetId] = useCachedState<string>(DEFAULT_SOCIAL_SET_STORAGE_KEY);
+  const [lastSocialSetId, setLastSocialSetId] = useCachedState<string>(LAST_SOCIAL_SET_STORAGE_KEY);
+  const [platformSelectionsBySocialSet, setPlatformSelectionsBySocialSet] = useCachedState<Record<string, string[]>>(
+    PLATFORM_SELECTIONS_STORAGE_KEY,
+    {},
   );
-  const [lastSocialSetId, setLastSocialSetId] = useCachedState<string>(
-    LAST_SOCIAL_SET_STORAGE_KEY,
+  const [publishOption, setPublishOption] = useState<PublishOption>(
+    (props.draftValues?.publishOption as PublishOption) ?? "draft",
   );
-  const [platformSelectionsBySocialSet, setPlatformSelectionsBySocialSet] =
-    useCachedState<Record<string, string[]>>(
-      PLATFORM_SELECTIONS_STORAGE_KEY,
-      {},
-    );
-  const [publishOption, setPublishOption] = useState<PublishOption>("draft");
   const previousSocialSetId = useRef<string | undefined>(undefined);
+  const hasInitializedPlatforms = useRef(false);
 
-  const { data: socialSets, isLoading: isLoadingSocialSets } = usePromise(
-    listSocialSets,
-    [],
-  );
+  const { data: socialSets, isLoading: isLoadingSocialSets } = usePromise(listSocialSets, []);
 
-  const groupedSocialSets = useMemo(
-    () => groupSocialSetsByTeam(socialSets ?? []),
-    [socialSets],
-  );
+  const groupedSocialSets = useMemo(() => groupSocialSetsByTeam(socialSets ?? []), [socialSets]);
 
-  const {
-    handleSubmit,
-    itemProps,
-    values,
-    reset,
-    focus,
-    setValue,
-    setValidationError,
-  } = useForm<FormValues>({
+  const { handleSubmit, itemProps, values, reset, focus, setValue, setValidationError } = useForm<FormValues>({
     initialValues: {
-      socialSetId: props.socialSetId ?? "",
-      platforms: [],
-      content: "",
-      draftTitle: "",
-      scratchpadText: "",
-      tags: [],
-      shareOption: "no",
-      scheduleDate: null,
-      scheduleTime: undefined,
+      socialSetId: props.socialSetId ?? (props.draftValues?.socialSetId as string) ?? "",
+      platforms: (props.draftValues?.platforms as string[]) ?? [],
+      content: (props.draftValues?.content as string) ?? "",
+      draftTitle: (props.draftValues?.draftTitle as string) ?? "",
+      scratchpadText: (props.draftValues?.scratchpadText as string) ?? "",
+      tags: (props.draftValues?.tags as string[]) ?? [],
+      shareOption: (props.draftValues?.shareOption as string) ?? "no",
+      scheduleDate: (props.draftValues?.scheduleDate as Date) ?? null,
+      scheduleTime: (props.draftValues?.scheduleTime as string) ?? undefined,
     },
     validation: {
       socialSetId: FormValidation.Required,
       content: FormValidation.Required,
-      platforms: (value) =>
-        value && value.length > 0 ? undefined : "Select at least one platform",
-      scheduleDate:
-        publishOption === "schedule" ? FormValidation.Required : undefined,
-      scheduleTime:
-        publishOption === "schedule" ? FormValidation.Required : undefined,
+      platforms: (value) => (value && value.length > 0 ? undefined : "Select at least one platform"),
+      scheduleDate: publishOption === "schedule" ? FormValidation.Required : undefined,
+      scheduleTime: publishOption === "schedule" ? FormValidation.Required : undefined,
     },
     onSubmit: async (formValues) => {
       const threadPosts = buildPostsFromContent(formValues.content, true);
@@ -178,10 +126,7 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
           });
           return;
         }
-        const scheduledDate = buildScheduledDate(
-          formValues.scheduleDate,
-          formValues.scheduleTime,
-        );
+        const scheduledDate = buildScheduledDate(formValues.scheduleDate, formValues.scheduleTime);
         if (!scheduledDate || Number.isNaN(scheduledDate.getTime())) {
           await showToast({
             style: Toast.Style.Failure,
@@ -209,10 +154,7 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
           platforms,
           draft_title: formValues.draftTitle || undefined,
           scratchpad_text: formValues.scratchpadText || undefined,
-          tags:
-            formValues.tags && formValues.tags.length > 0
-              ? formValues.tags
-              : undefined,
+          tags: formValues.tags && formValues.tags.length > 0 ? formValues.tags : undefined,
           share: formValues.shareOption === "yes" ? true : undefined,
           publish_at: publishAt || undefined,
         });
@@ -274,16 +216,9 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
 
   useEffect(() => {
     if (!values.socialSetId && (defaultSocialSetId || lastSocialSetId)) {
-      itemProps.socialSetId.onChange?.(
-        defaultSocialSetId || lastSocialSetId || "",
-      );
+      itemProps.socialSetId.onChange?.(defaultSocialSetId || lastSocialSetId || "");
     }
-  }, [
-    defaultSocialSetId,
-    itemProps.socialSetId,
-    lastSocialSetId,
-    values.socialSetId,
-  ]);
+  }, [defaultSocialSetId, itemProps.socialSetId, lastSocialSetId, values.socialSetId]);
 
   useEffect(() => {
     if (socialSets && socialSets.length === 1 && !values.socialSetId) {
@@ -297,17 +232,16 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
     }
   }, [setLastSocialSetId, values.socialSetId]);
 
-  const { data: socialSetDetail, isLoading: isLoadingSocialSetDetail } =
-    usePromise(
-      async (id?: string) => {
-        if (!id) {
-          return undefined;
-        }
-        return getSocialSetDetail(Number(id));
-      },
-      [values.socialSetId],
-      { execute: Boolean(values.socialSetId) },
-    );
+  const { data: socialSetDetail, isLoading: isLoadingSocialSetDetail } = usePromise(
+    async (id?: string) => {
+      if (!id) {
+        return undefined;
+      }
+      return getSocialSetDetail(Number(id));
+    },
+    [values.socialSetId],
+    { execute: Boolean(values.socialSetId) },
+  );
 
   const { data: tags, isLoading: isLoadingTags } = usePromise(
     async (id?: string) => {
@@ -324,18 +258,14 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
     if (!socialSetDetail) {
       return PLATFORM_KEYS;
     }
-    return PLATFORM_KEYS.filter(
-      (platform) => socialSetDetail.platforms[platform] !== null,
-    );
+    return PLATFORM_KEYS.filter((platform) => socialSetDetail.platforms[platform] !== null);
   }, [socialSetDetail]);
 
   useEffect(() => {
-    if (
-      previousSocialSetId.current &&
-      previousSocialSetId.current !== values.socialSetId
-    ) {
+    if (previousSocialSetId.current && previousSocialSetId.current !== values.socialSetId) {
       itemProps.platforms.onChange?.([]);
       itemProps.tags.onChange?.([]);
+      hasInitializedPlatforms.current = false;
     }
     previousSocialSetId.current = values.socialSetId;
   }, [itemProps.platforms, itemProps.tags, values.socialSetId]);
@@ -344,38 +274,34 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
     if (!values.platforms || values.platforms.length === 0) {
       return;
     }
-    const filtered = values.platforms.filter((platform) =>
-      availablePlatforms.includes(platform as PlatformKey),
-    );
+    const filtered = values.platforms.filter((platform) => availablePlatforms.includes(platform as PlatformKey));
     if (filtered.length !== values.platforms.length) {
       itemProps.platforms.onChange?.(filtered);
     }
   }, [availablePlatforms, itemProps.platforms, values.platforms]);
 
   useEffect(() => {
-    if (!values.socialSetId) {
-      return;
-    }
-    const storedPlatforms = platformSelectionsBySocialSet?.[values.socialSetId];
-    if (!storedPlatforms || storedPlatforms.length === 0) {
+    if (!values.socialSetId || hasInitializedPlatforms.current) {
       return;
     }
     if (values.platforms && values.platforms.length > 0) {
+      hasInitializedPlatforms.current = true;
       return;
     }
-    const filtered = storedPlatforms.filter((platform) =>
-      availablePlatforms.includes(platform as PlatformKey),
-    );
-    if (filtered.length > 0) {
-      itemProps.platforms.onChange?.(filtered);
+    const storedPlatforms = platformSelectionsBySocialSet?.[values.socialSetId];
+    if (storedPlatforms && storedPlatforms.length > 0) {
+      const filtered = storedPlatforms.filter((platform) => availablePlatforms.includes(platform as PlatformKey));
+      if (filtered.length > 0) {
+        itemProps.platforms.onChange?.(filtered);
+        hasInitializedPlatforms.current = true;
+        return;
+      }
     }
-  }, [
-    availablePlatforms,
-    itemProps.platforms,
-    platformSelectionsBySocialSet,
-    values.platforms,
-    values.socialSetId,
-  ]);
+    if (availablePlatforms.length > 0) {
+      itemProps.platforms.onChange?.([availablePlatforms[0]]);
+      hasInitializedPlatforms.current = true;
+    }
+  }, [availablePlatforms, itemProps.platforms, platformSelectionsBySocialSet, values.platforms, values.socialSetId]);
 
   useEffect(() => {
     if (!values.socialSetId) {
@@ -387,11 +313,11 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
     }));
   }, [setPlatformSelectionsBySocialSet, values.platforms, values.socialSetId]);
 
-  const isLoading =
-    isLoadingSocialSets || isLoadingSocialSetDetail || isLoadingTags;
+  const isLoading = isLoadingSocialSets || isLoadingSocialSetDetail || isLoadingTags;
 
   return (
     <Form
+      enableDrafts
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -399,16 +325,8 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
             <Action.SubmitForm title="Create Draft" onSubmit={handleSubmit} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action
-              title="Paste from Clipboard"
-              icon={Icon.Document}
-              onAction={handlePasteFromClipboard}
-            />
-            <Action
-              title="Clear Content"
-              icon={Icon.Trash}
-              onAction={handleClearContent}
-            />
+            <Action title="Paste from Clipboard" icon={Icon.Document} onAction={handlePasteFromClipboard} />
+            <Action title="Clear Content" icon={Icon.Trash} onAction={handleClearContent} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -442,19 +360,9 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
         })}
       </Form.Dropdown>
 
-      <Form.TagPicker
-        title="Platforms"
-        placeholder="Select platforms"
-        storeValue
-        {...itemProps.platforms}
-      >
+      <Form.TagPicker title="Platforms" placeholder="Select platforms" {...itemProps.platforms}>
         {availablePlatforms.map((platform) => (
-          <Form.TagPicker.Item
-            key={platform}
-            value={platform}
-            title={PLATFORM_LABELS[platform]}
-            icon={Icon.Dot}
-          />
+          <Form.TagPicker.Item key={platform} value={platform} title={PLATFORM_LABELS[platform]} icon={Icon.Dot} />
         ))}
       </Form.TagPicker>
 
@@ -474,90 +382,46 @@ export function CreateDraftForm(props: { socialSetId?: string }) {
         value={publishOption}
         onChange={(value) => setPublishOption(value as PublishOption)}
       >
-        <Form.Dropdown.Item
-          title="Save as draft"
-          value="draft"
-          icon={Icon.Circle}
-        />
+        <Form.Dropdown.Item title="Save as draft" value="draft" icon={Icon.Circle} />
         <Form.Dropdown.Item title="Publish now" value="now" icon={Icon.Bolt} />
-        <Form.Dropdown.Item
-          title="Next free slot"
-          value="next-free-slot"
-          icon={Icon.ArrowRightCircle}
-        />
-        <Form.Dropdown.Item
-          title="Schedule"
-          value="schedule"
-          icon={Icon.Clock}
-        />
+        <Form.Dropdown.Item title="Next free slot" value="next-free-slot" icon={Icon.ArrowRightCircle} />
+        <Form.Dropdown.Item title="Schedule" value="schedule" icon={Icon.Clock} />
       </Form.Dropdown>
 
       {publishOption === "schedule" ? (
         <>
-          <Form.DatePicker
-            title="Publish date"
-            type={Form.DatePicker.Type.Date}
-            {...itemProps.scheduleDate}
-          />
+          <Form.DatePicker title="Publish date" type={Form.DatePicker.Type.Date} {...itemProps.scheduleDate} />
           <Form.Dropdown title="Publish time" {...itemProps.scheduleTime}>
             {TIME_OPTIONS.map((option) => (
-              <Form.Dropdown.Item
-                key={option.value}
-                value={option.value}
-                title={option.title}
-              />
+              <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
             ))}
           </Form.Dropdown>
-          <Form.Description
-            title="Schedule"
-            text="Times use your local timezone."
-          />
+          <Form.Description title="Schedule" text="Times use your local timezone." />
         </>
       ) : null}
       <Form.Separator />
 
       <Form.Dropdown title="Generate share URL" {...itemProps.shareOption}>
         {SHARE_OPTIONS.map((option) => (
-          <Form.Dropdown.Item
-            key={option.value}
-            value={option.value}
-            title={option.title}
-          />
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
-      <Form.TextField
-        title="Draft Title"
-        placeholder="Optional"
-        {...itemProps.draftTitle}
-      />
-      <Form.TextArea
-        title="Scratchpad"
-        placeholder="Optional notes"
-        {...itemProps.scratchpadText}
-      />
+      <Form.TextField title="Draft Title" placeholder="Optional" {...itemProps.draftTitle} />
+      <Form.TextArea title="Scratchpad" placeholder="Optional notes" {...itemProps.scratchpadText} />
 
-      <Form.TagPicker
-        title="Tags"
-        placeholder="Select tags"
-        {...itemProps.tags}
-      >
+      <Form.TagPicker title="Tags" placeholder="Select tags" {...itemProps.tags}>
         {(tags || []).map((tag) => (
-          <Form.TagPicker.Item
-            key={tag.slug}
-            value={tag.slug}
-            title={tag.name}
-            icon={Icon.Tag}
-          />
+          <Form.TagPicker.Item key={tag.slug} value={tag.slug} title={tag.name} icon={Icon.Tag} />
         ))}
       </Form.TagPicker>
     </Form>
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ draftValues: FormValues }>) {
   const { apiKey } = getPreferences();
   if (!apiKey) {
     return <ApiKeyRequiredView />;
   }
-  return <CreateDraftForm />;
+  return <CreateDraftForm draftValues={props.draftValues} />;
 }

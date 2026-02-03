@@ -1,10 +1,6 @@
 import { AI, Tool } from "@raycast/api";
 import { createDraft, getSocialSetDetail } from "../lib/api";
-import {
-  PLATFORM_KEYS,
-  THREAD_PLATFORMS,
-  type PlatformKey,
-} from "../lib/constants";
+import { PLATFORM_KEYS, THREAD_PLATFORMS, type PlatformKey } from "../lib/constants";
 import { resolveSocialSetId } from "../lib/resolve-social-set";
 import type { DraftCreatePlatforms } from "../lib/types";
 import { buildPostsFromContent } from "../lib/utils";
@@ -46,16 +42,11 @@ async function resolveContent(input: Input) {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const platformLabel = input.platforms?.length
-    ? input.platforms.join(", ")
-    : "all enabled platforms";
+  const platformLabel = input.platforms?.length ? input.platforms.join(", ") : "all enabled platforms";
   const content = input.content?.trim();
   const prompt = input.prompt?.trim();
   const previewSource = content || prompt || "";
-  const preview =
-    previewSource.length > 80
-      ? previewSource.slice(0, 80) + "…"
-      : previewSource;
+  const preview = previewSource.length > 80 ? previewSource.slice(0, 80) + "…" : previewSource;
   const sourceLabel = content ? "content" : prompt ? "prompt" : "content";
   return {
     message: `Create draft on ${platformLabel} with ${sourceLabel}: "${preview}"?`,
@@ -69,9 +60,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 export default async function tool(input: Input) {
   const content = await resolveContent(input);
   if (!content) {
-    throw new Error(
-      "Content is required. Provide draft text or a prompt to generate it.",
-    );
+    throw new Error("Content is required. Provide draft text or a prompt to generate it.");
   }
 
   const scheduleDate = input.schedule_date?.trim();
@@ -85,20 +74,14 @@ export default async function tool(input: Input) {
   }
 
   const detail = await getSocialSetDetail(socialSetId);
-  const enabledPlatforms = PLATFORM_KEYS.filter(
-    (key) => detail.platforms[key] !== null,
-  );
+  const enabledPlatforms = PLATFORM_KEYS.filter((key) => detail.platforms[key] !== null);
 
   const platformKeys = input.platforms?.length
-    ? (input.platforms.filter((p) =>
-        enabledPlatforms.includes(p as PlatformKey),
-      ) as PlatformKey[])
+    ? (input.platforms.filter((p) => enabledPlatforms.includes(p as PlatformKey)) as PlatformKey[])
     : enabledPlatforms;
 
   if (platformKeys.length === 0) {
-    throw new Error(
-      `Invalid platforms. Choose from: ${PLATFORM_KEYS.join(", ")}`,
-    );
+    throw new Error(`Invalid platforms. Choose from: ${PLATFORM_KEYS.join(", ")}`);
   }
 
   const platforms: DraftCreatePlatforms = {};

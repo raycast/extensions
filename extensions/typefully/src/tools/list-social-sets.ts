@@ -7,9 +7,9 @@ export default async function tool() {
   const results = await Promise.all(
     socialSets.map(async (ss) => {
       const detail = await getSocialSetDetail(ss.id);
-      const enabledPlatforms = PLATFORM_KEYS.filter(
-        (key) => detail.platforms[key] !== null,
-      ).map((key) => PLATFORM_LABELS[key]);
+      const enabledPlatforms = PLATFORM_KEYS.filter((key) => detail.platforms[key] !== null).map(
+        (key) => PLATFORM_LABELS[key],
+      );
 
       return {
         id: ss.id,
