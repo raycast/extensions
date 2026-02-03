@@ -6,3 +6,7 @@
 - Run Scenarios command: list active scenarios and run them
 - OAuth 2.0 (PKCE) connection via Yandex; optional callback URL preference
 - Preferences: Yandex OAuth Client ID (required), Callback URL, Debug Logs
+
+## [1.0.2] - 2026-02-01
+
+- Support Windows platform

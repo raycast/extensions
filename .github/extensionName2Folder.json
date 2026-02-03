@@ -2254,6 +2254,7 @@
   "Envl/tiktoken": "tiktoken",
   "tm.wrnr/tim": "tim",
   "g0d/time": "time",
+  "alexi.build/time-awareness": "time-awareness",
   "marc.cinema/time-calculator": "time-calculator",
   "alex_jones/time-converter": "time-converter",
   "aramikuto/time-logger": "time-logger",

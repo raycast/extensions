@@ -45,3 +45,5 @@ export const truncate = (text: string, maxLength: number): string => {
   }
   return text;
 };
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
