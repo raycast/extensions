@@ -68,10 +68,34 @@ class ToshlClient {
     );
   }
 
-  async getTransactions(params: { from?: string; to?: string; page?: number; per_page?: number } = {}) {
+  async getTransactions(
+    params: {
+      from?: string;
+      to?: string;
+      page?: number;
+      per_page?: number;
+      search?: string;
+      categories?: string;
+      tags?: string;
+      accounts?: string;
+      type?: string;
+    } = {},
+  ) {
     if (this.isDemo) return MOCK_TRANSACTIONS;
     try {
-      const response = await this.api.get<Transaction[]>("/entries", { params });
+      // Remove undefined keys to keep the URL clean
+      const cleanParams = Object.entries(params).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (acc as any)[key] = value;
+          }
+          return acc;
+        },
+        {} as typeof params,
+      );
+
+      const response = await this.api.get<Transaction[]>("/entries", { params: cleanParams });
       return response.data;
     } catch (e) {
       console.error("Failed to get transactions", e);

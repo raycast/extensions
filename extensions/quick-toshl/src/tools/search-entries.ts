@@ -4,7 +4,7 @@ import { format, subDays, subMonths, startOfMonth, endOfMonth, startOfWeek, endO
 
 type Input = {
   /**
-   * Start date in YYYY-MM-DD format. If not provided, defaults to 30 days ago.
+   * Start date in YYYY-MM-DD format. If not provided, defaults to 1 year ago (365 days).
    */
   from?: string;
   /**
@@ -24,7 +24,13 @@ type Input = {
     | "last_month"
     | "last_7_days"
     | "last_30_days"
-    | "last_90_days";
+    | "last_90_days"
+    | "this_year"
+    | "last_year"
+    | "last_2_years"
+    | "last_5_years"
+    | "last_10_years"
+    | "all_time";
   /**
    * Filter by entry type: "expense", "income", "transfer", or "all". Defaults to "all".
    */
@@ -46,7 +52,7 @@ type Input = {
    */
   limit?: number;
   /**
-   * Search in description. Case-insensitive partial match.
+   * Search in description. Case-insensitive server-side match.
    */
   search?: string;
   /**
@@ -58,6 +64,22 @@ type Input = {
 function getDateRange(input: Input): { from: string; to: string } {
   const today = new Date();
   const formatDate = (d: Date) => format(d, "yyyy-MM-dd");
+
+  // Prioritize explicit from/to dates if provided
+  if (input.from || input.to) {
+    return {
+      from: input.from || formatDate(subDays(today, 365)),
+      to: input.to || formatDate(today),
+    };
+  }
+
+  // Prioritize explicit from/to dates if provided
+  if (input.from || input.to) {
+    return {
+      from: input.from || formatDate(subDays(today, 365)),
+      to: input.to || formatDate(today),
+    };
+  }
 
   if (input.dateRange) {
     switch (input.dateRange) {
@@ -89,11 +111,27 @@ function getDateRange(input: Input): { from: string; to: string } {
         return { from: formatDate(subDays(today, 30)), to: formatDate(today) };
       case "last_90_days":
         return { from: formatDate(subDays(today, 90)), to: formatDate(today) };
+      case "this_year":
+        return { from: formatDate(new Date(today.getFullYear(), 0, 1)), to: formatDate(today) };
+      case "last_year": {
+        const lastYear = today.getFullYear() - 1;
+        return { from: formatDate(new Date(lastYear, 0, 1)), to: formatDate(new Date(lastYear, 11, 31)) };
+      }
+      case "last_2_years":
+        return { from: formatDate(subDays(today, 365 * 2)), to: formatDate(today) };
+      case "last_5_years":
+        return { from: formatDate(subDays(today, 365 * 5)), to: formatDate(today) };
+      case "last_10_years":
+        return { from: formatDate(subDays(today, 365 * 10)), to: formatDate(today) };
+      case "all_time":
+        // Toshl started around 2012, so 2000 is safe enough
+        return { from: "2000-01-01", to: formatDate(today) };
     }
   }
 
+  // Changed default from 30 days to 365 days to ensure context is not missed
   return {
-    from: input.from || formatDate(subDays(today, 30)),
+    from: input.from || formatDate(subDays(today, 365)),
     to: input.to || formatDate(today),
   };
 }
@@ -104,65 +142,53 @@ export default async function searchEntries(input: Input) {
   const type = input.type || "all";
   const includeSummary = input.includeSummary !== false;
 
-  // Fetch all data
-  const [entries, allCategories, allTags, allAccounts] = await Promise.all([
-    toshl.getTransactions({ from, to, per_page: limit }),
+  // Fetch metadata first to resolve names to IDs
+  const [allCategories, allTags, allAccounts] = await Promise.all([
     toshl.getCategories(),
     toshl.getTags(),
     toshl.getAccounts(),
   ]);
 
-  // Create lookup maps
-  const categoryMap = new Map(allCategories.map((c) => [c.id, c.name]));
-  const tagMap = new Map(allTags.map((t) => [t.id, t.name]));
-  const accountMap = new Map(allAccounts.map((a) => [a.id, a.name]));
+  // Create reverse lookup maps (ID -> Name) for formatting output
+  const categoryIdNameMap = new Map(allCategories.map((c) => [c.id, c.name]));
+  const tagIdNameMap = new Map(allTags.map((t) => [t.id, t.name]));
+  const accountIdNameMap = new Map(allAccounts.map((a) => [a.id, a.name]));
 
-  // Parse filter inputs
-  const categoryFilter = input.categories ? input.categories.split(",").map((c) => c.trim().toLowerCase()) : null;
-  const tagFilter = input.tags ? input.tags.split(",").map((t) => t.trim().toLowerCase()) : null;
-  const accountFilter = input.accounts ? input.accounts.split(",").map((a) => a.trim().toLowerCase()) : null;
-  const searchTerm = input.search?.toLowerCase();
+  // Helper to resolve comma-separated names to IDs with partial matching
+  const resolveIds = (inputStr: string | undefined, items: { id: string; name: string }[]) => {
+    if (!inputStr) return undefined;
+    const searchTerms = inputStr.split(",").map((s) => s.trim().toLowerCase());
+    const matchedIds = new Set<string>();
 
-  // Filter entries
-  const filtered = entries.filter((entry) => {
-    // Type filter
-    const isTransfer = "transaction" in entry;
-    const isExpense = entry.amount < 0 && !isTransfer;
-    const isIncome = entry.amount > 0 && !isTransfer;
+    searchTerms.forEach((term) => {
+      items.forEach((item) => {
+        if (item.name.toLowerCase().includes(term)) {
+          matchedIds.add(item.id);
+        }
+      });
+    });
 
-    if (type === "expense" && !isExpense) return false;
-    if (type === "income" && !isIncome) return false;
-    if (type === "transfer" && !isTransfer) return false;
+    return matchedIds.size > 0 ? Array.from(matchedIds).join(",") : undefined;
+  };
 
-    // Category filter
-    if (categoryFilter) {
-      const categoryName = categoryMap.get(entry.category)?.toLowerCase() || "";
-      if (!categoryFilter.some((c) => categoryName.includes(c))) return false;
-    }
+  const categoryIds = resolveIds(input.categories, allCategories);
+  const tagIds = resolveIds(input.tags, allTags);
+  const accountIds = resolveIds(input.accounts, allAccounts);
 
-    // Tag filter
-    if (tagFilter) {
-      const entryTagNames = entry.tags.map((tid) => tagMap.get(tid)?.toLowerCase() || "");
-      if (!tagFilter.some((t) => entryTagNames.some((etn) => etn.includes(t)))) return false;
-    }
-
-    // Account filter
-    if (accountFilter) {
-      const accountName = accountMap.get(entry.account)?.toLowerCase() || "";
-      if (!accountFilter.some((a) => accountName.includes(a))) return false;
-    }
-
-    // Search filter
-    if (searchTerm) {
-      const desc = (entry.desc || "").toLowerCase();
-      if (!desc.includes(searchTerm)) return false;
-    }
-
-    return true;
+  // Fetch data with server-side filtering
+  const entries = await toshl.getTransactions({
+    from,
+    to,
+    per_page: limit,
+    search: input.search,
+    categories: categoryIds,
+    tags: tagIds,
+    accounts: accountIds,
+    type: type !== "all" ? type : undefined,
   });
 
   // Format entries for output
-  const formattedEntries = filtered.map((entry) => {
+  const formattedEntries = entries.map((entry) => {
     const isTransfer = "transaction" in entry;
     let entryType: string;
     if (isTransfer) {
@@ -181,14 +207,14 @@ export default async function searchEntries(input: Input) {
       absAmount: Math.abs(entry.amount),
       currency: entry.currency.code,
       type: entryType,
-      category: categoryMap.get(entry.category) || "Unknown",
-      tags: entry.tags.map((tid) => tagMap.get(tid) || "Unknown"),
-      account: accountMap.get(entry.account) || "Unknown",
+      category: categoryIdNameMap.get(entry.category) || "Unknown",
+      tags: (entry.tags || []).map((tid) => tagIdNameMap.get(tid) || "Unknown"),
+      account: accountIdNameMap.get(entry.account) || "Unknown",
       isRecurring: !!entry.repeat,
     };
   });
 
-  // Calculate summary
+  // Calculate summary based on the returned entries
   let summary = {};
   if (includeSummary) {
     const expenses = formattedEntries.filter((e) => e.type === "expense");
@@ -223,6 +249,7 @@ export default async function searchEntries(input: Input) {
     summary = {
       period: `${from} to ${to}`,
       totalEntries: formattedEntries.length,
+      explanation: "Summary is based on the matched entries (limited by pagination).",
       expenseCount: expenses.length,
       incomeCount: incomes.length,
       transferCount: transfers.length,
