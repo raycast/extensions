@@ -1,6 +1,6 @@
 # Oura Changelog
 
-## [2.0.0] - {PR_MERGE_DATE}
+## [2.0.0] - 2026-02-03
 - Migrated authentication to Oura OAuth2 (client ID/secret + PKCE) as Personal Access Tokens are now deprecated. 
 - Update API requests to use OAuth2 tokens
 - Refresh tokens automatically when expired
