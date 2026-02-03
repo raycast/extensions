@@ -1,6 +1,6 @@
 # TaskLink Changelog
 
-## [Fixes & updates] - {PR_MERGE_DATE}
+## [Fixes & updates] - 2026-02-03
 
 - Fix an issue with Windows line breaks
 - Update dependencies to the latest versions
