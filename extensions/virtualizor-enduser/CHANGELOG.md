@@ -1,6 +1,6 @@
 # Virtualizor Enduser Changelog
 
-## [Fix Distro Icon in Panel] - {PR_MERGE_DATE}
+## [Fix Distro Icon in Panel] - 2026-02-03
 
 - Extension would not use the right URL in "Manage Panels" for the distro `Icon`
 
