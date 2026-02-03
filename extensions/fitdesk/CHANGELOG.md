@@ -1,8 +1,9 @@
-# Changelog
+# FitDesk Changelog
 
 ## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
+
 - Initial release
 - 24 exercises across 5 categories (upper body, core, lower body, cardio, full-body)
 - Start Workout command for random exercise selection

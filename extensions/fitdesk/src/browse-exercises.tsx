@@ -34,6 +34,8 @@ function getExerciseMarkdown(exercise: Exercise): string {
     ? `\n\n![${exercise.name}](${exercise.gif})\n`
     : "";
 
+  console.log(gifSection);
+
   return `
 # ${categoryIcon} ${exercise.name}
 
