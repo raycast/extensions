@@ -15,7 +15,8 @@
     "pernielsentikaer",
     "lucasmezencio",
     "ridemountainpig",
-    "xmok"
+    "xmok",
+    "jadenmajid"
   ],
   "commands": [
     {
@@ -37,17 +38,62 @@
           "required": false,
           "title": "Custom Icon URL",
           "placeholder": "https://example.com/icon.png"
+        },
+        {
+          "name": "cpuMenubarFormat",
+          "description": "Options:<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "CPU Formatting",
+          "placeholder": "<PERCENT> %",
+          "default": "<PERCENT> %"
+        },    
+        {
+          "name": "memoryMenubarFormat",
+          "description": "Options:<VALUE>,<TOTAL>,<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "Memory Formatting",
+          "placeholder": "<PERCENT> % (<VALUE> GB / <TOTAL> GB)",
+          "default": "<PERCENT> % (<VALUE> GB / <TOTAL> GB)"
+        },
+        {
+          "name": "networkMenubarFormat",
+          "description": "Options:<UP>,<DOWN>",
+          "type": "textfield",
+          "required": false,
+          "title": "Network Formatting",
+          "placeholder": "↓ <DOWN>/s ↑ <UP>/s",
+          "default": "↓ <DOWN>/s ↑ <UP>/s"
+        },
+        {
+          "name": "diskMenubarFormat",
+          "description": "Options:<VALUE>,<TOTAL>",
+          "type": "textfield",
+          "required": false,
+          "title": "Disk Formatting",
+          "placeholder": "<VALUE> GB / <TOTAL> GB",
+          "default": "<VALUE> GB / <TOTAL> GB"
+        },
+        {
+          "name": "powerMenubarFormat",
+          "description": "Options:<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "Power Formatting",
+          "placeholder": "<PERCENT> %",
+          "default": "<PERCENT> %"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "os-utils": "0.0.14",
     "plist": "^3.1.0",
     "systeminformation": "^5.22.7",
-    "usehooks-ts": "^3.1.0"
+    "usehooks-ts": "^3.1.0",
+    "@raycast/api": "^1.104.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -99,11 +145,30 @@
       ]
     },
     {
-      "name": "displayMode",
-      "description": "Select display mode",
+      "name": "displayModeCpu",
+      "description": "Select cpu usage display mode",
       "type": "dropdown",
       "required": false,
-      "title": "Display mode",
+      "title": "CPU usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "used"
+    },
+    {
+      "name": "displayModeBattery",
+      "description": "Select battery usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Battery usage display mode",
       "placeholder": "placeHolder",
       "data": [
         {
@@ -116,8 +181,46 @@
         }
       ],
       "default": "free"
+    },
+    {
+      "name": "displayModeDisk",
+      "description": "Select disk usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Disk usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "free"
+    },
+    {
+      "name": "displayModeMemory",
+      "description": "Select memory usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Memory usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "used"
     }
-  ],
+    ],
   "platforms": [
     "macOS"
   ]

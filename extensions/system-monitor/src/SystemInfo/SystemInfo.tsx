@@ -5,7 +5,7 @@ import os from "node:os";
 import { Actions } from "../components/Actions";
 import { calculateDiskStorage, getOSInfo, getSerialNumber } from "./SystemUtils";
 
-const { displayMode } = getPreferenceValues<ExtensionPreferences>();
+const { displayModeDisk } = getPreferenceValues<ExtensionPreferences>();
 
 export default function SystemInfo() {
   return (
@@ -53,7 +53,7 @@ function SystemInfoDetail() {
                 key={index}
                 title={disk.diskName}
                 text={
-                  displayMode === "free"
+                  displayModeDisk === "free"
                     ? `${disk.totalAvailableStorage} GB available of ${disk.totalSize} GB`
                     : `${disk.usedStorage} GB used of ${disk.totalSize} GB`
                 }
