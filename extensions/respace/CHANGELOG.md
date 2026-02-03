@@ -1,6 +1,6 @@
 # Respace Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-03
 
 - Create and manage workspace bundles with apps, files, folders, URLs, and terminal commands
 - One-click workspace launching via "Open Workspace" command
