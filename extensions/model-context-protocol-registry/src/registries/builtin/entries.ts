@@ -314,10 +314,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://help.razuna.com/p/mcp-server",
     configuration: {
       command: "npx",
-      args: ["-y", "@razuna/mcp-server-remote"],
-      env: {
-        "access-token": "YOUR_ACCESS_TOKEN_HERE",
-      },
+      args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
     },
   },
   {
