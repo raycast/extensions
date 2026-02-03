@@ -1,0 +1,69 @@
+{
+  "name": "craft-capture-raycast",
+  "title": "Craft Capture",
+  "description": "Capture tasks to Craft Daily Note via capability link",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "categories": ["Productivity"],
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "capture-task",
+      "title": "Add to Daily Note",
+      "description": "Add content to your Craft daily note",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "capabilityUrl",
+      "title": "Craft Capability URL",
+      "type": "password",
+      "required": true,
+      "placeholder": "https://connect.craft.do/links/.../api/v1",
+      "description": "Your Craft capability link (no bearer token). /api/v1 or /api/v1/blocks both work."
+    },
+    {
+      "name": "appendPosition",
+      "title": "Append Position",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        { "title": "Add at End", "value": "end" },
+        { "title": "Add at Top", "value": "start" }
+      ],
+      "default": "end",
+      "description": "Where to insert the task in the Daily Note"
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "type": "textfield",
+      "required": false,
+      "default": "hh:mm a",
+      "description": "Used when you enable \"Add timestamp\""
+    },
+    {
+      "name": "addTimestamp",
+      "title": "",
+      "type": "checkbox",
+      "required": false,
+      "label": "Add timestamp to content",
+      "default": false,
+      "description": "Prepends a timestamp to the content"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.102.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "dev": "npx ray develop",
+    "build": "npx ray build"
+  }
+}
