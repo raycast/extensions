@@ -23,3 +23,6 @@ npm-debug.log*
 
 # Raycast
 .raycast/
+
+# Conductor
+.context/
