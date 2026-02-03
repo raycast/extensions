@@ -1,5 +1,10 @@
 # TaskLink Changelog
 
+## [Fixes & updates] - {PR_MERGE_DATE}
+
+- Fix an issue with Windows line breaks
+- Update dependencies to the latest versions
+
 ## [Windows Support] - 2026-01-13
 
 - Add Windows platform support
