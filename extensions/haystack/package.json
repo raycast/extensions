@@ -420,6 +420,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "FariaF22"
   ]
 }
