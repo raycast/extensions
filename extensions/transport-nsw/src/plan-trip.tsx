@@ -34,7 +34,7 @@ export default function Command() {
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [stops, setStops] = useState<StopLocation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Debounce search text
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function Command() {
       try {
         const response = await searchStops(debouncedSearchText);
         // Filter to only show stops with train, metro, or light rail
-        const allowedModes = [TransportMode.Train, TransportMode.Metro, TransportMode.LightRail];
+        const allowedModes: number[] = [TransportMode.Train, TransportMode.Metro, TransportMode.LightRail];
         const stopResults = (response.locations || []).filter((loc) => {
           if (loc.type !== "stop") return false;
           // Check modes array first, then fall back to productClasses

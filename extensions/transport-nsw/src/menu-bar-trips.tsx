@@ -102,7 +102,7 @@ export default function Command() {
     async function loadJourneys() {
       // Load trips sequentially to avoid rate limits
       const results: TripWithJourneys[] = [];
-      const allowedModes = [TransportMode.Train, TransportMode.Metro, TransportMode.LightRail];
+      const allowedModes: number[] = [TransportMode.Train, TransportMode.Metro, TransportMode.LightRail];
 
       for (const trip of displayTrips) {
         try {

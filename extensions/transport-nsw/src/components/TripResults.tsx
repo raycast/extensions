@@ -157,7 +157,7 @@ export function TripResults({ origin, destination, dateTime, isArrival }: TripRe
     try {
       const response = await planTrip(origin.id, destination.id, { dateTime, isArrival });
       // Filter to only rail journeys (no bus, coach, ferry, school bus)
-      const allowedModes = [TransportMode.Train, TransportMode.Metro, TransportMode.LightRail];
+      const allowedModes: number[] = [TransportMode.Train, TransportMode.Metro, TransportMode.LightRail];
       const railOnly = (response.journeys || []).filter((journey) => {
         // Check all transport legs - exclude if any leg uses non-rail transport
         return journey.legs.every((leg) => {

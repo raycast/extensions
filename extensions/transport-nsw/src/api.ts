@@ -105,7 +105,7 @@ export async function getDepartures(stopId: string): Promise<DepartureInfo[]> {
   const response = await fetchFromApi<DeparturesResponse>("departure_mon", params);
 
   // Filter to rail only and transform to simpler format
-  const allowedModes = [TransportMode.Train, TransportMode.Metro, TransportMode.LightRail];
+  const allowedModes: number[] = [TransportMode.Train, TransportMode.Metro, TransportMode.LightRail];
 
   return (response.stopEvents || [])
     .filter((event) => {
