@@ -37,11 +37,9 @@ Create, edit, and delete workspaces with a full management interface.
 ## 📦 Installation
 
 1. Clone this repository
-2. Install dependencies: `pnpm install`
-3. Build the extension: `pnpm build`
+2. Install dependencies: `npm install`
+3. Build the extension: `npm run build`
 4. Import into Raycast
-
-**Note**: This extension uses `pnpm` as the package manager. The `ray lint` command may show warnings about missing `package-lock.json`, which is expected since we use `pnpm-lock.yaml` instead. The extension builds and works correctly.
 
 ## 🎮 Usage
 
@@ -84,27 +82,27 @@ Create, edit, and delete workspaces with a full management interface.
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Run in development mode
-pnpm dev
+npm run dev
 
 # Build for production
-pnpm build
+npm run build
 
-# Format code
-pnpm format
+# Lint code
+npm run lint
 
-# Lint and check
-pnpm check
+# Fix lint issues
+npm run fix-lint
 ```
 
 ## 🧰 Technology Stack
 
 - **TypeScript**: Type-safe development
 - **Raycast API**: Native Raycast integration
-- **Biome**: Fast code formatter and linter
-- **pnpm**: Efficient package management
+- **Prettier**: Code formatter
+- **ESLint**: Code linter
 
 ## 💾 Storage
 
@@ -116,4 +114,4 @@ MIT
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read [AGENT.md](AGENT.md) for technical documentation.
+Contributions are welcome! Please open an issue or submit a pull request.
