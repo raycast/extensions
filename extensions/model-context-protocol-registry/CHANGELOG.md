@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Razuna MCP Server] - {PR_MERGE_DATE}
+## [Add Razuna MCP Server] - 2026-02-03
 
 Add official Razuna MCP Server to registry.
 
