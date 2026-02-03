@@ -1,6 +1,6 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 
-export const preferences = getPreferenceValues<Preferences>();
+export const preferences = getPreferenceValues();
 
 /** True when running in development mode (ray dev) */
 export const IS_DEV = environment.isDevelopment;

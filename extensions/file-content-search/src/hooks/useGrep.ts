@@ -107,7 +107,7 @@ export const useGrep = (command: string, options: GrepOptions): UseGrepResult =>
         clearInterval(updateIntervalId);
         updateIntervalId = undefined;
       }
-      if (!childProcess.killed) {
+      if (!childProcess.killed && childProcess.exitCode === null) {
         childProcess.kill("SIGKILL");
       }
     };
