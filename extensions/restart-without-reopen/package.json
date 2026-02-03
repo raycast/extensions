@@ -6,8 +6,7 @@
   "icon": "extension-icon-v1.png",
   "author": "CaffeineCat",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Developer Tools",
