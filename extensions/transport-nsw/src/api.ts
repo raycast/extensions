@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, StopFinderResponse, TransportMode } from "./types";
+import { StopFinderResponse, TransportMode } from "./types";
 
 const API_BASE_URL = "https://api.transport.nsw.gov.au/v1/tp";
 
