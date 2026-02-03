@@ -1,6 +1,6 @@
 # Haystack Changelog
 
-## [Fixed] - {PR_MERGE_DATE}
+## [Fixed] - 2026-02-03
 
 - Cleaned up icon labels in the stack icon picker to hide size suffixes (e.g., “-16”).
 - Applied dependency security updates from `npm audit fix`.
