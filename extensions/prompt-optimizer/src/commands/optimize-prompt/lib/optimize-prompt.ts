@@ -56,38 +56,51 @@ const INSTRUCTIONS_PROMPT = stripIndent`
 
   ---
 
-  ## LIMITED RESPONSE SCAFFOLDING (OPTIONAL)
+  ## RESPONSE SCAFFOLDING (OPTIONAL)
 
-  You MAY add minimal, domain-neutral response scaffolding
-  ONLY when it clearly improves answer usability
-  and does NOT introduce new goals, assumptions, or commitments.
+  You MAY introduce minimal, domain-neutral structure to the EXPECTED ANSWER
+  ONLY when it clearly improves clarity, usability, or reduces the risk of misinterpretation.
+
+  Structure MUST describe the form of the final output, NOT the reasoning or internal process.
 
   Allowed cases:
 
-  1) Comparison requests (e.g. A vs B)
-    - You MAY suggest comparison by commonly accepted criteria.
-    - You MAY suggest listing advantages and disadvantages.
-    - You MUST NOT force a single “best” conclusion.
+  1) Comparison or contrast requests
+    - You MAY suggest grouping the answer by common comparison criteria.
+    - You MAY suggest listing similarities and differences or pros/cons.
+    - You MUST NOT require a single “best” conclusion.
 
-  2) Broad evaluative or safety-related questions
-    - You MAY request a concise, neutral explanation
-      and note that conclusions may depend on context.
+  2) Explanatory or descriptive requests
+    - You MAY suggest dividing the answer into clear thematic sections.
+    - You MUST NOT require step-by-step reasoning or planning.
 
-  3) Artifact readability (code, logs, configs, structured data)
-   - You MAY wrap already present artifacts in code formatting
-     and MAY specify a language for syntax highlighting.
-   - You MUST NOT modify the artifact in any way,
-     including content, ordering, whitespace, or escaping.
+  3) Broad evaluative or safety-related questions
+    - You MAY request a concise, neutral explanation.
+    - You MAY note that conclusions may depend on context.
 
-  Scaffolding MUST:
-  - be minimal and optional,
+  4) Process-oriented or execution-focused requests (e.g. design, implementation, migration, rollout, integration)
+    - You MAY suggest a plan, phases, or ordered steps as an execution aid 
+      when such structure clearly helps perform the task.
+    - Any planning introduced MUST support execution and MUST NOT replace the original task
+      or become the sole expected result unless explicitly requested by the user.
+    - If the request expects an executable artifact (e.g. code, configuration, document),
+      the optimized prompt MUST still request that artifact.
+    - You MUST NOT introduce new goals, constraints, or execution stages not implied by the input.
+
+  4) Artifact readability (code, logs, configs, structured data)
+    - You MAY wrap existing artifacts in code formatting.
+    - You MAY specify a language for syntax highlighting.
+    - You MUST NOT modify artifacts in any way.
+
+  Structure MUST:
   - not add factual content,
-  - not introduce domain-specific rules,
   - not create new sub-tasks or deliverables,
   - not pre-commit to conclusions or recommendations.
 
-  Do NOT add reasoning or thinking instructions
-  whose sole purpose is internal decomposition.
+  You MUST NOT:
+  - introduce planning, reasoning, or “thinking” instructions,
+  - require intermediate steps or outlines,
+  - change the task into a multi-phase process.
 
   ---
 
@@ -101,26 +114,22 @@ const INSTRUCTIONS_PROMPT = stripIndent`
   - requestedChanges (optional)
 
   Rules:
-  - If currentOptimizedPrompt exists, refine it — do NOT restart.
-  - Apply requestedChanges literally unless they conflict
-    with strict intent preservation.
-  - Use clarifications only to reduce ambiguity;
-    do NOT extrapolate beyond them.
-  - targetMode may influence phrasing
-    but MUST NOT alter task meaning, structure, or scope.
+  - If clarifications are provided, treat currentOptimizedPrompt as the base prompt and refine it by incorporating all clarifications, applying the same optimization guidelines as in this document.
+  - If requestedChanges are provided, apply them as the primary driver of refinement. Follow them literally unless they conflict with intent preservation or other non-negotiable constraints
+  - If both clarifications and requestedChanges are provided, apply requestedChanges first, then integrate clarifications
+  - targetMode may influence phrasing but MUST NOT alter task meaning, structure, or scope.
 
   ---
 
   ## CLARIFYING QUESTIONS
 
-  You MAY include clarifyingQuestions ONLY if:
-  - the input permits multiple materially different interpretations, AND
-  - choosing one would irreversibly alter intent.
+  You MAY include up to 3 clarifyingQuestions if they help
+  produce a clearer or more effective prompt.
 
   Rules:
-  - Clarifying questions are optional and secondary.
-  - Their absence MUST NOT block optimization.
-  - Do NOT use questions to avoid conservative reformulation.
+  - Always optimize, with or without questions.
+  - Ask only questions directly related to ambiguity in the input, if the question would not help clarify ambiguity, do NOT ask it.
+  - Do NOT expand or reinterpret the task.
 
   ---
 
@@ -133,6 +142,7 @@ const INSTRUCTIONS_PROMPT = stripIndent`
   4. No invention
   5. Minimal change
   6. Artifact preservation
+  7. Target mode alignment
 
   If any check fails, revise and re-check.
 

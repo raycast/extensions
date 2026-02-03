@@ -1,16 +1,11 @@
 import React, { useCallback, useState } from "react";
 import { Toast, showToast } from "@raycast/api";
-import { LLMProviderError } from "shared/lib/llm-provider";
 import { improveOptimizedPrompt, optimizePrompt, retryOptimizePrompt } from "../lib/optimize-prompt";
 import { OptimizedPromptDetail } from "./OptimizedPromptDetail";
 import { OptimizePromptForm } from "./OptimizePromptForm";
 import { ImproveOptimizedPromptForm } from "./ImproveOptimizedPromptForm";
-import {
-  ImproveOptimizedPromptFormValues,
-  OptimizePromptFormErrorState,
-  OptimizePromptFormValues,
-  OptimizerSuccessResult,
-} from "../types";
+import { useLLMRequest } from "shared/hooks/useLLMRequest";
+import { ImproveOptimizedPromptFormValues, OptimizePromptFormValues, OptimizerSuccessResult } from "../types";
 import { TargetExecutionModeKey } from "shared/types";
 
 type OptimizationSession = {
@@ -20,77 +15,10 @@ type OptimizationSession = {
   clarifyingQuestions: string[];
 };
 
-type RequestRejectedResult = {
-  ok: false;
-  rejectReason: string;
-};
-
-type RequestSuccessResult = {
-  ok: true;
-};
-
-type RequestResult<T extends RequestSuccessResult> = T | RequestRejectedResult;
-
-type RunRequestOptions<T extends RequestSuccessResult> = {
-  execute: () => Promise<RequestResult<T>>;
-  onSuccess: (response: T) => void;
-  inProgressTitle: string;
-  successTitle: string;
-  failureTitle: string;
-  errorStateTitle?: string;
-};
-
 export const OptimizePromptCommand: React.FC = () => {
-  const [isOptimizing, setIsOptimizing] = useState(false);
   const [session, setSession] = useState<OptimizationSession | null>(null);
-  const [errorState, setErrorState] = useState<OptimizePromptFormErrorState | null>(null);
   const [view, setView] = useState<"form" | "detail" | "clarify">("form");
-
-  const runRequest = useCallback(async <T extends RequestSuccessResult>(options: RunRequestOptions<T>) => {
-    setIsOptimizing(true);
-    setErrorState(null);
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: options.inProgressTitle,
-    });
-
-    try {
-      const response = await options.execute();
-
-      if (!response.ok) {
-        if (options.errorStateTitle) {
-          setErrorState({
-            message: response.rejectReason,
-            title: options.errorStateTitle,
-          });
-        }
-
-        toast.style = Toast.Style.Failure;
-        toast.title = options.failureTitle;
-        toast.message = response.rejectReason;
-        return;
-      }
-
-      options.onSuccess(response);
-      toast.style = Toast.Style.Success;
-      toast.title = options.successTitle;
-    } catch (error) {
-      const info = toErrorInfo(error);
-      if (options.errorStateTitle) {
-        setErrorState({
-          title: options.errorStateTitle,
-          message: info.message,
-          status: info.status,
-        });
-      }
-      toast.style = Toast.Style.Failure;
-      toast.title = options.failureTitle;
-      toast.message = info.message;
-    } finally {
-      setIsOptimizing(false);
-    }
-  }, []);
+  const { isLoading, errorState, runRequest } = useLLMRequest();
 
   const handleOptimizePrompt = useCallback(
     async (values: OptimizePromptFormValues) => {
@@ -106,11 +34,16 @@ export const OptimizePromptCommand: React.FC = () => {
       setView("form");
 
       await runRequest<OptimizerSuccessResult>({
-        execute: () =>
-          optimizePrompt({
+        execute: async () => {
+          const response = await optimizePrompt({
             initialPrompt: values.prompt,
             targetMode: values.targetMode,
-          }),
+          });
+          if (!response.ok) {
+            throw new Error(response.rejectReason);
+          }
+          return response;
+        },
         onSuccess: (response) => {
           setSession({
             initialPrompt: values.prompt,
@@ -137,13 +70,18 @@ export const OptimizePromptCommand: React.FC = () => {
       }
 
       await runRequest<OptimizerSuccessResult>({
-        execute: () =>
-          improveOptimizedPrompt({
+        execute: async () => {
+          const response = await improveOptimizedPrompt({
             initialPrompt: session.initialPrompt,
             targetMode: session.targetMode,
             currentOptimizedPrompt: session.optimizedPrompt,
             clarifications: values.clarifications,
-          }),
+          });
+          if (!response.ok) {
+            throw new Error(response.rejectReason);
+          }
+          return response;
+        },
         onSuccess: (response) => {
           setSession({
             ...session,
@@ -167,12 +105,17 @@ export const OptimizePromptCommand: React.FC = () => {
     }
 
     await runRequest<OptimizerSuccessResult>({
-      execute: () =>
-        retryOptimizePrompt({
+      execute: async () => {
+        const response = await retryOptimizePrompt({
           initialPrompt: session.initialPrompt,
           targetMode: session.targetMode,
           currentOptimizedPrompt: session.optimizedPrompt,
-        }),
+        });
+        if (!response.ok) {
+          throw new Error(response.rejectReason);
+        }
+        return response;
+      },
       onSuccess: (response) => {
         setSession({
           ...session,
@@ -208,17 +151,5 @@ export const OptimizePromptCommand: React.FC = () => {
     );
   }
 
-  return <OptimizePromptForm isOptimizing={isOptimizing} errorState={errorState} onSubmit={handleOptimizePrompt} />;
+  return <OptimizePromptForm isOptimizing={isLoading} errorState={errorState} onSubmit={handleOptimizePrompt} />;
 };
-
-function toErrorInfo(error: unknown): { status?: number; message: string } {
-  if (error instanceof LLMProviderError) {
-    return { status: error.status, message: error.message };
-  }
-
-  if (error instanceof Error) {
-    return { message: error.message };
-  }
-
-  return { message: "API request failed" };
-}

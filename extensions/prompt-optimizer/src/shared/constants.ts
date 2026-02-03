@@ -27,4 +27,12 @@ export const TARGET_EXECUTION_MODES: TargetExecutionModeInfo[] = [
     description: "Execution context: automation step or system prompt with fixed input and no interaction",
     executionContext: "Non-interactive, fixed-input automation step. (eg System prompt, jobs)",
   },
+  {
+    key: "research",
+    title: "Research",
+    icon: Icon.MagnifyingGlass,
+    description: "Execution context: research assistant with access to external knowledge bases",
+    executionContext:
+      "Research assistant. Can access external knowledge bases and databases. (eg web, retrieval-augmented generation)",
+  },
 ];

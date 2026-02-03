@@ -1,5 +1,6 @@
 import React from "react";
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
+import { ResultDetail } from "shared/ui/ResultDetail";
 
 type OptimizedPromptDetailProps = {
   optimizedPrompt: string;
@@ -7,6 +8,7 @@ type OptimizedPromptDetailProps = {
   showImprovePromptAction?: boolean;
   onRetry?: () => void;
   showRetryAction?: boolean;
+  retryActionTitle?: string;
   copyActionTitle?: string;
   onBack?: () => void;
   backActionTitle?: string;
@@ -18,22 +20,24 @@ export const OptimizedPromptDetail: React.FC<OptimizedPromptDetailProps> = ({
   showImprovePromptAction = Boolean(onImprovePrompt),
   onRetry,
   showRetryAction = Boolean(onRetry),
+  retryActionTitle = "Retry Optimization",
   copyActionTitle = "Copy Optimized Prompt",
   onBack,
   backActionTitle = "Back",
 }) => {
   return (
-    <Detail
+    <ResultDetail
       markdown={optimizedPrompt}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title={copyActionTitle} content={optimizedPrompt} />
-          {showImprovePromptAction && (
-            <Action icon={Icon.LightBulb} title="Clarify Your Prompt" onAction={onImprovePrompt} />
-          )}
-          {showRetryAction && onRetry && <Action icon={Icon.Repeat} title="Retry Optimization" onAction={onRetry} />}
-          {onBack && <Action icon={Icon.ArrowLeft} title={backActionTitle} onAction={onBack} />}
-        </ActionPanel>
+      onRetry={onRetry}
+      showRetryAction={showRetryAction}
+      retryActionTitle={retryActionTitle}
+      copyActionTitle={copyActionTitle}
+      onBack={onBack}
+      backActionTitle={backActionTitle}
+      additionalActions={
+        showImprovePromptAction && onImprovePrompt ? (
+          <Action icon={Icon.LightBulb} title="Clarify Your Prompt" onAction={onImprovePrompt} />
+        ) : null
       }
     />
   );

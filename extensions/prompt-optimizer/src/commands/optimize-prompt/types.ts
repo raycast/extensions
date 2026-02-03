@@ -1,3 +1,5 @@
+import type { LLMRequestErrorState } from "shared/hooks/useLLMRequest";
+
 export type OptimizePromptFormValues = {
   prompt: string;
   targetMode: string;
@@ -7,12 +9,7 @@ export type ImproveOptimizedPromptFormValues = {
   clarifications: { question: string; answer: string }[];
 };
 
-export type OptimizePromptFormErrorState = {
-  title: string;
-  message: string;
-  status?: number;
-  snippet?: string;
-};
+export type OptimizePromptFormErrorState = LLMRequestErrorState;
 
 /**
  * The raw response from the optimizer LLM.

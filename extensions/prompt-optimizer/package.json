@@ -19,6 +19,12 @@
       "title": "Optimize Prompt",
       "description": "Rewrite and refine a prompt to make it clear, unambiguous, and ready for reliable execution by AI tools or agents.",
       "mode": "view"
+    },
+    {
+      "name": "improve-text",
+      "title": "Improve Text",
+      "description": "Improve any text while preserving its meaning.",
+      "mode": "view"
     }
   ],
   "preferences": [
