@@ -1,5 +1,20 @@
 # Clockify Changelog
 
+## [Add menu bar timer] - 2026-01-16
+
+- Added a menu bar command that shows the current timer counting up.
+- Allows stopping the timer directly from the menu bar.
+- Menu bar timer automatically updates when a timer is started or stopped from other menus.
+- Fixed timer display to update properly even when the menu bar is not focused.
+- Updated the menu bar timer to use a monospace font for better readability.
+
+## [Time Entry Management] - 2026-01-14
+
+- Add "Stop Timer at" action to stop running timer at a specific past time
+- Add "Add Time Entry" to create completed entries with start and end times
+- Add optional start time field when starting new timers
+- Fix API request format to use top-level start/end fields per Clockify API spec
+
 ## [Select Tag During Start + Modernize] - 2025-08-18
 
 - `Action` to `openExtensionPreferences` in invalid token view

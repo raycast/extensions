@@ -3,11 +3,9 @@ import {
   ActionPanel,
   Color,
   closeMainWindow,
-  getPreferenceValues,
   Icon,
   Keyboard,
   List,
-  LocalStorage,
   popToRoot,
   showHUD,
   showToast,
@@ -22,10 +20,11 @@ import {
   getInputDevices,
   getOutputDevices,
   setDefaultInputDevice,
-  setDefaultOutputDevice,
-  setDefaultSystemDevice,
   TransportType,
 } from "./audio-device";
+import { setOutputAndSystemDevice } from "./device-actions";
+import { getHiddenDevices, toggleDeviceVisibility } from "./device-preferences";
+import { getTransportTypeLabel } from "./device-labels";
 import { createDeepLink } from "./utils";
 
 type IOType = "input" | "output";
@@ -38,13 +37,10 @@ type DeviceListProps = {
 
 export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
   const { isLoading, data } = useAudioDevices(ioType);
-  const { data: hiddenDevices } = usePromise(getHiddenDevices, []);
-  const { data: showHidden, revalidate: refetchShowHidden } = usePromise(isShowingHiddenDevices, []);
 
-  const { data: sortedDevices, visitItem: recordDeviceSelection } = useFrecencySorting(
-    data?.devices?.filter((d) => !hiddenDevices?.includes(d.uid)) || [],
-    { key: (device) => device.uid },
-  );
+  const { data: sortedDevices, visitItem: recordDeviceSelection } = useFrecencySorting(data?.devices || [], {
+    key: (device) => device.uid,
+  });
 
   useEffect(() => {
     if ((!deviceId && !deviceName) || !data?.devices) return;
@@ -79,17 +75,6 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
 
   return (
     <List isLoading={isLoading}>
-      {hiddenDevices?.length > 0 && (
-        <List.EmptyView
-          title="No devices to show"
-          description="All devices are hidden. Tap Enter to show hidden devices."
-          actions={
-            <ActionPanel>
-              <ToggleShowHiddenDevicesAction onAction={refetchShowHidden} />
-            </ActionPanel>
-          }
-        />
-      )}
       {data &&
         sortedDevices.map((d) => {
           const isCurrent = d.uid === data.current.uid;
@@ -97,7 +82,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
             <List.Item
               key={d.uid}
               title={d.name}
-              subtitle={getSubtitle(d)}
+              subtitle={getTransportTypeLabel(d)}
               icon={getIcon(d, d.uid === data.current.uid)}
               actions={
                 <ActionPanel>
@@ -108,25 +93,6 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
             />
           );
         })}
-      {showHidden && data && (
-        <List.Section title="Hidden Devices">
-          {data.devices
-            .filter((d) => hiddenDevices.includes(d.uid))
-            .map((d) => (
-              <List.Item
-                key={d.uid}
-                title={d.name}
-                subtitle={getSubtitle(d)}
-                icon={getIcon(d, false)}
-                actions={
-                  <ActionPanel>
-                    <DeviceActions ioType={ioType} device={d} onSelection={() => recordDeviceSelection(d)} />
-                  </ActionPanel>
-                }
-              />
-            ))}
-        </List.Section>
-      )}
     </List>
   );
 }
@@ -141,7 +107,6 @@ function DeviceActions({
   onSelection: () => void;
 }) {
   const { revalidate: refetchHiddenDevices } = usePromise(getHiddenDevices, []);
-  const { revalidate: refetchShowHidden } = usePromise(isShowingHiddenDevices, []);
 
   return (
     <>
@@ -157,10 +122,6 @@ function DeviceActions({
       />
       <Action.CopyToClipboard title="Copy Device Name" content={device.name} shortcut={Keyboard.Shortcut.Common.Copy} />
       <ToggleDeviceVisibilityAction deviceId={device.uid} onAction={refetchHiddenDevices} />
-
-      <ActionPanel.Section title="Options">
-        <ToggleShowHiddenDevicesAction onAction={refetchShowHidden} />
-      </ActionPanel.Section>
     </>
   );
 }
@@ -210,14 +171,6 @@ function SetAudioDeviceAction({ device, type, onSelection }: SetAudioDeviceActio
   );
 }
 
-async function setOutputAndSystemDevice(deviceId: string) {
-  const { systemOutput } = getPreferenceValues();
-  await setDefaultOutputDevice(deviceId);
-  if (systemOutput) {
-    await setDefaultSystemDevice(deviceId);
-  }
-}
-
 function ToggleDeviceVisibilityAction({ deviceId, onAction }: { deviceId: string; onAction: () => void }) {
   const { data: isHidden, revalidate: refetchIsHidden } = usePromise(async () => {
     const hiddenDevices = await getHiddenDevices();
@@ -226,7 +179,7 @@ function ToggleDeviceVisibilityAction({ deviceId, onAction }: { deviceId: string
 
   return (
     <Action
-      title={isHidden ? "Show Device" : "Hide Device"}
+      title={isHidden ? "Include in Auto Switch" : "Exclude from Auto Switch"}
       icon={isHidden ? Icon.Eye : Icon.EyeDisabled}
       shortcut={null}
       onAction={async () => {
@@ -236,43 +189,6 @@ function ToggleDeviceVisibilityAction({ deviceId, onAction }: { deviceId: string
       }}
     />
   );
-}
-
-function ToggleShowHiddenDevicesAction({ onAction }: { onAction: () => void }) {
-  const { data: showHidden, revalidate: refetchShowHidden } = usePromise(async () => {
-    return (await LocalStorage.getItem("showHiddenDevices")) === "true";
-  }, []);
-
-  return (
-    <Action
-      title={showHidden ? "Hide Hidden Devices" : "Show Hidden Devices"}
-      icon={showHidden ? Icon.EyeDisabled : Icon.Eye}
-      onAction={async () => {
-        await LocalStorage.setItem("showHiddenDevices", showHidden ? "false" : "true");
-        refetchShowHidden();
-        onAction();
-      }}
-    />
-  );
-}
-
-async function toggleDeviceVisibility(deviceId: string) {
-  const hiddenDevices = JSON.parse((await LocalStorage.getItem("hiddenDevices")) || "[]");
-  const index = hiddenDevices.indexOf(deviceId);
-  if (index === -1) {
-    hiddenDevices.push(deviceId);
-  } else {
-    hiddenDevices.splice(index, 1);
-  }
-  await LocalStorage.setItem("hiddenDevices", JSON.stringify(hiddenDevices));
-}
-
-async function getHiddenDevices() {
-  return JSON.parse((await LocalStorage.getItem("hiddenDevices")) || "[]");
-}
-
-async function isShowingHiddenDevices() {
-  return (await LocalStorage.getItem("showHiddenDevices")) === "true";
 }
 
 function getDeviceIcon(device: AudioDevice): string | null {
@@ -299,7 +215,7 @@ function getDeviceIcon(device: AudioDevice): string | null {
   return null;
 }
 
-function getIcon(device: AudioDevice, isCurrent: boolean) {
+export function getIcon(device: AudioDevice, isCurrent: boolean) {
   const deviceIcon = getDeviceIcon(device);
 
   // If it's a special device (AirPods/AirPlay/Bluetooth), show its specific icon
@@ -323,8 +239,4 @@ function getAccessories(isCurrent: boolean) {
       icon: isCurrent ? Icon.Checkmark : undefined,
     },
   ];
-}
-
-function getSubtitle(device: AudioDevice) {
-  return Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0];
 }

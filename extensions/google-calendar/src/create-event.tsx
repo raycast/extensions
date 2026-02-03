@@ -28,6 +28,7 @@ type FormValues = {
   attendees: string | undefined;
   conferencingProvider: string | undefined;
   description: string | undefined;
+  sendInvitations: string;
 };
 
 const preferences: Preferences.CreateEvent = getPreferenceValues();
@@ -80,6 +81,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       attendees: props.launchContext?.attendees,
       conferencingProvider: props.launchContext?.conferencingProvider,
       description: props.launchContext?.description,
+      sendInvitations: props.launchContext?.sendInvitations ?? preferences.sendInvitations,
     },
     validation: {
       title: FormValidation.Required,
@@ -149,6 +151,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
           calendarId,
           requestBody,
           conferenceDataVersion: values.conferencingProvider === "hangoutsMeet" ? 1 : undefined,
+          sendUpdates: values.sendInvitations as "all" | "externalOnly" | "none",
         });
 
         resetForm();
@@ -259,6 +262,16 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
             />
           ))}
         </Form.Dropdown.Section>
+      </Form.Dropdown>
+      <Form.Dropdown
+        title="Send Invitations"
+        info="Send email invitations (including meeting links) to guests"
+        storeValue
+        {...itemProps.sendInvitations}
+      >
+        <Form.Dropdown.Item title="All Guests" value="all" />
+        <Form.Dropdown.Item title="External Guests Only" value="externalOnly" />
+        <Form.Dropdown.Item title="None" value="none" />
       </Form.Dropdown>
       <Form.TextArea title="Description" placeholder="Event description..." {...itemProps.description} />
     </Form>

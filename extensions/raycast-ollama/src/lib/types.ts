@@ -19,7 +19,8 @@ export interface RaycastArgumentsOllamaCommandCustom {
 export interface RaycastArgumentsOllamaCommandTranslate {
   fallbackText?: string;
   arguments: {
-    language: string;
+    source: string;
+    target: string;
   };
   launchType: string;
   launchContext?: string;

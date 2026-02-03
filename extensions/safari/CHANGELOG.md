@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Performance] - 2026-01-12
+
+- Significantly improved `Search Tabs` loading speed by replacing JXA with native Swift ScriptingBridge (˜4x faster load). 
+
 ## [Update] - 2025-06-19
 
 - Fixes for `Search Tabs` command:

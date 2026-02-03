@@ -1,6 +1,6 @@
-import { showToast, Toast } from '@raycast/api';
-import got from 'got';
-import { GENERAL_DOMAIN, getDomain } from '../utils/config';
+import { showToast, Toast } from "@raycast/api";
+import got from "got";
+import { GENERAL_DOMAIN, getDomain } from "../utils/config";
 
 export enum QRCodeStatus {
   Init = 0,
@@ -12,8 +12,8 @@ export enum QRCodeStatus {
 }
 
 export enum NextStep {
-  Polling = 'qr_login_polling',
-  EnterApp = 'enter_app',
+  Polling = "qr_login_polling",
+  EnterApp = "enter_app",
 }
 
 type QRCodeAPIWrapper<T> = {
@@ -47,14 +47,14 @@ export interface PollingQRCodeResponse {
 }
 
 const client = got.extend({
-  prefixUrl: getDomain('login'),
-  responseType: 'json',
+  prefixUrl: getDomain("login"),
+  responseType: "json",
   headers: {
-    'x-api-version': '1.0.8',
-    'x-app-id': '2',
-    'x-device-info': 'device_id=0;device_name=Raycast;device_os=Mac',
-    'x-locale': 'en-US',
-    'x-terminal-type': '2',
+    "x-api-version": "1.0.8",
+    "x-app-id": "2",
+    "x-device-info": "device_id=0;device_name=Raycast;device_os=Mac",
+    "x-locale": "en-US",
+    "x-terminal-type": "2",
   },
 });
 
@@ -67,7 +67,7 @@ export async function initQRCode(): Promise<
 > {
   try {
     const { body, headers: initHeaders } = await client.post<QRCodeAPIWrapper<InitQRCodeResponse>>(
-      'accounts/qrlogin/init',
+      "accounts/qrlogin/init",
       { json: { biz_type: null, redirect_uri: GENERAL_DOMAIN } },
     );
 
@@ -77,19 +77,19 @@ export async function initQRCode(): Promise<
       token,
       async polling() {
         const { body, headers } = await client.post<QRCodeAPIWrapper<PollingQRCodeResponse>>(
-          'accounts/qrlogin/polling',
+          "accounts/qrlogin/polling",
           {
             json: { biz_type: null },
-            headers: { 'x-flow-key': initHeaders['x-flow-key'] },
+            headers: { "x-flow-key": initHeaders["x-flow-key"] },
           },
         );
-        return { ...body.data.step_info, next_step: body.data.next_step, cookie: headers['set-cookie'] };
+        return { ...body.data.step_info, next_step: body.data.next_step, cookie: headers["set-cookie"] };
       },
     };
   } catch (error) {
-    let errorMessage = 'Load QR Code failed';
+    let errorMessage = "Load QR Code failed";
     if (error instanceof Error) {
-      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ""}`;
     }
 
     showToast(Toast.Style.Failure, errorMessage);

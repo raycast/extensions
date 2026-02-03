@@ -1,5 +1,4 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { SecretManagerService } from "../SecretManagerService";
 
@@ -56,7 +55,8 @@ export default function CreateSecretForm({ projectId, gcloudPath, onSecretCreate
   async function handleSubmit(values: { secretId: string; value: string; description?: string }) {
     const nameValidation = validateSecretId(values.secretId);
     if (!nameValidation.isValid) {
-      showFailureToast("Validation Error", {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid Secret ID",
         message: nameValidation.error || "Please check secret ID requirements",
       });
@@ -64,7 +64,8 @@ export default function CreateSecretForm({ projectId, gcloudPath, onSecretCreate
     }
 
     if (!values.value.trim()) {
-      showFailureToast("Validation Error", {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid Secret Value",
         message: "Secret value cannot be empty",
       });
@@ -75,27 +76,21 @@ export default function CreateSecretForm({ projectId, gcloudPath, onSecretCreate
 
     try {
       const service = new SecretManagerService(gcloudPath, projectId);
-      const success = await service.createSecret(values.secretId, values.value);
+      await service.createSecret(values.secretId, values.value);
 
-      if (success) {
-        showToast({
-          style: Toast.Style.Success,
-          title: "Secret created",
-          message: `Secret "${values.secretId}" has been created successfully`,
-        });
-        onSecretCreated();
-        pop();
-      } else {
-        showFailureToast({
-          title: "Failed to create secret",
-          message: "Secret creation failed. Please check your permissions and try again.",
-        });
-      }
+      showToast({
+        style: Toast.Style.Success,
+        title: "Secret created",
+        message: `Secret "${values.secretId}" has been created successfully`,
+      });
+      onSecretCreated();
+      pop();
     } catch (error) {
       console.error("Failed to create secret:", error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to create secret",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsSubmitting(false);

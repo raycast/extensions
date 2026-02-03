@@ -1,5 +1,9 @@
 # Linkwarden Changelog
 
+## [Add Helium Browser Support] - 2026-01-26
+
+- Added Helium to the list of supported Chromium browsers
+
 ## [Improve UX] - 2025-03-10
 
 - Added a success toast when a link is added and pop to root

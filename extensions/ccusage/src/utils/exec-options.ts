@@ -1,6 +1,6 @@
 import { getEnhancedNodePaths } from "./node-path-resolver";
 import { dirname } from "path";
-import { preferences } from "../preferences";
+import { getCustomNpxPath } from "../preferences";
 
 export const getExecOptions = () => {
   const env: Record<string, string> = {
@@ -9,7 +9,7 @@ export const getExecOptions = () => {
   };
 
   // Prepend custom npx directory to PATH for proper binary resolution
-  const customNpxPath = preferences.customNpxPath?.trim();
+  const customNpxPath = getCustomNpxPath();
   if (customNpxPath) {
     const customDir = dirname(customNpxPath);
     env.PATH = `${customDir}:${env.PATH}`;
