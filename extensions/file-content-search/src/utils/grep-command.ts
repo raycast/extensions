@@ -1,4 +1,4 @@
-import { DEFAULT_EXCLUDED_DIRS, DEFAULT_EXCLUDED_EXTENSIONS, getPreferences } from "../constants";
+import { DEFAULT_EXCLUDED_DIRS, DEFAULT_EXCLUDED_EXTENSIONS, preferences } from "../constants";
 
 type GrepCommandOptions = {
   path: string;
@@ -7,8 +7,29 @@ type GrepCommandOptions = {
 };
 
 /**
+ * Escapes a string for safe use as a shell argument.
+ * Wraps in single quotes and escapes any single quotes within.
+ */
+const shellEscape = (str: string): string => {
+  return `'${str.replace(/'/g, "'\\''")}'`;
+};
+
+/**
+ * Validates and sanitizes an exclude pattern (directory name or extension).
+ * Only allows alphanumeric characters, dots, underscores, and hyphens.
+ */
+const sanitizeExcludePattern = (pattern: string): string | null => {
+  const sanitized = pattern.trim();
+  if (!/^[\w.-]+$/.test(sanitized)) {
+    return null;
+  }
+  return sanitized;
+};
+
+/**
  * Parses a comma-separated string into an array of trimmed values.
  * Removes leading dots from values (e.g., ".png" becomes "png").
+ * Filters out patterns with unsafe characters.
  * @param value - The comma-separated string to parse
  * @param defaults - Default values to return if input is empty
  * @returns Array of parsed values or defaults
@@ -19,8 +40,9 @@ const parseCommaSeparated = (value: string | undefined, defaults: string[]): str
   }
   return value
     .split(",")
-    .map((item) => item.trim().replace(/^\./, "")) // (.png -> png)
-    .filter(Boolean);
+    .map((item) => item.trim().replace(/^\./, ""))
+    .map(sanitizeExcludePattern)
+    .filter((item): item is string => item !== null);
 };
 
 /**
@@ -28,8 +50,7 @@ const parseCommaSeparated = (value: string | undefined, defaults: string[]): str
  * @returns Array of directory names to exclude
  */
 const getExcludedDirectories = (): string[] => {
-  const { excludedDirectories } = getPreferences();
-  return parseCommaSeparated(excludedDirectories, DEFAULT_EXCLUDED_DIRS);
+  return parseCommaSeparated(preferences.excludedDirectories, DEFAULT_EXCLUDED_DIRS);
 };
 
 /**
@@ -37,8 +58,35 @@ const getExcludedDirectories = (): string[] => {
  * @returns Array of file extensions to exclude
  */
 const getExcludedExtensions = (): string[] => {
-  const { excludedExtensions } = getPreferences();
-  return parseCommaSeparated(excludedExtensions, DEFAULT_EXCLUDED_EXTENSIONS);
+  return parseCommaSeparated(preferences.excludedExtensions, DEFAULT_EXCLUDED_EXTENSIONS);
+};
+
+/**
+ * Builds grep command arguments for spawning without shell.
+ * Returns an array of arguments to pass to spawn().
+ */
+export const buildGrepArgs = (
+  query: string,
+  { path, useRegex, maxResults }: GrepCommandOptions,
+): string[] => {
+  const flags = useRegex ? "-rnaEb" : "-rnIFb";
+
+  const excludedDirs = getExcludedDirectories();
+  const excludedExts = getExcludedExtensions();
+
+  const args: string[] = [flags];
+
+  for (const d of excludedDirs) {
+    args.push(`--exclude-dir=${d}`);
+  }
+  for (const ext of excludedExts) {
+    args.push(`--exclude=*.${ext}`);
+  }
+
+  args.push("-m", String(maxResults));
+  args.push("--", query, path);
+
+  return args;
 };
 
 /**
@@ -59,10 +107,11 @@ export const buildGrepCommand = (
   const excludedDirs = getExcludedDirectories();
   const excludedExts = getExcludedExtensions();
 
-  const dirExcludes = excludedDirs.map((d) => `--exclude-dir=${d}`).join(" ");
-  const fileExcludes = excludedExts.map((ext) => `--exclude=*.${ext}`).join(" ");
+  const dirExcludes = excludedDirs.map((d) => `--exclude-dir=${shellEscape(d)}`).join(" ");
+  const fileExcludes = excludedExts.map((ext) => `--exclude=${shellEscape(`*.${ext}`)}`).join(" ");
 
-  const escapedQuery = query.replace(/'/g, "'\\''");
+  const escapedQuery = shellEscape(query);
+  const escapedPath = shellEscape(path);
 
-  return `LC_ALL=en_US.UTF-8 grep ${flags} ${dirExcludes} ${fileExcludes} '${escapedQuery}' "${path}" 2>/dev/null | head -n ${maxResults}`;
+  return `LC_ALL=en_US.UTF-8 grep ${flags} ${dirExcludes} ${fileExcludes} -m ${maxResults} -- ${escapedQuery} ${escapedPath} 2>/dev/null`;
 };

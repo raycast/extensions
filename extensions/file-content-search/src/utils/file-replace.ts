@@ -92,24 +92,24 @@ const replaceInLineStreaming = async (
       }
     });
 
-    lineReader.on("close", async () => {
-      writeStream.end();
-
+    writeStream.on("finish", async () => {
       if (!replaced) {
         await unlink(tempPath).catch(() => {});
         reject(new Error("Invalid line number"));
         return;
       }
 
-      writeStream.on("finish", async () => {
-        try {
-          await rename(tempPath, filePath);
-          resolve();
-        } catch (err) {
-          await unlink(tempPath).catch(() => {});
-          reject(err);
-        }
-      });
+      try {
+        await rename(tempPath, filePath);
+        resolve();
+      } catch (err) {
+        await unlink(tempPath).catch(() => {});
+        reject(err);
+      }
+    });
+
+    lineReader.on("close", () => {
+      writeStream.end();
     });
 
     lineReader.on("error", async (err) => {

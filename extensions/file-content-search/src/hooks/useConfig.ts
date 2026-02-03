@@ -1,13 +1,13 @@
 import { homedir } from "node:os";
 import { useCachedState } from "@raycast/utils";
-import { DEFAULT_MAX_RESULTS, getPreferences } from "../constants";
+import { DEFAULT_MAX_RESULTS, preferences } from "../constants";
 import type { Config } from "../types";
 
 const CONFIG_STORAGE_KEY = "search-config-v1";
 
 const getDefaultConfig = (): Config => ({
-  useRegex: getPreferences().defaultUseRegex ?? false,
-  searchPath: getPreferences().defaultSearchPath || homedir(),
+  useRegex: preferences.defaultUseRegex ?? false,
+  searchPath: preferences.defaultSearchPath || homedir(),
   timeout: 15,
   maxResults: DEFAULT_MAX_RESULTS,
 });
