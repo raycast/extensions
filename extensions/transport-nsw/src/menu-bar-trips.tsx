@@ -75,7 +75,7 @@ export default function Command() {
   const [tripsWithJourneys, setTripsWithJourneys] = useState<TripWithJourneys[]>(cachedJourneys);
   const [isLoading, setIsLoading] = useState(cachedJourneys.length === 0 && initialTrips.length > 0);
 
-  // Take only first 3 saved trips
+  // Take only first 3 saved trips (showing 5 departures each)
   const displayTrips = savedTrips.slice(0, 3);
 
   // Sync from LocalStorage (in case trips were saved by AI tool or before cache existed)
@@ -121,7 +121,7 @@ export default function Command() {
               const bTime = b.legs[0]?.origin.departureTimePlanned || "";
               return aTime.localeCompare(bTime);
             })
-            .slice(0, 3);
+            .slice(0, 5);
 
           results.push({ ...trip, journeys });
         } catch (err) {

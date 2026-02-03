@@ -50,7 +50,6 @@ export interface StopLocation {
   };
 }
 
-
 export interface SavedTrip {
   id: string;
   name: string;
