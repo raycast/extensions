@@ -1,5 +1,15 @@
 # Typefully Raycast Extension
 
+## Development
+
+After making code changes, always run Raycast's linter to fix formatting before committing:
+
+```bash
+npx ray lint --fix
+```
+
+This uses the Raycast store's exact Prettier version, which differs from the project's own `npm run lint`.
+
 ## Publishing
 
 ### How to publish

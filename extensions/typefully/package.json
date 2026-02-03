@@ -66,7 +66,7 @@
       "mode": "view"
     },
     {
-      "name": "scheduled-drafts",
+      "name": "view-scheduled",
       "title": "View Scheduled",
       "subtitle": "Typefully",
       "icon": "icon.png",
@@ -79,7 +79,7 @@
       "mode": "view"
     },
     {
-      "name": "published-drafts",
+      "name": "view-posted",
       "title": "View Published",
       "subtitle": "Typefully",
       "icon": "icon.png",
