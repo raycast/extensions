@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youtube-to-spotify",
+  "title": "YouTube to Spotify",
+  "description": "Download YouTube videos as metadata rich Spotify local files",
+  "type": "module",
+  "icon": "extension-icon.png",
+  "author": "maximilian_hagelstam",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "keywords": [
+    "youtube",
+    "spotify",
+    "local-files",
+    "downloader",
+    "yt-dlp",
+    "ffmpeg"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download Song",
+      "subtitle": "Song Downloader",
+      "description": "Download song with parameters",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to download song",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "name": "homebrewPath",
+      "title": "Homebrew Path",
+      "description": "Path to the Homebrew executable. You can enter `which brew` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ytdlPath",
+      "title": "yt-dlp Path",
+      "description": "Path to the yt-dlp executable. You can enter `which yt-dlp` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Path",
+      "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ffprobePath",
+      "title": "ffprobe Path",
+      "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2",
+    "execa": "^9.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.0",
+    "@types/react": "^19.2.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "pull": "ray pull-contributions",
+    "publish": "ray publish"
+  }
+}
