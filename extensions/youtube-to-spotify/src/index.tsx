@@ -140,17 +140,14 @@ export default function DownloadVideo() {
 
             await execa(ffmpegPath, ffmpegArgs);
 
-            import { trash } from "@raycast/api";
-            
-            await trash(filePath);
-            await trash(tempPath);
+            fs.unlinkSync(filePath);
+            fs.renameSync(tempPath, filePath);
 
             if (fs.existsSync(thumbnailPath)) {
-              await trash(thumbnailPath);
+              fs.unlinkSync(thumbnailPath);
             }
             if (fs.existsSync(coverArtPath) && coverArtPath !== thumbnailPath) {
-              await trash(coverArtPath);
-            }
+              fs.unlinkSync(coverArtPath);
             }
           } catch (error) {
             toast.title = "Metadata Embedding Failed";
