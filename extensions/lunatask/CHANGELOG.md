@@ -1,6 +1,6 @@
 # Lunatask Changelog
 
-## [1.1.0] - 2026-02-03
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Changed
 - Added Windows support by replacing `cross-fetch` with native `fetch`
