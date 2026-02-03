@@ -2,7 +2,7 @@ import { type ChildProcess, exec } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
 import type { TrackedWindow, TrackingMode, WorkspaceItem } from "../../../types/workspace";
-import { delay } from "../../utils/delay";
+import { delay, escapeForShell } from "../../utils/delay";
 import type { BeforeLaunchState, ItemLaunchStrategy } from "./base-strategy";
 
 const execAsync = promisify(exec);
@@ -48,13 +48,6 @@ function execWithTimeout(command: string, timeoutMs: number): Promise<string> {
       }
     });
   });
-}
-
-/**
- * Escapes single quotes for shell command embedding.
- */
-function escapeForShell(str: string): string {
-  return str.replace(/'/g, "'\\''");
 }
 
 /**
