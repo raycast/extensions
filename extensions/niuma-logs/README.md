@@ -26,10 +26,6 @@
 
 ![examples](./readme-assets/examples.png)
 
-Here's how it works:
-
-![showcase](./readme-assets/showcase.gif)
-
 ## Highlights
 
 ⚡️ **Zero friction** for recording daily tasks — don't let logging become another task
@@ -37,10 +33,6 @@ Here's how it works:
 🎥 **Visualize where your time goes** through Gantt chart perspective
 
 🔐 Data permissions are configurable — **rest assured**
-
-## Quick Start
-
-[👉 Click here for installation guide](./QUICKSTART.md)
 
 ## Usage Tips
 
