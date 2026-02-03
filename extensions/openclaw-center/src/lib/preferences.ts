@@ -1,13 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
-  connectionMode: "local" | "remote";
-  remoteUrl?: string;
-  localPort?: string;
-  password?: string;
-}
-
-export function getPreferences(): Preferences {
+export function getPreferences() {
   return getPreferenceValues<Preferences>();
 }
 

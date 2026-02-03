@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openclaw-center",
+  "version": "1.0.0",
   "title": "OpenClaw Center",
   "description": "Control your OpenClaw bot from Raycast - chat, skills, cron jobs, and status",
   "icon": "icon.png",

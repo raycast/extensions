@@ -28,9 +28,11 @@ import {
   signPayload,
 } from "./device-identity";
 
+import pkg from "../../package.json" with { type: "json" };
+
 // Client identification - must use schema-valid values
 const CLIENT_ID = "cli";
-const CLIENT_VERSION = "1.0.0";
+const CLIENT_VERSION = pkg.version;
 const CLIENT_MODE = "cli";
 
 interface PendingRequest {
@@ -271,6 +273,13 @@ export class GatewayClient {
           pending.reject(new Error(`Connection closed (code: ${code})`));
           this.pending.delete(id);
         }
+
+        // Reject the connect promise if we never completed the handshake
+        reject(
+          new Error(
+            `Connection closed before handshake completed (code: ${code})`,
+          ),
+        );
       });
     });
   }

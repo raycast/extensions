@@ -3,7 +3,9 @@
  * Logs are visible in Raycast's developer console (View > Toggle Developer Tools)
  */
 
-const DEBUG_ENABLED = true;
+import { environment } from "@raycast/api";
+
+const DEBUG_ENABLED = environment.isDevelopment;
 const DEBUG_PREFIX = "[OpenClaw]";
 
 export interface DebugLogEntry {
