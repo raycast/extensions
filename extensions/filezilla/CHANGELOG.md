@@ -1,6 +1,6 @@
 # FileZilla Changelog
 
-## [Add README + Modernize] - {PR_MERGE_DATE}
+## [Add README + Modernize] - 2026-02-03
 
 - Mention FileZilla needs to be in "Applications"
 - Modernize to use latest Raycast configuration
