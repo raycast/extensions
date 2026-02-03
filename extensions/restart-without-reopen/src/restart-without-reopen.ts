@@ -1,7 +1,21 @@
+import { confirmAlert, Alert } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { tryit } from "radash";
 
 export default async function main() {
+  const confirmed = await confirmAlert({
+    title: "Are you sure you want to restart now?",
+    message: "Windows will not reopen after restart.",
+    primaryAction: {
+      title: "Restart",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
+
+  if (!confirmed) {
+    return;
+  }
+
   const script = /* applescript */ `
         tell application "System Events"
           -- 1. Get the frontmost process and click the Apple menu
