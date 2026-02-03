@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ActionPanel, Action, List, Icon, showToast, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { searchStops } from "./api";
-import { StopLocation, Preferences, TransportMode } from "./types";
+import { StopLocation, TransportMode } from "./types";
 import { TripResults } from "./components/TripResults";
 import { useSavedTrips } from "./hooks/useSavedTrips";
 
