@@ -1,6 +1,6 @@
 # Swift Command Changelog
 
-## [Fix Windows Compatibility] - 2025-02-03
+## [Fix Windows Compatibility] - {PR_MERGE_DATE}
 
 ### Fixed
 
