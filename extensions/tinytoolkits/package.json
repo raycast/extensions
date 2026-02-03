@@ -1,0 +1,169 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinytoolkits",
+  "title": "TinyToolkits",
+  "description": "Simple calculator with Hex/Int output",
+  "icon": "toolkit-icon.png",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "libreTranslateUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "LibreTranslate Server URL",
+      "description": "URL of your LibreTranslate instance",
+      "default": "http://192.168.1.2:5000",
+      "placeholder": "http://192.168.1.2:5000"  
+    },
+    {
+      "name": "redmineUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Redmine Server URL",
+      "description": "URL of your Redmine instance",
+      "default": "http://192.168.110.8:8084",
+      "placeholder": "http://192.168.110.8:8084"
+    },
+    {
+      "name": "defaultTargetLanguage",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Target Language",
+      "description": "Default language for translation",
+      "default": "zh",
+      "data": [
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        }
+      ]
+    },
+    {
+      "name": "enableAutoTranslate",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Auto Translate",
+      "description": "Automatically translate as you type",
+      "default": true,
+      "label": "Enable Automatic Translation"
+    },
+    {
+      "name": "calculatorBackend",
+      "type": "dropdown",
+      "required": false,
+      "title": "Calculator Backend",
+      "description": "Backend for calculator",
+      "default": "py",  
+      "data": [
+        {
+          "title": "NodeJS Function",
+          "value": "js"
+        },
+        {
+          "title": "Python Eval",
+          "value": "py"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "calculator",
+      "title": "Calculate",
+      "description": "Simple calculator with Hex/Int output",
+      "mode": "view",
+      "subtitle": "Simple calculator with Hex/Int output",
+      "arguments": [
+        {
+          "name": "expression",
+          "placeholder": "Enter expression",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate select text to target language",
+      "mode": "view",
+      "subtitle": "Translate select text to target language",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Enter text to translate",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "redmine",
+      "title": "Search Redmine",
+      "subtitle": "Redmine",
+      "description": "Search in Redmine and access quick links",
+      "mode": "view"
+    },
+    {
+      "name": "search-browser",
+      "title": "Search Browser",
+      "subtitle": "Google, Bing, Baidu",
+      "description": "Search text in multiple engines",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "lodash.debounce": "^4.0.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash.debounce": "^4.0.9",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "Dong",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}

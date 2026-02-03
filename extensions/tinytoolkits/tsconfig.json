@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*", "raycast-env.d.ts"],
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    // optional
+    "outDir": "./dist", // 编译输出目录（与打包目录一致）
+    "rootDir": "./src", // 源代码根目录（包含utils）
+    "baseUrl": "./src", // 基础路径（可选，方便导入）
+    "paths": {
+      "@/*": ["*"] // 可选：配置路径别名，简化导入（如@/utils/useGlobalPreferences）
+    }
+  },
+  // optional
+  "exclude": ["node_modules", "dist"]
+}
