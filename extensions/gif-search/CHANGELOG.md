@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Add Klipy support] - {PR_MERGE_DATE}
+
+- Add Klipy support
+
 ## [Faster Thumbnails] - 2025-12-17
 
 - Speed up loading of thumbnails in large grid items

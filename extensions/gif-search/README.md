@@ -2,7 +2,7 @@ Elevat your Mac workflow with the GIF Search extension. This extension searches 
 
 ## **Discover the Perfect GIF in Seconds**
 
-* **Multi-Source Search**: Effortlessly switch between Giphy.com, Tenor.com, and TheFinerGifs.club using the search bar dropdown.  
+* **Multi-Source Search**: Effortlessly switch between Giphy.com, Tenor.com, Klipy.com, and TheFinerGifs.club using the search bar dropdown. Please note that Klipy.com requires you to generate an API key to use their service (free).  
 * **Smart Keyword Recognition**: Find the ideal GIF for any situation, whether you're looking for a reaction, meme, or emoji\-style animation.  
 * **Mac\-Optimized Performance**: Lightning-fast results, perfect for power users who demand speed and efficiency.
 
