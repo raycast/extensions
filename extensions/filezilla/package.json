@@ -5,6 +5,7 @@
   "description": "Connect to the FTP/SFTP server via FileZilla by just using your keyboard!",
   "icon": "icon.png",
   "author": "naqet",
+  "contributors": ["xmok"],
   "categories": [
     "Developer Tools",
     "Applications"
