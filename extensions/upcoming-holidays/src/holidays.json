@@ -1,0 +1,14 @@
+[
+  { "name": "New Year’s Day", "date": "2026-01-01" },
+  { "name": "MLK Day", "date": "2026-01-19" },
+  { "name": "Presidents Day", "date": "2026-02-16" },
+  { "name": "Memorial Day", "date": "2026-05-25" },
+  { "name": "Juneteenth", "date": "2026-06-19" },
+  { "name": "Independence Day (Observed)", "date": "2026-07-03" },
+  { "name": "Labor Day", "date": "2026-09-07" },
+  { "name": "Veterans Day", "date": "2026-11-11" },
+  { "name": "Thanksgiving Day", "date": "2026-11-26" },
+  { "name": "Family Day", "date": "2026-11-27" },
+  { "name": "Christmas", "date": "2026-12-25" },
+  { "name": "New Year’s Day ’27", "date": "2027-01-01" }
+]

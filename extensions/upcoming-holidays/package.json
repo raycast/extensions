@@ -17,9 +17,18 @@
   "commands": [
     {
       "name": "index",
-      "title": "List Upcoming Holidays",
-      "description": "Allows you to see the upcoming holidays for a country",
+      "title": "Upcoming Holidays",
+      "description": "Allows you to see the upcoming holidays from a simple JSON file.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "holidayDataJson",
+      "type": "file",
+      "title": "JSON with Holiday data.",
+      "description": "Select the file that contains holiday list in JSON Array format. Example: { \"name\": \"New Year’s Day\", \"date\": \"2026-01-01\" },...",
+      "required": true
     }
   ],
   "dependencies": {
