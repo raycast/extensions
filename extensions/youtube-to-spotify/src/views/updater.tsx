@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { execa } from "execa";
 
-const { homebrewPath } = getPreferenceValues();
+const { homebrewPath } = getPreferenceValues<Preferences>();
 
 export default function Updater() {
   const { pop } = useNavigation();
