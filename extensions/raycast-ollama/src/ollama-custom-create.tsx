@@ -17,7 +17,7 @@ interface FormData {
   keep_alive: string;
 }
 
-export default function Command() {
+export default function Command(): React.JSX.Element {
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, []);
   const { itemProps } = useForm<FormData>({
     onSubmit() {

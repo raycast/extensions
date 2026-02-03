@@ -1,5 +1,12 @@
 # Cloudflare Changelog
 
+## [View Workers Command] - 2026-01-24
+
+- Added new "View Workers" command to list Cloudflare Workers across all accounts
+- Workers list with configurable sorting (by modified date, created date, or name)
+- Detail view showing worker metadata (usage model, placement mode, modules, assets, logpush)
+- Actions to open on Cloudflare dashboard, copy worker name, and copy dashboard URL
+
 ## [Update] - 2025-11-06
 
 - Toggled on windows support

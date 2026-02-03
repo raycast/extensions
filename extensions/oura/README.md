@@ -16,10 +16,11 @@ Get data from your [Oura ring experience](https://ouraring.com) to keep track of
 
 ## Getting set up
 In order to get your Oura data directly available in Raycast, follow these steps:
-1. Visit [Oura on the web](https://cloud.ouraring.com/user/sign-in)
-2. From there, click the "Developer" icon in the bottom right. It looks like this "</>".
-3. You'll land on a "Cloud API for Developers" page. Don't worry if you're not sure what this is. Select "Personal Access Tokens" in the side navigation.
-4. Select the "Create New Personal Access Token" button. 
-5. This will create a new token that will be used to securely interact with Oura's service. Keep it secret, and keep it safe! You will lose access to the full token after leaving this page, so make sure you have it jotted down, or you will need to create a new one.
-6. Paste this access token into the "Oura Personal Access Token" field under this extension's settings panel.
-7. You should be good to go!
+1. Visit [Oura on the web](https://cloud.ouraring.com/user/sign-in).
+2. Click the "Developer" icon in the bottom right (it looks like "</>") to open the developer portal.
+3. Create a new application and set the Redirect URI to `https://raycast.com/redirect?packageName=Extension`.
+4. Copy the Client ID and Client Secret for your new application.
+5. Paste those values into the "Oura Client ID" and "Oura Client Secret" fields in this extension's preferences.
+6. Run any command to complete the OAuth sign-in flow.
+
+For more details about the API changes see [Oura's documentation](https://cloud.ouraring.com/v2/docs)

@@ -1,5 +1,15 @@
 # Spotify Player Changelog
 
+## [Generate Playlist: AI Tuning and Improved Playback] - 2026-01-23
+
+- Added AI tuning with history/undo
+- Changed argument to optional to access previous generation history
+- Added "Play Playlist" and improved playback reliability (URI arrays, auto-open Spotify, retries)
+- Reduced max songs from 75 to 10 for faster generation and better quality (tuning allows towards shorter playlists)
+- Upgraded AI model (with Sonar for better playlist content), prompt, and Spotify track matching
+- Improved error handling for AI outages, rate limits, and invalid responses
+- Fixed queueing when no active player exists
+
 ## [Fix] - 2026-01-14
 
 - Fixed error toast when Menu Bar Player command is disabled (handles "No enabled command" error)
@@ -20,11 +30,11 @@
 
 ## [Generate Playlist Improvements] - 2025-12-05
 
-- Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation  
-- Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**  
-- Added strict validation requiring the returned JSON to include a correctly structured `playlist` array  
-- Improved cultural and thematic vibe inference when no artists are explicitly listed  
-- Tightened rules for subgenre consistency, smooth energy progression, and removal of generic or low-intent tracks  
+- Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation
+- Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**
+- Added strict validation requiring the returned JSON to include a correctly structured `playlist` array
+- Improved cultural and thematic vibe inference when no artists are explicitly listed
+- Tightened rules for subgenre consistency, smooth energy progression, and removal of generic or low-intent tracks
 
 ## [Enhancements] - 2025-11-27
 

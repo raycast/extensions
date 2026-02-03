@@ -39,7 +39,7 @@
 
 ## [Close Raycast after create new database page] - 2024-04-22
 
-- Add settings to close Raycast after create a new database
+- Add settings to close Raycast after create a new database.
 
 ## [Support inline Markdown for text properties] - 2024-04-18
 

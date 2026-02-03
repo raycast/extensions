@@ -8,7 +8,8 @@ import {
   upperCase,
   upperFirst,
   titleCase,
-  spongeCase,
+  alternatingCase,
+  randomCase,
   swapCase,
   sentenceCase,
 } from "./customCases";
@@ -31,9 +32,10 @@ export const functions: CaseFunctions = {
   "Pascal Case": changeCase.pascalCase,
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
-  "Random Case": spongeCase,
+  "Random Case": randomCase,
   "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
+  "Alternating Case": alternatingCase,
   "Swap Case": swapCase,
   "Title Case": titleCase,
   "Upper Case": upperCase,
@@ -47,8 +49,9 @@ export const aliases: Record<CaseType, string[]> = {
   "Header Case": ["train", "dash"],
   "No Case": ["none"],
   "Kebab Case": ["dash", "slug", "param"],
-  "Random Case": ["sponge"],
+  "Random Case": ["random"],
   "Swap Case": ["reverse"],
+  "Alternating Case": ["alternating", "sponge"],
   "Constant Case": ["macro"],
 };
 

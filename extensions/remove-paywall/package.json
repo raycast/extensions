@@ -10,7 +10,8 @@
     "DannySeidel",
     "artivilla",
     "maxoliinyk",
-    "0xdhrv"
+    "0xdhrv",
+    "xilopaint"
   ],
   "categories": [
     "Web"
@@ -146,15 +147,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
+    "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "24.10.1",
+    "@types/node": "22.13.10",
     "@types/react": "19.2.5",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
   "scripts": {
