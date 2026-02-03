@@ -5,9 +5,6 @@
     "description": "Unofficial extension for Lunatask. Create tasks from Raycast.",
     "icon": "lunatask-icon.png",
     "author": "posthardcode",
-    "contributors": [
-        "jedce"
-    ],
     "version": "1.1.0",
     "categories": [
         "Productivity"

@@ -4,17 +4,17 @@ const { accessToken } = getPreferenceValues<{ accessToken: string }>();
 
 const prefixURL = "https://api.lunatask.app/v1";
 const headers = {
-    "Content-Type": "application/json",
-    Authorization: `bearer ${accessToken}`,
+  "Content-Type": "application/json",
+  Authorization: `bearer ${accessToken}`,
 };
 
 const client = {
-    post: (url: string, body: object) =>
-        fetch(`${prefixURL}/${url}`, {
-            method: "POST",
-            body: JSON.stringify(body),
-            headers,
-        }),
+  post: (url: string, body: object) =>
+    fetch(`${prefixURL}/${url}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers,
+    }),
 };
 
 export default client;
