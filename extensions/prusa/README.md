@@ -8,6 +8,11 @@ Control your Prusa printer directly from Raycast. Monitor print status, manage f
   - Temperature monitoring (nozzle and bed)
   - Print progress tracking
   - Current state and controls
+- 📊 **Menu Bar Progress**
+  - Real-time progress display (e.g., 45% | 2h 30m)
+  - Shows progress percentage and time remaining
+  - Updates automatically every 30 seconds
+  - Quick access to printer status from menu bar
 - 📁 **File Management**
   - Browse and search print files
   - Start prints directly
@@ -28,11 +33,21 @@ Control your Prusa printer directly from Raycast. Monitor print status, manage f
 ## Usage
 
 ### View Printer Status
+
 1. Open Raycast
 2. Type "Printer Status"
 3. View live printer information and controls
 
+### Menu Bar Progress
+
+1. Open Raycast
+2. Type "Printer Progress" and run the command
+3. The menu bar will show real-time progress while printing
+4. Format: `45% | 2h 30m` (progress percentage | time remaining)
+5. Click the menu bar item for detailed information
+
 ### Manage Files
+
 1. Open Raycast
 2. Type "Print Files"
 3. Browse, search, or manage your print files
@@ -53,5 +68,5 @@ Control your Prusa printer directly from Raycast. Monitor print status, manage f
 
 ## Support
 
-- GitHub Issues: https://github.com/raycast/extensions/issues
-- Raycast Discord: https://raycast.com/community
+- GitHub Issues: <https://github.com/raycast/extensions/issues>
+- Raycast Discord: <https://raycast.com/community>

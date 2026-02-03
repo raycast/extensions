@@ -23,6 +23,9 @@ export default function Command() {
 		exportEnteAuthSecrets();
 	} catch (error) {
 		showFailureToast(error, { title: "Export failed" });
+		return (
+			<Detail markdown={`## Export failed\n\n${error instanceof Error ? error.message : "Unknown error"}`} />
+		);
 	}
 
 	const secrets = parseSecrets(getSecrets(EXPORT_FILE_PATH));

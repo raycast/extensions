@@ -1,11 +1,10 @@
 // In src/index.tsx
-import { ActionPanel, closeMainWindow, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, Keyboard, List, open } from "@raycast/api";
 import { getIcon, apiEnabled } from "./utils/resultUtils";
 
 import { useSearch } from "./utils/useSearch";
-import open from "open";
 import { SearchResult } from "./utils/types";
-import React, { useState } from "react";
+import { useState } from "react";
 import FastGPTView from "./fastgpt-view";
 
 interface ExtensionPreferences {
@@ -15,8 +14,18 @@ interface ExtensionPreferences {
 
 export default function Command() {
   const { token, apiKey }: ExtensionPreferences = getPreferenceValues();
-  const { isLoading, history, results, searchText, search, searchWithApi, addHistory, isFastGPTLoading, queryFastGPT } =
-    useSearch(token, apiKey);
+  const {
+    isLoading,
+    history,
+    results,
+    searchText,
+    search,
+    searchWithApi,
+    addHistory,
+    isFastGPTLoading,
+    queryFastGPT,
+    deleteAllHistory,
+  } = useSearch(token, apiKey);
 
   const listItems: SearchResult[] = searchText.length === 0 ? history : results;
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
@@ -53,7 +62,7 @@ export default function Command() {
                   <ActionPanel.Section title="Result">
                     {getPreferenceValues()["fastGptShortcut"] && item.query.endsWith("?") ? (
                       // For question mark queries, default action is Ask FastGPT
-                      <ActionPanel.Item
+                      <Action
                         title="Ask FastGPT"
                         onAction={async () => {
                           item.description = "Ask FastGPT: " + item.query;
@@ -68,7 +77,7 @@ export default function Command() {
                       />
                     ) : item.isApiResult ? (
                       // For API results, default action is open in browser
-                      <ActionPanel.Item
+                      <Action
                         title="Open in Browser"
                         onAction={async () => {
                           item.description = "Open " + item.url.split("/")[2] + " in Browser";
@@ -79,7 +88,7 @@ export default function Command() {
                         icon={{ source: Icon.Globe }}
                       />
                     ) : item.query.includes("!") ? (
-                      <ActionPanel.Item
+                      <Action
                         title="Open in Browser"
                         onAction={async () => {
                           item.description = "Use a Kagi bang with: " + item.query;
@@ -92,7 +101,7 @@ export default function Command() {
                       />
                     ) : (
                       // For auto-suggest results, default action is search with API
-                      <ActionPanel.Item
+                      <Action
                         title="Search with Kagi API"
                         onAction={async () => {
                           const apiResults = await searchWithApi(item.query);
@@ -103,11 +112,22 @@ export default function Command() {
                         icon={{ source: Icon.MagnifyingGlass }}
                       />
                     )}
+                    {searchText.length === 0 && (
+                      <Action
+                        title="Delete History"
+                        shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                        onAction={deleteAllHistory}
+                        icon={Icon.Trash}
+                      />
+                    )}
                     {/* Additional actions... */}
                     {!(item.isApiResult || item.query.includes("!")) && (
-                      <ActionPanel.Item
+                      <Action
                         title="Open in Browser"
-                        shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd"], key: "enter" },
+                          Windows: { modifiers: ["ctrl"], key: "enter" },
+                        }}
                         onAction={async () => {
                           await addHistory(item);
                           await open(`https://kagi.com/search?q=${encodeURIComponent(item.query)}`);
@@ -117,9 +137,12 @@ export default function Command() {
                       />
                     )}
                     {getPreferenceValues()["fastGptShortcut"] && !(item.isFastGPT || item.query.includes("?")) && (
-                      <ActionPanel.Item
+                      <Action
                         title="Ask FastGPT"
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "opt"], key: "enter" },
+                          Windows: { modifiers: ["ctrl", "alt"], key: "enter" },
+                        }}
                         onAction={async () => {
                           await queryFastGPT(item.query);
                           setFastGPTQuery(item.query);
@@ -130,9 +153,12 @@ export default function Command() {
                         icon={{ source: Icon.QuestionMark }}
                       />
                     )}
-                    <ActionPanel.Item
+                    <Action
                       title="Open First Result"
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+                      }}
                       onAction={async () => {
                         await addHistory(item);
                         await open(`https://kagi.com/search?q=${encodeURIComponent(item.query + " !")}`);
@@ -143,9 +169,12 @@ export default function Command() {
                   </ActionPanel.Section>
                 ) : (
                   <ActionPanel.Section title="Result">
-                    <ActionPanel.Item
+                    <Action
                       title="Open in Browser"
-                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "enter" },
+                        Windows: { modifiers: ["ctrl"], key: "enter" },
+                      }}
                       onAction={async () => {
                         await addHistory(item);
                         await open(`https://kagi.com/search?q=${encodeURIComponent(item.query)}`);

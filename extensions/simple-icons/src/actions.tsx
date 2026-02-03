@@ -5,8 +5,15 @@ import { Action, Icon } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
 import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, LaunchContext } from "./types.js";
-import { copySvg, getAbsoluteFileLink, launchSocialBadge, makeCopyToDownload } from "./utils.js";
+import { copySvg, getAbsoluteFileLink, launchSocialBadge, makeCopyToDownload, usePasteInsteadOfCopy } from "./utils.js";
 import Releases from "./views/releases.js";
+
+const CopyOrPaste = ({ title, content }: { title: string; content: string }) =>
+  usePasteInsteadOfCopy ? (
+    <Action.Paste title={`Paste ${title}`} content={content} />
+  ) : (
+    <Action.CopyToClipboard title={`Copy ${title}`} content={content} />
+  );
 
 type ActionProps = {
   icon: IconData;
@@ -31,41 +38,49 @@ export const MakeBadge = ({ icon, version }: ActionProps) =>
   ) : null;
 
 export const CopySvg = ({ icon, version }: ActionProps) => {
-  return <Action title="Copy SVG" onAction={() => copySvg({ version, icon })} icon={Icon.Clipboard} />;
+  return (
+    <Action
+      title={`${usePasteInsteadOfCopy ? "Paste" : "Copy"} SVG`}
+      onAction={() => copySvg({ version, icon })}
+      icon={Icon.Clipboard}
+    />
+  );
 };
 
-export const CopyColor = ({ icon }: ActionProps) => <Action.CopyToClipboard title="Copy Color" content={icon.hex} />;
+export const CopyColor = ({ icon }: ActionProps) => <CopyOrPaste title="Color" content={icon.hex} />;
 
-export const CopyTitle = ({ icon }: ActionProps) => <Action.CopyToClipboard title="Copy Title" content={icon.title} />;
+export const CopyTitle = ({ icon }: ActionProps) => <CopyOrPaste title="Title" content={icon.title} />;
 
-export const CopySlug = ({ icon }: ActionProps) => (
-  <Action.CopyToClipboard title="Copy Slug" content={getIconSlug(icon)} />
-);
+export const CopySlug = ({ icon }: ActionProps) => <CopyOrPaste title="Slug" content={getIconSlug(icon)} />;
 
 export const CopyPath = ({ icon, version }: ActionProps) => (
-  <Action title="Copy Path" onAction={() => copySvg({ version, icon, pathOnly: true })} icon={Icon.Clipboard} />
+  <Action
+    title={`${usePasteInsteadOfCopy ? "Paste" : "Copy"} Path`}
+    onAction={() => copySvg({ version, icon, pathOnly: true })}
+    icon={Icon.Clipboard}
+  />
 );
 
 export const CopyCdn = ({ icon }: ActionProps) => {
   const simpleIconsCdnLink = `https://cdn.simpleicons.org/${getIconSlug(icon)}`;
-  return <Action.CopyToClipboard title="Copy CDN Link" content={simpleIconsCdnLink} />;
+  return <CopyOrPaste title="CDN Link" content={simpleIconsCdnLink} />;
 };
 
 export const CopyJsdelivr = ({ icon, version }: ActionProps) => {
   const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/${version}/icons/${getIconSlug(icon)}.svg`;
-  return <Action.CopyToClipboard title="Copy jsDelivr CDN Link" content={jsdelivrCdnLink} />;
+  return <CopyOrPaste title="jsDelivr CDN Link" content={jsdelivrCdnLink} />;
 };
 
 export const CopyUnpkg = ({ icon, version }: ActionProps) => {
   const unpkgCdnLink = `https://unpkg.com/${version}/icons/${getIconSlug(icon)}.svg`;
-  return <Action.CopyToClipboard title="Copy unpkg CDN Link" content={unpkgCdnLink} />;
+  return <CopyOrPaste title="unpkg CDN Link" content={unpkgCdnLink} />;
 };
 
 export const CopyFontEntities = ({ icon }: ActionProps) => (
   <>
-    <Action.CopyToClipboard title="Copy Character" content={String.fromCodePoint(icon.code)} />
-    <Action.CopyToClipboard title="Copy HTML Code" content={`&#${icon.code.toString()};`} />
-    <Action.CopyToClipboard title="Copy UTF Code" content={`\\u{${icon.code.toString(16).toUpperCase()}}`} />
+    <CopyOrPaste title="Character" content={String.fromCodePoint(icon.code)} />
+    <CopyOrPaste title="HTML Code" content={`&#${icon.code.toString()};`} />
+    <CopyOrPaste title="UTF Code" content={`\\u{${icon.code.toString(16).toUpperCase()}}`} />
   </>
 );
 

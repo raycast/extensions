@@ -7,7 +7,7 @@ import { BatteryDataInterface } from "../Interfaces";
 import { convertMinutesToHours } from "../utils";
 import { getBatteryData, getTimeOnBattery } from "./PowerUtils";
 
-const { displayMode } = getPreferenceValues<ExtensionPreferences>();
+const { displayModeBattery } = getPreferenceValues<ExtensionPreferences>();
 
 export default function PowerMonitor() {
   const { revalidate, data } = usePromise(async () => {
@@ -30,7 +30,7 @@ export default function PowerMonitor() {
       accessories={[
         {
           text: data?.batteryData
-            ? displayMode === "free"
+            ? displayModeBattery === "free"
               ? `${data?.batteryData?.batteryLevel} %`
               : `${100 - +data?.batteryData?.batteryLevel} %`
             : "Loading…",
@@ -52,7 +52,7 @@ function PowerMonitorDetail({ batteryData, isOnAC }: { batteryData?: BatteryData
       isLoading={!!batteryData || isLoadingTimeOnBattery}
       metadata={
         <List.Item.Detail.Metadata>
-          {displayMode === "free" ? (
+          {displayModeBattery === "free" ? (
             <List.Item.Detail.Metadata.Label title="Battery Level" text={`${batteryData?.batteryLevel}%`} />
           ) : (
             <List.Item.Detail.Metadata.Label

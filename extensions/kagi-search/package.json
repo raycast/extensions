@@ -7,7 +7,8 @@
   "author": "fearoffish",
   "contributors": [
     "goto10",
-    "ridemountainpig"
+    "ridemountainpig",
+    "xmok"
   ],
   "platforms": [
     "macOS",
@@ -57,25 +58,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "node-fetch": "^3.3.2",
-    "open": "^11.0.0"
+    "@raycast/api": "^1.104.3",
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "~24.10.1",
-    "@types/react": "^19.2.5",
-    "@typescript-eslint/eslint-plugin": "^8.46.4",
-    "@typescript-eslint/parser": "^8.46.4",
-    "eslint": "^9.39.1",
-    "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }
