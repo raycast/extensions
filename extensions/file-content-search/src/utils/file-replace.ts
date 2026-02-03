@@ -81,9 +81,29 @@ const replaceInLineStreaming = async (
     let currentLine = 0;
     let replaced = false;
 
+    writeStream.on("finish", async () => {
+      if (!replaced) {
+        await unlink(tempPath).catch(() => {});
+        reject(new Error("Invalid line number"));
+        return;
+      }
+      try {
+        await rename(tempPath, filePath);
+        resolve();
+      } catch (err) {
+        await unlink(tempPath).catch(() => {});
+        reject(err);
+      }
+    });
+
+    writeStream.on("error", async (err) => {
+      lineReader.close();
+      await unlink(tempPath).catch(() => {});
+      reject(err);
+    });
+
     lineReader.on("line", (line) => {
       currentLine++;
-
       if (currentLine === lineNumber) {
         writeStream.write(`${line.replace(search, replacement)}\n`);
         replaced = true;
@@ -96,30 +116,8 @@ const replaceInLineStreaming = async (
       writeStream.end();
     });
 
-    writeStream.on("finish", async () => {
-      if (!replaced) {
-        await unlink(tempPath).catch(() => {});
-        reject(new Error("Invalid line number"));
-        return;
-      }
-
-      try {
-        await rename(tempPath, filePath);
-        resolve();
-      } catch (err) {
-        await unlink(tempPath).catch(() => {});
-        reject(err);
-      }
-    });
-
     lineReader.on("error", async (err) => {
       writeStream.destroy();
-      await unlink(tempPath).catch(() => {});
-      reject(err);
-    });
-
-    writeStream.on("error", async (err) => {
-      lineReader.close();
       await unlink(tempPath).catch(() => {});
       reject(err);
     });
