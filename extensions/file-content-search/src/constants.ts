@@ -1,5 +1,4 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import type { Preferences } from "./types";
 
 export const getPreferences = (): Preferences => getPreferenceValues<Preferences>();
 

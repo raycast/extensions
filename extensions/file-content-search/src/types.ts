@@ -1,18 +1,4 @@
 /**
- * User preferences configured in Raycast extension settings.
- */
-export type Preferences = {
-  /** Default directory path for file searches */
-  defaultSearchPath: string;
-  /** Whether to use regex patterns by default */
-  defaultUseRegex: boolean;
-  /** Comma-separated list of directories to exclude from search */
-  excludedDirectories: string;
-  /** Comma-separated list of file extensions to exclude (e.g., png,jpg,pdf) */
-  excludedExtensions: string;
-};
-
-/**
  * Configuration options for executing a search operation.
  */
 export type Config = {
