@@ -17,6 +17,7 @@
     "joshmedeski",
     "joshhayes747",
     "inovvia"
+    "mateus_badalotti"
   ],
   "keywords": [
     "sound",
@@ -37,6 +38,29 @@
       "title": "Set Input Device",
       "subtitle": "Audio Device",
       "description": "Sets the active audio input device.",
+      "mode": "view"
+    },
+    {
+      "name": "auto-switch-input",
+      "title": "Toggle Input Auto Switch",
+      "subtitle": "Disabled",
+      "description": "Enable or disable automatic switching for input devices.",
+      "mode": "no-view",
+      "interval": "20s"
+    },
+    {
+      "name": "auto-switch-output",
+      "title": "Toggle Output Auto Switch",
+      "subtitle": "Disabled",
+      "description": "Enable or disable automatic switching for output devices.",
+      "mode": "no-view",
+      "interval": "20s"
+    },
+    {
+      "name": "customize-order",
+      "title": "Customize Auto Switch Device Order",
+      "subtitle": "Audio Device",
+      "description": "Set the priority order for input and output devices.",
       "mode": "view"
     },
     {

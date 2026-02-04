@@ -100,6 +100,12 @@
           ]
         }
       ]
+    },
+    {
+      "name": "search-ai-gateway-models",
+      "title": "Search AI Gateway Models",
+      "description": "Search for AI models available in the Vercel AI Gateway",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -416,6 +422,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.0",
+    "node-html-parser": "^7.0.2",
     "swr": "^2.3.4"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 import { Color } from "@raycast/api";
 import { LibraryType, Query } from "./types";
-import { compatibilityColors, MUL, platformColors, SUFFIXES } from "./constants";
+import { compatibilityColors, moduleTypeColors, MUL, platformColors, SUFFIXES } from "./constants";
 
 const toQueryString = (query: Partial<Query>): string => {
   return new URLSearchParams(query as Record<string, string>).toString();
@@ -89,6 +89,8 @@ export const getSupportedPlatforms = (library: LibraryType): string[] => {
   if (library.macos) platforms.push("macOS");
   if (library.tvos) platforms.push("tvOS");
   if (library.visionos) platforms.push("visionOS");
+  if (library.vegaos) platforms.push("VegaOS");
+  if (library.horizon) platforms.push("Horizon OS");
   return platforms;
 };
 
@@ -112,3 +114,29 @@ export function formatBytes(bytes: number, decimals = 2): string {
 
   return `${formatted} ${SUFFIXES[sizeRange]}`;
 }
+
+export const getPopularityLabel = (popularity?: number): { label: string; isHot: boolean } => {
+  if (popularity === undefined) return { label: "N/A", isHot: false };
+  const score = Math.round(popularity * 100);
+  const isHot = popularity > 0.1;
+  return { label: isHot ? `🔥 HOT (${score})` : `${score}`, isHot };
+};
+
+export const getModuleTypeLabel = (library: LibraryType): string[] => {
+  const labels: string[] = [];
+  const moduleType = library.github?.moduleType;
+
+  if (moduleType === "expo") labels.push("Expo Module");
+  if (moduleType === "turbo") labels.push("Turbo Module");
+  if (moduleType === "nitro") labels.push("Nitro Module");
+
+  return labels;
+};
+
+export const hasConfigPlugin = (library: LibraryType): boolean => {
+  return !!(library.configPlugin || library.github?.configPlugin);
+};
+
+export const getModuleTypeColor = (label: string): Color => {
+  return moduleTypeColors[label] || Color.SecondaryText;
+};

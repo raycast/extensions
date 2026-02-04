@@ -7,6 +7,10 @@
 - Windows support via PowerShell AudioDeviceCmdlets.
 - Update raycast package
 
+## [Update] - 2026-02-02
+
+- Added auto-switch commands with device order customization and toggles
+
 ## [Fix] - 2025-09-11
 
 - Remove problematic "airplay support" toggle

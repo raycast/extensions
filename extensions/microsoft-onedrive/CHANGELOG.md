@@ -1,5 +1,11 @@
 # Microsoft OneDrive Changelog
 
+## [Improvement] - 2026-01-31
+
+### Changed
+
+- Improved UX by limiting the search scope in the **Search Files** command to the current directory and its subdirectories.
+
 ## [Fixes and Improvements] - 2026-01-19
 
 ### Changed

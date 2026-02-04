@@ -1,5 +1,35 @@
 # Espanso Changelog
 
+## [Major Improvements] - 2026-02-02
+
+### New Features
+
+- **Profiles Support**: Organize matches by context using the `profiles/` folder structure
+  - Automatically detects matches in `profiles/work/`, `profiles/home/`, etc.
+  - New profile dropdown to filter matches by context
+  - Smart categorization that separates profiles from categories
+  - Matches outside profiles remain accessible from all contexts
+
+- **Customizable Breadcrumb Separator**: New extension setting to customize the character used for breadcrumb separation
+  - Default: `·` (middle dot)
+  - Choose from: `/`, `>`, `→`, `›`, `»`, or any custom character
+  - Applied consistently across categories, subcategories, and profiles
+
+### Improvements
+
+- **Enhanced Category Display**: Full folder hierarchy shown with breadcrumb navigation
+- **Proper Acronym Formatting**: 50+ common tech acronyms (AI, API, UI, UX, HTML, CSS, JSON, etc.) now display correctly
+- **Smart Index Handling**: When filename is "index", subcategory is hidden to avoid redundancy
+- **Better Organization**: Separated folder and filename handling in category logic
+- **TypeScript Type Checking**: Added `typecheck` script to package.json for improved code quality
+- **Dependency Updates**: Upgraded to latest versions for better performance and security
+
+### Technical Changes
+
+- Refactored category derivation logic for better maintainability
+- Added centralized `formatCategoryName` utility for consistent formatting
+- Improved breadcrumb path generation with full hierarchy support
+- Enhanced type safety across components
 
 ## [Improvements] - 2025-07-15
 

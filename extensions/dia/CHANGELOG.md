@@ -1,5 +1,9 @@
 # Dia Changelog
 
+## [Search Bookmarks: Open all in folder] - 2026-02-02
+
+- Added "Open All # in Dia" action on bookmark folders to open all bookmarks in that folder (and subfolders) as tabs in Dia for quick access to a bookmarked set of tabs; Raycast window closes after opening to keep user in flow.
+
 ## [Handle error in Search History + Fix CHANGELOG Dates] - 2025-12-25
 
 - Handle error in Search History when file is not found

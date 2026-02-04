@@ -1,8 +1,9 @@
 import { popToRoot, showToast, Toast } from "@raycast/api";
 
 function extractVideoId(video: string): string {
-  if (video.includes("youtube.com/watch?v=")) {
-    return video.split("v=")[1].split("&")[0];
+  if (video.includes("youtube.com/watch")) {
+    const match = video.match(/[?&]v=([^&]+)/);
+    return match ? match[1] : video;
   }
   if (video.includes("youtu.be/")) {
     return video.split("youtu.be/")[1].split("?")[0];
@@ -100,15 +101,20 @@ export async function getVideoTranscript(video: string): Promise<string | undefi
       return undefined;
     }
 
-    // Parse XML - format uses <p> tags with t (time) and d (duration) attributes
-    const segments = xml.match(/<p[^>]*>([^<]*)<\/p>/g) || [];
+    // YouTube srv3 format uses <s> tags nested inside <p> for text segments
+    const sSegments = xml.match(/<s[^>]*>([^<]*)<\/s>/g) || [];
+    const textSegments = xml.match(/<text[^>]*>([^<]*)<\/text>/g) || [];
+    const segments = sSegments.length > 0 ? sSegments : textSegments;
 
     const transcriptText = segments
       .map((segment: string) => {
-        const match = segment.match(/>([^<]*)</);
-        return match ? match[1] : "";
+        // Strip tags to get text (handles nested elements like <s>)
+        return segment
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
       })
-      .join(" ")
+      .join("")
       // Decode HTML entities
       .replace(/&amp;/g, "&")
       .replace(/&lt;/g, "<")

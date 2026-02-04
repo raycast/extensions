@@ -6,7 +6,8 @@
   "icon": "extension_icon.png",
   "author": "kom",
   "contributors": [
-    "bl1nk"
+    "bl1nk",
+    "mateus_badalotti"
   ],
   "categories": [
     "Productivity",
@@ -18,120 +19,6 @@
     "macOS"
   ],
   "commands": [
-    {
-      "name": "summarizeVideo",
-      "title": "Summarize YouTube Video [deprecated]",
-      "description": "Please migrate your settings and use one of the other commands to summarize your video.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "video",
-          "placeholder": "Video URL or ID",
-          "type": "text",
-          "required": true
-        }
-      ],
-      "preferences": [
-        {
-          "name": "chosenAi",
-          "title": "Choose AI",
-          "description": "Choose between Raycast AI, OpenAI ChatGPT or Anthropic Claude.",
-          "type": "dropdown",
-          "default": "raycastai",
-          "data": [
-            {
-              "value": "anthropic",
-              "title": "Anthropic Claude"
-            },
-            {
-              "value": "openai",
-              "title": "OpenAI ChatGPT"
-            },
-            {
-              "value": "raycastai",
-              "title": "Raycast AI"
-            }
-          ],
-          "required": false
-        },
-        {
-          "name": "creativity",
-          "title": "Creativity",
-          "description": "Choose how creative the AI should be.",
-          "type": "dropdown",
-          "default": "0.5",
-          "data": [
-            {
-              "value": "0",
-              "title": "None"
-            },
-            {
-              "value": "0.5",
-              "title": "Low"
-            },
-            {
-              "value": "1",
-              "title": "Medium"
-            },
-            {
-              "value": "1.5",
-              "title": "High"
-            },
-            {
-              "value": "2",
-              "title": "Maximum"
-            }
-          ],
-          "required": false
-        },
-        {
-          "name": "openaiApiToken",
-          "title": "OpenAI API Key",
-          "description": "Your OpenAI API Key. Required if you choose ChatGPT as your AI.",
-          "type": "password",
-          "default": "",
-          "required": false
-        },
-        {
-          "name": "openaiEndpoint",
-          "title": "OpenAI Endpoint",
-          "description": "Choose a custom OpenAI(-compatible) endpoint to use.",
-          "type": "textfield",
-          "default": "",
-          "required": false
-        },
-        {
-          "name": "openaiModel",
-          "title": "OpenAI Model",
-          "description": "Choose the OpenAI model to use. Defaults to `chatgpt-4o-latest`.",
-          "type": "textfield",
-          "required": false
-        },
-        {
-          "name": "anthropicApiToken",
-          "title": "Anthropic API Key",
-          "description": "Your Anthropic API Key. Required if you choose Anthropic Claude as your AI.",
-          "type": "password",
-          "default": "",
-          "required": false
-        },
-        {
-          "name": "anthropicModel",
-          "title": "Anthropic Model",
-          "description": "Choose the Anthropic model to use. Defaults to `claude-3-5-sonnet-latest`.",
-          "type": "textfield",
-          "required": false
-        },
-        {
-          "name": "language",
-          "title": "Language",
-          "description": "Define the language which the AI should use to summarize the video.",
-          "type": "textfield",
-          "default": "english",
-          "required": false
-        }
-      ]
-    },
     {
       "name": "summarizeVideoWithRaycast",
       "title": "Summarize YouTube Video with Raycast",
