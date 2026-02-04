@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execAsync, execFileAsync, parseDistros } from "./utils/wsl";
+import { execFileAsync, parseDistros } from "./utils/wsl";
 import { getConfiguredEditors, Editor } from "./utils/editors";
 
 interface Project {
