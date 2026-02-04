@@ -1,6 +1,6 @@
 # Fake Typing Effect Changelog
 
-## [Initial Version] - 2026-01-09
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Features
 

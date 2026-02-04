@@ -8,14 +8,8 @@ import {
 } from "@raycast/api";
 import { parseScript, typeWithDelay, showCountdown } from "./utils/typing";
 
-interface Preferences {
-  baseDelay: string;
-  countdownDuration: string;
-  showToasts: boolean;
-}
-
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   try {
     // Get clipboard content

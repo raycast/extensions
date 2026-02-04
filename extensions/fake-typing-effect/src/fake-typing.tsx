@@ -15,16 +15,11 @@ interface FormValues {
   baseDelay: string;
 }
 
-interface Preferences {
-  countdownDuration: string;
-  showToasts: boolean;
-}
-
 export default function Command() {
   const [isTyping, setIsTyping] = useState(false);
 
   async function handleSubmit(values: FormValues) {
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues();
 
     const script = values.script.trim();
     if (!script) {
