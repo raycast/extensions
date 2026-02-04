@@ -1,5 +1,5 @@
 # Minttr Changelog
 
-## [Added Minttr] - 2026-02-03
+## [Initial Release] - {PR_MERGE_DATE}
 
 Initial version code

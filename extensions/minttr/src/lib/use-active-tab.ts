@@ -1,4 +1,5 @@
 import { getFrontmostApplication } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 // AppleScript to get URL from different browsers
@@ -36,22 +37,6 @@ const getUrlScript = (bundleId: string): string => {
       return "";
   }
 };
-
-async function runAppleScript(script: string): Promise<string> {
-  if (!script) return "";
-
-  const { execSync } = await import("child_process");
-  try {
-    // Use stdin to pass script, handles multi-line scripts properly
-    const result = execSync("osascript", {
-      encoding: "utf-8",
-      input: script,
-    });
-    return result.trim();
-  } catch {
-    return "";
-  }
-}
 
 interface UseActiveTabResult {
   url: string | null;

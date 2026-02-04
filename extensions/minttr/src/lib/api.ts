@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiToken: string;
-  apiBaseUrl?: string;
-}
-
 const DEFAULT_BASE_URL = "https://my.minttr.com";
 
 function getApiConfig() {
