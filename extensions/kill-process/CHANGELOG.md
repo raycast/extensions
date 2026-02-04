@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Preferences] - {PR_MERGE_DATE}
+## [Preferences] - 2026-02-04
 
 - Added preference to skip kill confirmation dialogs
 
