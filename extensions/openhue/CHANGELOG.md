@@ -1,6 +1,6 @@
 # OpenHue Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-04
 
 - Control individual lights (on/off, brightness, color)
 - Manage rooms
