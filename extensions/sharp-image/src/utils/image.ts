@@ -82,7 +82,7 @@ function generateShortHash(): string {
   return hash;
 }
 
-function getOutputPath(inputPath: string, format: OutputFormat): string {
+function getOutputPath(inputPath: string, format: OutputFormat, isCompressOnly: boolean): string {
   const prefs = getPreferences();
   const inputDir = path.dirname(inputPath);
   const baseName = path.basename(inputPath, path.extname(inputPath));
@@ -102,8 +102,12 @@ function getOutputPath(inputPath: string, format: OutputFormat): string {
     return inputPath;
   }
 
-  const hash = generateShortHash();
-  return path.join(outputDir, `${baseName}_${hash}${ext}`);
+  if (isCompressOnly) {
+    const hash = generateShortHash();
+    return path.join(outputDir, `${baseName}_${hash}${ext}`);
+  }
+
+  return path.join(outputDir, `${baseName}${ext}`);
 }
 
 function getOriginalFormat(inputPath: string): OutputFormat {
@@ -174,7 +178,7 @@ async function runSharp(inputPath: string, outputPath: string, format: OutputFor
 
 export async function convertToWebP(inputPath: string): Promise<CompressResult> {
   const inputSize = statSync(inputPath).size;
-  const outputPath = getOutputPath(inputPath, "webp");
+  const outputPath = getOutputPath(inputPath, "webp", false);
 
   try {
     await runSharp(inputPath, outputPath, "webp");
@@ -203,7 +207,7 @@ export async function convertToWebP(inputPath: string): Promise<CompressResult> 
 
 export async function convertToAvif(inputPath: string): Promise<CompressResult> {
   const inputSize = statSync(inputPath).size;
-  const outputPath = getOutputPath(inputPath, "avif");
+  const outputPath = getOutputPath(inputPath, "avif", false);
 
   try {
     await runSharp(inputPath, outputPath, "avif");
@@ -233,7 +237,7 @@ export async function convertToAvif(inputPath: string): Promise<CompressResult> 
 export async function compressOriginal(inputPath: string): Promise<CompressResult> {
   const inputSize = statSync(inputPath).size;
   const format = getOriginalFormat(inputPath);
-  const outputPath = getOutputPath(inputPath, format);
+  const outputPath = getOutputPath(inputPath, format, true);
 
   try {
     await runSharp(inputPath, outputPath, format);
