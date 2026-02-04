@@ -8,9 +8,6 @@
 - Replace macOS-specific clipboard commands with Raycast Clipboard API
 - Improve app re-activation logic to prevent focus loss
 - Add platform detection for macOS and Windows specific operations
-
-## [Initial Release] - 2024-12-22
-
 - Initial release with 9 customizable AI actions
 - Fix Grammar action for typos and spelling errors
 - Make Concise action to shorten text
