@@ -36,10 +36,11 @@ let cachedSettings: StoredSettings | null = null;
 export async function loadStoredSettings(): Promise<StoredSettings> {
   const stored = await LocalStorage.getItem<string>("sharp-image-settings");
   if (stored) {
-    cachedSettings = JSON.parse(stored);
+    cachedSettings = JSON.parse(stored) as StoredSettings;
     return cachedSettings;
   }
-  return {};
+  cachedSettings = {};
+  return cachedSettings;
 }
 
 export function getPreferences(): Preferences {
