@@ -28,16 +28,7 @@ Stay on top of the crypto market and your Binance portfolio.
 
 ## Preferences
 
-### Menu Bar Command
-
-| Preference | Description | Default |
-|------------|-------------|---------|
-| Menu Bar Title | Choose between BTC Balance, USD Balance, or Icon Only | BTC Balance |
-| Show Spot | Show Spot wallet in menu bar | On |
-| Show Cross Margin | Show Cross Margin wallet in menu bar | On |
-| Show Isolated Margin | Show Isolated Margin wallet in menu bar | On |
-| Show USD-M Futures | Show USD-M Futures wallet in menu bar | On |
-| Show COIN-M Futures | Show COIN-M Futures wallet in menu bar | On |
+The Menu Bar command lets you show your balance in BTC, USD, or just a clickable icon for privacy. You can also select which wallets appear in the menu.
 
 ## Privacy & Security
 
