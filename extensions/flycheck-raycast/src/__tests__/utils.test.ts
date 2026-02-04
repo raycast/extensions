@@ -1,4 +1,4 @@
-import { parseMetar } from "../utils";
+import { isValidIcaoCode } from "../utils";
 
 describe("parseMetar", () => {
   test("parses variable wind (VRB)", () => {
