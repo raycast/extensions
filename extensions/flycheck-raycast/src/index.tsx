@@ -216,7 +216,10 @@ export default function Command() {
                         metar.wind?.gust_kts ? ` (Gusts ${metar.wind.gust_kts} kts)` : ""
                       }`}
                     />
-                    <List.Item.Detail.Metadata.Label title="Visibility" text={`${metar.visibility?.miles || 0} miles`} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Visibility"
+                      text={`${metar.visibility?.miles || 0} miles`}
+                    />
                     <List.Item.Detail.Metadata.Label
                       title="Temperature"
                       text={
