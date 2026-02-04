@@ -1,6 +1,4 @@
-<h1 align="center">Niuma Logs</h1>
-
-<p align="center"><img width="400" src="./readme-assets/logo.gif" alt="logo"></p>
+<h1 align="center">Niuma (/ˈnjuː ˈmɑː/) Logs</h1>
 
 <p align="center">Every log line tells the story of a cyber workhorse.</p>
 
@@ -24,8 +22,6 @@
 
 🎉 Congratulations, you've found a treasure :)
 
-![examples](./readme-assets/examples.png)
-
 ## Highlights
 
 ⚡️ **Zero friction** for recording daily tasks — don't let logging become another task
@@ -34,11 +30,57 @@
 
 🔐 Data permissions are configurable — **rest assured**
 
-## Usage Tips
+## Usage
 
-- When you start working on something, bring up the Raycast panel and type `start`, `^` to find "Start Task".
+### 1. Log in to [CNB](https://cnb.cool)
 
-- When you finish something, bring up the Raycast panel and type `complete`, `done`, `$` to find "Complete Task". Press Enter to see the incomplete list, then select a task to mark it as done.
+### 2. [Create an Organization](https://cnb.cool/new/groups)
+
+If you already have an existing organization, you may skip this step.
+
+### 3. [Create a Repository](https://cnb.cool/new/repos)
+
+For the repository owner, select the organization you just created.
+For the repository name, we recommend `my-logs`. This repository will store your task records and act as a pipeline for generating your periodic work reports.
+As for repository visibility, you may choose "Private." If your work can be made public, "Public" is also acceptable.
+
+### 4. [Generate an Access Token](https://cnb.cool/profile/token/create)
+
+Choose a clear and descriptive token name that reflects its intended use, such as `niuma-logs`.
+For the organization, select the one you just created.
+For permissions, check the following:
+- repo-issue (read/write)
+- repo-notes (read/write)
+- mission-delete (read/write)
+- mission-manage (read/write)
+- group-resource:rw (read/write)
+
+After submission, be sure to save the access token securely.
+
+![create token](./readme-assets/create-token.png)
+
+### 5. Configure the Relevant Information in Raycast
+
+Open the Raycast command panel (default shortcut: `Opt + Space`). Type `Complete Task` and press Enter.
+
+![click one task](./readme-assets/click-complete-task.png)
+
+You will be prompted to enter two fields:
+
+`Repo`: Enter the repository you just created in the format `organization/repository`.
+`Token`: Enter your access token.
+
+![fill info in raycast](./readme-assets/fill-info-in-raycast.png)
+
+### 6. 🎉 Setup Complete
+
+You are now ready to start using the extension.
+
+## Tips
+
+- When you start working on something, bring up the Raycast panel and type `start` to find "Start Task".
+
+- When you finish something, bring up the Raycast panel and type `complete` to find "Complete Task". Press Enter to see the incomplete list, then select a task to mark it as done.
 
 - Don't worry about task granularity — from long-term goals spanning half a year to small tasks completable in half an hour, just jot them down. Once recorded, you can free up your brain's RAM, reduce anxiety, and focus better on what's in front of you.
 

@@ -13,11 +13,6 @@
     {
       "name": "create-task",
       "title": "Start Task",
-      "keywords": [
-        "start",
-        "task",
-        "^"
-      ],
       "subtitle": "— New work just came in",
       "description": "Create a new task and record it as an issue in a CNB repository.",
       "mode": "no-view",
@@ -33,12 +28,6 @@
     {
       "name": "complete-task",
       "title": "Complete Task",
-      "keywords": [
-        "$",
-        "done",
-        "complete",
-        "task"
-      ],
       "subtitle": "— Another task completed",
       "description": "Mark a task as completed and record it as an issue in a CNB repository.",
       "mode": "view"
@@ -46,10 +35,6 @@
     {
       "name": "review-tasks",
       "title": "Review Tasks",
-      "keywords": [
-        "review",
-        "task"
-      ],
       "subtitle": "— See where the time went",
       "description": "View all task records. This command opens a Gantt-style task board in a CNB repository to review durations and completion status.",
       "mode": "no-view"
