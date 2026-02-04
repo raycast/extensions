@@ -129,12 +129,12 @@ export default function main() {
       })
       .then((res) => {
         setIsLoading(false);
-        return res.hits;
+        return res.hits as LaravelDocsHit[];
       })
       .catch((err) => {
         setIsLoading(false);
         showToast(Toast.Style.Failure, "Error searching Laravel Documentation", err.message);
-        return [];
+        return [] as LaravelDocsHit[];
       });
   };
 
