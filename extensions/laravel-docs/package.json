@@ -7,7 +7,12 @@
   "author": "indykoning",
   "contributors": [
     "aglipanci",
-    "eth0"
+    "eth0",
+    "LaurinStapf"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -20,7 +25,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
+    "@raycast/api": "^1.104.4",
     "algoliasearch": "^4.11.0",
     "glob": "^8.1.0",
     "striptags": "^3.2.0"
