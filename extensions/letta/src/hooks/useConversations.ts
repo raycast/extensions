@@ -36,12 +36,7 @@ interface UseConversationsReturn {
   startConversation: (agent: AgentWithAccount) => Conversation;
   /** Add a message to a conversation */
   addMessage: (conversationId: string, message: Omit<Message, "id">) => void;
-  updateLastMessage: (
-    conversationId: string,
-    content: string,
-    reasoning?: string,
-    shouldSave?: boolean
-  ) => void;
+  updateLastMessage: (conversationId: string, content: string, reasoning?: string, shouldSave?: boolean) => void;
   /** Set the active conversation */
   setActiveConversation: (conversationId: string | null) => void;
   /** Delete a conversation */

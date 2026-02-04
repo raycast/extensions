@@ -10,32 +10,12 @@ import { useMemo, useCallback } from "react";
 import { Letta } from "@letta-ai/letta-client";
 import type { LettaAccount } from "../types";
 
-/**
- * Raw preferences structure from Raycast
- */
-interface MultiAccountPreferences {
-  project1Name: string;
-  project1ApiKey: string;
-  project1BaseUrl?: string;
-  project2Name?: string;
-  project2ApiKey?: string;
-  project2BaseUrl?: string;
-  project3Name?: string;
-  project3ApiKey?: string;
-  project3BaseUrl?: string;
-  project4Name?: string;
-  project4ApiKey?: string;
-  project4BaseUrl?: string;
-  project5Name?: string;
-  project5ApiKey?: string;
-  project5BaseUrl?: string;
-  showReasoning?: boolean;
-}
+// Uses auto-generated Preferences type from raycast-env.d.ts
 
 /**
  * Parse preferences into account objects
  */
-function parseAccounts(prefs: MultiAccountPreferences): LettaAccount[] {
+function parseAccounts(prefs: Preferences): LettaAccount[] {
   const accounts: LettaAccount[] = [];
 
   if (prefs.project1ApiKey) {
@@ -112,7 +92,7 @@ function getOrCreateClient(account: LettaAccount): Letta {
  * Hook to manage multiple Letta accounts
  */
 export function useAccounts() {
-  const prefs = getPreferenceValues<MultiAccountPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const accounts = useMemo(
     () => parseAccounts(prefs),
@@ -154,6 +134,6 @@ export function useAccounts() {
 }
 
 export function getAccounts(): LettaAccount[] {
-  const prefs = getPreferenceValues<MultiAccountPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   return parseAccounts(prefs);
 }

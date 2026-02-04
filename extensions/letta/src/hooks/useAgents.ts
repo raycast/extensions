@@ -67,10 +67,7 @@ async function fetchAgentsForAccount(client: Letta, account: LettaAccount): Prom
 /**
  * Hook to fetch agents from all configured accounts
  */
-export function useAgents(
-  accounts: LettaAccount[],
-  getClientForAccount: (accountId: string) => Letta | undefined
-) {
+export function useAgents(accounts: LettaAccount[], getClientForAccount: (accountId: string) => Letta | undefined) {
   // Fetch agents from all accounts with caching
   const {
     data: agents,

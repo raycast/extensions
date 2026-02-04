@@ -13,9 +13,7 @@ import type { AgentWithAccount } from "../types";
 export function useLettaClient() {
   const { accounts, getClientForAccount, showReasoning } = useAccounts();
 
-  const getClientForAgent = (
-    agent: AgentSummary | AgentWithAccount | { accountId: string }
-  ): Letta | undefined => {
+  const getClientForAgent = (agent: AgentSummary | AgentWithAccount | { accountId: string }): Letta | undefined => {
     return getClientForAccount(agent.accountId);
   };
 

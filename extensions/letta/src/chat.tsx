@@ -16,11 +16,7 @@ import MemoryCommand from "./memory";
 
 export default function ChatCommand() {
   const { accounts, getClientForAccount, getClientForAgent, showReasoning } = useLettaClient();
-  const {
-    agents,
-    isLoading: agentsLoading,
-    revalidate: revalidateAgents,
-  } = useAgents(accounts, getClientForAccount);
+  const { agents, isLoading: agentsLoading, revalidate: revalidateAgents } = useAgents(accounts, getClientForAccount);
 
   // Map agents to include colors and account info
   const agentsWithColors: AgentWithAccount[] = useMemo(() => {
@@ -373,9 +369,7 @@ export default function ChatCommand() {
               title={summary.title}
               subtitle={summary.lastMessage}
               accessories={[{ tag: { value: summary.accountName, color: summary.agentColor } }]}
-              detail={
-                <List.Item.Detail markdown={buildConversationMarkdown(getConversation(summary.id) || null)} />
-              }
+              detail={<List.Item.Detail markdown={buildConversationMarkdown(getConversation(summary.id) || null)} />}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title="Chat">
