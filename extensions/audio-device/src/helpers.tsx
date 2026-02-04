@@ -137,7 +137,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
                   />
                 </ActionPanel>
               }
-              accessories={getAccessories(isCurrent, isHidden, shouldShowHidden)}
+              accessories={getAccessories(isCurrent, isHidden, shouldShowHidden, d)}
             />
           );
         })
@@ -237,11 +237,11 @@ function SetCommunicationDeviceAction({ device, type, onSelection }: SetAudioDev
       onAction={async () => {
         try {
           const api = await getAudioAPI();
-          if (api.setDefaultOutputDevice && api.setDefaultInputDevice) {
+          if (api.setDefaultCommunicationOutputDevice && api.setDefaultCommunicationInputDevice) {
             if (type === "input") {
-              await api.setDefaultInputDevice(device.id);
+              await api.setDefaultCommunicationInputDevice(device.id);
             } else {
-              await api.setDefaultOutputDevice(device.id);
+              await api.setDefaultCommunicationOutputDevice(device.id);
             }
             onSelection?.();
             closeMainWindow({ clearRootSearch: true });

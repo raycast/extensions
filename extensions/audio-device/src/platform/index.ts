@@ -49,6 +49,8 @@ export interface PlatformAudioAPI {
   setDefaultOutputDevice(deviceId: string): Promise<void>;
   setDefaultInputDevice(deviceId: string): Promise<void>;
   setDefaultSystemDevice?(deviceId: string): Promise<void>;
+  setDefaultCommunicationOutputDevice?(deviceId: string): Promise<void>;
+  setDefaultCommunicationInputDevice?(deviceId: string): Promise<void>;
   setOutputDeviceVolume?(deviceId: string, volume: number): Promise<void>;
   getOutputDeviceVolume?(deviceId: string): Promise<number | undefined>;
   createAggregateDevice?: (

@@ -193,6 +193,14 @@ export const windowsAudioAPI: PlatformAudioAPI = {
     await setDefault(deviceId, "input", false);
   },
 
+  async setDefaultCommunicationOutputDevice(deviceId: string) {
+    await setDefault(deviceId, "output", true);
+  },
+
+  async setDefaultCommunicationInputDevice(deviceId: string) {
+    await setDefault(deviceId, "input", true);
+  },
+
   async getOutputDeviceVolume() {
     return undefined;
   },
