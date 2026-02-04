@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execAsync, parseDistros } from "./utils/wsl";
+import { execAsync, execFileAsync, parseDistros } from "./utils/wsl";
 import { getConfiguredEditors, Editor } from "./utils/editors";
 
 interface Project {
@@ -66,13 +66,26 @@ export default function Command() {
       await Promise.all(
         distros.map(async (distro) => {
           try {
-            const { stdout } = await execAsync(
-              `wsl -d ${distro.name} find ${projectRoot} -maxdepth 1 -type d -not -path '*/.*'`,
-            );
+            // Safe find command: wsl -d <distro> find <root> ...
+            const { stdout } = await execFileAsync("wsl", [
+              "-d",
+              distro.name,
+              "find",
+              projectRoot,
+              "-maxdepth",
+              "1",
+              "-type",
+              "d",
+              "-not",
+              "-path",
+              "*/.*"
+            ]);
 
             const lines = stdout.split("\n").filter((line) => line.trim() !== "");
             lines.forEach((path) => {
               if (path !== projectRoot && path.trim() !== "") {
+                // Clean up path if it starts with ./ or similar? 
+                // 'find' output usually is clean if root is clean.
                 const parts = path.split("/");
                 const name = parts[parts.length - 1] || path;
                 results.push({
@@ -102,18 +115,35 @@ export default function Command() {
 
   async function openProject(project: Project) {
     try {
-      const editor = availableEditors.find((e) => e.id === selectedEditorId);
+      // Cast to include our custom property
+      const editor = availableEditors.find((e) => e.id === selectedEditorId) as (Editor & { needsWindowsPath?: boolean; useTerminal?: boolean }) | undefined;
+
       if (!editor) {
         await showToast({ style: Toast.Style.Failure, title: "No editor selected" });
         return;
       }
 
-      const command = editor.commandTemplate.replace(/{distro}/g, project.distro).replace(/{path}/g, project.path);
+      let targetPath = project.path;
+      if (editor.needsWindowsPath) {
+        const { stdout } = await execFileAsync("wsl", ["-d", project.distro, "wslpath", "-w", project.path]);
+        targetPath = stdout.trim();
+      }
 
-      if (editor.isTerminal) {
-        await execAsync(command); // It's a 'start wsl ...' command, so execAsync works
+      const { command, args } = editor.getCommand(project.distro, targetPath);
+
+      if (editor.useTerminal) {
+        // Launch in a new terminal window
+        // start wsl -d distro command args... 
+        // We assume 'args' here are just ["-d", distro, command, path] if it was constructed by getCommand
+        // But getCommand returned ["-d", distro, "vim", path]
+        // So we want: start wsl -d distro vim path
+        // We can use 'cmd /c start' or just exec 'start' if allowed? 
+        // execFileAsync('cmd.exe', ['/c', 'start', command, ...args])
+        // 'command' is 'wsl'.
+
+        await execFileAsync("cmd.exe", ["/c", "start", command, ...args]);
       } else {
-        await execAsync(command);
+        await execFileAsync(command, args);
       }
 
       await showToast({ style: Toast.Style.Success, title: `Opening in ${editor.name}` });
@@ -125,9 +155,9 @@ export default function Command() {
 
   async function openInExplorer(project: Project) {
     try {
-      const { stdout } = await execAsync(`wsl -d ${project.distro} wslpath -w "${project.path}"`);
+      const { stdout } = await execFileAsync("wsl", ["-d", project.distro, "wslpath", "-w", project.path]);
       const winPath = stdout.trim();
-      await execAsync(`explorer.exe "${winPath}"`);
+      await execFileAsync("explorer.exe", [winPath]);
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Failed to open Explorer", message: String(error) });
     }

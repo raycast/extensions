@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast, Color, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execAsync, parseDistros, parseOnlineDistros, Distro, OnlineDistro } from "./utils/wsl";
+import { execAsync, execFileAsync, parseDistros, parseOnlineDistros, Distro, OnlineDistro } from "./utils/wsl";
 
 export default function Command() {
   const [distros, setDistros] = useState<Distro[]>([]);
@@ -20,7 +20,7 @@ export default function Command() {
 
   async function fetchDistros() {
     try {
-      const { stdout } = await execAsync("wsl --list --verbose");
+      const { stdout } = await execFileAsync("wsl", ["--list", "--verbose"]);
       const parsedDistros = parseDistros(stdout);
       setDistros(parsedDistros);
     } catch {
@@ -34,7 +34,7 @@ export default function Command() {
 
   async function fetchOnlineDistros() {
     try {
-      const { stdout } = await execAsync("wsl --list --online");
+      const { stdout } = await execFileAsync("wsl", ["--list", "--online"]);
       const parsed = parseOnlineDistros(stdout);
       setOnlineDistros(parsed);
     } catch {
@@ -45,7 +45,8 @@ export default function Command() {
 
   async function openTerminal(name: string) {
     try {
-      await execAsync(`start wsl -d ${name}`);
+      // start wsl -d name
+      await execFileAsync("cmd.exe", ["/c", "start", "wsl", "-d", name]);
       // No toast needed for terminal as it pops up visually
     } catch {
       await showToast({ style: Toast.Style.Failure, title: "Failed to open terminal" });
@@ -55,7 +56,9 @@ export default function Command() {
   async function startDistro(name: string) {
     try {
       // Start a background process that keeps the distro alive without a window
-      await execAsync(`wsl -d ${name} -e sh -c "nohup sleep infinity > /dev/null 2>&1 &"`);
+      // wsl -d name -e sh -c "nohup sleep infinity > /dev/null 2>&1 &"
+      // Arguments must be carefully separated
+      await execFileAsync("wsl", ["-d", name, "-e", "sh", "-c", "nohup sleep infinity > /dev/null 2>&1 &"]);
       await showToast({ style: Toast.Style.Success, title: `Started ${name}` });
       // Give it a moment to change state then refresh
       setTimeout(fetchAll, 1000);
@@ -66,7 +69,7 @@ export default function Command() {
 
   async function terminateDistro(name: string) {
     try {
-      await execAsync(`wsl --terminate ${name}`);
+      await execFileAsync("wsl", ["--terminate", name]);
       await showToast({ style: Toast.Style.Success, title: `Terminated ${name}` });
       fetchDistros(); // Refresh status
     } catch {
@@ -77,7 +80,8 @@ export default function Command() {
   async function installDistro(name: string) {
     try {
       // Installation takes time, so we just trigger it in a new window to show progress
-      await execAsync(`start wsl --install -d ${name}`);
+      // start wsl --install -d name
+      await execFileAsync("cmd.exe", ["/c", "start", "wsl", "--install", "-d", name]);
       await showToast({
         style: Toast.Style.Success,
         title: `Installing ${name}...`,
@@ -92,7 +96,7 @@ export default function Command() {
     // Basic action, user will need to confirm if we add a confirmation dialog later
     // For now we rely on the user knowing what "Destructive" style means
     try {
-      await execAsync(`wsl --unregister ${name}`);
+      await execFileAsync("wsl", ["--unregister", name]);
       await showToast({ style: Toast.Style.Success, title: `Uninstalled ${name}` });
       fetchDistros();
     } catch {
