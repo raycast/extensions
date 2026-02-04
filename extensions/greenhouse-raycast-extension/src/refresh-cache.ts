@@ -1,7 +1,15 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { HarvestClient, HarvestError } from "./api/harvest";
-import { setCachedJobs, setCachedPipeline } from "./cache/cacheUtils";
-import { fetchActiveJobPosts, fetchJobPipelineData } from "./jobs/harvestData";
+import {
+  setCachedApplications,
+  setCachedJobs,
+  setCachedPipeline,
+} from "./cache/cacheUtils";
+import {
+  fetchActiveApplications,
+  fetchActiveJobPosts,
+  fetchJobPipelineData,
+} from "./jobs/harvestData";
 
 const RATE_LIMIT_RETRIES = 3;
 const RATE_LIMIT_BASE_DELAY_MS = 1000;
@@ -51,6 +59,16 @@ export default async function RefreshCacheCommand() {
       "active job posts",
     );
     setCachedJobs(jobs);
+
+    try {
+      const applications = await withRateLimitRetry(
+        () => fetchActiveApplications(client),
+        "active applications",
+      );
+      setCachedApplications(applications);
+    } catch (err) {
+      console.error("Failed to refresh active applications:", err);
+    }
 
     let successCount = 0;
     let errorCount = 0;

@@ -1,13 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HarvestClient } from "../api/harvest";
 import {
+  fetchActiveApplications,
   fetchActiveJobPosts,
+  fetchCandidateAttachments,
   fetchJobPipelineData,
   fetchOpenJobs,
+  findResumeAttachment,
 } from "./harvestData";
 import type {
   HarvestApplication,
+  HarvestAttachment,
   HarvestCandidate,
+  HarvestCandidateWithAttachments,
   HarvestJob,
   HarvestJobPost,
   HarvestJobStage,
@@ -158,6 +163,86 @@ describe("fetchJobPipelineData", () => {
       202: candidates[1],
     });
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("fetchActiveApplications", () => {
+  it("fetches active applications and candidates", async () => {
+    const client = new HarvestClient({ apiKey: "test-key" });
+    const applications: HarvestApplication[] = [
+      {
+        id: 11,
+        candidate_id: 201,
+        applied_at: "2024-01-05T00:00:00Z",
+        last_activity_at: null,
+        current_stage: { id: 1, name: "Applied" },
+        status: "active",
+        jobs: [{ id: 1001, name: "Engineer" }],
+      },
+      {
+        id: 12,
+        candidate_id: 202,
+        applied_at: "2024-01-06T00:00:00Z",
+        last_activity_at: null,
+        current_stage: { id: 2, name: "Screen" },
+        status: "active",
+        jobs: [{ id: 1002, name: "Designer" }],
+      },
+    ];
+    const candidates: HarvestCandidate[] = [
+      { id: 201, first_name: "Ada", last_name: "Lovelace" },
+      { id: 202, name: "Grace Hopper" },
+    ];
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = resolveUrl(input);
+      const parsed = new URL(url);
+
+      if (parsed.pathname === "/v1/applications") {
+        expect(parsed.searchParams.get("status")).toBe("active");
+        return toJsonResponse(applications);
+      }
+
+      if (parsed.pathname === "/v1/candidates") {
+        expect(parsed.searchParams.get("candidate_ids")).toBe("201,202");
+        return toJsonResponse(candidates);
+      }
+
+      throw new Error(`Unexpected fetch URL: ${url}`);
+    });
+
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const result = await fetchActiveApplications(client);
+
+    expect(result.applications).toEqual(applications);
+    expect(result.candidates).toEqual({
+      201: candidates[0],
+      202: candidates[1],
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not fetch candidates when there are no applications", async () => {
+    const client = new HarvestClient({ apiKey: "test-key" });
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = resolveUrl(input);
+      const parsed = new URL(url);
+
+      if (parsed.pathname === "/v1/applications") {
+        return toJsonResponse([]);
+      }
+
+      throw new Error(`Unexpected fetch URL: ${url}`);
+    });
+
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const result = await fetchActiveApplications(client);
+
+    expect(result.applications).toEqual([]);
+    expect(result.candidates).toEqual({});
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -331,5 +416,104 @@ describe("fetchActiveJobPosts", () => {
 
     expect(results).toHaveLength(1);
     expect(results[0].title).toBe("Valid Job");
+  });
+});
+
+describe("fetchCandidateAttachments", () => {
+  it("fetches attachments for a candidate", async () => {
+    const client = new HarvestClient({ apiKey: "test-key" });
+    const candidateId = 12345;
+    const candidate: HarvestCandidateWithAttachments = {
+      id: candidateId,
+      first_name: "Jane",
+      last_name: "Doe",
+      attachments: [
+        {
+          filename: "resume.pdf",
+          url: "https://example.com/resume.pdf",
+          type: "resume",
+          content_type: "application/pdf",
+        },
+        {
+          filename: "cover.pdf",
+          url: "https://example.com/cover.pdf",
+          type: "cover_letter",
+          content_type: "application/pdf",
+        },
+      ],
+    };
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = resolveUrl(input);
+      const parsed = new URL(url);
+      if (parsed.pathname === `/v1/candidates/${candidateId}`) {
+        return toJsonResponse(candidate);
+      }
+      throw new Error(`Unexpected fetch URL: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const result = await fetchCandidateAttachments(client, candidateId);
+
+    expect(result).toEqual(candidate.attachments);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns empty array when candidate has no attachments", async () => {
+    const client = new HarvestClient({ apiKey: "test-key" });
+    const candidateId = 12345;
+    const candidate: HarvestCandidateWithAttachments = {
+      id: candidateId,
+      first_name: "Jane",
+      last_name: "Doe",
+    };
+
+    const fetchMock = vi.fn(async () => toJsonResponse(candidate));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const result = await fetchCandidateAttachments(client, candidateId);
+
+    expect(result).toEqual([]);
+  });
+});
+
+describe("findResumeAttachment", () => {
+  it("finds the resume attachment from a list", () => {
+    const attachments: HarvestAttachment[] = [
+      {
+        filename: "cover.pdf",
+        url: "https://example.com/cover.pdf",
+        type: "cover_letter",
+      },
+      {
+        filename: "resume.pdf",
+        url: "https://example.com/resume.pdf",
+        type: "resume",
+      },
+    ];
+
+    const result = findResumeAttachment(attachments);
+
+    expect(result).toEqual(attachments[1]);
+  });
+
+  it("returns undefined when no resume attachment exists", () => {
+    const attachments: HarvestAttachment[] = [
+      {
+        filename: "cover.pdf",
+        url: "https://example.com/cover.pdf",
+        type: "cover_letter",
+      },
+    ];
+
+    const result = findResumeAttachment(attachments);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("returns undefined for empty array", () => {
+    const result = findResumeAttachment([]);
+
+    expect(result).toBeUndefined();
   });
 });

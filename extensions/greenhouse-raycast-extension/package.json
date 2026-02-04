@@ -1,13 +1,14 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "greenhouse-raycast-extension",
   "title": "Greenhouse",
   "version": "0.0.3",
-  "description": "Raycast extension for Greenhouse jobs and applicant pipeline stages",
+  "description": "Search Greenhouse jobs and candidate pipelines",
   "icon": "command-icon.png",
   "author": "jai",
+  "access": "public",
   "categories": ["Productivity"],
   "license": "MIT",
-  "private": true,
   "preferences": [
     {
       "name": "harvestApiKey",
@@ -29,8 +30,8 @@
       "title": "Recruiting Base URL",
       "type": "textfield",
       "required": false,
-      "placeholder": "https://s101.recruiting.eu.greenhouse.io",
-      "default": "https://s101.recruiting.eu.greenhouse.io",
+      "placeholder": "https://app.greenhouse.io",
+      "default": "https://app.greenhouse.io",
       "description": "Optional override for the Greenhouse Recruiting app base URL."
     }
   ],

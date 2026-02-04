@@ -58,4 +58,18 @@ export interface HarvestCandidate {
   first_name?: string | null;
   last_name?: string | null;
   name?: string | null;
+  company?: string | null;
+  title?: string | null;
+}
+
+export interface HarvestAttachment {
+  filename: string;
+  url: string;
+  type: string;
+  content_type?: string;
+  created_at?: string;
+}
+
+export interface HarvestCandidateWithAttachments extends HarvestCandidate {
+  attachments?: HarvestAttachment[];
 }

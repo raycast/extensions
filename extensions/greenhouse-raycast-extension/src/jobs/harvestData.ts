@@ -2,7 +2,9 @@ import { HarvestClient } from "../api/harvest";
 import { buildCandidateMap, chunkIds } from "./pipelineUtils";
 import type {
   HarvestApplication,
+  HarvestAttachment,
   HarvestCandidate,
+  HarvestCandidateWithAttachments,
   HarvestJob,
   HarvestJobPost,
   HarvestJobStage,
@@ -13,6 +15,11 @@ const CANDIDATE_BATCH_SIZE = 50;
 
 export interface JobPipelineData {
   stages: HarvestJobStage[];
+  applications: HarvestApplication[];
+  candidates: Record<number, HarvestCandidate>;
+}
+
+export interface CandidateSearchData {
   applications: HarvestApplication[];
   candidates: Record<number, HarvestCandidate>;
 }
@@ -96,4 +103,51 @@ export const fetchJobPipelineData = async (
     applications: applicationData,
     candidates: buildCandidateMap(candidateData),
   };
+};
+
+export const fetchActiveApplications = async (
+  client: HarvestClient,
+): Promise<CandidateSearchData> => {
+  const applicationData = await client.listAll<HarvestApplication>(
+    "applications",
+    {
+      status: "active",
+    },
+  );
+
+  const candidateIds = Array.from(
+    new Set(applicationData.map((application) => application.candidate_id)),
+  );
+  const candidateData: HarvestCandidate[] = [];
+
+  if (candidateIds.length) {
+    const idChunks = chunkIds(candidateIds, CANDIDATE_BATCH_SIZE);
+    for (const chunk of idChunks) {
+      const batch = await client.listAll<HarvestCandidate>("candidates", {
+        candidate_ids: chunk.join(","),
+      });
+      candidateData.push(...batch);
+    }
+  }
+
+  return {
+    applications: applicationData,
+    candidates: buildCandidateMap(candidateData),
+  };
+};
+
+export const fetchCandidateAttachments = async (
+  client: HarvestClient,
+  candidateId: number,
+): Promise<HarvestAttachment[]> => {
+  const { data } = await client.request<HarvestCandidateWithAttachments>({
+    path: `candidates/${candidateId}`,
+  });
+  return data.attachments ?? [];
+};
+
+export const findResumeAttachment = (
+  attachments: HarvestAttachment[],
+): HarvestAttachment | undefined => {
+  return attachments.find((a) => a.type === "resume");
 };

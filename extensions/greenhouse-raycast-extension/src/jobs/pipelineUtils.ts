@@ -5,7 +5,12 @@ import type {
 } from "./types";
 
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
-const DEFAULT_RECRUITING_BASE_URL = "https://s101.recruiting.eu.greenhouse.io";
+const DEFAULT_RECRUITING_BASE_URL = "https://app.greenhouse.io";
+
+const resolveRecruitingBaseUrl = (baseUrl?: string | null) => {
+  const resolvedBaseUrl = baseUrl?.trim();
+  return (resolvedBaseUrl || DEFAULT_RECRUITING_BASE_URL).replace(/\/$/, "");
+};
 
 export interface PipelineSection {
   id: string;
@@ -133,11 +138,16 @@ export const buildCandidateApplicationUrl = (
   candidateId: number,
   applicationId: number,
 ) => {
-  const resolvedBaseUrl = baseUrl?.trim();
-  const normalizedBaseUrl = (
-    resolvedBaseUrl || DEFAULT_RECRUITING_BASE_URL
-  ).replace(/\/$/, "");
+  const normalizedBaseUrl = resolveRecruitingBaseUrl(baseUrl);
   return `${normalizedBaseUrl}/people/${candidateId}/applications/${applicationId}/redesign`;
+};
+
+export const buildCandidateProfileUrl = (
+  baseUrl: string | undefined,
+  candidateId: number,
+) => {
+  const normalizedBaseUrl = resolveRecruitingBaseUrl(baseUrl);
+  return `${normalizedBaseUrl}/people/${candidateId}`;
 };
 
 const STAGE_COLOR_RULES: Array<{

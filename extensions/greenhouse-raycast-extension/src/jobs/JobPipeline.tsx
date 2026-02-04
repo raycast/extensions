@@ -6,10 +6,11 @@ import {
   List,
   Toast,
   getPreferenceValues,
+  open,
   showToast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { HarvestClient } from "../api/harvest";
 import {
   type HarvestErrorDisplay,
@@ -20,12 +21,17 @@ import type { JobListItem } from "./types";
 import {
   buildCandidateName,
   buildCandidateApplicationUrl,
+  buildCandidateProfileUrl,
   buildPipelineSections,
   getDaysSince,
   getStageTintName,
   type StageTintName,
 } from "./pipelineUtils";
-import { fetchJobPipelineData } from "./harvestData";
+import {
+  fetchCandidateAttachments,
+  fetchJobPipelineData,
+  findResumeAttachment,
+} from "./harvestData";
 
 interface JobPipelineProps {
   job: JobListItem;
@@ -93,6 +99,44 @@ export default function JobPipeline({ job }: JobPipelineProps) {
 
   const hasApplications = applications.length > 0;
 
+  const handleDownloadResume = useCallback(
+    async (candidateId: number) => {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching resume...",
+      });
+      try {
+        const attachments = await fetchCandidateAttachments(
+          client,
+          candidateId,
+        );
+        const resume = findResumeAttachment(attachments);
+        if (resume) {
+          await open(resume.url);
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Opening resume",
+            message: resume.filename,
+          });
+        } else {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "No resume found",
+            message: "This candidate has no resume attachment",
+          });
+        }
+      } catch (err) {
+        const errorDisplay = getHarvestErrorDisplay(err, "pipeline");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: errorDisplay.toastTitle ?? "Failed to fetch resume",
+          message: errorDisplay.toastMessage,
+        });
+      }
+    },
+    [client],
+  );
+
   return (
     <List
       isLoading={showLoading}
@@ -133,6 +177,10 @@ export default function JobPipeline({ job }: JobPipelineProps) {
                 application.candidate_id,
                 application.id,
               );
+              const candidateProfileUrl = buildCandidateProfileUrl(
+                preferences.recruitingBaseUrl,
+                application.candidate_id,
+              );
 
               return (
                 <List.Item
@@ -145,9 +193,22 @@ export default function JobPipeline({ job }: JobPipelineProps) {
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser
-                        title="Open Candidate"
+                        title="Open Application"
                         icon={Icon.ArrowRight}
                         url={candidateUrl}
+                      />
+                      <Action.OpenInBrowser
+                        title="Open Candidate Profile"
+                        icon={Icon.Person}
+                        url={candidateProfileUrl}
+                      />
+                      <Action
+                        title="Download Resume"
+                        icon={Icon.Document}
+                        shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        onAction={() =>
+                          handleDownloadResume(application.candidate_id)
+                        }
                       />
                     </ActionPanel>
                   }

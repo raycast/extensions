@@ -1,6 +1,6 @@
 import { HarvestError } from "./harvest";
 
-export type HarvestErrorContext = "jobs" | "pipeline";
+export type HarvestErrorContext = "jobs" | "pipeline" | "applications";
 
 export interface HarvestErrorDisplay {
   title: string;
