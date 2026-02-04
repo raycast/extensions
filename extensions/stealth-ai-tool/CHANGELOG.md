@@ -1,6 +1,6 @@
 # Stealth AI Changelog
 
-## [Windows Support & Finder Focus Fix] - {PR_MERGE_DATE}
+## [Windows Support & Finder Focus Fix] - 2026-02-04
 
 - Add Windows platform support using Raycast's cross-platform APIs
 - Fix Finder appearing and gaining focus during paste operations
