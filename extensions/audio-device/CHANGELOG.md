@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Fix] - 2026-02-04
+
+- Hidden devices tracked per input/output and shared across manual lists and auto-switch
+
 ## [Update] - {PR_MERGE_DATE}
 - Add Windows support via platform abstraction
 - Refactor audio handling into a platform abstraction layer.
