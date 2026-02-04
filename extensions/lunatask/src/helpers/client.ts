@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-const { accessToken } = getPreferenceValues();
+const { accessToken } = getPreferenceValues<Preferences>();
 
 const prefixURL = "https://api.lunatask.app/v1";
 const headers = {

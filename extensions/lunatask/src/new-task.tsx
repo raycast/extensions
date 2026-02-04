@@ -31,7 +31,7 @@ interface FieldRefs {
 }
 
 async function createTask(values: Values, fieldRefs: FieldRefs) {
-  const { defaultAreaId } = getPreferenceValues();
+  const { defaultAreaId } = getPreferenceValues<Preferences>();
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -86,7 +86,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
   const noteFieldRef = useRef<Form.TextArea>(null);
   const dateFieldRef = useRef<Form.DatePicker>(null);
 
-  const { defaultAreaId } = getPreferenceValues();
+  const { defaultAreaId } = getPreferenceValues<Preferences>();
 
   const { isLoading, data } = usePromise(async () => {
     const allAreas = await LocalStorage.allItems();
