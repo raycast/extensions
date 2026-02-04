@@ -124,14 +124,21 @@ function extractMarginPositions(positions: MarginPosition[]): MarginPositionInfo
   }));
 }
 
-function extractIsolatedMarginPositions(positions: IsolatedMarginPairPosition[]): MarginPositionInfo[] {
+function extractIsolatedMarginPositions(
+  positions: IsolatedMarginPairPosition[],
+  prices: Map<string, number>,
+): MarginPositionInfo[] {
   return positions.map((pos) => {
-    const totalValue = parseFloat(pos.baseAsset.positionValue) + parseFloat(pos.quoteAsset.positionValue);
+    // positionValue is in base asset (e.g., BTC), convert to USD
+    const totalValueInBaseAsset = parseFloat(pos.baseAsset.positionValue) + parseFloat(pos.quoteAsset.positionValue);
+    const baseAssetUsdtPrice = prices.get(`${pos.baseAsset.asset}USDT`) || 0;
+    const valueUsd = Math.abs(totalValueInBaseAsset) * baseAssetUsdtPrice;
+
     return {
       asset: pos.baseAsset.asset,
       pair: pos.pair,
       position: formatAmount(pos.baseAsset.netAsset, { type: "number" }),
-      valueUsd: Math.abs(totalValue),
+      valueUsd,
     };
   });
 }
@@ -182,7 +189,7 @@ async function fetchAllWalletData(): Promise<WalletData[]> {
             enabled: true,
             topAssets: extractTopAssets(data.assets, walletType),
             positions: [],
-            marginPositions: extractIsolatedMarginPositions(data.marginPositions),
+            marginPositions: extractIsolatedMarginPositions(data.marginPositions, prices),
           };
         }
         case "usdm-futures": {
