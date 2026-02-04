@@ -376,11 +376,6 @@ function SearchCommand() {
                 </>
               ) : (
                 <>
-                  <Action
-                    title="Type IP to Search…"
-                    icon={Icon.MagnifyingGlass}
-                    onAction={() => {}}
-                  />
                   <SwitchModeAction
                     currentMode={searchMode}
                     onModeChange={handleModeChange}

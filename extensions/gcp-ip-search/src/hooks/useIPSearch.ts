@@ -162,7 +162,14 @@ export function useIPSearch({
     return () => {
       isMounted = false;
     };
-  }, [ip, mode, initialResults]); // CustomProjectsIds is intentionally omitted to avoid re-triggering on array ref change if contents are same, but usually it's stable string array. Better to use mode change.
+  }, [
+    ip,
+    mode,
+    initialResults,
+    customProjectIds,
+    onSaveToHistory,
+    onRemoveFromHistory,
+  ]);
 
   return {
     results,

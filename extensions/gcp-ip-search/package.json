@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gcp-ip-search",
-  "title": "Google Cloud Platform",
+  "title": "Google Cloud Platform IP Search",
   "description": "Search for IP addresses across all your GCP projects and quickly navigate to the GCP console",
   "icon": "icon.png",
   "author": "pin-yi",
