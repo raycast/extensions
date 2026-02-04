@@ -5,4 +5,4 @@
 - Initial release of Restart Without Reopen extension
 - Restart Mac without reopening windows for a cleaner start
 - AppleScript-based implementation for reliable system interaction
-- Support for both macOS and Windows platforms
+- macOS-only support with AppleScript-based implementation
