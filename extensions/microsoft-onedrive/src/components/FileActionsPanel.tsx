@@ -90,7 +90,7 @@ export function FileActionsPanel({
           <ActionPanel.Submenu
             // eslint-disable-next-line @raycast/prefer-title-case
             title="Sort Search Results By"
-            icon={Icon.ArrowUp}
+            icon={Icon.ArrowDown}
             shortcut={{
               macOS: { modifiers: ["opt", "cmd"], key: "s" },
               Windows: { modifiers: ["alt", "ctrl"], key: "s" },

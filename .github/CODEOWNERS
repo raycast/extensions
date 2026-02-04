@@ -187,6 +187,7 @@
 /extensions/bike                                                    @SKaplanOfficial
 /extensions/bikeshare-station-status                                @itsmingjie
 /extensions/binance                                                 @grzegorzkrukowski
+/extensions/binance-exchange                                        @xilopaint
 /extensions/bing-search                                             @maver1ck @3c1u
 /extensions/bing-wallpaper                                          @koinzhang
 /extensions/binge-clock                                             @Aayush9029
@@ -665,6 +666,7 @@
 /extensions/facetime                                                @ron-myers @arthur-fontaine
 /extensions/fake-financial-data                                     @andre-rd-rodrigues @farisaziz12
 /extensions/fake-swedish-personal-number                            @Corey-Maler
+/extensions/fake-typing-effect                                      @Cyberistic
 /extensions/fakecrime-upload                                        @berkay-digital
 /extensions/fancy-text                                              @peduarte @pernielsentikaer @ridemountainpig @nexxai
 /extensions/fantastical                                             @devahschaefers @xilopaint @ramsaysewell @pernielsentikaer
@@ -1243,6 +1245,7 @@
 /extensions/manotori                                                @xmok
 /extensions/mantine                                                 @EmilMalanczak
 /extensions/manus                                                   @KthKuang
+/extensions/manus-manager                                           @wong2
 /extensions/maplestory-gg                                           @LitoMore @pernielsentikaer
 /extensions/marginnote                                              @ourongxing
 /extensions/markdown-blog-manager                                   @pyronaur
@@ -1319,6 +1322,7 @@
 /extensions/minio-manager                                           @2214372851
 /extensions/minion-ipsum                                            @vigosan
 /extensions/minisim                                                 @okwasniewski
+/extensions/minttr                                                  @EryouHao
 /extensions/miro                                                    @felixhaeberle @mathieudutour @Silv-1
 /extensions/mirror-displays                                         @yonbergman
 /extensions/mistral                                                 @colinlienard
@@ -1526,6 +1530,7 @@
 /extensions/openai-speak                                            @jnchman
 /extensions/openai-translator                                       @douo @dekura @leeonfield @ridemountainpig
 /extensions/openfortivpn                                            @rafalpetryka
+/extensions/openhue                                                 @thibauult
 /extensions/openrouter-model-search                                 @mutewinter @0xdhrv
 /extensions/openrouter-models-finder                                @jeejeeguan @degouville
 /extensions/openrouter-quick-actions                                @HugoGresse
@@ -1601,6 +1606,7 @@
 /extensions/pdf-compression                                         @BirkhoffLee
 /extensions/pdf-tools                                               @xilopaint
 /extensions/pdfsearch                                               @kevin-pek @xilopaint
+/extensions/pdsls                                                   @notjuliet
 /extensions/penflow-ai                                              @Feng6611
 /extensions/penpot                                                  @bobbymannino @tonka3000
 /extensions/pera-explorer                                           @akgunberk
@@ -1845,6 +1851,7 @@
 /extensions/react-native-directory                                  @shubh73
 /extensions/read-ai                                                 @JungHoonGhae @zezhehh
 /extensions/readeck                                                 @shichen437
+/extensions/reader-mode                                             @chrismessina @hetommy
 /extensions/readwise                                                @natterstefan
 /extensions/readwise-reader                                         @zach-fuller @birdmanmandbir @nicolas-marien @civ2boss
 /extensions/readwise-to-tana                                        @believer
