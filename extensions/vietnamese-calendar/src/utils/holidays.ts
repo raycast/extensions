@@ -64,7 +64,7 @@ const SOLAR_HOLIDAYS: Record<string, HolidayInfo | string> = {
   "22/12": { name: "🎖️ QĐNDVN", startYear: 1944 },
 };
 
-function getMothersDay(year: number): string {
+export function getMothersDay(year: number): string {
   // 2nd Sunday of May
   const firstDay = new Date(year, 4, 1); // Month is 0-indexed, 4 is May
   const dayOfWeek = getDay(firstDay); // 0 (Sun) - 6 (Sat)
@@ -78,7 +78,7 @@ function getMothersDay(year: number): string {
   return `${date}/5`;
 }
 
-function getFathersDay(year: number): string {
+export function getFathersDay(year: number): string {
   // 3rd Sunday of June
   const firstDay = new Date(year, 5, 1); // Month is 0-indexed, 5 is June
   const dayOfWeek = getDay(firstDay);
@@ -154,8 +154,8 @@ export function isOfficialHoliday(
   const solarKey = `${solarDay}/${solarMonth}`;
   const lunarKey = `${lunarDay}/${lunarMonth}`;
 
-  // Solar Holidays: 1/1, 30/4, 1/5, 2/9
-  if (["1/1", "30/4", "1/5", "2/9"].includes(solarKey)) {
+  // Solar Holidays: 1/1, 30/4, 1/5, 2/9, 24/11
+  if (["1/1", "30/4", "1/5", "2/9", "24/11"].includes(solarKey)) {
     return true;
   }
 

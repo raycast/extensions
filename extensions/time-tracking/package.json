@@ -7,7 +7,8 @@
   "author": "EinLinuus",
   "contributors": [
     "xmok",
-    "swain"
+    "swain",
+    "mateus_badalotti"
   ],
   "categories": [
     "Productivity",
@@ -117,6 +118,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

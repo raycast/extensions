@@ -25,7 +25,12 @@ import {
   getAudioAPI,
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
-import { getHiddenDevices, toggleDeviceVisibility, isShowingHiddenDevices } from "./device-preferences";
+import {
+  getHiddenDevices,
+  isShowingHiddenDevices,
+  setShowHiddenDevices,
+  toggleDeviceVisibility,
+} from "./device-preferences";
 import { getTransportTypeLabel } from "./device-labels";
 import { createDeepLink } from "./utils";
 
@@ -39,19 +44,16 @@ type DeviceListProps = {
 
 export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
   const { isLoading, data } = useAudioDevices(ioType);
-  const { data: hiddenDevices, revalidate: refetchHiddenDevices } = usePromise(getHiddenDevices, []);
-  const { data: shouldShowHidden } = usePromise(isShowingHiddenDevices, []);
-  const [localHiddenDevices, setLocalHiddenDevices] = useState<Set<string>>(new Set());
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    if (hiddenDevices && isMounted.current) {
-      setLocalHiddenDevices(new Set(hiddenDevices));
-    }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [hiddenDevices]);
+  const {
+    data: hiddenDevices,
+    isLoading: isHiddenLoading,
+    revalidate: refetchHiddenDevices,
+  } = usePromise(getHiddenDevices, [ioType]);
+  const {
+    data: showHiddenDevices,
+    isLoading: isShowHiddenLoading,
+    revalidate: refetchShowHiddenDevices,
+  } = usePromise(isShowingHiddenDevices, [ioType]);
 
   const { data: sortedDevices, visitItem: recordDeviceSelection } = useFrecencySorting(data?.devices || [], {
     key: (device) => device.uid,
@@ -88,44 +90,58 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     })();
   }, [deviceId, deviceName, data, ioType, recordDeviceSelection]);
 
+  const hiddenSet = new Set(hiddenDevices ?? []);
+  const shouldShowHidden = showHiddenDevices ?? false;
+  const visibleDevices = (sortedDevices ?? []).filter((device) => shouldShowHidden || !hiddenSet.has(device.uid));
+
+  const loading = isLoading || isHiddenLoading || isShowHiddenLoading;
+  const showEmptyView = !loading && visibleDevices.length === 0;
+
   return (
-    <List isLoading={isLoading}>
-      {data &&
-        sortedDevices
-          .filter((d) => shouldShowHidden || !localHiddenDevices.has(d.uid))
-          .map((d) => {
-            const isCurrent = d.uid === data.current.uid;
-            const isHidden = localHiddenDevices.has(d.uid);
-            return (
-              <List.Item
-                key={d.uid}
-                title={d.name}
-                subtitle={getTransportTypeLabel(d)}
-                icon={getIcon(d, d.uid === data.current.uid)}
-                actions={
-                  <ActionPanel>
-                    <DeviceActions
-                      ioType={ioType}
-                      device={d}
-                      isHidden={isHidden}
-                      shouldShowHidden={shouldShowHidden || false}
-                      onSelection={() => recordDeviceSelection(d)}
-                      onVisibilityChange={() => {
-                        if (isMounted.current) {
-                          refetchHiddenDevices().then((devices) => {
-                            if (devices && isMounted.current) {
-                              setLocalHiddenDevices(new Set(devices));
-                            }
-                          });
-                        }
-                      }}
-                    />
-                  </ActionPanel>
-                }
-                accessories={getAccessories(isCurrent, isHidden, shouldShowHidden || false, d)}
+    <List isLoading={loading}>
+      {showEmptyView ? (
+        <List.EmptyView
+          title={shouldShowHidden ? "No devices found" : "No visible devices"}
+          description={shouldShowHidden ? undefined : "Hidden devices are not shown. Toggle to manage hidden devices."}
+          actions={
+            <ActionPanel>
+              <ToggleShowHiddenDevicesAction
+                ioType={ioType}
+                isShowing={shouldShowHidden}
+                onToggle={() => void refetchShowHiddenDevices()}
               />
-            );
-          })}
+            </ActionPanel>
+          }
+        />
+      ) : (
+        data &&
+        visibleDevices.map((d) => {
+          const isCurrent = d.uid === data.current.uid;
+          const isHidden = hiddenSet.has(d.uid);
+          return (
+            <List.Item
+              key={d.uid}
+              title={d.name}
+              subtitle={getTransportTypeLabel(d)}
+              icon={getIcon(d, d.uid === data.current.uid)}
+              actions={
+                <ActionPanel>
+                  <DeviceActions
+                    ioType={ioType}
+                    device={d}
+                    isHidden={isHidden}
+                    isShowingHidden={shouldShowHidden}
+                    onSelection={() => recordDeviceSelection(d)}
+                    onHiddenChange={() => void refetchHiddenDevices()}
+                    onShowHiddenChange={() => void refetchShowHiddenDevices()}
+                  />
+                </ActionPanel>
+              }
+              accessories={getAccessories(isCurrent, isHidden, shouldShowHidden)}
+            />
+          );
+        })
+      )}
     </List>
   );
 }
@@ -134,16 +150,18 @@ function DeviceActions({
   ioType,
   device,
   isHidden,
-  shouldShowHidden,
+  isShowingHidden,
   onSelection,
-  onVisibilityChange,
+  onHiddenChange,
+  onShowHiddenChange,
 }: {
   ioType: IOType;
   device: AudioDevice;
   isHidden: boolean;
-  shouldShowHidden: boolean;
+  isShowingHidden: boolean;
   onSelection: () => void;
-  onVisibilityChange: () => void;
+  onHiddenChange: () => void;
+  onShowHiddenChange: () => void;
 }) {
   return (
     <>
@@ -159,13 +177,8 @@ function DeviceActions({
         }}
       />
       <Action.CopyToClipboard title="Copy Device Name" content={device.name} shortcut={Keyboard.Shortcut.Common.Copy} />
-      <ToggleHiddenDeviceAction
-        deviceId={device.uid}
-        ioType={ioType}
-        isHidden={isHidden}
-        shouldShowHidden={shouldShowHidden}
-        onAction={onVisibilityChange}
-      />
+      <ToggleHiddenDeviceAction deviceId={device.uid} ioType={ioType} isHidden={isHidden} onAction={onHiddenChange} />
+      <ToggleShowHiddenDevicesAction ioType={ioType} isShowing={isShowingHidden} onToggle={onShowHiddenChange} />
     </>
   );
 }
@@ -254,15 +267,10 @@ function ToggleHiddenDeviceAction({
   deviceId: string;
   ioType: IOType;
   isHidden: boolean;
-  shouldShowHidden: boolean;
   onAction: () => void;
 }) {
-  const title = isHidden ? "Include in Auto Switch" : "Exclude from Auto Switch";
+  const title = isHidden ? "Show Device" : "Hide Device";
   const icon = isHidden ? Icon.Eye : Icon.EyeDisabled;
-
-  if (!shouldShowHidden && !isHidden) {
-    return null;
-  }
 
   return (
     <Action
@@ -270,8 +278,29 @@ function ToggleHiddenDeviceAction({
       icon={icon}
       shortcut={null}
       onAction={async () => {
-        await toggleDeviceVisibility(deviceId);
+        await toggleDeviceVisibility(ioType, deviceId);
         onAction();
+      }}
+    />
+  );
+}
+
+function ToggleShowHiddenDevicesAction({
+  ioType,
+  isShowing,
+  onToggle,
+}: {
+  ioType: IOType;
+  isShowing: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <Action
+      title={isShowing ? "Hide Hidden Devices" : "Show Hidden Devices"}
+      icon={isShowing ? Icon.EyeDisabled : Icon.Eye}
+      onAction={async () => {
+        await setShowHiddenDevices(ioType, !isShowing);
+        onToggle();
       }}
     />
   );
@@ -327,8 +356,9 @@ export function getIcon(device: AudioDevice, isCurrent: boolean) {
   };
 }
 
+
 function getAccessories(isCurrent: boolean, isHidden: boolean, shouldShowHidden: boolean, device?: AudioDevice) {
-  const accessories: Array<{ icon: Icon; tooltip?: string }> = [];
+  const accessories: List.Item.Accessory[] = [];
 
   if (isCurrent) {
     accessories.push({ icon: Icon.Checkmark });

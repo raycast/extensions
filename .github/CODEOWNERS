@@ -314,6 +314,7 @@
 /extensions/clash                                                   @ciiiii
 /extensions/claude                                                  @florisdobber @alejandrot96 @FelixLisczyk @gcordalis @rortan134 @ridemountainpig @pernielsentikaer @ridjis @mhrmsn
 /extensions/claude-code-cheatsheet                                  @harumeri
+/extensions/claude-code-config-switcher                             @WangCheng0116
 /extensions/claude-code-launcher                                    @stephendolan @ridemountainpig
 /extensions/claudecast                                              @qazi0
 /extensions/clean-keyboard                                          @ike-gg @owain-williams @xilopaint @ridemountainpig @LitoMore
@@ -664,6 +665,7 @@
 /extensions/facetime                                                @ron-myers @arthur-fontaine
 /extensions/fake-financial-data                                     @andre-rd-rodrigues @farisaziz12
 /extensions/fake-swedish-personal-number                            @Corey-Maler
+/extensions/fake-typing-effect                                      @Cyberistic
 /extensions/fakecrime-upload                                        @berkay-digital
 /extensions/fancy-text                                              @peduarte @pernielsentikaer @ridemountainpig @nexxai
 /extensions/fantastical                                             @devahschaefers @xilopaint @ramsaysewell @pernielsentikaer
@@ -684,6 +686,7 @@
 /extensions/ffmpeg                                                  @RenderCoder @blekmus @aagedal @EvanZhouDev @j3lte
 /extensions/fhir                                                    @loris
 /extensions/fibonacci-sequence                                      @adambutler
+/extensions/fifteen-million-merits                                  @alexibuild
 /extensions/figlet                                                  @pernielsentikaer
 /extensions/figma-files                                             @michaelwschultz @pernielsentikaer @GLaDO8
 /extensions/figma-learn-companion                                   @MadMaxMcKinney
@@ -717,6 +720,7 @@
 /extensions/flibusta-search                                         @vladislav-yevtushenko
 /extensions/flight-miles-calculator                                 @DannySeidel @pernielsentikaer
 /extensions/flighty                                                 @hrishabhn @damian-duchnowski
+/extensions/floaty                                                  @fayecat
 /extensions/flow                                                    @vimtor @tyuichis
 /extensions/fluctuation                                             @zoffyzhang
 /extensions/fluent-outdoors                                         @juhamust
@@ -1316,6 +1320,7 @@
 /extensions/minio-manager                                           @2214372851
 /extensions/minion-ipsum                                            @vigosan
 /extensions/minisim                                                 @okwasniewski
+/extensions/minttr                                                  @EryouHao
 /extensions/miro                                                    @felixhaeberle @mathieudutour @Silv-1
 /extensions/mirror-displays                                         @yonbergman
 /extensions/mistral                                                 @colinlienard
@@ -2219,6 +2224,7 @@
 /extensions/teamgantt                                               @knownasilya
 /extensions/teamup-rooms                                            @drewwatkins11
 /extensions/techcrunch                                              @khlebobul
+/extensions/telegram                                                @ikupenov
 /extensions/teleport                                                @lamberttraccard
 /extensions/tembo                                                   @vrmiguel
 /extensions/tempmail                                                @Joshlucpoll
@@ -2268,7 +2274,7 @@
 /extensions/time-logs                                               @damianredecki
 /extensions/time-machine                                            @SuoweiHu @gheorghiuradu
 /extensions/time-teller                                             @ickas @pernielsentikaer
-/extensions/time-tracking                                           @EinLinuus @xmok @swain
+/extensions/time-tracking                                           @EinLinuus @xmok @swain @mateusbadalotti
 /extensions/time-traveling-world-clock                              @himarky @iwex @ridemountainpig @0xdhrv
 /extensions/time-until-i-do                                         @MuhaddiMu
 /extensions/timecamp                                                @iAmKevinCruz
@@ -2350,7 +2356,7 @@
 /extensions/type-snob                                               @sawyerh @chrismessina @0xdhrv
 /extensions/type-the-alphabet                                       @Visual-Studio-Coder
 /extensions/typeform-navigator                                      @jdvr @xmok
-/extensions/typefully                                               @DanielFerguson @pernielsentikaer @thomaspaulmann
+/extensions/typefully                                               @DanielFerguson @DanielFerguson @pernielsentikaer @thomaspaulmann
 /extensions/typer                                                   @yaronschwimmer @ridemountainpig
 /extensions/typescript-documentation-search                         @chezhe
 /extensions/typescript-mock-generator                               @comoser
@@ -2577,6 +2583,7 @@
 /extensions/yu-gi-oh-card-lookup                                    @Apope1999
 /extensions/yubikey-code                                            @yoyoyeti
 /extensions/za-fake-id-number-generator                             @runningdeveloper
+/extensions/zacks-stock-ranking                                     @joshmillgate
 /extensions/zalgo-text                                              @petermiles
 /extensions/zeabur                                                  @ridemountainpig
 /extensions/zed-recent-projects                                     @ewgenius @tleo19 @jylamont @pernielsentikaer @tmwrnr @true-real-michael @remorses @vensauro
