@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wsl-manager",
   "title": "WSL Manager",
-  "description": "Manage and launch WSL distributions.",
+  "description": "Seamlessly manage WSL distributions and open projects in your preferred editor directly from Raycast.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

@@ -6,6 +6,7 @@ export default function Command() {
   const [distros, setDistros] = useState<Distro[]>([]);
   const [onlineDistros, setOnlineDistros] = useState<OnlineDistro[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     fetchAll();
@@ -99,10 +100,19 @@ export default function Command() {
     }
   }
 
+  // Filter logic
+  const filteredDistros = distros.filter((d) => d.name.toLowerCase().includes(searchText.toLowerCase()));
+
+  const filteredOnlineDistros = onlineDistros.filter(
+    (d) =>
+      d.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      d.friendlyName.toLowerCase().includes(searchText.toLowerCase()),
+  );
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search distros..." onSearchTextChange={() => {}}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search distros..." onSearchTextChange={setSearchText}>
       <List.Section title="Installed Distributions">
-        {distros.map((distro) => (
+        {filteredDistros.map((distro) => (
           <List.Item
             key={distro.name}
             title={distro.name}
@@ -162,7 +172,7 @@ export default function Command() {
       </List.Section>
 
       <List.Section title="Available Online">
-        {onlineDistros.map((distro) => (
+        {filteredOnlineDistros.map((distro) => (
           <List.Item
             key={distro.name}
             title={distro.friendlyName}

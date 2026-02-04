@@ -157,7 +157,7 @@ export default function Command() {
           key={`${project.distro}-${project.path}`}
           title={project.name}
           subtitle={`${project.distro}: ${project.path}`}
-          icon="list-icon.png"
+          icon={Icon.List}
           actions={
             <ActionPanel>
               <Action title={`Open in ${currentEditorName}`} icon={Icon.Pencil} onAction={() => openProject(project)} />
