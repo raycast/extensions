@@ -29,6 +29,13 @@
       "subtitle": "Open FAVORO web app",
       "description": "Open the FAVORO web application in your browser",
       "mode": "no-view"
+    },
+    {
+      "name": "logout-favoro",
+      "title": "Logout from FAVORO",
+      "subtitle": "Disconnect your FAVORO account",
+      "description": "Disconnect from FAVORO and clear all cached data",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
