@@ -1,6 +1,6 @@
 # Instagram Media Downloader Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2026-02-04
 
 - Add multi-selection support for highlight stories with visual checkmark indicators.
 - Add "Select All" and "Deselect All" actions.
