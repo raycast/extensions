@@ -1,5 +1,9 @@
 # Kill Process Changelog
 
+## [Preferences] - {PR_MERGE_DATE}
+
+- Added preference to skip kill confirmation dialogs
+
 ## [Fixes and Improvements] - 2026-01-13
 
 - Added shortcut for the **Copy Path** action
