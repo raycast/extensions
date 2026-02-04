@@ -203,14 +203,6 @@ function SetCommunicationDeviceAction({ device, type, onSelection }: SetAudioDev
   );
 }
 
-async function setOutputAndSystemDevice(deviceId: string) {
-  const { systemOutput } = getPreferenceValues();
-  await setDefaultOutputDevice(deviceId);
-  if (systemOutput) {
-    await setDefaultSystemDevice(deviceId);
-  }
-}
-
 function ToggleDeviceVisibilityAction({ deviceId, onAction }: { deviceId: string; onAction: () => void }) {
   const { data: isHidden, revalidate: refetchIsHidden } = usePromise(async () => {
     const hiddenDevices = await getHiddenDevices();
