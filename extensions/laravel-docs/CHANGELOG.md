@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Added support for windows
+- Added support for Windows
 
 ## [Update] - 2025-02-26
 

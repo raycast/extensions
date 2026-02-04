@@ -27,7 +27,6 @@
   "dependencies": {
     "@raycast/api": "^1.104.4",
     "algoliasearch": "^4.11.0",
-    "glob": "^8.1.0",
     "striptags": "^3.2.0"
   },
   "devDependencies": {
@@ -43,6 +42,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

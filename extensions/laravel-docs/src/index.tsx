@@ -50,6 +50,15 @@ type LaravelDocsHit = {
   };
 };
 
+type DocsItem = {
+  url: string;
+  title: string;
+};
+
+type DocsSection = {
+  [section: string]: DocsItem[];
+};
+
 export default function main() {
   const algoliaClient = useMemo(() => {
     return algoliasearch(APPID, APIKEY);
@@ -59,7 +68,7 @@ export default function main() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
+  const [searchResults, setSearchResults] = useState<LaravelDocsHit[] | undefined>();
   const [version, setVersion] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -171,10 +180,10 @@ export default function main() {
           />
         );
       }) ||
-        Object.entries(currentDocs).map(([section, items]: Array<any>) => {
+        Object.entries(currentDocs as DocsSection).map(([section, items]) => {
           return (
             <List.Section title={section} key={section}>
-              {items.map((item: any) => {
+              {items.map((item: DocsItem) => {
                 return (
                   <List.Item
                     key={item.url}
