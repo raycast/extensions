@@ -41,7 +41,7 @@ async function fetchRaw<T>(endpoint: string, options: RequestInit = {}): Promise
 
     let errorDetails: ApiErrorResponse | undefined;
     try {
-      errorDetails = await response.json();
+      errorDetails = (await response.json()) as ApiErrorResponse;
     } catch {
       // Response body is not JSON
     }
@@ -52,7 +52,7 @@ async function fetchRaw<T>(endpoint: string, options: RequestInit = {}): Promise
     throw new ApiError(errorMessage, response.status, errorDetails);
   }
 
-  return response.json();
+  return (await response.json()) as T;
 }
 
 /**
@@ -177,7 +177,7 @@ export async function fetchBookmarks(etag?: string): Promise<FetchBookmarksResul
 
     let errorDetails: ApiErrorResponse | undefined;
     try {
-      errorDetails = await response.json();
+      errorDetails = (await response.json()) as ApiErrorResponse;
     } catch {
       // Response body is not JSON
     }
@@ -188,7 +188,7 @@ export async function fetchBookmarks(etag?: string): Promise<FetchBookmarksResul
     throw new ApiError(errorMessage, response.status, errorDetails);
   }
 
-  const exportResponse: BookmarksExportResponse = await response.json();
+  const exportResponse = (await response.json()) as BookmarksExportResponse;
 
   // Parse included resources into separate arrays
   const areas: FavoroArea[] = [];

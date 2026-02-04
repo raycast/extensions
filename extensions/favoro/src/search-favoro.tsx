@@ -8,7 +8,7 @@ import { LinkItem } from "./components/LinkItem";
 import { formatLastSynced } from "./lib/cache";
 import type { CachedData, SearchResultLink } from "./types";
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const { isAuthenticated, isLoading: authLoading, error: authError, authorize, logout } = useAuth();
   const { favoriteIds, isFavorite, toggleFavorite, validateFavorites, clearFavorites } = useFavorites();
 

@@ -75,7 +75,7 @@ async function exchangeCodeForTokens(
     throw new Error(`Failed to exchange code for tokens: ${errorText}`);
   }
 
-  return response.json();
+  return (await response.json()) as OAuth.TokenResponse;
 }
 
 /**
@@ -101,7 +101,7 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
     throw new Error(`Failed to refresh tokens: ${errorText}`);
   }
 
-  return response.json();
+  return (await response.json()) as OAuth.TokenResponse;
 }
 
 /**

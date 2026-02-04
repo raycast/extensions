@@ -22,7 +22,7 @@ function getDomain(url: string): string {
 /**
  * A list item component for displaying a FAVORO link
  */
-export function LinkItem({ link, isFavorite = false, onToggleFavorite }: LinkItemProps): JSX.Element {
+export function LinkItem({ link, isFavorite = false, onToggleFavorite }: LinkItemProps) {
   const { label, url, description, favicon } = link.attributes;
   const domain = getDomain(url);
 
