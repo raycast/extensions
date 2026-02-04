@@ -19,6 +19,14 @@ export default async function Command() {
 
   const status = await getStatus();
 
+  if (!status.selectedProfileName) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No active profile found. Open OpenVPN Connect and ensure a profile is visible.",
+    });
+    return;
+  }
+
   let error;
 
   if (status.isConnected) {
