@@ -1,6 +1,6 @@
 # Fancy Text Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-02-04
 
 - Added a new preference to control whether the selected text is automatically retrieved when the command opens
 
