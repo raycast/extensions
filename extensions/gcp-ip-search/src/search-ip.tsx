@@ -15,6 +15,10 @@ import { SearchMode } from "./types";
 import { useSearchHistory } from "./hooks/useSearchHistory";
 import { CustomProjectsForm } from "./components/CustomProjectsForm";
 import { ResultsView } from "./components/ResultsView";
+import {
+  ConfigureProjectsAction,
+  SwitchModeAction,
+} from "./components/SearchActions";
 
 // IP validation helper function
 function isValidIP(ip: string): boolean {
@@ -207,35 +211,6 @@ function SearchCommand() {
   const isInitialLoading = isHistoryLoading;
   const showWelcome = !searchText && history.length === 0 && !isInitialLoading;
 
-  // Cycle search mode helper
-  const nextMode = (current: SearchMode): SearchMode => {
-    if (current === "quick") return "full";
-    if (current === "full") return "custom";
-    return "quick";
-  };
-
-  const getModeLabel = (mode: SearchMode) => {
-    switch (mode) {
-      case "quick":
-        return "Quick (First Match)";
-      case "full":
-        return "Detailed (Full Scan)";
-      case "custom":
-        return "Custom (Selected Projects)";
-      default:
-        return mode;
-    }
-  };
-
-  const cycleSearchMode = async () => {
-    const next = nextMode(searchMode);
-    await handleModeChange(next);
-    await showToast({
-      style: Toast.Style.Success,
-      title: `Switched to ${getModeLabel(next)}`,
-    });
-  };
-
   return (
     <List
       isLoading={isInitialLoading}
@@ -285,35 +260,14 @@ function SearchCommand() {
                   title="Start Search"
                   onAction={() => startSearch(searchText)}
                 />
-                <Action
-                  title={`Switch Mode to ${nextMode(searchMode) === "quick" ? "Quick" : nextMode(searchMode) === "full" ? "Detailed" : "Custom"}`}
-                  icon={Icon.ArrowRight}
-                  shortcut={{ modifiers: ["cmd"], key: "m" }}
-                  onAction={cycleSearchMode}
+                <SwitchModeAction
+                  currentMode={searchMode}
+                  onModeChange={handleModeChange}
                 />
                 {searchMode === "custom" && (
-                  <Action
-                    title="Configure Custom Projects"
-                    icon={Icon.Gear}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                    onAction={() =>
-                      push(
-                        <CustomProjectsForm
-                          initialValue={customProjects}
-                          onSave={async (value) => {
-                            setCustomProjects(value);
-                            await LocalStorage.setItem(
-                              "custom-projects",
-                              value,
-                            );
-                            await showToast({
-                              style: Toast.Style.Success,
-                              title: "Configuration Saved",
-                            });
-                          }}
-                        />,
-                      )
-                    }
+                  <ConfigureProjectsAction
+                    customProjects={customProjects}
+                    onProjectsChange={setCustomProjects}
                   />
                 )}
               </ActionPanel>
@@ -384,35 +338,14 @@ function SearchCommand() {
                       onAction={() => removeFromHistory(item.ip)}
                       shortcut={{ modifiers: ["cmd"], key: "x" }}
                     />
-                    <Action
-                      title={`Switch Mode to ${nextMode(searchMode) === "quick" ? "Quick" : nextMode(searchMode) === "full" ? "Detailed" : "Custom"}`}
-                      icon={Icon.ArrowRight}
-                      shortcut={{ modifiers: ["cmd"], key: "m" }}
-                      onAction={cycleSearchMode}
+                    <SwitchModeAction
+                      currentMode={searchMode}
+                      onModeChange={handleModeChange}
                     />
                     {searchMode === "custom" && (
-                      <Action
-                        title="Configure Custom Projects"
-                        icon={Icon.Gear}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                        onAction={() =>
-                          push(
-                            <CustomProjectsForm
-                              initialValue={customProjects}
-                              onSave={async (value) => {
-                                setCustomProjects(value);
-                                await LocalStorage.setItem(
-                                  "custom-projects",
-                                  value,
-                                );
-                                await showToast({
-                                  style: Toast.Style.Success,
-                                  title: "Configuration Saved",
-                                });
-                              }}
-                            />,
-                          )
-                        }
+                      <ConfigureProjectsAction
+                        customProjects={customProjects}
+                        onProjectsChange={setCustomProjects}
                       />
                     )}
                   </ActionPanel>
@@ -432,34 +365,13 @@ function SearchCommand() {
             <ActionPanel>
               {searchMode === "custom" ? (
                 <>
-                  <Action
-                    title="Configure Custom Projects"
-                    icon={Icon.Gear}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                    onAction={() =>
-                      push(
-                        <CustomProjectsForm
-                          initialValue={customProjects}
-                          onSave={async (value) => {
-                            setCustomProjects(value);
-                            await LocalStorage.setItem(
-                              "custom-projects",
-                              value,
-                            );
-                            await showToast({
-                              style: Toast.Style.Success,
-                              title: "Configuration Saved",
-                            });
-                          }}
-                        />,
-                      )
-                    }
+                  <ConfigureProjectsAction
+                    customProjects={customProjects}
+                    onProjectsChange={setCustomProjects}
                   />
-                  <Action
-                    title={`Switch Mode to ${nextMode(searchMode) === "quick" ? "Quick" : nextMode(searchMode) === "full" ? "Detailed" : "Custom"}`}
-                    icon={Icon.ArrowRight}
-                    shortcut={{ modifiers: ["cmd"], key: "m" }}
-                    onAction={cycleSearchMode}
+                  <SwitchModeAction
+                    currentMode={searchMode}
+                    onModeChange={handleModeChange}
                   />
                 </>
               ) : (
@@ -469,11 +381,9 @@ function SearchCommand() {
                     icon={Icon.MagnifyingGlass}
                     onAction={() => {}}
                   />
-                  <Action
-                    title={`Switch Mode to ${nextMode(searchMode) === "quick" ? "Quick" : nextMode(searchMode) === "full" ? "Detailed" : "Custom"}`}
-                    icon={Icon.ArrowRight}
-                    shortcut={{ modifiers: ["cmd"], key: "m" }}
-                    onAction={cycleSearchMode}
+                  <SwitchModeAction
+                    currentMode={searchMode}
+                    onModeChange={handleModeChange}
                   />
                 </>
               )}
