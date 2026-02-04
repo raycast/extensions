@@ -132,9 +132,9 @@ export function mapKlipyResponse(response: KlipyGif) {
     large_preview_gif_url: medias.tinygif?.url,
     gif_url: medias.gif?.url ?? "",
     metadata: {
-      width: medias.gif.dims[0],
-      height: medias.gif.dims[1],
-      size: medias.gif.size,
+      width: medias.gif?.dims?.[0],
+      height: medias.gif?.dims?.[1],
+      size: medias.gif?.size,
       labels: [{ title: "Created", text: formatRelative(fromUnixTime(response.created), new Date()) }],
       tags: response.tags,
     },
