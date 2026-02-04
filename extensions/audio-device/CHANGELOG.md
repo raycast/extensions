@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Hidden devices tracked per input/output and shared across manual lists and auto-switch
+
 ## [Update] - 2026-02-02
 
 - Added auto-switch commands with device order customization and toggles

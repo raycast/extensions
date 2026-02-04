@@ -9,10 +9,12 @@ import { getIcon } from "./helpers";
 import {
   applyDeviceOrder,
   getDeviceOrder,
-  getDisabledDevices,
+  getHiddenDevices,
+  isShowingHiddenDevices,
   normalizeDeviceOrder,
   setDeviceOrder,
-  setDisabledDevices,
+  setHiddenDevices,
+  setShowHiddenDevices,
 } from "./device-preferences";
 
 type IOType = "input" | "output";
@@ -22,15 +24,17 @@ const AUTO_SWITCH_DEBOUNCE_MS = 1000;
 export default function Command() {
   const [ioType, setIoType] = useState<IOType>("output");
   const [order, setOrder] = useState<string[]>([]);
-  const [disabled, setDisabled] = useState<string[]>([]);
+  const [hidden, setHidden] = useState<string[]>([]);
+  const [showHidden, setShowHidden] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data, isLoading } = usePromise(
     async (type: IOType) => {
       const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
       const storedOrder = await getDeviceOrder(type);
-      const disabledDevices = await getDisabledDevices();
-      return { devices, storedOrder, disabledDevices };
+      const hiddenDevices = await getHiddenDevices(type);
+      const showHiddenDevices = await isShowingHiddenDevices(type);
+      return { devices, storedOrder, hiddenDevices, showHiddenDevices };
     },
     [ioType],
   );
@@ -39,7 +43,8 @@ export default function Command() {
     if (!data) return;
     const normalized = normalizeDeviceOrder(data.storedOrder, data.devices);
     setOrder(normalized);
-    setDisabled(data.disabledDevices);
+    setHidden(data.hiddenDevices);
+    setShowHidden(data.showHiddenDevices);
     if (normalized.join("|") !== data.storedOrder.join("|")) {
       void setDeviceOrder(ioType, normalized);
     }
@@ -55,9 +60,10 @@ export default function Command() {
 
   const devices = data?.devices ?? [];
   const orderedDevices = applyDeviceOrder(order, devices);
-  const disabledSet = new Set(disabled);
-  const enabledDevices = orderedDevices.filter((device) => !disabledSet.has(device.uid));
-  const disabledDevices = orderedDevices.filter((device) => disabledSet.has(device.uid));
+  const hiddenSet = new Set(hidden);
+  const visibleDevices = orderedDevices.filter((device) => !hiddenSet.has(device.uid));
+  const hiddenDevices = orderedDevices.filter((device) => hiddenSet.has(device.uid));
+  const showEmptyView = !isLoading && visibleDevices.length === 0 && (!showHidden || hiddenDevices.length === 0);
 
   async function persistOrder(nextOrder: string[]) {
     setOrder(nextOrder);
@@ -87,19 +93,19 @@ export default function Command() {
     await persistOrder(nextOrder);
   }
 
-  async function disable(device: AudioDevice) {
-    if (disabled.includes(device.uid)) return;
-    const nextDisabled = [...disabled, device.uid];
-    setDisabled(nextDisabled);
-    await setDisabledDevices(nextDisabled);
+  async function hide(device: AudioDevice) {
+    if (hidden.includes(device.uid)) return;
+    const nextHidden = [...hidden, device.uid];
+    setHidden(nextHidden);
+    await setHiddenDevices(ioType, nextHidden);
     scheduleAutoSwitch(ioType);
   }
 
-  async function enable(device: AudioDevice) {
-    if (!disabled.includes(device.uid)) return;
-    const nextDisabled = disabled.filter((id) => id !== device.uid);
-    setDisabled(nextDisabled);
-    await setDisabledDevices(nextDisabled);
+  async function show(device: AudioDevice) {
+    if (!hidden.includes(device.uid)) return;
+    const nextHidden = hidden.filter((id) => id !== device.uid);
+    setHidden(nextHidden);
+    await setHiddenDevices(ioType, nextHidden);
     scheduleAutoSwitch(ioType);
   }
 
@@ -107,6 +113,12 @@ export default function Command() {
     const nextOrder = devices.map((device) => device.uid);
     await persistOrder(nextOrder);
     await showToast(Toast.Style.Success, "Order reset to system list");
+  }
+
+  async function toggleShowHidden() {
+    const next = !showHidden;
+    setShowHidden(next);
+    await setShowHiddenDevices(ioType, next);
   }
 
   function scheduleAutoSwitch(type: IOType) {
@@ -128,56 +140,88 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Enabled Devices">
-        {enabledDevices.map((device) => (
-          <List.Item
-            key={device.uid}
-            title={device.name}
-            icon={getIcon(device, false)}
-            accessories={[{ text: getTransportTypeLabel(device) }]}
-            actions={
-              <ActionPanel>
-                <Action title="Move Up" icon={Icon.ArrowUp} onAction={() => moveDevice(device.uid, "up")} />
-                <Action title="Move Down" icon={Icon.ArrowDown} onAction={() => moveDevice(device.uid, "down")} />
-                <Action title="Move to Top" icon={Icon.ArrowUpCircle} onAction={() => moveDevice(device.uid, "top")} />
-                <Action
-                  title="Move to Bottom"
-                  icon={Icon.ArrowDownCircle}
-                  onAction={() => moveDevice(device.uid, "bottom")}
+      {showEmptyView ? (
+        <List.EmptyView
+          title={showHidden ? "No devices found" : "No visible devices"}
+          description={showHidden ? undefined : "Hidden devices are not shown. Toggle to manage hidden devices."}
+          actions={
+            <ActionPanel>
+              <Action
+                title={showHidden ? "Hide Hidden Devices" : "Show Hidden Devices"}
+                icon={showHidden ? Icon.EyeDisabled : Icon.Eye}
+                onAction={toggleShowHidden}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <>
+          <List.Section title="Visible Devices">
+            {visibleDevices.map((device) => (
+              <List.Item
+                key={device.uid}
+                title={device.name}
+                icon={getIcon(device, false)}
+                accessories={[{ text: getTransportTypeLabel(device) }]}
+                actions={
+                  <ActionPanel>
+                    <Action title="Move Up" icon={Icon.ArrowUp} onAction={() => moveDevice(device.uid, "up")} />
+                    <Action title="Move Down" icon={Icon.ArrowDown} onAction={() => moveDevice(device.uid, "down")} />
+                    <Action
+                      title="Move to Top"
+                      icon={Icon.ArrowUpCircle}
+                      onAction={() => moveDevice(device.uid, "top")}
+                    />
+                    <Action
+                      title="Move to Bottom"
+                      icon={Icon.ArrowDownCircle}
+                      onAction={() => moveDevice(device.uid, "bottom")}
+                    />
+                    <Action
+                      title="Hide Device"
+                      icon={Icon.EyeDisabled}
+                      onAction={() => hide(device)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    />
+                    <ActionPanel.Section>
+                      <Action
+                        title={showHidden ? "Hide Hidden Devices" : "Show Hidden Devices"}
+                        icon={showHidden ? Icon.EyeDisabled : Icon.Eye}
+                        onAction={toggleShowHidden}
+                      />
+                      <Action title="Reset Order" icon={Icon.ArrowClockwise} onAction={resetOrder} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+          {showHidden && hiddenDevices.length > 0 && (
+            <List.Section title="Hidden Devices">
+              {hiddenDevices.map((device) => (
+                <List.Item
+                  key={device.uid}
+                  title={device.name}
+                  icon={getIcon(device, false)}
+                  subtitle="Hidden"
+                  actions={
+                    <ActionPanel>
+                      <Action title="Show Device" icon={Icon.Eye} onAction={() => show(device)} />
+                      <ActionPanel.Section>
+                        <Action
+                          title={showHidden ? "Hide Hidden Devices" : "Show Hidden Devices"}
+                          icon={showHidden ? Icon.EyeDisabled : Icon.Eye}
+                          onAction={toggleShowHidden}
+                        />
+                        <Action title="Reset Order" icon={Icon.ArrowClockwise} onAction={resetOrder} />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
                 />
-                <Action
-                  title="Disable Device"
-                  icon={Icon.EyeDisabled}
-                  onAction={() => disable(device)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                />
-                <ActionPanel.Section>
-                  <Action title="Reset Order" icon={Icon.ArrowClockwise} onAction={resetOrder} />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-      {disabledDevices.length > 0 && (
-        <List.Section title="Disabled Devices">
-          {disabledDevices.map((device) => (
-            <List.Item
-              key={device.uid}
-              title={device.name}
-              icon={getIcon(device, false)}
-              subtitle="Disabled"
-              actions={
-                <ActionPanel>
-                  <Action title="Enable Device" icon={Icon.Eye} onAction={() => enable(device)} />
-                  <ActionPanel.Section>
-                    <Action title="Reset Order" icon={Icon.ArrowClockwise} onAction={resetOrder} />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
+              ))}
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );
