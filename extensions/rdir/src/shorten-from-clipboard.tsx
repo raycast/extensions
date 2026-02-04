@@ -1,10 +1,5 @@
 import { showToast, Toast, Clipboard, getPreferenceValues, showHUD, openExtensionPreferences } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-  copyToClipboard: boolean;
-}
-
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
 

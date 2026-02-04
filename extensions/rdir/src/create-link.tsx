@@ -15,12 +15,6 @@ interface FormValues {
   url: string;
 }
 
-interface Preferences {
-  apiKey: string;
-  copyToClipboard: boolean;
-  autoFillFromClipboard: boolean;
-}
-
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const [initialUrl, setInitialUrl] = useState<string>("");
