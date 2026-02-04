@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [Auto-assign active tag on create] - {PR_MERGE_DATE}
+## [Auto-assign active tag on create] - 2026-02-04
 
 - When creating a new todo while filtered by a tag, the todo inherits the active tag automatically (ref: [Issue #24930](https://github.com/raycast/extensions/issues/24930)).
 
