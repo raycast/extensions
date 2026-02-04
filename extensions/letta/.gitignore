@@ -32,8 +32,7 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 
-# Package managers
-package-lock.json
+# Package managers (keep package-lock.json for Raycast CI)
 yarn.lock
 pnpm-lock.yaml
 
