@@ -1,6 +1,6 @@
 # Typefully Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-04
 
 New Raycast extension for Typefully, built on the Typefully API v2.
 
