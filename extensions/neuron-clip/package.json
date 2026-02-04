@@ -1,0 +1,65 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "neuron-clip",
+    "title": "Neuron",
+    "description": "Capture notes, search your knowledge base, and write daily journal entries from Raycast. Syncs with your Neuron dashboard so you can capture ideas, clip content with tags, and open or start Recall on any note without leaving the keyboard.",
+    "icon": "neuron.png",
+    "author": "jay_npatel77",
+    "categories": [
+        "Productivity"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "create-note",
+            "title": "Create Note",
+            "description": "Quickly capture a thought to your Neuron Raycast notes.",
+            "mode": "view"
+        },
+        {
+            "name": "search-notes",
+            "title": "Search Content",
+            "description": "Search notes, folders, tags and so much more.",
+            "mode": "view"
+        },
+        {
+            "name": "write-journal",
+            "title": "Write Journal Daily Note",
+            "description": "Create or append to a daily journal note for a chosen date and add markdown to your Neuron journal with timestamp.",
+            "mode": "view"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "apiKey",
+            "title": "API Key",
+            "description": "Get your API key from www.neuronapp.tech",
+            "type": "password",
+            "required": true,
+            "placeholder": "Your API key..."
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.69.0",
+        "@raycast/utils": "^1.13.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.39.2",
+        "@raycast/eslint-config": "^1.0.6",
+        "@types/node": "22.15.30",
+        "@types/react": "19.1.8",
+        "eslint": "^9.39.1",
+        "eslint-plugin-react": "^7.37.5",
+        "globals": "^17.3.0",
+        "prettier": "3.7.3",
+        "typescript": "5.9.3",
+        "typescript-eslint": "^8.54.0"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
