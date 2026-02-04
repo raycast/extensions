@@ -289,7 +289,7 @@ function useTranslate(argText: string) {
   const translate = useCallback(
     async function translate(content: string) {
       const { is_search_clipboard, max_char_limit } = getPreferenceValues();
-      const charLimit = parseInt(max_char_limit) || 200;
+      const charLimit = parseInt(max_char_limit, 10) || 200;
       let isSelection = false;
       let isClipboard = false;
 
