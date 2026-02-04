@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-02-04
 
 - Hidden devices tracked per input/output and shared across manual lists and auto-switch
 
