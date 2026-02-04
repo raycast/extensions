@@ -1,4 +1,4 @@
-import { BaseExtractor, ExtractorResult, ExtractorDocument } from "./_base";
+import { BaseExtractor, ExtractorResult, ExtractorDocument, ExtractorElement } from "./_base";
 
 /**
  * Extractor for Hacker News (news.ycombinator.com)
@@ -9,9 +9,9 @@ import { BaseExtractor, ExtractorResult, ExtractorDocument } from "./_base";
  * - Ask HN / Show HN posts
  */
 export class HackerNewsExtractor extends BaseExtractor {
-  private mainPost: ExtractorDocument | null;
+  private mainPost: ExtractorElement | null;
   private isCommentPage: boolean;
-  private mainComment: ExtractorDocument | null;
+  private mainComment: ExtractorElement | null;
 
   constructor(document: ExtractorDocument, url: string, schemaOrgData?: Record<string, unknown> | null) {
     super(document, url, schemaOrgData);
@@ -28,8 +28,8 @@ export class HackerNewsExtractor extends BaseExtractor {
     return !!this.mainPost?.querySelector('.navs a[href*="parent"]');
   }
 
-  private findMainComment(): ExtractorDocument | null {
-    return this.mainPost?.querySelector(".comment") || null;
+  private findMainComment(): ExtractorElement | null {
+    return this.mainPost?.querySelector(".comment") ?? null;
   }
 
   canExtract(): boolean {
@@ -95,7 +95,7 @@ export class HackerNewsExtractor extends BaseExtractor {
 
     // Regular story page
     const titleRow = this.mainPost.querySelector("tr.athing");
-    const storyUrl = this.getAttribute(titleRow?.querySelector(".titleline a"), "href") || "";
+    const storyUrl = this.getAttribute(titleRow?.querySelector(".titleline a") ?? null, "href") || "";
 
     let content = "";
 
@@ -193,11 +193,11 @@ export class HackerNewsExtractor extends BaseExtractor {
       const preview = commentText.slice(0, 50) + (commentText.length > 50 ? "..." : "");
       return `Comment by ${author}: ${preview}`;
     }
-    return this.getTextContent(this.mainPost?.querySelector(".titleline"));
+    return this.getTextContent(this.mainPost?.querySelector(".titleline") ?? null);
   }
 
   private getPostAuthor(): string {
-    return this.getTextContent(this.mainPost?.querySelector(".hnuser"));
+    return this.getTextContent(this.mainPost?.querySelector(".hnuser") ?? null);
   }
 
   private createDescription(): string {
@@ -210,7 +210,7 @@ export class HackerNewsExtractor extends BaseExtractor {
   }
 
   private getPostDate(): string {
-    const timeElement = this.mainPost?.querySelector(".age");
+    const timeElement = this.mainPost?.querySelector(".age") ?? null;
     const timestamp = this.getAttribute(timeElement, "title") || "";
     return timestamp.split("T")[0] || "";
   }

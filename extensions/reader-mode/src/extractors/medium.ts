@@ -1,4 +1,4 @@
-import { BaseExtractor, ExtractorResult, ExtractorDocument } from "./_base";
+import { BaseExtractor, ExtractorResult, ExtractorDocument, ExtractorElement } from "./_base";
 
 /**
  * Extractor for Medium (medium.com)
@@ -33,7 +33,7 @@ export class MediumExtractor extends BaseExtractor {
       this.querySelector('[role="main"]') ||
       this.document;
 
-    const clone = articleContainer.cloneNode(true) as ExtractorDocument;
+    const clone = articleContainer.cloneNode(true) as ExtractorElement;
 
     // Remove unwanted elements
     this.removeUnwantedElements(clone);
@@ -58,7 +58,7 @@ export class MediumExtractor extends BaseExtractor {
     };
   }
 
-  private removeUnwantedElements(container: ExtractorDocument): void {
+  private removeUnwantedElements(container: ExtractorElement): void {
     const removeSelectors = [
       // Reading time and metadata
       '[data-testid="storyReadTime"]',
@@ -104,7 +104,7 @@ export class MediumExtractor extends BaseExtractor {
 
     for (const selector of removeSelectors) {
       const elements = container.querySelectorAll(selector);
-      elements.forEach((el: ExtractorDocument) => {
+      elements.forEach((el) => {
         try {
           el.remove();
         } catch {
@@ -115,15 +115,15 @@ export class MediumExtractor extends BaseExtractor {
 
     // Remove all SVG icons
     const svgs = container.querySelectorAll("svg");
-    svgs.forEach((svg: ExtractorDocument) => svg.remove());
+    svgs.forEach((svg) => svg.remove());
 
     // Remove all buttons
     const buttons = container.querySelectorAll("button");
-    buttons.forEach((button: ExtractorDocument) => button.remove());
+    buttons.forEach((button) => button.remove());
 
     // Clean up images with data-testid="og" (Open Graph duplicates)
     const ogImages = container.querySelectorAll('[data-testid="og"]');
-    ogImages.forEach((img: ExtractorDocument) => {
+    ogImages.forEach((img) => {
       const picture = img.closest("picture");
       if (picture) {
         picture.remove();

@@ -1,4 +1,4 @@
-import { BaseExtractor, ExtractorResult, ExtractorDocument } from "./_base";
+import { BaseExtractor, ExtractorResult, ExtractorDocument, ExtractorElement } from "./_base";
 
 /**
  * Extractor for GitHub (github.com)
@@ -150,7 +150,7 @@ export class GitHubExtractor extends BaseExtractor {
     };
   }
 
-  private extractAuthor(container: ExtractorDocument, selectors: string[]): string {
+  private extractAuthor(container: ExtractorElement, selectors: string[]): string {
     for (const selector of selectors) {
       const authorLink = container.querySelector(selector);
       if (authorLink) {
@@ -184,8 +184,8 @@ export class GitHubExtractor extends BaseExtractor {
     return "";
   }
 
-  private cleanBodyContent(bodyElement: ExtractorDocument): string {
-    const clone = bodyElement.cloneNode(true) as ExtractorDocument;
+  private cleanBodyContent(bodyElement: ExtractorElement): string {
+    const clone = bodyElement.cloneNode(true) as ExtractorElement;
 
     // Remove interactive elements
     const removeSelectors = [
@@ -200,7 +200,7 @@ export class GitHubExtractor extends BaseExtractor {
 
     for (const selector of removeSelectors) {
       const elements = clone.querySelectorAll(selector);
-      elements.forEach((el: ExtractorDocument) => el.remove());
+      elements.forEach((el) => el.remove());
     }
 
     return clone.innerHTML?.trim() || "";
