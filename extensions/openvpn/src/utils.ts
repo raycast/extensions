@@ -3,7 +3,7 @@ import { runAppleScript } from "run-applescript";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
-const openVpnBinary = '"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect"';
+const openVpnBinary = '"/Applications/OpenVPN Connect/OpenVPN Connect.app/Contents/MacOS/OpenVPN Connect"';
 const menuBarReadyTimeoutMs = 8000;
 const menuBarPollMs = 250;
 
