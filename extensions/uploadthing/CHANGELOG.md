@@ -1,6 +1,6 @@
 # UploadThing Changelog
 
-## [2.0.5] - {PR_MERGE_DATE}
+## [2.0.5] - 2026-01-12
 
 - Fixed issue on windows with the polyfill (ref: [Issue #24092](https://github.com/raycast/extensions/issues/24092))
 

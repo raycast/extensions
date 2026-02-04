@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "series-rating-graphs",
+  "title": "Series Rating Graphs",
+  "description": "Search for TV show ratings and get individual episode ratings, straight from Raycast",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-shows",
+      "title": "Search TV Shows",
+      "description": "Search for TV shows and get episode ratings",
+      "mode": "view",
+      "subtitle": "Series Rating Graphs"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "muhammadrizo",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Web",
+    "Data",
+    "Fun"
+  ],
+  "preferences": [
+    {
+      "name": "viewMode",
+      "description": "Choose view mode",
+      "type": "dropdown",
+      "required": false,
+      "default": "grid",
+      "title": "View Mode",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "grid"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ]
+    },
+    {
+      "name": "preferredWebsite",
+      "description": "Choose which website opens by default when viewing TV series details.",
+      "type": "dropdown",
+      "required": false,
+      "default": "seriesGraph",
+      "title": "Preferred Website",
+      "data": [
+        {
+          "title": "SeriesGraph",
+          "value": "seriesGraph"
+        },
+        {
+          "title": "IMDb",
+          "value": "imdb"
+        },
+        {
+          "title": "TMDB",
+          "value": "tmdb"
+        }
+      ]
+    },
+    {
+      "name": "tmdbAccessToken",
+      "description": "Optional TMDB Access Token for 'Open SeriesGraph Page' and 'Open TMDB Page' actions. Get from https://themoviedb.org/settings/api.",
+      "type": "password",
+      "required": false,
+      "title": "TMDB Read Access Token"
+    },
+    {
+      "name": "downloadPath",
+      "description": "Specify the path download images",
+      "type": "directory",
+      "required": false,
+      "title": "Download Path",
+      "default": {
+        "macOS": "~/Downloads",
+        "Windows": "C:\\Users\\%USERPROFILE%\\Downloads"
+      }
+    },
+    {
+      "name": "showInFinderAfterDownload",
+      "description": "Show in Finder/File Explorer after download",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show In Finder/File Explorer"
+    }
+  ]
+}

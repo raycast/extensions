@@ -78,21 +78,27 @@ describe("sanitize.ts", () => {
       expect(await validateFilePath("zshrc")).toBe(false); // Not the exact path
     });
 
-    it("should return false for path traversal attempts", async () => {
-      expect(await validateFilePath("../zshrc")).toBe(false);
-      expect(await validateFilePath("../../zshrc")).toBe(false);
-      expect(await validateFilePath("/Users/../etc/passwd")).toBe(false);
+    it.each([
+      ["../zshrc", "relative path traversal"],
+      ["../../zshrc", "double path traversal"],
+      ["/Users/../etc/passwd", "absolute path with traversal"],
+    ])("should reject path traversal: %s (%s)", async (path) => {
+      expect(await validateFilePath(path)).toBe(false);
     });
 
-    it("should return false for paths containing ~", async () => {
-      expect(await validateFilePath("~/.zshrc")).toBe(false);
-      expect(await validateFilePath("/Users/test/~/.zshrc")).toBe(false);
+    it.each([
+      ["~/.zshrc", "unexpanded tilde"],
+      ["/Users/test/~/.zshrc", "tilde in middle of path"],
+    ])("should reject paths containing ~: %s (%s)", async (path) => {
+      expect(await validateFilePath(path)).toBe(false);
     });
 
-    it("should return false for absolute paths outside home directory", async () => {
-      expect(await validateFilePath("/etc/passwd")).toBe(false);
-      expect(await validateFilePath("/var/log/system.log")).toBe(false);
-      expect(await validateFilePath("/tmp/file")).toBe(false);
+    it.each([
+      ["/etc/passwd", "system config"],
+      ["/var/log/system.log", "system logs"],
+      ["/tmp/file", "temp directory"],
+    ])("should reject paths outside home directory: %s (%s)", async (path) => {
+      expect(await validateFilePath(path)).toBe(false);
     });
 
     it("should return true for absolute paths in home directory", async () => {
@@ -141,8 +147,9 @@ describe("sanitize.ts", () => {
       expect(validateFileSize(FILE_CONSTANTS.MAX_FILE_SIZE * 2)).toBe(false);
     });
 
-    it("should handle negative file sizes", () => {
-      expect(validateFileSize(-1)).toBe(true); // Negative sizes are considered valid
+    it("should reject negative file sizes", () => {
+      expect(validateFileSize(-1)).toBe(false);
+      expect(validateFileSize(-100)).toBe(false);
     });
   });
 
@@ -209,7 +216,7 @@ alias ll='ls -la'`;
       const result = validateZshrcContent(content);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain("Suspicious pattern detected: eval with curl");
+      expect(result.errors).toContain("Suspicious pattern: eval with remote code download");
     });
 
     it("should detect dangerous rm -rf / command", () => {
@@ -220,7 +227,7 @@ alias ll='ls -la'`;
       const result = validateZshrcContent(content);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain("Dangerous command detected: rm -rf /");
+      expect(result.errors).toContain("Dangerous command: recursive delete on root filesystem");
     });
 
     it("should detect multiple issues", () => {
@@ -234,8 +241,8 @@ rm -rf /`;
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(3);
       expect(result.errors).toContain("Line 1 is too long (1001 characters)");
-      expect(result.errors).toContain("Suspicious pattern detected: eval with curl");
-      expect(result.errors).toContain("Dangerous command detected: rm -rf /");
+      expect(result.errors).toContain("Suspicious pattern: eval with remote code download");
+      expect(result.errors).toContain("Dangerous command: recursive delete on root filesystem");
     });
 
     it("should handle empty content", () => {

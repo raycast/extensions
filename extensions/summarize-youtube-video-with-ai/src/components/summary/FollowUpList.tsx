@@ -1,5 +1,5 @@
 /* Copy All Q&A would be weirdly formatted otherwise */
-/* eslint-disable @raycast/prefer-title-case */
+
 import { Action, ActionPanel, AI, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { FINDING_ANSWER } from "../../const/toast_messages";

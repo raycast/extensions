@@ -60,6 +60,7 @@ export default function ManageDomains() {
                 target={<EmailForwarders selectedDomainName={domain.domain} domains={domains} />}
               />
               <Action.Push icon={Icon.Gear} title="Advanced" target={<Advanced selectedDomainName={domain.domain} />} />
+              <Action.Push icon={Icon.Monitor} title="DNS" target={<DNSInfo domain={domain.domain} />} />
               <Action.Push
                 icon={Icon.Plus}
                 title="Add New Domain"

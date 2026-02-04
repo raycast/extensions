@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "42-api",
+  "title": "42 Api Tools",
+  "description": "Track your logtime and find peers in 42 school clusters directly from Raycast",
+  "icon": "42.png",
+  "author": "maujogue",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find-user",
+      "title": "Find User",
+      "subtitle": "42 API",
+      "description": "This displays the user exact location in the clusters.",
+      "mode": "view"
+    },
+    {
+      "name": "today-logtime",
+      "title": "My Logtime Today",
+      "subtitle": "42 API",
+      "description": "Compute your logtime for today.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "userLogin",
+          "title": "Your 42 Login",
+          "description": "Your 42 username (for menu bar logtime display)",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "maujogue"
+        },
+        {
+          "name": "goalHours",
+          "title": "Daily Goal (hours)",
+          "description": "The target number of hours to reach before triggering confetti",
+          "type": "textfield",
+          "default": "7",
+          "required": false
+        },
+        {
+          "name": "goalMinutes",
+          "title": "Daily Goal (minutes)",
+          "description": "The target number of minutes to reach before triggering confetti",
+          "type": "textfield",
+          "default": "0",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "42 OAuth Client ID",
+      "description": "Your OAuth application Client ID (UID). Get it from https://profile.intra.42.fr/oauth/applications",
+      "type": "password",
+      "required": true,
+      "placeholder": "u-s4t2ud..."
+    },
+    {
+      "name": "clientSecret",
+      "title": "42 OAuth Client Secret",
+      "description": "Your OAuth application Client Secret. Get it from https://profile.intra.42.fr/oauth/applications",
+      "type": "password",
+      "required": true,
+      "placeholder": "s-s4t2ud..."
+    },
+    {
+      "name": "debugMode",
+      "label": "Enable API error messages",
+      "title": "Debug Mode",
+      "description": "Enable debug mode to see detailed error messages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

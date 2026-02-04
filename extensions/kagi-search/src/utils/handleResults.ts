@@ -1,11 +1,11 @@
 // src/utils/handleResults.ts
-import { getLocalStorageItem, getPreferenceValues, randomId } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { SearchResult } from "./types";
-import fetch from "node-fetch";
 import { TextDecoder } from "node:util";
+import { nanoid } from "nanoid";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
-  const historyString = (await getLocalStorageItem("history")) as string;
+  const historyString = await LocalStorage.getItem<string>("history");
 
   if (historyString === undefined) {
     return [];
@@ -38,7 +38,7 @@ export async function getSearchResults(
   const json = JSON.parse(text);
 
   const firstResult = {
-    id: randomId(),
+    id: nanoid(),
     query: searchText,
     description: `Search Kagi for '${searchText}'`,
     url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(searchText)}`,
@@ -47,7 +47,7 @@ export async function getSearchResults(
   // Apply description changes based on conditions
   if (searchText.includes("!")) {
     firstResult.description = "Use a Kagi bang with: " + searchText;
-  } else if (searchText.includes("?") && getPreferenceValues()["fastGptShortcut"]) {
+  } else if (searchText.includes("?") && getPreferenceValues<ExtensionPreferences>()["fastGptShortcut"]) {
     firstResult.description = "Ask FastGPT: " + searchText;
   }
 
@@ -55,7 +55,7 @@ export async function getSearchResults(
 
   json[1].forEach((item: string, i: number) => {
     const result = {
-      id: randomId(),
+      id: nanoid(),
       query: item,
       description: `Search Kagi for '${item}'`,
       url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(item)}`,
@@ -63,7 +63,7 @@ export async function getSearchResults(
     // Apply the same conditional logic to the other results
     if (result.query.includes("!")) {
       result.description = "Use a Kagi bang with: " + item;
-    } else if (result.query.includes("?") && getPreferenceValues()["fastGptShortcut"]) {
+    } else if (result.query.includes("?") && getPreferenceValues<ExtensionPreferences>()["fastGptShortcut"]) {
       result.description = "Ask FastGPT: " + item;
     }
     results[i + 1] = result;

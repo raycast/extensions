@@ -6,10 +6,6 @@ Summarize any YouTube Video with AI and ask follow up questions to get all the d
 
 ### Commands
 
-## `summarizeVideo`
-
-This command is deprecated. Please use one of the below commands instead. If you have set preferences for this command, please migrate them to the new command.
-
 ## `summarizeVideoWithRaycast`
 
 ### Preferences for Raycast

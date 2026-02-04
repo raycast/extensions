@@ -18,7 +18,7 @@ import { useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
 import { RepositoryDirectoryActions } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
-import { Repository, RepositoryCloningState, RepositoryCloningProcess } from "./types";
+import { Repository, RepositoryCloningState, RepositoryCloningProcess, Remote } from "./types";
 import { useRepositoriesView } from "./hooks/useRepositoriesView";
 import { useGitRemotes } from "./hooks/useGitRemotes";
 import { RemoteHostIcon } from "./components/icons/RemoteHostIcons";
@@ -26,8 +26,12 @@ import { useGitRepository } from "./hooks/useGitRepository";
 import { GitManager } from "./utils/git-manager";
 import { useInterval } from "./hooks/useInterval";
 import { promises as fs } from "fs";
-import { basename } from "path";
+import { basename, join } from "path";
 import { prettyPath } from "./utils/path-utils";
+import { existsSync } from "fs";
+import { RemoteWebPageAction } from "./components/actions/RemoteActions";
+import { showFailureToast, useCachedState } from "@raycast/utils";
+import { CopyToClipboardMenuAction } from "./components/actions/CopyToClipboardMenuAction";
 
 export default function ManageRepositories() {
   const {
@@ -73,7 +77,7 @@ export default function ManageRepositories() {
       searchBarPlaceholder="Search by name, path"
       actions={
         <ActionPanel>
-          <AddRepositoryAction onAddRepository={addRepository} />
+          <AddRepositoryActions onAddRepository={addRepository} />
           <RepositoriesOrderActionsSection />
         </ActionPanel>
       }
@@ -182,6 +186,19 @@ function RepositoryListItem({
               icon={Icon.Book}
               onPush={onOpen}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyToClipboardMenuAction
+              contents={[
+                { title: "Directory Path", content: repo.path, icon: Icon.Folder },
+                ...Object.values(remotes).map((remote) => ({
+                  title: remote.displayName,
+                  content: remote.fetchUrl,
+                  icon: Icon.Link,
+                })),
+              ]}
+            />
+            <RepositoryAttachedLinksAction remotes={remotes} />
             <Action.CreateQuicklink
               title="Create Quicklink"
               quicklink={{
@@ -190,7 +207,6 @@ function RepositoryListItem({
                 )}`,
                 name: `Show ${repo.name} in Git`,
               }}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
             />
             <Action
               title="Remove from List"
@@ -199,6 +215,7 @@ function RepositoryListItem({
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
             />
+            <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
           </ActionPanel.Section>
 
           <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
@@ -206,7 +223,7 @@ function RepositoryListItem({
           <RepositoriesOrderActionsSection />
 
           <ActionPanel.Section title="List">
-            <AddRepositoryAction onAddRepository={onAddRepository} />
+            <AddRepositoryActions onAddRepository={onAddRepository} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -214,14 +231,18 @@ function RepositoryListItem({
   );
 }
 
-function AddRepositoryAction({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
+function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
   return (
-    <>
+    <ActionPanel.Submenu title="Add Repository" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }}>
       <Action.Push
-        title="Add Repository"
+        title="Create New Repository"
+        target={<CreateRepositoryForm onAddRepository={onAddRepository} />}
+        icon={Icon.NewFolder}
+      />
+      <Action.Push
+        title="Add Existing Directory"
         target={<AddRepositoryForm onAddRepository={onAddRepository} />}
-        icon={Icon.Plus}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        icon={Icon.Folder}
       />
       <Action
         title="Clone Repository"
@@ -233,9 +254,81 @@ function AddRepositoryAction({ onAddRepository }: { onAddRepository: (repoPath: 
           })
         }
         icon={Icon.Download}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
       />
-    </>
+    </ActionPanel.Submenu>
+  );
+}
+
+function CreateRepositoryForm({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
+  const { pop } = useNavigation();
+  const [outputDirectory, setOutputDirectory] = useCachedState<string[]>("create-repository-output-directory", []);
+  const [repositoryName, setRepositoryName] = useState<string>("");
+
+  const handleSubmit = async (values: { outputDirectory: string[]; repositoryName: string }) => {
+    if (!values.outputDirectory || values.outputDirectory.length === 0) {
+      return;
+    }
+    const repoPath = join(values.outputDirectory[0], values.repositoryName);
+
+    // Check if repository already exists
+    if (existsSync(repoPath)) {
+      await showFailureToast(new Error(`Directory "${repoPath}" already exists`), {
+        title: "Repository already exists",
+      });
+      return;
+    }
+
+    try {
+      // Create directory if it doesn't exist
+      await fs.mkdir(repoPath, { recursive: true });
+
+      // Initialize git repository
+      const gitManager = new GitManager(repoPath);
+      await gitManager.init();
+
+      // Add repository to list
+      await onAddRepository(repoPath);
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Repository created",
+        message: `"${values.repositoryName}" initialized successfully`,
+      });
+
+      pop();
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to create repository" });
+    }
+  };
+
+  return (
+    <Form
+      navigationTitle="Create Git Repository"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Repository" icon={Icon.PlusCircle} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker
+        id="outputDirectory"
+        title="Output Directory"
+        value={outputDirectory}
+        error={outputDirectory.length === 0 ? "Required" : undefined}
+        onChange={(paths: string[]) => setOutputDirectory(paths)}
+        allowMultipleSelection={false}
+        canChooseDirectories
+        canChooseFiles={false}
+      />
+      <Form.TextField
+        id="repositoryName"
+        title="Repository Name"
+        value={repositoryName}
+        error={repositoryName.length === 0 ? "Required" : undefined}
+        onChange={setRepositoryName}
+        placeholder="my-repository"
+      />
+    </Form>
   );
 }
 
@@ -423,6 +516,7 @@ function CloningRepositoryListItem({
                 onAction={onRemove}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
               />
+              <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
             </>
           ) : (
             <>
@@ -478,5 +572,22 @@ function RepositoriesOrderActionsSection() {
         />
       </ActionPanel.Submenu>
     </ActionPanel.Section>
+  );
+}
+
+/**
+ * Action for opening the attached links of a branch.
+ */
+function RepositoryAttachedLinksAction({ remotes }: { remotes: Record<string, Remote> }) {
+  return (
+    <ActionPanel.Submenu title="Open Link to" icon={Icon.Link} shortcut={{ modifiers: ["cmd"], key: "l" }}>
+      {Object.values(remotes).map((remote) => (
+        <RemoteWebPageAction.Base
+          key={`remote-web-page-other-${remote.name}`}
+          remote={remote}
+          showTitle={Object.values(remotes).length > 1}
+        />
+      ))}
+    </ActionPanel.Submenu>
   );
 }

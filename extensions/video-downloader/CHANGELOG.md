@@ -1,5 +1,11 @@
 # Video Downloader Changelog
 
+## [Improvement] - 2026-01-28
+
+- Added MP3 format option for audio downloads
+- Fixed slow video info loading for playlist URLs
+- Fixed download progress not updating in real-time
+
 ## [Fix: Windows Path Resolution Issues] - 2025-12-07
 
 - Resolved error with `winget` command detection on Windows systems

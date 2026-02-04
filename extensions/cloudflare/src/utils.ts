@@ -75,6 +75,10 @@ function getPageUrl(accountId: string, pageName: string): string {
   return `${CLOUDFLARE_BASE}/${accountId}/pages/view/${pageName}`;
 }
 
+function getWorkerUrl(accountId: string, workerName: string): string {
+  return `${CLOUDFLARE_BASE}/${accountId}/workers/services/view/${workerName}/production`;
+}
+
 function getDeploymentUrl(
   accountId: string,
   pageName: string,
@@ -141,6 +145,7 @@ export {
   getMemberStatusIcon,
   getSiteUrl,
   getPageUrl,
+  getWorkerUrl,
   getDeploymentUrl,
   getRepoUrl,
   getCommitUrl,

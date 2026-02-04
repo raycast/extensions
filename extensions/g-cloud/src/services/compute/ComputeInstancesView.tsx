@@ -18,6 +18,7 @@ import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { LogsView } from "../logs-service";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 interface ComputeInstancesViewProps {
   projectId: string;
@@ -472,6 +473,9 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
               onAction={() => handleZoneChange(zone)}
             />
           ))}
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -494,6 +498,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
               key={instance.id}
               instance={instance}
               service={service}
+              projectId={projectId}
               onViewDetails={viewInstanceDetails}
               onStart={startInstance}
               onStop={stopInstance}
@@ -511,6 +516,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
               key={instance.id}
               instance={instance}
               service={service}
+              projectId={projectId}
               onViewDetails={viewInstanceDetails}
               onStart={startInstance}
               onStop={stopInstance}

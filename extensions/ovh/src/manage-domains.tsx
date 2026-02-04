@@ -13,8 +13,8 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, getAvatarIcon, getFavicon, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
-import { DNSRecord, Domain } from "./types";
-import { callOvh } from "./ovh";
+import { DNSRecord, Domain, DomainServiceInfo } from "./types";
+import { callOvh, ovh } from "./ovh";
 
 function generateDomainAccessories(domain: Domain) {
   const accessories: List.Item.Accessory[] = [];
@@ -49,6 +49,12 @@ function generateDomainAccessories(domain: Domain) {
     case "automatic_renew":
       accessories.push({
         tag: { value: "Automatic renewal", color: Color.Green },
+        tooltip: `Before ${new Date(domain.renewalDate).getMonth() + 1}/${new Date(domain.renewalDate).getFullYear()}`,
+      });
+      break;
+    case "manual_renew":
+      accessories.push({
+        tag: { value: "Manual renewal", color: Color.Yellow },
         tooltip: `Before ${new Date(domain.renewalDate).getMonth() + 1}/${new Date(domain.renewalDate).getFullYear()}`,
       });
       break;
@@ -127,6 +133,12 @@ export default function ManageDomains() {
                 target={<ModifyDNSServers domain={domain} />}
                 onPop={revalidate}
               />
+              <Action.Push
+                icon={Icon.Pencil}
+                title="Update Service Information"
+                target={<UpdateServiceInformation serviceName={domain.domain} />}
+                onPop={revalidate}
+              />
               <Action
                 shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
                 icon={Icon.AppWindowSidebarLeft}
@@ -186,9 +198,7 @@ function DNSRecords({ domain }: { domain: Domain }) {
         },
       );
       toast.title = "Deleted! Refreshing";
-      await callOvh(`v1/domain/zone/${record.zone}/refresh`, {
-        method: "POST",
-      }).catch(() => {
+      await ovh.domain.zone.refresh(record.zone).catch(() => {
         throw new Error("Could not refresh");
       });
       toast.style = Toast.Style.Success;
@@ -361,6 +371,118 @@ function ModifyDNSServers({ domain }: { domain: Domain }) {
       <Form.TextField title="DNS server 2" placeholder={domain.nameServers[1]?.nameServer} {...itemProps.ns2} />
       <Form.TextField title="DNS server 3" placeholder={domain.nameServers[2]?.nameServer} {...itemProps.ns3} />
       <Form.TextField title="DNS server 4" placeholder={domain.nameServers[3]?.nameServer} {...itemProps.ns4} />
+    </Form>
+  );
+}
+
+function UpdateServiceInformation({ serviceName }: { serviceName: string }) {
+  const { pop } = useNavigation();
+  type FormValues = {
+    period: string;
+    alsoUpdateDNSZone: boolean;
+  };
+  const { isLoading: isLoadingPaymentMethods, data: paymentMethods } = useCachedPromise(async () => {
+    const result = await callOvh<number[]>("v1/me/payment/method?status=VALID");
+    return result;
+  });
+  const { isLoading, data } = useCachedPromise(
+    async (serviceName: string) => {
+      const result = await callOvh<DomainServiceInfo>(`v1/domain/${serviceName}/serviceInfos`);
+      return result;
+    },
+    [serviceName],
+  );
+  const { handleSubmit, itemProps, values } = useForm<FormValues>({
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Updating");
+      const body = {
+        renew: {
+          manualPayment: !values.period,
+          deleteAtExpiration: !!data?.renew?.deleteAtExpiration,
+          forced: !!data?.renew?.forced,
+          automatic: !!values.period,
+          period: values.period ? +values.period : null,
+        },
+      };
+      try {
+        const updates = [
+          callOvh(`v1/domain/${serviceName}/serviceInfos`, {
+            method: "PUT",
+            body,
+          }),
+        ];
+        if (values.alsoUpdateDNSZone)
+          updates.push(
+            callOvh(`v1/domain/zone/${serviceName}/serviceInfos`, {
+              method: "PUT",
+              body,
+            }).then(() =>
+              ovh.domain.zone.refresh(serviceName).catch(() => {
+                throw new Error("Could not refresh");
+              }),
+            ),
+          );
+        await Promise.all(updates);
+        toast.style = Toast.Style.Success;
+        toast.title = "Updated";
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = `${error}`;
+      }
+    },
+    initialValues: {
+      period: data?.renew?.period?.toString(),
+    },
+  });
+  return (
+    <Form
+      isLoading={isLoadingPaymentMethods || isLoading}
+      navigationTitle={`... / ${serviceName} / Update Service Information`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Pencil} title="Update Service Information" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description
+        title="Configure renewal"
+        text={`How often would you like to renew your ${serviceName} service?`}
+      />
+      <Form.Dropdown title="" {...itemProps.period}>
+        <Form.Dropdown.Item title="Manual renewal" value="" />
+        <Form.Dropdown.Item title="Every year" value="12" />
+        <Form.Dropdown.Item title="Every 2 years" value="24" />
+        <Form.Dropdown.Item title="Every 3 years" value="36" />
+        <Form.Dropdown.Item title="Every 4 years" value="48" />
+        <Form.Dropdown.Item title="Every 5 years" value="60" />
+        <Form.Dropdown.Item title="Every 6 years" value="72" />
+        <Form.Dropdown.Item title="Every 7 years" value="84" />
+        <Form.Dropdown.Item title="Every 8 years" value="96" />
+        <Form.Dropdown.Item title="Every 9 years" value="108" />
+      </Form.Dropdown>
+      {!values.period ? (
+        <>
+          <Form.Description
+            text={`You have selected manual renewal for your ${serviceName} service. Your service won't automatically renew when it expires.`}
+          />
+        </>
+      ) : (
+        <>
+          <Form.Description
+            text={`This service will automatically renew every ${+values.period / 12} ${values.period === "12" ? "year" : "years"}.
+        
+If you choose not to renew, disable auto-renewal before your service expires.`}
+          />
+          {!paymentMethods?.length && (
+            <Form.Description
+              text={`You have selected automatic payment for your ${serviceName} service. To use this renewal method, please enter a payment method in the “Payments Methods” section.`}
+            />
+          )}
+        </>
+      )}
+      <Form.Checkbox label="Also Update DNS Zone" {...itemProps.alsoUpdateDNSZone} />
     </Form>
   );
 }

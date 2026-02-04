@@ -23,31 +23,31 @@
       "data": [
         {
           "title": "OVH Europe",
-          "value":"eu.api.ovh.com"
+          "value": "eu.api.ovh.com"
         },
         {
-         "title": "OVH US",
-          "value":"api.us.ovhcloud.com"
+          "title": "OVH US",
+          "value": "api.us.ovhcloud.com"
         },
         {
-         "title": "OVH North America",
-          "value":"ca.api.ovh.com"
+          "title": "OVH North America",
+          "value": "ca.api.ovh.com"
         },
         {
-         "title": "SoYouStart Europe",
-          "value":"eu.api.soyoustart.com"
+          "title": "SoYouStart Europe",
+          "value": "eu.api.soyoustart.com"
         },
         {
-         "title": "SoYouStart North America",
-          "value":"ca.api.soyoustart.com"
+          "title": "SoYouStart North America",
+          "value": "ca.api.soyoustart.com"
         },
         {
-         "title": "Kimsufi Europe",
-          "value":"eu.api.kimsufi.com"
+          "title": "Kimsufi Europe",
+          "value": "eu.api.kimsufi.com"
         },
         {
-         "title": "Kimsufi North America",
-          "value":"ca.api.kimsufi.com"
+          "title": "Kimsufi North America",
+          "value": "ca.api.kimsufi.com"
         }
       ]
     },
@@ -86,8 +86,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
