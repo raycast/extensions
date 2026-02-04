@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sharp-image",
+  "title": "Sharp Image",
+  "description": "Fast image compression and format conversion using Sharp (WebP, AVIF, PNG, JPEG)",
+  "icon": "extension-icon.png",
+  "author": "huan_hao",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "to-webp",
+      "title": "Convert to WebP",
+      "description": "Convert selected images to WebP format",
+      "mode": "no-view"
+    },
+    {
+      "name": "to-avif",
+      "title": "Convert to AVIF",
+      "description": "Convert selected images to AVIF format",
+      "mode": "no-view"
+    },
+    {
+      "name": "compress",
+      "title": "Compress Image",
+      "description": "Compress selected images while keeping the original format",
+      "mode": "no-view"
+    },
+    {
+      "name": "settings",
+      "title": "Compression Settings",
+      "description": "Configure compression quality and output settings",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sharpPath",
+      "title": "Sharp CLI Path",
+      "description": "Full path to sharp command. Run 'which sharp' in terminal to find it.",
+      "type": "textfield",
+      "default": "/usr/local/bin/sharp",
+      "required": true
+    },
+    {
+      "name": "outputToSource",
+      "title": "Output to Source Directory",
+      "label": "Save to source directory",
+      "description": "Save compressed images in the same directory as the original",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "customOutputDir",
+      "title": "Custom Output Directory",
+      "description": "Directory to save compressed images (used when 'Output to Source Directory' is disabled)",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "webpQuality",
+      "title": "WebP Quality",
+      "description": "Quality for WebP compression (1-100, higher is better quality)",
+      "type": "textfield",
+      "default": "80",
+      "required": false
+    },
+    {
+      "name": "avifQuality",
+      "title": "AVIF Quality",
+      "description": "Quality for AVIF compression (1-100, higher is better quality)",
+      "type": "textfield",
+      "default": "65",
+      "required": false
+    },
+    {
+      "name": "jpegQuality",
+      "title": "JPEG Quality",
+      "description": "Quality for JPEG compression (1-100, higher is better quality)",
+      "type": "textfield",
+      "default": "85",
+      "required": false
+    },
+    {
+      "name": "overwriteOriginal",
+      "title": "Overwrite Original",
+      "label": "Overwrite original file",
+      "description": "Replace the original file instead of creating a new one",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
