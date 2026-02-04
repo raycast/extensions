@@ -71,7 +71,7 @@ export default function DayDetailView({ date: initialDate }: Props) {
       selectedItemId={initialSelectionId}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="View as Solar or Lunar"
+          tooltip="View as Solar, Lunar, or Week Count"
           value={dateType}
           onChange={(val) => {
             setManualDateType(val as DateType);
