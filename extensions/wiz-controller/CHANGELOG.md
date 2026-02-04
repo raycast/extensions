@@ -1,3 +1,3 @@
 # Wiz Controller Changelog
 
-## [Initial Version] - 2026-02-04
+## [Initial Version] - {PR_MERGE_DATE}
