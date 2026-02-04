@@ -28,7 +28,7 @@ export default function Command() {
     // We fetch available editors for the default distro (or first running one) to populate list
     // This is a simplification; realistically each distro might have different editors,
     // but for Windows apps (VS Code, etc.) it's global.
-    const { stdout } = await execAsync("wsl --list --verbose");
+    const { stdout } = await execFileAsync("wsl", ["--list", "--verbose"]);
     const distros = parseDistros(stdout).filter((d) => d.state === "Running");
     const defaultDistro = distros.length > 0 ? distros[0].name : "Ubuntu";
 
