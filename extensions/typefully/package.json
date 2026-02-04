@@ -5,6 +5,13 @@
   "description": "Create and manage social media drafts on Typefully for X, LinkedIn, Threads, Bluesky, and Mastodon.",
   "icon": "icon.png",
   "author": "frankdilo",
+  "owner": "typefully",
+  "access": "public",
+  "contributors": [
+    "danielferguson",
+    "pernielsentikaer",
+    "thomas"
+  ],
   "categories": [
     "Productivity",
     "Web"
