@@ -52,7 +52,7 @@ export default function Command() {
   async function fetchProjects() {
     try {
       // 1. Get all running distros
-      const { stdout: wslOutput } = await execAsync("wsl --list --verbose");
+      const { stdout: wslOutput } = await execFileAsync("wsl", ["--list", "--verbose"]);
       const distros = parseDistros(wslOutput).filter((d) => d.state === "Running");
 
       if (distros.length === 0) {
