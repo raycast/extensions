@@ -49,8 +49,6 @@ export const AC_SCENES: WizScene[] = [
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function sendWizCommand(
   method: string,
   params: Record<string, unknown> = {},
