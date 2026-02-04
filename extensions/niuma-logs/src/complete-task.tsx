@@ -61,7 +61,7 @@ export default function CompleteTask() {
     }
 
     loadIssues();
-  }, []);
+  }, [repo, client]);
 
   if (state.error) {
     showToast({
