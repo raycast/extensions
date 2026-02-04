@@ -5,36 +5,11 @@
   "description": "Create and manage social media drafts on Typefully for X, LinkedIn, Threads, Bluesky, and Mastodon.",
   "icon": "icon.png",
   "author": "frankdilo",
-  "license": "MIT",
   "categories": [
     "Productivity",
     "Web"
   ],
-  "tools": [
-    {
-      "name": "create-draft",
-      "title": "Create Draft",
-      "description": "Create a new social media draft on Typefully. Provide either content (full draft text) or prompt (idea to generate). Use --- on its own line to split threads. Supports X (Twitter), LinkedIn, Threads, Bluesky, and Mastodon."
-    },
-    {
-      "name": "list-drafts",
-      "title": "List Drafts",
-      "description": "List unpublished, scheduled, or published drafts from Typefully."
-    },
-    {
-      "name": "list-social-sets",
-      "title": "List Social Sets",
-      "description": "List available Typefully social sets (accounts/profiles) the user can post to."
-    },
-    {
-      "name": "schedule-draft",
-      "title": "Schedule Draft",
-      "description": "Schedule an existing Typefully draft for a specific date and time."
-    }
-  ],
-  "ai": {
-    "instructions": "You help users create and manage social media drafts on Typefully. When creating a draft, always call create-draft; if you have exact draft text, pass it in content, otherwise pass the idea in prompt and let the tool generate the draft. The account and platforms are resolved automatically — do NOT call list-social-sets before creating a draft, and do NOT ask the user which platforms to target unless they explicitly mention one. For threads, separate posts with --- on its own line inside content. When scheduling, call list-drafts first to get the draft ID and social_set_id."
-  },
+  "license": "MIT",
   "commands": [
     {
       "name": "create-draft",
@@ -104,6 +79,31 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "create-draft",
+      "title": "Create Draft",
+      "description": "Create a new social media draft on Typefully. Provide either content (full draft text) or prompt (idea to generate). Use --- on its own line to split threads. Supports X (Twitter), LinkedIn, Threads, Bluesky, and Mastodon."
+    },
+    {
+      "name": "list-drafts",
+      "title": "List Drafts",
+      "description": "List unpublished, scheduled, or published drafts from Typefully."
+    },
+    {
+      "name": "list-social-sets",
+      "title": "List Social Sets",
+      "description": "List available Typefully social sets (accounts/profiles) the user can post to."
+    },
+    {
+      "name": "schedule-draft",
+      "title": "Schedule Draft",
+      "description": "Schedule an existing Typefully draft for a specific date and time."
+    }
+  ],
+  "ai": {
+    "instructions": "You help users create and manage social media drafts on Typefully. When creating a draft, always call create-draft; if you have exact draft text, pass it in content, otherwise pass the idea in prompt and let the tool generate the draft. The account and platforms are resolved automatically — do NOT call list-social-sets before creating a draft, and do NOT ask the user which platforms to target unless they explicitly mention one. For threads, separate posts with --- on its own line inside content. When scheduling, call list-drafts first to get the draft ID and social_set_id."
+  },
   "preferences": [
     {
       "name": "apiKey",
