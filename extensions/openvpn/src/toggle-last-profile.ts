@@ -7,7 +7,14 @@ export default async function Command() {
   const isAppRunning = await isRunning();
 
   if (!isAppRunning) {
-    startOpenVPN();
+    const isReady = await startOpenVPN();
+    if (!isReady) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "OpenVPN Connect isn't ready. Open the app and allow Accessibility permissions.",
+      });
+      return;
+    }
   }
 
   const status = await getStatus();
