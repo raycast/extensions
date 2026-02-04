@@ -48,9 +48,7 @@ export const AC_SCENES: WizScene[] = [
   { id: 10, name: "Bedtime", category: "Miscellaneous", isDynamic: false },
 ];
 
-interface Preferences {
-  ipAddress: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function sendWizCommand(
