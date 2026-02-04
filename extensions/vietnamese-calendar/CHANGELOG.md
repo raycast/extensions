@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.3.2] - {PR_MERGE_DATE}
+## [1.3.2] - 2026-02-04
 
 - Added "Week Count Cycle" view to support recurring holidays like Mother's Day and Father's Day.
 - Updated Mother's Day and Father's Day to display future dates based on week count logic.
