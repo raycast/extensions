@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0] - 2026-01-28
+
+### Fixed
+
+- **MetaForge API Updates** - Updated to latest API changes
+  - Event Timers now uses `/events-schedule` endpoint (replaces deprecated `/event-timers`)
+  - Simplified event processing - server now pre-computes timestamps
+  - Quest locations now properly display map names
+
 ## [1.4.0] - 2026-01-04
 
 ### Added

@@ -99,7 +99,7 @@
         ]
       },
       {
-        "input": "@say how many voices do you have in english?",
+        "input": "@say how many voices do you have in English?",
         "mocks": {
           "get-voices": [
             {
@@ -113,9 +113,9 @@
               "name": "Bad News"
             },
             {
-              "example": "Hello! My name is Bahh.",
+              "example": "Hello! My name is Cellos.",
               "languageCode": "en_US",
-              "name": "Bahh"
+              "name": "Cellos"
             }
           ]
         },
@@ -181,19 +181,19 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.0",
+    "@raycast/api": "^1.104.4",
     "@raycast/utils": "^2.2.2",
     "bplist-parser": "^0.3.2",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "mac-say": "^0.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/lodash": "^4.17.20",
-    "@types/node": "^24.6.2",
-    "@types/react": "^19.2.0",
+    "@types/lodash": "^4.17.23",
+    "@types/node": "^25.2.0",
+    "@types/react": "^19.2.10",
     "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
   "platforms": [

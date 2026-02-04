@@ -31,6 +31,12 @@ This extension supports both "Umami Cloud" and "Umami Self-Hosted".
 |------------|---------|
 | Umami Endpoint | The URL of your Umami instance including "api" e.g. `https://umami.example.com/api/` |
 | Umami User ID (Self-Hosted) | The ID of the User performing the API calls |
-| Umami Client Secret (Self-Hosted) | A random string used to generate unique values. This needs to match the `APP_SECRET` used in the Umami deployment |
+| Umami Client Secret (Self-Hosted) * | A random string used to generate unique values. This needs to match the `APP_SECRET` used in the Umami deployment |
 
 > For now, the extension shows you your sites with the last 24 hours of stats
+
+\* ❗ If you did not set a custom APP_SECRET, try the following:
+
+- same value as `DB_URL`
+- `secret`
+- `replace-me-with-a-random-string`

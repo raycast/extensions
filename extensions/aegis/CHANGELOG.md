@@ -1,5 +1,10 @@
 # Aegis Extension Changelog
 
+## [Aegis Windows Support] - 2026-01-28
+
+- Update `@raycast/api` and `@raycast/utils` to support Windows
+- Add Windows to supported platforms
+
 ## [Aegis Search Enhance] - 2025-01-12
 
 - Improves the seacher performance with React's `useMemo`

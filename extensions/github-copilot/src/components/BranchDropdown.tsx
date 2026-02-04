@@ -2,30 +2,33 @@ import { Form } from "@raycast/api";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useBranches } from "../hooks/useBranches";
 
-export function BranchDropdown(props: {
+type BranchDropdownProps = {
   itemProps: Form.ItemProps<string>;
   repository?: string;
   onLoadingChange?: (isLoading: boolean) => void;
-}) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const { branches, isLoading, defaultBranch } = useBranches(props.repository ?? "", searchQuery);
+};
 
-  const { onChange, value, ...restItemProps } = props.itemProps;
-  const previousRepository = useRef(props.repository);
+export function BranchDropdown(props: Readonly<BranchDropdownProps>) {
+  const { repository, itemProps, onLoadingChange } = props;
+  const [searchQuery, setSearchQuery] = useState("");
+  const { branches, isLoading, defaultBranch } = useBranches(repository ?? "", searchQuery);
+
+  const { onChange, value, ...restItemProps } = itemProps;
+  const previousRepository = useRef(repository);
 
   // Clear branch value when repository changes
   useEffect(() => {
-    if (previousRepository.current && previousRepository.current !== props.repository) {
+    if (previousRepository.current && previousRepository.current !== repository) {
       // Repository changed, clear the current branch value
       onChange?.("");
     }
-    previousRepository.current = props.repository;
-  }, [props.repository, onChange]);
+    previousRepository.current = repository;
+  }, [repository, onChange]);
 
   // Notify parent about loading state changes
   useEffect(() => {
-    props.onLoadingChange?.(isLoading);
-  }, [isLoading, props.onLoadingChange]);
+    onLoadingChange?.(isLoading);
+  }, [isLoading, onLoadingChange]);
 
   const controlledValue = useMemo(() => {
     if (value && branches.includes(value)) {
@@ -61,7 +64,7 @@ export function BranchDropdown(props: {
     >
       {branches.map((branch) => (
         <Form.Dropdown.Item
-          key={`${props.repository}-${branch}`}
+          key={`${repository}-${branch}`}
           title={branch === defaultBranch ? `${branch} (default)` : branch}
           value={branch}
         />

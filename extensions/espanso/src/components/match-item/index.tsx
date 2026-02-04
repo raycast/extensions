@@ -1,20 +1,21 @@
 import { Application, Action, ActionPanel, Clipboard, Icon, List } from "@raycast/api";
-import { capitalCase } from "change-case";
 import { FormattedMatch } from "../../lib/types";
+import { formatCategoryName } from "../../lib/utils";
 
 interface MatchItemProps {
   match: FormattedMatch;
   sectionKey: string;
   application: Application | undefined;
+  separator: string;
 }
 
-export default function MatchItem({ match, sectionKey, application }: MatchItemProps) {
-  const { triggers, replace, form, label, filePath, subcategory } = match;
+export default function MatchItem({ match, sectionKey, application, separator }: MatchItemProps) {
+  const { triggers, replace, form, label, filePath, profile } = match;
 
   return (
     <List.Item
       title={label ?? triggers.join(", ")}
-      subtitle={subcategory ? capitalCase(subcategory) : ""}
+      subtitle={profile ? formatCategoryName(profile, separator) : ""}
       detail={
         <List.Item.Detail
           markdown={form ? "`form` is not supported yet." : replace}
@@ -30,14 +31,20 @@ export default function MatchItem({ match, sectionKey, application }: MatchItemP
                   <List.Item.Detail.Metadata.TagList.Item text={label} color="#d7d0d1" />
                 </List.Item.Detail.Metadata.TagList>
               )}
-              <List.Item.Detail.Metadata.TagList title="Category">
-                <List.Item.Detail.Metadata.TagList.Item text={capitalCase(sectionKey)} color="#8da0cb" />
-              </List.Item.Detail.Metadata.TagList>
-              {subcategory && (
-                <List.Item.Detail.Metadata.TagList title="Subcategory">
-                  <List.Item.Detail.Metadata.TagList.Item text={capitalCase(subcategory)} color="#fc8d62" />
+              {profile && (
+                <List.Item.Detail.Metadata.TagList title="Profile">
+                  <List.Item.Detail.Metadata.TagList.Item
+                    text={formatCategoryName(profile, separator)}
+                    color="#66c2a5"
+                  />
                 </List.Item.Detail.Metadata.TagList>
               )}
+              <List.Item.Detail.Metadata.TagList title="Category">
+                <List.Item.Detail.Metadata.TagList.Item
+                  text={formatCategoryName(sectionKey, separator)}
+                  color="#8da0cb"
+                />
+              </List.Item.Detail.Metadata.TagList>
               <List.Item.Detail.Metadata.Label title="File" text={filePath} />
             </List.Item.Detail.Metadata>
           }

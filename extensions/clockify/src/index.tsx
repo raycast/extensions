@@ -1,22 +1,30 @@
 import {
+  Action,
   ActionPanel,
   Form,
   Icon,
   List,
-  showToast,
-  useNavigation,
-  Toast,
-  Action,
   LocalStorage,
   openExtensionPreferences,
+  showToast,
+  Toast,
+  useNavigation,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
-import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
-import { fetcher, isInProgress, showElapsedTime } from "./utils";
+import {
+  isInProgress,
+  getElapsedTime,
+  getTimeEntries,
+  stopCurrentTimer,
+  addNewTimeEntry,
+  getAllTimeEntriesFromLocalStorage,
+  fetcher,
+  dateDiffToString,
+} from "./utils";
 import { TimeEntry, Project, Task, Tag } from "./types";
-import { useCachedState } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 
 function OpenWebPage() {
   return <Action.OpenInBrowser title="Open Website" url="https://app.clockify.me" />;
@@ -35,10 +43,10 @@ function ToggleTags() {
 }
 
 function useClock(entry: TimeEntry) {
-  const [time, setTime] = useState(showElapsedTime(entry));
+  const [time, setTime] = useState(getElapsedTime(entry));
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(showElapsedTime(entry)), 1000);
+    const interval = setInterval(() => setTime(getElapsedTime(entry)), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -62,10 +70,12 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
       keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
       actions={
         <ActionPanel>
-          <Action
-            icon={Icon.Stop}
-            title="Stop Timer"
-            onAction={() => stopCurrentTimer().then(() => updateTimeEntries())}
+          <Action icon={Icon.Stop} title="Stop Timer" onAction={() => stopCurrentTimer(updateTimeEntries)} />
+          <Action.Push
+            icon={Icon.Clock}
+            title="Stop Timer at…"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            target={<StopTimerAtForm entry={entry} updateTimeEntries={updateTimeEntries} />}
           />
           <OpenWebPage />
           <ToggleTags />
@@ -87,17 +97,15 @@ export default function Main() {
     async function fetchTimeEntries() {
       setIsLoading(true);
 
-      const storedEntries: string | undefined = await LocalStorage.getItem("entries");
-
-      if (storedEntries) {
-        setEntries(JSON.parse(storedEntries));
+      const storedEntries = getAllTimeEntriesFromLocalStorage();
+      if (storedEntries.length > 0) {
+        setEntries(storedEntries);
       }
 
       const filteredEntries = await getTimeEntries({ onError: setIsValidToken });
 
       if (filteredEntries) {
         setEntries(filteredEntries);
-        LocalStorage.setItem("entries", JSON.stringify(filteredEntries));
       }
 
       setIsLoading(false);
@@ -113,7 +121,6 @@ export default function Main() {
       .then((entries) => {
         if (entries) {
           setEntries(entries);
-          LocalStorage.setItem("entries", JSON.stringify(entries));
         }
 
         setIsLoading(false);
@@ -151,6 +158,21 @@ export default function Main() {
                 </ActionPanel>
               }
             />
+            <List.Item
+              icon={{ source: Icon.Plus }}
+              title="Add Time Entry"
+              subtitle="Add a completed entry with start and end times"
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    icon={Icon.Plus}
+                    title="Add Time Entry"
+                    target={<AddTimeEntry updateTimeEntries={updateTimeEntries} />}
+                  />
+                  <OpenWebPage />
+                </ActionPanel>
+              }
+            />
           </List.Section>
           <List.Section title="Latest entries">
             {entries.map((entry) =>
@@ -174,12 +196,7 @@ export default function Main() {
                         icon={Icon.Play}
                         title="Start Timer"
                         onAction={() => {
-                          addNewTimeEntry(
-                            entry.description,
-                            entry.projectId,
-                            entry.taskId,
-                            entry.tags.map((tag) => tag.id),
-                          ).then(() => updateTimeEntries());
+                          addNewTimeEntry(entry.description, entry.projectId, entry.taskId, updateTimeEntries);
                         }}
                       />
                       <OpenWebPage />
@@ -197,15 +214,38 @@ export default function Main() {
 }
 
 function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
-  const { config } = useConfig();
+  const { config, isValidToken } = useConfig();
   const [projects, setProjects] = useState<Project[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { pop } = useNavigation();
 
+  const { handleSubmit, itemProps } = useForm<{
+    projectId: string;
+    taskId?: string;
+    description?: string;
+    tagIds?: string[];
+    startTime?: Date | null;
+  }>({
+    validation: {
+      projectId: FormValidation.Required,
+    },
+    async onSubmit({ description, projectId, taskId, tagIds, startTime }) {
+      await addNewTimeEntry(
+        description,
+        projectId,
+        taskId === "-1" ? null : taskId,
+        tagIds || [],
+        startTime || undefined,
+      );
+      updateTimeEntries();
+      pop();
+    },
+  });
+
   useEffect(() => {
-    if (isEmpty(config)) return;
+    if (isEmpty(config) || !isValidToken) return;
 
     async function getAllProjectsAndTagsOnWorkspace(): Promise<void> {
       setIsLoading(true);
@@ -230,7 +270,20 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
     }
 
     getAllProjectsAndTagsOnWorkspace();
-  }, [config]);
+  }, [config, isValidToken]);
+
+  async function fetchTasksForProject(projectId: string): Promise<void> {
+    setIsLoading(true);
+
+    const storedTasks: string | undefined = await LocalStorage.getItem(`project[${projectId}]`);
+    if (storedTasks) setTasks(JSON.parse(storedTasks));
+
+    const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects/${projectId}/tasks?page-size=1000`);
+
+    setTasks(data || []);
+    LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data));
+    setIsLoading(false);
+  }
 
   return (
     <Form
@@ -238,45 +291,12 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Start"
-            onSubmit={({ description, projectId, taskId, tagIds }) => {
-              if (projectId) {
-                addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId, tagIds).then(
-                  updateTimeEntries,
-                );
-                pop();
-              } else {
-                showToast(Toast.Style.Failure, "Project is required.");
-              }
-            }}
-          />
+          <Action.SubmitForm title="Start" onSubmit={handleSubmit} />
           <Action.SubmitForm title="Discard" onSubmit={pop} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="projectId"
-        title="Project"
-        onChange={(projectId) => {
-          async function getAllTasksForProject(projectId: string): Promise<void> {
-            setIsLoading(true);
-
-            const storedTasks: string | undefined = await LocalStorage.getItem(`project[${projectId}]`);
-            if (storedTasks) setTasks(JSON.parse(storedTasks));
-
-            const { data } = await fetcher(
-              `/workspaces/${config.workspaceId}/projects/${projectId}/tasks?page-size=1000`,
-            );
-
-            setTasks(data || []);
-            LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data));
-            setIsLoading(false);
-          }
-
-          getAllTasksForProject(projectId);
-        }}
-      >
+      <Form.Dropdown {...itemProps.projectId} title="Project" onChange={(projectId) => fetchTasksForProject(projectId)}>
         {projects.map((project: Project) => (
           <Form.Dropdown.Item
             key={project.id}
@@ -288,7 +308,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
       </Form.Dropdown>
 
       {tasks.length ? (
-        <Form.Dropdown id="taskId" title="Task">
+        <Form.Dropdown {...itemProps.taskId} title="Task">
           <Form.Dropdown.Section>
             <Form.Dropdown.Item key={-1} value={"-1"} title={"Without task"} icon={{ source: Icon.BlankDocument }} />
           </Form.Dropdown.Section>
@@ -306,10 +326,18 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
         </Form.Dropdown>
       ) : null}
 
-      <Form.TextField id="description" title="Description" placeholder="What are you working on?" autoFocus />
+      <Form.TextField {...itemProps.description} title="Description" placeholder="What are you working on?" autoFocus />
 
       <Form.Separator />
-      <Form.TagPicker title="Tags (optional)" id="tagIds" placeholder="Search tags">
+
+      <Form.DatePicker
+        {...itemProps.startTime}
+        title="Start Time (optional)"
+        type={Form.DatePicker.Type.DateTime}
+        max={new Date()}
+      />
+
+      <Form.TagPicker {...itemProps.tagIds} title="Tags (optional)" placeholder="Search tags">
         {tags.map((tag) => (
           <Form.TagPicker.Item key={tag.id} title={tag.name} value={tag.id} />
         ))}
@@ -318,79 +346,238 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   );
 }
 
-async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-  const userId = await LocalStorage.getItem("userId");
+function StopTimerAtForm({ entry, updateTimeEntries }: { entry: TimeEntry; updateTimeEntries: () => void }) {
+  const { pop } = useNavigation();
+  const startTime = new Date(entry.timeInterval.start);
 
-  const { data, error } = await fetcher(
-    `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`,
-  );
-
-  if (error === "Unauthorized") {
-    onError?.(false);
-    return [];
-  }
-
-  if (data?.length) {
-    const filteredEntries: TimeEntry[] = uniqWith(
-      data,
-      (a: TimeEntry, b: TimeEntry) =>
-        a.projectId === b.projectId && a.taskId === b.taskId && a.description === b.description,
-    );
-
-    return filteredEntries;
-  } else {
-    return [];
-  }
-}
-
-async function stopCurrentTimer(): Promise<void> {
-  showToast(Toast.Style.Animated, "Stopping…");
-
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-  const userId = await LocalStorage.getItem("userId");
-
-  const { data, error } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries`, {
-    method: "PATCH",
-    body: { end: new Date().toISOString() },
-  });
-
-  if (!error && data) {
-    showToast(Toast.Style.Success, "Timer stopped");
-  } else {
-    showToast(Toast.Style.Failure, "No timer running");
-  }
-}
-
-async function addNewTimeEntry(
-  description: string | undefined | null,
-  projectId: string,
-  taskId: string | undefined | null,
-  tagIds: string[] = [],
-): Promise<void> {
-  showToast(Toast.Style.Animated, "Starting…");
-
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-
-  const { data } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
-    method: "POST",
-    body: {
-      description,
-      taskId,
-      projectId,
-      timeInterval: {
-        start: new Date().toISOString(),
-        end: null,
-        duration: null,
+  const { handleSubmit, itemProps } = useForm<{ endDate: Date | null }>({
+    initialValues: {
+      endDate: new Date(),
+    },
+    validation: {
+      endDate: (value) => {
+        if (!value) return "End time is required";
+        if (value <= startTime) {
+          return `End time must be after start time (${startTime.toLocaleTimeString()})`;
+        }
+        if (value > new Date()) {
+          return "End time cannot be in the future";
+        }
+        return undefined;
       },
-      tagIds,
-      customFieldValues: [],
+    },
+    async onSubmit({ endDate }) {
+      if (!endDate) return;
+      showToast(Toast.Style.Animated, "Stopping timer...");
+
+      const workspaceId = await LocalStorage.getItem("workspaceId");
+      const userId = await LocalStorage.getItem("userId");
+
+      const { data, error } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries`, {
+        method: "PATCH",
+        body: { end: endDate.toISOString() },
+      });
+
+      if (!error && data) {
+        showToast(Toast.Style.Success, "Timer stopped", `Ended at ${endDate.toLocaleTimeString()}`);
+        updateTimeEntries();
+        pop();
+      } else {
+        showToast(Toast.Style.Failure, "Failed to stop timer");
+      }
     },
   });
 
-  if (data?.id) {
-    showToast(Toast.Style.Success, "Timer is running");
-  } else {
-    showToast(Toast.Style.Failure, "Timer could not be started");
+  return (
+    <Form
+      navigationTitle="Stop Timer at"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Stop Timer" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description
+        title="Current Timer"
+        text={`${entry.project?.name || "No Project"} - ${entry.description || "No Description"}`}
+      />
+      <Form.Description title="Started at" text={startTime.toLocaleString()} />
+      <Form.Separator />
+      <Form.DatePicker
+        {...itemProps.endDate}
+        title="Stop at"
+        type={Form.DatePicker.Type.DateTime}
+        min={startTime}
+        max={new Date()}
+      />
+    </Form>
+  );
+}
+
+function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
+  const { config } = useConfig();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { pop } = useNavigation();
+
+  const defaultStart = new Date();
+  defaultStart.setHours(defaultStart.getHours() - 1);
+
+  const { handleSubmit, itemProps, values } = useForm<{
+    projectId: string;
+    taskId?: string;
+    description?: string;
+    tagIds?: string[];
+    startDate: Date | null;
+    endDate: Date | null;
+  }>({
+    initialValues: {
+      startDate: defaultStart,
+      endDate: new Date(),
+    },
+    validation: {
+      projectId: FormValidation.Required,
+      startDate: FormValidation.Required,
+      endDate: (value) => {
+        if (!value) return "End time is required";
+        if (value > new Date()) {
+          return "End time cannot be in the future";
+        }
+        if (values.startDate && value <= values.startDate) {
+          return "End time must be after start time";
+        }
+        return undefined;
+      },
+    },
+    async onSubmit(formValues) {
+      const { projectId, taskId, description, tagIds, startDate, endDate } = formValues;
+      if (!startDate || !endDate) return;
+
+      showToast(Toast.Style.Animated, "Adding time entry...");
+
+      const workspaceId = await LocalStorage.getItem("workspaceId");
+
+      const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
+        method: "POST",
+        body: {
+          start: startDate.toISOString(),
+          end: endDate.toISOString(),
+          description: description || null,
+          taskId: taskId === "-1" ? null : taskId || null,
+          projectId,
+          tagIds: tagIds || [],
+          customFieldValues: [],
+        },
+      });
+
+      if (data?.id) {
+        const duration = dateDiffToString(startDate, endDate);
+        showToast(Toast.Style.Success, "Time entry added", `Duration: ${duration}`);
+        updateTimeEntries();
+        pop();
+      } else {
+        showToast(Toast.Style.Failure, "Failed to add time entry", error?.toString());
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (isEmpty(config)) return;
+
+    async function getAllProjectsAndTags(): Promise<void> {
+      setIsLoading(true);
+
+      const [storedProjects, storedTags] = await Promise.all([
+        LocalStorage.getItem<string>("projects"),
+        LocalStorage.getItem<string>("tags"),
+      ]);
+      if (storedProjects) setProjects(JSON.parse(storedProjects));
+      if (storedTags) setTags(JSON.parse(storedTags));
+
+      const [projectsResponse, tagsResponse] = await Promise.all([
+        fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000&archived=false`),
+        fetcher(`/workspaces/${config.workspaceId}/tags?page-size=1000&archived=false`),
+      ]);
+
+      setProjects(projectsResponse.data || []);
+      LocalStorage.setItem("projects", JSON.stringify(projectsResponse.data));
+      setTags(tagsResponse.data || []);
+      LocalStorage.setItem("tags", JSON.stringify(tagsResponse.data));
+      setIsLoading(false);
+    }
+
+    getAllProjectsAndTags();
+  }, [config]);
+
+  async function fetchTasksForProject(projectId: string): Promise<void> {
+    setIsLoading(true);
+
+    const storedTasks: string | undefined = await LocalStorage.getItem(`project[${projectId}]`);
+    if (storedTasks) setTasks(JSON.parse(storedTasks));
+
+    const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects/${projectId}/tasks?page-size=1000`);
+
+    setTasks(data || []);
+    LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data));
+    setIsLoading(false);
   }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      navigationTitle="Add Time Entry"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Add Entry" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown {...itemProps.projectId} title="Project" onChange={(projectId) => fetchTasksForProject(projectId)}>
+        {projects.map((project: Project) => (
+          <Form.Dropdown.Item
+            key={project.id}
+            value={project.id}
+            title={`${project.name} - ${project?.clientName || "No Client"}`}
+            icon={{ source: Icon.Circle, tintColor: project.color }}
+          />
+        ))}
+      </Form.Dropdown>
+
+      {tasks.length > 0 && (
+        <Form.Dropdown {...itemProps.taskId} title="Task">
+          <Form.Dropdown.Section>
+            <Form.Dropdown.Item key={-1} value={"-1"} title="Without task" icon={{ source: Icon.BlankDocument }} />
+          </Form.Dropdown.Section>
+          <Form.Dropdown.Section title="Project tasks">
+            {tasks.map((task: Task) => (
+              <Form.Dropdown.Item
+                key={task.id}
+                value={task.id}
+                title={task.name}
+                icon={{ source: Icon.BlankDocument }}
+              />
+            ))}
+          </Form.Dropdown.Section>
+        </Form.Dropdown>
+      )}
+
+      <Form.TextField {...itemProps.description} title="Description" placeholder="What were you working on?" />
+
+      <Form.Separator />
+
+      <Form.DatePicker {...itemProps.startDate} title="Start Time" type={Form.DatePicker.Type.DateTime} />
+
+      <Form.DatePicker {...itemProps.endDate} title="End Time" type={Form.DatePicker.Type.DateTime} max={new Date()} />
+
+      <Form.Separator />
+
+      <Form.TagPicker {...itemProps.tagIds} title="Tags (optional)" placeholder="Search tags">
+        {tags.map((tag) => (
+          <Form.TagPicker.Item key={tag.id} title={tag.name} value={tag.id} />
+        ))}
+      </Form.TagPicker>
+    </Form>
+  );
 }

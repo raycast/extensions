@@ -9,8 +9,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect } from "react";
-import { useImmer } from "use-immer";
+import { useEffect, useState } from "react";
 import supportedLanguages from "../../data/supportedLanguages";
 import { Language } from "../../types";
 
@@ -53,7 +52,7 @@ export function LanguagesManagerItem({
 
 export const LanguagesManagerList = () => {
   const preference = getPreferenceValues<Preferences>();
-  const [selectedLanguages, setSelectedLanguages] = useImmer<Language[]>([]);
+  const [selectedLanguages, setSelectedLanguages] = useState<Language[]>([]);
 
   const getSelectedLanguages = async () => {
     const selectedLanguages = await LocalStorage.getItem("SelectedLanguages");
@@ -72,38 +71,35 @@ export const LanguagesManagerList = () => {
         selectedLanguages as unknown as string,
       ) as Language[];
 
-      setSelectedLanguages((draft) => {
-        draft.push(...data, primaryLanguage);
-      });
+      setSelectedLanguages([...data, primaryLanguage]);
     } else {
-      setSelectedLanguages((draft) => {
-        draft.push(primaryLanguage);
-      });
+      setSelectedLanguages([primaryLanguage]);
     }
   };
 
   const selectLanguage = (language: Language) => {
-    setSelectedLanguages((draft) => {
-      draft.push(language);
-    });
-    const payload = [...selectedLanguages, language];
+    const selectedLanguagesWithoutPrimary = selectedLanguages.filter(
+      (lang) => lang.value !== preference.primaryLanguage,
+    );
+    setSelectedLanguages((prev) => [...prev, language]);
+    const payload = [...selectedLanguagesWithoutPrimary, language];
     LocalStorage.setItem("SelectedLanguages", JSON.stringify(payload));
     showToast(Toast.Style.Success, "Language set was saved!");
   };
 
   const unselectLanguage = (language: Language) => {
-    setSelectedLanguages((draft) => {
-      const deleteIndex = draft.findIndex(
-        (lang) => lang.value === language.value,
-      );
-      if (deleteIndex !== -1) {
-        draft.splice(deleteIndex, 1);
-      }
-    });
-    const updatedLanguages = selectedLanguages.filter(
-      (lang) => lang.value !== language.value,
+    const updatedLanguagesWithoutPrimary = selectedLanguages.filter(
+      (lang) =>
+        lang.value !== language.value &&
+        lang.value !== preference.primaryLanguage,
     );
-    LocalStorage.setItem("SelectedLanguages", JSON.stringify(updatedLanguages));
+    setSelectedLanguages((prev) =>
+      prev.filter((lang) => lang.value !== language.value),
+    );
+    LocalStorage.setItem(
+      "SelectedLanguages",
+      JSON.stringify(updatedLanguagesWithoutPrimary),
+    );
   };
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 # Random Data Generator Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-01-13
 
 - Added shortcuts to the Windows version
 

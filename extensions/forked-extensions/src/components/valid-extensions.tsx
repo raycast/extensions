@@ -43,7 +43,7 @@ export default function ValidExtensions({
                 icon={Icon.NewDocument}
                 title="Fork"
                 onAction={catchError(async () => {
-                  await operation.fork(x.folder);
+                  await operation.fork(`extensions/${x.folder}`);
                   onPop();
                   pop();
                 })}

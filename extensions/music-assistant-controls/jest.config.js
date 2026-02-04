@@ -17,7 +17,8 @@ module.exports = {
     '!src/external-code/**/*',
     // Exclude UI components that use Raycast UI primitives
     '!src/menu-bar.tsx',
-    '!src/set-active-player.tsx'
+    '!src/set-active-player.tsx',
+    '!src/set-volume.tsx'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],

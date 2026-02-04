@@ -1,6 +1,6 @@
 # Smart Reply Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-01-12
 
 - Add support for Windows platform.
 - Bump all dependencies to the latest.

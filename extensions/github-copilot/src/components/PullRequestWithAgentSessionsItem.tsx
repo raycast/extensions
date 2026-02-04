@@ -3,9 +3,11 @@ import { PullRequestWithAgentSessions } from "../services/copilot";
 import { getIcon } from "../utils";
 import { reauthorize } from "../lib/oauth";
 
-export function PullRequestWithAgentSessionsItem(props: {
-  pullRequestWithAgentSessions: PullRequestWithAgentSessions;
-}) {
+export function PullRequestWithAgentSessionsItem(
+  props: Readonly<{
+    pullRequestWithAgentSessions: PullRequestWithAgentSessions;
+  }>,
+) {
   return (
     <List.Item
       key={props.pullRequestWithAgentSessions.key}
@@ -32,6 +34,14 @@ export function PullRequestWithAgentSessionsItem(props: {
               shortcut={Keyboard.Shortcut.Common.Open}
               url={props.pullRequestWithAgentSessions.pullRequest.url}
             />
+            {!!props.pullRequestWithAgentSessions.sessions[0]?.workflow_run_id && (
+              <Action.OpenInBrowser
+                title="Open Workflow Run"
+                icon={Icon.Hammer}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                url={`https://github.com/${props.pullRequestWithAgentSessions.pullRequest.repository.owner.login}/${props.pullRequestWithAgentSessions.pullRequest.repository.name}/actions/runs/${props.pullRequestWithAgentSessions.sessions[0].workflow_run_id}`}
+              />
+            )}
           </ActionPanel.Section>
           <Action
             title="Create Task"

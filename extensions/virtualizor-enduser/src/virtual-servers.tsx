@@ -65,7 +65,7 @@ export default function VirtualServers(props: { panel?: Panel }) {
             icon={getIcon(vps.status)}
             title={vps.hostname}
             subtitle={Object.values(vps.ips).join(", ")}
-            accessories={[{ icon: generateBaseUrl() + vps.distro }, { text: vps.email }]}
+            accessories={[{ icon: generateBaseUrl(props.panel?.virtualizor_url) + vps.distro }, { text: vps.email }]}
             actions={
               !isLoading && (
                 <ActionPanel>

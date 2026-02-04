@@ -11,8 +11,8 @@ import {
   Alert,
   confirmAlert,
 } from "@raycast/api";
-import { useLoadStoredSchedules } from "./fetchStoredSchedule";
-import { ListActionPanel } from "./listActionPanel";
+import { useLoadStoredSchedules } from "./hooks/useLoadStoredSchedules";
+import { ListActionPanel } from "./components/ListActionPanel";
 import {
   Schedule,
   changeScheduleState,

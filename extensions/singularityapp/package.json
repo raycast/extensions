@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "singularityapp",
+  "title": "SingularityApp",
+  "description": "Check your SingularityApp tasks and add new ones quickly",
+  "icon": "singularity-icon.png",
+  "author": "alikhil",
+  "access": "public",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "home",
+      "title": "My Tasks",
+      "description": "Show your Singularity tasks and views (inbox, today, upcoming, completed, projects, tags).",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "Completed",
+              "value": "completed"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "View",
+          "description": "Indicates which view you want to see in the command."
+        }
+      ],
+      "keywords": [
+        "home",
+        "inbox",
+        "today",
+        "today tasks",
+        "upcoming",
+        "upcoming tasks",
+        "completed",
+        "completed tasks"
+      ]
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Create a new task in SingularityApp",
+      "mode": "view"
+    },
+    {
+      "name": "set-api-token",
+      "title": "Set API Token",
+      "description": "Save your SingularityApp API token for use in other commands",
+      "mode": "view"
+    },
+    {
+      "name": "set-max-count",
+      "title": "Set Max Tasks Count",
+      "description": "Configure how many tasks to fetch per request (workaround for API pagination limitation)",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,17 @@
 # Music Assistant Controls Changelog
 
+## [REST API Migration] - 2026-01-30
+
+### 🔧 Technical Improvements
+
+- **Migrated from WebSocket to REST API** - Switched to Music Assistant's REST API for simpler and more reliable communication
+- **Improved Reliability** - No more connection state management or reconnection logic issues
+- **Performance Optimization** - Fixed menu bar timeout issues by memoizing client instance
+
+### 📝 Documentation
+
+- **Simplified Setup** - Removed instructions for exposing port 8095 in Home Assistant add-on, as it's now enabled by default
+
 ## [Update for breaking changes in Music Assistant API] - 2025-12-28
 
 ### ✅ Compatibility
@@ -12,7 +24,6 @@
 - Loads players, queues, and providers immediately after connecting so the menu bar and commands always have up-to-date data.
 - Menu bar command refreshes more often, so state should match the current song a lot more accurately.
 - Paused song no longer perpetually displayed in the menu bar, only in the dropdown.
-
 
 ## [Volume Control Features] - 2025-09-12
 
