@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast, Color, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execAsync, execFileAsync, parseDistros, parseOnlineDistros, Distro, OnlineDistro } from "./utils/wsl";
+import { execFileAsync, parseDistros, parseOnlineDistros, Distro, OnlineDistro } from "./utils/wsl";
 
 export default function Command() {
   const [distros, setDistros] = useState<Distro[]>([]);

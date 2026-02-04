@@ -1,4 +1,4 @@
-import { execAsync, execFileAsync } from "./wsl";
+import { execFileAsync } from "./wsl";
 
 export interface Editor {
   name: string;
@@ -46,15 +46,15 @@ const COMMON_EDITORS: Editor[] = [
     // Let's assume the caller handles wslpath conversion if we return a special flag or we do two steps.
     // However, to keep it simple and secure, we can use 'wsl' to run wslpath, capture output, then run notepad.
     // BUT 'getCommand' is synchronous.
-    // We will change getCommand to return just the args for the final command, 
-    // and assume the caller might need to do path conversion? 
+    // We will change getCommand to return just the args for the final command,
+    // and assume the caller might need to do path conversion?
     // Actually, for Notepad/Notepad++, we need the Windows path.
     // Let's make getCommand async? No, that complicates things.
-    // Let's use a composite command via PowerShell (Start-Process) or keep the pipe logic BUT 
-    // we can't use pipe with execFile easily. 
+    // Let's use a composite command via PowerShell (Start-Process) or keep the pipe logic BUT
+    // we can't use pipe with execFile easily.
     // Safer approach: Caller (open-project) should convert path if needed.
     // But 'open-project' doesn't know if the editor needs a Windows path.
-    // Let's stick to the previous implementation for now but use a safer construction? 
+    // Let's stick to the previous implementation for now but use a safer construction?
     // No, we must eliminate shell = true.
     // We will use "wsl" to run "wslpath" inside the editor logic?
     // Use 'wsl -d distro wslpath -w path' to get the path.

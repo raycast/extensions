@@ -78,13 +78,13 @@ export default function Command() {
               "d",
               "-not",
               "-path",
-              "*/.*"
+              "*/.*",
             ]);
 
             const lines = stdout.split("\n").filter((line) => line.trim() !== "");
             lines.forEach((path) => {
               if (path !== projectRoot && path.trim() !== "") {
-                // Clean up path if it starts with ./ or similar? 
+                // Clean up path if it starts with ./ or similar?
                 // 'find' output usually is clean if root is clean.
                 const parts = path.split("/");
                 const name = parts[parts.length - 1] || path;
@@ -116,7 +116,9 @@ export default function Command() {
   async function openProject(project: Project) {
     try {
       // Cast to include our custom property
-      const editor = availableEditors.find((e) => e.id === selectedEditorId) as (Editor & { needsWindowsPath?: boolean; useTerminal?: boolean }) | undefined;
+      const editor = availableEditors.find((e) => e.id === selectedEditorId) as
+        | (Editor & { needsWindowsPath?: boolean; useTerminal?: boolean })
+        | undefined;
 
       if (!editor) {
         await showToast({ style: Toast.Style.Failure, title: "No editor selected" });
@@ -133,11 +135,11 @@ export default function Command() {
 
       if (editor.useTerminal) {
         // Launch in a new terminal window
-        // start wsl -d distro command args... 
+        // start wsl -d distro command args...
         // We assume 'args' here are just ["-d", distro, command, path] if it was constructed by getCommand
         // But getCommand returned ["-d", distro, "vim", path]
         // So we want: start wsl -d distro vim path
-        // We can use 'cmd /c start' or just exec 'start' if allowed? 
+        // We can use 'cmd /c start' or just exec 'start' if allowed?
         // execFileAsync('cmd.exe', ['/c', 'start', command, ...args])
         // 'command' is 'wsl'.
 
