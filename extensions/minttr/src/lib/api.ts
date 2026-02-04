@@ -3,7 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 const DEFAULT_BASE_URL = "https://my.minttr.com";
 
 function getApiConfig() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const baseUrl = preferences.apiBaseUrl || DEFAULT_BASE_URL;
   const token = preferences.apiToken;
 
