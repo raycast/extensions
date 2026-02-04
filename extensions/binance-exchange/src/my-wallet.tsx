@@ -16,6 +16,7 @@ import {
   getIsolatedMarginWalletData,
   getMarginWalletData,
   getPricePrecisionSync,
+  getQuoteAssetSync,
   getSpotWalletData,
   getUsdmFuturesWalletData,
   IsolatedMarginPairPosition,
@@ -265,18 +266,21 @@ function getFuturesPositionDetail(position: WalletPosition, walletType: WalletTy
   // Get price precision from cache (uses spot equivalent for futures symbols)
   const pricePrecision = getPricePrecisionSync(position.symbol);
 
-  // For COIN-M: show contracts, for USD-M: show notional in USDT
+  // For COIN-M: show contracts, for USD-M: show notional in quote asset
   const isCoinM = walletType === "coinm-futures";
+
+  // Get collateral/margin asset from exchangeInfo cache
+  // USD-M: returns quote asset (USDT, USDC, etc.)
+  // COIN-M: returns base asset (BTC, ETH, etc.) as collateral
+  const collateralAsset = getQuoteAssetSync(position.symbol) || (isCoinM ? "BTC" : "USDT");
+
   const sizeValue = isCoinM
     ? `${Math.abs(parseFloat(position.size))} Cont`
-    : `${formatAmount(Math.abs(parseFloat(position.notional || "0")).toString(), { type: "price", precision: 2 })} USDT`;
+    : `${formatAmount(Math.abs(parseFloat(position.notional || "0")).toString(), { type: "price", precision: 2 })} ${collateralAsset}`;
 
   // Format margin/pnl values based on wallet type
   const formatMarginValue = (value: string | undefined) => {
-    if (isCoinM) {
-      return formatAmount(value, { type: "crypto", asset: "BTC" });
-    }
-    return formatAmount(value, { type: "price", precision: 8 });
+    return formatAmount(value, { type: "crypto", asset: collateralAsset });
   };
 
   return (

@@ -85,6 +85,10 @@ async function fetchAndCachePrecisionData(): Promise<PrecisionCacheData> {
           pricePrecision[symbol.symbol] = getPrecisionFromTickSize(priceFilter.tickSize);
         }
       }
+      // Quote asset mapping for USD-M (e.g., BTCUSDT -> USDT, ETHUSDC -> USDC)
+      if (symbol.quoteAsset) {
+        symbolQuoteAsset[symbol.symbol] = symbol.quoteAsset;
+      }
     }
   } catch {
     // Failed to fetch USD-M Futures exchangeInfo - continue without it
@@ -105,6 +109,10 @@ async function fetchAndCachePrecisionData(): Promise<PrecisionCacheData> {
         if (priceFilter?.tickSize) {
           pricePrecision[symbol.symbol] = getPrecisionFromTickSize(priceFilter.tickSize);
         }
+      }
+      // Base asset mapping for COIN-M (collateral is the base asset, e.g., ETHUSD_PERP -> ETH)
+      if (symbol.baseAsset) {
+        symbolQuoteAsset[symbol.symbol] = symbol.baseAsset;
       }
     }
   } catch {
