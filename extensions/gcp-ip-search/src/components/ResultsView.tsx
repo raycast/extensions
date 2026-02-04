@@ -66,12 +66,6 @@ export function ResultsView({
       isShowingDetail={isShowingDetail}
       onSearchTextChange={setResultFilterText}
       searchText={resultFilterText}
-      actions={
-        // Global actions when not selecting a specific item
-        !results.length && !isLoading ? (
-          <ActionPanel>{/* Add global actions if needed */}</ActionPanel>
-        ) : undefined
-      }
     >
       {isLoading ? (
         <List.EmptyView
@@ -342,20 +336,6 @@ export function ResultsView({
           icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
           title="No Resources Found"
           description={`IP ${ip} was not found in any of your GCP projects.`}
-          actions={
-            !isLoading && mode === "quick" ? (
-              <ActionPanel>
-                <Action
-                  title="Try Detailed Search"
-                  icon={Icon.MagnifyingGlass}
-                  onAction={() => {
-                    // We need a way to temporarily switch mode or just start a search knowing it's full?
-                    // For simplicity in this iteration, just letting user toggle dropdown.
-                  }}
-                />
-              </ActionPanel>
-            ) : undefined
-          }
         />
       )}
     </List>
