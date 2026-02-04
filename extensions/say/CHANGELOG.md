@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-02-04
 
 - Polish AI Extension configurations
 - Bump all dependencies to the latest
