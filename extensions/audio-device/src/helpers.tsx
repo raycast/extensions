@@ -356,7 +356,6 @@ export function getIcon(device: AudioDevice, isCurrent: boolean) {
   };
 }
 
-
 function getAccessories(isCurrent: boolean, isHidden: boolean, shouldShowHidden: boolean, device?: AudioDevice) {
   const accessories: List.Item.Accessory[] = [];
 
