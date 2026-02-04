@@ -2,7 +2,6 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "letta",
     "title": "Letta Agents",
-    "version": "1.0.0",
     "description": "Chat with Letta stateful agents that remember and learn over time",
     "icon": "icon.png",
     "author": "wesseljt",

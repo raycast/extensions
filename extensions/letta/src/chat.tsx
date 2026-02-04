@@ -161,8 +161,8 @@ export default function ChatCommand() {
             }
             streamingWorked = true;
           }
-        } catch (streamError) {
-          console.log("Streaming failed, falling back:", streamError);
+        } catch {
+          // Streaming not available, fall back to non-streaming
         }
 
         // Fallback to non-streaming

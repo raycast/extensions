@@ -36,3 +36,12 @@ yarn-error.log*
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Development docs
+docs
+Letta Raycast Extension.md
+assets/ICONS.md
+
+# Editor configs
+.cursorindexingignore
+.specstory/
