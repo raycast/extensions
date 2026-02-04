@@ -1,6 +1,6 @@
 # Time Tracking Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-02-04
 
 - Add Windows support (ref: [#25071](https://github.com/raycast/extensions/issues/25071))
 
