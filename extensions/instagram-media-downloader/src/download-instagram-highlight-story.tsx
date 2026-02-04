@@ -201,8 +201,8 @@ export default function Command({
                     icon={Icon.XMarkCircle}
                     onAction={deselectAll}
                     shortcut={{
-                      macOS: { modifiers: ["cmd", "shift"], key: "d" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                      macOS: { modifiers: ["cmd", "shift"], key: "x" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "x" },
                     }}
                   />
                 </ActionPanel.Section>
