@@ -116,7 +116,7 @@ export default function AgentsCommand() {
                         />
                         <Action.CopyToClipboard
                           icon={Icon.Clipboard}
-                          title="Copy Agent Id"
+                          title="Copy Agent ID"
                           content={agent.id}
                           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                         />

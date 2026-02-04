@@ -47,7 +47,7 @@ export default function MemoryCommand({ agentId, agentName, accountId = "project
         memoryBlocks = result;
       } else if (result && typeof result === "object") {
         // Could be paginated or have a data property
-        const resultObj = result as Record<string, unknown>;
+        const resultObj = result as unknown as Record<string, unknown>;
         if (Array.isArray(resultObj.data)) {
           memoryBlocks = resultObj.data;
         } else if (Symbol.asyncIterator in result) {

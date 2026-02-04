@@ -169,7 +169,7 @@ export default function ChatCommand() {
 
           const responseMessages: Record<string, unknown>[] = Array.isArray(response)
             ? response
-            : (((response as Record<string, unknown>).messages as Record<string, unknown>[]) ?? []);
+            : (((response as unknown as Record<string, unknown>).messages as Record<string, unknown>[]) ?? []);
 
           for (const msg of responseMessages) {
             const msgType = msg.message_type as string | undefined;

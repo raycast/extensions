@@ -230,7 +230,7 @@ export function useChat(client: Letta, agentId?: string | null, initialMessages?
 
           const responseMessages: Record<string, unknown>[] = Array.isArray(response)
             ? response
-            : (((response as Record<string, unknown>).messages as Record<string, unknown>[]) ?? []);
+            : (((response as unknown as Record<string, unknown>).messages as Record<string, unknown>[]) ?? []);
 
           const assistantParts: string[] = [];
           const reasoningParts: string[] = [];

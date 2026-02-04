@@ -36,7 +36,7 @@ async function fetchAgentsForAccount(client: Letta, account: LettaAccount): Prom
     if (Array.isArray(result)) {
       agentsList = result;
     } else if (result && typeof result === "object") {
-      const resultObj = result as Record<string, unknown>;
+      const resultObj = result as unknown as Record<string, unknown>;
 
       if (Array.isArray(resultObj.data)) {
         agentsList = resultObj.data;
