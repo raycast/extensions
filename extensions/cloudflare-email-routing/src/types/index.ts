@@ -52,7 +52,8 @@ export interface AliasRule {
   email: string;
   forwardsToEmail: string;
   enabled: boolean;
-  createdAt: Date;
+  createdAt?: Date;
+  isManaged: boolean;
 }
 
 export interface ApiConfig {

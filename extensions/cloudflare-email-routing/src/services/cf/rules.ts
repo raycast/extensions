@@ -276,13 +276,14 @@ function convertRuleToAlias(rule: EmailRoutingRule): AliasRule {
   const parsedName = isManaged
     ? parseRuleName(ruleName)
     : {
-        timestamp: Date.now(),
+        timestamp: 0,
         label: undefined,
         description: rule.name,
         email: "",
       };
   const matcherEmail = rule.matchers?.[0]?.value;
   const forwardEmail = rule.actions?.[0]?.value?.[0];
+  const createdAt = isManaged ? new Date(parsedName.timestamp) : undefined;
 
   return {
     id: rule.id!,
@@ -293,6 +294,7 @@ function convertRuleToAlias(rule: EmailRoutingRule): AliasRule {
     email: matcherEmail ?? "Unknown alias",
     forwardsToEmail: forwardEmail ?? "Unknown destination",
     enabled: rule.enabled ?? true,
-    createdAt: new Date(parsedName.timestamp),
+    createdAt,
+    isManaged,
   };
 }

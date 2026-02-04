@@ -46,7 +46,13 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
     }
 
     if (trimmed.includes("@")) {
-      const [localPart, inputDomain] = trimmed.split("@");
+      const atIndex = trimmed.indexOf("@");
+      const lastAtIndex = trimmed.lastIndexOf("@");
+      if (atIndex !== lastAtIndex) {
+        throw new Error("Alias must include only one @ symbol");
+      }
+      const localPart = trimmed.slice(0, atIndex);
+      const inputDomain = trimmed.slice(atIndex + 1);
       if (!localPart || !inputDomain) {
         throw new Error("Alias must include a valid domain");
       }
@@ -287,7 +293,9 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
         </ActionPanel>
       }
     >
-      {!alias && <Form.TextField title="Alias" placeholder="random-slug" autoFocus {...itemProps.alias} />}
+      {!alias && (
+        <Form.TextField title="Alias" placeholder="random-slug or name@example.com" autoFocus {...itemProps.alias} />
+      )}
       <Form.TextField
         title="Label"
         placeholder="Enter a label for this alias (required)"
