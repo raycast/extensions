@@ -12,7 +12,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useFrecencySorting, usePromise } from "@raycast/utils";
-import { useEffect, useState, useRef } from "react";
+import { useEffect } from "react";
 import {
   type AudioDevice,
   getDefaultInputDevice,
@@ -261,7 +261,6 @@ function ToggleHiddenDeviceAction({
   deviceId,
   ioType,
   isHidden,
-  shouldShowHidden,
   onAction,
 }: {
   deviceId: string;
@@ -369,6 +368,13 @@ function getAccessories(isCurrent: boolean, isHidden: boolean, shouldShowHidden:
 
   if (isWindows && device?.isCommunication && !isCurrent) {
     accessories.push({ icon: Icon.Phone, tooltip: "Communication Device" });
+  }
+
+  if (isWindows && device && !isCurrent) {
+    const deviceType = getSubtitle(device);
+    if (deviceType) {
+      accessories.push({ text: deviceType });
+    }
   }
 
   return accessories;
