@@ -20,7 +20,6 @@ export default function Command() {
 
     const fetchSelectedText = async () => {
       try {
-        await getSelectedText();
         const selectedText = await getSelectedText();
         if (selectedText) {
           setSearchText(selectedText);
