@@ -12,5 +12,6 @@ export async function handleOnOpenPage(page: Page, setRecentPage: (page: Page) =
 }
 
 export function urlForPreferredMethod(url: string) {
-  return open_in?.name === "Notion" ? url.replace(/^https:\/\/(?:www\.)?notion\.so\/(?:native\/)?/i, "notion://") : url;
+  // Keep the https URL so Notion can resolve access via universal links.
+  return url;
 }

@@ -93,6 +93,7 @@ function Search() {
                   setRecentPage={setRecentPage}
                   removeRecentPage={(id) => removeRecentPage(id, accountId)}
                   accountLabel={accountLabel}
+                  showTypeAccessory
                 />
               );
             })}

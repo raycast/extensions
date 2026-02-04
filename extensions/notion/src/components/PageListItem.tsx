@@ -46,6 +46,7 @@ type PageListItemProps = {
   icon?: Image.ImageLike;
   customActions?: JSX.Element[];
   accountLabel?: string;
+  showTypeAccessory?: boolean;
 };
 
 export function PageListItem({
@@ -60,8 +61,10 @@ export function PageListItem({
   users,
   mutate,
   accountLabel,
+  showTypeAccessory = false,
 }: PageListItemProps) {
   const accessories: List.Item.Accessory[] = [];
+  const pageWord = page.object.charAt(0).toUpperCase() + page.object.slice(1);
 
   if (databaseView && databaseView.properties) {
     const properties = Object.keys(databaseView.properties).map((propId) =>
@@ -90,6 +93,16 @@ export function PageListItem({
       tooltip: `Last Edited: ${format(date, "EEE d MMM yyyy 'at' HH:mm")}${
         lastEditedUser ? ` by ${lastEditedUser.name}` : ""
       }`,
+    });
+  }
+
+  if (showTypeAccessory) {
+    accessories.push({
+      tag: {
+        value: pageWord,
+        color: page.object === "database" ? Color.Blue : Color.SecondaryText,
+      },
+      tooltip: pageWord,
     });
   }
 
@@ -158,8 +171,6 @@ export function PageListItem({
       : primaryAction == "notion"
         ? [OpenInBrowserAction, OpenInRaycastAction]
         : [OpenInRaycastAction, OpenInBrowserAction];
-
-  const pageWord = page.object.charAt(0).toUpperCase() + page.object.slice(1);
 
   return (
     <List.Item
