@@ -34,7 +34,7 @@ export default function ListVaultsItems(props: { vaultName: string }) {
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Vaults">
             {vaults?.map((vault) => {
-              return <List.Dropdown.Item title={vault.title} value={vault.id} key={vault.id} icon={Icon.Folder} />;
+              return <List.Dropdown.Item title={vault.title} value={vault.title} key={vault.id} icon={Icon.Folder} />;
             })}
           </List.Dropdown.Section>
         </List.Dropdown>

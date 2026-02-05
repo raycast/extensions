@@ -18,18 +18,29 @@ A Raycast extension that lets you use **Proton Pass via the official Proton CLI*
 ## Installation
 
 ### 1) Install Proton CLI
-Follow the official Proton instructions to install and log in to your Proton Pass account with the CLI:
-- https://protonpass.github.io/pass-cli/
 
-### 2) Verify it’s available:
+Follow the official Proton instructions to install and log in to your Proton Pass account with the CLI:
+
+- <https://protonpass.github.io/pass-cli/>
+
+Installation in MacOS
+
+```bash
+  brew install protonpass/tap/pass-cli
+
+  pass-cli login
+```
+
+### 2) Verify it’s available
 
 ```bash
   pass-cli vault list
 ```
 
-### 3) Get the path to the CLI:
+### 3) Get the path to the CLI
+
 ```bash
-  where pass-cli
+  which pass-cli
 ```
 
 ### 4) Set the path in Raycast preferences

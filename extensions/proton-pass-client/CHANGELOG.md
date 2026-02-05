@@ -1,6 +1,6 @@
 # Proton Pass Client Changelog
 
-## 1.0.0 - 2026-02-04
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Browse Proton Pass vaults and items from Raycast
 - Search and filter items by status (Active/Trashed) and vault
