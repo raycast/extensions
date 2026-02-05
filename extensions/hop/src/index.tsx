@@ -1,13 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-  closeMainWindow,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
@@ -160,7 +151,7 @@ function ConnectionItem({ connection }: { connection: ConnectionWithHistory }) {
           <ActionPanel.Section>
             <Action title="Connect in Terminal" icon={Icon.Terminal} onAction={connectInTerminal} />
             <Action.CopyToClipboard
-              title="Copy Ssh Command"
+              title="Copy SSH Command"
               content={sshCommand}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -173,7 +164,7 @@ function ConnectionItem({ connection }: { connection: ConnectionWithHistory }) {
             />
             {connection.user && (
               <Action.CopyToClipboard
-                title="Copy User@host"
+                title="Copy User@Host"
                 content={`${connection.user}@${connection.host}`}
                 shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
               />
