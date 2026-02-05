@@ -1,5 +1,12 @@
 # Instagram Media Downloader Changelog
 
+## [New Features] - 2026-02-04
+
+- Add multi-selection support for highlight stories with visual checkmark indicators.
+- Add "Select All" and "Deselect All" actions.
+- Add "Download Selected" action for batch downloading selected highlights.
+- Add "Save Selected Urls to JSON" action for saving selected highlight URLs.
+
 ## [Maintenance] - 2025-09-08
 
 - Add support for Windows platform.

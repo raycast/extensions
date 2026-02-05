@@ -1,5 +1,11 @@
 # Microsoft OneDrive Changelog
 
+## [Improvement] - 2026-02-04
+
+### Changed
+
+- Updated icon for the **Sort Search Results By** action.
+
 ## [Improvement] - 2026-01-31
 
 ### Changed

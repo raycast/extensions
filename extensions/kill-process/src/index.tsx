@@ -37,6 +37,7 @@ export default function ProcessList() {
   const closeWindowAfterKill = preferences.closeWindowAfterKill;
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
+  const skipConfirmation = preferences.skipConfirmation;
   const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
@@ -105,17 +106,19 @@ export default function ProcessList() {
 
   const killProcess = async (process: Process, force: boolean = false) => {
     const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
-    if (
-      !(await confirmAlert({
-        title: `${force ? "Force " : ""}Kill ${processName}?`,
-        rememberUserChoice: true,
-      }))
-    ) {
-      showToast({
-        title: `Cancelled Killing ${processName}`,
-        style: Toast.Style.Failure,
-      });
-      return;
+    if (!skipConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: `${force ? "Force " : ""}Kill ${processName}?`,
+          rememberUserChoice: true,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled Killing ${processName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
     }
 
     const command = getKillCommand(process.id, force);

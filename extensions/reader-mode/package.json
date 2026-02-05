@@ -1,0 +1,277 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reader-mode",
+  "title": "Reader Mode",
+  "description": "Read the web distraction-free in Raycast.",
+  "icon": "reader-icon.png",
+  "author": "chrismessina",
+  "contributors": [
+    "heytommy"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "version": "1.0.0",
+  "categories": [
+    "News",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open Reader Mode",
+      "subtitle": "Reader Mode",
+      "description": "Open URL in reader mode",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://raycast.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-clipboard",
+      "title": "Open Clipboard in Reader Mode",
+      "subtitle": "Reader Mode",
+      "description": "Open URL from clipboard in reader mode",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-current-tab",
+      "title": "Open Current Tab in Reader Mode",
+      "subtitle": "Reader Mode",
+      "description": "Open current browser tab in reader mode",
+      "mode": "view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rewriteArticleTitles",
+      "title": "Rewrite Article Titles",
+      "description": "Generate concise, easy-to-read titles (requires Raycast AI).",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableAISummary",
+      "title": "Automatically Generate Summaries",
+      "description": "Automatically summarize articles (requires Raycast AI).",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "defaultSummaryStyle",
+      "title": "Default Summary Style",
+      "description": "Default style for summaries.",
+      "type": "dropdown",
+      "default": "overview",
+      "required": false,
+      "data": [
+        {
+          "title": "Overview",
+          "value": "overview"
+        },
+        {
+          "title": "At a Glance",
+          "value": "at-a-glance"
+        },
+        {
+          "title": "Comprehensive",
+          "value": "comprehensive"
+        },
+        {
+          "title": "Opposing Sides",
+          "value": "opposite-sides"
+        },
+        {
+          "title": "The 5 Ws",
+          "value": "five-ws"
+        },
+        {
+          "title": "Explain Like I'm 5",
+          "value": "eli5"
+        },
+        {
+          "title": "People, Places & Things",
+          "value": "entities"
+        }
+      ]
+    },
+    {
+      "name": "summaryOutputLanguage",
+      "title": "Summary Output Language",
+      "description": "Language for AI-generated summaries.",
+      "type": "dropdown",
+      "default": "en-US",
+      "required": false,
+      "data": [
+        {
+          "title": "🇺🇸 English",
+          "value": "en-US"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de-DE"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it-IT"
+        },
+        {
+          "title": "🇧🇷 Portuguese",
+          "value": "pt-BR"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja-JP"
+        },
+        {
+          "title": "🇨🇳 Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "🇹🇼 Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko-KR"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru-RU"
+        },
+        {
+          "title": "🇸🇦 Arabic",
+          "value": "ar-SA"
+        },
+        {
+          "title": "🇮🇳 Hindi",
+          "value": "hi-IN"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl-NL"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl-PL"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv-SE"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "tr-TR"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi-VN"
+        },
+        {
+          "title": "🇹🇭 Thai",
+          "value": "th-TH"
+        },
+        {
+          "title": "🇬🇷 Greek",
+          "value": "el-GR"
+        },
+        {
+          "title": "🇮🇱 Hebrew",
+          "value": "he-IL"
+        }
+      ]
+    },
+    {
+      "name": "showArticleImage",
+      "title": "Article Image",
+      "description": "Display the article's featured image at the top of the reader view.",
+      "type": "checkbox",
+      "label": "Show",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to save downloaded files. If not set, defaults to Downloads folder.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "enablePaywallHopper",
+      "title": "Paywall Hopper",
+      "description": "Try to retrieve paywalled or member-only content from archive services.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "skipPreCheck",
+      "title": "Skip Readability Pre-Check",
+      "description": "Skip the readability pre-check and always show reader mode.",
+      "type": "checkbox",
+      "label": "Skip",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "description": "Enable extra diagnostics for troubleshooting and bug reports.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.2.2",
+    "@mozilla/readability": "^0.6.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "linkedom": "^0.18.12",
+    "marked": "^17.0.1",
+    "turndown": "^7.2.2",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

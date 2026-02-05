@@ -731,6 +731,15 @@
       "type": "checkbox"
     },
     {
+      "description": "Skip confirmation dialogs when killing processes.",
+      "label": "Never Ask for Confirmation",
+      "name": "skipConfirmation",
+      "required": false,
+      "default": false,
+      "title": "Confirmation",
+      "type": "checkbox"
+    },
+    {
       "description": "Refresh duration in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
       "label": "Refresh Duration",
       "name": "refreshDuration",

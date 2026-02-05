@@ -2,9 +2,9 @@ Elevat your Mac workflow with the GIF Search extension. This extension searches 
 
 ## **Discover the Perfect GIF in Seconds**
 
-* **Multi-Source Search**: Effortlessly switch between Giphy.com, Tenor.com, and TheFinerGifs.club using the search bar dropdown.  
-* **Smart Keyword Recognition**: Find the ideal GIF for any situation, whether you're looking for a reaction, meme, or emoji\-style animation.  
-* **Mac\-Optimized Performance**: Lightning-fast results, perfect for power users who demand speed and efficiency.
+- **Multi-Source Search**: Effortlessly switch between Giphy.com, Tenor.com, Klipy.com, and TheFinerGifs.club using the search bar dropdown. Please note that Klipy.com requires you to generate an API key to use their service (free).
+- **Smart Keyword Recognition**: Find the ideal GIF for any situation, whether you're looking for a reaction, meme, or emoji\-style animation.
+- **Mac\-Optimized Performance**: Lightning-fast results, perfect for power users who demand speed and efficiency.
 
 ## **Customizable Actions for Every Workflow**
 
@@ -52,10 +52,10 @@ Whichever setting is chosen will be moved to the top of the list, making it the 
 
 Use descriptive keywords in the search bar. Combine terms like emotions, actions, or popular references for best results.
 
-### **How do I find out what a GIF is from?** 
+### **How do I find out what a GIF is from?**
 
 Select "View GIF Details" to access metadata, including source information when available.
 
-### **Can I use Google to search for GIFs?** 
+### **Can I use Google to search for GIFs?**
 
 While Google offers GIF search, Raycast's GIF Search provides a more streamlined experience directly within your Mac workflow.

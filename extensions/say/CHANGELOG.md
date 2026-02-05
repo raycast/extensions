@@ -1,5 +1,10 @@
 # Say - Text to Speech Changelog
 
+## [Maintenance] - 2026-02-04
+
+- Polish AI Extension configurations
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-12-17
 
 - Add AI Say Tool to say things out loud from AI Chat
