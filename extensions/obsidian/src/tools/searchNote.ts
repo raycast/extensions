@@ -5,8 +5,19 @@ import { Note, Obsidian, ObsidianVault } from "@/obsidian";
 import { getNotesWithCache } from "../utils/hooks";
 
 type Input = {
+  /**
+   * The search term for the note to find
+   */
   searchTerm: string;
+  /**
+   * If the user provides a vault name or hints towards one, ALWAYS use it here.
+   */
   vaultName?: string;
+  /**
+   * Whether to search inside note content and enable tag filtering.
+   * Set to false for faster title/path-only search.
+   * Defaults to true.
+   */
   searchContent?: boolean;
 };
 
