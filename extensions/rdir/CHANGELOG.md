@@ -1,5 +1,5 @@
 # Rdir Changelog
 
-## [Added Rdir] - {PR_MERGE_DATE}
+## [Added Rdir] - 2026-02-05
 
 Initial version
