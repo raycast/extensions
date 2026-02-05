@@ -1,3 +1,5 @@
+export type ViewType = "list" | "list-detailed" | "grid";
+
 export type AnimeData = {
   mal_id: number;
   url: string;
