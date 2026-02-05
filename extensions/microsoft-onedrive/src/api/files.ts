@@ -40,7 +40,6 @@ async function collectFilesRecursively(dirPath: string, basePath: string = ""): 
   const entries = await fs.readdir(dirPath, { withFileTypes: true });
 
   if (entries.length === 0 && basePath) {
-    // This is an empty folder
     emptyFolders.push(basePath);
   }
 
@@ -98,7 +97,6 @@ async function ensureFolderPathExists(
 ): Promise<string> {
   if (!folderPath) return rootFolderId;
 
-  // Check cache first
   const cacheKey = `${rootFolderId}/${folderPath}`;
   if (folderCache.has(cacheKey)) {
     return folderCache.get(cacheKey)!;
@@ -575,8 +573,7 @@ export async function uploadFiles(
   });
 
   try {
-    // Collect all files and empty folders, expanding directories recursively
-    // Also track root-level items (files and folders being uploaded directly)
+    // Collect files and empty folders, expanding directories recursively
     const filesToUpload: FileToUpload[] = [];
     const emptyFoldersToCreate: string[] = [];
     const rootItems: { name: string; isDirectory: boolean }[] = [];
@@ -586,20 +583,15 @@ export async function uploadFiles(
       const itemName = path.basename(selectedPath);
 
       if (stats.isDirectory()) {
-        // Track the directory as a root item for conflict checking
         rootItems.push({ name: itemName, isDirectory: true });
-        // For directories, collect all files with paths relative to the directory name
         const collected = await collectFilesRecursively(selectedPath, itemName);
         filesToUpload.push(...collected.files);
         emptyFoldersToCreate.push(...collected.emptyFolders);
-        // If the directory itself is empty (no files and no subfolders), add it
         if (collected.files.length === 0 && collected.emptyFolders.length === 0) {
           emptyFoldersToCreate.push(itemName);
         }
       } else {
-        // Track the file as a root item
         rootItems.push({ name: itemName, isDirectory: false });
-        // For regular files, no relative path needed
         filesToUpload.push({ absolutePath: selectedPath, relativePath: "" });
       }
     }
@@ -622,7 +614,7 @@ export async function uploadFiles(
           : `${totalFiles} files`
         : `${totalEmptyFolders} empty folder${totalEmptyFolders !== 1 ? "s" : ""}`;
 
-    // Check for conflicts at the root level (folders and direct files)
+    // Check for conflicts
     const drivePrefix = getDrivePrefix(driveId);
     const folderCache = new Map<string, string>();
     const conflictingItems: { name: string; isDirectory: boolean }[] = [];
@@ -641,19 +633,16 @@ export async function uploadFiles(
         return false;
       }
 
-      // For conflicting folders, create them now with rename behavior
-      // and update file paths with the actual name assigned by the API
+      // Create conflicting folders with rename behavior and update paths
+      // (files are renamed during upload with conflictBehavior=rename)
       for (const item of conflictingItems) {
         if (item.isDirectory) {
           const folder = await ensureFolderExists(drivePrefix, destinationFolder.id, item.name, "rename");
-          folderCache.set(`${destinationFolder.id}/${item.name}`, folder.id);
-          // If API renamed the folder, update all paths
           if (folder.name !== item.name) {
             renamePaths(item.name, folder.name, filesToUpload, emptyFoldersToCreate);
-            folderCache.set(`${destinationFolder.id}/${folder.name}`, folder.id);
           }
+          folderCache.set(`${destinationFolder.id}/${folder.name}`, folder.id);
         }
-        // For files, API will handle renaming during upload with conflictBehavior=rename
       }
     }
 
