@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Add Klipy support] - {PR_MERGE_DATE}
+## [Add Klipy support] - 2026-02-05
 
 - Add Klipy support
 
