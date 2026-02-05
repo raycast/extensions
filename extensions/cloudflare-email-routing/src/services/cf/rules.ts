@@ -94,7 +94,7 @@ export async function getUnusedRules(): Promise<AliasRule[]> {
   const allRules = await getAllRules();
   const appRules = allRules.filter((r) => r.name?.startsWith(APP_RULE_PREFIX) && !parseRuleName(r.name).label);
   const result = appRules.map((r) => convertRuleToAlias(r));
-  result.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  result.sort((a, b) => (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0));
   return result;
 }
 
