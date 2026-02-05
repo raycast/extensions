@@ -1,4 +1,4 @@
+const { defineConfig } = require("eslint/config");
 const raycastConfig = require("@raycast/eslint-config");
 
-// Flatten nested arrays from the config
-module.exports = raycastConfig.flat(Infinity);
+module.exports = defineConfig(raycastConfig.flat(Infinity));
