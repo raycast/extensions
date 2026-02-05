@@ -299,6 +299,22 @@
       "mode": "view"
     },
     {
+      "name": "copilot-usage",
+      "title": "Copilot Usage",
+      "description": "Check GitHub Copilot usage and quota",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copilotUserSession",
+          "type": "password",
+          "required": true,
+          "title": "User Session Cookie",
+          "description": "The user session cookie from github.com, you can get it from the browser's developer tools (Application → Cookies → user_session)",
+          "placeholder": "Paste your user session cookie here"
+        }
+      ]
+    },
+    {
       "name": "my-issues-menu",
       "title": "My Issues Menu Bar",
       "description": "Display My Issues in the Menu Bar",

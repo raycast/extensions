@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Add Copilot Usage Command] - {PR_MERGE_DATE}
+
+- Copilot Usage: Added a new command to view Copilot usage
+
 ## [Add Pagination Support to My Starred Repositories] - 2026-01-24
 
 - My Starred Repositories: Migrated from REST API to GraphQL API for better pagination support
