@@ -1,6 +1,6 @@
 # Withings Sync Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-05
 
 - Added configurable lookback days preference (default: 7 days)
 - Added Smart Sync to automatically find last Garmin entry and sync only newer measurements
