@@ -166,7 +166,7 @@ export function FileActionsPanel({
       <ActionPanel.Section>
         {upload && (
           <Action.Push
-            title="Upload to Current Folder…"
+            title="Upload to Current Directory"
             icon={Icon.Upload}
             shortcut={{
               macOS: { modifiers: ["shift", "cmd"], key: "u" },
@@ -239,7 +239,7 @@ export function EmptyFolderActionsPanel({
 
       {currentDrive && (
         <Action.Push
-          title="Upload to Current Folder…"
+          title="Upload to Current Directory"
           icon={Icon.Upload}
           shortcut={{
             macOS: { modifiers: ["shift", "cmd"], key: "u" },

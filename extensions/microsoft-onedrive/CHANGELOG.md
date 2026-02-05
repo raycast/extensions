@@ -1,5 +1,16 @@
 # Microsoft OneDrive Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+### Added
+
+- The **Upload to Current Directory** action now supports uploading entire directories, preserving the folder structure.
+- Added conflict detection when uploading items that already exist in the destination, with options to **Keep Both** or **Stop**.
+
+### Changed
+
+- Renamed **Upload to Current Folder** action to **Upload to Current Directory** to improve terminology consistency.
+
 ## [Improvement] - 2026-02-04
 
 ### Changed
