@@ -1,6 +1,6 @@
 # Port.io Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-05
 
 - Add Browse Dashboards command to view and open Port dashboards and pages
 - Add Run Self Service Action command to browse and execute Port self-service actions
