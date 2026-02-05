@@ -21,10 +21,34 @@ export interface TimelineViewProps {
   onSetBaseISO: (iso: string) => void;
   onToggleView: () => void;
   onClearBase: () => Promise<void>;
+  scrubMinutes: number;
+  optionScrubMinutes: number;
 }
 
 export function TimelineView(props: TimelineViewProps) {
-  const { baseISO, baseCityId, selectedZoneIds, onShiftMinutes, onSetBaseISO, onToggleView, onClearBase } = props;
+  const {
+    baseISO,
+    baseCityId,
+    selectedZoneIds,
+    onShiftMinutes,
+    onSetBaseISO,
+    onToggleView,
+    onClearBase,
+    scrubMinutes,
+    optionScrubMinutes,
+  } = props;
+
+  function formatScrubTitle(minutes: number): string {
+    const sign = minutes >= 0 ? "+" : "-";
+    const abs = Math.abs(minutes);
+    if (abs === 60) return `${sign}1 Hour`;
+    return `${sign}${abs} Minutes`;
+  }
+
+  function formatScrubLabel(minutes: number): string {
+    if (minutes === 60) return "1hr";
+    return `${minutes}min`;
+  }
 
   const baseZoneId = baseCityId ? getTimezone(baseCityId) : Intl.DateTimeFormat().resolvedOptions().timeZone;
   const baseTime = useMemo(() => DateTime.fromISO(baseISO).setZone(baseZoneId), [baseISO, baseZoneId]);
@@ -74,7 +98,10 @@ export function TimelineView(props: TimelineViewProps) {
             />
           ))}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="← →  |  ⌥← →  |  ⌘N" text="±1hr  ±30min  Reset" />
+          <Detail.Metadata.Label
+            title="← →  |  ⌥← →  |  ⌘N"
+            text={`±${formatScrubLabel(scrubMinutes)}  ±${formatScrubLabel(optionScrubMinutes)}  Reset`}
+          />
         </Detail.Metadata>
       }
       actions={
@@ -93,27 +120,27 @@ export function TimelineView(props: TimelineViewProps) {
           />
           <ActionPanel.Section title="Scrub Time">
             <Action
-              title="-1 Hour"
+              title={formatScrubTitle(-scrubMinutes)}
               icon={Icon.ArrowLeft}
-              onAction={() => onShiftMinutes(-60)}
+              onAction={() => onShiftMinutes(-scrubMinutes)}
               shortcut={{ modifiers: [], key: "arrowLeft" }}
             />
             <Action
-              title="+1 Hour"
+              title={formatScrubTitle(scrubMinutes)}
               icon={Icon.ArrowRight}
-              onAction={() => onShiftMinutes(60)}
+              onAction={() => onShiftMinutes(scrubMinutes)}
               shortcut={{ modifiers: [], key: "arrowRight" }}
             />
             <Action
-              title="-30 Minutes"
+              title={formatScrubTitle(-optionScrubMinutes)}
               icon={Icon.ArrowLeftCircle}
-              onAction={() => onShiftMinutes(-30)}
+              onAction={() => onShiftMinutes(-optionScrubMinutes)}
               shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
             />
             <Action
-              title="+30 Minutes"
+              title={formatScrubTitle(optionScrubMinutes)}
               icon={Icon.ArrowRightCircle}
-              onAction={() => onShiftMinutes(30)}
+              onAction={() => onShiftMinutes(optionScrubMinutes)}
               shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
             />
           </ActionPanel.Section>
@@ -129,7 +156,7 @@ export function TimelineView(props: TimelineViewProps) {
           )}
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Base ISO"
+              title="Copy Base Iso"
               content={baseTime.toISO() ?? ""}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
