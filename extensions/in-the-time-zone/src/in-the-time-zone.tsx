@@ -1,4 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, LocalStorage } from "@raycast/api";
+
+interface Preferences {
+  defaultScrubMinutes: string;
+  optionScrubMinutes: string;
+}
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import { searchCities } from "./citySearch";
@@ -22,6 +27,10 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "timeline">("timeline");
   const [searchText, setSearchText] = useState("");
+
+  const preferences = getPreferenceValues<Preferences>();
+  const scrubMinutes = parseInt(preferences.defaultScrubMinutes, 10) || 60;
+  const optionScrubMinutes = parseInt(preferences.optionScrubMinutes, 10) || 30;
 
   useEffect(() => {
     const load = async () => {
@@ -133,6 +142,13 @@ export default function Command() {
     setBaseISO((prev) => DateTime.fromISO(prev).plus({ minutes: delta }).toISO() || prev);
   }
 
+  function formatScrubTitle(minutes: number): string {
+    const sign = minutes >= 0 ? "+" : "-";
+    const abs = Math.abs(minutes);
+    if (abs === 60) return `${sign}1 Hour`;
+    return `${sign}${abs} Minutes`;
+  }
+
   // Render Timeline View when selected
   if (viewMode === "timeline") {
     return (
@@ -144,6 +160,8 @@ export default function Command() {
         onSetBaseISO={setBaseISO}
         onToggleView={() => setViewMode("list")}
         onClearBase={clearBase}
+        scrubMinutes={scrubMinutes}
+        optionScrubMinutes={optionScrubMinutes}
       />
     );
   }
@@ -213,29 +231,29 @@ export default function Command() {
                 )}
                 <ActionPanel.Section title="Scrub Time">
                   <Action
-                    title="-1 Hour"
-                    onAction={() => shiftMinutes(-60)}
+                    title={formatScrubTitle(-scrubMinutes)}
+                    onAction={() => shiftMinutes(-scrubMinutes)}
                     shortcut={{ modifiers: [], key: "arrowLeft" }}
                   />
                   <Action
-                    title="+1 Hour"
-                    onAction={() => shiftMinutes(60)}
+                    title={formatScrubTitle(scrubMinutes)}
+                    onAction={() => shiftMinutes(scrubMinutes)}
                     shortcut={{ modifiers: [], key: "arrowRight" }}
                   />
                   <Action
-                    title="-30 Minutes"
-                    onAction={() => shiftMinutes(-30)}
+                    title={formatScrubTitle(-optionScrubMinutes)}
+                    onAction={() => shiftMinutes(-optionScrubMinutes)}
                     shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
                   />
                   <Action
-                    title="+30 Minutes"
-                    onAction={() => shiftMinutes(30)}
+                    title={formatScrubTitle(optionScrubMinutes)}
+                    onAction={() => shiftMinutes(optionScrubMinutes)}
                     shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
-                    title="Copy Base ISO"
+                    title="Copy Base Iso"
                     content={base.toISO() ?? ""}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
@@ -281,23 +299,23 @@ export default function Command() {
                     />
                     <ActionPanel.Section title="Scrub Time">
                       <Action
-                        title="-1 Hour"
-                        onAction={() => shiftMinutes(-60)}
+                        title={formatScrubTitle(-scrubMinutes)}
+                        onAction={() => shiftMinutes(-scrubMinutes)}
                         shortcut={{ modifiers: [], key: "arrowLeft" }}
                       />
                       <Action
-                        title="+1 Hour"
-                        onAction={() => shiftMinutes(60)}
+                        title={formatScrubTitle(scrubMinutes)}
+                        onAction={() => shiftMinutes(scrubMinutes)}
                         shortcut={{ modifiers: [], key: "arrowRight" }}
                       />
                       <Action
-                        title="-30 Minutes"
-                        onAction={() => shiftMinutes(-30)}
+                        title={formatScrubTitle(-optionScrubMinutes)}
+                        onAction={() => shiftMinutes(-optionScrubMinutes)}
                         shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
                       />
                       <Action
-                        title="+30 Minutes"
-                        onAction={() => shiftMinutes(30)}
+                        title={formatScrubTitle(optionScrubMinutes)}
+                        onAction={() => shiftMinutes(optionScrubMinutes)}
                         shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
                       />
                     </ActionPanel.Section>
