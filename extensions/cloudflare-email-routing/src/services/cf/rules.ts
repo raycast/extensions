@@ -142,7 +142,7 @@ export async function createRule(
   return convertRuleToAlias(data.result);
 }
 
-export async function updateRule(id: string, label: string, description?: string, email?: string): Promise<void> {
+export async function updateRule(id: string, label: string, description?: string, email?: string): Promise<AliasRule> {
   const config = getApiConfig();
 
   // Get the current rule to preserve email
@@ -195,6 +195,8 @@ export async function updateRule(id: string, label: string, description?: string
       `Failed to update rule: ${updateData.errors?.map((e: { message: string }) => e.message).join(", ") || "Unknown error"}`
     );
   }
+
+  return convertRuleToAlias(updateData.result);
 }
 
 export async function deleteRule(id: string): Promise<void> {

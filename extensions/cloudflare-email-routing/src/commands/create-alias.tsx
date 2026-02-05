@@ -131,7 +131,8 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
 
           if (unusedRules.length > 0) {
             const ruleToUse = unusedRules[0];
-            await updateRule(ruleToUse.id, values.label, values.description, normalizedAlias);
+            const updatedRule = await updateRule(ruleToUse.id, values.label, values.description, normalizedAlias);
+            createdEmail = updatedRule.email;
           } else {
             showToast({
               style: Toast.Style.Animated,
@@ -235,17 +236,17 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
       if (unusedRules.length > 0) {
         const ruleToUse = unusedRules[0];
         const quickLabel = config.defaultLabel || "Quick Alias";
-        await updateRule(ruleToUse.id, quickLabel, "Created using random unused alias");
+        const updatedRule = await updateRule(ruleToUse.id, quickLabel, "Created using random unused alias");
 
-        await Clipboard.copy(ruleToUse.email);
+        await Clipboard.copy(updatedRule.email);
         showToast({
           style: Toast.Style.Success,
           title: "Alias Created",
-          message: `Copied ${ruleToUse.email} to clipboard`,
+          message: `Copied ${updatedRule.email} to clipboard`,
           primaryAction: {
             title: "Copy Email",
             onAction: () => {
-              Clipboard.copy(ruleToUse.email);
+              Clipboard.copy(updatedRule.email);
             },
           },
         });
