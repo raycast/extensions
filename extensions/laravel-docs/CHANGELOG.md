@@ -1,6 +1,6 @@
 # Laravel Documentation Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-05
 
 - Added support for Windows
 
