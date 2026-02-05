@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getEntityUrl, searchEntities } from "./api/port-client";
@@ -79,11 +71,7 @@ export default function SearchEntities() {
           description={error.message}
           actions={
             <ActionPanel>
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -119,17 +107,12 @@ export default function SearchEntities() {
             subtitle={entity.identifier}
             accessories={[
               { tag: formatBlueprint(entity.blueprint) },
-              ...(entity.team && entity.team.length > 0
-                ? [{ icon: Icon.TwoPeople, text: entity.team[0] }]
-                : []),
+              ...(entity.team && entity.team.length > 0 ? [{ icon: Icon.TwoPeople, text: entity.team[0] }] : []),
             ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    title="Open in Port"
-                    url={getEntityUrl(entity)}
-                  />
+                  <Action.OpenInBrowser title="Open in Port" url={getEntityUrl(entity)} />
                   <Action.CopyToClipboard
                     title="Copy URL"
                     content={getEntityUrl(entity)}

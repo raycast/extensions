@@ -33,9 +33,7 @@ ${
   response.references && response.references.length > 0
     ? `
 ## References
-${response.references
-  .map((ref) => (ref.url ? `- [${ref.title}](${ref.url})` : `- ${ref.title}`))
-  .join("\n")}
+${response.references.map((ref) => (ref.url ? `- [${ref.title}](${ref.url})` : `- ${ref.title}`)).join("\n")}
 `
     : ""
 }
@@ -47,11 +45,7 @@ ${response.references
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action
-              title="Ask Another Question"
-              icon={Icon.Message}
-              onAction={onAskAnother}
-            />
+            <Action title="Ask Another Question" icon={Icon.Message} onAction={onAskAnother} />
             <Action.CopyToClipboard
               title="Copy Answer"
               content={response.answer}
@@ -115,11 +109,7 @@ export default function AskPortAI() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Ask Port AI"
-            icon={Icon.Message}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Ask Port AI" icon={Icon.Message} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

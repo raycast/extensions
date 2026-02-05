@@ -29,12 +29,12 @@ This extension requires Port API credentials to authenticate with your Port orga
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| Browse Dashboards | List and open Port dashboards and catalog pages |
-| Run Self-service Action | Browse and execute self-service actions |
-| Search Entities | Search your software catalog by name or identifier |
-| Ask Port AI | Ask questions and get AI-powered answers |
+| Command                 | Description                                        |
+| ----------------------- | -------------------------------------------------- |
+| Browse Dashboards       | List and open Port dashboards and catalog pages    |
+| Run Self-service Action | Browse and execute self-service actions            |
+| Search Entities         | Search your software catalog by name or identifier |
+| Ask Port AI             | Ask questions and get AI-powered answers           |
 
 ## Links
 

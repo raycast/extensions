@@ -5,7 +5,10 @@
   "description": "Access Port.io dashboards, run self-service actions, and ask Port AI questions",
   "icon": "extension-icon.png",
   "author": "etay_alony",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -58,16 +61,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.87.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.10.2",
-    "@types/react": "18.3.18",
-    "eslint": "^8.57.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.0",
+    "@types/react": "19.2.11",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist -o dist",

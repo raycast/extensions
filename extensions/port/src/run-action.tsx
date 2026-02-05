@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getActions, getActionUrl, PortAction } from "./api/port-client";
 
@@ -34,10 +26,7 @@ export default function RunActionCommand() {
       const allActions = await getActions();
       // Filter to self-service actions and sort by title
       return allActions
-        .filter(
-          (action) =>
-            action.trigger.type === "self-service" || !action.trigger.type,
-        )
+        .filter((action) => action.trigger.type === "self-service" || !action.trigger.type)
         .sort((a, b) => a.title.localeCompare(b.title));
     },
     [],
@@ -62,16 +51,8 @@ export default function RunActionCommand() {
           description={error.message}
           actions={
             <ActionPanel>
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
-              <Action
-                title="Retry"
-                icon={Icon.RotateClockwise}
-                onAction={() => revalidate()}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Retry" icon={Icon.RotateClockwise} onAction={() => revalidate()} />
             </ActionPanel>
           }
         />
@@ -87,17 +68,11 @@ export default function RunActionCommand() {
           icon={Icon.Play}
           title={action.title}
           subtitle={action.description}
-          accessories={[
-            { text: action.blueprint || "" },
-            { text: getTriggerTypeLabel(action) },
-          ]}
+          accessories={[{ text: action.blueprint || "" }, { text: getTriggerTypeLabel(action) }]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.OpenInBrowser
-                  title="Open in Port"
-                  url={getActionUrl(action)}
-                />
+                <Action.OpenInBrowser title="Open in Port" url={getActionUrl(action)} />
                 <Action.CopyToClipboard
                   title="Copy URL"
                   content={getActionUrl(action)}

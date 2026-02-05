@@ -114,10 +114,7 @@ async function getAccessToken(): Promise<string> {
   return cachedToken;
 }
 
-async function fetchWithAuth(
-  endpoint: string,
-  options: RequestInit = {},
-): Promise<Response> {
+async function fetchWithAuth(endpoint: string, options: RequestInit = {}): Promise<Response> {
   const token = await getAccessToken();
   const baseUrl = getBaseUrl();
 
@@ -272,18 +269,14 @@ export async function askPortAI(question: string): Promise<PortAIResponse> {
 
 export function getPortUrl(page: PortPage): string {
   const { baseUrl } = getPortPreferences();
-  const appUrl = baseUrl
-    ? baseUrl.replace("api.", "app.").replace("/v1", "")
-    : "https://app.getport.io";
+  const appUrl = baseUrl ? baseUrl.replace("api.", "app.").replace("/v1", "") : "https://app.getport.io";
 
   return `${appUrl}/${page.identifier}`;
 }
 
 export function getActionUrl(action: PortAction): string {
   const { baseUrl } = getPortPreferences();
-  const appUrl = baseUrl
-    ? baseUrl.replace("api.", "app.").replace("/v1", "")
-    : "https://app.getport.io";
+  const appUrl = baseUrl ? baseUrl.replace("api.", "app.").replace("/v1", "") : "https://app.getport.io";
 
   return `${appUrl}/self-serve?action=${action.identifier}`;
 }
@@ -326,9 +319,7 @@ export async function searchEntities(query: string): Promise<PortEntity[]> {
 
 export function getEntityUrl(entity: PortEntity): string {
   const { baseUrl } = getPortPreferences();
-  const appUrl = baseUrl
-    ? baseUrl.replace("api.", "app.").replace("/v1", "")
-    : "https://app.getport.io";
+  const appUrl = baseUrl ? baseUrl.replace("api.", "app.").replace("/v1", "") : "https://app.getport.io";
 
   return `${appUrl}/${entity.blueprint}Entity?identifier=${encodeURIComponent(entity.identifier)}`;
 }

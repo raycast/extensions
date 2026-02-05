@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getPages, getPortUrl, PortPage } from "./api/port-client";
@@ -73,9 +64,7 @@ export default function BrowseDashboards() {
     async () => {
       const allPages = await getPages();
       // Sort by title
-      return allPages.sort((a, b) =>
-        (a.title || a.identifier).localeCompare(b.title || b.identifier),
-      );
+      return allPages.sort((a, b) => (a.title || a.identifier).localeCompare(b.title || b.identifier));
     },
     [],
     {
@@ -92,16 +81,12 @@ export default function BrowseDashboards() {
 
   // Filter out pages that don't work as standalone dashboards
   const excludedTypes = ["entity", "user", "team", "run"];
-  const validPages = pages?.filter(
-    (page) =>
-      !excludedTypes.includes(page.type) && !page.identifier.startsWith("$"),
-  );
+  const validPages = pages?.filter((page) => !excludedTypes.includes(page.type) && !page.identifier.startsWith("$"));
 
   const filteredPages = validPages?.filter((page) => {
     if (filter === "all") return true;
     if (filter === "dashboard") return page.type === "dashboard";
-    if (filter === "blueprint-entities")
-      return page.type === "blueprint-entities";
+    if (filter === "blueprint-entities") return page.type === "blueprint-entities";
     return true;
   });
 
@@ -114,16 +99,8 @@ export default function BrowseDashboards() {
           description={error.message}
           actions={
             <ActionPanel>
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
-              <Action
-                title="Retry"
-                icon={Icon.RotateClockwise}
-                onAction={() => revalidate()}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Retry" icon={Icon.RotateClockwise} onAction={() => revalidate()} />
             </ActionPanel>
           }
         />
@@ -136,11 +113,7 @@ export default function BrowseDashboards() {
       isLoading={isLoading}
       searchBarPlaceholder="Search dashboards and pages..."
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by type"
-          value={filter}
-          onChange={(value) => setFilter(value as PageFilter)}
-        >
+        <List.Dropdown tooltip="Filter by type" value={filter} onChange={(value) => setFilter(value as PageFilter)}>
           <List.Dropdown.Item title="All Pages" value="all" />
           <List.Dropdown.Item title="Dashboards" value="dashboard" />
           <List.Dropdown.Item title="Catalogs" value="blueprint-entities" />
@@ -154,18 +127,13 @@ export default function BrowseDashboards() {
           title={getDisplayTitle(page)}
           subtitle={page.identifier}
           accessories={[
-            ...(isDynamicPage(page)
-              ? [{ tag: { value: "Dynamic", color: Color.Orange } }]
-              : []),
+            ...(isDynamicPage(page) ? [{ tag: { value: "Dynamic", color: Color.Orange } }] : []),
             { text: getPageTypeLabel(page.type) },
           ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.OpenInBrowser
-                  title="Open in Port"
-                  url={getPortUrl(page)}
-                />
+                <Action.OpenInBrowser title="Open in Port" url={getPortUrl(page)} />
                 <Action.CopyToClipboard
                   title="Copy URL"
                   content={getPortUrl(page)}
