@@ -1,6 +1,6 @@
 # Myanimelist search Changelog
 
-## [New Addition and views] - {PR_MERGE_DATE}
+## [New Addition and views] - 2026-02-05
 
 - Added a new AnimeDetail component with comprehensive anime information (broadcast schedule, source, studios, premiere date, duration, etc.)
 - Extended the API schema to support new fields (broadcast, source, typed studios array)
