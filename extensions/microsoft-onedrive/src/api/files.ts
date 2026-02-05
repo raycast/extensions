@@ -696,8 +696,10 @@ export async function uploadFiles(
           headers: { "Content-Type": "application/octet-stream" },
         });
         uploadedBytes += fileSize;
-        const progress = Math.round((uploadedBytes / totalBytes) * 100);
-        toast.message = `${progress}% complete`;
+        if (totalBytes > 0) {
+          const progress = Math.round((uploadedBytes / totalBytes) * 100);
+          toast.message = `${progress}% complete`;
+        }
       } else {
         // Resumable upload for large files
         const sessionEndpoint = `${drivePrefix}${itemPath}:/${encodeURIComponent(fileName)}:/createUploadSession`;
@@ -718,8 +720,10 @@ export async function uploadFiles(
             body: chunk,
           });
           uploadedBytes += chunk.length;
-          const progress = Math.round((uploadedBytes / totalBytes) * 100);
-          toast.message = `${progress}% complete`;
+          if (totalBytes > 0) {
+            const progress = Math.round((uploadedBytes / totalBytes) * 100);
+            toast.message = `${progress}% complete`;
+          }
         }
       }
     }
