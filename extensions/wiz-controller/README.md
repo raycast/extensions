@@ -1,6 +1,6 @@
 # Wiz Controller
 
-Control your Wiz lights directly from Raycast.
+Control your Wiz lights directly from Raycast
 
 ## Setup
 
