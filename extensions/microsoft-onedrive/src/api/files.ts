@@ -12,7 +12,11 @@ const CHUNK_SIZE = 327680; // 320KB chunks for resumable upload
 interface FileToUpload {
   absolutePath: string;
   relativePath: string; // relative to the selected item (empty for direct files)
-  renamedTo?: string; // alternative name for conflict resolution
+}
+
+interface FolderInfo {
+  id: string;
+  name: string;
 }
 
 interface CollectedItems {
@@ -50,9 +54,14 @@ async function collectFilesRecursively(dirPath: string, basePath: string = ""): 
 }
 
 /**
- * Create a folder in OneDrive if it doesn't exist
+ * Create a folder in OneDrive, optionally renaming if it already exists
  */
-async function ensureFolderExists(drivePrefix: string, parentFolderId: string, folderName: string): Promise<string> {
+async function ensureFolderExists(
+  drivePrefix: string,
+  parentFolderId: string,
+  folderName: string,
+  conflictBehavior: "replace" | "rename" = "replace",
+): Promise<FolderInfo> {
   const parentPath = parentFolderId === "root" ? "/root" : `/items/${parentFolderId}`;
   const endpoint = `${drivePrefix}${parentPath}/children`;
 
@@ -61,12 +70,12 @@ async function ensureFolderExists(drivePrefix: string, parentFolderId: string, f
     body: JSON.stringify({
       name: folderName,
       folder: {},
-      "@microsoft.graph.conflictBehavior": "replace",
+      "@microsoft.graph.conflictBehavior": conflictBehavior,
     }),
   });
 
   const folder = (await response.json()) as DriveItem;
-  return folder.id;
+  return { id: folder.id, name: folder.name };
 }
 
 /**
@@ -98,7 +107,8 @@ async function ensureFolderPathExists(
     if (folderCache.has(partCacheKey)) {
       currentFolderId = folderCache.get(partCacheKey)!;
     } else {
-      currentFolderId = await ensureFolderExists(drivePrefix, currentFolderId, part);
+      const folder = await ensureFolderExists(drivePrefix, currentFolderId, part);
+      currentFolderId = folder.id;
       folderCache.set(partCacheKey, currentFolderId);
     }
   }
@@ -125,25 +135,6 @@ async function itemExistsInFolder(drivePrefix: string, folderId: string, itemNam
   } catch {
     return false;
   }
-}
-
-/**
- * Find a unique name for an item by appending a number suffix
- * e.g., "Documents" -> "Documents 1", "sample.pdf" -> "sample 1.pdf"
- */
-async function findUniqueName(drivePrefix: string, folderId: string, originalName: string): Promise<string> {
-  const ext = path.extname(originalName);
-  const baseName = ext ? originalName.slice(0, -ext.length) : originalName;
-
-  let counter = 1;
-  let newName = ext ? `${baseName} ${counter}${ext}` : `${baseName} ${counter}`;
-
-  while (await itemExistsInFolder(drivePrefix, folderId, newName)) {
-    counter++;
-    newName = ext ? `${baseName} ${counter}${ext}` : `${baseName} ${counter}`;
-  }
-
-  return newName;
 }
 
 /**
@@ -625,6 +616,7 @@ export async function uploadFiles(
 
     // Check for conflicts at the root level (folders and direct files)
     const drivePrefix = getDrivePrefix(driveId);
+    const folderCache = new Map<string, string>();
     const conflictingItems: { name: string; isDirectory: boolean }[] = [];
 
     for (const item of rootItems) {
@@ -641,20 +633,19 @@ export async function uploadFiles(
         return false;
       }
 
-      // Rename conflicting items to unique names
+      // For conflicting folders, create them now with rename behavior
+      // and update file paths with the actual name assigned by the API
       for (const item of conflictingItems) {
-        const newName = await findUniqueName(drivePrefix, destinationFolder.id, item.name);
-
         if (item.isDirectory) {
-          renamePaths(item.name, newName, filesToUpload, emptyFoldersToCreate);
-        } else {
-          // For direct files, store the new name
-          for (const file of filesToUpload) {
-            if (!file.relativePath && path.basename(file.absolutePath) === item.name) {
-              file.renamedTo = newName;
-            }
+          const folder = await ensureFolderExists(drivePrefix, destinationFolder.id, item.name, "rename");
+          folderCache.set(`${destinationFolder.id}/${item.name}`, folder.id);
+          // If API renamed the folder, update all paths
+          if (folder.name !== item.name) {
+            renamePaths(item.name, folder.name, filesToUpload, emptyFoldersToCreate);
+            folderCache.set(`${destinationFolder.id}/${folder.name}`, folder.id);
           }
         }
+        // For files, API will handle renaming during upload with conflictBehavior=rename
       }
     }
 
@@ -671,12 +662,9 @@ export async function uploadFiles(
     const totalBytes = fileSizes.reduce((sum, size) => sum + size, 0);
     let uploadedBytes = 0;
 
-    const folderCache = new Map<string, string>();
-
     for (let fileIndex = 0; fileIndex < filesToUpload.length; fileIndex++) {
       const file = filesToUpload[fileIndex];
-      // Use renamed name if available (for conflicting direct files)
-      const fileName = file.renamedTo || path.basename(file.absolutePath);
+      const fileName = path.basename(file.absolutePath);
 
       // Determine the target folder - create subfolders if needed
       let targetFolderId = destinationFolder.id;
