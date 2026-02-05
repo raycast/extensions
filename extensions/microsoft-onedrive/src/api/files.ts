@@ -25,6 +25,13 @@ interface CollectedItems {
 }
 
 /**
+ * Convert path to use forward slashes (required by Graph API)
+ */
+function toApiPath(p: string): string {
+  return p.replace(/\\\\/g, "/");
+}
+
+/**
  * Recursively collect all files and empty folders from a directory
  */
 async function collectFilesRecursively(dirPath: string, basePath: string = ""): Promise<CollectedItems> {
@@ -39,7 +46,8 @@ async function collectFilesRecursively(dirPath: string, basePath: string = ""): 
 
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
-    const relativePath = basePath ? path.join(basePath, entry.name) : entry.name;
+    // Use forward slashes for Graph API compatibility (path.join uses \\ on Windows)
+    const relativePath = basePath ? toApiPath(path.join(basePath, entry.name)) : entry.name;
 
     if (entry.isDirectory()) {
       const subItems = await collectFilesRecursively(fullPath, relativePath);
@@ -96,12 +104,12 @@ async function ensureFolderPathExists(
     return folderCache.get(cacheKey)!;
   }
 
-  const parts = folderPath.split(path.sep);
+  const parts = folderPath.split("/");
   let currentFolderId = rootFolderId;
   let currentPath = "";
 
   for (const part of parts) {
-    currentPath = currentPath ? path.join(currentPath, part) : part;
+    currentPath = currentPath ? `${currentPath}/${part}` : part;
     const partCacheKey = `${rootFolderId}/${currentPath}`;
 
     if (folderCache.has(partCacheKey)) {
@@ -141,7 +149,7 @@ async function itemExistsInFolder(drivePrefix: string, folderId: string, itemNam
  * Rename paths that start with oldName to use newName instead
  */
 function renamePaths(oldName: string, newName: string, files: FileToUpload[], folders: string[]): void {
-  const prefix = oldName + path.sep;
+  const prefix = oldName + "/";
   for (const file of files) {
     if (file.relativePath.startsWith(prefix) || file.relativePath === oldName) {
       file.relativePath = file.relativePath.replace(oldName, newName);
