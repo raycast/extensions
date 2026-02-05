@@ -2,6 +2,8 @@
 
 Manage and monitor your Google Jules sessions directly from Raycast.
 
+[![Built with Jules](https://img.shields.io/badge/Built%20with-Jules-715cd7)](https://jules.google)
+
 ## Features
 
 - **Launch & Manage**: Start new Google Jules sessions from anywhere and manage them in a unified view.

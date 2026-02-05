@@ -504,7 +504,7 @@ function SessionDetail(props: { session: Session }) {
           <List.Item.Detail.Metadata.Label title="State" text={formatSessionState(session.state)} />
           <List.Item.Detail.Metadata.Separator />
           {prUrl && <List.Item.Detail.Metadata.Link title="Pull Request" text={prUrl} target={prUrl} />}
-          <List.Item.Detail.Metadata.Label title="Repository" text={formatRepoName(session.sourceContext.source)} />
+          <List.Item.Detail.Metadata.Label title="Repository" text={formatRepoName(session.sourceContext?.source)} />
         </List.Item.Detail.Metadata>
       }
     />
@@ -527,7 +527,7 @@ function SessionListItem(props: {
       id={props.session.id}
       key={props.session.id}
       title={title}
-      subtitle={props.isShowingDetail ? undefined : formatRepoName(props.session.sourceContext.source)}
+      subtitle={props.isShowingDetail ? undefined : formatRepoName(props.session.sourceContext?.source)}
       icon={getStatusIconForSession(props.session)}
       accessories={getSessionAccessories(props.session, {
         hideCreateTime: props.isShowingDetail,
@@ -708,7 +708,7 @@ export default function Command() {
   ).sort();
 
   const filteredData = data?.filter((session) => {
-    if (filterRepo !== "all" && formatRepoName(session.sourceContext.source) !== filterRepo) return false;
+    if (filterRepo !== "all" && formatRepoName(session.sourceContext?.source) !== filterRepo) return false;
     return true;
   });
 

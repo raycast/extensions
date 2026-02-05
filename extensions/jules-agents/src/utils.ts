@@ -168,7 +168,8 @@ export async function refreshMenuBar(): Promise<void> {
   }
 }
 
-export function formatRepoName(source: string): string {
+export function formatRepoName(source?: string): string {
+  if (!source) return "No Repository";
   if (source.startsWith("sources/github/")) {
     return source.replace("sources/github/", "");
   }

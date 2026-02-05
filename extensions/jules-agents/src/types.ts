@@ -2,7 +2,7 @@ export interface Session {
   name?: string;
   id: string;
   prompt: string;
-  sourceContext: SourceContext;
+  sourceContext?: SourceContext;
   title?: string;
   requirePlanApproval?: boolean;
   automationMode?: AutomationMode;
@@ -169,3 +169,6 @@ export interface ListSourcesResponse {
   sources: Source[];
   nextPageToken?: string;
 }
+
+// Constants
+export const NO_REPO = "NO_REPO";

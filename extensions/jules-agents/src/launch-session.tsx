@@ -10,12 +10,12 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedState, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { BranchDropdown } from "./components/BranchDropdown";
 import { SourceDropdown } from "./components/SourceDropdown";
 import { createSession, useSources } from "./jules";
-import { AutomationMode, Source } from "./types";
+import { AutomationMode, NO_REPO, Source } from "./types";
 import { refreshMenuBar } from "./utils";
 
 type Values = {
@@ -33,7 +33,8 @@ interface LaunchContext {
 export default function Command(props: LaunchProps<{ launchContext?: LaunchContext }>) {
   const preferences = getPreferenceValues<Preferences>();
   const { data: sources, isLoading: isLoadingSources } = useSources();
-  const initialSource = props.launchContext?.source;
+  const [lastUsedSource, setLastUsedSource] = useCachedState<string>("lastUsedSource", NO_REPO);
+  const initialSource = props.launchContext?.source || lastUsedSource;
   const [selectedSource, setSelectedSource] = useState<Source | undefined>(undefined);
 
   const { reset, focus, handleSubmit, itemProps, setValue } = useForm<Values>({
@@ -52,23 +53,27 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
 
       try {
         let startingBranch = values.startingBranch;
+        let sourceContext = undefined;
 
-        if (!startingBranch) {
-          const selectedSource = sources?.find((s) => s.name === values.sourceId);
-          if (selectedSource?.githubRepo?.defaultBranch?.displayName) {
-            startingBranch = selectedSource.githubRepo.defaultBranch.displayName;
-          } else {
-            // Fallback to "main" if we can't find the source or its default branch
-            startingBranch = "main";
+        if (values.sourceId !== NO_REPO) {
+          if (!startingBranch) {
+            const selectedSource = sources?.find((s) => s.name === values.sourceId);
+            // ... logic to find default branch
+            if (selectedSource?.githubRepo?.defaultBranch?.displayName) {
+              startingBranch = selectedSource.githubRepo.defaultBranch.displayName;
+            } else {
+              startingBranch = "main";
+            }
           }
+          sourceContext = {
+            source: values.sourceId,
+            githubRepoContext: { startingBranch },
+          };
         }
 
         const response = await createSession({
           prompt: values.prompt,
-          sourceContext: {
-            source: values.sourceId,
-            githubRepoContext: { startingBranch },
-          },
+          sourceContext,
           requirePlanApproval: values.requirePlanApproval,
           automationMode: values.autoCreatePR
             ? AutomationMode.AUTO_CREATE_PR
@@ -76,6 +81,9 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
         });
 
         await refreshMenuBar();
+
+        // Save the source for next time
+        setLastUsedSource(values.sourceId);
 
         reset();
         focus("prompt");
@@ -143,14 +151,17 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
           itemProps.sourceId.onChange?.(value);
           const source = sources?.find((s) => s.name === value);
           setSelectedSource(source);
-          if (source?.githubRepo?.defaultBranch?.displayName) {
+          if (value === NO_REPO) {
+            // Clear or handle no repo specific logic if needed
+            setValue("startingBranch", "");
+          } else if (source?.githubRepo?.defaultBranch?.displayName) {
             setValue("startingBranch", source.githubRepo.defaultBranch.displayName);
           }
         }}
         value={itemProps.sourceId.value}
       />
 
-      <BranchDropdown selectedSource={selectedSource} itemProps={itemProps} />
+      {selectedSource && <BranchDropdown selectedSource={selectedSource} itemProps={itemProps} />}
 
       <Form.Separator />
 

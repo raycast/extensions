@@ -1,6 +1,6 @@
 import { Form } from "@raycast/api";
 import { useSources } from "../jules";
-import { Source } from "../types";
+import { NO_REPO, Source } from "../types";
 
 interface SourceDropdownProps {
   onSelectionChange: (sourceId: string) => void;
@@ -28,6 +28,7 @@ export function SourceDropdown({ onSelectionChange, value }: SourceDropdownProps
       value={value}
       onChange={onSelectionChange}
     >
+      <Form.Dropdown.Item value={NO_REPO} title="No Repository" />
       {sources && sources.length > 0 ? (
         sources.map((source) => (
           <Form.Dropdown.Item

@@ -5,11 +5,9 @@
   "description": "Create and manage async sessions with Google Jules Agents",
   "icon": "icon.png",
   "author": "ihildy",
+  "access": "public",
   "categories": [
     "Developer Tools"
-  ],
-  "contributors": [
-    "NtFelix"
   ],
   "license": "MIT",
   "platforms": [
