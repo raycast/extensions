@@ -1,0 +1,6 @@
+node_modules/
+.raycast/
+dist/
+.DS_Store
+assets/icon.af
+assets/icon.af~lock~
