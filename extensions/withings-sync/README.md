@@ -69,6 +69,7 @@ npm run build   # Build for distribution
 ### View Withings Measurements
 
 Browse your recent health measurements from Withings including:
+
 - Weight (configurable: lb or kg)
 - Body fat percentage
 - Blood pressure (systolic/diastolic)
@@ -79,6 +80,7 @@ Browse your recent health measurements from Withings including:
 ### Sync to Garmin
 
 Upload your Withings measurements to Garmin Connect with multiple sync options:
+
 - **Sync Today's Data**: Upload all measurements from today in one action
 - **Sync All Recent**: Batch sync the most recent days with data
 - **Smart Sync Since Last Garmin Entry**: Automatically sync only measurements newer than your last Garmin entry (⌘S)

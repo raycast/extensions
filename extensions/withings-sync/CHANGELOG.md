@@ -1,6 +1,6 @@
 # Withings Sync Changelog
 
-## [Enhanced Sync Features] - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added configurable lookback days preference (default: 7 days)
 - Added Smart Sync to automatically find last Garmin entry and sync only newer measurements
@@ -12,9 +12,6 @@
 - Fixed duplicate upload prevention
 - Fixed unit conversion bug where Garmin weight was in grams but treated as kilograms
 - Added body water/hydration sync support
-
-## [Initial Version] - 2026-01-18
-
 - View Withings measurements (weight, blood pressure, heart rate, body composition)
 - Sync measurements to Garmin Connect
 - Quick "Sync Today's Data" action to upload all measurements from today

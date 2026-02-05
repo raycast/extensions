@@ -148,7 +148,11 @@ export class GarminAPI {
             };
           }
         } catch (dayError) {
-          // No data for this date
+          // No data for this date;
+          console.warn(
+            `[GARMIN] No data for ${currentDate.toISOString().split("T")[0]}`,
+          );
+          console.warn(dayError);
         }
 
         currentDate.setDate(currentDate.getDate() + 1);
@@ -228,6 +232,10 @@ export class GarminAPI {
           }
         } catch (dayError) {
           // No data for this day, continue searching backwards
+          console.warn(
+            `[GARMIN] No data for ${currentDate.toISOString().split("T")[0]}`,
+          );
+          console.warn(dayError);
         }
 
         currentDate.setDate(currentDate.getDate() - 1);
