@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex-app",
+  "title": "Codex App",
+  "description": "Control the Codex App via Raycast",
+  "icon": "extension_icon.png",
+  "author": "jon_r",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-thread",
+      "title": "New Thread",
+      "subtitle": "Open a new thread",
+      "description": "Opens a new thread in the last project that was open",
+      "icon": "extension_icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Open settings menu",
+      "description": "Opens the settings menu",
+      "icon": "extension_icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-skills",
+      "title": "Open Skills",
+      "subtitle": "Open skills menu",
+      "description": "Opens the skills menu",
+      "icon": "extension_icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-automations",
+      "title": "Open Automations",
+      "subtitle": "Open automations menu",
+      "description": "Opens the automations menu",
+      "icon": "extension_icon.png",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
