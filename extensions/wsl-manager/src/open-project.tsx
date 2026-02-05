@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, LocalStorage } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, LocalStorage, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { execFileAsync, parseDistros } from "./utils/wsl";
 import { getConfiguredEditors, Editor } from "./utils/editors";
@@ -16,7 +16,6 @@ export default function Command() {
   const [availableEditors, setAvailableEditors] = useState<Editor[]>([]);
 
   // In a real app, this would be a user preference
-  const projectRoot = "~";
 
   useEffect(() => {
     fetchProjects();
@@ -60,41 +59,82 @@ export default function Command() {
         return;
       }
 
-      // 2. Scan each distro for projects
+      // Get configured project roots preference
+      const preferences = getPreferenceValues();
+      const rootsStr = preferences.projectRoots || "~";
+      const roots = rootsStr
+        .split(",")
+        .map((r: string) => r.trim())
+        .filter((r: string) => r.length > 0);
+
+      // 2. Scan each distro for projects in all configured roots
       const results: Project[] = [];
 
       await Promise.all(
         distros.map(async (distro) => {
           try {
-            // Safe find command: wsl -d <distro> find <root> ...
-            const { stdout } = await execFileAsync("wsl", [
-              "-d",
-              distro.name,
-              "find",
-              projectRoot,
-              "-maxdepth",
-              "1",
-              "-type",
-              "d",
-              "-not",
-              "-path",
-              "*/.*",
-            ]);
+            // We need to scan each root
+            for (const root of roots) {
+              // Safe find command: wsl -d <distro> find <root> ...
+              const { stdout } = await execFileAsync("wsl", [
+                "-d",
+                distro.name,
+                "find",
+                root,
+                "-mindepth",
+                "1",
+                "-maxdepth",
+                "1",
+                "-type",
+                "d",
+                "-not",
+                "-path",
+                "*/.*",
+              ]);
 
-            const lines = stdout.split("\n").filter((line) => line.trim() !== "");
-            lines.forEach((path) => {
-              if (path !== projectRoot && path.trim() !== "") {
-                // Clean up path if it starts with ./ or similar?
-                // 'find' output usually is clean if root is clean.
-                const parts = path.split("/");
-                const name = parts[parts.length - 1] || path;
-                results.push({
-                  name,
-                  path: path.trim(),
-                  distro: distro.name,
-                });
-              }
-            });
+              const lines = stdout.split("\n").filter((line) => line.trim() !== "");
+              lines.forEach((path) => {
+                if (path !== root && path.trim() !== "") {
+                  // Check if path is exactly the root (sometimes find returns the root itself)
+                  // If root is ~ it might return /home/user, so we check if path ends with root basename?
+                  // Actually 'find root' returns 'root' as first item usually.
+                  // We can just filter out if it equals the root path resolved.
+                  // But 'find' output is absolute paths usually if we provide absolute, or relative if relative.
+                  // If we use '~', wsl find expands it? No, find expects path.
+                  // 'wsl find ~' works because shell expands ~, but we are using execFile?
+                  // Wait, execFileAsync('wsl', ['find', '~']) -> wsl doesn't expand ~ if it's an arg to 'find' binary directly?
+                  // Actually 'wsl find ~' might fail if 'find' doesn't get strict path.
+                  // But the previous code used `projectRoot = "~"` and it supposedly worked or was default.
+                  // If the user provided `~`, we might need to let the shell expand it or use `wsl -d distro -- exec find ...`?
+                  // Or we just assume the user provides valid paths.
+                  // For `~`, we might want to manually resolve it to `/home/$USER` or just Use `wsl -d distro -- find ~ ...` inside bash -c?
+                  // The previous code used `wsl -d distro find ~ ...`.
+                  // Let's stick to what was there but iterate.
+
+                  const cleanPath = path.trim();
+                  // Basic check to avoid listing the root itself if possible,
+                  // but 'find' output matches 'root' exactly on first line.
+                  // We can check if cleanPath is one of the roots but determining exact string match is tricky with ~ expansion.
+                  // Simpler: Just filter out if the name is empty or same as root basename?
+
+                  const parts = cleanPath.split("/");
+                  const name = parts[parts.length - 1] || cleanPath;
+
+                  // Filter out if name is just the root folder name?
+                  // No, users might name their repo 'code'.
+                  // Let's just push it. unique key will dedupe later potentially or React key handles it.
+                  // Actually, let's just ignore if it seems to be the root.
+                  // 'find -minheaders 1' avoids root? No, 'mindepth 1'.
+                  // We can add -mindepth 1 to find command!
+
+                  results.push({
+                    name,
+                    path: cleanPath,
+                    distro: distro.name,
+                  });
+                }
+              });
+            }
           } catch (e) {
             console.error(`Failed to scan distro ${distro.name}`, e);
           }

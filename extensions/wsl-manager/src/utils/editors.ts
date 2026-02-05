@@ -24,9 +24,10 @@ const COMMON_EDITORS: Editor[] = [
     id: "antigravity",
     isTerminal: false,
     getCommand: (distro, path) => ({
-      command: "antigravity",
-      args: [path],
+      command: "cmd.exe",
+      args: ["/c", "antigravity", path],
     }),
+    needsWindowsPath: true,
   },
   {
     name: "Cursor",
@@ -41,32 +42,11 @@ const COMMON_EDITORS: Editor[] = [
     name: "Notepad",
     id: "notepad",
     isTerminal: false,
-    // For notepad we need to convert path first, which is complex with execFile alone if piping
-    // But we can run wslpath separately in the caller or here?
-    // Let's assume the caller handles wslpath conversion if we return a special flag or we do two steps.
-    // However, to keep it simple and secure, we can use 'wsl' to run wslpath, capture output, then run notepad.
-    // BUT 'getCommand' is synchronous.
-    // We will change getCommand to return just the args for the final command,
-    // and assume the caller might need to do path conversion?
-    // Actually, for Notepad/Notepad++, we need the Windows path.
-    // Let's make getCommand async? No, that complicates things.
-    // Let's use a composite command via PowerShell (Start-Process) or keep the pipe logic BUT
-    // we can't use pipe with execFile easily.
-    // Safer approach: Caller (open-project) should convert path if needed.
-    // But 'open-project' doesn't know if the editor needs a Windows path.
-    // Let's stick to the previous implementation for now but use a safer construction?
-    // No, we must eliminate shell = true.
-    // We will use "wsl" to run "wslpath" inside the editor logic?
-    // Use 'wsl -d distro wslpath -w path' to get the path.
-    // Then 'notepad path'.
-    // We will verify this in 'src/open-project.ts'.
-    // For now, let's keep the structure but maybe mark these as needing windows path?
-    // Let's add 'needsWindowsPath' to Editor interface.
     getCommand: (distro, path) => ({
       command: "notepad.exe",
       args: [path], // This expects a windows path!
     }),
-    needsWindowsPath: true, // Custom property we'll add
+    needsWindowsPath: true,
   },
   {
     name: "Notepad++",
@@ -119,14 +99,28 @@ export async function getConfiguredEditors(distro: string): Promise<Editor[]> {
 
   try {
     const { stdout } = await execFileAsync("where.exe", ["code", "cursor", "antigravity", "notepad"]);
-    const found = stdout.toLowerCase();
+    const foundLines = stdout.toLowerCase().split(/\r?\n/);
 
-    if (found.includes("code")) detectedEditors.push(COMMON_EDITORS.find((e) => e.id === "vscode")!);
-    if (found.includes("cursor")) detectedEditors.push(COMMON_EDITORS.find((e) => e.id === "cursor")!);
-    if (found.includes("antigravity")) detectedEditors.push(COMMON_EDITORS.find((e) => e.id === "antigravity")!);
-    if (found.includes("notepad")) detectedEditors.push(COMMON_EDITORS.find((e) => e.id === "notepad")!);
+    // Helper to check if any line ends with the executable name
+    // where.exe returns full paths like C:\...\bin\code.cmd
+    const hasEditor = (name: string) =>
+      foundLines.some((line) => {
+        const fileName = line.split("\\").pop();
+        if (!fileName) return false;
+        // Check for exact name or name with typical extensions
+        return (
+          fileName === name || fileName === `${name}.exe` || fileName === `${name}.cmd` || fileName === `${name}.bat`
+        );
+      });
+
+    if (hasEditor("code")) detectedEditors.push(COMMON_EDITORS.find((e) => e.id === "vscode")!);
+    if (hasEditor("cursor")) detectedEditors.push(COMMON_EDITORS.find((e) => e.id === "cursor")!);
+    if (hasEditor("antigravity")) detectedEditors.push(COMMON_EDITORS.find((e) => e.id === "antigravity")!);
+
+    // Notepad usually is just notepad.exe in System32
+    if (hasEditor("notepad")) detectedEditors.push(COMMON_EDITORS.find((e) => e.id === "notepad")!);
   } catch {
-    // Ignore errors, some might be missing
+    // Ignore errors that happen if none are found or command fails
   }
 
   // 2. Check WSL-side editors (vim, nano, micro)

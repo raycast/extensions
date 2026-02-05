@@ -18,7 +18,17 @@
       "title": "Open WSL Project",
       "description": "Open a project directly in VS Code Remote",
       "mode": "view",
-      "subtitle": "WSL Manager"
+      "subtitle": "WSL Manager",
+      "preferences": [
+        {
+          "name": "projectRoots",
+          "title": "Project Directories",
+          "description": "Comma-separated list of directories to scan for projects (e.g. ~, ~/code)",
+          "type": "textfield",
+          "default": "~",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
