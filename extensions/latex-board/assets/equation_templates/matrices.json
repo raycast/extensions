@@ -1,0 +1,30 @@
+{
+  "Matrix Environment": {
+    "Matrix 1": " \\begin{matrix} a & b \\\\ c & d \\end{matrix} ",
+    "Matrix 2": " \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} ",
+    "Matrix 3": " \\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} ",
+    "Matrix 4": " \\begin{Bmatrix} a & b \\\\ c & d \\end{Bmatrix} ",
+    "Matrix 5": " \\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix} ",
+    "Matrix 6": " \\begin{Vmatrix} a & b \\\\ c & d \\end{Vmatrix} ",
+    "Matrix Example": " \\begin{pmatrix} a & b & c \\\\ d & e & f \\end{pmatrix} "
+  },
+  "Array Environment": {
+    "Array 1": " \\left( \\begin{array}{ccc} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{array} \\right) ",
+    "Array 2": " \\left[ \\begin{array}{rrr} 1 & 10 & 100 \\\\ 10 & 100 & 1 \\\\ 100 & 1 & 10 \\end{array} \\right] ",
+    "Array 3": " \\left( \\begin{array}{crl} 1 & 10 & 100 \\\\ 10 & 100 & 1 \\\\ 100 & 1 & 10 \\end{array} \\right) "
+  },
+  "Examples": {
+    "General m x n Matrix": " A = a_{ij} = \\left( \\begin{array}{cccc} a_{11} & a_{12} & \\ldots & a_{1n} \\\\ a_{21} & a_{22} & \\ldots & a_{2n} \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ a_{m1} & a_{m2} & \\ldots & a_{mn} \\end{array} \\right) ",
+    "Partitioned Matrix": " \\left(\\begin{array}{c|cc} a & b & c \\\\ \\hline d & e & f \\\\ g & h & i \\end{array} \\right) ",
+    "Diagonal Matrix": " \\begin{pmatrix} \\lambda_1 & & & & \\\\ & \\lambda_2 & & \\Huge{0} & \\\\ & & \\ddots & & \\\\ & \\Huge{0} & & \\lambda_{n-1} & \\\\ & & & & \\lambda_n \\end{pmatrix} "
+  },
+  "Other": {
+    "Transpose Matrix": " \\left(\\begin{array}{ccc} a & b & c\\\\ d & e & f\\end{array}\\right)^{\\mathrm{T}} =\\left(\\begin{array}{cc} a & d \\\\ b & e \\\\ c & f \\end{array}\\right) ",
+    "Trace": " \\mathrm{tr} \\begin{pmatrix} a_{11} & a_{12} & a_{13} \\\\ a_{21} & a_{22} & a_{23} \\\\ a_{31} & a_{32} & a_{33} \\end{pmatrix} = a_{11} + a_{22} + a_{33} "
+  },
+  "Matrix Operations": {
+    "Determinant": " \\mathrm{det} A = \\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix} = ad - bc ",
+    "Rank": " \\mathrm{rank} A ",
+    "Dimension": " \\dim A "
+  }
+}

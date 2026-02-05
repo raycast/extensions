@@ -1,0 +1,21 @@
+{
+  "Radicals": {
+    "Radical Example 1": " \\sqrt{x} ",
+    "Radical Example 2": " \\sqrt[n]{x} ",
+    "Radical Example 3": " \\sqrt [n]{a + b} "
+  },
+  "Exponents": {
+    "Power Example 1": " a^x ",
+    "Power Example 2": " a^{x + y} ",
+    "Power Example 3": " a^{x^y} ",
+    "Exponential 1": " \\exp(x) ",
+    "Exponential 2": " e^x ",
+    "Exponential 3": " \\mathrm{e}^x "
+  },
+  "Logarithms": {
+    "Log 1": " \\log x ",
+    "Log 2": " \\log_{10}x ",
+    "Log 3": " \\log_{e}x ",
+    "Natural Log": " \\ln x "
+  }
+}
