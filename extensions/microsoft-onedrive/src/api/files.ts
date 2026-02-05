@@ -133,7 +133,7 @@ async function itemExistsInFolder(drivePrefix: string, folderId: string, itemNam
   try {
     const accessToken = await getAccessToken();
     const folderPath = folderId === "root" ? "/root" : `/items/${folderId}`;
-    const endpoint = `${GRAPH_API_BASE}${drivePrefix}${folderPath}:/${encodeURIComponent(itemName)}`;
+    const endpoint = `${GRAPH_API_BASE}${drivePrefix}${folderPath}:/${encodeURIComponent(itemName)}:`;
     const response = await fetch(endpoint, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
