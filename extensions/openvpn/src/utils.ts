@@ -177,23 +177,30 @@ export const connect = async (profileName: string) => {
     return "No active profile menu found. Open OpenVPN Connect and ensure a profile is visible.";
   }
 
-  const error = await runAppleScript(`
-    try
-      tell application "System Events" to tell process "OpenVPN Connect"
-        click menu item "${profileName}" of menu "${status.selectedProfileName}" of menu item "${status.selectedProfileName}" of menu 1 of menu bar item 1 of menu bar 2
-        return ""
-      end tell
-    on error
-      try
-        tell application "System Events" to tell process "OpenVPN Connect"
-          click menu item "${profileName}" of menu "${status.selectedProfileName}" of menu item "${status.selectedProfileName}" of menu 1 of menu bar item 1 of menu bar 1
-          return ""
-        end tell
-      on error
-        return "Failed to connect"
-      end try
-    end try
-  `);
+  const error = await runAppleScript(
+    `
+      on run argv
+        set profileName to item 1 of argv
+        set selectedProfileName to item 2 of argv
+        try
+          tell application "System Events" to tell process "OpenVPN Connect"
+            click menu item profileName of menu selectedProfileName of menu item selectedProfileName of menu 1 of menu bar item 1 of menu bar 2
+            return ""
+          end tell
+        on error
+          try
+            tell application "System Events" to tell process "OpenVPN Connect"
+              click menu item profileName of menu selectedProfileName of menu item selectedProfileName of menu 1 of menu bar item 1 of menu bar 1
+              return ""
+            end tell
+          on error
+            return "Failed to connect"
+          end try
+        end try
+      end run
+    `,
+    [profileName, status.selectedProfileName],
+  );
 
   return error;
 };
