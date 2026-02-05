@@ -1,4 +1,15 @@
-import { Action, ActionPanel, List, showToast, Toast, confirmAlert, Icon, Form, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  showToast,
+  Toast,
+  confirmAlert,
+  Icon,
+  Form,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   getAllProviders,
@@ -103,6 +114,7 @@ export default function Command() {
                   style={Action.Style.Destructive}
                   onAction={() => handleDelete(provider.id)}
                   icon={Icon.Trash}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel>
             }
@@ -198,16 +210,54 @@ function AddProviderForm({ onProviderAdded }: { onProviderAdded: () => void }) {
   }, [form.providerType]);
 
   async function handleSubmit() {
+    // Validate required fields
+    const errors: string[] = [];
+
+    // Common validation
+    if (!form.displayName.trim()) {
+      errors.push("Display Name is required");
+    }
+
+    // Provider-specific validation
+    if (form.providerType === CloudProviderType.S3) {
+      if (!form.accessKeyId.trim()) {
+        errors.push("Access Key ID is required for S3 providers");
+      }
+      if (!form.secretAccessKey.trim()) {
+        errors.push("Secret Access Key is required for S3 providers");
+      }
+      if (!form.bucket.trim()) {
+        errors.push("Bucket Name is required for S3 providers");
+      }
+    } else if (form.providerType === CloudProviderType.BunnyCDN) {
+      if (!form.storageZone.trim()) {
+        errors.push("Storage Zone Name is required for BunnyCDN");
+      }
+      if (!form.apiKey.trim()) {
+        errors.push("API Key is required for BunnyCDN");
+      }
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: errors.join(", "),
+      });
+      return;
+    }
+
     let credentials: Record<string, string> = {};
     if (form.providerType === CloudProviderType.S3) {
       credentials = {
-        accessKeyId: form.accessKeyId,
-        secretAccessKey: form.secretAccessKey,
-        bucket: form.bucket,
-        endpoint: form.endpoint,
-        region: form.region,
+        accessKeyId: form.accessKeyId.trim(),
+        secretAccessKey: form.secretAccessKey.trim(),
+        bucket: form.bucket.trim(),
+        endpoint: form.endpoint.trim(),
+        region: form.region.trim(),
       };
-      if (form.accessLevel === "public" && form.domain) credentials.domain = form.domain;
+      if (form.accessLevel === "public" && form.domain.trim()) credentials.domain = form.domain.trim();
     } else if (form.providerType === CloudProviderType.BunnyCDN) {
       let pullZoneName = form.pullZoneDomain.trim();
       // Remove protocol, .b-cdn.net, and slashes
@@ -215,20 +265,33 @@ function AddProviderForm({ onProviderAdded }: { onProviderAdded: () => void }) {
         .replace(/^https?:\/\//, "")
         .replace(/\.b-cdn\.net.*/, "")
         .replace(/\/$/, "");
-      credentials = { storageZone: form.storageZone, apiKey: form.apiKey, storageEndpoint: form.storageEndpoint };
+      credentials = {
+        storageZone: form.storageZone.trim(),
+        apiKey: form.apiKey.trim(),
+        storageEndpoint: form.storageEndpoint,
+      };
       if (pullZoneName) credentials.pullZoneDomain = pullZoneName;
     }
-    const account = createNewProviderAccount(
-      form.providerType,
-      form.displayName,
-      credentials,
-      form.defaultPath,
-      form.accessLevel,
-    );
-    await addOrUpdateProvider(account);
-    await showToast({ style: Toast.Style.Success, title: "Provider added" });
-    onProviderAdded();
-    pop();
+
+    try {
+      const account = createNewProviderAccount(
+        form.providerType,
+        form.displayName.trim(),
+        credentials,
+        form.defaultPath.trim(),
+        form.accessLevel,
+      );
+      await addOrUpdateProvider(account);
+      await showToast({ style: Toast.Style.Success, title: "Provider added" });
+      onProviderAdded();
+      pop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error instanceof Error ? error.message : "Failed to add provider",
+      });
+    }
   }
 
   return (
@@ -251,30 +314,37 @@ function AddProviderForm({ onProviderAdded }: { onProviderAdded: () => void }) {
       </Form.Dropdown>
       <Form.TextField
         id="displayName"
-        title="Display Name"
+        title="Display Name *"
         value={form.displayName}
         onChange={(v) => setForm((prev) => ({ ...prev, displayName: v }))}
+        placeholder="Enter a name for this provider"
+        info="Required: A friendly name to identify this provider"
       />
       {form.providerType === CloudProviderType.S3 && (
         <>
           <Form.TextField
             id="accessKeyId"
-            title="Access Key ID"
+            title="Access Key ID *"
             value={form.accessKeyId}
             onChange={(v) => setForm((prev) => ({ ...prev, accessKeyId: v }))}
+            placeholder="Enter your S3 access key ID"
+            info="Required: Your S3 access key ID"
           />
           <Form.TextField
             id="bucket"
-            title="Bucket Name"
+            title="Bucket Name *"
             value={form.bucket}
             onChange={(v) => setForm((prev) => ({ ...prev, bucket: v }))}
             placeholder="e.g. my-bucket"
+            info="Required: The name of your S3 bucket"
           />
           <Form.PasswordField
             id="secretAccessKey"
-            title="Secret Access Key"
+            title="Secret Access Key *"
             value={form.secretAccessKey}
             onChange={(v) => setForm((prev) => ({ ...prev, secretAccessKey: v }))}
+            placeholder="Enter your S3 secret access key"
+            info="Required: Your S3 secret access key"
           />
           <Form.TextField
             id="endpoint"
@@ -306,15 +376,19 @@ function AddProviderForm({ onProviderAdded }: { onProviderAdded: () => void }) {
         <>
           <Form.TextField
             id="storageZone"
-            title="Storage Zone Name"
+            title="Storage Zone Name *"
             value={form.storageZone}
             onChange={(v) => setForm((prev) => ({ ...prev, storageZone: v }))}
+            placeholder="Enter your BunnyCDN storage zone name"
+            info="Required: Your BunnyCDN storage zone name"
           />
           <Form.PasswordField
             id="apiKey"
-            title="API Key"
+            title="API Key *"
             value={form.apiKey}
             onChange={(v) => setForm((prev) => ({ ...prev, apiKey: v }))}
+            placeholder="Enter your BunnyCDN API key"
+            info="Required: Your BunnyCDN API key"
           />
           <Form.Dropdown
             id="storageEndpoint"
@@ -402,16 +476,54 @@ function EditProviderForm({
   }, [provider]);
 
   async function handleSubmit() {
+    // Validate required fields
+    const errors: string[] = [];
+
+    // Common validation
+    if (!form.displayName.trim()) {
+      errors.push("Display Name is required");
+    }
+
+    // Provider-specific validation
+    if (form.providerType === CloudProviderType.S3) {
+      if (!form.accessKeyId.trim()) {
+        errors.push("Access Key ID is required for S3 providers");
+      }
+      if (!form.secretAccessKey.trim()) {
+        errors.push("Secret Access Key is required for S3 providers");
+      }
+      if (!form.bucket.trim()) {
+        errors.push("Bucket Name is required for S3 providers");
+      }
+    } else if (form.providerType === CloudProviderType.BunnyCDN) {
+      if (!form.storageZone.trim()) {
+        errors.push("Storage Zone Name is required for BunnyCDN");
+      }
+      if (!form.apiKey.trim()) {
+        errors.push("API Key is required for BunnyCDN");
+      }
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: errors.join(", "),
+      });
+      return;
+    }
+
     let credentials: Record<string, string> = {};
     if (form.providerType === CloudProviderType.S3) {
       credentials = {
-        accessKeyId: form.accessKeyId,
-        secretAccessKey: form.secretAccessKey,
-        bucket: form.bucket,
-        endpoint: form.endpoint,
-        region: form.region,
+        accessKeyId: form.accessKeyId.trim(),
+        secretAccessKey: form.secretAccessKey.trim(),
+        bucket: form.bucket.trim(),
+        endpoint: form.endpoint.trim(),
+        region: form.region.trim(),
       };
-      if (form.accessLevel === "public" && form.domain) credentials.domain = form.domain;
+      if (form.accessLevel === "public" && form.domain.trim()) credentials.domain = form.domain.trim();
     } else if (form.providerType === CloudProviderType.BunnyCDN) {
       let pullZoneName = form.pullZoneDomain.trim();
       // Remove protocol, .b-cdn.net, and slashes
@@ -419,20 +531,33 @@ function EditProviderForm({
         .replace(/^https?:\/\//, "")
         .replace(/\.b-cdn\.net.*/, "")
         .replace(/\/$/, "");
-      credentials = { storageZone: form.storageZone, apiKey: form.apiKey, storageEndpoint: form.storageEndpoint };
+      credentials = {
+        storageZone: form.storageZone.trim(),
+        apiKey: form.apiKey.trim(),
+        storageEndpoint: form.storageEndpoint,
+      };
       if (pullZoneName) credentials.pullZoneDomain = pullZoneName;
     }
-    const updatedProvider = {
-      ...provider,
-      displayName: form.displayName,
-      credentials,
-      defaultPath: form.defaultPath,
-      accessLevel: form.accessLevel,
-    };
-    await addOrUpdateProvider(updatedProvider);
-    await showToast({ style: Toast.Style.Success, title: "Provider updated" });
-    onProviderUpdated();
-    pop();
+
+    try {
+      const updatedProvider = {
+        ...provider,
+        displayName: form.displayName.trim(),
+        credentials,
+        defaultPath: form.defaultPath.trim(),
+        accessLevel: form.accessLevel,
+      };
+      await addOrUpdateProvider(updatedProvider);
+      await showToast({ style: Toast.Style.Success, title: "Provider updated" });
+      onProviderUpdated();
+      pop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error instanceof Error ? error.message : "Failed to update provider",
+      });
+    }
   }
 
   return (
@@ -456,30 +581,37 @@ function EditProviderForm({
       </Form.Dropdown>
       <Form.TextField
         id="displayName"
-        title="Display Name"
+        title="Display Name *"
         value={form.displayName}
         onChange={(v) => setForm((prev) => ({ ...prev, displayName: v }))}
+        placeholder="Enter a name for this provider"
+        info="Required: A friendly name to identify this provider"
       />
       {form.providerType === CloudProviderType.S3 && (
         <>
           <Form.TextField
             id="accessKeyId"
-            title="Access Key ID"
+            title="Access Key ID *"
             value={form.accessKeyId}
             onChange={(v) => setForm((prev) => ({ ...prev, accessKeyId: v }))}
+            placeholder="Enter your S3 access key ID"
+            info="Required: Your S3 access key ID"
           />
           <Form.TextField
             id="bucket"
-            title="Bucket Name"
+            title="Bucket Name *"
             value={form.bucket}
             onChange={(v) => setForm((prev) => ({ ...prev, bucket: v }))}
             placeholder="e.g. my-bucket"
+            info="Required: The name of your S3 bucket"
           />
           <Form.PasswordField
             id="secretAccessKey"
-            title="Secret Access Key"
+            title="Secret Access Key *"
             value={form.secretAccessKey}
             onChange={(v) => setForm((prev) => ({ ...prev, secretAccessKey: v }))}
+            placeholder="Enter your S3 secret access key"
+            info="Required: Your S3 secret access key"
           />
           <Form.TextField
             id="endpoint"
@@ -511,15 +643,19 @@ function EditProviderForm({
         <>
           <Form.TextField
             id="storageZone"
-            title="Storage Zone Name"
+            title="Storage Zone Name *"
             value={form.storageZone}
             onChange={(v) => setForm((prev) => ({ ...prev, storageZone: v }))}
+            placeholder="Enter your BunnyCDN storage zone name"
+            info="Required: Your BunnyCDN storage zone name"
           />
           <Form.PasswordField
             id="apiKey"
-            title="API Key"
+            title="API Key *"
             value={form.apiKey}
             onChange={(v) => setForm((prev) => ({ ...prev, apiKey: v }))}
+            placeholder="Enter your BunnyCDN API key"
+            info="Required: Your BunnyCDN API key"
           />
           <Form.Dropdown
             id="storageEndpoint"

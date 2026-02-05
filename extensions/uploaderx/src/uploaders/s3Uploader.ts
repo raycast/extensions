@@ -37,23 +37,26 @@ export async function uploadToS3(
       ContentDisposition: "inline",
     }),
   );
-  // Generate a presigned URL for the uploaded object
-  let url = "";
+  // For public objects with no expiry requested, return the stable public URL directly
+  if (expiry <= 0 && provider.accessLevel === "public") {
+    return getPublicS3Url(provider, filePath);
+  }
+
+  // Generate a presigned URL for the uploaded object when expiry is set or for private access
+  const effectiveExpiry = expiry > 0 ? Math.min(expiry, MAX_PRESIGN_EXPIRY) : MAX_PRESIGN_EXPIRY;
   try {
-    url = await getSignedUrl(
+    return await getSignedUrl(
       s3,
       new GetObjectCommand({ Bucket: bucket, Key: key, ResponseContentDisposition: "inline" }),
-      { expiresIn: Math.min(expiry, MAX_PRESIGN_EXPIRY) },
+      { expiresIn: effectiveExpiry },
     );
   } catch {
-    // fallback to public URL if possible
+    // Fallback to a public-style URL if presigning fails
     if (endpoint) {
-      url = `${endpoint.replace(/\/+$/, "")}/${bucket}/${key}`;
-    } else {
-      url = `https://${bucket}.s3.${region || "us-east-1"}.amazonaws.com/${key}`;
+      return `${endpoint.replace(/\/+$/, "")}/${bucket}/${key}`;
     }
+    return `https://${bucket}.s3.${region || "us-east-1"}.amazonaws.com/${key}`;
   }
-  return url;
 }
 
 export function getPublicS3Url(provider: CloudProviderAccount, filePath: string): string {

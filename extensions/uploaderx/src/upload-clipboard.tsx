@@ -1,9 +1,9 @@
-import { showToast, Toast, Clipboard, LocalStorage, List, ActionPanel, Action } from "@raycast/api";
+import { showToast, Toast, Clipboard, List, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getAllProviders, CloudProviderType } from "./cloudProviders";
-import { uploadToS3, getPublicS3Url, MAX_PRESIGN_EXPIRY } from "./uploaders/s3Uploader";
-import { uploadToBunny, getPublicBunnyUrl } from "./uploaders/bunnyUploader";
-import { truncateFileName, getFileIcon } from "./utils/fileUtils";
+import { getAllProviders, CloudProviderAccount } from "./cloudProviders";
+import { uploadSingleFile } from "./utils/uploadHelpers";
+import { saveRecentUploads, type RecentUpload } from "./utils/recentUploads";
+import { UploadedLinksScreen } from "./uploaded-links-view";
 
 // Utility to convert file:// URI to local file path
 function fileUriToPath(fileUri: string): string {
@@ -15,19 +15,21 @@ function fileUriToPath(fileUri: string): string {
 
 export default function Command() {
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadedLink, setUploadedLink] = useState<{
-    file: string;
-    url: string;
-    uploadedAt: number;
-    type: "public" | "presigned";
-    expiry?: number;
-  } | null>(null);
+  const [providers, setProviders] = useState<CloudProviderAccount[]>([]);
+  const [uploadedLink, setUploadedLink] = useState<RecentUpload | null>(null);
 
   useEffect(() => {
     (async () => {
+      const allProviders = await getAllProviders();
+      setProviders(allProviders);
+
+      if (allProviders.length === 0) {
+        setIsUploading(false);
+        return;
+      }
+
       setIsUploading(true);
-      const providers = await getAllProviders();
-      const currentProvider = providers.find((p) => p.isDefault) || providers[0] || null;
+      const currentProvider = allProviders.find((p) => p.isDefault) || allProviders[0] || null;
       if (!currentProvider) {
         await showToast({ style: Toast.Style.Failure, title: "No provider configured" });
         setIsUploading(false);
@@ -44,27 +46,13 @@ export default function Command() {
         return;
       }
       const filePath = fileUriToPath(file);
-      let url = "";
-      let type: "public" | "presigned" = "public";
-      let expiryValue: number | undefined = undefined;
       try {
-        if (currentProvider.providerType === CloudProviderType.S3) {
-          if (currentProvider.accessLevel === "public") {
-            await uploadToS3(currentProvider, filePath, currentProvider.defaultPath, 0);
-            url = getPublicS3Url(currentProvider, filePath);
-            type = "public";
-          } else {
-            type = "presigned";
-            expiryValue = MAX_PRESIGN_EXPIRY;
-            url = await uploadToS3(currentProvider, filePath, currentProvider.defaultPath, expiryValue);
-          }
-        } else if (currentProvider.providerType === CloudProviderType.BunnyCDN) {
-          await uploadToBunny(currentProvider, filePath, currentProvider.defaultPath);
-          url = getPublicBunnyUrl(currentProvider, filePath);
-          type = currentProvider.accessLevel === "public" ? "public" : "presigned";
-        } else {
-          throw new Error("Unsupported provider type");
-        }
+        const link = await uploadSingleFile(currentProvider, filePath);
+        setUploadedLink(link);
+        await saveRecentUploads([link]);
+        await Clipboard.copy(link.url);
+        await showToast({ style: Toast.Style.Success, title: "Link copied to clipboard", message: link.url });
+        setIsUploading(false);
       } catch (err) {
         await showToast({
           style: Toast.Style.Failure,
@@ -80,94 +68,37 @@ export default function Command() {
         setIsUploading(false);
         return;
       }
-      const link = {
-        file: filePath.split("/").pop() || filePath,
-        url,
-        uploadedAt: Date.now(),
-        type,
-        expiry: expiryValue,
-      };
-      setUploadedLink(link);
-      // Save to recent uploads
-      const prev = (await LocalStorage.getItem<string>("recentUploads")) || "[]";
-      let prevArr: { file: string; url: string; uploadedAt: number; type?: "public" | "presigned"; expiry?: number }[] =
-        [];
-      try {
-        prevArr = JSON.parse(prev);
-      } catch {
-        // Ignore JSON parse errors and use empty array
-      }
-      const merged = [link, ...prevArr].slice(0, 50);
-      await LocalStorage.setItem("recentUploads", JSON.stringify(merged));
-      await Clipboard.copy(url);
-      await showToast({ style: Toast.Style.Success, title: "Link copied to clipboard", message: url });
-      setIsUploading(false);
     })();
   }, []);
+
+  // Show empty state if no providers are configured
+  if (providers.length === 0) {
+    return (
+      <List navigationTitle="Upload from Clipboard">
+        <List.EmptyView
+          title="No Cloud Providers Configured"
+          description="You need to add at least one cloud storage provider before you can upload from clipboard."
+          actions={
+            <ActionPanel>
+              <Action.Open
+                title="Manage Cloud Providers"
+                target="raycast://extensions/scisaif/uploaderx/manage-cloud-providers"
+                icon="⚙️"
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   if (isUploading) {
     return <List isLoading navigationTitle="Uploading from Clipboard..." />;
   }
   if (uploadedLink) {
-    return <UploadedLinksScreen links={[uploadedLink]} />;
+    return <UploadedLinksScreen navigationTitle="Uploaded File Link" links={[uploadedLink]} />;
   }
   return <List navigationTitle="Upload from Clipboard" />;
 }
 
-function UploadedLinksScreen({
-  links,
-}: {
-  links: { file: string; url: string; uploadedAt: number; type: "public" | "presigned"; expiry?: number }[];
-}) {
-  return (
-    <List navigationTitle="Uploaded File Link" isShowingDetail>
-      {links.map((link) => (
-        <UploadedFileListItem key={link.url} link={link} />
-      ))}
-    </List>
-  );
-}
-
-function UploadedFileListItem({
-  link,
-}: {
-  link: { file: string; url: string; uploadedAt: number; type?: "public" | "presigned"; expiry?: number };
-}) {
-  return (
-    <List.Item
-      key={link.url}
-      title={truncateFileName(link.file)}
-      subtitle={link.url}
-      icon={getFileIcon(link.file, link.url)}
-      accessories={[
-        link.type === "presigned"
-          ? { tag: `Expires in ${link.expiry ? Math.round(link.expiry / 3600) + "h" : "?"}` }
-          : { tag: link.type === "public" ? "Public" : "Private" },
-        { date: new Date(link.uploadedAt), tooltip: new Date(link.uploadedAt).toLocaleString() },
-      ]}
-      detail={
-        <List.Item.Detail
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="File Name" text={link.file} />
-              <List.Item.Detail.Metadata.Link title="Link" target={link.url} text={link.url} />
-              <List.Item.Detail.Metadata.Label title="Uploaded" text={new Date(link.uploadedAt).toLocaleString()} />
-              {link.type === "presigned" && (
-                <List.Item.Detail.Metadata.Label
-                  title="Expiry"
-                  text={link.expiry ? `${Math.round(link.expiry / 3600)}h` : "?"}
-                />
-              )}
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard content={link.url} />
-          <Action.OpenInBrowser url={link.url} />
-        </ActionPanel>
-      }
-    />
-  );
-}
+// UploadedLinksScreen and UploadedFileListItem are now shared via ./uploaded-links-view

@@ -55,11 +55,6 @@ export async function setDefaultProvider(id: string): Promise<void> {
   await saveAllProviders(providers);
 }
 
-export async function getDefaultProvider(): Promise<CloudProviderAccount | undefined> {
-  const providers = await getAllProviders();
-  return providers.find((p) => p.isDefault);
-}
-
 export function createNewProviderAccount(
   providerType: CloudProviderType,
   displayName: string,

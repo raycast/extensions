@@ -88,7 +88,9 @@ export function getPublicBunnyUrl(provider: CloudProviderAccount, filePath: stri
     return `https://${pullZoneDomain}.b-cdn.net/${key}`;
   } else if (provider.accessLevel === "public" && domain) {
     console.log("[BunnyCDN] Using domain");
-    return `${domain.replace(/\/+$/, "")}/${key}`;
+    const trimmedDomain = domain.replace(/\/+$/, "");
+    const normalizedDomain = /^https?:\/\//.test(trimmedDomain) ? trimmedDomain : `https://${trimmedDomain}`;
+    return `${normalizedDomain}/${key}`;
   } else {
     console.log("[BunnyCDN] Using default public URL");
     // BunnyCDN default public URL (user must configure pull zone for this to work)

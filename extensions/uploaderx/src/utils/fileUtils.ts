@@ -5,12 +5,19 @@ export function truncateFileName(fileName: string, maxLength = 24): string {
   return `${base}...${ext}`;
 }
 
+export function truncateUrl(url: string, maxLength = 50): string {
+  if (url.length <= maxLength) return url;
+  return url.slice(0, maxLength - 3) + "...";
+}
+
+const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "tiff"];
+
 export function getFileIcon(
   fileName: string,
   url: string,
 ): { source: string } | { source: { light: string; dark: string } } {
   const ext = fileName.split(".").pop()?.toLowerCase() || "";
-  if (["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "tiff"].includes(ext)) {
+  if (IMAGE_EXTENSIONS.includes(ext)) {
     return { source: url };
   }
   if (ext === "pdf") {
@@ -20,9 +27,4 @@ export function getFileIcon(
     return { source: { light: "zip.png", dark: "zip.png" } };
   }
   return { source: { light: "file.png", dark: "file.png" } };
-}
-
-export function isImage(fileName: string) {
-  const ext = fileName.split(".").pop()?.toLowerCase() || "";
-  return ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "tiff"].includes(ext);
 }
