@@ -1,0 +1,301 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cai-clipboard-ai",
+  "title": "Cai: Local Clipboard AI",
+  "description": "Select text and run intelligent actions with ⌥C. Private and local, powered by your favorite AI.",
+  "icon": "extension-icon.png",
+  "author": "soyasis",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "smart-paste",
+      "title": "Smart Paste",
+      "description": "Analyzes your clipboard content and suggests relevant actions like creating calendar events, opening maps, translating, summarizing, and more",
+      "mode": "view",
+      "keywords": [
+        "clipboard",
+        "paste",
+        "smart"
+      ]
+    },
+    {
+      "name": "smart-select",
+      "title": "Smart Select",
+      "description": "Analyzes selected text and suggests relevant actions like creating calendar events, opening maps, translating, summarizing, and more",
+      "mode": "view",
+      "keywords": [
+        "selection",
+        "select",
+        "text"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "llmProvider",
+      "title": "LLM Provider",
+      "description": "Select your local LLM provider or choose Custom for other OpenAI-compatible servers",
+      "type": "dropdown",
+      "default": "lmstudio",
+      "data": [
+        {
+          "title": "LM Studio",
+          "value": "lmstudio"
+        },
+        {
+          "title": "Ollama",
+          "value": "ollama"
+        },
+        {
+          "title": "Jan AI",
+          "value": "jan"
+        },
+        {
+          "title": "LocalAI",
+          "value": "localai"
+        },
+        {
+          "title": "vLLM",
+          "value": "vllm"
+        },
+        {
+          "title": "Text Generation Web UI",
+          "value": "textgen"
+        },
+        {
+          "title": "Anything LLM",
+          "value": "anythingllm"
+        },
+        {
+          "title": "Msty AI",
+          "value": "msty"
+        },
+        {
+          "title": "Open WebUI",
+          "value": "openwebui"
+        },
+        {
+          "title": "GPT4All",
+          "value": "gpt4all"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "llmCustomUrl",
+      "title": "Custom LLM Server URL",
+      "description": "Only used if 'Custom' is selected above. Must be OpenAI-compatible API endpoint.",
+      "type": "textfield",
+      "default": "http://127.0.0.1:8080/v1",
+      "required": false,
+      "placeholder": "http://127.0.0.1:8080/v1"
+    },
+    {
+      "name": "llmModel",
+      "title": "Model Name (optional)",
+      "description": "Specific model to use. Leave empty to use server's default/loaded model.",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "placeholder": "Leave empty for default"
+    },
+    {
+      "name": "preferredSearchEngine",
+      "title": "Preferred Search Engine",
+      "description": "Which search engine to use for web searches",
+      "type": "dropdown",
+      "default": "brave",
+      "data": [
+        {
+          "title": "Brave Search",
+          "value": "brave"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
+        },
+        {
+          "title": "Ecosia",
+          "value": "ecosia"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "preferredMaps",
+      "title": "Preferred Maps App",
+      "description": "Which maps app to open addresses in (Apple Maps opens in browser on Windows)",
+      "type": "dropdown",
+      "default": "apple",
+      "data": [
+        {
+          "title": "Apple Maps",
+          "value": "apple"
+        },
+        {
+          "title": "Google Maps",
+          "value": "google"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "translationLanguage1",
+      "title": "Translation Language 1",
+      "description": "First preferred language for quick translations",
+      "type": "dropdown",
+      "default": "English",
+      "data": [
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Arabic",
+          "value": "Arabic"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "translationLanguage2",
+      "title": "Translation Language 2",
+      "description": "Second preferred language for quick translations",
+      "type": "dropdown",
+      "default": "Spanish",
+      "data": [
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Arabic",
+          "value": "Arabic"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "customActionPrompt",
+      "title": "Custom Action Prompt (⌘1)",
+      "description": "Your custom AI instruction (e.g., 'Proofread selected text', 'Create email reply', 'Count words', 'convert to python list'). Always accessible via ⌘1",
+      "type": "textfield",
+      "default": "Use a custom prompt",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.17.0",
+    "chrono-node": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
