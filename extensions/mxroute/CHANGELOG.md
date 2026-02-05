@@ -1,6 +1,6 @@
 # MXroute Changelog
 
-## [Domain Verification Key in Add + Catch All UX] - {PR_MERGE_DATE}
+## [Domain Verification Key in Add + Catch All UX] - 2026-02-05
 
 - _Domain Verification Key_ is shown in "Add New Domain"
 - Improve the "Advanced" view to include descriptions of _CatchAll Type_
