@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}}}
+## [Bug Fix] - {PR_MERGE_DATE}
 
 - Fixed a bug where the Jira create-issue flow copied an API base URL instead of the normal `/browse/KEY` issue link.
 
