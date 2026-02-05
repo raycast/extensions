@@ -1,6 +1,6 @@
 # Domainr Changelog
 
-## [Unreleased] - {PR_MERGE_DATE}
+## [Unreleased] - 2026-02-05
 
 - Renamed "Domainr (Fastly Domain Search)" to "Fastly Domain Search"
 
