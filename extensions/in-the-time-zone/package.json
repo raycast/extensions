@@ -22,8 +22,38 @@
     {
       "name": "defaultScrubMinutes",
       "type": "dropdown",
-      "title": "Default Scrub Minutes",
-      "description": "Arrow keys scrub this many minutes.",
+      "title": "Arrow Key Scrub Minutes",
+      "description": "Arrow keys (← →) scrub this many minutes.",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        }
+      ],
+      "default": "60",
+      "required": false
+    },
+    {
+      "name": "optionScrubMinutes",
+      "type": "dropdown",
+      "title": "Option+Arrow Key Scrub Minutes",
+      "description": "Option+Arrow keys (⌥← ⌥→) scrub this many minutes.",
       "data": [
         {
           "title": "5 minutes",
