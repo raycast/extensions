@@ -1,4 +1,3 @@
-import "../../../raycast-env.d.ts";
 import { Item, ItemsJson, Vault, VaultsJson } from "./types";
 import { promisify } from "util";
 import { execFile } from "child_process";
@@ -193,7 +192,7 @@ export class Client {
   }
 }
 
-const { cliPath } = getPreferenceValues<Preferences>();
+const { cliPath } = getPreferenceValues<ExtensionPreferences>();
 // Single in-memory client
 let client: Client | null = null;
 
