@@ -1,5 +1,5 @@
 import { exec, execSync } from "child_process";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);

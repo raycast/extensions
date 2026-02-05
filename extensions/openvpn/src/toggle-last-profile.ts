@@ -45,9 +45,9 @@ export default async function Command() {
   }
 
   // Show success toast reflecting the new state after toggling
-  const newIsConnected = !status.isConnected;
+  const isConnectedAfterToggle = !status.isConnected;
   await showToast({
-    style: Toast.Style.Success,
-    title: `${status.selectedProfileName} ${newIsConnected ? "CONNECTED" : "DISCONNECTED"}`,
+    style: isConnectedAfterToggle ? Toast.Style.Success : Toast.Style.Failure,
+    title: `${status.selectedProfileName} ${isConnectedAfterToggle ? "CONNECTED" : "DISCONNECTED"}`,
   });
 }
