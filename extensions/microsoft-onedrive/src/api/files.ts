@@ -677,7 +677,7 @@ export async function uploadFiles(
       // Determine the target folder - create subfolders if needed
       let targetFolderId = destinationFolder.id;
       if (file.relativePath) {
-        const folderPath = path.dirname(file.relativePath);
+        const folderPath = toApiPath(path.dirname(file.relativePath));
         if (folderPath && folderPath !== ".") {
           targetFolderId = await ensureFolderPathExists(drivePrefix, destinationFolder.id, folderPath, folderCache);
         }
