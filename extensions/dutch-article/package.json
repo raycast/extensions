@@ -4,15 +4,15 @@
   "title": "Dutch Article (Het of De)",
   "description": "Look up whether a Dutch word uses 'het' or 'de' as its article",
   "icon": "command-icon.png",
-  "author": "ahmedaziz",
+  "author": "ahmeed83",
   "categories": [
-    "Education"
+    "Communication"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "lookup",
-      "title": "Look Up Dutch Article",
+      "title": "Look up Dutch Article",
       "description": "Check if a Dutch word uses 'het' or 'de'",
       "mode": "view"
     }
@@ -21,13 +21,13 @@
     "@raycast/api": "^1.104.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.10.4",
-    "@types/react": "17.0.80",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.0",
+    "@types/react": "19.2.11",
     "canvas": "^3.2.1",
-    "eslint": "^8.56.0",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3"
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

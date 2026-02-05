@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Dutch nouns with their articles (het = neuter, de = common gender)
 // Comprehensive list with ~3000 words
 

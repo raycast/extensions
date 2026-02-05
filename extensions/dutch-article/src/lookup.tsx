@@ -1,15 +1,5 @@
-// @ts-nocheck
 import { useState, useEffect, useMemo } from "react";
-import {
-  Action,
-  ActionPanel,
-  List,
-  showToast,
-  Toast,
-  Clipboard,
-  Icon,
-  Color,
-} from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Clipboard, Icon, Color } from "@raycast/api";
 import { dutchWords } from "./words";
 
 interface ArticleResult {
@@ -44,8 +34,8 @@ function levenshteinDistance(a: string, b: string): number {
       } else {
         matrix[i][j] = Math.min(
           matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j] + 1, // deletion
         );
       }
     }
@@ -77,9 +67,7 @@ function findSpellingSuggestions(query: string, maxDistance: number = 2): Spelli
   }
 
   // Sort by distance (closest first), then alphabetically
-  return suggestions
-    .sort((a, b) => a.distance - b.distance || a.word.localeCompare(b.word))
-    .slice(0, 5);
+  return suggestions.sort((a, b) => a.distance - b.distance || a.word.localeCompare(b.word)).slice(0, 5);
 }
 
 // Search for matching words in the dictionary (prefix match)
@@ -121,15 +109,12 @@ async function lookupOnline(word: string): Promise<ArticleResult | null> {
   const trimmedWord = word.trim().toLowerCase();
 
   try {
-    const response = await fetch(
-      `https://welklidwoord.nl/${encodeURIComponent(trimmedWord)}`,
-      {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-          Accept: "text/html,application/xhtml+xml",
-        },
-      }
-    );
+    const response = await fetch(`https://welklidwoord.nl/${encodeURIComponent(trimmedWord)}`, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        Accept: "text/html,application/xhtml+xml",
+      },
+    });
     const html = await response.text();
 
     // Check if the word was not found in the database
@@ -230,7 +215,7 @@ export default function Command() {
       try {
         const result = await lookupOnline(query);
         setOnlineResult(result); // Will be null if not found
-      } catch (error) {
+      } catch {
         setOnlineResult(null);
         showToast({
           style: Toast.Style.Failure,
@@ -383,21 +368,23 @@ export default function Command() {
       {showResults ? (
         <>
           {localResults.length > 0 && (
-            <List.Section title={localResults.length === 1 && localResults[0].word === searchText.trim().toLowerCase() ? "Result" : "Suggestions"}>
+            <List.Section
+              title={
+                localResults.length === 1 && localResults[0].word === searchText.trim().toLowerCase()
+                  ? "Result"
+                  : "Suggestions"
+              }
+            >
               {localResults.map((result, index) =>
-                renderItem(result, index === 0 && result.word === searchText.trim().toLowerCase())
+                renderItem(result, index === 0 && result.word === searchText.trim().toLowerCase()),
               )}
             </List.Section>
           )}
           {onlineResult && !hasExactLocalMatch && (
-            <List.Section title="Online Result">
-              {renderItem(onlineResult, true)}
-            </List.Section>
+            <List.Section title="Online Result">{renderItem(onlineResult, true)}</List.Section>
           )}
           {spellingSuggestions.length > 0 && (
-            <List.Section title="Did you mean...?">
-              {spellingSuggestions.map(renderSuggestion)}
-            </List.Section>
+            <List.Section title="Did you mean...?">{spellingSuggestions.map(renderSuggestion)}</List.Section>
           )}
         </>
       ) : (
