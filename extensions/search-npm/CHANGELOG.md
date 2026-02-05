@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Added npmx] - {PR_MERGE_DATE}
+## [Added npmx] - 2026-02-05
 
 - Add ability to open package page in npmx.dev
 
