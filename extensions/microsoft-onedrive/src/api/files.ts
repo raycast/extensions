@@ -28,7 +28,7 @@ interface CollectedItems {
  * Convert path to use forward slashes (required by Graph API)
  */
 function toApiPath(p: string): string {
-  return p.replace(/\\\\/g, "/");
+  return p.replace(/\\/g, "/");
 }
 
 /**
