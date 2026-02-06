@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, Icon, getApplications } from "@raycast/api";
-import { useSQL, usePromise } from "@raycast/utils";
+import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -11,7 +11,6 @@ import {
   formatTimestamp,
   formatDuration,
   groupTranscriptsByDate,
-  getUniqueApps,
 } from "./utils";
 
 const WISPR_DB = resolve(
@@ -22,38 +21,60 @@ const WISPR_DB = resolve(
 const COLUMNS = `transcriptEntityId, asrText, formattedText, editedText,
   timestamp, app, url, duration, numWords, status, language, conversationId, isArchived`;
 
-function buildQuery(search: string) {
+const PAGE_SIZE = 50;
+
+function buildPaginatedQuery(
+  search: string,
+  appFilter: string,
+  limit: number,
+  offset: number,
+) {
+  const conditions = ["(isArchived = 0 OR isArchived IS NULL)"];
+
   if (search.trim()) {
     const escaped = search.replace(/'/g, "''");
     const pattern = `%${escaped}%`;
-    return `SELECT ${COLUMNS} FROM History
-      WHERE (isArchived = 0 OR isArchived IS NULL)
-        AND (formattedText LIKE '${pattern}' OR asrText LIKE '${pattern}' OR editedText LIKE '${pattern}')
-      ORDER BY timestamp DESC LIMIT 100`;
+    conditions.push(
+      `(formattedText LIKE '${pattern}' OR asrText LIKE '${pattern}' OR editedText LIKE '${pattern}')`,
+    );
+  } else {
+    conditions.push("formattedText IS NOT NULL AND formattedText != ''");
   }
-  return `SELECT ${COLUMNS} FROM History
-    WHERE (isArchived = 0 OR isArchived IS NULL)
-      AND formattedText IS NOT NULL AND formattedText != ''
-    ORDER BY timestamp DESC LIMIT 200`;
+
+  if (appFilter !== "all") {
+    const escaped = appFilter.replace(/'/g, "''");
+    conditions.push(`app = '${escaped}'`);
+  }
+
+  return `SELECT ${COLUMNS} FROM History WHERE ${conditions.join(" AND ")} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`;
 }
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [appFilter, setAppFilter] = useState("all");
 
-  const query = useMemo(() => buildQuery(searchText), [searchText]);
-  const { data, isLoading, permissionView } = useSQL<Transcript>(
-    WISPR_DB,
-    query,
-    {
-      permissionPriming:
-        "This is required to read your Wispr Flow transcription history.",
+  const { isLoading, data, pagination } = useCachedPromise(
+    (search: string, app: string) => async (options: { page: number }) => {
+      const offset = options.page * PAGE_SIZE;
+      const query = buildPaginatedQuery(search, app, PAGE_SIZE, offset);
+      const results = await executeSQL<Transcript>(WISPR_DB, query);
+      return { data: results, hasMore: results.length === PAGE_SIZE };
     },
+    [searchText, appFilter],
   );
 
-  if (permissionView) {
-    return permissionView;
-  }
+  const { data: uniqueAppsData } = useCachedPromise(async () => {
+    return executeSQL<{ app: string }>(
+      WISPR_DB,
+      `SELECT DISTINCT app FROM History WHERE (isArchived = 0 OR isArchived IS NULL) AND app IS NOT NULL AND app != '' ORDER BY app`,
+    );
+  }, []);
+
+  const uniqueApps = useMemo(() => {
+    return (uniqueAppsData ?? [])
+      .map((row) => ({ bundleId: row.app, name: getAppName(row.app) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [uniqueAppsData]);
 
   const { data: installedApps } = usePromise(getApplications);
   const appPathMap = useMemo(() => {
@@ -67,12 +88,7 @@ export default function Command() {
   }, [installedApps]);
 
   const allTranscripts = data ?? [];
-  const filtered =
-    appFilter === "all"
-      ? allTranscripts
-      : allTranscripts.filter((t) => t.app === appFilter);
-  const groups = groupTranscriptsByDate(filtered);
-  const uniqueApps = getUniqueApps(allTranscripts);
+  const groups = groupTranscriptsByDate(allTranscripts);
 
   return (
     <List
@@ -81,6 +97,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle
       isShowingDetail
+      pagination={pagination}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by App" onChange={setAppFilter}>
           <List.Dropdown.Item title="All Apps" value="all" />
@@ -107,7 +124,7 @@ export default function Command() {
           ))}
         </List.Section>
       ))}
-      {!isLoading && filtered.length === 0 && (
+      {!isLoading && allTranscripts.length === 0 && (
         <List.EmptyView
           title="No Transcripts Found"
           description={
