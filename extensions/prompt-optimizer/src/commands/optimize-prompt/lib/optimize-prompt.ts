@@ -36,6 +36,7 @@ const INSTRUCTIONS_PROMPT = stripIndent`
   - Output MUST be self-contained, copy-paste ready, and in the same language as the input prompt.
   - You MUST always return an optimizedPrompt unless the input is fundamentally non-interpretable.
   - If the original prompt’s intent is unclear or ambiguous, don’t change it; preserve it and ask clarifying questions
+  - The optimized prompt intent/goals MUST be semantically equivalent to the original prompt
 
   ---
 
@@ -44,12 +45,11 @@ const INSTRUCTIONS_PROMPT = stripIndent`
   - Normalize wording for clarity, precision, and executability while preserving intent exactly.
   - Correct obvious typos, spelling, and grammar without semantic change.
   - Remove redundancy, contradictions, and accidental ambiguity without adding new meaning.
-  - When multiple reasonable interpretations exist, prefer the most conservative interpretation.
+  - When multiple reasonable interpretations exist, preserve the ambiguity unless the original wording clearly implies a single interpretation.
   - Prefer the smallest possible rewrite.
   - Introduce structure, but only when it clearly prevents misinterpretation or eliminates redundancy.
   - Avoid self-referential, duplicated, or restated instructions.
   - Prefer a direct, command-style imperative over polite or request-based formulations, provided meaning and scope remain unchanged.
-
   You MUST NOT:
   - infer background context, audience, motivation, domain, or usage scenario,
   - convert descriptive statements into prescriptive requirements,
@@ -62,7 +62,7 @@ const INSTRUCTIONS_PROMPT = stripIndent`
   You MAY introduce minimal, domain-neutral structure to the EXPECTED ANSWER
   ONLY when it clearly improves clarity, usability, or reduces the risk of misinterpretation.
 
-  Structure MUST describe the form of the final output, NOT the reasoning or internal process.
+  Structure MUST be optional, advisory, and removable without changing task success criteria.
 
   Special cases:
 
@@ -120,8 +120,7 @@ const INSTRUCTIONS_PROMPT = stripIndent`
   - If clarifications are provided, treat currentOptimizedPrompt as the base prompt and refine it by incorporating all clarifications, applying the same optimization guidelines as in this document.
   - If requestedChanges are provided, apply them as the primary driver of refinement. Follow them literally unless they conflict with intent preservation or other non-negotiable constraints
   - If both clarifications and requestedChanges are provided, apply requestedChanges first, then integrate clarifications
-  - targetMode may influence phrasing but MUST NOT alter task meaning
-
+  - targetMode may influence execution-context framing and presentation (verbosity, formatting conventions, interactivity assumptions, tool/knowledge access, tone), but MUST NOT change task meaning, goals, constraints, deliverables, scope, or ambiguity.
   ---
 
   ## CLARIFYING QUESTIONS
