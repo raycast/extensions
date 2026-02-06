@@ -1,5 +1,9 @@
 # GitHub Copilot Changelog
 
+## [Premium requests on view tasks] - {PR_MERGE_DATE}
+
+- Add premium requests used to the "View Tasks" command
+
 ## [Additional instructions for issue assignment] - 2026-02-06
 
 - Add optional "Additional Instructions" field when assigning an issue to Copilot

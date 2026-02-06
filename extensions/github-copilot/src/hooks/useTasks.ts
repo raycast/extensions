@@ -10,6 +10,7 @@ const minutesAgoISO8601Timestamp = (n: number): string => {
 const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   {
     key: "1",
+    premiumRequests: 2,
     pullRequest: {
       globalId: "foo",
       title: "Refactor homepage layout into discrete components",
@@ -40,6 +41,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "2",
+    premiumRequests: 4,
     pullRequest: {
       globalId: "foo",
       title: "Implement dark/light mode switcher",
@@ -70,6 +72,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "3",
+    premiumRequests: 2,
     pullRequest: {
       globalId: "foo",
       title: "Fix bug in authentication flow",
@@ -100,6 +103,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "3.1",
+    premiumRequests: 2,
     pullRequest: {
       globalId: "foo",
       title: "Increase test coverage for product page",
@@ -130,6 +134,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "4",
+    premiumRequests: 2,
     pullRequest: {
       globalId: "foo",
       title: "Update copy for sold out books",
@@ -160,6 +165,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "5",
+    premiumRequests: 2,
     pullRequest: {
       globalId: "foo",
       title: "Upgrade to Ruby 3.4.1",
@@ -190,6 +196,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "6",
+    premiumRequests: 4,
     pullRequest: {
       globalId: "foo",
       title: "Migrate <ProductImage> to use styled-components",
@@ -220,6 +227,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "7",
+    premiumRequests: 0,
     pullRequest: {
       globalId: "foo",
       title: "Refresh documentation for build process",
