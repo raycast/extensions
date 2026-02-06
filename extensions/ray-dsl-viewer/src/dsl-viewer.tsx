@@ -187,7 +187,6 @@ export default function Command() {
   const handlePaste = async () => {
     try {
       const text = await Clipboard.readText();
-      console.log("Clipboard text:", text?.substring(0, 100));
       if (!text) {
         await showToast({
           style: Toast.Style.Failure,
@@ -197,7 +196,6 @@ export default function Command() {
       }
 
       const detected = detectContentType(text);
-      console.log("Detected type:", detected);
       setContent(text);
       setContentType(detected);
       await showToast({
@@ -205,7 +203,6 @@ export default function Command() {
         title: `Detected as ${formatTypeLabel(detected)}`,
       });
     } catch (error) {
-      console.error("Paste error:", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to paste",
