@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Additional instructions for issue assignment] - {PR_MERGE_DATE}
+## [Additional instructions for issue assignment] - 2026-02-06
 
 - Add optional "Additional Instructions" field when assigning an issue to Copilot
 
