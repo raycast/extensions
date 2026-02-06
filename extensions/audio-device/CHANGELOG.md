@@ -4,7 +4,7 @@
 
 - Hidden devices tracked per input/output and shared across manual lists and auto-switch
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-06
 - Add Windows support via platform abstraction
 - Refactor audio handling into a platform abstraction layer.
 - Moves macOS binary logic to src/platform/macos and adds
