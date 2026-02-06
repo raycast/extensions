@@ -72,7 +72,10 @@ function isMermaidBlock(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
   if (trimmed.startsWith("%%{")) return true;
-  const firstWord = trimmed.split(/[\s\n]/)[0].toLowerCase().replace(/-v\d+$/, "");
+  const firstWord = trimmed
+    .split(/[\s\n]/)[0]
+    .toLowerCase()
+    .replace(/-v\d+$/, "");
   return MERMAID_KEYWORDS.some((kw) => firstWord === kw.toLowerCase());
 }
 
