@@ -1,0 +1,21 @@
+## [Initial Release] - 2026-02-06
+
+- Manage multiple Mercury API keys with account switching
+- View accounts with balances, account and routing numbers
+- Search and filter transactions with status grouping
+- View and manage debit cards
+- Quick balance HUD and menu bar balance display
+- Create and manage payment recipients (ACH, wire, check)
+- Send payments and transfer between accounts
+- Invoice management with line items and status filtering
+- Customer management for accounts receivable
+- View organization details and team members
+- Treasury and credit account views
+- Download bank statements
+- Expense category management
+- Event log for audit and reconciliation
+- Webhook endpoint management
+- AI-powered financial summary with conversation
+- Automatic API permission detection on account setup
+- Per-account feature toggles to show/hide commands
+- Graceful handling of restricted API endpoints
