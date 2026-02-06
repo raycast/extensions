@@ -6,15 +6,17 @@
  */
 
 import { Action, ActionPanel, Icon, List, showToast, Toast, Color } from "@raycast/api";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLettaClient, useAgents } from "./hooks";
 import ChatCommand from "./chat";
 
 export default function AgentsCommand() {
   const { accounts, getClientForAccount } = useLettaClient();
+  const [searchText, setSearchText] = useState("");
   const { agents, isLoading, activeAgentId, setActiveAgentId, error, revalidate } = useAgents(
     accounts,
-    getClientForAccount
+    getClientForAccount,
+    searchText
   );
 
   if (error) {
@@ -39,7 +41,13 @@ export default function AgentsCommand() {
   }, [agents]);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search agents..." navigationTitle="Manage Agents">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search agents..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      navigationTitle="Manage Agents"
+    >
       {!isLoading && !hasAgents && (
         <List.EmptyView
           icon={Icon.Person}
@@ -144,7 +152,8 @@ function ChatWithAgent({ agentId }: { agentId: string }) {
   // Set as active when component mounts (not during render!)
   useEffect(() => {
     setActiveAgentId(agentId);
-  }, [agentId, setActiveAgentId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentId]);
 
   // The ChatCommand will pick up the active agent from storage
   return <ChatCommand />;

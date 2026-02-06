@@ -23,6 +23,17 @@
                 "ai",
                 "memory"
             ]
+        },
+        {
+            "name": "agents",
+            "title": "Manage Agents",
+            "description": "View, search, and manage your Letta agents",
+            "mode": "view",
+            "keywords": [
+                "agents",
+                "manage",
+                "list"
+            ]
         }
     ],
     "preferences": [
