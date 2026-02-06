@@ -1,0 +1,826 @@
+[
+  {
+    "keys": "grt",
+    "description": "cd to git root"
+  },
+  {
+    "keys": "ggpnp",
+    "description": "git pull && git push"
+  },
+  {
+    "keys": "ggpur",
+    "description": "git pull --rebase upstream"
+  },
+  {
+    "keys": "g",
+    "description": "git"
+  },
+  {
+    "keys": "ga",
+    "description": "git add"
+  },
+  {
+    "keys": "gaa",
+    "description": "git add --all"
+  },
+  {
+    "keys": "gapa",
+    "description": "git add --patch"
+  },
+  {
+    "keys": "gau",
+    "description": "git add --update"
+  },
+  {
+    "keys": "gav",
+    "description": "git add --verbose"
+  },
+  {
+    "keys": "gwip",
+    "description": "git add -A; git rm deleted; git commit --wip"
+  },
+  {
+    "keys": "gam",
+    "description": "git am"
+  },
+  {
+    "keys": "gama",
+    "description": "git am --abort"
+  },
+  {
+    "keys": "gamc",
+    "description": "git am --continue"
+  },
+  {
+    "keys": "gamscp",
+    "description": "git am --show-current-patch"
+  },
+  {
+    "keys": "gams",
+    "description": "git am --skip"
+  },
+  {
+    "keys": "gap",
+    "description": "git apply"
+  },
+  {
+    "keys": "gapt",
+    "description": "git apply --3way"
+  },
+  {
+    "keys": "gbs",
+    "description": "git bisect"
+  },
+  {
+    "keys": "gbsb",
+    "description": "git bisect bad"
+  },
+  {
+    "keys": "gbsg",
+    "description": "git bisect good"
+  },
+  {
+    "keys": "gbsn",
+    "description": "git bisect new"
+  },
+  {
+    "keys": "gbso",
+    "description": "git bisect old"
+  },
+  {
+    "keys": "gbsr",
+    "description": "git bisect reset"
+  },
+  {
+    "keys": "gbss",
+    "description": "git bisect start"
+  },
+  {
+    "keys": "gbl",
+    "description": "git blame -w"
+  },
+  {
+    "keys": "gb",
+    "description": "git branch"
+  },
+  {
+    "keys": "gba",
+    "description": "git branch --all"
+  },
+  {
+    "keys": "gbd",
+    "description": "git branch --delete"
+  },
+  {
+    "keys": "gbD",
+    "description": "git branch --delete --force"
+  },
+  {
+    "keys": "gbgd",
+    "description": "git branch delete gone branches"
+  },
+  {
+    "keys": "gbgD",
+    "description": "git branch force delete gone branches"
+  },
+  {
+    "keys": "gbm",
+    "description": "git branch --move"
+  },
+  {
+    "keys": "gbnm",
+    "description": "git branch --no-merged"
+  },
+  {
+    "keys": "gbr",
+    "description": "git branch --remote"
+  },
+  {
+    "keys": "ggsup",
+    "description": "git branch set upstream to origin"
+  },
+  {
+    "keys": "gbg",
+    "description": "git branch show gone branches"
+  },
+  {
+    "keys": "gco",
+    "description": "git checkout"
+  },
+  {
+    "keys": "gcor",
+    "description": "git checkout --recurse-submodules"
+  },
+  {
+    "keys": "gcb",
+    "description": "git checkout -b"
+  },
+  {
+    "keys": "gcB",
+    "description": "git checkout -B"
+  },
+  {
+    "keys": "gcd",
+    "description": "git checkout develop branch"
+  },
+  {
+    "keys": "gcm",
+    "description": "git checkout main branch"
+  },
+  {
+    "keys": "gcp",
+    "description": "git cherry-pick"
+  },
+  {
+    "keys": "gcpa",
+    "description": "git cherry-pick --abort"
+  },
+  {
+    "keys": "gcpc",
+    "description": "git cherry-pick --continue"
+  },
+  {
+    "keys": "gclean",
+    "description": "git clean --interactive -d"
+  },
+  {
+    "keys": "gcl",
+    "description": "git clone --recurse-submodules"
+  },
+  {
+    "keys": "gclf",
+    "description": "git clone shallow with submodules"
+  },
+  {
+    "keys": "gccd",
+    "description": "git clone and cd into directory"
+  },
+  {
+    "keys": "gcam",
+    "description": "git commit --all --message"
+  },
+  {
+    "keys": "gcas",
+    "description": "git commit --all --signoff"
+  },
+  {
+    "keys": "gcasm",
+    "description": "git commit --all --signoff --message"
+  },
+  {
+    "keys": "gcmsg",
+    "description": "git commit --message"
+  },
+  {
+    "keys": "gcsm",
+    "description": "git commit --signoff --message"
+  },
+  {
+    "keys": "gc",
+    "description": "git commit --verbose"
+  },
+  {
+    "keys": "gca",
+    "description": "git commit --verbose --all"
+  },
+  {
+    "keys": "gca!",
+    "description": "git commit --verbose --all --amend"
+  },
+  {
+    "keys": "gcan!",
+    "description": "git commit --verbose --all --no-edit --amend"
+  },
+  {
+    "keys": "gcans!",
+    "description": "git commit --verbose --all --signoff --no-edit --amend"
+  },
+  {
+    "keys": "gcann!",
+    "description": "git commit --verbose --all --date=now --no-edit --amend"
+  },
+  {
+    "keys": "gc!",
+    "description": "git commit --verbose --amend"
+  },
+  {
+    "keys": "gcn",
+    "description": "git commit --verbose --no-edit"
+  },
+  {
+    "keys": "gcn!",
+    "description": "git commit --verbose --no-edit --amend"
+  },
+  {
+    "keys": "gcs",
+    "description": "git commit -S"
+  },
+  {
+    "keys": "gcss",
+    "description": "git commit -S -s"
+  },
+  {
+    "keys": "gcssm",
+    "description": "git commit -S -s -m"
+  },
+  {
+    "keys": "gcf",
+    "description": "git config --list"
+  },
+  {
+    "keys": "gcfu",
+    "description": "git commit --fixup"
+  },
+  {
+    "keys": "gdct",
+    "description": "git describe latest tag"
+  },
+  {
+    "keys": "gd",
+    "description": "git diff"
+  },
+  {
+    "keys": "gdca",
+    "description": "git diff --cached"
+  },
+  {
+    "keys": "gdcw",
+    "description": "git diff --cached --word-diff"
+  },
+  {
+    "keys": "gds",
+    "description": "git diff --staged"
+  },
+  {
+    "keys": "gdw",
+    "description": "git diff --word-diff"
+  },
+  {
+    "keys": "gdv",
+    "description": "git diff view"
+  },
+  {
+    "keys": "gdup",
+    "description": "git diff upstream"
+  },
+  {
+    "keys": "gdnolock",
+    "description": "git diff exclude lock files"
+  },
+  {
+    "keys": "gdt",
+    "description": "git diff-tree"
+  },
+  {
+    "keys": "gf",
+    "description": "git fetch"
+  },
+  {
+    "keys": "gfa",
+    "description": "git fetch --all --tags --prune"
+  },
+  {
+    "keys": "gfo",
+    "description": "git fetch origin"
+  },
+  {
+    "keys": "gg",
+    "description": "git gui citool"
+  },
+  {
+    "keys": "gga",
+    "description": "git gui citool --amend"
+  },
+  {
+    "keys": "ghh",
+    "description": "git help"
+  },
+  {
+    "keys": "glgg",
+    "description": "git log --graph"
+  },
+  {
+    "keys": "glgga",
+    "description": "git log --graph --decorate --all"
+  },
+  {
+    "keys": "glgm",
+    "description": "git log --graph --max-count=10"
+  },
+  {
+    "keys": "glod",
+    "description": "git log oneline decorated"
+  },
+  {
+    "keys": "glods",
+    "description": "git log oneline decorated short date"
+  },
+  {
+    "keys": "glol",
+    "description": "git log oneline relative date"
+  },
+  {
+    "keys": "glola",
+    "description": "git log oneline relative date all"
+  },
+  {
+    "keys": "glols",
+    "description": "git log oneline relative date stat"
+  },
+  {
+    "keys": "glo",
+    "description": "git log --oneline --decorate"
+  },
+  {
+    "keys": "glog",
+    "description": "git log --oneline --decorate --graph"
+  },
+  {
+    "keys": "gloga",
+    "description": "git log --oneline --decorate --graph --all"
+  },
+  {
+    "keys": "glp",
+    "description": "git log --pretty"
+  },
+  {
+    "keys": "glg",
+    "description": "git log --stat"
+  },
+  {
+    "keys": "glgp",
+    "description": "git log --stat --patch"
+  },
+  {
+    "keys": "gignored",
+    "description": "git ls-files ignored"
+  },
+  {
+    "keys": "gfg",
+    "description": "git ls-files grep"
+  },
+  {
+    "keys": "gm",
+    "description": "git merge"
+  },
+  {
+    "keys": "gma",
+    "description": "git merge --abort"
+  },
+  {
+    "keys": "gmc",
+    "description": "git merge --continue"
+  },
+  {
+    "keys": "gms",
+    "description": "git merge --squash"
+  },
+  {
+    "keys": "gmff",
+    "description": "git merge --ff-only"
+  },
+  {
+    "keys": "gmom",
+    "description": "git merge origin main"
+  },
+  {
+    "keys": "gmum",
+    "description": "git merge upstream main"
+  },
+  {
+    "keys": "gmtl",
+    "description": "git mergetool --no-prompt"
+  },
+  {
+    "keys": "gmtlvim",
+    "description": "git mergetool vimdiff"
+  },
+  {
+    "keys": "gl",
+    "description": "git pull"
+  },
+  {
+    "keys": "gpr",
+    "description": "git pull --rebase"
+  },
+  {
+    "keys": "gprv",
+    "description": "git pull --rebase -v"
+  },
+  {
+    "keys": "gpra",
+    "description": "git pull --rebase --autostash"
+  },
+  {
+    "keys": "gprav",
+    "description": "git pull --rebase --autostash -v"
+  },
+  {
+    "keys": "gprom",
+    "description": "git pull --rebase origin main"
+  },
+  {
+    "keys": "gpromi",
+    "description": "git pull --rebase=interactive origin main"
+  },
+  {
+    "keys": "gprum",
+    "description": "git pull --rebase upstream main"
+  },
+  {
+    "keys": "gprumi",
+    "description": "git pull --rebase=interactive upstream main"
+  },
+  {
+    "keys": "ggpull",
+    "description": "git pull origin current branch"
+  },
+  {
+    "keys": "ggl",
+    "description": "git pull origin current branch"
+  },
+  {
+    "keys": "gluc",
+    "description": "git pull upstream current branch"
+  },
+  {
+    "keys": "glum",
+    "description": "git pull upstream main"
+  },
+  {
+    "keys": "gp",
+    "description": "git push"
+  },
+  {
+    "keys": "gpd",
+    "description": "git push --dry-run"
+  },
+  {
+    "keys": "gpf!",
+    "description": "git push --force"
+  },
+  {
+    "keys": "ggf",
+    "description": "git push --force origin current branch"
+  },
+  {
+    "keys": "gpf",
+    "description": "git push --force-with-lease"
+  },
+  {
+    "keys": "ggfl",
+    "description": "git push --force-with-lease origin current branch"
+  },
+  {
+    "keys": "gpsup",
+    "description": "git push --set-upstream origin current branch"
+  },
+  {
+    "keys": "gpsupf",
+    "description": "git push --set-upstream origin current branch --force-with-lease"
+  },
+  {
+    "keys": "gpv",
+    "description": "git push --verbose"
+  },
+  {
+    "keys": "gpoat",
+    "description": "git push origin --all && git push origin --tags"
+  },
+  {
+    "keys": "gpod",
+    "description": "git push origin --delete"
+  },
+  {
+    "keys": "ggpush",
+    "description": "git push origin current branch"
+  },
+  {
+    "keys": "ggp",
+    "description": "git push origin current branch"
+  },
+  {
+    "keys": "gpu",
+    "description": "git push upstream"
+  },
+  {
+    "keys": "grb",
+    "description": "git rebase"
+  },
+  {
+    "keys": "grba",
+    "description": "git rebase --abort"
+  },
+  {
+    "keys": "grbc",
+    "description": "git rebase --continue"
+  },
+  {
+    "keys": "grbi",
+    "description": "git rebase --interactive"
+  },
+  {
+    "keys": "grbo",
+    "description": "git rebase --onto"
+  },
+  {
+    "keys": "grbs",
+    "description": "git rebase --skip"
+  },
+  {
+    "keys": "grbd",
+    "description": "git rebase develop branch"
+  },
+  {
+    "keys": "grbm",
+    "description": "git rebase main branch"
+  },
+  {
+    "keys": "grbom",
+    "description": "git rebase origin main"
+  },
+  {
+    "keys": "grbum",
+    "description": "git rebase upstream main"
+  },
+  {
+    "keys": "grf",
+    "description": "git reflog"
+  },
+  {
+    "keys": "gr",
+    "description": "git remote"
+  },
+  {
+    "keys": "grv",
+    "description": "git remote --verbose"
+  },
+  {
+    "keys": "gra",
+    "description": "git remote add"
+  },
+  {
+    "keys": "grrm",
+    "description": "git remote remove"
+  },
+  {
+    "keys": "grmv",
+    "description": "git remote rename"
+  },
+  {
+    "keys": "grset",
+    "description": "git remote set-url"
+  },
+  {
+    "keys": "grup",
+    "description": "git remote update"
+  },
+  {
+    "keys": "grh",
+    "description": "git reset"
+  },
+  {
+    "keys": "gru",
+    "description": "git reset --"
+  },
+  {
+    "keys": "grhh",
+    "description": "git reset --hard"
+  },
+  {
+    "keys": "grhk",
+    "description": "git reset --keep"
+  },
+  {
+    "keys": "grhs",
+    "description": "git reset --soft"
+  },
+  {
+    "keys": "gpristine",
+    "description": "git reset --hard && git clean"
+  },
+  {
+    "keys": "gwipe",
+    "description": "git reset --hard && git clean -df"
+  },
+  {
+    "keys": "groh",
+    "description": "git reset origin current branch --hard"
+  },
+  {
+    "keys": "grs",
+    "description": "git restore"
+  },
+  {
+    "keys": "grss",
+    "description": "git restore --source"
+  },
+  {
+    "keys": "grst",
+    "description": "git restore --staged"
+  },
+  {
+    "keys": "gunwip",
+    "description": "git undo wip commit"
+  },
+  {
+    "keys": "grev",
+    "description": "git revert"
+  },
+  {
+    "keys": "grm",
+    "description": "git rm"
+  },
+  {
+    "keys": "grmc",
+    "description": "git rm --cached"
+  },
+  {
+    "keys": "gcount",
+    "description": "git shortlog --summary -n"
+  },
+  {
+    "keys": "gsh",
+    "description": "git show"
+  },
+  {
+    "keys": "gsps",
+    "description": "git show --pretty=short --show-signature"
+  },
+  {
+    "keys": "gstall",
+    "description": "git stash --all"
+  },
+  {
+    "keys": "gstu",
+    "description": "git stash --include-untracked"
+  },
+  {
+    "keys": "gstaa",
+    "description": "git stash apply"
+  },
+  {
+    "keys": "gstc",
+    "description": "git stash clear"
+  },
+  {
+    "keys": "gstd",
+    "description": "git stash drop"
+  },
+  {
+    "keys": "gstl",
+    "description": "git stash list"
+  },
+  {
+    "keys": "gstp",
+    "description": "git stash pop"
+  },
+  {
+    "keys": "gsta",
+    "description": "git stash push/save"
+  },
+  {
+    "keys": "gsts",
+    "description": "git stash show --patch"
+  },
+  {
+    "keys": "gst",
+    "description": "git status"
+  },
+  {
+    "keys": "gss",
+    "description": "git status --short"
+  },
+  {
+    "keys": "gsb",
+    "description": "git status --short -b"
+  },
+  {
+    "keys": "gsi",
+    "description": "git submodule init"
+  },
+  {
+    "keys": "gsu",
+    "description": "git submodule update"
+  },
+  {
+    "keys": "gsd",
+    "description": "git svn dcommit"
+  },
+  {
+    "keys": "git-svn-dcommit-push",
+    "description": "git svn dcommit && git push"
+  },
+  {
+    "keys": "gsr",
+    "description": "git svn rebase"
+  },
+  {
+    "keys": "gsw",
+    "description": "git switch"
+  },
+  {
+    "keys": "gswc",
+    "description": "git switch -c"
+  },
+  {
+    "keys": "gswd",
+    "description": "git switch develop branch"
+  },
+  {
+    "keys": "gswm",
+    "description": "git switch main branch"
+  },
+  {
+    "keys": "gta",
+    "description": "git tag --annotate"
+  },
+  {
+    "keys": "gts",
+    "description": "git tag -s"
+  },
+  {
+    "keys": "gtv",
+    "description": "git tag sort by version"
+  },
+  {
+    "keys": "gignore",
+    "description": "git update-index --assume-unchanged"
+  },
+  {
+    "keys": "gunignore",
+    "description": "git update-index --no-assume-unchanged"
+  },
+  {
+    "keys": "gwch",
+    "description": "git log --patch --abbrev-commit"
+  },
+  {
+    "keys": "gwt",
+    "description": "git worktree"
+  },
+  {
+    "keys": "gwtls",
+    "description": "git worktree list"
+  },
+  {
+    "keys": "gwtmv",
+    "description": "git worktree move"
+  },
+  {
+    "keys": "gwtrm",
+    "description": "git worktree remove"
+  },
+  {
+    "keys": "gk",
+    "description": "gitk --all --branches"
+  },
+  {
+    "keys": "gke",
+    "description": "gitk --all with reflogs"
+  },
+  {
+    "keys": "gtl",
+    "description": "git tag list sorted"
+  }
+]

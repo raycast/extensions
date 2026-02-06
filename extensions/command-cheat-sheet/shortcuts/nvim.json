@@ -1,0 +1,34 @@
+[
+  {
+    "keys": "U",
+    "description": "Uppercase"
+  },
+  {
+    "keys": "gsaw",
+    "description": "Surround word with arg"
+  },
+  {
+    "keys": "gsd",
+    "description": "Delete surround"
+  },
+  {
+    "keys": "gsr",
+    "description": "Replace surround"
+  },
+  {
+    "keys": "leader U D",
+    "description": "Toggle diagnostics"
+  },
+  {
+    "keys": "leader U W",
+    "description": "Toggle word wrap"
+  },
+  {
+    "keys": "gww",
+    "description": "Wrap current line"
+  },
+  {
+    "keys": "gwap",
+    "description": "Wrap current paragraph"
+  }
+]
