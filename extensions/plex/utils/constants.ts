@@ -6,8 +6,9 @@ export const plexBaseUrl = preferences.plexBaseUrl;
 export const plex_token = preferences.plexToken;
 
 export const ENDPOINTS = {
-  librarySections: `${plexBaseUrl}/library/sections/`,
+  librarySections: `${plexBaseUrl}/library/sections`,
   activeSessions: `${plexBaseUrl}/status/sessions`,
+  identity: `${plexBaseUrl}/identity`,
 };
 
 export const SECTION_ICONS = {

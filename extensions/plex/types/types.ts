@@ -27,7 +27,7 @@ export interface SectionsApiResponse {
   };
 }
 
-type Metadata = {
+export type Metadata = {
   ratingKey: string;
   key: string;
   guid: string;
@@ -52,13 +52,23 @@ type Metadata = {
   hasPremiumExtras: string;
   hasPremiumPrimaryExtra: string;
   ratingImage: string;
+  Genre?: { tag: string }[];
+  Director?: { tag: string }[];
+  Role?: { tag: string; thumb?: string }[];
+  Writer?: { tag: string }[];
+  Country?: { tag: string }[];
+  viewCount?: number;
+  lastViewedAt?: number;
+  viewOffset?: number;
 };
+
+export type MetadataWithThumb = Metadata & { thumbUrl: string };
 
 type MediaContainer = {
   size: number;
   title1: string;
   title2: string;
-  Metadata: Metadata;
+  Metadata: Metadata[];
 };
 
 export type SectionItemsApiResponse = {
@@ -212,4 +222,8 @@ interface TranscodeSessionInfo {
   timeStamp: number;
   maxOffsetAvailable: number;
   minOffsetAvailable: number;
+}
+
+export interface IdentityResponse {
+  MediaContainer: { machineIdentifier: string };
 }
