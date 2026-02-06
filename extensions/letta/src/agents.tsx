@@ -152,7 +152,6 @@ function ChatWithAgent({ agentId }: { agentId: string }) {
   // Set as active when component mounts (not during render!)
   useEffect(() => {
     setActiveAgentId(agentId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agentId]);
 
   // The ChatCommand will pick up the active agent from storage

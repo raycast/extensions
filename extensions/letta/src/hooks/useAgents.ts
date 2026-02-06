@@ -26,11 +26,7 @@ const STORAGE_KEY_ACTIVE_AGENT = "letta-active-agent-id";
 /**
  * Fetch agents from a single account
  */
-async function fetchAgentsForAccount(
-  client: Letta,
-  account: LettaAccount,
-  query?: string
-): Promise<AgentSummary[]> {
+async function fetchAgentsForAccount(client: Letta, account: LettaAccount, query?: string): Promise<AgentSummary[]> {
   try {
     console.log(`[Letta] Fetching agents for account: ${account.name}${query ? ` with query: "${query}"` : ""}`);
 
