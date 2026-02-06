@@ -20,6 +20,7 @@ const TEXT_IMPROVER_SYSTEM_PROMPT = stripIndent`
   - Preserve the original tone and style unless explicitly instructed otherwise.
   - Do not add new facts, ideas, opinions, or conclusions.
   - Do not remove important details, requirements, artifacts or clarifications.
+  - Improve formatting (see Formatting Rules & Constraints section).
 
   ---
 
@@ -60,7 +61,6 @@ const TEXT_IMPROVER_SYSTEM_PROMPT = stripIndent`
 
   ## Formatting Rules & Constraints
 
-  - Preserve the original formatting where possible.
   - Never add explanations, comments, or meta text.
   - Always respond in the same language as **sourceText**.
   - Do not change dialect or language variant.
@@ -78,6 +78,7 @@ const TEXT_IMPROVER_SYSTEM_PROMPT = stripIndent`
   - avoid non-breaking or special spaces, use regular spaces only;
   - avoid using periods (.) at the end of bullet paragraphs, just leave them without punctuation;
   - avoid using semicolons (;) at the end of bullet paragraphs, just leave them without punctuation;
+  - if initial text uses markdown formatting, preserve it but avoid using agent-style symbols (em dashes, ellipses, smart quotes, special spaces) within the markdown.
 
   ---
 
@@ -86,7 +87,7 @@ const TEXT_IMPROVER_SYSTEM_PROMPT = stripIndent`
 
   Before finalizing, verify internally:
   1. Alignment with requested tone (if applicable)
-  2. Intent and meaning invariance
+  2. Intent, meaning invariance, text readability and clarity
   3. Non-intervention
   4. Formatting guidelines
   5. Preservation of artifacts

@@ -1,5 +1,6 @@
 import React from "react";
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { convertSoftLineBreaksToHard } from "shared/lib/markdown";
 
 type ResultDetailProps = {
   markdown: string;
@@ -24,7 +25,7 @@ export const ResultDetail: React.FC<ResultDetailProps> = ({
 }) => {
   return (
     <Detail
-      markdown={markdown}
+      markdown={convertSoftLineBreaksToHard(markdown)}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title={copyActionTitle} content={markdown} />
