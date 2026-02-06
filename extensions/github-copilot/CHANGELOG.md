@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Fix titles and URLs for tasks without a pull request] - {PR_MERGE_DATE}
+## [Fix titles and URLs for tasks without a pull request] - 2026-02-06
 
 - Fix titles and URLs for tasks without a pull request in "View Tasks" command
 
