@@ -64,3 +64,8 @@ export interface GameSearchResult {
 export interface SearchResponse {
   data: GameSearchResult[];
 }
+
+export interface TokenCache {
+  value: string;
+  timestamp: number;
+}

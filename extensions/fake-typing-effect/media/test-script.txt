@@ -1,0 +1,8 @@
+[0.5]Testing the typing effect![0.5][ctrl+c]
+vim test.txt[enter]
+[0.5][speed:15]Hello World![speed:default][0.3][escape][0.5][shift+;]wq[enter]
+[0.5]
+Let's see what we wrote:[ctrl+c]
+cat test.txt[enter]
+[0.5]
+Done! [0.3]✨[ctrl+c]

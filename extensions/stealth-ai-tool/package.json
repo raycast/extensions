@@ -1,0 +1,318 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stealth-ai-tool",
+  "title": "Stealth AI",
+  "description": "In-line AI formatting. (1) Change model in Raycast Settings > AI > Quick AI Model. (2) Set custom Hotkey & Alias per action in Settings.",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "author": "ahmed",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "edit-action",
+      "title": "Edit Action Prompt",
+      "subtitle": "Stealth AI",
+      "description": "Hidden utility to edit prompts",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "actionId",
+          "placeholder": "action-1",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "action-1",
+      "title": "Stealth Action 1",
+      "subtitle": "Stealth AI",
+      "description": "Fix typos and grammar",
+      "mode": "no-view",
+      "keywords": [
+        "grammar",
+        "typo",
+        "spelling",
+        "fix"
+      ],
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Fix Grammar",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "Fix all typos, spelling errors, and grammar issues in the following text. Return only the corrected text without any explanation:",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "action-2",
+      "title": "Stealth Action 2",
+      "subtitle": "Stealth AI",
+      "description": "Make text more concise",
+      "mode": "no-view",
+      "keywords": [
+        "concise",
+        "shorter",
+        "brief",
+        "shorten"
+      ],
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Make Concise",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "Make the following text more concise while preserving the key meaning. Return only the rewritten text without explanation:",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "action-3",
+      "title": "Stealth Action 3",
+      "subtitle": "Stealth AI",
+      "description": "Convert text to bullet list",
+      "mode": "no-view",
+      "keywords": [
+        "list",
+        "bullets",
+        "points",
+        "organize"
+      ],
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Create List",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "Convert the following text into a clean bullet point list. Return only the list without explanation:",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "action-4",
+      "title": "Stealth Action 4",
+      "subtitle": "Stealth AI",
+      "description": "Make text more professional",
+      "mode": "no-view",
+      "keywords": [
+        "professional",
+        "formal",
+        "business",
+        "polish"
+      ],
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Make Professional",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "Rewrite the following text to be more professional and polished, suitable for business communication. Return only the rewritten text without explanation:",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "action-5",
+      "title": "Stealth Action 5",
+      "subtitle": "Stealth AI",
+      "description": "Simplify complex text",
+      "mode": "no-view",
+      "keywords": [
+        "simplify",
+        "simple",
+        "easy",
+        "explain"
+      ],
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Simplify",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "Simplify the following text to make it easier to understand. Use simpler words and shorter sentences. Return only the simplified text without explanation:",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "action-6",
+      "title": "Stealth Action 6",
+      "subtitle": "Stealth AI",
+      "description": "Custom AI Action 6",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Action 6",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "The prompt. Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "action-7",
+      "title": "Stealth Action 7",
+      "subtitle": "Stealth AI",
+      "description": "Custom AI Action 7",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Action 7",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "The prompt. Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "action-8",
+      "title": "Stealth Action 8",
+      "subtitle": "Stealth AI",
+      "description": "Custom AI Action 8",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Action 8",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "The prompt. Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "action-9",
+      "title": "Stealth Action 9",
+      "subtitle": "Stealth AI",
+      "description": "Custom AI Action 9",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "title",
+          "title": "Action Title",
+          "description": "Name shown in notifications",
+          "type": "textfield",
+          "default": "Action 9",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "title": "AI Prompt",
+          "description": "The prompt. Edit in the action view for multiline.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.2",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray dev",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

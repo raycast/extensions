@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "botpress",
+  "title": "Botpress",
+  "description": "Manage your Botpress chatbots",
+  "icon": "bp-logo.png",
+  "author": "ermek_barmashev",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "pat",
+      "title": "Personal Access Token",
+      "description": "Your Botpress Personal Access Token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "workspaceId",
+      "title": "Workspace ID",
+      "description": "Your Botpress Workspace ID",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "list-bots",
+      "title": "List Bots",
+      "description": "View and open your Botpress bots",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@botpress/client": "^1.30.0",
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

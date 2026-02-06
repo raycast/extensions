@@ -1,65 +1,12 @@
 import { ActionPanel, Action, List, Detail, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
-import { API, EventTimer, EventTimerRaw } from "./api";
+import { API, EventTimer } from "./api";
 import { getCached, setCache, CacheKeys } from "./cache";
 
 interface EventTimersResponse {
-  data: EventTimerRaw[];
-}
-
-function parseTimeToMs(timeStr: string, baseDate: Date): number {
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  const date = new Date(baseDate);
-  date.setUTCHours(hours, minutes, 0, 0);
-  return date.getTime();
-}
-
-function transformRawEvents(rawEvents: EventTimerRaw[]): EventTimer[] {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const events: EventTimer[] = [];
-
-  for (const raw of rawEvents) {
-    for (const timeSlot of raw.times) {
-      // Create event for today
-      let startTime = parseTimeToMs(timeSlot.start, today);
-      let endTime = parseTimeToMs(timeSlot.end, today);
-
-      // Handle overnight events (e.g., 22:00 - 00:00)
-      if (endTime <= startTime) {
-        endTime += 24 * 60 * 60 * 1000; // Add 24 hours
-      }
-
-      events.push({
-        name: raw.name,
-        map: raw.map,
-        icon: raw.icon,
-        startTime,
-        endTime,
-      });
-
-      // Create event for tomorrow
-      startTime = parseTimeToMs(timeSlot.start, tomorrow);
-      endTime = parseTimeToMs(timeSlot.end, tomorrow);
-      if (endTime <= startTime) {
-        endTime += 24 * 60 * 60 * 1000;
-      }
-
-      events.push({
-        name: raw.name,
-        map: raw.map,
-        icon: raw.icon,
-        startTime,
-        endTime,
-      });
-    }
-  }
-
-  return events;
+  data: EventTimer[];
+  cachedAt?: number;
 }
 
 interface EventWithStatus extends EventTimer {
@@ -179,7 +126,7 @@ export default function EventTimers() {
   const [mapFilter, setMapFilter] = useState<string>("all");
   const [tick, setTick] = useState(0);
 
-  const cachedEventTimers = getCached<EventTimerRaw[]>(CacheKeys.eventTimers);
+  const cachedEventTimers = getCached<EventTimer[]>(CacheKeys.eventTimers);
 
   const { isLoading, data, revalidate } = useFetch<EventTimersResponse>(API.eventTimers, {
     keepPreviousData: true,
@@ -205,9 +152,8 @@ export default function EventTimers() {
     return () => clearInterval(interval);
   }, []);
 
-  const rawEvents = data?.data || cachedEventTimers || [];
-  const events = useMemo(() => transformRawEvents(rawEvents), [rawEvents]);
-  const maps = [...new Set(rawEvents.map((e) => e.map))].sort();
+  const events = data?.data || cachedEventTimers || [];
+  const maps = [...new Set(events.map((e) => e.map))].sort();
 
   const eventsWithStatus = useMemo(() => {
     const now = Date.now();

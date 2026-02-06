@@ -82,7 +82,9 @@ export type Doc = Pick<
   Document,
   "id" | "title" | "created_at" | "creation_source" | "public" | "sharing_link_visibility"
 > & {
-  notes_markdown?: string; // Optional - loaded on-demand when viewing "My Notes" or exporting
+  notes_markdown?: string; // Optional - loaded on-demand when viewing "My notes" or exporting
+  isShared?: boolean; // True if this doc was shared with the user (not owned by them)
+  sharedBy?: string; // Name of the person who shared this doc
 };
 
 // Notes structure

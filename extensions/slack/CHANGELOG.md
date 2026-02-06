@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Multi-word search support] - 2026-01-20
+
+- Improved search in "Open Channel" and "Send Message" commands to support multi-word queries
+- Now you can search for "sre time" to find channel "sre-free-time"
+
 ## [Add action for copying IDs of users or channels] - 2025-11-20
 
 - Added "Copy ID to Clipboard" action to the "Open Channel" command so we can easily copy the user or channel's ID straight from the list for both MacOS and Windows

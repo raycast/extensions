@@ -5,7 +5,7 @@ import { CacheKey, RAYCAST_WALLPAPER } from "../utils/constants";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import React from "react";
 import { AppearancedWallpaper, RaycastWallpaperWithInfo } from "../types/types";
-import { setWallpaper } from "../utils/applescript-utils";
+import { setWallpaper } from "../utils/platform-utils";
 import { picturesDirectory } from "../types/preferences";
 import ActionStyle = Alert.ActionStyle;
 

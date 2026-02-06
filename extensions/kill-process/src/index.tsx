@@ -7,6 +7,7 @@ import {
   confirmAlert,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   open,
   popToRoot,
@@ -19,7 +20,7 @@ import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
 import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
-import { fetchRunningProcesses, fetchProcessPerformance } from "./utils/process";
+import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
@@ -36,6 +37,7 @@ export default function ProcessList() {
   const closeWindowAfterKill = preferences.closeWindowAfterKill;
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
+  const skipConfirmation = preferences.skipConfirmation;
   const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
@@ -104,17 +106,19 @@ export default function ProcessList() {
 
   const killProcess = async (process: Process, force: boolean = false) => {
     const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
-    if (
-      !(await confirmAlert({
-        title: `${force ? "Force " : ""}Kill ${processName}?`,
-        rememberUserChoice: true,
-      }))
-    ) {
-      showToast({
-        title: `Cancelled Killing ${processName}`,
-        style: Toast.Style.Failure,
-      });
-      return;
+    if (!skipConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: `${force ? "Force " : ""}Kill ${processName}?`,
+          rememberUserChoice: true,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled Killing ${processName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
     }
 
     const command = getKillCommand(process.id, force);
@@ -327,17 +331,23 @@ export default function ProcessList() {
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                     <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
-                    {process.path == null ? null : <Action.CopyToClipboard title="Copy Path" content={process.path} />}
+                    {process.path == null ? null : (
+                      <Action.CopyToClipboard
+                        title="Copy Path"
+                        content={process.path}
+                        shortcut={Keyboard.Shortcut.Common.CopyPath}
+                      />
+                    )}
                     <Action
                       title="Reload"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ key: "r", modifiers: ["cmd"] }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={() => fetchProcesses()}
                     />
                     <Action
                       title={`${aggregateApps ? "Disable" : "Enable"} Aggregating Apps`}
                       icon={Icon.AppWindow}
-                      shortcut={{ key: "tab", modifiers: ["shift"] }}
+                      shortcut={{ modifiers: ["shift"], key: "tab" }}
                       onAction={() => {
                         setAggregateApps(!aggregateApps);
                         showToast({

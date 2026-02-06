@@ -4,6 +4,85 @@ import path from "node:path";
 import { exec, execSync } from "node:child_process";
 import type { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import { getPreferenceValues } from "@raycast/api";
+import { capitalCase } from "change-case";
+
+const ACRONYMS = [
+  "AI",
+  "API",
+  "UI",
+  "UX",
+  "URL",
+  "HTML",
+  "CSS",
+  "JS",
+  "TS",
+  "SQL",
+  "REST",
+  "HTTP",
+  "HTTPS",
+  "JSON",
+  "XML",
+  "PDF",
+  "CSV",
+  "CLI",
+  "GUI",
+  "SDK",
+  "IDE",
+  "AWS",
+  "GCP",
+  "iOS",
+  "macOS",
+  "OS",
+  "RAM",
+  "ROM",
+  "CPU",
+  "GPU",
+  "USB",
+  "DVD",
+  "CD",
+  "SSH",
+  "FTP",
+  "SMTP",
+  "DNS",
+  "VPN",
+  "IP",
+  "TCP",
+  "UDP",
+  "AJAX",
+  "CRUD",
+  "JWT",
+  "OAuth",
+  "SaaS",
+  "PaaS",
+  "IaaS",
+];
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function formatCategoryName(category: string, separator: string = " · "): string {
+  if (category.includes(separator)) {
+    return category
+      .split(separator)
+      .map((part) => {
+        let formatted = capitalCase(part);
+        ACRONYMS.forEach((acronym) => {
+          const regex = new RegExp(`\\b${escapeRegex(acronym)}\\b`, "gi");
+          formatted = formatted.replace(regex, acronym);
+        });
+        return formatted;
+      })
+      .join(separator);
+  }
+
+  let formatted = capitalCase(category);
+  ACRONYMS.forEach((acronym) => {
+    const regex = new RegExp(`\\b${escapeRegex(acronym)}\\b`, "gi");
+    formatted = formatted.replace(regex, acronym);
+  });
+  return formatted;
+}
 
 export function getEspansoCmd(): string {
   const { espansoPath } = getPreferenceValues<{ espansoPath?: string }>();
@@ -96,14 +175,11 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
       }
     }
 
-    // Derive category from relative path, matching UI logic
     const relPath = path.relative(espansoMatchDir, filePath);
-    let category =
+    const category =
       relPath && !relPath.startsWith("..") && relPath !== ""
         ? relPath.split(path.sep)[0]?.replace(/\.yml$/, "")
         : path.basename(filePath, ".yml");
-    // Capitalize category for UI consistency
-    category = category.charAt(0).toUpperCase() + category.slice(1);
     finalMatches.push(
       ...matches.flatMap((obj: EspansoMatch) => {
         if ("trigger" in obj) {
@@ -111,7 +187,7 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
           return [{ triggers: [trigger], replace, form, label, filePath, category }];
         } else if ("triggers" in obj) {
           const { triggers, replace, form, label } = obj;
-          return triggers.map((trigger: string) => ({ triggers: [trigger], replace, form, label, filePath, category }));
+          return [{ triggers, replace, form, label, filePath, category }];
         } else if ("regex" in obj) {
           const { regex, replace, form, label } = obj;
           return [{ triggers: [regex], replace, form, label, filePath, category }];

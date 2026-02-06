@@ -68,6 +68,15 @@
     },
     {
       "title": "Search bookmarks",
+      "name": "sortByFrecency",
+      "label": "Sort by frecency",
+      "description": "Whether to sort bookmarks by frecency (frequency + recency).",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "title": "",
       "name": "showDescription",
       "label": "Show description",
       "description": "Whether to show a description for each bookmark in search results.",
