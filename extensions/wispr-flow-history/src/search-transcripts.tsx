@@ -43,6 +43,7 @@ function buildPaginatedQuery(
   search: string,
   appFilter: string,
   showArchived: boolean,
+  minDuration: number,
   limit: number,
   offset: number,
 ) {
@@ -66,30 +67,37 @@ function buildPaginatedQuery(
     conditions.push(`app = '${escaped}'`);
   }
 
+  if (minDuration > 0) {
+    conditions.push(`duration >= ${minDuration}`);
+  }
+
   return `SELECT ${COLUMNS} FROM History WHERE ${conditions.join(" AND ")} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`;
 }
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [appFilter, setAppFilter] = useState("all");
-  const { primaryAction, showArchived } = getPreferenceValues<Preferences>();
+  const { primaryAction, showArchived, minimumDuration, confirmBeforeArchive } =
+    getPreferenceValues<Preferences>();
   const dbPath = getDbPath();
+  const minDuration = Number(minimumDuration) || 0;
 
   const { isLoading, data, pagination, revalidate } = useCachedPromise(
-    (search: string, app: string, archived: boolean) =>
+    (search: string, app: string, archived: boolean, minDur: number) =>
       async (options: { page: number }) => {
         const offset = options.page * PAGE_SIZE;
         const query = buildPaginatedQuery(
           search,
           app,
           archived,
+          minDur,
           PAGE_SIZE,
           offset,
         );
         const results = await executeSQL<Transcript>(dbPath, query);
         return { data: results, hasMore: results.length === PAGE_SIZE };
       },
-    [searchText, appFilter, showArchived],
+    [searchText, appFilter, showArchived, minDuration],
   );
 
   const { data: uniqueAppsData } = useCachedPromise(
@@ -165,6 +173,7 @@ export default function Command() {
               transcript={transcript}
               appPathMap={appPathMap}
               primaryAction={primaryAction}
+              confirmBeforeArchive={confirmBeforeArchive}
               dbPath={dbPath}
               onArchive={revalidate}
             />
@@ -190,12 +199,14 @@ function TranscriptListItem({
   transcript,
   appPathMap,
   primaryAction,
+  confirmBeforeArchive,
   dbPath,
   onArchive,
 }: {
   transcript: Transcript;
   appPathMap: Map<string, string>;
   primaryAction: string;
+  confirmBeforeArchive: boolean;
   dbPath: string;
   onArchive: () => void;
 }) {
@@ -212,28 +223,28 @@ function TranscriptListItem({
   const appIcon = appPath ? { fileIcon: appPath } : Icon.Microphone;
 
   const handleArchive = useCallback(async () => {
-    if (
-      await confirmAlert({
+    if (confirmBeforeArchive) {
+      const confirmed = await confirmAlert({
         title: "Archive Transcript",
         message: "Are you sure you want to archive this transcript?",
         primaryAction: {
           title: "Archive",
           style: Alert.ActionStyle.Destructive,
         },
-      })
-    ) {
-      const escaped = transcript.transcriptEntityId.replace(/'/g, "''");
-      await executeSQL(
-        dbPath,
-        `UPDATE History SET isArchived = 1 WHERE transcriptEntityId = '${escaped}'`,
-      );
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Transcript archived",
       });
-      onArchive();
+      if (!confirmed) return;
     }
-  }, [transcript.transcriptEntityId, onArchive]);
+    const escaped = transcript.transcriptEntityId.replace(/'/g, "''");
+    await executeSQL(
+      dbPath,
+      `UPDATE History SET isArchived = 1 WHERE transcriptEntityId = '${escaped}'`,
+    );
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Transcript archived",
+    });
+    onArchive();
+  }, [transcript.transcriptEntityId, confirmBeforeArchive, dbPath, onArchive]);
 
   const wisprFlowPath = appPathMap.get("com.electron.wispr-flow");
   const hasOriginalText =

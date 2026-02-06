@@ -33,6 +33,23 @@
       "default": false
     },
     {
+      "name": "minimumDuration",
+      "title": "Minimum Duration",
+      "description": "Hide transcripts shorter than this duration (in seconds). Useful for filtering out accidental triggers.",
+      "type": "textfield",
+      "required": false,
+      "default": "0"
+    },
+    {
+      "name": "confirmBeforeArchive",
+      "title": "Confirm Before Archive",
+      "label": "Show confirmation dialog before archiving",
+      "description": "Show a confirmation dialog before archiving a transcript",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
       "name": "databasePath",
       "title": "Database Path",
       "description": "Custom path to the Wispr Flow database file. Leave empty to use the default location.",
