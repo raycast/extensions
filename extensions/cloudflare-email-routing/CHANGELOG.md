@@ -1,6 +1,6 @@
 # Cloudflare Email Routing Changelog
 
-## Editable Alias Defaults - {PR_MERGE_DATE}
+## Editable Alias Defaults - 2026-02-06
 
 - Add configurable alias preface and default label preferences
 - Allow editing the alias slug when creating new aliases
