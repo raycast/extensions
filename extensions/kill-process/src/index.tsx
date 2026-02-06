@@ -22,7 +22,38 @@ import { Process } from "./types";
 import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
 import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
 
+function isAppProcessType(type: Process["type"]): boolean {
+  return type === "app" || type === "aggregatedApp";
+}
+
+function stripZeroDecimals(value: string): string {
+  return value.endsWith(".00") ? value.slice(0, -3) : value;
+}
+
+function stripTrailingZeros(value: string): string {
+  // Examples: "6.80" -> "6.8", "6.00" -> "6", "6.01" -> "6.01"
+  return value.replace(/(?:\.0+|(\.\d*[1-9])0+)$/, "$1");
+}
+
+function formatCpu(cpu: number): string {
+  // Avoid noise like "0.00%". Keep other values at 2 decimals unless they're exactly ".00".
+  if (Math.abs(cpu) < 0.005) return "0%";
+  return `${stripTrailingZeros(cpu.toFixed(2))}%`;
+}
+
+function formatMemory(memKb: number): string {
+  const mb = memKb / 1024;
+  if (mb >= 1024) {
+    const gb = mb / 1024;
+    return `${stripZeroDecimals(gb.toFixed(2))} GB`;
+  }
+  // If it's shown in MB, keep it as a whole number to reduce visual jitter.
+  return `${Math.floor(mb)} MB`;
+}
+
 export default function ProcessList() {
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
   const [state, setState] = useState<Process[]>([]);
   const [query, setQuery] = useState<string>("");
@@ -37,13 +68,17 @@ export default function ProcessList() {
   const closeWindowAfterKill = preferences.closeWindowAfterKill;
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
-  const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
+  const skipConfirmation = preferences.skipConfirmation;
+  const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.defaultSort === "memory" ? "memory" : "cpu");
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
   // Cache CPU data from WMI queries (persists across refreshes)
   const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
 
-  const fetchProcesses = () => {
+  const fetchProcesses = (showLoading: boolean) => {
+    if (showLoading) {
+      setIsLoading(true);
+    }
     fetchRunningProcesses()
       .then((processes) => {
         // Apply cached CPU values to new process list
@@ -58,19 +93,23 @@ export default function ProcessList() {
 
         // On Windows, fetch accurate CPU data in the background
         if (isWindows) {
-          fetchProcessPerformance().then((cpuData) => {
-            if (cpuData.size > 0) {
-              // Update cache with new CPU data
-              setCpuCache(cpuData);
-              // Update displayed processes
-              setFetchResult((currentProcesses) =>
-                currentProcesses.map((proc) => {
-                  const cpu = cpuData.get(proc.id);
-                  return cpu !== undefined ? { ...proc, cpu } : proc;
-                }),
-              );
-            }
-          });
+          fetchProcessPerformance()
+            .then((cpuData) => {
+              if (cpuData.size > 0) {
+                // Update cache with new CPU data
+                setCpuCache(cpuData);
+                // Update displayed processes
+                setFetchResult((currentProcesses) =>
+                  currentProcesses.map((proc) => {
+                    const cpu = cpuData.get(proc.id);
+                    return cpu !== undefined ? { ...proc, cpu } : proc;
+                  }),
+                );
+              }
+            })
+            .catch((err) => {
+              console.error("Failed to fetch process performance:", err);
+            });
         }
       })
       .catch((err) => {
@@ -80,42 +119,70 @@ export default function ProcessList() {
           style: Toast.Style.Failure,
           message: err instanceof Error ? err.message : "Unknown error",
         });
+      })
+      .finally(() => {
+        setHasLoadedOnce(true);
+        setIsLoading(false);
       });
   };
 
-  useInterval(fetchProcesses, refreshDuration);
+  useInterval(() => fetchProcesses(!hasLoadedOnce), refreshDuration);
   useEffect(() => {
-    let processes = fetchResult;
+    let processes = [...fetchResult];
     if (aggregateApps) {
       processes = aggregate(processes);
     }
+
     processes.sort((a, b) => {
-      if (sortBy === "memory") {
-        return a.mem > b.mem ? -1 : 1;
-      } else {
-        return a.cpu > b.cpu ? -1 : 1;
+      if (shouldPrioritizeAppsWhenFiltering && query.trim() !== "") {
+        const rankA = isAppProcessType(a.type) ? 0 : 1;
+        const rankB = isAppProcessType(b.type) ? 0 : 1;
+        const rankDiff = rankA - rankB;
+        if (rankDiff !== 0) return rankDiff;
       }
+
+      const aValue = sortBy === "memory" ? a.mem : a.cpu;
+      const bValue = sortBy === "memory" ? b.mem : b.cpu;
+      if (aValue === bValue) return 0;
+      return aValue > bValue ? -1 : 1;
     });
     setState(processes);
-  }, [fetchResult, sortBy, aggregateApps]);
+  }, [fetchResult, sortBy, aggregateApps, shouldPrioritizeAppsWhenFiltering, query]);
 
   const fileIcon = (process: Process) => {
     return getFileIcon(process);
   };
 
+  const getKeywords = (process: Process): string[] => {
+    const keywords: string[] = [process.processName];
+    if (process.appName) keywords.push(process.appName);
+    if (shouldIncludePid) keywords.push(String(process.id));
+    if (shouldIncludePaths && process.path) {
+      keywords.push(process.path);
+
+      // Add path segments so queries like "Applications" or "Chrome.app" match reliably.
+      const parts = process.path.split("/").filter(Boolean);
+      for (const part of parts.slice(0, 12)) {
+        keywords.push(part);
+      }
+    }
+    return keywords;
+  };
+
   const killProcess = async (process: Process, force: boolean = false) => {
     const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
-    if (
-      !(await confirmAlert({
+    if (!skipConfirmation) {
+      const didConfirm = await confirmAlert({
         title: `${force ? "Force " : ""}Kill ${processName}?`,
         rememberUserChoice: true,
-      }))
-    ) {
-      showToast({
-        title: `Cancelled Killing ${processName}`,
-        style: Toast.Style.Failure,
       });
-      return;
+      if (!didConfirm) {
+        showToast({
+          title: `Cancelled Killing ${processName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
     }
 
     const command = getKillCommand(process.id, force);
@@ -146,32 +213,36 @@ export default function ProcessList() {
         title: `Killed ${processName}`,
         style: Toast.Style.Success,
       });
-    });
 
-    setFetchResult(state.filter((p) => p.id !== process.id));
-    if (closeWindowAfterKill) {
-      closeMainWindow();
-    }
-    if (goToRootAfterKill) {
-      popToRoot({ clearSearchBar: clearSearchBarAfterKill });
-    }
-    if (clearSearchBarAfterKill) {
-      clearSearchBar({ forceScrollToTop: true });
-    }
+      setFetchResult((current) => current.filter((p) => p.id !== process.id));
+      if (closeWindowAfterKill) {
+        closeMainWindow();
+      }
+      if (goToRootAfterKill) {
+        popToRoot({ clearSearchBar: clearSearchBarAfterKill });
+      }
+      if (clearSearchBarAfterKill) {
+        clearSearchBar({ forceScrollToTop: true });
+      }
+    });
   };
 
-  const subtitleString = (process: Process) => {
-    const subtitles = [];
-    if (process.type === "aggregatedApp" && process.appName != undefined) {
-      subtitles.push(process.appName);
+  const subtitleString = (process: Process): string | undefined => {
+    const subtitles: string[] = [];
+
+    // Avoid rendering a redundant subtitle like "Chrome  Chrome".
+    if (process.type === "aggregatedApp" && process.appName) {
+      const appName = process.appName.trim();
+      const processName = process.processName.trim();
+      if (appName !== "" && appName.toLowerCase() !== processName.toLowerCase()) {
+        subtitles.push(appName);
+      }
     }
-    if (shouldShowPID) {
-      subtitles.push(process.id.toString());
-    }
-    if (shouldShowPath) {
-      subtitles.push(process.path);
-    }
-    return subtitles.join(" - ");
+
+    if (shouldShowPID) subtitles.push(process.id.toString());
+    if (shouldShowPath) subtitles.push(process.path);
+
+    return subtitles.length > 0 ? subtitles.join(" - ") : undefined;
   };
 
   const aggregate = (processes: Process[]): Process[] => {
@@ -182,10 +253,8 @@ export default function ProcessList() {
     };
     const appMap = new Map<number, ProcessNode>();
     appMap.set(1, { process: { id: 1 } as Process, childNodes: [] });
-    const originalAppIds = Array<number>();
     processes.forEach((process) => {
       if (process.type === "app") {
-        originalAppIds.push(process.id);
         let node = appMap.get(process.id);
         if (node == undefined) {
           node = { process, childNodes: [] } as ProcessNode;
@@ -225,16 +294,10 @@ export default function ProcessList() {
       }
     });
     const rootApps = appMap.get(1)?.childNodes;
-    let afterAppIds = Array<number>();
     rootApps?.forEach((rootApp) => {
       if (rootApp.process == undefined) {
         return;
       }
-      afterAppIds.push(rootApp.process.id);
-      const childIds: number[] = rootApp.childNodes
-        .map((node) => node.process?.id)
-        .filter((item): item is number => item != undefined);
-      afterAppIds = afterAppIds.concat(childIds);
       result.push({
         id: rootApp.process.id,
         pid: rootApp.process.pid,
@@ -259,11 +322,12 @@ export default function ProcessList() {
 
   return (
     <List
-      isLoading={state.length === 0}
-      searchBarPlaceholder="Filter by name"
-      onSearchTextChange={(query) => setQuery(query)}
+      filtering
+      isLoading={isLoading}
+      searchBarPlaceholder="Search processes"
+      onSearchTextChange={(newQuery) => setQuery(newQuery)}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" storeValue onChange={(newValue) => setSortBy(newValue as "cpu" | "memory")}>
+        <List.Dropdown tooltip="Sort" value={sortBy} onChange={(newValue) => setSortBy(newValue as "cpu" | "memory")}>
           <List.Dropdown.Section title="Sort By">
             <List.Dropdown.Item title="CPU Usage" value="cpu" />
             <List.Dropdown.Item title="Memory Usage" value="memory" />
@@ -271,75 +335,61 @@ export default function ProcessList() {
         </List.Dropdown>
       }
     >
+      {!isLoading ? (
+        <List.EmptyView
+          icon={query.trim() !== "" ? Icon.MagnifyingGlass : Icon.Terminal}
+          title={query.trim() !== "" ? `No matches for "${query}"` : "No processes to show"}
+          description={
+            query.trim() !== ""
+              ? "Try adjusting Advanced Filtering preferences (PID/Path) or refine your query."
+              : "Try reloading the list."
+          }
+        />
+      ) : null}
       <List.Section title="Processes" subtitle={`${processCount} running`}>
-        {state
-          .filter((process) => {
-            if (query === "") {
-              return true;
-            }
-            const nameMatches = process.processName.toLowerCase().includes(query.toLowerCase());
-            const pathMatches =
-              shouldIncludePaths &&
-              process.path.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
-            const pidMatches = shouldIncludePid && process.id.toString().includes(query);
-            const appNameMatches =
-              process.type === "aggregatedApp" && process.appName?.toLowerCase().includes(query.toLowerCase());
+        {state.map((process) => {
+          const icon = fileIcon(process);
+          const hasPath = Boolean(process.path);
 
-            return nameMatches || pathMatches || pidMatches || appNameMatches;
-          })
-          .sort((a, b) => {
-            // If this flag is true, we bring apps to the top, but only if we have a query.
-            if (shouldPrioritizeAppsWhenFiltering) {
-              const appTypes = ["app", "aggregatedApp"];
-              if (appTypes.includes(a.type) && !appTypes.includes(b.type)) {
-                return -1;
-              } else if (!appTypes.includes(a.type) && appTypes.includes(b.type)) {
-                return 1;
-              }
-            }
-
-            // Otherwise, we leave the order as is.
-            return 0;
-          })
-          .map((process, index) => {
-            const icon = fileIcon(process);
-            return (
-              <List.Item
-                key={index}
-                title={process.processName}
-                subtitle={subtitleString(process)}
-                icon={icon}
-                accessories={[
-                  {
-                    text: `${process.cpu.toFixed(2)}%`,
-                    icon: { source: "cpu.svg", tintColor: Color.PrimaryText },
-                    tooltip: "% CPU",
+          return (
+            <List.Item
+              key={process.id}
+              title={process.processName}
+              subtitle={subtitleString(process)}
+              icon={icon}
+              keywords={getKeywords(process)}
+              accessories={[
+                {
+                  text: formatCpu(process.cpu),
+                  icon: { source: "cpu.svg", tintColor: Color.PrimaryText },
+                  tooltip: "% CPU",
+                },
+                {
+                  text: formatMemory(process.mem),
+                  icon: {
+                    source: "memorychip.svg",
+                    tintColor: Color.PrimaryText,
                   },
-                  {
-                    text: prettyBytes(process.mem * 1024),
-                    icon: {
-                      source: "memorychip.svg",
-                      tintColor: Color.PrimaryText,
-                    },
-                    tooltip: "Memory",
-                  },
-                ]}
-                actions={
-                  <ActionPanel>
+                  tooltip: `Memory (${prettyBytes(process.mem * 1024)})`,
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                     <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
-                    {process.path == null ? null : (
+                    {hasPath ? (
                       <Action.CopyToClipboard
                         title="Copy Path"
                         content={process.path}
                         shortcut={Keyboard.Shortcut.Common.CopyPath}
                       />
-                    )}
+                    ) : null}
                     <Action
                       title="Reload"
                       icon={Icon.ArrowClockwise}
                       shortcut={Keyboard.Shortcut.Common.Refresh}
-                      onAction={() => fetchProcesses()}
+                      onAction={() => fetchProcesses(true)}
                     />
                     <Action
                       title={`${aggregateApps ? "Disable" : "Enable"} Aggregating Apps`}
@@ -352,11 +402,12 @@ export default function ProcessList() {
                         });
                       }}
                     />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

@@ -1,5 +1,21 @@
 # Kill Process Changelog
 
+## [UX and Preferences] - {PR_MERGE_DATE}
+
+- Reworked preferences layout: added `Default Sort` dropdown (defaults to Memory), moved app aggregation into `Grouping`, moved PID/path options into `Advanced Filtering`, and renamed `Refresh Duration` to `Refresh Interval (ms)`
+- Switched to Raycast native list filtering and introduced `keywords` so searching by PID/path respects the corresponding preferences (also adds path segment keywords for more reliable matches)
+- Added a custom empty state for when no results match
+- Restored the Cmd+K action list to match the Store version (Kill, Force Kill, Copy Path, Reload, Toggle Aggregating Apps) with no extra actions
+- Tweaked CPU/Memory formatting to reduce noise and improve readability (examples):
+  - CPU: `0.00%` -> `0%`, `6.80%` -> `6.8%`, `12.00%` -> `12%`
+  - Memory: `604.22 MB` -> `604 MB`, `2.00 GB` -> `2 GB`, `2.23 GB` -> `2.23 GB`
+- Hid redundant subtitles for aggregated apps (e.g. avoid `Chrome  Chrome`)
+- Fixed UI behavior after killing a process (only removes the item and triggers "after kill" actions on success) and removed unused aggregation bookkeeping
+
+## [Preferences] - 2026-02-04
+
+- Added preference to skip kill confirmation dialogs
+
 ## [Fixes and Improvements] - 2026-01-13
 
 - Added shortcut for the **Copy Path** action

@@ -12,7 +12,8 @@
     "erics118",
     "xilopaint",
     "validate",
-    "dead_hikikomori"
+    "dead_hikikomori",
+    "mateus_badalotti"
   ],
   "platforms": [
     "macOS",
@@ -643,40 +644,22 @@
   },
   "preferences": [
     {
-      "description": "Determine whether the process path should be searched for the query or only the process name.",
-      "label": "Search Process Paths",
-      "name": "shouldSearchInPaths",
+      "description": "Default sorting for processes in the list.",
+      "name": "defaultSort",
       "required": false,
-      "default": false,
-      "title": "Filtering",
-      "type": "checkbox"
-    },
-    {
-      "description": "Determine whether the process PID should be searched for the query or only the process name.",
-      "label": "Search Process PID",
-      "name": "shouldSearchInPid",
-      "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
-    },
-    {
-      "description": "Determine whether apps are listed before other results when filtering.",
-      "label": "Prioritize Apps",
-      "name": "shouldPrioritizeAppsWhenFiltering",
-      "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
-    },
-    {
-      "description": "Determine whether processes are sorted by CPU or memory usage.",
-      "label": "Sort by Memory Usage",
-      "name": "sortByMem",
-      "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
+      "title": "Default Sort",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "CPU Usage",
+          "value": "cpu"
+        },
+        {
+          "title": "Memory Usage",
+          "value": "memory"
+        }
+      ],
+      "default": "memory"
     },
     {
       "description": "Determine whether aggregate processes belong to the same app.",
@@ -684,7 +667,7 @@
       "name": "aggregateApps",
       "required": false,
       "default": false,
-      "title": "",
+      "title": "Grouping",
       "type": "checkbox"
     },
     {
@@ -720,6 +703,7 @@
       "name": "clearSearchBarAfterKill",
       "required": false,
       "default": true,
+      "title": "",
       "type": "checkbox"
     },
     {
@@ -728,17 +712,53 @@
       "name": "goToRootAfterKill",
       "required": false,
       "default": false,
+      "title": "",
       "type": "checkbox"
     },
     {
-      "description": "Refresh duration in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
-      "label": "Refresh Duration",
+      "description": "Skip confirmation dialogs when killing processes.",
+      "label": "Never Ask for Confirmation",
+      "name": "skipConfirmation",
+      "required": false,
+      "default": false,
+      "title": "Confirmation",
+      "type": "checkbox"
+    },
+    {
+      "description": "Refresh interval in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
       "name": "refreshDuration",
       "required": false,
-      "title": "Refresh Duration",
+      "title": "Refresh Interval (ms)",
       "type": "textfield",
       "default": "3000",
       "placeholder": "3000"
+    },
+    {
+      "description": "Determine whether the process path should be searched for the query or only the process name.",
+      "label": "Search Process Paths",
+      "name": "shouldSearchInPaths",
+      "required": false,
+      "default": false,
+      "title": "Advanced Filtering",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether the process PID should be searched for the query or only the process name.",
+      "label": "Search Process PID",
+      "name": "shouldSearchInPid",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether apps are listed before other results when filtering.",
+      "label": "Prioritize Apps in Results",
+      "name": "shouldPrioritizeAppsWhenFiltering",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
