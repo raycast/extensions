@@ -3,6 +3,9 @@
 ## [Premium requests on view tasks] - {PR_MERGE_DATE}
 
 - Add premium requests used to the "View Tasks" command
+## [Fix titles and URLs for tasks without a pull request] - 2026-02-06
+
+- Fix titles and URLs for tasks without a pull request in "View Tasks" command
 
 ## [Additional instructions for issue assignment] - 2026-02-06
 

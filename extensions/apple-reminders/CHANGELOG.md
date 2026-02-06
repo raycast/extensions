@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Improve search results ordering] - 2026-02-06
+
+- Keep incomplete reminders above completed ones when filtering in My Reminders
+
 ## [Fix crashes when reminder data is undefined] - 2026-01-28
 
 - Fix crash in menu bar when `data.reminders` is undefined or not an array

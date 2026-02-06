@@ -9,13 +9,13 @@ export function TaskItem(
     taskWithPullRequest: TaskWithPullRequest;
   }>,
 ) {
-  const { task, pullRequest, premiumRequests } = props.taskWithPullRequest;
-  const title = pullRequest?.title ?? `Task ${task.id}`;
-  const subtitle = pullRequest ? `${pullRequest.repository.owner.login}/${pullRequest.repository.name}` : undefined;
+  const { task, pullRequest, premiumRequests, repository } = props.taskWithPullRequest;
+  const title = pullRequest?.title ?? task.name ?? `Task ${task.id}`;
+  const subtitle = repository ? `${repository.owner.login}/${repository.name}` : undefined;
 
   // Construct the task URL: https://github.com/{owner}/{repo}/tasks/{task_id}
-  const taskUrl = pullRequest
-    ? `https://github.com/${pullRequest.repository.owner.login}/${pullRequest.repository.name}/tasks/${task.id}`
+  const taskUrl = repository
+    ? `https://github.com/${repository.owner.login}/${repository.name}/tasks/${task.id}`
     : undefined;
 
   const createdAt = useMemo(() => new Date(task.created_at), [task.created_at]);
