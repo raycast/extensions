@@ -47,8 +47,8 @@
       "name": "savvycalLink",
       "type": "textfield",
       "required": false,
-      "title": "SavvyCal Link Slug",
-      "description": "The slug from your SavvyCal URL (e.g., 'chat' from savvycal.com/you/chat). Required if using SavvyCal.",
+      "title": "SavvyCal Link Slug(s)",
+      "description": "Comma-separated slugs from your SavvyCal URLs (e.g., 'chat' or 'chat, interview'). First slug is the default. Required if using SavvyCal.",
       "default": "chat"
     },
     {
@@ -69,8 +69,8 @@
       "name": "calcomEventSlug",
       "type": "textfield",
       "required": false,
-      "title": "Cal.com Event Slug",
-      "description": "The event type slug (e.g., 'pow-wow' from cal.com/you/pow-wow). Required if using Cal.com."
+      "title": "Cal.com Event Slug(s)",
+      "description": "Comma-separated event type slugs (e.g., 'pow-wow' or 'pow-wow, 30min'). First slug is the default. Required if using Cal.com."
     },
     {
       "name": "defaultTimezone",
@@ -107,6 +107,14 @@
         {
           "title": "Paris (CET/CEST)",
           "value": "Europe/Paris"
+        },
+        {
+          "title": "Israel (IST/IDT)",
+          "value": "Asia/Jerusalem"
+        },
+        {
+          "title": "India (IST)",
+          "value": "Asia/Kolkata"
         },
         {
           "title": "Tokyo (JST)",
