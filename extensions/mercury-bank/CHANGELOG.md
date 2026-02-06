@@ -1,4 +1,4 @@
-## [Initial Release] - 2026-02-06
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Manage multiple Mercury API keys with account switching
 - View accounts with balances, account and routing numbers

@@ -2,7 +2,7 @@ import { Color, Icon } from "@raycast/api";
 import { format, formatDistanceToNow, isToday, isYesterday } from "date-fns";
 
 export function formatCurrency(amount: number, currency = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency,
     minimumFractionDigits: 2,

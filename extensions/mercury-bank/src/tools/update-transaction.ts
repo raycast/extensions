@@ -7,13 +7,17 @@ type Input = {
 };
 
 export default async function UpdateTransaction(input: Input) {
+  if (!input.note && !input.categoryId) {
+    return { error: "At least one of note or categoryId must be provided" };
+  }
+
   const api = await getApiClient();
   if (!api) return { error: "No Mercury account configured" };
 
   try {
     const transaction = await api.updateTransaction(input.transactionId, {
-      note: input.note,
-      categoryId: input.categoryId,
+      ...(input.note !== undefined ? { note: input.note } : {}),
+      ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
     });
 
     return {
@@ -35,6 +39,8 @@ export const confirmation = {
     const changes = [];
     if (input.note) changes.push(`note to "${input.note}"`);
     if (input.categoryId) changes.push(`category to ${input.categoryId}`);
-    return `Update transaction ${input.transactionId}: set ${changes.join(" and ")}?`;
+    return changes.length > 0
+      ? `Update transaction ${input.transactionId}: set ${changes.join(" and ")}?`
+      : `Update transaction ${input.transactionId}?`;
   },
 };
