@@ -31,6 +31,7 @@ const APP_NAMES: Record<string, string> = {
   "us.zoom.xos": "Zoom",
   "com.brave.Browser": "Brave",
   "com.arc.Arc": "Arc",
+  "company.thebrowser.Browser": "Arc",
   "com.cursor.Cursor": "Cursor",
 };
 

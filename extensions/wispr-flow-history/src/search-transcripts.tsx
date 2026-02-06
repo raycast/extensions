@@ -1,6 +1,17 @@
-import { List, ActionPanel, Action, Icon, getApplications } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Detail,
+  Toast,
+  showToast,
+  confirmAlert,
+  Alert,
+  getApplications,
+} from "@raycast/api";
 import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { homedir } from "os";
 import { resolve } from "path";
 import { Transcript } from "./types";
@@ -8,7 +19,6 @@ import {
   getAppName,
   getDisplayText,
   parseTimestamp,
-  formatTimestamp,
   formatDuration,
   groupTranscriptsByDate,
 } from "./utils";
@@ -53,7 +63,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [appFilter, setAppFilter] = useState("all");
 
-  const { isLoading, data, pagination } = useCachedPromise(
+  const { isLoading, data, pagination, revalidate } = useCachedPromise(
     (search: string, app: string) => async (options: { page: number }) => {
       const offset = options.page * PAGE_SIZE;
       const query = buildPaginatedQuery(search, app, PAGE_SIZE, offset);
@@ -82,6 +92,15 @@ export default function Command() {
     for (const app of installedApps ?? []) {
       if (app.bundleId) {
         map.set(app.bundleId, app.path);
+      }
+    }
+    // Map legacy bundle IDs to current app paths
+    const BUNDLE_ALIASES: Record<string, string> = {
+      "com.arc.Arc": "company.thebrowser.Browser",
+    };
+    for (const [oldId, newId] of Object.entries(BUNDLE_ALIASES)) {
+      if (!map.has(oldId) && map.has(newId)) {
+        map.set(oldId, map.get(newId)!);
       }
     }
     return map;
@@ -120,6 +139,7 @@ export default function Command() {
               key={transcript.transcriptEntityId}
               transcript={transcript}
               appPathMap={appPathMap}
+              onArchive={revalidate}
             />
           ))}
         </List.Section>
@@ -142,14 +162,15 @@ export default function Command() {
 function TranscriptListItem({
   transcript,
   appPathMap,
+  onArchive,
 }: {
   transcript: Transcript;
   appPathMap: Map<string, string>;
+  onArchive: () => void;
 }) {
   const displayText = getDisplayText(transcript);
   const appName = getAppName(transcript.app);
   const date = parseTimestamp(transcript.timestamp);
-  const timeLabel = formatTimestamp(date);
   const duration = formatDuration(transcript.duration);
 
   const truncatedTitle =
@@ -159,11 +180,38 @@ function TranscriptListItem({
   const appPath = transcript.app ? appPathMap.get(transcript.app) : undefined;
   const appIcon = appPath ? { fileIcon: appPath } : Icon.Microphone;
 
+  const handleArchive = useCallback(async () => {
+    if (
+      await confirmAlert({
+        title: "Archive Transcript",
+        message: "Are you sure you want to archive this transcript?",
+        primaryAction: {
+          title: "Archive",
+          style: Alert.ActionStyle.Destructive,
+        },
+      })
+    ) {
+      const escaped = transcript.transcriptEntityId.replace(/'/g, "''");
+      await executeSQL(
+        WISPR_DB,
+        `UPDATE History SET isArchived = 1 WHERE transcriptEntityId = '${escaped}'`,
+      );
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Transcript archived",
+      });
+      onArchive();
+    }
+  }, [transcript.transcriptEntityId, onArchive]);
+
+  const wisprFlowPath = appPathMap.get("com.electron.wispr-flow");
+  const hasOriginalText =
+    transcript.asrText && transcript.asrText !== displayText;
+
   return (
     <List.Item
       icon={appIcon}
       title={truncatedTitle}
-      accessories={[{ text: timeLabel, tooltip: date.toLocaleString() }]}
       detail={
         <List.Item.Detail
           markdown={displayText}
@@ -219,10 +267,60 @@ function TranscriptListItem({
             <Action.Paste title="Paste to Active App" content={displayText} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            {hasOriginalText ? (
+              <Action.Push
+                title="View Original Transcription"
+                icon={Icon.Eye}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                target={
+                  <Detail
+                    markdown={transcript.asrText ?? ""}
+                    navigationTitle="Original Transcription"
+                    actions={
+                      <ActionPanel>
+                        <Action.CopyToClipboard
+                          title="Copy Original Text"
+                          content={transcript.asrText ?? ""}
+                        />
+                        <Action.Paste
+                          title="Paste Original Text"
+                          content={transcript.asrText ?? ""}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                }
+              />
+            ) : null}
+            {appPath ? (
+              <Action.Open
+                title={`Open ${appName}`}
+                icon={appIcon}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                target={appPath}
+              />
+            ) : null}
+            {wisprFlowPath ? (
+              <Action.Open
+                title="Open Wispr Flow"
+                icon={Icon.Microphone}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                target={wisprFlowPath}
+              />
+            ) : null}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Transcript ID"
               content={transcript.transcriptEntityId}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+            <Action
+              title="Archive Transcript"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              onAction={handleArchive}
             />
           </ActionPanel.Section>
         </ActionPanel>
