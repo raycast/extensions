@@ -174,6 +174,9 @@ export default function ProcessList() {
     if (!skipConfirmation) {
       const didConfirm = await confirmAlert({
         title: `${force ? "Force " : ""}Kill ${processName}?`,
+        // Persist per-alert answers in Raycast, bringing back the "Do not show this message again" checkbox.
+        // Users can clear saved answers via the command settings ("Reset Confirmation Dialogs").
+        rememberUserChoice: true,
       });
       if (!didConfirm) {
         showToast({
