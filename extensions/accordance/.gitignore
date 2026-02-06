@@ -14,6 +14,7 @@ compiled_raycast_rust
 .github/
 .docs
 .design
+AGENTS.md
 
 # misc
 .DS_Store

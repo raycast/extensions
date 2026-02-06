@@ -157,6 +157,58 @@ Module discovery reads `Info.plist` from `~/Library/Application Support/Accordan
 - Always check cache before executing AppleScript calls
 - Normalize references before cache lookup for consistency
 
+## Publishing Workflow
+
+This extension lives in the `raycast/extensions` monorepo for publishing. The Raycast team may
+make changes (optimized images, CHANGELOG tweaks, etc.) directly in that monorepo between our
+releases. To avoid merge conflicts when publishing:
+
+### Before starting any new work
+
+```bash
+npx @raycast/api@latest pull-contributions
+```
+
+Resolve any contributions **before** writing new code. This keeps the local repo in sync with
+what reviewers may have changed in `raycast/extensions`.
+
+### Before publishing
+
+```bash
+# Sync the GitHub fork with upstream
+gh repo sync entupo/raycast-extensions
+
+# Then publish
+npm run publish
+```
+
+### Full workflow
+
+1. `npx @raycast/api@latest pull-contributions` -- pull reviewer changes
+2. Make changes, commit
+3. `npm run lint && npm run build` -- verify clean
+4. Test manually in Raycast via `npm run dev`
+5. `gh repo sync entupo/raycast-extensions` -- sync fork
+6. `npm run publish` -- opens a draft PR on `raycast/extensions`
+7. Fill in PR description, mark as "Ready for review"
+
+### Troubleshooting
+
+If `npm run publish` fails with merge conflicts, check the cached clone at
+`~/.config/raycast/public-extensions-fork/`. It may have stale branches or unresolved merges
+from a previous attempt. Fix with:
+
+```bash
+cd ~/.config/raycast/public-extensions-fork
+git merge --abort        # if stuck in a merge
+git checkout main
+git fetch origin
+git reset --hard origin/main
+git branch -D ext/accordance   # delete stale branch if present
+```
+
+Then retry `npm run publish`.
+
 ## Copilot Instructions
 
 Additional context is available in `.github/copilot-instructions.md` covering the original
