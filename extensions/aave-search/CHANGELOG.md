@@ -1,5 +1,12 @@
 # Aave Search Changelog
 
+## [1.1.5] - 2026-02-06
+
+### Maintenance
+
+- Update toolbox to support new networks
+- Add megaeth icon
+
 ## [1.1.4] - 2025-09-29
 
 ### Maintenance

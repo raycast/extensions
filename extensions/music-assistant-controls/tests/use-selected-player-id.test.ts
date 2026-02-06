@@ -1,4 +1,5 @@
 import { showToast, launchCommand, LocalStorage, LaunchType } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   storeSelectedQueueID,
   getSelectedQueueID,
@@ -7,9 +8,11 @@ import {
 } from "../src/use-selected-player-id";
 
 jest.mock("@raycast/api");
+jest.mock("@raycast/utils");
 
 const mockShowToast = showToast as jest.MockedFunction<typeof showToast>;
 const mockLaunchCommand = launchCommand as jest.MockedFunction<typeof launchCommand>;
+const mockShowFailureToast = showFailureToast as jest.MockedFunction<typeof showFailureToast>;
 const mockLocalStorage = LocalStorage as jest.Mocked<typeof LocalStorage>;
 
 describe("use-selected-player-id", () => {
@@ -65,13 +68,20 @@ describe("use-selected-player-id", () => {
       });
     });
 
-    it("should show toast and return undefined when stored data is null", async () => {
-      mockLocalStorage.getItem.mockResolvedValue("null");
+    it("should show toast and return undefined when stored data is missing queue_id", async () => {
+      mockLocalStorage.getItem.mockResolvedValue(JSON.stringify({}));
 
       const result = await getSelectedQueueID();
 
       expect(result).toBeUndefined();
-      expect(mockShowToast).toHaveBeenCalled();
+      expect(mockShowToast).toHaveBeenCalledWith({
+        title: "😲 No player selected!",
+        message: "Please select an active player first.",
+        primaryAction: {
+          title: "Set Active Player",
+          onAction: expect.any(Function),
+        },
+      });
     });
 
     it("should show toast and return undefined when stored data is invalid JSON", async () => {
@@ -80,11 +90,19 @@ describe("use-selected-player-id", () => {
       const result = await getSelectedQueueID();
 
       expect(result).toBeUndefined();
-      expect(mockShowToast).toHaveBeenCalled();
+      expect(mockShowToast).toHaveBeenCalledWith({
+        title: "😲 No player selected!",
+        message: "Please select an active player first.",
+        primaryAction: {
+          title: "Set Active Player",
+          onAction: expect.any(Function),
+        },
+      });
     });
 
     it("should launch set-active-player command when toast action is clicked", async () => {
       mockLocalStorage.getItem.mockResolvedValue(undefined);
+      mockLaunchCommand.mockResolvedValue();
 
       await getSelectedQueueID();
 
@@ -95,22 +113,50 @@ describe("use-selected-player-id", () => {
       expect(onAction).toBeDefined();
 
       if (onAction) {
-        onAction();
+        await onAction();
         expect(mockLaunchCommand).toHaveBeenCalledWith({
           name: "set-active-player",
           type: LaunchType.UserInitiated,
         });
+        expect(mockShowFailureToast).not.toHaveBeenCalled();
       }
     });
 
-    it("should handle LocalStorage errors gracefully", async () => {
-      const error = new Error("Storage access denied");
-      mockLocalStorage.getItem.mockRejectedValue(error);
+    it("should handle launchCommand errors in toast action", async () => {
+      mockLocalStorage.getItem.mockResolvedValue(undefined);
+      const error = new Error("Command launch failed");
+      mockLaunchCommand.mockRejectedValue(error);
 
-      const result = await getSelectedQueueID();
+      await getSelectedQueueID();
 
-      expect(result).toBeUndefined();
-      expect(mockShowToast).toHaveBeenCalled();
+      const toastOptions = mockShowToast.mock.calls[0][0];
+      const onAction = (toastOptions as any).primaryAction?.onAction;
+
+      if (onAction) {
+        await onAction();
+        expect(mockShowFailureToast).toHaveBeenCalledWith(error, {
+          title: "Failed to launch set-active-player command",
+        });
+      }
+    });
+
+    it("should handle launchCommand errors in catch block toast action", async () => {
+      const storageError = new Error("Storage access denied");
+      mockLocalStorage.getItem.mockRejectedValue(storageError);
+      const commandError = new Error("Command launch failed");
+      mockLaunchCommand.mockRejectedValue(commandError);
+
+      await getSelectedQueueID();
+
+      const toastOptions = mockShowToast.mock.calls[0][0];
+      const onAction = (toastOptions as any).primaryAction?.onAction;
+
+      if (onAction) {
+        await onAction();
+        expect(mockShowFailureToast).toHaveBeenCalledWith(commandError, {
+          title: "Failed to launch set-active-player command",
+        });
+      }
     });
   });
 });

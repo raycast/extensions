@@ -1,17 +1,18 @@
 import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Color } from "@raycast/api";
 import { provider, reauthorize } from "./lib/oauth";
 import { showFailureToast, withAccessToken } from "@raycast/utils";
-import { usePullRequestsWithAgentSessions } from "./hooks/usePullRequestsWithAgentSessions";
-import { PullRequestWithAgentSessionsItem } from "./components";
+import { useTasks } from "./hooks/useTasks";
+import { TaskItem } from "./components";
 
 function Command() {
-  const { isLoading, pullRequestsWithAgentSessions } = usePullRequestsWithAgentSessions();
+  const { isLoading, tasks } = useTasks();
 
-  const openPullRequests = pullRequestsWithAgentSessions.filter(
-    (pullRequestWithAgentSessions) => pullRequestWithAgentSessions.pullRequest.state === "OPEN",
+  // Filter tasks by pull request state (if available)
+  const openTasks = tasks.filter(
+    (taskWithPullRequest) => !taskWithPullRequest.pullRequest || taskWithPullRequest.pullRequest.state === "OPEN",
   );
-  const closedPullRequests = pullRequestsWithAgentSessions.filter(
-    (pullRequestWithAgentSessions) => pullRequestWithAgentSessions.pullRequest.state !== "OPEN",
+  const closedTasks = tasks.filter(
+    (taskWithPullRequest) => taskWithPullRequest.pullRequest && taskWithPullRequest.pullRequest.state !== "OPEN",
   );
 
   return (
@@ -42,30 +43,20 @@ function Command() {
     >
       <List.EmptyView
         icon={{ source: "copilot.svg", tintColor: Color.PrimaryText }}
-        title={pullRequestsWithAgentSessions.length === 0 ? "No Tasks Found" : "No Matching Tasks"}
-        description={
-          pullRequestsWithAgentSessions.length === 0
-            ? "Press Return to create your first task"
-            : "Try a different search"
-        }
+        title={tasks.length === 0 ? "No Tasks Found" : "No Matching Tasks"}
+        description={tasks.length === 0 ? "Press Return to create your first task" : "Try a different search"}
       />
-      {openPullRequests.length > 0 && (
+      {openTasks.length > 0 && (
         <List.Section title="Open">
-          {openPullRequests.map((pullRequestWithAgentSessions) => (
-            <PullRequestWithAgentSessionsItem
-              key={pullRequestWithAgentSessions.key}
-              pullRequestWithAgentSessions={pullRequestWithAgentSessions}
-            />
+          {openTasks.map((taskWithPullRequest) => (
+            <TaskItem key={taskWithPullRequest.key} taskWithPullRequest={taskWithPullRequest} />
           ))}
         </List.Section>
       )}
-      {closedPullRequests.length > 0 && (
+      {closedTasks.length > 0 && (
         <List.Section title="Closed">
-          {closedPullRequests.map((pullRequestWithAgentSessions) => (
-            <PullRequestWithAgentSessionsItem
-              key={pullRequestWithAgentSessions.key}
-              pullRequestWithAgentSessions={pullRequestWithAgentSessions}
-            />
+          {closedTasks.map((taskWithPullRequest) => (
+            <TaskItem key={taskWithPullRequest.key} taskWithPullRequest={taskWithPullRequest} />
           ))}
         </List.Section>
       )}

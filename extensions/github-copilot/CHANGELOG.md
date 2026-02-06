@@ -1,5 +1,31 @@
 # GitHub Copilot Changelog
 
+## [Switch extension to use new API] - 2026-02-06
+
+- Switch "Create Task", "View Tasks" and "Menu Bar Tasks" commands to use new API
+
+## [Open workflow run] - 2026-02-03
+
+- Add "Open workflow run" menu item to the "View Tasks" command
+
+## [Assign Issue to Copilot] - 2026-02-03
+
+- Add "Assign Issue to Copilot" command
+
+## [Manage Paid Premium Requests action] - 2026-02-02
+
+- Add "Manage Paid Premium Requests" action to the "Copilot Usage" command
+- Fix title casing for "Log Out" action
+
+## [Copilot usage auth] - 2026-02-01
+
+- Fix auth for Copilot usage command using existing OAuth
+- Remove apps.json preference (no longer needed)
+
+## [Menu bar command] - 2026-01-09
+
+- Hide the menu bar command when there are no open pull requests
+
 ## [Model picker, custom agents and more] - 2025-12-08
 
 - Allow selecting a model when creating a task (Copilot Pro and Pro+ users only)

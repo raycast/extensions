@@ -196,7 +196,7 @@ function AgentListItem(props: {
                 url={props.agent.target.prUrl}
                 shortcut={{
                   macOS: { modifiers: ["cmd", "shift"], key: "return" },
-                  windows: { modifiers: ["ctrl", "shift"], key: "return" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "return" },
                 }}
               />
             )}
@@ -214,7 +214,7 @@ function AgentListItem(props: {
               target={<FollowupInstruction agent={props.agent} />}
               shortcut={{
                 macOS: { modifiers: ["cmd", "shift"], key: "n" },
-                windows: { modifiers: ["ctrl", "shift"], key: "n" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "n" },
               }}
             />
           </ActionPanel.Section>
@@ -244,7 +244,7 @@ function AgentListItem(props: {
               onAction={() => props.setIsShowingDetail(!props.isShowingDetail)}
               shortcut={{
                 macOS: { modifiers: ["cmd", "shift"], key: "d" },
-                windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "d" },
               }}
             />
             <Action.Push
@@ -253,7 +253,7 @@ function AgentListItem(props: {
               target={<AgentConversation agent={props.agent} />}
               shortcut={{
                 macOS: { modifiers: ["cmd", "shift"], key: "v" },
-                windows: { modifiers: ["ctrl", "shift"], key: "v" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "v" },
               }}
             />
           </ActionPanel.Section>

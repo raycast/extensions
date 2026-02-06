@@ -1,4 +1,4 @@
-import { Detail, showToast, Toast, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast, Clipboard } from "@raycast/api";
 import { homedir } from "os";
 import QRCode from "qrcode";
 import { QR_OPTIONS, QR_OPTIONS_PREVIEW, SVG_OPTIONS } from "./config";
@@ -46,8 +46,18 @@ export async function generateQRCode(options: { URL?: string; format?: "png" | "
   }
 }
 
-export function QRCodeView({ qrData, height }: { qrData: string; height: number }) {
-  return <Detail isLoading={!qrData} markdown={`![qrcode](${qrData}?raycast-height=${height})`} />;
+export function QRCodeView({ qrData, height, onBack }: { qrData: string; height: number; onBack: () => void }) {
+  return (
+    <Detail
+      isLoading={!qrData}
+      markdown={`![qrcode](${qrData}?raycast-height=${height})`}
+      actions={
+        <ActionPanel>
+          <Action title="Edit QR Code" onAction={onBack} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 export const getQRCodePath = (qrcodeUrl: string, format: "png" | "svg" = "png") => {

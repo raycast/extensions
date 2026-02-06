@@ -10,7 +10,7 @@ interface AddIncidentFormValues {
   requester_email: string;
 }
 
-export default function Command(): JSX.Element {
+export default function AddIncidentCommand() {
   const preferences = getPreferenceValues<Preferences>();
   const { handleSubmit } = useForm<AddIncidentFormValues>({
     async onSubmit(values) {

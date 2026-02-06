@@ -9,6 +9,8 @@ export function getApiConfig(): ApiConfig {
     zoneId: preferences.cloudflareZoneId,
     destinationEmail: preferences.destinationEmail,
     preAllocatePool: preferences.preAllocatePool,
+    aliasPreface: preferences.aliasPreface?.trim() || undefined,
+    defaultLabel: preferences.defaultLabel?.trim() || undefined,
   };
 
   return config;

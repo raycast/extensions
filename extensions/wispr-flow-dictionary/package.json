@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wispr-flow-dictionary",
+  "title": "Wispr Flow Dictionary",
+  "description": "Manage your Wispr Flow custom vocabulary - add, view, search, and delete words",
+  "icon": "extension-icon.png",
+  "author": "christi4nity",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-word",
+      "title": "Add Word to Wispr Flow",
+      "description": "Add a new word or phrase to your Wispr Flow dictionary",
+      "mode": "view"
+    },
+    {
+      "name": "list-words",
+      "title": "Manage Wispr Flow Dictionary",
+      "description": "View, search, and delete words from your Wispr Flow dictionary",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.0",
+    "uuid": "^11.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.5",
+    "@types/react": "19.0.2",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @anthropic-ai/ray@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

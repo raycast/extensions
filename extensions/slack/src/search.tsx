@@ -1,6 +1,7 @@
 // This filename should be named `switch-to-channel.tsx` or something similar
 // but it's kept as `search.tsx` as changing the command's name will cause users to lose their keywords and aliases
 import { ActionPanel, Action, Icon, List, getPreferenceValues } from "@raycast/api";
+import { useState } from "react";
 import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
@@ -46,6 +47,13 @@ function searchItemAccessories(
   return searchMetadata;
 }
 
+function matchesAllWords(text: string, searchText: string): boolean {
+  if (!searchText.trim()) return true;
+  const words = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+  const lowerText = text.toLowerCase();
+  return words.every((word) => lowerText.includes(word));
+}
+
 function CopyIdAction({ id }: { id: string }) {
   return (
     <Action.CopyToClipboard
@@ -60,6 +68,7 @@ function CopyIdAction({ id }: { id: string }) {
 }
 
 function Search() {
+  const [searchText, setSearchText] = useState("");
   const { isAppInstalled, isLoading } = useSlackApp();
   const { data, isLoading: isLoadingChannels } = useChannels();
 
@@ -67,9 +76,15 @@ function Search() {
 
   const { data: recents, visitItem, resetRanking } = useFrecencySorting(channels, { key: (item) => item.id });
 
+  const filteredRecents = recents.filter((item) => matchesAllWords(item.name, searchText));
+
   return (
-    <List isLoading={isLoading || isLoadingChannels}>
-      {recents.map((item) => {
+    <List
+      isLoading={isLoading || isLoadingChannels}
+      filtering={false}
+      onSearchTextChange={setSearchText}
+    >
+      {filteredRecents.map((item) => {
         const isUser = item.id.startsWith("U");
 
         if (isUser) {

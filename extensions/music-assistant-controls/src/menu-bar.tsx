@@ -2,11 +2,11 @@ import { Icon, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { PlayerQueue, Player } from "./external-code/interfaces";
 import MusicAssistantClient from "./music-assistant-client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { selectedPlayerKey, StoredQueue } from "./use-selected-player-id";
 
 export default function Command() {
-  const client = new MusicAssistantClient();
+  const client = useMemo(() => new MusicAssistantClient(), []);
   const {
     isLoading,
     data: queues,
