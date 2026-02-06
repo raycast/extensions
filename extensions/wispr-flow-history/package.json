@@ -10,6 +10,36 @@
   ],
   "platforms": ["macOS"],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "The default action when pressing Enter on a transcript",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        { "title": "Copy to Clipboard", "value": "copy" },
+        { "title": "Paste to Active App", "value": "paste" }
+      ]
+    },
+    {
+      "name": "showArchived",
+      "title": "Show Archived",
+      "label": "Include archived transcripts",
+      "description": "Include archived transcripts in the list",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "databasePath",
+      "title": "Database Path",
+      "description": "Custom path to the Wispr Flow database file. Leave empty to use the default location.",
+      "type": "file",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "search-transcripts",

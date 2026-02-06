@@ -9,6 +9,7 @@ import {
   confirmAlert,
   Alert,
   getApplications,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
 import { useState, useMemo, useCallback } from "react";
@@ -23,10 +24,15 @@ import {
   groupTranscriptsByDate,
 } from "./utils";
 
-const WISPR_DB = resolve(
+const DEFAULT_DB = resolve(
   homedir(),
   "Library/Application Support/Wispr Flow/flow.sqlite",
 );
+
+function getDbPath(): string {
+  const { databasePath } = getPreferenceValues<Preferences>();
+  return databasePath && databasePath.trim() !== "" ? databasePath : DEFAULT_DB;
+}
 
 const COLUMNS = `transcriptEntityId, asrText, formattedText, editedText,
   timestamp, app, url, duration, numWords, status, language, conversationId, isArchived`;
@@ -36,10 +42,14 @@ const PAGE_SIZE = 50;
 function buildPaginatedQuery(
   search: string,
   appFilter: string,
+  showArchived: boolean,
   limit: number,
   offset: number,
 ) {
-  const conditions = ["(isArchived = 0 OR isArchived IS NULL)"];
+  const conditions: string[] = [];
+  if (!showArchived) {
+    conditions.push("(isArchived = 0 OR isArchived IS NULL)");
+  }
 
   if (search.trim()) {
     const escaped = search.replace(/'/g, "''");
@@ -62,23 +72,38 @@ function buildPaginatedQuery(
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [appFilter, setAppFilter] = useState("all");
+  const { primaryAction, showArchived } = getPreferenceValues<Preferences>();
+  const dbPath = getDbPath();
 
   const { isLoading, data, pagination, revalidate } = useCachedPromise(
-    (search: string, app: string) => async (options: { page: number }) => {
-      const offset = options.page * PAGE_SIZE;
-      const query = buildPaginatedQuery(search, app, PAGE_SIZE, offset);
-      const results = await executeSQL<Transcript>(WISPR_DB, query);
-      return { data: results, hasMore: results.length === PAGE_SIZE };
-    },
-    [searchText, appFilter],
+    (search: string, app: string, archived: boolean) =>
+      async (options: { page: number }) => {
+        const offset = options.page * PAGE_SIZE;
+        const query = buildPaginatedQuery(
+          search,
+          app,
+          archived,
+          PAGE_SIZE,
+          offset,
+        );
+        const results = await executeSQL<Transcript>(dbPath, query);
+        return { data: results, hasMore: results.length === PAGE_SIZE };
+      },
+    [searchText, appFilter, showArchived],
   );
 
-  const { data: uniqueAppsData } = useCachedPromise(async () => {
-    return executeSQL<{ app: string }>(
-      WISPR_DB,
-      `SELECT DISTINCT app FROM History WHERE (isArchived = 0 OR isArchived IS NULL) AND app IS NOT NULL AND app != '' ORDER BY app`,
-    );
-  }, []);
+  const { data: uniqueAppsData } = useCachedPromise(
+    (archived: boolean) => {
+      const archiveCondition = archived
+        ? ""
+        : "AND (isArchived = 0 OR isArchived IS NULL)";
+      return executeSQL<{ app: string }>(
+        dbPath,
+        `SELECT DISTINCT app FROM History WHERE app IS NOT NULL AND app != '' ${archiveCondition} ORDER BY app`,
+      );
+    },
+    [showArchived],
+  );
 
   const uniqueApps = useMemo(() => {
     return (uniqueAppsData ?? [])
@@ -139,6 +164,8 @@ export default function Command() {
               key={transcript.transcriptEntityId}
               transcript={transcript}
               appPathMap={appPathMap}
+              primaryAction={primaryAction}
+              dbPath={dbPath}
               onArchive={revalidate}
             />
           ))}
@@ -162,10 +189,14 @@ export default function Command() {
 function TranscriptListItem({
   transcript,
   appPathMap,
+  primaryAction,
+  dbPath,
   onArchive,
 }: {
   transcript: Transcript;
   appPathMap: Map<string, string>;
+  primaryAction: string;
+  dbPath: string;
   onArchive: () => void;
 }) {
   const displayText = getDisplayText(transcript);
@@ -193,7 +224,7 @@ function TranscriptListItem({
     ) {
       const escaped = transcript.transcriptEntityId.replace(/'/g, "''");
       await executeSQL(
-        WISPR_DB,
+        dbPath,
         `UPDATE History SET isArchived = 1 WHERE transcriptEntityId = '${escaped}'`,
       );
       await showToast({
@@ -260,11 +291,29 @@ function TranscriptListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy to Clipboard"
-              content={displayText}
-            />
-            <Action.Paste title="Paste to Active App" content={displayText} />
+            {primaryAction === "paste" ? (
+              <>
+                <Action.Paste
+                  title="Paste to Active App"
+                  content={displayText}
+                />
+                <Action.CopyToClipboard
+                  title="Copy to Clipboard"
+                  content={displayText}
+                />
+              </>
+            ) : (
+              <>
+                <Action.CopyToClipboard
+                  title="Copy to Clipboard"
+                  content={displayText}
+                />
+                <Action.Paste
+                  title="Paste to Active App"
+                  content={displayText}
+                />
+              </>
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             {hasOriginalText ? (
