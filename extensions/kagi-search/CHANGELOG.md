@@ -1,6 +1,6 @@
 # Kagi Search Changelog
 
-## [1.2.4] - {PR_MERGE_DATE}
+## [1.2.4] - 2026-02-06
 
 * Add `Action` to Remove History when API disabled
 
