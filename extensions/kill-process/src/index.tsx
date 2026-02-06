@@ -9,6 +9,7 @@ import {
   Icon,
   Keyboard,
   List,
+  LocalStorage,
   open,
   popToRoot,
   showToast,
@@ -21,6 +22,38 @@ import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
 import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
 import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
+
+const CONFIRMATION_NONCE_STORAGE_KEY = "kill-process.confirmation-nonce";
+
+async function getConfirmationNonce(): Promise<number> {
+  const value = await LocalStorage.getItem<string>(CONFIRMATION_NONCE_STORAGE_KEY);
+  const nonce = value ? Number(value) : 0;
+  return Number.isFinite(nonce) && nonce >= 0 ? nonce : 0;
+}
+
+async function incrementConfirmationNonce(): Promise<number> {
+  const next = (await getConfirmationNonce()) + 1;
+  await LocalStorage.setItem(CONFIRMATION_NONCE_STORAGE_KEY, String(next));
+  return next;
+}
+
+function invisibleConfirmationSuffix(nonce: number): string {
+  // We need a stable (but invisible) suffix so users can "reset" Raycast's remembered confirmation dialogs
+  // even if Raycast no longer shows the built-in "Reset Confirmation Dialogs" UI.
+  //
+  // When nonce === 0, we keep the title identical to older versions, so existing remembered choices still apply.
+  if (nonce <= 0) return "";
+
+  // Encode nonce in base-3 using zero-width characters to avoid changing the visible title.
+  const alphabet = ["\u200b", "\u200c", "\u200d"] as const; // ZWSP, ZWNJ, ZWJ
+  let n = nonce;
+  let out = "";
+  while (n > 0) {
+    out += alphabet[n % alphabet.length];
+    n = Math.floor(n / alphabet.length);
+  }
+  return out;
+}
 
 function isAppProcessType(type: Process["type"]): boolean {
   return type === "app" || type === "aggregatedApp";
@@ -172,10 +205,10 @@ export default function ProcessList() {
   const killProcess = async (process: Process, force: boolean = false) => {
     const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
     if (!skipConfirmation) {
+      const nonce = await getConfirmationNonce();
       const didConfirm = await confirmAlert({
-        title: `${force ? "Force " : ""}Kill ${processName}?`,
+        title: `${force ? "Force " : ""}Kill ${processName}?${invisibleConfirmationSuffix(nonce)}`,
         // Persist per-alert answers in Raycast, bringing back the "Do not show this message again" checkbox.
-        // Users can clear saved answers via the command settings ("Reset Confirmation Dialogs").
         rememberUserChoice: true,
       });
       if (!didConfirm) {
@@ -405,6 +438,18 @@ export default function ProcessList() {
                       }}
                     />
                   </ActionPanel.Section>
+                  {!skipConfirmation ? (
+                    <ActionPanel.Section title="Confirmation">
+                      <Action
+                        title="Reset Confirmation Dialogs"
+                        icon={Icon.RotateAntiClockwise}
+                        onAction={async () => {
+                          await incrementConfirmationNonce();
+                          showToast({ title: "Reset confirmation dialogs", style: Toast.Style.Success });
+                        }}
+                      />
+                    </ActionPanel.Section>
+                  ) : null}
                 </ActionPanel>
               }
             />
