@@ -11,7 +11,6 @@ export function useInterval(callback: () => void, delay: number | null) {
 
   // Set up the interval.
   useEffect(() => {
-    savedCallback.current();
     const refreshEnabled = (delay ?? 0) > 0;
     if (refreshEnabled) {
       const interval = Math.max(delay ?? 0, 1000);

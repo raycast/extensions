@@ -12,7 +12,8 @@
     "erics118",
     "xilopaint",
     "validate",
-    "dead_hikikomori"
+    "dead_hikikomori",
+    "mateus_badalotti"
   ],
   "platforms": [
     "macOS",
@@ -643,17 +644,45 @@
   },
   "preferences": [
     {
-      "description": "Determine whether the process path should be searched for the query or only the process name.",
-      "label": "Search Process Paths",
+      "description": "Default ordering for the process list.",
+      "name": "sortBy",
+      "required": false,
+      "title": "Default Sort",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "CPU",
+          "value": "cpu"
+        },
+        {
+          "title": "Memory",
+          "value": "memory"
+        }
+      ],
+      "default": "memory"
+    },
+    {
+      "description": "Refresh the list every N ms. Use 0 to disable. Minimum: 1000.",
+      "label": "Interval (ms)",
+      "name": "refreshDuration",
+      "required": false,
+      "title": "Auto-Refresh",
+      "type": "textfield",
+      "default": "3000",
+      "placeholder": "3000"
+    },
+    {
+      "description": "Include the full executable path when searching.",
+      "label": "Include Process Path",
       "name": "shouldSearchInPaths",
       "required": false,
       "default": false,
-      "title": "Filtering",
+      "title": "Search",
       "type": "checkbox"
     },
     {
-      "description": "Determine whether the process PID should be searched for the query or only the process name.",
-      "label": "Search Process PID",
+      "description": "Include the PID when searching.",
+      "label": "Include PID",
       "name": "shouldSearchInPid",
       "required": false,
       "default": false,
@@ -661,8 +690,8 @@
       "type": "checkbox"
     },
     {
-      "description": "Determine whether apps are listed before other results when filtering.",
-      "label": "Prioritize Apps",
+      "description": "When searching, show apps before helper/background processes.",
+      "label": "Prefer Apps",
       "name": "shouldPrioritizeAppsWhenFiltering",
       "required": false,
       "default": false,
@@ -670,25 +699,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Determine whether processes are sorted by CPU or memory usage.",
-      "label": "Sort by Memory Usage",
-      "name": "sortByMem",
-      "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
-    },
-    {
-      "description": "Determine whether aggregate processes belong to the same app.",
-      "label": "Aggregate Apps",
-      "name": "aggregateApps",
-      "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
-    },
-    {
-      "description": "Show process PID info.",
+      "description": "Show the PID in each row subtitle.",
       "label": "Show PID",
       "name": "shouldShowPID",
       "required": false,
@@ -697,7 +708,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Show process path.",
+      "description": "Show the full executable path in each row subtitle.",
       "label": "Show Process Path",
       "name": "shouldShowPath",
       "required": false,
@@ -706,8 +717,26 @@
       "type": "checkbox"
     },
     {
-      "description": "Close window after killing a process",
-      "label": "Close Window",
+      "description": "Group related processes under their parent app.",
+      "label": "Group by App",
+      "name": "aggregateApps",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Skip the confirmation dialog when killing a process.",
+      "label": "Never Ask for Confirmation",
+      "name": "skipKillConfirmation",
+      "required": false,
+      "default": false,
+      "title": "Confirmation",
+      "type": "checkbox"
+    },
+    {
+      "description": "Close the Raycast window after killing a process.",
+      "label": "Close Raycast Window",
       "name": "closeWindowAfterKill",
       "required": false,
       "default": true,
@@ -715,39 +744,22 @@
       "type": "checkbox"
     },
     {
-      "description": "Clear search bar after killing a process",
-      "label": "Clear Search Bar",
-      "name": "clearSearchBarAfterKill",
-      "required": false,
-      "default": true,
-      "type": "checkbox"
-    },
-    {
-      "description": "Go back to root search after killing a process",
-      "label": "Go back to Root Search",
+      "description": "Return to the root search (if the window stays open).",
+      "label": "Return to Root Search",
       "name": "goToRootAfterKill",
       "required": false,
       "default": false,
+      "title": "",
       "type": "checkbox"
     },
     {
-      "description": "Skip confirmation dialogs when killing processes.",
-      "label": "Never Ask for Confirmation",
-      "name": "skipConfirmation",
+      "description": "Clear the search bar (if the window stays open).",
+      "label": "Clear Search",
+      "name": "clearSearchBarAfterKill",
       "required": false,
-      "default": false,
-      "title": "Confirmation",
+      "default": true,
+      "title": "",
       "type": "checkbox"
-    },
-    {
-      "description": "Refresh duration in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
-      "label": "Refresh Duration",
-      "name": "refreshDuration",
-      "required": false,
-      "title": "Refresh Duration",
-      "type": "textfield",
-      "default": "3000",
-      "placeholder": "3000"
     }
   ],
   "dependencies": {
