@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo } from 'react';
 import { getQuickFindData } from './api';
+import ErrorView from './components/ErrorView';
 
 interface SearchItem {
   id: string;
@@ -13,8 +14,8 @@ interface SearchItem {
 }
 
 export default function Command() {
-  // Single JXA call to fetch all data - dramatically reduces AppleScript overhead
-  const { data, isLoading } = useCachedPromise(getQuickFindData);
+  // Single query against Things' SQLite DB — bypasses slow Apple Events
+  const { data, isLoading, error, revalidate } = useCachedPromise(getQuickFindData);
 
   const items = useMemo(() => {
     if (!data) return [];
@@ -64,6 +65,10 @@ export default function Command() {
 
     return allItems;
   }, [data]);
+
+  if (error) {
+    return <ErrorView error={error} onRetry={revalidate} />;
+  }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search areas, projects, and to-dos...">
