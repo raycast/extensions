@@ -32,8 +32,8 @@ export default function Command() {
       )}
       {providers.length > 0 &&
         providers.map((provider) => (
-          <List.Section key={provider.id} title={provider.name}>
-            {provider.models?.length === 0 && (
+          <List.Section key={provider.id} title={provider.name} subtitle={`${provider.models.length} models`}>
+            {provider.models.length === 0 && (
               <List.Item
                 key={`${provider.id}-add-model`}
                 title="Add Model"
@@ -55,7 +55,7 @@ export default function Command() {
                 }
               />
             )}
-            {provider.models?.map((model) => (
+            {provider.models.map((model) => (
               <List.Item
                 key={model.id}
                 title={model.name}
@@ -72,7 +72,7 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Label title="Model ID" text={model.id} />
                         <List.Item.Detail.Metadata.Label title="Model Name" text={model.name} />
-                        <List.Item.Detail.Metadata.Label title="Context" text={model.context.toString()} />
+                        <List.Item.Detail.Metadata.Label title="Context Window" text={model.context.toString()} />
                         {model.description && (
                           <List.Item.Detail.Metadata.Label title="Description" text={model.description} />
                         )}
