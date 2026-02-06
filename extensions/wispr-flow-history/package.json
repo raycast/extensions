@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wispr-flow-history",
+  "title": "Wispr Flow History",
+  "description": "Search and browse your Wispr Flow voice transcription history",
+  "icon": "icon.png",
+  "author": "carterm",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-transcripts",
+      "title": "Search Transcripts",
+      "subtitle": "Wispr Flow",
+      "description": "Search and browse your Wispr Flow transcription history",
+      "mode": "view",
+      "hotkey": {
+        "modifiers": ["ctrl", "shift"],
+        "key": "v"
+      }
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
