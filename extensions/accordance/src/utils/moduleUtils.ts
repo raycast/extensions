@@ -3,6 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
+import { escapeForAppleScript } from "./applescriptUtils";
 
 const cache = new Cache();
 const CACHE_KEY = "accordance-modules";
@@ -120,7 +121,7 @@ export async function isEnglishModule(moduleName: string): Promise<boolean> {
       tell application "Accordance"
         if not running then launch
         try
-          set result to «event AccdIsEg» {"${moduleName}"}
+          set result to «event AccdIsEg» {"${escapeForAppleScript(moduleName)}"}
           return result
         on error errMsg
           return "Error: " & errMsg

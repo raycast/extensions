@@ -21,9 +21,13 @@ interface Workspace {
   path: string;
 }
 
+interface Preferences {
+  workspacePath: string;
+}
+
 export default function Command() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadWorkspaces();
@@ -31,12 +35,12 @@ export default function Command() {
 
   async function loadWorkspaces() {
     try {
-      const preferences = getPreferenceValues<Preferences.OpenWorkspace>();
+      const preferences = getPreferenceValues<Preferences>();
       const workspacePath = preferences.workspacePath.replace(/^~/, homedir());
 
       if (!existsSync(workspacePath)) {
         await showFailureToast(`The configured workspace path does not exist: ${workspacePath}`);
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
 
@@ -59,7 +63,7 @@ export default function Command() {
       console.error("Failed to load workspaces:", error);
       await showFailureToast("Failed to load Accordance workspaces");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -116,7 +120,7 @@ export default function Command() {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return <List isLoading={true} />;
   }
 

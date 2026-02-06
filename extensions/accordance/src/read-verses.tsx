@@ -1,11 +1,15 @@
-import { ActionPanel, List, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, getPreferenceValues, open, Keyboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { ModuleSelector } from "./components/ModuleSelector";
 import { fetchModules } from "./utils/moduleUtils";
-import { validateReference, findBookData, normalizeReference, Reference } from "./utils/bibleUtils";
+import { validateReference, findBookData, normalizeReference, Reference, cleanVerseText } from "./utils/bibleUtils";
 import { generateAccordanceAppleScript } from "./utils/applescriptUtils";
-import { BibleData } from "./components/BibleData";
+import { bibleData } from "./components/bibleData";
+
+interface Preferences {
+  defaultText: string;
+}
 
 interface VerseResult {
   reference: string;
@@ -42,17 +46,10 @@ export default function Command() {
     initializeModule();
   }, []);
 
-  // Function to clean verse text by removing extra spaces
-  const cleanVerseText = (text: string): string => {
-    return text
-      .trim() // Remove leading/trailing whitespace
-      .replace(/\s+/g, " "); // Replace multiple consecutive spaces with single space
-  };
-
-  // Generate next verse reference
-  const getNextReference = (ref: Reference): Reference => {
+  // Generate next verse reference, returns null at end of Bible
+  const getNextReference = (ref: Reference): Reference | null => {
     const bookData = findBookData(ref.book);
-    if (!bookData) return ref;
+    if (!bookData) return null;
 
     if (ref.verse < bookData.verses[ref.chapter - 1]) {
       return { ...ref, verse: ref.verse + 1 };
@@ -60,13 +57,13 @@ export default function Command() {
       return { book: ref.book, chapter: ref.chapter + 1, verse: 1 };
     } else {
       // Move to next book
-      const currentBookIndex = BibleData.findIndex((b) => b.name === bookData.name);
-      if (currentBookIndex < BibleData.length - 1) {
-        const nextBook = BibleData[currentBookIndex + 1];
+      const currentBookIndex = bibleData.findIndex((b) => b.name === bookData.name);
+      if (currentBookIndex < bibleData.length - 1) {
+        const nextBook = bibleData[currentBookIndex + 1];
         return { book: nextBook.name, chapter: 1, verse: 1 };
       } else {
         // End of Bible
-        return ref;
+        return null;
       }
     }
   };
@@ -74,9 +71,10 @@ export default function Command() {
   // Generate verse references starting from a reference
   const generateVerseReferences = (startRef: Reference, count: number): Reference[] => {
     const refs: Reference[] = [];
-    let current = startRef;
+    let current: Reference | null = startRef;
 
     for (let i = 0; i < count; i++) {
+      if (!current) break;
       refs.push(current);
       current = getNextReference(current);
     }
@@ -117,6 +115,7 @@ export default function Command() {
             verse: ref.verse,
           };
           setVerses((prev) => [...prev, errorVerse]);
+          loadedCount++;
           continue;
         }
 
@@ -144,6 +143,7 @@ export default function Command() {
           verse: ref.verse,
         };
         setVerses((prev) => [...prev, errorVerse]);
+        loadedCount++;
       }
     }
 
@@ -185,6 +185,11 @@ export default function Command() {
         chapter: lastVerse.chapter,
         verse: lastVerse.verse,
       });
+
+      if (!nextStartRef) {
+        setHasMore(false);
+        return;
+      }
 
       const references = generateVerseReferences(nextStartRef, 20);
       const loadedCount = await loadVersesProgressively(references);
@@ -232,7 +237,21 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action title="Start Reading" onAction={() => handleSearch(query)} icon={Icon.Book} />
-                <Action.CopyToClipboard title="Copy Verse Text" content={`${verse.text}`} />
+                <Action
+                  title="Open in Accordance"
+                  icon={Icon.Globe}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                  onAction={async () => {
+                    const url = `accord://read/${encodeURIComponent(selectedModule)}?${encodeURIComponent(verse.reference)}`;
+                    try {
+                      await open(url);
+                    } catch (error) {
+                      console.error("Failed to open in Accordance:", error);
+                      await showFailureToast("Failed to open in Accordance");
+                    }
+                  }}
+                />
+                <Action.CopyToClipboard title="Copy Verse Text" content={verse.text} />
                 <Action.CopyToClipboard title="Copy Reference Only" content={verse.reference} />
               </ActionPanel>
             }

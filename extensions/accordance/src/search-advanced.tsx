@@ -5,6 +5,10 @@ import { SEARCH_SCOPES } from "./utils/categories";
 import { fetchModules } from "./utils/moduleUtils";
 import { showFailureToast } from "@raycast/utils";
 
+interface Preferences {
+  defaultText: string;
+}
+
 interface SearchItem {
   id: string;
   title: string;
@@ -132,7 +136,7 @@ export default function Command() {
     {
       id: "bible-search",
       title: "Search Words in Bible",
-      subtitle: `${selectedModule}`,
+      subtitle: selectedModule,
       detail: `Searches for words or phrases in your selected Bible text (${selectedModule}). Enter any word, phrase, or partial text to find all occurrences in the Bible. Supports complex searches with Boolean operators.`,
       urlTemplate: `accord://search/{module};Words?{query}`,
       icon: Icon.MagnifyingGlass,

@@ -79,7 +79,7 @@ function ModuleSearchList({ module }: { module: ModuleInfo }) {
 export default function Command() {
   const [query, setQuery] = useState("");
   const [allModules, setAllModules] = useState<ModuleInfo[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedModuleType, setSelectedModuleType] = useState<string>("all");
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function Command() {
       console.error("Failed to load modules:", error);
       await showFailureToast("Failed to discover Accordance modules");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -164,7 +164,7 @@ export default function Command() {
           }
         });
 
-  if (loading) {
+  if (isLoading) {
     return <List isLoading={true} searchText={query} onSearchTextChange={setQuery} />;
   }
 
