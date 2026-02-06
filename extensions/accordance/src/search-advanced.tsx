@@ -5,10 +5,6 @@ import { SEARCH_SCOPES } from "./utils/categories";
 import { fetchModules } from "./utils/moduleUtils";
 import { showFailureToast } from "@raycast/utils";
 
-interface Preferences {
-  defaultText: string;
-}
-
 interface SearchItem {
   id: string;
   title: string;
@@ -114,7 +110,7 @@ function SearchList({ item, initialModule }: { item: SearchItem; initialModule: 
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchAdvanced>();
   const [query, setQuery] = useState("");
   const [selectedModule, setSelectedModule] = useState(preferences.defaultText); // Will be updated when modules load
 

@@ -6,10 +6,6 @@ import { fetchModules } from "./utils/moduleUtils";
 import { cleanVerseText, normalizeReference, validateReferenceFormat } from "./utils/bibleUtils";
 import { generateAccordanceAppleScript } from "./utils/applescriptUtils";
 
-interface Preferences {
-  defaultText: string;
-}
-
 interface VerseResult {
   reference: string;
   text: string;
@@ -17,7 +13,7 @@ interface VerseResult {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.GetVerses>();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<VerseResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);

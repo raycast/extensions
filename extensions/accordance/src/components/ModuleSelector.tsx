@@ -2,10 +2,6 @@ import { List, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetchModules, discoverAllModules } from "../utils/moduleUtils";
 
-interface Preferences {
-  defaultText: string;
-}
-
 interface ModuleSelectorProps {
   onModuleChange: (module: string) => void;
   initialModule?: string;
@@ -13,7 +9,7 @@ interface ModuleSelectorProps {
 }
 
 export function ModuleSelector({ onModuleChange, initialModule, showAllModules = false }: ModuleSelectorProps) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [modules, setModules] = useState<string[]>([]);
   const [selectedModule, setSelectedModule] = useState(initialModule || "");
 

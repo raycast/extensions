@@ -7,10 +7,6 @@ import { validateReference, findBookData, normalizeReference, Reference, cleanVe
 import { generateAccordanceAppleScript } from "./utils/applescriptUtils";
 import { bibleData } from "./components/bibleData";
 
-interface Preferences {
-  defaultText: string;
-}
-
 interface VerseResult {
   reference: string;
   text: string;
@@ -24,7 +20,7 @@ interface VerseResult {
 const verseCache = new Map<string, VerseResult>();
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.ReadVerses>();
   const [query, setQuery] = useState("");
   const [verses, setVerses] = useState<VerseResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
