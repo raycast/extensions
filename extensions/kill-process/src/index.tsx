@@ -24,6 +24,7 @@ import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } 
 import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
 
 const CONFIRMATION_NONCE_STORAGE_KEY = "kill-process.confirmation-nonce";
+const RESET_CONFIRMATION_PREF_LAST_VALUE_KEY = "kill-process.reset-confirmation-dialogs-pref-last-value";
 
 async function getConfirmationNonce(): Promise<number> {
   const value = await LocalStorage.getItem<string>(CONFIRMATION_NONCE_STORAGE_KEY);
@@ -53,6 +54,31 @@ function invisibleConfirmationSuffix(nonce: number): string {
     n = Math.floor(n / alphabet.length);
   }
   return out;
+}
+
+async function maybeResetRememberedConfirmationDialogs(options: {
+  resetPreferenceEnabled: boolean;
+  skipConfirmationEnabled: boolean;
+}): Promise<void> {
+  const lastValueRaw = await LocalStorage.getItem<string>(RESET_CONFIRMATION_PREF_LAST_VALUE_KEY);
+  const lastValue = lastValueRaw === "true" ? true : lastValueRaw === "false" ? false : undefined;
+
+  if (lastValue === options.resetPreferenceEnabled) return;
+
+  await LocalStorage.setItem(RESET_CONFIRMATION_PREF_LAST_VALUE_KEY, String(options.resetPreferenceEnabled));
+
+  if (!options.resetPreferenceEnabled) return;
+
+  if (options.skipConfirmationEnabled) {
+    await showToast({
+      title: "Disable 'Never Ask for Confirmation' to reset dialogs",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
+  await incrementConfirmationNonce();
+  await showToast({ title: "Reset confirmation dialogs", style: Toast.Style.Success });
 }
 
 function isAppProcessType(type: Process["type"]): boolean {
@@ -102,11 +128,19 @@ export default function ProcessList() {
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
   const skipConfirmation = preferences.skipConfirmation;
+  const resetConfirmationDialogs = preferences.resetConfirmationDialogs;
   const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.defaultSort === "memory" ? "memory" : "cpu");
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
   // Cache CPU data from WMI queries (persists across refreshes)
   const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
+
+  useEffect(() => {
+    void maybeResetRememberedConfirmationDialogs({
+      resetPreferenceEnabled: resetConfirmationDialogs,
+      skipConfirmationEnabled: skipConfirmation,
+    });
+  }, [resetConfirmationDialogs, skipConfirmation]);
 
   const fetchProcesses = (showLoading: boolean) => {
     if (showLoading) {
@@ -438,18 +472,6 @@ export default function ProcessList() {
                       }}
                     />
                   </ActionPanel.Section>
-                  {!skipConfirmation ? (
-                    <ActionPanel.Section title="Confirmation">
-                      <Action
-                        title="Reset Confirmation Dialogs"
-                        icon={Icon.RotateAntiClockwise}
-                        onAction={async () => {
-                          await incrementConfirmationNonce();
-                          showToast({ title: "Reset confirmation dialogs", style: Toast.Style.Success });
-                        }}
-                      />
-                    </ActionPanel.Section>
-                  ) : null}
                 </ActionPanel>
               }
             />
