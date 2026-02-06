@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Grid, Icon } from "@raycast/api";
+import type { JSX } from "react";
 import { BringListInfo } from "../lib/bringAPI";
 
 export interface Section {

@@ -1,22 +1,33 @@
-import { getPreferenceValues, Grid, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Grid, Icon, showToast, Toast } from "@raycast/api";
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
+import { useEffect, useMemo, useState } from "react";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
-import { BringAPI, BringCustomItem, BringList, BringListInfo, Translations } from "./lib/bringAPI";
-import { getListData, getOrCreateCustomSection, getSectionsFromData, getTranslationsData } from "./lib/bringService";
+import { BringCustomItem, BringList, BringListInfo, Translations } from "./lib/bringAPI";
+import {
+  getBringApi,
+  getListData,
+  getOrCreateCustomSection,
+  getSectionsFromData,
+  getTranslationsData,
+} from "./lib/bringService";
 import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 
 export default function Command() {
-  const bringApiRef = useRef(new BringAPI());
   const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
   const [purchaseStyle, setPurchaseStyle] = useState<string>("ungrouped");
 
   const { data: lists = [], isLoading: isLoadingLists } = useCachedPromise(async () => {
-    const bringApi = await getBringApi();
-    const { lists } = await bringApi.getLists();
-    return lists;
+    try {
+      const bringApi = await getBringApi();
+      const { lists } = await bringApi.getLists();
+      return lists;
+    } catch (error) {
+      console.error("Failed to fetch lists", error);
+      showFailureToast(error, { title: "Failed to fetch lists" });
+      return [];
+    }
   });
 
   const DropdownComponent = () => {
@@ -73,12 +84,6 @@ export default function Command() {
     },
     [locale],
   );
-
-  async function getBringApi(): Promise<BringAPI> {
-    const { email, password } = getPreferenceValues<ExtensionPreferences>();
-    await bringApiRef.current.login(email, password);
-    return bringApiRef.current;
-  }
 
   function addToList(list: BringListInfo): (item: Item, specification?: string) => Promise<void> {
     if (!list) return async () => {};

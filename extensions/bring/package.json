@@ -9,6 +9,10 @@
     "ilian",
     "xilopaint"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -43,15 +47,28 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "add-items",
+      "title": "Add Items",
+      "description": "It can add items to your Bring! shopping list"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get current lists and items to purchase",
+      "description": "It can retrieve all your lists and their items"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.83.2",
+    "@raycast/api": "^1.104.4",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4"
+    "axios": "^1.13.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.3",
     "eslint": "^8.57.1",
     "prettier": "^3.3.3",
     "typescript": "^5.6.2"

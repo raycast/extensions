@@ -4,10 +4,15 @@ Search and add items to your [Bring!](https://www.getbring.com/) shopping lists.
 
 ## Configuration
 
-For this extension to work, you need to set your Bring! email and password in the extension options.
+For this extension to work, you need to set your Bring! email and password in
+the extension options.
 
-## Usage
+## AI Tools
 
-When you have multiple lists in Bring! you are asked the first time you run the command to select which list to use.
-The selection is remembered for the next time you run the command.
-You can change the list selection with the alternative action "Switch to Another List" (`⌘ + L`).
+This extension includes AI Tools that makes it easy to add multiple items at the
+same time:
+
+- **Add Items Tool**: Can be used to add items to your Bring! shopping list,
+  using context-aware prompts and specifications (e.g., "2% fat" for milk).
+- **Get List Tool**: Let's AI know about your Bring! shopping lists and existing
+  items.
