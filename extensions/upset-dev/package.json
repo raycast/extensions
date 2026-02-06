@@ -23,12 +23,20 @@
       "subtitle": "upset.dev",
       "description": "Fetches favicones from websites and customize it with your needs",
       "mode": "view"
+    },
+    {
+      "name": "blobCDN",
+      "title": "BlobCDN",
+      "subtitle": "upset.dev",
+      "description": "Get SVG blobs from blobcdn.com",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.3",
     "@raycast/utils": "^1.17.0",
-    "is-valid-domain": "^0.1.6"
+    "is-valid-domain": "^0.1.6",
+    "jimp": "^1.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
