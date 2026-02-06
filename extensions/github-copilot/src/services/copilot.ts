@@ -37,6 +37,7 @@ type TaskCollaborator = {
 // A task returned from Copilot API
 type Task = {
   id: string;
+  name: string | null;
   creator_id: number;
   user_collaborators: number[];
   agent_collaborators: TaskCollaborator[];
@@ -75,10 +76,18 @@ type PullRequest = {
   };
 };
 
+type Repository = {
+  name: string;
+  owner: {
+    login: string;
+  };
+};
+
 // A task with associated pull request info (for display)
 type TaskWithPullRequest = {
   task: Task;
   pullRequest: PullRequest | null;
+  repository: Repository | null;
   key: string;
 };
 
@@ -261,6 +270,27 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
     .filter((result) => result.status === "fulfilled")
     .map((result) => result.value);
 
+  // Fetch repository info for tasks without pull requests
+  const tasksWithoutPRs = retrievedTasks.filter(
+    (task) => !task.artifacts.some((artifact) => artifact.data.type === "pull"),
+  );
+  const uniqueRepoIds = Array.from(new Set(tasksWithoutPRs.map((task) => task.repo_id)));
+
+  const repoResults = await Promise.allSettled(
+    uniqueRepoIds.map(async (repoId) => {
+      const response = await octokit.request("GET /repositories/{id}", { id: repoId });
+      return {
+        repoId,
+        name: response.data.name,
+        owner: { login: response.data.owner.login },
+      };
+    }),
+  );
+
+  const repositories = repoResults
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+
   // Transform tasks into TaskWithPullRequest format
   const tasksWithPullRequests: TaskWithPullRequest[] = retrievedTasks.map((task) => {
     // Find the first pull request artifact for this task
@@ -269,9 +299,12 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
       ? pullRequests.find((pr) => pr.globalId === pullArtifact.data.global_id) || null
       : null;
 
+    const repository = pullRequest?.repository ?? repositories.find((r) => r.repoId === task.repo_id) ?? null;
+
     return {
       task,
       pullRequest,
+      repository,
       key: task.id,
     };
   });

@@ -10,6 +10,7 @@ const minutesAgoISO8601Timestamp = (n: number): string => {
 const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   {
     key: "1",
+    repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
       title: "Refactor homepage layout into discrete components",
@@ -25,6 +26,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     },
     task: {
       id: "task-1",
+      name: null,
       creator_id: 1,
       user_collaborators: [],
       agent_collaborators: [],
@@ -40,6 +42,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "2",
+    repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
       title: "Implement dark/light mode switcher",
@@ -55,6 +58,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     },
     task: {
       id: "task-2",
+      name: null,
       creator_id: 1,
       user_collaborators: [],
       agent_collaborators: [],
@@ -70,6 +74,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "3",
+    repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
       title: "Fix bug in authentication flow",
@@ -85,6 +90,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     },
     task: {
       id: "task-3",
+      name: null,
       creator_id: 1,
       user_collaborators: [],
       agent_collaborators: [],
@@ -100,6 +106,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "3.1",
+    repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
       title: "Increase test coverage for product page",
@@ -115,6 +122,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     },
     task: {
       id: "task-4",
+      name: null,
       creator_id: 1,
       user_collaborators: [],
       agent_collaborators: [],
@@ -130,6 +138,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "4",
+    repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
       title: "Update copy for sold out books",
@@ -145,6 +154,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     },
     task: {
       id: "task-5",
+      name: null,
       creator_id: 1,
       user_collaborators: [],
       agent_collaborators: [],
@@ -160,6 +170,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "5",
+    repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
       title: "Upgrade to Ruby 3.4.1",
@@ -175,6 +186,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     },
     task: {
       id: "task-6",
+      name: null,
       creator_id: 1,
       user_collaborators: [],
       agent_collaborators: [],
@@ -190,6 +202,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "6",
+    repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
       title: "Migrate <ProductImage> to use styled-components",
@@ -205,6 +218,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     },
     task: {
       id: "task-7",
+      name: null,
       creator_id: 1,
       user_collaborators: [],
       agent_collaborators: [],
@@ -220,6 +234,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "7",
+    repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
       title: "Refresh documentation for build process",
@@ -235,6 +250,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     },
     task: {
       id: "task-8",
+      name: null,
       creator_id: 1,
       user_collaborators: [],
       agent_collaborators: [],
