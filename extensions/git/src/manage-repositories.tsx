@@ -48,24 +48,8 @@ export default function ManageRepositories() {
   // Use view hook only for regular repositories
   const { displayedRepositories } = useRepositoriesView(currentRepositories);
 
-  const handleRemove = async (repoName: string, repoPath: string) => {
-    const confirmed = await confirmAlert({
-      title: "Remove from recent?",
-      message: `Are you sure you want to remove "${repoName}" from the recent repositories list?`,
-      primaryAction: {
-        title: "Remove",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (confirmed) {
-      await removeRepository(repoPath);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Repository removed",
-        message: `"${repoName}" removed from recent list`,
-      });
-    }
+  const handleRemove = async (repoPath: string) => {
+    await removeRepository(repoPath);
   };
 
   const handleKillClone = async (repoPath: string) => {
@@ -113,7 +97,7 @@ export default function ManageRepositories() {
                 key={repo.id}
                 repo={repo}
                 onOpen={() => visitRepository(repo.path)}
-                onRemove={() => handleRemove(repo.name, repo.path)}
+                onRemove={() => handleRemove(repo.path)}
                 onAddRepository={addRepository}
               />
             ))}
@@ -163,6 +147,26 @@ function RepositoryListItem({
     return { source: `git-project.svg`, tintColor: Color.SecondaryText };
   }, [repo.languageStats]);
 
+  const handleRemove = async () => {
+    const confirmed = await confirmAlert({
+      title: "Remove from recent?",
+      message: `Are you sure you want to remove "${repo.name}" from the recent repositories list?`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      onRemove();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Repository removed",
+        message: `"${repo.name}" removed from recent list`,
+      });
+    }
+  };
+
   return (
     <List.Item
       id={repo.id}
@@ -210,7 +214,7 @@ function RepositoryListItem({
             />
             <Action
               title="Remove from List"
-              onAction={onRemove}
+              onAction={handleRemove}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
