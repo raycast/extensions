@@ -49,6 +49,7 @@ export default function ProcessList() {
   const closeWindowAfterKill = preferences.closeWindowAfterKill;
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
+  const skipConfirmation = preferences.skipConfirmation;
   const [sortBy, setSortBy] = useState<SortBy>(preferences.sortBy);
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 

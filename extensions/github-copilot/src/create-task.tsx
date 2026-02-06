@@ -41,7 +41,7 @@ function Command() {
       });
 
       try {
-        const { sessionUrl } = await createTask(
+        const { taskUrl } = await createTask(
           values.repository,
           values.prompt,
           values.branch,
@@ -56,14 +56,14 @@ function Command() {
             title: "Open in Browser",
             shortcut: Keyboard.Shortcut.Common.Open,
             onAction: () => {
-              open(sessionUrl);
+              open(taskUrl);
             },
           },
           secondaryAction: {
             title: "Copy URL",
             shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: async () => {
-              await Clipboard.copy(sessionUrl);
+              await Clipboard.copy(taskUrl);
               await showToast({
                 style: Toast.Style.Success,
                 title: "Copied URL to Clipboard",

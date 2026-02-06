@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.2] - 2026-02-04
+
+- Added "Week Count Cycle" view to support recurring holidays like Mother's Day and Father's Day.
+- Updated Mother's Day and Father's Day to display future dates based on week count logic.
+- Marked "Văn hoá VN" (24/11) as an official holiday.
+
 ## [1.3.1] - 2026-01-20
 
 - feat: Add "Văn hoá VN" event (Nov 24) starting from 2026.

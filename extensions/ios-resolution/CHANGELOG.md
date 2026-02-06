@@ -1,5 +1,10 @@
 # iOS Resolution Changelog
 
+## [Addition of Device Type (MacBook)] - 2026-02-06
+- Addition of New Device type (MacBook)
+- Browse all MacBook models
+- View MacBook specifications: logical/physical resolution, PPI, scale factor, screen diagonal, aspect ratio
+
 ## [Initial Version] - 2026-01-23
 
 - Browse all devices (iPhone, iPad, iPod touch, Apple Watch)

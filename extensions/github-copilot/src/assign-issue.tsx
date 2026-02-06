@@ -15,6 +15,7 @@ type FormValues = {
   branch: string;
   customAgent: string;
   model: string;
+  additionalInstructions: string;
 };
 
 function Command() {
@@ -60,6 +61,7 @@ function Command() {
           baseRef: formValues.branch,
           customAgent: formValues.customAgent,
           model: formValues.model,
+          additionalInstructions: formValues.additionalInstructions,
         });
 
         await showToast({
@@ -119,6 +121,11 @@ function Command() {
         onLoadingChange={setIsCustomAgentsLoading}
       />
       <ModelDropdown itemProps={itemProps.model} onLoadingChange={setIsModelLoading} />
+      <Form.TextArea
+        title="Additional Instructions"
+        placeholder="Add any context, constraints, or specific requirements for Copilot"
+        {...itemProps.additionalInstructions}
+      />
     </Form>
   );
 }
