@@ -12,6 +12,7 @@ type AssignIssueToCopilotOptions = {
   baseRef?: string;
   customAgent?: string;
   model?: string;
+  additionalInstructions?: string;
 };
 
 type AssignIssueToCopilotResult = {
@@ -403,7 +404,7 @@ const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
 };
 
 const ASSIGN_ISSUE_MUTATION = `
-  mutation AssignIssueToCopilot($issueId: ID!, $repositoryId: ID!, $copilotBotId: ID!, $baseRef: String, $customAgent: String, $model: String) {
+  mutation AssignIssueToCopilot($issueId: ID!, $repositoryId: ID!, $copilotBotId: ID!, $baseRef: String, $customAgent: String, $model: String, $customInstructions: String) {
     updateIssue(input: {
       id: $issueId,
       assigneeIds: [$copilotBotId],
@@ -411,7 +412,8 @@ const ASSIGN_ISSUE_MUTATION = `
         targetRepositoryId: $repositoryId,
         baseRef: $baseRef,
         customAgent: $customAgent,
-        model: $model
+        model: $model,
+        customInstructions: $customInstructions
       }
     }) {
       issue {
@@ -432,6 +434,7 @@ async function assignIssueToCopilot(options: AssignIssueToCopilotOptions): Promi
       baseRef: options.baseRef || "main",
       customAgent: options.customAgent || null,
       model: options.model || null,
+      customInstructions: options.additionalInstructions || null,
       headers: {
         "GraphQL-Features": "issues_copilot_assignment_api_support,coding_agent_model_selection",
       },
