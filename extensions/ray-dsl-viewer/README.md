@@ -92,6 +92,10 @@ npm install
 npm run dev
 ```
 
+## Privacy
+
+Mermaid diagrams are rendered using [mermaid.ink](https://mermaid.ink), an external service. When you preview a Mermaid diagram, the diagram content is sent to mermaid.ink to generate the image. Markdown content is rendered locally and is not sent to any external service.
+
 ## License
 
 MIT
