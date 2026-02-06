@@ -22,6 +22,17 @@ import { Process } from "./types";
 import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
 import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
 
+type SortBy = "cpu" | "memory";
+
+const formatRunningCount = (count: number) => `${count} running process${count === 1 ? "" : "es"}`;
+
+const formatPercent = (value: number) => {
+  // Keep the previous rounding behavior (2 decimals), but drop trailing zeros for readability.
+  // Examples: 0.00 -> 0, 2.70 -> 2.7, 2.34 -> 2.34
+  const trimmed = value.toFixed(2).replace(/\.?0+$/, "");
+  return `${trimmed === "-0" ? "0" : trimmed}%`;
+};
+
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
   const [state, setState] = useState<Process[]>([]);
@@ -33,11 +44,12 @@ export default function ProcessList() {
   const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering;
   const shouldShowPID = preferences.shouldShowPID;
   const shouldShowPath = preferences.shouldShowPath;
+  const skipKillConfirmation = preferences.skipKillConfirmation;
   const refreshDuration = +preferences.refreshDuration;
   const closeWindowAfterKill = preferences.closeWindowAfterKill;
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
-  const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
+  const [sortBy, setSortBy] = useState<SortBy>(preferences.sortBy);
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
   // Cache CPU data from WMI queries (persists across refreshes)
@@ -104,18 +116,23 @@ export default function ProcessList() {
   };
 
   const killProcess = async (process: Process, force: boolean = false) => {
-    const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
-    if (
-      !(await confirmAlert({
-        title: `${force ? "Force " : ""}Kill ${processName}?`,
-        rememberUserChoice: true,
-      }))
-    ) {
-      showToast({
-        title: `Cancelled Killing ${processName}`,
-        style: Toast.Style.Failure,
-      });
-      return;
+    const processDisplayName =
+      process.processName === "-" ? `PID ${process.id}` : `${process.processName} (PID: ${process.id})`;
+    const alertTitle = force ? "Force Kill Process?" : "Kill Process?";
+    const alertMessage = `${force ? "Force kill" : "Kill"} ${processDisplayName}?`;
+    if (!skipKillConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: alertTitle,
+          message: alertMessage,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled killing ${processDisplayName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
     }
 
     const command = getKillCommand(process.id, force);
@@ -143,7 +160,7 @@ export default function ProcessList() {
       }
 
       showToast({
-        title: `Killed ${processName}`,
+        title: `Killed ${processDisplayName}`,
         style: Toast.Style.Success,
       });
     });
@@ -166,12 +183,12 @@ export default function ProcessList() {
       subtitles.push(process.appName);
     }
     if (shouldShowPID) {
-      subtitles.push(process.id.toString());
+      subtitles.push(`PID: ${process.id}`);
     }
     if (shouldShowPath) {
       subtitles.push(process.path);
     }
-    return subtitles.join(" - ");
+    return subtitles.join(" | ");
   };
 
   const aggregate = (processes: Process[]): Process[] => {
@@ -260,18 +277,26 @@ export default function ProcessList() {
   return (
     <List
       isLoading={state.length === 0}
-      searchBarPlaceholder="Filter by name"
+      searchBarPlaceholder="Search processes"
       onSearchTextChange={(query) => setQuery(query)}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" storeValue onChange={(newValue) => setSortBy(newValue as "cpu" | "memory")}>
-          <List.Dropdown.Section title="Sort By">
-            <List.Dropdown.Item title="CPU Usage" value="cpu" />
-            <List.Dropdown.Item title="Memory Usage" value="memory" />
+        <List.Dropdown
+          tooltip="Sort"
+          storeValue
+          defaultValue={preferences.sortBy}
+          // Raycast doesn't currently expose a documented "disable search field" prop.
+          // `filtering={false}` is the closest available option and may hide the search field entirely.
+          filtering={false}
+          onChange={(newValue) => setSortBy(newValue as SortBy)}
+        >
+          <List.Dropdown.Section title="Sort">
+            <List.Dropdown.Item title="CPU" value="cpu" />
+            <List.Dropdown.Item title="Memory" value="memory" />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
-      <List.Section title="Processes" subtitle={`${processCount} running`}>
+      <List.Section title="Running Processes" subtitle={formatRunningCount(processCount)}>
         {state
           .filter((process) => {
             if (query === "") {
@@ -311,9 +336,9 @@ export default function ProcessList() {
                 icon={icon}
                 accessories={[
                   {
-                    text: `${process.cpu.toFixed(2)}%`,
+                    text: formatPercent(process.cpu),
                     icon: { source: "cpu.svg", tintColor: Color.PrimaryText },
-                    tooltip: "% CPU",
+                    tooltip: "CPU (%)",
                   },
                   {
                     text: prettyBytes(process.mem * 1024),

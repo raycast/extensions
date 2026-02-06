@@ -1,5 +1,12 @@
 # Kill Process Changelog
 
+## [UX Improvements] - {PR_MERGE_DATE}
+
+- Improved wording and organization of preferences (sorting/refresh/search/display)
+- Added a **Never Ask for Confirmation** preference for killing processes
+- Updated the process list labels (search placeholder, section title/subtitle, and row subtitle formatting)
+- Improved CPU percentage formatting (e.g., `0.00%` -> `0%`, `2.70%` -> `2.7%`)
+
 ## [Fixes and Improvements] - 2026-01-13
 
 - Added shortcut for the **Copy Path** action
