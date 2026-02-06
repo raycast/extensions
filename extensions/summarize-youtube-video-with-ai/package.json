@@ -136,7 +136,7 @@
         {
           "name": "openaiModel",
           "title": "OpenAI Model",
-          "description": "Choose the OpenAI model to use. Defaults to `chatgpt-4o-latest`.",
+          "description": "Choose the OpenAI model to use. Defaults to `gpt-5-mini`.",
           "type": "textfield",
           "required": false
         },
@@ -205,7 +205,7 @@
         {
           "name": "anthropicModel",
           "title": "Anthropic Model",
-          "description": "Choose the Anthropic model to use. Defaults to `claude-3-5-sonnet-latest`.",
+          "description": "Choose the Anthropic model to use. Defaults to `claude-haiku-4-5`.",
           "type": "textfield",
           "required": false
         },
@@ -297,17 +297,17 @@
     }
   ],
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.71.2",
-    "@raycast/api": "^1.104.3",
+    "@anthropic-ai/sdk": "^0.72.1",
+    "@raycast/api": "^1.104.4",
     "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
-    "openai": "^6.16.0",
+    "openai": "^6.17.0",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^25.0.10",
-    "@types/react": "^19.2.10",
+    "@types/node": "^25.2.0",
+    "@types/react": "^19.2.13",
     "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "prettier": "^3.8.1",
@@ -319,6 +319,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "test:transcript": "npx tsx test/transcript.test.ts"
+    "check:youtube-api": "npx tsx test/transcript.test.ts"
   }
 }

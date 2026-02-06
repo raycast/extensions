@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "models-dev",
+  "title": "Models Dev",
+  "description": "Explore AI model specifications, pricing, and capabilities from models.dev",
+  "icon": "extension-icon.png",
+  "author": "carlesandres",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "preferences": [
+    {
+      "name": "enableBackgroundSync",
+      "title": "Background Sync",
+      "description": "Allow periodic background refresh of models data",
+      "type": "checkbox",
+      "label": "Enable background sync",
+      "default": false,
+      "required": false
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "models",
+    "models.dev",
+    "llm",
+    "gpt",
+    "claude",
+    "gemini",
+    "openai",
+    "anthropic",
+    "pricing",
+    "comparison",
+    "artificial intelligence"
+  ],
+  "commands": [
+    {
+      "name": "search-models",
+      "title": "Search AI Models",
+      "subtitle": "Models Dev",
+      "description": "Search across all AI models by name, provider, or capability",
+      "mode": "view",
+      "keywords": [
+        "llm",
+        "gpt",
+        "claude",
+        "gemini",
+        "search",
+        "find"
+      ]
+    },
+    {
+      "name": "browse-providers",
+      "title": "Search AI Providers",
+      "subtitle": "Models Dev",
+      "description": "Explore AI providers and their model offerings",
+      "mode": "view",
+      "keywords": [
+        "openai",
+        "anthropic",
+        "google",
+        "provider",
+        "vendor"
+      ]
+    },
+    {
+      "name": "find-by-capability",
+      "title": "AI Models by Capability",
+      "subtitle": "Models Dev",
+      "description": "Filter models by multiple capabilities",
+      "mode": "view",
+      "keywords": [
+        "reasoning",
+        "vision",
+        "audio",
+        "tools",
+        "filter"
+      ]
+    },
+    {
+      "name": "pricing-explorer",
+      "title": "AI Models by Price",
+      "subtitle": "Models Dev",
+      "description": "Compare model pricing across providers",
+      "mode": "view",
+      "keywords": [
+        "cost",
+        "pricing",
+        "cheap",
+        "expensive",
+        "budget"
+      ]
+    },
+    {
+      "name": "compare-models",
+      "title": "Compare AI Models",
+      "subtitle": "Models Dev",
+      "description": "Select models to compare side-by-side",
+      "mode": "view",
+      "keywords": [
+        "compare",
+        "diff",
+        "versus",
+        "side-by-side"
+      ]
+    },
+    {
+      "name": "background-sync",
+      "title": "Background Sync",
+      "subtitle": "Models Dev",
+      "description": "Refresh model data in the background",
+      "mode": "no-view",
+      "interval": "1h",
+      "disabledByDefault": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.1.0",
+    "@types/react": "19.2.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

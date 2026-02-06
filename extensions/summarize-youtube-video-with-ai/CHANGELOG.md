@@ -1,5 +1,14 @@
 # Summarize YouTube Video Changelog
 
+## [Chore] - 2026-02-06
+
+- Moved AbortController inside useEffect
+- Parallelized video data and transcript fetching
+- Added stream listener cleanup with cancelled flags
+- Created singleton SDK clients
+- Optimized O(n) array updates in streaming
+- Fixed history sorting (newest first)
+
 ## [Fix] - 2026-01-29
 
 - Fix transcript XML parsing for YouTube's srv3 format (extract text from `<s>` segments)
