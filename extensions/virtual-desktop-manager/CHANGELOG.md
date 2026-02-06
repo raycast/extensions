@@ -43,14 +43,3 @@ All notable changes to the Virtual Desktop Manager extension will be documented 
 - Automatic daemon reload when saving keybinding changes
 - Getter commands use Raycast HUD for non-intrusive feedback
 
-### Requirements
-- Windows 10/11
-- AutoHotkey v2.1-alpha.5 or later
-- Raycast for Windows
-
----
-
-## Links
-
-- [VD.ahk Library](https://github.com/FuPeiJiang/VD.ahk) - The underlying AutoHotkey library
-- [AutoHotkey v2.1-alpha.5 Download](https://www.autohotkey.com/download/2.1/AutoHotkey_2.1-alpha.5_setup.exe)
