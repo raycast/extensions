@@ -20,10 +20,22 @@ import {
   InstallableResults,
   InstalledMap,
   OutdatedResults,
-  Remote,
   DownloadProgressCallback,
+  ChunkedRemote,
+  CacheIndex,
+  IndexEntry,
 } from "../types";
-import { cachePath, fetchRemote } from "../cache";
+import {
+  cachePath,
+  fetchRemote,
+  downloadRemoteToCache,
+  getChunkedCacheConfig,
+  isChunkedCacheValid,
+  buildChunkedCache,
+  loadIndex,
+  loadItemsFromChunks,
+  IndexExtractor,
+} from "../cache";
 import { brewPath } from "./paths";
 import { execBrew } from "./commands";
 import { brewLogger, cacheLogger } from "../logger";
@@ -41,8 +53,40 @@ const caskCachePath = cachePath("cask.json");
 const formulaURL = "https://formulae.brew.sh/api/formula.json";
 const caskURL = "https://formulae.brew.sh/api/cask.json";
 
-const formulaRemote: Remote<Formula> = { url: formulaURL, cachePath: formulaCachePath };
-const caskRemote: Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
+const formulaRemote: ChunkedRemote<Formula> = {
+  url: formulaURL,
+  cachePath: formulaCachePath,
+  chunkedConfig: getChunkedCacheConfig("formula"),
+};
+
+const caskRemote: ChunkedRemote<Cask> = {
+  url: caskURL,
+  cachePath: caskCachePath,
+  chunkedConfig: getChunkedCacheConfig("cask"),
+};
+
+/** Extract index entry from a Formula */
+const extractFormulaIndex: IndexExtractor<Formula> = (item, chunkNumber, indexInChunk): IndexEntry => {
+  return {
+    id: item.name,
+    n: item.name.toLowerCase(),
+    d: item.desc?.toLowerCase().slice(0, 100),
+    a: item.aliases?.length > 0 ? item.aliases.map((a) => a.toLowerCase()) : undefined,
+    c: chunkNumber,
+    i: indexInChunk,
+  };
+};
+
+/** Extract index entry from a Cask */
+const extractCaskIndex: IndexExtractor<Cask> = (item, chunkNumber, indexInChunk): IndexEntry => {
+  return {
+    id: item.token,
+    n: item.token.toLowerCase(),
+    d: item.desc?.toLowerCase().slice(0, 100),
+    c: chunkNumber,
+    i: indexInChunk,
+  };
+};
 
 /**
  * Check if the search cache files exist (formula.json and cask.json).
@@ -527,6 +571,140 @@ function getSystemTagForCache(): string {
   }
 
   return `${arch}_${osVersion}`;
+}
+
+/// Chunked Cache Functions
+
+// Mutex to prevent concurrent chunked cache builds
+let formulaeChunkedBuildInProgress: Promise<void> | null = null;
+let casksChunkedBuildInProgress: Promise<void> | null = null;
+
+/**
+ * Ensure chunked cache exists and is valid.
+ * Downloads source JSON to disk (without parsing) and builds chunks.
+ */
+async function ensureChunkedCache<T>(
+  remote: ChunkedRemote<T>,
+  extractIndex: IndexExtractor<T>,
+  onProgress?: DownloadProgressCallback,
+): Promise<void> {
+  const isValid = await isChunkedCacheValid(remote.chunkedConfig, remote.url);
+  if (isValid) {
+    return;
+  }
+
+  // Need to rebuild - download source JSON to disk WITHOUT parsing into memory
+  // This is critical to avoid heap exhaustion on initial load
+  brewLogger.log("Building chunked cache", { type: remote.chunkedConfig.type });
+
+  // Download to disk only (no parsing)
+  await downloadRemoteToCache(remote.url, remote.cachePath, onProgress);
+
+  // Now build the chunked cache from the downloaded file
+  // This streams through the file and writes chunks incrementally
+  await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress);
+}
+
+/**
+ * Fetch the chunked index for formulae.
+ * Builds chunked cache if it doesn't exist or is stale.
+ */
+export async function fetchFormulaIndex(onProgress?: DownloadProgressCallback): Promise<CacheIndex> {
+  // Check if already cached in memory
+  if (formulaRemote.index) {
+    return formulaRemote.index;
+  }
+
+  // Check if fetch is already in progress (deduplication)
+  if (formulaRemote.indexFetch) {
+    return formulaRemote.indexFetch;
+  }
+
+  // Start fetch with deduplication
+  formulaRemote.indexFetch = (async () => {
+    // Use mutex to prevent concurrent builds
+    if (formulaeChunkedBuildInProgress) {
+      brewLogger.log("Waiting for existing formula chunked cache build");
+      await formulaeChunkedBuildInProgress;
+    } else {
+      formulaeChunkedBuildInProgress = ensureChunkedCache(formulaRemote, extractFormulaIndex, onProgress);
+      try {
+        await formulaeChunkedBuildInProgress;
+      } finally {
+        formulaeChunkedBuildInProgress = null;
+      }
+    }
+
+    // Load index
+    const index = await loadIndex(formulaRemote.chunkedConfig);
+    formulaRemote.index = index;
+    return index;
+  })();
+
+  try {
+    return await formulaRemote.indexFetch;
+  } finally {
+    formulaRemote.indexFetch = undefined;
+  }
+}
+
+/**
+ * Fetch the chunked index for casks.
+ * Builds chunked cache if it doesn't exist or is stale.
+ */
+export async function fetchCaskIndex(onProgress?: DownloadProgressCallback): Promise<CacheIndex> {
+  // Check if already cached in memory
+  if (caskRemote.index) {
+    return caskRemote.index;
+  }
+
+  // Check if fetch is already in progress (deduplication)
+  if (caskRemote.indexFetch) {
+    return caskRemote.indexFetch;
+  }
+
+  // Start fetch with deduplication
+  caskRemote.indexFetch = (async () => {
+    // Use mutex to prevent concurrent builds
+    if (casksChunkedBuildInProgress) {
+      brewLogger.log("Waiting for existing cask chunked cache build");
+      await casksChunkedBuildInProgress;
+    } else {
+      casksChunkedBuildInProgress = ensureChunkedCache(caskRemote, extractCaskIndex, onProgress);
+      try {
+        await casksChunkedBuildInProgress;
+      } finally {
+        casksChunkedBuildInProgress = null;
+      }
+    }
+
+    // Load index
+    const index = await loadIndex(caskRemote.chunkedConfig);
+    caskRemote.index = index;
+    return index;
+  })();
+
+  try {
+    return await caskRemote.indexFetch;
+  } finally {
+    caskRemote.indexFetch = undefined;
+  }
+}
+
+/**
+ * Fetch specific formulae by their index entries.
+ * Only loads the chunks containing the requested items.
+ */
+export async function fetchFormulaItems(entries: IndexEntry[]): Promise<Formula[]> {
+  return loadItemsFromChunks<Formula>(formulaRemote.chunkedConfig, entries);
+}
+
+/**
+ * Fetch specific casks by their index entries.
+ * Only loads the chunks containing the requested items.
+ */
+export async function fetchCaskItems(entries: IndexEntry[]): Promise<Cask[]> {
+  return loadItemsFromChunks<Cask>(caskRemote.chunkedConfig, entries);
 }
 
 /**
