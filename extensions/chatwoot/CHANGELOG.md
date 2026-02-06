@@ -1,6 +1,6 @@
 # Chatwoot Changelog
 
-## [Add "Settings" with Canned Responses & Teams] - {PR_MERGE_DATE}
+## [Add "Settings" with Canned Responses & Teams] - 2026-02-06
 
 ### Canned Responses
 - list, add, delete
