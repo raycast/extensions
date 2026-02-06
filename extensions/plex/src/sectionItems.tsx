@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { useState } from "react";
-import { IdentityResponse, Metadata, SectionItemsApiResponse } from "../types/types";
+import { IdentityResponse, Metadata, MetadataWithThumb, SectionItemsApiResponse } from "../types/types";
 import { ENDPOINTS, plex_token } from "../utils/constants";
 import { getSubtitle } from "../utils/subtitle";
 import { getImdbUrl, getPlexDeeplink, getThumbLink, getTmdbUrl } from "../utils/links";
@@ -13,7 +13,7 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
 
   const endpoint = `${ENDPOINTS.librarySections}/${sectionId}/all?sort=${sort}`;
 
-  const { data, isLoading } = useFetch(endpoint, {
+  const { data, isLoading } = useFetch<Metadata[], MetadataWithThumb[], MetadataWithThumb[]>(endpoint, {
     headers: { "X-Plex-Token": plex_token, Accept: "application/json" },
     parseResponse: parseLibraryResponse,
     mapResult(items) {
