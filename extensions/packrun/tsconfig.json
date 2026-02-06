@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 22",
+  "compilerOptions": {
+    "lib": ["es2023", "DOM"],
+    "module": "node16",
+    "target": "es2022",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "moduleResolution": "node16",
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*", "ray-env.d.ts"],
+  "exclude": ["node_modules"]
+}
