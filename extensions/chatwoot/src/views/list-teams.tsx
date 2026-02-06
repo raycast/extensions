@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { Team } from "../types";
 
-export default function Teams() {
+export default function ListTeams() {
   const {
     isLoading,
     data: teams,
@@ -78,13 +78,13 @@ export default function Teams() {
             subtitle={team.description}
             actions={
               <ActionPanel>
+                <Action.Push icon={Icon.PlusCircle} title="Create New Team" target={<AddTeam />} onPop={mutate} />
                 <Action
                   icon={Icon.XMarkCircle}
                   title="Delete Team"
                   onAction={() => confirmAndDelete(team)}
                   style={Action.Style.Destructive}
                 />
-                <Action.Push icon={Icon.PlusCircle} title="Create New Team" target={<AddTeam />} onPop={mutate} />
               </ActionPanel>
             }
           />
@@ -114,6 +114,9 @@ function AddTeam() {
         toast.title = "Failed";
         toast.message = `${error}`;
       }
+    },
+    initialValues: {
+      allow_auto_assign: true,
     },
     validation: {
       name: FormValidation.Required,

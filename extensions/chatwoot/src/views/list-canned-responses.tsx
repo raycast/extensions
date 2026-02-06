@@ -15,7 +15,7 @@ import { useCachedPromise, useForm, FormValidation } from "@raycast/utils";
 import { chatwoot } from "../chatwoot";
 import { CannedResponse } from "../types";
 
-export default function CannedResponses() {
+export default function ListCannedResponses() {
   const {
     isLoading,
     data: responses,
@@ -86,6 +86,12 @@ export default function CannedResponses() {
             detail={<List.Item.Detail markdown={response.content} />}
             actions={
               <ActionPanel>
+                <Action.Push
+                  icon={Icon.PlusCircle}
+                  title="Add Canned Response"
+                  target={<AddCannedResponse />}
+                  onPop={mutate}
+                />
                 <Action
                   icon={Icon.XMarkCircle}
                   title="Delete Canned Response"
