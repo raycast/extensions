@@ -84,7 +84,7 @@ type AgentSession = {
 
 type ListAgentSessionsResponse = {
   sessions: AgentSession[];
-}
+};
 
 type Repository = {
   name: string;

@@ -20,6 +20,7 @@ export function TaskItem(
 
   const createdAt = useMemo(() => new Date(task.created_at), [task.created_at]);
   const relativeDate = useMemo(() => formatRelativeDate(createdAt), [createdAt]);
+  const premiumRequestsConsumed = useMemo(() => premiumRequests > 0, [premiumRequests]);
 
   return (
     <List.Item
@@ -29,12 +30,11 @@ export function TaskItem(
       icon={getTaskIcon(props.taskWithPullRequest)}
       accessories={[
         {
-          icon: premiumRequests > 0 ? Icon.Bolt : undefined,
-          text: premiumRequests > 0 ? `${premiumRequests} · ${relativeDate}` : relativeDate,
-          tooltip:
-            premiumRequests > 0
-              ? `${premiumRequests} premium requests · Started at ${createdAt.toLocaleString()}`
-              : `Started at ${createdAt.toLocaleString()}`,
+          icon: premiumRequestsConsumed ? Icon.Bolt : undefined,
+          text: premiumRequestsConsumed ? `${premiumRequests} · ${relativeDate}` : relativeDate,
+          tooltip: premiumRequestsConsumed
+            ? `${premiumRequests} premium requests · Started at ${createdAt.toLocaleString()}`
+            : `Started at ${createdAt.toLocaleString()}`,
         },
       ]}
       actions={
