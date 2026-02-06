@@ -287,9 +287,7 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
     }),
   );
 
-  const repositories = repoResults
-    .filter((result) => result.status === "fulfilled")
-    .map((result) => result.value);
+  const repositories = repoResults.filter((result) => result.status === "fulfilled").map((result) => result.value);
 
   // Transform tasks into TaskWithPullRequest format
   const tasksWithPullRequests: TaskWithPullRequest[] = retrievedTasks.map((task) => {
