@@ -174,7 +174,6 @@ export default function ProcessList() {
     if (!skipConfirmation) {
       const didConfirm = await confirmAlert({
         title: `${force ? "Force " : ""}Kill ${processName}?`,
-        rememberUserChoice: true,
       });
       if (!didConfirm) {
         showToast({
