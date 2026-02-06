@@ -568,7 +568,7 @@ ${transcript}
             accessories.push({
               icon: {
                 source: noteFolder.icon ? mapIconToHeroicon(noteFolder.icon.value) : getDefaultIconUrl(),
-                tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : Color.Blue,
+                tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : mapColorToHex("default"),
               },
               tooltip:
                 folderNames.length > 1 ? `In folders: ${folderNames.join(", ")}` : `In folder: ${firstFolderName}`,
@@ -583,7 +583,7 @@ ${transcript}
         } else {
           // Show "No folder" indicator for orphaned notes (matching search-notes.tsx)
           accessories.push({
-            icon: { source: Icon.Document, tintColor: Color.SecondaryText },
+            icon: { source: Icon.Document, tintColor: mapColorToHex("default") },
             tooltip: "Not in any folder",
           });
         }
@@ -599,7 +599,7 @@ ${transcript}
             title={note.title ?? untitledNoteTitle}
             icon={{
               source: selectedNoteIds.has(note.id) ? Icon.CheckCircle : Icon.Circle,
-              tintColor: selectedNoteIds.has(note.id) ? Color.Green : Color.SecondaryText,
+              tintColor: selectedNoteIds.has(note.id) ? mapColorToHex("lime") : Color.SecondaryText,
             }}
             accessories={accessories}
             actions={
@@ -728,7 +728,7 @@ function BulkNotionResults({
             <List.Item
               key={result.noteId}
               title={result.title}
-              icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
+              icon={{ source: Icon.Clock, tintColor: mapColorToHex("amber") }}
               accessories={[{ text: "Saving..." }]}
             />
           ))}
@@ -741,7 +741,7 @@ function BulkNotionResults({
             <List.Item
               key={result.noteId}
               title={result.title}
-              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+              icon={{ source: Icon.CheckCircle, tintColor: mapColorToHex("lime") }}
               accessories={[{ text: "Saved to Notion" }]}
               actions={
                 <ActionPanel>
@@ -773,7 +773,7 @@ function BulkNotionResults({
               key={result.noteId}
               title={result.title}
               subtitle={result.error || "Unknown error"}
-              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+              icon={{ source: Icon.XMarkCircle, tintColor: mapColorToHex("red") }}
               accessories={[{ text: "Failed" }]}
               actions={
                 <ActionPanel>

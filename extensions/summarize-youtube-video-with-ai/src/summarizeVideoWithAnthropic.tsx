@@ -46,23 +46,25 @@ export default function SummarizeVideoWithAnthropic(
     setQuestion,
     transcript,
     question,
+    questions,
   });
 
   const [historyItem, setHistoryItem] = useState<string | null>(null);
 
   useEffect(() => {
     if (summary && videoData && !historyItem) {
+      const uniqueId = `${videoData.videoId}-${Date.now()}`;
       const item = {
         aiService: aiService,
         createdAt: new Date(),
-        id: videoData.videoId,
+        id: uniqueId,
         questions,
         summary,
         title: videoData.title,
         videoUrl: videoURL ?? "",
       };
       addToHistory(item);
-      setHistoryItem(videoData.videoId);
+      setHistoryItem(uniqueId);
     }
   }, [summary, videoData, addToHistory, videoURL, historyItem, questions]);
 

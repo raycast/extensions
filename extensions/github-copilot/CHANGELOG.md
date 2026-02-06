@@ -1,5 +1,13 @@
 # GitHub Copilot Changelog
 
+## [Open workflow run] - 2026-02-03
+
+- Add "Open workflow run" menu item to the "View Tasks" command
+
+## [Assign Issue to Copilot] - 2026-02-03
+
+- Add "Assign Issue to Copilot" command
+
 ## [Manage Paid Premium Requests action] - 2026-02-02
 
 - Add "Manage Paid Premium Requests" action to the "Copilot Usage" command

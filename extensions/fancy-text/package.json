@@ -81,6 +81,15 @@
           "value": "surrounded"
         }
       ]
+    },
+    {
+      "name": "autoGetSelectedText",
+      "description": "Automatically use the currently selected text when the command is opened",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Get Selected Text",
+      "label": "Automatically get the selected text",
+      "default": true
     }
   ],
   "dependencies": {

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Razuna MCP Server] - 2026-02-03
+
+Add official Razuna MCP Server to registry.
+
 ## [Update Anytype MCP Server] - 2026-01-13
 
 Update Anytype MCP Server to use the latest version of the Anytype API.
