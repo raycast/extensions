@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-06
 
 ### Added
 - **GitHub Integration**: Add deployment and GitHub Pages links
