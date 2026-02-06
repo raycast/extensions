@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Switch extension to use new API] - {PR_MERGE_DATE}
+## [Switch extension to use new API] - 2026-02-06
 
 - Switch "Create Task", "View Tasks" and "Menu Bar Tasks" commands to use new API
 
