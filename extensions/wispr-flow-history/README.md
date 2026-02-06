@@ -9,12 +9,25 @@ Search and browse your [Wispr Flow](https://wisprflow.ai) voice transcription hi
 
 ## Features
 
+- **Infinite scroll** — transcripts load progressively as you scroll
 - **Search transcripts** — type to filter across all your dictations
-- **Time-grouped list** — transcripts organized by Today, Yesterday, This Week, and older
+- **Time-grouped list** — transcripts organized by Today, Yesterday, This Week, Last Week, and Older
 - **App filter** — filter by which app you were dictating into (Slack, VS Code, Chrome, etc.)
-- **Detail view** — full transcript text with metadata (source app, word count, duration)
+- **Sort options** — sort by newest, oldest, longest duration, or most words
+- **Detail view** — full transcript text with metadata (source app, dictation time, word count, duration, WPM)
+- **View original transcription** — see the raw text before Wispr's formatting
+- **Open source app** — launch the app a transcript was dictated in
+- **Archive transcripts** — archive transcripts you no longer need
 - **Copy or paste** — press Enter to copy, or paste directly into your active app
+
+## Preferences
+
+- **Primary Action** — choose Copy to Clipboard or Paste to Active App as the default action
+- **Show Archived** — include archived transcripts in the list
+- **Minimum Duration** — hide transcripts shorter than a specified duration (filters out accidental triggers)
+- **Confirm Before Archive** — toggle the confirmation dialog when archiving
+- **Database Path** — custom path to the Wispr Flow database for non-standard installs
 
 ## How It Works
 
-Wispr Flow stores your transcription history in a local SQLite database on your Mac. This extension reads that database in read-only mode — it never modifies your data and makes no network requests.
+Wispr Flow stores your transcription history in a local SQLite database on your Mac. This extension reads that database locally — it makes no network requests. The only modification it can make is archiving transcripts, which mirrors Wispr Flow's own archive feature.
