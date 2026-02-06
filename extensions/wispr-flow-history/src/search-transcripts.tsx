@@ -10,9 +10,11 @@ import {
   Alert,
   getApplications,
   getPreferenceValues,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
 import { useState, useMemo, useCallback } from "react";
+import { existsSync } from "fs";
 import { homedir } from "os";
 import { resolve } from "path";
 import { Transcript } from "./types";
@@ -75,11 +77,29 @@ function buildPaginatedQuery(
 }
 
 export default function Command() {
-  const [searchText, setSearchText] = useState("");
-  const [appFilter, setAppFilter] = useState("all");
   const { primaryAction, showArchived, minimumDuration, confirmBeforeArchive } =
     getPreferenceValues<Preferences>();
   const dbPath = getDbPath();
+
+  if (!existsSync(dbPath)) {
+    return (
+      <Detail
+        markdown={`## Wispr Flow Database Not Found\n\nCould not find the Wispr Flow database at:\n\n\`${dbPath}\`\n\nMake sure [Wispr Flow](https://wisprflow.ai) is installed and has at least one transcription recorded, or update the database path in the extension preferences.`}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Open Extension Preferences"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  const [searchText, setSearchText] = useState("");
+  const [appFilter, setAppFilter] = useState("all");
   const minDuration = Number(minimumDuration) || 0;
 
   const { isLoading, data, pagination, revalidate } = useCachedPromise(
