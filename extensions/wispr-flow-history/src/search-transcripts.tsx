@@ -174,6 +174,16 @@ function TranscriptListItem({
                   text={duration}
                 />
               ) : null}
+              {transcript.numWords && transcript.duration ? (
+                <List.Item.Detail.Metadata.Label
+                  title="WPM"
+                  text={String(
+                    Math.round(
+                      transcript.numWords / (transcript.duration / 60),
+                    ),
+                  )}
+                />
+              ) : null}
               <List.Item.Detail.Metadata.Label
                 title="Dictated"
                 text={date.toLocaleString()}
