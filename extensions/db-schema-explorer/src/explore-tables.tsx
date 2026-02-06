@@ -345,7 +345,11 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
                   detail={<List.Item.Detail markdown={markdown} />}
                   actions={
                     <ActionPanel>
-                      <Action.CopyToClipboard title="Copy DDL" content={entry.ddl} shortcut={Keyboard.Shortcut.Copy} />
+                      <Action.CopyToClipboard
+                        title="Copy DDL"
+                        content={entry.ddl}
+                        shortcut={Keyboard.Shortcut.Common.Copy}
+                      />
                       <Action
                         title={isSelected ? "Remove from Selection" : "Add to Selection"}
                         onAction={() => toggleTableSelection(key)}
