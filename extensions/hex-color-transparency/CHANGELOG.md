@@ -1,6 +1,6 @@
 # Hex Color Transparency Changelog
 
-## [Initial Version] - 2026-02-06
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Look up hex transparency values for all opacity levels (0-100%)
 - Paste a hex color to see combined #RRGGBBAA values
