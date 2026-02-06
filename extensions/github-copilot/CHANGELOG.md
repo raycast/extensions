@@ -1,5 +1,9 @@
 # GitHub Copilot Changelog
 
+## [Fix titles and URLs for tasks without a pull request] - {PR_MERGE_DATE}
+
+- Fix titles and URLs for tasks without a pull request in "View Tasks" command
+
 ## [Additional instructions for issue assignment] - 2026-02-06
 
 - Add optional "Additional Instructions" field when assigning an issue to Copilot
