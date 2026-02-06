@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Improve search results ordering] - {PR_MERGE_DATE}
+## [Improve search results ordering] - 2026-02-06
 
 - Keep incomplete reminders above completed ones when filtering in My Reminders
 
