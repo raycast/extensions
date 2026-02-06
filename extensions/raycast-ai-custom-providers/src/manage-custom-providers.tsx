@@ -1,6 +1,7 @@
 import { ActionPanel, List, Action, Icon, Alert, confirmAlert, Color } from "@raycast/api";
 import { useProviders } from "./hooks/useProviders";
 import { ProviderForm } from "./components/views/ProviderForm";
+import { ModelForm } from "./components/views/ModelForm";
 import { PROVIDERS_FILE_PATH } from "./utils/yaml-handler";
 import { Provider, Model } from "./types";
 
@@ -27,11 +28,33 @@ export default function Command() {
         />
       )}
       {!isLoading && !error && providers.length === 0 && (
-        <List.EmptyView title="No providers found" description="Add a new provider to get started" icon={Icon.Info} />
+        <List.EmptyView title="No providers found" description="Add a new provider to get started" />
       )}
       {providers.length > 0 &&
         providers.map((provider) => (
           <List.Section key={provider.id} title={provider.name}>
+            {provider.models?.length === 0 && (
+              <List.Item
+                key={`${provider.id}-add-model`}
+                title="Add Model"
+                icon={Icon.Plus}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title={provider.name}>
+                      <AddNewModelAction provider={provider} onSave={loadProviders} />
+                      <EditProviderAction provider={provider} onSave={loadProviders} />
+                      <RemoveProviderAction provider={provider} removeProvider={removeProvider} />
+                    </ActionPanel.Section>
+
+                    <ActionPanel.Section title="Configuration">
+                      <AddNewProviderAction onSave={loadProviders} />
+                      <OpenConfigurationFileAction />
+                      <ReloadConfigAction loadProviders={loadProviders} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            )}
             {provider.models?.map((model) => (
               <List.Item
                 key={model.id}
@@ -58,31 +81,29 @@ export default function Command() {
                             <List.Item.Detail.Metadata.TagList title="Abilities">
                               {Object.entries(model.abilities).map(([abilityName, ability]) => {
                                 if (ability?.supported) {
-                                  // Map ability names to colors
-                                  const getAbilityColor = (name: string): Color => {
+                                  // Map ability names to color, icon, and display text
+                                  const getAbilityProps = (
+                                    name: string,
+                                  ): { color: Color; icon: Icon; text: string } => {
                                     switch (name) {
                                       case "temperature":
-                                        return Color.Orange;
+                                        return { color: Color.Orange, icon: Icon.Temperature, text: "Temperature" };
                                       case "vision":
-                                        return Color.Blue;
+                                        return { color: Color.Blue, icon: Icon.Image, text: "Vision" };
                                       case "system_message":
-                                        return Color.Green;
+                                        return { color: Color.Green, icon: Icon.Message, text: "System Message" };
                                       case "tools":
-                                        return Color.Purple;
+                                        return { color: Color.Purple, icon: Icon.WrenchScrewdriver, text: "Tools" };
                                       case "reasoning_effort":
-                                        return Color.Yellow;
+                                        return { color: Color.Yellow, icon: Icon.LightBulb, text: "Reasoning Effort" };
                                       default:
-                                        return Color.SecondaryText;
+                                        return { color: Color.SecondaryText, icon: Icon.Circle, text: name };
                                     }
                                   };
 
-                                  return (
-                                    <List.Item.Detail.Metadata.TagList.Item
-                                      key={abilityName}
-                                      text={abilityName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                                      color={getAbilityColor(abilityName)}
-                                    />
-                                  );
+                                  const abilityProps = getAbilityProps(abilityName);
+
+                                  return <List.Item.Detail.Metadata.TagList.Item key={abilityName} {...abilityProps} />;
                                 }
                                 return null;
                               })}
@@ -125,19 +146,22 @@ export default function Command() {
                   <ActionPanel>
                     <ActionPanel.Section title={model.name}>
                       <Action.Push
-                        title="Edit"
+                        title="Edit Model"
                         icon={{ source: Icon.Pencil }}
-                        target={<ProviderForm provider={provider} onSave={loadProviders} modelId={model.id} />}
+                        target={<ModelForm provider={provider} model={model} onSave={loadProviders} />}
                         shortcut={{ modifiers: ["cmd"], key: "e" }}
                       />
                       <RemoveModelAction provider={provider} model={model} removeModel={removeModel} />
                     </ActionPanel.Section>
+
                     <ActionPanel.Section title={provider.name}>
+                      <AddNewModelAction provider={provider} onSave={loadProviders} />
+                      <EditProviderAction provider={provider} onSave={loadProviders} />
                       <RemoveProviderAction provider={provider} removeProvider={removeProvider} />
                     </ActionPanel.Section>
 
-                    <AddNewProviderAction onSave={loadProviders} />
-                    <ActionPanel.Section>
+                    <ActionPanel.Section title="Configuration">
+                      <AddNewProviderAction onSave={loadProviders} />
                       <OpenConfigurationFileAction />
                       <ReloadConfigAction loadProviders={loadProviders} />
                     </ActionPanel.Section>
@@ -157,6 +181,17 @@ function AddNewProviderAction({ onSave }: { onSave: () => void }) {
       title="Add New Provider"
       icon={Icon.Plus}
       target={<ProviderForm onSave={onSave} />}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+    />
+  );
+}
+
+function AddNewModelAction({ provider, onSave }: { provider: Provider; onSave: () => void }) {
+  return (
+    <Action.Push
+      title="Add New Model"
+      icon={Icon.Plus}
+      target={<ModelForm provider={provider} onSave={onSave} />}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
     />
   );
@@ -205,6 +240,17 @@ function RemoveModelAction({
   );
 }
 
+function EditProviderAction({ provider, onSave }: { provider: Provider; onSave: () => void }) {
+  return (
+    <Action.Push
+      title="Edit Provider"
+      icon={{ source: Icon.Pencil }}
+      target={<ProviderForm provider={provider} onSave={onSave} />}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+    />
+  );
+}
+
 function RemoveProviderAction({
   provider,
   removeProvider,
@@ -217,6 +263,7 @@ function RemoveProviderAction({
       title="Remove Provider"
       icon={Icon.Trash}
       style={Action.Style.Destructive}
+      shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
       onAction={async () => {
         const confirmed = await confirmAlert({
           title: "Remove Provider",

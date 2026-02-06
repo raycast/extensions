@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { readProvidersFile, writeProvidersFile } from "../utils/yaml-handler";
-import { Provider } from "../types";
+import { Provider, Model } from "../types";
 import { showFailureToast } from "@raycast/utils";
 
 /**
@@ -136,6 +136,56 @@ export function useProviders() {
     [providers, saveProviders],
   );
 
+  /**
+   * Creates or updates a model in a provider
+   * If a model with the same ID exists, it will be updated; otherwise, a new model will be added
+   * @param providerId ID of the provider that owns the model
+   * @param model Model data to save
+   * @param oldModelId Optional old model ID - if provided and different from new ID, removes old model before adding new one (for renaming)
+   */
+  const putModel = useCallback(
+    (providerId: string, model: Model, oldModelId?: string) => {
+      try {
+        const updatedProviders = providers.map((provider) => {
+          if (provider.id !== providerId) {
+            return provider;
+          }
+
+          let updatedModels = [...provider.models];
+
+          // If oldModelId is provided and different from new ID, remove old model first
+          if (oldModelId && oldModelId !== model.id) {
+            updatedModels = updatedModels.filter((m) => m.id !== oldModelId);
+          }
+
+          // Find existing model by new ID
+          const existingIndex = updatedModels.findIndex((m) => m.id === model.id);
+
+          if (existingIndex >= 0) {
+            // Update existing model
+            updatedModels[existingIndex] = model;
+          } else {
+            // Add new model
+            updatedModels.push(model);
+          }
+
+          return {
+            ...provider,
+            models: updatedModels,
+          };
+        });
+
+        saveProviders(updatedProviders);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error("Failed to save model");
+        setError(error);
+        console.error("Error saving model:", error);
+        throw error;
+      }
+    },
+    [providers, saveProviders],
+  );
+
   // Load providers on mount
   useEffect(() => {
     loadProviders();
@@ -150,5 +200,6 @@ export function useProviders() {
     removeProvider,
     removeModel,
     putProvider,
+    putModel,
   };
 }

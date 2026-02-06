@@ -37,10 +37,12 @@
       "title": "Manage Custom Providers",
       "description": "Manage custom AI providers and models for Chat AI",
       "mode": "view",
+      "keywords": [
+        "Manage Custom Models"
+      ],
       "preferences": [
         {
           "name": "createBackup",
-          "title": "",
           "description": "Create a backup file when making changes to the YAML configuration file",
           "type": "checkbox",
           "label": "Create backup after changes",
