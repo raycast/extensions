@@ -11,6 +11,7 @@ import {
   getApplications,
   getPreferenceValues,
   openExtensionPreferences,
+  Cache,
 } from "@raycast/api";
 import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
 import { useState, useMemo, useCallback } from "react";
@@ -41,11 +42,21 @@ const COLUMNS = `transcriptEntityId, asrText, formattedText, editedText,
 
 const PAGE_SIZE = 50;
 
+const cache = new Cache();
+
+const SORT_OPTIONS: Record<string, string> = {
+  "sort:newest": "timestamp DESC",
+  "sort:oldest": "timestamp ASC",
+  "sort:longest": "duration DESC",
+  "sort:most-words": "numWords DESC",
+};
+
 function buildPaginatedQuery(
   search: string,
   appFilter: string,
   showArchived: boolean,
   minDuration: number,
+  sort: string,
   limit: number,
   offset: number,
 ) {
@@ -73,7 +84,8 @@ function buildPaginatedQuery(
     conditions.push(`duration >= ${minDuration}`);
   }
 
-  return `SELECT ${COLUMNS} FROM History WHERE ${conditions.join(" AND ")} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`;
+  const orderBy = SORT_OPTIONS[sort] ?? "timestamp DESC";
+  return `SELECT ${COLUMNS} FROM History WHERE ${conditions.join(" AND ")} ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
 }
 
 export default function Command() {
@@ -100,10 +112,28 @@ export default function Command() {
 
   const [searchText, setSearchText] = useState("");
   const [appFilter, setAppFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState(
+    cache.get("sortOrder") ?? "sort:newest",
+  );
   const minDuration = Number(minimumDuration) || 0;
 
+  const handleDropdownChange = useCallback((value: string) => {
+    if (value.startsWith("sort:")) {
+      setSortOrder(value);
+      cache.set("sortOrder", value);
+    } else {
+      setAppFilter(value);
+    }
+  }, []);
+
   const { isLoading, data, pagination, revalidate } = useCachedPromise(
-    (search: string, app: string, archived: boolean, minDur: number) =>
+    (
+      search: string,
+      app: string,
+      archived: boolean,
+      minDur: number,
+      sort: string,
+    ) =>
       async (options: { page: number }) => {
         const offset = options.page * PAGE_SIZE;
         const query = buildPaginatedQuery(
@@ -111,13 +141,14 @@ export default function Command() {
           app,
           archived,
           minDur,
+          sort,
           PAGE_SIZE,
           offset,
         );
         const results = await executeSQL<Transcript>(dbPath, query);
         return { data: results, hasMore: results.length === PAGE_SIZE };
       },
-    [searchText, appFilter, showArchived, minDuration],
+    [searchText, appFilter, showArchived, minDuration, sortOrder],
   );
 
   const { data: uniqueAppsData } = useCachedPromise(
@@ -171,9 +202,13 @@ export default function Command() {
       isShowingDetail
       pagination={pagination}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by App" onChange={setAppFilter}>
-          <List.Dropdown.Item title="All Apps" value="all" />
-          <List.Dropdown.Section title="Apps">
+        <List.Dropdown
+          tooltip="Filter & Sort"
+          value={appFilter}
+          onChange={handleDropdownChange}
+        >
+          <List.Dropdown.Section title="Filter by App">
+            <List.Dropdown.Item title="All Apps" value="all" />
             {uniqueApps.map((app) => (
               <List.Dropdown.Item
                 key={app.bundleId}
@@ -181,6 +216,12 @@ export default function Command() {
                 value={app.bundleId}
               />
             ))}
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Sort By">
+            <List.Dropdown.Item title="Newest First" value="sort:newest" />
+            <List.Dropdown.Item title="Oldest First" value="sort:oldest" />
+            <List.Dropdown.Item title="Longest Duration" value="sort:longest" />
+            <List.Dropdown.Item title="Most Words" value="sort:most-words" />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
@@ -286,8 +327,8 @@ function TranscriptListItem({
                 icon={appIcon}
               />
               <List.Item.Detail.Metadata.Label
-                title="Content type"
-                text="Text"
+                title="Dictated"
+                text={date.toLocaleString()}
               />
               {transcript.numWords ? (
                 <List.Item.Detail.Metadata.Label
@@ -311,10 +352,6 @@ function TranscriptListItem({
                   )}
                 />
               ) : null}
-              <List.Item.Detail.Metadata.Label
-                title="Dictated"
-                text={date.toLocaleString()}
-              />
             </List.Item.Detail.Metadata>
           }
         />
