@@ -1,5 +1,16 @@
 # Timezone converter Changelog
 
+## [Rewrite] - 2026-02-06
+
+- Replaced argument input with inline search bar for faster conversions
+- Added natural input parsing: supports IANA identifiers, abbreviations, and city names
+- Added ambiguous abbreviation handling (e.g. IST shows India, Ireland, and Israel)
+- Added configurable favorite timezones
+- Added reverse conversion action
+- Added day boundary indicators (+1 day / -1 day)
+- Removed `luxon` dependency in favor of native `Intl` APIs
+- Updated all dependencies to latest versions
+
 ## [Enhancement] - 2025-02-25
 
 Added UTC to the list of time zones.
