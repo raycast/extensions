@@ -21,6 +21,7 @@ interface Preferences {
 }
 
 const preferences = getPreferenceValues<Preferences>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ALL_TIMEZONES = ["UTC", ...(Intl as any).supportedValuesOf("timeZone")];
 
 function formatZoneName(zoneName: string) {
@@ -93,7 +94,7 @@ function Timezones() {
           setTime(newTime);
           setIsCustom(true);
         }}
-      />
+      />,
     );
   }
 
@@ -368,7 +369,7 @@ function CustomTime({ onSelect }: { onSelect: (newTime: DateTime) => void }) {
             second,
             millisecond,
           })
-          .setZone(value.zoneName)
+          .setZone(value.zoneName),
       );
     pop();
   }
