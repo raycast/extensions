@@ -13,12 +13,6 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 
-interface Preferences {
-  platform: string;
-  password: string;
-  resultLimit: string;
-}
-
 interface Book {
   title: string;
   author: string;
