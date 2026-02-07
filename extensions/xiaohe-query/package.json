@@ -89,5 +89,8 @@
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Extension to npm.\\n\\nIf you intend to release it to the Raycast Store, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
