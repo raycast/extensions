@@ -2,7 +2,7 @@
  * Search command for browsing and searching brew packages.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
@@ -65,7 +65,11 @@ function getDownloadSubtitle(progress: FileDownloadProgress, isProcessing: boole
 /**
  * Get accessory text showing total size or status (right side)
  */
-function getDownloadAccessory(progress: FileDownloadProgress, isProcessing: boolean, itemType: string): string {
+function getDownloadAccessory(
+  progress: FileDownloadProgress,
+  isProcessing: boolean,
+  itemType: string,
+): string {
   if (progress.complete && progress.totalItems > 0) {
     return `${formatNumber(progress.totalItems)} ${itemType}`;
   }
@@ -115,7 +119,11 @@ export default function SearchView() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
 
-  const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
+  const {
+    isLoading: isLoadingInstalled,
+    data: installed,
+    revalidate: revalidateInstalled,
+  } = useBrewInstalled();
 
   // useBrewSearch automatically applies installed status via useMemo
   // whenever either search results or installed data changes
@@ -132,6 +140,12 @@ export default function SearchView() {
 
   const formulae = filter != InstallableFilterType.casks ? (results?.formulae ?? []) : [];
   const casks = filter != InstallableFilterType.formulae ? (results?.casks ?? []) : [];
+
+  // Memoize isInstalled callback to avoid creating a new function every render
+  const isInstalledCallback = useCallback(
+    (name: string) => isInstalled(name, installed),
+    [installed],
+  );
 
   // Track if we've shown the completion toast (persists across renders)
   const hasShownCompletionToast = useRef(false);
@@ -153,7 +167,7 @@ export default function SearchView() {
         message: `${formatNumber(totalFormulae)} formulae and ${formatNumber(totalCasks)} casks loaded`,
       });
     }
-  }, [phase, results]);
+  }, [phase, results, indexTotals]);
 
   // Determine which loading UI to show during initial load:
   // - hasCacheFiles === null: Still checking if cache exists, show simple loading
@@ -192,7 +206,8 @@ export default function SearchView() {
         formulaeProgress.bytesDownloaded >= formulaeProgress.totalBytes);
 
     const isProcessingCasks = phase === "casks" && isCasksDownloadDone && !casksProgress.complete;
-    const isProcessingFormulae = phase === "formulae" && isFormulaeDownloadDone && !formulaeProgress.complete;
+    const isProcessingFormulae =
+      phase === "formulae" && isFormulaeDownloadDone && !formulaeProgress.complete;
 
     // Formulae haven't started yet if we're still in casks phase
     const formulaeNotStarted = phase === "casks";
@@ -219,7 +234,9 @@ export default function SearchView() {
     const casksSubtitle = getDownloadSubtitle(casksProgress, isProcessingCasks);
 
     // Build formulae subtitle - empty when waiting, otherwise show progress
-    const formulaeSubtitle = formulaeNotStarted ? "" : getDownloadSubtitle(formulaeProgress, isProcessingFormulae);
+    const formulaeSubtitle = formulaeNotStarted
+      ? ""
+      : getDownloadSubtitle(formulaeProgress, isProcessingFormulae);
 
     // Build formulae title based on state
     let formulaeTitle = "Download Formulae";
@@ -232,9 +249,15 @@ export default function SearchView() {
     // Build formulae accessory text (right side)
     let formulaeAccessoryText = "Waiting";
     if (formulaeNotStarted) {
-      formulaeAccessoryText = isProcessingCasks ? "Waiting on Casks processing..." : "Waiting on Casks to finish...";
+      formulaeAccessoryText = isProcessingCasks
+        ? "Waiting on Casks processing..."
+        : "Waiting on Casks to finish...";
     } else {
-      formulaeAccessoryText = getDownloadAccessory(formulaeProgress, isProcessingFormulae, "formulae");
+      formulaeAccessoryText = getDownloadAccessory(
+        formulaeProgress,
+        isProcessingFormulae,
+        "formulae",
+      );
     }
 
     // Build formulae icon - show empty circle if not started
@@ -243,13 +266,19 @@ export default function SearchView() {
       : getDownloadIcon(formulaeProgress, isProcessingFormulae);
 
     return (
-      <List navigationTitle="First-time setup" searchBarPlaceholder={statusMessage} isLoading={true}>
+      <List
+        navigationTitle="First-time setup"
+        searchBarPlaceholder={statusMessage}
+        isLoading={true}
+      >
         <List.Section title="Initializing...">
           <List.Item
             icon={getDownloadIcon(casksProgress, isProcessingCasks)}
             title={isProcessingCasks ? "Processing Casks" : "Downloading Casks"}
             subtitle={casksSubtitle}
-            accessories={[{ text: getDownloadAccessory(casksProgress, isProcessingCasks, "casks") }]}
+            accessories={[
+              { text: getDownloadAccessory(casksProgress, isProcessingCasks, "casks") },
+            ]}
           />
           <List.Item
             icon={formulaeIcon}
@@ -271,7 +300,7 @@ export default function SearchView() {
       isLoading={isLoadingInstalled || isLoadingSearch}
       onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
       filtering={false}
-      isInstalled={(name) => isInstalled(name, installed)}
+      isInstalled={isInstalledCallback}
       onAction={() => revalidateInstalled()}
       dataFetched={loadingState.phase === "complete"}
       showMetadataPanel={showMetadataPanel}
