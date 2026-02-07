@@ -177,7 +177,7 @@ async function runStealthActionInternal(
           `osascript -e '
             tell application "System Events"
               set procList to name of every process whose visible is true and name is not "Raycast" and name is not "Finder"
-              if (count of allProcs) > 0 then
+              if (count of procList) > 0 then
                 return item 1 of procList
               else
                 return "Finder"
@@ -254,12 +254,11 @@ async function runStealthActionInternal(
       message: "Please select text first",
     });
     toast.primaryAction = {
-      title: "Edit Prompt",
+      title: "Configure AI Model",
       onAction: () => {
         launchCommand({
-          name: "edit-action",
+          name: "configure-model",
           type: LaunchType.UserInitiated,
-          arguments: { actionId },
         });
       },
     };

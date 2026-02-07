@@ -1,6 +1,6 @@
 # Stealth AI Changelog
 
-## [In-App AI Configuration] - 2026-02-07
+## [In-App AI Configuration] - {PR_MERGE_DATE}
 
 - Add in-app AI provider and model configuration (no more Raycast Settings)
 - Support for RaycastAI (default), OpenAI, Anthropic, Gemini, and OpenRouter model fetching via API

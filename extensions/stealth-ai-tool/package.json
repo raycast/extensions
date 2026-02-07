@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stealth-ai-tool",
   "title": "Stealth AI",
   "description": "In-line AI formatting. Configure your AI provider via the 'Configure AI Model' command. Set custom Hotkey & Alias per action in Settings.",
@@ -7,6 +8,10 @@
   "author": "ahmed",
   "categories": [
     "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "ai": {
     "evals": [
