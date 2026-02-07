@@ -10,7 +10,6 @@ import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
 import type { FileDownloadProgress } from "./hooks/useBrewSearch";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
-import { preferences } from "./utils/preferences";
 
 interface SearchPreferences {
   showMetadataPanel?: boolean;
@@ -114,10 +113,7 @@ function getDownloadIcon(progress: FileDownloadProgress, isProcessing = false) {
 export default function SearchView() {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const { showMetadataPanel: showMetadataPanelPref } = getPreferenceValues<SearchPreferences>();
-
-  // Disable metadata panel when using internal API (it lacks metadata, causing slow lazy loading)
-  const showMetadataPanel = showMetadataPanelPref && !preferences.useInternalApi;
+  const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
 
   const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
 

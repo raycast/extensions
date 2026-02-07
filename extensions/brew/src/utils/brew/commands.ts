@@ -31,7 +31,10 @@ let homebrewEnvLogged = false;
 /**
  * Execute a brew command.
  */
-export async function execBrew(cmd: string, options?: { signal?: AbortSignal }): Promise<ExecResult> {
+export async function execBrew(
+  cmd: string,
+  options?: { signal?: AbortSignal },
+): Promise<ExecResult> {
   try {
     const env = await execBrewEnv();
     return await execp(`${brewExecutable()} ${cmd}`, {
@@ -71,7 +74,6 @@ export async function execBrew(cmd: string, options?: { signal?: AbortSignal }):
  * Homebrew 5.0 environment variables:
  * - HOMEBREW_DOWNLOAD_CONCURRENCY: Controls parallel downloads (default: "auto")
  *   Set to "1" to disable concurrent downloads
- * - HOMEBREW_USE_INTERNAL_API: Opt-in to the new smaller internal JSON API
  */
 export async function execBrewEnv(): Promise<NodeJS.ProcessEnv> {
   const askpassPath = path_join(environment.assetsPath, "askpass.sh");

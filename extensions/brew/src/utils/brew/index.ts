@@ -81,6 +81,3 @@ export {
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";
-
-// Internal API (experimental)
-export { getSystemTag, getInternalFormulaUrl, getInternalCaskUrl, logInternalApiConfig } from "./internal-api";

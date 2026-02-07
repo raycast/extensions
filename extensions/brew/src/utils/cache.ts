@@ -27,7 +27,6 @@ import {
 import { cacheLogger, fetchLogger } from "./logger";
 import { NetworkError, ParseError, isNetworkError, isRecoverableError, ensureError } from "./errors";
 import { wait } from "./async";
-import { preferences } from "./preferences";
 
 /// Cache Paths
 
@@ -461,10 +460,6 @@ async function _fetchRemote<T>(
         const contentLengthKb = (totalBytes / 1024).toFixed(2);
         logData.responseSizeBytes = totalBytes;
         logData.responseSizeKb = `${contentLengthKb} KB`;
-      }
-
-      if (preferences.useInternalApi) {
-        logData.usingInternalApi = true;
       }
 
       cacheLogger.log("Cache updated from remote", logData);

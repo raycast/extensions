@@ -5,17 +5,8 @@
  * when the split-view is enabled in search results.
  */
 
-import { useEffect, useState } from "react";
 import { Color, List } from "@raycast/api";
-import {
-  Cask,
-  Formula,
-  brewIsInstalled,
-  brewName,
-  brewPrefix,
-  brewFetchFormulaInfo,
-  brewFetchCaskInfo,
-} from "../utils";
+import { Cask, Formula, brewIsInstalled, brewName, brewPrefix } from "../utils";
 
 interface FormulaListItemDetailProps {
   formula: Formula;
@@ -28,76 +19,11 @@ interface CaskListItemDetailProps {
 }
 
 /**
- * Check if a formula has minimal data (from fast list / internal API) vs full data.
- */
-function formulaHasMinimalData(formula: Formula): boolean {
-  return !formula.homepage || !formula.tap || !formula.desc;
-}
-
-/**
- * Check if a cask has minimal data (from fast list / internal API) vs full data.
- */
-function caskHasMinimalData(cask: Cask): boolean {
-  return !cask.homepage || !cask.tap || !cask.desc;
-}
-
-/**
  * Detail panel for a formula in the split-view.
- * Lazily loads full data when the formula has minimal data (e.g., from internal API).
  */
-export function FormulaListItemDetail({ formula: initialFormula, isInstalled }: FormulaListItemDetailProps) {
-  const [formula, setFormula] = useState<Formula>(initialFormula);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Update formula when the initial formula changes (user selects different item)
-  useEffect(() => {
-    setFormula(initialFormula);
-  }, [initialFormula]);
-
-  // Lazy load full formula data if we only have minimal data
-  useEffect(() => {
-    if (!formulaHasMinimalData(initialFormula)) {
-      return;
-    }
-
-    let cancelled = false;
-    const controller = new AbortController();
-
-    const loadFullData = async () => {
-      setIsLoading(true);
-
-      try {
-        const fullFormula = await brewFetchFormulaInfo(initialFormula.name, controller.signal);
-
-        if (!cancelled && fullFormula) {
-          // Preserve installed info from initial formula
-          if (initialFormula.installed?.length > 0) {
-            fullFormula.installed = initialFormula.installed;
-          }
-          setFormula(fullFormula);
-        }
-      } catch {
-        // Silently fail - we'll just show the minimal data
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    loadFullData();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [initialFormula]);
-
+export function FormulaListItemDetail({ formula, isInstalled }: FormulaListItemDetailProps) {
   return (
     <List.Item.Detail
-      isLoading={isLoading}
       markdown={formatFormulaMarkdown(formula)}
       metadata={
         <List.Item.Detail.Metadata>
@@ -155,61 +81,10 @@ export function FormulaListItemDetail({ formula: initialFormula, isInstalled }: 
 
 /**
  * Detail panel for a cask in the split-view.
- * Lazily loads full data when the cask has minimal data (e.g., from internal API).
  */
-export function CaskListItemDetail({ cask: initialCask, isInstalled }: CaskListItemDetailProps) {
-  const [cask, setCask] = useState<Cask>(initialCask);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Update cask when the initial cask changes (user selects different item)
-  useEffect(() => {
-    setCask(initialCask);
-  }, [initialCask]);
-
-  // Lazy load full cask data if we only have minimal data
-  useEffect(() => {
-    if (!caskHasMinimalData(initialCask)) {
-      return;
-    }
-
-    let cancelled = false;
-    const controller = new AbortController();
-
-    const loadFullData = async () => {
-      setIsLoading(true);
-
-      try {
-        const fullCask = await brewFetchCaskInfo(initialCask.token, controller.signal);
-
-        if (!cancelled && fullCask) {
-          // Preserve installed version from initial cask
-          if (initialCask.installed) {
-            fullCask.installed = initialCask.installed;
-          }
-          setCask(fullCask);
-        }
-      } catch {
-        // Silently fail - we'll just show the minimal data
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    loadFullData();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [initialCask]);
-
+export function CaskListItemDetail({ cask, isInstalled }: CaskListItemDetailProps) {
   return (
     <List.Item.Detail
-      isLoading={isLoading}
       markdown={formatCaskMarkdown(cask)}
       metadata={
         <List.Item.Detail.Metadata>
