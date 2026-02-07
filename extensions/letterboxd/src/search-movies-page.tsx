@@ -28,7 +28,9 @@ export default function SearchMoviesPage(props: SearchMoviesPageProps) {
       searchBarPlaceholder={STRINGS.searchMoviesPlaceholder}
       onSearchTextChange={setSearch}
     >
-      {data?.data?.map((movie) => <MovieItem key={movie.id} movie={movie} />)}
+      {data?.data?.map((movie) => (
+        <MovieItem key={movie.id} movie={movie} />
+      ))}
     </List>
   );
 }
