@@ -7,7 +7,7 @@ export default async () => {
     try {
       await setOutputDevice(preferences.favourite);
       await showHUD(`Active output audio device set to ${preferences.favourite}`);
-    } catch (err) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Favourite output audio device could not be set",

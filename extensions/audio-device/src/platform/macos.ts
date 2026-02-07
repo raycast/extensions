@@ -9,7 +9,7 @@ const binary = path.join(environment.supportPath, "audio-devices");
 
 async function ensureBinary() {
   if (!fs.existsSync(binary)) {
-    await execa("cp", [binaryAsset, binary]);
+    fs.copyFileSync(binaryAsset, binary);
     await execa("chmod", ["+x", binary]);
   }
 }
