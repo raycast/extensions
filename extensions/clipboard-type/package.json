@@ -61,48 +61,10 @@
         {
           "title": "Very Fast (5 ms)",
           "value": "very-fast"
-        }
-      ]
-    },
-    {
-      "name": "delay",
-      "type": "dropdown",
-      "title": "Typing Speed",
-      "required": false,
-      "description": "Choose how quickly characters are typed",
-      "default": "0.002",
-      "data": [
-        {
-          "title": "Slowest (1 s)",
-          "value": "1"
         },
         {
-          "title": "Very Slow (200 ms)",
-          "value": "0.2"
-        },
-        {
-          "title": "Slow (100 ms)",
-          "value": "0.1"
-        },
-        {
-          "title": "Leisurely (50 ms)",
-          "value": "0.05"
-        },
-        {
-          "title": "Moderate (20 ms)",
-          "value": "0.02"
-        },
-        {
-          "title": "Normal (2 ms)",
-          "value": "0.002"
-        },
-        {
-          "title": "Fast (1 ms)",
-          "value": "0.001"
-        },
-        {
-          "title": "Ultra Fast (0.5 ms)",
-          "value": "0.0005"
+          "title": "Super Human (0 ms)",
+          "value": "super-human"
         }
       ]
     }
