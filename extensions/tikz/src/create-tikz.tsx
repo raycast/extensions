@@ -62,7 +62,7 @@ export default function Command() {
 
       // Generate filename
       const timestamp = Date.now();
-      const baseName = values.fileName?.trim().replace(/[^a-z0-9]/gi, "_") || "diagram";
+    const baseName = (values.fileName?.trim().replace(/[^a-z0-9]/gi, "_").substring(0, 100) || "diagram") || "diagram";
       const texFileName = `${baseName}_${timestamp}.tex`;
       const pdfFileName = `${baseName}_${timestamp}.pdf`;
       const pngFileName = `${baseName}_${timestamp}.png`;
