@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Form, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, open, trash } from "@raycast/api";
 import { execSync } from "child_process";
-import { writeFileSync, mkdirSync, existsSync, readFileSync, unlinkSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { useState } from "react";
 import { homedir } from "os";
@@ -62,7 +62,11 @@ export default function Command() {
 
       // Generate filename
       const timestamp = Date.now();
-    const baseName = (values.fileName?.trim().replace(/[^a-z0-9]/gi, "_").substring(0, 100) || "diagram") || "diagram";
+      const baseName =
+        values.fileName
+          ?.trim()
+          .replace(/[^a-z0-9]/gi, "_")
+          .substring(0, 100) || "diagram";
       const texFileName = `${baseName}_${timestamp}.tex`;
       const pdfFileName = `${baseName}_${timestamp}.pdf`;
       const pngFileName = `${baseName}_${timestamp}.png`;
@@ -167,10 +171,10 @@ ${cleanTikzCode}
             const logFilePath = join(outputDir, `${baseName}_${timestamp}.log`);
             const auxFilePath = join(outputDir, `${baseName}_${timestamp}.aux`);
 
-            if (existsSync(pdfFilePath)) unlinkSync(pdfFilePath);
-            if (existsSync(texFilePath)) unlinkSync(texFilePath);
-            if (existsSync(logFilePath)) unlinkSync(logFilePath);
-            if (existsSync(auxFilePath)) unlinkSync(auxFilePath);
+            if (existsSync(pdfFilePath)) await trash(pdfFilePath);
+            if (existsSync(texFilePath)) await trash(texFilePath);
+            if (existsSync(logFilePath)) await trash(logFilePath);
+            if (existsSync(auxFilePath)) await trash(auxFilePath);
           } catch {
             // Ignore cleanup errors
           }

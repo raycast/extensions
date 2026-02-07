@@ -1,6 +1,6 @@
-import { environment, showToast, Toast } from "@raycast/api";
+import { environment, showToast, Toast, trash } from "@raycast/api";
 import { execSync } from "child_process";
-import { writeFileSync, mkdirSync, existsSync, readFileSync, unlinkSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 
 // Find pdflatex in common locations
@@ -52,7 +52,7 @@ export default async function (input: Input): Promise<string> {
 
     // Generate unique filename
     const timestamp = Date.now();
-    const baseName = input.fileName?.replace(/[^a-z0-9]/gi, "_") || "diagram";
+    const baseName = input.fileName?.replace(/[^a-z0-9]/gi, "_").substring(0, 100) || "diagram";
     const texFileName = `${baseName}_${timestamp}.tex`;
     const pdfFileName = `${baseName}_${timestamp}.pdf`;
     const pngFileName = `${baseName}_${timestamp}.png`;
@@ -154,10 +154,10 @@ ${cleanTikzCode}
           const logFilePath = join(outputDir, `${baseName}_${timestamp}.log`);
           const auxFilePath = join(outputDir, `${baseName}_${timestamp}.aux`);
 
-          if (existsSync(pdfFilePath)) unlinkSync(pdfFilePath);
-          if (existsSync(texFilePath)) unlinkSync(texFilePath);
-          if (existsSync(logFilePath)) unlinkSync(logFilePath);
-          if (existsSync(auxFilePath)) unlinkSync(auxFilePath);
+          if (existsSync(pdfFilePath)) await trash(pdfFilePath);
+          if (existsSync(texFilePath)) await trash(texFilePath);
+          if (existsSync(logFilePath)) await trash(logFilePath);
+          if (existsSync(auxFilePath)) await trash(auxFilePath);
         } catch {
           // Ignore cleanup errors
         }
