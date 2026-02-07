@@ -19,7 +19,6 @@ export type {
   InstallableResults,
   OutdatedResults,
   InstalledMap,
-  Remote,
 } from "../types";
 
 // Paths
@@ -38,8 +37,6 @@ export {
   brewFetchInstalledFast,
   brewFetchOutdated,
   brewUpdate,
-  brewFetchFormulae,
-  brewFetchCasks,
   brewFetchFormulaInfo,
   brewFetchCaskInfo,
   hasSearchCache,

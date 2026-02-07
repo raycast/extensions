@@ -22,7 +22,6 @@ import {
 } from "../types";
 import {
   cachePath,
-  fetchRemote,
   downloadRemoteToCache,
   getChunkedCacheConfig,
   isChunkedCacheValid,
@@ -417,22 +416,6 @@ export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
   brewLogger.log("Running brew update");
   await execBrew(`update`, cancel ? { signal: cancel } : undefined);
   brewLogger.log("Brew update completed");
-}
-
-/**
- * Fetch all formulae from the remote API.
- * Uses stream-json parsing for memory efficiency.
- */
-export async function brewFetchFormulae(onProgress?: DownloadProgressCallback): Promise<Formula[]> {
-  return await fetchRemote(formulaRemote, onProgress);
-}
-
-/**
- * Fetch all casks from the remote API.
- * Uses stream-json parsing for memory efficiency.
- */
-export async function brewFetchCasks(onProgress?: DownloadProgressCallback): Promise<Cask[]> {
-  return await fetchRemote(caskRemote, onProgress);
 }
 
 /// Chunked Cache Functions
