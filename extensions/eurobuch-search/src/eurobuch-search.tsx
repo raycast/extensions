@@ -13,7 +13,11 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 
-// interface Preferences deleted
+interface Preferences {
+  platform: string;
+  password: string;
+  resultLimit: string;
+}
 
 interface Book {
   title: string;
@@ -53,7 +57,6 @@ const parseEurobuchXML = (xml: string): Book[] => {
 
   while ((match = bookRegex.exec(xml)) !== null) {
     const getAttribute = (name: string): string => {
-      if (!match) return "";
       const regex = new RegExp(`${name}="([^"]*)"`, "i");
       const value = regex.exec(match[1])?.[1] || "";
       return decodeXMLEntities(value);
@@ -86,13 +89,13 @@ const parseEurobuchXML = (xml: string): Book[] => {
 const convertISBN10to13 = (isbn10: string): string => {
   // Remove hyphens and spaces
   const clean = isbn10.replace(/[-\s]/g, "");
-
+  
   // Check if it's a valid ISBN-10 (9 digits + checksum)
   if (clean.length !== 10) return isbn10;
-
+  
   // Take first 9 digits and prepend 978
   const isbn13base = "978" + clean.substring(0, 9);
-
+  
   // Calculate ISBN-13 checksum
   let sum = 0;
   for (let i = 0; i < 12; i++) {
@@ -100,7 +103,7 @@ const convertISBN10to13 = (isbn10: string): string => {
     sum += i % 2 === 0 ? digit : digit * 3;
   }
   const checksum = (10 - (sum % 10)) % 10;
-
+  
   return isbn13base + checksum;
 };
 
@@ -116,11 +119,11 @@ const searchBooks = async (query: string, prefs: Preferences): Promise<Book[]> =
   // Try to detect and convert ISBN-10 to ISBN-13
   let searchQuery = query;
   const cleanQuery = query.replace(/[-\s]/g, "");
-
+  
   // If it looks like ISBN-10 (10 chars, last might be X)
   if (cleanQuery.length === 10 && /^\d{9}[\dXx]$/.test(cleanQuery)) {
     const isbn13 = convertISBN10to13(cleanQuery);
-    void showToast({
+    showToast({
       style: Toast.Style.Success,
       title: "ISBN-10 converted",
       message: `${cleanQuery} → ${isbn13}`,
@@ -159,7 +162,7 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
+  const debounceTimer = useRef<NodeJS.Timeout>();
   const initializedRef = useRef(false);
 
   // Auto-fill from selection or clipboard on mount
@@ -172,9 +175,9 @@ export default function Command() {
         // First try to get selected text
         const selected = await getSelectedText();
         const cleaned = selected.trim();
-
+        
         // Check if it looks like an ISBN (10 or 13 digits, possibly with X)
-        if (/^\d{9}[\dXx]$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))) {
+        if (/^\d{10}[\dXx]?$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))) {
           setSearchText(cleaned);
           return;
         }
@@ -184,9 +187,9 @@ export default function Command() {
           const clipboardText = await Clipboard.readText();
           if (clipboardText) {
             const cleaned = clipboardText.trim();
-
+            
             // Check if clipboard contains an ISBN
-            if (/^\d{9}[\dXx]$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))) {
+            if (/^\d{10}[\dXx]?$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))) {
               setSearchText(cleaned);
               return;
             }
@@ -222,13 +225,13 @@ export default function Command() {
     {
       keepPreviousData: true,
       onError: (err) => {
-        void showToast({
+        showToast({
           style: Toast.Style.Failure,
           title: "Search Error",
           message: err.message,
         });
       },
-    },
+    }
   );
 
   const priceRange =
@@ -237,8 +240,8 @@ export default function Command() {
           books[books.length - 1].price + books[books.length - 1].shipping
         ).toFixed(2)}`
       : books.length === 1
-        ? `€${(books[0].price + books[0].shipping).toFixed(2)}`
-        : null;
+      ? `€${(books[0].price + books[0].shipping).toFixed(2)}`
+      : null;
 
   return (
     <List
@@ -296,10 +299,9 @@ export default function Command() {
                 key={`${book.isbn}-${book.dealer}-${index}`}
                 icon={{ source: Icon.Book, tintColor: Color.Blue }}
                 title={book.title}
-                subtitle={book.author || "Unknown Author"}
+                subtitle={`${book.author || "Unknown"} • ${book.dealer}`}
                 accessories={[
                   { text: `€${totalFormatted}` },
-                  { text: book.dealer },
                   ...(book.condition ? [{ tag: { value: book.condition, color: Color.Green } }] : []),
                 ]}
                 detail={
@@ -380,7 +382,7 @@ export default function Command() {
                       content={`${book.title}\nAuthor: ${book.author || "Unknown"}\nISBN: ${book.isbn || "N/A"}\nCondition: ${
                         book.condition || "N/A"
                       }\nPrice: €${book.price.toFixed(2)}\nShipping: €${book.shipping.toFixed(
-                        2,
+                        2
                       )}\nTotal: €${totalFormatted}\nDealer: ${book.dealer}\nPlatform: ${book.platform}\n\nDirect offer: ${
                         book.link
                       }${book.isbn ? `\nEurobuch overview: https://www.eurobuch.de/buch/isbn/${book.isbn}.html` : ""}`}
