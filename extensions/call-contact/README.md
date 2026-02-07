@@ -6,6 +6,7 @@ The fastest way to call, message, or FaceTime your contacts directly from Raycas
 
 - **⚡️ Instant Search**: Zero latency. Your contacts load instantly.
 - **⭐️ Smart Favorites**: Favorites stay at the top, sorted by who you called last.
+- **🔢 Direct Dial**: Type any number and call it instantly, even if it's not in your contacts.
 - **🚨 Priority Call**: One command to **text AND call** simultaneously (perfect for emergencies).
 - **� Multi-Channel**: WhatsApp, FaceTime, iMessage, and Phone all in one place.
 
@@ -33,11 +34,8 @@ Toggle a contact as a Favorite.
 - Favorites always appear at the top of an empty search.
 - They are sorted by **Recency** (who you spoke to last).
 
-### 💬 Other Actions (`Cmd + K`)
-Access the Action Panel to connect via other apps:
-- **WhatsApp Message**: Opens a chat directly.
-- **FaceTime**: Audio or Video calls.
 - **iMessage**: Send a standard text.
+- **Recents Management**: Remove individual entries (`Cmd + Backspace`) or clear all history (`Cmd + Shift + Backspace`) from the empty state.
 
 ## ⚙️ Configuration
 

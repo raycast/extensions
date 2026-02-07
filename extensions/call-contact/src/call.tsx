@@ -10,6 +10,8 @@ import {
   LocalStorage,
   open,
   getPreferenceValues,
+  Alert,
+  confirmAlert,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { spawn } from "child_process";
@@ -22,6 +24,11 @@ interface Contact {
   image?: string;
   frequency?: number;
   lastContacted?: number;
+}
+
+function cleanPhoneForUri(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  return phone.startsWith("+") ? `+${digits}` : digits;
 }
 
 export default function Command() {
@@ -112,9 +119,9 @@ export default function Command() {
 
         if (freshContacts.length > 0) {
           setContacts(freshContacts);
-          setLoading(false);
           await LocalStorage.setItem("cached-contacts", JSON.stringify(freshContacts));
         }
+        setLoading(false);
       },
       onError: (error) => {
         showToast({
@@ -130,6 +137,7 @@ export default function Command() {
   const { data: userData } = usePromise(
     async (_refresh: number) => {
       void _refresh;
+
       const [freqString, favString] = await Promise.all([
         LocalStorage.getItem<string>("call-frequencies"),
         LocalStorage.getItem<string>("favorite-contacts"),
@@ -212,6 +220,8 @@ export default function Command() {
       return c.name.toLowerCase().includes(lowerQuery) || c.phone.includes(lowerQuery);
     });
 
+    const isPhoneNumber = /^[+\d\s().-]{3,20}$/.test(lowerQuery) && lowerQuery.replace(/\D/g, "").length >= 3;
+
     const getScore = (c: Contact & { isFavorite: boolean }) => {
       const name = c.name.toLowerCase();
       const freq = c.frequency || 0;
@@ -234,6 +244,16 @@ export default function Command() {
       if (scoreA !== scoreB) return scoreB - scoreA;
       return a.name.localeCompare(b.name);
     });
+
+    if (isPhoneNumber) {
+      const directDial: Contact & { isFavorite: boolean } = {
+        id: `direct-dial-${lowerQuery}`,
+        name: `Call ${lowerQuery}`,
+        phone: lowerQuery,
+        isFavorite: false,
+      };
+      return { favorites: [], recents: [directDial, ...sortedSearch], isSearch: true };
+    }
 
     return { favorites: [], recents: sortedSearch, isSearch: true };
   }, [contacts, userData, searchText]);
@@ -278,6 +298,39 @@ export default function Command() {
     } catch (e) {
       console.error("Failed to toggle favorite", e);
       await showToast({ title: "Failed to update favorites", style: Toast.Style.Failure });
+    }
+  }, []);
+
+  const removeRecent = useCallback(async (contact: Contact) => {
+    try {
+      const stored = await LocalStorage.getItem<string>("call-frequencies");
+      const current = stored ? JSON.parse(stored) : {};
+
+      delete current[contact.id];
+
+      await LocalStorage.setItem("call-frequencies", JSON.stringify(current));
+      setRefreshKey((prev) => prev + 1);
+      await showToast({ title: "Removed from Recents", style: Toast.Style.Success });
+    } catch (e) {
+      console.error("Failed to remove recent", e);
+    }
+  }, []);
+
+  const clearRecents = useCallback(async () => {
+    if (
+      await confirmAlert({
+        title: "Clear Recents History",
+        message: "Are you sure you want to clear all recently contacted people? This cannot be undone.",
+        primaryAction: { title: "Clear All", style: Alert.ActionStyle.Destructive },
+      })
+    ) {
+      try {
+        await LocalStorage.removeItem("call-frequencies");
+        setRefreshKey((prev) => prev + 1);
+        await showToast({ title: "Recents Cleared", style: Toast.Style.Success });
+      } catch (e) {
+        console.error("Failed to clear recents", e);
+      }
     }
   }, []);
 
@@ -339,6 +392,7 @@ export default function Command() {
                   contact={contact}
                   onCall={handleCall}
                   onToggleFavorite={toggleFavorite}
+                  onClearAllRecents={clearRecents}
                 />
               ))}
             </List.Section>
@@ -352,6 +406,8 @@ export default function Command() {
                   contact={contact}
                   onCall={handleCall}
                   onToggleFavorite={toggleFavorite}
+                  onRemoveRecent={removeRecent}
+                  onClearAllRecents={clearRecents}
                 />
               ))}
             </List.Section>
@@ -366,10 +422,14 @@ function ContactItem({
   contact,
   onCall,
   onToggleFavorite,
+  onRemoveRecent,
+  onClearAllRecents,
 }: {
   contact: Contact & { isFavorite: boolean };
   onCall: (c: Contact) => Promise<void>;
   onToggleFavorite: (c: Contact) => Promise<void>;
+  onRemoveRecent?: (c: Contact) => Promise<void>;
+  onClearAllRecents?: () => Promise<void>;
 }) {
   return (
     <List.Item
@@ -389,7 +449,7 @@ function ContactItem({
             icon={{ source: Icon.PhoneRinging, tintColor: "#127A33" }} // Darker Green
             onAction={async () => {
               await onCall(contact);
-              await open(`tel://${contact.phone.replace(/\s/g, "")}`);
+              await open(`tel://${cleanPhoneForUri(contact.phone)}`);
             }}
           />
           <Action
@@ -408,16 +468,13 @@ function ContactItem({
 
               await onCall(contact); // Log frequency
 
-              // Clean phone number
-              const cleanPhone = contact.phone.replace(/\s/g, "");
+              const cleanPhone = cleanPhoneForUri(contact.phone);
               const body = encodeURIComponent(priorityMessage);
 
               // 1. Open SMS Draft (so it's ready)
               await open(`sms:${cleanPhone}&body=${body}`);
 
               // 2. Start Call (immedately after)
-              // We add a tiny delay to ensure the OS registers the first open command separately if needed,
-              // but standard await open() usually handles the hand-off.
               await open(`tel://${cleanPhone}`);
             }}
           />
@@ -426,7 +483,7 @@ function ContactItem({
             icon={{ source: Icon.Phone, tintColor: "#34C759" }} // FaceTime Green
             onAction={async () => {
               await onCall(contact);
-              await open(`facetime-audio://${contact.phone.replace(/\s/g, "")}`);
+              await open(`facetime-audio://${cleanPhoneForUri(contact.phone)}`);
             }}
           />
           <Action
@@ -434,7 +491,7 @@ function ContactItem({
             icon={{ source: Icon.Video, tintColor: "#34C759" }} // FaceTime Green
             onAction={async () => {
               await onCall(contact);
-              await open(`facetime://${contact.phone.replace(/\s/g, "")}`);
+              await open(`facetime://${cleanPhoneForUri(contact.phone)}`);
             }}
           />
           <Action
@@ -442,7 +499,7 @@ function ContactItem({
             icon={{ source: Icon.Message, tintColor: "#34C759" }} // Green Message
             onAction={async () => {
               await onCall(contact); // Log as interaction
-              await open(`sms:${contact.phone.replace(/\s/g, "")}`);
+              await open(`sms:${cleanPhoneForUri(contact.phone)}`);
             }}
           />
           <Action
@@ -459,6 +516,28 @@ function ContactItem({
             content={contact.phone}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
+          {(onRemoveRecent || onClearAllRecents) && (
+            <ActionPanel.Section>
+              {onRemoveRecent && (contact.frequency || 0) > 0 && (
+                <Action
+                  title="Remove from Recents"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  onAction={() => onRemoveRecent(contact)}
+                />
+              )}
+              {onClearAllRecents && (
+                <Action
+                  title="Clear Recents History"
+                  icon={Icon.ExclamationMark}
+                  style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                  onAction={onClearAllRecents}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
