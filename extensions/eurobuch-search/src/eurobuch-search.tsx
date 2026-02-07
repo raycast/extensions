@@ -171,7 +171,7 @@ export default function Command() {
         const cleaned = selected.trim();
         
         // Check if it looks like an ISBN (10 or 13 digits, possibly with X)
-        if (/^\d{10}[\dXx]?$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))) {
+        if (/^\d{9}[\dXx]$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, "")))
           setSearchText(cleaned);
           return;
         }
