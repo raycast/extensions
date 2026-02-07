@@ -10,8 +10,20 @@ export default async function Command() {
     return;
   }
   await closeMainWindow();
-  const { delay: delayStr } = getPreferenceValues<Preferences>();
+  const { delay: delayStr, humanCadence, humanCadenceSpeed } = getPreferenceValues<Preferences>();
   const delay = Number.parseFloat(delayStr); // Delay between keystrokes in seconds
+
+  const humanCadenceSpeeds = {
+    "very-slow": { min: 0.1, max: 0.3 },
+    slow: { min: 0.05, max: 0.15 },
+    average: { min: 0.02, max: 0.1 },
+    fast: { min: 0.01, max: 0.05 },
+    "very-fast": { min: 0.005, max: 0.02 },
+  };
+
+  const humanCadenceRange = humanCadenceSpeeds[humanCadenceSpeed];
+
+  const delayString = `(random number from ${humanCadenceRange.min} to ${humanCadenceRange.max})`;
 
   const appleScriptContent = `
 set delaySeconds to ${delay}
@@ -27,7 +39,7 @@ tell application "System Events"
     else
       keystroke c
     end if
-    delay delaySeconds
+    delay ${humanCadence ? delayString : "delaySeconds"}
   end repeat
 end tell
 `;
