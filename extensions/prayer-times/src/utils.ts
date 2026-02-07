@@ -206,7 +206,7 @@ export async function fetchPrayerTimes(lat: number, lng: number, method: number 
   try {
     const today = new Date();
     const timestamp = Math.floor(today.getTime() / 1000);
-    const url = `http://api.aladhan.com/v1/timings/${timestamp}?latitude=${lat}&longitude=${lng}&method=${method}`;
+    const url = `https://api.aladhan.com/v1/timings/${timestamp}?latitude=${lat}&longitude=${lng}&method=${method}`;
 
     const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch prayer times");
