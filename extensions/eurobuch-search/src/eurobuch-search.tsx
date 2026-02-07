@@ -171,10 +171,15 @@ export default function Command() {
         const cleaned = selected.trim();
         
         // Check if it looks like an ISBN (10 or 13 digits, possibly with X)
-        if (/^\d{9}[\dXx]$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, "")))
-          setSearchText(cleaned);
-          return;
-        }
+       if (/^\d{9}[\dXx]$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))) {
+  setSearchText(cleaned);
+  return;
+}
+// Optional: Falls kein ISBN, aber Text vorhanden ist
+if (cleaned.length >= 2) {
+  setSearchText(cleaned);
+  return;
+}
       } catch {
         // No selection, try clipboard
         try {
@@ -183,7 +188,7 @@ export default function Command() {
             const cleaned = clipboardText.trim();
             
             // Check if clipboard contains an ISBN
-            if (/^\d{9}[\dXx]$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, "")))
+            if (/^\d{9}[\dXx]$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))){
               setSearchText(cleaned);
               return;
             }
