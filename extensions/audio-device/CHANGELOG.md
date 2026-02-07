@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## Chore - {PR_MERGE_DATE}
+## Chore - 2026-02-07
 - Fix issues in lint due to newer ESlint package
 
 ## [Fix] - 2026-02-04
