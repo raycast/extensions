@@ -1,6 +1,6 @@
 # TikZ Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-07
 
 - Added AI tool for generating TikZ diagrams from LaTeX code in Raycast AI chat
 - Added manual "Create TikZ" command with form UI
