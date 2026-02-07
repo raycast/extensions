@@ -1,5 +1,8 @@
 # Audio Device Changelog
 
+## Chore - {PR_MERGE_DATE}
+- Fix issues in lint due to newer ESlint package
+
 ## [Fix] - 2026-02-04
 
 - Hidden devices tracked per input/output and shared across manual lists and auto-switch
