@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for Amp Code, Codex (OpenAI), Droid (Factory AI), and Gemini CLI
+- **Multi-Agent Support** - View usage for Amp Code, Codex (OpenAI), Droid (Factory AI), Gemini CLI, and Kimi
 - **Quick Overview** - See remaining quotas and usage at a glance
 - **Detailed Breakdown** - Expand each agent for full usage details
 - **Refresh & Copy** - Quickly refresh data or copy usage details to clipboard
@@ -18,19 +18,20 @@ Track usage across your AI coding agents in one place.
 | Agent | Data Source | Setup Required |
 |-------|-------------|----------------|
 | **Amp** | Local SQLite database | None (auto-detected) |
-| **Codex** | OpenAI API | Authorization token |
+| **Codex** | OpenAI API | None (auto-detected after `codex login`) |
 | **Droid** | Factory AI API | Authorization token |
 | **Gemini** | Local state file | None (auto-detected) |
+| **Kimi** | Moonshot API | Authorization token |
 
 ## Configuration
 
-### Codex Token
+### Codex (Zero Config)
 
-1. Open https://chatgpt.com/codex/settings/usage in your browser
-2. Open DevTools (F12) → Network tab
-3. Refresh the page and find any API request
-4. Copy the `Authorization` header value (starts with `Bearer eyJ...`)
-5. Paste in extension preferences
+1. Run `codex login` in Terminal (if you are not already logged in)
+2. Open Agent Usage in Raycast — Codex usage will be auto-detected from `~/.codex/auth.json`
+
+Optional fallback:
+- If auto-detection fails, you can still paste a token manually in extension preferences (`Codex Authorization Token`).
 
 ### Droid Token
 
@@ -58,7 +59,7 @@ Track usage across your AI coding agents in one place.
 
 ## Roadmap
 
-More agents coming soon: Claude Code, Kimi, z.ai, and others.
+More agents coming soon: Claude Code, z.ai, and others.
 
 ## Credits
 

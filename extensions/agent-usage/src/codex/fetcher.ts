@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
+import { normalizeCodexAuthorizationHeader, resolveCodexAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 const REQUEST_TIMEOUT = 10000;
@@ -12,13 +13,10 @@ async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | nul
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
-    // 规范化 token 格式
-    const authHeader = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-
     const response = await fetch(CODEX_USAGE_API, {
       method: "GET",
       headers: {
-        Authorization: authHeader,
+        Authorization: normalizeCodexAuthorizationHeader(token),
         Accept: "application/json",
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -33,7 +31,8 @@ async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | nul
         usage: null,
         error: {
           type: "unauthorized",
-          message: "Authorization token expired or invalid. Please update it in extension settings.",
+          message:
+            "Authorization token expired or invalid. Run 'codex login' or update the token in extension settings.",
         },
       };
     }
@@ -50,7 +49,6 @@ async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | nul
 
     const data = await response.json();
 
-    // 解析 API 响应
     return parseCodexApiResponse(data);
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -145,7 +143,6 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
       },
     };
 
-    // 可选的 code review limit
     if (response.code_review_rate_limit?.primary_window) {
       const reviewWindow = response.code_review_rate_limit.primary_window;
       usage.codeReviewLimit = {
@@ -187,63 +184,66 @@ function formatDuration(seconds: number): string {
 export { formatDuration };
 
 export function useCodexUsage() {
-  const [token, setToken] = useState<string>("");
   const [usage, setUsage] = useState<CodexUsage | null>(null);
   const [error, setError] = useState<CodexError | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
 
-  // 从偏好设置读取 token
-  useEffect(() => {
-    const preferences = getPreferenceValues<Preferences>();
-    const savedToken = preferences.codexAuthToken?.trim() || "";
-    setToken(savedToken);
-  }, []);
-
-  // 获取数据的函数
   const fetchData = useCallback(async () => {
-    if (!token) {
+    setIsLoading(true);
+    setError(null);
+
+    const preferences = getPreferenceValues<Preferences>();
+    const preferenceToken = preferences.codexAuthToken?.trim() || "";
+    const {
+      primaryToken,
+      localToken,
+      preferenceToken: cleanedPreferenceToken,
+    } = resolveCodexAuthTokens({ preferenceToken });
+
+    if (!primaryToken) {
+      setUsage(null);
+      setError({
+        type: "not_configured",
+        message: "Codex is not configured. Run 'codex login' or add a token in extension settings (Cmd+,).",
+      });
       setIsLoading(false);
       setHasInitialFetch(true);
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    let result = await fetchCodexUsage(primaryToken);
 
-    const result = await fetchCodexUsage(token);
+    if (
+      shouldFallbackToPreferenceToken({
+        localToken,
+        preferenceToken: cleanedPreferenceToken,
+        errorType: result.error?.type,
+      })
+    ) {
+      result = await fetchCodexUsage(cleanedPreferenceToken);
+    }
 
     setUsage(result.usage);
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, [token]);
+  }, []);
 
-  // 首次加载时获取数据
   useEffect(() => {
-    if (!hasInitialFetch && token) {
+    if (!hasInitialFetch) {
       fetchData();
     }
-  }, [token, hasInitialFetch, fetchData]);
+  }, [hasInitialFetch, fetchData]);
 
-  // 重新验证（手动刷新）
   const revalidate = useCallback(async () => {
     await fetchData();
   }, [fetchData]);
 
-  // 如果没有配置 token，显示配置错误
-  const finalError: CodexError | null =
-    !token && hasInitialFetch
-      ? {
-          type: "not_configured",
-          message: "Codex token not configured. Please add it in extension settings (Cmd+,).",
-        }
-      : error;
-
   return {
     isLoading,
     usage,
-    error: finalError,
+    error,
     revalidate,
   };
 }

@@ -54,6 +54,14 @@
           "required": false
         },
         {
+          "name": "showKimi",
+          "type": "checkbox",
+          "label": "Show Kimi",
+          "description": "Show Kimi usage in the list",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "ampDisplayMode",
           "type": "dropdown",
           "title": "Amp Display Mode",
@@ -68,8 +76,8 @@
         {
           "name": "codexAuthToken",
           "type": "password",
-          "title": "Codex Authorization Token",
-          "description": "From browser DevTools: Authorization header when accessing https://chatgpt.com/codex/settings/usage. Format: 'Bearer eyJ...' or just 'eyJ...'",
+          "title": "Codex Authorization Token (Optional)",
+          "description": "Optional fallback token. Usually auto-detected from ~/.codex/auth.json after 'codex login'. You can still paste Authorization header value ('Bearer eyJ...' or just 'eyJ...').",
           "required": false
         },
         {
@@ -77,6 +85,13 @@
           "type": "password",
           "title": "Droid Authorization Token",
           "description": "From browser DevTools: Authorization header when accessing https://app.factory.ai/settings/billing. Format: 'Bearer eyJ...' or just 'eyJ...'",
+          "required": false
+        },
+        {
+          "name": "kimiAuthToken",
+          "type": "password",
+          "title": "Kimi Authorization Token",
+          "description": "From browser DevTools: Authorization header when accessing https://www.kimi.com/code/console. Format: 'Bearer eyJ...' or just 'eyJ...'",
           "required": false
         }
       ]

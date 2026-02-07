@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { GeminiUsage, GeminiError, GeminiModelQuota } from "./types";
+import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import { execSync } from "child_process";
 
 const SETTINGS_PATH = path.join(os.homedir(), ".gemini", "settings.json");
 const OAUTH_CREDS_PATH = path.join(os.homedir(), ".gemini", "oauth_creds.json");
@@ -78,74 +78,10 @@ function formatResetTime(isoTime: string): string {
   }
 }
 
-function findGeminiBinaryPath(): string | null {
-  try {
-    const result = execSync("which gemini", { encoding: "utf-8" }).trim();
-    return result || null;
-  } catch {
-    return null;
-  }
-}
-
-function findOauth2JsPath(binaryPath: string): string | null {
-  try {
-    const realPath = fs.realpathSync(binaryPath);
-    const baseDir = path.dirname(realPath);
-
-    // Homebrew nested path
-    const homebrewPath = path.join(
-      baseDir,
-      "libexec/lib/node_modules/@google/gemini-cli/node_modules/@google/gemini-cli-core/dist/src/code_assist/oauth2.js",
-    );
-    if (fs.existsSync(homebrewPath)) return homebrewPath;
-
-    // Bun/npm sibling path
-    const npmPath = path.join(baseDir, "node_modules/@google/gemini-cli-core/dist/src/code_assist/oauth2.js");
-    if (fs.existsSync(npmPath)) return npmPath;
-
-    // Try parent directories
-    let dir = baseDir;
-    for (let i = 0; i < 5; i++) {
-      const tryPath = path.join(dir, "node_modules/@google/gemini-cli-core/dist/src/code_assist/oauth2.js");
-      if (fs.existsSync(tryPath)) return tryPath;
-      dir = path.dirname(dir);
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function extractOAuthClientCredentials(oauth2JsPath: string): { clientId: string; clientSecret: string } | null {
-  try {
-    const content = fs.readFileSync(oauth2JsPath, "utf-8");
-
-    const clientIdMatch = content.match(/OAUTH_CLIENT_ID\s*=\s*["']([^"']+)["']/);
-    const clientSecretMatch = content.match(/OAUTH_CLIENT_SECRET\s*=\s*["']([^"']+)["']/);
-
-    if (clientIdMatch && clientSecretMatch) {
-      return {
-        clientId: clientIdMatch[1],
-        clientSecret: clientSecretMatch[1],
-      };
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 async function refreshAccessToken(creds: OAuthCreds): Promise<{ accessToken: string; expiryDate: number } | null> {
   if (!creds.refresh_token) return null;
 
-  const binaryPath = findGeminiBinaryPath();
-  if (!binaryPath) return null;
-
-  const oauth2JsPath = findOauth2JsPath(binaryPath);
-  if (!oauth2JsPath) return null;
-
-  const clientCreds = extractOAuthClientCredentials(oauth2JsPath);
+  const clientCreds = resolveGeminiOAuthClientCredentialsFromLocal();
   if (!clientCreds) return null;
 
   try {
@@ -322,8 +258,8 @@ async function fetchQuota(
 
 async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: GeminiError | null }> {
   // Check auth type
-  const settings = readJsonFile<{ authType?: string }>(SETTINGS_PATH);
-  const authType = settings?.authType || "oauth-personal";
+  const settings = readJsonFile<{ authType?: string; security?: { auth?: { selectedType?: string } } }>(SETTINGS_PATH);
+  const authType = resolveGeminiAuthType(settings);
 
   if (authType === "api-key" || authType === "vertex-ai") {
     return {

@@ -9,11 +9,14 @@ import { useDroidUsage } from "./droid/fetcher";
 import { renderDroidDetail, getDroidAccessory, formatDroidUsageText } from "./droid/renderer";
 import { useGeminiUsage } from "./gemini/fetcher";
 import { renderGeminiDetail, getGeminiAccessory, formatGeminiUsageText } from "./gemini/renderer";
+import { useKimiUsage } from "./kimi/fetcher";
+import { renderKimiDetail, getKimiAccessory, formatKimiUsageText } from "./kimi/renderer";
 import { AgentDefinition, Accessory, UsageState } from "./agents/types";
 import { AmpError, AmpUsage } from "./amp/types";
 import { CodexError, CodexUsage } from "./codex/types";
 import { DroidError, DroidUsage } from "./droid/types";
 import { GeminiError, GeminiUsage } from "./gemini/types";
+import { KimiError, KimiUsage } from "./kimi/types";
 
 const AGENT_ORDER_KEY = "agent-order";
 
@@ -52,6 +55,14 @@ const AGENTS: AgentDefinition[] = [
     description: "Google Gemini CLI",
     isSupported: true,
   },
+  {
+    id: "kimi",
+    name: "Kimi",
+    icon: "kimi-icon.ico",
+    description: "Moonshot Kimi Code",
+    isSupported: true,
+    settingsUrl: "https://www.kimi.com/code/console?from=membership",
+  },
 ];
 
 function renderUnsupportedDetail(agent: AgentDefinition): React.ReactNode {
@@ -70,10 +81,11 @@ interface UsageStates {
   codex: UsageState<CodexUsage, CodexError>;
   droid: UsageState<DroidUsage, DroidError>;
   gemini: UsageState<GeminiUsage, GeminiError>;
+  kimi: UsageState<KimiUsage, KimiError>;
 }
 
 function getAgentAccessory(agent: AgentDefinition, states: UsageStates): Accessory {
-  const { amp, codex, droid, gemini } = states;
+  const { amp, codex, droid, gemini, kimi } = states;
 
   if (agent.id === "amp") {
     return getAmpAccessory(amp.usage, amp.error, amp.isLoading);
@@ -91,11 +103,15 @@ function getAgentAccessory(agent: AgentDefinition, states: UsageStates): Accesso
     return getGeminiAccessory(gemini.usage, gemini.error, gemini.isLoading);
   }
 
+  if (agent.id === "kimi") {
+    return getKimiAccessory(kimi.usage, kimi.error, kimi.isLoading);
+  }
+
   return { text: "—", tooltip: "Not supported yet" };
 }
 
 function renderAgentDetail(agent: AgentDefinition, states: UsageStates): React.ReactNode {
-  const { amp, codex, droid, gemini } = states;
+  const { amp, codex, droid, gemini, kimi } = states;
 
   if (agent.id === "amp" && agent.isSupported) {
     return renderAmpDetail(amp.usage, amp.error);
@@ -113,11 +129,15 @@ function renderAgentDetail(agent: AgentDefinition, states: UsageStates): React.R
     return renderGeminiDetail(gemini.usage, gemini.error);
   }
 
+  if (agent.id === "kimi" && agent.isSupported) {
+    return renderKimiDetail(kimi.usage, kimi.error);
+  }
+
   return renderUnsupportedDetail(agent);
 }
 
 function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
-  const { amp, codex, droid, gemini } = states;
+  const { amp, codex, droid, gemini, kimi } = states;
 
   if (agent.id === "amp") {
     return formatAmpUsageText(amp.usage, amp.error);
@@ -131,6 +151,9 @@ function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
   if (agent.id === "gemini") {
     return formatGeminiUsageText(gemini.usage, gemini.error);
   }
+  if (agent.id === "kimi") {
+    return formatKimiUsageText(kimi.usage, kimi.error);
+  }
   return `${agent.name}\nStatus: Not supported yet`;
 }
 
@@ -140,6 +163,7 @@ export default function Command() {
   const codexState: UsageState<CodexUsage, CodexError> = useCodexUsage();
   const droidState: UsageState<DroidUsage, DroidError> = useDroidUsage();
   const geminiState: UsageState<GeminiUsage, GeminiError> = useGeminiUsage();
+  const kimiState: UsageState<KimiUsage, KimiError> = useKimiUsage();
 
   const [agentOrder, setAgentOrder] = useState<string[]>(AGENTS.map((a) => a.id));
 
@@ -168,6 +192,7 @@ export default function Command() {
     codex: prefs.showCodex,
     droid: prefs.showDroid,
     gemini: prefs.showGemini,
+    kimi: prefs.showKimi,
   };
 
   const sortedAgents = agentOrder
@@ -175,7 +200,8 @@ export default function Command() {
     .filter((a): a is AgentDefinition => a !== undefined);
   const visibleAgents = sortedAgents.filter((agent) => visibilityMap[agent.id]);
 
-  const isLoading = ampState.isLoading || codexState.isLoading || droidState.isLoading || geminiState.isLoading;
+  const isLoading =
+    ampState.isLoading || codexState.isLoading || droidState.isLoading || geminiState.isLoading || kimiState.isLoading;
 
   const handleRefresh = async () => {
     await Promise.all([
@@ -183,6 +209,7 @@ export default function Command() {
       codexState.revalidate(),
       droidState.revalidate(),
       geminiState.revalidate(),
+      kimiState.revalidate(),
     ]);
     await showToast({
       title: "Refreshed",
@@ -213,12 +240,14 @@ export default function Command() {
           codex: codexState,
           droid: droidState,
           gemini: geminiState,
+          kimi: kimiState,
         });
         const detail = renderAgentDetail(agent, {
           amp: ampState,
           codex: codexState,
           droid: droidState,
           gemini: geminiState,
+          kimi: kimiState,
         });
 
         const canMoveUp = index > 0;
@@ -245,6 +274,7 @@ export default function Command() {
                         codex: codexState,
                         droid: droidState,
                         gemini: geminiState,
+                        kimi: kimiState,
                       })}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
