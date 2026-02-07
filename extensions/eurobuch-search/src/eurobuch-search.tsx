@@ -301,12 +301,12 @@ if (cleaned.length >= 2) {
 
             return (
               <List.Item
-                key={`${book.isbn}-${book.dealer}-${index}`}
+                key={`${book.isbn || book.link}-${book.dealer}`}
                 icon={{ source: Icon.Book, tintColor: Color.Blue }}
                 title={book.title}
-                subtitle={`${book.author || "Unknown"} • ${book.dealer}`}
+                subtitle={`${book.author || "Unknown"} • ${book.dealer}${book.isbn ? ` • ISBN: ${book.isbn}` : ""}`}
                 accessories={[
-                  { text: `€${totalFormatted}` },
+                  { text: `€${book.price.toFixed(2)} + €${book.shipping.toFixed(2)} = €${totalFormatted}` },
                   ...(book.condition ? [{ tag: { value: book.condition, color: Color.Green } }] : []),
                 ]}
                 detail={
