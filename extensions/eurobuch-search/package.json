@@ -38,14 +38,13 @@
   ],
   "preferences": [
     {
-      "name": "platform",
-      "title": "Eurobuch Platform ID",
-      "description": "Your Eurobuch platform identifier (use 'test' for testing without account)",
-      "type": "password",
-      "required": true,
-      "default": "test",
-      "placeholder": "test"
-    },
+  "name": "platform",
+  "title": "Eurobuch Platform ID",
+  "description": "Your Eurobuch platform identifier",
+  "type": "textfield",  // ← Ändern von "password" zu "textfield"
+  "required": false,     // ← Ändern zu false
+  "default": "test"
+},
     {
       "name": "password",
       "title": "Eurobuch Password",
