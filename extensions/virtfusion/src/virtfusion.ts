@@ -15,15 +15,30 @@ class VirtFusion {
       },
       ...options,
     });
-    if (!response.ok) throw new Error(response.statusText);
-    if (response.status === 204) return undefined as T;
-    if (response.headers.get("Content-Type")?.includes("text/html")) return undefined as T;
+    if (!response.ok) {
+      const result = await response.json().catch(() => null) as {errors: string[]} | null
+      throw new Error(result?.errors[0] || response.statusText);
+    }
+    if (response.headers.get("Content-Type")?.includes("text/html") || response.status === 204) return undefined as T;
     const result = (await response.json()) as T;
     return result;
   }
 
   public async connect() {
     return this.request<void>("connect");
+  }
+  public async setBootOrder(params: { serverId: string}, payload: {order: string }) {
+    return this.request<{
+  "data": {
+    "task": {
+      "id": number,
+      "status": string
+    }
+  }
+}>(`server/${params.serverId}/bootOrder`, {
+  method: "POST",
+  body: JSON.stringify(payload)
+});
   }
   public async listServers(params: { page: number }) {
     return this.request<PaginatedResult<Server>>(`server?page=${params.page}`);

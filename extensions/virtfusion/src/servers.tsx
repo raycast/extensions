@@ -1,7 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 import { Panel, Server } from "./types";
 import VirtFusion from "./virtfusion";
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color,Icon, List, showToast, Toast } from "@raycast/api";
 
 export default function Servers({ panel }: { panel: Panel }) {
   const {
@@ -28,11 +28,11 @@ export default function Servers({ panel }: { panel: Panel }) {
           icon={Icon.HardDrive}
           title={server.name}
           accessories={[
-            { text: server.memory, tooltip: "Memory" },
-            { text: server.cpu, tooltip: "CPU" },
-            { text: server.storage[0].capacity, tooltip: "Capacity" },
-            { text: server.network.primary.limit, tooltip: "Traffic" },
-            { tag: server.network.primary.ipv4[0].address },
+            { icon: Icon.MemoryChip, text: server.memory, tooltip: "Memory" },
+            { icon: Icon.ComputerChip, text: server.cpu, tooltip: "CPU" },
+            { icon: Icon.HardDrive, text: server.storage[0].capacity, tooltip: "Capacity" },
+            { icon: Icon.Heartbeat, text: server.network.primary.limit, tooltip: "Traffic" },
+            { icon:Icon.Network, tag: server.network.primary.ipv4[0].address },
           ]}
           actions={<ActionPanel>
             <Action.Push icon={Icon.List} title="Server Details" target={<ServerDetails panel={panel} server={server} />} />
@@ -49,6 +49,7 @@ function ServerDetails({panel,server}:{panel: Panel,server: Server}) {
     isLoading,
     data: tasks,
     pagination,
+    mutate
   } = useCachedPromise(
     () => async (options) => {
       const vf = new VirtFusion(panel);
@@ -64,7 +65,22 @@ function ServerDetails({panel,server}:{panel: Panel,server: Server}) {
 
   return <List isLoading={isLoading} pagination={pagination}>
     <List.Section title="Media">
-      <List.Item title="Boot Order" accessories={server.bootOrder.map(item => ({icon: item==="hd" ? Icon.HardDrive : item==="cdrom" ? Icon.Cd : undefined, text: item}))} />
+      <List.Item title="Boot Order" accessories={server.bootOrder.map(item => ({icon: item==="hd" ? Icon.HardDrive : item==="cdrom" ? Icon.Cd : undefined, text: item}))} actions={<ActionPanel>
+        <Action icon={Icon.Repeat} title="Flip Boot Order" onAction={async () => {
+          const vf = new VirtFusion(panel);
+          const order = server.bootOrder.toReversed().join().replace("hd", "hdd");
+          const toast = await showToast(Toast.Style.Animated, "Flipping");
+          try {
+            await mutate(vf.setBootOrder({serverId: server.id}, {order}))
+            toast.style = Toast.Style.Success;
+            toast.title = "Flipped";
+          } catch (error) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed";
+            toast.message = `${error}`
+          }
+        }} />
+      </ActionPanel>} />
     </List.Section>
     <List.Section title="Storage">
       {server.storage.map((drive, index) => <List.Item key={getDriveLetter(index+1)} icon={Icon.HardDrive} title={`Drive: ${getDriveLetter(index+1)}`} subtitle={drive.capacity} accessories={[
@@ -78,7 +94,7 @@ function ServerDetails({panel,server}:{panel: Panel,server: Server}) {
       ]} />)}
     </List.Section>
     <List.Section title="Tasks">
-      {tasks.map(task => <List.Item key={Icon.Document} title={task.action} subtitle={task.started} accessories={[{tag: {value:task.status, color: task.status==="complete" ? Color.Blue : undefined}}]} />)}
+      {tasks.map((task, taskIndex) => <List.Item key={taskIndex} icon={Icon.Document} title={task.action} subtitle={task.started} accessories={[{tag: {value:task.status, color: task.status==="complete" ? Color.Blue : undefined}}]} />)}
     </List.Section>
   </List>
 }

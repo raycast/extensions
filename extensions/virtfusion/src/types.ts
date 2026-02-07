@@ -8,7 +8,7 @@ export type Panel = {
 export type Server = {
   id: string;
   name: string;
-  bootOrder: string[]
+  bootOrder: Array<"hd"|"cdrom">
   memory: string;
   cpu: string;
   storage: Array<{
