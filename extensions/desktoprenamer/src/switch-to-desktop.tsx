@@ -1,5 +1,6 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast, Form, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, Form, useNavigation, open } from "@raycast/api";
 import { usePromise, runAppleScript } from "@raycast/utils";
+import { runDesktopRenamerCommand } from "./utils";
 
 interface Space {
   id: string;
@@ -10,64 +11,59 @@ interface Space {
 
 export default function Command() {
   const { data, isLoading } = usePromise(async () => {
-    // 1. Get all spaces (ID|Name|DisplayID|Num format per line)
-    // 2. Get current space name
-    const script = `
-      try
+    try {
+      return await runAppleScript(`
         tell application "DesktopRenamer"
           set allSpaces to get all spaces
           set currentName to get current space name
           return allSpaces & "|||||" & currentName
         end tell
-      on error e
-        return "ERROR: " & e
-      end try
-    `;
-
-    const result = await runAppleScript(script);
-
-    if (result.startsWith("ERROR")) {
-      throw new Error(result.replace("ERROR: ", ""));
+      `);
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Command Failed",
+        message: "Is DesktopRenamer running?",
+        primaryAction: {
+          title: "Open DesktopRenamer",
+          onAction: () => open("DesktopRenamer.app"),
+        },
+      });
+      return "";
     }
+  });
 
-    const [spacesStr, currentName] = result.split("|||||");
+  // Parse data
+  let spaces: Space[] = [];
+  let currentName = "";
 
-    const spaces: Space[] = spacesStr
+  if (data) {
+    const [spacesStr, curName] = data.split("|||||");
+    currentName = curName ? curName.trim() : "";
+    spaces = spacesStr
       .split("\n")
       .filter((line) => line.trim().length > 0)
       .map((line) => {
-        // Format: ID|Name|DisplayID|Num
-        // Backward compatibility: If only ID|Name, handle gracefully
         const parts = line.split("|");
-        const id = parts[0];
-        const name = parts[1] || "Unknown";
-        const displayID = parts[2] || "Main";
-        const num = parseInt(parts[3] || "0", 10);
-
-        return { id, name, displayID, num };
+        return {
+          id: parts[0],
+          name: parts[1] || "Unknown",
+          displayID: parts[2] || "Main",
+          num: parseInt(parts[3] || "0", 10),
+        };
       });
-
-    return {
-      spaces,
-      currentName: currentName.trim(),
-    };
-  });
+  }
 
   async function switchSpace(space: Space) {
     try {
-      await runAppleScript(`tell application "DesktopRenamer" to switch to space "${space.id}"`);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to switch space",
-        message: String(error),
-      });
+      await runDesktopRenamerCommand(`switch to space "${space.id}"`);
+    } catch {
+      // Handled by utils
     }
   }
 
-  // Group spaces by Display ID
   const groupedSpaces =
-    data?.spaces.reduce(
+    spaces.reduce(
       (acc, space) => {
         const group = acc[space.displayID] || [];
         group.push(space);
@@ -79,10 +75,11 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search desktops...">
+      {/* ... List Logic ... */}
       {Object.entries(groupedSpaces).map(([displayID, spaces]) => (
         <List.Section key={displayID} title={displayID}>
           {spaces.map((space) => {
-            const isCurrent = space.name === data?.currentName;
+            const isCurrent = space.name === currentName;
             return (
               <List.Item
                 key={space.id}
@@ -104,9 +101,7 @@ export default function Command() {
                         <RenameSpaceForm
                           space={space}
                           onRename={() => {
-                            // Ideally refresh data, but revalidate is implicit on back nav usually?
-                            // Or we trigger a revalidation.
-                            // We can assume optimistic update or just rely on re-run.
+                            // trigger revalidation?
                           }}
                         />
                       }
@@ -127,12 +122,12 @@ function RenameSpaceForm({ space, onRename }: { space: Space; onRename: () => vo
 
   async function handleRename(values: { name: string }) {
     try {
-      await runAppleScript(`tell application "DesktopRenamer" to rename space "${space.id}" to "${values.name}"`);
+      await runDesktopRenamerCommand(`rename space "${space.id}" to "${values.name}"`);
       await showToast({ style: Toast.Style.Success, title: "Renamed space" });
       onRename();
       pop();
-    } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to rename", message: String(error) });
+    } catch {
+      // Handled
     }
   }
 

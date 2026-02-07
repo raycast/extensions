@@ -18,7 +18,6 @@
     {
       "name": "current-desktop",
       "title": "Current Desktop",
-      "subtitle": "DesktopRenamer",
       "description": "Show the currently active desktop with live status.",
       "mode": "no-view",
       "interval": "2s"
@@ -26,7 +25,6 @@
     {
       "name": "toggle-space-label-windows",
       "title": "Toggle Space Label Windows",
-      "subtitle": "Both Active & Preview",
       "description": "Toggle both Active & Preview Label Windows.",
       "mode": "no-view"
     },
@@ -47,21 +45,18 @@
     {
       "name": "toggle-active-label-window",
       "title": "Toggle Active Label Window",
-      "subtitle": "Label in Current Desktop",
       "description": "Toggle the Active Label Window.",
       "mode": "no-view"
     },
     {
       "name": "toggle-preview-label-window",
       "title": "Toggle Preview Label Window",
-      "subtitle": "Label in Mission Control",
       "description": "Toggle the Preview Label Windows.",
       "mode": "no-view"
     },
     {
       "name": "toggle-active-label-window-visibility",
       "title": "Toggle Visible Label Window",
-      "subtitle": "Visibility on Desktop",
       "description": "Show/hide the Active Label Window from the desktop.",
       "mode": "no-view"
     },
