@@ -12,7 +12,7 @@ function makeTempFile(content: string): { dir: string; filePath: string } {
 }
 
 test("resolveCodexAuthToken prefers local Codex login token over preference token", async () => {
-  const { resolveCodexAuthToken } = await import("./auth.ts");
+  const { resolveCodexAuthToken } = await import("./auth");
   const { dir, filePath } = makeTempFile(JSON.stringify({ tokens: { access_token: "local-token" } }));
 
   try {
@@ -28,7 +28,7 @@ test("resolveCodexAuthToken prefers local Codex login token over preference toke
 });
 
 test("resolveCodexAuthToken falls back to preference token when local auth file is missing", async () => {
-  const { resolveCodexAuthToken } = await import("./auth.ts");
+  const { resolveCodexAuthToken } = await import("./auth");
 
   const token = resolveCodexAuthToken({
     preferenceToken: "pref-token",
@@ -39,7 +39,7 @@ test("resolveCodexAuthToken falls back to preference token when local auth file 
 });
 
 test("resolveCodexAuthToken returns null when both local and preference tokens are unavailable", async () => {
-  const { resolveCodexAuthToken } = await import("./auth.ts");
+  const { resolveCodexAuthToken } = await import("./auth");
 
   const token = resolveCodexAuthToken({
     preferenceToken: "   ",
@@ -50,14 +50,14 @@ test("resolveCodexAuthToken returns null when both local and preference tokens a
 });
 
 test("normalizeCodexAuthorizationHeader adds Bearer prefix when missing", async () => {
-  const { normalizeCodexAuthorizationHeader } = await import("./auth.ts");
+  const { normalizeCodexAuthorizationHeader } = await import("./auth");
 
   assert.equal(normalizeCodexAuthorizationHeader("abc-token"), "Bearer abc-token");
   assert.equal(normalizeCodexAuthorizationHeader("Bearer already"), "Bearer already");
 });
 
 test("resolveCodexAuthTokens exposes primary/local/preference tokens", async () => {
-  const { resolveCodexAuthTokens } = await import("./auth.ts");
+  const { resolveCodexAuthTokens } = await import("./auth");
   const { dir, filePath } = makeTempFile(JSON.stringify({ tokens: { access_token: "local-token" } }));
 
   try {
@@ -77,7 +77,7 @@ test("resolveCodexAuthTokens exposes primary/local/preference tokens", async () 
 });
 
 test("shouldFallbackToPreferenceToken is true only for unauthorized local-token failures", async () => {
-  const { shouldFallbackToPreferenceToken } = await import("./auth.ts");
+  const { shouldFallbackToPreferenceToken } = await import("./auth");
 
   assert.equal(
     shouldFallbackToPreferenceToken({

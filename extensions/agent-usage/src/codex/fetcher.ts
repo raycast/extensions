@@ -215,6 +215,7 @@ export function useCodexUsage() {
     let result = await fetchCodexUsage(primaryToken);
 
     if (
+      cleanedPreferenceToken &&
       shouldFallbackToPreferenceToken({
         localToken,
         preferenceToken: cleanedPreferenceToken,
