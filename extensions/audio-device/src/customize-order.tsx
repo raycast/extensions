@@ -165,7 +165,7 @@ export default function Command() {
                 accessories={[{ text: getTransportTypeLabel(device) }]}
                 actions={
                   <ActionPanel>
-                    <Action title="Move Up" icon={Icon.ArrowUp} onAction={() => moveDevice(device.uid, "up")} />
+                    <Action title="Move up" icon={Icon.ArrowUp} onAction={() => moveDevice(device.uid, "up")} />
                     <Action title="Move Down" icon={Icon.ArrowDown} onAction={() => moveDevice(device.uid, "down")} />
                     <Action
                       title="Move to Top"
