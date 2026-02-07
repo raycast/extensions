@@ -10,7 +10,7 @@ interface Space {
 }
 
 export default function Command() {
-  const { data, isLoading } = usePromise(async () => {
+  const { data, isLoading, revalidate } = usePromise(async () => {
     try {
       return await runAppleScript(`
         tell application "DesktopRenamer"
@@ -33,7 +33,6 @@ export default function Command() {
     }
   });
 
-  // Parse data
   let spaces: Space[] = [];
   let currentName = "";
 
@@ -75,7 +74,6 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search desktops...">
-      {/* ... List Logic ... */}
       {Object.entries(groupedSpaces).map(([displayID, spaces]) => (
         <List.Section key={displayID} title={displayID}>
           {spaces.map((space) => {
@@ -97,14 +95,7 @@ export default function Command() {
                       title="Rename Space"
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       icon={Icon.Pencil}
-                      target={
-                        <RenameSpaceForm
-                          space={space}
-                          onRename={() => {
-                            // trigger revalidation?
-                          }}
-                        />
-                      }
+                      target={<RenameSpaceForm space={space} onRename={revalidate} />}
                     />
                   </ActionPanel>
                 }

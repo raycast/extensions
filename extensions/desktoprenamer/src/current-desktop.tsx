@@ -10,7 +10,6 @@ export default async function Command() {
       await updateCommandMetadata({ subtitle: `${name}` });
     }
   } catch {
-    // Error toast handled by runDesktopRenamerCommand
     await updateCommandMetadata({ subtitle: "Connection Failed" });
   }
 }
