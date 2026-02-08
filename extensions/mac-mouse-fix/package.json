@@ -71,6 +71,12 @@
       "title": "Toggle Menu Bar Item",
       "description": "Show/hide Mac Mouse Fix menu bar item",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-pointer-acceleration",
+      "title": "Toggle Pointer Acceleration",
+      "description": "Toggle the 'Pointer acceleration' setting in macOS System Settings (Mouse → Advanced)",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
