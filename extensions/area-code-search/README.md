@@ -1,35 +1,35 @@
 # Area Code Search
 
-Search area codes and their corresponding locations in the United States. Find any US area code to instantly see the city and state it belongs to.
+Search US area codes by code, city, or state. Find which cities use an area code, see timezones and local time, and copy results with one action.
 
 ## Features
 
-- **Fast Search**: Type any digits to instantly filter area codes
-- **Comprehensive Database**: Complete database of US area codes with city and state information
-- **Quick Actions**: Copy area codes or locations to clipboard with keyboard shortcuts
-- **Empty States**: Helpful messages when starting a search or when no results are found
+- **Search by area code** – Type digits (e.g. `206`, `212`) to see all cities in that area code
+- **Search by city or state** – Type a city name (e.g. `Seattle`) or state (e.g. `Washington`) to find area codes
+- **Grouped results** – Cities are grouped by area code so overlays and multi-city area codes are easy to scan
+- **Timezone and time** – Each city row shows a timezone label (ET, CT, MT, PT, etc.) and current local time
+- **Quick copy** – Copy the area code, the city/state location, or both in one format: `area code — city, state`
+
+## Requirements
+
+- [Raycast](https://raycast.com) (macOS)
+- No API keys or account required; data is bundled with the extension
+
+## Installation
+
+1. Open the [Raycast Store](https://www.raycast.com/store) and search for "Area Code Search"
+2. Click **Install** (or install from the repo and run `npm run dev` for development)
 
 ## Usage
 
-1. Launch the extension by typing "Area Code Search" in Raycast
-2. Start typing any digits (1-3 digits)
-3. Browse the filtered results showing cities and states
-4. Press **Enter** on any result to copy the location (city and state) to clipboard
+1. Open Raycast and run **Search Area Codes** (or assign a hotkey)
+2. Type an area code (`206`), a city (`Seattle`), or a state (`Washington`)
+3. Browse the grouped results; use the action panel to copy area code, location, or both
 
-## Use Cases
+## Author
 
-- **Unknown Callers**: Quickly identify where an incoming call is from based on the area code
-- **Business Research**: Find the location associated with phone numbers for market research
-- **Personal Reference**: Look up area codes before placing calls to different regions
-- **Data Entry**: Quick reference while entering or validating phone numbers
+**mjking**
 
-## Screenshots
+## License
 
-![Area Code Search](metadata/area-code-search-1.png)
-*Search for area codes by typing digits*
-
-![Search Results](metadata/area-code-search-2.png)
-*View city and state for each area code*
-
-![Copy Actions](metadata/area-code-search-3.png)
-*Quick action to copy location*
+MIT
