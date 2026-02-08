@@ -15,13 +15,12 @@
   ],
   "license": "MIT",
   "commands": [
-  "commands": [
     {
       "name": "current-desktop",
       "title": "Current Desktop",
       "description": "Show the currently active desktop with live status.",
       "mode": "no-view",
-      "interval": "2s"
+      "interval": "10s"
     },
     {
       "name": "toggle-space-label-windows",

@@ -57,6 +57,8 @@ export default function Command() {
     try {
       const sanitizedId = space.id.replace(/"/g, '\\"');
       await runDesktopRenamerCommand(`switch to space "${sanitizedId}"`);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await revalidate();
     } catch {
       // Handled by utils
     }
