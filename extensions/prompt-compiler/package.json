@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prompt-compiler",
+  "version": "1.0.0",
+  "title": "Prompt Compiler",
+  "description": "BYOK multi-provider command to translate any language into polished English and an LLM-ready prompt.",
+  "icon": "icon.png",
+  "author": "dishangyijiao",
+  "license": "MIT",
+  "categories": ["Productivity", "Developer Tools"],
+  "platforms": ["macOS"],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "jest --runInBand",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "prompt",
+    "BYOK",
+    "LLM",
+    "translate",
+    "clipboard",
+    "AI",
+    "OpenAI",
+    "Anthropic",
+    "Gemini",
+    "DeepSeek",
+    "Kimi"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "eslint": "^8.56.0",
+    "jest": "^30.2.0",
+    "prettier": "^3.3.3",
+    "react": "19.0.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.5.3"
+  },
+  "peerDependencies": {
+    "react": "19.0.0"
+  },
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "API / Model",
+      "description": "Select the provider, then paste that provider's API key below.",
+      "type": "dropdown",
+      "required": true,
+      "default": "deepseek",
+      "data": [
+        { "title": "DeepSeek", "value": "deepseek" },
+        { "title": "Kimi (Moonshot)", "value": "kimi" },
+        { "title": "OpenAI", "value": "openai" },
+        { "title": "Anthropic", "value": "anthropic" },
+        { "title": "Gemini", "value": "gemini" }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Paste the API key for the provider above. DeepSeek: platform.deepseek.com; Kimi: platform.moonshot.cn; OpenAI: platform.openai.com; Anthropic: console.anthropic.com; Gemini: aistudio.google.com.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model (optional)",
+      "description": "Leave empty to use default. Override to use a different model (e.g. gpt-4o, claude-3-opus).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. gpt-4o"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Compile Prompt",
+      "description": "Paste or select text, then generate translation, optimized prompt, or both and copy to clipboard.",
+      "mode": "view",
+      "keywords": ["translate", "prompt", "LLM", "clipboard", "BYOK"]
+    }
+  ]
+}
