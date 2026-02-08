@@ -55,7 +55,8 @@ export default function Command() {
 
   async function switchSpace(space: Space) {
     try {
-      await runDesktopRenamerCommand(`switch to space "${space.id}"`);
+      const sanitizedId = space.id.replace(/"/g, '\\"');
+      await runDesktopRenamerCommand(`switch to space "${sanitizedId}"`);
     } catch {
       // Handled by utils
     }
