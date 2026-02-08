@@ -13,12 +13,6 @@ import {
 import { useEffect, useState } from "react";
 import { compilePrompt, formatOutputForMode, OutputMode } from "./lib/llm";
 
-type Preferences = {
-  provider: string;
-  apiKey: string;
-  model: string;
-};
-
 type FormValues = {
   input: string;
   outputMode: OutputMode;
@@ -37,7 +31,7 @@ const PROVIDER_DEFAULTS: Record<string, { baseUrl: string; model: string; chatPa
 };
 
 function getApiConfig(
-  prefs: Preferences
+  prefs: Preferences.Index
 ): { provider: string; apiKey: string; baseUrl: string; model: string; chatPath?: string } | null {
   const { provider, apiKey, model } = prefs;
   if (!apiKey?.trim()) return null;
@@ -110,7 +104,7 @@ export default function Command() {
       return;
     }
 
-    const prefs = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues<Preferences.Index>();
     const config = getApiConfig(prefs);
     if (!config) {
       showToast({
@@ -132,9 +126,7 @@ export default function Command() {
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       const isAuthError =
-        message.includes("401") ||
-        message.includes("Invalid Authentication") ||
-        message.includes("Invalid API key");
+        message.includes("401") || message.includes("Invalid Authentication") || message.includes("Invalid API key");
       if (isAuthError) {
         const provider = config?.provider ?? prefs.provider;
         const help = API_KEY_HELP[provider]

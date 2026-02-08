@@ -100,6 +100,28 @@ describe("llm", () => {
     ).rejects.toThrow("timed out");
   });
 
+  test("compilePrompt uses configured baseUrl for Anthropic", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(
+      mockResponse({
+        ok: true,
+        status: 200,
+        jsonBody: { content: [{ type: "text", text: "## English Translation\nT\n\n## Optimized Prompt\nP" }] },
+      })
+    );
+
+    await compilePrompt("text", {
+      provider: "anthropic",
+      apiKey: "k",
+      baseUrl: "https://proxy.example.com/anthropic",
+      model: "claude-sonnet-4-5",
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://proxy.example.com/anthropic/v1/messages",
+      expect.anything()
+    );
+  });
+
   test("formatOutputForMode returns selected section", () => {
     const result = {
       markdown: "m",

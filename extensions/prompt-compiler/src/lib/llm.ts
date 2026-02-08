@@ -34,12 +34,7 @@ export type CompileResult = {
 };
 
 function normalizeProvider(provider?: string): Provider {
-  if (
-    provider === "kimi" ||
-    provider === "openai" ||
-    provider === "anthropic" ||
-    provider === "gemini"
-  ) {
+  if (provider === "kimi" || provider === "openai" || provider === "anthropic" || provider === "gemini") {
     return provider;
   }
   return "deepseek";
@@ -117,11 +112,7 @@ function mapNetworkError(provider: string | undefined, err: unknown): Error {
   return new Error(`Network error while contacting ${providerLabel(provider)}: ${message}`);
 }
 
-async function fetchWithTimeout(
-  url: string,
-  init: RequestInit,
-  provider?: string
-): Promise<Response> {
+async function fetchWithTimeout(url: string, init: RequestInit, provider?: string): Promise<Response> {
   try {
     return await fetch(url, {
       ...init,
@@ -134,9 +125,7 @@ async function fetchWithTimeout(
 
 function normalizeModelResponse(raw: string): CompileResult {
   const markdown = raw.replace(/\r\n/g, "\n").trim();
-  const translationMatch = markdown.match(
-    /##\s*English Translation\s*([\s\S]*?)(?=##\s*Optimized Prompt|$)/i
-  );
+  const translationMatch = markdown.match(/##\s*English Translation\s*([\s\S]*?)(?=##\s*Optimized Prompt|$)/i);
   const promptMatch = markdown.match(/##\s*Optimized Prompt\s*([\s\S]*)$/i);
 
   const translation = translationMatch?.[1]?.trim() || markdown;
@@ -205,7 +194,8 @@ async function callOpenAICompatible(input: string, config: LLMConfig): Promise<s
 
 async function callAnthropic(input: string, config: LLMConfig): Promise<string> {
   const apiKey = config.apiKey.trim();
-  const url = "https://api.anthropic.com/v1/messages";
+  const normalizedBaseUrl = config.baseUrl.replace(/\/$/, "");
+  const url = normalizedBaseUrl.endsWith("/v1") ? `${normalizedBaseUrl}/messages` : `${normalizedBaseUrl}/v1/messages`;
 
   const res = await fetchWithTimeout(
     url,
@@ -255,9 +245,7 @@ export async function compilePrompt(input: string, config: LLMConfig): Promise<C
   }
 
   const raw =
-    config.provider === "anthropic"
-      ? await callAnthropic(input, config)
-      : await callOpenAICompatible(input, config);
+    config.provider === "anthropic" ? await callAnthropic(input, config) : await callOpenAICompatible(input, config);
 
   return normalizeModelResponse(raw);
 }

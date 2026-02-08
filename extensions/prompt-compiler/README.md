@@ -97,8 +97,6 @@ prompt-compiler/
 │   └── icon.png          # Extension icon (512×512 PNG)
 ├── tests/
 │   └── llm.test.ts       # LLM parser/error mapping unit tests
-├── .github/workflows/
-│   └── ci.yml            # lint + build + test gates
 ├── src/
 │   ├── index.tsx         # Main command: form, API call, result view, clipboard
 │   └── lib/
