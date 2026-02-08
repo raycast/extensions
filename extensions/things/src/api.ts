@@ -343,30 +343,8 @@ export const getListsAndTags = async (): Promise<{ lists: List[]; tags: string[]
 };
 
 export const getLists = async (): Promise<List[]> => {
-  const projects = (await getProjects()) || [];
-  const areas = (await getAreas()) || [];
-
-  const projectsWithoutAreas = projects
-    .filter((project) => !project.area)
-    .map((project) => ({ ...project, type: 'project' as const }));
-
-  const organizedAreasAndProjects: { name: string; id: string; type: 'area' | 'project' }[] = [];
-  areas.forEach((area) => {
-    organizedAreasAndProjects.push({
-      ...area,
-      type: 'area' as const,
-    });
-
-    const associatedProjects = projects
-      .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({
-        ...project,
-        type: 'project' as const,
-      }));
-    organizedAreasAndProjects.push(...associatedProjects);
-  });
-
-  return [...projectsWithoutAreas, ...organizedAreasAndProjects];
+  const { lists } = await getListsAndTags();
+  return lists;
 };
 
 export async function silentlyOpenThingsURL(url: string) {

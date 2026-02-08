@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Reduce JXA Latency for List Fetching] - {PR_MERGE_DATE}
+
+- Consolidated `getLists` to use a single JXA call instead of two sequential calls for projects and areas
+
 ## [JXA Performance Optimization] - 2026-01-12
 
 - Reduced JXA fetch times by ~75% using `properties()` batching to minimize Apple Event overhead
