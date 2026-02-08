@@ -2,7 +2,10 @@
 
 ## [Reduce JXA Latency for List Fetching] - {PR_MERGE_DATE}
 
-- Consolidated `getLists` to use a single JXA call instead of two sequential calls for projects and areas
+- Todo list views and the menu bar command now fetch tags and lists in a single JXA call instead of two
+- The menu bar command and `get-lists` tool no longer fetch tags unnecessarily
+- The "Add New Project" form fetches tags and areas in a single JXA call instead of two
+- Consolidated collection-fetching functions into a single `getCollections` API
 
 ## [JXA Performance Optimization] - 2026-01-12
 
