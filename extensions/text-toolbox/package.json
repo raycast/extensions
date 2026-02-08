@@ -1,0 +1,542 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-toolbox",
+  "title": "Text Toolbox",
+  "description": "Transform text with 25+ operations: case conversion, encoding/decoding, hashing, line operations, and more. Chain transformations for powerful text processing.",
+  "icon": "extension-icon.png",
+  "author": "eldot",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "transform-selected-text",
+      "title": "Transform Selected Text",
+      "description": "Transform currently selected or clipboard text",
+      "mode": "view"
+    },
+    {
+      "name": "transform-text-input",
+      "title": "Transform Text",
+      "description": "Enter text and choose transformation",
+      "mode": "view"
+    },
+    {
+      "name": "uppercase",
+      "title": "Convert to UPPERCASE",
+      "description": "Convert text to UPPERCASE",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "lowercase",
+      "title": "Convert to lowercase",
+      "description": "Convert text to lowercase",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "camelcase",
+      "title": "Convert to camelCase",
+      "description": "Convert text to camelCase",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "pascalcase",
+      "title": "Convert to PascalCase",
+      "description": "Convert text to PascalCase",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "snakecase",
+      "title": "Convert to snake_case",
+      "description": "Convert text to snake_case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "kebabcase",
+      "title": "Convert to kebab-case",
+      "description": "Convert text to kebab-case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "snake-upper-case",
+      "title": "Convert to SNAKE_UPPER_CASE",
+      "description": "Convert text to SNAKE_UPPER_CASE",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "capitalize-each-word",
+      "title": "Capitalize Each Word",
+      "description": "Capitalize the first letter of each word",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "trim",
+      "title": "Trim Whitespace",
+      "description": "Remove leading/trailing whitespace",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "remove-extra-spaces",
+      "title": "Remove Extra Spaces",
+      "description": "Collapse multiple spaces to single space",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "remove-non-ascii",
+      "title": "Remove Non-ASCII Characters",
+      "description": "Remove all non-ASCII characters",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "sort-lines",
+      "title": "Sort Lines",
+      "description": "Sort lines alphabetically A-Z",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "reverse-lines",
+      "title": "Reverse Lines",
+      "description": "Reverse line order",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "remove-duplicate-lines",
+      "title": "Remove Duplicate Lines",
+      "description": "Keep only unique lines",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "add-line-numbers",
+      "title": "Add Line Numbers",
+      "description": "Prefix each line with number",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "url-encode",
+      "title": "Encode as URL",
+      "description": "Escape URL unsafe characters",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "url-decode",
+      "title": "Decode from URL",
+      "description": "Unescape URL encoded characters",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "base64-encode",
+      "title": "Encode to Base64",
+      "description": "Encode text to Base64",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "base64-decode",
+      "title": "Decode from Base64",
+      "description": "Decode Base64 to text",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "html-encode",
+      "title": "Encode HTML Entities",
+      "description": "Encode HTML entities",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "html-decode",
+      "title": "Decode HTML Entities",
+      "description": "Decode HTML entities",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "hex-encode",
+      "title": "Encode as Hexadecimal",
+      "description": "Convert text to hexadecimal",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "hex-decode",
+      "title": "Decode from Hexadecimal",
+      "description": "Convert hexadecimal to text",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "md5",
+      "title": "Calculate MD5 Hash",
+      "description": "Generate MD5 hash",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "sha1",
+      "title": "Calculate SHA1 Hash",
+      "description": "Generate SHA1 hash",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "sha256",
+      "title": "Calculate SHA256 Hash",
+      "description": "Generate SHA256 hash",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "sha512",
+      "title": "Calculate SHA512 Hash",
+      "description": "Generate SHA512 hash",
+      "mode": "no-view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useMultilineInput",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transform Text: Multiline Input",
+      "label": "Use multiline text area by default",
+      "description": "For Transform Text command: When enabled, uses a text area (press Cmd+Enter to submit). When disabled, uses a text field (press Enter to submit), still allows to switch to text area with down arrow.",
+      "default": false
+    },
+    {
+      "name": "textSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "Quick Transform: Text Source",
+      "description": "Where to get text for quick transform commands (Upper Case, Lower Case, etc.)",
+      "default": "selectedOnly",
+      "data": [
+        {
+          "value": "selectedOnly",
+          "title": "Selected Text Only"
+        },
+        {
+          "value": "preferSelected",
+          "title": "Prefer Selected Text"
+        },
+        {
+          "value": "clipboardOnly",
+          "title": "Clipboard Only"
+        },
+        {
+          "value": "preferClipboard",
+          "title": "Prefer Clipboard"
+        }
+      ]
+    },
+    {
+      "name": "resultBehavior",
+      "type": "dropdown",
+      "required": false,
+      "title": "Quick Transform: Result Behavior",
+      "description": "What to do with the transformed text from quick transform commands",
+      "default": "copy",
+      "data": [
+        {
+          "value": "copy",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "paste",
+          "title": "Paste"
+        }
+      ]
+    },
+    {
+      "name": "enableUpperCase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Upper Case",
+      "label": "Enable Upper Case transformation",
+      "description": "Convert text to UPPERCASE",
+      "default": true
+    },
+    {
+      "name": "enableLowerCase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Lower Case",
+      "label": "Enable Lower Case transformation",
+      "description": "Convert text to lowercase",
+      "default": true
+    },
+    {
+      "name": "enableCamelCase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: camelCase",
+      "label": "Enable camelCase transformation",
+      "description": "Convert text to camelCase",
+      "default": true
+    },
+    {
+      "name": "enablePascalCase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: PascalCase",
+      "label": "Enable PascalCase transformation",
+      "description": "Convert text to PascalCase",
+      "default": true
+    },
+    {
+      "name": "enableSnakeCase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: snake_case",
+      "label": "Enable snake_case transformation",
+      "description": "Convert text to snake_case",
+      "default": true
+    },
+    {
+      "name": "enableKebabCase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: kebab-case",
+      "label": "Enable kebab-case transformation",
+      "description": "Convert text to kebab-case",
+      "default": true
+    },
+    {
+      "name": "enableSnakeUpperCase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: SNAKE_UPPER_CASE",
+      "label": "Enable SNAKE_UPPER_CASE transformation",
+      "description": "Convert text to SNAKE_UPPER_CASE",
+      "default": true
+    },
+    {
+      "name": "enableCapitalizeEachWord",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Capitalize Each Word",
+      "label": "Enable Capitalize Each Word transformation",
+      "description": "Capitalize the first letter of each word",
+      "default": true
+    },
+    {
+      "name": "enableTrim",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Trim",
+      "label": "Enable Trim transformation",
+      "description": "Remove leading/trailing whitespace",
+      "default": true
+    },
+    {
+      "name": "enableRemoveExtraSpaces",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Remove Extra Spaces",
+      "label": "Enable Remove Extra Spaces transformation",
+      "description": "Collapse multiple spaces to single space",
+      "default": true
+    },
+    {
+      "name": "enableRemoveNonAscii",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Remove Non-ASCII",
+      "label": "Enable Remove Non-ASCII transformation",
+      "description": "Remove all non-ASCII characters",
+      "default": true
+    },
+    {
+      "name": "enableSortLines",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Sort Lines",
+      "label": "Enable Sort Lines transformation",
+      "description": "Sort lines alphabetically A-Z",
+      "default": true
+    },
+    {
+      "name": "enableReverseLines",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Reverse Lines",
+      "label": "Enable Reverse Lines transformation",
+      "description": "Reverse line order",
+      "default": true
+    },
+    {
+      "name": "enableRemoveDuplicateLines",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Remove Duplicate Lines",
+      "label": "Enable Remove Duplicate Lines transformation",
+      "description": "Keep only unique lines",
+      "default": true
+    },
+    {
+      "name": "enableAddLineNumbers",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Add Line Numbers",
+      "label": "Enable Add Line Numbers transformation",
+      "description": "Prefix each line with number",
+      "default": true
+    },
+    {
+      "name": "enableUrlEncode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: URL Encode",
+      "label": "Enable URL Encode transformation",
+      "description": "Escape URL unsafe characters",
+      "default": true
+    },
+    {
+      "name": "enableUrlDecode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: URL Decode",
+      "label": "Enable URL Decode transformation",
+      "description": "Unescape URL encoded characters",
+      "default": true
+    },
+    {
+      "name": "enableBase64Encode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Base64 Encode",
+      "label": "Enable Base64 Encode transformation",
+      "description": "Encode text to Base64",
+      "default": true
+    },
+    {
+      "name": "enableBase64Decode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Base64 Decode",
+      "label": "Enable Base64 Decode transformation",
+      "description": "Decode Base64 to text",
+      "default": true
+    },
+    {
+      "name": "enableHtmlEncode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: HTML Encode",
+      "label": "Enable HTML Encode transformation",
+      "description": "Encode HTML entities",
+      "default": true
+    },
+    {
+      "name": "enableHtmlDecode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: HTML Decode",
+      "label": "Enable HTML Decode transformation",
+      "description": "Decode HTML entities",
+      "default": true
+    },
+    {
+      "name": "enableHexEncode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Hex Encode",
+      "label": "Enable Hex Encode transformation",
+      "description": "Convert text to hexadecimal",
+      "default": true
+    },
+    {
+      "name": "enableHexDecode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: Hex Decode",
+      "label": "Enable Hex Decode transformation",
+      "description": "Convert hexadecimal to text",
+      "default": true
+    },
+    {
+      "name": "enableMd5",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: MD5 Hash",
+      "label": "Enable MD5 Hash transformation",
+      "description": "Generate MD5 hash",
+      "default": true
+    },
+    {
+      "name": "enableSha1",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: SHA1 Hash",
+      "label": "Enable SHA1 Hash transformation",
+      "description": "Generate SHA1 hash",
+      "default": true
+    },
+    {
+      "name": "enableSha256",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: SHA256 Hash",
+      "label": "Enable SHA256 Hash transformation",
+      "description": "Generate SHA256 hash",
+      "default": true
+    },
+    {
+      "name": "enableSha512",
+      "type": "checkbox",
+      "required": false,
+      "title": "Transformations: SHA512 Hash",
+      "label": "Enable SHA512 Hash transformation",
+      "description": "Generate SHA512 hash",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/jest": "^30.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "jest": "^30.2.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
