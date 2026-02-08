@@ -281,8 +281,7 @@ export async function getCollections<K extends keyof CollectionMap>(...keys: K[]
   if (keySet.has('tags')) jxaLines.push(`result.tags = things.tags().map(${mapTagJxa});`);
   if (keySet.has('projects') || keySet.has('lists'))
     jxaLines.push(`result.projects = things.projects().map(${mapProjectJxa});`);
-  if (keySet.has('areas') || keySet.has('lists'))
-    jxaLines.push(`result.areas = things.areas().map(${mapAreaJxa});`);
+  if (keySet.has('areas') || keySet.has('lists')) jxaLines.push(`result.areas = things.areas().map(${mapAreaJxa});`);
   jxaLines.push(`return result;`);
 
   const raw = await executeJxa(jxaLines.join('\n'), `Get ${keys.join(', ')}`);
