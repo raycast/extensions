@@ -1,7 +1,7 @@
 import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addProject, getAreas, getTags } from './api';
+import { addProject, getCollections } from './api';
 import ErrorView from './components/ErrorView';
 import { listItems } from './helpers';
 import { getDateString } from './utils';
@@ -23,8 +23,9 @@ type AddNewProjectProps = {
 };
 
 export function AddNewProject({ draftValues }: AddNewProjectProps) {
-  const { data: tags, isLoading: isLoadingTags, error: tagsError } = useCachedPromise(() => getTags());
-  const { data: areas, isLoading: isLoadingAreas, error: areasError } = useCachedPromise(() => getAreas());
+  const { data, isLoading, error } = useCachedPromise(() => getCollections('tags', 'areas'));
+  const tags = data?.tags;
+  const areas = data?.areas;
 
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit(values) {
@@ -85,9 +86,6 @@ Tasks:`);
       await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos', message: errorMessage });
     }
   }
-
-  const isLoading = isLoadingTags || isLoadingAreas;
-  const error = tagsError || areasError;
 
   if (error) {
     return <ErrorView error={error} />;
