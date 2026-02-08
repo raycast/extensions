@@ -24,7 +24,7 @@ import {
   PageProperty,
   User,
 } from "../utils/notion";
-import { handleOnOpenPage } from "../utils/openPage";
+import { handleOnOpenPage, isNotionApp } from "../utils/openPage";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
@@ -123,31 +123,35 @@ export function PageListItem({
   const OpenInAppAction = (
     <Action title={`Open in App`} icon={"notion-logo.png"} onAction={() => handleOnOpenPage(page, setRecentPage)} />
   );
+  const { primaryAction, open_in } = getPreferenceValues<Preferences.SearchPage>();
+
   const OpenInBrowserAction = (
     <Action
       title={`Open in Browser`}
       icon={Icon.Globe}
       onAction={async () => {
         if (!page.url) return;
-        if (open_in?.name === "Notion") {
-          open(page.url);
-        } else open(page.url, open_in);
+        // When the preferred app is Notion, "Open in Browser" should still
+        // open in the default browser — not hand the HTTPS URL to the Notion
+        // app (which just activates it without navigating).
+        if (isNotionApp(open_in)) {
+          await open(page.url);
+        } else {
+          await open(page.url, open_in);
+        }
         await setRecentPage(page);
-        closeMainWindow();
+        await closeMainWindow();
       }}
     />
   );
 
-  const { primaryAction, open_in } = getPreferenceValues<Preferences.SearchPage>();
-
-  const OpenPageActions =
-    open_in?.name == "Notion" // Default app is Notion
-      ? primaryAction == "notion"
-        ? [OpenInAppAction, OpenInRaycastAction, OpenInBrowserAction]
-        : [OpenInRaycastAction, OpenInAppAction, OpenInBrowserAction]
-      : primaryAction == "notion"
-        ? [OpenInBrowserAction, OpenInRaycastAction]
-        : [OpenInRaycastAction, OpenInBrowserAction];
+  const OpenPageActions = isNotionApp(open_in) // Default app is Notion
+    ? primaryAction == "notion"
+      ? [OpenInAppAction, OpenInRaycastAction, OpenInBrowserAction]
+      : [OpenInRaycastAction, OpenInAppAction, OpenInBrowserAction]
+    : primaryAction == "notion"
+      ? [OpenInBrowserAction, OpenInRaycastAction]
+      : [OpenInRaycastAction, OpenInBrowserAction];
 
   const pageWord = page.object.charAt(0).toUpperCase() + page.object.slice(1);
 

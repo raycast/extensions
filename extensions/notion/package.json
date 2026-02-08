@@ -20,7 +20,8 @@
     "samuelkraft",
     "abesto",
     "xmok",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "0xdhrv"
   ],
   "pastContributors": [
     "thomaslombart",
@@ -279,21 +280,21 @@
   ],
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "@notionhq/client": "^2.2.15",
-    "@raycast/api": "^1.103.9",
+    "@notionhq/client": "^5.9.0",
+    "@raycast/api": "^1.104.5",
     "@raycast/utils": "^2.2.2",
     "@tryfabric/martian": "^1.2.4",
-    "date-fns": "^3.3.1",
-    "linkedom": "^0.16.8",
-    "notion-to-md": "^3.1.1"
+    "date-fns": "^4.1.0",
+    "linkedom": "^0.18.12",
+    "notion-to-md": "^3.1.9"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.2",
+    "@types/react": "19.2.13",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "overrides": {
     "katex": "^0.16.21"
