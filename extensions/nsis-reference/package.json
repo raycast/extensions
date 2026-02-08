@@ -27,10 +27,10 @@
     "@sindresorhus/slugify": "^2.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^20.8.10",
     "@types/react": "^18.3.3",
-    "eslint": "^8.51.0",
+    "eslint": "^9.22.0",
     "react": "^18.2.0",
     "typescript": "^5.2.2"
   },
