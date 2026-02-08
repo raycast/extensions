@@ -23,6 +23,17 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "showConfirmation",
+      "type": "checkbox",
+      "title": "Confirmation",
+      "label": "Show confirmation before restart",
+      "description": "Show a confirmation dialog before restarting your Mac.",
+      "default": true,
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.4",
     "@raycast/utils": "^1.17.0",

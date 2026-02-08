@@ -1,19 +1,23 @@
-import { confirmAlert, Alert } from "@raycast/api";
+import { confirmAlert, Alert, getPreferenceValues } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { tryit } from "radash";
 
 export default async function main() {
-  const confirmed = await confirmAlert({
-    title: "Are you sure you want to restart now?",
-    message: "Windows will not reopen after restart.",
-    primaryAction: {
-      title: "Restart",
-      style: Alert.ActionStyle.Destructive,
-    },
-  });
+  const { showConfirmation } = getPreferenceValues<Preferences>();
 
-  if (!confirmed) {
-    return;
+  if (showConfirmation) {
+    const confirmed = await confirmAlert({
+      title: "Are you sure you want to restart now?",
+      message: "Windows will not reopen after restart.",
+      primaryAction: {
+        title: "Restart",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (!confirmed) {
+      return;
+    }
   }
 
   const script = /* applescript */ `
