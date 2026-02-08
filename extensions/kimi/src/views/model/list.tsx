@@ -36,6 +36,7 @@ export const ModelListItem = ({
       title={model.name}
       accessories={[{ text: new Date(model.updated_at ?? 0).toLocaleDateString() }]}
       detail={<ModelDetailView model={model} />}
+      // @ts-expect-error - Raycast bundles its own @types/react, causing ReactElement version mismatch
       actions={selectedModel === model.id ? actionPanel(model) : undefined}
     />
   );

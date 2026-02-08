@@ -22,6 +22,7 @@ export const ConversationListView = (props: {
             { tag: conversation.model.name },
             { text: new Date(conversation.created_at ?? 0).toLocaleDateString() },
           ]}
+          // @ts-expect-error - Raycast bundles its own @types/react, causing ReactElement version mismatch
           actions={conversation && selectedConversation === conversation.id ? actionPanel(conversation) : undefined}
         />
       ))}
