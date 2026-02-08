@@ -65,20 +65,14 @@ export default function Command() {
                     markdown={model.description}
                     metadata={
                       <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label title="Provider ID" text={provider.id} />
-                        <List.Item.Detail.Metadata.Label title="Provider Name" text={provider.name} />
+                        <List.Item.Detail.Metadata.Label title="Name" text={model.name} />
+                        <List.Item.Detail.Metadata.Label title="Provider" text={provider.name} />
                         <List.Item.Detail.Metadata.Label title="Base URL" text={provider.base_url} />
-
                         <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label title="Model ID" text={model.id} />
-                        <List.Item.Detail.Metadata.Label title="Model Name" text={model.name} />
-                        <List.Item.Detail.Metadata.Label title="Context Window" text={model.context.toString()} />
-                        {model.description && (
-                          <List.Item.Detail.Metadata.Label title="Description" text={model.description} />
-                        )}
+                        <List.Item.Detail.Metadata.Label title="Context" text={formatContextTokens(model.context)} />
                         {model.abilities && Object.keys(model.abilities).length > 0 && (
                           <>
-                            <List.Item.Detail.Metadata.TagList title="Abilities">
+                            <List.Item.Detail.Metadata.TagList title="Capabilities">
                               {Object.entries(model.abilities).map(([abilityName, ability]) => {
                                 if (ability?.supported) {
                                   // Map ability names to color, icon, and display text
@@ -110,21 +104,6 @@ export default function Command() {
                             </List.Item.Detail.Metadata.TagList>
                           </>
                         )}
-
-                        {provider.api_keys && Object.keys(provider.api_keys).length > 0 && (
-                          <>
-                            <List.Item.Detail.Metadata.Separator />
-                            <List.Item.Detail.Metadata.Label title="API Keys" />
-                            {Object.entries(provider.api_keys).map(([key, value]) => (
-                              <List.Item.Detail.Metadata.Label
-                                key={key}
-                                title={key}
-                                text={value ? "•••••••••••••" : value}
-                              />
-                            ))}
-                          </>
-                        )}
-
                         {provider.additional_parameters && Object.keys(provider.additional_parameters).length > 0 && (
                           <>
                             <List.Item.Detail.Metadata.Separator />
@@ -290,4 +269,21 @@ function ReloadConfigAction({ loadProviders }: { loadProviders: () => void }) {
       onAction={loadProviders}
     />
   );
+}
+
+/**
+ * Formats context size (token count) for display, e.g. "8k tokens", "131k tokens", "1M tokens".
+ */
+function formatContextTokens(context: number): string {
+  if (context >= 1_000_000) {
+    const millions = context / 1_000_000;
+    const value = millions % 1 === 0 ? `${millions}` : `${millions.toFixed(1)}`;
+    return `${value}M tokens`;
+  }
+  if (context >= 1_000) {
+    const thousands = context / 1_000;
+    const value = thousands % 1 === 0 ? `${thousands}` : `${Math.round(thousands)}`;
+    return `${value}k tokens`;
+  }
+  return `${context} tokens`;
 }
