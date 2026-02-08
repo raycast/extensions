@@ -4,7 +4,7 @@ import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import Ask from "./ask";
 import { useConversations } from "./hooks/useConversations";
-import { Conversation } from "./type";
+import type { Conversation } from "./type";
 import { ConversationListView } from "./views/conversation-list";
 
 export default function Conversation() {

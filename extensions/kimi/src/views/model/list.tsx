@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
-import { Model } from "../../type";
+import type { ReactElement } from "react";
+import type { Model } from "../../type";
 
 export const ModelListView = ({
   title,
@@ -10,7 +11,7 @@ export const ModelListView = ({
   title: string;
   models: Model[];
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => ReactElement;
 }) => (
   <List.Section title={title} subtitle={models.length.toLocaleString()}>
     {models.map((model) => (
@@ -26,7 +27,7 @@ export const ModelListItem = ({
 }: {
   model: Model;
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => ReactElement;
 }) => {
   return (
     <List.Item

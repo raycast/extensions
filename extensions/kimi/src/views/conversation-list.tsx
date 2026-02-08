@@ -1,11 +1,12 @@
 import { List } from "@raycast/api";
-import { Conversation } from "../type";
+import type { ReactElement } from "react";
+import type { Conversation } from "../type";
 
 export const ConversationListView = (props: {
   title: string;
   conversations: Conversation[];
   selectedConversation: string | null;
-  actionPanel: (conversation: Conversation) => JSX.Element;
+  actionPanel: (conversation: Conversation) => ReactElement;
 }) => {
   const { title, conversations, selectedConversation, actionPanel } = props;
 
