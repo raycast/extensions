@@ -29,7 +29,7 @@ function useDebouncedValue<T>(value: T, delay = 300): T {
 }
 
 function buildSearchUrl(query: string): string {
-  const { apiKey } = getPreferenceValues<{ apiKey?: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   const url = new URL(GOOGLE_BOOKS_API_URL);
   url.searchParams.set("q", query);
   url.searchParams.set("maxResults", MAX_RESULTS.toString());
