@@ -298,7 +298,7 @@ export async function getCollections<K extends keyof CollectionMap>(...keys: K[]
   ) as Pick<CollectionMap, K>;
 }
 
-function organizeLists(projects: Project[], areas: Area[]): List[] {
+function organizeLists(projects: Project[] = [], areas: Area[] = []): List[] {
   const projectsWithoutAreas = projects
     .filter((project) => !project.area)
     .map((project) => ({ ...project, type: 'project' as const }));
