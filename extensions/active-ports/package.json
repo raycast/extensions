@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "active-ports",
+  "title": "Active Ports",
+  "description": "View and manage active TCP ports, kill processes, and restart dev servers.",
+  "icon": "extension-icon.png",
+  "author": "jurre_jan",
+  "categories": ["Developer Tools", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Active Ports",
+      "description": "List all active ports with process information",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Active Ports Menu",
+      "description": "Menu bar showing active port count with quick actions",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "bunx @raycast/api@latest publish"
+  }
+}

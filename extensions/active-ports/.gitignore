@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Raycast
+raycast-env.d.ts
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+
+# Claude
+.claude/
+CLAUDE.md
+.repomap.tags.cache.v1/
