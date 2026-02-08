@@ -1,5 +1,10 @@
 # Kill Process Changelog
 
+## [UX Improvements] - {PR_MERGE_DATE}
+
+- Reorganized preferences into clearer sections
+- Avoid showing a redundant subtitle when it matches the process name
+
 ## [Preferences] - 2026-02-04
 
 - Added preference to skip kill confirmation dialogs

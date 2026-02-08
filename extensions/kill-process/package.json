@@ -12,7 +12,8 @@
     "erics118",
     "xilopaint",
     "validate",
-    "dead_hikikomori"
+    "dead_hikikomori",
+    "mateus_badalotti"
   ],
   "platforms": [
     "macOS",
@@ -643,17 +644,45 @@
   },
   "preferences": [
     {
-      "description": "Determine whether the process path should be searched for the query or only the process name.",
-      "label": "Search Process Paths",
+      "description": "Default ordering for the process list.",
+      "name": "sortByMem",
+      "required": false,
+      "title": "Default Sort",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "CPU",
+          "value": "cpu"
+        },
+        {
+          "title": "Memory",
+          "value": "memory"
+        }
+      ],
+      "default": "cpu"
+    },
+    {
+      "description": "Refresh the list every N ms. Use 0 to disable. Minimum: 1000.",
+      "label": "Interval (ms)",
+      "name": "refreshDuration",
+      "required": false,
+      "title": "Auto-Refresh",
+      "type": "textfield",
+      "default": "3000",
+      "placeholder": "3000"
+    },
+    {
+      "description": "Include the full executable path when searching.",
+      "label": "Include Process Path",
       "name": "shouldSearchInPaths",
       "required": false,
       "default": false,
-      "title": "Filtering",
+      "title": "Search",
       "type": "checkbox"
     },
     {
-      "description": "Determine whether the process PID should be searched for the query or only the process name.",
-      "label": "Search Process PID",
+      "description": "Include the PID when searching.",
+      "label": "Include PID",
       "name": "shouldSearchInPid",
       "required": false,
       "default": false,
@@ -661,8 +690,8 @@
       "type": "checkbox"
     },
     {
-      "description": "Determine whether apps are listed before other results when filtering.",
-      "label": "Prioritize Apps",
+      "description": "List app processes before other results.",
+      "label": "Prefer Apps",
       "name": "shouldPrioritizeAppsWhenFiltering",
       "required": false,
       "default": false,
@@ -670,21 +699,12 @@
       "type": "checkbox"
     },
     {
-      "description": "Determine whether processes are sorted by CPU or memory usage.",
-      "label": "Sort by Memory Usage",
-      "name": "sortByMem",
-      "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
-    },
-    {
       "description": "Determine whether aggregate processes belong to the same app.",
-      "label": "Aggregate Apps",
+      "label": "Group by App",
       "name": "aggregateApps",
       "required": false,
       "default": false,
-      "title": "",
+      "title": "Grouping",
       "type": "checkbox"
     },
     {
@@ -706,7 +726,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Close window after killing a process",
+      "description": "Close window after killing a process.",
       "label": "Close Window",
       "name": "closeWindowAfterKill",
       "required": false,
@@ -715,19 +735,21 @@
       "type": "checkbox"
     },
     {
-      "description": "Clear search bar after killing a process",
+      "description": "Clear search bar after killing a process.",
       "label": "Clear Search Bar",
       "name": "clearSearchBarAfterKill",
       "required": false,
       "default": true,
+      "title": "",
       "type": "checkbox"
     },
     {
-      "description": "Go back to root search after killing a process",
+      "description": "Go back to root search after killing a process.",
       "label": "Go back to Root Search",
       "name": "goToRootAfterKill",
       "required": false,
       "default": false,
+      "title": "",
       "type": "checkbox"
     },
     {
@@ -738,16 +760,6 @@
       "default": false,
       "title": "Confirmation",
       "type": "checkbox"
-    },
-    {
-      "description": "Refresh duration in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
-      "label": "Refresh Duration",
-      "name": "refreshDuration",
-      "required": false,
-      "title": "Refresh Duration",
-      "type": "textfield",
-      "default": "3000",
-      "placeholder": "3000"
     }
   ],
   "dependencies": {

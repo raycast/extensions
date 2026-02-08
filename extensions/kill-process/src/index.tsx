@@ -22,6 +22,21 @@ import { Process } from "./types";
 import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
 import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
 
+type SortBy = "cpu" | "memory";
+
+const parseSortByPreference = (value: unknown): SortBy => {
+  // Backwards compatible:
+  // - old preference: boolean (true => memory, false => cpu)
+  // - new preference: dropdown string ("cpu" | "memory")
+  if (value === true || value === "memory") {
+    return "memory";
+  }
+  if (value === false || value === "cpu") {
+    return "cpu";
+  }
+  return "cpu";
+};
+
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
   const [state, setState] = useState<Process[]>([]);
@@ -38,7 +53,7 @@ export default function ProcessList() {
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
   const skipConfirmation = preferences.skipConfirmation;
-  const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
+  const [sortBy, setSortBy] = useState<SortBy>(parseSortByPreference(preferences.sortByMem));
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
   // Cache CPU data from WMI queries (persists across refreshes)
@@ -163,18 +178,41 @@ export default function ProcessList() {
     }
   };
 
-  const subtitleString = (process: Process) => {
-    const subtitles = [];
-    if (process.type === "aggregatedApp" && process.appName != undefined) {
-      subtitles.push(process.appName);
+  const subtitleString = (process: Process): string | undefined => {
+    const subtitles: string[] = [];
+    const title = process.processName?.trim() ?? "";
+    const titleLower = title.toLowerCase();
+
+    const pushSubtitle = (value: string | undefined | null) => {
+      const trimmed = value?.trim();
+      if (!trimmed) {
+        return;
+      }
+
+      // If the subtitle would duplicate the row title, omit it entirely.
+      if (trimmed.toLowerCase() === titleLower) {
+        return;
+      }
+
+      // Prevent duplicates within the subtitle itself.
+      if (subtitles.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
+        return;
+      }
+
+      subtitles.push(trimmed);
+    };
+
+    if (process.type === "aggregatedApp") {
+      pushSubtitle(process.appName);
     }
     if (shouldShowPID) {
-      subtitles.push(process.id.toString());
+      pushSubtitle(process.id.toString());
     }
     if (shouldShowPath) {
-      subtitles.push(process.path);
+      pushSubtitle(process.path);
     }
-    return subtitles.join(" - ");
+
+    return subtitles.length > 0 ? subtitles.join(" - ") : undefined;
   };
 
   const aggregate = (processes: Process[]): Process[] => {
@@ -259,6 +297,7 @@ export default function ProcessList() {
   };
 
   const processCount = state.length;
+  const processCountLabel = `${processCount} ${processCount === 1 ? "Process" : "Processes"} Running`;
 
   return (
     <List
@@ -266,7 +305,12 @@ export default function ProcessList() {
       searchBarPlaceholder="Filter by name"
       onSearchTextChange={(query) => setQuery(query)}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" storeValue onChange={(newValue) => setSortBy(newValue as "cpu" | "memory")}>
+        <List.Dropdown
+          tooltip="Filter"
+          storeValue
+          defaultValue={sortBy}
+          onChange={(newValue) => setSortBy(newValue as SortBy)}
+        >
           <List.Dropdown.Section title="Sort By">
             <List.Dropdown.Item title="CPU Usage" value="cpu" />
             <List.Dropdown.Item title="Memory Usage" value="memory" />
@@ -274,7 +318,7 @@ export default function ProcessList() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Processes" subtitle={`${processCount} running`}>
+      <List.Section title={processCountLabel}>
         {state
           .filter((process) => {
             if (query === "") {
