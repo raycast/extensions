@@ -13,21 +13,13 @@ export function minorUnitsToMajor(amount: MinorUnitAmount | undefined, fallbackC
   if (!amount) return 0;
   const currency = (amount.currency ?? fallbackCurrency).toUpperCase();
   const decimals = getDecimals(currency);
-  const minorUnits = typeof amount.minorUnits === "number" ? amount.minorUnits : Number(amount.minorUnits);
-  if (!Number.isFinite(minorUnits)) {
-    return 0;
-  }
-  return minorUnits / 10 ** decimals;
+  return amount.minorUnits / 10 ** decimals;
 }
 
 export function formatAmount(amount: MinorUnitAmount | undefined, fallbackCurrency: string): string {
   if (!amount) return "-";
 
   const currency = (amount.currency ?? fallbackCurrency).toUpperCase();
-  const minorUnits = typeof amount.minorUnits === "number" ? amount.minorUnits : Number(amount.minorUnits);
-  if (!Number.isFinite(minorUnits)) {
-    return "-";
-  }
   const value = minorUnitsToMajor(amount, fallbackCurrency);
 
   return new Intl.NumberFormat(undefined, {

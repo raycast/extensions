@@ -11,7 +11,7 @@ import { AccountWithBalance, MinorUnitAmount, StarlingBalance } from "./lib/type
 function getNonZeroAmount(...candidates: Array<MinorUnitAmount | undefined>): MinorUnitAmount | undefined {
   for (const amount of candidates) {
     if (!amount) continue;
-    if (typeof amount.minorUnits === "number" && amount.minorUnits !== 0) return amount;
+    if (amount.minorUnits !== 0) return amount;
   }
   return candidates.find((amount) => amount !== undefined);
 }
@@ -131,12 +131,9 @@ function DashboardCommand() {
           const { account, balance } = accountRow;
           const display = resolveDisplayedBalances(account.accountType, balance);
           const effective = formatAmount(display.effective, preferences.defaultCurrency);
-          const effectiveMinorUnits =
-            typeof display.effective?.minorUnits === "number"
-              ? display.effective.minorUnits
-              : Number(display.effective?.minorUnits);
+          const effectiveMinorUnits = display.effective?.minorUnits;
           const amountColor =
-            Number.isFinite(effectiveMinorUnits) && effectiveMinorUnits !== 0
+            effectiveMinorUnits !== undefined && effectiveMinorUnits !== 0
               ? effectiveMinorUnits > 0
                 ? Color.Green
                 : Color.Red

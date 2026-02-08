@@ -26,7 +26,7 @@ export function getResolvedPreferences(): ResolvedPreferences {
   let useDemoData = false;
   let personalAccessToken: string | undefined;
   try {
-    const values = getPreferenceValues<{ useDemoData?: boolean; personalAccessToken?: string }>();
+    const values = getPreferenceValues<Preferences>();
     useDemoData = values.useDemoData === true;
     personalAccessToken = normalizeToken(values.personalAccessToken);
   } catch {
