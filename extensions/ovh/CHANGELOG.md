@@ -1,6 +1,6 @@
 # OVHcloud Changelog
 
-## [Improve DNS Records Display] - {PR_MERGE_DATE}
+## [Improve DNS Records Display] - 2026-02-08
 
 - Improved DNS Records loading so it loads the relevant cached records (previously, dns records for the last domain were shown until updated)
 
