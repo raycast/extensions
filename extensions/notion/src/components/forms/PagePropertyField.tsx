@@ -13,7 +13,7 @@ import {
   FormValueForDatabaseProperty,
 } from "../../utils/notion";
 
-// @ts-expect-error - Overload doesn't match, but is the function signature we want to be visisble.
+// @ts-expect-error - Overload doesn't match, but is the function signature we want to be visible.
 export function PagePropertyField(props: {
   type: ReadablePropertyType;
   databaseProperty: DatabaseProperty;

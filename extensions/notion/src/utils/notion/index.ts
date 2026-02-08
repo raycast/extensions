@@ -1,8 +1,13 @@
-import { Client } from "@notionhq/client";
-import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
+import type {
+  BlockObjectRequest,
+  PageObjectResponse,
+  PartialPageObjectResponse,
+  DataSourceObjectResponse,
+  PartialDataSourceObjectResponse,
+  DatabaseObjectResponse,
+  PartialDatabaseObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { Color, Icon } from "@raycast/api";
-
-import { UnwrapArray, UnwrapPromise } from "../types";
 
 import { DatabaseProperty } from "./database/property";
 import { PageProperty } from "./page";
@@ -11,7 +16,13 @@ export * from "./database";
 export * from "./page";
 export * from "./user";
 
-export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
+export type NotionObject =
+  | PageObjectResponse
+  | PartialPageObjectResponse
+  | DataSourceObjectResponse
+  | PartialDataSourceObjectResponse
+  | DatabaseObjectResponse
+  | PartialDatabaseObjectResponse;
 
 type Markdown = string;
 export type PageContent = Markdown | BlockObjectRequest[];
