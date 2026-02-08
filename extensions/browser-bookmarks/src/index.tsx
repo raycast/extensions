@@ -244,6 +244,7 @@ export default function Command() {
     safari.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
+    vivaldiSnapshot.bookmarks,
     whale.bookmarks,
     zen.bookmarks,
     frecencies,
@@ -273,6 +274,7 @@ export default function Command() {
       ...safari.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
+      ...vivaldiSnapshot.folders,
       ...whale.folders,
       ...zen.folders,
     ];
@@ -300,6 +302,7 @@ export default function Command() {
     safari.folders,
     sidekick.folders,
     vivaldi.folders,
+    vivaldiSnapshot.folders,
     whale.folders,
     zen.folders,
     setFolders,
@@ -440,6 +443,9 @@ export default function Command() {
     if (hasVivaldi) {
       vivaldi.mutate();
     }
+    if (hasVivaldiSnapshot) {
+      vivaldiSnapshot.mutate();
+    }
     if (hasWhale) {
       whale.mutate();
     }
@@ -508,6 +514,7 @@ export default function Command() {
         safari.isLoading ||
         sidekick.isLoading ||
         vivaldi.isLoading ||
+        vivaldiSnapshot.isLoading ||
         whale.isLoading ||
         zen.isLoading
       }
