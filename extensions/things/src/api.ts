@@ -273,27 +273,29 @@ type CollectionMap = {
   lists: List[];
 };
 
+const jxaFetches = [
+  { name: 'tags', needs: ['tags'], expr: `things.tags().map(${mapTagJxa})` },
+  { name: 'projects', needs: ['projects', 'lists'], expr: `things.projects().map(${mapProjectJxa})` },
+  { name: 'areas', needs: ['areas', 'lists'], expr: `things.areas().map(${mapAreaJxa})` },
+];
+
 export async function getCollections<K extends keyof CollectionMap>(...keys: K[]): Promise<Pick<CollectionMap, K>> {
   const keySet = new Set<string>(keys);
 
-  const jxaLines = [`const things = Application('${preferences.thingsAppIdentifier}');`, `const result = {};`];
+  const script = [
+    `const things = Application('${preferences.thingsAppIdentifier}');`,
+    `const result = {};`,
+    ...jxaFetches
+      .filter(({ needs }) => needs.some((k) => keySet.has(k)))
+      .map(({ name, expr }) => `result.${name} = ${expr};`),
+    `return result;`,
+  ].join('\n');
 
-  if (keySet.has('tags')) jxaLines.push(`result.tags = things.tags().map(${mapTagJxa});`);
-  if (keySet.has('projects') || keySet.has('lists'))
-    jxaLines.push(`result.projects = things.projects().map(${mapProjectJxa});`);
-  if (keySet.has('areas') || keySet.has('lists')) jxaLines.push(`result.areas = things.areas().map(${mapAreaJxa});`);
-  jxaLines.push(`return result;`);
+  const raw = await executeJxa(script, `Get ${keys.join(', ')}`);
 
-  const raw = await executeJxa(jxaLines.join('\n'), `Get ${keys.join(', ')}`);
-
-  const result: Partial<CollectionMap> = {};
-
-  if (keySet.has('tags')) result.tags = raw.tags;
-  if (keySet.has('projects')) result.projects = raw.projects;
-  if (keySet.has('areas')) result.areas = raw.areas;
-  if (keySet.has('lists')) result.lists = organizeLists(raw.projects, raw.areas);
-
-  return result as Pick<CollectionMap, K>;
+  return Object.fromEntries(
+    keys.map((key) => [key, key === 'lists' ? organizeLists(raw.projects, raw.areas) : raw[key]]),
+  ) as Pick<CollectionMap, K>;
 }
 
 function organizeLists(projects: Project[], areas: Area[]): List[] {
