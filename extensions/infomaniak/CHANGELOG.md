@@ -1,6 +1,6 @@
 # Infomaniak Changelog
 
-## [List Favorites in kDrive] - {PR_MERGE_DATE}
+## [List Favorites in kDrive] - 2026-02-08
 
 - List Favorites in **kDrive**
 
