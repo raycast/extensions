@@ -39,7 +39,7 @@ async function getFirefoxProfiles() {
         try {
           const profileDirectory = readdirSync(`${FIREFOX_FOLDER}/${path}`);
           return profileDirectory.includes("places.sqlite");
-        } catch (error) {
+        } catch {
           return false;
         }
       }
