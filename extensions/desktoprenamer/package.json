@@ -15,6 +15,7 @@
   ],
   "license": "MIT",
   "commands": [
+  "commands": [
     {
       "name": "current-desktop",
       "title": "Current Desktop",
@@ -58,12 +59,6 @@
       "name": "toggle-active-label-window-visibility",
       "title": "Toggle Visible Label Window",
       "description": "Show/hide the Active Label Window from the desktop.",
-      "mode": "no-view"
-    },
-    {
-      "name": "current-desktop",
-      "title": "Current Desktop",
-      "description": "Show the name of the current desktop",
       "mode": "no-view"
     },
     {
