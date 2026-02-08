@@ -37,6 +37,7 @@ import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
+import useVivaldiSnapshotBookmarks from "./hooks/useVivaldiSnapshotBrowser";
 import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
 import useZenBookmarks from "./hooks/useZenBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
@@ -130,6 +131,7 @@ export default function Command() {
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
+  const hasVivaldiSnapshot = browsers.includes(BROWSERS_BUNDLE_ID.vivaldiSnapshot) ?? false;
   const hasWhale = browsers.includes(BROWSERS_BUNDLE_ID.whale) ?? false;
   const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
 
@@ -154,6 +156,7 @@ export default function Command() {
   const safari = useSafariBookmarks(hasSafari);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
+  const vivaldiSnapshot = useVivaldiSnapshotBookmarks(hasVivaldiSnapshot);
   const whale = useWhaleBookmarks(hasWhale);
   const zen = useZenBookmarks(hasZen);
 
@@ -183,6 +186,7 @@ export default function Command() {
       ...safari.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
+      ...vivaldiSnapshot.bookmarks,
       ...whale.bookmarks,
       ...zen.bookmarks,
     ]
