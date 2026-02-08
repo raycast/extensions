@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Premium requests on view tasks] - {PR_MERGE_DATE}
+## [Premium requests on view tasks] - 2026-02-08
 
 - Add premium requests used to the "View Tasks" command
 
