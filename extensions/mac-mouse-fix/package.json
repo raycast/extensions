@@ -5,6 +5,9 @@
   "description": "Control Mac Mouse Fix from Raycast",
   "icon": "extension-icon.png",
   "author": "marcjulian",
+  "contributors": [
+    "ovitrif"
+  ],
   "platforms": [
     "macOS"
   ],
