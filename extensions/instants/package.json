@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "instants",
+  "title": "Instants",
+  "description": "Search and play sound clips from MyInstants.com directly from Raycast",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-instants",
+      "title": "Search Instants",
+      "description": "Search for sound clips on MyInstants",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Favorite Instants",
+      "description": "View and play your favorite sounds",
+      "mode": "view"
+    },
+    {
+      "name": "trending",
+      "title": "Trending Instants",
+      "description": "Browse trending sounds on MyInstants",
+      "mode": "view"
+    },
+    {
+      "name": "play-favorite",
+      "title": "Play Favorite",
+      "description": "Play a favorite by number (1-based). Supports deep link URL with arguments.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "number",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "favorite-1",
+      "title": "Favorite 1",
+      "description": "Play your first favorite sound",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite-2",
+      "title": "Favorite 2",
+      "description": "Play your second favorite sound",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite-3",
+      "title": "Favorite 3",
+      "description": "Play your third favorite sound",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite-4",
+      "title": "Favorite 4",
+      "description": "Play your fourth favorite sound",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite-5",
+      "title": "Favorite 5",
+      "description": "Play your fifth favorite sound",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite-6",
+      "title": "Favorite 6",
+      "description": "Play your sixth favorite sound",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite-7",
+      "title": "Favorite 7",
+      "description": "Play your seventh favorite sound",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite-8",
+      "title": "Favorite 8",
+      "description": "Play your eighth favorite sound",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cacheDurationMinutes",
+      "type": "textfield",
+      "title": "Cache Duration (minutes)",
+      "description": "How long to cache search and trending results. Default: 60.",
+      "default": "60",
+      "required": false
+    },
+    {
+      "name": "downloadWhenFavorite",
+      "type": "checkbox",
+      "title": "Favorites",
+      "label": "Download when adding to favorites",
+      "description": "Download the sound file to your device when you add it to favorites. Playback will use the local file when available.",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^2.2.2",
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.2",
+    "@types/react": "19.2.13",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
