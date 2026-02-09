@@ -14,11 +14,17 @@ export type SearchResponse = {
 };
 
 export const API_BASE_URL = "https://skills.sh/api";
-export const REPO_URL = "https://github.com/keito4/raycast-skills-sh";
+export const REPO_URL = "https://github.com/raycast/extensions";
 
 export function formatInstalls(count: number): string {
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K`;
+  if (count >= 1_000_000_000) {
+    return `${(count / 1_000_000_000).toFixed(1)}B`;
+  }
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1)}M`;
+  }
+  if (count >= 1_000) {
+    return `${(count / 1_000).toFixed(1)}K`;
   }
   return count.toString();
 }
