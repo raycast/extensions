@@ -1,6 +1,6 @@
 # Gitfox Changelog
 
-## [Gitfox v4] - {PR_MERGE_DATE}
+## [Gitfox v4] - 2026-02-09
 
 - Added support for Gitfox v4 plist format
 - Added menu bar command for quick access to repositories
