@@ -28,7 +28,7 @@ interface EditBlobProps {
 
 // helper function to identify is `input` is a valid hex color code
 function isHexColor(input: string | undefined): string {
-  if (input == undefined || input.length == 0) {
+  if (!input || input.length === 0) {
     return "";
   }
 
@@ -150,7 +150,7 @@ export default function ShowBlob() {
           <Detail.Metadata.Label title="Size (px)" text={size} />
           <Detail.Metadata.Label title="fill" text={fill == "" ? "<random>" : fill} />
           <Detail.Metadata.Label title="stroke" text={stroke == "" ? "<random>" : stroke} />
-          <Detail.Metadata.Label title="Stroke Width" text={stroke == "" ? "<random>" : stroke} />
+          <Detail.Metadata.Label title="Stroke Width" text={strokeWidth} />
         </Detail.Metadata>
       }
       actions={

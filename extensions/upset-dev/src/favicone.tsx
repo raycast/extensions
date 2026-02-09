@@ -8,7 +8,7 @@ import {
   validateDomainName,
   validateSizeLoose,
 } from "./helpers/helpers";
-import { SUPPORT_DIR, CTRL_X, CMD_SPACE } from "./helpers/consts";
+import { SUPPORT_DIR, CTRL_X, CMD_SPACE_MACOS, CMD_SPACE_WINDOWS } from "./helpers/consts";
 import { useFaviconeHistory } from "./hooks/hooks";
 import { useState } from "react";
 import path from "node:path";
@@ -169,7 +169,7 @@ export default function ShowSearchedFavicons() {
                   title="Copy Favicon"
                   icon={Icon.CopyClipboard}
                   content={{ file: faviconPath }}
-                  shortcut={CMD_SPACE}
+                  shortcut={CMD_SPACE_MACOS}
                 />
               </ActionPanel>
             }

@@ -73,7 +73,8 @@ export async function addFaviconeToSupportDir(entry: FormEntry) {
   // perform a get request from `url` that returns a .png image
   const response = await fetch(url);
   // turn the body of the response into an array of bytes that represents the bytes to construct a png
-  const faviconPngData = await response.bytes();
+  const arrayBuffer = await response.arrayBuffer();
+  const faviconPngData = Buffer.from(arrayBuffer);
   // the format for each favicone stored in `SUPPORT_DIR` is `${entry.domain}-${entry.width}w-${entry.height}h.png`
   const faviconPath = path.join(SUPPORT_DIR, `${entry.domain}-${entry.width}w-${entry.height}h.png`);
 
