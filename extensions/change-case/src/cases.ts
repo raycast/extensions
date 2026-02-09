@@ -73,8 +73,7 @@ function preLowercaseText(input: string, preserveCase: boolean) {
 
 export function convert(input: string, c: string) {
   const preferences = getPreferenceValues<Preferences>();
-  const preserveCase =
-    preferences.preserveCase || CASES_SKIP_PRELOWERCASE.has(c);
+  const preserveCase = preferences.preserveCase || CASES_SKIP_PRELOWERCASE.has(c);
 
   const modified = functions[c](preLowercaseText(input, preserveCase), {
     prefixCharacters: preferences.prefixCharacters,

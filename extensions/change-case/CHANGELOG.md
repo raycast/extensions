@@ -2,7 +2,7 @@
 
 ## [Fix Swap Case] - {PR_MERGE_DATE}
 
-- Prevents pre-lowercasing of input for swap case
+- Prevents pre-lowercasing of input for case-sensitive transforms: Swap Case, Alternating Case, Random Case, Lower First, and Upper First
 
 ## [Refactor and ESLint Compatibility] - 2026-01-19
 
