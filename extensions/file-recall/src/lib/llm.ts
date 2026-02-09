@@ -130,7 +130,8 @@ ${toolDescs}`;
 }
 
 /**
- * Make a single API call (no retry, no fallback).
+ * Make a single API call with automatic 429 rate-limit retry.
+ * Uses exponential backoff: 2s, 4s, 8s (up to 3 retries).
  */
 async function rawApiCall(
   url: string,
@@ -143,23 +144,43 @@ async function rawApiCall(
   data?: OpenAIChatCompletionResponse;
   errorText?: string;
 }> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
-    signal,
-  });
+  const MAX_RATE_LIMIT_RETRIES = 3;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    return { ok: false, status: response.status, errorText };
+  for (let attempt = 0; attempt <= MAX_RATE_LIMIT_RETRIES; attempt++) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+      signal,
+    });
+
+    if (!response.ok) {
+      // Handle 429 rate limiting with exponential backoff
+      if (response.status === 429 && attempt < MAX_RATE_LIMIT_RETRIES) {
+        const retryAfter = response.headers.get("retry-after");
+        const waitMs = retryAfter
+          ? parseInt(retryAfter, 10) * 1000
+          : 2000 * Math.pow(2, attempt); // 2s, 4s, 8s
+        console.log(
+          `Rate limited (429). Retrying in ${waitMs}ms (attempt ${attempt + 1}/${MAX_RATE_LIMIT_RETRIES})`,
+        );
+        await new Promise((r) => setTimeout(r, waitMs));
+        continue;
+      }
+
+      const errorText = await response.text();
+      return { ok: false, status: response.status, errorText };
+    }
+
+    const data = (await response.json()) as OpenAIChatCompletionResponse;
+    return { ok: true, status: response.status, data };
   }
 
-  const data = (await response.json()) as OpenAIChatCompletionResponse;
-  return { ok: true, status: response.status, data };
+  // Should not reach here, but safety fallback
+  return { ok: false, status: 429, errorText: "Rate limit exceeded after retries" };
 }
 
 /**
@@ -348,6 +369,202 @@ function parseToolCallFromText(text: string): ToolCall | null {
   }
 
   return null;
+}
+
+// ─── Streaming Chat Completion ───────────────────────────────
+
+/**
+ * Stream-based SSE delta event (partial tool call or content).
+ */
+interface StreamDelta {
+  content?: string | null;
+  tool_calls?: Array<{
+    index: number;
+    id?: string;
+    type?: "function";
+    function?: {
+      name?: string;
+      arguments?: string;
+    };
+  }>;
+}
+
+/**
+ * Streaming chat completion with SSE parsing.
+ * Emits partial content via onPartialContent callback for real-time UI updates.
+ * Falls back to non-streaming if SSE fails.
+ */
+export async function streamChatCompletion(
+  options: ChatCompletionOptions & {
+    onPartialContent?: (text: string) => void;
+  },
+): Promise<ChatResponse> {
+  const { apiKey, apiBaseUrl, model } =
+    getPreferenceValues<Preferences.RecallFile>();
+  const {
+    messages,
+    temperature = 0.3,
+    maxTokens = 4000,
+    tools,
+    signal,
+    onPartialContent,
+  } = options;
+
+  const url = `${apiBaseUrl.replace(/\/$/, "")}/chat/completions`;
+  const hasTools = tools && tools.length > 0;
+
+  // Only stream in native function calling mode
+  if (!hasTools || functionCallingDisabled) {
+    return chatCompletion(options);
+  }
+
+  const body: Record<string, unknown> = {
+    model,
+    messages: sanitizeMessages(messages, true),
+    temperature,
+    max_tokens: maxTokens,
+    tools,
+    stream: true,
+  };
+
+  console.log(
+    `LLM Stream Request: model=${model}, msgs=${messages.length}, tools=${(tools || []).length}`,
+  );
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+      signal,
+    });
+
+    if (!response.ok) {
+      // If streaming is not supported, fall back to non-streaming
+      if (response.status === 400 || response.status === 404) {
+        console.log("Streaming not supported, falling back to non-streaming.");
+        return chatCompletion(options);
+      }
+      // Handle rate limiting
+      if (response.status === 429) {
+        console.log("Rate limited during streaming, falling back.");
+        return chatCompletion(options);
+      }
+      const errorText = await response.text();
+      throw new Error(`API Error (${response.status}): ${errorText}`);
+    }
+
+    if (!response.body) {
+      console.log("No response body for streaming, falling back.");
+      return chatCompletion(options);
+    }
+
+    // Parse SSE stream
+    let contentAccum = "";
+    const toolCallAccum: Map<
+      number,
+      { id: string; name: string; arguments: string }
+    > = new Map();
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    try {
+      let streamDone = false;
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) { streamDone = true; break; }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Process complete SSE lines
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || ""; // Keep incomplete line in buffer
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith("data:")) continue;
+
+          const data = trimmed.slice(5).trim();
+          if (data === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(data) as {
+              choices: Array<{
+                delta: StreamDelta;
+                finish_reason: string | null;
+              }>;
+            };
+            const delta = parsed.choices?.[0]?.delta;
+            if (!delta) continue;
+
+            // Accumulate text content
+            if (delta.content) {
+              contentAccum += delta.content;
+              onPartialContent?.(delta.content);
+            }
+
+            // Accumulate tool calls
+            if (delta.tool_calls) {
+              for (const tc of delta.tool_calls) {
+                const existing = toolCallAccum.get(tc.index);
+                if (!existing) {
+                  toolCallAccum.set(tc.index, {
+                    id: tc.id || "",
+                    name: tc.function?.name || "",
+                    arguments: tc.function?.arguments || "",
+                  });
+                } else {
+                  if (tc.id) existing.id = tc.id;
+                  if (tc.function?.name) existing.name += tc.function.name;
+                  if (tc.function?.arguments)
+                    existing.arguments += tc.function.arguments;
+                }
+              }
+            }
+          } catch {
+            // Skip malformed JSON lines
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    // Build response
+    const toolCalls: ToolCall[] | null =
+      toolCallAccum.size > 0
+        ? Array.from(toolCallAccum.values()).map((tc) => ({
+            id: tc.id || `stream_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+            type: "function" as const,
+            function: {
+              name: tc.name,
+              arguments: tc.arguments,
+            },
+          }))
+        : null;
+
+    return {
+      content: contentAccum || null,
+      toolCalls,
+    };
+  } catch (error) {
+    // If streaming fails with non-abort error, fall back to non-streaming
+    if (
+      error instanceof DOMException ||
+      (error instanceof Error && error.name === "AbortError")
+    ) {
+      throw error; // Re-throw abort errors
+    }
+    console.log(
+      `Streaming failed: ${error instanceof Error ? error.message : "unknown"}, falling back.`,
+    );
+    return chatCompletion(options);
+  }
 }
 
 // ─── Multimodal: Image Analysis ──────────────────────────────

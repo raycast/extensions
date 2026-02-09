@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useState, useCallback, useRef } from "react";
 import { RankedFileResult, AgentState, AgentStep } from "./lib/types";
-import { runAgent } from "./lib/agent";
+import { runAgent, AgentSession } from "./lib/agent";
 
 // ─── Media Type Detection ────────────────────────────────────
 
@@ -225,6 +225,7 @@ export default function RecallFileCommand() {
   const [searchText, setSearchText] = useState("");
   const [showThinking, setShowThinking] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const sessionRef = useRef<AgentSession | null>(null);
 
   // Check if API key is configured
   const preferences = getPreferenceValues<Preferences.RecallFile>();
@@ -263,6 +264,19 @@ Go to **Extension Preferences** to set:
     }
     abortControllerRef.current = new AbortController();
 
+    // Detect multi-turn: if query contains "；" or ";", it's a refinement
+    const isRefinement =
+      sessionRef.current !== null &&
+      (query.includes("；") || query.includes(";"));
+
+    // For refinement, pass the previous session
+    const previousSession = isRefinement ? sessionRef.current ?? undefined : undefined;
+
+    if (!isRefinement) {
+      // Fresh search: clear session
+      sessionRef.current = null;
+    }
+
     setState({
       phase: "thinking",
       query,
@@ -276,7 +290,7 @@ Go to **Extension Preferences** to set:
     try {
       await showToast({
         style: Toast.Style.Animated,
-        title: "Agent is thinking...",
+        title: isRefinement ? "Refining search..." : "Agent is thinking...",
       });
 
       const result = await runAgent(
@@ -294,7 +308,11 @@ Go to **Extension Preferences** to set:
           }
         },
         abortControllerRef.current.signal,
+        previousSession,
       );
+
+      // Save session for potential multi-turn continuation
+      sessionRef.current = result.session;
 
       if (result.files.length === 0) {
         setState((prev) => ({
@@ -493,6 +511,7 @@ ${thinkingSection}
               title="Try Again"
               icon={Icon.MagnifyingGlass}
               onAction={() => {
+                sessionRef.current = null;
                 setState({
                   phase: "idle",
                   query: "",
@@ -848,6 +867,7 @@ ${thinkingSection}
                       icon={Icon.MagnifyingGlass}
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
                       onAction={() => {
+                        sessionRef.current = null;
                         setState({
                           phase: "idle",
                           query: "",

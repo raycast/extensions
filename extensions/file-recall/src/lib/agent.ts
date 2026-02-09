@@ -4,15 +4,27 @@
  */
 
 import { ChatMessage, AgentStep, AgentResult } from "./types";
-import { chatCompletion, resetFunctionCallingState } from "./llm";
+import {
+  chatCompletion,
+  streamChatCompletion,
+  resetFunctionCallingState,
+} from "./llm";
 import {
   TOOL_DEFINITIONS,
   executeTool,
   resetFileRegistry,
   getRegisteredFiles,
 } from "./tools";
+import { ToolDefinition } from "./types";
 
 const MAX_ITERATIONS = 12;
+const NUDGE_SOFT_THRESHOLD = 4; // After 4 tool calls: gentle nudge
+const NUDGE_HARD_THRESHOLD = 8; // After 8 tool calls: hard deadline
+
+/** Image extensions used for dynamic tool filtering (show analyze_image only when relevant) */
+const IMAGE_EXTS = new Set([
+  "png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff", "tif", "heic", "heif", "svg",
+]);
 
 export type OnStepCallback = (step: AgentStep) => void;
 
@@ -204,32 +216,117 @@ function buildSystemPrompt(): string {
   return lines.join("\n");
 }
 
+// ─── Session Management ──────────────────────────────────────
+
+/**
+ * Represents an agent session that can persist across multi-turn interactions.
+ * When the user refines a search (e.g., adds clues), we keep the existing
+ * messages and file registry instead of starting from scratch.
+ */
+export interface AgentSession {
+  /** Conversation history from the previous run */
+  messages: ChatMessage[];
+  /** Whether this is a continuation (multi-turn) */
+  isContinuation: boolean;
+}
+
+/**
+ * Create an empty session (for first query).
+ */
+export function createEmptySession(): AgentSession {
+  return { messages: [], isContinuation: false };
+}
+
 /**
  * Run the agent loop. The LLM autonomously decides which tools to call and when to stop.
  *
  * @param userQuery - The user's natural language file description
  * @param onStep - Callback for each step (for live UI updates)
  * @param signal - Optional AbortSignal to cancel the agent loop
- * @returns AgentResult with ranked files, summary, and questions
+ * @param previousSession - Optional previous session for multi-turn refinement
+ * @returns AgentResult with ranked files, summary, questions, and the session for continuation
  */
 export async function runAgent(
   userQuery: string,
   onStep: OnStepCallback,
   signal?: AbortSignal,
-): Promise<AgentResult> {
-  // Reset state for this new agent run
-  resetFileRegistry();
+  previousSession?: AgentSession,
+): Promise<AgentResult & { session: AgentSession }> {
+  const isMultiTurn = previousSession?.isContinuation ?? false;
+
+  if (!isMultiTurn) {
+    // Fresh search: reset everything
+    resetFileRegistry();
+  }
   resetFunctionCallingState();
 
   // Pre-analyze user query for guardrails
   const userMentionedTime = queryMentionsTime(userQuery);
 
-  const messages: ChatMessage[] = [
-    { role: "system", content: buildSystemPrompt() },
-    { role: "user", content: userQuery },
-  ];
+  // ─── Initialize messages ──────────────────────────────────
+  let messages: ChatMessage[];
+
+  if (isMultiTurn && previousSession && previousSession.messages.length > 0) {
+    // Multi-turn: keep previous conversation and append new user message
+    messages = [
+      ...previousSession.messages,
+      {
+        role: "user",
+        content: `[Follow-up clue]: ${userQuery}\n\nThe user has provided additional information. Use the files already found in previous searches plus this new clue to refine results. Call finish with the best matches.`,
+      },
+    ];
+    onStep({
+      type: "thinking",
+      content: "Refining search with new clues from previous context...",
+    });
+  } else {
+    // Fresh search: start from scratch
+    messages = [
+      { role: "system", content: buildSystemPrompt() },
+      { role: "user", content: userQuery },
+    ];
+
+    // ─── Planning Phase ──────────────────────────────────────
+    // Ask the LLM to make a brief plan before tool execution.
+    // This focuses the agent and reduces "wandering" search behavior.
+    try {
+      if (!signal?.aborted) {
+        onStep({ type: "thinking", content: "Planning search strategy..." });
+
+        const planResponse = await chatCompletion({
+          messages: [
+            ...messages,
+            {
+              role: "system",
+              content:
+                `Before searching, briefly plan your approach in 1-3 steps. ` +
+                `Analyze the user's query: what keywords to search, what file type is likely, ` +
+                `and whether content verification is needed. ` +
+                `Be concise (2-4 sentences). Then proceed to execute.`,
+            },
+          ],
+          maxTokens: 300,
+          temperature: 0.2,
+          signal,
+        });
+
+        if (planResponse.content) {
+          onStep({ type: "thinking", content: planResponse.content });
+          // Inject plan as assistant message so the LLM follows its own plan
+          messages.push({
+            role: "assistant",
+            content: planResponse.content,
+          });
+        }
+      }
+    } catch {
+      // Planning is optional — if it fails (abort, API error), just skip it
+      console.log("Planning phase skipped due to error.");
+    }
+  }
 
   let agentResult: AgentResult | null = null;
+  let totalToolCalls = 0;
 
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
     // Check if cancelled before each iteration
@@ -243,13 +340,64 @@ export async function runAgent(
 
     let response;
     try {
-      // Call LLM with tools
-      response = await chatCompletion({
-        messages,
-        tools: TOOL_DEFINITIONS,
-        maxTokens: 4000,
+      // Compress old tool results to save context tokens
+      let compressedMessages = compressMessages(messages);
+
+      // Token overflow protection: aggressive compression if approaching limit
+      const estimatedTokens = estimateTokens(compressedMessages);
+      if (estimatedTokens > TOKEN_SAFETY_LIMIT) {
+        console.log(
+          `Token overflow protection: ~${estimatedTokens} tokens, applying aggressive compression`,
+        );
+        compressedMessages = aggressiveCompress(messages);
+      }
+
+      // Dynamic temperature: lower as we get deeper into iterations (more deterministic)
+      const dynamicTemp =
+        totalToolCalls >= NUDGE_HARD_THRESHOLD
+          ? 0.1
+          : totalToolCalls >= NUDGE_SOFT_THRESHOLD
+            ? 0.2
+            : 0.3;
+
+      // Dynamic max tokens: lower in later phases (shorter, more focused responses)
+      const dynamicMaxTokens =
+        totalToolCalls >= NUDGE_SOFT_THRESHOLD ? 2000 : 4000;
+
+      // Dynamic tool filtering: only show tools relevant to current phase
+      const registeredFiles = getRegisteredFiles();
+      const hasFiles = registeredFiles.length > 0;
+      const hasImages = registeredFiles.some((f) =>
+        IMAGE_EXTS.has(f.extension.toLowerCase()),
+      );
+      const availableTools = getAvailableTools(hasFiles, hasImages);
+
+      // Call LLM with filtered tools (streaming for real-time feedback)
+      let streamBuffer = "";
+      response = await streamChatCompletion({
+        messages: compressedMessages,
+        tools: availableTools,
+        temperature: dynamicTemp,
+        maxTokens: dynamicMaxTokens,
         signal,
+        onPartialContent: (text) => {
+          // Accumulate streaming text and emit on sentence boundaries
+          streamBuffer += text;
+          if (
+            streamBuffer.includes(".") ||
+            streamBuffer.includes("。") ||
+            streamBuffer.includes("\n") ||
+            streamBuffer.length > 60
+          ) {
+            onStep({ type: "thinking", content: streamBuffer.trim() });
+            streamBuffer = "";
+          }
+        },
       });
+      // Flush any remaining buffer
+      if (streamBuffer.trim()) {
+        onStep({ type: "thinking", content: streamBuffer.trim() });
+      }
     } catch (error) {
       // If aborted, break out of the loop gracefully (partial results will be returned)
       if (signal?.aborted) {
@@ -297,14 +445,10 @@ export async function runAgent(
       break;
     }
 
-    // Execute each tool call
-    for (const toolCall of response.toolCalls) {
-      // Check if cancelled before each tool execution
-      if (signal?.aborted) break;
-
+    // ─── Pre-process tool calls (guardrails) ────────────────
+    const preparedCalls = response.toolCalls.map((toolCall) => {
       const toolName = toolCall.function.name;
       let toolArgsStr = toolCall.function.arguments;
-
       let toolArgs: Record<string, unknown> = {};
       try {
         toolArgs = JSON.parse(toolArgsStr);
@@ -324,46 +468,59 @@ export async function runAgent(
         }
       }
 
-      // Emit tool_call step
+      return { toolCall, toolName, toolArgsStr, toolArgs };
+    });
+
+    // Emit all tool_call steps upfront
+    for (const { toolName, toolArgs } of preparedCalls) {
       onStep({
         type: "tool_call",
         content: formatToolCallDescription(toolName, toolArgs),
         toolName,
         toolArgs,
       });
+    }
 
-      // Execute the tool
-      try {
-        const { result, agentResult: finishResult } = await executeTool(
-          toolName,
-          toolArgsStr,
-        );
+    // ─── Execute tools in parallel ────────────────────────────
+    if (signal?.aborted) break;
+
+    const toolResults = await Promise.allSettled(
+      preparedCalls.map(({ toolName, toolArgsStr }) =>
+        executeTool(toolName, toolArgsStr),
+      ),
+    );
+
+    // ─── Process results in order ─────────────────────────────
+    for (let i = 0; i < preparedCalls.length; i++) {
+      const { toolCall, toolName } = preparedCalls[i];
+      const settled = toolResults[i];
+
+      if (settled.status === "fulfilled") {
+        const { result, agentResult: finishResult } = settled.value;
 
         // Emit tool_result step
         const resultSummary = summarizeToolResult(toolName, result);
-        onStep({
-          type: "tool_result",
-          content: resultSummary,
-          toolName,
-        });
+        onStep({ type: "tool_result", content: resultSummary, toolName });
 
-        // Add tool result to conversation
+        // Add (possibly truncated) tool result to conversation
         messages.push({
           role: "tool",
-          content: result,
+          content: truncateToolResultForLLM(toolName, result),
           tool_call_id: toolCall.id,
         });
 
-        // If this was finish, capture the result
+        // If this was finish, validate and capture the result
         if (toolName === "finish" && finishResult) {
-          agentResult = finishResult;
+          agentResult = validateFinishResult(finishResult);
         }
-      } catch (error) {
-        // If aborted during tool execution, break gracefully
+      } else {
+        // Tool execution failed
         if (signal?.aborted) break;
 
         const errorMsg =
-          error instanceof Error ? error.message : "Tool execution failed";
+          settled.reason instanceof Error
+            ? settled.reason.message
+            : "Tool execution failed";
 
         onStep({
           type: "error",
@@ -376,12 +533,41 @@ export async function runAgent(
           content: JSON.stringify({ error: errorMsg }),
           tool_call_id: toolCall.id,
         });
+
+        // Error recovery guidance: tell the LLM to try a different approach
+        messages.push({
+          role: "system",
+          content:
+            `Tool "${toolName}" failed with: ${errorMsg}. ` +
+            `Analyze the error and try a different approach. Do NOT retry with the same parameters.`,
+        });
       }
     }
+
+    // Track total tool calls for convergence nudging
+    totalToolCalls += response.toolCalls.length;
 
     // If finish was called, we're done
     if (agentResult) {
       break;
+    }
+
+    // ─── Convergence Nudge ──────────────────────────────────
+    // Inject system messages to push the LLM toward finishing.
+    if (totalToolCalls >= NUDGE_HARD_THRESHOLD) {
+      messages.push({
+        role: "system",
+        content:
+          `You have made ${totalToolCalls} tool calls. This is your LAST chance. ` +
+          `You MUST call finish now with your best matches (even if imperfect). Do NOT search again.`,
+      });
+    } else if (totalToolCalls >= NUDGE_SOFT_THRESHOLD) {
+      messages.push({
+        role: "system",
+        content:
+          `You have made ${totalToolCalls} tool calls. Please start wrapping up — ` +
+          `call finish with your best matches so far, or call finish with empty results and explain what you tried.`,
+      });
     }
   }
 
@@ -428,7 +614,224 @@ export async function runAgent(
     content: agentResult.summary,
   });
 
-  return agentResult;
+  // Return result with session for potential multi-turn continuation
+  return {
+    ...agentResult,
+    session: {
+      messages: messages,
+      isContinuation: true,
+    },
+  };
+}
+
+// ─── Dynamic Tool Filtering ──────────────────────────────────
+
+/**
+ * Search-phase tools: initial file discovery.
+ */
+const SEARCH_TOOLS = new Set([
+  "search_files",
+  "find_directories",
+  "list_recent_files",
+  "finish",
+]);
+
+/**
+ * Verification tools: need files in the registry first.
+ */
+const VERIFY_TOOLS = new Set([
+  "read_file_preview",
+  "grep_files",
+  "get_file_metadata",
+]);
+
+/**
+ * Filter available tools based on the current agent state.
+ * - Before any files are found: only search tools
+ * - After files are found: add verification tools
+ * - If image files exist in results: add analyze_image
+ *
+ * This reduces tool definition tokens by ~40% in early iterations
+ * and prevents the LLM from calling irrelevant tools.
+ */
+function getAvailableTools(hasFiles: boolean, hasImages: boolean): ToolDefinition[] {
+  return TOOL_DEFINITIONS.filter((t) => {
+    const name = t.function.name;
+
+    // Always available
+    if (SEARCH_TOOLS.has(name)) return true;
+
+    // Verification tools: only after we have files
+    if (VERIFY_TOOLS.has(name)) return hasFiles;
+
+    // analyze_image: only when images exist in results
+    if (name === "analyze_image") return hasFiles && hasImages;
+
+    return true;
+  });
+}
+
+// ─── Token Estimation & Overflow Protection ──────────────────
+
+/**
+ * Rough token estimate for a message array.
+ * Uses ~4 chars per token heuristic (good enough for overflow detection).
+ */
+function estimateTokens(messages: ChatMessage[]): number {
+  let chars = 0;
+  for (const msg of messages) {
+    chars += (msg.content || "").length;
+    if (msg.tool_calls) {
+      for (const tc of msg.tool_calls) {
+        chars += tc.function.name.length + tc.function.arguments.length;
+      }
+    }
+  }
+  return Math.ceil(chars / 4);
+}
+
+/**
+ * Maximum estimated tokens before aggressive compression kicks in.
+ * Most models support 8K-128K, so 10K is a conservative safety threshold.
+ */
+const TOKEN_SAFETY_LIMIT = 10000;
+
+/**
+ * Aggressively compress messages when approaching token limit.
+ * Keeps only system, user, and the last 2 tool result pairs.
+ */
+function aggressiveCompress(messages: ChatMessage[]): ChatMessage[] {
+  const result: ChatMessage[] = [];
+  const toolResults: number[] = [];
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    // Always keep system and user messages
+    if (msg.role === "system" || msg.role === "user") {
+      result.push(msg);
+    } else {
+      toolResults.push(i);
+    }
+  }
+
+  // Keep only the last 4 non-system/user messages (roughly 2 tool call + result pairs)
+  const recentIndices = new Set(toolResults.slice(-4));
+  for (const idx of toolResults) {
+    if (recentIndices.has(idx)) {
+      result.push(messages[idx]);
+    } else {
+      // Ultra-brief for old messages
+      const msg = messages[idx];
+      if (msg.role === "tool") {
+        result.push({ ...msg, content: '{"summary":"(compressed)"}' });
+      } else {
+        result.push({ ...msg, content: msg.content ? msg.content.slice(0, 100) : "" });
+      }
+    }
+  }
+
+  return result;
+}
+
+// ─── Context Compression ─────────────────────────────────────
+
+/**
+ * Number of recent tool-result messages to keep in full.
+ * Older tool results are compressed to one-line summaries.
+ */
+const KEEP_RECENT_TOOL_RESULTS = 4;
+
+/**
+ * Compress old tool results in the message history to save context tokens.
+ * - System + user messages: always kept intact
+ * - Recent N tool result messages: kept in full
+ * - Older tool result messages: replaced with a one-line summary
+ * - Assistant messages: always kept (they contain tool_calls references)
+ */
+function compressMessages(messages: ChatMessage[]): ChatMessage[] {
+  // Find indices of all tool-result messages
+  const toolResultIndices: number[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    if (messages[i].role === "tool") {
+      toolResultIndices.push(i);
+    }
+  }
+
+  // If we have few tool results, no compression needed
+  if (toolResultIndices.length <= KEEP_RECENT_TOOL_RESULTS) {
+    return messages;
+  }
+
+  // Indices of old tool results that should be compressed
+  const oldIndices = new Set(
+    toolResultIndices.slice(0, -KEEP_RECENT_TOOL_RESULTS),
+  );
+
+  return messages.map((msg, i) => {
+    if (!oldIndices.has(i)) return msg;
+
+    // Compress old tool result to a short summary
+    const summary = summarizeToolResultBrief(msg.content || "");
+    return {
+      ...msg,
+      content: summary,
+    };
+  });
+}
+
+/**
+ * Create a very brief summary of a tool result (for compressed context).
+ */
+function summarizeToolResultBrief(resultJson: string): string {
+  try {
+    const r = JSON.parse(resultJson);
+
+    if (r.error) return JSON.stringify({ summary: `Error: ${r.error}` });
+    if (r.already_searched)
+      return JSON.stringify({ summary: "Redundant search skipped." });
+    if (r.count !== undefined && r.files) {
+      const names = r.files
+        .slice(0, 5)
+        .map((f: { name: string }) => f.name)
+        .join(", ");
+      return JSON.stringify({
+        summary: `Found ${r.count} files: ${names}${r.count > 5 ? "..." : ""}`,
+      });
+    }
+    if (r.count !== undefined && r.directories) {
+      return JSON.stringify({
+        summary: `Found ${r.count} directories.`,
+      });
+    }
+    if (r.pattern !== undefined) {
+      return JSON.stringify({
+        summary: `grep "${r.pattern}": ${r.total_matches || 0} matches in ${r.files_with_matches || 0} files.`,
+      });
+    }
+    if (r.preview !== undefined) {
+      return JSON.stringify({
+        summary: r.search_term
+          ? `File search for "${r.search_term}": ${r.found ? `${r.match_count} matches` : "not found"}.`
+          : `Read ${r.lines_shown || 0} lines.`,
+      });
+    }
+    if (r.summary) {
+      return JSON.stringify({
+        summary: (r.summary as string).slice(0, 100),
+      });
+    }
+    if (r.description) {
+      return JSON.stringify({
+        summary: `Image: ${(r.description as string).slice(0, 100)}`,
+      });
+    }
+    // Fallback: just stringify keys
+    return JSON.stringify({
+      summary: `Result keys: ${Object.keys(r).join(", ")}`,
+    });
+  } catch {
+    return JSON.stringify({ summary: "Tool completed." });
+  }
 }
 
 // ─── Helper Functions ────────────────────────────────────────
@@ -497,6 +900,91 @@ function formatToolCallDescription(
     }
     default:
       return `Calling ${toolName}`;
+  }
+}
+
+/**
+ * Truncate a tool result before sending to the LLM context.
+ * Keeps the most important information while reducing token usage.
+ * This is the "Observation Filter" layer between raw tool output and the LLM.
+ */
+function truncateToolResultForLLM(
+  toolName: string,
+  resultJson: string,
+): string {
+  try {
+    const result = JSON.parse(resultJson);
+
+    switch (toolName) {
+      case "search_files":
+      case "list_recent_files": {
+        // Cap at 10 files for LLM context (it doesn't need all 20)
+        if (result.files && result.files.length > 10) {
+          result.files = result.files.slice(0, 10);
+          result.truncated = true;
+          result.note = `Showing top 10 of ${result.count} files. Use these file_ids.`;
+        }
+        return JSON.stringify(result);
+      }
+
+      case "grep_files": {
+        // Limit matches per file to 3 for LLM context
+        if (result.results) {
+          for (const fileResult of result.results) {
+            if (fileResult.matches && fileResult.matches.length > 3) {
+              fileResult.matches = fileResult.matches.slice(0, 3);
+              fileResult.truncated = true;
+            }
+          }
+        }
+        return JSON.stringify(result);
+      }
+
+      case "read_file_preview": {
+        // Truncate preview to 2000 chars for LLM
+        if (result.preview && result.preview.length > 2000) {
+          result.preview =
+            result.preview.slice(0, 2000) + "\n... (truncated for brevity)";
+        }
+        return JSON.stringify(result);
+      }
+
+      case "get_file_metadata": {
+        // Keep summary but limit details to most useful keys
+        if (result.details) {
+          const importantKeys = new Set([
+            "Title",
+            "Authors",
+            "Kind",
+            "Pages",
+            "Duration (sec)",
+            "Camera Model",
+            "Is Screenshot",
+            "Screenshot Type",
+            "Width (px)",
+            "Height (px)",
+            "Genre",
+            "Album",
+            "Codecs",
+            "Description",
+            "Downloaded From",
+          ]);
+          const filtered: Record<string, string> = {};
+          for (const [k, v] of Object.entries(result.details)) {
+            if (importantKeys.has(k)) {
+              filtered[k] = v as string;
+            }
+          }
+          result.details = filtered;
+        }
+        return JSON.stringify(result);
+      }
+
+      default:
+        return resultJson;
+    }
+  } catch {
+    return resultJson;
   }
 }
 
@@ -574,4 +1062,46 @@ function shortenPath(path: string): string {
   const home = process.env.HOME || "";
   if (path.startsWith(home)) return "~" + path.slice(home.length);
   return path;
+}
+
+// ─── Finish Result Validation ────────────────────────────────
+
+/**
+ * Validate and clean up the finish result from the LLM.
+ * - Filter out files with invalid file_ids (resolved to undefined by registry)
+ * - Clamp scores to [0, 100]
+ * - Warn if all scores are identical (likely hallucination)
+ * - Ensure match_reason is not empty
+ */
+function validateFinishResult(result: AgentResult): AgentResult {
+  // Filter: only files that actually exist (valid file_id resolution)
+  const validFiles = result.files.filter((f) => f.path && f.name);
+
+  // Clamp scores and fix empty reasons
+  for (const f of validFiles) {
+    f.relevanceScore = Math.max(0, Math.min(100, f.relevanceScore));
+    if (!f.matchReason || f.matchReason.trim().length === 0) {
+      f.matchReason = "Matched by agent search.";
+    }
+  }
+
+  // Detect hallucinated uniform scores (e.g. all files scored exactly 85)
+  if (validFiles.length > 2) {
+    const scores = new Set(validFiles.map((f) => f.relevanceScore));
+    if (scores.size === 1) {
+      console.warn(
+        `Finish validation: all ${validFiles.length} files have identical score ${[...scores][0]}, adjusting.`,
+      );
+      // Redistribute scores: first file keeps score, subsequent ones get gradually lower
+      const baseScore = validFiles[0].relevanceScore;
+      validFiles.forEach((f, i) => {
+        f.relevanceScore = Math.max(10, baseScore - i * 5);
+      });
+    }
+  }
+
+  return {
+    ...result,
+    files: validFiles,
+  };
 }
