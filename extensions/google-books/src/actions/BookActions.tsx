@@ -21,21 +21,24 @@ export function BookActionSections({
   const hasCover = !!getLargeCover(item);
   const isbn = getISBN(item);
   const authors = item.volumeInfo?.authors?.join(", ");
+  const link = item.volumeInfo?.infoLink ?? item.selfLink;
 
   return (
     <>
       <ActionPanel.Section>
-        <Action.OpenInBrowser url={item.volumeInfo.infoLink} />
+        {link && <Action.OpenInBrowser url={link} />}
         <Action.Push icon={Icon.Text} title="View Book Description" target={<BookDetail item={item} />} />
         {hasCover && <Action.Push icon={Icon.Image} title="View Book Cover" target={<BookCover item={item} />} />}
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy">
-        <Action.CopyToClipboard
-          icon={Icon.Link}
-          shortcut={Keyboard.Shortcut.Common.Copy}
-          title="Copy Link"
-          content={item.volumeInfo.infoLink}
-        />
+        {link && (
+          <Action.CopyToClipboard
+            icon={Icon.Link}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+            title="Copy Link"
+            content={link}
+          />
+        )}
         {authors && (
           <Action.CopyToClipboard
             icon={Icon.Person}

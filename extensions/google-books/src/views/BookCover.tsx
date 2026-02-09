@@ -83,9 +83,11 @@ export function BookCover({ item }: { item: VolumeItem }) {
               />
             </ActionPanel.Section>
           )}
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={item.volumeInfo.infoLink} />
-          </ActionPanel.Section>
+          {(item.volumeInfo?.infoLink || item.selfLink) && (
+            <ActionPanel.Section>
+              <Action.OpenInBrowser url={item.volumeInfo?.infoLink ?? item.selfLink} />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
