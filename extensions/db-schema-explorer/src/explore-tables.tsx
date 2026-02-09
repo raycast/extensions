@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Keyboard, List, launchCommand, LaunchType, type LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, List, launchCommand, LaunchType, type LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getDatabases, getDefaultDatabase, type StoredDatabase } from "./lib/databases";
 import { readSchemaCache, type SchemaCache, type TableCacheEntry } from "./lib/cache";
@@ -318,11 +318,7 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
         filtering={true}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard
-              title={`Copy Full Schema (${items.length} Tables)`}
-              content={fullSchemaDdl}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-            />
+            <Action.CopyToClipboard title={`Copy Full Schema (${items.length} Tables)`} content={fullSchemaDdl} />
             {selectedOrderedKeys.length > 0 && (
               <>
                 <Action.CopyToClipboard
@@ -361,19 +357,14 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
                   detail={<List.Item.Detail markdown={markdown} />}
                   actions={
                     <ActionPanel>
-                      <Action.CopyToClipboard
-                        title="Copy DDL"
-                        content={entry.ddl}
-                        shortcut={Keyboard.Shortcut.Common.Copy}
+                      <Action.CopyToClipboard title="Copy DDL" content={entry.ddl} />
+                      <Action
+                        title={isSelected ? "Remove from Selection" : "Add to Selection"}
+                        onAction={() => toggleTableSelection(key)}
                       />
                       <Action.CopyToClipboard
                         title={`Copy Full Schema (${items.length} Tables)`}
                         content={fullSchemaDdl}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-                      />
-                      <Action
-                        title={isSelected ? "Remove from Selection" : "Add to Selection"}
-                        onAction={() => toggleTableSelection(key)}
                       />
                       {selectedOrderedKeys.length > 0 && (
                         <>
