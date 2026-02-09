@@ -26,11 +26,6 @@ const ResponseSchema = z.object({
 
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
-interface Preferences {
-  apiKey: string;
-  model: string;
-}
-
 export default function Command(props: LaunchProps<{ arguments: { text: string } }>) {
   const { text } = props.arguments;
   const preferences = getPreferenceValues<Preferences>();
