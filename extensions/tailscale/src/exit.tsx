@@ -12,7 +12,7 @@ import {
   Device,
   MULLVAD_DEVICE_TAG,
 } from "./shared";
-import DeviceItem from "./components/DeviceItem";
+import { getDeviceListIcon } from "./components/deviceListIcon";
 
 function loadExitNodes(status: StatusResponse) {
   const devices = getDevices(status);
@@ -76,18 +76,23 @@ export default function ExitNodeList() {
           {exitNodes?.map((exitNode) => {
             const isMullvad = exitNode.tags?.includes(MULLVAD_DEVICE_TAG) && exitNode.location;
             const countryFlag = isMullvad && exitNode.location ? flag(exitNode.location.CountryCode) : undefined;
+            const title = exitNode.name;
             const subtitle =
               isMullvad && exitNode.location
                 ? `Mullvad Exit Node - ${exitNode.location.City}, ${exitNode.location.Country} ${countryFlag ? ` ${countryFlag}` : ""}`
                 : `${exitNode.ipv4}${exitNode.os ? ` - ${exitNode.os}` : ""}`;
 
             return (
-              <DeviceItem
-                key={exitNode.key}
-                device={exitNode}
-                showLoginName={false}
+              <List.Item
+                title={title}
                 subtitle={subtitle}
-                accessories={[{ tag: exitNode.exitnode ? "Connected" : "" }]}
+                key={exitNode.key}
+                icon={getDeviceListIcon(exitNode.online)}
+                accessories={[
+                  {
+                    tag: exitNode.exitnode ? `Connected` : "",
+                  },
+                ]}
                 actions={
                   <ActionPanel>
                     <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.dns, false)} />
