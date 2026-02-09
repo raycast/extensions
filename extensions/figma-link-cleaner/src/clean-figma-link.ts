@@ -17,6 +17,8 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
 import {
   isFigmaFrontmost,
+  isFigmaRunning,
+  focusFigmaAndCopyLink,
   sendCopyLinkKeystroke,
   AccessibilityPermissionError,
   sleep,
@@ -25,7 +27,10 @@ import { isFigmaUrl, cleanFigmaUrl } from "./lib/figma";
 import { tryShortenUrl, isShortenerEnabled } from "./lib/shortener";
 
 /** Delay after sending Cmd+L before reading clipboard (ms) */
-const KEYSTROKE_DELAY = 350;
+const KEYSTROKE_DELAY = 500;
+
+/** Extra delay when Figma needed to be focused first (ms) */
+const FOCUS_EXTRA_DELAY = 300;
 
 /** Number of retries if clipboard doesn't update */
 const MAX_RETRIES = 1;
@@ -35,15 +40,17 @@ const MAX_RETRIES = 1;
  */
 export default async function Command() {
   try {
-    // Step 1: Check if Figma is the frontmost app
+    // Step 1: Check if Figma is frontmost or at least running
     const figmaIsActive = isFigmaFrontmost();
+    const figmaIsRunning = figmaIsActive || isFigmaRunning();
 
     // Step 2: Get current clipboard to detect changes later
     const clipboardBefore = await Clipboard.readText();
 
-    // Step 3: If Figma is active, try to copy the selection link
-    if (figmaIsActive) {
-      const success = await tryCopyFromFigma(clipboardBefore);
+    // Step 3: If Figma is running, copy the selection link
+    if (figmaIsRunning) {
+      const needsFocus = !figmaIsActive;
+      const success = await tryCopyFromFigma(clipboardBefore, needsFocus);
       if (!success) {
         // tryCopyFromFigma shows its own error toast
         return;
@@ -55,8 +62,8 @@ export default async function Command() {
 
     // Step 5: Check if we have a Figma URL
     if (!clipboardText || !isFigmaUrl(clipboardText)) {
-      // Different message depending on whether Figma was active
-      if (figmaIsActive) {
+      // Different message depending on whether Figma was running
+      if (figmaIsRunning) {
         await showToast({
           style: Toast.Style.Failure,
           title: "No Figma link found",
@@ -132,17 +139,26 @@ export default async function Command() {
  * Attempts to copy the current Figma selection link using Cmd+L.
  *
  * @param clipboardBefore - The clipboard content before attempting copy
+ * @param needsFocus - If true, brings Figma to front first (e.g., when run from Raycast search)
  * @returns true if successful (clipboard was updated), false otherwise
  */
 async function tryCopyFromFigma(
   clipboardBefore: string | undefined,
+  needsFocus = false,
 ): Promise<boolean> {
   let attempts = 0;
 
   while (attempts <= MAX_RETRIES) {
     try {
-      // Send Cmd+L to Figma
-      sendCopyLinkKeystroke();
+      // Send Cmd+L to Figma (focus first if needed)
+      if (needsFocus && attempts === 0) {
+        // Combined AppleScript: focus Figma → verify frontmost → send Cmd+L
+        focusFigmaAndCopyLink();
+        // Extra wait since Figma was just brought to front
+        await sleep(FOCUS_EXTRA_DELAY);
+      } else {
+        sendCopyLinkKeystroke();
+      }
 
       // Wait for clipboard to update
       await sleep(KEYSTROKE_DELAY);
