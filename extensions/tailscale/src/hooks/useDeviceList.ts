@@ -34,7 +34,7 @@ export function useDeviceList(options: UseDeviceListOptions = {}) {
       }
     }
     fetch();
-  }, []);
+  }, [filter, errorMessage]);
 
   return { devices, error, isLoading: !devices && !error };
 }
