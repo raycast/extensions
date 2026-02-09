@@ -9,7 +9,7 @@ export async function uploadToBunny(
   filePath: string,
   defaultPath: string,
 ): Promise<string> {
-  const { storageZone, apiKey, domain, storageEndpoint } = provider.credentials;
+  const { storageZone, apiKey, storageEndpoint } = provider.credentials;
   if (!storageZone || !apiKey) throw new Error("Missing BunnyCDN credentials");
   const endpoint = storageEndpoint || "storage.bunnycdn.com";
   const fileName = path.basename(filePath);
@@ -17,18 +17,6 @@ export async function uploadToBunny(
   const url = `https://${endpoint}/${storageZone}/${key}`;
   const fileBuffer = fs.readFileSync(filePath);
   const contentType = mime.lookup(fileName) || "application/octet-stream";
-
-  console.log("[BunnyCDN] Upload Params:", {
-    storageZone,
-    apiKey: apiKey ? `***${apiKey.slice(-4)}` : undefined,
-    domain,
-    storageEndpoint: endpoint,
-    filePath,
-    key,
-    url,
-    contentType,
-    fileSize: fileBuffer.length,
-  });
 
   await new Promise<void>((resolve, reject) => {
     const req = https.request(
@@ -42,8 +30,6 @@ export async function uploadToBunny(
         },
       },
       (res) => {
-        console.log("[BunnyCDN] Response Status:", res.statusCode);
-        console.log("[BunnyCDN] Response Headers:", res.headers);
         if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
           resolve();
         } else {
@@ -52,14 +38,12 @@ export async function uploadToBunny(
             errorMsg += `\n${chunk.toString()}`;
           });
           res.on("end", () => {
-            console.error("[BunnyCDN] Upload Error:", errorMsg);
             reject(new Error(errorMsg));
           });
         }
       },
     );
     req.on("error", (err) => {
-      console.error("[BunnyCDN] Request Error:", err);
       reject(err);
     });
     req.write(fileBuffer);
@@ -73,26 +57,15 @@ export async function uploadToBunny(
 export function getPublicBunnyUrl(provider: CloudProviderAccount, filePath: string): string {
   const { storageZone, domain, pullZoneDomain } = provider.credentials;
   const fileName = path.basename(filePath);
-  console.log("[BunnyCDN] Public URL Params:", {
-    storageZone,
-    domain,
-    pullZoneDomain,
-    filePath,
-    fileName,
-    providerAccessLevel: provider.accessLevel,
-  });
   const key = provider.defaultPath ? `${provider.defaultPath.replace(/\/+$/, "")}/${fileName}` : fileName;
   if (provider.accessLevel === "public" && pullZoneDomain) {
-    console.log("[BunnyCDN] Using pull zone");
     // Use pull zone name to construct the URL
     return `https://${pullZoneDomain}.b-cdn.net/${key}`;
   } else if (provider.accessLevel === "public" && domain) {
-    console.log("[BunnyCDN] Using domain");
     const trimmedDomain = domain.replace(/\/+$/, "");
     const normalizedDomain = /^https?:\/\//.test(trimmedDomain) ? trimmedDomain : `https://${trimmedDomain}`;
     return `${normalizedDomain}/${key}`;
   } else {
-    console.log("[BunnyCDN] Using default public URL");
     // BunnyCDN default public URL (user must configure pull zone for this to work)
     return `https://${storageZone}.b-cdn.net/${key}`;
   }

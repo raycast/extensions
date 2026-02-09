@@ -67,7 +67,6 @@ export default function Command() {
           });
           links.push(link);
         } catch (err: unknown) {
-          console.error("Upload failed for file:", filePath, err);
           await showFailureToast(err, { title: `Upload failed: ${filePath.split("/").pop()}` });
           continue;
         }
@@ -82,7 +81,6 @@ export default function Command() {
         await showToast({ style: Toast.Style.Success, title: "All files uploaded", message: "See links below." });
       }
     } catch (e) {
-      console.error("General upload error:", e);
       await showToast({
         style: Toast.Style.Failure,
         title: "Upload failed",
