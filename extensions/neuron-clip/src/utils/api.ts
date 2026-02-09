@@ -1,7 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { getPreferenceValues } from "@raycast/api";
-
 export const API_URL = "https://www.neuronapp.tech";
 
 interface ClipResponse {
