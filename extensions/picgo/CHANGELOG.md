@@ -1,6 +1,6 @@
 # Picgo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-09
 
 - Add command `Upload Images`, supports local or clipboard images uploading via **PicGo**.
 - Remembering your uploader configuration with **Raycast LocalStorage**.
