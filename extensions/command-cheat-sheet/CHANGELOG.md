@@ -10,13 +10,13 @@ When releasing a new version, follow these guidelines:
 
 Update both `package.json` version and add a new section to this changelog.
 
-## [1.0.1] - 2026-02-05
+## [1.0.1] - {PR_MERGE_DATE}
 
 ### Fix
 
 - Fixed icon path
 
-## [1.0.0] - 2026-02-05
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
