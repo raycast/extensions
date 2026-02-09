@@ -296,11 +296,39 @@ Go to **Extension Preferences** to set:
       const result = await runAgent(
         query,
         (step: AgentStep) => {
-          // Append each step for live UI updates
-          setState((prev) => ({
-            ...prev,
-            steps: [...prev.steps, step],
-          }));
+          setState((prev) => {
+            const lastStep = prev.steps[prev.steps.length - 1];
+
+            // Merge consecutive "thinking" steps into one to avoid UI fragmentation.
+            // This handles streaming chunks and keeps the thinking view clean.
+            if (
+              step.type === "thinking" &&
+              lastStep?.type === "thinking" &&
+              !lastStep.toolName &&
+              !step.toolName
+            ) {
+              // If the new content is a short fragment (streaming chunk),
+              // append it to the previous thinking step
+              if (step.content.length < 20 && step.content !== "Analyzing...") {
+                const merged = [...prev.steps];
+                merged[merged.length - 1] = {
+                  ...lastStep,
+                  content: lastStep.content + step.content,
+                };
+                return { ...prev, steps: merged };
+              }
+
+              // If it's the full response (longer text that supersedes "Analyzing..."),
+              // replace the "Analyzing..." placeholder
+              if (lastStep.content === "Analyzing...") {
+                const merged = [...prev.steps];
+                merged[merged.length - 1] = step;
+                return { ...prev, steps: merged };
+              }
+            }
+
+            return { ...prev, steps: [...prev.steps, step] };
+          });
 
           // Update toast based on step type
           if (step.type === "tool_call") {

@@ -374,31 +374,25 @@ export async function runAgent(
       const availableTools = getAvailableTools(hasFiles, hasImages);
 
       // Call LLM with filtered tools (streaming for real-time feedback)
-      let streamBuffer = "";
+      // Streaming reduces time-to-first-token but we DON'T emit fragments
+      // as separate thinking steps — that causes UI fragmentation.
+      // Instead, we show a single progress indicator during streaming,
+      // and emit the full thinking text once streaming completes.
+      let streamedLength = 0;
       response = await streamChatCompletion({
         messages: compressedMessages,
         tools: availableTools,
         temperature: dynamicTemp,
         maxTokens: dynamicMaxTokens,
         signal,
-        onPartialContent: (text) => {
-          // Accumulate streaming text and emit on sentence boundaries
-          streamBuffer += text;
-          if (
-            streamBuffer.includes(".") ||
-            streamBuffer.includes("。") ||
-            streamBuffer.includes("\n") ||
-            streamBuffer.length > 60
-          ) {
-            onStep({ type: "thinking", content: streamBuffer.trim() });
-            streamBuffer = "";
+        onPartialContent: () => {
+          // Show a progress indicator only once (not per-chunk)
+          if (streamedLength === 0) {
+            onStep({ type: "thinking", content: "Analyzing..." });
           }
+          streamedLength++;
         },
       });
-      // Flush any remaining buffer
-      if (streamBuffer.trim()) {
-        onStep({ type: "thinking", content: streamBuffer.trim() });
-      }
     } catch (error) {
       // If aborted, break out of the loop gracefully (partial results will be returned)
       if (signal?.aborted) {
