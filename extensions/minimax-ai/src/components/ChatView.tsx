@@ -23,10 +23,7 @@ interface ChatViewProps {
   onDeleteConversation: (conversation: Conversation) => void;
 }
 
-function formatConversation(
-  messages: Message[],
-  streamingContent: string,
-): string {
+function formatConversation(messages: Message[], streamingContent: string): string {
   if (messages.length === 0 && !streamingContent) {
     return `# New Conversation
 
@@ -53,9 +50,7 @@ Type your message above and press **Enter** to send.`;
 function formatDate(timestamp: number): string {
   const date = new Date(timestamp);
   const now = new Date();
-  const diffDays = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
@@ -130,8 +125,7 @@ export function ChatView({
         // Block ALL selection changes during loading OR during submit
         // isSubmittingRef is synchronous, isLoading prop may lag behind
         // Programmatic selection from parent still works via useEffect
-        if (!id || id === selectedId || isLoading || isSubmittingRef.current)
-          return;
+        if (!id || id === selectedId || isLoading || isSubmittingRef.current) return;
 
         setSelectedId(id);
 
@@ -152,11 +146,7 @@ export function ChatView({
         detail={<List.Item.Detail markdown={markdown} />}
         actions={
           <ActionPanel>
-            <Action
-              title="Send Message"
-              icon={Icon.Message}
-              onAction={handleSendMessage}
-            />
+            <Action title="Send Message" icon={Icon.Message} onAction={handleSendMessage} />
             <Action
               title="New Chat"
               icon={Icon.Plus}
@@ -176,10 +166,7 @@ export function ChatView({
               ? formatConversation(conv.messages, streamingContent)
               : `**${conv.title}**\n\n${conv.messages.length} messages`;
             const convFullText = conv.messages
-              .map(
-                (m) =>
-                  `${m.role === "user" ? "You" : "Assistant"}: ${m.content}`,
-              )
+              .map((m) => `${m.role === "user" ? "You" : "Assistant"}: ${m.content}`)
               .join("\n\n");
 
             return (
@@ -188,18 +175,11 @@ export function ChatView({
                 key={conv.id}
                 icon={Icon.Message}
                 title={conv.title}
-                accessories={[
-                  { text: `${conv.messages.length}` },
-                  { text: formatDate(conv.updatedAt) },
-                ]}
+                accessories={[{ text: `${conv.messages.length}` }, { text: formatDate(conv.updatedAt) }]}
                 detail={<List.Item.Detail markdown={convMarkdown} />}
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="Send Message"
-                      icon={Icon.Message}
-                      onAction={handleSendMessage}
-                    />
+                    <Action title="Send Message" icon={Icon.Message} onAction={handleSendMessage} />
                     <Action
                       title="New Chat"
                       icon={Icon.Plus}

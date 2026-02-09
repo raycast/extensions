@@ -9,10 +9,16 @@
     "type": "git",
     "url": "https://github.com/MonforteGG/raycast-minimax"
   },
-  "categories": ["Productivity", "Developer Tools"],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "apiVersion": "1.93.0",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "ask-ai",
@@ -48,8 +54,14 @@
       "description": "MiniMax model to use for AI responses",
       "default": "MiniMax-M2.1",
       "data": [
-        { "title": "MiniMax M2.1 (Recommended)", "value": "MiniMax-M2.1" },
-        { "title": "MiniMax M2 (200k context)", "value": "MiniMax-M2" }
+        {
+          "title": "MiniMax M2.1 (Recommended)",
+          "value": "MiniMax-M2.1"
+        },
+        {
+          "title": "MiniMax M2 (200k context)",
+          "value": "MiniMax-M2"
+        }
       ]
     },
     {
@@ -68,10 +80,22 @@
       "description": "Controls randomness of responses",
       "default": "0.7",
       "data": [
-        { "title": "0.3 (Focused)", "value": "0.3" },
-        { "title": "0.7 (Balanced)", "value": "0.7" },
-        { "title": "1.0 (Creative)", "value": "1.0" },
-        { "title": "1.5 (Very Creative)", "value": "1.5" }
+        {
+          "title": "0.3 (Focused)",
+          "value": "0.3"
+        },
+        {
+          "title": "0.7 (Balanced)",
+          "value": "0.7"
+        },
+        {
+          "title": "1.0 (Creative)",
+          "value": "1.0"
+        },
+        {
+          "title": "1.5 (Very Creative)",
+          "value": "1.5"
+        }
       ]
     },
     {
@@ -82,10 +106,22 @@
       "description": "Maximum length of AI responses",
       "default": "4096",
       "data": [
-        { "title": "1024 (Short)", "value": "1024" },
-        { "title": "2048 (Medium)", "value": "2048" },
-        { "title": "4096 (Long)", "value": "4096" },
-        { "title": "8192 (Very Long)", "value": "8192" }
+        {
+          "title": "1024 (Short)",
+          "value": "1024"
+        },
+        {
+          "title": "2048 (Medium)",
+          "value": "2048"
+        },
+        {
+          "title": "4096 (Long)",
+          "value": "4096"
+        },
+        {
+          "title": "8192 (Very Long)",
+          "value": "8192"
+        }
       ]
     },
     {
@@ -108,16 +144,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.13.0",
-    "@types/react": "19.0.8",
-    "eslint": "^8.57.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.2",
+    "@types/react": "19.2.13",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

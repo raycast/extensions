@@ -1,18 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  useNavigation,
-  LaunchProps,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, LaunchProps } from "@raycast/api";
 import { useChat } from "./hooks/useChat";
 import { QuickAIResult } from "./components/QuickAIResult";
-import {
-  createConversation,
-  saveConversation,
-  setCurrentConversationId,
-} from "./utils/storage";
+import { createConversation, saveConversation, setCurrentConversationId } from "./utils/storage";
 import { Message } from "./providers/base";
 
 interface FormValues {
@@ -24,20 +14,11 @@ function AskForm({ onSubmit }: { onSubmit: (question: string) => void }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Ask AI"
-            onSubmit={(values: FormValues) => onSubmit(values.question)}
-          />
+          <Action.SubmitForm title="Ask AI" onSubmit={(values: FormValues) => onSubmit(values.question)} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="question"
-        title="Question"
-        placeholder="Ask anything..."
-        autoFocus
-        enableMarkdown
-      />
+      <Form.TextArea id="question" title="Question" placeholder="Ask anything..." autoFocus enableMarkdown />
     </Form>
   );
 }
@@ -92,12 +73,8 @@ function ResultView({ question }: { question: string }) {
   );
 }
 
-export default function AskAI(
-  props: LaunchProps<{ arguments: { question?: string } }>,
-) {
-  const [question, setQuestion] = useState<string | null>(
-    props.arguments?.question ?? null,
-  );
+export default function AskAI(props: LaunchProps<{ arguments: { question?: string } }>) {
+  const [question, setQuestion] = useState<string | null>(props.arguments?.question ?? null);
 
   if (!question) {
     return <AskForm onSubmit={setQuestion} />;

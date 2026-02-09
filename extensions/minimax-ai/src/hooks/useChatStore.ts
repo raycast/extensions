@@ -30,10 +30,7 @@ export function useChatStore(): UseChatStoreReturn {
   // Load from LocalStorage on mount
   useEffect(() => {
     async function load() {
-      const [convs, storedCurrentId] = await Promise.all([
-        getConversations(),
-        getCurrentConversationId(),
-      ]);
+      const [convs, storedCurrentId] = await Promise.all([getConversations(), getCurrentConversationId()]);
       setConversations(convs);
 
       // Validate that currentId exists in conversations
@@ -49,8 +46,7 @@ export function useChatStore(): UseChatStoreReturn {
   }, []);
 
   // Derived state: current conversation
-  const currentConversation =
-    conversations.find((c) => c.id === currentId) ?? null;
+  const currentConversation = conversations.find((c) => c.id === currentId) ?? null;
 
   // Change current conversation
   const setCurrentId = useCallback(
@@ -65,57 +61,51 @@ export function useChatStore(): UseChatStoreReturn {
   );
 
   // Add message to a conversation
-  const addMessage = useCallback(
-    async (conversationId: string, message: Message) => {
-      setConversations((prev) => {
-        const updated = prev.map((conv) => {
-          if (conv.id !== conversationId) return conv;
+  const addMessage = useCallback(async (conversationId: string, message: Message) => {
+    setConversations((prev) => {
+      const updated = prev.map((conv) => {
+        if (conv.id !== conversationId) return conv;
 
-          const newMessages = [...conv.messages, message];
-          return {
-            ...conv,
-            messages: newMessages,
-            title: generateTitle(newMessages),
-            updatedAt: Date.now(),
-          };
-        });
-
-        // Sort by updatedAt
-        return updated.sort((a, b) => b.updatedAt - a.updatedAt);
-      });
-
-      // Also persist to storage
-      const convs = await getConversations();
-      const conv = convs.find((c) => c.id === conversationId);
-      if (conv) {
         const newMessages = [...conv.messages, message];
-        const updated: Conversation = {
+        return {
           ...conv,
           messages: newMessages,
           title: generateTitle(newMessages),
           updatedAt: Date.now(),
         };
-        await storageSaveConversation(updated);
-      }
-    },
-    [],
-  );
+      });
+
+      // Sort by updatedAt
+      return updated.sort((a, b) => b.updatedAt - a.updatedAt);
+    });
+
+    // Also persist to storage
+    const convs = await getConversations();
+    const conv = convs.find((c) => c.id === conversationId);
+    if (conv) {
+      const newMessages = [...conv.messages, message];
+      const updated: Conversation = {
+        ...conv,
+        messages: newMessages,
+        title: generateTitle(newMessages),
+        updatedAt: Date.now(),
+      };
+      await storageSaveConversation(updated);
+    }
+  }, []);
 
   // Create a new conversation
-  const createConversation = useCallback(
-    async (firstMessage?: string): Promise<string> => {
-      const newConv = storageCreateConversation(firstMessage);
+  const createConversation = useCallback(async (firstMessage?: string): Promise<string> => {
+    const newConv = storageCreateConversation(firstMessage);
 
-      // Add to state
-      setConversations((prev) => [newConv, ...prev]);
+    // Add to state
+    setConversations((prev) => [newConv, ...prev]);
 
-      // Persist to storage
-      await storageSaveConversation(newConv);
+    // Persist to storage
+    await storageSaveConversation(newConv);
 
-      return newConv.id;
-    },
-    [],
-  );
+    return newConv.id;
+  }, []);
 
   // Delete a conversation
   const deleteConversation = useCallback(

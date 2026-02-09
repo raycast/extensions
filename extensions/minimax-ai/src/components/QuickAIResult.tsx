@@ -7,12 +7,7 @@ interface QuickAIResultProps {
   onContinueInChat?: () => void;
 }
 
-export function QuickAIResult({
-  question,
-  response,
-  isLoading,
-  onContinueInChat,
-}: QuickAIResultProps) {
+export function QuickAIResult({ question, response, isLoading, onContinueInChat }: QuickAIResultProps) {
   const markdown = response || (isLoading ? "Thinking..." : "");
 
   return (

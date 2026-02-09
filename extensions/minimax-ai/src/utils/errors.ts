@@ -33,8 +33,7 @@ export async function handleError(error: unknown): Promise<void> {
     return;
   }
 
-  const message =
-    error instanceof Error ? error.message : "An unexpected error occurred";
+  const message = error instanceof Error ? error.message : "An unexpected error occurred";
   await showToast({
     style: Toast.Style.Failure,
     title: "Error",

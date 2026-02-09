@@ -24,16 +24,12 @@ export async function getConversations(): Promise<Conversation[]> {
   }
 }
 
-export async function getConversation(
-  id: string,
-): Promise<Conversation | null> {
+export async function getConversation(id: string): Promise<Conversation | null> {
   const conversations = await getConversations();
   return conversations.find((c) => c.id === id) ?? null;
 }
 
-export async function saveConversation(
-  conversation: Conversation,
-): Promise<void> {
+export async function saveConversation(conversation: Conversation): Promise<void> {
   const conversations = await getConversations();
   const index = conversations.findIndex((c) => c.id === conversation.id);
 
@@ -57,9 +53,7 @@ export async function getCurrentConversationId(): Promise<string | null> {
   return id ?? null;
 }
 
-export async function setCurrentConversationId(
-  id: string | null,
-): Promise<void> {
+export async function setCurrentConversationId(id: string | null): Promise<void> {
   if (id) {
     await LocalStorage.setItem(CURRENT_CONVERSATION_KEY, id);
   } else {
@@ -71,9 +65,7 @@ export function createConversation(firstMessage?: string): Conversation {
   const now = Date.now();
   return {
     id: `conv_${now}_${Math.random().toString(36).slice(2, 9)}`,
-    title: firstMessage
-      ? firstMessage.slice(0, 50) + (firstMessage.length > 50 ? "..." : "")
-      : "New Conversation",
+    title: firstMessage ? firstMessage.slice(0, 50) + (firstMessage.length > 50 ? "..." : "") : "New Conversation",
     messages: [],
     createdAt: now,
     updatedAt: now,

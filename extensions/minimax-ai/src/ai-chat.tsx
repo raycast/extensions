@@ -52,15 +52,7 @@ export default function AIChat() {
       // Increment trigger to force re-selection after the list reorders
       setSelectionTrigger((prev) => prev + 1);
     },
-    [
-      currentId,
-      currentConversation,
-      isLoading,
-      createConversation,
-      setCurrentId,
-      addMessage,
-      sendMessage,
-    ],
+    [currentId, currentConversation, isLoading, createConversation, setCurrentId, addMessage, sendMessage],
   );
 
   const handleNewChat = useCallback(async () => {

@@ -1,11 +1,4 @@
-import {
-  AIProvider,
-  ChatRequest,
-  ChatResponse,
-  StreamCallbacks,
-  ProviderConfig,
-  Message,
-} from "./base";
+import { AIProvider, ChatRequest, ChatResponse, StreamCallbacks, ProviderConfig, Message } from "./base";
 
 const MINIMAX_API_URL = "https://api.minimax.io/v1/chat/completions";
 const REQUEST_TIMEOUT_MS = 60000; // 60 seconds timeout
@@ -93,10 +86,7 @@ export class MiniMaxProvider implements AIProvider {
     }
   }
 
-  async chatStream(
-    request: ChatRequest,
-    callbacks: StreamCallbacks,
-  ): Promise<void> {
+  async chatStream(request: ChatRequest, callbacks: StreamCallbacks): Promise<void> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -124,9 +114,7 @@ export class MiniMaxProvider implements AIProvider {
         callbacks.onError(new Error("Request timed out"));
         return;
       }
-      callbacks.onError(
-        error instanceof Error ? error : new Error(String(error)),
-      );
+      callbacks.onError(error instanceof Error ? error : new Error(String(error)));
       return;
     }
 
@@ -177,10 +165,7 @@ export class MiniMaxProvider implements AIProvider {
                 if (!insideThinking && thinkingBuffer.endsWith("<think>")) {
                   insideThinking = true;
                   thinkingBuffer = "";
-                } else if (
-                  insideThinking &&
-                  thinkingBuffer.endsWith("</think>")
-                ) {
+                } else if (insideThinking && thinkingBuffer.endsWith("</think>")) {
                   insideThinking = false;
                   thinkingBuffer = "";
                 } else if (!insideThinking) {
@@ -211,9 +196,7 @@ export class MiniMaxProvider implements AIProvider {
 
       callbacks.onComplete(fullResponse);
     } catch (error) {
-      callbacks.onError(
-        error instanceof Error ? error : new Error(String(error)),
-      );
+      callbacks.onError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 

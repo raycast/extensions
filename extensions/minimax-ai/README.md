@@ -29,15 +29,15 @@ npm run dev
 
 Open Raycast → Search for "AI Chat" → `Cmd + ,` to open preferences:
 
-| Preference | Type | Description |
-|-------------|------|-------------|
-| **MiniMax API Key** | password | Your MiniMax API key (required) |
-| **Model** | dropdown | MiniMax-M2.1 (recommended) or MiniMax-M2 |
-| **System Prompt** | text | Custom system prompt (optional) |
-| **Temperature** | dropdown | 0.3 / 0.7 / 1.0 / 1.5 |
-| **Max Tokens** | dropdown | 1024 / 2048 / 4096 / 8192 |
-| **Stream Responses** | checkbox | Enable streaming (default: true) |
-| **Concise Mode** | checkbox | Brief 2-3 sentence answers unless more detail requested (default: true) |
+| Preference           | Type     | Description                                                             |
+| -------------------- | -------- | ----------------------------------------------------------------------- |
+| **MiniMax API Key**  | password | Your MiniMax API key (required)                                         |
+| **Model**            | dropdown | MiniMax-M2.1 (recommended) or MiniMax-M2                                |
+| **System Prompt**    | text     | Custom system prompt (optional)                                         |
+| **Temperature**      | dropdown | 0.3 / 0.7 / 1.0 / 1.5                                                   |
+| **Max Tokens**       | dropdown | 1024 / 2048 / 4096 / 8192                                               |
+| **Stream Responses** | checkbox | Enable streaming (default: true)                                        |
+| **Concise Mode**     | checkbox | Brief 2-3 sentence answers unless more detail requested (default: true) |
 
 ### Getting a MiniMax API Key
 
@@ -50,6 +50,7 @@ Open Raycast → Search for "AI Chat" → `Cmd + ,` to open preferences:
 ## Commands
 
 ### AI Chat
+
 Conversational chat with integrated history.
 
 - **Top bar**: Type your message
@@ -61,6 +62,7 @@ Conversational chat with integrated history.
 - `Cmd + C`: Copy conversation
 
 ### Ask AI
+
 Quick question with streaming response.
 
 - Type your question in the form
@@ -97,6 +99,7 @@ raycast-minimax/
 **Endpoint:** `https://api.minimax.io/v1/chat/completions`
 
 **Models:**
+
 - `MiniMax-M2.1`: Recommended model, optimized for chat
 - `MiniMax-M2`: 200k context window for longer conversations
 
