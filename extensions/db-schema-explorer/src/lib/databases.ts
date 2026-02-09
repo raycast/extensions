@@ -74,7 +74,8 @@ export async function ensureMigratedAsync(): Promise<void> {
   const fromStorage = await LocalStorage.getItem<string>(LEGACY_STORAGE_KEY_CONNECTION);
   if (fromStorage && String(fromStorage).trim()) connectionString = String(fromStorage).trim();
   if (!connectionString) {
-    const prefs = getPreferenceValues<{ connectionString?: string }>();
+    // Legacy migration: check for connectionString preference that may no longer exist in Preferences type
+    const prefs = getPreferenceValues<Preferences>() as Preferences & { connectionString?: string };
     const fromPrefs = prefs.connectionString?.trim();
     if (fromPrefs) connectionString = fromPrefs;
   }

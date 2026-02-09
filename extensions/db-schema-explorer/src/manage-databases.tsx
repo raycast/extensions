@@ -4,6 +4,7 @@ import {
   addDatabase,
   getDatabases,
   readRegistry,
+  removeDatabase,
   setDefaultDatabase,
   updateDatabase,
   type StoredDatabase,
@@ -287,6 +288,17 @@ export default function Command() {
                 }}
               />
             ))}
+            <Action
+              title="Delete Database"
+              style={Action.Style.Destructive}
+              onAction={async () => {
+                await removeDatabase(selectedDb.id);
+                await loadDatabases();
+                setMode("list");
+                setSelectedDb(null);
+                await showToast({ style: Toast.Style.Success, title: "Database deleted", message: selectedDb.name });
+              }}
+            />
           </ActionPanel>
         }
       />
@@ -346,6 +358,15 @@ export default function Command() {
                       }}
                     />
                   )}
+                  <Action
+                    title="Delete Database"
+                    style={Action.Style.Destructive}
+                    onAction={async () => {
+                      await removeDatabase(db.id);
+                      await loadDatabases();
+                      await showToast({ style: Toast.Style.Success, title: "Database deleted", message: db.name });
+                    }}
+                  />
                 </ActionPanel>
               }
             />

@@ -30,15 +30,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "connectionString",
-      "type": "password",
-      "required": false,
-      "title": "Connection String",
-      "description": "PostgreSQL connection string (e.g. postgresql://user:password@host:5432/database)"
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.104.4",
     "@raycast/utils": "^1.17.0",
