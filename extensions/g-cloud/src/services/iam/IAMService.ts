@@ -194,8 +194,7 @@ export class IAMService {
       modifier(policy);
       const url = `${CRM_API}/projects/${this.projectId}:setIamPolicy`;
       await gcpPost(this.gcloudPath, url, { policy });
-      const cacheKey =
-        resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
+      const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";

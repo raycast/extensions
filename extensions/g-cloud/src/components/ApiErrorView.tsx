@@ -121,7 +121,7 @@ export function ApiErrorView({ error, projectId, apiName, onRetry, title }: ApiE
       description={cleanMessage}
       actions={
         <ActionPanel>
-          {isApiError && enableUrl && <Action title="Enable API" icon={Icon.Globe} onAction={() => open(enableUrl!)} />}
+          {isApiError && enableUrl && <Action title="Enable Api" icon={Icon.Globe} onAction={() => open(enableUrl!)} />}
           {onRetry && (
             <Action
               title="Retry"
