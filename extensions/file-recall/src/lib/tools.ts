@@ -169,6 +169,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
       description:
         "Search for a text pattern inside one or more files. Returns matching lines with line numbers. " +
         "Works with text files AND binary document formats (xmind, docx, xlsx, pptx, pages, numbers). " +
+        "Supports extended regex (-E): alternation (a|b), quantifiers ({n,m}), etc. " +
         "Use this to verify if files actually contain the content the user is looking for.",
       parameters: {
         type: "object",
@@ -176,7 +177,8 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
           pattern: {
             type: "string",
             description:
-              "Text pattern to search for (case-insensitive). Supports basic regex.",
+              "Text pattern to search for (case-insensitive). Supports extended regex (ERE): " +
+              "alternation (SELECT|INSERT), quantifiers ({20,}), groups (ab)+, etc.",
           },
           file_ids: {
             type: "array",
@@ -187,6 +189,16 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
             type: "string",
             description:
               "Search in a specific directory path instead of file_ids.",
+          },
+          include_all: {
+            type: "boolean",
+            description:
+              "If true, search ALL file types (not just code/text). Default false.",
+          },
+          max_depth: {
+            type: "number",
+            description:
+              "Max directory recursion depth when searching by path. Default: unlimited.",
           },
           max_matches_per_file: {
             type: "number",
@@ -274,6 +286,54 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
             description: "Max files to return. Default 20.",
           },
         },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "scan_directory",
+      description:
+        "Scan files in a directory by reading their content (first N bytes) and matching a regex pattern. " +
+        "Does NOT rely on Spotlight index. Use when the user describes content characteristics " +
+        "(e.g. 'base64 data', 'file with SQL', 'contains IP addresses') and search_files found nothing useful. " +
+        "Default scans ~/Documents, ~/Downloads, ~/Desktop.",
+      parameters: {
+        type: "object",
+        properties: {
+          content_pattern: {
+            type: "string",
+            description:
+              "JavaScript regex pattern to match against file content. " +
+              'Examples: "[A-Za-z0-9+/=]{100,}" for base64, "SELECT|INSERT|UPDATE" for SQL.',
+          },
+          directory: {
+            type: "string",
+            description:
+              "Directory to scan. Default: scans ~/Documents, ~/Downloads, ~/Desktop.",
+          },
+          file_types: {
+            type: "array",
+            items: { type: "string" },
+            description:
+              'File extensions to filter (e.g. ["json", "txt"]). Default: all files.',
+          },
+          max_depth: {
+            type: "number",
+            description: "Max directory recursion depth. Default 3, max 5.",
+          },
+          max_files: {
+            type: "number",
+            description:
+              "Max number of files to scan. Default 200, max 500.",
+          },
+          preview_bytes: {
+            type: "number",
+            description:
+              "Bytes to read from each file for matching. Default 512, max 4096.",
+          },
+        },
+        required: ["content_pattern"],
       },
     },
   },
@@ -381,6 +441,8 @@ interface GrepFilesArgs {
   pattern: string;
   file_ids?: number[];
   path?: string;
+  include_all?: boolean;
+  max_depth?: number;
   max_matches_per_file?: number;
 }
 
@@ -394,6 +456,15 @@ interface ListRecentFilesArgs {
   directory?: string;
   hours?: number;
   limit?: number;
+}
+
+interface ScanDirectoryArgs {
+  content_pattern: string;
+  directory?: string;
+  file_types?: string[];
+  max_depth?: number;
+  max_files?: number;
+  preview_bytes?: number;
 }
 
 interface FinishFileIdEntry {
@@ -1028,16 +1099,20 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
     // grep recursively in directory
     const dir = args.path.replace(/^~/, process.env.HOME || "~");
     try {
-      const { stdout } = await execFileAsync(
-        "grep",
-        [
-          "-ril",
+      const grepArgs = ["-Eril"]; // Extended regex, case-insensitive, recursive, files-with-matches
+      if (!args.include_all) {
+        grepArgs.push(
           "--include=*.{txt,log,md,json,csv,js,ts,py,go,java,sql,html,css,xml,yaml,yml,toml,cfg,conf,ini,sh}",
-          args.pattern,
-          dir,
-        ],
-        { timeout: 10000, maxBuffer: 1024 * 1024 },
-      );
+        );
+      }
+      if (args.max_depth != null) {
+        grepArgs.push(`--max-depth=${args.max_depth}`);
+      }
+      grepArgs.push(args.pattern, dir);
+      const { stdout } = await execFileAsync("grep", grepArgs, {
+        timeout: 10000,
+        maxBuffer: 1024 * 1024,
+      });
       const paths = stdout.trim().split("\n").filter(Boolean).slice(0, 20);
       for (const p of paths) {
         const name = p.split("/").pop() || p;
@@ -1099,7 +1174,7 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
       const { stdout } = await execFileAsync(
         "grep",
         [
-          "-in",
+          "-Ein",
           `--max-count=${maxMatchesPerFile}`,
           args.pattern,
           fileInfo.path,
@@ -1637,6 +1712,175 @@ export async function executeListRecentFiles(
   }
 }
 
+// ─── Scan Directory ──────────────────────────────────────────
+
+/**
+ * Directories to exclude from scan_directory to avoid noise.
+ */
+const SCAN_EXCLUDE_DIRS = new Set([
+  "node_modules",
+  ".git",
+  ".svn",
+  "__pycache__",
+  ".cache",
+  ".Trash",
+  "Library",
+  ".npm",
+  ".cargo",
+  ".rustup",
+  "vendor",
+  "dist",
+  "build",
+  ".next",
+  "pkg",
+]);
+
+/**
+ * Default directories to scan when no directory is specified.
+ */
+const DEFAULT_SCAN_DIRS = ["~/Documents", "~/Downloads", "~/Desktop"];
+
+/**
+ * Execute the scan_directory tool.
+ * Scans files in a directory by reading their first N bytes and matching a regex.
+ * This bypasses Spotlight indexing entirely — useful for content-pattern searches.
+ */
+export async function executeScanDirectory(
+  args: ScanDirectoryArgs,
+): Promise<string> {
+  const maxDepth = Math.min(args.max_depth ?? 3, 5);
+  const maxFiles = Math.min(args.max_files ?? 200, 500);
+  const previewBytes = Math.min(args.preview_bytes ?? 512, 4096);
+  const home = process.env.HOME || "~";
+
+  // Validate the content_pattern as a valid regex
+  let regex: RegExp;
+  try {
+    regex = new RegExp(args.content_pattern, "i");
+  } catch (e) {
+    return JSON.stringify({
+      error: `Invalid regex pattern: ${e instanceof Error ? e.message : "unknown error"}`,
+    });
+  }
+
+  // Determine directories to scan
+  const scanDirs: string[] = [];
+  if (args.directory) {
+    scanDirs.push(args.directory.replace(/^~/, home));
+  } else {
+    for (const d of DEFAULT_SCAN_DIRS) {
+      scanDirs.push(d.replace(/^~/, home));
+    }
+  }
+
+  // Build find command arguments for file extension filter
+  const extFilter: string[] = [];
+  if (args.file_types && args.file_types.length > 0) {
+    for (let i = 0; i < args.file_types.length; i++) {
+      if (i > 0) extFilter.push("-o");
+      extFilter.push("-name", `*.${args.file_types[i]}`);
+    }
+  }
+
+  // Build exclude patterns for find's -not -path
+  const excludeArgs: string[] = [];
+  for (const dir of SCAN_EXCLUDE_DIRS) {
+    excludeArgs.push("-not", "-path", `*/${dir}/*`);
+  }
+
+  // Collect candidate file paths across all scan directories
+  const candidatePaths: string[] = [];
+
+  for (const scanDir of scanDirs) {
+    try {
+      const findArgs = [
+        scanDir,
+        "-maxdepth",
+        String(maxDepth),
+        "-type",
+        "f",
+        ...excludeArgs,
+      ];
+
+      // Add extension filter if specified
+      if (extFilter.length > 0) {
+        findArgs.push("(", ...extFilter, ")");
+      }
+
+      const { stdout } = await execFileAsync("find", findArgs, {
+        timeout: 10000,
+        maxBuffer: 2 * 1024 * 1024,
+      });
+      const paths = stdout.trim().split("\n").filter(Boolean);
+      candidatePaths.push(...paths);
+
+      if (candidatePaths.length >= maxFiles) break;
+    } catch {
+      // find may fail on permission errors — continue with other dirs
+      continue;
+    }
+  }
+
+  // Limit total files to scan
+  const pathsToScan = candidatePaths.slice(0, maxFiles);
+  const matchedFiles: {
+    file_id: number;
+    name: string;
+    path: string;
+    ext: string;
+    size: string;
+    preview: string;
+  }[] = [];
+
+  // Read each file's first N bytes and test the regex
+  for (const filePath of pathsToScan) {
+    try {
+      const { stdout } = await execFileAsync("head", ["-c", String(previewBytes), filePath], {
+        timeout: 2000,
+        maxBuffer: previewBytes + 1024,
+      });
+
+      if (regex.test(stdout)) {
+        // File matches! Register it and add to results
+        const results = await pathsToResults([filePath], 1);
+        if (results.length > 0) {
+          const fileIds = registerFiles(results);
+          const f = results[0];
+          matchedFiles.push({
+            file_id: fileIds[0],
+            name: f.name,
+            path: f.path,
+            ext: f.extension,
+            size: f.sizeFormatted,
+            preview:
+              stdout.length > 200
+                ? stdout.slice(0, 200) + "..."
+                : stdout,
+          });
+        }
+      }
+    } catch {
+      // Skip files that can't be read (binary, permissions, etc.)
+      continue;
+    }
+
+    // Stop early if we have enough matches
+    if (matchedFiles.length >= 20) break;
+  }
+
+  return JSON.stringify({
+    count: matchedFiles.length,
+    scanned: pathsToScan.length,
+    pattern: args.content_pattern,
+    directories: scanDirs.map((d) => d.replace(home, "~")),
+    files: matchedFiles,
+    message:
+      matchedFiles.length === 0
+        ? `No files matched pattern "${args.content_pattern}" in ${pathsToScan.length} scanned files.`
+        : undefined,
+  });
+}
+
 /**
  * Execute the finish tool. Looks up files from the registry by file_id.
  */
@@ -1705,6 +1949,11 @@ export async function executeTool(
     case "list_recent_files":
       return {
         result: await executeListRecentFiles(args as ListRecentFilesArgs),
+      };
+
+    case "scan_directory":
+      return {
+        result: await executeScanDirectory(args as ScanDirectoryArgs),
       };
 
     case "finish": {
