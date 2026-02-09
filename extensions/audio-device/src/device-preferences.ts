@@ -16,6 +16,14 @@ const SHOW_HIDDEN_KEYS = {
 } as const;
 const INPUT_ORDER_KEY = "deviceOrderInput";
 const OUTPUT_ORDER_KEY = "deviceOrderOutput";
+const DEFAULT_DEVICE_UID_KEYS = {
+  input: "defaultDeviceUidInput",
+  output: "defaultDeviceUidOutput",
+} as const;
+const DEFAULT_DEVICE_NAME_KEYS = {
+  input: "defaultDeviceNameInput",
+  output: "defaultDeviceNameOutput",
+} as const;
 
 function parseStoredList(value: string | null | undefined): string[] {
   if (!value) return [];
@@ -104,4 +112,22 @@ export function applyDeviceOrder(order: string[], devices: AudioDevice[]): Audio
   const normalized = normalizeDeviceOrder(order, devices);
   const deviceMap = new Map(devices.map((device) => [device.uid, device]));
   return normalized.map((id) => deviceMap.get(id)).filter(Boolean) as AudioDevice[];
+}
+
+export async function getDefaultDeviceUid(type: IOType): Promise<string | undefined> {
+  return (await LocalStorage.getItem<string>(DEFAULT_DEVICE_UID_KEYS[type])) || undefined;
+}
+
+export async function getDefaultDeviceName(type: IOType): Promise<string | undefined> {
+  return (await LocalStorage.getItem<string>(DEFAULT_DEVICE_NAME_KEYS[type])) || undefined;
+}
+
+export async function setDefaultDevicePreference(type: IOType, uid: string, name: string) {
+  await LocalStorage.setItem(DEFAULT_DEVICE_UID_KEYS[type], uid);
+  await LocalStorage.setItem(DEFAULT_DEVICE_NAME_KEYS[type], name);
+}
+
+export async function clearDefaultDevicePreference(type: IOType) {
+  await LocalStorage.removeItem(DEFAULT_DEVICE_UID_KEYS[type]);
+  await LocalStorage.removeItem(DEFAULT_DEVICE_NAME_KEYS[type]);
 }

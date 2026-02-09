@@ -1,5 +1,15 @@
 # Audio Device Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+- Default (sticky) device feature: set any device as your default input or output from the device list
+- When the default device is connected, the extension automatically switches to it and stays on it
+- Default device takes priority over auto-switch priority order
+- "Default" tag shown on the designated device in the list
+- "Set as Default Device" / "Clear Default Device" actions with Cmd+Shift+D shortcut
+- Auto-switch subtitle shows the default device name
+
 ## Chore - 2026-02-07
 - Fix issues in lint due to newer ESlint package
 

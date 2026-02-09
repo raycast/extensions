@@ -8,7 +8,13 @@ import {
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
 import { AUTO_SWITCH_KEYS } from "./auto-switch-keys";
-import { applyDeviceOrder, getDeviceOrder, getHiddenDevices } from "./device-preferences";
+import {
+  applyDeviceOrder,
+  getDeviceOrder,
+  getHiddenDevices,
+  getDefaultDeviceUid,
+  getDefaultDeviceName,
+} from "./device-preferences";
 
 type IOType = "input" | "output";
 
@@ -40,76 +46,108 @@ async function setAutoSwitchEnabled(type: IOType, enabled: boolean) {
   await LocalStorage.setItem(AUTO_SWITCH_KEYS[type], enabled ? "true" : "false");
 }
 
-async function maybeSwitchInput(hiddenDevices: string[]) {
-  const devices = await getInputDevices();
-  const order = await getDeviceOrder("input");
+/**
+ * Try to switch to the user's default (sticky) device if it is available.
+ * Returns true if a switch was made, false otherwise.
+ */
+async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
+  const defaultUid = await getDefaultDeviceUid(type);
+  if (!defaultUid) return false;
+
+  const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
+  const target = devices.find((d) => d.uid === defaultUid);
+  if (!target) return false; // default device is not connected
+
+  const current = type === "input" ? await getDefaultInputDevice() : await getDefaultOutputDevice();
+  if (current.uid === target.uid) return false; // already on the default device
+
+  if (type === "input") {
+    await setDefaultInputDevice(target.id);
+  } else {
+    await setOutputAndSystemDevice(target.id);
+  }
+  return true;
+}
+
+async function maybeSwitchByPriority(type: IOType, hiddenDevices: string[]) {
+  const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
+  const order = await getDeviceOrder(type);
   const hiddenSet = new Set(hiddenDevices);
   const ordered = applyDeviceOrder(order, devices).filter((device) => !hiddenSet.has(device.uid));
   const target = ordered[0];
   if (!target) return false;
 
-  const current = await getDefaultInputDevice();
+  const current = type === "input" ? await getDefaultInputDevice() : await getDefaultOutputDevice();
   if (current.uid === target.uid) return false;
 
-  await setDefaultInputDevice(target.id);
+  if (type === "input") {
+    await setDefaultInputDevice(target.id);
+  } else {
+    await setOutputAndSystemDevice(target.id);
+  }
   return true;
 }
 
-async function maybeSwitchOutput(hiddenDevices: string[]) {
-  const devices = await getOutputDevices();
-  const order = await getDeviceOrder("output");
-  const hiddenSet = new Set(hiddenDevices);
-  const ordered = applyDeviceOrder(order, devices).filter((device) => !hiddenSet.has(device.uid));
-  const target = ordered[0];
-  if (!target) return false;
+async function runSwitch(type: IOType, includeAutoSwitch: boolean) {
+  // Default device always takes priority
+  const switchedToDefault = await maybeSwitchToDefault(type);
+  if (switchedToDefault) return true;
 
-  const current = await getDefaultOutputDevice();
-  if (current.uid === target.uid) return false;
+  // Fall back to priority-order auto-switch only if enabled
+  if (!includeAutoSwitch) return false;
 
-  await setOutputAndSystemDevice(target.id);
-  return true;
-}
-
-async function runSwitch(type: IOType) {
   const hiddenDevices = await getHiddenDevices(type);
-  const changed = type === "input" ? await maybeSwitchInput(hiddenDevices) : await maybeSwitchOutput(hiddenDevices);
-
-  return changed;
+  return maybeSwitchByPriority(type, hiddenDevices);
 }
 
 export async function applyAutoSwitchIfEnabled(type: IOType) {
   const enabled = await isAutoSwitchEnabled(type);
-  if (!enabled) return false;
 
   try {
-    return await runSwitch(type);
+    // Always try the default device; only do priority-order if auto-switch is enabled
+    return await runSwitch(type, enabled);
   } catch {
     return false;
   }
 }
 
+async function buildSubtitle(type: IOType, autoSwitchEnabled: boolean): Promise<string> {
+  const defaultName = await getDefaultDeviceName(type);
+  const parts: string[] = [];
+  if (autoSwitchEnabled) parts.push("Enabled");
+  if (defaultName) parts.push(`Default: ${defaultName}`);
+  if (parts.length === 0) return "Disabled";
+  return parts.join(" | ");
+}
+
 export async function runAutoSwitch(type: IOType) {
   const isBackground = environment.launchType === LaunchType.Background;
   const enabled = await isAutoSwitchEnabled(type);
+  const hasDefault = !!(await getDefaultDeviceUid(type));
 
   if (!isBackground) {
+    // Manual trigger: toggle the auto-switch state
     const nextEnabled = !enabled;
     await setAutoSwitchEnabled(type, nextEnabled);
-    await updateCommandMetadata({ subtitle: nextEnabled ? "Enabled" : "Disabled" });
+    const subtitle = await buildSubtitle(type, nextEnabled);
+    await updateCommandMetadata({ subtitle });
     await showHUD(nextEnabled ? "Auto switch enabled" : "Auto switch disabled");
-    if (!nextEnabled) return;
-  } else if (!enabled) {
+    if (!nextEnabled && !hasDefault) return;
+  } else if (!enabled && !hasDefault) {
+    // Background: nothing to do if both auto-switch and default are off
     await updateCommandMetadata({ subtitle: "Disabled" });
     return;
   } else {
-    await updateCommandMetadata({ subtitle: "Enabled" });
+    // Background: update subtitle to reflect current state
+    const subtitle = await buildSubtitle(type, enabled);
+    await updateCommandMetadata({ subtitle });
   }
 
   try {
     if (isBackground && (await shouldSkipForInterval(type))) {
       return;
     }
-    await runSwitch(type);
+    await runSwitch(type, enabled);
     if (isBackground) {
       await markLastRun(type);
     }

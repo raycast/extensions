@@ -30,6 +30,9 @@ import {
   isShowingHiddenDevices,
   setShowHiddenDevices,
   toggleDeviceVisibility,
+  getDefaultDeviceUid,
+  setDefaultDevicePreference,
+  clearDefaultDevicePreference,
 } from "./device-preferences";
 import { getTransportTypeLabel } from "./device-labels";
 import { createDeepLink } from "./utils";
@@ -54,6 +57,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     isLoading: isShowHiddenLoading,
     revalidate: refetchShowHiddenDevices,
   } = usePromise(isShowingHiddenDevices, [ioType]);
+  const { data: defaultDeviceUid, revalidate: refetchDefaultDevice } = usePromise(getDefaultDeviceUid, [ioType]);
 
   const { data: sortedDevices, visitItem: recordDeviceSelection } = useFrecencySorting(data?.devices || [], {
     key: (device) => device.uid,
@@ -118,6 +122,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
         visibleDevices.map((d) => {
           const isCurrent = d.uid === data.current.uid;
           const isHidden = hiddenSet.has(d.uid);
+          const isDefault = d.uid === defaultDeviceUid;
           return (
             <List.Item
               key={d.uid}
@@ -130,14 +135,16 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
                     ioType={ioType}
                     device={d}
                     isHidden={isHidden}
+                    isDefault={isDefault}
                     isShowingHidden={shouldShowHidden}
                     onSelection={() => recordDeviceSelection(d)}
                     onHiddenChange={() => void refetchHiddenDevices()}
                     onShowHiddenChange={() => void refetchShowHiddenDevices()}
+                    onDefaultChange={() => void refetchDefaultDevice()}
                   />
                 </ActionPanel>
               }
-              accessories={getAccessories(isCurrent, isHidden, shouldShowHidden, d)}
+              accessories={getAccessories(isCurrent, isHidden, isDefault, shouldShowHidden, d)}
             />
           );
         })
@@ -150,23 +157,28 @@ function DeviceActions({
   ioType,
   device,
   isHidden,
+  isDefault,
   isShowingHidden,
   onSelection,
   onHiddenChange,
   onShowHiddenChange,
+  onDefaultChange,
 }: {
   ioType: IOType;
   device: AudioDevice;
   isHidden: boolean;
+  isDefault: boolean;
   isShowingHidden: boolean;
   onSelection: () => void;
   onHiddenChange: () => void;
   onShowHiddenChange: () => void;
+  onDefaultChange: () => void;
 }) {
   return (
     <>
       <SetAudioDeviceAction device={device} type={ioType} onSelection={onSelection} />
       {isWindows && <SetCommunicationDeviceAction device={device} type={ioType} onSelection={onSelection} />}
+      <SetDefaultDeviceAction device={device} ioType={ioType} isDefault={isDefault} onAction={onDefaultChange} />
       <Action.CreateQuicklink
         quicklink={{
           name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
@@ -355,8 +367,18 @@ export function getIcon(device: AudioDevice, isCurrent: boolean) {
   };
 }
 
-function getAccessories(isCurrent: boolean, isHidden: boolean, shouldShowHidden: boolean, device?: AudioDevice) {
+function getAccessories(
+  isCurrent: boolean,
+  isHidden: boolean,
+  isDefault: boolean,
+  shouldShowHidden: boolean,
+  device?: AudioDevice,
+) {
   const accessories: List.Item.Accessory[] = [];
+
+  if (isDefault) {
+    accessories.push({ tag: { value: "Default", color: Color.Blue }, tooltip: "Default device (auto-switch target)" });
+  }
 
   if (isCurrent) {
     accessories.push({ icon: Icon.Checkmark });
@@ -378,6 +400,46 @@ function getAccessories(isCurrent: boolean, isHidden: boolean, shouldShowHidden:
   }
 
   return accessories;
+}
+
+function SetDefaultDeviceAction({
+  device,
+  ioType,
+  isDefault,
+  onAction,
+}: {
+  device: AudioDevice;
+  ioType: IOType;
+  isDefault: boolean;
+  onAction: () => void;
+}) {
+  if (isDefault) {
+    return (
+      <Action
+        title="Clear Default Device"
+        icon={Icon.StarDisabled}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        onAction={async () => {
+          await clearDefaultDevicePreference(ioType);
+          onAction();
+          await showToast(Toast.Style.Success, `Cleared default ${ioType} device`);
+        }}
+      />
+    );
+  }
+
+  return (
+    <Action
+      title="Set as Default Device"
+      icon={Icon.Star}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      onAction={async () => {
+        await setDefaultDevicePreference(ioType, device.uid, device.name);
+        onAction();
+        await showToast(Toast.Style.Success, `Set "${device.name}" as default ${ioType} device`);
+      }}
+    />
+  );
 }
 
 function getSubtitle(device: AudioDevice) {
