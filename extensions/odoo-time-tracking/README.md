@@ -1,0 +1,3 @@
+# Odoo
+
+Interact with Odoo
