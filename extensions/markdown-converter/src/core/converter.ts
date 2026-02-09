@@ -10,7 +10,10 @@ import { debugConfig } from "./env.js";
  * - 'preserve-external-only': Only preserve images with http/https URLs
  * - 'remove': Remove all images from the output
  */
-export type ImageHandlingMode = 'preserve' | 'remove' | 'preserve-external-only';
+export type ImageHandlingMode =
+  | "preserve"
+  | "remove"
+  | "preserve-external-only";
 
 export type ConversionOptions = {
   domParserAdapter?: DOMParserAdapter;
@@ -62,8 +65,6 @@ const BLOCK_TEXT_ELEMENTS = new Set([
   "PRE",
 ]);
 
-
-
 function clampHeading(level: number | null | undefined): number | null {
   if (!level || Number.isNaN(level)) {
     return null;
@@ -71,11 +72,14 @@ function clampHeading(level: number | null | undefined): number | null {
   return Math.min(Math.max(level, 1), 6);
 }
 
-function extractHeadingLevelFromString(value: string | null | undefined): number | null {
+function extractHeadingLevelFromString(
+  value: string | null | undefined,
+): number | null {
   if (!value) {
     return null;
   }
-  const headingMatch = value.match(/heading\s*([1-6])/i) ?? value.match(/heading([1-6])/i);
+  const headingMatch =
+    value.match(/heading\s*([1-6])/i) ?? value.match(/heading([1-6])/i);
   if (headingMatch) {
     return clampHeading(parseInt(headingMatch[1] ?? headingMatch[2], 10));
   }
@@ -115,7 +119,8 @@ function inferHeadingLevelFromStyle(element: HTMLElement): number | null {
   const style = element.style;
   const fontSize = parseFontSize(style?.fontSize);
   const fontWeight = style?.fontWeight?.toLowerCase();
-  const isBold = fontWeight === "bold" || (!!fontWeight && parseInt(fontWeight, 10) >= 600);
+  const isBold =
+    fontWeight === "bold" || (!!fontWeight && parseInt(fontWeight, 10) >= 600);
   if (!fontSize || !isBold) {
     return null;
   }
@@ -144,14 +149,17 @@ function inferHeadingLevelFromStyle(element: HTMLElement): number | null {
 function detectWordHeadingLevel(element: HTMLElement): number | null {
   const role = element.getAttribute("role");
   if (role?.toLowerCase() === "heading") {
-    const ariaLevel = element.getAttribute("aria-level") ?? element.dataset.ariaLevel;
+    const ariaLevel =
+      element.getAttribute("aria-level") ?? element.dataset.ariaLevel;
     const levelFromAria = clampHeading(parseInt(ariaLevel ?? "", 10));
     if (levelFromAria) {
       return levelFromAria;
     }
   }
 
-  const explicitDataAttr = element.getAttribute("data-ccp-parastyle") ?? element.getAttribute("data-ccp-parastyle-name");
+  const explicitDataAttr =
+    element.getAttribute("data-ccp-parastyle") ??
+    element.getAttribute("data-ccp-parastyle-name");
   const levelFromDataAttr = extractHeadingLevelFromString(explicitDataAttr);
   if (levelFromDataAttr) {
     return levelFromDataAttr;
@@ -261,7 +269,10 @@ function rowAppearsToBeHeader(row: HTMLTableRowElement): boolean {
 
     // Check for <b> or <strong> as direct wrapper of content
     const firstChild = cell.firstElementChild;
-    if (firstChild && (firstChild.tagName === "B" || firstChild.tagName === "STRONG")) {
+    if (
+      firstChild &&
+      (firstChild.tagName === "B" || firstChild.tagName === "STRONG")
+    ) {
       // Verify the bold element contains most/all of the cell content
       const boldText = firstChild.textContent?.trim() ?? "";
       if (boldText === textContent) {
@@ -308,7 +319,10 @@ function rowAppearsToBeHeader(row: HTMLTableRowElement): boolean {
 function extractCellContentWithoutBold(cell: HTMLTableCellElement): string {
   // Check for <b> or <strong> as direct wrapper
   const firstChild = cell.firstElementChild;
-  if (firstChild && (firstChild.tagName === "B" || firstChild.tagName === "STRONG")) {
+  if (
+    firstChild &&
+    (firstChild.tagName === "B" || firstChild.tagName === "STRONG")
+  ) {
     const boldText = firstChild.textContent?.trim() ?? "";
     const cellText = cell.textContent?.trim() ?? "";
     if (boldText === cellText) {
@@ -435,7 +449,7 @@ function simplifyTableCells(doc: Document): void {
 
       // Check if cell contains images or links that should be preserved
       const hasPreservableContent = cell.querySelector("img, a");
-      
+
       if (hasPreservableContent) {
         // Unwrap block elements but preserve their inline children
         const blockElements = Array.from(cell.querySelectorAll("p, div"));
@@ -469,7 +483,9 @@ function shouldTransformToCodeBlock(element: HTMLElement): boolean {
     return false;
   }
 
-  let encounteredMonospace = isMonospaceFontFamily(readInlineFontFamily(element));
+  let encounteredMonospace = isMonospaceFontFamily(
+    readInlineFontFamily(element),
+  );
   const ownerDocument = element.ownerDocument;
   const showElements = ownerDocument.defaultView?.NodeFilter?.SHOW_ELEMENT ?? 1;
   const showText = ownerDocument.defaultView?.NodeFilter?.SHOW_TEXT ?? 4;
@@ -622,7 +638,9 @@ function extractMonospaceBlockText(element: HTMLElement): string {
 }
 
 function convertMonospaceSpansToCode(doc: Document) {
-  const candidates = Array.from(doc.body.querySelectorAll("span, font, tt")) as HTMLElement[];
+  const candidates = Array.from(
+    doc.body.querySelectorAll("span, font, tt"),
+  ) as HTMLElement[];
 
   for (const element of candidates) {
     if (element.closest("pre, code")) {
@@ -642,7 +660,9 @@ function convertMonospaceSpansToCode(doc: Document) {
     }
 
     let shouldSkip = false;
-    const descendants = Array.from(element.querySelectorAll("*")) as HTMLElement[];
+    const descendants = Array.from(
+      element.querySelectorAll("*"),
+    ) as HTMLElement[];
     for (const descendant of descendants) {
       const tag = descendant.tagName;
       if (tag === "A" || tag === "IMG" || tag === "CODE" || tag === "PRE") {
@@ -765,7 +785,9 @@ function convertItalicSpansToEm(doc: Document) {
 }
 
 function consolidateWordLists(doc: Document) {
-  const listContainers = Array.from(doc.body.querySelectorAll<HTMLElement>("div.ListContainerWrapper"));
+  const listContainers = Array.from(
+    doc.body.querySelectorAll<HTMLElement>("div.ListContainerWrapper"),
+  );
 
   if (listContainers.length === 0) {
     return;
@@ -786,7 +808,8 @@ function consolidateWordLists(doc: Document) {
     const listItem = list.querySelector("li") as HTMLElement;
     const listId = listItem?.getAttribute("data-listid") || "";
 
-    const isSameGroup = listType === lastListType && listId === lastListId && lastListId !== null;
+    const isSameGroup =
+      listType === lastListType && listId === lastListId && lastListId !== null;
 
     if (isSameGroup) {
       currentGroup.push(container);
@@ -849,13 +872,18 @@ function isLegacyWordListParagraph(element: HTMLElement): boolean {
   return false;
 }
 
-function extractWordListInfo(paragraph: HTMLElement, commentNodeType: number): { type: "ul" | "ol"; contentHtml: string } | null {
-  const markerSpan = paragraph.querySelector<HTMLElement>('span[style*="mso-list:Ignore"]');
+function extractWordListInfo(
+  paragraph: HTMLElement,
+  commentNodeType: number,
+): { type: "ul" | "ol"; contentHtml: string } | null {
+  const markerSpan = paragraph.querySelector<HTMLElement>(
+    'span[style*="mso-list:Ignore"]',
+  );
   let listType: "ul" | "ol" | null = null;
 
   if (markerSpan) {
     const markerText = markerSpan.textContent ?? "";
-    listType = /^\s*\d+[\.\)]/.test(markerText.trim()) ? "ol" : "ul";
+    listType = /^\s*\d+[.)]/.test(markerText.trim()) ? "ol" : "ul";
   } else {
     listType = detectListTypeFromContent(paragraph.textContent ?? "");
   }
@@ -868,7 +896,9 @@ function extractWordListInfo(paragraph: HTMLElement, commentNodeType: number): {
   removeNodesByType(clone, commentNodeType);
 
   if (markerSpan) {
-    const ignored = Array.from(clone.querySelectorAll<HTMLElement>('span[style*="mso-list:Ignore"]'));
+    const ignored = Array.from(
+      clone.querySelectorAll<HTMLElement>('span[style*="mso-list:Ignore"]'),
+    );
     for (const span of ignored) {
       span.remove();
     }
@@ -895,7 +925,10 @@ function convertLegacyWordParagraphLists(doc: Document) {
   const defaultView = doc.defaultView;
   const commentNodeType = defaultView?.Node?.COMMENT_NODE ?? 8;
   const children = Array.from(doc.body.children);
-  let currentList: { element: HTMLUListElement | HTMLOListElement; type: "ul" | "ol" } | null = null;
+  let currentList: {
+    element: HTMLUListElement | HTMLOListElement;
+    type: "ul" | "ol";
+  } | null = null;
 
   for (const child of children) {
     const paragraph = child as HTMLElement;
@@ -904,7 +937,7 @@ function convertLegacyWordParagraphLists(doc: Document) {
       continue;
     }
 
-  const info = extractWordListInfo(paragraph, commentNodeType);
+    const info = extractWordListInfo(paragraph, commentNodeType);
     if (!info) {
       currentList = null;
       continue;
@@ -926,22 +959,39 @@ function convertLegacyWordParagraphLists(doc: Document) {
 }
 
 function replaceOfficeParagraphNodes(doc: Document) {
-  const officeNodes = Array.from(doc.body.querySelectorAll<HTMLElement>("o\\:p"));
+  const officeNodes = Array.from(
+    doc.body.querySelectorAll<HTMLElement>("o\\:p"),
+  );
   for (const node of officeNodes) {
-    const content = node.textContent && node.textContent.length > 0 ? node.textContent : "\u00a0";
+    const content =
+      node.textContent && node.textContent.length > 0
+        ? node.textContent
+        : "\u00a0";
     const textNode = doc.createTextNode(content);
     node.replaceWith(textNode);
   }
 }
 
-const INLINE_TAGS_FOR_NBSP = new Set(["A", "B", "I", "EM", "STRONG", "CODE", "SPAN", "SMALL", "BIG", "SUB", "SUP"]);
+const INLINE_TAGS_FOR_NBSP = new Set([
+  "A",
+  "B",
+  "I",
+  "EM",
+  "STRONG",
+  "CODE",
+  "SPAN",
+  "SMALL",
+  "BIG",
+  "SUB",
+  "SUP",
+]);
 
 function detectListTypeFromContent(text: string): "ul" | "ol" | null {
   const normalized = text.replace(/\u00a0/g, " ").trim();
   if (!normalized) {
     return null;
   }
-  if (/^\d+[\.)]/.test(normalized)) {
+  if (/^\d+[.)]/.test(normalized)) {
     return "ol";
   }
   if (/^[•·o\-*]/i.test(normalized)) {
@@ -964,12 +1014,15 @@ function removeNodesByType(root: HTMLElement, nodeType: number) {
   }
 }
 
-function removeLeadingListMarkerNodes(element: HTMLElement, listType: "ul" | "ol") {
+function removeLeadingListMarkerNodes(
+  element: HTMLElement,
+  listType: "ul" | "ol",
+) {
   const document = element.ownerDocument;
   const nodeCtor = document.defaultView?.Node;
   const TEXT_NODE = nodeCtor?.TEXT_NODE ?? 3;
   const ELEMENT_NODE = nodeCtor?.ELEMENT_NODE ?? 1;
-  const orderedPattern = /^\s*\d+[\.)](?:\s+|$)/;
+  const orderedPattern = /^\s*\d+[.)](?:\s+|$)/;
   const bulletPattern = /^\s*[•·o\-*](?:\s+|$)/i;
   const pattern = listType === "ol" ? orderedPattern : bulletPattern;
 
@@ -1050,7 +1103,10 @@ function trimLeadingWhitespaceNodes(element: HTMLElement) {
       break;
     }
 
-    if (child.nodeType === ELEMENT_NODE && (child as HTMLElement).tagName === "BR") {
+    if (
+      child.nodeType === ELEMENT_NODE &&
+      (child as HTMLElement).tagName === "BR"
+    ) {
       child.parentNode?.removeChild(child);
       continue;
     }
@@ -1078,7 +1134,11 @@ function convertInlineBoundarySpacesToNbsp(doc: Document) {
     const previousSibling = textNode.previousSibling;
     const nextSibling = textNode.nextSibling;
 
-    if (value.startsWith(" ") && previousSibling && previousSibling.nodeType === 1) {
+    if (
+      value.startsWith(" ") &&
+      previousSibling &&
+      previousSibling.nodeType === 1
+    ) {
       const previousElement = previousSibling as HTMLElement;
       if (INLINE_TAGS_FOR_NBSP.has(previousElement.tagName)) {
         value = nbsp + value.slice(1);
@@ -1101,21 +1161,30 @@ function resolveContext(options: ConversionOptions): ConversionContext {
     return { parser: options.domParserAdapter };
   }
   if (typeof DOMParser === "undefined") {
-    throw new Error("DOMParser is not available. Provide domParserAdapter in ConversionOptions.");
+    throw new Error(
+      "DOMParser is not available. Provide domParserAdapter in ConversionOptions.",
+    );
   }
   // Create a simple adapter wrapper for the global DOMParser
-  return { 
+  return {
     parser: {
-      parseFromString: (html: string, type: string) => new DOMParser().parseFromString(html, type as DOMParserSupportedType)
-    }
+      parseFromString: (html: string, type: string) =>
+        new DOMParser().parseFromString(html, type as DOMParserSupportedType),
+    },
   };
 }
 
 function isGoogleDocsHtml(html: string): boolean {
-  return html.includes('docs-internal-guid-') || html.includes('id="docs-internal-guid-');
+  return (
+    html.includes("docs-internal-guid-") ||
+    html.includes('id="docs-internal-guid-')
+  );
 }
 
-function normalizeGoogleDocsHtml(html: string, context: ConversionContext): string {
+function normalizeGoogleDocsHtml(
+  html: string,
+  context: ConversionContext,
+): string {
   try {
     const doc = context.parser.parseFromString(html, "text/html");
     if (!doc?.body) {
@@ -1123,8 +1192,10 @@ function normalizeGoogleDocsHtml(html: string, context: ConversionContext): stri
     }
 
     // Remove the wrapper <b> tag that Google Docs adds
-    const wrapperB = doc.querySelector('b[id*="docs-internal-guid"]') as HTMLElement;
-    if (wrapperB && wrapperB.style.fontWeight === 'normal') {
+    const wrapperB = doc.querySelector(
+      'b[id*="docs-internal-guid"]',
+    ) as HTMLElement;
+    if (wrapperB && wrapperB.style.fontWeight === "normal") {
       // Move all children out of the wrapper
       const parent = wrapperB.parentNode;
       if (parent) {
@@ -1137,7 +1208,7 @@ function normalizeGoogleDocsHtml(html: string, context: ConversionContext): stri
 
     // Convert Google Docs inline styles to semantic HTML
     convertGoogleDocsStylesToSemanticHtml(doc);
-    
+
     // Detect and group consecutive monospace paragraphs into code blocks
     groupMonospaceParagraphsIntoCodeBlocks(doc);
 
@@ -1151,7 +1222,7 @@ function normalizeGoogleDocsHtml(html: string, context: ConversionContext): stri
     simplifyTableCells(doc);
 
     convertMonospaceSpansToCode(doc);
-    
+
     // Apply some Word normalization techniques that also work for Google Docs
     convertInlineBoundarySpacesToNbsp(doc);
     convertBoldSpansToStrong(doc);
@@ -1166,24 +1237,24 @@ function normalizeGoogleDocsHtml(html: string, context: ConversionContext): stri
 function convertGoogleDocsStylesToSemanticHtml(doc: Document): void {
   // Convert spans with font-weight:700 to <strong>, but not if they're inside headings
   const boldSpans = doc.querySelectorAll('span[style*="font-weight:700"]');
-  boldSpans.forEach(span => {
+  boldSpans.forEach((span) => {
     // Skip if this span is inside a heading element
-    const isInHeading = span.closest('h1, h2, h3, h4, h5, h6');
+    const isInHeading = span.closest("h1, h2, h3, h4, h5, h6");
     if (!isInHeading) {
-      const strong = doc.createElement('strong');
+      const strong = doc.createElement("strong");
       strong.innerHTML = span.innerHTML;
       span.parentNode?.replaceChild(strong, span);
     } else {
       // For headings, just remove the span and keep the text content
-      const textNode = doc.createTextNode(span.textContent || '');
+      const textNode = doc.createTextNode(span.textContent || "");
       span.parentNode?.replaceChild(textNode, span);
     }
   });
 
   // Convert spans with font-style:italic to <em>
   const italicSpans = doc.querySelectorAll('span[style*="font-style:italic"]');
-  italicSpans.forEach(span => {
-    const em = doc.createElement('em');
+  italicSpans.forEach((span) => {
+    const em = doc.createElement("em");
     em.innerHTML = span.innerHTML;
     span.parentNode?.replaceChild(em, span);
   });
@@ -1211,7 +1282,8 @@ function removeNonBreakingSpaces(doc: Document): void {
       continue;
     }
 
-    const parentElement = node.parentElement ?? (node.parentNode as Element | null);
+    const parentElement =
+      node.parentElement ?? (node.parentNode as Element | null);
     if (parentElement?.closest("pre, code")) {
       continue;
     }
@@ -1222,11 +1294,11 @@ function removeNonBreakingSpaces(doc: Document): void {
 
 function groupMonospaceParagraphsIntoCodeBlocks(doc: Document): void {
   // Find consecutive paragraphs with monospace font
-  const monospaceParas = Array.from(doc.querySelectorAll('p')).filter(p => {
-    const spans = p.querySelectorAll('span');
-    return Array.from(spans).some(span => {
-      const style = span.getAttribute('style') || '';
-      return style.includes('Courier New') || style.includes('monospace');
+  const monospaceParas = Array.from(doc.querySelectorAll("p")).filter((p) => {
+    const spans = p.querySelectorAll("span");
+    return Array.from(spans).some((span) => {
+      const style = span.getAttribute("style") || "";
+      return style.includes("Courier New") || style.includes("monospace");
     });
   });
 
@@ -1253,24 +1325,27 @@ function groupMonospaceParagraphsIntoCodeBlocks(doc: Document): void {
   }
 
   // Convert groups to code blocks
-  groups.forEach(group => {
-    if (group.length >= 2) { // Only convert if multiple consecutive paragraphs
-      const pre = doc.createElement('pre');
-      const code = doc.createElement('code');
-      
-      const codeContent = group.map(para => {
-        // Extract text content, preserving line structure
-        return para.textContent?.trim() || '';
-      }).join('\n');
-      
+  groups.forEach((group) => {
+    if (group.length >= 2) {
+      // Only convert if multiple consecutive paragraphs
+      const pre = doc.createElement("pre");
+      const code = doc.createElement("code");
+
+      const codeContent = group
+        .map((para) => {
+          // Extract text content, preserving line structure
+          return para.textContent?.trim() || "";
+        })
+        .join("\n");
+
       code.textContent = codeContent;
       pre.appendChild(code);
-      
+
       // Replace the first paragraph with the code block
       group[0].parentNode?.replaceChild(pre, group[0]);
-      
+
       // Remove the remaining paragraphs
-      group.slice(1).forEach(para => para.remove());
+      group.slice(1).forEach((para) => para.remove());
     }
   });
 }
@@ -1300,7 +1375,9 @@ function normalizeWordHtml(html: string, context: ConversionContext): string {
   }
 }
 
-function createTurndownService(imageHandling: ImageHandlingMode = 'preserve'): TurndownService {
+function createTurndownService(
+  imageHandling: ImageHandlingMode = "preserve",
+): TurndownService {
   const turndownInstance = new TurndownService({
     headingStyle: "atx",
     codeBlockStyle: "fenced",
@@ -1317,10 +1394,7 @@ function createTurndownService(imageHandling: ImageHandlingMode = 'preserve'): T
   // Turndown's default fencedCodeBlock rule only handles <pre><code>
   turndownInstance.addRule("barePre", {
     filter: function (node) {
-      return (
-        node.nodeName === "PRE" &&
-        !node.querySelector("code")
-      );
+      return node.nodeName === "PRE" && !node.querySelector("code");
     },
     replacement: function (content, node) {
       const element = node as HTMLPreElement;
@@ -1348,7 +1422,11 @@ function createTurndownService(imageHandling: ImageHandlingMode = 'preserve'): T
   // Custom rule to handle paragraphs inside list items (Word behavior)
   turndownInstance.addRule("listParagraph", {
     filter: function (node) {
-      return !!(node.nodeName === "P" && node.parentNode && node.parentNode.nodeName === "LI");
+      return !!(
+        node.nodeName === "P" &&
+        node.parentNode &&
+        node.parentNode.nodeName === "LI"
+      );
     },
     replacement: function (content) {
       return content;
@@ -1378,7 +1456,7 @@ function createTurndownService(imageHandling: ImageHandlingMode = 'preserve'): T
       const isOrdered = element.tagName.toLowerCase() === "ol";
 
       const processedItems = listItems.map((li, index) => {
-        let itemContent = turndownInstance
+        const itemContent = turndownInstance
           .turndown(li.innerHTML)
           .replace(/^\s+/, "")
           .replace(/\s+$/, "")
@@ -1401,12 +1479,12 @@ function createTurndownService(imageHandling: ImageHandlingMode = 'preserve'): T
     filter: "a",
     replacement: function (content, node) {
       const element = node as HTMLAnchorElement;
-      const href = element.getAttribute('href') || '';
-      
+      const href = element.getAttribute("href") || "";
+
       if (!href) {
         return content;
       }
-      
+
       // Always return links without title attributes for maximum compatibility
       return `[${content}](${href})`;
     },
@@ -1418,30 +1496,30 @@ function createTurndownService(imageHandling: ImageHandlingMode = 'preserve'): T
     replacement: function (content, node) {
       const element = node as HTMLImageElement;
 
-      if (imageHandling === 'remove') {
-        return '';
+      if (imageHandling === "remove") {
+        return "";
       }
-      
+
       // Use getAttribute to get the original src value without JSDOM URL resolution
-      const src = element.getAttribute('src') || '';
-      const rawAlt = element.getAttribute('alt') || '';
+      const src = element.getAttribute("src") || "";
+      const rawAlt = element.getAttribute("alt") || "";
       const alt = rawAlt
-        .replace(/[\r\n]+/g, ' ')
-        .replace(/\s{2,}/g, ' ')
+        .replace(/[\r\n]+/g, " ")
+        .replace(/\s{2,}/g, " ")
         .trim();
-      
+
       if (!src) {
-        return '';
+        return "";
       }
-      
+
       // Handle different image types based on configuration
-      if (imageHandling === 'preserve-external-only') {
+      if (imageHandling === "preserve-external-only") {
         // Only preserve images with external URLs (http/https)
         if (!src.match(/^https?:\/\//i)) {
-          return '';
+          return "";
         }
       }
-      
+
       // Return standard Markdown image syntax
       return `![${alt}](${src})`;
     },
@@ -1453,19 +1531,22 @@ function createTurndownService(imageHandling: ImageHandlingMode = 'preserve'): T
 /**
  * Converts HTML content to Markdown format with platform-specific optimizations.
  * Handles Word, Google Docs, and web content with configurable image processing.
- * 
+ *
  * @param html - The HTML string to convert to Markdown
  * @param options - Configuration options for conversion behavior
  * @returns The converted Markdown string, or empty string if input is invalid
  */
-export function convertHtmlToMarkdown(html: string, options: ConversionOptions = {}): string {
+export function convertHtmlToMarkdown(
+  html: string,
+  options: ConversionOptions = {},
+): string {
   // Validate input
-  if (!html || typeof html !== 'string') {
-    return '';
+  if (!html || typeof html !== "string") {
+    return "";
   }
 
   const context = resolveContext(options);
-  
+
   // Detect source and apply appropriate normalization
   let normalized: string;
   if (isGoogleDocsHtml(html)) {
@@ -1476,12 +1557,12 @@ export function convertHtmlToMarkdown(html: string, options: ConversionOptions =
 
   // Create TurndownService instance with image handling configuration
   const turndownInstance = createTurndownService(options.imageHandling);
-  
+
   const markdown = turndownInstance.turndown(normalized);
- 
+
   if (debugConfig.inlineDebug && normalized.includes("monospace")) {
-    mdlog('debug', 'converter', 'Normalized HTML:', normalized);
-    mdlog('debug', 'converter', 'Resulting Markdown:', markdown);
+    mdlog("debug", "converter", "Normalized HTML:", normalized);
+    mdlog("debug", "converter", "Resulting Markdown:", markdown);
   }
   return markdown.replace(/\u00a0/g, " ").replace(/[ \t]+\n/g, "\n");
 }
@@ -1489,19 +1570,23 @@ export function convertHtmlToMarkdown(html: string, options: ConversionOptions =
 /**
  * Converts clipboard content to Markdown format with fallback handling.
  * Prioritizes HTML content over plain text when both are available.
- * 
+ *
  * @param html - Optional HTML content from clipboard (preferred)
  * @param plain - Optional plain text content from clipboard (fallback)
  * @param options - Configuration options for conversion behavior
  * @returns The converted Markdown string, or empty string if no valid content
  */
-export function convertClipboardPayload(html?: string, plain?: string, options: ConversionOptions = {}): string {
+export function convertClipboardPayload(
+  html?: string,
+  plain?: string,
+  options: ConversionOptions = {},
+): string {
   // Ensure html is a string before calling trim()
-  if (html && typeof html === 'string' && html.trim()) {
+  if (html && typeof html === "string" && html.trim()) {
     return convertHtmlToMarkdown(html, options);
   }
   // Ensure plain is a string before calling trim()
-  if (plain && typeof plain === 'string') {
+  if (plain && typeof plain === "string") {
     return plain.trim();
   }
   return "";

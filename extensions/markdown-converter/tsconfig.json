@@ -1,30 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    // Raycast defaults
+    "target": "es2021",
     "jsx": "react-jsx",
-    "rootDir": ".",
-    "outDir": "dist",
-    "declaration": true,
-    "moduleDetection": "force",
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": false,
-    "skipLibCheck": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "types": ["node"]
-  },
-  "include": [
-    "src/**/*",
-    "lib/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+    "resolveJsonModule": true,
+    "outDir": "dist",
+
+    "module": "commonjs",
+    "strict": true,
+    // Override: shared converter code needs DOM types (uses linkedom at runtime)
+    "lib": ["es2021", "DOM", "DOM.Iterable"]
+  }
 }

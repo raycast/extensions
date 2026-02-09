@@ -54,38 +54,18 @@
       "title": "Convert Clipboard to Word 365",
       "description": "Convert Markdown or Org text to Microsoft Word optimized rich text",
       "mode": "no-view"
-    }
-  ],
-  "preferences": [
+    },
     {
-      "name": "imageHandling",
-      "type": "dropdown",
-      "required": false,
-      "title": "Image Handling",
-      "description": "How to handle images during conversion",
-      "default": "preserve",
-      "data": [
-        {
-          "title": "Preserve all images",
-          "value": "preserve"
-        },
-        {
-          "title": "Preserve external images only",
-          "value": "preserve-external-only"
-        },
-        {
-          "title": "Remove all images",
-          "value": "remove"
-        }
-      ]
+      "name": "convert-to-slack",
+      "title": "Convert Clipboard to Slack",
+      "description": "Convert Markdown or Org text to Slack mrkdwn format",
+      "mode": "no-view"
     }
   ],
+  "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
-    "clipboardy": "^5.0.0",
     "linkedom": "^0.18.12",
-    "node-clipboard": "^1.2.0",
     "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
@@ -105,7 +85,6 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "prebuild": "node ../scripts/sync-version.mjs && node ../scripts/prepare-raycast-build.mjs",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
