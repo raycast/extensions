@@ -123,3 +123,155 @@ export interface FastlyErrorResponse {
   status: number;
   title: string;
 }
+
+// ACL types (Compute/Edge ACLs via /resources/acls)
+export interface ComputeACL {
+  id: string;
+  name: string;
+}
+
+export interface ComputeACLListResponse {
+  data: ComputeACL[];
+  meta: {
+    total: number;
+  };
+}
+
+export interface ComputeACLEntry {
+  prefix: string;
+  action: "ALLOW" | "BLOCK";
+}
+
+export interface ComputeACLEntriesResponse {
+  entries: ComputeACLEntry[];
+  meta: {
+    limit: number;
+    next_cursor?: string;
+  };
+}
+
+export interface ComputeACLBulkEntry {
+  op: "create" | "update" | "delete";
+  prefix: string;
+  action?: "ALLOW" | "BLOCK";
+}
+
+// Secret Store types
+export interface SecretStore {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface SecretStoreListResponse {
+  data: SecretStore[];
+  meta: {
+    limit: number;
+    cursor?: string;
+  };
+}
+
+export interface SecretStoreSecret {
+  name: string;
+  created_at: string;
+  recreated_at?: string;
+}
+
+export interface SecretStoreSecretsResponse {
+  data: SecretStoreSecret[];
+  meta: {
+    limit: number;
+    cursor?: string;
+  };
+}
+
+// Config Store types
+export interface ConfigStore {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Config Store list endpoint returns a plain array
+export type ConfigStoreListResponse = ConfigStore[];
+
+export interface ConfigStoreItem {
+  item_key: string;
+  item_value: string;
+  store_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Config Store items endpoint returns a plain array
+export type ConfigStoreItemsResponse = ConfigStoreItem[];
+
+// KV Store types
+export interface KVStore {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface KVStoreListResponse {
+  data: KVStore[];
+  meta: {
+    limit: number;
+    cursor?: string;
+  };
+}
+
+export interface KVStoreKeysResponse {
+  data: string[];
+  meta: {
+    limit: number;
+    cursor?: string;
+  };
+}
+
+// Audit Log / Events types (JSON:API format)
+export interface AuditEvent {
+  id: string;
+  type: "event";
+  attributes: {
+    admin: boolean;
+    created_at: string;
+    customer_id: string;
+    description: string;
+    event_type: string;
+    ip: string;
+    metadata: Record<string, unknown>;
+    service_id?: string;
+    user_id?: string;
+    token_id?: string;
+  };
+}
+
+export interface AuditEventListResponse {
+  data: AuditEvent[];
+  links: {
+    current?: string;
+    first?: string;
+    last?: string;
+    next?: string;
+    prev?: string;
+  };
+  meta: {
+    current_page: number;
+    per_page: number;
+    record_count: number;
+    total_pages: number;
+  };
+}
+
+export interface AuditEventFilters {
+  event_type?: string;
+  service_id?: string;
+  user_id?: string;
+  created_at_start?: string;
+  created_at_end?: string;
+  page?: number;
+  per_page?: number;
+}

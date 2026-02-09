@@ -46,6 +46,36 @@
       "mode": "view"
     },
     {
+      "name": "kv-stores",
+      "title": "Manage KV Stores",
+      "description": "Browse and manage Fastly KV Store key-value pairs",
+      "mode": "view"
+    },
+    {
+      "name": "secret-stores",
+      "title": "Manage Secret Stores",
+      "description": "View and manage Fastly Secret Store secrets",
+      "mode": "view"
+    },
+    {
+      "name": "config-stores",
+      "title": "Manage Config Stores",
+      "description": "View and manage Fastly Config Store key-value pairs",
+      "mode": "view"
+    },
+    {
+      "name": "acls",
+      "title": "Manage ACLs",
+      "description": "View and manage Fastly Access Control Lists and IP entries",
+      "mode": "view"
+    },
+    {
+      "name": "audit-log",
+      "title": "View Audit Log",
+      "description": "View and filter Fastly audit log events for security monitoring and compliance",
+      "mode": "view"
+    },
+    {
       "name": "docs",
       "title": "Fastly Docs",
       "description": "Helpful Fastly documentation",
