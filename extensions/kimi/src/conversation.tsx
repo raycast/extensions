@@ -16,7 +16,8 @@ export default function Conversation() {
   const [conversation, setConversation] = useState<Conversation | null>(null);
 
   useEffect(() => {
-    setConversation(conversations.data.find((x) => x.id === selectedConversationId));
+    const found = conversations.data.find((x) => x.id === selectedConversationId);
+    setConversation(found ?? null);
   }, [selectedConversationId]);
 
   useEffect(() => {

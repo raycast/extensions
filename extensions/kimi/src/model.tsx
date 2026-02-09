@@ -89,7 +89,21 @@ export default function Model() {
       onSearchTextChange={setSearchText}
     >
       {models.data.length === 0 ? (
-        <List.EmptyView title="No custom models" description="Create a new model with ⌘ + N" icon={Icon.Stars} />
+        <List.EmptyView
+          title="No custom models"
+          description="Create a new model with ⌘ + N"
+          icon={Icon.Stars}
+          actions={
+            <ActionPanel>
+              <Action
+                title={"Create Model"}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                icon={Icon.Plus}
+                onAction={() => push(<ModelForm name={searchText} use={{ models }} />)}
+              />
+            </ActionPanel>
+          }
+        />
       ) : (
         <>
           <ModelListItem
