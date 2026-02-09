@@ -12,13 +12,13 @@ import {
   Detail,
 } from "@raycast/api";
 import { useState } from "react";
-import { PrinterStatus, LightReport } from "./utils/types";
+import { PrinterStatus, LightReport, BambuPreferences } from "./utils/types";
 import { useMQTT } from "./utils/mqtt";
 import { formatTime } from "./utils/format";
 import { SEQUENCE_IDS, FTP_CONFIG } from "./utils/constants";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<BambuPreferences>();
   const [status, setStatus] = useState<PrinterStatus>({});
 
   const { client, isConnecting, waitForConnection } = useMQTT(preferences, {

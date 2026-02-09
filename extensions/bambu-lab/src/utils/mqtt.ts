@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import mqtt, { MqttClient } from "mqtt";
+import { BambuPreferences } from "./types";
 import { MQTT_CONFIG, SEQUENCE_IDS } from "./constants";
 
 export interface UseMQTTOptions {
@@ -9,7 +10,7 @@ export interface UseMQTTOptions {
   pushAllOnConnect?: boolean;
 }
 
-export function useMQTT(preferences: Preferences, options: UseMQTTOptions = {}) {
+export function useMQTT(preferences: BambuPreferences, options: UseMQTTOptions = {}) {
   const { onConnect, onMessage, subscribeToReports = true, pushAllOnConnect = false } = options;
 
   const [client, setClient] = useState<MqttClient | null>(null);

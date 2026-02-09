@@ -17,14 +17,14 @@ import { useEffect, useState } from "react";
 import * as fs from "fs";
 import * as path from "path";
 import { Client as FTPClient, FileInfo } from "basic-ftp";
-import { SDFile } from "./utils/types";
+import { SDFile, BambuPreferences } from "./utils/types";
 import { useMQTT } from "./utils/mqtt";
 import { formatBytes } from "./utils/format";
 import { isPrintableFile, isProjectFile } from "./utils/fileUtils";
 import { FTP_CONFIG, SD_CARD_PATHS } from "./utils/constants";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<BambuPreferences>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState("");
@@ -88,7 +88,7 @@ export default function Command() {
           const list = await ftp.list(folder);
           const filesInFolder = list.map((f) => {
             if (folder !== SD_CARD_PATHS.ROOT) {
-              const folderName = folder.replace("/", "");
+              const folderName = folder.replace(/^\//, "");
               f.name = `${folderName}/${f.name}`;
             }
             return f;

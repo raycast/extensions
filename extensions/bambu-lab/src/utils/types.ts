@@ -33,3 +33,10 @@ export interface SDFile {
   size: number;
   date: Date;
 }
+
+export interface BambuPreferences {
+  ipAddress: string;
+  accessCode: string;
+  serialNumber: string;
+  useAmsDefault: boolean;
+}
