@@ -20,6 +20,22 @@ Key strengths:
 - EPUB metadata optimized for reading: site name as source/author (instead of article author name)
 - Send with or without preview
 
+## Advantages vs Official "Send to Kindle" Chrome Extension
+
+| Feature                                                | This Raycast extension | Official Chrome extension |
+| ------------------------------------------------------ | ---------------------- | ------------------------- |
+| Outdated UX                        | ❌                    | ✅                        |
+| Readability.js-based extraction for better results                        | ✅                     | ❌                        |
+| Custom per-domain CSS filters                          | ✅                     | ❌                        |
+| Manual cover photo selection (`Cover CSS`)             | ✅                     | ❌                        |
+| Edit content before sending                            | ✅                     | ❌                        |
+| Faster in email mode                                   | ✅                     | ❌                        |
+| Uses site name instead of article author name          | ✅                     | ❌                        |
+| Import/export filter profiles (JSON)                   | ✅                     | ❌                        |
+| Two delivery methods (local app or email)              | ✅                     | ❌                        |
+| Optional removal of all article links before sending   | ✅                     | ❌                        |
+| Sending history   | ✅                     | ❌                        |
+
 ## Requirements
 
 1. Raycast installed.
@@ -136,22 +152,6 @@ Useful for:
 Bonus:
 
 - JSON import/export for sharing filter profiles across machines.
-
-## Advantages vs Official "Send to Kindle" Chrome Extension
-
-| Feature                                                | This Raycast extension | Official Chrome extension |
-| ------------------------------------------------------ | ---------------------- | ------------------------- |
-| Outdated UX                        | ❌                    | ✅                        |
-| Readability.js-based extraction for better results                        | ✅                     | ❌                        |
-| Custom per-domain CSS filters                          | ✅                     | ❌                        |
-| Manual cover photo selection (`Cover CSS`)             | ✅                     | ❌                        |
-| Edit content before sending                            | ✅                     | ❌                        |
-| Faster in email mode                                   | ✅                     | ❌                        |
-| Uses site name instead of article author name          | ✅                     | ❌                        |
-| Import/export filter profiles (JSON)                   | ✅                     | ❌                        |
-| Two delivery methods (local app or email)              | ✅                     | ❌                        |
-| Optional removal of all article links before sending   | ✅                     | ❌                        |
-| Sending history   | ✅                     | ❌                        |
 
 ## Gmail App Password (Important)
 
