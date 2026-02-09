@@ -27,6 +27,19 @@ type SortBy = "cpu" | "memory";
 
 const APP_GROUPING_STORAGE_KEY = "kill-process.app-grouping-enabled";
 
+const parseBooleanLike = (value: LocalStorage.Value | undefined): boolean | null => {
+  if (value == null) {
+    return null;
+  }
+  if (value === true || value === "true" || value === 1 || value === "1") {
+    return true;
+  }
+  if (value === false || value === "false" || value === 0 || value === "0") {
+    return false;
+  }
+  return null;
+};
+
 const parseSortByPreference = (value: unknown): SortBy => {
   // Backwards compatible:
   // - old preference: boolean (true => memory, false => cpu)
@@ -64,14 +77,19 @@ export default function ProcessList() {
 
   useEffect(() => {
     const loadAppGrouping = async () => {
-      const stored = await LocalStorage.getItem<string | boolean>(APP_GROUPING_STORAGE_KEY);
+      const stored = await LocalStorage.getItem<LocalStorage.Value>(APP_GROUPING_STORAGE_KEY);
       if (typeof stored === "boolean") {
         setIsAppGroupingEnabled(stored);
         return;
       }
-      if (typeof stored === "string") {
-        setIsAppGroupingEnabled(stored === "true");
+
+      const parsed = parseBooleanLike(stored);
+      if (parsed == null) {
+        return;
       }
+
+      setIsAppGroupingEnabled(parsed);
+      await LocalStorage.setItem(APP_GROUPING_STORAGE_KEY, parsed);
     };
 
     void loadAppGrouping();
@@ -316,8 +334,8 @@ export default function ProcessList() {
 
   const toggleAppGrouping = async () => {
     const nextValue = !isAppGroupingEnabled;
-    setIsAppGroupingEnabled(nextValue);
     await LocalStorage.setItem(APP_GROUPING_STORAGE_KEY, nextValue);
+    setIsAppGroupingEnabled(nextValue);
     await showToast({ title: `${nextValue ? "Enabled" : "Disabled"} App Grouping` });
   };
 
