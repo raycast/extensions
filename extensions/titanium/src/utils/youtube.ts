@@ -73,8 +73,6 @@ async function fetchPlayerData(videoId: string): Promise<PlayerResponse> {
           clientName: "ANDROID",
           clientVersion: "19.09.37",
           androidSdkVersion: 30,
-          hl: "en",
-          gl: "US",
         },
       },
       videoId,
@@ -120,7 +118,8 @@ async function fetchTranscriptFromCaptions(
   captionTracks: CaptionTrack[],
 ): Promise<string> {
   const track =
-    captionTracks.find((t) => t.languageCode === "en") || captionTracks[0];
+    captionTracks.find((t) => t.languageCode.startsWith("en")) ||
+    captionTracks[0];
 
   const response = await fetch(track.baseUrl, {
     headers: { "User-Agent": USER_AGENT },

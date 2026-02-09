@@ -26,7 +26,21 @@
     {
       "name": "get-video-summary",
       "title": "Get Video Summary",
-      "description": "Fetches the transcript and metadata of a YouTube video so you can summarize it."
+      "description": "Fetches the transcript and metadata of a YouTube video so you can summarize it.",
+      "instructions": "Fetch a YouTube video transcript and metadata for summarization",
+      "input": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The YouTube video URL or video ID to summarize"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "confirmation": false
     }
   ],
   "ai": {

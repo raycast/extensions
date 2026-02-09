@@ -101,14 +101,20 @@ export default function Command() {
                     icon={Icon.Trash}
                     title="Remove from History"
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={{
+                      macOS: { modifiers: ["ctrl"], key: "x" },
+                      Windows: { modifiers: ["ctrl"], key: "x" },
+                    }}
                     onAction={() => removeItem(index)}
                   />
                   <Action
                     icon={Icon.XMarkCircle}
                     title="Clear All History"
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                    shortcut={{
+                      macOS: { modifiers: ["ctrl", "shift"], key: "x" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "x" },
+                    }}
                     onAction={clearAll}
                   />
                 </ActionPanel.Section>
