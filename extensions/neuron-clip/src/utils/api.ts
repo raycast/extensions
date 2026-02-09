@@ -1,8 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-}
+import { getPreferenceValues } from "@raycast/api";
 
 export const API_URL = "https://www.neuronapp.tech";
 
