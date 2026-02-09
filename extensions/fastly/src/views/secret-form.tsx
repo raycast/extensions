@@ -94,7 +94,7 @@ export function SecretForm({ store, secretName, onSaved }: SecretFormProps) {
       <Form.PasswordField
         title="Secret Value"
         placeholder="Enter secret value"
-        info="This value will be encrypted and cannot be retrieved after creation. Press ${String.fromCharCode(8984)}G to generate a random value."
+        info={`This value will be encrypted and cannot be retrieved after creation. Press ${String.fromCharCode(8984)}G to generate a random value.`}
         {...itemProps.secret}
       />
     </Form>

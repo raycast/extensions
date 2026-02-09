@@ -1,6 +1,6 @@
 # Fastly Changelog
 
-## [New Data Stores and Security Features] - 2026-02-09
+## [New Data Stores and Security Features] - {PR_MERGE_DATE}
 
 Added support for Fastly's data stores and audit logging:
 

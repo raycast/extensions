@@ -9,7 +9,6 @@ import {
   confirmAlert,
   Alert,
   Clipboard,
-  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { ConfigStore, ConfigStoreItem } from "../types";
@@ -36,8 +35,7 @@ function isJsonValue(value: string): boolean {
 }
 
 function buildCurlCommand(storeId: string): string {
-  const preferences = getPreferenceValues<Preferences>();
-  return `curl -s -H "Fastly-Key: ${preferences.apiToken}" "https://api.fastly.com/resources/stores/config/${storeId}/items"`;
+  return `curl -s -H "Fastly-Key: $FASTLY_API_TOKEN" "https://api.fastly.com/resources/stores/config/${storeId}/items"`;
 }
 
 export function ConfigStoreItems({ store }: ConfigStoreItemsProps) {

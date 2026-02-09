@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 import { ConfigStore } from "../types";
 import { getConfigStoreItem } from "../api";
 import { useCachedPromise } from "@raycast/utils";
@@ -20,8 +20,7 @@ function formatValue(value: string): { markdown: string; isJson: boolean } {
 }
 
 function buildCurlCommand(storeId: string, key: string): string {
-  const preferences = getPreferenceValues<Preferences>();
-  return `curl -s -H "Fastly-Key: ${preferences.apiToken}" "https://api.fastly.com/resources/stores/config/${storeId}/item/${encodeURIComponent(key)}"`;
+  return `curl -s -H "Fastly-Key: $FASTLY_API_TOKEN" "https://api.fastly.com/resources/stores/config/${storeId}/item/${encodeURIComponent(key)}"`;
 }
 
 export function ConfigItemDetail({ store, itemKey }: ConfigItemDetailProps) {

@@ -10,7 +10,6 @@ import {
   Alert,
   Clipboard,
   Color,
-  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { ComputeACL, ComputeACLEntry } from "../types";
@@ -23,8 +22,7 @@ interface ACLEntriesProps {
 }
 
 function buildCurlCommand(aclId: string): string {
-  const preferences = getPreferenceValues<Preferences>();
-  return `curl -s -H "Fastly-Key: ${preferences.apiToken}" "https://api.fastly.com/resources/acls/${aclId}/entries"`;
+  return `curl -s -H "Fastly-Key: $FASTLY_API_TOKEN" "https://api.fastly.com/resources/acls/${aclId}/entries"`;
 }
 
 export function ACLEntries({ acl }: ACLEntriesProps) {
