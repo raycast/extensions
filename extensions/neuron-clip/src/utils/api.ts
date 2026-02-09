@@ -4,7 +4,7 @@ interface Preferences {
   apiKey: string;
 }
 
-export const API_URL = "http://localhost:3000";
+export const API_URL = "https://www.neuronapp.tech";
 
 interface ClipResponse {
   success: boolean;
