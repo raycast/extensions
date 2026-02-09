@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-09
 
 - Interact with Moonshot AI's Kimi directly from Raycast
 - Ask questions and get streaming responses in real-time
