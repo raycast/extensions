@@ -18,6 +18,7 @@ export interface Device {
   key: string;
   name: string;
   userid: string;
+  loginName?: string;
   dns: string;
   ipv4: string;
   ipv6: string;
@@ -148,11 +149,13 @@ export function getDevices(status: StatusResponse) {
   const devices: Device[] = [];
   const self = status.Self;
 
+  const selfUser = status.User?.[self.UserID.toString()];
   const me = {
     self: true,
     key: self.ID,
     name: self.DNSName.split(".")[0],
     userid: self.UserID.toString(),
+    loginName: selfUser?.LoginName,
     dns: self.DNSName,
     ipv4: self.TailscaleIPs[0],
     ipv6: self.TailscaleIPs[1],
@@ -167,11 +170,13 @@ export function getDevices(status: StatusResponse) {
   devices.push(me);
 
   for (const [, peer] of Object.entries(status.Peer)) {
+    const peerUser = status.User?.[peer.UserID.toString()];
     const device = {
       self: false,
       key: peer.ID,
       name: peer.DNSName.split(".")[0],
       userid: peer.UserID.toString(),
+      loginName: peerUser?.LoginName,
       dns: peer.DNSName,
       ipv4: peer.TailscaleIPs[0],
       ipv6: peer.TailscaleIPs[1],
