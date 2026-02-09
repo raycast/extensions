@@ -196,6 +196,19 @@ export default function SearchDatabase({
                         }
                       }}
                     />
+                    <Action
+                      title="Paste URL"
+                      icon={Icon.BlankDocument}
+                      shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+                      onAction={() => {
+                        if (entry[4] !== "") {
+                          const processedUrl = processPlaceholders(entry[4], arrayToEntry(entry));
+                          Clipboard.paste(processedUrl).then(() => closeMainWindow());
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No URL Set");
+                        }
+                      }}
+                    />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Copy">
                     <Action
@@ -235,6 +248,20 @@ export default function SearchDatabase({
                             showToast(Toast.Style.Failure, "Error", "Invalid TOTP URL");
                           }
                         } else showToast(Toast.Style.Failure, "Error", "No TOTP Set");
+                      }}
+                    />
+                    <Action
+                      title="Copy URL"
+                      icon={Icon.Clipboard}
+                      shortcut={{ modifiers: ["cmd"], key: "u" }}
+                      onAction={() => {
+                        if (entry[4] !== "") {
+                          const processedUrl = processPlaceholders(entry[4], arrayToEntry(entry));
+                          Clipboard.copy(processedUrl);
+                          showHUD("URL has been copied to clipboard");
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No URL Set");
+                        }
                       }}
                     />
                   </ActionPanel.Section>
