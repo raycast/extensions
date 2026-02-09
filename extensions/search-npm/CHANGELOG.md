@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Fix keywords] - 2026-02-09
+## [Fix keywords] - {PR_MERGE_DATE}
 
 - Fix intermittent `keywords` issue
 
