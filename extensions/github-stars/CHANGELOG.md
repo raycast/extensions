@@ -1,6 +1,6 @@
 # Github-Stars Changelog
 
-## [Update + refactor] - 2026-02-09
+## [Update + refactor] - {PR_MERGE_DATE}
 - update dependencuies & refactor to use `useFetch`
 
 ## [Fix Something Went Wrongs] - 2023-12-17

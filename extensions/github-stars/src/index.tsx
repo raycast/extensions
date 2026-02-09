@@ -3,13 +3,8 @@ import { useFetch } from "@raycast/utils";
 import { Star } from "./response.model";
 import { PackageListItem } from "./PackagListItem";
 
-interface ExtensionPreferences {
-  githubUsername: string;
-  resultsCount: string;
-}
-
 export default function PackageList() {
-  const { githubUsername, resultsCount }: ExtensionPreferences = getPreferenceValues();
+  const { githubUsername, resultsCount } = getPreferenceValues();
 
   const { data, isLoading } = useFetch<Star[], Star[]>(
     `https://api.github.com/users/${githubUsername}/starred?per_page=${resultsCount}`,
