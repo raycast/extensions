@@ -102,48 +102,52 @@ export function ConversationView({ conversation: initialConversation }: Conversa
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Ask a follow-up question..."
-      navigationTitle={`${formatModelName(conversation.model)} • ${conversation.chats.length} exchanges`}
     >
-      {conversation.chats.map((chat, idx) => (
-        <List.Item
-          key={chat.id}
-          title={`Q${idx + 1}: ${chat.question}`}
-          icon={{ source: Icon.Message, tintColor: Color.Blue }}
-          detail={<List.Item.Detail markdown={`## Question\n\n${chat.question}\n\n## Answer\n\n${chat.answer}`} />}
-          actions={
-            <ActionPanel>
-              {searchText && <Action title="Ask Follow-Up" icon={Icon.Message} onAction={handleFollowUp} />}
-              <Action.CopyToClipboard
-                title="Copy Answer"
-                content={chat.answer}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
-              <Action.CopyToClipboard
-                title="Copy Question & Answer"
-                content={`Q: ${chat.question}\n\nA: ${chat.answer}`}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              />
-              {idx === conversation.chats.length - 1 && (
-                <>
-                  <Action
-                    title={conversation.pinned ? "Unpin Conversation" : "Pin Conversation"}
-                    icon={conversation.pinned ? Icon.PinDisabled : Icon.Pin}
-                    onAction={handlePinToggle}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                  />
-                  <Action
-                    title="Delete Conversation"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={handleDelete}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  />
-                </>
-              )}
-            </ActionPanel>
-          }
-        />
-      ))}
+      <List.Section
+        title={formatModelName(conversation.model)}
+        subtitle={`${conversation.chats.length} ${conversation.chats.length === 1 ? "exchange" : "exchanges"}`}
+      >
+        {conversation.chats.map((chat, idx) => (
+          <List.Item
+            key={chat.id}
+            title={`Q${idx + 1}: ${chat.question}`}
+            icon={{ source: Icon.Message, tintColor: Color.Blue }}
+            detail={<List.Item.Detail markdown={`## Question\n\n${chat.question}\n\n## Answer\n\n${chat.answer}`} />}
+            actions={
+              <ActionPanel>
+                {searchText && <Action title="Ask Follow-Up" icon={Icon.Message} onAction={handleFollowUp} />}
+                <Action.CopyToClipboard
+                  title="Copy Answer"
+                  content={chat.answer}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Question & Answer"
+                  content={`Q: ${chat.question}\n\nA: ${chat.answer}`}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+                {idx === conversation.chats.length - 1 && (
+                  <>
+                    <Action
+                      title={conversation.pinned ? "Unpin Conversation" : "Pin Conversation"}
+                      icon={conversation.pinned ? Icon.PinDisabled : Icon.Pin}
+                      onAction={handlePinToggle}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    />
+                    <Action
+                      title="Delete Conversation"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={handleDelete}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    />
+                  </>
+                )}
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

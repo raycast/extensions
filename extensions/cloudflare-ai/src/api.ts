@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, AIResponse, ModelsResponse, ModelDropdownItem, Message } from "./types";
+import { AIResponse, ModelsResponse, ModelDropdownItem, Message } from "./types";
 import { detectModelType, buildRequestBody, buildRequestBodyWithHistory, formatModelName } from "./models";
 import { parseAIResponse } from "./parsers";
 

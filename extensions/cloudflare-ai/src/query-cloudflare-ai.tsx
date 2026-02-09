@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ActionPanel, Action, List, useNavigation, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
-import { Preferences, ModelDropdownItem, Conversation, Chat } from "./types";
+import { ModelDropdownItem, Conversation, Chat } from "./types";
 import { fetchCloudflareModels, queryCloudflareAI } from "./api";
 import { ConversationView } from "./components/ConversationView";
 import { useConversations } from "./hooks/useConversations";
