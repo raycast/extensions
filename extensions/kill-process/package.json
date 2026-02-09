@@ -647,7 +647,7 @@
       "description": "Default ordering for the process list.",
       "name": "sortByMem",
       "required": false,
-      "title": "Default Sort",
+      "title": "Default Sort By",
       "type": "dropdown",
       "data": [
         {
