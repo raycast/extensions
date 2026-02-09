@@ -147,7 +147,7 @@ export const PackageListItem = ({
       subtitle={pkg.description}
       icon={Icon.Box}
       accessories={accessories}
-      keywords={pkg.keywords}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Links">
