@@ -18,7 +18,7 @@
 
 - **API Key** (required) – Get it from your Neuron org Developers page (www.neuronapp.tech).
 
-## [Initial Release] - 2025-02-03
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add Create Note command with form (title, content, URL, tags)
 - Add Search Content command for notes, folders, and tags with detail view
