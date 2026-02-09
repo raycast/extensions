@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-09
 
 - Add AI Chat command with conversation history
 - Add Ask AI command for quick questions
