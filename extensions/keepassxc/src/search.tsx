@@ -15,16 +15,15 @@ const preferences: Preference = getPreferenceValues();
 const lockAfterInactivity = Number(preferences.lockAfterInactivity);
 
 /**
- * The entry point of Search command.
+ * The entry point of Search command
  *
  * This component determines whether the database is already unlocked or not,
  * and renders either the search interface or the unlock interface accordingly.
- *
  * If the user has set the lockAfterInactivity preference, the component will
  * automatically launch an inactivity timer, which will lock the database after
- * the specified amount of time if the user doesn't interact with the database.
+ * the specified amount of time if the user doesn't interact with the database
  *
- * @returns {JSX.Element} The rendered component.
+ * @returns {JSX.Element} - The rendered component
  */
 export default function Command(): JSX.Element {
   const [isLoaded, setIsLoaded] = useState(false);

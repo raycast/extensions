@@ -9,13 +9,14 @@ interface Preference {
 
 /**
  * Utility function to show a toast message for CLI errors.
- * @param {Object} e - Error object with a `message` property.
- * @returns {void}
  *
  * Takes the error message from the CLI and shows a toast message with a human-readable description.
  * If the error is due to an invalid preference, the toast message will be "Invalid Preference: <preference name>".
+ *
+ * @param {Object} e - Error object with a `message` property.
+ * @returns {void}
  */
-const showToastCliErrors = (e: { message: string }): void => {
+const showToastKeepassxcCliErrors = (e: { message: string }): void => {
   let invalidPreference = "";
   let toastMessage = e.message.trim();
   if (e.message.includes("Invalid credentials") || e.message.includes("Failed to load key file")) {
@@ -153,13 +154,13 @@ class KeePassLoader {
   /**
    * Find the installed KeePassXC application.
    *
-   * @returns {Promise<void>} A promise that resolves nothing.
-   *
    * This function uses the `getApplications` function from the `@raycast/api` library
    * to get a list of all installed applications on the system. It then filters the list
    * to only include applications with the name "KeePassXC". If the list is not empty,
    * it sets the `keepassxcCli` class variable to the path of the found application.
    * If the list is empty, it does nothing.
+   *
+   * @returns {Promise<void>} A promise that resolves nothing.
    */
   static findApplication = async (): Promise<void> => {
     if (process.platform === "win32") {
@@ -228,14 +229,14 @@ class KeePassLoader {
   };
 
   /**
-   * Execute the keepassxc-cli command with the given options and
-   * returns the result as a string.
+   * Execute the `keepassxc-cli` command with the given options and
+   * returns the result as a string
    *
-   * The function will reject the promise if an
-   * error occurs during the execution of the command.
+   * The function will reject the promise if an error occurs during the execution
+   * of the command.
    *
-   * @param {string[]} options - The options to pass to the keepassxc-cli command.
-   * @returns {Promise<string>} The result of the command.
+   * @param {string[]} options - The options to pass to the `keepassxc-cli` command
+   * @returns {Promise<string>} - The result of the command
    */
   static execKeepassxcCli = (options: string[]): Promise<string> =>
     KeePassLoader.findApplication().then(() => {
@@ -276,12 +277,12 @@ class KeePassLoader {
     });
 
   /**
-   * Load credentials from LocalStorage.
+   * Load credentials from LocalStorage
    *
    * If the credentials aren't stored in LocalStorage, it will return an empty object.
-   * Otherwise, it will return the loaded credentials.
+   * Otherwise, it will return the loaded credentials
    *
-   * @returns {Promise<{ databasePassword: string; keyFile: string }>} The loaded credentials.
+   * @returns {Promise<{ databasePassword: string; keyFile: string }>} - The loaded credentials
    */
   static loadCredentialsCache = async (): Promise<{ databasePassword: string; keyFile: string }> => {
     const credentials: { databasePassword: string; keyFile: string } = {
@@ -298,12 +299,12 @@ class KeePassLoader {
   };
 
   /**
-   * Load entries from LocalStorage.
+   * Load entries from LocalStorage
    *
-   * If the entries aren't stored in LocalStorage, it will return an empty array.
-   * Otherwise, it will return the parsed entries.
+   * If the entries aren't stored in LocalStorage, it will return an empty array
+   * Otherwise, it will return the parsed entries
    *
-   * @returns {Promise<string[][]>} The entries in a CSV format.
+   * @returns {Promise<string[][]>} - The entries in a CSV format
    */
   static loadEntriesCache = (): Promise<string[][]> =>
     LocalStorage.getItem("entries").then((entries) => {
@@ -315,14 +316,13 @@ class KeePassLoader {
     });
 
   /**
-   * Refreshes the cache of the KeePass database entries.
+   * Refreshes the cache of the KeePass database entries
    *
    * Calls the KeePassXC CLI to export the database entries in CSV format.
    * The exported entries are then cached and parsed into a sorted array
-   * of strings.
+   * of strings
    *
-   * @returns {Promise<string[][]>} - A promise that resolves to the parsed
-   * entries.
+   * @returns {Promise<string[][]>} - A promise that resolves to the parsed entries
    */
   static refreshEntriesCache = (): Promise<string[][]> =>
     this.execKeepassxcCli([
@@ -338,10 +338,10 @@ class KeePassLoader {
     });
 
   /**
-   * Sets the database password and key file path.
+   * Sets the database password and key file path
    *
-   * @param {string} password - The password for the KeePass database.
-   * @param {string} [keyFile=""] - The optional path to the key file.
+   * @param {string} password - The password for the KeePass database
+   * @param {string} [keyFile=""] - The optional path to the key file
    */
   static setCredentials = (password: string, keyFile: string = "") => {
     this.setDatabasePassword(password);
@@ -349,4 +349,4 @@ class KeePassLoader {
   };
 }
 
-export { KeePassLoader, showToastCliErrors };
+export { KeePassLoader, showToastKeepassxcCliErrors };

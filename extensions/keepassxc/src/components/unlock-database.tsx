@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { JSX } from "react/jsx-runtime";
 import { useForm } from "@raycast/utils";
-import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
+import { KeePassLoader, showToastKeepassxcCliErrors } from "../utils/keepass-loader";
 
 interface PasswordForm {
   password: string;
@@ -39,7 +39,7 @@ export default function UnlockDatabase({
         KeePassLoader.cacheCredentials(value.password, value.keyFile[0]);
         KeePassLoader.setCredentials(value.password, value.keyFile[0]);
         setIsUnlocked(true);
-      }, showToastCliErrors);
+      }, showToastKeepassxcCliErrors);
     },
     validation: {
       password: (value) => {
