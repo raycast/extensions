@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Reduce JXA Latency for List Fetching] - {PR_MERGE_DATE}
+## [Reduce JXA Latency for List Fetching] - 2026-02-09
 
 - Todo list views and the menu bar command now fetch tags and lists in a single JXA call instead of two
 - The menu bar command and `get-lists` tool no longer fetch tags unnecessarily
