@@ -325,7 +325,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
           max_files: {
             type: "number",
             description:
-              "Max number of files to scan. Default 200, max 500.",
+              "Max number of files to scan. Default 500, max 1000.",
           },
           preview_bytes: {
             type: "number",
@@ -1749,7 +1749,7 @@ export async function executeScanDirectory(
   args: ScanDirectoryArgs,
 ): Promise<string> {
   const maxDepth = Math.min(args.max_depth ?? 3, 5);
-  const maxFiles = Math.min(args.max_files ?? 200, 500);
+  const maxFiles = Math.min(args.max_files ?? 500, 1000);
   const previewBytes = Math.min(args.preview_bytes ?? 512, 4096);
   const home = process.env.HOME || "~";
 
@@ -1789,35 +1789,42 @@ export async function executeScanDirectory(
   }
 
   // Collect candidate file paths across all scan directories
+  // We scan depth-by-depth (breadth-first) so shallow files get priority.
+  // This ensures files like ~/Documents/test.json are scanned before
+  // deeply nested files in subdirectories.
   const candidatePaths: string[] = [];
 
-  for (const scanDir of scanDirs) {
-    try {
-      const findArgs = [
-        scanDir,
-        "-maxdepth",
-        String(maxDepth),
-        "-type",
-        "f",
-        ...excludeArgs,
-      ];
+  for (let depth = 1; depth <= maxDepth; depth++) {
+    if (candidatePaths.length >= maxFiles) break;
 
-      // Add extension filter if specified
-      if (extFilter.length > 0) {
-        findArgs.push("(", ...extFilter, ")");
+    for (const scanDir of scanDirs) {
+      try {
+        const findArgs = [
+          scanDir,
+          "-mindepth",
+          String(depth),
+          "-maxdepth",
+          String(depth),
+          "-type",
+          "f",
+          ...excludeArgs,
+        ];
+
+        // Add extension filter if specified
+        if (extFilter.length > 0) {
+          findArgs.push("(", ...extFilter, ")");
+        }
+
+        const { stdout } = await execFileAsync("find", findArgs, {
+          timeout: 10000,
+          maxBuffer: 2 * 1024 * 1024,
+        });
+        const paths = stdout.trim().split("\n").filter(Boolean);
+        candidatePaths.push(...paths);
+      } catch {
+        // find may fail on permission errors — continue with other dirs
+        continue;
       }
-
-      const { stdout } = await execFileAsync("find", findArgs, {
-        timeout: 10000,
-        maxBuffer: 2 * 1024 * 1024,
-      });
-      const paths = stdout.trim().split("\n").filter(Boolean);
-      candidatePaths.push(...paths);
-
-      if (candidatePaths.length >= maxFiles) break;
-    } catch {
-      // find may fail on permission errors — continue with other dirs
-      continue;
     }
   }
 
