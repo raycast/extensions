@@ -1,14 +1,14 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { FormEntry, EntryProps, ResizeIconProps } from "./types/types";
+import { EntryProps, FormEntry, ResizeIconProps } from "./types/types";
 import {
   addFaviconeToSupportDir,
   initializeSupportDir,
-  validateSize,
   validateDomainName,
+  validateSize,
   validateSizeLoose,
 } from "./helpers/helpers";
-import { SUPPORT_DIR, CTRL_X, CMD_SPACE_MACOS, CMD_SPACE_WINDOWS } from "./helpers/consts";
+import { CMD_SPACE_MACOS, CMD_SPACE_WINDOWS, CTRL_X, SUPPORT_DIR } from "./helpers/consts";
 import { useFaviconeHistory } from "./hooks/hooks";
 import { useState } from "react";
 import path from "node:path";
@@ -169,7 +169,12 @@ export default function ShowSearchedFavicons() {
                   title="Copy Favicon"
                   icon={Icon.CopyClipboard}
                   content={{ file: faviconPath }}
-                  shortcut={CMD_SPACE_MACOS}
+                  shortcut={
+                    {
+                      macOS: CMD_SPACE_MACOS,
+                      Windows: CMD_SPACE_WINDOWS,
+                    } as Keyboard.Shortcut
+                  }
                 />
               </ActionPanel>
             }

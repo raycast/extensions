@@ -2,8 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "upset-dev",
   "title": "Upset.dev",
-  "owner": "sereinnedotdev",
-  "access": "public",
   "description": "A collection of utilities from upset.dev that you can interact inside Raycast!",
   "icon": "upsetdotdev.png",
   "author": "sereinne",
