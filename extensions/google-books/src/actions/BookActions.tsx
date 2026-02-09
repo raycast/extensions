@@ -27,14 +27,7 @@ export function BookActionSections({
       <ActionPanel.Section>
         <Action.OpenInBrowser url={item.volumeInfo.infoLink} />
         <Action.Push icon={Icon.Text} title="View Book Description" target={<BookDetail item={item} />} />
-        {hasCover && (
-          <Action.Push
-            icon={Icon.Image}
-            title="View Book Cover"
-            target={<BookCover item={item} />}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
-        )}
+        {hasCover && <Action.Push icon={Icon.Image} title="View Book Cover" target={<BookCover item={item} />} />}
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy">
         <Action.CopyToClipboard

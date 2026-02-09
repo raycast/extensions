@@ -7,6 +7,9 @@ import { join } from "path";
 
 async function fetchCoverBuffer(url: string): Promise<Buffer> {
   const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch cover: ${response.status} ${response.statusText}`);
+  }
   return Buffer.from(await response.arrayBuffer());
 }
 
@@ -52,7 +55,7 @@ export function BookCover({ item }: { item: VolumeItem }) {
               <Action
                 icon={Icon.Clipboard}
                 title="Copy Cover"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
                 onAction={async () => {
                   try {
                     const buffer = await fetchCoverBuffer(cover);
@@ -76,7 +79,7 @@ export function BookCover({ item }: { item: VolumeItem }) {
                 icon={Icon.Link}
                 title="Copy Cover URL"
                 content={cover}
-                shortcut={Keyboard.Shortcut.Common.Copy}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
             </ActionPanel.Section>
           )}

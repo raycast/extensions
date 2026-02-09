@@ -10,16 +10,6 @@ Extension for Raycast to search [Google Books](https://books.google.com).
 - **Category Filter** — filter results by category
 - **View Book Cover** — full-page cover image with actions to download, copy image, or copy URL
 
-## Keyboard Shortcuts
-
-| Shortcut | Action                    |
-| -------- | ------------------------- |
-| `⌘ ⇧ ↩`  | Toggle Detail Sidebar     |
-| `⌘ ⇧ L`  | View Book List            |
-| `⌘ ⇧ F`  | Show Book Covers          |
-| `⌘ ⇧ G`  | Show Book Covers (Sorted) |
-| `⌘ ⇧ C`  | View / Copy Book Cover    |
-
 ## Setup (Optional)
 
 This extension works out of the box, but without an API key requests share a global quota and may be rate-limited. To avoid this, you can provide your own **free** Google Books API key.

@@ -42,7 +42,8 @@ export function formatPrice(item: VolumeItem): string | undefined {
   const retail = item.saleInfo?.retailPrice;
   const list = item.saleInfo?.listPrice;
   const price = retail ?? list;
-  if (!price?.amount) return undefined;
+  if (price?.amount == null) return undefined;
+  if (price.amount === 0) return "Free";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: price.currencyCode,
