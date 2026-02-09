@@ -51,15 +51,21 @@ export default function Command() {
 
   const connectFtp = async (ftpClient: FTPClient) => {
     try {
+      // Try FTPS first (Implicit TLS)
       await ftpClient.access({
         host: preferences.ipAddress,
         user: FTP_CONFIG.USERNAME,
         password: preferences.accessCode,
         secure: "implicit",
         port: FTP_CONFIG.SECURE_PORT,
-        secureOptions: { rejectUnauthorized: false },
+        secureOptions: {
+          // Necessary for Bambu Lab printers which use self-signed certificates on local LAN.
+          // Without this, the connection is rejected by the client.
+          rejectUnauthorized: false,
+        },
       });
     } catch {
+      // Fallback to plain FTP if FTPS fails
       await ftpClient.access({
         host: preferences.ipAddress,
         user: FTP_CONFIG.USERNAME,
@@ -147,12 +153,17 @@ export default function Command() {
     if (!fs.existsSync(filePath)) return;
 
     const fileName = path.basename(filePath);
+    const fileSize = fs.statSync(filePath).size;
+
     setIsLoading(true);
     setProgress(`Upload: ${fileName}...`);
 
     const ftp = new FTPClient();
     ftp.trackProgress((info) => {
-      setProgress(`Upload ${Math.round((info.bytes / info.bytesOverall) * 100)}%`);
+      if (fileSize > 0) {
+        const percent = Math.round((info.bytesOverall / fileSize) * 100);
+        setProgress(`Uploading ${percent}%`);
+      }
     });
 
     try {
