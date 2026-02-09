@@ -51,7 +51,7 @@ type Input = {
   calendarId?: string;
 };
 
-const preferences: ExtensionPreferences = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   if (!input.attendees) {

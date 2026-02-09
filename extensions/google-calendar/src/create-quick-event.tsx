@@ -10,31 +10,32 @@ type FormValues = {
   input: string;
 };
 
-const preferences: Preferences.CreateEvent = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 type ParseInputReturn = {
   title?: string;
   startTime?: Date;
-  titleError?: string;
-  startTimeError?: string;
+  error?: string;
   input: string;
 };
 
 function parseInput(input: string): ParseInputReturn {
-  const trimmed = input.trim();
-  if (!trimmed) {
+  if (!input.trim()) {
     return { input };
   }
   const results = chrono.parse(input);
   if (results.length === 0) {
-    return { input, title: input, startTimeError: `No time detected – try adding “at 3pm”` };
+    return { input, title: input, error: `No time detected – try adding "at 3pm"` };
   }
 
-  const title = trimmed.replace(results[0].text, "");
+  const title = input.replace(results[0].text, "").trim();
   const startTime = results[0].start.date();
-  const titleError = (title || "").trim() === "" ? "Title cannot be empty" : "";
 
-  return { input, title, titleError, startTime };
+  if (title === "") {
+    return { input, error: "Title cannot be empty" };
+  }
+
+  return { input, title, startTime };
 }
 
 function Command() {
@@ -47,14 +48,17 @@ function Command() {
     },
     onSubmit: async () => {
       if (parsed.input !== values.input) {
-        await showToast({ style: Toast.Style.Failure, title: "Parsing date..." });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Parsing...",
+        });
         return;
       }
-      if (parsed.titleError || !parsed.startTime || parsed.startTimeError) {
+      if (parsed.error || !parsed.startTime) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Invalid input",
-          message: parsed.titleError || parsed.startTimeError,
+          message: parsed.error,
         });
         return;
       }
@@ -62,7 +66,8 @@ function Command() {
       await showToast({ style: Toast.Style.Animated, title: "Creating event" });
 
       const startTime = parsed.startTime;
-      const durationMs = Number(preferences.defaultEventDuration) * 60 * 1000;
+      const defaultDuration = preferences.defaultEventDuration;
+      const durationMs = (defaultDuration ? Number(defaultDuration) : 15) * 60 * 1000;
 
       const requestBody: calendar_v3.Schema$Event = {
         summary: parsed.title,
@@ -124,12 +129,13 @@ function Command() {
         placeholder="Team meeting tomorrow at 3pm, 10/01 14:30, next Mon 9am"
         {...itemProps.input}
       />
+      <Form.Description title="Parsed error" text={parsed.error || " "} />
       <Form.Description
-        title="Preview Event"
-        text={`${parsed.titleError || parsed.title || ""} \n${
+        title="Preview"
+        text={`${parsed.title || ""} \n${
           parsed.startTime
             ? `${formatRelative(parsed.startTime, new Date())} (${format(parsed.startTime, "PPPp")})`
-            : (parsed.startTimeError ?? "")
+            : ""
         }`}
       />
     </Form>
