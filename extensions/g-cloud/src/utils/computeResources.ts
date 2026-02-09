@@ -169,15 +169,6 @@ export const imageFamilies: Record<string, ImageFamilyInfo[]> = {
   ],
 };
 
-export function getMachineTypeDescription(machineType: string): string {
-  const matchingSeries = Object.entries(machineTypes).find(([, types]) => types.some((mt) => mt.name === machineType));
-
-  if (!matchingSeries) return "";
-
-  const [, types] = matchingSeries;
-  return types.find((mt) => mt.name === machineType)?.description ?? "";
-}
-
 export function getMachineTypesByFamily(): { title: string; types: MachineTypeInfo[] }[] {
   return [
     { title: "General Purpose (E2)", types: machineTypes["e2-standard"] },
