@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-translator",
+  "title": "AI Translator",
+  "description": "Translate to Japanese and get feedback using Structured Outputs.",
+  "categories": ["Productivity"],
+  "icon": "icon.png",
+  "author": "ususso",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Translate & Feedback",
+      "description": "Translate English input and get feedback.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Enter English text...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API Key",
+      "type": "password",
+      "required": true,
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model to use",
+      "type": "dropdown",
+      "required": false,
+      "default": "gpt-4o-mini",
+      "data": [
+        { "title": "GPT-4o Mini (Fast)", "value": "gpt-4o-mini" },
+        { "title": "GPT-4o (High Quality)", "value": "gpt-4o" },
+        { "title": "GPT-4.1 Nano (Fastest)", "value": "gpt-4.1-nano" },
+        { "title": "GPT-4.1 Mini (Fast)", "value": "gpt-4.1-mini" },
+        { "title": "GPT-4.1 (High Quality)", "value": "gpt-4.1" },
+        { "title": "GPT-5 Nano (Fastest)", "value": "gpt-5-nano" },
+        { "title": "GPT-5 Mini (Fast)", "value": "gpt-5-mini" },
+        { "title": "GPT-5", "value": "gpt-5" },
+        { "title": "GPT-5 Chat (Latest)", "value": "gpt-5-chat-latest" },
+        { "title": "GPT-5.1", "value": "gpt-5.1" },
+        { "title": "GPT-5.1 Chat (Latest)", "value": "gpt-5.1-chat-latest" },
+        { "title": "GPT-5.2", "value": "gpt-5.2" },
+        { "title": "GPT-5.2 Chat (Latest)", "value": "gpt-5.2-chat-latest" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^1.17.0",
+    "openai": "^4.55.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
