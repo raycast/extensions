@@ -1,6 +1,7 @@
 # Tailscale Changelog
 
 ## [Show User Login Name] - {PR_MERGE_DATE}
+
 - Shows the user's login name as an accessory in the All Devices command
 - Shows if a device advertises allowing SSH
 
