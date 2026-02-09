@@ -692,7 +692,7 @@ function AddCoverSkillGrid({ sourceHtml, pageUrl, domain, onSaved }: AddCoverSki
       navigationTitle="Add cover skill"
       searchBarPlaceholder="Search by selector"
       fit={Grid.Fit.Fill}
-      aspectRatio="5/8"
+      aspectRatio="2/3"
     >
       {items.length === 0 && !isLoading ? (
         <Grid.EmptyView
