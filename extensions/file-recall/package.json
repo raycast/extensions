@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "file-recall",
+  "title": "File Recall",
+  "description": "Find files on your Mac using natural language and fuzzy memory, powered by an AI agent",
+  "icon": "brain-icon.png",
+  "author": "punk8",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "recall-file",
+      "title": "Recall File",
+      "subtitle": "File Recall",
+      "description": "Describe what you remember about a file and let AI find it for you",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your OpenAI-compatible API key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Base URL for OpenAI-compatible API (e.g. https://api.openai.com/v1)",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.openai.com/v1"
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model name to use (e.g. gpt-4o-mini, gpt-4o, deepseek-chat)",
+      "type": "textfield",
+      "required": true,
+      "default": "gpt-4o-mini"
+    },
+    {
+      "name": "searchDirs",
+      "title": "Search Directories",
+      "description": "Directories to search in (comma-separated). Leave empty to search everywhere.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Documents,~/Desktop,~/Downloads"
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Results",
+      "description": "Maximum number of search results to show",
+      "type": "textfield",
+      "required": false,
+      "default": "20"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.1",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
