@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { listVaults, listItems, checkAuth } from "./lib/pass-cli";
 import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { getItemIcon } from "./lib/utils";
-import { getCachedVaults, setCachedVaults, getCachedItems, setCachedItems } from "./lib/cache";
+import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
 import { openTerminalForLogin } from "./lib/terminal";
 
 function VaultItems({ vault }: { vault: Vault }) {
@@ -16,20 +16,17 @@ function VaultItems({ vault }: { vault: Vault }) {
   }, []);
 
   async function loadVaultItems() {
-    const cachedItems = await getCachedItems();
+    const cachedItems = await getCachedItemsForVault(vault.shareId);
     if (cachedItems && !hasLoadedFromCache.current) {
-      const filtered = cachedItems.filter((item) => item.shareId === vault.shareId);
-      if (filtered.length > 0) {
-        setItems(filtered);
-        setIsLoading(false);
-        hasLoadedFromCache.current = true;
-      }
+      setItems(cachedItems);
+      setIsLoading(false);
+      hasLoadedFromCache.current = true;
     }
 
     try {
       const freshItems = await listItems(vault.shareId);
       setItems(freshItems);
-      await setCachedItems(freshItems);
+      await setCachedItemsForVault(vault.shareId, freshItems);
     } catch (error: unknown) {
       if (!hasLoadedFromCache.current) {
         const message = error instanceof Error ? error.message : "An unknown error occurred";

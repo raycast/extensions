@@ -36,6 +36,10 @@ async function setCache<T>(key: string, data: T): Promise<void> {
 export const getCachedItems = () => getCache<Item[]>(ITEMS_CACHE_KEY);
 export const setCachedItems = (items: Item[]) => setCache(ITEMS_CACHE_KEY, items);
 
+export const getCachedItemsForVault = (shareId: string) => getCache<Item[]>(`${ITEMS_CACHE_KEY}_${shareId}`);
+export const setCachedItemsForVault = (shareId: string, items: Item[]) =>
+  setCache(`${ITEMS_CACHE_KEY}_${shareId}`, items);
+
 export const getCachedVaults = () => getCache<Vault[]>(VAULTS_CACHE_KEY);
 export const setCachedVaults = (vaults: Vault[]) => setCache(VAULTS_CACHE_KEY, vaults);
 

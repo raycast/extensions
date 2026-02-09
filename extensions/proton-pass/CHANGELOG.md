@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search all items across vaults
 - List and browse vaults

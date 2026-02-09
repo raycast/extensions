@@ -11,12 +11,12 @@ import {
   PassCliErrorType,
   PasswordOptions,
   PasswordScore,
-  Preferences,
   Vault,
   VaultRole,
 } from "./types";
 import { MOCK_VAULTS, MOCK_ITEMS, MOCK_ITEM_DETAILS, MOCK_TOTP_CODES } from "./mock-data";
 import { clearCache } from "./cache";
+import { ensureCli } from "./cli";
 
 let mockCacheCleared = false;
 
@@ -88,10 +88,24 @@ function getEnhancedPath(): string {
   return [...additionalPaths, currentPath].filter((p) => p.length > 0).join(delimiter);
 }
 
-function getCliPath(): string {
+function getConfiguredCliPath(): string | undefined {
   const preferences = getPreferenceValues<Preferences>();
   const configured = trimOrUndefined(preferences.cliPath);
-  return stripSurroundingQuotes(configured ?? "pass-cli");
+  if (!configured || configured === "pass-cli") {
+    return undefined;
+  }
+  return stripSurroundingQuotes(configured);
+}
+
+async function getCliPathAsync(): Promise<string> {
+  // Check if user configured a custom path
+  const configured = getConfiguredCliPath();
+  if (configured) {
+    return configured;
+  }
+
+  // Ensure CLI is installed (auto-download if needed)
+  return ensureCli();
 }
 
 function createExecEnv(): NodeJS.ProcessEnv {
@@ -158,7 +172,7 @@ async function execPassCli(
 }
 
 async function runCli(args: string[]): Promise<string> {
-  const cliPath = getCliPath();
+  const cliPath = await getCliPathAsync();
   const env = createExecEnv();
 
   try {
@@ -325,7 +339,7 @@ function normalizeCustomFields(raw: unknown): ItemDetail["customFields"] {
       const name = trimOrUndefined(field.name ?? field.key);
       const value = trimOrUndefined(field.value);
       const typeRaw = trimOrUndefined(field.type)?.toLowerCase();
-      const type = typeRaw === "hidden" ? "hidden" : "text";
+      const type = typeRaw === "text" ? "text" : "hidden";
       if (!name || value === undefined) return undefined;
       return { name, value, type } as const;
     })

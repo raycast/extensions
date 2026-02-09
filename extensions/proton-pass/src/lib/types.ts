@@ -73,10 +73,3 @@ export class PassCliError extends Error {
     Object.setPrototypeOf(this, PassCliError.prototype);
   }
 }
-
-export interface Preferences {
-  cliPath: string;
-  defaultPasswordLength?: string;
-  defaultPasswordType?: string;
-  copyPasswordTransient?: boolean;
-}

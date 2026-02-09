@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { listItems, listVaults, getItem, getItemRaw, getTotp, checkAuth } from "./lib/pass-cli";
-import { Item, ItemDetail as ItemDetailType, Preferences, PassCliError, PassCliErrorType, Vault } from "./lib/types";
+import { Item, ItemDetail as ItemDetailType, PassCliError, PassCliErrorType, Vault } from "./lib/types";
 import { getItemIcon, formatItemSubtitle, maskPassword, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";

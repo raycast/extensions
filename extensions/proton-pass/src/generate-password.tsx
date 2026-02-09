@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Clipboard, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { generatePassword, passwordScore } from "./lib/pass-cli";
-import { Preferences, PasswordScore, PassCliError, PassCliErrorType } from "./lib/types";
+import { PasswordScore, PassCliError, PassCliErrorType } from "./lib/types";
 import { getPasswordStrengthLabel, getPasswordStrengthIcon, maskPassword } from "./lib/utils";
 import { renderErrorView } from "./lib/error-views";
 

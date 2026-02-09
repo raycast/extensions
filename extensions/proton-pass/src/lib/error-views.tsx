@@ -1,6 +1,27 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
 import { JSX } from "react";
 import { PassCliErrorType, PROTON_PASS_CLI_DOCS } from "./types";
+import { clearCliCache } from "./cli";
+
+function ClearCliCacheAction({ onComplete }: { onComplete?: () => void }): JSX.Element {
+  const handle = async () => {
+    try {
+      await clearCliCache();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "CLI Cache Cleared",
+        message: "The CLI will be re-downloaded on next use",
+      });
+      onComplete?.();
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Clear Cache",
+      });
+    }
+  };
+  return <Action title="Clear CLI Cache" icon={Icon.Trash} onAction={handle} />;
+}
 
 interface ErrorViewProps {
   errorType: PassCliErrorType;
@@ -86,6 +107,7 @@ export function ErrorListView({ errorType, onRetry, contextTitle }: ErrorViewPro
             {config.showDocsLink && (
               <Action.OpenInBrowser title="View Documentation" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
             )}
+            <ClearCliCacheAction onComplete={onRetry} />
           </ActionPanel>
         }
       />
