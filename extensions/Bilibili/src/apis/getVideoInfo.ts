@@ -1,17 +1,8 @@
 import { API } from "./api";
-
-import got from "got";
-import { Cache } from "@raycast/api";
+import { getJson } from "./request";
 
 export async function getVideoInfo(id: string) {
-  const cache = new Cache();
-  const cookie = cache.get("cookie") || "{}";
-
-  const res: Bilibili.VideoInfoResponse = await got(API.videoInfo(id), {
-    headers: {
-      cookie,
-    },
-  }).json();
+  const res = await getJson<Bilibili.VideoInfoResponse>(API.videoInfo(id));
 
   if (res.code !== 0) throw new Error(res.message);
 

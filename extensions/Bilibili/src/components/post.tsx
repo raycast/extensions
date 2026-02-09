@@ -3,6 +3,12 @@ import { formatUrl } from "../utils";
 import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
 const { Metadata } = List.Item.Detail;
 
+function renderCoverMarkdown(cover: string) {
+  return `<img src="${formatUrl(
+    cover
+  )}" style="display:block;width:100%;height:auto;max-width:100%;object-fit:contain;" />`;
+}
+
 function renderTypeText(type: Bilibili.DynamicType) {
   switch (type) {
     case "DYNAMIC_TYPE_FORWARD":
@@ -42,7 +48,7 @@ export function Post(props: {
       title={props.desc}
       detail={
         <List.Item.Detail
-          markdown={props.cover ? `<img src="${formatUrl(props.cover)}" center width="300" />` : props.desc}
+          markdown={props.cover ? renderCoverMarkdown(props.cover) : props.desc}
           metadata={
             <Metadata>
               {props.title && <Metadata.Label title={props.title} />}

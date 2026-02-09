@@ -6,9 +6,20 @@ import { runAppleScript } from "run-applescript";
 
 const { Metadata } = List.Item.Detail;
 
+function escapeMarkdownText(content: string) {
+  return content.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function renderDetailMarkdown(cover: string, desc?: string) {
+  const description = desc?.trim();
+  const descriptionMarkdown = description ? `\n\n### Description\n\n${escapeMarkdownText(description)}` : "";
+  return `![Cover](${formatUrl(cover)})${descriptionMarkdown}`;
+}
+
 export function Video(props: {
   title: string;
   cover: string;
+  desc?: string;
   url: string;
   uploader: Bilibili.Uploader;
   bvid: string;
@@ -45,7 +56,7 @@ export function Video(props: {
       title={props.title}
       detail={
         <List.Item.Detail
-          markdown={`<img src="${formatUrl(props.cover)}" center width="300" />`}
+          markdown={renderDetailMarkdown(props.cover, props.desc)}
           metadata={
             <Metadata>
               <Metadata.Label title={props.title} />
@@ -78,6 +89,7 @@ export function Video(props: {
           <Action.Push
             icon={Icon.QuoteBlock}
             title="AI Summary"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
             target={<ConclusionView bvid={props.bvid} cid={props.cid || 0} up_mid={props.uploader.mid} />}
           />
           {props.markAsWatchedCallback && (

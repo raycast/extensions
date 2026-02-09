@@ -1,8 +1,8 @@
-import got from "got";
 import { API } from "./api";
+import { getJson } from "./request";
 
 export async function getCid(bvid: string) {
-  const res: Bilibili.BvidGetCidResponse = await got(API.bvidGetCid(bvid)).json();
+  const res = await getJson<Bilibili.BvidGetCidResponse>(API.bvidGetCid(bvid));
 
   if (res.code !== 0) throw new Error(res.message);
   if (res.data.length <= 0) throw new Error("Not found cid with this bvid!");

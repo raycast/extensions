@@ -1,17 +1,8 @@
 import { API } from "./api";
-
-import got from "got";
-import { Cache } from "@raycast/api";
+import { getJson } from "./request";
 
 export async function getPlayUrl(bvid: string, cid: string) {
-  const cache = new Cache();
-  const cookie = cache.get("cookie") || "{}";
-
-  const res: Bilibili.PlayUrlResponse = await got(API.playUrl(bvid, cid), {
-    headers: {
-      cookie,
-    },
-  }).json();
+  const res = await getJson<Bilibili.PlayUrlResponse>(API.playUrl(bvid, cid));
 
   if (res.code !== 0) throw new Error(res.message);
 

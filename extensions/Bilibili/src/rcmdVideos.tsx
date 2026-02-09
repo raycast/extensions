@@ -1,33 +1,38 @@
 import { useRcmdVideos } from "./hooks";
-import { CheckLogin, Video } from "./components";
+import { CheckLogin, VideoGridItem } from "./components";
 import { formatNumber, secondToDate } from "./utils";
 
-import { useState } from "react";
-import { List } from "@raycast/api";
+import { useRef, useState } from "react";
+import { Grid } from "@raycast/api";
 
 export default function Command() {
   const [idx, setIdx] = useState(1);
-  const [countSet, setCountSet] = useState(new Set<string | undefined>([]));
+  const selectedIdsRef = useRef(new Set<string>());
 
   const { rcmdVideos, isLoading } = useRcmdVideos(idx);
 
   return (
     <CheckLogin>
-      <List
-        filtering={false}
+      <Grid
+        columns={2}
+        aspectRatio="16/9"
+        fit={Grid.Fit.Fill}
+        inset={Grid.Inset.Zero}
         isLoading={isLoading}
-        isShowingDetail={true}
         onSelectionChange={(id) => {
-          setCountSet(countSet.add(id || ""));
+          if (!id || selectedIdsRef.current.has(id)) return;
 
-          if (countSet.size % 16 === 0) setIdx(idx + 1);
+          selectedIdsRef.current.add(id);
+          if (selectedIdsRef.current.size % 16 === 0) setIdx((current) => current + 1);
         }}
       >
         {rcmdVideos?.map((item) => (
-          <Video
-            key={item.bvid}
+          <VideoGridItem
+            key={`${item.bvid}-${item.cid}-${item.pubdate}`}
+            id={`${item.bvid}-${item.cid}-${item.pubdate}`}
             title={item.title}
             cover={item.pic}
+            desc={item.desc}
             url={item.uri}
             bvid={item.bvid}
             cid={item.cid}
@@ -47,7 +52,7 @@ export default function Command() {
             }}
           />
         ))}
-      </List>
+      </Grid>
     </CheckLogin>
   );
 }

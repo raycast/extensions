@@ -13,13 +13,13 @@ function FilterDropdown(props: { kindTypes: KindType[]; onKindTypeChange: (newVa
   const { kindTypes, onKindTypeChange } = props;
   return (
     <List.Dropdown
-      tooltip="Select Drink Type"
+      tooltip="Select Filter Type"
       storeValue={true}
       onChange={(newValue) => {
         onKindTypeChange(newValue);
       }}
     >
-      <List.Dropdown.Section title="Alcoholic Beverages">
+      <List.Dropdown.Section title="Dynamic Filters">
         {kindTypes.map((kindType) => (
           <List.Dropdown.Item key={kindType.id} title={kindType.name} value={kindType.id} />
         ))}
@@ -62,7 +62,7 @@ export default function Command() {
     };
 
     if (item.type === "DYNAMIC_TYPE_AV") {
-      const { aid, title, cover, jump_url, bvid, duration_text, badge, stat, last_play_time } =
+      const { aid, title, cover, desc, jump_url, bvid, duration_text, badge, stat, last_play_time } =
         item.modules.module_dynamic.major.archive;
 
       return (
@@ -70,6 +70,7 @@ export default function Command() {
           key={bvid}
           title={title}
           cover={cover}
+          desc={desc}
           url={jump_url}
           bvid={bvid}
           uploader={{

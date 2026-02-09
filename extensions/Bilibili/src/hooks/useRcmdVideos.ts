@@ -10,12 +10,22 @@ export function useRcmdVideos(idx: number) {
   useEffect(() => {
     (async () => {
       try {
+        setIsLoading(true);
         const res = await getRcmd(idx);
+        const data = res.filter((item) => item.uri);
 
-        setRcmdVideos(rcmdVideos.concat(res.filter((item) => item.uri)));
+        setRcmdVideos((prev) => {
+          const merged = [...prev, ...data];
+          const dedupedMap = new Map<string, Bilibili.Video>();
+          for (const item of merged) {
+            dedupedMap.set(item.bvid, item);
+          }
+          return [...dedupedMap.values()];
+        });
         setIsLoading(false);
       } catch (error) {
         showToast(Toast.Style.Failure, "Get rcmd videos failed");
+        setIsLoading(false);
       }
     })();
   }, [idx]);
