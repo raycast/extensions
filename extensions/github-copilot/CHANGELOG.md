@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Fix search-repositories AI tool] - {PR_MERGE_DATE}
+## [Fix search-repositories AI tool] - 2026-02-09
 
 - Fix search-repositories AI tool crash
 
