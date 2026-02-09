@@ -1,0 +1,101 @@
+{
+  "name": "raycast-folder-launcher",
+  "title": "Folder Launcher",
+  "description": "Quickly open folders with fuzzy search (zoxide-like)",
+  "icon": "command-icon.png",
+  "author": "tccpc",
+  "license": "MIT",
+  "version": "1.0.0",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "commands": [
+    {
+      "name": "quick-open",
+      "title": "Quick Open",
+      "subtitle": "Folder Launcher",
+      "description": "Fuzzy search and open folders",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "directory",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspacePath",
+      "type": "directory",
+      "required": true,
+      "title": "Workspace Path",
+      "description": "Select your workspace directory",
+      "default": "~"
+    },
+    {
+      "name": "maxDepth",
+      "type": "dropdown",
+      "required": true,
+      "title": "Search Depth",
+      "description": "How deep to search for subdirectories",
+      "default": "2",
+      "data": [
+        { "title": "1 level", "value": "1" },
+        { "title": "2 levels", "value": "2" },
+        { "title": "3 levels", "value": "3" },
+        { "title": "4 levels", "value": "4" },
+        { "title": "5 levels", "value": "5" }
+      ]
+    },
+    {
+      "name": "appChoice",
+      "type": "dropdown",
+      "required": true,
+      "title": "Application",
+      "description": "Select an application to open folders",
+      "default": "vscode",
+      "data": [
+        { "title": "VS Code", "value": "vscode" },
+        { "title": "OpenCode", "value": "opencode" },
+        { "title": "Antigravity", "value": "antigravity" },
+        { "title": "Cursor", "value": "cursor" },
+        { "title": "Zed", "value": "zed" },
+        { "title": "WebStorm", "value": "webstorm" },
+        { "title": "IntelliJ IDEA", "value": "idea" },
+        { "title": "Sublime Text", "value": "sublime" },
+        { "title": "Custom", "value": "custom" }
+      ]
+    },
+    {
+      "name": "customAppPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Application Path",
+      "description": "Path to custom application (only used when 'Custom' is selected)",
+      "placeholder": "/path/to/your/app"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.0",
+    "fuse.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.0.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@types/react": "18.0.27"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
