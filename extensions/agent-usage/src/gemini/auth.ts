@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { execSync } from "child_process";
+import { resolveGeminiBinaryPath } from "./binary";
 
 interface GeminiSettings {
   authType?: string;
@@ -32,15 +32,6 @@ const GEMINI_OAUTH2_RELATIVE_PATH = path.join(
 function cleanString(value: string | undefined): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
-}
-
-function findGeminiBinaryPath(): string | null {
-  try {
-    const result = execSync("which gemini", { encoding: "utf-8" }).trim();
-    return result || null;
-  } catch {
-    return null;
-  }
 }
 
 function findGeminiOauth2FilePath(binaryPath: string): string | null {
@@ -87,7 +78,7 @@ function findGeminiOauth2FilePath(binaryPath: string): string | null {
 
 function readGeminiOauth2FileContent(): string | null {
   try {
-    const binaryPath = findGeminiBinaryPath();
+    const binaryPath = resolveGeminiBinaryPath();
     if (!binaryPath) {
       return null;
     }

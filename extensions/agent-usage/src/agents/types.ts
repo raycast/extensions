@@ -1,4 +1,4 @@
-export type AgentId = "amp" | "codex" | "droid" | "gemini" | "kimi";
+export type AgentId = "amp" | "codex" | "droid" | "gemini" | "kimi" | "antigravity";
 
 export interface AgentDefinition {
   id: AgentId;

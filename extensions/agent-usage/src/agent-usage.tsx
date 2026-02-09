@@ -1,6 +1,5 @@
 import { List, Action, ActionPanel, Icon, showToast, Toast, getPreferenceValues, LocalStorage } from "@raycast/api";
-import { execSync } from "child_process";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAmpUsage } from "./amp/fetcher";
 import { renderAmpDetail, getAmpAccessory, formatAmpUsageText } from "./amp/renderer";
 import { useCodexUsage } from "./codex/fetcher";
@@ -9,14 +8,18 @@ import { useDroidUsage } from "./droid/fetcher";
 import { renderDroidDetail, getDroidAccessory, formatDroidUsageText } from "./droid/renderer";
 import { useGeminiUsage } from "./gemini/fetcher";
 import { renderGeminiDetail, getGeminiAccessory, formatGeminiUsageText } from "./gemini/renderer";
+import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth";
 import { useKimiUsage } from "./kimi/fetcher";
 import { renderKimiDetail, getKimiAccessory, formatKimiUsageText } from "./kimi/renderer";
+import { useAntigravityUsage } from "./antigravity/fetcher";
+import { renderAntigravityDetail, getAntigravityAccessory, formatAntigravityUsageText } from "./antigravity/renderer";
 import { AgentDefinition, Accessory, UsageState } from "./agents/types";
 import { AmpError, AmpUsage } from "./amp/types";
 import { CodexError, CodexUsage } from "./codex/types";
 import { DroidError, DroidUsage } from "./droid/types";
 import { GeminiError, GeminiUsage } from "./gemini/types";
 import { KimiError, KimiUsage } from "./kimi/types";
+import { AntigravityError, AntigravityUsage } from "./antigravity/types";
 
 const AGENT_ORDER_KEY = "agent-order";
 
@@ -63,6 +66,13 @@ const AGENTS: AgentDefinition[] = [
     isSupported: true,
     settingsUrl: "https://www.kimi.com/code/console?from=membership",
   },
+  {
+    id: "antigravity",
+    name: "Antigravity",
+    icon: "antigravity-icon.png",
+    description: "Google Antigravity",
+    isSupported: true,
+  },
 ];
 
 function renderUnsupportedDetail(agent: AgentDefinition): React.ReactNode {
@@ -82,10 +92,11 @@ interface UsageStates {
   droid: UsageState<DroidUsage, DroidError>;
   gemini: UsageState<GeminiUsage, GeminiError>;
   kimi: UsageState<KimiUsage, KimiError>;
+  antigravity: UsageState<AntigravityUsage, AntigravityError>;
 }
 
 function getAgentAccessory(agent: AgentDefinition, states: UsageStates): Accessory {
-  const { amp, codex, droid, gemini, kimi } = states;
+  const { amp, codex, droid, gemini, kimi, antigravity } = states;
 
   if (agent.id === "amp") {
     return getAmpAccessory(amp.usage, amp.error, amp.isLoading);
@@ -107,11 +118,15 @@ function getAgentAccessory(agent: AgentDefinition, states: UsageStates): Accesso
     return getKimiAccessory(kimi.usage, kimi.error, kimi.isLoading);
   }
 
+  if (agent.id === "antigravity") {
+    return getAntigravityAccessory(antigravity.usage, antigravity.error, antigravity.isLoading);
+  }
+
   return { text: "—", tooltip: "Not supported yet" };
 }
 
 function renderAgentDetail(agent: AgentDefinition, states: UsageStates): React.ReactNode {
-  const { amp, codex, droid, gemini, kimi } = states;
+  const { amp, codex, droid, gemini, kimi, antigravity } = states;
 
   if (agent.id === "amp" && agent.isSupported) {
     return renderAmpDetail(amp.usage, amp.error);
@@ -133,11 +148,15 @@ function renderAgentDetail(agent: AgentDefinition, states: UsageStates): React.R
     return renderKimiDetail(kimi.usage, kimi.error);
   }
 
+  if (agent.id === "antigravity" && agent.isSupported) {
+    return renderAntigravityDetail(antigravity.usage, antigravity.error);
+  }
+
   return renderUnsupportedDetail(agent);
 }
 
 function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
-  const { amp, codex, droid, gemini, kimi } = states;
+  const { amp, codex, droid, gemini, kimi, antigravity } = states;
 
   if (agent.id === "amp") {
     return formatAmpUsageText(amp.usage, amp.error);
@@ -154,6 +173,9 @@ function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
   if (agent.id === "kimi") {
     return formatKimiUsageText(kimi.usage, kimi.error);
   }
+  if (agent.id === "antigravity") {
+    return formatAntigravityUsageText(antigravity.usage, antigravity.error);
+  }
   return `${agent.name}\nStatus: Not supported yet`;
 }
 
@@ -164,6 +186,7 @@ export default function Command() {
   const droidState: UsageState<DroidUsage, DroidError> = useDroidUsage();
   const geminiState: UsageState<GeminiUsage, GeminiError> = useGeminiUsage();
   const kimiState: UsageState<KimiUsage, KimiError> = useKimiUsage();
+  const antigravityState: UsageState<AntigravityUsage, AntigravityError> = useAntigravityUsage();
 
   const [agentOrder, setAgentOrder] = useState<string[]>(AGENTS.map((a) => a.id));
 
@@ -193,6 +216,7 @@ export default function Command() {
     droid: prefs.showDroid,
     gemini: prefs.showGemini,
     kimi: prefs.showKimi,
+    antigravity: prefs.showAntigravity,
   };
 
   const sortedAgents = agentOrder
@@ -201,7 +225,59 @@ export default function Command() {
   const visibleAgents = sortedAgents.filter((agent) => visibilityMap[agent.id]);
 
   const isLoading =
-    ampState.isLoading || codexState.isLoading || droidState.isLoading || geminiState.isLoading || kimiState.isLoading;
+    ampState.isLoading ||
+    codexState.isLoading ||
+    droidState.isLoading ||
+    geminiState.isLoading ||
+    kimiState.isLoading ||
+    antigravityState.isLoading;
+
+  const hasPromptedGeminiReauth = useRef(false);
+
+  const handleGeminiReauth = useCallback(async () => {
+    const toast = await showToast({
+      title: "Running Gemini Re-Authentication",
+      message: "Please complete Gemini login flow.",
+      style: Toast.Style.Animated,
+    });
+
+    try {
+      await launchGeminiReauth();
+      await geminiState.revalidate();
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Gemini Re-Authentication Completed";
+      toast.message = "Usage check refreshed.";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Gemini Re-Authentication Failed";
+      toast.message = error instanceof Error ? error.message : "Please run 'gemini' manually.";
+    }
+  }, [geminiState.revalidate]);
+
+  useEffect(() => {
+    const errorType = geminiState.error?.type;
+
+    if (shouldPromptGeminiReauth(errorType, hasPromptedGeminiReauth.current)) {
+      hasPromptedGeminiReauth.current = true;
+      void showToast({
+        title: "Gemini Token Expired",
+        message: "Run 'gemini' to refresh your login.",
+        style: Toast.Style.Failure,
+        primaryAction: {
+          title: "Run Gemini Re-Authentication",
+          onAction: () => {
+            void handleGeminiReauth();
+          },
+        },
+      });
+      return;
+    }
+
+    if (errorType !== "unauthorized") {
+      hasPromptedGeminiReauth.current = false;
+    }
+  }, [geminiState.error?.type, handleGeminiReauth]);
 
   const handleRefresh = async () => {
     await Promise.all([
@@ -210,6 +286,7 @@ export default function Command() {
       droidState.revalidate(),
       geminiState.revalidate(),
       kimiState.revalidate(),
+      antigravityState.revalidate(),
     ]);
     await showToast({
       title: "Refreshed",
@@ -241,6 +318,7 @@ export default function Command() {
           droid: droidState,
           gemini: geminiState,
           kimi: kimiState,
+          antigravity: antigravityState,
         });
         const detail = renderAgentDetail(agent, {
           amp: ampState,
@@ -248,6 +326,7 @@ export default function Command() {
           droid: droidState,
           gemini: geminiState,
           kimi: kimiState,
+          antigravity: antigravityState,
         });
 
         const canMoveUp = index > 0;
@@ -275,31 +354,12 @@ export default function Command() {
                         droid: droidState,
                         gemini: geminiState,
                         kimi: kimiState,
+                        antigravity: antigravityState,
                       })}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                     {agent.id === "gemini" && geminiState.error?.type === "unauthorized" && (
-                      <Action
-                        title="Re-Authenticate Gemini"
-                        icon={Icon.Key}
-                        onAction={async () => {
-                          try {
-                            execSync("gemini", { timeout: 30000 });
-                          } catch {
-                            // gemini CLI may exit with non-zero, ignore
-                          }
-                          await geminiState.revalidate();
-                          if (geminiState.error?.type === "unauthorized") {
-                            await showToast({
-                              title: "Authentication Failed",
-                              message: "Run 'gemini' in terminal to re-authenticate",
-                              style: Toast.Style.Failure,
-                            });
-                          } else {
-                            await showToast({ title: "Re-authenticated", style: Toast.Style.Success });
-                          }
-                        }}
-                      />
+                      <Action title="Run Gemini Re-Authentication" icon={Icon.Key} onAction={handleGeminiReauth} />
                     )}
                     {agent.settingsUrl && (
                       <Action.OpenInBrowser title={`Open ${agent.name} Settings`} url={agent.settingsUrl} />
