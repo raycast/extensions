@@ -10,6 +10,9 @@
     "Applications",
     "Productivity"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "search-apps",
