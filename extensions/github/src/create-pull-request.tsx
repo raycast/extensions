@@ -122,7 +122,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
             try {
               await github.enablePullRequestAutoMerge({
                 nodeId: pullRequestId,
-                mergeMethod: (values.autoMergeMethod as PullRequestMergeMethod) || undefined,
+                mergeMethod: (values.autoMergeMethod as PullRequestMergeMethod) || allowedMergeMethods[0],
               });
             } catch (error) {
               toast.style = Toast.Style.Success;
