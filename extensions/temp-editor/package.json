@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "temp-editor",
+  "title": "Temp Editor",
+  "description": "A temporary text input window for composing text and copying it to the clipboard. Useful for avoiding IME cursor issues in vim, tmux/zellij, and CLI-based LLMs, or writing multi-line terminal commands with proper IME support.",
+  "icon": "icon.png",
+  "author": "okash1n",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Temp Editor",
+      "description": "Open a temporary text input window. Compose text with full IME support, then copy to clipboard for pasting into terminals, vim, or LLM prompts.",
+      "mode": "view",
+      "keywords": ["text", "note", "clipboard", "copy"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "react": "^19.0.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
