@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { type Skill, getCompany } from "../shared";
 
@@ -13,6 +13,13 @@ export function useCompanyFilter(allSkills: Skill[]) {
     }
     return new Map([...counts.entries()].sort(([a], [b]) => a.localeCompare(b)));
   }, [allSkills]);
+
+  // Reset filter when the selected company is no longer in the results
+  useEffect(() => {
+    if (company !== "all" && !companyCounts.has(company)) {
+      setCompany("all");
+    }
+  }, [company, companyCounts]);
 
   const skills = company === "all" ? allSkills : allSkills.filter((s) => getCompany(s) === company);
 
