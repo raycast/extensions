@@ -60,6 +60,8 @@ const CASES_SKIP_PRELOWERCASE: Set<string> = new Set([
   "Swap Case", // pre-lowercasing would make output all-uppercase
   "Alternating Case", // alternates per character from original positions
   "Random Case", // no point in pre-lowercasing, as output is random anyway
+  "Lower First", // only first letter should be changed
+  "Upper First", // only first letter should be changed
 ]);
 
 function preLowercaseText(input: string, preserveCase: boolean) {
