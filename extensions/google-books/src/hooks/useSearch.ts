@@ -44,7 +44,9 @@ function useSearch(query: string | undefined): UseSearchReturn {
   const debouncedQuery = useDebouncedValue(query, 300);
   const [cachedResults, setCachedResults] = useCachedState<VolumeItem[]>("last-results", []);
 
-  const { isLoading, data } = useFetch(buildSearchUrl(debouncedQuery ?? ""), {
+  const searchUrl = debouncedQuery ? buildSearchUrl(debouncedQuery) : "";
+
+  const { isLoading, data } = useFetch(searchUrl, {
     mapResult(result: GoogleBooksResponse) {
       return {
         data: (result.items ?? []).filter((item) => item.volumeInfo?.title),

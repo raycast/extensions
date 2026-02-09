@@ -56,7 +56,7 @@ export function BookCover({ item }: { item: VolumeItem }) {
                 onAction={async () => {
                   try {
                     const buffer = await fetchCoverBuffer(cover);
-                    const tempPath = join(tmpdir(), "raycast-google-books-cover.jpg");
+                    const tempPath = join(tmpdir(), `raycast-google-books-${item.id}.jpg`);
                     await writeFile(tempPath, buffer);
                     await Clipboard.copy({ file: tempPath });
                     await showToast({
