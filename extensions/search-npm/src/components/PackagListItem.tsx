@@ -111,11 +111,17 @@ export const PackageListItem = ({
     ),
   };
 
+  const keywords = Array.isArray(pkg.keywords)
+  ? pkg.keywords
+  : typeof pkg.keywords === 'string'
+    ? [pkg.keywords]
+    : []
+
   const accessories: List.Item.Accessory[] = [
-    pkg?.keywords?.length
+    keywords?.length
       ? {
           icon: Icon.Tag,
-          tooltip: pkg.keywords.join(", "),
+          tooltip: keywords.join(", "),
         }
       : {},
   ];
