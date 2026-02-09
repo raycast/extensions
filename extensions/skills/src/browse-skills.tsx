@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { SkillListItem } from "./components/SkillListItem";
 import { type SearchResponse, API_BASE_URL, buildIssueUrl, getCompany } from "./shared";
 
-const BROWSE_URL = `${API_BASE_URL}/search?q=skill&limit=50`;
+const BROWSE_URL = `${API_BASE_URL}/search?q=skill&limit=100`;
 
 export default function Command() {
   const [company, setCompany] = useState("all");
