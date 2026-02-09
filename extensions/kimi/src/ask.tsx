@@ -39,7 +39,7 @@ export default function Ask(props: { conversation?: Conversation }) {
 
   const [isAutoFullInput] = useState(() => {
     return getPreferenceValues<{
-      isAutoFullInput: string;
+      isAutoFullInput: boolean;
     }>().isAutoFullInput;
   });
 

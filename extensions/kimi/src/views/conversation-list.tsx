@@ -16,9 +16,13 @@ export const ConversationListView = (props: {
         <List.Item
           id={conversation.id}
           key={conversation.id}
-          title={conversation.chats[conversation.chats.length - 1].question}
+          title={
+            conversation.chats.length > 0
+              ? conversation.chats[conversation.chats.length - 1].question
+              : "Empty conversation"
+          }
           accessories={[
-            { text: conversation.chats[conversation.chats.length - 1].answer },
+            { text: conversation.chats.length > 0 ? conversation.chats[conversation.chats.length - 1].answer : "" },
             { tag: conversation.model.name },
             { text: new Date(conversation.created_at ?? 0).toLocaleDateString() },
           ]}

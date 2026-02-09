@@ -12,8 +12,8 @@ export function useSavedChat(): SavedChatHook {
 
       if (storedSavedChats) {
         setData((previous) => [...previous, ...JSON.parse(storedSavedChats)]);
-        setLoading(false);
       }
+      setLoading(false);
     })();
   }, []);
 

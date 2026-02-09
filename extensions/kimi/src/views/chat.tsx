@@ -22,7 +22,7 @@ export const ChatView = ({
 }: ChatViewProps) => {
   const savedChat = useSavedChat();
 
-  const sortedChats = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const sortedChats = [...data].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const getActionPanel = (selectedChat: Chat) => (
     <ActionPanel>

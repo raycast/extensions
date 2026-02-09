@@ -1,4 +1,6 @@
-export type Set<T> = React.Dispatch<React.SetStateAction<T>>;
+import type { Dispatch, SetStateAction } from "react";
+
+export type Set<T> = Dispatch<SetStateAction<T>>;
 
 export type Message = {
   role: "user" | "assistant";
