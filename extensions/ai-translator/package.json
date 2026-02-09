@@ -5,7 +5,7 @@
   "description": "Translate to Japanese and get feedback using Structured Outputs.",
   "categories": ["Productivity"],
   "icon": "icon.png",
-  "author": "ususso",
+  "author": "usp",
   "platforms": [
     "macOS",
     "Windows"
