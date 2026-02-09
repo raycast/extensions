@@ -32,7 +32,9 @@ export function useConversations(): ConversationsHook {
     if (!isLoading) {
       // Filter out conversations with no chats before saving
       const conversationsToSave = data.filter((conv) => conv.chats.length > 0);
-      LocalStorage.setItem("cloudflare-ai-conversations", JSON.stringify(conversationsToSave));
+      void LocalStorage.setItem("cloudflare-ai-conversations", JSON.stringify(conversationsToSave)).catch((error) => {
+        console.error("Failed to save conversations:", error);
+      });
     }
   }, [data, isLoading]);
 

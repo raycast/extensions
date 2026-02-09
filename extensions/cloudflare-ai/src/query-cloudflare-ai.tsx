@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List, useNavigation, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, List, useNavigation, showToast, Toast, getPreferenceValues, Icon } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 import { ModelDropdownItem, Conversation, Chat } from "./types";
 import { fetchCloudflareModels, queryCloudflareAI } from "./api";
@@ -134,7 +134,7 @@ export default function Command() {
         />
       ) : (
         <List.EmptyView
-          icon="💬"
+          icon={Icon.Message}
           title="Ask Cloudflare AI"
           description="Type your question in the search bar and press Enter"
         />

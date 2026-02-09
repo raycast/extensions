@@ -1,6 +1,3 @@
-// Re-export model-specific types
-export * from "./get-all-model";
-
 // AI Response types
 export interface AIResponse {
   result:

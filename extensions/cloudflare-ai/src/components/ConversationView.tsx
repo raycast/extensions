@@ -115,12 +115,22 @@ export function ConversationView({ conversation: initialConversation }: Conversa
             detail={<List.Item.Detail markdown={`## Question\n\n${chat.question}\n\n## Answer\n\n${chat.answer}`} />}
             actions={
               <ActionPanel>
-                {searchText && <Action title="Ask Follow-Up" icon={Icon.Message} onAction={handleFollowUp} />}
-                <Action.CopyToClipboard
-                  title="Copy Answer"
-                  content={chat.answer}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
+                {searchText ? (
+                  <>
+                    <Action title="Ask Follow-Up" icon={Icon.Message} onAction={handleFollowUp} />
+                    <Action.CopyToClipboard
+                      title="Copy Answer"
+                      content={chat.answer}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                  </>
+                ) : (
+                  <Action.CopyToClipboard
+                    title="Copy Answer"
+                    content={chat.answer}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                )}
                 <Action.CopyToClipboard
                   title="Copy Question & Answer"
                   content={`Q: ${chat.question}\n\nA: ${chat.answer}`}
