@@ -1,5 +1,9 @@
 # Change Case Changelog
 
+## [Fix Swap Case] - {PR_MERGE_DATE}
+
+- Prevents pre-lowercasing of input for swap case
+
 ## [Refactor and ESLint Compatibility] - 2026-01-19
 
 - Added a proper `alternatingCase` transformation alongside the existing `randomCase` option
