@@ -174,12 +174,23 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     "https://gist.githubusercontent.com/florisdobber/35f702f0bab6816ac847b182be6f4903/raw/2f6a8296dc5818d76ed594b318e064f9983e0715/prompts.csv",
     {
       parseResponse: async (response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to load prompt library: ${response.status}`);
+        }
         const text = await response.text();
         return parse(text, {
           columns: true,
         });
       },
       keepPreviousData: true,
+      onError: (error) => {
+        console.error("Failed to load prompt library:", error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Prompt library unavailable",
+          message: "Using default prompts only",
+        });
+      },
     },
   );
 

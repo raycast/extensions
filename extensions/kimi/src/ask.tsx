@@ -38,9 +38,7 @@ export default function Ask(props: { conversation?: Conversation }) {
   );
 
   const [isAutoFullInput] = useState(() => {
-    return getPreferenceValues<{
-      isAutoFullInput: boolean;
-    }>().isAutoFullInput;
+    return getPreferenceValues<Preferences.Ask>().isAutoFullInput;
   });
 
   const { push, pop } = useNavigation();

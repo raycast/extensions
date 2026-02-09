@@ -27,7 +27,7 @@ export const SaveAsSnippetAction = ({ text, name }: { text: string; name: string
     icon={Icon.Snippets}
     title="Save as a Snippet"
     snippet={{ text, name }}
-    shortcut={{ modifiers: ["cmd"], key: "n" }}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
   />
 );
 

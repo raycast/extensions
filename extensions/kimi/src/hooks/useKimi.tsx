@@ -8,9 +8,7 @@ interface KimiConfig {
 
 export function useKimi(): KimiConfig {
   const [config] = useState(() => {
-    const apiKey = getPreferenceValues<{
-      apiKey: string;
-    }>().apiKey;
+    const apiKey = getPreferenceValues<Preferences>().apiKey;
 
     return {
       apiKey: apiKey,

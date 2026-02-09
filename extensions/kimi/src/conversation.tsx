@@ -13,7 +13,7 @@ export default function Conversation() {
 
   const [searchText, setSearchText] = useState<string>("");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [conversation, setConversation] = useState<Conversation | null>();
+  const [conversation, setConversation] = useState<Conversation | null>(null);
 
   useEffect(() => {
     setConversation(conversations.data.find((x) => x.id === selectedConversationId));
