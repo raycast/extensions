@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "titanium",
+  "title": "Titanium",
+  "description": "Summarize YouTube videos using Raycast AI. Mention @titanium in AI Chat with a YouTube link to get a summary.",
+  "icon": "extension-icon.png",
+  "author": "textviolence",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "history",
+      "title": "History",
+      "description": "View videos summarized via AI Chat",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-video-summary",
+      "title": "Get Video Summary",
+      "description": "Fetches the transcript and metadata of a YouTube video so you can summarize it."
+    }
+  ],
+  "ai": {
+    "instructions": "You summarize YouTube videos. When the user provides a YouTube URL or video ID, use the get-video-summary tool to fetch the transcript and metadata. Format the summary as key highlights with emoji + headline + one sentence description. If the user asks follow-up questions about the video, answer based on the transcript you received from the tool."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.2.0",
+    "@types/react": "^19.2.13",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
