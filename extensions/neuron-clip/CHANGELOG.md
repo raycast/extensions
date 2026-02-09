@@ -1,6 +1,6 @@
 # Neuron Changelog
 
-## [Current] - 2025-02-03
+## [Current] - {PR_MERGE_DATE}
 
 ### Commands
 
