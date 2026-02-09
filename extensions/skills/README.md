@@ -22,6 +22,6 @@ Search for specific AI agent skills.
 
 ## Screenshots
 
-![Browse Skills](metadata/skills-1.png)
-![Skill Detail](metadata/skills-2.png)
-![Search Skills](metadata/skills-3.png)
+![Browse Skills](metadata/skills-1-1.png)
+![Skill Detail](metadata/skills-2-1.png)
+![Search Skills](metadata/skills-3-1.png)
