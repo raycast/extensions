@@ -33,6 +33,8 @@ export function useMQTT(preferences: BambuPreferences, options: UseMQTTOptions =
     const mqttClient = mqtt.connect(host, {
       username: MQTT_CONFIG.USERNAME,
       password: preferences.accessCode,
+      // Necessary for Bambu Lab printers which use self-signed certificates on local LAN.
+      // Standard TLS verification fails because the certificate is not trusted by the OS.
       rejectUnauthorized: false,
     });
 
