@@ -111,11 +111,7 @@ export const PackageListItem = ({
     ),
   };
 
-  const keywords = Array.isArray(pkg.keywords)
-  ? pkg.keywords
-  : typeof pkg.keywords === 'string'
-    ? [pkg.keywords]
-    : []
+  const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : typeof pkg.keywords === "string" ? [pkg.keywords] : [];
 
   const accessories: List.Item.Accessory[] = [
     keywords?.length
