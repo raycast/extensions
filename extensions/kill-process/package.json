@@ -672,8 +672,8 @@
       "placeholder": "3000"
     },
     {
-      "description": "Include the full executable path when searching.",
-      "label": "Include Process Path",
+      "description": "Search in the full executable path.",
+      "label": "Search Process Paths",
       "name": "shouldSearchInPaths",
       "required": false,
       "default": false,
@@ -681,8 +681,8 @@
       "type": "checkbox"
     },
     {
-      "description": "Include the PID when searching.",
-      "label": "Include PID",
+      "description": "Search in the PID.",
+      "label": "Search Process PID",
       "name": "shouldSearchInPid",
       "required": false,
       "default": false,
@@ -691,20 +691,11 @@
     },
     {
       "description": "List app processes before other results.",
-      "label": "Prefer Apps",
+      "label": "Prioritize Apps",
       "name": "shouldPrioritizeAppsWhenFiltering",
       "required": false,
       "default": false,
       "title": "",
-      "type": "checkbox"
-    },
-    {
-      "description": "Determine whether aggregate processes belong to the same app.",
-      "label": "Group by App",
-      "name": "aggregateApps",
-      "required": false,
-      "default": false,
-      "title": "Grouping",
       "type": "checkbox"
     },
     {

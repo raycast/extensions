@@ -9,6 +9,7 @@ import {
   Icon,
   Keyboard,
   List,
+  LocalStorage,
   open,
   popToRoot,
   showToast,
@@ -23,6 +24,8 @@ import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } 
 import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
 
 type SortBy = "cpu" | "memory";
+
+const APP_GROUPING_STORAGE_KEY = "kill-process.app-grouping-enabled";
 
 const parseSortByPreference = (value: unknown): SortBy => {
   // Backwards compatible:
@@ -43,8 +46,8 @@ export default function ProcessList() {
   const [query, setQuery] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
-  const shouldIncludePaths = preferences.shouldSearchInPaths;
-  const shouldIncludePid = preferences.shouldSearchInPid;
+  const shouldSearchInPaths = preferences.shouldSearchInPaths;
+  const shouldSearchInPid = preferences.shouldSearchInPid;
   const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering;
   const shouldShowPID = preferences.shouldShowPID;
   const shouldShowPath = preferences.shouldShowPath;
@@ -54,10 +57,25 @@ export default function ProcessList() {
   const goToRootAfterKill = preferences.goToRootAfterKill;
   const skipConfirmation = preferences.skipConfirmation;
   const [sortBy, setSortBy] = useState<SortBy>(parseSortByPreference(preferences.sortByMem));
-  const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
+  const [isAppGroupingEnabled, setIsAppGroupingEnabled] = useState<boolean>(false);
 
   // Cache CPU data from WMI queries (persists across refreshes)
   const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
+
+  useEffect(() => {
+    const loadAppGrouping = async () => {
+      const stored = await LocalStorage.getItem<string | boolean>(APP_GROUPING_STORAGE_KEY);
+      if (typeof stored === "boolean") {
+        setIsAppGroupingEnabled(stored);
+        return;
+      }
+      if (typeof stored === "string") {
+        setIsAppGroupingEnabled(stored === "true");
+      }
+    };
+
+    void loadAppGrouping();
+  }, []);
 
   const fetchProcesses = () => {
     fetchRunningProcesses()
@@ -102,7 +120,7 @@ export default function ProcessList() {
   useInterval(fetchProcesses, refreshDuration);
   useEffect(() => {
     let processes = fetchResult;
-    if (aggregateApps) {
+    if (isAppGroupingEnabled) {
       processes = aggregate(processes);
     }
     processes.sort((a, b) => {
@@ -113,7 +131,7 @@ export default function ProcessList() {
       }
     });
     setState(processes);
-  }, [fetchResult, sortBy, aggregateApps]);
+  }, [fetchResult, sortBy, isAppGroupingEnabled]);
 
   const fileIcon = (process: Process) => {
     return getFileIcon(process);
@@ -296,8 +314,14 @@ export default function ProcessList() {
     return result;
   };
 
+  const toggleAppGrouping = async () => {
+    const nextValue = !isAppGroupingEnabled;
+    setIsAppGroupingEnabled(nextValue);
+    await LocalStorage.setItem(APP_GROUPING_STORAGE_KEY, nextValue);
+    await showToast({ title: `${nextValue ? "Enabled" : "Disabled"} App Grouping` });
+  };
+
   const processCount = state.length;
-  const processCountLabel = `${processCount} ${processCount === 1 ? "Process" : "Processes"} Running`;
 
   return (
     <List
@@ -318,7 +342,7 @@ export default function ProcessList() {
         </List.Dropdown>
       }
     >
-      <List.Section title={processCountLabel}>
+      <List.Section title="Processes" subtitle={`${processCount} running`}>
         {state
           .filter((process) => {
             if (query === "") {
@@ -326,9 +350,9 @@ export default function ProcessList() {
             }
             const nameMatches = process.processName.toLowerCase().includes(query.toLowerCase());
             const pathMatches =
-              shouldIncludePaths &&
+              shouldSearchInPaths &&
               process.path.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
-            const pidMatches = shouldIncludePid && process.id.toString().includes(query);
+            const pidMatches = shouldSearchInPid && process.id.toString().includes(query);
             const appNameMatches =
               process.type === "aggregatedApp" && process.appName?.toLowerCase().includes(query.toLowerCase());
 
@@ -389,15 +413,10 @@ export default function ProcessList() {
                       onAction={() => fetchProcesses()}
                     />
                     <Action
-                      title={`${aggregateApps ? "Disable" : "Enable"} Aggregating Apps`}
+                      title={`${isAppGroupingEnabled ? "Disable" : "Enable"} App Grouping`}
                       icon={Icon.AppWindow}
                       shortcut={{ modifiers: ["shift"], key: "tab" }}
-                      onAction={() => {
-                        setAggregateApps(!aggregateApps);
-                        showToast({
-                          title: `${aggregateApps ? "Disabled" : "Enabled"} aggregating apps`,
-                        });
-                      }}
+                      onAction={toggleAppGrouping}
                     />
                   </ActionPanel>
                 }
