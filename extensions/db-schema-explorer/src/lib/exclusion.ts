@@ -96,5 +96,7 @@ export function ruleDescription(rule: ExclusionRule): string {
       return `Contains: ${rule.pattern}`;
     case "not_contains":
       return `Does not contain: ${rule.pattern}`;
+    default:
+      return `Unknown rule type: ${rule.type}`;
   }
 }

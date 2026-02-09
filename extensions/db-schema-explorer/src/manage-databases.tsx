@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, List, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   addDatabase,
@@ -319,7 +319,7 @@ export default function Command() {
         <List.EmptyView
           title="No databases"
           description="Add a database to get started."
-          icon="🔌"
+          icon={Icon.Plug}
           actions={
             <ActionPanel>
               <Action title="Add Database" onAction={() => setMode("addForm")} />

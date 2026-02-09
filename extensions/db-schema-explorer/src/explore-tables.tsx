@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, launchCommand, LaunchType, type LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, List, launchCommand, LaunchType, type LaunchProps, Icon } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getDatabases, getDefaultDatabase, type StoredDatabase } from "./lib/databases";
 import { readSchemaCache, type SchemaCache, type TableCacheEntry } from "./lib/cache";
@@ -173,7 +173,7 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
         <List.EmptyView
           title="No databases"
           description="Add a database in Manage Databases first."
-          icon="🔌"
+          icon={Icon.Plug}
           actions={
             <ActionPanel>
               <Action
@@ -235,7 +235,7 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
           <List.EmptyView
             title="No credentials for this database"
             description="Open Manage Databases and edit credentials for this database."
-            icon="🔌"
+            icon={Icon.Plug}
             actions={
               <ActionPanel>
                 <Action
@@ -259,7 +259,7 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
                 ? "Database has no tables or views, or all are excluded."
                 : "Run Sync Schema for this database, or open Manage Databases."
             }
-            icon="📋"
+            icon={Icon.Document}
             actions={
               <ActionPanel>
                 <Action
@@ -283,7 +283,7 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
           <List.EmptyView
             title="All tables excluded"
             description="Adjust exclusion rules in Manage Databases for this database."
-            icon="🔍"
+            icon={Icon.MagnifyingGlass}
             actions={
               <ActionPanel>
                 <Action

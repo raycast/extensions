@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, launchCommand, LaunchType, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getDatabases, type StoredDatabase } from "./lib/databases";
 import { syncDatabaseSchema } from "./lib/sync-one";
@@ -89,7 +89,7 @@ export default function Command() {
         <List.EmptyView
           title="No databases"
           description="Add a database in Manage Databases first."
-          icon="🔌"
+          icon={Icon.Plug}
           actions={
             <ActionPanel>
               <Action
@@ -109,7 +109,7 @@ export default function Command() {
         <List.EmptyView
           title="Sync failed"
           description={errorMessage ?? "Unknown error"}
-          icon="⚠️"
+          icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
               <Action
@@ -130,7 +130,7 @@ export default function Command() {
         <List.Item
           title="Schema synced"
           subtitle={`${selectedDb.name}: ${tableCount} tables cached`}
-          icon="✅"
+          icon={Icon.CheckCircle}
           actions={
             <ActionPanel>
               <Action
