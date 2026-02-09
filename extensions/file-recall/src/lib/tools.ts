@@ -566,16 +566,32 @@ function isRedundantSearch(newArgs: SearchFilesArgs): string | null {
     );
     const prevDir = prev.directory?.replace(/^~/, process.env.HOME || "~");
 
-    // New keywords are a subset of (or equal to) previous keywords
-    const kwSubset = newKw.size === 0 || [...newKw].every((k) => prevKw.has(k));
-    // Directory is the same or not specified in new
-    const dirMatch = !newDir || newDir === prevDir;
-    // New types are a subset of (or equal to) previous types
-    const typeSubset =
-      newTypes.size === 0 || [...newTypes].every((t) => prevTypes.has(t));
+    // A search is redundant only if it's EQUAL to or NARROWER than a previous one.
+    // "No constraint" means broader (matches more), NOT narrower.
+    //
+    // Keywords (OR semantics): more keywords = broader. So the new search is
+    // covered only if its keywords are a non-empty subset of the previous search.
+    const kwCovered =
+      newKw.size > 0 &&
+      prevKw.size > 0 &&
+      [...newKw].every((k) => prevKw.has(k));
+    // If new search has no keywords but prev had some, new is BROADER → not redundant
+    // If new search has keywords but prev had none, prev was BROADER → new is narrower → covered
+    const kwRedundant = kwCovered || (newKw.size > 0 && prevKw.size === 0);
 
-    // If all three match, the new search is covered by the previous one
-    if (kwSubset && dirMatch && typeSubset) {
+    // Types: same logic. No type filter = all types = broader.
+    const typeCovered =
+      newTypes.size > 0 &&
+      prevTypes.size > 0 &&
+      [...newTypes].every((t) => prevTypes.has(t));
+    const typeRedundant =
+      typeCovered || (newTypes.size > 0 && prevTypes.size === 0);
+
+    // Directory: new search is covered if same dir, or prev had no dir (global)
+    const dirRedundant = newDir === prevDir || (!newDir && !prevDir) || (!!newDir && !prevDir);
+
+    // All three must be redundant for the search to be considered covered
+    if (kwRedundant && dirRedundant && typeRedundant) {
       return (
         "This search overlaps with a previous search. " +
         "The files you need are already in the results above — use those file_ids. " +
@@ -664,12 +680,20 @@ export async function executeSearchFiles(
 
   // Execute queries progressively until we find results
   const allPaths = new Set<string>();
+  // Track whether the most specific query (with type filter) found anything
+  let typeFilteredFound = false;
 
-  for (const query of queries) {
+  for (let qi = 0; qi < queries.length; qi++) {
+    const query = queries[qi];
     try {
       console.log(`mdfind query: ${query}`);
       const paths = await runMdfind(query, searchIn);
       for (const p of paths) allPaths.add(p);
+
+      // Track if type-filtered query (early strategies) found results
+      if (qi <= 1 && paths.length > 0 && typeCond && query.includes(typeCond)) {
+        typeFilteredFound = true;
+      }
 
       if (allPaths.size >= maxResults) break;
     } catch {
@@ -677,14 +701,36 @@ export async function executeSearchFiles(
     }
   }
 
-  // If still nothing and we had a directory scope, try without it
-  if (allPaths.size === 0 && searchIn.length > 0 && contentCond) {
-    console.log("Retrying without directory scope...");
-    try {
-      const paths = await runMdfind(contentCond, []);
-      for (const p of paths) allPaths.add(p);
-    } catch {
-      // ignore
+  // If we have a directory scope, also try globally in these cases:
+  // 1. No results at all
+  // 2. Type-filtered query found nothing but broader query found results
+  //    (the results are likely wrong type - e.g. Go files when searching for PDFs)
+  if (searchIn.length > 0 && contentCond) {
+    const shouldRetryGlobal =
+      allPaths.size === 0 || (typeCond && !typeFilteredFound);
+    if (shouldRetryGlobal) {
+      console.log("Retrying without directory scope...");
+      // Try with type filter first (most precise)
+      if (typeCond) {
+        try {
+          const typeQuery = contentCond
+            ? [contentCond, typeCond].join(" && ")
+            : typeCond;
+          const paths = await runMdfind(typeQuery, []);
+          for (const p of paths) allPaths.add(p);
+        } catch {
+          // ignore
+        }
+      }
+      // Also try content-only if still not enough
+      if (allPaths.size < maxResults) {
+        try {
+          const paths = await runMdfind(contentCond, []);
+          for (const p of paths) allPaths.add(p);
+        } catch {
+          // ignore
+        }
+      }
     }
   }
 
