@@ -75,9 +75,9 @@ export async function ensureMigratedAsync(): Promise<void> {
   if (fromStorage && String(fromStorage).trim()) connectionString = String(fromStorage).trim();
   if (!connectionString) {
     // Legacy migration: check for connectionString preference that may no longer exist in Preferences type
-    const prefs = getPreferenceValues<Preferences>() as Preferences & { connectionString?: string };
-    const fromPrefs = prefs.connectionString?.trim();
-    if (fromPrefs) connectionString = fromPrefs;
+    const prefs = getPreferenceValues<Preferences>();
+    const fromPrefs = (prefs as Record<string, unknown>).connectionString;
+    if (typeof fromPrefs === "string" && fromPrefs.trim()) connectionString = fromPrefs.trim();
   }
   const oldCachePath = getLegacyCachePath();
   const hasOldCache = fs.existsSync(oldCachePath);

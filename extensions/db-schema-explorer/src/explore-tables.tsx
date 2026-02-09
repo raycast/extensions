@@ -122,6 +122,17 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
     };
   }, [bySchema, sortedSchemas, selectedTableKeys]);
 
+  const fullSchemaDdl = useMemo(() => {
+    const ddls: string[] = [];
+    for (const schema of sortedSchemas) {
+      const schemaItems = bySchema.get(schema) ?? [];
+      for (const { entry } of schemaItems) {
+        ddls.push(entry.ddl);
+      }
+    }
+    return ddls.join("\n\n");
+  }, [bySchema, sortedSchemas]);
+
   const addAllToSelection = useCallback(() => {
     setSelectedTableKeys(new Set(items.map((i) => i.key)));
   }, [items]);
@@ -307,6 +318,11 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
         filtering={true}
         actions={
           <ActionPanel>
+            <Action.CopyToClipboard
+              title={`Copy Full Schema (${items.length} Tables)`}
+              content={fullSchemaDdl}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            />
             {selectedOrderedKeys.length > 0 && (
               <>
                 <Action.CopyToClipboard
@@ -349,6 +365,11 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
                         title="Copy DDL"
                         content={entry.ddl}
                         shortcut={Keyboard.Shortcut.Common.Copy}
+                      />
+                      <Action.CopyToClipboard
+                        title={`Copy Full Schema (${items.length} Tables)`}
+                        content={fullSchemaDdl}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                       />
                       <Action
                         title={isSelected ? "Remove from Selection" : "Add to Selection"}
