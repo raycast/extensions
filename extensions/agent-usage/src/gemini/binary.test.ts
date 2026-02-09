@@ -5,7 +5,7 @@ import * as os from "os";
 import * as path from "path";
 
 test("findLatestMiseGeminiBinaryPath returns the highest installed node version binary", async () => {
-  const { findLatestMiseGeminiBinaryPath } = await import("./binary.ts");
+  const { findLatestMiseGeminiBinaryPath } = await import("./binary");
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-mise-"));
 
@@ -31,7 +31,7 @@ test("findLatestMiseGeminiBinaryPath returns the highest installed node version 
 });
 
 test("resolveGeminiBinaryPath ignores non-executable GEMINI_PATH", async () => {
-  const { resolveGeminiBinaryPath } = await import("./binary.ts");
+  const { resolveGeminiBinaryPath } = await import("./binary");
 
   const previousGeminiPath = process.env.GEMINI_PATH;
   const previousGeminiCliPath = process.env.GEMINI_CLI_PATH;

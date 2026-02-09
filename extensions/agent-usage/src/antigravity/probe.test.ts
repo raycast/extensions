@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 test("parseProcessInfoFromPsOutput extracts pid, csrf token and extension port", async () => {
-  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+  const { parseProcessInfoFromPsOutput } = await import("./probe");
 
   const output = `
   111 /Applications/Other.app/Contents/MacOS/language_server_macos --app_data_dir other --csrf_token abc
@@ -19,7 +19,7 @@ test("parseProcessInfoFromPsOutput extracts pid, csrf token and extension port",
 });
 
 test("parseProcessInfoFromPsOutput marks antigravity seen when csrf token missing", async () => {
-  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+  const { parseProcessInfoFromPsOutput } = await import("./probe");
 
   const output = `
   333 /Applications/Antigravity.app/Contents/MacOS/language_server_macos --app_data_dir antigravity --extension_server_port 41234
@@ -32,7 +32,7 @@ test("parseProcessInfoFromPsOutput marks antigravity seen when csrf token missin
 });
 
 test("parseListeningPorts parses and de-duplicates listening ports", async () => {
-  const { parseListeningPorts } = await import("./probe.ts");
+  const { parseListeningPorts } = await import("./probe");
 
   const output = `
 COMMAND   PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
@@ -47,7 +47,7 @@ server    222 me    12u  IPv4 0x0000000000000000      0t0  TCP 127.0.0.1:9090 (L
 });
 
 test("requestWithFallback retries with HTTP on the same port when HTTPS fails", async () => {
-  const { requestWithFallback } = await import("./probe.ts");
+  const { requestWithFallback } = await import("./probe");
 
   const attempts: string[] = [];
 
@@ -72,7 +72,7 @@ test("requestWithFallback retries with HTTP on the same port when HTTPS fails", 
 });
 
 test("requestWithFallback retries HTTP on detected port when extension HTTP port is unavailable", async () => {
-  const { requestWithFallback } = await import("./probe.ts");
+  const { requestWithFallback } = await import("./probe");
 
   const attempts: string[] = [];
 

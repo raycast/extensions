@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 test("parseAntigravityUserStatusResponse parses account and prioritized models", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
+  const { parseAntigravityUserStatusResponse } = await import("./parser");
 
   const response = {
     code: 0,
@@ -47,7 +47,7 @@ test("parseAntigravityUserStatusResponse parses account and prioritized models",
 });
 
 test("parseAntigravityCommandModelConfigsResponse supports fallback payload", async () => {
-  const { parseAntigravityCommandModelConfigsResponse } = await import("./parser.ts");
+  const { parseAntigravityCommandModelConfigsResponse } = await import("./parser");
 
   const response = {
     code: "OK",
@@ -76,7 +76,7 @@ test("parseAntigravityCommandModelConfigsResponse supports fallback payload", as
 });
 
 test("formatResetTime supports ISO and epoch values", async () => {
-  const { formatResetTime } = await import("./parser.ts");
+  const { formatResetTime } = await import("./parser");
 
   const originalNow = Date.now;
   Date.now = () => new Date("2026-01-01T00:00:00Z").getTime();
@@ -90,7 +90,7 @@ test("formatResetTime supports ISO and epoch values", async () => {
 });
 
 test("parseAntigravityUserStatusResponse falls back to Claude Sonnet when Opus is unavailable", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
+  const { parseAntigravityUserStatusResponse } = await import("./parser");
 
   const response = {
     code: 0,
@@ -127,7 +127,7 @@ test("parseAntigravityUserStatusResponse falls back to Claude Sonnet when Opus i
 });
 
 test("parseAntigravityUserStatusResponse returns parse_error for invalid payload", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
+  const { parseAntigravityUserStatusResponse } = await import("./parser");
 
   const result = parseAntigravityUserStatusResponse({ code: 0, userStatus: { cascadeModelConfigData: {} } });
 

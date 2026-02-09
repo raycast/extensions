@@ -5,7 +5,7 @@ import * as os from "os";
 import * as path from "path";
 
 test("shouldPromptGeminiReauth returns true only for unauthorized errors that have not been prompted", async () => {
-  const { shouldPromptGeminiReauth } = await import("./reauth.ts");
+  const { shouldPromptGeminiReauth } = await import("./reauth");
 
   assert.equal(shouldPromptGeminiReauth("unauthorized", false), true);
   assert.equal(shouldPromptGeminiReauth("unauthorized", true), false);
@@ -14,7 +14,7 @@ test("shouldPromptGeminiReauth returns true only for unauthorized errors that ha
 });
 
 test("getGeminiReauthCommand prefers GEMINI_PATH when provided", async () => {
-  const { getGeminiReauthCommand } = await import("./reauth.ts");
+  const { getGeminiReauthCommand } = await import("./reauth");
 
   const previousGeminiPath = process.env.GEMINI_PATH;
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-path-"));
