@@ -153,10 +153,15 @@ export default function SearchView() {
   // Extract primitive for stable dependency (avoids render loops from object changes)
   const phase = loadingState.phase;
 
-  // Show completion toast when download AND processing are fully complete
+  // Show completion toast only on cold start (no cache) when download AND processing are fully complete
   // Wait for phase === "complete" to ensure we have accurate totals
   useEffect(() => {
-    if (phase === "complete" && !hasShownCompletionToast.current && results) {
+    if (
+      phase === "complete" &&
+      !hasShownCompletionToast.current &&
+      results &&
+      hasCacheFiles === false
+    ) {
       hasShownCompletionToast.current = true;
       // Use indexTotals for accurate counts (total packages in index, not filtered results)
       const totalFormulae = indexTotals?.formulae || 0;
@@ -167,7 +172,7 @@ export default function SearchView() {
         message: `${formatNumber(totalFormulae)} formulae and ${formatNumber(totalCasks)} casks loaded`,
       });
     }
-  }, [phase, results, indexTotals]);
+  }, [phase, results, indexTotals, hasCacheFiles]);
 
   // Determine which loading UI to show during initial load:
   // - hasCacheFiles === null: Still checking if cache exists, show simple loading
