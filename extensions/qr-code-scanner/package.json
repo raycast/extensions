@@ -44,14 +44,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.103.0",
     "jimp": "^0.22.12",
     "jsqr": "^1.4.0",
     "open": "^8.4.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.37",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "@types/screenshot-desktop": "^1.12.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -64,5 +64,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

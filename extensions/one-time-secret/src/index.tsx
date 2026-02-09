@@ -1,7 +1,6 @@
 import { Form, ActionPanel, Action, Clipboard, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useState } from "react";
-import fetch, { Headers, RequestInit } from "node-fetch";
-import { OneTimeSecretClient, OneTimeSecretResponse } from "./one-time-secret-client";
+import { OneTimeSecretClient } from "./one-time-secret-client";
 
 type Values = {
   lifetime: string;
@@ -35,7 +34,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       const response = await oneTimeSecretClient.storeAnonymousSecret(
         values.secret,
         values.lifetime,
-        values.passphrase
+        values.passphrase,
       );
 
       await Clipboard.copy(oneTimeSecretClient.getShareableUrl(response.secret_key));

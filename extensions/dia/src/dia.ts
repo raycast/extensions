@@ -1,7 +1,7 @@
-import { runAppleScript, usePromise, useSQL } from "@raycast/utils";
+import { runAppleScript, showFailureToast, usePromise, useSQL } from "@raycast/utils";
 import { resolve } from "path";
 import { homedir } from "os";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import dedent from "dedent";
 import { escapeAppleScriptString, escapeSQLLikePattern } from "./utils";
 import { getBookmarksTree, type BookmarkDirectory } from "./bookmarks";
@@ -136,13 +136,22 @@ function getHistoryQuery(searchText?: string, limit = 100) {
 
 export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
   const historyPath = getHistoryPath();
-
   // getHistoryQuery now handles escaping internally
   const historyQuery = getHistoryQuery(searchText, options?.limit);
 
-  return useSQL<HistoryItem>(historyPath, historyQuery, {
+  const dbExists = existsSync(historyPath);
+  // const result = useSQL<HistoryItem>(dbExists ? historyPath : __filename, historyQuery, {
+  const result = useSQL<HistoryItem>(dbExists ? historyPath : __filename, historyQuery, {
     permissionPriming: "This extension needs access to read your Dia browser history.",
+    execute: dbExists,
   });
+
+  if (!dbExists) {
+    const error = new Error("The database does not exist");
+    showFailureToast(error);
+    return { isLoading: false, error, data: [], permissionView: null, revalidate: () => {} };
+  }
+  return result;
 }
 
 async function getTabs() {

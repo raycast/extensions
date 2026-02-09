@@ -369,7 +369,7 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
             icon={{
               source:
                 (document.dataSourceView?.dataSource.connectorProvider &&
-                  ConnectorProviders[document.dataSourceView?.dataSource.connectorProvider].icon) ??
+                  ConnectorProviders[document.dataSourceView?.dataSource.connectorProvider]?.icon) ??
                 Icon.Globe,
             }}
             accessories={[
@@ -377,11 +377,11 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
                 tag: {
                   color:
                     (document.dataSourceView?.dataSource.connectorProvider &&
-                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider].color) ??
+                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider]?.color) ??
                     Color.SecondaryText,
                   value:
                     (document.dataSourceView?.dataSource.connectorProvider &&
-                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider].name) ??
+                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider]?.name) ??
                     "Unknown",
                 },
               },

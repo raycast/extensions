@@ -77,12 +77,17 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
     (_repoPath: string, branchFilter: BranchFilter, _selectedBranch?: Branch, _detachedHead?: DetachedHead) =>
       async (options: { page: number }) => {
         const selectedSourceName = evaluateBranchName(branchFilter, branchesState!);
-        const commits = await gitManager.getCommits(selectedSourceName, options.page);
 
-        return {
-          data: commits,
-          hasMore: commits.length > 0,
-        };
+        try {
+          const commits = await gitManager.getCommits(selectedSourceName, options.page);
+
+          return {
+            data: commits,
+            hasMore: commits.length > 0,
+          };
+        } catch {
+          return { data: [], hasMore: false };
+        }
       },
     [gitManager.repoPath, branchFilter, branchesState?.currentBranch, branchesState?.detachedHead], // Include both repository path and branch for proper cache isolation
     {

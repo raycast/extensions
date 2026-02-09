@@ -58,7 +58,7 @@ $result | ConvertTo-Json -Compress
  */
 export function getProcessListCommand(): string {
   if (isWindows) {
-    return `powershell -EncodedCommand ${encodePowerShellCommand(WINDOWS_PROCESS_LIST_SCRIPT)}`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(WINDOWS_PROCESS_LIST_SCRIPT)}`;
   }
   return "ps -eo pid,ppid,pcpu,rss,comm";
 }
@@ -69,7 +69,7 @@ export function getProcessListCommand(): string {
  */
 export function getProcessPerformanceCommand(): string {
   if (isWindows) {
-    return `powershell -EncodedCommand ${encodePowerShellCommand(WINDOWS_CPU_PERFORMANCE_SCRIPT)}`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(WINDOWS_CPU_PERFORMANCE_SCRIPT)}`;
   }
   return "ps -eo pid,ppid,pcpu,rss,comm";
 }
@@ -81,7 +81,7 @@ export function getKillCommand(pid: number, force = false): string {
   if (isWindows) {
     return force ? `taskkill /F /PID ${pid}` : `taskkill /PID ${pid}`;
   }
-  return force ? `sudo kill -9 ${pid}` : `kill -9 ${pid}`;
+  return force ? `zsh -c 'sudo kill -9 ${pid}'` : `kill -9 ${pid}`;
 }
 
 /**

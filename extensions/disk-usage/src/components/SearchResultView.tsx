@@ -1,35 +1,25 @@
-import { useMemo, type FC } from "react";
-import type { FileNode, FileSystemIndex } from "../types";
+import { type FC, useEffect, useState } from "react";
+import type { DiskUsageSend } from "../machines/disk-usage-machine";
+import type { FileNode } from "../types";
+import { getGlobalSearchIndex } from "../utils/storage";
 import { FileSection } from "./FileSection";
-import { DiskUsageSend } from "../machines/disk-usage-machine";
 
 export const SearchResultsView: FC<{
-  fsIndex: FileSystemIndex;
   query: string;
   isProcessingDeletion: boolean;
   send: DiskUsageSend;
-}> = ({ fsIndex, query, isProcessingDeletion, send }) => {
-  const filteredItems = useMemo(() => {
-    const allFiles: FileNode[] = [];
-    const lowerQuery = query.toLowerCase();
+}> = ({ query, isProcessingDeletion, send }) => {
+  const [items, setItems] = useState<FileNode[]>([]);
 
-    Object.values(fsIndex).forEach((snapshot) => {
-      snapshot.accessible.forEach((node) => {
-        if (node.name.toLowerCase().includes(lowerQuery)) {
-          allFiles.push(node);
-        }
-      });
+  useEffect(() => {
+    getGlobalSearchIndex().then((all) => {
+      const lowerQuery = query.toLowerCase();
+      const filtered = all.filter((node) => node.name.toLowerCase().includes(lowerQuery));
+      setItems(filtered);
     });
-
-    return allFiles.sort((a, b) => b.bytes - a.bytes).slice(0, 100);
-  }, [fsIndex, query]);
+  }, [query]);
 
   return (
-    <FileSection
-      title={`Search Results "${query}"`}
-      items={filteredItems}
-      isDeleting={isProcessingDeletion}
-      send={send}
-    />
+    <FileSection title={`Search Results "${query}"`} items={items} isDeleting={isProcessingDeletion} send={send} />
   );
 };

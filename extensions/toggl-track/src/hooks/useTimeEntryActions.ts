@@ -16,7 +16,7 @@ export function useTimeEntryActions(revalidateRunningTimeEntry: () => void, reva
       revalidateRunningTimeEntry();
       await showToast(Toast.Style.Success, "Time entry resumed");
       await clearSearchBar({ forceScrollToTop: true });
-    } catch (e) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to resume time entry");
     }
   }
@@ -28,7 +28,7 @@ export function useTimeEntryActions(revalidateRunningTimeEntry: () => void, reva
       await showToast(Toast.Style.Success, `Stopped time entry`);
       revalidateRunningTimeEntry();
       revalidateTimeEntries();
-    } catch (e) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to stop time entry");
     }
   }

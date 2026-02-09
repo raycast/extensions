@@ -1,0 +1,248 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "virtual-desktop-manager",
+  "title": "Virtual Desktop Manager",
+  "description": "Manage Windows virtual desktops directly from Raycast using AutoHotkey. Brings hyprland like experience to windows.",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-shortcuts",
+      "title": "View Keyboard Shortcuts",
+      "description": "View all available keyboard shortcuts at a glance",
+      "mode": "view"
+    },
+    {
+      "name": "edit-keybindings",
+      "title": "Edit Keybindings",
+      "description": "Customize keybindings for all commands",
+      "mode": "view"
+    },
+    {
+      "name": "run-keybindings-daemon",
+      "title": "Run Keybindings Daemon",
+      "description": "Start or reload the background keybindings script",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-keybindings-daemon",
+      "title": "Stop Keybindings Daemon",
+      "description": "Stop the background keybindings script",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-desktop-1",
+      "title": "Go to Desktop 1",
+      "description": "Switch to virtual desktop 1",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-desktop-2",
+      "title": "Go to Desktop 2",
+      "description": "Switch to virtual desktop 2",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-desktop-3",
+      "title": "Go to Desktop 3",
+      "description": "Switch to virtual desktop 3",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-desktop-4",
+      "title": "Go to Desktop 4",
+      "description": "Switch to virtual desktop 4",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-desktop-5",
+      "title": "Go to Desktop 5",
+      "description": "Switch to virtual desktop 5",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-next-desktop",
+      "title": "Go to Next Desktop",
+      "description": "Switch to the next virtual desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-previous-desktop",
+      "title": "Go to Previous Desktop",
+      "description": "Switch to the previous virtual desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-to-desktop-1",
+      "title": "Move Window to Desktop 1 & Follow",
+      "description": "Move the active window to desktop 1 and switch",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-to-desktop-2",
+      "title": "Move Window to Desktop 2 & Follow",
+      "description": "Move the active window to desktop 2 and switch",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-to-desktop-3",
+      "title": "Move Window to Desktop 3 & Follow",
+      "description": "Move the active window to desktop 3 and switch",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-to-desktop-4",
+      "title": "Move Window to Desktop 4 & Follow",
+      "description": "Move the active window to desktop 4 and switch",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-to-desktop-5",
+      "title": "Move Window to Desktop 5 & Follow",
+      "description": "Move the active window to desktop 5 and switch",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-window-stay-1",
+      "title": "Move Window to Desktop 1 (Stay)",
+      "description": "Move window to desktop 1 without following",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-window-stay-2",
+      "title": "Move Window to Desktop 2 (Stay)",
+      "description": "Move window to desktop 2 without following",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-window-stay-3",
+      "title": "Move Window to Desktop 3 (Stay)",
+      "description": "Move window to desktop 3 without following",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-window-next-desktop",
+      "title": "Move Window to Next Desktop",
+      "description": "Move the active window to the next desktop and follow",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-window-previous-desktop",
+      "title": "Move Window to Previous Desktop",
+      "description": "Move the active window to the previous desktop and follow",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-desktop",
+      "title": "Create Desktop & Switch",
+      "description": "Create a new virtual desktop and switch to it",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-desktop-stay",
+      "title": "Create Desktop (Stay)",
+      "description": "Create a new desktop but stay on current",
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-desktop",
+      "title": "Remove Current Desktop",
+      "description": "Remove the current virtual desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "ensure-desktops",
+      "title": "Ensure 5 Desktops Exist",
+      "description": "Create desktops until at least 5 exist",
+      "mode": "no-view"
+    },
+    {
+      "name": "pin-window",
+      "title": "Toggle Pin Window",
+      "description": "Toggle pin window to all desktops",
+      "mode": "no-view"
+    },
+    {
+      "name": "explicit-pin-window",
+      "title": "Pin Window",
+      "description": "Pin the active window to all desktops",
+      "mode": "no-view"
+    },
+    {
+      "name": "explicit-unpin-window",
+      "title": "Unpin Window",
+      "description": "Unpin the active window",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-window-pinned",
+      "title": "Check Window Pinned",
+      "description": "Check if the active window is pinned",
+      "mode": "no-view"
+    },
+    {
+      "name": "pin-app",
+      "title": "Toggle Pin App",
+      "description": "Toggle pin app to all desktops",
+      "mode": "no-view"
+    },
+    {
+      "name": "explicit-pin-app",
+      "title": "Pin App",
+      "description": "Pin the active app to all desktops",
+      "mode": "no-view"
+    },
+    {
+      "name": "explicit-unpin-app",
+      "title": "Unpin App",
+      "description": "Unpin the active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-app-pinned",
+      "title": "Check App Pinned",
+      "description": "Check if the active app is pinned",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-current-desktop",
+      "title": "Show Current Desktop",
+      "description": "Show which desktop you're currently on",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-desktop-count",
+      "title": "Show Desktop Count",
+      "description": "Show total number of virtual desktops",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "sameed_majgaonkar",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ]
+}

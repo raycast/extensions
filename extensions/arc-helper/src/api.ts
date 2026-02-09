@@ -30,13 +30,18 @@ export interface QuestReward {
   quantity: string;
 }
 
+export interface QuestLocation {
+  id: string;
+  map: string;
+}
+
 export interface Quest {
   id: string;
   name: string;
   objectives: string[];
   xp: number;
   granted_items: string[];
-  locations: string[];
+  locations: QuestLocation[];
   marker_category: string | null;
   required_items: string[];
   rewards: QuestReward[];
@@ -50,19 +55,12 @@ export interface Arc {
   image: string;
 }
 
-export interface EventTime {
-  start: string;
-  end: string;
-}
-
 export interface EventTimer {
-  game: string;
   name: string;
   map: string;
   icon: string;
-  description: string;
-  days: string[];
-  times: EventTime[];
+  startTime: number;
+  endTime: number;
 }
 
 export interface TraderItem {
@@ -99,7 +97,7 @@ export const API = {
   items: `${BASE_URL}/items`,
   arcs: `${BASE_URL}/arcs`,
   quests: `${BASE_URL}/quests`,
-  eventTimers: `${BASE_URL}/event-timers`,
+  eventTimers: `${BASE_URL}/events-schedule`,
   traders: `${BASE_URL}/traders`,
 };
 

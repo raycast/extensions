@@ -11,14 +11,15 @@ export const shellEnvironmentVariables: { [key: string]: string } = (() => {
       .toString()
       .trim()
       .split("\0")
-      .map((value) => value.split("="))
-      .reduce(
-        (acc, [key, value]) => {
-          acc[key] = value;
-          return acc;
-        },
-        {} as { [key: string]: string },
-      );
+      .map((envVar) => {
+        const indexEqualSign = envVar.indexOf("=");
+        if (indexEqualSign === -1) {
+          return null;
+        }
+        return [envVar.slice(0, indexEqualSign), envVar.slice(indexEqualSign + 1)];
+      })
+      .filter((envVar) => envVar !== null)
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as { [key: string]: string });
 
     // Load SSH socket from launchctl to access the system ssh-agent with already set up SSH keys.
     const SSH_AUTH_SOCK_VALUE = execSync(`launchctl getenv SSH_AUTH_SOCK`).toString().trim();

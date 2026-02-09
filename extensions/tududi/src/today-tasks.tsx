@@ -133,7 +133,7 @@ export default function Command() {
       };
 
       // Update task
-      const response = await fetch(`${preferences.apiUrl}/api/task/${task.id}`, {
+      const response = await fetch(`${preferences.apiUrl}/api/task/${task.uid}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

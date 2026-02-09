@@ -1,6 +1,6 @@
-import { Document } from "../utils/types";
 import { getFoldersWithCache } from "../utils/folderHelpers";
-import { getDocumentsList } from "../utils/fetchData";
+import { getDocumentsListStripped, getSharedDocuments } from "../utils/fetchData";
+import { Doc } from "../utils/types";
 
 type Input = {
   /**
@@ -25,6 +25,13 @@ type Input = {
    * Default: 10 for general queries, 1 for "latest" queries
    */
   limit?: number;
+  /**
+   * Filter by document source
+   * - "my-notes": Only user's own notes (default)
+   * - "shared": Only notes shared with the user
+   * - "all": Both user's notes and shared notes
+   */
+  source?: "my-notes" | "shared" | "all";
 };
 
 type Meeting = {
@@ -48,6 +55,10 @@ type Meeting = {
    * Folder names that this meeting belongs to
    */
   folderNames: string[];
+  /**
+   * Whether this meeting was shared with the user (not owned by them)
+   */
+  isShared: boolean;
 };
 
 /**
@@ -60,17 +71,52 @@ type Meeting = {
  * - User asks about their latest/most recent meeting(s)
  * - User wants to see meetings from a specific time period
  * - You need to get meeting IDs before fetching full content
+ * - User asks for shared notes (use source: "shared")
  *
  * CRITICAL: For task extraction queries like "what are the tasks from my latest meeting?":
  * 1. Call THIS tool with { "date": "latest", "limit": 1 } to get the meeting ID
- * 2. Then call ai-notes with { "noteId": "<id-from-step-1>", "includeTranscript": false }
- * DO NOT skip step 2 - you MUST call ai-notes with the specific noteId to get content.
+ * 2. Then call get-note-content with { "noteId": "<id-from-step-1>" }
+ * DO NOT skip step 2 - you MUST call get-note-content with the specific noteId to get content.
+ * Note: get-note-content does NOT include transcripts. Use get-transcript tool separately if transcripts are needed.
  *
- * After getting the meeting list, use the ai-notes tool with specific noteId
+ * After getting the meeting list, use the get-note-content tool with specific noteId
  * to retrieve full content for individual meetings.
  */
 export default async function tool(input: Input): Promise<Meeting[]> {
-  const documents = (await getDocumentsList()) as Document[];
+  const source = input.source || "my-notes";
+
+  // Fetch documents based on source filter
+  let documents: Doc[] = [];
+  const sharedDocIds = new Set<string>();
+
+  if (source === "my-notes") {
+    documents = await getDocumentsListStripped();
+  } else if (source === "shared") {
+    documents = await getSharedDocuments();
+    // All documents from this source are shared
+    documents.forEach((doc) => sharedDocIds.add(doc.id));
+  } else {
+    // source === "all": merge both, deduplicate by ID
+    const [myDocs, sharedDocs] = await Promise.all([getDocumentsListStripped(), getSharedDocuments()]);
+
+    // Mark shared documents
+    sharedDocs.forEach((doc) => sharedDocIds.add(doc.id));
+
+    // Merge and deduplicate (my docs take precedence)
+    const seenIds = new Set<string>();
+    for (const doc of myDocs) {
+      if (!seenIds.has(doc.id)) {
+        seenIds.add(doc.id);
+        documents.push(doc);
+      }
+    }
+    for (const doc of sharedDocs) {
+      if (!seenIds.has(doc.id)) {
+        seenIds.add(doc.id);
+        documents.push(doc);
+      }
+    }
+  }
 
   if (!documents || documents.length === 0) {
     return [];
@@ -124,6 +170,7 @@ export default async function tool(input: Input): Promise<Meeting[]> {
       date: new Date(document.created_at).toISOString(),
       folderIds: folderInfo.ids,
       folderNames: folderInfo.names,
+      isShared: sharedDocIds.has(document.id) || document.isShared === true,
     });
   }
 

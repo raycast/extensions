@@ -1,10 +1,12 @@
-import { ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { getAvatarIcon, MutatePromise } from "@raycast/utils";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { Task } from "../api/tasks";
 import { asanaToRaycastColor } from "../helpers/colors";
 import { getDueDateColor, getDueDateText } from "../helpers/task";
+import { useSubtasks } from "../hooks/useSubtasks";
 import { useTaskDetail } from "../hooks/useTaskDetail";
+import SubtasksList from "./SubtasksList";
 import TaskActions from "./TaskActions";
 
 type TaskDetailProps = {
@@ -14,13 +16,24 @@ type TaskDetailProps = {
 };
 
 export default function TaskDetail({ task: originalTask, workspace, mutateList }: TaskDetailProps) {
-  const { data: task, isLoading, mutate: mutateDetail } = useTaskDetail(originalTask);
+  const { data: task, isLoading: isLoadingDetail, mutate: mutateDetail } = useTaskDetail(originalTask);
+  const { data: subtasks, isLoading: isLoadingSubtasks, mutate: mutateSubtasks } = useSubtasks(task.gid);
+
+  const isLoading = isLoadingDetail || isLoadingSubtasks;
 
   let markdown = `# ${task.name}`;
 
   if (task.html_notes) {
     const notes = NodeHtmlMarkdown.translate(task.html_notes.replace(/\n/g, "<br/>"));
     markdown += `\n\n${notes}`;
+  }
+
+  if (subtasks && subtasks.length > 0) {
+    markdown += `\n\n---\n\n## Subtasks\n\n`;
+    subtasks.forEach((subtask) => {
+      const checkmark = subtask.completed ? "- [x]" : "- [ ]";
+      markdown += `${checkmark} ${subtask.name}\n`;
+    });
   }
 
   return (
@@ -35,6 +48,8 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
             icon={task.completed ? Icon.CheckCircle : Icon.Circle}
             text={task.completed ? "Completed" : "Incomplete"}
           />
+
+          {task.parent && <Detail.Metadata.Label title="Parent Task" icon={Icon.Dot} text={task.parent.name} />}
 
           <Detail.Metadata.Label
             title="Assignee"
@@ -57,6 +72,14 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
             icon={{ source: Icon.Calendar, tintColor: getDueDateColor(task) }}
             text={getDueDateText(task)}
           />
+
+          {subtasks && subtasks.length > 0 && (
+            <Detail.Metadata.Label
+              title="Subtasks"
+              icon={Icon.CheckList}
+              text={`${subtasks.length} ${subtasks.length === 1 ? "subtask" : "subtasks"}`}
+            />
+          )}
 
           {task.projects && task.projects.length > 0 ? (
             <Detail.Metadata.TagList title={task.projects.length === 1 ? "Project" : "Projects"}>
@@ -106,12 +129,21 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
       }
       actions={
         <ActionPanel>
+          {subtasks && subtasks.length > 0 && (
+            <Action.Push
+              title="View Subtasks"
+              icon={Icon.CheckList}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              target={<SubtasksList parentTask={task} workspace={workspace} />}
+            />
+          )}
           <TaskActions
             task={task}
             workspace={workspace}
             isDetail={true}
             mutateList={mutateList}
             mutateDetail={mutateDetail}
+            mutateSubtasks={mutateSubtasks}
           />
         </ActionPanel>
       }

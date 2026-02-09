@@ -1,5 +1,13 @@
 # GIF Search Changelog
 
+## [Add Klipy support] - 2026-02-05
+
+- Add Klipy support
+
+## [Faster Thumbnails] - 2025-12-17
+
+- Speed up loading of thumbnails in large grid items
+
 ## [Enhancement] - 2025-09-29
 
 - Add a new action to paste a GIF into the front-most application

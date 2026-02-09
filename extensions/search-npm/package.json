@@ -16,7 +16,8 @@
     "litomore",
     "ridemountainpig",
     "dbrooks",
-    "YourMCGeek"
+    "YourMCGeek",
+    "kodie"
   ],
   "license": "MIT",
   "categories": [
@@ -116,6 +117,10 @@
         {
           "title": "Skypack.dev Package Page",
           "value": "skypackPackagePage"
+        },
+        {
+          "title": "npmx Package Page",
+          "value": "npmxPackagePage"
         }
       ],
       "title": "Default Open Action",

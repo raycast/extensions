@@ -43,7 +43,7 @@ export function useModel(): ModelHook {
             try {
               const body = JSON.parse((res as unknown as { body: string }).body);
               models = body.data;
-            } catch (e) {
+            } catch {
               // ignore try to parse it
             }
           }

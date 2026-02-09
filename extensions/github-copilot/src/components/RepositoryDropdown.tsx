@@ -3,11 +3,13 @@ import { useCachedState } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { Repository, useSearchRepositories } from "../hooks/useRepositorySearch";
 
-export function RepositoryDropdown(props: {
-  itemProps: Form.ItemProps<string>;
-  organizations?: string[];
-  onLoadingChange?: (isLoading: boolean) => void;
-}) {
+export function RepositoryDropdown(
+  props: Readonly<{
+    itemProps: Form.ItemProps<string>;
+    organizations?: string[];
+    onLoadingChange?: (isLoading: boolean) => void;
+  }>,
+) {
   const [searchQuery, setSearchQuery] = useState("");
   const [previousRepositories, setPreviousRepositories] = useCachedState<Repository[]>("previousRepositories", []);
   const { data, isLoading } = useSearchRepositories({

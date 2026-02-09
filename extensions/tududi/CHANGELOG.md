@@ -1,5 +1,11 @@
 # Tududi Changelog
 
+## [1.8.1] - 2025-12-15
+
+### Bug fixes
+
+- Using `uid` for updating priority in "Today Tasks" instead of `id`
+
 ## [1.8.0] - 2025-12-12
 
 ### Technical Improvements

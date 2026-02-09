@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import React from "react";
+import * as React from "react";
 import { McpServerConfig } from "../../mcp/types";
 import { McpServerFormConfig } from "./form/config";
 import { DeleteMcpServer, GetMcpServerConfig } from "./function";
@@ -75,7 +75,7 @@ export function McpServerView(): React.JSX.Element {
     return <List.Item.Detail markdown={configMarkdown} />;
   }
 
-  const form = React.useRef<React.JSX.Element | undefined>();
+  const form = React.useRef<React.JSX.Element | undefined>(undefined);
   React.useEffect(() => {
     if (McpServer && !showForm) {
       form.current = <McpServerFormConfig setShow={setShowForm} config={McpServer} setConfig={setMcpServer} />;

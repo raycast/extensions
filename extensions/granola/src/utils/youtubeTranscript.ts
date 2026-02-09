@@ -57,15 +57,29 @@ export function extractVideoId(url: string): string | null {
 /**
  * Fetches transcript from YouTube URL
  */
-export async function fetchYouTubeTranscript(url: string): Promise<YouTubeTranscriptResult> {
+export async function fetchYouTubeTranscript(url: string, signal?: AbortSignal): Promise<YouTubeTranscriptResult> {
   const videoId = extractVideoId(url);
 
   if (!videoId) {
     throw new Error("Invalid YouTube URL or video ID");
   }
 
+  if (signal?.aborted) {
+    throw new Error("Transcript fetch cancelled");
+  }
+
+  let abortHandler: (() => void) | null = null;
+  const abortPromise = signal
+    ? new Promise<never>((_, reject) => {
+        abortHandler = () => reject(new Error("Transcript fetch cancelled"));
+        signal.addEventListener("abort", abortHandler, { once: true });
+      })
+    : null;
+
   try {
-    const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
+    const transcriptData = (await (abortPromise
+      ? Promise.race([YoutubeTranscript.fetchTranscript(videoId), abortPromise])
+      : YoutubeTranscript.fetchTranscript(videoId))) as TranscriptEntry[];
 
     if (!transcriptData || transcriptData.length === 0) {
       throw new Error("No transcript available for this video");
@@ -88,6 +102,10 @@ export async function fetchYouTubeTranscript(url: string): Promise<YouTubeTransc
       title: `YouTube Video ${videoId}`, // We could enhance this to fetch actual title if needed
     };
   } catch (error) {
+    if (signal?.aborted) {
+      throw new Error("Transcript fetch cancelled");
+    }
+
     if (error instanceof Error) {
       // Handle specific YouTube transcript errors
       if (error.message.includes("Too many requests")) {
@@ -102,13 +120,20 @@ export async function fetchYouTubeTranscript(url: string): Promise<YouTubeTransc
     }
 
     throw new Error(`Failed to fetch YouTube transcript: ${error}`);
+  } finally {
+    if (signal && abortHandler) {
+      signal.removeEventListener("abort", abortHandler);
+    }
   }
 }
 
 /**
  * Process input - either fetch from YouTube or return as manual transcript
  */
-export async function processTranscriptInput(input: string): Promise<{
+export async function processTranscriptInput(
+  input: string,
+  signal?: AbortSignal,
+): Promise<{
   transcript: string;
   isFromYouTube: boolean;
   videoId?: string;
@@ -117,7 +142,7 @@ export async function processTranscriptInput(input: string): Promise<{
   const trimmedInput = input.trim();
 
   if (isYouTubeURL(trimmedInput)) {
-    const result = await fetchYouTubeTranscript(trimmedInput);
+    const result = await fetchYouTubeTranscript(trimmedInput, signal);
     return {
       transcript: result.transcript,
       isFromYouTube: true,

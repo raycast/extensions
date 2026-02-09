@@ -98,7 +98,6 @@ export function RepositoryDirectoryActions({ repositoryPath, onOpen }: Repositor
           ))}
         </ActionPanel.Submenu>
       )}
-      <Action.CopyToClipboard title="Copy Repository Path" content={repositoryPath} />
     </ActionPanel.Section>
   );
 }

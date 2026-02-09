@@ -1,5 +1,9 @@
 # Raycast Zoxide Changelog
 
+## [Added Additional Open With Action] - 2026-01-31
+
+- Added "Open With" action to the actions pane that allows opening the directory in a different app not set in the Zoxide settings.
+
 ## [Added Search using Spotlight Secondary Action] - 2025-11-10
 
 - Added "Search using Spotlight" secondary action to Zoxide results to enable searching for directories not in the list. Previously was only accessible via an empty list.

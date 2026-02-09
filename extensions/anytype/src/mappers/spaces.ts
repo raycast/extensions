@@ -1,5 +1,5 @@
 import { RawSpace, Space } from "../models";
-import { getIconWithFallback } from "../utils";
+import { getIconWithFallback, getNameWithFallback } from "../utils";
 
 /**
  * Map raw `Space` objects from the API into display-ready data (e.g., icon).
@@ -20,11 +20,11 @@ export async function mapSpaces(spaces: RawSpace[]): Promise<Space[]> {
  * @returns Display-ready `Space` object.
  */
 export async function mapSpace(space: RawSpace): Promise<Space> {
-  const icon = await getIconWithFallback(space.icon, "space");
+  const icon = await getIconWithFallback(space.icon, space.object);
 
   return {
     ...space,
-    name: space.name?.trim() || "Untitled",
+    name: getNameWithFallback(space.name),
     icon,
   };
 }
