@@ -44,6 +44,7 @@ export async function saveToHistory(text: string) {
 export async function removeFromHistory(id: string) {
   const history = await getHistory();
   const newHistory = history.filter((item) => item.id !== id);
+  await ensureSupportPath();
   await fs.writeFile(HISTORY_FILE, JSON.stringify(newHistory, null, 2));
 }
 
