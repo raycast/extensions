@@ -5,7 +5,12 @@
 
 import { ChatMessage, AgentStep, AgentResult } from "./types";
 import { chatCompletion, resetFunctionCallingState } from "./llm";
-import { TOOL_DEFINITIONS, executeTool, resetFileRegistry } from "./tools";
+import {
+  TOOL_DEFINITIONS,
+  executeTool,
+  resetFileRegistry,
+  getRegisteredFiles,
+} from "./tools";
 
 const MAX_ITERATIONS = 12;
 
@@ -204,11 +209,13 @@ function buildSystemPrompt(): string {
  *
  * @param userQuery - The user's natural language file description
  * @param onStep - Callback for each step (for live UI updates)
+ * @param signal - Optional AbortSignal to cancel the agent loop
  * @returns AgentResult with ranked files, summary, and questions
  */
 export async function runAgent(
   userQuery: string,
   onStep: OnStepCallback,
+  signal?: AbortSignal,
 ): Promise<AgentResult> {
   // Reset state for this new agent run
   resetFileRegistry();
@@ -225,12 +232,35 @@ export async function runAgent(
   let agentResult: AgentResult | null = null;
 
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-    // Call LLM with tools
-    const response = await chatCompletion({
-      messages,
-      tools: TOOL_DEFINITIONS,
-      maxTokens: 4000,
-    });
+    // Check if cancelled before each iteration
+    if (signal?.aborted) {
+      onStep({
+        type: "error",
+        content: "Search cancelled by user.",
+      });
+      break;
+    }
+
+    let response;
+    try {
+      // Call LLM with tools
+      response = await chatCompletion({
+        messages,
+        tools: TOOL_DEFINITIONS,
+        maxTokens: 4000,
+        signal,
+      });
+    } catch (error) {
+      // If aborted, break out of the loop gracefully (partial results will be returned)
+      if (signal?.aborted) {
+        onStep({
+          type: "error",
+          content: "Search cancelled by user.",
+        });
+        break;
+      }
+      throw error; // Re-throw non-abort errors
+    }
 
     // If LLM returned text content (thinking), emit it
     if (response.content) {
@@ -269,6 +299,9 @@ export async function runAgent(
 
     // Execute each tool call
     for (const toolCall of response.toolCalls) {
+      // Check if cancelled before each tool execution
+      if (signal?.aborted) break;
+
       const toolName = toolCall.function.name;
       let toolArgsStr = toolCall.function.arguments;
 
@@ -326,6 +359,9 @@ export async function runAgent(
           agentResult = finishResult;
         }
       } catch (error) {
+        // If aborted during tool execution, break gracefully
+        if (signal?.aborted) break;
+
         const errorMsg =
           error instanceof Error ? error.message : "Tool execution failed";
 
@@ -349,19 +385,40 @@ export async function runAgent(
     }
   }
 
-  // If we exhausted iterations without a result, create a default
+  // If we exhausted iterations or were cancelled without a result, create a default
   if (!agentResult) {
-    onStep({
-      type: "error",
-      content: "Agent reached maximum iterations without finishing.",
-    });
+    const wasCancelled = signal?.aborted;
+
+    if (!wasCancelled) {
+      onStep({
+        type: "error",
+        content: "Agent reached maximum iterations without finishing.",
+      });
+    }
+
+    // Try to return partial results from the file registry
+    const partialFiles = getRegisteredFiles();
+    const hasPartial = partialFiles.length > 0;
 
     agentResult = {
-      files: [],
-      summary: "Search timed out after maximum iterations.",
-      clarifyingQuestions: [
-        "Could you provide more specific details about the file?",
-      ],
+      files: hasPartial
+        ? partialFiles.slice(0, 10).map((f, i) => ({
+            ...f,
+            relevanceScore: 50,
+            matchReason: wasCancelled
+              ? "Search was stopped before verification."
+              : "Agent timed out before ranking.",
+            rank: i + 1,
+          }))
+        : [],
+      summary: wasCancelled
+        ? hasPartial
+          ? `Search stopped. Found ${partialFiles.length} files before cancellation (unranked).`
+          : "Search stopped before finding results."
+        : "Search timed out after maximum iterations.",
+      clarifyingQuestions: wasCancelled
+        ? []
+        : ["Could you provide more specific details about the file?"],
     };
   }
 

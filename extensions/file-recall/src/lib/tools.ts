@@ -6,7 +6,7 @@ import {
 } from "./types";
 import { runMdfind, pathsToResults, findDirectories } from "./file-search";
 import { analyzeImage as analyzeImageLLM } from "./llm";
-import { readFile, unlink, mkdtemp } from "fs/promises";
+import { readFile, rm, mkdtemp } from "fs/promises";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { tmpdir } from "os";
@@ -26,6 +26,13 @@ let fileRegistry: FileResult[] = [];
  */
 export function resetFileRegistry(): void {
   fileRegistry = [];
+}
+
+/**
+ * Get all files currently in the registry (for partial results on cancel).
+ */
+export function getRegisteredFiles(): FileResult[] {
+  return [...fileRegistry];
 }
 
 /**
@@ -388,7 +395,7 @@ interface FinishArgs {
  * Get user-configured search directories.
  */
 function getSearchDirs(): string[] {
-  const { searchDirs } = getPreferenceValues<{ searchDirs: string }>();
+  const { searchDirs } = getPreferenceValues<Preferences.RecallFile>();
   if (!searchDirs) return [];
   return searchDirs
     .split(",")
@@ -467,7 +474,7 @@ export async function executeSearchFiles(
   }
 
   const maxResults =
-    parseInt(getPreferenceValues<{ maxResults: string }>().maxResults) || 20;
+    parseInt(getPreferenceValues<Preferences.RecallFile>().maxResults) || 20;
 
   // Build progressive queries from most specific to broadest.
   const queries: string[] = [];
@@ -1172,12 +1179,7 @@ export async function executeAnalyzeImage(
     const thumbBuffer = await readFile(thumbPath);
     const base64 = thumbBuffer.toString("base64");
 
-    // Clean up temp file
-    try {
-      await unlink(thumbPath);
-    } catch {
-      /* ignore */
-    }
+    // (temp file cleaned up with tmpDir in finally block)
 
     // Send to multimodal LLM
     const question =
@@ -1233,7 +1235,7 @@ export async function executeAnalyzeImage(
     // Clean up temp directory
     if (tmpDir) {
       try {
-        await unlink(tmpDir);
+        await rm(tmpDir, { recursive: true });
       } catch {
         /* ignore */
       }

@@ -1,12 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { ChatMessage, ChatResponse, ToolDefinition, ToolCall } from "./types";
 
-interface Preferences {
-  apiKey: string;
-  apiBaseUrl: string;
-  model: string;
-}
-
 interface OpenAIToolCall {
   id: string;
   type: "function";
@@ -31,6 +25,7 @@ export interface ChatCompletionOptions {
   temperature?: number;
   maxTokens?: number;
   tools?: ToolDefinition[];
+  signal?: AbortSignal;
 }
 
 /**
@@ -141,6 +136,7 @@ async function rawApiCall(
   url: string,
   apiKey: string,
   body: Record<string, unknown>,
+  signal?: AbortSignal,
 ): Promise<{
   ok: boolean;
   status: number;
@@ -154,6 +150,7 @@ async function rawApiCall(
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(body),
+    signal,
   });
 
   if (!response.ok) {
@@ -177,8 +174,15 @@ async function rawApiCall(
 export async function chatCompletion(
   options: ChatCompletionOptions,
 ): Promise<ChatResponse> {
-  const { apiKey, apiBaseUrl, model } = getPreferenceValues<Preferences>();
-  const { messages, temperature = 0.3, maxTokens = 4000, tools } = options;
+  const { apiKey, apiBaseUrl, model } =
+    getPreferenceValues<Preferences.RecallFile>();
+  const {
+    messages,
+    temperature = 0.3,
+    maxTokens = 4000,
+    tools,
+    signal,
+  } = options;
 
   const url = `${apiBaseUrl.replace(/\/$/, "")}/chat/completions`;
   const hasTools = tools && tools.length > 0;
@@ -204,7 +208,7 @@ export async function chatCompletion(
         console.log(`Retrying tools mode (attempt ${attempt + 1})...`);
       }
 
-      const result = await rawApiCall(url, apiKey, body);
+      const result = await rawApiCall(url, apiKey, body, signal);
 
       if (result.ok && result.data) {
         const choice = result.data.choices[0];
@@ -265,7 +269,7 @@ export async function chatCompletion(
       `LLM Request [fallback mode]: model=${model}, msgs=${fallbackMessages.length}`,
     );
 
-    const result = await rawApiCall(url, apiKey, body);
+    const result = await rawApiCall(url, apiKey, body, signal);
 
     if (!result.ok) {
       throw new Error(`API Error (${result.status}): ${result.errorText}`);
@@ -298,7 +302,7 @@ export async function chatCompletion(
     max_tokens: maxTokens,
   };
 
-  const result = await rawApiCall(url, apiKey, body);
+  const result = await rawApiCall(url, apiKey, body, signal);
   if (!result.ok) {
     throw new Error(`API Error (${result.status}): ${result.errorText}`);
   }
@@ -362,7 +366,8 @@ export async function analyzeImage(
   mimeType: string,
   question: string,
 ): Promise<string> {
-  const { apiKey, apiBaseUrl, model } = getPreferenceValues<Preferences>();
+  const { apiKey, apiBaseUrl, model } =
+    getPreferenceValues<Preferences.RecallFile>();
   const url = `${apiBaseUrl.replace(/\/$/, "")}/chat/completions`;
 
   // Construct multimodal message with image_url content part

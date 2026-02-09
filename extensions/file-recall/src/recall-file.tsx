@@ -173,7 +173,7 @@ function buildFileDetailMarkdown(file: RankedFileResult): string {
 // ─── Format Date ─────────────────────────────────────────────
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -227,7 +227,7 @@ export default function RecallFileCommand() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Check if API key is configured
-  const preferences = getPreferenceValues<{ apiKey: string }>();
+  const preferences = getPreferenceValues<Preferences.RecallFile>();
   if (!preferences.apiKey) {
     return (
       <Detail
@@ -279,18 +279,22 @@ Go to **Extension Preferences** to set:
         title: "Agent is thinking...",
       });
 
-      const result = await runAgent(query, (step: AgentStep) => {
-        // Append each step for live UI updates
-        setState((prev) => ({
-          ...prev,
-          steps: [...prev.steps, step],
-        }));
+      const result = await runAgent(
+        query,
+        (step: AgentStep) => {
+          // Append each step for live UI updates
+          setState((prev) => ({
+            ...prev,
+            steps: [...prev.steps, step],
+          }));
 
-        // Update toast based on step type
-        if (step.type === "tool_call") {
-          showToast({ style: Toast.Style.Animated, title: step.content });
-        }
-      });
+          // Update toast based on step type
+          if (step.type === "tool_call") {
+            showToast({ style: Toast.Style.Animated, title: step.content });
+          }
+        },
+        abortControllerRef.current.signal,
+      );
 
       if (result.files.length === 0) {
         setState((prev) => ({
@@ -317,19 +321,59 @@ Go to **Extension Preferences** to set:
         });
       }
     } catch (error) {
-      const errorMessage =
+      // Handle abort errors — show whatever partial state we have
+      const isAbort =
+        (error instanceof DOMException && error.name === "AbortError") ||
+        (error instanceof Error &&
+          (error.message.includes("abort") ||
+            error.message.includes("cancel")));
+
+      if (isAbort) {
+        setState((prev) => {
+          // If we already have results from a previous search, keep them
+          if (prev.results.length > 0) {
+            return {
+              ...prev,
+              phase: "results",
+              summary: prev.summary || "Search was stopped.",
+            };
+          }
+          // Otherwise go back to idle so user can try again
+          return {
+            ...prev,
+            phase: "idle",
+          };
+        });
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Search stopped",
+        });
+        return;
+      }
+
+      const msg =
         error instanceof Error ? error.message : "Unknown error occurred";
       setState((prev) => ({
         ...prev,
         phase: "idle",
-        error: errorMessage,
+        error: msg,
       }));
       await showToast({
         style: Toast.Style.Failure,
         title: "Search Failed",
-        message: errorMessage,
+        message: msg,
       });
     }
+  }, []);
+
+  // ─── Stop Search Handler ─────────────────────────────────
+
+  const handleStopSearch = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    showToast({ style: Toast.Style.Success, title: "Search stopped" });
   }, []);
 
   // ─── "Answer clarifying question" handler ───────────────
@@ -539,9 +583,19 @@ ${thinkingSection}
           icon={Icon.Stars}
           title="Agent is thinking..."
           description={
-            state.steps.length > 0
+            (state.steps.length > 0
               ? state.steps[state.steps.length - 1].content
-              : "Analyzing your description..."
+              : "Analyzing your description...") +
+            "\n\nPress Esc or Enter to stop the search."
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Stop Search"
+                icon={Icon.Stop}
+                onAction={handleStopSearch}
+              />
+            </ActionPanel>
           }
         />
       )}
