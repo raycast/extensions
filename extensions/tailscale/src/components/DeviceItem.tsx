@@ -1,4 +1,4 @@
-import { List, Icon } from "@raycast/api";
+import { List, Icon, Color } from "@raycast/api";
 import type { Device } from "../shared";
 import CopyActions from "./CopyActions";
 import { getDeviceListIcon } from "./deviceListIcon";
@@ -11,6 +11,7 @@ export default function DeviceItem({ device, showLoginName = true }: { device: D
       key={device.key}
       icon={getDeviceListIcon(device.online)}
       accessories={[
+        ...(device.ssh ? [{ tag: { value: "SSH", color: Color.Green } }] : []),
         ...(device.self ? [{ text: "This device", icon: Icon.Person }] : []),
         ...(showLoginName && device.loginName ? [{ text: device.loginName }] : []),
         { text: device.online ? `Connected` : "Last seen " + formatDate(device.lastseen) },

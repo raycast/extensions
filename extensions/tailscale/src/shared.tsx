@@ -27,6 +27,7 @@ export interface Device {
   lastseen: Date;
   exitnode: boolean;
   exitnodeoption: boolean;
+  ssh?: boolean;
   tags?: string[];
   location?: Location;
 }
@@ -49,6 +50,8 @@ export type StatusDevice = {
   LastSeen: string;
   UserID: number;
   HostName: string;
+  /** Present when the device advertises Tailscale SSH (sshHostKeys in status --json). */
+  sshHostKeys?: string[];
   Tags?: string[];
   Location?: Location;
 };
@@ -164,6 +167,7 @@ export function getDevices(status: StatusResponse) {
     lastseen: new Date(self.LastSeen),
     exitnode: self.ExitNode,
     exitnodeoption: self.ExitNodeOption,
+    ssh: (self.sshHostKeys?.length ?? 0) > 0,
     tags: self.Tags,
   };
 
@@ -185,6 +189,7 @@ export function getDevices(status: StatusResponse) {
       lastseen: new Date(peer.LastSeen),
       exitnode: peer.ExitNode,
       exitnodeoption: peer.ExitNodeOption,
+      ssh: (peer.sshHostKeys?.length ?? 0) > 0,
       tags: peer.Tags,
       location: peer.Location,
     };
