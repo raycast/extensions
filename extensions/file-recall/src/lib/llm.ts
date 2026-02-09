@@ -337,6 +337,7 @@ export async function chatCompletion(
 /**
  * Try to parse a tool call from the LLM's text response.
  * Expected format: {"tool": "tool_name", "args": {...}}
+ * Also accepts common LLM variations: kwargs, parameters, arguments, input
  */
 function parseToolCallFromText(text: string): ToolCall | null {
   try {
@@ -354,13 +355,24 @@ function parseToolCallFromText(text: string): ToolCall | null {
 
     const parsed = JSON.parse(jsonStr.substring(braceStart, braceEnd + 1));
 
-    if (parsed.tool && typeof parsed.tool === "string") {
+    // Accept various tool name keys
+    const toolName =
+      parsed.tool || parsed.name || parsed.function || parsed.tool_name;
+    if (toolName && typeof toolName === "string") {
+      // Accept various argument keys that LLMs commonly use
+      const toolArgs =
+        parsed.args ||
+        parsed.kwargs ||
+        parsed.parameters ||
+        parsed.arguments ||
+        parsed.input ||
+        {};
       return {
         id: `fallback_${Date.now()}`,
         type: "function",
         function: {
-          name: parsed.tool,
-          arguments: JSON.stringify(parsed.args || {}),
+          name: toolName,
+          arguments: JSON.stringify(toolArgs),
         },
       };
     }

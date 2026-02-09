@@ -20,12 +20,15 @@ const execFileAsync = promisify(execFile);
 // The LLM references files by index (e.g. file_id=0) instead of copying full paths.
 
 let fileRegistry: FileResult[] = [];
+let filePathIndex: Map<string, number> = new Map();
 
 /**
  * Reset the file registry. Call at the start of each agent run.
  */
 export function resetFileRegistry(): void {
   fileRegistry = [];
+  filePathIndex = new Map();
+  searchHistory = [];
 }
 
 /**
@@ -36,12 +39,24 @@ export function getRegisteredFiles(): FileResult[] {
 }
 
 /**
- * Add files to the registry. Returns the starting index.
+ * Add files to the registry with path-based deduplication.
+ * Files already registered (by path) are skipped; their existing file_id is reused.
+ * Returns an array of file_ids corresponding to the input files (in order).
  */
-function registerFiles(files: FileResult[]): number {
-  const startIdx = fileRegistry.length;
-  fileRegistry.push(...files);
-  return startIdx;
+function registerFiles(files: FileResult[]): number[] {
+  const ids: number[] = [];
+  for (const file of files) {
+    const existingId = filePathIndex.get(file.path);
+    if (existingId !== undefined) {
+      ids.push(existingId);
+    } else {
+      const newId = fileRegistry.length;
+      fileRegistry.push(file);
+      filePathIndex.set(file.path, newId);
+      ids.push(newId);
+    }
+  }
+  return ids;
 }
 
 /**
@@ -116,7 +131,8 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     function: {
       name: "read_file_preview",
       description:
-        "Read content of a text file. Supports offset for jumping to specific sections, and search_term to find and show content around a specific keyword.",
+        "Read content of a file. Works with text files AND binary document formats (xmind, docx, xlsx, pptx, pages, numbers, keynote). " +
+        "Binary docs are automatically extracted to text. Supports offset and search_term to find specific content.",
       parameters: {
         type: "object",
         properties: {
@@ -152,6 +168,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
       name: "grep_files",
       description:
         "Search for a text pattern inside one or more files. Returns matching lines with line numbers. " +
+        "Works with text files AND binary document formats (xmind, docx, xlsx, pptx, pages, numbers). " +
         "Use this to verify if files actually contain the content the user is looking for.",
       parameters: {
         type: "object",
@@ -452,6 +469,53 @@ function buildQueryParts(args: SearchFilesArgs) {
   return { keywordCond, nameCond, typeCond, dateCond };
 }
 
+// ─── Search Dedup ─────────────────────────────────────────────
+// Track previous search_files arguments to detect redundant searches.
+
+let searchHistory: SearchFilesArgs[] = [];
+
+/**
+ * Check if a new search is redundant (already covered by a prior search).
+ * A search is redundant if its parameters are a subset of a previous search:
+ *  - same or fewer keywords
+ *  - same or no directory constraint
+ *  - same or fewer file type filters
+ */
+function isRedundantSearch(newArgs: SearchFilesArgs): string | null {
+  const newKw = new Set((newArgs.keywords || []).map((k) => k.toLowerCase()));
+  const newTypes = new Set(
+    (newArgs.file_types || []).map((t) => t.toLowerCase()),
+  );
+  const newDir = newArgs.directory?.replace(/^~/, process.env.HOME || "~");
+
+  for (const prev of searchHistory) {
+    const prevKw = new Set((prev.keywords || []).map((k) => k.toLowerCase()));
+    const prevTypes = new Set(
+      (prev.file_types || []).map((t) => t.toLowerCase()),
+    );
+    const prevDir = prev.directory?.replace(/^~/, process.env.HOME || "~");
+
+    // New keywords are a subset of (or equal to) previous keywords
+    const kwSubset = newKw.size === 0 || [...newKw].every((k) => prevKw.has(k));
+    // Directory is the same or not specified in new
+    const dirMatch = !newDir || newDir === prevDir;
+    // New types are a subset of (or equal to) previous types
+    const typeSubset =
+      newTypes.size === 0 || [...newTypes].every((t) => prevTypes.has(t));
+
+    // If all three match, the new search is covered by the previous one
+    if (kwSubset && dirMatch && typeSubset) {
+      return (
+        "This search overlaps with a previous search. " +
+        "The files you need are already in the results above — use those file_ids. " +
+        "If they aren't sufficient, try a completely different approach: " +
+        "different keywords, find_directories, grep_files, or list_recent_files."
+      );
+    }
+  }
+  return null;
+}
+
 /**
  * Execute the search_files tool.
  *
@@ -461,6 +525,17 @@ function buildQueryParts(args: SearchFilesArgs) {
 export async function executeSearchFiles(
   args: SearchFilesArgs,
 ): Promise<string> {
+  // Check for redundant search before executing
+  const redundant = isRedundantSearch(args);
+  if (redundant) {
+    return JSON.stringify({
+      count: 0,
+      files: [],
+      message: redundant,
+      already_searched: true,
+    });
+  }
+  searchHistory.push(args);
   const configDirs = getSearchDirs();
   const { keywordCond, nameCond, typeCond, dateCond } = buildQueryParts(args);
 
@@ -553,10 +628,10 @@ export async function executeSearchFiles(
     });
   }
 
-  // Register files and return with IDs
-  const startIdx = registerFiles(results);
+  // Register files (with dedup) and return with IDs
+  const fileIds = registerFiles(results);
   const fileInfos = results.map((f, i) => ({
-    file_id: startIdx + i,
+    file_id: fileIds[i],
     name: f.name,
     path: f.path,
     ext: f.extension,
@@ -604,6 +679,142 @@ export async function executeFindDirectories(
  * Execute the read_file_preview tool.
  * Enhanced: supports offset and search_term for targeted content reading.
  */
+/**
+ * Binary/archive file extensions that need special extraction to read content.
+ * These are ZIP-based formats with structured content inside.
+ */
+const BINARY_DOC_EXTENSIONS = new Set([
+  "xmind",
+  "docx",
+  "xlsx",
+  "pptx",
+  "odt",
+  "ods",
+  "odp",
+  "pages",
+  "numbers",
+  "keynote",
+]);
+
+/**
+ * Extract readable text from binary document formats.
+ * Uses macOS-native tools: textutil for Office/iWork, unzip for XMind.
+ */
+async function extractBinaryDocContent(
+  filePath: string,
+  ext: string,
+): Promise<string | null> {
+  try {
+    const lowerExt = ext.toLowerCase();
+
+    // XMind: ZIP containing content.json
+    if (lowerExt === "xmind") {
+      try {
+        const { stdout } = await execFileAsync("unzip", [
+          "-p",
+          filePath,
+          "content.json",
+        ]);
+        // Parse JSON and extract readable text
+        const data = JSON.parse(stdout);
+        return extractXMindText(data);
+      } catch {
+        // Older XMind format: try content.xml
+        try {
+          const { stdout } = await execFileAsync("unzip", [
+            "-p",
+            filePath,
+            "content.xml",
+          ]);
+          // Strip XML tags for readable text
+          return stdout.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        } catch {
+          return null;
+        }
+      }
+    }
+
+    // Office/iWork docs: use macOS textutil to convert to plain text
+    if (
+      ["docx", "doc", "pages", "odt", "rtf"].includes(lowerExt)
+    ) {
+      const { stdout } = await execFileAsync("textutil", [
+        "-convert",
+        "txt",
+        "-stdout",
+        filePath,
+      ]);
+      return stdout;
+    }
+
+    // XLSX/Numbers/ODS: use mdimport for basic text extraction
+    if (["xlsx", "xls", "numbers", "csv", "ods"].includes(lowerExt)) {
+      try {
+        const { stdout } = await execFileAsync("mdimport", [
+          "-d2",
+          filePath,
+        ]);
+        // Extract text content from mdimport debug output
+        const textMatch = stdout.match(
+          /kMDItemTextContent\s*=\s*"([^"]+)"/,
+        );
+        if (textMatch) return textMatch[1];
+      } catch {
+        // Fallback: try Spotlight metadata
+      }
+      return null;
+    }
+
+    // PPTX/Keynote/ODP: use textutil if available
+    if (["pptx", "keynote", "odp"].includes(lowerExt)) {
+      try {
+        const { stdout } = await execFileAsync("textutil", [
+          "-convert",
+          "txt",
+          "-stdout",
+          filePath,
+        ]);
+        return stdout;
+      } catch {
+        return null;
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Recursively extract text from XMind JSON content structure.
+ */
+function extractXMindText(data: unknown): string {
+  const texts: string[] = [];
+
+  function walk(obj: unknown) {
+    if (!obj || typeof obj !== "object") return;
+    if (Array.isArray(obj)) {
+      for (const item of obj) walk(item);
+      return;
+    }
+    const record = obj as Record<string, unknown>;
+    // Extract title/text fields common in XMind JSON
+    for (const key of ["title", "text", "content", "label", "note"]) {
+      if (typeof record[key] === "string" && (record[key] as string).trim()) {
+        texts.push(record[key] as string);
+      }
+    }
+    // Recurse into nested objects
+    for (const value of Object.values(record)) {
+      walk(value);
+    }
+  }
+
+  walk(data);
+  return texts.join("\n");
+}
+
 export async function executeReadFilePreview(
   args: ReadFilePreviewArgs,
 ): Promise<string> {
@@ -622,6 +833,85 @@ export async function executeReadFilePreview(
 
   if (!filePath) {
     return JSON.stringify({ error: "Either file_id or path is required." });
+  }
+
+  // Check if this is a binary document format that needs special extraction
+  const fileExt = filePath.split(".").pop() || "";
+  if (BINARY_DOC_EXTENSIONS.has(fileExt.toLowerCase())) {
+    try {
+      const extracted = await extractBinaryDocContent(filePath, fileExt);
+      if (!extracted) {
+        return JSON.stringify({
+          path: filePath,
+          binary: true,
+          error: `Could not extract text from .${fileExt} file. Try get_file_metadata for basic info.`,
+        });
+      }
+      const allLines = extracted.split("\n");
+      const totalLines = allLines.length;
+
+      // Support search_term in extracted content
+      if (args.search_term) {
+        const termLower = args.search_term.toLowerCase();
+        const matchIndices: number[] = [];
+        for (let i = 0; i < allLines.length; i++) {
+          if (allLines[i].toLowerCase().includes(termLower)) {
+            matchIndices.push(i);
+          }
+        }
+        if (matchIndices.length === 0) {
+          return JSON.stringify({
+            path: filePath,
+            binary: true,
+            extracted: true,
+            search_term: args.search_term,
+            found: false,
+            total_lines: totalLines,
+            message: `"${args.search_term}" not found in extracted content of .${fileExt} file.`,
+          });
+        }
+        const contextLines = 3;
+        const snippets: { line_number: number; content: string }[] = [];
+        for (const matchIdx of matchIndices.slice(0, 5)) {
+          const start = Math.max(0, matchIdx - contextLines);
+          const end = Math.min(totalLines, matchIdx + contextLines + 1);
+          for (let i = start; i < end; i++) {
+            snippets.push({ line_number: i + 1, content: allLines[i] });
+          }
+        }
+        const previewText = snippets.map((s) => `${s.line_number}: ${s.content}`).join("\n");
+        return JSON.stringify({
+          path: filePath,
+          binary: true,
+          extracted: true,
+          search_term: args.search_term,
+          found: true,
+          match_count: matchIndices.length,
+          total_lines: totalLines,
+          preview: previewText.length > 4000 ? previewText.slice(0, 4000) + "\n... (truncated)" : previewText,
+        });
+      }
+
+      // Default: show first N lines of extracted content
+      const offset = args.offset ?? 0;
+      const lines = allLines.slice(offset, offset + maxLines);
+      const preview = lines.join("\n");
+      return JSON.stringify({
+        path: filePath,
+        binary: true,
+        extracted: true,
+        offset,
+        lines_shown: lines.length,
+        total_lines: totalLines,
+        preview: preview.length > 4000 ? preview.slice(0, 4000) + "\n... (truncated)" : preview,
+      });
+    } catch (error) {
+      return JSON.stringify({
+        path: filePath,
+        binary: true,
+        error: error instanceof Error ? error.message : "Failed to extract content",
+      });
+    }
   }
 
   try {
@@ -771,6 +1061,40 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
   // Search each file
   let totalMatches = 0;
   for (const fileInfo of filesToSearch) {
+    // Check if this is a binary document that needs extraction
+    const ext = (fileInfo.path.split(".").pop() || "").toLowerCase();
+    if (BINARY_DOC_EXTENSIONS.has(ext)) {
+      try {
+        const extracted = await extractBinaryDocContent(fileInfo.path, ext);
+        if (extracted) {
+          const lines = extracted.split("\n");
+          const patternLower = args.pattern.toLowerCase();
+          const matches: { line_number: number; content: string }[] = [];
+          for (let i = 0; i < lines.length && matches.length < maxMatchesPerFile; i++) {
+            if (lines[i].toLowerCase().includes(patternLower)) {
+              const content = lines[i].trim();
+              matches.push({
+                line_number: i + 1,
+                content: content.length > 200 ? content.slice(0, 200) + "..." : content,
+              });
+            }
+          }
+          if (matches.length > 0) {
+            totalMatches += matches.length;
+            results.push({
+              file_id: fileInfo.fileId,
+              path: fileInfo.path,
+              name: fileInfo.name,
+              matches,
+            });
+          }
+        }
+      } catch {
+        // Binary extraction failed, skip this file
+      }
+      continue;
+    }
+
     try {
       const { stdout } = await execFileAsync(
         "grep",
@@ -1291,10 +1615,10 @@ export async function executeListRecentFiles(
       });
     }
 
-    // Register and return
-    const startIdx = registerFiles(results);
+    // Register (with dedup) and return
+    const fileIds = registerFiles(results);
     const fileInfos = results.map((f, i) => ({
-      file_id: startIdx + i,
+      file_id: fileIds[i],
       name: f.name,
       path: f.path,
       ext: f.extension,
