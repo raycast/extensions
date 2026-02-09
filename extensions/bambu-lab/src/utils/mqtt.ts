@@ -62,6 +62,7 @@ export function useMQTT(preferences: BambuPreferences, options: UseMQTTOptions =
     });
 
     mqttClient.on("error", () => {
+      mqttClient.end();
       setIsConnected(false);
       setIsConnecting(false);
     });
