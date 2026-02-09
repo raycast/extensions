@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "focus-tidbyt",
+  "title": "Focus Tidbyt",
+  "description": "Sync Raycast Focus timers to a Tidbyt/Tronbyt display.",
+  "icon": "icon.png",
+  "author": "lukas-69",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-focus-tidbyt",
+      "title": "Start Focus + Tidbyt",
+      "description": "Start a Raycast Focus session and push updates to Tidbyt",
+      "mode": "view"
+    },
+    {
+      "name": "stop-focus-tidbyt",
+      "title": "Stop Focus + Tidbyt",
+      "description": "Stop the Raycast Focus session and clear Tidbyt",
+      "mode": "no-view"
+    },
+    {
+      "name": "refresh-tidbyt",
+      "title": "Refresh Tidbyt",
+      "description": "Background refresh to update the Tidbyt countdown",
+      "mode": "no-view",
+      "interval": "10s"
+    },
+    {
+      "name": "preview-tidbyt-frame",
+      "title": "Preview Tidbyt Frame",
+      "description": "Render a local preview image for the countdown",
+      "mode": "view"
+    },
+    {
+      "name": "test-push-tidbyt",
+      "title": "Test Push Tidbyt",
+      "description": "Push a test image using the selected provider",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "pushProvider",
+      "title": "Push Provider",
+      "description": "Choose whether to push to Tidbyt (official cloud) or Tronbyt (self-hosted).",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Tronbyt (self-hosted)",
+          "value": "tronbyt"
+        },
+        {
+          "title": "Tidbyt (official)",
+          "value": "tidbyt"
+        }
+      ],
+      "default": "tronbyt",
+      "required": false
+    },
+    {
+      "name": "tidbytDeviceId",
+      "title": "Tidbyt Device ID",
+      "description": "From the Tidbyt mobile app, open Settings → Get API key and copy the Device ID.",
+      "placeholder": "device-id",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "tidbytApiToken",
+      "title": "Tidbyt API Key",
+      "description": "API key generated in the Tidbyt mobile app (Settings → Get API key).",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "tidbytPixletPath",
+      "title": "Pixlet Path (Optional)",
+      "description": "Path to the pixlet binary used for Tidbyt pushes (default: pixlet).",
+      "placeholder": "pixlet",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "tronbytBaseUrl",
+      "title": "Tronbyt Base URL",
+      "description": "Use the URL where the Tronbyt Server web app is reachable (default: http://localhost:8000). Only required for pushing updates.",
+      "placeholder": "http://localhost:8000",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "tronbytDeviceId",
+      "title": "Tronbyt Device ID",
+      "description": "In the Tronbyt Server web app, open the Devices list and copy the ID shown for your device. Only required for pushing updates.",
+      "placeholder": "device-id",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "tronbytApiToken",
+      "title": "Tronbyt API Token",
+      "description": "Token used to authenticate with the Tronbyt API",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "tronbytAuthHeader",
+      "title": "Authorization Header (Optional)",
+      "description": "Overrides token-based auth if set. Example: Bearer abc123",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "installationId",
+      "title": "Installation ID",
+      "description": "Used to overwrite the same app slot on the device",
+      "type": "textfield",
+      "default": "raycast-focus",
+      "required": false
+    },
+    {
+      "name": "updateInterval",
+      "title": "Update Interval",
+      "description": "How often to push updates (e.g. 10s, 30s, 1m). Background runs every 10 seconds.",
+      "type": "textfield",
+      "default": "10s",
+      "required": false
+    },
+    {
+      "name": "startShortcutName",
+      "title": "Start Shortcut Name",
+      "description": "Apple Shortcut that starts a Raycast Focus session",
+      "type": "textfield",
+      "default": "Raycast Focus - Start",
+      "required": false
+    },
+    {
+      "name": "completeShortcutName",
+      "title": "Complete Shortcut Name",
+      "description": "Apple Shortcut that completes a Raycast Focus session",
+      "type": "textfield",
+      "default": "Raycast Focus - Complete",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.2",
+    "cross-image": "^0.4.3",
+    "node-webpmux": "^3.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
