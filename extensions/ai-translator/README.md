@@ -49,8 +49,7 @@ The translation is copied to the clipboard automatically. You can also copy the 
 Set these in the Raycast extension preferences:
 - OpenAI API Key (required)
 - Model (optional, default: `gpt-4o-mini`)
-  - `gpt-4o-mini` for speed
-  - `gpt-4o-2024-08-06` for higher quality
+  - Choose a faster model for speed or a higher-quality model for accuracy.
 
 ## Project Structure
 - `src/index.tsx` - Raycast command UI and OpenAI call
