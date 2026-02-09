@@ -1,4 +1,10 @@
-import type { Connection } from "mysql2/promise";
+// MySQL support is not currently integrated into the extension.
+// This file exists for future MySQL support but is not actively used.
+// The Connection type is defined locally to avoid requiring mysql2 dependency.
+
+interface MysqlConnection {
+  query(sql: string): Promise<[unknown, unknown[]]>;
+}
 
 export type MysqlTableRow = {
   TABLE_SCHEMA: string;
@@ -128,7 +134,7 @@ const INDEXES_QUERY = `
   ORDER BY TABLE_SCHEMA, TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX
 `;
 
-export async function fetchMysqlSchemaData(conn: Connection): Promise<MysqlSchemaData> {
+export async function fetchMysqlSchemaData(conn: MysqlConnection): Promise<MysqlSchemaData> {
   const [tablesRes, columnsRes, pkRes, uniquesRes, fkRes, indexesRes] = await Promise.all([
     conn.query(TABLES_QUERY),
     conn.query(COLUMNS_QUERY),
