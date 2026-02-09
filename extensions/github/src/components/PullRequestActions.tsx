@@ -12,7 +12,7 @@ import {
   UserFieldsFragment,
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { PR_SORT_TYPES_TO_QUERIES } from "../helpers/pull-request";
+import { getMergeMethodTitle, PR_SORT_TYPES_TO_QUERIES } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
 import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
@@ -175,14 +175,14 @@ export default function PullRequestActions({
     }
   }
 
-  async function enableAutoMerge() {
+  async function enableAutoMerge(mergeMethod?: PullRequestMergeMethod) {
     try {
       await showToast({
         style: Toast.Style.Animated,
         title: `Enabling auto-merge for pull request #${pullRequest.number}`,
       });
 
-      await github.enablePullRequestAutoMerge({ nodeId: pullRequest.id });
+      await github.enablePullRequestAutoMerge({ nodeId: pullRequest.id, mergeMethod });
 
       await mutate();
 
@@ -288,7 +288,15 @@ export default function PullRequestActions({
     pullRequest.mergeable === MergeableState.Mergeable &&
     pullRequest.mergeStateStatus !== MergeStateStatus.Blocked;
 
-  const anyMergeActionAvailable = canMerge || pullRequest.repository.autoMergeAllowed;
+  const isOpen = !pullRequest.closed && !pullRequest.merged;
+  const allowedMergeMethods = [
+    pullRequest.repository.mergeCommitAllowed && PullRequestMergeMethod.Merge,
+    pullRequest.repository.squashMergeAllowed && PullRequestMergeMethod.Squash,
+    pullRequest.repository.rebaseMergeAllowed && PullRequestMergeMethod.Rebase,
+  ].filter(Boolean) as PullRequestMergeMethod[];
+
+  const canAutoMerge = isOpen && pullRequest.repository.autoMergeAllowed;
+  const anyMergeActionAvailable = canMerge || canAutoMerge;
 
   const viewerUser = getGitHubUser(viewer);
 
@@ -330,34 +338,6 @@ export default function PullRequestActions({
 
       {anyMergeActionAvailable && (
         <ActionPanel.Section>
-          {!canMerge && !pullRequest.isInMergeQueue && !pullRequest.repository.autoMergeAllowed && (
-            <>
-              {pullRequest.autoMergeRequest && (
-                <Action
-                  title="Disable Auto Merge"
-                  icon={{
-                    source: "pull-request-merged.svg",
-                    tintColor: Color.PrimaryText,
-                  }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  onAction={() => disableAutoMerge()}
-                />
-              )}
-
-              {!pullRequest.autoMergeRequest && (
-                <Action
-                  title="Merge When Ready"
-                  icon={{
-                    source: "pull-request-merged.svg",
-                    tintColor: Color.PrimaryText,
-                  }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  onAction={() => enableAutoMerge()}
-                />
-              )}
-            </>
-          )}
-
           {pullRequest.isMergeQueueEnabled && canMerge && !pullRequest.isInMergeQueue && (
             <Action
               title="Add to Merge Queue"
@@ -420,6 +400,42 @@ export default function PullRequestActions({
               ) : null}
             </>
           ) : null}
+
+          {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length === 1 && (
+            <Action
+              title="Enable Auto-Merge"
+              icon={{
+                source: "pull-request-merged.svg",
+                tintColor: Color.PrimaryText,
+              }}
+              onAction={() => enableAutoMerge(allowedMergeMethods[0])}
+            />
+          )}
+
+          {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length > 1 && (
+            <ActionPanel.Submenu
+              title="Enable Auto-Merge"
+              icon={{
+                source: "pull-request-merged.svg",
+                tintColor: Color.PrimaryText,
+              }}
+            >
+              {allowedMergeMethods.map((method) => (
+                <Action key={method} title={getMergeMethodTitle(method)} onAction={() => enableAutoMerge(method)} />
+              ))}
+            </ActionPanel.Submenu>
+          )}
+
+          {isOpen && pullRequest.autoMergeRequest && (
+            <Action
+              title="Disable Auto-Merge"
+              icon={{
+                source: "pull-request-merged.svg",
+                tintColor: Color.PrimaryText,
+              }}
+              onAction={() => disableAutoMerge()}
+            />
+          )}
         </ActionPanel.Section>
       )}
 

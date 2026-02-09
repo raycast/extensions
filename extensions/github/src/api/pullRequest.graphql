@@ -63,6 +63,7 @@ fragment PullRequestFields on PullRequest {
   mergeStateStatus
   autoMergeRequest {
     enabledAt
+    mergeMethod
   }
 }
 
@@ -95,6 +96,7 @@ fragment PullRequestDetailsFields on PullRequest {
   mergeStateStatus
   autoMergeRequest {
     enabledAt
+    mergeMethod
   }
   milestone {
     id
@@ -331,8 +333,8 @@ mutation removePullRequestFromMergeQueue($nodeId: ID!) {
   }
 }
 
-mutation enablePullRequestAutoMerge($nodeId: ID!) {
-  enablePullRequestAutoMerge(input: { pullRequestId: $nodeId }) {
+mutation enablePullRequestAutoMerge($nodeId: ID!, $mergeMethod: PullRequestMergeMethod) {
+  enablePullRequestAutoMerge(input: { pullRequestId: $nodeId, mergeMethod: $mergeMethod }) {
     pullRequest {
       id
     }
