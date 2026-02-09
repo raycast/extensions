@@ -110,4 +110,28 @@ describe("getInputText", () => {
 
     expect(result).toEqual({ text: "text", source: "clipboard" });
   });
+
+  it("shows toast for unexpected errors from getSelectedText", async () => {
+    mockedGetSelectedText.mockRejectedValue(new Error("Permission denied"));
+    mockedClipboardReadText.mockResolvedValue("clipboard text");
+
+    const result = await getInputText();
+
+    expect(result).toEqual({ text: "clipboard text", source: "clipboard" });
+    expect(mockedShowToast).toHaveBeenCalledWith({
+      style: "failure",
+      title: "Error Reading Selection",
+      message: "Permission denied",
+    });
+  });
+
+  it("does not show toast when getSelectedText throws no-selection error", async () => {
+    mockedGetSelectedText.mockRejectedValue(new Error("Unable to get selected text"));
+    mockedClipboardReadText.mockResolvedValue("clipboard text");
+
+    const result = await getInputText();
+
+    expect(result).toEqual({ text: "clipboard text", source: "clipboard" });
+    expect(mockedShowToast).not.toHaveBeenCalled();
+  });
 });

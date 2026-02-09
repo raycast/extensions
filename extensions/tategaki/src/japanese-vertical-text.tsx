@@ -43,7 +43,16 @@ export async function getInputText(): Promise<{ text: string; source: "selected"
       }
       return { text: trimInput(selected), source: "selected" };
     }
-  } catch {}
+  } catch (error) {
+    const isNoSelection = error instanceof Error && error.message.toLowerCase().includes("selected text");
+    if (!isNoSelection) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error Reading Selection",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
 
   const clipboard = await Clipboard.readText();
   if (clipboard && clipboard.trim()) {

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { trimInput, convertToVertical } from "../convert";
 
 describe("trimInput", () => {
@@ -150,6 +150,29 @@ describe("convertToVertical", () => {
       const result = convertToVertical("A", "");
       expect(result).toBe("A ");
       expect(result.endsWith(" ")).toBe(true);
+    });
+  });
+
+  describe("Intl.Segmenter fallback", () => {
+    const originalSegmenter = Intl.Segmenter;
+
+    afterEach(() => {
+      Object.defineProperty(Intl, "Segmenter", {
+        value: originalSegmenter,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it("falls back to Array.from when Intl.Segmenter is unavailable", () => {
+      Object.defineProperty(Intl, "Segmenter", {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+
+      const result = convertToVertical("ABC", "");
+      expect(result).toBe("A \nB \nC ");
     });
   });
 });

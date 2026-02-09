@@ -1,6 +1,9 @@
 function segmentGraphemes(text: string): string[] {
-  const segmenter = new Intl.Segmenter("ja", { granularity: "grapheme" });
-  return Array.from(segmenter.segment(text), (s) => s.segment);
+  if (typeof Intl !== "undefined" && typeof Intl.Segmenter === "function") {
+    const segmenter = new Intl.Segmenter("ja", { granularity: "grapheme" });
+    return Array.from(segmenter.segment(text), (s) => s.segment);
+  }
+  return Array.from(text);
 }
 
 function isHalfWidth(char: string): boolean {
