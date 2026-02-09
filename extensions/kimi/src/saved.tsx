@@ -37,7 +37,7 @@ export default function Saved() {
     </ActionPanel>
   );
 
-  const sortedSavedChats = savedChat.data.sort(
+  const sortedSavedChats = [...savedChat.data].sort(
     (a, b) => new Date(b.saved_at ?? 0).getTime() - new Date(a.saved_at ?? 0).getTime(),
   );
 

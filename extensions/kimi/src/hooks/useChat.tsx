@@ -70,24 +70,23 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       style: Toast.Style.Animated,
     });
 
-    let chat: Chat = {
+    const chat: Chat = {
       id: uuidv4(),
       question,
       answer: "",
       created_at: new Date().toISOString(),
     };
 
-    setData((prev) => {
-      return [...prev, chat];
-    });
+    // Build messages array using current data + new chat
+    const currentData = [...data, chat];
 
-    // Build messages array
     const messages: KimiMessage[] = [];
     if (model.prompt) {
       messages.push({ role: "system", content: model.prompt });
     }
-    messages.push(...(chatTransformer(data) as KimiMessage[]));
-    messages.push({ role: "user", content: question });
+    messages.push(...(chatTransformer(currentData) as KimiMessage[]));
+
+    setData(currentData);
 
     if (useStream) {
       // Abort any existing stream before starting a new one
@@ -220,11 +219,23 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         }
 
         const result = await response.json();
-        chat = { ...chat, answer: result.choices?.[0]?.message?.content || "" };
+        const finalChat: Chat = { ...chat, answer: result.choices?.[0]?.message?.content || "" };
 
         toast.title = "Got your answer!";
         toast.style = Toast.Style.Success;
         setLoading(false);
+
+        // Update data and history for non-streaming mode
+        setData((prev) => {
+          return prev.map((a) => {
+            if (a.id === finalChat.id) {
+              return finalChat;
+            }
+            return a;
+          });
+        });
+
+        history.add(finalChat);
       } catch (err) {
         toast.title = "Error";
         if (err instanceof Error) {
@@ -233,18 +244,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         toast.style = Toast.Style.Failure;
         setLoading(false);
       }
-
-      // Update data and history only for non-streaming mode
-      setData((prev) => {
-        return prev.map((a) => {
-          if (a.id === chat.id) {
-            return chat;
-          }
-          return a;
-        });
-      });
-
-      history.add(chat);
     }
   }
 

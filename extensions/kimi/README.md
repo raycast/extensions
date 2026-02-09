@@ -72,6 +72,6 @@ All preferences properties list that can be customize through `Raycast Settings 
 | ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
 | `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal Kimi API key |
 | `useStream`              | Stream Responses        | `boolean`                           | `true`   | `true`  | Stream responses from Kimi in real-time |                                                                         
-| `isAutoLoad`             | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your front most application to the `question bar` or `full text input form` automatically |
+| `isAutoLoad`             | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your front most application to the question bar or full text input form automatically |
 | `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
 ---

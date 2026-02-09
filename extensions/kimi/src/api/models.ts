@@ -20,12 +20,6 @@ interface ModelApiResponse {
 
 const MODELS_CACHE_KEY = "available_models_cache";
 
-// Hardcoded fallback list in case API and cache both fail
-const FALLBACK_MODELS: AvailableModel[] = [
-  { id: "kimi-k2.5", display_name: "Kimi K2.5", created_at: "2025-11-01T00:00:00Z" },
-  { id: "kimi-k2-thinking", display_name: "Kimi K2 Thinking", created_at: "2025-10-01T00:00:00Z" },
-];
-
 /**
  * Fetches available models from the Kimi API
  */
@@ -65,8 +59,8 @@ export async function fetchAvailableModels(): Promise<AvailableModel[]> {
     if (cached) {
       return cached;
     }
-    // Fall back to hardcoded list if all else fails
-    return FALLBACK_MODELS;
+    // Return empty array if both API and cache fail
+    return [];
   }
 }
 

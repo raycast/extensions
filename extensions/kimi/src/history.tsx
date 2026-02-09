@@ -41,7 +41,7 @@ export default function History() {
     </ActionPanel>
   );
 
-  const sortedHistory = history.data.sort(
+  const sortedHistory = [...history.data].sort(
     (a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime(),
   );
 

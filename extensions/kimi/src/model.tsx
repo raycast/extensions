@@ -50,7 +50,7 @@ export default function Model() {
     </ActionPanel>
   );
 
-  const sortedModels = models.data.sort(
+  const sortedModels = [...models.data].sort(
     (a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime(),
   );
 
