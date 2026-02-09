@@ -8,6 +8,24 @@ import * as path from "path";
 
 const execAsync = promisify(exec);
 
+function getPlayCommand(filePath: string): string {
+  switch (process.platform) {
+    case "win32":
+      return `powershell -c (New-Object Media.SoundPlayer "${filePath}").PlaySync()`;
+    case "darwin":
+      return `afplay "${filePath}"`;
+    default:
+      return `ffplay -nodisp -autoexit "${filePath}" 2>/dev/null || mpv --no-video "${filePath}" 2>/dev/null`;
+  }
+}
+
+const modKey = process.platform === "win32" ? "Ctrl" : "⌘";
+
+function sortPhonetics(phonetics: WordData["phonetics"]): WordData["phonetics"] {
+  const order: Record<string, number> = { US: 0, UK: 1 };
+  return [...phonetics].sort((a, b) => (order[a.accent ?? ""] ?? 2) - (order[b.accent ?? ""] ?? 2));
+}
+
 interface WordDetailsProps {
   wordData: WordData;
   onBack: () => void;
@@ -48,8 +66,9 @@ export function WordDetails({ wordData, onBack }: WordDetailsProps) {
       const tempFilePath = path.join(tempDir, `pronunciation_${Date.now()}.mp3`);
       fs.writeFileSync(tempFilePath, buffer);
 
-      // Play using macOS afplay command
-      await execAsync(`afplay "${tempFilePath}"`);
+      // Play audio using platform-specific command
+      const playCommand = getPlayCommand(tempFilePath);
+      await execAsync(playCommand);
 
       // Clean up
       fs.unlinkSync(tempFilePath);
@@ -74,17 +93,10 @@ export function WordDetails({ wordData, onBack }: WordDetailsProps) {
       navigationTitle={`Pronunciation: ${wordData.word}`}
       actions={
         <ActionPanel>
-          {wordData.phonetics
+          {sortPhonetics(wordData.phonetics)
             .filter((p) => p.audio)
             .map((phonetic, index) => {
-              const parts = [];
-              if (phonetic.accent) {
-                parts.push(phonetic.accent);
-              }
-              if (phonetic.text) {
-                parts.push(phonetic.text);
-              }
-              const label = parts.length > 0 ? parts.join(" ") : `Pronunciation ${index + 1}`;
+              const label = phonetic.accent || `Pronunciation ${index + 1}`;
               const isLoading = audioLoading === phonetic.audio;
 
               // Map index to valid keyboard key
@@ -112,25 +124,13 @@ function generateMarkdown(wordData: WordData): string {
   let markdown = `# ${wordData.word}\n\n`;
 
   // Audio shortcuts section at the top
-  const audioPhonetics = wordData.phonetics.filter((p) => p.audio);
+  const audioPhonetics = sortPhonetics(wordData.phonetics).filter((p) => p.audio);
   if (audioPhonetics.length > 0) {
     markdown += `> 🔊 **Quick Play:** `;
     audioPhonetics.forEach((phonetic, index) => {
       if (index > 0) markdown += " • ";
-      markdown += `⌘${index + 1}`;
-
-      // Show accent and phonetic text
-      const parts = [];
-      if (phonetic.accent) {
-        parts.push(phonetic.accent);
-      }
-      if (phonetic.text) {
-        parts.push(phonetic.text);
-      }
-
-      if (parts.length > 0) {
-        markdown += ` (${parts.join(" ")})`;
-      }
+      const accent = phonetic.accent || `${index + 1}`;
+      markdown += `${modKey}${index + 1} (${accent})`;
     });
     markdown += `\n\n`;
   }

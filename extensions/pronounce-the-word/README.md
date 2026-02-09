@@ -53,7 +53,10 @@ If a word isn't found, you'll see:
 
 ### Audio Playback
 
-Audio files are downloaded and played using macOS's native `afplay` command for reliable playback in Raycast's Node.js environment.
+Audio files are downloaded and played using platform-specific commands for reliable playback:
+- **macOS**: Native `afplay` command
+- **Windows**: PowerShell with .NET System.Media.SoundPlayer
+- **Linux**: `ffplay` or `mpv`
 
 ### Storage
 
