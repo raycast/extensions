@@ -102,7 +102,6 @@ export function ApiErrorView({ error, projectId, apiName, onRetry, title }: ApiE
   const isApiError = isApiNotEnabledError(error);
   const cleanMessage = getCleanErrorMessage(error, apiName);
 
-  // Get the enable URL
   let enableUrl = extractApiUrl(error);
   if (!enableUrl && isApiError) {
     const extractedProjectId = projectId || extractProjectId(error);
