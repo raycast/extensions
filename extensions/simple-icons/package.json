@@ -133,28 +133,37 @@
       "required": false,
       "type": "checkbox",
       "default": false
+    },
+    {
+      "name": "usePasteInsteadOfCopy",
+      "title": "Use Paste Instead of Copy",
+      "label": "Enabled",
+      "description": "Use paste action instead of copy action for copying content",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
+    "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2",
     "array-shuffle": "^4.0.0",
     "date-fns": "^4.1.0",
     "fast-fuzzy": "^1.12.0",
-    "got": "^14.6.5",
-    "lodash": "^4.17.21",
-    "pacote": "^21.0.4",
+    "got": "^14.6.6",
+    "lodash": "^4.17.23",
+    "pacote": "^21.1.0",
     "raycast-cross-extension": "^0.2.3",
     "semver": "^7.7.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/lodash": "^4.17.21",
+    "@types/lodash": "^4.17.23",
     "@types/pacote": "^11.1.8",
-    "@types/react": "^19.2.7",
+    "@types/react": "^19.2.10",
     "@types/semver": "^7.7.1",
-    "eslint": "^9.39.1",
-    "prettier": "^3.7.4",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   }
 }

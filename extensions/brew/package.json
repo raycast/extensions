@@ -34,7 +34,18 @@
       "title": "Search",
       "subtitle": "Brew",
       "description": "Search brew formulae & casks",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showMetadataPanel",
+          "type": "checkbox",
+          "default": true,
+          "required": false,
+          "title": "Search View",
+          "label": "Show metadata panel in search results",
+          "description": "Display a metadata panel next to the search results list showing details for the selected package.\nNote: This option is ignored when 'Use internal API for faster search' is enabled."
+        }
+      ]
     },
     {
       "name": "outdated",

@@ -46,13 +46,6 @@ export const checkEnteBinary = (): boolean => {
 
 export const exportEnteAuthSecrets = (): boolean => {
 	try {
-		fse.removeSync(EXPORT_FILE_PATH);
-		console.log("Export file removed");
-	} catch (error) {
-		console.error("Error during removal:", error);
-	}
-
-	try {
 		execSync(`${DEFAULT_CLI_PATH} export`);
 		console.log("Export to", EXPORT_FILE_PATH);
 	} catch {

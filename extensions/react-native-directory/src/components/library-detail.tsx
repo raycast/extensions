@@ -4,15 +4,22 @@ import {
   formatBytes,
   getCompatibilityColor,
   getCompatibilityTags,
+  getModuleTypeColor,
+  getModuleTypeLabel,
   getPlatformColor,
+  getPopularityLabel,
   getSupportedPlatforms,
   getTimeSinceToday,
+  hasConfigPlugin,
 } from "../utils";
 import { CHROME_APPLICATION, SCORING_URL } from "../constants";
+import { useNpmRegistry } from "../hooks/use-npm-registry";
 
-const Metadata = ({ library }: { library: LibraryType }) => {
+const Metadata = ({ library, authorName }: { library: LibraryType; authorName?: string }) => {
   const compatibilityTags = getCompatibilityTags(library);
   const platformTags = getSupportedPlatforms(library);
+  const moduleTypeTags = getModuleTypeLabel(library);
+  const { label: popularityLabel, isHot } = getPopularityLabel(library.popularity);
 
   return (
     <List.Item.Detail.Metadata>
@@ -29,6 +36,26 @@ const Metadata = ({ library }: { library: LibraryType }) => {
           <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} color={getPlatformColor(tag)} />
         ))}
       </List.Item.Detail.Metadata.TagList>
+
+      {!!moduleTypeTags.length && (
+        <List.Item.Detail.Metadata.TagList title="Module Type">
+          {moduleTypeTags.map((tag) => (
+            <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} color={getModuleTypeColor(tag)} />
+          ))}
+        </List.Item.Detail.Metadata.TagList>
+      )}
+
+      <List.Item.Detail.Metadata.Separator />
+
+      <List.Item.Detail.Metadata.TagList title="Popularity">
+        <List.Item.Detail.Metadata.TagList.Item
+          text={popularityLabel}
+          icon={isHot ? Icon.Bolt : Icon.LineChart}
+          color={isHot ? Color.Orange : Color.SecondaryText}
+        />
+      </List.Item.Detail.Metadata.TagList>
+
+      {authorName && <List.Item.Detail.Metadata.Label title="Author" text={authorName} icon={Icon.Person} />}
 
       <List.Item.Detail.Metadata.Separator />
 
@@ -55,6 +82,7 @@ const Metadata = ({ library }: { library: LibraryType }) => {
       {library.github.hasTypes && (
         <List.Item.Detail.Metadata.Label title="TypeScript Types" icon={{ source: "ts-icon.png" }} />
       )}
+      {hasConfigPlugin(library) && <List.Item.Detail.Metadata.Label title="Config Plugin" icon={Icon.Gear} />}
       {library.github?.license?.name && (
         <List.Item.Detail.Metadata.Label
           title="License"
@@ -92,17 +120,19 @@ const Metadata = ({ library }: { library: LibraryType }) => {
           onAction={async () => await open(`${library.github.urls.repo}/stargazers`, CHROME_APPLICATION)}
         />
       </List.Item.Detail.Metadata.TagList>
-      <List.Item.Detail.Metadata.TagList
-        title={`${library.github.stats.dependencies === 1 ? "Dependency" : "Dependencies"}`}
-      >
-        <List.Item.Detail.Metadata.TagList.Item
-          text={library.github.stats.dependencies.toLocaleString()}
-          icon={Icon.Box}
-          onAction={async () =>
-            await open(`https://www.npmjs.com/package/${library.npmPkg}?activeTab=dependencies`, CHROME_APPLICATION)
-          }
-        />
-      </List.Item.Detail.Metadata.TagList>
+      {library.github.stats.dependencies !== undefined && (
+        <List.Item.Detail.Metadata.TagList
+          title={`${library.github.stats.dependencies === 1 ? "Dependency" : "Dependencies"}`}
+        >
+          <List.Item.Detail.Metadata.TagList.Item
+            text={library.github.stats.dependencies.toLocaleString()}
+            icon={Icon.Box}
+            onAction={async () =>
+              await open(`https://www.npmjs.com/package/${library.npmPkg}?activeTab=dependencies`, CHROME_APPLICATION)
+            }
+          />
+        </List.Item.Detail.Metadata.TagList>
+      )}
       {library.npm?.size && (
         <List.Item.Detail.Metadata.TagList title="Package Size">
           <List.Item.Detail.Metadata.TagList.Item
@@ -136,18 +166,31 @@ const Metadata = ({ library }: { library: LibraryType }) => {
           onAction={async () => await open(`${library.github.urls.repo}/issues`, CHROME_APPLICATION)}
         />
       </List.Item.Detail.Metadata.TagList>
+
+      {!!library.github.topics?.length && (
+        <>
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.TagList title="Topics">
+            {library.github.topics.map((topic) => (
+              <List.Item.Detail.Metadata.TagList.Item key={topic} text={topic} color={Color.Blue} />
+            ))}
+          </List.Item.Detail.Metadata.TagList>
+        </>
+      )}
     </List.Item.Detail.Metadata>
   );
 };
 
 export const LibraryDetail = ({ library }: { library: LibraryType }) => {
-  const markdown = `
-  # ${library.github.name}
-  
-  ${library.github.description}
-  
-  ${library.images && library.images.length ? `\n### Images\n${library.images.map((image) => `![Image](${image})`).join("\n")}` : ""}
-  `;
+  const { authorName } = useNpmRegistry(library.npmPkg);
 
-  return <List.Item.Detail markdown={markdown} metadata={<Metadata library={library} />} />;
+  const markdown = `
+# ${library.github.name}
+
+${library.github.description ?? ""}
+
+${library.images && library.images.length ? `\n### Images\n${library.images.map((image) => `![Image](${image})`).join("\n")}` : ""}
+  `.trim();
+
+  return <List.Item.Detail markdown={markdown} metadata={<Metadata library={library} authorName={authorName} />} />;
 };

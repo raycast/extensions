@@ -2,12 +2,11 @@ import { Action, ActionPanel, Clipboard, Form, Icon, Keyboard, open, popToRoot, 
 import { FormValidation, showFailureToast, useForm, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { BranchDropdown, RepositoryDropdown } from "./components";
+import { BranchDropdown, RepositoryDropdown, CustomAgentsDropdown } from "./components";
 import { useViewer } from "./hooks/useViewer";
 import { provider, reauthorize } from "./lib/oauth";
 import { createTask } from "./services/copilot";
 import { ModelDropdown } from "./components/ModelDropdown";
-import { CustomAgentsDropdown } from "./components/CustomAgentsDropdown";
 
 type FormValues = {
   prompt: string;
@@ -42,7 +41,7 @@ function Command() {
       });
 
       try {
-        const { sessionUrl } = await createTask(
+        const { taskUrl } = await createTask(
           values.repository,
           values.prompt,
           values.branch,
@@ -57,14 +56,14 @@ function Command() {
             title: "Open in Browser",
             shortcut: Keyboard.Shortcut.Common.Open,
             onAction: () => {
-              open(sessionUrl);
+              open(taskUrl);
             },
           },
           secondaryAction: {
             title: "Copy URL",
             shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: async () => {
-              await Clipboard.copy(sessionUrl);
+              await Clipboard.copy(taskUrl);
               await showToast({
                 style: Toast.Style.Success,
                 title: "Copied URL to Clipboard",

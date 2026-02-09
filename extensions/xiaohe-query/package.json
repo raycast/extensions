@@ -1,0 +1,96 @@
+{
+  "name": "xiaohe-query",
+  "title": "Xiaohe Query",
+  "description": "Query Xiaohe (Flypy) codes and decomposition for a single Chinese character.",
+  "icon": "extension-icon.png",
+  "author": "dongqing",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "commands": [
+    {
+      "name": "main",
+      "title": "Xiaohe Query",
+      "subtitle": "Query Xiaohe encoding",
+      "description": "Search encoding and decomposition for a single Chinese character.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "inputStrategy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Input Strategy",
+      "description": "Choose how to detect the character when the extension launches.",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Smart Auto (Prefer Selection)",
+          "value": "auto"
+        },
+        {
+          "title": "Selection Only",
+          "value": "selection"
+        },
+        {
+          "title": "Clipboard Only",
+          "value": "clipboard"
+        },
+        {
+          "title": "Manual",
+          "value": "manual"
+        }
+      ]
+    },
+    {
+      "name": "aiCreativity",
+      "type": "dropdown",
+      "required": false,
+      "title": "AI Creativity",
+      "description": "Control how creative the AI output should be.",
+      "default": "0",
+      "data": [
+        {
+          "title": "Strict (0.0)",
+          "value": "0"
+        },
+        {
+          "title": "Balanced (0.5)",
+          "value": "0.5"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Extension to npm.\\n\\nIf you intend to release it to the Raycast Store, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

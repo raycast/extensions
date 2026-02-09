@@ -44,16 +44,19 @@ export function remoteHostParser(url: string): RemoteHostParserResult {
 function githubParser(_url: string, parsed: URLComponents): RemoteHostParserResult {
   const { protocol: scheme, hostname, path } = parsed;
 
+  const organizationName = (() => {
+    const match = path.match(/^([^/]+)/);
+    return match ? match[1] : undefined;
+  })();
+  const repositoryName = (() => {
+    const match = path.match(/\/([^/]+)$/);
+    return match ? match[1] : undefined;
+  })();
+
   return {
     provider: "GitHub" as RemoteProvider,
-    organizationName: (() => {
-      const match = path.match(/^([^/]+)/);
-      return match ? match[1] : undefined;
-    })(),
-    repositoryName: (() => {
-      const match = path.match(/\/([^/]+)$/);
-      return match ? match[1] : undefined;
-    })(),
+    organizationName,
+    repositoryName,
     get avatarUrl() {
       return this.organizationName ? `${scheme}://${hostname}/${this.organizationName}.png?size=64` : undefined;
     },
@@ -131,24 +134,47 @@ function githubParser(_url: string, parsed: URLComponents): RemoteHostParserResu
       other(): RemoteWebPage[] {
         return [
           {
+            title: "Home Page",
+            url: `${scheme}://${hostname}/${path}`,
+            icon: { source: "git-project.svg" },
+          },
+          {
+            title: "Issues",
+            url: `${scheme}://${hostname}/${path}/issues`,
+            icon: { source: `https://api.iconify.design/ri/issues-line.svg`, fallback: Icon.Bug },
+            shortcut: { modifiers: ["cmd"], key: "i" },
+          },
+          {
             title: "Pull Requests",
             url: `${scheme}://${hostname}/${path}/pulls`,
             icon: { source: "git-merge.svg" },
           },
           {
-            title: "Issues",
-            url: `${scheme}://${hostname}/${path}/issues`,
-            icon: Icon.Bug,
+            title: "Actions",
+            url: `${scheme}://${hostname}/${path}/actions`,
+            icon: Icon.Play,
+            shortcut: { modifiers: ["cmd"], key: "b" },
+          },
+          {
+            title: "Deployments",
+            url: `${scheme}://${hostname}/${path}/deployments`,
+            icon: Icon.Rocket,
+            shortcut: { modifiers: ["cmd"], key: "d" },
+          },
+          {
+            title: "GitHub Page",
+            url: `${scheme}://${organizationName}.github.io/${repositoryName}/`,
+            icon: Icon.Globe,
+          },
+          {
+            title: "Projects",
+            url: `${scheme}://${hostname}/${path}/projects`,
+            icon: { source: `https://api.iconify.design/si/projects-line.svg`, fallback: Icon.Folder },
           },
           {
             title: "Settings",
             url: `${scheme}://${hostname}/${path}/settings`,
             icon: Icon.Gear,
-          },
-          {
-            title: "Home Page",
-            url: `${scheme}://${hostname}/${path}`,
-            icon: { source: "git-project.svg" },
           },
         ];
       },
@@ -232,19 +258,54 @@ function gitlabParser(_url: string, parsed: URLComponents): RemoteHostParserResu
       other(): RemoteWebPage[] {
         return [
           {
+            title: "Home Page",
+            url: `${scheme}://${hostname}/${path}`,
+            icon: { source: "git-project.svg" },
+          },
+          {
+            title: "Members",
+            url: `${scheme}://${hostname}/${path}/-/members`,
+            icon: { source: `https://api.iconify.design/tdesign/member.svg`, fallback: Icon.Person },
+          },
+          {
+            title: "Issues",
+            url: `${scheme}://${hostname}/${path}/-/issues`,
+            icon: { source: `https://api.iconify.design/ri/issues-line.svg`, fallback: Icon.Bug },
+            shortcut: { modifiers: ["cmd"], key: "i" },
+          },
+          {
+            title: "Issue Board",
+            url: `${scheme}://${hostname}/${path}/-/boards`,
+            icon: {
+              source: `https://api.iconify.design/material-symbols/view-kanban-outline-rounded.svg`,
+              fallback: Icon.List,
+            },
+          },
+          {
+            title: "Wiki",
+            url: `${scheme}://${hostname}/${path}/-/wikis/home`,
+            icon: Icon.Book,
+          },
+          {
             title: "Merge Requests",
             url: `${scheme}://${hostname}/${path}/-/merge_requests`,
             icon: { source: "git-merge.svg" },
           },
           {
+            title: "Pipelines",
+            url: `${scheme}://${hostname}/${path}/-/pipelines`,
+            icon: { source: `https://api.iconify.design/uil/rocket.svg`, fallback: Icon.Hammer },
+            shortcut: { modifiers: ["cmd"], key: "b" },
+          },
+          {
+            title: "Releases",
+            url: `${scheme}://${hostname}/${path}/-/releases`,
+            icon: Icon.Box,
+          },
+          {
             title: "Settings",
             url: `${scheme}://${hostname}/${path}/-/settings`,
             icon: Icon.Gear,
-          },
-          {
-            title: "Home Page",
-            url: `${scheme}://${hostname}/${path}`,
-            icon: { source: "git-project.svg" },
           },
         ];
       },
@@ -330,9 +391,15 @@ function giteaParser(_url: string, parsed: URLComponents): RemoteHostParserResul
       other(): RemoteWebPage[] {
         return [
           {
+            title: "Home Page",
+            url: `${scheme}://${hostname}/${path}`,
+            icon: { source: "git-project.svg" },
+          },
+          {
             title: "Issues",
             url: `${scheme}://${hostname}/${path}/issues`,
-            icon: Icon.Bug,
+            icon: { source: `https://api.iconify.design/ri/issues-line.svg`, fallback: Icon.Bug },
+            shortcut: { modifiers: ["cmd"], key: "i" },
           },
           {
             title: "Pull Requests",
@@ -340,14 +407,25 @@ function giteaParser(_url: string, parsed: URLComponents): RemoteHostParserResul
             icon: { source: "git-merge.svg" },
           },
           {
+            title: "Actions",
+            url: `${scheme}://${hostname}/${path}/actions`,
+            icon: Icon.Play,
+            shortcut: { modifiers: ["cmd"], key: "b" },
+          },
+          {
+            title: "Releases",
+            url: `${scheme}://${hostname}/${path}/releases`,
+            icon: Icon.Tag,
+          },
+          {
+            title: "Wiki",
+            url: `${scheme}://${hostname}/${path}/wiki`,
+            icon: Icon.Book,
+          },
+          {
             title: "Settings",
             url: `${scheme}://${hostname}/${path}/settings`,
             icon: Icon.Gear,
-          },
-          {
-            title: "Home Page",
-            url: `${scheme}://${hostname}/${path}`,
-            icon: { source: "git-project.svg" },
           },
         ];
       },
@@ -455,6 +533,11 @@ function bitbucketParser(_url: string, parsed: URLComponents): RemoteHostParserR
         if (!repoBase) return [];
         return [
           {
+            title: "Home Page",
+            url: repoBase,
+            icon: { source: "git-project.svg" },
+          },
+          {
             title: "Pull Requests",
             url: `${repoBase}/pull-requests`,
             icon: { source: "git-merge.svg" },
@@ -463,11 +546,6 @@ function bitbucketParser(_url: string, parsed: URLComponents): RemoteHostParserR
             title: "Settings",
             url: `${repoBase}/settings`,
             icon: Icon.Gear,
-          },
-          {
-            title: "Home Page",
-            url: repoBase,
-            icon: { source: "git-project.svg" },
           },
         ];
       },
@@ -581,14 +659,14 @@ function azureDevopsParser(_url: string, parsed: URLComponents): RemoteHostParse
         if (!repoBase) return [];
         return [
           {
-            title: "Pull Requests",
-            url: `${repoBase}/pullrequests`,
-            icon: { source: "git-merge.svg" },
-          },
-          {
             title: "Home Page",
             url: repoBase,
             icon: { source: "git-project.svg" },
+          },
+          {
+            title: "Pull Requests",
+            url: `${repoBase}/pullrequests`,
+            icon: { source: "git-merge.svg" },
           },
         ];
       },

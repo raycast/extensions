@@ -117,12 +117,12 @@ export const calculateDailyCostPercentage = (dailyCost: number, totalCost: numbe
 };
 
 export const calculateMonthlyProjection = (
-  totalCost: number,
+  monthlyCost: number,
 ): { dailyAverage: number; projectedMonthlyCost: number } => {
   const now = new Date();
+  const dayOfMonth = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const todayDayOfMonth = now.getDate();
-  const dailyAverage = totalCost / Math.max(todayDayOfMonth, 1);
+  const dailyAverage = monthlyCost / Math.max(dayOfMonth, 1);
   const projectedMonthlyCost = dailyAverage * daysInMonth;
 
   return {

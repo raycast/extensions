@@ -48,7 +48,7 @@ export default async function tool(input: Input): Promise<Output> {
       const batch = documentMap.slice(i, i + batchSize);
 
       const batchPromises = batch.map(async ({ document, noteId }) => {
-        const title = document?.title || "Untitled Note";
+        const title = document?.title || "New note";
 
         // Skip if document not found
         if (!document) {

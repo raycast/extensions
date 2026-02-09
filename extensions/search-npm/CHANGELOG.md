@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Added npmx] - 2026-02-05
+
+- Add ability to open package page in npmx.dev
+
 ## [Update] - 2025-11-06
 
 - Add support for Bun, implemented suggestion from [#22693](https://github.com/raycast/extensions/issues/22693)

@@ -4,11 +4,15 @@ import { useState, useEffect, useMemo } from "react";
 import Fuse from "fuse.js";
 
 import { STATE_KEYS } from "./lib/constants";
-import { TOTPAccount } from "./types";
-import { loadAccountsFromStorage, clearStoredData } from "./lib/storage";
+import { TOTPAccount, ImportMode } from "./types";
+import { loadAccountsFromStorage, clearStoredData, getImportMode, setImportMode } from "./lib/storage";
 import { generateTOTP, generateNextTOTP, getTimeRemaining } from "./lib/totp";
 import { getProgressColor } from "./lib/colors";
-import SetupForm from "./SetupForm";
+import SetupFormJSON from "./components/SetupFormJSON";
+import SetupFormSQLite from "./components/SetupFormSQLite";
+import ModeSelector from "./components/ModeSelector";
+
+type SetupStep = "select" | "json" | "sqlite" | null;
 
 export default function Command() {
   const [accounts, setAccounts] = useCachedState<TOTPAccount[]>(STATE_KEYS.ACCOUNTS, []);
@@ -23,6 +27,8 @@ export default function Command() {
     STATE_KEYS.SORTING_MODE,
     "frecency",
   );
+  const [setupStep, setSetupStep] = useState<SetupStep>(null);
+  const [currentMode, setCurrentMode] = useState<ImportMode | null>(null);
 
   const {
     data: sortedByFrecency,
@@ -61,26 +67,44 @@ export default function Command() {
     return fuse.search(searchText.trim()).map((r) => r.item);
   }, [fuse, searchText, sortedAccounts]);
 
-  useEffect(() => {
-    const loadAccounts = async () => {
-      setIsLoading(true);
-      try {
-        const loadedAccounts = await loadAccountsFromStorage();
-        if (loadedAccounts.length === 0) {
-          setNeedsSetup(true);
-        } else {
-          setAccounts(loadedAccounts);
-          setNeedsSetup(false);
-        }
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load accounts");
+  const loadAccounts = async () => {
+    setIsLoading(true);
+    try {
+      const mode = await getImportMode();
+      setCurrentMode(mode);
+      const loadedAccounts = await loadAccountsFromStorage();
+      if (loadedAccounts.length === 0) {
         setNeedsSetup(true);
-      } finally {
-        setIsLoading(false);
+        setSetupStep("select");
+      } else {
+        setAccounts(loadedAccounts);
+        setNeedsSetup(false);
+        setSetupStep(null);
       }
-    };
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load accounts");
+      setNeedsSetup(true);
+      setSetupStep("select");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      const loadedAccounts = await loadAccountsFromStorage();
+      setAccounts(loadedAccounts);
+      showToast(Toast.Style.Success, "Refreshed", `Loaded ${loadedAccounts.length} accounts`);
+    } catch (err) {
+      showFailureToast(err instanceof Error ? err.message : "Failed to refresh accounts");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadAccounts();
   }, []);
 
@@ -111,11 +135,37 @@ export default function Command() {
   const handleAccountsLoaded = (loadedAccounts: TOTPAccount[]) => {
     setAccounts(loadedAccounts);
     setNeedsSetup(false);
+    setSetupStep(null);
     setError(null);
+    getImportMode().then(setCurrentMode);
   };
 
+  const handleModeSelected = async (mode: ImportMode) => {
+    if (mode === "json") {
+      await setImportMode("json");
+      setSetupStep("json");
+    } else {
+      setSetupStep("sqlite");
+    }
+  };
+
+  const handleBackToModeSelect = () => {
+    setSetupStep("select");
+  };
+
+  // setup flow
   if (needsSetup) {
-    return <SetupForm onAccountsLoaded={handleAccountsLoaded} />;
+    if (setupStep === "select") {
+      return <ModeSelector onModeSelected={handleModeSelected} />;
+    }
+    if (setupStep === "json") {
+      return <SetupFormJSON onAccountsLoaded={handleAccountsLoaded} />;
+    }
+    if (setupStep === "sqlite") {
+      return <SetupFormSQLite onAccountsLoaded={handleAccountsLoaded} onBack={handleBackToModeSelect} />;
+    }
+    // default to mode selector if setup step is unclear
+    return <ModeSelector onModeSelected={handleModeSelected} />;
   }
 
   if (!isLoading && error) {
@@ -134,9 +184,11 @@ export default function Command() {
     );
   }
 
+  const navigationTitle = currentMode === "sqlite" ? "TOTP (Live)" : "TOTP (JSON)";
+
   return (
     <List
-      navigationTitle="TOTP codes"
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search accounts..."
       filtering={false}
       onSearchTextChange={(text) => setSearchText(text)}
@@ -205,6 +257,14 @@ export default function Command() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Settings">
+                  {currentMode === "sqlite" && (
+                    <Action
+                      title="Refresh from Database"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={handleRefresh}
+                    />
+                  )}
                   <Action
                     title={`Sort by ${sortingMode === "frecency" ? "Name" : "Usage"}`}
                     icon={sortingMode === "frecency" ? Icon.ArrowUp : Icon.BarChart}
@@ -259,6 +319,8 @@ export default function Command() {
                           await clearStoredData();
                           setAccounts([]);
                           setNeedsSetup(true);
+                          setSetupStep("select");
+                          setCurrentMode(null);
                           showToast(Toast.Style.Success, "Reset Complete");
                         } catch {
                           showFailureToast("Failed to reset authenticator data");

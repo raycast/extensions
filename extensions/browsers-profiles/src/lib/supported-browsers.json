@@ -62,6 +62,13 @@
       "title": "Helium",
       "path": "/Library/Application Support/net.imput.helium",
       "icon": "helium.png"
+    },
+    {
+      "app": "Arc",
+      "type": "CHROMIUM",
+      "title": "Arc",
+      "path": "/Library/Application Support/Arc/User Data",
+      "icon": "arc.png"
     }
   ],
   "firefox": [
