@@ -59,6 +59,12 @@
       "mode": "view"
     },
     {
+      "name": "history",
+      "title": "Send to Kindle History",
+      "description": "View history of sent articles",
+      "mode": "view"
+    },
+    {
       "name": "set-change-sending-method",
       "title": "Set / Change Sending Method",
       "description": "Choose and validate your Kindle delivery method",
@@ -75,7 +81,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

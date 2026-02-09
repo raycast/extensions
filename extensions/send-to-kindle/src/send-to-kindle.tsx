@@ -4,25 +4,34 @@ import {
   BrowserExtension,
   Detail,
   Form,
+  Grid,
+  Icon,
+  List,
+  Color,
   environment,
   getPreferenceValues,
   getApplications,
   launchCommand,
   LaunchType,
   open,
-  showHUD,
   showInFinder,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
 import TurndownService from "turndown";
 import { mkdir, readFile, unlink, writeFile } from "fs/promises";
 import path from "path";
-import { extractBaseDomainFromUrl, extractDomainFromUrl, getFiltersForDomain, parseCssSelectors } from "./filters";
+import {
+  addFilter,
+  extractBaseDomainFromUrl,
+  extractDomainFromUrl,
+  getFiltersForDomain,
+  parseCssSelectors,
+} from "./filters";
 import { buildEpubBuffer, EpubResource } from "./epub";
 import crypto from "crypto";
 import os from "os";
@@ -31,18 +40,40 @@ import { promisify } from "util";
 import { sendEpubByEmail } from "./email";
 import { SetupDeliveryModeForm } from "./setup-delivery-mode";
 import { resolveSendPreferences, shouldShowSetupScreen } from "./settings";
+import { addToHistory } from "./history-storage";
 
 type ViewState = {
   isLoading: boolean;
   title: string;
   markdownBody: string;
   author: string;
+  skillDomain: string;
   pageUrl: string;
   sourceHtml: string;
   coverSelectors: string[];
+  readabilityHtml: string;
+  contentFilters: string[];
 };
 
 type ArticleData = Omit<ViewState, "isLoading">;
+
+type CoverSelectionMethod = "css-selector" | "first-image";
+
+type EpubPreviewMetadata = {
+  domain: string;
+  coverMethodLabel: string;
+  coverStatusLabel: string;
+  coverThumbnail?: string;
+  coverPreviewThumbnail?: string;
+};
+
+type CoverImageCandidate = {
+  selector: string;
+  previewDataUrl: string;
+  sourceUrl: string;
+  width: number;
+  height: number;
+};
 
 type SendToKindleCommandProps = {
   autoSend?: boolean;
@@ -58,6 +89,10 @@ export default async function Command() {
   try {
     const article = await loadArticle();
     await sendArticle(article, { direct: true });
+    await addToHistory({
+      title: article.title,
+      url: article.pageUrl,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await showToast({
@@ -70,14 +105,23 @@ export default async function Command() {
 
 export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandProps) {
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
+  const [version, setVersion] = useState(0);
   const [state, setState] = useState<ViewState>({
     isLoading: true,
     title: "Reading",
     markdownBody: "",
     author: "",
+    skillDomain: "",
     pageUrl: "",
     sourceHtml: "",
     coverSelectors: [],
+    readabilityHtml: "",
+    contentFilters: [],
+  });
+  const [epubPreviewMetadata, setEpubPreviewMetadata] = useState<EpubPreviewMetadata>({
+    domain: "",
+    coverMethodLabel: "Analyzing...",
+    coverStatusLabel: "Checking image...",
   });
 
   useEffect(() => {
@@ -110,6 +154,10 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
         });
         if (autoSend) {
           await sendArticle(article, { direct: true });
+          await addToHistory({
+            title: article.title,
+            url: article.pageUrl,
+          });
         }
       } catch (error) {
         if (!isMounted) return;
@@ -124,9 +172,12 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
           title: "Error",
           markdownBody: message,
           author: "",
+          skillDomain: "",
           pageUrl: "",
           sourceHtml: "",
           coverSelectors: [],
+          readabilityHtml: "",
+          contentFilters: [],
         });
       }
     }
@@ -136,7 +187,49 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
     return () => {
       isMounted = false;
     };
-  }, [autoSend, needsOnboarding]);
+  }, [autoSend, needsOnboarding, version]);
+
+  useEffect(() => {
+    if (needsOnboarding !== false || state.isLoading) return;
+
+    let isMounted = true;
+    const domain =
+      state.author || extractBaseDomainFromUrl(state.pageUrl) || extractDomainFromUrl(state.pageUrl) || "Unknown";
+    setEpubPreviewMetadata((previous) => ({
+      ...previous,
+      domain,
+      coverMethodLabel: "Analyzing...",
+      coverStatusLabel: "Checking image...",
+      coverThumbnail: undefined,
+    }));
+
+    async function loadEpubPreviewMetadata() {
+      const preview = await buildEpubPreviewMetadata(state);
+      if (!isMounted) return;
+      setEpubPreviewMetadata(preview);
+    }
+
+    loadEpubPreviewMetadata().catch(() => {
+      if (!isMounted) return;
+      setEpubPreviewMetadata({
+        domain,
+        coverMethodLabel: "Unavailable",
+        coverStatusLabel: "Unable to compute cover preview.",
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    needsOnboarding,
+    state.author,
+    state.coverSelectors,
+    state.isLoading,
+    state.markdownBody,
+    state.pageUrl,
+    state.sourceHtml,
+  ]);
 
   if (needsOnboarding === null) {
     return <Detail isLoading markdown="Loading setup..." navigationTitle="Send to Kindle" />;
@@ -149,6 +242,10 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
   async function handleSend() {
     try {
       await sendArticle(state);
+      await addToHistory({
+        title: state.title,
+        url: state.pageUrl,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       await showToast({
@@ -166,27 +263,90 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
       markdown={markdown}
       isLoading={state.isLoading}
       navigationTitle={state.title}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Kindle Title" text={state.title.trim() || "Reading"} />
+          <Detail.Metadata.Label title="Domain" text={epubPreviewMetadata.domain || "Unknown"} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label
+            title="Cover"
+            text={epubPreviewMetadata.coverStatusLabel}
+            icon={epubPreviewMetadata.coverThumbnail}
+          />
+          <Detail.Metadata.Label title="Cover Method" text={epubPreviewMetadata.coverMethodLabel} />
+        </Detail.Metadata>
+      }
       actions={
         <ActionPanel>
           <Action title="Send to Kindle" onAction={() => handleSend()} />
-          {!autoSend && (
+          {epubPreviewMetadata.coverThumbnail && (
             <Action.Push
-              title="Edit Content"
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              title="View Cover"
+              shortcut={{ modifiers: ["opt"], key: "p" }}
               target={
-                <EditArticleForm
+                <CoverPreview
+                  coverPreviewThumbnail={epubPreviewMetadata.coverPreviewThumbnail}
+                  coverStatusLabel={epubPreviewMetadata.coverStatusLabel}
+                  coverMethodLabel={epubPreviewMetadata.coverMethodLabel}
                   title={state.title}
-                  markdownBody={state.markdownBody}
-                  onSave={({ title, markdownBody }) => {
-                    setState((previous) => ({
-                      ...previous,
-                      title,
-                      markdownBody,
-                    }));
-                  }}
                 />
               }
             />
+          )}
+          {!autoSend && (
+            <>
+              <Action.Push
+                title="Add Cover Skill"
+                shortcut={{ modifiers: ["opt"], key: "k" }}
+                target={
+                  <AddCoverSkillGrid
+                    sourceHtml={state.sourceHtml}
+                    pageUrl={state.pageUrl}
+                    domain={state.skillDomain}
+                    onSaved={(selector) => {
+                      setState((previous) => ({
+                        ...previous,
+                        coverSelectors: Array.from(new Set([...previous.coverSelectors, selector])),
+                      }));
+                    }}
+                  />
+                }
+              />
+              <Action.Push
+                title="Add Filter Skill"
+                shortcut={{ modifiers: ["cmd"], key: "f" }}
+                target={
+                  <AddFilterSkillList
+                    readabilityHtml={state.readabilityHtml}
+                    domain={state.skillDomain}
+                    existingFilters={state.contentFilters}
+                    onReload={() => setVersion((v) => v + 1)}
+                  />
+                }
+              />
+              <Action.Push
+                title="Edit Content"
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                target={
+                  <EditArticleForm
+                    title={state.title}
+                    markdownBody={state.markdownBody}
+                    onSave={({ title, markdownBody }) => {
+                      setState((previous) => ({
+                        ...previous,
+                        title,
+                        markdownBody,
+                      }));
+                    }}
+                  />
+                }
+              />
+              <Action.CopyToClipboard
+                title="Copy Original Source Code"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                content={state.sourceHtml}
+              />
+            </>
           )}
           <Action title="Reveal Output Folder" onAction={() => showInFinder(environment.supportPath)} />
         </ActionPanel>
@@ -222,6 +382,7 @@ async function loadArticle(): Promise<ArticleData> {
   const sourceDomain = extractBaseDomainFromUrl(pageUrl);
   const coverSelectorList: string[] = [];
   const seenCoverSelectors = new Set<string>();
+  let contentFilters: string[] = [];
   if (domain) {
     const filters = await getFiltersForDomain(domain);
     const invalidSelectors: string[] = [];
@@ -239,12 +400,21 @@ async function loadArticle(): Promise<ArticleData> {
       }
 
       try {
-        const matches = Array.from(document.querySelectorAll(filter.selector)) as Array<{ remove?: () => void }>;
+        const selector = parseCssSelectors(filter.selector).join(", ");
+        if (!selector) continue;
+
+        const matches = Array.from(document.querySelectorAll(selector)) as Array<{ remove?: () => void }>;
         matches.forEach((element) => element.remove?.());
       } catch {
         invalidSelectors.push(filter.selector);
       }
     }
+
+    // Collect effective content filters (selectors)
+    // We want to return all valid selectors that were used
+    contentFilters = filters
+      .filter((f) => !invalidSelectors.includes(f.selector) && f.selector.trim())
+      .map((f) => f.selector);
 
     if (invalidSelectors.length > 0) {
       await showToast({
@@ -255,7 +425,7 @@ async function loadArticle(): Promise<ArticleData> {
     }
   }
 
-  const reader = new Readability(document);
+  const reader = new Readability(document, { keepClasses: true });
   const article = reader.parse();
 
   if (!article?.content) {
@@ -272,9 +442,12 @@ async function loadArticle(): Promise<ArticleData> {
     title: article.title?.trim() || activeTab?.title || "Reading",
     markdownBody: turndownService.turndown(article.content),
     author: sourceDomain || domain || "",
+    skillDomain: sourceDomain || domain || "",
     pageUrl,
     sourceHtml: html,
     coverSelectors: coverSelectorList,
+    readabilityHtml: article.content,
+    contentFilters,
   };
 }
 
@@ -344,13 +517,9 @@ async function sendArticle(inputState: ArticleData, options?: { direct?: boolean
     });
     await deleteGeneratedEpub(filePath);
 
-    if (options?.direct) {
-      await showHUD("Delivered to Kindle Inbox");
-      return;
-    }
     progressToast.style = Toast.Style.Success;
-    progressToast.title = "File Sent by Email";
-    progressToast.message = "";
+    progressToast.title = options?.direct ? "Delivered to Kindle Inbox" : "File Sent by Email";
+    progressToast.message = options?.direct ? "Your EPUB was sent successfully." : "";
     return;
   }
 
@@ -365,14 +534,9 @@ async function sendArticle(inputState: ArticleData, options?: { direct?: boolean
   }
   await deleteGeneratedEpub(filePath);
 
-  if (options?.direct) {
-    await showHUD("Delivered to Send to Kindle");
-    return;
-  }
-
   progressToast.style = Toast.Style.Success;
-  progressToast.title = "File Sent to Send to Kindle";
-  progressToast.message = "";
+  progressToast.title = options?.direct ? "Delivered to Send to Kindle" : "File Sent to Send to Kindle";
+  progressToast.message = options?.direct ? "The app received your EPUB." : "";
 }
 
 async function deleteGeneratedEpub(filePath: string): Promise<void> {
@@ -420,6 +584,835 @@ function EditArticleForm({ title, markdownBody, onSave }: EditArticleFormProps) 
   );
 }
 
+type CoverPreviewProps = {
+  coverPreviewThumbnail?: string;
+  coverStatusLabel: string;
+  coverMethodLabel: string;
+  title: string;
+};
+
+function CoverPreview({ coverPreviewThumbnail, coverStatusLabel, coverMethodLabel, title }: CoverPreviewProps) {
+  const { pop } = useNavigation();
+
+  const markdown = coverPreviewThumbnail
+    ? `![Cover Preview](${coverPreviewThumbnail})`
+    : `# No Cover Available\n\n${coverStatusLabel}`;
+
+  return (
+    <Detail
+      markdown={markdown}
+      navigationTitle="Cover Preview"
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Title" text={title} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Status" text={coverStatusLabel} />
+          <Detail.Metadata.Label title="Method" text={coverMethodLabel} />
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action title="Close" onAction={pop} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+type AddCoverSkillGridProps = {
+  sourceHtml: string;
+  pageUrl: string;
+  domain: string;
+  onSaved: (selector: string) => void;
+};
+
+function AddCoverSkillGrid({ sourceHtml, pageUrl, domain, onSaved }: AddCoverSkillGridProps) {
+  const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
+  const [items, setItems] = useState<CoverImageCandidate[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadCandidates() {
+      try {
+        const candidates = await listCoverCandidates({
+          sourceHtml,
+          pageUrl,
+          minWidth: 400,
+        });
+        if (!isMounted) return;
+        setItems(candidates);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadCandidates().catch(async () => {
+      if (!isMounted) return;
+      setIsLoading(false);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to list images",
+        message: "Couldn't parse images from the source HTML.",
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [pageUrl, sourceHtml]);
+
+  async function handleAddCoverSelector(selector: string) {
+    const normalizedDomain = domain.trim();
+    if (!normalizedDomain) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Missing domain",
+        message: "No domain found for this page.",
+      });
+      return;
+    }
+
+    const result = await addFilter(normalizedDomain, "", selector);
+    onSaved(selector);
+    await showToast({
+      style: Toast.Style.Success,
+      title: result.operation === "created" ? "Skill created" : "Skill updated",
+      message: `Cover CSS added for ${normalizedDomain}.`,
+    });
+    pop();
+  }
+
+  return (
+    <Grid
+      isLoading={isLoading}
+      navigationTitle="Add cover skill"
+      searchBarPlaceholder="Search by selector"
+      fit={Grid.Fit.Fill}
+      aspectRatio="5/8"
+    >
+      {items.length === 0 && !isLoading ? (
+        <Grid.EmptyView
+          title="No image found"
+          description="No source image of at least 400px width could be resolved."
+        />
+      ) : (
+        items.map((item) => (
+          <Grid.Item
+            key={`${item.selector}-${item.sourceUrl}`}
+            content={item.previewDataUrl}
+            title={item.height > 0 ? `${item.width}x${item.height}` : `${item.width}px wide`}
+            subtitle={item.selector}
+            actions={
+              <ActionPanel>
+                <Action title="Add Cover CSS Selector" onAction={() => handleAddCoverSelector(item.selector)} />
+                <Action.CopyToClipboard title="Copy CSS Selector" content={item.selector} />
+                <Action.OpenInBrowser title="Open Source Image" url={item.sourceUrl} />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
+    </Grid>
+  );
+}
+
+type CssSelectorCandidate = {
+  selector: string;
+  preview: string;
+  count: number;
+};
+
+type AddFilterSkillListProps = {
+  readabilityHtml: string;
+  domain: string;
+  existingFilters: string[];
+  onReload: () => void;
+};
+
+function AddFilterSkillList({ readabilityHtml, domain, existingFilters, onReload }: AddFilterSkillListProps) {
+  const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
+  const [items, setItems] = useState<CssSelectorCandidate[]>([]);
+  const [addedSelectors, setAddedSelectors] = useState<Set<string>>(new Set(existingFilters));
+  const hasChangesRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (hasChangesRef.current) {
+        onReload();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSelectors() {
+      try {
+        const selectors = await extractSelectorsFromReadability(readabilityHtml);
+        if (!isMounted) return;
+        setItems(selectors);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadSelectors().catch(async () => {
+      if (!isMounted) return;
+      setIsLoading(false);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to extract selectors",
+        message: "Couldn't parse CSS selectors from Readability content.",
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [readabilityHtml]);
+
+  async function handleAddFilterSelector(selector: string) {
+    const normalizedDomain = domain.trim();
+    if (!normalizedDomain) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Missing domain",
+        message: "No domain found for this page.",
+      });
+      return;
+    }
+
+    const result = await addFilter(normalizedDomain, selector, "");
+    setAddedSelectors((prev) => new Set(prev).add(selector));
+    hasChangesRef.current = true;
+    await showToast({
+      style: Toast.Style.Success,
+      title: result.operation === "created" ? "Skill created" : "Skill updated",
+      message: `Filter CSS added for ${normalizedDomain}.`,
+    });
+  }
+
+  return (
+    <List
+      isLoading={isLoading}
+      navigationTitle="Add filter skill"
+      searchBarPlaceholder="Search by selector"
+      isShowingDetail
+    >
+      {items.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No selectors found"
+          description="No CSS selectors could be extracted from the article content."
+        />
+      ) : (
+        items.map((item) => {
+          const isAdded = addedSelectors.has(item.selector);
+          return (
+            <List.Item
+              key={item.selector}
+              title={item.selector}
+              subtitle={`${item.count} element${item.count > 1 ? "s" : ""}`}
+              icon={isAdded ? { source: Icon.Checkmark, tintColor: Color.Green } : undefined}
+              detail={
+                <List.Item.Detail
+                  markdown={`### Content Preview\n\n${item.preview}`}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="CSS Selector" text={item.selector} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Elements Found"
+                        text={`${item.count} element${item.count > 1 ? "s" : ""}`}
+                      />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label title="Domain" text={domain} />
+                      {isAdded && <List.Item.Detail.Metadata.Label title="Status" text="✓ Added to filters" />}
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={isAdded ? "Already Added" : "Add Filter CSS Selector"}
+                    onAction={() => handleAddFilterSelector(item.selector)}
+                    icon={isAdded ? Icon.Checkmark : Icon.Plus}
+                  />
+                  <Action.CopyToClipboard title="Copy CSS Selector" content={item.selector} />
+                  <Action title="Return to Preview" shortcut={{ modifiers: ["cmd"], key: "enter" }} onAction={pop} />
+                </ActionPanel>
+              }
+            />
+          );
+        })
+      )}
+    </List>
+  );
+}
+
+function extractSelectorsFromReadability(readabilityHtml: string): CssSelectorCandidate[] {
+  if (!readabilityHtml.trim()) return [];
+
+  const { document } = parseHTML(readabilityHtml);
+  const allElements = document.querySelectorAll("*");
+  const selectorMap = new Map<string, { preview: string; count: number }>();
+
+  // Filter out document-level elements
+  const excludedTags = new Set(["html", "head", "body", "script", "style", "meta", "link"]);
+
+  for (const element of Array.from(allElements)) {
+    const el = element as unknown as DomElementLike;
+    if (!el.tagName) continue;
+
+    const tagName = el.tagName.toLowerCase();
+    if (excludedTags.has(tagName)) continue;
+
+    const possibleSelectors: string[] = [];
+
+    // 1. ID Selector
+    if (el.id && typeof el.id === "string" && el.id.trim()) {
+      possibleSelectors.push(`#${escapeCssId(el.id.trim())}`);
+    }
+
+    // 2. Class Selectors
+    if (el.className && typeof el.className === "string") {
+      const classes = el.className.split(/\s+/).filter(Boolean);
+      for (const cls of classes) {
+        possibleSelectors.push(`.${escapeCssClass(cls)}`);
+        // 3. Tag + Class combination (for slightly more specificity)
+        possibleSelectors.push(`${tagName}.${escapeCssClass(cls)}`);
+      }
+    }
+
+    // 4. Specific Tags (if no class/id, but interesting tag)
+    if (["figure", "aside", "blockquote", "img", "video", "iframe", "canvas", "code", "pre"].includes(tagName)) {
+      possibleSelectors.push(tagName);
+    }
+
+    // Process all found selectors for this element
+    for (const selector of possibleSelectors) {
+      // Get preview text content (first 200 chars)
+      // We process preview only if we haven't computed this selector globally yet,
+      // OR if we want to ensure we count it correctly.
+      // Since map key is selector, we just update count if exists.
+
+      if (selectorMap.has(selector)) {
+        const existing = selectorMap.get(selector)!;
+        existing.count += 1;
+        continue;
+      }
+
+      // New selector found, compute preview
+      const textContent =
+        typeof el.querySelector === "function"
+          ? Array.from(document.querySelectorAll(selector))
+              .map((node) => {
+                const n = node as unknown as { textContent?: string };
+                return n.textContent?.trim() || "";
+              })
+              .filter(Boolean)
+              .join("\n\n---\n\n")
+              .trim()
+          : "";
+
+      const preview = textContent || "(No text content)";
+
+      selectorMap.set(selector, { preview, count: 1 });
+    }
+  }
+
+  // Convert to array
+  const results: CssSelectorCandidate[] = [];
+  for (const [selector, data] of selectorMap.entries()) {
+    results.push({
+      selector,
+      preview: data.preview,
+      count: data.count,
+    });
+  }
+
+  // Sort: prioritize selectors that might be more useful (e.g., classes over tags)
+  results.sort((a, b) => {
+    // 1. Selectors with content/previews are better than empty
+    const aHasContent = a.preview !== "(No text content)";
+    const bHasContent = b.preview !== "(No text content)";
+    if (aHasContent !== bHasContent) return aHasContent ? -1 : 1;
+
+    // 2. Sort by count (fewer matches usually means more specific, BUT for blocking maybe we want to block ALL 'ad-box'?)
+    // Actually, widespread classes might be generic. Let's stick to simple alpha or groupings?
+    // Let's try: Class/ID first, then Tag.
+    const aType = a.selector.startsWith("#") ? 3 : a.selector.startsWith(".") ? 2 : 1;
+    const bType = b.selector.startsWith("#") ? 3 : b.selector.startsWith(".") ? 2 : 1;
+    if (aType !== bType) return bType - aType; // High priority first
+
+    return a.selector.localeCompare(b.selector);
+  });
+
+  return results;
+}
+
+type CoverCandidateInput = {
+  sourceHtml: string;
+  pageUrl: string;
+  minWidth: number;
+};
+
+type DomElementLike = {
+  tagName?: string;
+  id?: string;
+  className?: string;
+  parentElement?: unknown;
+  childNodes?: unknown[];
+  previousElementSibling?: unknown;
+  querySelector?: (selector: string) => unknown;
+  querySelectorAll?: (selector: string) => unknown[];
+  getAttribute?: (name: string) => string | null;
+};
+
+type ImageDimensions = {
+  width: number;
+  height: number;
+};
+
+async function listCoverCandidates({
+  sourceHtml,
+  pageUrl,
+  minWidth,
+}: CoverCandidateInput): Promise<CoverImageCandidate[]> {
+  if (!sourceHtml.trim()) return [];
+  const { document } = parseHTML(sourceHtml);
+
+  // CRITICAL: Limit the number of img elements we even examine to prevent memory overflow
+  const allImageElements = document.querySelectorAll("img");
+  const maxElementsToExamine = 120; // Wider scan to avoid missing hero image in long pages
+  const imageElements = Array.from(allImageElements).slice(0, maxElementsToExamine) as unknown[];
+
+  const seenCandidates = new Set<string>();
+  const items: CoverImageCandidate[] = [];
+  const maxCandidates = 5; // Reduced from 8 to 5 for memory safety
+
+  for (const node of imageElements) {
+    // Stop if we already have enough candidates
+    if (items.length >= maxCandidates) break;
+
+    const imageElement = isImageElementLike(node) ? node : null;
+    if (!imageElement) continue;
+    const domNode = node as DomElementLike;
+
+    const selector = buildCssSelector(domNode);
+    if (!selector) continue;
+
+    const sourceUrls = chooseImageUrlsWithPictureSources(domNode, imageElement, pageUrl).slice(0, 8);
+    if (sourceUrls.length === 0) continue;
+
+    const declaredWidth = inferDeclaredWidth(domNode, imageElement);
+    let addedCandidate = false;
+    for (const sourceUrl of sourceUrls) {
+      const candidateKey = `${selector}::${sourceUrl}`;
+      if (seenCandidates.has(candidateKey)) continue;
+
+      const fetched = await fetchImage(sourceUrl, pageUrl);
+      if (!fetched) continue;
+
+      const dimensions = getImageDimensions(fetched.data, fetched.mediaType);
+      const width = dimensions?.width ?? declaredWidth;
+      if (!width || width < minWidth) continue;
+
+      const previewBuffer = (await resizeImageForCover(fetched.data, fetched.mediaType)) ?? fetched.data;
+      const previewDataUrl = `data:${fetched.mediaType};base64,${previewBuffer.toString("base64")}`;
+      const height = dimensions?.height ?? 0;
+
+      seenCandidates.add(candidateKey);
+      items.push({
+        selector,
+        sourceUrl,
+        previewDataUrl,
+        width,
+        height,
+      });
+      addedCandidate = true;
+      break;
+    }
+
+    // Fallback: keep candidate if declared dimensions are sufficient,
+    // even when fetching/normalizing fails (eg. hotlink/webp conversion issues).
+    if (!addedCandidate && declaredWidth && declaredWidth >= minWidth) {
+      const sourceUrl = sourceUrls[0];
+      const candidateKey = `${selector}::${sourceUrl}`;
+      if (!seenCandidates.has(candidateKey)) {
+        seenCandidates.add(candidateKey);
+        items.push({
+          selector,
+          sourceUrl,
+          previewDataUrl: sourceUrl,
+          width: declaredWidth,
+          height: 0,
+        });
+      }
+    }
+  }
+
+  return items;
+}
+
+function inferDeclaredWidth(
+  domNode: DomElementLike,
+  imageElement: { getAttribute: (name: string) => string | null },
+): number | null {
+  const widthAttribute = parsePixels(imageElement.getAttribute("width"));
+  if (widthAttribute) return widthAttribute;
+
+  const style = imageElement.getAttribute("style");
+  if (style) {
+    const styleMatch = style.match(/(?:^|;)\s*width\s*:\s*(\d+(?:\.\d+)?)px/i);
+    if (styleMatch) {
+      const parsed = Number(styleMatch[1]);
+      if (Number.isFinite(parsed) && parsed > 0) return Math.round(parsed);
+    }
+  }
+
+  const srcset = imageElement.getAttribute("srcset") || imageElement.getAttribute("data-srcset");
+  if (srcset) {
+    const srcsetWidths = srcset
+      .split(",")
+      .map((entry) => entry.trim().match(/\s(\d+)w$/))
+      .filter((match): match is RegExpMatchArray => Boolean(match))
+      .map((match) => Number(match[1]))
+      .filter((value) => Number.isFinite(value) && value > 0);
+    if (srcsetWidths.length > 0) {
+      return Math.max(...srcsetWidths);
+    }
+  }
+
+  const pictureSourceWidths = listPictureSourceWidths(domNode);
+  if (pictureSourceWidths.length > 0) {
+    return Math.max(...pictureSourceWidths);
+  }
+
+  const sourceCandidates = [
+    imageElement.getAttribute("src"),
+    imageElement.getAttribute("data-src"),
+    imageElement.getAttribute("data-original"),
+    imageElement.getAttribute("data-lazy-src"),
+    imageElement.getAttribute("data-actualsrc"),
+  ];
+  for (const candidate of sourceCandidates) {
+    if (!candidate) continue;
+    const queryMatch = candidate.match(/[?&](?:w|width)=(\d{2,5})/i);
+    if (!queryMatch) continue;
+    const parsed = Number(queryMatch[1]);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+
+  return null;
+}
+
+function chooseImageUrlsWithPictureSources(
+  domNode: DomElementLike,
+  imageElement: { getAttribute: (name: string) => string | null },
+  pageUrl: string,
+): string[] {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+
+  const pictureCandidates = listPictureSourceUrls(domNode);
+  for (const candidate of pictureCandidates) {
+    try {
+      const resolved = candidate.startsWith("data:") ? candidate : new URL(candidate, pageUrl).toString();
+      if (seen.has(resolved)) continue;
+      seen.add(resolved);
+      urls.push(resolved);
+
+      const original = extractOriginalImageUrlCandidate(resolved, pageUrl);
+      if (original && !seen.has(original)) {
+        seen.add(original);
+        urls.push(original);
+      }
+    } catch {
+      // Try next candidate.
+    }
+  }
+
+  const fallback = chooseImageUrl(imageElement, pageUrl);
+  if (fallback && !seen.has(fallback)) {
+    urls.push(fallback);
+  }
+
+  return urls;
+}
+
+function listPictureSourceWidths(node: DomElementLike): number[] {
+  const picture = getParentPictureElement(node);
+  if (!picture?.querySelectorAll) return [];
+
+  const sourceNodes = Array.from(picture.querySelectorAll("source")) as unknown[];
+  const widths: number[] = [];
+  for (const sourceNode of sourceNodes) {
+    if (!isDomElementLike(sourceNode) || typeof sourceNode.getAttribute !== "function") continue;
+    const widthAttribute = parsePixels(sourceNode.getAttribute("width"));
+    if (widthAttribute) widths.push(widthAttribute);
+
+    const srcset = sourceNode.getAttribute("srcset");
+    if (!srcset) continue;
+    const srcsetWidths = srcset
+      .split(",")
+      .map((entry) => entry.trim().match(/\s(\d+)w$/))
+      .filter((match): match is RegExpMatchArray => Boolean(match))
+      .map((match) => Number(match[1]))
+      .filter((value) => Number.isFinite(value) && value > 0);
+    widths.push(...srcsetWidths);
+  }
+
+  return widths;
+}
+
+function listPictureSourceUrls(node: DomElementLike): string[] {
+  const picture = getParentPictureElement(node);
+  if (!picture?.querySelectorAll) return [];
+
+  type SrcsetCandidate = { url: string; width: number | null };
+  const candidates: SrcsetCandidate[] = [];
+  const sourceNodes = Array.from(picture.querySelectorAll("source")) as unknown[];
+  for (const sourceNode of sourceNodes) {
+    if (!isDomElementLike(sourceNode) || typeof sourceNode.getAttribute !== "function") continue;
+    const srcset = sourceNode.getAttribute("srcset");
+    if (!srcset) continue;
+    candidates.push(...parseSrcsetCandidates(srcset));
+  }
+
+  candidates.sort((a, b) => {
+    if (a.width === null && b.width === null) return 0;
+    if (a.width === null) return 1;
+    if (b.width === null) return -1;
+    return b.width - a.width;
+  });
+
+  const dedupedUrls: string[] = [];
+  const seen = new Set<string>();
+  for (const candidate of candidates) {
+    if (seen.has(candidate.url)) continue;
+    seen.add(candidate.url);
+    dedupedUrls.push(candidate.url);
+  }
+
+  return dedupedUrls;
+}
+
+function getParentPictureElement(node: DomElementLike): DomElementLike | null {
+  const parent = isDomElementLike(node.parentElement) ? node.parentElement : null;
+  if (!parent) return null;
+  return parent.tagName?.toLowerCase() === "picture" ? parent : null;
+}
+
+function parsePixels(value: string | null): number | null {
+  if (!value) return null;
+  const parsed = Number(value.replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return Math.round(parsed);
+}
+
+function isDomElementLike(value: unknown): value is DomElementLike {
+  if (!value || typeof value !== "object") return false;
+  const element = value as Partial<DomElementLike>;
+  return typeof element.tagName === "string";
+}
+
+// New simplified buildCssSelector function
+
+function escapeCssId(id: string): string {
+  return id.replace(/[^a-zA-Z0-9_-]/g, (char) => `\\${char}`);
+}
+
+function escapeCssClass(className: string): string {
+  return className.replace(/[^a-zA-Z0-9_-]/g, (char) => `\\${char}`);
+}
+
+function buildCssSelector(element: DomElementLike): string {
+  if (!isDomElementLike(element)) return "";
+
+  const id = typeof element.id === "string" ? element.id.trim() : "";
+  if (id) {
+    return `#${escapeCssId(id)}`;
+  }
+
+  // Utility classes to exclude (generic, non-semantic)
+  const utilityClasses = new Set([
+    "lazyload",
+    "lazy",
+    "loaded",
+    "loading",
+    "active",
+    "inactive",
+    "visible",
+    "hidden",
+    "entered",
+    "exited",
+    "fade",
+    "show",
+    "hide",
+    "open",
+    "closed",
+  ]);
+
+  // Try to find a good selector from this element or its parents
+  // Check up to 2 levels of parents
+  let current: DomElementLike | null = element;
+  let depth = 0;
+  const maxDepth = 2;
+
+  while (current && isDomElementLike(current) && depth <= maxDepth) {
+    const classNames =
+      typeof current.className === "string"
+        ? current.className
+            .split(/\s+/)
+            .map((className) => className.trim())
+            .filter(Boolean)
+        : [];
+
+    // Filter out utility classes and js/is/has prefixes
+    const cleanClasses = classNames.filter((c) => !utilityClasses.has(c.toLowerCase()) && !c.match(/^(js-|is-|has-)/));
+
+    // Look for BEM-style classes (block__element or block--modifier)
+    const bemClasses = cleanClasses.filter((c) => c.includes("__") || c.includes("--"));
+
+    if (bemClasses.length > 0) {
+      // Prefer longer, more specific BEM classes
+      const bestBem = bemClasses.sort((a, b) => b.length - a.length)[0];
+      return `.${escapeCssClass(bestBem)}`;
+    }
+
+    // Look for semantic/specific class names
+    const semanticClasses = cleanClasses.filter(
+      (className) =>
+        className.includes("topper") ||
+        className.includes("hero") ||
+        className.includes("featured") ||
+        className.includes("main") ||
+        className.includes("cover") ||
+        (className.includes("article") && className.includes("image")) ||
+        className.includes("visual") ||
+        className.includes("banner") ||
+        className.includes("thumbnail") ||
+        className.includes("poster"),
+    );
+
+    if (semanticClasses.length > 0) {
+      const bestSemantic = semanticClasses.sort((a, b) => b.length - a.length)[0];
+      return `.${escapeCssClass(bestSemantic)}`;
+    }
+
+    // If we have meaningful classes on current element, use them
+    if (cleanClasses.length > 0 && depth === 0) {
+      const meaningfulClasses = cleanClasses.filter((c) => c.length > 3);
+      if (meaningfulClasses.length > 0) {
+        return `.${escapeCssClass(meaningfulClasses[0])}`;
+      }
+    }
+
+    // Move to parent
+    current = isDomElementLike(current.parentElement) ? current.parentElement : null;
+    depth++;
+  }
+
+  // Fallback to tag with classes from original element
+  const tag = element.tagName?.toLowerCase();
+  if (!tag || tag === "html") return "";
+
+  const originalClasses =
+    typeof element.className === "string"
+      ? element.className
+          .split(/\s+/)
+          .map((c) => c.trim())
+          .filter(Boolean)
+      : [];
+
+  const cleanOriginalClasses = originalClasses.filter(
+    (c) => !utilityClasses.has(c.toLowerCase()) && !c.match(/^(js-|is-|has-)/),
+  );
+
+  if (cleanOriginalClasses.length > 0) {
+    const classList = cleanOriginalClasses
+      .slice(0, 2)
+      .map((c) => escapeCssClass(c))
+      .join(".");
+    return `${tag}.${classList}`;
+  }
+
+  return tag;
+}
+function getImageDimensions(data: Buffer, mediaType: string): ImageDimensions | null {
+  if (mediaType === "image/png") {
+    if (data.length < 24) return null;
+    const signature = data.slice(0, 8);
+    const isPngSignature = signature.equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    if (!isPngSignature) return null;
+    const width = data.readUInt32BE(16);
+    const height = data.readUInt32BE(20);
+    if (width <= 0 || height <= 0) return null;
+    return { width, height };
+  }
+
+  if (mediaType === "image/gif") {
+    if (data.length < 10) return null;
+    const signature = data.slice(0, 6).toString("ascii");
+    if (signature !== "GIF87a" && signature !== "GIF89a") return null;
+    const width = data.readUInt16LE(6);
+    const height = data.readUInt16LE(8);
+    if (width <= 0 || height <= 0) return null;
+    return { width, height };
+  }
+
+  if (mediaType === "image/jpeg") {
+    return getJpegDimensions(data);
+  }
+
+  return null;
+}
+
+function getJpegDimensions(data: Buffer): ImageDimensions | null {
+  if (data.length < 4 || data[0] !== 0xff || data[1] !== 0xd8) return null;
+  let offset = 2;
+
+  while (offset + 1 < data.length) {
+    if (data[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+
+    const marker = data[offset + 1];
+    offset += 2;
+
+    if (marker === 0xd9 || marker === 0xda) break;
+    if (offset + 1 >= data.length) break;
+
+    const segmentLength = data.readUInt16BE(offset);
+    if (segmentLength < 2 || offset + segmentLength > data.length) break;
+
+    const isStartOfFrame =
+      (marker >= 0xc0 && marker <= 0xc3) ||
+      (marker >= 0xc5 && marker <= 0xc7) ||
+      (marker >= 0xc9 && marker <= 0xcb) ||
+      (marker >= 0xcd && marker <= 0xcf);
+    if (isStartOfFrame) {
+      if (offset + 7 > data.length) return null;
+      const height = data.readUInt16BE(offset + 3);
+      const width = data.readUInt16BE(offset + 5);
+      if (width <= 0 || height <= 0) return null;
+      return { width, height };
+    }
+
+    offset += segmentLength;
+  }
+
+  return null;
+}
+
 type InlineImagesResult = {
   html: string;
   resources: EpubResource[];
@@ -438,6 +1431,7 @@ type InlineImagesInput = {
 
 type FetchResponse = {
   ok: boolean;
+  status: number;
   headers: { get: (name: string) => string | null };
   arrayBuffer: () => Promise<ArrayBuffer>;
 };
@@ -453,7 +1447,7 @@ type ImageElementLike = {
 };
 
 const SUPPORTED_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/gif"]);
-const INPUT_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
+const INPUT_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"]);
 const MIME_EXTENSION_MAP: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -512,7 +1506,7 @@ async function inlineImages({
     try {
       let resource = cache.get(candidate);
       if (!resource) {
-        const fetched = await fetchImage(candidate);
+        const fetched = await fetchImage(candidate, pageUrl);
         if (!fetched) {
           warnings.push(candidate);
           continue;
@@ -549,15 +1543,7 @@ async function inlineImages({
 
       if (allowCoverResource && !coverResource) {
         const coverData = await resizeImageForCover(resource.data, resource.mediaType);
-        const coverExtension = MIME_EXTENSION_MAP[resource.mediaType] || "jpg";
-        const coverHash = crypto.createHash("sha1").update(candidate).digest("hex").slice(0, 10);
-        coverResource = {
-          id: "cover-image",
-          href: `images/cover-${coverHash}.${coverExtension}`,
-          mediaType: resource.mediaType,
-          data: coverData ?? resource.data,
-          properties: "cover-image",
-        };
+        coverResource = buildCoverResource(candidate, resource, coverData ?? resource.data);
       }
     } catch {
       warnings.push(candidate);
@@ -601,8 +1587,22 @@ function chooseImageUrl(element: { getAttribute: (name: string) => string | null
   const cleaned = candidates.map((candidate) => candidate.trim()).filter(Boolean);
   if (cleaned.length === 0) return null;
 
-  const preferred = cleaned.find((candidate) => hasSupportedExtension(candidate));
-  const chosen = preferred ?? cleaned[cleaned.length - 1];
+  const expanded: string[] = [];
+  const seenExpanded = new Set<string>();
+  for (const candidate of cleaned) {
+    if (!seenExpanded.has(candidate)) {
+      seenExpanded.add(candidate);
+      expanded.push(candidate);
+    }
+    const original = extractOriginalImageUrlCandidate(candidate, pageUrl);
+    if (original && !seenExpanded.has(original)) {
+      seenExpanded.add(original);
+      expanded.push(original);
+    }
+  }
+
+  const preferred = expanded.find((candidate) => hasSupportedExtension(candidate));
+  const chosen = preferred ?? expanded[expanded.length - 1];
 
   try {
     if (chosen.startsWith("data:")) return chosen;
@@ -621,6 +1621,7 @@ type CoverFromSelectorsInput = {
 type CoverFromSelectorsResult = {
   coverResource?: EpubResource;
   invalidSelectors: string[];
+  coverMethod?: CoverSelectionMethod;
 };
 
 async function pickCoverFromSelectors({
@@ -644,36 +1645,103 @@ async function pickCoverFromSelectors({
       continue;
     }
 
-    for (const match of matches) {
+    // Keep a cap for performance, but allow enough matches for broad selectors (eg. ".w-full")
+    const limitedMatches = matches.slice(0, 120);
+
+    type CoverCandidate = {
+      imageElement: ImageElementLike;
+      url: string;
+      declaredWidth: number | null;
+    };
+
+    const candidates: CoverCandidate[] = [];
+    const seenUrls = new Set<string>();
+
+    // Phase 1: Collect all candidates with their declared dimensions (fast, no network calls)
+    for (const match of limitedMatches) {
       const imageElement = findImageElement(match);
       if (!imageElement) continue;
 
-      const candidate = chooseImageUrl(imageElement, pageUrl);
-      if (!candidate) continue;
+      const declaredWidth = inferDeclaredWidth(match as unknown as DomElementLike, imageElement);
+      const urls = chooseImageUrlsWithPictureSources(match as unknown as DomElementLike, imageElement, pageUrl).slice(
+        0,
+        6,
+      );
+      for (const url of urls) {
+        if (seenUrls.has(url)) continue;
+        seenUrls.add(url);
+        candidates.push({
+          imageElement,
+          url,
+          declaredWidth,
+        });
+      }
+    }
 
+    if (candidates.length === 0) continue;
+
+    // Sort candidates by declared width (largest first), putting unknowns at the end
+    candidates.sort((a, b) => {
+      if (a.declaredWidth === null && b.declaredWidth === null) return 0;
+      if (a.declaredWidth === null) return 1;
+      if (b.declaredWidth === null) return -1;
+      return b.declaredWidth - a.declaredWidth;
+    });
+
+    // Phase 2: Try to fetch images, starting with the largest declared size
+    // If we have declared dimensions, only try the top candidates
+    // If no declared dimensions, try all candidates
+    const hasDeclaredDimensions = candidates.some((c) => c.declaredWidth !== null);
+    const candidatesToTry = hasDeclaredDimensions ? candidates.slice(0, 12) : candidates;
+
+    type FetchedCandidate = {
+      url: string;
+      fetched: { data: Buffer; mediaType: string };
+      width: number;
+      height: number;
+    };
+
+    const fetchedCandidates: FetchedCandidate[] = [];
+
+    for (const candidate of candidatesToTry) {
       try {
-        const fetched = await fetchImage(candidate);
+        const fetched = await fetchImage(candidate.url, pageUrl);
         if (!fetched || !SUPPORTED_IMAGE_MIME_TYPES.has(fetched.mediaType)) {
           continue;
         }
 
-        const coverData = await resizeImageForCover(fetched.data, fetched.mediaType);
-        const coverExtension = MIME_EXTENSION_MAP[fetched.mediaType] || "jpg";
-        const coverHash = crypto.createHash("sha1").update(candidate).digest("hex").slice(0, 10);
-        return {
-          coverResource: {
-            id: "cover-image",
-            href: `images/cover-${coverHash}.${coverExtension}`,
-            mediaType: fetched.mediaType,
-            data: coverData ?? fetched.data,
-            properties: "cover-image",
-          },
-          invalidSelectors,
-        };
+        const dimensions = getImageDimensions(fetched.data, fetched.mediaType);
+        const width = dimensions?.width ?? candidate.declaredWidth ?? 0;
+        const height = dimensions?.height ?? 0;
+
+        if (width > 0) {
+          fetchedCandidates.push({
+            url: candidate.url,
+            fetched,
+            width,
+            height,
+          });
+        }
       } catch {
-        // Keep scanning with next candidates.
+        // Continue to next candidate
       }
     }
+
+    if (fetchedCandidates.length === 0) continue;
+
+    // Select the largest image by area (width × height)
+    const largest = fetchedCandidates.reduce((prev, current) => {
+      const prevArea = prev.width * (prev.height || prev.width);
+      const currentArea = current.width * (current.height || current.width);
+      return currentArea > prevArea ? current : prev;
+    });
+
+    const coverData = await resizeImageForCover(largest.fetched.data, largest.fetched.mediaType);
+    return {
+      coverResource: buildCoverResource(largest.url, largest.fetched, coverData ?? largest.fetched.data),
+      invalidSelectors,
+      coverMethod: "css-selector",
+    };
   }
 
   return { invalidSelectors };
@@ -702,10 +1770,160 @@ function findImageElement(element: unknown): ImageElementLike | null {
 }
 
 function parseSrcset(srcset: string): string[] {
+  return parseSrcsetCandidates(srcset).map((candidate) => candidate.url);
+}
+
+function parseSrcsetCandidates(srcset: string): Array<{ url: string; width: number | null }> {
   return srcset
     .split(",")
-    .map((entry) => entry.trim().split(/\s+/)[0])
-    .filter(Boolean);
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const parts = entry.split(/\s+/).filter(Boolean);
+      const url = parts[0] ?? "";
+      const widthToken = parts.find((part) => /^\d+w$/i.test(part));
+      const width = widthToken ? Number(widthToken.slice(0, -1)) : null;
+      return {
+        url,
+        width: Number.isFinite(width) && width !== null && width > 0 ? width : null,
+      };
+    })
+    .filter((candidate) => Boolean(candidate.url));
+}
+
+function buildCoverResource(
+  sourceUrl: string,
+  fetchedImage: { data: Buffer; mediaType: string },
+  coverData: Buffer,
+): EpubResource {
+  const coverExtension = MIME_EXTENSION_MAP[fetchedImage.mediaType] || "jpg";
+  const coverHash = crypto.createHash("sha1").update(sourceUrl).digest("hex").slice(0, 10);
+  return {
+    id: "cover-image",
+    href: `images/cover-${coverHash}.${coverExtension}`,
+    mediaType: fetchedImage.mediaType,
+    data: coverData,
+    properties: "cover-image",
+  };
+}
+
+async function resolveFirstImageCoverFromHtml(
+  html: string,
+  pageUrl: string,
+): Promise<{ coverResource?: EpubResource; coverMethod?: CoverSelectionMethod }> {
+  if (!html.trim()) return {};
+  const { document } = parseHTML(`<article>${html}</article>`);
+  const article = document.querySelector("article");
+  if (!article) return {};
+
+  const imageElements = Array.from(article.querySelectorAll("img")) as ImageElementLike[];
+  for (const imageElement of imageElements) {
+    const candidate = chooseImageUrl(imageElement, pageUrl);
+    if (!candidate) continue;
+
+    try {
+      const fetched = await fetchImage(candidate, pageUrl);
+      if (!fetched || !SUPPORTED_IMAGE_MIME_TYPES.has(fetched.mediaType)) {
+        continue;
+      }
+
+      const resized = await resizeImageForCover(fetched.data, fetched.mediaType);
+      return {
+        coverResource: buildCoverResource(candidate, fetched, resized ?? fetched.data),
+        coverMethod: "first-image",
+      };
+    } catch {
+      // Keep scanning until a compatible image is found.
+    }
+  }
+
+  return {};
+}
+
+async function resolveEpubCoverPreview(
+  inputState: ArticleData,
+  options?: { shareEpubCover?: boolean; disableArticleLinks?: boolean; includeTitleInMarkdown?: boolean },
+): Promise<{ coverResource?: EpubResource; coverMethod?: CoverSelectionMethod }> {
+  if (options?.shareEpubCover === false) {
+    return {};
+  }
+
+  const includeTitleInMarkdown = options?.includeTitleInMarkdown ?? true;
+  const markdown = buildMarkdown(inputState.title, inputState.markdownBody, { includeTitle: includeTitleInMarkdown });
+  let articleHtml = markdownToHtml(markdown);
+  if (options?.disableArticleLinks) {
+    articleHtml = stripLinksFromHtml(articleHtml);
+  }
+
+  const fromSelectors = await pickCoverFromSelectors({
+    sourceHtml: inputState.sourceHtml,
+    pageUrl: inputState.pageUrl,
+    selectors: inputState.coverSelectors,
+  });
+  if (fromSelectors.coverResource) {
+    return {
+      coverResource: fromSelectors.coverResource,
+      coverMethod: fromSelectors.coverMethod,
+    };
+  }
+
+  return resolveFirstImageCoverFromHtml(articleHtml, inputState.pageUrl);
+}
+
+async function buildEpubPreviewMetadata(inputState: ArticleData): Promise<EpubPreviewMetadata> {
+  const preferences = await resolveSendPreferences();
+  const sendMethod = preferences.sendMethod ?? "app";
+  const extensionPreferences = getPreferenceValues<{ shareEpubCover?: boolean; disableArticleLinks?: boolean }>();
+  const shareEpubCover = extensionPreferences.shareEpubCover !== false;
+  const disableArticleLinks = extensionPreferences.disableArticleLinks === true;
+  const includeTitleInMarkdown = sendMethod !== "email";
+  const domain =
+    inputState.author ||
+    extractBaseDomainFromUrl(inputState.pageUrl) ||
+    extractDomainFromUrl(inputState.pageUrl) ||
+    "Unknown";
+
+  if (!shareEpubCover) {
+    return {
+      domain,
+      coverMethodLabel: "Disabled by preference",
+      coverStatusLabel: "Cover sharing is disabled.",
+    };
+  }
+
+  const coverPreview = await resolveEpubCoverPreview(inputState, {
+    shareEpubCover,
+    disableArticleLinks,
+    includeTitleInMarkdown,
+  });
+
+  if (!coverPreview.coverResource) {
+    return {
+      domain,
+      coverMethodLabel: "No cover found",
+      coverStatusLabel: "No image found (CSS selectors and first article image).",
+    };
+  }
+
+  const coverMethodLabel = coverPreview.coverMethod === "css-selector" ? "Cover Skill" : "First article image";
+  const coverThumbnail = `data:${coverPreview.coverResource.mediaType};base64,${coverPreview.coverResource.data.toString("base64")}`;
+
+  // Create a smaller thumbnail for the preview screen (240px) to improve loading speed
+  const previewData = await resizeImageForPreview(
+    coverPreview.coverResource.data,
+    coverPreview.coverResource.mediaType,
+  );
+  const coverPreviewThumbnail = previewData
+    ? `data:${coverPreview.coverResource.mediaType};base64,${previewData.toString("base64")}`
+    : coverThumbnail;
+
+  return {
+    domain,
+    coverMethodLabel,
+    coverStatusLabel: "Cover ready",
+    coverThumbnail,
+    coverPreviewThumbnail,
+  };
 }
 
 function hasSupportedExtension(candidate: string): boolean {
@@ -719,7 +1937,21 @@ function hasSupportedExtension(candidate: string): boolean {
   }
 }
 
-async function fetchImage(url: string): Promise<{ data: Buffer; mediaType: string } | null> {
+function extractOriginalImageUrlCandidate(candidate: string, pageUrl: string): string | null {
+  try {
+    if (candidate.startsWith("data:")) return null;
+    const parsed = new URL(candidate, pageUrl);
+    const original = parsed.searchParams.get("url");
+    if (!original) return null;
+    const resolvedOriginal = new URL(original, parsed).toString();
+    if (!resolvedOriginal || resolvedOriginal === parsed.toString()) return null;
+    return resolvedOriginal;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchImage(url: string, pageUrl?: string): Promise<{ data: Buffer; mediaType: string } | null> {
   if (url.startsWith("data:")) {
     const decoded = decodeDataUri(url);
     if (!decoded) return null;
@@ -729,20 +1961,52 @@ async function fetchImage(url: string): Promise<{ data: Buffer; mediaType: strin
   const fetcher = (globalThis as unknown as { fetch?: Fetcher }).fetch;
   if (!fetcher) return null;
 
-  const response = await fetcher(url, {
-    headers: {
-      Accept: "image/png,image/jpeg,image/gif,image/*;q=0.8,*/*;q=0.5",
-    },
-  });
+  const headers: Record<string, string> = {
+    Accept: "image/png,image/jpeg,image/gif,image/*;q=0.8,*/*;q=0.5",
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  };
 
-  if (!response.ok) return null;
-  const contentType = response.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
-  if (!contentType?.startsWith("image/")) return null;
-  if (!INPUT_IMAGE_MIME_TYPES.has(contentType)) return null;
+  if (pageUrl) {
+    try {
+      const refererUrl = new URL(pageUrl);
+      headers["Referer"] = refererUrl.origin + refererUrl.pathname;
+    } catch {
+      // Ignore invalid pageUrl
+    }
+  }
 
-  const arrayBuffer = await response.arrayBuffer();
-  const data = Buffer.from(arrayBuffer);
-  return normalizeImage(data, contentType);
+  try {
+    const response = await fetcher(url, { headers });
+
+    if (!response.ok) {
+      const originalCandidate = pageUrl ? extractOriginalImageUrlCandidate(url, pageUrl) : null;
+      if (originalCandidate && originalCandidate !== url) {
+        return fetchImage(originalCandidate, pageUrl);
+      }
+      return null;
+    }
+    const contentType = response.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
+    if (!contentType?.startsWith("image/")) return null;
+    if (!INPUT_IMAGE_MIME_TYPES.has(contentType)) return null;
+
+    const arrayBuffer = await response.arrayBuffer();
+    const data = Buffer.from(arrayBuffer);
+    const normalized = await normalizeImage(data, contentType);
+    if (normalized) return normalized;
+
+    const originalCandidate = pageUrl ? extractOriginalImageUrlCandidate(url, pageUrl) : null;
+    if (originalCandidate && originalCandidate !== url) {
+      return fetchImage(originalCandidate, pageUrl);
+    }
+    return null;
+  } catch {
+    const originalCandidate = pageUrl ? extractOriginalImageUrlCandidate(url, pageUrl) : null;
+    if (originalCandidate && originalCandidate !== url) {
+      return fetchImage(originalCandidate, pageUrl);
+    }
+    return null;
+  }
 }
 
 function decodeDataUri(dataUri: string): { data: Buffer; mediaType: string } | null {
@@ -762,7 +2026,13 @@ function decodeDataUri(dataUri: string): { data: Buffer; mediaType: string } | n
 
 async function normalizeImage(data: Buffer, mediaType: string): Promise<{ data: Buffer; mediaType: string } | null> {
   if (mediaType === "image/webp") {
-    const converted = await convertWebpToJpegWithSips(data);
+    const converted = await convertImageToJpegWithSips(data, "webp");
+    if (!converted) return null;
+    return { data: converted, mediaType: "image/jpeg" };
+  }
+
+  if (mediaType === "image/avif") {
+    const converted = await convertImageToJpegWithSips(data, "avif");
     if (!converted) return null;
     return { data: converted, mediaType: "image/jpeg" };
   }
@@ -773,13 +2043,13 @@ async function normalizeImage(data: Buffer, mediaType: string): Promise<{ data: 
 
 const execFileAsync = promisify(execFile);
 
-async function convertWebpToJpegWithSips(data: Buffer): Promise<Buffer | null> {
+async function convertImageToJpegWithSips(data: Buffer, format: "webp" | "avif"): Promise<Buffer | null> {
   if (process.platform !== "darwin") return null;
 
   const tempDir = path.join(os.tmpdir(), "send-to-kindle-images");
   await mkdir(tempDir, { recursive: true });
   const token = crypto.randomUUID();
-  const inputPath = path.join(tempDir, `image-${token}.webp`);
+  const inputPath = path.join(tempDir, `image-${token}.${format}`);
   const outputPath = path.join(tempDir, `image-${token}.jpg`);
 
   try {
@@ -829,6 +2099,35 @@ async function resizeImageForCover(data: Buffer, mediaType: string): Promise<Buf
     return await readFile(outputPath);
   } catch {
     return null;
+  }
+}
+
+async function resizeImageForPreview(data: Buffer, mediaType: string): Promise<Buffer | null> {
+  if (process.platform !== "darwin") return null;
+
+  const tempDir = path.join(os.tmpdir(), "send-to-kindle-preview");
+  await mkdir(tempDir, { recursive: true });
+  const token = crypto.randomUUID();
+  const extension = MIME_EXTENSION_MAP[mediaType] || "jpg";
+  const inputPath = path.join(tempDir, `preview-${token}.${extension}`);
+  const outputPath = path.join(tempDir, `preview-${token}-resized.${extension}`);
+
+  try {
+    await writeFile(inputPath, data);
+
+    // Resize to 240px width maintaining aspect ratio
+    await execFileAsync("sips", ["-Z", "240", inputPath, "--out", outputPath]);
+
+    return await readFile(outputPath);
+  } catch {
+    return null;
+  } finally {
+    try {
+      await unlink(inputPath).catch(() => {});
+      await unlink(outputPath).catch(() => {});
+    } catch {
+      // Ignore cleanup errors
+    }
   }
 }
 

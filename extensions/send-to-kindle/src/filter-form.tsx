@@ -91,10 +91,10 @@ export default function FilterForm({
         title: "Filter updated",
       });
     } else {
-      await addFilter(normalizedDomain, normalizedSelector, normalizedCoverSelector);
+      const result = await addFilter(normalizedDomain, normalizedSelector, normalizedCoverSelector);
       await showToast({
         style: Toast.Style.Success,
-        title: "Filter saved",
+        title: result.operation === "updated" ? "Skill updated" : "Skill saved",
       });
     }
 
@@ -116,7 +116,7 @@ export default function FilterForm({
             <Action.Push
               title="Import Skill JSON"
               icon={Icon.Download}
-              shortcut={{ modifiers: ["cmd"], key: "k" }}
+              shortcut={{ modifiers: ["opt"], key: "i" }}
               target={
                 <ImportSkillForm
                   onImported={(filter) => {

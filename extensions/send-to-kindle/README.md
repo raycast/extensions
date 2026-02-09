@@ -141,6 +141,7 @@ Bonus:
 
 | Feature                                                | This Raycast extension | Official Chrome extension |
 | ------------------------------------------------------ | ---------------------- | ------------------------- |
+| Outdated UX                        | ❌                    | ✅                        |
 | Readability.js-based extraction for better results                        | ✅                     | ❌                        |
 | Custom per-domain CSS filters                          | ✅                     | ❌                        |
 | Manual cover photo selection (`Cover CSS`)             | ✅                     | ❌                        |
@@ -150,6 +151,7 @@ Bonus:
 | Import/export filter profiles (JSON)                   | ✅                     | ❌                        |
 | Two delivery methods (local app or email)              | ✅                     | ❌                        |
 | Optional removal of all article links before sending   | ✅                     | ❌                        |
+| Sending history   | ✅                     | ❌                        |
 
 ## Gmail App Password (Important)
 

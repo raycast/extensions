@@ -10,6 +10,11 @@ export type DomainFilter = {
   updatedAt: string;
 };
 
+export type UpsertFilterResult = {
+  filter: DomainFilter;
+  operation: "created" | "updated";
+};
+
 type DomainFilterLike = Partial<DomainFilter> & {
   domain?: unknown;
   selector?: unknown;
@@ -104,6 +109,11 @@ export function parseCssSelectors(input: string): string[] {
     .filter(Boolean);
 }
 
+function mergeSelectorLists(existing: string, incoming: string): string {
+  const merged = new Set([...parseCssSelectors(existing), ...parseCssSelectors(incoming)]);
+  return Array.from(merged).join(", ");
+}
+
 function isIpAddress(value: string): boolean {
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(value)) return true;
   return value.includes(":");
@@ -164,21 +174,43 @@ export async function listFilters(): Promise<DomainFilter[]> {
   );
 }
 
-export async function addFilter(domain: string, selector: string, coverSelector = ""): Promise<DomainFilter> {
+export async function addFilter(domain: string, selector: string, coverSelector = ""): Promise<UpsertFilterResult> {
   const filters = await readFilters();
+  const normalizedDomain = normalizeDomain(domain);
+  const normalizedSelector = selector.trim();
+  const normalizedCoverSelector = coverSelector.trim();
   const now = new Date().toISOString();
+  const existingIndex = filters.findIndex((filter) => filter.domain === normalizedDomain);
+
+  if (existingIndex !== -1) {
+    const updatedFilter: DomainFilter = {
+      ...filters[existingIndex],
+      selector: mergeSelectorLists(filters[existingIndex].selector, normalizedSelector),
+      coverSelector: mergeSelectorLists(filters[existingIndex].coverSelector, normalizedCoverSelector),
+      updatedAt: now,
+    };
+
+    const nextFilters = filters.filter(
+      (filter, index) => index === existingIndex || filter.domain !== normalizedDomain,
+    );
+    nextFilters[existingIndex] = updatedFilter;
+
+    await writeFilters(nextFilters);
+    return { filter: updatedFilter, operation: "updated" };
+  }
+
   const newFilter: DomainFilter = {
     id: makeId(),
-    domain: normalizeDomain(domain),
-    selector: selector.trim(),
-    coverSelector: coverSelector.trim(),
+    domain: normalizedDomain,
+    selector: normalizedSelector,
+    coverSelector: normalizedCoverSelector,
     createdAt: now,
     updatedAt: now,
   };
 
   filters.push(newFilter);
   await writeFilters(filters);
-  return newFilter;
+  return { filter: newFilter, operation: "created" };
 }
 
 export async function updateFilter(
@@ -191,17 +223,54 @@ export async function updateFilter(
   const index = filters.findIndex((filter) => filter.id === id);
   if (index === -1) return null;
 
+  const normalizedDomain = normalizeDomain(domain);
+  const normalizedSelector = selector.trim();
+  const normalizedCoverSelector = coverSelector.trim();
   const now = new Date().toISOString();
+  const existingForDomain = filters.find((filter) => filter.id !== id && filter.domain === normalizedDomain);
+
+  if (existingForDomain) {
+    const updatedExisting: DomainFilter = {
+      ...existingForDomain,
+      selector: normalizedSelector,
+      coverSelector: normalizedCoverSelector,
+      updatedAt: now,
+    };
+
+    const next: DomainFilter[] = [];
+    for (const filter of filters) {
+      if (filter.id === id) continue;
+      if (filter.id === existingForDomain.id) {
+        next.push(updatedExisting);
+        continue;
+      }
+      if (filter.domain === normalizedDomain) continue;
+      next.push(filter);
+    }
+
+    await writeFilters(next);
+    return updatedExisting;
+  }
+
   const updated: DomainFilter = {
     ...filters[index],
-    domain: normalizeDomain(domain),
-    selector: selector.trim(),
-    coverSelector: coverSelector.trim(),
+    domain: normalizedDomain,
+    selector: normalizedSelector,
+    coverSelector: normalizedCoverSelector,
     updatedAt: now,
   };
 
-  filters[index] = updated;
-  await writeFilters(filters);
+  const next: DomainFilter[] = [];
+  for (const filter of filters) {
+    if (filter.id === id) {
+      next.push(updated);
+      continue;
+    }
+    if (filter.domain === normalizedDomain) continue;
+    next.push(filter);
+  }
+
+  await writeFilters(next);
   return updated;
 }
 
