@@ -46,10 +46,32 @@ export default function CurrentlyPlayingMenuBarCommand() {
     [],
     { execute: shouldExecute.current },
   );
+  const {
+    isLoading: isLoadingFavoriteStatus,
+    data: favoriteStatus,
+    mutate: mutateFavoriteStatus,
+  } = usePromise(
+    (trackId?: string) => {
+      if (!trackId) {
+        return Promise.resolve(undefined);
+      }
+
+      return pipe(
+        music.currentTrack.getFavorite,
+        TE.matchW(
+          () => undefined,
+          (isFavorited) => isFavorited.trim().toLowerCase() === "true",
+        ),
+      )();
+    },
+    [currentTrack?.id],
+    { execute: !!currentTrack },
+  );
 
   const isRunning = !isLoadingCurrentTrack && !!currentTrack;
   const isPlaying = playerState === PlayerState.PLAYING;
-  const isLoading = isLoadingCurrentTrack || isLoadingPlayerState;
+  const isFavorited = favoriteStatus === true;
+  const isLoading = isLoadingCurrentTrack || isLoadingPlayerState || isLoadingFavoriteStatus;
 
   if (!isRunning) {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
@@ -120,6 +142,30 @@ export default function CurrentlyPlayingMenuBarCommand() {
         onAction={() =>
           pipe(music.player.previous, handleTaskEitherError("Failed to rewind track", "Track rewinded"))()
         }
+      />
+      <MenuBarExtra.Item
+        icon={isFavorited ? Icon.StarDisabled : Icon.Star}
+        title={isFavorited ? "Unfavorite Track" : "Favorite Track"}
+        onAction={() => {
+          const nextFavoriteState = !isFavorited;
+          const toggleFavoriteAction = nextFavoriteState ? music.currentTrack.favorite : music.currentTrack.unfavorite;
+
+          return pipe(
+            toggleFavoriteAction,
+            handleTaskEitherError(
+              nextFavoriteState ? "Failed to favorite the track" : "Failed to unfavorite the track",
+              nextFavoriteState ? "Favorited" : "Unfavorited",
+            ),
+            TE.chainFirstTaskK(
+              () => () =>
+                mutateFavoriteStatus(undefined, {
+                  optimisticUpdate() {
+                    return nextFavoriteState;
+                  },
+                }),
+            ),
+          )();
+        }}
       />
       <MenuBarExtra.Section>
         <MenuBarExtra.Item

@@ -11,29 +11,98 @@ import { STAR_VALUE } from "../constants";
 import { getMacosVersion } from "../get-macos-version";
 import { ScriptError, Track } from "../models";
 
+const FAVORITE_CONFIRMATION_TIMEOUT_MS = 10_000;
+const FAVORITE_POLL_INTERVAL_MS = 250;
+
+const isSonomaOrNewer = (versionMajor: number) => versionMajor >= 14;
+const isTrackFavorited = (status: string) => status.trim().toLowerCase() === "true";
+const getFavoriteErrorMessage = (error: Error | ScriptError) =>
+  "shortMessage" in error && typeof error.shortMessage === "string" ? error.shortMessage : error.message;
+const getFavoriteCommand = (versionMajor: number) =>
+  isSonomaOrNewer(versionMajor) ? "get favorited of current track" : "get loved of current track";
+const getSetFavoriteCommand = (versionMajor: number, targetState: boolean) =>
+  isSonomaOrNewer(versionMajor)
+    ? `set favorited of current track to ${targetState.toString()}`
+    : `set loved of current track to ${targetState.toString()}`;
+const getFavoriteByVersion = (versionMajor: number) => tell("Music", getFavoriteCommand(versionMajor));
+const waitForFavoritePollInterval = pipe(
+  TE.right(undefined),
+  TE.chainFirstTaskK(
+    () => () =>
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, FAVORITE_POLL_INTERVAL_MS);
+      }),
+  ),
+);
+const getFavoriteTimeoutError = (targetState: boolean, lastError?: Error | ScriptError) =>
+  new Error(
+    `Music did not confirm track was ${
+      targetState ? "favorited" : "unfavorited"
+    } within ${FAVORITE_CONFIRMATION_TIMEOUT_MS / 1000} seconds${
+      lastError ? ` (last check error: ${getFavoriteErrorMessage(lastError)})` : ""
+    }.`,
+  );
+
+const waitForFavoriteConfirmation = (
+  getFavoriteStatus: () => TE.TaskEither<ScriptError, string>,
+  targetState: boolean,
+  startTime: number,
+  lastError?: Error | ScriptError,
+): TE.TaskEither<Error | ScriptError, void> =>
+  pipe(
+    getFavoriteStatus(),
+    TE.map(isTrackFavorited),
+    TE.orElseW((error) => {
+      if (Date.now() - startTime >= FAVORITE_CONFIRMATION_TIMEOUT_MS) {
+        return TE.left(getFavoriteTimeoutError(targetState, error));
+      }
+
+      return pipe(
+        waitForFavoritePollInterval,
+        TE.chainW(() => waitForFavoriteConfirmation(getFavoriteStatus, targetState, startTime, error)),
+      );
+    }),
+    TE.chainW((isFavorited) => {
+      if (isFavorited === targetState) {
+        return TE.right(undefined);
+      }
+
+      if (Date.now() - startTime >= FAVORITE_CONFIRMATION_TIMEOUT_MS) {
+        return TE.left(getFavoriteTimeoutError(targetState, lastError));
+      }
+
+      return pipe(
+        waitForFavoritePollInterval,
+        TE.chainW(() => waitForFavoriteConfirmation(getFavoriteStatus, targetState, startTime, lastError)),
+      );
+    }),
+  );
+
+const setFavoriteWithConfirmation = (targetState: boolean): TE.TaskEither<Error | ScriptError, string> =>
+  pipe(
+    TE.tryCatch(() => getMacosVersion(), E.toError),
+    TE.chainW((version) => {
+      const getFavoriteStatus = () => getFavoriteByVersion(version.major);
+
+      return pipe(
+        tell("Music", getSetFavoriteCommand(version.major, targetState)),
+        TE.chainW((result) =>
+          pipe(
+            waitForFavoriteConfirmation(getFavoriteStatus, targetState, Date.now()),
+            TE.map(() => result),
+          ),
+        ),
+      );
+    }),
+  );
+
 export const reveal = tell("Music", "reveal current track");
 export const getFavorite = pipe(
   TE.tryCatch(() => getMacosVersion(), E.toError),
-  TE.chainW((version) =>
-    version.major >= 14 ? tell("Music", "get favorited of current track") : tell("Music", "get loved of current track"),
-  ),
+  TE.chainW((version) => getFavoriteByVersion(version.major)),
 );
-export const favorite = pipe(
-  TE.tryCatch(() => getMacosVersion(), E.toError),
-  TE.chainW((version) =>
-    version.major >= 14
-      ? tell("Music", "set favorited of current track to true")
-      : tell("Music", "set loved of current track to true"),
-  ),
-);
-export const unfavorite = pipe(
-  TE.tryCatch(() => getMacosVersion(), E.toError),
-  TE.chainW((version) =>
-    version.major >= 14
-      ? tell("Music", "set favorited of current track to false")
-      : tell("Music", "set loved of current track to false"),
-  ),
-);
+export const favorite = setFavoriteWithConfirmation(true);
+export const unfavorite = setFavoriteWithConfirmation(false);
 export const getDislike = tell("Music", "get disliked of current track");
 export const dislike = tell("Music", "set disliked of current track to true");
 export const undislike = tell("Music", "set disliked of current track to false");
