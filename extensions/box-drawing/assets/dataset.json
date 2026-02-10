@@ -1,0 +1,101 @@
+{
+  "light": [
+    {
+      "title": "Lines",
+      "items": [
+        { "shape": "─", "name": "horz." },
+        { "shape": "│", "name": "vert." }
+      ]
+    },
+    {
+      "title": "Corners",
+      "items": [
+        { "shape": "┌", "name": "down & right" },
+        { "shape": "┐", "name": "down & left" },
+        { "shape": "└", "name": "up & right" },
+        { "shape": "┘", "name": "up & left" }
+      ]
+    },
+    {
+      "title": "Tees",
+      "items": [
+        { "shape": "┬", "name": "down & horz." },
+        { "shape": "┴", "name": "up & horz." },
+        { "shape": "├", "name": "vert. & right" },
+        { "shape": "┤", "name": "vert. & left" }
+      ]
+    },
+    {
+      "title": "Cross",
+      "items": [
+        { "shape": "┼", "name": "vert. & horz." }
+      ]
+    }
+  ],
+  "heavy": [
+    {
+      "title": "Lines",
+      "items": [
+        { "shape": "━", "name": "horz." },
+        { "shape": "┃", "name": "vert." }
+      ]
+    },
+    {
+      "title": "Corners",
+      "items": [
+        { "shape": "┏", "name": "down & right" },
+        { "shape": "┓", "name": "down & left" },
+        { "shape": "┗", "name": "up & right" },
+        { "shape": "┛", "name": "up & left" }
+      ]
+    },
+    {
+      "title": "Tees",
+      "items": [
+        { "shape": "┳", "name": "down & horz." },
+        { "shape": "┻", "name": "up & horz." },
+        { "shape": "┣", "name": "vert. & right" },
+        { "shape": "┫", "name": "vert. & left" }
+      ]
+    },
+    {
+      "title": "Cross",
+      "items": [
+        { "shape": "╋", "name": "vert. & horz." }
+      ]
+    }
+  ],
+  "double": [
+    {
+      "title": "Lines",
+      "items": [
+        { "shape": "═", "name": "horz." },
+        { "shape": "║", "name": "vert." }
+      ]
+    },
+    {
+      "title": "Corners",
+      "items": [
+        { "shape": "╔", "name": "down & right" },
+        { "shape": "╗", "name": "down & left" },
+        { "shape": "╚", "name": "up & right" },
+        { "shape": "╝", "name": "up & left" }
+      ]
+    },
+    {
+      "title": "Tees",
+      "items": [
+        { "shape": "╦", "name": "down & horz." },
+        { "shape": "╩", "name": "up & horz." },
+        { "shape": "╠", "name": "vert. & right" },
+        { "shape": "╣", "name": "vert. & left" }
+      ]
+    },
+    {
+      "title": "Cross",
+      "items": [
+        { "shape": "╬", "name": "vert. & horz." }
+      ]
+    }
+  ]
+}
