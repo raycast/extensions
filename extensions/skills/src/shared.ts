@@ -33,6 +33,15 @@ export function buildInstallCommand(skill: Skill): string {
   return `npx skills add https://github.com/${skill.source} --skill ${skill.skillId}`;
 }
 
+export function deduplicateSkills(skills: Skill[]): Skill[] {
+  const seen = new Set<string>();
+  return skills.filter((skill) => {
+    if (seen.has(skill.id)) return false;
+    seen.add(skill.id);
+    return true;
+  });
+}
+
 export function getCompany(skill: Skill): string {
   return (skill.source ?? "").split("/")[0];
 }

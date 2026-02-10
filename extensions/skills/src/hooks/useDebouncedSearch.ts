@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { type SearchResponse, API_BASE_URL } from "../shared";
+import { type SearchResponse, API_BASE_URL, deduplicateSkills } from "../shared";
 
 export function useDebouncedSearch(searchText: string, delay = 300) {
   const [data, setData] = useState<SearchResponse | undefined>();
@@ -13,7 +13,8 @@ export function useDebouncedSearch(searchText: string, delay = 300) {
     const url = `${API_BASE_URL}/search?q=${encodeURIComponent(query)}&limit=50`;
     const res = await fetch(url, { signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return (await res.json()) as SearchResponse;
+    const data = (await res.json()) as SearchResponse;
+    return { ...data, skills: deduplicateSkills(data.skills) };
   }, []);
 
   const executeSearch = useCallback(

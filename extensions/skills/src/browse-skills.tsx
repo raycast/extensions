@@ -2,7 +2,7 @@ import { List, ActionPanel, Action, Icon, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { SkillListItem } from "./components/SkillListItem";
 import { useCompanyFilter } from "./hooks/useCompanyFilter";
-import { type SearchResponse, API_BASE_URL, buildIssueUrl } from "./shared";
+import { type SearchResponse, API_BASE_URL, buildIssueUrl, deduplicateSkills } from "./shared";
 
 const BROWSE_URL = `${API_BASE_URL}/search?q=skill&limit=100`;
 
@@ -11,7 +11,7 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  const { company, setCompany, companyCounts, skills } = useCompanyFilter(data?.skills ?? []);
+  const { company, setCompany, companyCounts, skills } = useCompanyFilter(deduplicateSkills(data?.skills ?? []));
 
   if (error && !data) {
     return (
