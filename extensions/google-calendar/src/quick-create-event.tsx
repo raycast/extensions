@@ -943,6 +943,20 @@ function preprocessQuery(query: string): string {
     query = query.replace(pattern, replacement);
   }
 
+  // Convert compact times in ranges: "515-10pm" → "5:15-10pm", "1030-2pm" → "10:30-2pm"
+  // Must run before time range patterns so they can then match the normalized format
+  const compactTimeRangePattern = /\b(\d{3,4})\s*-\s*(\d{1,4})\s*(am|pm)\b/gi;
+  query = query.replace(compactTimeRangePattern, (match, startRaw, endRaw, ampm) => {
+    const formatCompact = (s: string) => {
+      if (s.length === 3) return `${s[0]}:${s.slice(1)}`;
+      if (s.length === 4) return `${s.slice(0, 2)}:${s.slice(2)}`;
+      return s;
+    };
+    const start = formatCompact(startRaw);
+    const end = formatCompact(endRaw);
+    return `from ${start}${ampm} to ${end}${ampm}`;
+  });
+
   // Convert time ranges like "2-3pm" to "from 2pm to 3pm"
   const timeRangePattern = /\b(\d{1,2}(?::\d{2})?)\s*-\s*(\d{1,2}(?::\d{2})?)\s*(am|pm)\b/gi;
   query = query.replace(timeRangePattern, (_, start, end, ampm) => {
@@ -1000,6 +1014,19 @@ function preprocessQuery(query: string): string {
   // Remove invalid EU-like patterns (e.g., 25h, 30h) so Sherlock doesn't misparse them as dates
   // These get kept in the title since we do this after EU time conversion
   query = query.replace(/\b([3-9]\d|2[4-9])h\b/gi, "");
+
+  // Protect hyphens between words (e.g., "Parent-Teacher") from being parsed as
+  // time range separators by Sherlock. Restored in title after parsing.
+  query = query.replace(/([a-zA-Z])-([a-zA-Z])/g, "$1WDHYPHN$2");
+
+  // Move numeric dates (M/D, M/DD, MM/DD) to the front of the query.
+  // Sherlock only applies a trailing date to the nearest time (end time in a range),
+  // but when the date comes first, it applies to both start and end correctly.
+  const numericDatePattern = /\b(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)\b/;
+  const numericDateMatch = query.match(numericDatePattern);
+  if (numericDateMatch) {
+    query = numericDateMatch[1] + " " + query.replace(numericDatePattern, "").replace(/\s+/g, " ").trim();
+  }
 
   return query;
 }
@@ -1266,8 +1293,11 @@ function QuickCreateEvent() {
     // Convert them to regular events when recurrence is specified
     let eventType = rawEventType;
     let eventTypeLabel = rawEventTypeLabel;
-    // Restore protected patterns in title (e.g., ONE_ON_ONE_MEETING -> 1-on-1)
-    let eventTitle = parsed.eventTitle?.replace(/ONE_ON_ONE_MEETING/g, "1-on-1") ?? null;
+    // Restore protected patterns in title
+    let eventTitle =
+      parsed.eventTitle
+        ?.replace(/ONE_ON_ONE_MEETING/g, "1-on-1")
+        .replace(/WDHYPHN/g, "-") ?? null;
     let apiLimitationWarning: string | undefined;
 
     if (finalRecurrence && (rawEventType === "outOfOffice" || rawEventType === "focusTime")) {
