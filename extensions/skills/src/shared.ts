@@ -30,7 +30,7 @@ export function formatInstalls(count: number): string {
 }
 
 export function buildInstallCommand(skill: Skill): string {
-  return `npx skills add https://github.com/${skill.source} --skill ${skill.skillId}`;
+  return `npx skills add ${skill.source}@${skill.skillId}`;
 }
 
 export function deduplicateSkills(skills: Skill[]): Skill[] {
