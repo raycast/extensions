@@ -1,6 +1,6 @@
 # Textream Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-02-10
 
 - Updated extension icon
 
