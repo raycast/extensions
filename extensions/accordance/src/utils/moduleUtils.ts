@@ -117,11 +117,13 @@ export function clearAllModulesCache(): void {
  */
 export async function isEnglishModule(moduleName: string): Promise<boolean> {
   try {
+    const escapedModule = escapeForAppleScript(moduleName);
     const appleScript = `
       tell application "Accordance"
         if not running then launch
         try
-          set result to «event AccdIsEg» {"${escapeForAppleScript(moduleName)}"}
+          set theModule to "${escapedModule}"
+          set result to «event AccdIsEg» {theModule}
           return result
         on error errMsg
           return "Error: " & errMsg
