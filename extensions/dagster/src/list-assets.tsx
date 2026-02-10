@@ -8,11 +8,12 @@ import {
   showToast,
   Toast,
   confirmAlert,
+  open,
   Alert,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { fetchAssetGraph, materializeAssets, dagsterRunUrl, type Preferences } from "./api";
+import { fetchAssetGraph, materializeAssets, dagsterRunUrl } from "./api";
 import { formatTimestamp, buildGraphIndex, resolveAssetSelection, groupByJob, type MaterializeScope } from "./helpers";
 import AssetMaterializations from "./components/AssetMaterializations";
 import AssetMetrics from "./components/AssetMetrics";

@@ -1,4 +1,16 @@
-import { ActionPanel, Action, List, Icon, Color, Keyboard, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  Color,
+  Keyboard,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+  open,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { fetchJobs, launchRun, reexecuteRun, dagsterRunUrl, dagsterJobUrl, type Job } from "./api";

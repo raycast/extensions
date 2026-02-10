@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchRunAssets, dagsterRunUrl, type Preferences } from "../api";
+import { fetchRunAssets, dagsterRunUrl } from "../api";
 import { formatTimestamp } from "../helpers";
 import AssetMaterializations from "./AssetMaterializations";
 import AssetMetrics from "./AssetMetrics";

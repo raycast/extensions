@@ -1,14 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-// --- Preferences ---
-
-export interface Preferences {
-  dagsterUrl: string;
-  extraHeaders?: string;
-  username?: string;
-  password?: string;
-}
-
 // --- GraphQL Client ---
 
 export async function graphqlFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
