@@ -1,8 +1,11 @@
 import { ActionPanel, Action, List, Icon, open, closeMainWindow, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { homedir } from "os";
-import { execSync } from "child_process";
 import { join } from "path";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 
 interface Project {
   name: string;
@@ -25,29 +28,47 @@ export default function Command() {
   async function loadRecentProjects() {
     try {
       const dbPath = join(homedir(), "Library", "Application Support", "Qoder", "User", "globalStorage", "state.vscdb");
-      const raw = execSync(
-        `sqlite3 "${dbPath}" "SELECT value FROM ItemTable WHERE key='history.recentlyOpenedPathsList';"`,
-        { encoding: "utf-8" },
-      );
-      const data = JSON.parse(raw) as { entries: RecentEntry[] };
+
+      // Use execFile instead of execSync for better security (no shell interpretation)
+      const { stdout } = await execFileAsync("/usr/bin/sqlite3", [
+        dbPath,
+        "SELECT value FROM ItemTable WHERE key='history.recentlyOpenedPathsList';",
+      ]);
+
+      if (!stdout || !stdout.trim()) {
+        setProjects([]);
+        return;
+      }
+
+      const data = JSON.parse(stdout.trim()) as { entries: RecentEntry[] };
 
       const projectList: Project[] = (data.entries || [])
-        .filter((entry: RecentEntry) => entry.folderUri)
         .map((entry: RecentEntry) => {
-          const decodedPath = decodeURIComponent(entry.folderUri!.replace("file://", ""));
+          // Handle both folder and workspace entries
+          let uri = entry.folderUri;
+          if (!uri && entry.workspace?.configPath) {
+            // Extract folder path from workspace config path
+            uri = entry.workspace.configPath.replace(/\/[^/]+\.code-workspace$/, "");
+          }
+
+          if (!uri) return null;
+
+          const decodedPath = decodeURIComponent(uri.replace("file://", ""));
           return {
             name: decodedPath.split("/").pop() || "Untitled",
             path: decodedPath,
           };
         })
-        .filter((p: Project) => p.path);
+        .filter((p): p is Project => p !== null && Boolean(p.path));
 
       setProjects(projectList);
-    } catch {
+    } catch (error) {
+      console.error("Error loading recent projects:", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to load recent projects",
-        message: "Make sure Qoder is installed and you have opened some projects",
+        message:
+          error instanceof Error ? error.message : "Make sure Qoder is installed and you have opened some projects",
       });
     } finally {
       setIsLoading(false);
