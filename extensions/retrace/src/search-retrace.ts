@@ -1,5 +1,5 @@
-import { open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { openRetraceDeeplink } from "./open-retrace-deeplink";
 
 export default async function Command(props: { arguments: { query: string } }) {
   const query = props.arguments.query?.trim();
@@ -10,8 +10,13 @@ export default async function Command(props: { arguments: { query: string } }) {
   }
 
   try {
-    const deeplink = `retrace://search?q=${encodeURIComponent(query)}`;
-    await open(deeplink);
+    await openRetraceDeeplink({
+      context: "search-retrace",
+      urls: [`retrace://search?q=${encodeURIComponent(query)}`],
+      metadata: {
+        query,
+      },
+    });
   } catch (error: unknown) {
     await showFailureToast(error, { title: "Error opening Retrace search" });
   }

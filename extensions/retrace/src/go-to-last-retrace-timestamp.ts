@@ -1,5 +1,6 @@
-import { LocalStorage, open } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { openRetraceDeeplink } from "./open-retrace-deeplink";
 
 const LAST_TIMESTAMP_KEY = "lastRetraceTimestamp";
 
@@ -21,8 +22,13 @@ export default async function Command() {
     const timestampMs =
       normalizedTimestamp.length === 10 ? String(Number(normalizedTimestamp) * 1000) : normalizedTimestamp;
 
-    const deeplink = `retrace://timeline?t=${timestampMs}`;
-    await open(deeplink);
+    await openRetraceDeeplink({
+      context: "go-to-last-retrace-timestamp",
+      urls: [`retrace://timeline?t=${timestampMs}`, `retrace://timeline?timestamp=${timestampMs}`],
+      metadata: {
+        storedTimestamp: normalizedTimestamp,
+      },
+    });
   } catch (error: unknown) {
     await showFailureToast(error, { title: "Error accessing last timestamp" });
   }

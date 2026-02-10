@@ -1,6 +1,7 @@
-import { LocalStorage, open } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import * as chrono from "chrono-node";
+import { openRetraceDeeplink } from "./open-retrace-deeplink";
 
 const LAST_TIMESTAMP_KEY = "lastRetraceTimestamp";
 
@@ -103,8 +104,15 @@ export default async function Command(props: { arguments: { time: string } }) {
 
     await LocalStorage.setItem(LAST_TIMESTAMP_KEY, String(timestampMs));
 
-    const deeplink = `retrace://timeline?t=${timestampMs}`;
-    await open(deeplink);
+    const timestampValue = String(timestampMs);
+    await openRetraceDeeplink({
+      context: "go-to-retrace-timestamp",
+      urls: [`retrace://timeline?t=${timestampValue}`, `retrace://timeline?timestamp=${timestampValue}`],
+      metadata: {
+        input: timeInput,
+        timestampMs,
+      },
+    });
   } catch (error: unknown) {
     await showFailureToast(error, { title: "Error processing time input" });
   }
