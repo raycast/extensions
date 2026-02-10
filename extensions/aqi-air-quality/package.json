@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aqi-air-quality",
+  "title": "AQI Air Quality",
+  "description": "An air quality information extension that allows you to see air quality in your status bar",
+  "icon": "extension-icon.png",
+  "author": "riccardogiorato",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "air-quality",
+      "title": "Air Quality",
+      "description": "Show air quality information in your status bar",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "preferences": [
+        {
+          "name": "locationQuery",
+          "title": "Manual Location",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "City, address, or place name",
+          "description": "Optional. Leave blank to use IP-based location. Sources: IQAir (if key) or Open-Meteo for AQI; KeyCDN for IP geolocation."
+        },
+        {
+          "name": "aqiScale",
+          "title": "AQI Scale",
+          "type": "dropdown",
+          "required": false,
+          "default": "european",
+          "data": [
+            {
+              "title": "European AQI (EAQI)",
+              "value": "european"
+            },
+            {
+              "title": "US AQI (EPA)",
+              "value": "us"
+            }
+          ],
+          "description": "Choose which AQI scale to display. If unavailable, the extension falls back to the other scale."
+        },
+        {
+          "name": "iqairApiKey",
+          "title": "IQAIR API Key",
+          "type": "password",
+          "required": false,
+          "placeholder": "Your AirVisual key",
+          "description": "Optional. Provides more precise AQI when available. Sources: IQAir (if key) or Open-Meteo for AQI; KeyCDN for IP geolocation."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
