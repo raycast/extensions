@@ -5,7 +5,7 @@
   "subtitle": "Manage your Google Cloud resources without opening a browser",
   "description": "A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.",
   "icon": "icon.png",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "ojowwalker77",
   "contributors": [
     "ben_selleslagh"
@@ -53,8 +53,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.55.2",
-    "@raycast/utils": "^1.9.0",
-    "dotenv": "^16.4.7"
+    "@raycast/utils": "^1.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Fix keywords] - 2026-02-10
+
+- Fix intermittent `keywords` issue
+
 ## [Added npmx] - 2026-02-05
 
 - Add ability to open package page in npmx.dev

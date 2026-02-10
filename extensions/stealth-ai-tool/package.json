@@ -2,33 +2,33 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stealth-ai-tool",
   "title": "Stealth AI",
-  "description": "In-line AI formatting. (1) Change model in Raycast Settings > AI > Quick AI Model. (2) Set custom Hotkey & Alias per action in Settings.",
-  "version": "1.0.0",
+  "description": "In-line AI formatting. Configure your AI provider via the 'Configure AI Model' command. Set custom Hotkey & Alias per action in Settings.",
+  "version": "1.1.0",
   "icon": "icon.png",
   "author": "ahmed",
   "categories": [
     "Productivity"
   ],
-  "license": "MIT",
   "platforms": [
     "macOS",
     "Windows"
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "Fix grammar in: hello world"
+      }
+    ]
+  },
+  "license": "MIT",
   "commands": [
     {
-      "name": "edit-action",
-      "title": "Edit Action Prompt",
+      "name": "configure-model",
+      "title": "Configure AI Model",
       "subtitle": "Stealth AI",
-      "description": "Hidden utility to edit prompts",
+      "description": "Fetch and select models for your provider",
       "mode": "view",
-      "arguments": [
-        {
-          "name": "actionId",
-          "placeholder": "action-1",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "icon": "icon.png"
     },
     {
       "name": "action-1",
@@ -36,6 +36,7 @@
       "subtitle": "Stealth AI",
       "description": "Fix typos and grammar",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "grammar",
         "typo",
@@ -68,6 +69,7 @@
       "subtitle": "Stealth AI",
       "description": "Make text more concise",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "concise",
         "shorter",
@@ -100,6 +102,7 @@
       "subtitle": "Stealth AI",
       "description": "Convert text to bullet list",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "list",
         "bullets",
@@ -132,6 +135,7 @@
       "subtitle": "Stealth AI",
       "description": "Make text more professional",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "professional",
         "formal",
@@ -164,6 +168,7 @@
       "subtitle": "Stealth AI",
       "description": "Simplify complex text",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "simplify",
         "simple",
@@ -196,6 +201,7 @@
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 6",
       "mode": "no-view",
+      "ai": true,
       "icon": "icon.png",
       "preferences": [
         {
@@ -222,6 +228,7 @@
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 7",
       "mode": "no-view",
+      "ai": true,
       "icon": "icon.png",
       "preferences": [
         {
@@ -248,6 +255,7 @@
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 8",
       "mode": "no-view",
+      "ai": true,
       "icon": "icon.png",
       "preferences": [
         {
@@ -274,6 +282,7 @@
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 9",
       "mode": "no-view",
+      "ai": true,
       "icon": "icon.png",
       "preferences": [
         {
@@ -296,17 +305,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.2",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^25.0.10",
-    "@types/react": "^19.2.9",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^9.39.2",
-    "prettier": "^3.8.1",
-    "typescript": "^5.9.3"
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

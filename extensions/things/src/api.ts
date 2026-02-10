@@ -266,108 +266,55 @@ const mapAreaJxa = `area => {
   };
 }`;
 
-export const getTags = (): Promise<string[]> =>
-  executeJxa(
-    `
-  const things = Application('${preferences.thingsAppIdentifier}');
-  return things.tags().map(${mapTagJxa});
-`,
-    'Get tags',
-  );
-
-export const getProjects = async (): Promise<Project[]> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-    return things.projects().map(${mapProjectJxa});
-  `,
-    'Get projects',
-  );
-};
-
-export const getAreas = async (): Promise<Area[]> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-    return things.areas().map(${mapAreaJxa});
-  `,
-    'Get areas',
-  );
-};
-
-export const getTagsProjectsAndAreas = async (): Promise<{
+type CollectionMap = {
   tags: string[];
   projects: Project[];
   areas: Area[];
-}> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-
-    const tags = things.tags().map(${mapTagJxa});
-    const projects = things.projects().map(${mapProjectJxa});
-    const areas = things.areas().map(${mapAreaJxa});
-
-    return { tags, projects, areas };
-  `,
-    'Get tags, projects, and areas',
-  );
+  lists: List[];
 };
 
-export const getListsAndTags = async (): Promise<{ lists: List[]; tags: string[] }> => {
-  const { tags, projects, areas } = await getTagsProjectsAndAreas();
+const jxaFetches = [
+  { name: 'tags', needs: ['tags'], expr: `things.tags().map(${mapTagJxa})` },
+  { name: 'projects', needs: ['projects', 'lists'], expr: `things.projects().map(${mapProjectJxa})` },
+  { name: 'areas', needs: ['areas', 'lists'], expr: `things.areas().map(${mapAreaJxa})` },
+];
 
+export async function getCollections<K extends keyof CollectionMap>(...keys: K[]): Promise<Pick<CollectionMap, K>> {
+  const keySet = new Set<string>(keys);
+
+  const script = [
+    `const things = Application('${preferences.thingsAppIdentifier}');`,
+    `const result = {};`,
+    ...jxaFetches
+      .filter(({ needs }) => needs.some((k) => keySet.has(k)))
+      .map(({ name, expr }) => `result.${name} = ${expr};`),
+    `return result;`,
+  ].join('\n');
+
+  const raw = await executeJxa(script, `Get ${keys.join(', ')}`);
+
+  return Object.fromEntries(
+    keys.map((key) => [key, key === 'lists' ? organizeLists(raw.projects, raw.areas) : raw[key]]),
+  ) as Pick<CollectionMap, K>;
+}
+
+function organizeLists(projects: Project[] = [], areas: Area[] = []): List[] {
   const projectsWithoutAreas = projects
     .filter((project) => !project.area)
     .map((project) => ({ ...project, type: 'project' as const }));
 
-  const organizedAreasAndProjects: { name: string; id: string; type: 'area' | 'project' }[] = [];
+  const organizedAreasAndProjects: List[] = [];
   areas.forEach((area) => {
-    organizedAreasAndProjects.push({
-      ...area,
-      type: 'area' as const,
-    });
+    organizedAreasAndProjects.push({ ...area, type: 'area' as const });
 
     const associatedProjects = projects
       .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({
-        ...project,
-        type: 'project' as const,
-      }));
-    organizedAreasAndProjects.push(...associatedProjects);
-  });
-
-  const lists = [...projectsWithoutAreas, ...organizedAreasAndProjects];
-
-  return { lists, tags };
-};
-
-export const getLists = async (): Promise<List[]> => {
-  const projects = (await getProjects()) || [];
-  const areas = (await getAreas()) || [];
-
-  const projectsWithoutAreas = projects
-    .filter((project) => !project.area)
-    .map((project) => ({ ...project, type: 'project' as const }));
-
-  const organizedAreasAndProjects: { name: string; id: string; type: 'area' | 'project' }[] = [];
-  areas.forEach((area) => {
-    organizedAreasAndProjects.push({
-      ...area,
-      type: 'area' as const,
-    });
-
-    const associatedProjects = projects
-      .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({
-        ...project,
-        type: 'project' as const,
-      }));
+      .map((project) => ({ ...project, type: 'project' as const }));
     organizedAreasAndProjects.push(...associatedProjects);
   });
 
   return [...projectsWithoutAreas, ...organizedAreasAndProjects];
-};
+}
 
 export async function silentlyOpenThingsURL(url: string) {
   const asyncExec = promisify(exec);

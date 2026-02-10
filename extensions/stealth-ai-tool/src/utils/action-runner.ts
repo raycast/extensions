@@ -1,7 +1,9 @@
 import {
   AI,
   Clipboard,
+  environment,
   getPreferenceValues,
+  getSelectedText,
   launchCommand,
   LaunchType,
   LocalStorage,
@@ -10,7 +12,7 @@ import {
 } from "@raycast/api";
 
 import { execSync } from "child_process";
-import { platform } from "os";
+import { LLMService } from "./llm-service";
 
 interface ActionConfig {
   title: string;
@@ -81,6 +83,27 @@ export async function runStealthAction(
   }
 }
 
+async function showModelErrorToast(errorMsg: string) {
+  const isModelError = /model/i.test(errorMsg);
+  const toast = await showToast({
+    style: Toast.Style.Failure,
+    title: isModelError ? "Model Error" : "AI Call Failed",
+    message: isModelError ? "Run 'Configure AI Model' to fix this" : errorMsg,
+  });
+  if (isModelError) {
+    toast.primaryAction = {
+      title: "Configure AI Model",
+      onAction: () => {
+        launchCommand({
+          name: "configure-model",
+          type: LaunchType.UserInitiated,
+        });
+      },
+    };
+  }
+  return toast;
+}
+
 async function runStealthActionInternal(
   actionId: string,
   forceEditor?: boolean,
@@ -106,11 +129,7 @@ async function runStealthActionInternal(
   }
   console.log(`Config: ${currentConfig.title}`);
 
-  const isMac = platform() === "darwin";
-
-  // 2. Get selected text
-  let selectedText = "";
-  let hasRealSelection = false;
+  const isMac = process.platform === "darwin";
 
   // Store original app info for re-activation (macOS only)
   let frontApp = "";
@@ -181,93 +200,45 @@ async function runStealthActionInternal(
     }
   }
 
-  // Use Raycast's cross-platform Clipboard API to read selected text
-  // First, clear clipboard with a marker to detect if copy happens
-  const marker = `__NO_SELECTION_${Date.now()}__`;
-
+  // 2. AI Access Debug (for troubleshooting "Model not supported")
+  let canAccessAI = false;
   try {
-    await Clipboard.copy(marker);
-    console.log("[DEBUG] Clipboard cleared with marker");
-  } catch {
-    console.log("[DEBUG] Could not clear clipboard");
+    canAccessAI = environment.canAccess(AI);
+    console.log(`[DEBUG] environment.canAccess(AI): ${canAccessAI}`);
+  } catch (e) {
+    console.log(`[DEBUG] environment.canAccess(AI) failed with error: ${e}`);
   }
 
   try {
-    if (!forceEditor) {
-      // Simulate Cmd+C / Ctrl+C to copy selection
-      console.log("[DEBUG] Sending copy command...");
-
-      if (isMac) {
-        execSync(
-          `osascript -e 'tell application "System Events" to key code 8 using command down'`,
-        );
-      } else {
-        // Windows: Use PowerShell to send Ctrl+C
-        execSync(
-          `powershell -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('^c')"`,
-        );
-      }
-
-      // Wait for clipboard to update
-      await new Promise((resolve) => setTimeout(resolve, 250));
-
-      // Check what's in clipboard now using Raycast API
-      let clipboardAfter = "";
+    console.log("AI.Model Keys: " + Object.keys(AI.Model).join(", "));
+    const mapping: Record<string, string> = {};
+    for (const key of Object.keys(AI.Model)) {
       try {
-        clipboardAfter = (await Clipboard.readText()) || "";
-        console.log(
-          `[DEBUG] Clipboard after copy: "${clipboardAfter.substring(0, 50)}" (${clipboardAfter.length} chars)`,
-        );
-
-        if (clipboardAfter === marker) {
-          console.log(
-            "[DEBUG] Clipboard still has marker - NO SELECTION, auto-selecting line...",
-          );
-
-          if (isMac) {
-            // macOS: Auto-select current line
-            execSync(
-              `osascript -e 'tell application "System Events"
-                key code 124 using command down
-                delay 0.05
-                key code 123 using {command down, shift down}
-                delay 0.05
-                key code 8 using command down
-              end tell'`,
-            );
-          } else {
-            // Windows: Home, then Shift+End to select line, then Ctrl+C
-            execSync(
-              `powershell -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{END}'); Start-Sleep -Milliseconds 50; [System.Windows.Forms.SendKeys]::SendWait('+{HOME}'); Start-Sleep -Milliseconds 50; [System.Windows.Forms.SendKeys]::SendWait('^c')"`,
-            );
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, 200));
-
-          clipboardAfter = (await Clipboard.readText()) || "";
-          console.log(
-            `[DEBUG] Clipboard after auto-select: "${clipboardAfter.substring(0, 50)}" (${clipboardAfter.length} chars)`,
-          );
-
-          if (clipboardAfter !== marker && clipboardAfter.trim().length > 0) {
-            console.log("[DEBUG] Line auto-selected successfully!");
-            hasRealSelection = true;
-            selectedText = clipboardAfter;
-          } else {
-            console.log("[DEBUG] Auto-select failed - empty line?");
-            hasRealSelection = false;
-          }
-        } else {
-          console.log("[DEBUG] REAL SELECTION detected!");
-          hasRealSelection = true;
-          selectedText = clipboardAfter;
-        }
-      } catch {
-        console.log("[DEBUG] Could not read clipboard");
+        mapping[key] = (AI.Model as Record<string, string>)[key];
+      } catch (_e) {
+        // ignore
       }
     }
+    console.log("[DEBUG] AI.Model Mapping:", JSON.stringify(mapping, null, 2));
   } catch (e) {
-    console.log(`[DEBUG] Error: ${e}`);
+    console.log(`[DEBUG] AI.Model logging failed: ${e}`);
+  }
+
+  // 3. Get selected text using Raycast's native cross-platform API
+  let selectedText = "";
+  let hasRealSelection = false;
+
+  try {
+    if (!forceEditor) {
+      console.log("[DEBUG] Using Raycast getSelectedText API...");
+      selectedText = await getSelectedText();
+      console.log(
+        `[DEBUG] Got selected text: "${selectedText.substring(0, 50)}..." (${selectedText.length} chars)`,
+      );
+      hasRealSelection = selectedText.trim().length > 0;
+    }
+  } catch (e) {
+    console.log(`[DEBUG] getSelectedText failed (no selection): ${e}`);
     hasRealSelection = false;
   }
 
@@ -283,41 +254,77 @@ async function runStealthActionInternal(
       message: "Please select text first",
     });
     toast.primaryAction = {
-      title: "Edit Prompt",
+      title: "Configure AI Model",
       onAction: () => {
         launchCommand({
-          name: "edit-action",
+          name: "configure-model",
           type: LaunchType.UserInitiated,
-          arguments: { actionId },
         });
       },
     };
     return;
   }
 
-  // 3. Show processing toast
+  // 4. Show processing toast
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `${currentConfig.title}...`,
   });
 
   try {
-    // 4. Call AI
+    // 5. Final AI access check
+    const currentProvider = await LLMService.getProvider();
+    if (!canAccessAI && currentProvider === "raycast") {
+      throw new Error("Raycast AI is required. Please upgrade to Raycast Pro.");
+    }
+
+    // 6. Call AI (using new LLM Service)
     const prompt = `${currentConfig.prompt}\n\n${selectedText}`;
-    console.log("Calling AI...");
-    const result = await AI.ask(prompt);
-    console.log(`AI result: "${result?.substring(0, 50)}..."`);
+    console.log(`Calling AI via ${currentProvider}...`);
+
+    let result = "";
+    try {
+      result = await LLMService.askAI(prompt);
+      console.log(`AI result: "${result?.substring(0, 50)}..."`);
+    } catch (e) {
+      console.error(`AI Service failed: ${e}`);
+
+      const errorMsg = (e as Error).message;
+
+      // Check for model-related errors
+      if (/model/i.test(errorMsg)) {
+        await showModelErrorToast(errorMsg);
+        return;
+      }
+
+      // Special handling for Raycast AI limitation
+      if (errorMsg.includes("Raycast AI is not supported")) {
+        await showModelErrorToast(errorMsg);
+        return;
+      }
+
+      // Clipboard Fallback
+      console.log("[DEBUG] AI Service failed. Using Clipboard Fallback.");
+      await Clipboard.copy(prompt);
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "AI Call Failed",
+        message: "Prompt copied! Paste in external AI tool.",
+      });
+      return;
+    }
 
     if (!result) throw new Error("Empty AI response");
 
     const cleanResult = result.trim();
 
-    // 5. Insert text using Raycast's cross-platform Clipboard.paste API
+    // 7. Insert text (for successful calls)
     toast.title = "Inserting...";
     console.log(`Pasting ${cleanResult.length} chars to replace selection`);
 
-    // Re-activate the original app before pasting (macOS only)
     if (isMac) {
+      // ... existing macOS logic ...
       if (frontAppBundleId && frontAppBundleId !== "com.apple.finder") {
         try {
           execSync(
@@ -325,26 +332,8 @@ async function runStealthActionInternal(
             { timeout: 5000 },
           );
           await new Promise((resolve) => setTimeout(resolve, 150));
-          console.log(
-            `[DEBUG] Re-activated app by bundle ID: ${frontAppBundleId}`,
-          );
-        } catch (e) {
-          console.log(`[DEBUG] Could not activate by bundle ID: ${e}`);
-          if (frontApp && frontApp !== "Finder") {
-            try {
-              const escapedAppName = frontApp.replace(/"/g, '\\"');
-              execSync(
-                `osascript -e 'tell application "${escapedAppName}" to activate'`,
-                { timeout: 5000 },
-              );
-              await new Promise((resolve) => setTimeout(resolve, 150));
-              console.log(`[DEBUG] Re-activated app by name: ${frontApp}`);
-            } catch (e2) {
-              console.log(
-                `[DEBUG] Could not re-activate by name either: ${e2}`,
-              );
-            }
-          }
+        } catch (_e) {
+          // ignore activation errors
         }
       } else if (frontApp && frontApp !== "Finder") {
         try {
@@ -354,34 +343,24 @@ async function runStealthActionInternal(
             { timeout: 5000 },
           );
           await new Promise((resolve) => setTimeout(resolve, 150));
-          console.log(`[DEBUG] Re-activated app by name: ${frontApp}`);
-        } catch (e) {
-          console.log(`[DEBUG] Could not re-activate original app: ${e}`);
+        } catch (_e) {
+          // ignore activation errors
         }
-      } else {
-        // No valid app to re-activate - use clipboard only mode
-        console.log(
-          "[DEBUG] No valid app to re-activate, using clipboard only",
-        );
-        await Clipboard.copy(cleanResult);
-        toast.style = Toast.Style.Success;
-        toast.title = "Copied to clipboard";
-        toast.message = "Press Cmd+V to paste";
-        return;
       }
     }
 
-    // Use Raycast's cross-platform paste API
-    // This handles clipboard + paste in one call and works on both macOS and Windows
     await Clipboard.paste(cleanResult);
-    console.log("Text inserted successfully");
-
     toast.style = Toast.Style.Success;
     toast.title = "Done!";
   } catch (error) {
     console.error("Error:", error);
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed";
-    toast.message = String(error);
+    const errorMsg = String(error);
+    if (/model/i.test(errorMsg)) {
+      await showModelErrorToast(errorMsg);
+    } else {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = errorMsg;
+    }
   }
 }
