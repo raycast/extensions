@@ -5,6 +5,9 @@
   "description": "Browse and search AI agent skills from Skills",
   "icon": "icon.png",
   "author": "keito4",
+  "contributors": [
+    "DaleSeo"
+  ],
   "categories": [
     "Developer Tools"
   ],
