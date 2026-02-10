@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "creem",
   "title": "Creem",
-  "description": "Smooth payments for SaaS and Indie Hackers that don't break the bank",
+  "description": "The all-in-one platform for software companies",
   "icon": "creem.png",
   "author": "xmok",
   "categories": [
