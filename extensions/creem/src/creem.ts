@@ -8,6 +8,6 @@ const httpClient = new HTTPClient({
   fetcher: (request) => fetch(request),
 });
 httpClient.addHook("response", async (response) => {
-    if (!response.ok) throw new Error(response.statusText)
-})
+  if (!response.ok) throw new Error(response.statusText);
+});
 export const creem = new Creem({ serverIdx: mode === "production" ? 0 : 1, apiKey: API_KEY, httpClient });
