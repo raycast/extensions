@@ -1,6 +1,6 @@
 # Confluence Changelog
 
-## [Allow Windows to use this Extension] - {PR_MERGE_DATE}
+## [Allow Windows to use this Extension] - 2026-02-10
 
 - Add `Windows` to allowed platforms
 
