@@ -4,6 +4,14 @@
   "title": "SayIntentions",
   "description": "Fast access to SayIntentions via keyboard shortcuts. Great for flight sim sessions where you don't want to speak but still want quick ATC communication.",
   "icon": "extension-icon.png",
+  "author": "kyleawayan",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -63,6 +71,15 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "SayIntentions API Key",
+      "description": "Your API Key (ACARS ID) from the Pilot Portal",
+      "type": "password",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.1"
@@ -82,22 +99,5 @@
     "build": "ray build",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
-  },
-  "author": "kyleawayan",
-  "platforms": [
-    "Windows",
-    "macOS"
-  ],
-  "categories": [
-    "Applications"
-  ],
-  "preferences": [
-    {
-      "name": "apiKey",
-      "title": "SayIntentions API Key",
-      "description": "Your API Key (ACARS ID) from the Pilot Portal",
-      "type": "password",
-      "required": true
-    }
-  ]
+  }
 }
