@@ -42,7 +42,7 @@ export function deduplicateSkills(skills: Skill[]): Skill[] {
   });
 }
 
-export function getCompany(skill: Skill): string {
+export function getOwner(skill: Skill): string {
   return (skill.source ?? "").split("/")[0];
 }
 

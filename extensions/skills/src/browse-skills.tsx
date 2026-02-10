@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { SkillListItem } from "./components/SkillListItem";
-import { useCompanyFilter } from "./hooks/useCompanyFilter";
+import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { type SearchResponse, API_BASE_URL, buildIssueUrl, deduplicateSkills } from "./shared";
 
 const BROWSE_URL = `${API_BASE_URL}/search?q=skill&limit=100`;
@@ -11,7 +11,7 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  const { company, setCompany, companyCounts, skills } = useCompanyFilter(deduplicateSkills(data?.skills ?? []));
+  const { owner, setOwner, ownerCounts, skills } = useOwnerFilter(deduplicateSkills(data?.skills ?? []));
 
   if (error && !data) {
     return (
@@ -36,10 +36,10 @@ export default function Command() {
       isLoading={isLoading}
       searchBarPlaceholder="Filter skills..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Company" value={company} storeValue onChange={setCompany}>
-          <List.Dropdown.Item title="All Companies" value="all" />
-          <List.Dropdown.Section title="Companies">
-            {[...companyCounts.entries()].map(([c, count]) => (
+        <List.Dropdown tooltip="Filter by Owner" value={owner} storeValue onChange={setOwner}>
+          <List.Dropdown.Item title="All Owners" value="all" />
+          <List.Dropdown.Section title="Owners">
+            {[...ownerCounts.entries()].map(([c, count]) => (
               <List.Dropdown.Item key={c} title={`${c} (${count})`} value={c} />
             ))}
           </List.Dropdown.Section>

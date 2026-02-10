@@ -2,7 +2,7 @@ import { List, ActionPanel, Action, Icon, Detail } from "@raycast/api";
 import { useState } from "react";
 
 import { SkillListItem } from "./components/SkillListItem";
-import { useCompanyFilter } from "./hooks/useCompanyFilter";
+import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
 import { buildIssueUrl } from "./shared";
 
@@ -11,7 +11,7 @@ export default function Command() {
 
   const { data, isLoading, error, revalidate, searchUrl } = useDebouncedSearch(searchText);
 
-  const { company, setCompany, companyCounts, skills } = useCompanyFilter(data?.skills ?? []);
+  const { owner, setOwner, ownerCounts, skills } = useOwnerFilter(data?.skills ?? []);
 
   if (error && !data) {
     return (
@@ -37,10 +37,10 @@ export default function Command() {
       searchBarPlaceholder="Search skills..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Company" value={company} storeValue onChange={setCompany}>
-          <List.Dropdown.Item title="All Companies" value="all" />
-          <List.Dropdown.Section title="Companies">
-            {[...companyCounts.entries()].map(([c, count]) => (
+        <List.Dropdown tooltip="Filter by Owner" value={owner} storeValue onChange={setOwner}>
+          <List.Dropdown.Item title="All Owners" value="all" />
+          <List.Dropdown.Section title="Owners">
+            {[...ownerCounts.entries()].map(([c, count]) => (
               <List.Dropdown.Item key={c} title={`${c} (${count})`} value={c} />
             ))}
           </List.Dropdown.Section>
