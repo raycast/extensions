@@ -13,7 +13,12 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useCallback, useRef } from "react";
-import { RankedFileResult, AgentState, AgentStep } from "./lib/types";
+import {
+  RankedFileResult,
+  AgentState,
+  AgentStep,
+  AgentEvent,
+} from "./lib/types";
 import { runAgent, AgentSession } from "./lib/agent";
 
 // ─── Media Type Detection ────────────────────────────────────
@@ -226,6 +231,9 @@ export default function RecallFileCommand() {
   const [showThinking, setShowThinking] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const sessionRef = useRef<AgentSession | null>(null);
+  const steeringQueueRef = useRef<string[]>([]);
+  const isRunningRef = useRef(false);
+  const assistantStepIndexRef = useRef<Map<string, number>>(new Map());
 
   // Check if API key is configured
   const preferences = getPreferenceValues<Preferences.RecallFile>();
@@ -258,19 +266,47 @@ Go to **Extension Preferences** to set:
   const handleSearch = useCallback(async (query: string) => {
     if (!query || query.trim().length < 2) return;
 
-    // Cancel any ongoing search
+    // Detect refinement: if query contains "；" or ";"
+    const hasDelimiter = query.includes("；") || query.includes(";");
+    const isRefinement =
+      hasDelimiter && (sessionRef.current !== null || isRunningRef.current);
+
+    // If agent is currently running, treat refinement as "steering" (queue clue)
+    if (isRunningRef.current && isRefinement) {
+      const parts = query
+        .split(/[；;]/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+      const lastClue = parts[parts.length - 1] || "";
+      if (lastClue.length >= 1) {
+        steeringQueueRef.current.push(lastClue);
+        setState((prev) => ({
+          ...prev,
+          steps: [
+            ...prev.steps,
+            {
+              type: "thinking",
+              content: `Queued clue: "${lastClue}"`,
+            },
+          ],
+        }));
+        showToast({ style: Toast.Style.Animated, title: "Queued clue" });
+      }
+      return;
+    }
+
+    // Cancel any ongoing search (new run)
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
-
-    // Detect multi-turn: if query contains "；" or ";", it's a refinement
-    const isRefinement =
-      sessionRef.current !== null &&
-      (query.includes("；") || query.includes(";"));
+    steeringQueueRef.current = [];
+    assistantStepIndexRef.current.clear();
 
     // For refinement, pass the previous session
-    const previousSession = isRefinement ? sessionRef.current ?? undefined : undefined;
+    const previousSession = isRefinement
+      ? (sessionRef.current ?? undefined)
+      : undefined;
 
     if (!isRefinement) {
       // Fresh search: clear session
@@ -288,6 +324,7 @@ Go to **Extension Preferences** to set:
     });
 
     try {
+      isRunningRef.current = true;
       await showToast({
         style: Toast.Style.Animated,
         title: isRefinement ? "Refining search..." : "Agent is thinking...",
@@ -296,39 +333,7 @@ Go to **Extension Preferences** to set:
       const result = await runAgent(
         query,
         (step: AgentStep) => {
-          setState((prev) => {
-            const lastStep = prev.steps[prev.steps.length - 1];
-
-            // Merge consecutive "thinking" steps into one to avoid UI fragmentation.
-            // This handles streaming chunks and keeps the thinking view clean.
-            if (
-              step.type === "thinking" &&
-              lastStep?.type === "thinking" &&
-              !lastStep.toolName &&
-              !step.toolName
-            ) {
-              // If the new content is a short fragment (streaming chunk),
-              // append it to the previous thinking step
-              if (step.content.length < 20 && step.content !== "Analyzing...") {
-                const merged = [...prev.steps];
-                merged[merged.length - 1] = {
-                  ...lastStep,
-                  content: lastStep.content + step.content,
-                };
-                return { ...prev, steps: merged };
-              }
-
-              // If it's the full response (longer text that supersedes "Analyzing..."),
-              // replace the "Analyzing..." placeholder
-              if (lastStep.content === "Analyzing...") {
-                const merged = [...prev.steps];
-                merged[merged.length - 1] = step;
-                return { ...prev, steps: merged };
-              }
-            }
-
-            return { ...prev, steps: [...prev.steps, step] };
-          });
+          setState((prev) => ({ ...prev, steps: [...prev.steps, step] }));
 
           // Update toast based on step type
           if (step.type === "tool_call") {
@@ -337,6 +342,44 @@ Go to **Extension Preferences** to set:
         },
         abortControllerRef.current.signal,
         previousSession,
+        {
+          getSteeringMessages: () => steeringQueueRef.current.splice(0),
+          onEvent: (event: AgentEvent) => {
+            switch (event.type) {
+              case "assistant_message_start": {
+                setState((prev) => {
+                  const nextSteps: AgentStep[] = [
+                    ...prev.steps,
+                    { type: "thinking", content: "Analyzing..." },
+                  ];
+                  assistantStepIndexRef.current.set(
+                    event.messageId,
+                    nextSteps.length - 1,
+                  );
+                  return { ...prev, steps: nextSteps };
+                });
+                break;
+              }
+              case "assistant_message_update":
+              case "assistant_message_end": {
+                setState((prev) => {
+                  const idx = assistantStepIndexRef.current.get(
+                    event.messageId,
+                  );
+                  if (idx === undefined) return prev;
+                  const nextSteps = [...prev.steps];
+                  const existing = nextSteps[idx];
+                  if (!existing) return prev;
+                  nextSteps[idx] = { ...existing, content: event.content };
+                  return { ...prev, steps: nextSteps };
+                });
+                break;
+              }
+              default:
+                break;
+            }
+          },
+        },
       );
 
       // Save session for potential multi-turn continuation
@@ -409,6 +452,8 @@ Go to **Extension Preferences** to set:
         title: "Search Failed",
         message: msg,
       });
+    } finally {
+      isRunningRef.current = false;
     }
   }, []);
 

@@ -3,7 +3,7 @@
  * and iterates until it has found the files the user is looking for.
  */
 
-import { ChatMessage, AgentStep, AgentResult } from "./types";
+import { ChatMessage, AgentStep, AgentResult, AgentEvent } from "./types";
 import {
   chatCompletion,
   streamChatCompletion,
@@ -23,10 +23,39 @@ const NUDGE_HARD_THRESHOLD = 8; // After 8 tool calls: hard deadline
 
 /** Image extensions used for dynamic tool filtering (show analyze_image only when relevant) */
 const IMAGE_EXTS = new Set([
-  "png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff", "tif", "heic", "heif", "svg",
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "bmp",
+  "tiff",
+  "tif",
+  "heic",
+  "heif",
+  "svg",
 ]);
 
 export type OnStepCallback = (step: AgentStep) => void;
+
+export interface AgentLoopHooks {
+  /**
+   * "Steering" messages are user interruptions that should be injected mid-run.
+   * If any arrive, the agent should stop executing remaining tool calls for the
+   * current assistant message, and continue with a new turn using the new clue(s).
+   */
+  getSteeringMessages?: () => Promise<string[]> | string[];
+  /**
+   * Follow-up messages are processed after the agent would otherwise stop.
+   * Useful for queued refinements that should run after the current turn finishes.
+   */
+  getFollowUpMessages?: () => Promise<string[]> | string[];
+  /**
+   * Fine-grained event stream (pi-mono style).
+   * If provided, `runAgent` emits assistant message and tool execution lifecycle events.
+   */
+  onEvent?: (event: AgentEvent) => void;
+}
 
 /**
  * Time-related words in Chinese, English, and common patterns.
@@ -133,7 +162,7 @@ function buildSystemPrompt(): string {
     ``,
     `## YOUR TOOLS`,
     ``,
-    `You have 8 tools. Use them strategically:`,
+    `You have 9 tools. Use them strategically:`,
     ``,
     `| Tool | Purpose | When to use |`,
     `|------|---------|-------------|`,
@@ -162,6 +191,7 @@ function buildSystemPrompt(): string {
     `3. If user mentioned a project name, call find_directories first, then search within it.`,
     `4. Call search_files with ONLY the parameters you identified. Do not over-constrain.`,
     `5. If no results, try broader: remove filters one by one, try name_pattern, try ~/Downloads.`,
+    `6. If there are MANY candidates, use pagination: call search_files with offset/limit to fetch more pages (use next_offset from the tool result).`,
     ``,
     `### Phase 1b: Content Pattern Scan (when search_files fails)`,
     `If search_files returns no useful results AND the user is describing`,
@@ -273,6 +303,7 @@ export async function runAgent(
   onStep: OnStepCallback,
   signal?: AbortSignal,
   previousSession?: AgentSession,
+  hooks?: AgentLoopHooks,
 ): Promise<AgentResult & { session: AgentSession }> {
   const isMultiTurn = previousSession?.isContinuation ?? false;
 
@@ -283,11 +314,59 @@ export async function runAgent(
   resetFunctionCallingState();
 
   // Pre-analyze user query for guardrails
-  const userMentionedTime = queryMentionsTime(userQuery);
+  let userMentionedTime = queryMentionsTime(userQuery);
+
+  // Initialize messages (assigned below). Declared early so helper closures can reference it.
+  let messages: ChatMessage[] = [];
+
+  const emitEvent = (event: AgentEvent): void => {
+    try {
+      hooks?.onEvent?.(event);
+    } catch {
+      // UI events should never break the agent loop
+    }
+  };
+
+  const readSteering = async (): Promise<string[]> => {
+    const raw = hooks?.getSteeringMessages?.();
+    const msgs = raw instanceof Promise ? await raw : raw;
+    return (msgs || []).map((m) => (m || "").trim()).filter(Boolean);
+  };
+
+  const readFollowUps = async (): Promise<string[]> => {
+    const raw = hooks?.getFollowUpMessages?.();
+    const msgs = raw instanceof Promise ? await raw : raw;
+    return (msgs || []).map((m) => (m || "").trim()).filter(Boolean);
+  };
+
+  const injectSteeringMessages = async (): Promise<void> => {
+    const steering = await readSteering();
+    if (steering.length === 0) return;
+
+    // Update guardrail state: steering may mention time.
+    if (!userMentionedTime) {
+      userMentionedTime = queryMentionsTime(steering.join(" "));
+    }
+
+    onStep({
+      type: "thinking",
+      content:
+        steering.length === 1
+          ? `Received new clue: "${steering[0]}". Re-planning...`
+          : `Received ${steering.length} new clues. Re-planning...`,
+    });
+
+    for (const clue of steering) {
+      messages.push({
+        role: "user",
+        content:
+          `[Steering clue]: ${clue}\n\nThe user provided a new clue while you were working. ` +
+          `Incorporate it immediately. If you already found candidate files, reuse their file_ids and verify/rerank.`,
+      });
+    }
+  };
 
   // ─── Initialize messages ──────────────────────────────────
-  let messages: ChatMessage[];
-
   if (isMultiTurn && previousSession && previousSession.messages.length > 0) {
     // Multi-turn: keep previous conversation and append new user message
     messages = [
@@ -350,6 +429,8 @@ export async function runAgent(
   let agentResult: AgentResult | null = null;
   let totalToolCalls = 0;
 
+  emitEvent({ type: "agent_start" });
+
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
     // Check if cancelled before each iteration
     if (signal?.aborted) {
@@ -360,7 +441,20 @@ export async function runAgent(
       break;
     }
 
+    emitEvent({ type: "turn_start", iteration });
+    let turnEnded = false;
+    const endTurn = () => {
+      if (turnEnded) return;
+      turnEnded = true;
+      emitEvent({ type: "turn_end", iteration });
+    };
+
+    // Steering: inject any queued user clues before calling the LLM.
+    await injectSteeringMessages();
+
     let response;
+    let assistantStreamId: string | null = null;
+    let assistantStreamContent = "";
     try {
       // Compress old tool results to save context tokens
       let compressedMessages = compressMessages(messages);
@@ -399,19 +493,41 @@ export async function runAgent(
       // as separate thinking steps — that causes UI fragmentation.
       // Instead, we show a single progress indicator during streaming,
       // and emit the full thinking text once streaming completes.
-      let streamedLength = 0;
+      let streamedPlaceholderShown = false;
       response = await streamChatCompletion({
         messages: compressedMessages,
         tools: availableTools,
         temperature: dynamicTemp,
         maxTokens: dynamicMaxTokens,
         signal,
-        onPartialContent: () => {
-          // Show a progress indicator only once (not per-chunk)
-          if (streamedLength === 0) {
+        onPartialContent: (delta) => {
+          if (!delta) return;
+
+          // If UI provided an event handler, stream content updates to it.
+          if (hooks?.onEvent) {
+            if (!assistantStreamId) {
+              assistantStreamId = `assistant_${Date.now()}_${iteration}`;
+              emitEvent({
+                type: "assistant_message_start",
+                messageId: assistantStreamId,
+                kind: "thinking",
+              });
+            }
+            assistantStreamContent += delta;
+            emitEvent({
+              type: "assistant_message_update",
+              messageId: assistantStreamId,
+              delta,
+              content: assistantStreamContent,
+            });
+            return;
+          }
+
+          // Fallback: show a single progress indicator (avoid UI fragmentation).
+          if (!streamedPlaceholderShown) {
+            streamedPlaceholderShown = true;
             onStep({ type: "thinking", content: "Analyzing..." });
           }
-          streamedLength++;
         },
       });
     } catch (error) {
@@ -421,6 +537,7 @@ export async function runAgent(
           type: "error",
           content: "Search cancelled by user.",
         });
+        endTurn();
         break;
       }
       throw error; // Re-throw non-abort errors
@@ -428,10 +545,41 @@ export async function runAgent(
 
     // If LLM returned text content (thinking), emit it
     if (response.content) {
-      onStep({
-        type: "thinking",
-        content: response.content,
-      });
+      // Close out the streaming lifecycle (if any).
+      if (hooks?.onEvent && assistantStreamId) {
+        emitEvent({
+          type: "assistant_message_end",
+          messageId: assistantStreamId,
+          content: response.content,
+        });
+      }
+
+      // If a UI event stream is present, prefer it over step-based thinking to avoid duplication.
+      if (!hooks?.onEvent) {
+        onStep({
+          type: "thinking",
+          content: response.content,
+        });
+      } else if (!assistantStreamId) {
+        // Non-streaming providers: emit a single assistant message lifecycle.
+        const messageId = `assistant_${Date.now()}_${iteration}`;
+        emitEvent({
+          type: "assistant_message_start",
+          messageId,
+          kind: "thinking",
+        });
+        emitEvent({
+          type: "assistant_message_update",
+          messageId,
+          delta: response.content,
+          content: response.content,
+        });
+        emitEvent({
+          type: "assistant_message_end",
+          messageId,
+          content: response.content,
+        });
+      }
 
       // Add assistant message to conversation
       messages.push({
@@ -440,6 +588,16 @@ export async function runAgent(
         tool_calls: response.toolCalls ?? undefined,
       });
     } else if (response.toolCalls) {
+      // If we streamed text but ended up with tool calls and no final content,
+      // still close out the assistant message lifecycle.
+      if (hooks?.onEvent && assistantStreamId) {
+        emitEvent({
+          type: "assistant_message_end",
+          messageId: assistantStreamId,
+          content: assistantStreamContent,
+        });
+      }
+
       // No text content, but has tool calls - add the message
       messages.push({
         role: "assistant",
@@ -450,6 +608,25 @@ export async function runAgent(
 
     // If no tool calls, the agent is done thinking (shouldn't happen often with tools)
     if (!response.toolCalls || response.toolCalls.length === 0) {
+      // Follow-ups: if user queued messages after we would stop, keep going.
+      const followUps = await readFollowUps();
+      if (followUps.length > 0) {
+        if (!userMentionedTime) {
+          userMentionedTime = queryMentionsTime(followUps.join(" "));
+        }
+        for (const clue of followUps) {
+          messages.push({
+            role: "user",
+            content:
+              `[Follow-up clue]: ${clue}\n\nThe user provided additional information. ` +
+              `Use your previous tool results and file_ids to refine and finish.`,
+          });
+        }
+        endTurn();
+        // Continue with another iteration/turn instead of stopping.
+        continue;
+      }
+
       // LLM finished without calling finish - create a default result
       if (!agentResult) {
         agentResult = {
@@ -458,6 +635,7 @@ export async function runAgent(
           clarifyingQuestions: [],
         };
       }
+      endTurn();
       break;
     }
 
@@ -497,47 +675,156 @@ export async function runAgent(
       });
     }
 
-    // ─── Execute tools in parallel ────────────────────────────
-    if (signal?.aborted) break;
+    // ─── Execute tools sequentially (steerable) ───────────────
+    if (signal?.aborted) {
+      endTurn();
+      break;
+    }
 
-    const toolResults = await Promise.allSettled(
-      preparedCalls.map(({ toolName, toolArgsStr }) =>
-        executeTool(toolName, toolArgsStr),
-      ),
-    );
+    let steeringTriggered = false;
 
-    // ─── Process results in order ─────────────────────────────
     for (let i = 0; i < preparedCalls.length; i++) {
-      const { toolCall, toolName } = preparedCalls[i];
-      const settled = toolResults[i];
+      let { toolCall, toolName, toolArgsStr, toolArgs } = preparedCalls[i];
 
-      if (settled.status === "fulfilled") {
-        const { result, agentResult: finishResult } = settled.value;
+      if (signal?.aborted) break;
 
-        // Emit tool_result step
+      // Guardrail: don't allow finish with invented file_ids.
+      // If the registry is empty or none of the provided ids exist, treat as a tool error
+      // and continue the loop so the model is forced to search first.
+      if (toolName === "finish") {
+        const registrySize = getRegisteredFiles().length;
+        const finishArgs = toolArgs as {
+          file_ids?: unknown;
+          summary?: unknown;
+          clarifying_questions?: unknown;
+        };
+
+        const provided = Array.isArray(finishArgs.file_ids)
+          ? (finishArgs.file_ids as unknown[]).filter(
+              (e): e is Record<string, unknown> =>
+                !!e && typeof e === "object" && !Array.isArray(e),
+            )
+          : [];
+        const validEntries = provided
+          .filter((e) => typeof e?.file_id === "number")
+          .filter(
+            (e) =>
+              (e.file_id as number) >= 0 &&
+              (e.file_id as number) < registrySize,
+          )
+          .slice(0, 10);
+
+        if (validEntries.length === 0 && provided.length > 0) {
+          const errorMsg =
+            registrySize === 0
+              ? "finish called before any files were found (empty registry)."
+              : "finish referenced only invalid file_ids (not in registry).";
+
+          emitEvent({
+            type: "tool_execution_start",
+            toolCallId: toolCall.id,
+            toolName,
+            args: toolArgs,
+          });
+
+          onStep({
+            type: "error",
+            content: `Tool finish failed: ${errorMsg}`,
+            toolName,
+          });
+
+          messages.push({
+            role: "tool",
+            content: JSON.stringify({ error: errorMsg }),
+            tool_call_id: toolCall.id,
+          });
+
+          emitEvent({
+            type: "tool_execution_end",
+            toolCallId: toolCall.id,
+            toolName,
+            isError: true,
+            result: JSON.stringify({ error: errorMsg }),
+          });
+
+          messages.push({
+            role: "system",
+            content:
+              `Your finish call was invalid: ${errorMsg} ` +
+              `You MUST only reference file_ids returned by search_files/list_recent_files/scan_directory. ` +
+              `Call search_files first, then call finish with valid file_ids.`,
+          });
+
+          // Stop executing other tool calls from this assistant message.
+          break;
+        }
+
+        // If there are some valid entries, replace args so executeFinish can't drop them all.
+        if (
+          validEntries.length > 0 &&
+          validEntries.length !== provided.length
+        ) {
+          const summary =
+            typeof finishArgs.summary === "string" ? finishArgs.summary : "";
+          const clarifying_questions = Array.isArray(
+            finishArgs.clarifying_questions,
+          )
+            ? finishArgs.clarifying_questions
+            : undefined;
+          const fixedArgs = {
+            file_ids: validEntries,
+            summary,
+            ...(clarifying_questions ? { clarifying_questions } : {}),
+          };
+          const fixedArgsStr = JSON.stringify(fixedArgs);
+          preparedCalls[i] = {
+            ...preparedCalls[i],
+            toolArgs: fixedArgs as Record<string, unknown>,
+            toolArgsStr: fixedArgsStr,
+          };
+          toolArgs = fixedArgs as Record<string, unknown>;
+          toolArgsStr = fixedArgsStr;
+        }
+      }
+
+      emitEvent({
+        type: "tool_execution_start",
+        toolCallId: toolCall.id,
+        toolName,
+        args: toolArgs,
+      });
+
+      try {
+        const { result, agentResult: finishResult } = await executeTool(
+          toolName,
+          toolArgsStr,
+        );
+
         const resultSummary = summarizeToolResult(toolName, result);
         onStep({ type: "tool_result", content: resultSummary, toolName });
 
-        // Add (possibly truncated) tool result to conversation
         messages.push({
           role: "tool",
           content: truncateToolResultForLLM(toolName, result),
           tool_call_id: toolCall.id,
         });
 
-        // If this was finish, validate and capture the result
+        emitEvent({
+          type: "tool_execution_end",
+          toolCallId: toolCall.id,
+          toolName,
+          isError: false,
+          result,
+        });
+
         if (toolName === "finish" && finishResult) {
           agentResult = validateFinishResult(finishResult);
         }
-      } else {
-        // Tool execution failed
+      } catch (e) {
         if (signal?.aborted) break;
 
         const errorMsg =
-          settled.reason instanceof Error
-            ? settled.reason.message
-            : "Tool execution failed";
-
+          e instanceof Error ? e.message : "Tool execution failed";
         onStep({
           type: "error",
           content: `Tool ${toolName} failed: ${errorMsg}`,
@@ -550,13 +837,77 @@ export async function runAgent(
           tool_call_id: toolCall.id,
         });
 
-        // Error recovery guidance: tell the LLM to try a different approach
+        emitEvent({
+          type: "tool_execution_end",
+          toolCallId: toolCall.id,
+          toolName,
+          isError: true,
+          result: JSON.stringify({ error: errorMsg }),
+        });
+
         messages.push({
           role: "system",
           content:
             `Tool "${toolName}" failed with: ${errorMsg}. ` +
             `Analyze the error and try a different approach. Do NOT retry with the same parameters.`,
         });
+      }
+
+      // If this turn produced a final result, stop early.
+      if (agentResult) break;
+
+      // Check steering after each tool execution.
+      const steering = await readSteering();
+      if (steering.length > 0) {
+        steeringTriggered = true;
+
+        onStep({
+          type: "thinking",
+          content:
+            "New clue received while executing tools. Skipping remaining tool calls and continuing...",
+        });
+
+        // IMPORTANT: some providers require a tool result for EVERY tool call
+        // before the next assistant message. So we emit "skipped" tool results
+        // for the remaining calls to keep the protocol consistent.
+        for (let j = i + 1; j < preparedCalls.length; j++) {
+          const skipped = preparedCalls[j];
+          messages.push({
+            role: "tool",
+            content: JSON.stringify({
+              skipped: true,
+              reason: "Skipped due to queued user message.",
+            }),
+            tool_call_id: skipped.toolCall.id,
+          });
+          emitEvent({
+            type: "tool_execution_end",
+            toolCallId: skipped.toolCall.id,
+            toolName: skipped.toolName,
+            isError: true,
+            skipped: true,
+            result: JSON.stringify({
+              skipped: true,
+              reason: "Skipped due to queued user message.",
+            }),
+          });
+        }
+
+        // Update guardrails based on steering content, then inject as user messages.
+        if (!userMentionedTime) {
+          userMentionedTime = queryMentionsTime(steering.join(" "));
+        }
+
+        for (const clue of steering) {
+          messages.push({
+            role: "user",
+            content:
+              `[Steering clue]: ${clue}\n\nThe user provided a new clue while you were working. ` +
+              `Incorporate it immediately. If you already found candidate files, reuse their file_ids and verify/rerank.`,
+          });
+        }
+
+        break;
       }
     }
 
@@ -565,7 +916,14 @@ export async function runAgent(
 
     // If finish was called, we're done
     if (agentResult) {
+      endTurn();
       break;
+    }
+
+    // If we injected steering, continue with the next assistant turn immediately.
+    if (steeringTriggered) {
+      endTurn();
+      continue;
     }
 
     // ─── Convergence Nudge ──────────────────────────────────
@@ -585,6 +943,8 @@ export async function runAgent(
           `call finish with your best matches so far, or call finish with empty results and explain what you tried.`,
       });
     }
+
+    endTurn();
   }
 
   // If we exhausted iterations or were cancelled without a result, create a default
@@ -631,6 +991,7 @@ export async function runAgent(
   });
 
   // Return result with session for potential multi-turn continuation
+  emitEvent({ type: "agent_end" });
   return {
     ...agentResult,
     session: {
@@ -671,7 +1032,10 @@ const VERIFY_TOOLS = new Set([
  * This reduces tool definition tokens by ~40% in early iterations
  * and prevents the LLM from calling irrelevant tools.
  */
-function getAvailableTools(hasFiles: boolean, hasImages: boolean): ToolDefinition[] {
+function getAvailableTools(
+  hasFiles: boolean,
+  hasImages: boolean,
+): ToolDefinition[] {
   return TOOL_DEFINITIONS.filter((t) => {
     const name = t.function.name;
 
@@ -742,7 +1106,10 @@ function aggressiveCompress(messages: ChatMessage[]): ChatMessage[] {
       if (msg.role === "tool") {
         result.push({ ...msg, content: '{"summary":"(compressed)"}' });
       } else {
-        result.push({ ...msg, content: msg.content ? msg.content.slice(0, 100) : "" });
+        result.push({
+          ...msg,
+          content: msg.content ? msg.content.slice(0, 100) : "",
+        });
       }
     }
   }
@@ -871,6 +1238,8 @@ function formatToolCallDescription(
         parts.push(`types: ${(args.file_types as string[]).join(", ")}`);
       if (args.date_after) parts.push(`after: ${args.date_after}`);
       if (args.name_pattern) parts.push(`name: *${args.name_pattern}*`);
+      if (typeof args.offset === "number") parts.push(`offset: ${args.offset}`);
+      if (typeof args.limit === "number") parts.push(`limit: ${args.limit}`);
       return `Searching files (${parts.join(", ")})`;
     }
     case "find_directories":
@@ -939,7 +1308,17 @@ function truncateToolResultForLLM(
         if (result.files && result.files.length > 10) {
           result.files = result.files.slice(0, 10);
           result.truncated = true;
-          result.note = `Showing top 10 of ${result.count} files. Use these file_ids.`;
+          const total =
+            typeof result.total_candidates === "number"
+              ? result.total_candidates
+              : typeof result.count === "number"
+                ? result.count
+                : result.files.length;
+          const next =
+            typeof result.next_offset === "number" ? result.next_offset : null;
+          result.note =
+            `Showing top 10 of ${total} candidates. Use these file_ids.` +
+            (next !== null ? ` To fetch more, call search_files with offset=${next}.` : "");
         }
         return JSON.stringify(result);
       }

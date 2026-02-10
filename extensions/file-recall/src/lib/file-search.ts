@@ -33,6 +33,7 @@ export async function runMdfind(
   dirs: string[],
 ): Promise<string[]> {
   const allPaths: string[] = [];
+  const MAX_BUFFER = 8 * 1024 * 1024;
 
   if (dirs.length > 0) {
     for (const dir of dirs) {
@@ -42,7 +43,7 @@ export async function runMdfind(
           ["-onlyin", dir, query],
           {
             timeout: 15000,
-            maxBuffer: 1024 * 1024,
+            maxBuffer: MAX_BUFFER,
           },
         );
         const paths = stdout
@@ -58,7 +59,7 @@ export async function runMdfind(
     try {
       const { stdout } = await execFileAsync("mdfind", [query], {
         timeout: 15000,
-        maxBuffer: 1024 * 1024,
+        maxBuffer: MAX_BUFFER,
       });
       const paths = stdout
         .trim()
@@ -82,15 +83,62 @@ export async function runMdfind(
 export async function pathsToResults(
   paths: string[],
   limit: number,
+  options?: { preserveOrder?: boolean },
 ): Promise<FileResult[]> {
   const results: FileResult[] = [];
   const uniquePaths = [...new Set(paths)];
 
-  for (const filePath of uniquePaths.slice(0, limit)) {
+  for (const filePath of uniquePaths) {
     try {
       const stats = await stat(filePath);
       if (!stats.isFile()) continue;
 
+      results.push({
+        path: filePath,
+        name: basename(filePath),
+        extension: extname(filePath).replace(".", "").toLowerCase(),
+        size: stats.size,
+        modifiedAt: stats.mtime,
+        createdAt: stats.birthtime,
+        sizeFormatted: formatSize(stats.size),
+      });
+      if (results.length >= limit) break;
+    } catch {
+      continue;
+    }
+  }
+
+  if (!options?.preserveOrder) {
+    results.sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime());
+  }
+  return results;
+}
+
+/**
+ * Convert a page of file paths to FileResult objects, preserving the input order.
+ * Also returns the next offset so callers can paginate without repeating paths,
+ * even when some paths are skipped (permissions, missing files, etc.).
+ */
+export async function pathsToResultsPage(
+  paths: string[],
+  offset: number,
+  limit: number,
+): Promise<{ results: FileResult[]; nextOffset: number; totalCandidates: number }> {
+  const results: FileResult[] = [];
+  const uniquePaths = [...new Set(paths)];
+  const totalCandidates = uniquePaths.length;
+
+  const start = Math.max(0, Math.floor(offset || 0));
+  const max = Math.max(1, Math.floor(limit || 1));
+
+  let idx = start;
+  while (idx < totalCandidates && results.length < max) {
+    const filePath = uniquePaths[idx];
+    idx++;
+    if (!filePath) continue;
+    try {
+      const stats = await stat(filePath);
+      if (!stats.isFile()) continue;
       results.push({
         path: filePath,
         name: basename(filePath),
@@ -105,8 +153,7 @@ export async function pathsToResults(
     }
   }
 
-  results.sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime());
-  return results;
+  return { results, nextOffset: idx, totalCandidates };
 }
 
 /**

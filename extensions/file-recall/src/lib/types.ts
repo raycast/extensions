@@ -74,6 +74,49 @@ export interface AgentStep {
   toolArgs?: Record<string, unknown>;
 }
 
+// ─── Agent Event Stream Types ────────────────────────────────
+
+/**
+ * Fine-grained events for streaming UI updates (pi-mono style).
+ * UI can render a single assistant "thinking" message that is updated in place,
+ * instead of appending many small "thinking" steps.
+ */
+export type AgentEvent =
+  | { type: "agent_start" }
+  | { type: "agent_end" }
+  | { type: "turn_start"; iteration: number }
+  | { type: "turn_end"; iteration: number }
+  | {
+      type: "assistant_message_start";
+      messageId: string;
+      kind: "thinking" | "answer";
+    }
+  | {
+      type: "assistant_message_update";
+      messageId: string;
+      delta: string;
+      content: string;
+    }
+  | {
+      type: "assistant_message_end";
+      messageId: string;
+      content: string;
+    }
+  | {
+      type: "tool_execution_start";
+      toolCallId: string;
+      toolName: string;
+      args: Record<string, unknown>;
+    }
+  | {
+      type: "tool_execution_end";
+      toolCallId: string;
+      toolName: string;
+      isError: boolean;
+      result: string;
+      skipped?: boolean;
+    };
+
 /**
  * The final result returned by the agent.
  */

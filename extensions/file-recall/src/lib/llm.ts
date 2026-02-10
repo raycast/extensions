@@ -180,7 +180,11 @@ async function rawApiCall(
   }
 
   // Should not reach here, but safety fallback
-  return { ok: false, status: 429, errorText: "Rate limit exceeded after retries" };
+  return {
+    ok: false,
+    status: 429,
+    errorText: "Rate limit exceeded after retries",
+  };
 }
 
 /**
@@ -340,6 +344,25 @@ export async function chatCompletion(
  * Also accepts common LLM variations: kwargs, parameters, arguments, input
  */
 function parseToolCallFromText(text: string): ToolCall | null {
+  const tryParseJsonObject = (candidate: string): unknown | null => {
+    const trimmed = candidate.trim();
+    if (!trimmed) return null;
+
+    // First try strict JSON.
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      // Fallback: tolerate trailing commas like {"a":1,} or [1,2,]
+      // LLMs often emit these; JSON.parse rejects them.
+      const withoutTrailingCommas = trimmed.replace(/,(\s*[}\]])/g, "$1");
+      try {
+        return JSON.parse(withoutTrailingCommas);
+      } catch {
+        return null;
+      }
+    }
+  };
+
   try {
     // Extract JSON from the response (may have markdown code blocks)
     const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || [
@@ -353,19 +376,25 @@ function parseToolCallFromText(text: string): ToolCall | null {
     const braceEnd = jsonStr.lastIndexOf("}");
     if (braceStart === -1 || braceEnd === -1) return null;
 
-    const parsed = JSON.parse(jsonStr.substring(braceStart, braceEnd + 1));
+    const parsed = tryParseJsonObject(
+      jsonStr.substring(braceStart, braceEnd + 1),
+    ) as Record<string, unknown> | null;
+    if (!parsed || typeof parsed !== "object") return null;
 
     // Accept various tool name keys
     const toolName =
-      parsed.tool || parsed.name || parsed.function || parsed.tool_name;
+      (parsed as Record<string, unknown>).tool ||
+      (parsed as Record<string, unknown>).name ||
+      (parsed as Record<string, unknown>).function ||
+      (parsed as Record<string, unknown>).tool_name;
     if (toolName && typeof toolName === "string") {
       // Accept various argument keys that LLMs commonly use
       const toolArgs =
-        parsed.args ||
-        parsed.kwargs ||
-        parsed.parameters ||
-        parsed.arguments ||
-        parsed.input ||
+        (parsed as Record<string, unknown>).args ||
+        (parsed as Record<string, unknown>).kwargs ||
+        (parsed as Record<string, unknown>).parameters ||
+        (parsed as Record<string, unknown>).arguments ||
+        (parsed as Record<string, unknown>).input ||
         {};
       return {
         id: `fallback_${Date.now()}`,
@@ -489,7 +518,10 @@ export async function streamChatCompletion(
       let streamDone = false;
       while (!streamDone) {
         const { done, value } = await reader.read();
-        if (done) { streamDone = true; break; }
+        if (done) {
+          streamDone = true;
+          break;
+        }
 
         buffer += decoder.decode(value, { stream: true });
 
@@ -551,7 +583,9 @@ export async function streamChatCompletion(
     const toolCalls: ToolCall[] | null =
       toolCallAccum.size > 0
         ? Array.from(toolCallAccum.values()).map((tc) => ({
-            id: tc.id || `stream_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+            id:
+              tc.id ||
+              `stream_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
             type: "function" as const,
             function: {
               name: tc.name,

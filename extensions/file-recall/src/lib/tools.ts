@@ -4,7 +4,12 @@ import {
   AgentResult,
   FileResult,
 } from "./types";
-import { runMdfind, pathsToResults, findDirectories } from "./file-search";
+import {
+  runMdfind,
+  pathsToResults,
+  pathsToResultsPage,
+  findDirectories,
+} from "./file-search";
 import { analyzeImage as analyzeImageLLM } from "./llm";
 import { readFile, rm, mkdtemp } from "fs/promises";
 import { execFile } from "child_process";
@@ -29,6 +34,7 @@ export function resetFileRegistry(): void {
   fileRegistry = [];
   filePathIndex = new Map();
   searchHistory = [];
+  searchCache = new Map();
 }
 
 /**
@@ -74,7 +80,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     function: {
       name: "search_files",
       description:
-        "Search for files using macOS Spotlight. Returns files with file_id. Use file_id in other tools and finish.",
+        "Search for files using macOS Spotlight. Returns files with file_id. Supports pagination via offset/limit so you can iteratively fetch more candidates without flooding the context.",
       parameters: {
         type: "object",
         properties: {
@@ -104,6 +110,16 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
           date_before: {
             type: "string",
             description: "ISO date. Only files modified before this date.",
+          },
+          offset: {
+            type: "number",
+            description:
+              "Pagination offset into the candidate list. Default 0. Use next_offset returned by the tool to fetch the next page.",
+          },
+          limit: {
+            type: "number",
+            description:
+              "Max number of files to return in this page. Default is extension preference maxResults.",
           },
         },
       },
@@ -324,8 +340,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
           },
           max_files: {
             type: "number",
-            description:
-              "Max number of files to scan. Default 500, max 1000.",
+            description: "Max number of files to scan. Default 500, max 1000.",
           },
           preview_bytes: {
             type: "number",
@@ -418,6 +433,8 @@ interface SearchFilesArgs {
   name_pattern?: string;
   date_after?: string;
   date_before?: string;
+  offset?: number;
+  limit?: number;
 }
 
 interface FindDirectoriesArgs {
@@ -545,6 +562,88 @@ function buildQueryParts(args: SearchFilesArgs) {
 
 let searchHistory: SearchFilesArgs[] = [];
 
+// ─── Search Cache (pagination) ─────────────────────────────────
+// Cache Spotlight path lists for a given query signature so the agent can
+// request additional pages via offset/limit without rerunning mdfind.
+
+type CachedRankedPath = { path: string; local_score: number };
+let searchCache: Map<string, { ranked: CachedRankedPath[]; createdAtMs: number }> =
+  new Map();
+
+function normalizeSearchArgsForCache(args: SearchFilesArgs): string {
+  const home = process.env.HOME || "~";
+
+  const keywords = (args.keywords || [])
+    .map((k) => (k || "").trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0, 20);
+
+  const file_types = (args.file_types || [])
+    .map((t) => (t || "").trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0, 20)
+    .sort();
+
+  const directory = args.directory
+    ? args.directory.replace(/^~/, home)
+    : undefined;
+
+  const name_pattern = args.name_pattern
+    ? String(args.name_pattern).trim()
+    : undefined;
+
+  const date_after = args.date_after ? String(args.date_after).trim() : undefined;
+  const date_before = args.date_before
+    ? String(args.date_before).trim()
+    : undefined;
+
+  // offset/limit are intentionally excluded from the cache key
+  return JSON.stringify({
+    keywords,
+    directory,
+    file_types,
+    name_pattern,
+    date_after,
+    date_before,
+  });
+}
+
+function localScorePath(path: string, args: SearchFilesArgs): number {
+  const lowerPath = path.toLowerCase();
+  const name = (path.split("/").pop() || path).toLowerCase();
+  const ext = (name.split(".").pop() || "").toLowerCase();
+
+  const keywords = (args.keywords || [])
+    .map((k) => (k || "").trim().toLowerCase())
+    .filter(Boolean);
+
+  const fileTypes = (args.file_types || [])
+    .map((t) => (t || "").trim().toLowerCase())
+    .filter(Boolean);
+
+  const namePattern = args.name_pattern
+    ? String(args.name_pattern).trim().toLowerCase()
+    : "";
+
+  let score = 0;
+
+  if (namePattern && name.includes(namePattern)) score += 45;
+  if (fileTypes.length > 0 && fileTypes.includes(ext)) score += 20;
+
+  for (const kw of keywords.slice(0, 10)) {
+    if (!kw) continue;
+    if (name.includes(kw)) score += 18;
+    else if (lowerPath.includes(kw)) score += 8;
+  }
+
+  if (args.directory) {
+    const dir = args.directory.replace(/^~/, process.env.HOME || "~").toLowerCase();
+    if (dir && lowerPath.startsWith(dir)) score += 12;
+  }
+
+  return Math.max(0, Math.min(100, score));
+}
+
 /**
  * Check if a new search is redundant (already covered by a prior search).
  * A search is redundant if its parameters are a subset of a previous search:
@@ -553,6 +652,9 @@ let searchHistory: SearchFilesArgs[] = [];
  *  - same or fewer file type filters
  */
 function isRedundantSearch(newArgs: SearchFilesArgs): string | null {
+  // Pagination requests are not redundant by definition.
+  if ((newArgs.offset ?? 0) > 0) return null;
+
   const newKw = new Set((newArgs.keywords || []).map((k) => k.toLowerCase()));
   const newTypes = new Set(
     (newArgs.file_types || []).map((t) => t.toLowerCase()),
@@ -588,7 +690,8 @@ function isRedundantSearch(newArgs: SearchFilesArgs): string | null {
       typeCovered || (newTypes.size > 0 && prevTypes.size === 0);
 
     // Directory: new search is covered if same dir, or prev had no dir (global)
-    const dirRedundant = newDir === prevDir || (!newDir && !prevDir) || (!!newDir && !prevDir);
+    const dirRedundant =
+      newDir === prevDir || (!newDir && !prevDir) || (!!newDir && !prevDir);
 
     // All three must be redundant for the search to be considered covered
     if (kwRedundant && dirRedundant && typeRedundant) {
@@ -612,31 +715,49 @@ function isRedundantSearch(newArgs: SearchFilesArgs): string | null {
 export async function executeSearchFiles(
   args: SearchFilesArgs,
 ): Promise<string> {
-  // Check for redundant search before executing
-  const redundant = isRedundantSearch(args);
-  if (redundant) {
-    return JSON.stringify({
-      count: 0,
-      files: [],
-      message: redundant,
-      already_searched: true,
-    });
+  const requestedOffset = Math.max(0, Math.floor(args.offset ?? 0));
+  const prefMax =
+    parseInt(getPreferenceValues<Preferences.RecallFile>().maxResults) || 20;
+  const requestedLimit =
+    args.limit != null ? Math.floor(args.limit) : prefMax;
+  const limit = Math.min(Math.max(1, requestedLimit), 50);
+
+  // Canonical args: exclude pagination from cache key + redundancy checks.
+  const canonicalArgs: SearchFilesArgs = { ...args, offset: 0, limit: undefined };
+
+  // Redundant-search guard only applies to the first page. Pagination pages are valid.
+  if (requestedOffset === 0) {
+    const redundant = isRedundantSearch(canonicalArgs);
+    if (redundant) {
+      return JSON.stringify({
+        count: 0,
+        files: [],
+        offset: requestedOffset,
+        limit,
+        total_candidates: 0,
+        next_offset: null,
+        message: redundant,
+        already_searched: true,
+      });
+    }
+    searchHistory.push(canonicalArgs);
   }
-  searchHistory.push(args);
+
+  const cacheKey = normalizeSearchArgsForCache(canonicalArgs);
+  const cached = searchCache.get(cacheKey);
+  const cacheHit = !!cached;
   const configDirs = getSearchDirs();
-  const { keywordCond, nameCond, typeCond, dateCond } = buildQueryParts(args);
+  const { keywordCond, nameCond, typeCond, dateCond } =
+    buildQueryParts(canonicalArgs);
 
   // Determine search directories
   let searchIn: string[] = [];
-  if (args.directory) {
-    const dir = args.directory.replace(/^~/, process.env.HOME || "~");
+  if (canonicalArgs.directory) {
+    const dir = canonicalArgs.directory.replace(/^~/, process.env.HOME || "~");
     searchIn = [dir];
   } else {
     searchIn = configDirs;
   }
-
-  const maxResults =
-    parseInt(getPreferenceValues<Preferences.RecallFile>().maxResults) || 20;
 
   // Build progressive queries from most specific to broadest.
   const queries: string[] = [];
@@ -678,74 +799,102 @@ export async function executeSearchFiles(
     queries.push('kMDItemFSName == "*"');
   }
 
-  // Execute queries progressively until we find results
-  const allPaths = new Set<string>();
-  // Track whether the most specific query (with type filter) found anything
-  let typeFilteredFound = false;
+  const MAX_CANDIDATE_CAP = 5000;
+  const minCandidates = Math.max(500, limit * 80);
+  const maxCandidates = Math.min(MAX_CANDIDATE_CAP, minCandidates);
 
-  for (let qi = 0; qi < queries.length; qi++) {
-    const query = queries[qi];
-    try {
-      console.log(`mdfind query: ${query}`);
-      const paths = await runMdfind(query, searchIn);
-      for (const p of paths) allPaths.add(p);
+  let ranked: CachedRankedPath[] | null = cached?.ranked ?? null;
 
-      // Track if type-filtered query (early strategies) found results
-      if (qi <= 1 && paths.length > 0 && typeCond && query.includes(typeCond)) {
-        typeFilteredFound = true;
-      }
+  if (!ranked) {
+    // Execute queries progressively and cache a ranked path list.
+    const allPaths = new Set<string>();
+    let typeFilteredFound = false;
 
-      if (allPaths.size >= maxResults) break;
-    } catch {
-      continue;
-    }
-  }
-
-  // If we have a directory scope, also try globally in these cases:
-  // 1. No results at all
-  // 2. Type-filtered query found nothing but broader query found results
-  //    (the results are likely wrong type - e.g. Go files when searching for PDFs)
-  if (searchIn.length > 0 && contentCond) {
-    const shouldRetryGlobal =
-      allPaths.size === 0 || (typeCond && !typeFilteredFound);
-    if (shouldRetryGlobal) {
-      console.log("Retrying without directory scope...");
-      // Try with type filter first (most precise)
-      if (typeCond) {
-        try {
-          const typeQuery = contentCond
-            ? [contentCond, typeCond].join(" && ")
-            : typeCond;
-          const paths = await runMdfind(typeQuery, []);
-          for (const p of paths) allPaths.add(p);
-        } catch {
-          // ignore
+    for (let qi = 0; qi < queries.length; qi++) {
+      const query = queries[qi];
+      try {
+        console.log(`mdfind query: ${query}`);
+        const paths = await runMdfind(query, searchIn);
+        for (const p of paths) {
+          allPaths.add(p);
+          if (allPaths.size >= maxCandidates) break;
         }
-      }
-      // Also try content-only if still not enough
-      if (allPaths.size < maxResults) {
-        try {
-          const paths = await runMdfind(contentCond, []);
-          for (const p of paths) allPaths.add(p);
-        } catch {
-          // ignore
+
+        if (
+          qi <= 1 &&
+          paths.length > 0 &&
+          typeCond &&
+          query.includes(typeCond)
+        ) {
+          typeFilteredFound = true;
         }
+
+        if (allPaths.size >= maxCandidates) break;
+      } catch {
+        continue;
       }
     }
+
+    // If we have a directory scope, also try globally when directory scope is too narrow.
+    if (searchIn.length > 0 && contentCond) {
+      const shouldRetryGlobal =
+        allPaths.size === 0 || (typeCond && !typeFilteredFound);
+      if (shouldRetryGlobal) {
+        console.log("Retrying without directory scope...");
+        if (typeCond) {
+          try {
+            const typeQuery = contentCond
+              ? [contentCond, typeCond].join(" && ")
+              : typeCond;
+            const paths = await runMdfind(typeQuery, []);
+            for (const p of paths) {
+              allPaths.add(p);
+              if (allPaths.size >= maxCandidates) break;
+            }
+          } catch {
+            // ignore
+          }
+        }
+        if (allPaths.size < maxCandidates) {
+          try {
+            const paths = await runMdfind(contentCond, []);
+            for (const p of paths) {
+              allPaths.add(p);
+              if (allPaths.size >= maxCandidates) break;
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+    }
+
+    const uniquePaths = [...allPaths];
+    ranked = uniquePaths
+      .map((p) => ({ path: p, local_score: localScorePath(p, canonicalArgs) }))
+      .sort((a, b) => {
+        const d = b.local_score - a.local_score;
+        if (d !== 0) return d;
+        const depthA = a.path.split("/").length;
+        const depthB = b.path.split("/").length;
+        if (depthA !== depthB) return depthA - depthB;
+        return a.path.localeCompare(b.path);
+      });
+
+    searchCache.set(cacheKey, { ranked, createdAtMs: Date.now() });
   }
 
-  const uniquePaths = [...allPaths].slice(0, maxResults * 2);
-  const results = await pathsToResults(uniquePaths, maxResults);
+  const candidatePaths = ranked.map((r) => r.path);
+  const scoreByPath = new Map<string, number>(
+    ranked.map((r) => [r.path, r.local_score]),
+  );
 
-  if (results.length === 0) {
-    return JSON.stringify({
-      count: 0,
-      files: [],
-      message: "No files found matching the criteria.",
-    });
-  }
+  const { results, nextOffset, totalCandidates } = await pathsToResultsPage(
+    candidatePaths,
+    requestedOffset,
+    limit,
+  );
 
-  // Register files (with dedup) and return with IDs
   const fileIds = registerFiles(results);
   const fileInfos = results.map((f, i) => ({
     file_id: fileIds[i],
@@ -755,9 +904,34 @@ export async function executeSearchFiles(
     size: f.sizeFormatted,
     modified: f.modifiedAt.toISOString().split("T")[0],
     created: f.createdAt.toISOString().split("T")[0],
+    local_score: scoreByPath.get(f.path) ?? localScorePath(f.path, canonicalArgs),
   }));
 
-  return JSON.stringify({ count: results.length, files: fileInfos });
+  if (fileInfos.length === 0) {
+    return JSON.stringify({
+      count: 0,
+      files: [],
+      offset: requestedOffset,
+      limit,
+      total_candidates: totalCandidates,
+      next_offset: nextOffset < totalCandidates ? nextOffset : null,
+      cache_hit: cacheHit,
+      message:
+        requestedOffset > 0
+          ? "No files found in this page. Try fetching the next page (next_offset) or adjust the query."
+          : "No files found matching the criteria.",
+    });
+  }
+
+  return JSON.stringify({
+    count: fileInfos.length,
+    files: fileInfos,
+    offset: requestedOffset,
+    limit,
+    total_candidates: totalCandidates,
+    next_offset: nextOffset < totalCandidates ? nextOffset : null,
+    cache_hit: cacheHit,
+  });
 }
 
 /**
@@ -844,7 +1018,10 @@ async function extractBinaryDocContent(
             "content.xml",
           ]);
           // Strip XML tags for readable text
-          return stdout.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          return stdout
+            .replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
         } catch {
           return null;
         }
@@ -852,9 +1029,7 @@ async function extractBinaryDocContent(
     }
 
     // Office/iWork docs: use macOS textutil to convert to plain text
-    if (
-      ["docx", "doc", "pages", "odt", "rtf"].includes(lowerExt)
-    ) {
+    if (["docx", "doc", "pages", "odt", "rtf"].includes(lowerExt)) {
       const { stdout } = await execFileAsync("textutil", [
         "-convert",
         "txt",
@@ -867,14 +1042,9 @@ async function extractBinaryDocContent(
     // XLSX/Numbers/ODS: use mdimport for basic text extraction
     if (["xlsx", "xls", "numbers", "csv", "ods"].includes(lowerExt)) {
       try {
-        const { stdout } = await execFileAsync("mdimport", [
-          "-d2",
-          filePath,
-        ]);
+        const { stdout } = await execFileAsync("mdimport", ["-d2", filePath]);
         // Extract text content from mdimport debug output
-        const textMatch = stdout.match(
-          /kMDItemTextContent\s*=\s*"([^"]+)"/,
-        );
+        const textMatch = stdout.match(/kMDItemTextContent\s*=\s*"([^"]+)"/);
         if (textMatch) return textMatch[1];
       } catch {
         // Fallback: try Spotlight metadata
@@ -996,7 +1166,9 @@ export async function executeReadFilePreview(
             snippets.push({ line_number: i + 1, content: allLines[i] });
           }
         }
-        const previewText = snippets.map((s) => `${s.line_number}: ${s.content}`).join("\n");
+        const previewText = snippets
+          .map((s) => `${s.line_number}: ${s.content}`)
+          .join("\n");
         return JSON.stringify({
           path: filePath,
           binary: true,
@@ -1005,7 +1177,10 @@ export async function executeReadFilePreview(
           found: true,
           match_count: matchIndices.length,
           total_lines: totalLines,
-          preview: previewText.length > 4000 ? previewText.slice(0, 4000) + "\n... (truncated)" : previewText,
+          preview:
+            previewText.length > 4000
+              ? previewText.slice(0, 4000) + "\n... (truncated)"
+              : previewText,
         });
       }
 
@@ -1020,13 +1195,17 @@ export async function executeReadFilePreview(
         offset,
         lines_shown: lines.length,
         total_lines: totalLines,
-        preview: preview.length > 4000 ? preview.slice(0, 4000) + "\n... (truncated)" : preview,
+        preview:
+          preview.length > 4000
+            ? preview.slice(0, 4000) + "\n... (truncated)"
+            : preview,
       });
     } catch (error) {
       return JSON.stringify({
         path: filePath,
         binary: true,
-        error: error instanceof Error ? error.message : "Failed to extract content",
+        error:
+          error instanceof Error ? error.message : "Failed to extract content",
       });
     }
   }
@@ -1129,6 +1308,139 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
     matches: { line_number: number; content: string }[];
   }[] = [];
 
+  const MAX_FILES_TO_SCAN_IN_DIR = 800;
+  const MAX_DEPTH_CAP = 20;
+
+  // Default extensions when include_all is false (plus binary docs we can extract).
+  const DEFAULT_TEXT_EXTS = new Set([
+    "txt",
+    "log",
+    "md",
+    "json",
+    "csv",
+    "js",
+    "ts",
+    "jsx",
+    "tsx",
+    "py",
+    "go",
+    "java",
+    "sql",
+    "html",
+    "css",
+    "xml",
+    "yaml",
+    "yml",
+    "toml",
+    "cfg",
+    "conf",
+    "ini",
+    "sh",
+    "bash",
+    "zsh",
+    "env",
+    "properties",
+  ]);
+
+  // Directory exclusions to keep recursive search focused and fast.
+  // (Mirrors scan_directory exclusions, with a couple common extras.)
+  const GREP_EXCLUDE_DIRS = new Set([
+    "node_modules",
+    ".git",
+    ".svn",
+    "__pycache__",
+    ".cache",
+    ".Trash",
+    "Library",
+    ".npm",
+    ".cargo",
+    ".rustup",
+    "vendor",
+    "dist",
+    "build",
+    ".next",
+    "pkg",
+    ".venv",
+    "venv",
+  ]);
+
+  function compilePatternRegex(pattern: string): RegExp | null {
+    try {
+      return new RegExp(pattern, "i");
+    } catch {
+      return null;
+    }
+  }
+
+  async function collectCandidateFilesInDir(
+    dir: string,
+    maxDepthRaw: number | undefined,
+    includeAll: boolean | undefined,
+  ): Promise<string[]> {
+    const maxDepth =
+      maxDepthRaw != null
+        ? Math.max(1, Math.min(maxDepthRaw, MAX_DEPTH_CAP))
+        : MAX_DEPTH_CAP;
+
+    const excludeArgs: string[] = [];
+    for (const d of GREP_EXCLUDE_DIRS) {
+      excludeArgs.push("-not", "-path", `*/${d}/*`);
+    }
+
+    const allowedExts =
+      includeAll === true
+        ? null
+        : new Set<string>([
+            ...DEFAULT_TEXT_EXTS,
+            ...Array.from(BINARY_DOC_EXTENSIONS),
+          ]);
+
+    const extFilterArgs: string[] = [];
+    if (allowedExts) {
+      const exts = Array.from(allowedExts).sort();
+      extFilterArgs.push("(");
+      for (let i = 0; i < exts.length; i++) {
+        if (i > 0) extFilterArgs.push("-o");
+        extFilterArgs.push("-iname", `*.${exts[i]}`);
+      }
+      extFilterArgs.push(")");
+    }
+
+    const unique = new Set<string>();
+
+    // Breadth-first by depth: shallow files first.
+    for (let depth = 1; depth <= maxDepth; depth++) {
+      if (unique.size >= MAX_FILES_TO_SCAN_IN_DIR) break;
+      try {
+        const findArgs = [
+          dir,
+          "-mindepth",
+          String(depth),
+          "-maxdepth",
+          String(depth),
+          "-type",
+          "f",
+          ...excludeArgs,
+          ...extFilterArgs,
+        ];
+
+        const { stdout } = await execFileAsync("find", findArgs, {
+          timeout: 10000,
+          maxBuffer: 4 * 1024 * 1024,
+        });
+        const paths = stdout.trim().split("\n").filter(Boolean);
+        for (const p of paths) {
+          unique.add(p);
+          if (unique.size >= MAX_FILES_TO_SCAN_IN_DIR) break;
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    return Array.from(unique);
+  }
+
   // Collect file paths to search
   const filesToSearch: { fileId?: number; path: string; name: string }[] = [];
 
@@ -1142,30 +1454,18 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
   }
 
   if (args.path) {
-    // grep recursively in directory
+    // Directory scope: enumerate candidate files via find (portable on macOS),
+    // then grep per-file. This avoids GNU-only grep flags (--include/--max-depth).
     const dir = args.path.replace(/^~/, process.env.HOME || "~");
-    try {
-      const grepArgs = ["-Eril"]; // Extended regex, case-insensitive, recursive, files-with-matches
-      if (!args.include_all) {
-        grepArgs.push(
-          "--include=*.{txt,log,md,json,csv,js,ts,py,go,java,sql,html,css,xml,yaml,yml,toml,cfg,conf,ini,sh}",
-        );
-      }
-      if (args.max_depth != null) {
-        grepArgs.push(`--max-depth=${args.max_depth}`);
-      }
-      grepArgs.push(args.pattern, dir);
-      const { stdout } = await execFileAsync("grep", grepArgs, {
-        timeout: 10000,
-        maxBuffer: 1024 * 1024,
-      });
-      const paths = stdout.trim().split("\n").filter(Boolean).slice(0, 20);
-      for (const p of paths) {
-        const name = p.split("/").pop() || p;
-        filesToSearch.push({ path: p, name });
-      }
-    } catch {
-      // grep returns exit code 1 if no matches - that's ok
+    const candidatePaths = await collectCandidateFilesInDir(
+      dir,
+      args.max_depth,
+      args.include_all,
+    );
+
+    for (const p of candidatePaths) {
+      const name = p.split("/").pop() || p;
+      filesToSearch.push({ path: p, name });
     }
   }
 
@@ -1181,7 +1481,11 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
 
   // Search each file
   let totalMatches = 0;
+  const patternRegex = compilePatternRegex(args.pattern);
   for (const fileInfo of filesToSearch) {
+    // Stop early if we have enough matched files
+    if (results.length >= 20) break;
+
     // Check if this is a binary document that needs extraction
     const ext = (fileInfo.path.split(".").pop() || "").toLowerCase();
     if (BINARY_DOC_EXTENSIONS.has(ext)) {
@@ -1189,21 +1493,39 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
         const extracted = await extractBinaryDocContent(fileInfo.path, ext);
         if (extracted) {
           const lines = extracted.split("\n");
-          const patternLower = args.pattern.toLowerCase();
           const matches: { line_number: number; content: string }[] = [];
-          for (let i = 0; i < lines.length && matches.length < maxMatchesPerFile; i++) {
-            if (lines[i].toLowerCase().includes(patternLower)) {
+          for (
+            let i = 0;
+            i < lines.length && matches.length < maxMatchesPerFile;
+            i++
+          ) {
+            const line = lines[i] ?? "";
+            const isMatch = patternRegex
+              ? patternRegex.test(line)
+              : line.toLowerCase().includes(args.pattern.toLowerCase());
+            if (isMatch) {
               const content = lines[i].trim();
               matches.push({
                 line_number: i + 1,
-                content: content.length > 200 ? content.slice(0, 200) + "..." : content,
+                content:
+                  content.length > 200
+                    ? content.slice(0, 200) + "..."
+                    : content,
               });
             }
           }
           if (matches.length > 0) {
             totalMatches += matches.length;
+            // Ensure path-scoped results are registered for follow-up tool calls.
+            let registeredId = fileInfo.fileId;
+            if (registeredId === undefined) {
+              const meta = await pathsToResults([fileInfo.path], 1);
+              if (meta.length > 0) {
+                registeredId = registerFiles(meta)[0];
+              }
+            }
             results.push({
-              file_id: fileInfo.fileId,
+              file_id: registeredId,
               path: fileInfo.path,
               name: fileInfo.name,
               matches,
@@ -1220,8 +1542,10 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
       const { stdout } = await execFileAsync(
         "grep",
         [
-          "-Ein",
-          `--max-count=${maxMatchesPerFile}`,
+          "-Eain",
+          "-m",
+          String(maxMatchesPerFile),
+          "--",
           args.pattern,
           fileInfo.path,
         ],
@@ -1231,8 +1555,10 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
       const matchLines = stdout.trim().split("\n").filter(Boolean);
       const matches = matchLines.map((line) => {
         const colonIdx = line.indexOf(":");
-        const lineNum = parseInt(line.substring(0, colonIdx)) || 0;
-        const content = line.substring(colonIdx + 1).trim();
+        const lineNum =
+          colonIdx > 0 ? parseInt(line.substring(0, colonIdx)) || 0 : 0;
+        const content =
+          colonIdx > 0 ? line.substring(colonIdx + 1).trim() : line.trim();
         return {
           line_number: lineNum,
           content:
@@ -1242,8 +1568,16 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
 
       if (matches.length > 0) {
         totalMatches += matches.length;
+        // Ensure path-scoped results are registered for follow-up tool calls.
+        let registeredId = fileInfo.fileId;
+        if (registeredId === undefined) {
+          const meta = await pathsToResults([fileInfo.path], 1);
+          if (meta.length > 0) {
+            registeredId = registerFiles(meta)[0];
+          }
+        }
         results.push({
-          file_id: fileInfo.fileId,
+          file_id: registeredId,
           path: fileInfo.path,
           name: fileInfo.name,
           matches,
@@ -1253,6 +1587,9 @@ export async function executeGrepFiles(args: GrepFilesArgs): Promise<string> {
       // grep exit code 1 = no match, that's normal
       continue;
     }
+
+    // Stop early if we have enough matches
+    if (results.length >= 20) break;
   }
 
   return JSON.stringify({
@@ -1888,10 +2225,14 @@ export async function executeScanDirectory(
   // Read each file's first N bytes and test the regex
   for (const filePath of pathsToScan) {
     try {
-      const { stdout } = await execFileAsync("head", ["-c", String(previewBytes), filePath], {
-        timeout: 2000,
-        maxBuffer: previewBytes + 1024,
-      });
+      const { stdout } = await execFileAsync(
+        "head",
+        ["-c", String(previewBytes), filePath],
+        {
+          timeout: 2000,
+          maxBuffer: previewBytes + 1024,
+        },
+      );
 
       if (regex.test(stdout)) {
         // File matches! Register it and add to results
@@ -1906,9 +2247,7 @@ export async function executeScanDirectory(
             ext: f.extension,
             size: f.sizeFormatted,
             preview:
-              stdout.length > 200
-                ? stdout.slice(0, 200) + "..."
-                : stdout,
+              stdout.length > 200 ? stdout.slice(0, 200) + "..." : stdout,
           });
         }
       }
