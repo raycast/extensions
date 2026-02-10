@@ -1,6 +1,6 @@
 # Clipboard Type Changelog
 
-## [Added human cadence typing] {PR_MERGE_DATE}
+## [Added human cadence typing] 2026-02-10
 
 - Added a new preference to enable human cadence typing, which simulates more natural typing by introducing random delays between keystrokes.
 
