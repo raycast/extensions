@@ -123,7 +123,11 @@ export async function pathsToResultsPage(
   paths: string[],
   offset: number,
   limit: number,
-): Promise<{ results: FileResult[]; nextOffset: number; totalCandidates: number }> {
+): Promise<{
+  results: FileResult[];
+  nextOffset: number;
+  totalCandidates: number;
+}> {
   const results: FileResult[] = [];
   const uniquePaths = [...new Set(paths)];
   const totalCandidates = uniquePaths.length;

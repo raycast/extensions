@@ -567,8 +567,10 @@ let searchHistory: SearchFilesArgs[] = [];
 // request additional pages via offset/limit without rerunning mdfind.
 
 type CachedRankedPath = { path: string; local_score: number };
-let searchCache: Map<string, { ranked: CachedRankedPath[]; createdAtMs: number }> =
-  new Map();
+let searchCache: Map<
+  string,
+  { ranked: CachedRankedPath[]; createdAtMs: number }
+> = new Map();
 
 function normalizeSearchArgsForCache(args: SearchFilesArgs): string {
   const home = process.env.HOME || "~";
@@ -592,7 +594,9 @@ function normalizeSearchArgsForCache(args: SearchFilesArgs): string {
     ? String(args.name_pattern).trim()
     : undefined;
 
-  const date_after = args.date_after ? String(args.date_after).trim() : undefined;
+  const date_after = args.date_after
+    ? String(args.date_after).trim()
+    : undefined;
   const date_before = args.date_before
     ? String(args.date_before).trim()
     : undefined;
@@ -637,7 +641,9 @@ function localScorePath(path: string, args: SearchFilesArgs): number {
   }
 
   if (args.directory) {
-    const dir = args.directory.replace(/^~/, process.env.HOME || "~").toLowerCase();
+    const dir = args.directory
+      .replace(/^~/, process.env.HOME || "~")
+      .toLowerCase();
     if (dir && lowerPath.startsWith(dir)) score += 12;
   }
 
@@ -718,12 +724,15 @@ export async function executeSearchFiles(
   const requestedOffset = Math.max(0, Math.floor(args.offset ?? 0));
   const prefMax =
     parseInt(getPreferenceValues<Preferences.RecallFile>().maxResults) || 20;
-  const requestedLimit =
-    args.limit != null ? Math.floor(args.limit) : prefMax;
+  const requestedLimit = args.limit != null ? Math.floor(args.limit) : prefMax;
   const limit = Math.min(Math.max(1, requestedLimit), 50);
 
   // Canonical args: exclude pagination from cache key + redundancy checks.
-  const canonicalArgs: SearchFilesArgs = { ...args, offset: 0, limit: undefined };
+  const canonicalArgs: SearchFilesArgs = {
+    ...args,
+    offset: 0,
+    limit: undefined,
+  };
 
   // Redundant-search guard only applies to the first page. Pagination pages are valid.
   if (requestedOffset === 0) {
@@ -904,7 +913,8 @@ export async function executeSearchFiles(
     size: f.sizeFormatted,
     modified: f.modifiedAt.toISOString().split("T")[0],
     created: f.createdAt.toISOString().split("T")[0],
-    local_score: scoreByPath.get(f.path) ?? localScorePath(f.path, canonicalArgs),
+    local_score:
+      scoreByPath.get(f.path) ?? localScorePath(f.path, canonicalArgs),
   }));
 
   if (fileInfos.length === 0) {

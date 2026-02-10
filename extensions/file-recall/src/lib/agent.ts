@@ -684,7 +684,8 @@ export async function runAgent(
     let steeringTriggered = false;
 
     for (let i = 0; i < preparedCalls.length; i++) {
-      let { toolCall, toolName, toolArgsStr, toolArgs } = preparedCalls[i];
+      const { toolCall, toolName } = preparedCalls[i];
+      let { toolArgsStr, toolArgs } = preparedCalls[i];
 
       if (signal?.aborted) break;
 
@@ -1318,7 +1319,9 @@ function truncateToolResultForLLM(
             typeof result.next_offset === "number" ? result.next_offset : null;
           result.note =
             `Showing top 10 of ${total} candidates. Use these file_ids.` +
-            (next !== null ? ` To fetch more, call search_files with offset=${next}.` : "");
+            (next !== null
+              ? ` To fetch more, call search_files with offset=${next}.`
+              : "");
         }
         return JSON.stringify(result);
       }
