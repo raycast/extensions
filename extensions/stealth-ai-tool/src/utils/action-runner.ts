@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { LLMService } from "./llm-service";
 
 interface ActionConfig {
@@ -52,6 +52,32 @@ let isRunning = false;
 let lastRunTime = 0;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const OSA_TIMEOUT_MS = 5000;
+
+function escapeAppleScriptString(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function runOsaScript(script: string) {
+  return execFileSync("osascript", ["-e", script], {
+    timeout: OSA_TIMEOUT_MS,
+  })
+    .toString()
+    .trim();
+}
+
+function activateApplication(frontApp: string, frontAppBundleId: string) {
+  if (frontAppBundleId && frontAppBundleId !== "com.apple.finder") {
+    const escapedBundleId = escapeAppleScriptString(frontAppBundleId);
+    runOsaScript(`tell application id "${escapedBundleId}" to activate`);
+    return;
+  }
+
+  if (frontApp && frontApp !== "Finder") {
+    const escapedAppName = escapeAppleScriptString(frontApp);
+    runOsaScript(`tell application "${escapedAppName}" to activate`);
+  }
+}
 
 export async function runStealthAction(
   actionId: string,
@@ -115,27 +141,11 @@ async function trySelectAllInActiveField(
 
   try {
     // Reactivate the target app before sending Cmd+A
-    if (frontAppBundleId && frontAppBundleId !== "com.apple.finder") {
-      execSync(
-        `osascript -e 'tell application id "${frontAppBundleId}" to activate'`,
-        { timeout: 5000 },
-      );
-    } else if (frontApp && frontApp !== "Finder") {
-      const escapedAppName = frontApp.replace(/"/g, '\\"');
-      execSync(
-        `osascript -e 'tell application "${escapedAppName}" to activate'`,
-        {
-          timeout: 5000,
-        },
-      );
-    }
+    activateApplication(frontApp, frontAppBundleId);
 
     await sleep(150);
-    execSync(
-      `osascript -e 'tell application "System Events" to keystroke "a" using command down'`,
-      {
-        timeout: 5000,
-      },
+    runOsaScript(
+      `tell application "System Events" to keystroke "a" using command down`,
     );
     await sleep(120);
 
@@ -180,27 +190,23 @@ async function runStealthActionInternal(
   if (isMac) {
     // macOS: Get the PREVIOUS frontmost app (not Raycast)
     try {
-      const previousAppResult = execSync(
-        `osascript -e '
-          tell application "System Events"
-            set frontProc to first process whose frontmost is true
-            set frontName to name of frontProc
-            if frontName is "Raycast" then
-              set allProcs to every process whose visible is true and name is not "Raycast"
-              if (count of allProcs) > 0 then
-                set targetProc to item 1 of allProcs
-                return {name of targetProc, bundle identifier of targetProc}
-              else
-                return {"", ""}
-              end if
+      const previousAppResult = runOsaScript(`
+        tell application "System Events"
+          set frontProc to first process whose frontmost is true
+          set frontName to name of frontProc
+          if frontName is "Raycast" then
+            set allProcs to every process whose visible is true and name is not "Raycast"
+            if (count of allProcs) > 0 then
+              set targetProc to item 1 of allProcs
+              return {name of targetProc, bundle identifier of targetProc}
             else
-              return {frontName, bundle identifier of frontProc}
+              return {"", ""}
             end if
-          end tell
-        '`,
-      )
-        .toString()
-        .trim();
+          else
+            return {frontName, bundle identifier of frontProc}
+          end if
+        end tell
+      `);
 
       console.log(`[DEBUG] Previous app result: ${previousAppResult}`);
 
@@ -215,20 +221,16 @@ async function runStealthActionInternal(
       console.log(`[DEBUG] Target app: ${frontApp} (${frontAppBundleId})`);
 
       if (!frontApp || frontApp === "Raycast" || frontApp === "") {
-        const fallbackResult = execSync(
-          `osascript -e '
-            tell application "System Events"
-              set procList to name of every process whose visible is true and name is not "Raycast" and name is not "Finder"
-              if (count of procList) > 0 then
-                return item 1 of procList
-              else
-                return "Finder"
-              end if
-            end tell
-          '`,
-        )
-          .toString()
-          .trim();
+        const fallbackResult = runOsaScript(`
+          tell application "System Events"
+            set procList to name of every process whose visible is true and name is not "Raycast" and name is not "Finder"
+            if (count of procList) > 0 then
+              return item 1 of procList
+            else
+              return "Finder"
+            end if
+          end tell
+        `);
         frontApp = fallbackResult;
         console.log(`[DEBUG] Fallback app: ${frontApp}`);
       }
@@ -285,10 +287,8 @@ async function runStealthActionInternal(
   }
 
   if (
-    forceEditor ||
-    !hasRealSelection ||
-    !selectedText ||
-    selectedText.trim().length === 0
+    !forceEditor &&
+    (!hasRealSelection || !selectedText || selectedText.trim().length === 0)
   ) {
     console.log("[DEBUG] No selection detected. Trying auto-select-all.");
     selectedText = await trySelectAllInActiveField(
@@ -297,15 +297,17 @@ async function runStealthActionInternal(
       frontAppBundleId,
     );
     hasRealSelection = selectedText.trim().length > 0;
+  }
 
-    if (!hasRealSelection) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No text selected",
-        message: "Could not auto-select text from the active field",
-      });
-      return;
-    }
+  if (!hasRealSelection || !selectedText || selectedText.trim().length === 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No text selected",
+      message: forceEditor
+        ? "Please select text first"
+        : "Could not auto-select text from the active field",
+    });
+    return;
   }
 
   // 4. Show processing toast
@@ -368,27 +370,11 @@ async function runStealthActionInternal(
 
     if (isMac) {
       // ... existing macOS logic ...
-      if (frontAppBundleId && frontAppBundleId !== "com.apple.finder") {
-        try {
-          execSync(
-            `osascript -e 'tell application id "${frontAppBundleId}" to activate'`,
-            { timeout: 5000 },
-          );
-          await new Promise((resolve) => setTimeout(resolve, 150));
-        } catch (_e) {
-          // ignore activation errors
-        }
-      } else if (frontApp && frontApp !== "Finder") {
-        try {
-          const escapedAppName = frontApp.replace(/"/g, '\\"');
-          execSync(
-            `osascript -e 'tell application "${escapedAppName}" to activate'`,
-            { timeout: 5000 },
-          );
-          await new Promise((resolve) => setTimeout(resolve, 150));
-        } catch (_e) {
-          // ignore activation errors
-        }
+      try {
+        activateApplication(frontApp, frontAppBundleId);
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      } catch (_e) {
+        // ignore activation errors
       }
     }
 
