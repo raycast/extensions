@@ -26,7 +26,8 @@ import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process"
 type SortBy = "cpu" | "memory";
 
 const APP_GROUPING_STORAGE_KEY = "kill-process.app-grouping-enabled";
-const SORT_BY_STORAGE_KEY = "kill-process.sort-by";
+const SORT_BY_DROPDOWN_ID = "kill-process.sort-by";
+const DEFAULT_SORT_BY: SortBy = "cpu";
 
 const parseBooleanLike = (value: LocalStorage.Value | undefined): boolean | null => {
   if (value == null) {
@@ -61,22 +62,13 @@ export default function ProcessList() {
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
   const skipConfirmation = preferences.skipConfirmation;
-  const [sortBy, setSortBy] = useState<SortBy>("cpu");
+  const [sortBy, setSortBy] = useState<SortBy>(DEFAULT_SORT_BY);
   const [isAppGroupingEnabled, setIsAppGroupingEnabled] = useState<boolean>(false);
 
   // Cache CPU data from WMI queries (persists across refreshes)
   const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
 
   useEffect(() => {
-    const loadSortBy = async () => {
-      const stored = await LocalStorage.getItem<string>(SORT_BY_STORAGE_KEY);
-      if (!isSortBy(stored)) {
-        return;
-      }
-
-      setSortBy(stored);
-    };
-
     const loadAppGrouping = async () => {
       const stored = await LocalStorage.getItem<LocalStorage.Value>(APP_GROUPING_STORAGE_KEY);
       if (typeof stored === "boolean") {
@@ -93,7 +85,6 @@ export default function ProcessList() {
       await LocalStorage.setItem(APP_GROUPING_STORAGE_KEY, parsed);
     };
 
-    void loadSortBy();
     void loadAppGrouping();
   }, []);
 
@@ -350,14 +341,15 @@ export default function ProcessList() {
       onSearchTextChange={(query) => setQuery(query)}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filter"
-          value={sortBy}
+          id={SORT_BY_DROPDOWN_ID}
+          tooltip="Sort"
+          storeValue={true}
+          defaultValue={DEFAULT_SORT_BY}
           onChange={(newValue) => {
             if (!isSortBy(newValue)) {
               return;
             }
             setSortBy(newValue);
-            void LocalStorage.setItem(SORT_BY_STORAGE_KEY, newValue);
           }}
         >
           <List.Dropdown.Section title="Sort By">
