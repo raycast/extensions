@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, popToRoot, closeMainWindow, Image, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, popToRoot, closeMainWindow, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { flag } from "country-emoji";
 import {
@@ -12,6 +12,7 @@ import {
   Device,
   MULLVAD_DEVICE_TAG,
 } from "./shared";
+import { getDeviceListIcon } from "./components/deviceListIcon";
 
 function loadExitNodes(status: StatusResponse) {
   const devices = getDevices(status);
@@ -37,15 +38,15 @@ function setExitNode(dnsName: string, allowLAN: boolean) {
 export default function ExitNodeList() {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [error, setError] = useState<ErrorDetails>();
-  const [exitNodes, setExitNodes] = useState<Device[]>([]);
+  const [exitNodes, setExitNodes] = useState<Device[] | undefined>();
   useEffect(() => {
     async function fetch() {
       try {
         const status = getStatus();
-        const _list = loadExitNodes(status);
-        setExitNodes(_list);
-        sortDevices(_list);
-        if (isExitNodeActive(_list)) {
+        const list = loadExitNodes(status);
+        sortDevices(list);
+        setExitNodes(list);
+        if (isExitNodeActive(list)) {
           setIsActive(true);
         }
       } catch (error) {
@@ -67,7 +68,7 @@ export default function ExitNodeList() {
               title="Turn off exit node"
               actions={
                 <ActionPanel>
-                  <Action title="Turn Off Exit Node" onAction={() => setExitNode("", false)} />
+                  <Action title="Turn off Exit Node" onAction={() => setExitNode("", false)} />
                 </ActionPanel>
               }
             />
@@ -86,23 +87,7 @@ export default function ExitNodeList() {
                 title={title}
                 subtitle={subtitle}
                 key={exitNode.key}
-                icon={
-                  exitNode.online
-                    ? {
-                        source: {
-                          light: "connected_light.png",
-                          dark: "connected_dark.png",
-                        },
-                        mask: Image.Mask.Circle,
-                      }
-                    : {
-                        source: {
-                          light: "lastseen_light.png",
-                          dark: "lastseen_dark.png",
-                        },
-                        mask: Image.Mask.Circle,
-                      }
-                }
+                icon={getDeviceListIcon(exitNode.online)}
                 accessories={[
                   {
                     tag: exitNode.exitnode ? `Connected` : "",

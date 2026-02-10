@@ -97,13 +97,27 @@ export const PackageListItem = ({
         onOpen={handleAddToHistory}
       />
     ),
+    npmxPackagePage: (
+      <Action.OpenInBrowser
+        url={`https://npmx.dev/package/${pkg.name}`}
+        // eslint-disable-next-line @raycast/prefer-title-case
+        title="Open npmx Package Page"
+        icon={{
+          source: "npmx.png",
+        }}
+        key="npmxPackagePage"
+        onOpen={handleAddToHistory}
+      />
+    ),
   };
 
+  const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : typeof pkg.keywords === "string" ? [pkg.keywords] : [];
+
   const accessories: List.Item.Accessory[] = [
-    pkg?.keywords?.length
+    keywords?.length
       ? {
           icon: Icon.Tag,
-          tooltip: pkg.keywords.join(", "),
+          tooltip: keywords.join(", "),
         }
       : {},
   ];
@@ -133,7 +147,7 @@ export const PackageListItem = ({
       subtitle={pkg.description}
       icon={Icon.Box}
       accessories={accessories}
-      keywords={pkg.keywords}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Links">

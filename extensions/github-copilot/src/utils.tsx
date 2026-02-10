@@ -1,24 +1,26 @@
 import { Color, Image, Keyboard } from "@raycast/api";
-import { PullRequestWithAgentSessions, AgentSessionState } from "./services/copilot";
+import { TaskWithPullRequest } from "./services/copilot";
 
-export function getIcon(pullRequestsWithAgentSessions: PullRequestWithAgentSessions): Image.ImageLike {
-  const source = getIconPath(pullRequestsWithAgentSessions);
+export function getTaskIcon(taskWithPullRequest: TaskWithPullRequest): Image.ImageLike {
+  const source = getTaskIconPath(taskWithPullRequest);
 
   return { source, tintColor: Color.PrimaryText };
 }
 
-export function getIconPath(pullRequestWithAgentSessions: PullRequestWithAgentSessions): string {
-  if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.QUEUED) {
+export function getTaskIconPath(taskWithPullRequest: TaskWithPullRequest): string {
+  const status = taskWithPullRequest.task.status;
+
+  if (status === "queued") {
     return "clock.svg";
-  } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.IN_PROGRESS) {
+  } else if (status === "in_progress") {
     return "sync.svg";
-  } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.FAILED) {
+  } else if (status === "failed") {
     return "stop.svg";
-  } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.TIMED_OUT) {
+  } else if (status === "timed_out") {
     return "stop.svg";
-  } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.CANCELLED) {
+  } else if (status === "cancelled") {
     return "skip.svg";
-  } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.COMPLETED) {
+  } else if (status === "completed") {
     return "check-circle-fill.svg";
   } else {
     return "circle.svg";
@@ -46,4 +48,27 @@ export const truncate = (text: string, maxLength: number): string => {
   return text;
 };
 
-export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const shortWeekday = (d: Date) => d.toLocaleDateString("en-US", { weekday: "short" });
+const shortMonth = (d: Date) => d.toLocaleDateString("en-US", { month: "short" });
+
+export function formatRelativeDate(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  const diffHr = Math.floor(diffMs / 3_600_000);
+  const diffDays = Math.floor(diffMs / 86_400_000);
+
+  if (diffMin < 60) {
+    return `${Math.max(diffMin, 1)}m`;
+  }
+  if (diffHr < 24) {
+    return `${diffHr}h`;
+  }
+  if (diffDays < 7) {
+    return `${shortWeekday(date)} ${date.getDate()}`;
+  }
+  if (date.getFullYear() === now.getFullYear()) {
+    return `${date.getDate()} ${shortMonth(date)}`;
+  }
+  return `${date.getDate()} ${shortMonth(date)} ${String(date.getFullYear()).slice(2)}`;
+}

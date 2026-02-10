@@ -1,5 +1,9 @@
 # Unicode Symbols
 
+## [Add README] - 2026-02-10
+
+- Add README to explain to users how to configure the extension, in order to prevent unnecessary issues to be opened.
+
 ## [Update Keyboard Shortcuts] - 2025-12-18
 
 - Update keyboard shortcuts for Windows compatibility

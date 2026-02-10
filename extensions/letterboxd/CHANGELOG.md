@@ -1,5 +1,11 @@
 # letterboxd Changelog
 
+## [Maintenance] - 2026-02-07
+
+- Add support for Windows platform
+- Bump all dependencies to the latest
+- Update to use fetch instead of got
+
 ## [Fix search movies not working] - 2025-09-15
 
 - Fix the issue with the search movies not working

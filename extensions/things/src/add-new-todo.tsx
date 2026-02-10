@@ -13,7 +13,7 @@ import {
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addTodo, getListsAndTags } from './api';
+import { addTodo, getCollections } from './api';
 import TodoList from './components/TodoList';
 import ErrorView from './components/ErrorView';
 import { getChecklistItemsWithAI, listItems } from './helpers';
@@ -40,7 +40,7 @@ type AddNewTodoProps = {
 
 export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoProps) {
   const { push } = useNavigation();
-  const { data, isLoading, error } = useCachedPromise(getListsAndTags);
+  const { data, isLoading, error } = useCachedPromise(() => getCollections('tags', 'lists'));
   const tags = data?.tags;
   const lists = data?.lists;
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({

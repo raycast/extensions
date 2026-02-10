@@ -1,11 +1,16 @@
 # Fathom for Raycast Changelog
 
-## Improve Full-Text Search - 2025-12-25
+## [Update] - 2026-02-10
+
+- Updated dependencies
+- Removed `calendarInvitees` parameter from SDK call with explanatory comment about HTTP fallback
+
+## [Improve Full-Text Search] - 2025-12-25
 
 - Fixed `get-meeting-details` tool to paginate through all meetings when searching by title
 - Changed "Refresh Cache" shortcut to use `Keyboard.Shortcut.Common.Refresh` for Raycast consistency
 
-## Update to Fathom SDK 0.0.36 - 2025-11-09
+## [Update to Fathom SDK 0.0.36] - 2025-11-09
 
 ### Changed
 

@@ -1,6 +1,7 @@
 # Kill Process Changelog
 
 ## [UX Improvements] - {PR_MERGE_DATE}
+
 - Removed the redundant **Default Sort By** preference (sorting is now persisted via the command dropdown)
 
 ## [UX Improvements] - 2026-02-10

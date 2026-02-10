@@ -1,0 +1,139 @@
+{
+  "a": {
+    "stroke": "一 (横)",
+    "components": "鱼",
+    "mnemonic": "A像鱼",
+    "small_words": "凹"
+  },
+  "b": {
+    "components": "宀 冖 勹 卜 匕 癶 贝 疒 丷",
+    "mnemonic": "宝盖 倒八 瘠勹(bāo) 匕",
+    "small_words": "百 白 八 卜 匕 卡 不 巴 本 必 丙 半 办"
+  },
+  "c": {
+    "components": "艹 卄 廾 廿 刂 寸 豸 囱 虫",
+    "mnemonic": "草 (艹)",
+    "small_words": "寸 才 匆 册"
+  },
+  "d": {
+    "stroke": "丶 (点)",
+    "components": "丶 冫 氵 刂 ⺈ (刀字头)",
+    "mnemonic": "点 刀",
+    "small_words": "大 丁 刀 歹 习 东 丹 电 氏"
+  },
+  "e": {
+    "components": "阝 卩 彐 山 见 下",
+    "mnemonic": "耳 彐 山 像E 儿",
+    "small_words": "二 耳 儿 而"
+  },
+  "f": {
+    "components": "扌 (提手) 丰 (丰字头) 缶",
+    "mnemonic": "扶手 丰变形 缶(fǒu)",
+    "small_words": "非 方 飞 夫 凡 甫 弗 乏 丰"
+  },
+  "g": {
+    "stroke": "一 (横)",
+    "components": "既左(艮) 民 鬼 革 骨",
+    "mnemonic": "艮(gèn)",
+    "small_words": "广 弓 戈 工 瓜 干 个 甘 丐 果 更 央"
+  },
+  "h": {
+    "components": "丿 (撇) 夂 (冬字头) 虍 (虎字头) 禾",
+    "mnemonic": "火 虎头 禾",
+    "small_words": "禾 户 互 平 火"
+  },
+  "i": {
+    "components": "彳 亍 虫",
+    "mnemonic": "彳(chì) 亍(chù)",
+    "small_words": "川 厂 车 长 叉 尺 丑 臣 成 垂 斥 串 产 出"
+  },
+  "j": {
+    "components": "钅 (金字旁) 巾",
+    "mnemonic": "金 卷字头",
+    "small_words": "巾 几 九 斤 久 巨 己 井 及 夹 甲 臼 韭 戋 柬 击"
+  },
+  "k": {
+    "components": "匚 冂 凵 口 囗",
+    "mnemonic": "框 (k)",
+    "small_words": "口 开 亏"
+  },
+  "l": {
+    "stroke": "丨 (竖)",
+    "components": "耂 立 龙",
+    "mnemonic": "老字头",
+    "small_words": "了 力 乐 来 良 两 里 吏 来 卵 丽"
+  },
+  "m": {
+    "components": "木",
+    "mnemonic": "木 (m)",
+    "small_words": "木 毛 米 门 马 皿 末 灭 母 民 么 面"
+  },
+  "n": {
+    "stroke": "乀 (捺)",
+    "components": "牛 牜",
+    "mnemonic": "无尾牛 牛",
+    "small_words": "甘 女 牛 鸟 乃 内 农 年"
+  },
+  "o": {
+    "components": "日 月 目",
+    "mnemonic": "圆的 (O)",
+    "small_words": ""
+  },
+  "p": {
+    "stroke": "丿 (撇)",
+    "components": "礻 衤",
+    "mnemonic": "强记 (P)",
+    "small_words": "片 平 片"
+  },
+  "q": {
+    "components": "犭(反犬) 求 具上 其上",
+    "mnemonic": "反犬 且 其",
+    "small_words": "七 千 犬 丘 曲 且 气 乞"
+  },
+  "r": {
+    "components": "亻 (单人旁)",
+    "mnemonic": "人 (r)",
+    "small_words": "人 入 冉 壬 刃"
+  },
+  "s": {
+    "components": "纟 厶 龴 (勇字头) 罒",
+    "mnemonic": "丝 私 四",
+    "small_words": "三 巳 肃"
+  },
+  "t": {
+    "components": "田",
+    "mnemonic": "田 (t)",
+    "small_words": "土 天 太 屯"
+  },
+  "u": {
+    "components": "饣 (食字旁) 尸 广 丷 米 石",
+    "mnemonic": "食 手(shou) 十变形 水",
+    "small_words": "十 尸 士 手 身 水 上 少 术 失 生 世 申 史 升 事 书 束 勺 成 豕 氏 矢"
+  },
+  "v": {
+    "stroke": "乛 (折)",
+    "components": "zh (声母)",
+    "mnemonic": "竹 豸(zhì)",
+    "small_words": "止 爪 主 舟 之 正 丈 中 专 朱 州 重 乍"
+  },
+  "w": {
+    "components": "亠 夂 (冬字头) 攵 文",
+    "mnemonic": "文字头 反文",
+    "small_words": "王 瓦 五 无 万 午 亡 未 乌 韦 勿 为 戊 我 丸 兀"
+  },
+  "x": {
+    "components": "忄 乂 丷 ⺌ ⺗",
+    "mnemonic": "心 乂像X 兴字头 小",
+    "small_words": "小 西 心 血 下 乡 戌 习"
+  },
+  "y": {
+    "components": "讠 (言字旁) 𧘇 (衣字底) ⺶ ⺷ 羊",
+    "mnemonic": "言 衣底 羊变形 无尾羊",
+    "small_words": "又 酉 已 于 义 与 夭 玉 牙 丫 永 尤 也 业 由 央 亚 严 用 幺 禺 尹 禹 夷 弋 聿 雨 曳"
+  },
+  "z": {
+    "components": "足 走 辶",
+    "mnemonic": "足 走 之底",
+    "small_words": "再 自 子"
+  }
+}

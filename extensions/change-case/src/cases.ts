@@ -55,6 +55,15 @@ export const aliases: Record<CaseType, string[]> = {
   "Constant Case": ["macro"],
 };
 
+// cases that must not be pre-lowercased, as they depend on the original casing
+const CASES_SKIP_PRELOWERCASE: Set<string> = new Set([
+  "Swap Case", // pre-lowercasing would make output all-uppercase
+  "Alternating Case", // alternates per character from original positions
+  "Random Case", // no point in pre-lowercasing, as output is random anyway
+  "Lower First", // only first letter should be changed
+  "Upper First", // only first letter should be changed
+]);
+
 function preLowercaseText(input: string, preserveCase: boolean) {
   if (!preserveCase) {
     return input.toLowerCase();
@@ -64,8 +73,9 @@ function preLowercaseText(input: string, preserveCase: boolean) {
 
 export function convert(input: string, c: string) {
   const preferences = getPreferenceValues<Preferences>();
+  const preserveCase = preferences.preserveCase || CASES_SKIP_PRELOWERCASE.has(c);
 
-  const modified = functions[c](preLowercaseText(input, preferences.preserveCase), {
+  const modified = functions[c](preLowercaseText(input, preserveCase), {
     prefixCharacters: preferences.prefixCharacters,
     suffixCharacters: preferences.suffixCharacters,
   });

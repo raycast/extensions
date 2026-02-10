@@ -667,9 +667,10 @@
       "label": "Search Process PID",
       "name": "shouldSearchInPid",
       "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
+      "title": "Auto-Refresh",
+      "type": "textfield",
+      "default": "3000",
+      "placeholder": "3000"
     },
     {
       "description": "List app processes before other results.",
@@ -677,7 +678,7 @@
       "name": "shouldPrioritizeAppsWhenFiltering",
       "required": false,
       "default": false,
-      "title": "",
+      "title": "Search",
       "type": "checkbox"
     },
     {

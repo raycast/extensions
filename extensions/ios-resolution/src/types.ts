@@ -1,7 +1,7 @@
 export interface Device {
   id: string;
   name: string;
-  family: "iPhone" | "iPad" | "iPod touch" | "Apple Watch";
+  family: "iPhone" | "MacBook" | "iPad" | "iPod touch" | "Apple Watch";
   logicalWidth: number;
   logicalHeight: number;
   physicalWidth: number;
