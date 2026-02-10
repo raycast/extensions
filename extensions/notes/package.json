@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notes",
+  "title": "Notes",
+  "description": "A quick markdown notes writer",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-notes",
+      "title": "View Notes",
+      "description": "Let's you view your notes",
+      "mode": "view"
+    },
+    {
+      "name": "new-note",
+      "title": "New Note",
+      "description": "Let's you write a new markdown note",
+      "mode": "view"
+    },
+    {
+      "name": "todos",
+      "title": "Todos",
+      "description": "Manage your todo list",
+      "mode": "view"
+    },
+    {
+      "name": "scratchpad",
+      "title": "Scratchpad",
+      "description": "Instant scratch note — just open and type",
+      "mode": "view"
+    },
+    {
+      "name": "pomodoro",
+      "title": "Pomodoro Timer",
+      "description": "Focus timer with work and break intervals",
+      "mode": "view"
+    },
+    {
+      "name": "pomodoro-bg",
+      "title": "Pomodoro Status",
+      "description": "Updates the Pomodoro Timer subtitle in the background",
+      "mode": "no-view",
+      "interval": "10s"
+    },
+    {
+      "name": "quick-timer",
+      "title": "Timer",
+      "description": "Set a background timer with notification",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "sebastian",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Documentation",
+    "Applications"
+  ],
+  "preferences": [
+    {
+      "name": "spotifyUri",
+      "title": "Spotify URI",
+      "description": "Spotify URI to play during focus sessions (e.g. spotify:playlist:ID, spotify:album:ID, spotify:track:ID, spotify:artist:ID). Defaults to the lofi playlist.",
+      "type": "textfield",
+      "required": false,
+      "default": "spotify:playlist:0vvXsWCC9xrXsKd4FyS8kM",
+      "placeholder": "spotify:playlist:0vvXsWCC9xrXsKd4FyS8kM"
+    }
+  ]
+}
