@@ -1,24 +1,19 @@
-import { List, Icon, Action, ActionPanel, Color } from "@raycast/api";
+import { List, Icon, Color } from "@raycast/api";
 
 type Props = {
-    msg?: string;
+    error: Error;
+    description?: string;
+    actions?: React.ReactNode;
 };
 
-export default function ErrorView({ msg }: Props) {
+export default function ErrorView({ error, description, actions }: Props) {
     return (
         <List>
             <List.EmptyView
                 icon={{ source: Icon.Warning, tintColor: Color.Red }}
-                title={msg ?? "Fail to Load PicGo Config"}
-                description="Make sure you installed picgo and setup configs"
-                actions={
-                    <ActionPanel>
-                        <Action.OpenInBrowser
-                            title="View Installation Guide"
-                            url="https://docs.picgo.app/core/"
-                        ></Action.OpenInBrowser>
-                    </ActionPanel>
-                }
+                title={error.message ?? "Failed!"}
+                description={description}
+                actions={actions}
             ></List.EmptyView>
         </List>
     );
