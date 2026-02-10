@@ -1,12 +1,17 @@
 import { ActionPanel, Action, List, Icon, open, closeMainWindow, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { homedir } from "os";
-import { readFile } from "fs/promises";
+import { execSync } from "child_process";
 import { join } from "path";
 
 interface Project {
   name: string;
   path: string;
+}
+
+interface RecentEntry {
+  folderUri?: string;
+  workspace?: { configPath: string };
 }
 
 export default function Command() {
@@ -19,25 +24,20 @@ export default function Command() {
 
   async function loadRecentProjects() {
     try {
-      const qoderStoragePath = join(
-        homedir(),
-        "Library",
-        "Application Support",
-        "Qoder",
-        "User",
-        "globalStorage",
-        "storage.json",
+      const dbPath = join(homedir(), "Library", "Application Support", "Qoder", "User", "globalStorage", "state.vscdb");
+      const raw = execSync(
+        `sqlite3 "${dbPath}" "SELECT value FROM ItemTable WHERE key='history.recentlyOpenedPathsList';"`,
+        { encoding: "utf-8" },
       );
-      const data = await readFile(qoderStoragePath, "utf-8");
-      const storage = JSON.parse(data);
+      const data = JSON.parse(raw) as { entries: RecentEntry[] };
 
-      const folders = storage.backupWorkspaces?.folders || [];
-      const projectList: Project[] = folders
-        .map((folder: { folderUri: string }) => {
-          const path = folder.folderUri.replace("file://", "");
+      const projectList: Project[] = (data.entries || [])
+        .filter((entry: RecentEntry) => entry.folderUri)
+        .map((entry: RecentEntry) => {
+          const decodedPath = decodeURIComponent(entry.folderUri!.replace("file://", ""));
           return {
-            name: path.split("/").pop() || "Untitled",
-            path: path,
+            name: decodedPath.split("/").pop() || "Untitled",
+            path: decodedPath,
           };
         })
         .filter((p: Project) => p.path);
