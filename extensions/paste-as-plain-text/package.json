@@ -59,6 +59,14 @@
       "required": false
     },
     {
+      "label": "Remove spaces",
+      "name": "removeSpaces",
+      "type": "checkbox",
+      "description": "Remove all spaces from plain text before pasting",
+      "default": false,
+      "required": false
+    },
+    {
       "title": "Actions When Pasting",
       "name": "autoFetchTitle",
       "label": "Auto Fetch Title",
@@ -131,12 +139,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
-    "axios": "^1.12.2",
-    "cheerio": "^1.1.2",
-    "fs-extra": "^11.3.2",
+    "@raycast/api": "^1.104.5",
+    "axios": "^1.13.5",
+    "cheerio": "^1.2.0",
+    "fs-extra": "^11.3.3",
     "json5": "^2.2.3",
-    "validator": "^13.15.15"
+    "validator": "^13.15.26"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -155,6 +163,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

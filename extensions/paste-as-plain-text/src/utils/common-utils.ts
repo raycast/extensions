@@ -1,4 +1,4 @@
-import { cleanLineBreaks, showTips, trimEnd, trimStart } from "../types/types";
+import { cleanLineBreaks, removeSpaces, showTips, trimEnd, trimStart } from "../types/types";
 import { Cache, showHUD, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { load } from "cheerio";
@@ -52,6 +52,9 @@ export const transform = (str: string | undefined | null): string => {
   let result = str;
   result = tryTrim(result);
   result = tryStrip(result);
+  if (removeSpaces) {
+    result = result.replace(/\s/g, "");
+  }
 
   return result;
 };

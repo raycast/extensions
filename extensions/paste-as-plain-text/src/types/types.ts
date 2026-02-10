@@ -5,11 +5,12 @@ interface Preferences {
   trimEnd: boolean;
   autoFetchTitle: boolean;
   cleanLineBreaks: boolean;
+  removeSpaces: boolean;
   replaceClipboard: boolean;
   showTips: boolean;
 }
 
-export const { trimStart, trimEnd, autoFetchTitle, cleanLineBreaks, replaceClipboard, showTips } =
+export const { trimStart, trimEnd, autoFetchTitle, cleanLineBreaks, removeSpaces, replaceClipboard, showTips } =
   getPreferenceValues<Preferences>();
 
 export enum PasteFormat {

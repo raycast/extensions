@@ -1,5 +1,9 @@
 # Paste as Plain text Changelog
 
+## [Function Optimisation] - {PR_MERGE_DATE}
+
+- Add "Remove spaces" preference: optionally remove all spaces from plain text before pasting.
+
 ## [Maintenance] - 2025-10-23
 
 - Add support for Windows platform.
