@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [UX Improvements] - {PR_MERGE_DATE}
+## [UX Improvements] - 2026-02-10
 
 - Reorganized preferences into clearer sections
 - Avoid showing a redundant subtitle when it matches the process name
