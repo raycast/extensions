@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "go-to-retrace-timestamp",
-  "title": "Go to Retrace Timestamp",
-  "description": "Open Retrace at a specific timestamp",
+  "title": "Retrace Quick Actions",
+  "description": "Open Retrace timeline and search using deeplinks",
   "icon": "retrace.png",
   "author": "haseab_",
   "categories": [
@@ -31,6 +31,21 @@
       "subtitle": "Launches Previous Retrace Timestamp",
       "description": "Launches Previous Retrace Timestamp",
       "mode": "no-view"
+    },
+    {
+      "name": "search-retrace",
+      "title": "Search Retrace",
+      "subtitle": "Open Retrace search for a query",
+      "description": "Search in Retrace using retrace://search?q=...",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "e.g. oauth callback error",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {

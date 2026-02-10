@@ -1,8 +1,15 @@
-# Go to Retrace Timestamp
+# Retrace Quick Actions
 
-Open your Retrace timeline at the time you choose using natural language.
+Open Retrace with focused commands for timeline navigation and text search.
 
-Examples:
+## Commands
+
+- `Go to Retrace Timestamp`: Open timeline at a natural-language time.
+- `Go to Last Retrace Timestamp`: Re-open the most recently used timestamp.
+- `Search Retrace`: Open Retrace search with your query.
+
+## Timestamp examples
+
 - `3 minutes ago`
 - `y1 2:05pm`
 - `2:05pm y1`
