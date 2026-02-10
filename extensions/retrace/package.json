@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "go-to-retrace-timestamp",
+  "name": "retrace",
   "title": "Retrace Quick Actions",
   "description": "Open Retrace timeline and search using deeplinks",
   "icon": "retrace.png",
