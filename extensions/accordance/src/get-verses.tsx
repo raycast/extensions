@@ -1,9 +1,9 @@
-import { ActionPanel, List, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, getPreferenceValues, open, Keyboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { ModuleSelector } from "./components/ModuleSelector";
 import { fetchModules } from "./utils/moduleUtils";
-import { cleanVerseText, normalizeReference, validateReference } from "./utils/bibleUtils";
+import { cleanVerseText, normalizeReference, validateReferenceFormat } from "./utils/bibleUtils";
 import { generateAccordanceAppleScript } from "./utils/applescriptUtils";
 
 interface VerseResult {
@@ -13,7 +13,7 @@ interface VerseResult {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.GetVerses>();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<VerseResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +44,7 @@ export default function Command() {
   }, [results, isInitialLoad]);
 
   async function fetchVerses(reference: string) {
-    const validation = validateReference(reference);
+    const validation = validateReferenceFormat(reference);
     if (!validation.isValid) {
       await showFailureToast(validation.error!);
       setResults([]);
@@ -119,7 +119,7 @@ export default function Command() {
         {results.map((verse, index) => (
           <List.Item
             id={`verse-${index}-${verse.reference}-${verse.module}`}
-            key={`result-${index}`}
+            key={`${verse.reference}-${verse.module}`}
             icon={Icon.ShortParagraph}
             title={verse.reference}
             subtitle={verse.module}
@@ -127,7 +127,21 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action title="Get Verse" onAction={() => fetchVerses(query)} icon={Icon.Book} />
-                <Action.CopyToClipboard title="Copy Verse Text" content={`${verse.text}`} />
+                <Action
+                  title="Open in Accordance"
+                  icon={Icon.Globe}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                  onAction={async () => {
+                    const url = `accord://read/${encodeURIComponent(selectedModule)}?${encodeURIComponent(verse.reference)}`;
+                    try {
+                      await open(url);
+                    } catch (error) {
+                      console.error("Failed to open in Accordance:", error);
+                      await showFailureToast("Failed to open in Accordance");
+                    }
+                  }}
+                />
+                <Action.CopyToClipboard title="Copy Verse Text" content={verse.text} />
                 <Action.CopyToClipboard title="Copy Reference Only" content={verse.reference} />
               </ActionPanel>
             }
