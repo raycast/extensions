@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react";
 import { JSX } from "react/jsx-runtime";
 import { List } from "@raycast/api";
-import FolderFilterDropdown from "./folder-filter-dropdown";
+
 import Entry from "./entry";
+import FolderFilterDropdown from "./folder-filter-dropdown";
 import { KeePassLoader, showToastKeepassxcCliErrors } from "../utils/keepass-loader";
 import { PinLoader } from "../utils/pin-loader";
 import { getEntryId, getFolders } from "../utils/entry-helper";
 
 /**
- * Component for searching and displaying KeePass database entries.
- *
- * @param {Object} props - The component props.
- * @param {(isUnlocked: boolean) => void} props.setIsUnlocked - A function to update the lock status of the database.
- *
- * @returns {JSX.Element} The search interface for KeePass database entries.
+ * Component for searching and displaying KeePass database entries
  *
  * This component loads entries from the cache and updates them by refreshing the cache.
  * It displays the entries in a searchable list format. Users can perform actions such as
  * pasting or copying passwords, usernames, and TOTP, as well as opening URLs associated
- * with entries. If an error occurs, the database is locked, and an error message is shown.
+ * with entries. If an error occurs, the database is locked, and an error message is shown
+ *
+ * @param {Object} props - The component props
+ * @param {(isUnlocked: boolean) => void} props.setIsUnlocked - A function to update the lock status of the database
+ * @returns {JSX.Element} - The search interface for KeePass database entries
  */
 export default function SearchDatabase({
   setIsUnlocked,
@@ -39,7 +39,7 @@ export default function SearchDatabase({
   useEffect(() => {
     let currentPinnedIds: Set<string>;
 
-    PinLoader.loadIdsCache()
+    PinLoader.loadPinnedIdsCache()
       .then((pinnedIds) => {
         currentPinnedIds = pinnedIds;
         setPinnedIds(pinnedIds);
@@ -54,7 +54,7 @@ export default function SearchDatabase({
         setIsLoading(false);
         setEntries(entries);
         setFolders(getFolders(entries));
-        return PinLoader.cleanEntries(entries, currentPinnedIds);
+        return PinLoader.cleanPinnedIds(entries, currentPinnedIds);
       }, errorHandler)
       .then((cleanedPinnedIds) => {
         if (cleanedPinnedIds) setPinnedIds(cleanedPinnedIds);

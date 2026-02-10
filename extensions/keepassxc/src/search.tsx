@@ -10,9 +10,8 @@ interface Preference {
   lockAfterInactivity: string;
 }
 
-const preferences: Preference = getPreferenceValues();
-// Minute(s) before locking the database
-const lockAfterInactivity = Number(preferences.lockAfterInactivity);
+// The amount of time (in minutes) after which the database should be locked due to inactivity
+const lockAfterInactivity = Number(getPreferenceValues<Preference>().lockAfterInactivity);
 
 /**
  * The entry point of Search command
@@ -41,17 +40,19 @@ export default function Command(): JSX.Element {
               KeePassLoader.deleteCredentialsCache();
             }
             InactivityTimer.launchInactivityTimer();
+            setIsLoaded(true);
           });
         } else {
           KeePassLoader.setCredentials(credentials.databasePassword, credentials.keyFile);
           setIsUnlocked(true);
+          setIsLoaded(true);
         }
       } else {
         if (lockAfterInactivity > 0) {
           InactivityTimer.launchInactivityTimer();
         }
+        setIsLoaded(true);
       }
-      setIsLoaded(true);
     });
   }, []);
 

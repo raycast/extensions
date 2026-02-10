@@ -14,21 +14,28 @@ import {
   Toast,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
+
 import { arrayToEntry, processPlaceholders } from "../utils/placeholder-processor";
 import { getTOTPCode } from "../utils/totp";
 import { isValidUrl } from "../utils/url-checker";
 import { getEntryId } from "../utils/entry-helper";
 import { PinLoader } from "../utils/pin-loader";
 
-const preferences: ExtensionPreferences = getPreferenceValues();
-// Whether to display favicons in the user interface
-const userInterfaceFavicon = Boolean(preferences.userInterfaceFavicon);
+interface Preference {
+  userInterfaceFavicon: boolean;
+}
+
+// Whether to show favicons in the UI
+const userInterfaceFavicon = getPreferenceValues<Preference>().userInterfaceFavicon;
 
 /**
- * Component representing a single KeePass entry.
+ * Component representing a single KeePass entry
  *
- * @param param0
- * @returns
+ * @param {Object} props - The component props
+ * @param {string[]} props.entry - The entry data
+ * @param {Set<string>} props.pinnedIds - The set of pinned entry IDs
+ * @param {(newPinnedIds: Set<string>) => void} props.setPinnedIds - A function to update the pinned IDs
+ * @returns {JSX.Element} - The rendered entry component
  */
 export default function Entry({
   entry,
@@ -209,7 +216,7 @@ export default function Entry({
                 newPinnedIds.add(entryId);
               }
               setPinnedIds(newPinnedIds);
-              PinLoader.saveEntries(newPinnedIds);
+              PinLoader.savePinnedIds(newPinnedIds);
             }}
           />
         </ActionPanel>
