@@ -80,7 +80,7 @@ function getAppFolderName(app: Application): string {
   return sanitizeFolderName(`${app.name} App Icons`);
 }
 
-function escapeSwiftString(s: string): string {
+function escapeStringLiteral(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
@@ -90,8 +90,8 @@ function escapeSwiftString(s: string): string {
  * by leveraging the same system icon resolution that Finder uses.
  */
 async function extractAppIconToFile(appPath: string, outputPath: string, size: number): Promise<void> {
-  const safeAppPath = escapeSwiftString(appPath);
-  const safeOutputPath = escapeSwiftString(outputPath);
+  const safeAppPath = escapeStringLiteral(appPath);
+  const safeOutputPath = escapeStringLiteral(outputPath);
   const script = [
     "import AppKit",
     `let icon = NSWorkspace.shared.icon(forFile: "${safeAppPath}")`,
@@ -137,7 +137,11 @@ async function findIcnsPath(appPath: string): Promise<string | null> {
 async function copyIconToClipboard(app: Application, size: number): Promise<void> {
   const tmpFile = path.join(os.tmpdir(), `${sanitizeFolderName(app.name)}-${size}.png`);
   await extractAppIconToFile(app.path, tmpFile, size);
-  await Clipboard.copy({ file: tmpFile });
+  try {
+    await Clipboard.copy({ file: tmpFile });
+  } finally {
+    await unlink(tmpFile).catch(() => {});
+  }
 }
 
 type ExportResult = {
@@ -372,14 +376,21 @@ function AppActions({
           title="Show Info in Finder"
           icon={Icon.Finder}
           shortcut={{ modifiers: ["cmd"], key: "i" }}
-          onAction={() =>
-            execFileAsync("/usr/bin/open", ["-R", "-a", "Finder", app.path]).then(() =>
-              execFileAsync("/usr/bin/osascript", [
+          onAction={async () => {
+            try {
+              await execFileAsync("/usr/bin/open", ["-R", "-a", "Finder", app.path]);
+              await execFileAsync("/usr/bin/osascript", [
                 "-e",
-                `tell application "Finder" to open information window of (POSIX file "${app.path}" as alias)`,
-              ]),
-            )
-          }
+                `tell application "Finder" to open information window of (POSIX file "${escapeStringLiteral(app.path)}" as alias)`,
+              ]);
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to show info in Finder",
+                message: String(error),
+              });
+            }
+          }}
         />
         <Action
           title="Show Export Folder in Finder"
