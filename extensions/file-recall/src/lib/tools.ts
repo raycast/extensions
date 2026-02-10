@@ -2321,7 +2321,24 @@ export async function executeTool(
   toolName: string,
   argsJson: string,
 ): Promise<{ result: string; agentResult?: AgentResult }> {
-  const args = JSON.parse(argsJson);
+  const unwrapArgsContainer = (input: unknown): unknown => {
+    const wrappers = ["args", "kwargs", "parameters", "arguments", "input"];
+    let current = input;
+    for (let depth = 0; depth < 3; depth++) {
+      if (!current || typeof current !== "object" || Array.isArray(current)) {
+        break;
+      }
+      const record = current as Record<string, unknown>;
+      const keys = Object.keys(record);
+      if (keys.length !== 1) break;
+      const key = wrappers.find((k) => k === keys[0]);
+      if (!key) break;
+      current = record[key];
+    }
+    return current;
+  };
+
+  const args = unwrapArgsContainer(JSON.parse(argsJson));
 
   switch (toolName) {
     case "search_files":

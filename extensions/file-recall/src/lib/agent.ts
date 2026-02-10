@@ -650,6 +650,31 @@ export async function runAgent(
         toolArgs = {};
       }
 
+      // Some providers/models wrap tool args inside a single top-level object like:
+      // {"kwargs": {...}} or {"args": {...}}. Unwrap it for compatibility.
+      const unwrapToolArgs = (
+        input: Record<string, unknown>,
+      ): Record<string, unknown> => {
+        let current = input;
+        const wrappers = ["args", "kwargs", "parameters", "arguments", "input"];
+        for (let depth = 0; depth < 3; depth++) {
+          const keys = Object.keys(current);
+          if (keys.length !== 1) break;
+          const key = wrappers.find((k) => k === keys[0]);
+          if (!key) break;
+          const val = current[key];
+          if (!val || typeof val !== "object" || Array.isArray(val)) break;
+          current = val as Record<string, unknown>;
+        }
+        return current;
+      };
+
+      const unwrapped = unwrapToolArgs(toolArgs);
+      if (unwrapped !== toolArgs) {
+        toolArgs = unwrapped;
+        toolArgsStr = JSON.stringify(toolArgs);
+      }
+
       // Guardrail: strip date params from search_files if user never mentioned time
       if (toolName === "search_files" && !userMentionedTime) {
         if (toolArgs.date_after || toolArgs.date_before) {
