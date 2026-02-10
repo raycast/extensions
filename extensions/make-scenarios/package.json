@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "make-scenarios",
+  "title": "Search Make Scenarios",
+  "description": "Search, browse, and open Make.com scenarios across all your organizations, teams, and zones",
+  "icon": "extension-icon.png",
+  "author": "ido_kraicer",
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-make",
+      "title": "Search Make",
+      "description": "Search Make.com organizations and scenarios in one place",
+      "mode": "view"
+    },
+    {
+      "name": "search-scenarios",
+      "title": "Search Make Scenarios",
+      "description": "Search and browse Make.com scenarios across all organizations and zones",
+      "mode": "view"
+    },
+    {
+      "name": "search-organizations",
+      "title": "Search Make Organizations",
+      "description": "Search and jump into a Make.com organization's scenarios page",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Make.com API token (the value after 'Token ', found in your Make.com profile settings)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "zone",
+      "title": "Zone",
+      "description": "Your Make.com zone (e.g. eu1.make.com, eu2.make.com, us1.make.com). Found in your Make.com account URL.",
+      "type": "dropdown",
+      "required": true,
+      "default": "eu1.make.com",
+      "data": [
+        {
+          "title": "EU1 (eu1.make.com)",
+          "value": "eu1.make.com"
+        },
+        {
+          "title": "EU2 (eu2.make.com)",
+          "value": "eu2.make.com"
+        },
+        {
+          "title": "US1 (us1.make.com)",
+          "value": "us1.make.com"
+        },
+        {
+          "title": "US2 (us2.make.com)",
+          "value": "us2.make.com"
+        },
+        {
+          "title": "Celonis EU (eu1.make.celonis.com)",
+          "value": "eu1.make.celonis.com"
+        },
+        {
+          "title": "Celonis US (us1.make.celonis.com)",
+          "value": "us1.make.celonis.com"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.4",
+    "@types/react": "19.0.8",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1"
+  }
+}
