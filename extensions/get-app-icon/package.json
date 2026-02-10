@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "get-app-icon",
+  "title": "Get App Icon",
+  "description": "Quickly save or copy an app's icon in multiple sizes and formats.",
+  "icon": "get-app-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultViewMode",
+      "title": "Default View",
+      "type": "dropdown",
+      "default": "list",
+      "required": false,
+      "description": "Choose whether to display applications as a list or grid by default",
+      "data": [
+        { "title": "List", "value": "list" },
+        { "title": "Grid", "value": "grid" }
+      ]
+    },
+    {
+      "name": "outputPath",
+      "title": "Output Folder",
+      "label": "Where to save exported icons",
+      "type": "directory",
+      "default": "~/Downloads/",
+      "required": true,
+      "description": "Base folder to store exported icons"
+    },
+    {
+      "name": "formatPng",
+      "title": "Export Formats",
+      "label": "PNG",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "Export icons in PNG format"
+    },
+    {
+      "name": "formatJpeg",
+      "title": "",
+      "label": "JPEG",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export icons in JPEG format"
+    },
+    {
+      "name": "formatIcns",
+      "title": "",
+      "label": "ICNS (original)",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export the original .icns file"
+    },
+    {
+      "name": "size16",
+      "title": "Export Icon Sizes",
+      "label": "16px",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export a 16×16 PNG"
+    },
+    {
+      "name": "size32",
+      "title": "",
+      "label": "32px",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export a 32×32 PNG"
+    },
+    {
+      "name": "size48",
+      "title": "",
+      "label": "48px",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export a 48×48 PNG"
+    },
+    {
+      "name": "size64",
+      "title": "",
+      "label": "64px",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export a 64×64 PNG"
+    },
+    {
+      "name": "size128",
+      "title": "",
+      "label": "128px",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export a 128×128 PNG"
+    },
+    {
+      "name": "size256",
+      "title": "",
+      "label": "256px",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export a 256×256 PNG"
+    },
+    {
+      "name": "size512",
+      "title": "",
+      "label": "512px",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "Export a 512×512 PNG"
+    },
+    {
+      "name": "size1024",
+      "title": "",
+      "label": "1024px",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Export a 1024×1024 PNG"
+    }
+  ],
+  "commands": [
+    {
+      "name": "get-app-icon",
+      "title": "Get App Icon",
+      "description": "Quickly save an app's icon in multiple sizes and formats.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
