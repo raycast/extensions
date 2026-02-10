@@ -1,5 +1,9 @@
 # Unicode Symbols
 
+## [Add README] - {PR_MERGE_DATE}
+
+- Add README to explain to users how to configure the extension, in order to prevent unnecessary issues to be opened.
+
 ## [Update Keyboard Shortcuts] - 2025-12-18
 
 - Update keyboard shortcuts for Windows compatibility
