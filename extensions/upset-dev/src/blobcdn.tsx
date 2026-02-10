@@ -135,7 +135,7 @@ export default function ShowBlob() {
   const [fill, setFill] = useState("");
   const [stroke, setStroke] = useState("");
   const [strokeWidth, setStrokeWidth] = useState("0");
-  const url = `https://blobcdn.com/blob.svg?size=${size}${stroke == "" ? "" : stroke.substring(1)}&strokeWidth=${strokeWidth}&randomness=${randomness}&extraPoints=${extraPoints}${seed == "" ? "" : "&seed=" + seed}${fill == "" ? "" : "&fill=" + fill.substring(1)}`;
+  const url = `https://blobcdn.com/blob.svg?size=${size}&stroke=${stroke.substring(1)}&strokeWidth=${strokeWidth}&randomness=${randomness}&extraPoints=${extraPoints}${seed == "" ? "" : "&seed=" + seed}&fill=${fill.substring(1)}`;
 
   return (
     <Detail
