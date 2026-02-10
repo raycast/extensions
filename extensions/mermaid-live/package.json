@@ -3,6 +3,7 @@
   "name": "mermaid-live",
   "title": "Mermaid Live",
   "description": "Render Mermaid diagrams from your clipboard instantly",
+  "categories": ["Developer Tools"],
   "icon": "extension-icon.png",
   "author": "reynaldo_endis",
   "platforms": [

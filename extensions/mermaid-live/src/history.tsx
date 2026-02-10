@@ -134,12 +134,12 @@ export default function Command() {
   );
 }
 
-// Vista de detalle de diagrama desde historial
+// Detail view of diagram from history
 function DiagramDetailView({ item }: { item: HistoryItem }) {
   const imageUrl = `https://mermaid.ink/img/pako:${encodeMermaid(item.code)}`;
   const markdown = `# ${item.name}\n\n![Diagram](${imageUrl}?raycast-width=900)`;
 
-  // Actualizar último acceso cuando se abre el diagrama
+  // Update last accessed when diagram is opened
   useEffect(() => {
     async function updateLastAccessed() {
       const historyJson = await LocalStorage.getItem<string>("mermaid-history");
@@ -217,7 +217,7 @@ function DiagramDetailView({ item }: { item: HistoryItem }) {
   );
 }
 
-// Formulario para renombrar
+// Form to rename
 function RenameForm({ item, onRename }: { item: HistoryItem; onRename: () => void }) {
   const { pop } = useNavigation();
 
@@ -267,11 +267,11 @@ async function getHistory(): Promise<HistoryItem[]> {
   const history: HistoryItem[] = JSON.parse(historyJson);
 
   return history.sort((a, b) => {
-    // Primero los pinned
+    // Pinned items first
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
 
-    // Luego por último acceso (más reciente primero)
+    // Then by last accessed (most recent first)
     return new Date(b.lastAccessed).getTime() - new Date(a.lastAccessed).getTime();
   });
 }

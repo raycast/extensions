@@ -36,11 +36,11 @@ export default function Command() {
   const [isFirstRender, setIsFirstRender] = useState(true);
   const [currentHistoryItem, setCurrentHistoryItem] = useState<HistoryItem | null>(null);
 
-  // Cargar el último diagrama guardado al iniciar
+  // Load the last saved diagram on startup
   useEffect(() => {
     async function loadSavedDiagram() {
       try {
-        // Migrar datos existentes si es necesario
+        // Migrate existing data if necessary
         await migrateHistoryData();
 
         const savedCode = await LocalStorage.getItem<string>("lastMermaidCode");
@@ -51,7 +51,7 @@ export default function Command() {
           const imageUrl = `https://mermaid.ink/img/pako:${encoded}`;
           const markdown = `# Mermaid Diagram\n\n![Diagram](${imageUrl}?raycast-width=900)`;
 
-          // Verificar si está en el historial
+          // Check if it exists in history
           const historyItem = await findHistoryItemByCode(savedCode);
           setCurrentHistoryItem(historyItem);
 
@@ -74,25 +74,25 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    let isMounted = true; // Flag para evitar setState en componente desmontado
+    let isMounted = true; // Flag to prevent setState on unmounted component
 
     async function loadAndRender() {
       try {
-        // 1. Leer del clipboard
+        // 1. Read from clipboard
         const clipboardText = await Clipboard.readText();
 
-        // Si el clipboard no ha cambiado, no hacer nada
+        // If clipboard hasn't changed, do nothing
         if (clipboardText === lastClipboard) {
           return;
         }
 
-        if (!isMounted) return; // No actualizar si ya se desmontó
+        if (!isMounted) return; // Don't update if unmounted
 
-        // Actualizar el último clipboard conocido
+        // Update last known clipboard
         setLastClipboard(clipboardText);
 
         if (!clipboardText) {
-          // Clipboard vacío - mostrar estado informativo
+          // Empty clipboard - show informative state
           if (!isMounted) return;
           setState({
             isLoading: false,
@@ -102,9 +102,9 @@ export default function Command() {
           return;
         }
 
-        // 2. Validar que sea código Mermaid (básico)
+        // 2. Validate that it's Mermaid code (basic)
         if (!isMermaidCode(clipboardText)) {
-          // No es Mermaid - mantener el último diagrama válido o mostrar estado informativo
+          // Not Mermaid - keep last valid diagram or show informative state
           if (!isMounted) return;
           setState((prev) => ({
             ...prev,
@@ -114,7 +114,7 @@ export default function Command() {
           return;
         }
 
-        // Mostrar loading mientras renderiza
+        // Show loading while rendering
         if (!isMounted) return;
         setState({
           isLoading: true,
@@ -123,14 +123,14 @@ export default function Command() {
           mermaidCode: undefined,
         });
 
-        // 3. Encodear usando pako format
+        // 3. Encode using pako format
         const encoded = encodeMermaid(clipboardText);
 
-        // 4. Generar URL
+        // 4. Generate URL
         const imageUrl = `https://mermaid.ink/img/pako:${encoded}`;
 
-        // 5. Crear markdown para Detail (sin timestamp, solo en metadata)
-        // Usar raycast-width para hacer la imagen más grande en el panel
+        // 5. Create markdown for Detail (no timestamp, only in metadata)
+        // Use raycast-width to make the image larger in the panel
         const markdown = `# Mermaid Diagram\n\n![Diagram](${imageUrl}?raycast-width=900)`;
 
         const now = new Date();
@@ -142,16 +142,16 @@ export default function Command() {
           lastUpdated: now,
         });
 
-        // Guardar en LocalStorage para persistencia
+        // Save to LocalStorage for persistence
         await LocalStorage.setItem("lastMermaidCode", clipboardText);
         await LocalStorage.setItem("lastUpdatedTimestamp", now.toISOString());
 
-        // Guardar en historial (evitando duplicados) y obtener el item
+        // Save to history (avoiding duplicates) and get the item
         const historyItem = await saveToHistory(clipboardText);
         if (!isMounted) return;
         setCurrentHistoryItem(historyItem);
 
-        // Marcar que ya no es el primer render
+        // Mark that this is no longer the first render
         if (isFirstRender) {
           setIsFirstRender(false);
         }
@@ -164,22 +164,22 @@ export default function Command() {
       }
     }
 
-    // Cargar inmediatamente
+    // Load immediately
     loadAndRender();
 
-    // Polling cada 1 segundo para detectar cambios en el clipboard
+    // Poll every 1 second to detect clipboard changes
     const interval = setInterval(loadAndRender, 1000);
 
-    // Cleanup al desmontar
+    // Cleanup on unmount
     return () => {
-      isMounted = false; // Marcar como desmontado
+      isMounted = false; // Mark as unmounted
       clearInterval(interval);
     };
-  }, [lastClipboard, isFirstRender]); // Agregar dependencias correctas
+  }, [lastClipboard, isFirstRender]); // Add correct dependencies
 
-  // Toast eliminado - el feedback visual estará en la pantalla
+  // Toast removed - visual feedback will be on screen
 
-  // Mostrar error toast solo para errores reales (no para clipboard vacío o inválido)
+  // Show error toast only for real errors (not for empty or invalid clipboard)
   useEffect(() => {
     if (state.error && state.error.message !== "EMPTY_CLIPBOARD" && state.error.message !== "INVALID_MERMAID") {
       showToast({
@@ -190,7 +190,7 @@ export default function Command() {
     }
   }, [state.error]);
 
-  // Estado: Clipboard vacío
+  // State: Empty clipboard
   if (state.error?.message === "EMPTY_CLIPBOARD") {
     const emptyMarkdown = `# 📋 Watching Clipboard...
 
@@ -216,7 +216,7 @@ Need help? Check out [Mermaid Documentation](https://mermaid.js.org/)`;
     return <Detail markdown={emptyMarkdown} navigationTitle="Mermaid Diagram - Watching" />;
   }
 
-  // Estado: Contenido no es Mermaid
+  // State: Content is not Mermaid
   if (state.error?.message === "INVALID_MERMAID") {
     const invalidMarkdown = `# 🤔 Hmm, that doesn't look like Mermaid...
 
@@ -267,7 +267,7 @@ Try copying some Mermaid code and run this command again!
     );
   }
 
-  // Error real (problemas de red, encoding, etc.)
+  // Real error (network issues, encoding, etc.)
   if (state.error) {
     return (
       <Detail
@@ -277,7 +277,7 @@ Try copying some Mermaid code and run this command again!
     );
   }
 
-  // Loading state - mientras renderiza o en el primer load
+  // Loading state - while rendering or on first load
   if (state.isLoading) {
     return (
       <Detail
@@ -426,38 +426,38 @@ function isMermaidCode(text: string): boolean {
 }
 
 function encodeMermaid(mermaidCode: string): string {
-  // Crear el objeto con formato mermaid.ink
+  // Create object with mermaid.ink format
   const graphObject = {
     code: mermaidCode,
     mermaid: JSON.stringify({ theme: "default" }),
   };
 
-  // Convertir a JSON y comprimir con pako (deflate)
+  // Convert to JSON and compress with pako (deflate)
   const jsonString = JSON.stringify(graphObject);
   const compressed = pako.deflate(jsonString);
 
-  // Convertir a base64 URL-safe
+  // Convert to URL-safe base64
   const base64 = Buffer.from(compressed).toString("base64");
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
-// Funciones de gestión de historial
+// History management functions
 async function saveToHistory(code: string): Promise<HistoryItem> {
   const historyJson = await LocalStorage.getItem<string>("mermaid-history");
   const history: HistoryItem[] = historyJson ? JSON.parse(historyJson) : [];
 
   const now = new Date().toISOString();
 
-  // Verificar si ya existe (evitar duplicados por código)
+  // Check if already exists (avoid duplicates by code)
   const existingIndex = history.findIndex((item) => item.code === code);
   let currentItem: HistoryItem;
 
   if (existingIndex !== -1) {
-    // Actualizar último acceso del existente
+    // Update last accessed time of existing item
     history[existingIndex].lastAccessed = now;
     currentItem = history[existingIndex];
   } else {
-    // Crear nuevo item con nombre auto-generado
+    // Create new item with auto-generated name
     const diagramType = detectDiagramType(code);
     currentItem = {
       id: generateId(),
@@ -467,10 +467,10 @@ async function saveToHistory(code: string): Promise<HistoryItem> {
       lastAccessed: now,
       isPinned: false,
     };
-    history.unshift(currentItem); // Agregar al inicio
+    history.unshift(currentItem); // Add at beginning
   }
 
-  // Limitar historial a 100 items
+  // Limit history to 100 items
   const limitedHistory = history.slice(0, 100);
   await LocalStorage.setItem("mermaid-history", JSON.stringify(limitedHistory));
 
@@ -516,7 +516,7 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// Migrar datos existentes para agregar lastAccessed
+// Migrate existing data to add lastAccessed
 async function migrateHistoryData(): Promise<void> {
   const historyJson = await LocalStorage.getItem<string>("mermaid-history");
   if (!historyJson) return;
@@ -540,7 +540,7 @@ async function migrateHistoryData(): Promise<void> {
   }
 }
 
-// Formulario para renombrar desde el render
+// Form to rename from render view
 function RenameCurrentForm({
   currentName,
   code,
