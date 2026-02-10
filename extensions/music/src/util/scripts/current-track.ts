@@ -13,18 +13,34 @@ import { ScriptError, Track } from "../models";
 
 const FAVORITE_CONFIRMATION_TIMEOUT_MS = 10_000;
 const FAVORITE_POLL_INTERVAL_MS = 250;
+const FAVORITE_TRACK_ID_MISMATCH = "__TRACK_ID_MISMATCH__";
 
 const isSonomaOrNewer = (versionMajor: number) => versionMajor >= 14;
 const isTrackFavorited = (status: string) => status.trim().toLowerCase() === "true";
 const getFavoriteErrorMessage = (error: Error | ScriptError) =>
   "shortMessage" in error && typeof error.shortMessage === "string" ? error.shortMessage : error.message;
+const getFavoritePropertyByVersion = (versionMajor: number) => (isSonomaOrNewer(versionMajor) ? "favorited" : "loved");
 const getFavoriteCommand = (versionMajor: number) =>
-  isSonomaOrNewer(versionMajor) ? "get favorited of current track" : "get loved of current track";
+  `get ${getFavoritePropertyByVersion(versionMajor)} of current track`;
 const getSetFavoriteCommand = (versionMajor: number, targetState: boolean) =>
   isSonomaOrNewer(versionMajor)
     ? `set favorited of current track to ${targetState.toString()}`
     : `set loved of current track to ${targetState.toString()}`;
 const getFavoriteByVersion = (versionMajor: number) => tell("Music", getFavoriteCommand(versionMajor));
+const escapeAppleScriptString = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+const getFavoriteForCurrentTrackIdByVersion = (versionMajor: number, trackId: string) =>
+  runScript(`
+    tell application "Music"
+      set expectedTrackId to "${escapeAppleScriptString(trackId)}"
+      set currentTrackId to (id of current track) as text
+
+      if currentTrackId is not expectedTrackId then
+        return "${FAVORITE_TRACK_ID_MISMATCH}"
+      end if
+
+      return (${getFavoritePropertyByVersion(versionMajor)} of current track) as text
+    end tell
+  `);
 const waitForFavoritePollInterval = pipe(
   TE.right(undefined),
   TE.chainFirstTaskK(
@@ -101,6 +117,12 @@ export const getFavorite = pipe(
   TE.tryCatch(() => getMacosVersion(), E.toError),
   TE.chainW((version) => getFavoriteByVersion(version.major)),
 );
+export const getFavoriteForCurrentTrackId = (trackId: string): TE.TaskEither<Error | ScriptError, string | undefined> =>
+  pipe(
+    TE.tryCatch(() => getMacosVersion(), E.toError),
+    TE.chainW((version) => getFavoriteForCurrentTrackIdByVersion(version.major, trackId)),
+    TE.map((favoriteStatus) => (favoriteStatus === FAVORITE_TRACK_ID_MISMATCH ? undefined : favoriteStatus)),
+  );
 export const favorite = setFavoriteWithConfirmation(true);
 export const unfavorite = setFavoriteWithConfirmation(false);
 export const getDislike = tell("Music", "get disliked of current track");

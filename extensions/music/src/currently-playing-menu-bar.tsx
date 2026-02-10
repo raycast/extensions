@@ -11,6 +11,12 @@ import { formatTitle } from "./util/track";
 
 const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
+
+type FavoriteStatus = {
+  trackId: string;
+  isFavorited: boolean;
+};
+
 export default function CurrentlyPlayingMenuBarCommand() {
   const shouldExecute = useRef<boolean>(false);
 
@@ -53,14 +59,23 @@ export default function CurrentlyPlayingMenuBarCommand() {
   } = usePromise(
     (trackId?: string) => {
       if (!trackId) {
-        return Promise.resolve(undefined);
+        return Promise.resolve<FavoriteStatus | undefined>(undefined);
       }
 
       return pipe(
-        music.currentTrack.getFavorite,
+        music.currentTrack.getFavoriteForCurrentTrackId(trackId),
         TE.matchW(
           () => undefined,
-          (isFavorited) => isFavorited.trim().toLowerCase() === "true",
+          (favoriteStatus) => {
+            if (favoriteStatus === undefined) {
+              return undefined;
+            }
+
+            return {
+              trackId,
+              isFavorited: favoriteStatus.trim().toLowerCase() === "true",
+            };
+          },
         ),
       )();
     },
@@ -70,7 +85,8 @@ export default function CurrentlyPlayingMenuBarCommand() {
 
   const isRunning = !isLoadingCurrentTrack && !!currentTrack;
   const isPlaying = playerState === PlayerState.PLAYING;
-  const isFavorited = favoriteStatus === true;
+  const isFavoriteStatusForCurrentTrack = favoriteStatus?.trackId === currentTrack?.id;
+  const isFavorited = isFavoriteStatusForCurrentTrack && favoriteStatus?.isFavorited === true;
   const isLoading = isLoadingCurrentTrack || isLoadingPlayerState || isLoadingFavoriteStatus;
 
   if (!isRunning) {
@@ -147,6 +163,7 @@ export default function CurrentlyPlayingMenuBarCommand() {
         icon={isFavorited ? Icon.StarDisabled : Icon.Star}
         title={isFavorited ? "Unfavorite Track" : "Favorite Track"}
         onAction={() => {
+          const actionTrackId = currentTrack.id;
           const nextFavoriteState = !isFavorited;
           const toggleFavoriteAction = nextFavoriteState ? music.currentTrack.favorite : music.currentTrack.unfavorite;
 
@@ -159,8 +176,12 @@ export default function CurrentlyPlayingMenuBarCommand() {
             TE.chainFirstTaskK(
               () => () =>
                 mutateFavoriteStatus(undefined, {
-                  optimisticUpdate() {
-                    return nextFavoriteState;
+                  optimisticUpdate(data) {
+                    if (!data || data.trackId !== actionTrackId) {
+                      return data;
+                    }
+
+                    return { trackId: actionTrackId, isFavorited: nextFavoriteState };
                   },
                 }),
             ),
