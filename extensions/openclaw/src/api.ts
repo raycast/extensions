@@ -1,11 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  endpoint: string;
-  token: string;
-  agentId: string;
-}
-
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -31,8 +25,8 @@ interface StreamDelta {
   }[];
 }
 
-export function getPreferences(): Preferences {
-  const prefs = getPreferenceValues<Preferences>();
+export function getPreferences() {
+  const prefs = getPreferenceValues<ExtensionPreferences>();
 
   if (!prefs.token) {
     throw new Error(

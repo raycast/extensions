@@ -8,12 +8,8 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { askQuestion } from "./api";
-
-interface AskArguments {
-  question?: string;
-}
 
 function ResultView({
   question,
@@ -123,7 +119,7 @@ function AskForm({ initialQuestion }: { initialQuestion?: string }) {
 }
 
 export default function Command(
-  props: LaunchProps<{ arguments: AskArguments }>,
+  props: LaunchProps<{ arguments: Arguments.Ask }>,
 ) {
   const initialQuestion = props.arguments?.question;
 
@@ -139,11 +135,11 @@ function ImmediateAsk({ question }: { question: string }) {
   const [answer, setAnswer] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     askQuestion(question)
       .then(setAnswer)
       .catch((e) => setError(e.message));
-  });
+  }, []);
 
   if (error) {
     return <Detail markdown={`## Error\n\n${error}`} />;
