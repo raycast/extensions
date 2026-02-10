@@ -38,8 +38,8 @@ interface PendingMessage {
   submittedAt: number;
 }
 
-const STORAGE_KEY = "clawdbot-conversations";
-const PENDING_KEY = "clawdbot-pending-messages";
+const STORAGE_KEY = "openclaw-conversations";
+const PENDING_KEY = "openclaw-pending-messages";
 
 async function loadConversations(): Promise<Conversation[]> {
   const data = await LocalStorage.getItem<string>(STORAGE_KEY);
@@ -139,7 +139,7 @@ function ConversationView({
           showToast({
             style: Toast.Style.Success,
             title: "Response received",
-            message: "Clawdbot's response has arrived",
+            message: "OpenClaw's response has arrived",
           });
         } else if (result.status === "error") {
           await clearPendingMessage(currentConv.id);
@@ -278,7 +278,7 @@ function ConversationView({
         showToast({
           style: Toast.Style.Success,
           title: "Message sent",
-          message: "Clawdbot is thinking... You can close Raycast.",
+          message: "OpenClaw is thinking... You can close Raycast.",
         });
 
         // Start polling in background (non-blocking)
@@ -406,7 +406,7 @@ function ConversationView({
           subtitle="Type above and press Enter"
           icon={Icon.Message}
           detail={
-            <List.Item.Detail markdown="Type a message above and press **Enter** to start chatting with Clawdbot." />
+            <List.Item.Detail markdown="Type a message above and press **Enter** to start chatting with OpenClaw." />
           }
           actions={
             <ActionPanel>
@@ -435,7 +435,7 @@ function ConversationView({
                   ? Icon.Person
                   : Icon.Stars
             }
-            title={msg.role === "user" ? "You" : "Clawdbot"}
+            title={msg.role === "user" ? "You" : "OpenClaw"}
             subtitle={
               msg.isPending
                 ? "Thinking..."
@@ -446,7 +446,7 @@ function ConversationView({
             }
             detail={
               <List.Item.Detail
-                markdown={`**${msg.role === "user" ? "You" : "Clawdbot"}**\n\n${msg.content}`}
+                markdown={`**${msg.role === "user" ? "You" : "OpenClaw"}**\n\n${msg.content}`}
               />
             }
             actions={
@@ -468,7 +468,7 @@ function ConversationView({
                   content={currentConv.messages
                     .map(
                       (m) =>
-                        `${m.role === "user" ? "You" : "Clawdbot"}: ${m.content}`,
+                        `${m.role === "user" ? "You" : "OpenClaw"}: ${m.content}`,
                     )
                     .join("\n\n")}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}

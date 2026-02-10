@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "clawdbot",
-  "title": "Moltbot",
-  "description": "Chat with your local Clawdbot AI assistant",
+  "name": "openclaw",
+  "title": "OpenClaw",
+  "description": "Chat with your local OpenClaw AI assistant",
   "icon": "icon.png",
   "author": "leveragedrobot",
   "contributors": [
@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "ask",
-      "title": "Ask Clawdbot",
-      "description": "Quick question to Clawdbot",
+      "title": "Ask OpenClaw",
+      "description": "Quick question to OpenClaw",
       "mode": "view",
       "arguments": [
         {
@@ -27,14 +27,14 @@
     },
     {
       "name": "chat",
-      "title": "Chat with Clawdbot",
-      "description": "Open a conversation with Clawdbot",
+      "title": "Chat with OpenClaw",
+      "description": "Open a conversation with OpenClaw",
       "mode": "view"
     },
     {
       "name": "clipboard",
       "title": "Ask About Clipboard",
-      "description": "Ask Clawdbot about your clipboard content",
+      "description": "Ask OpenClaw about your clipboard content",
       "mode": "view"
     },
     {
@@ -46,13 +46,13 @@
     {
       "name": "status",
       "title": "Gateway Status",
-      "description": "Check Clawdbot gateway connection status",
+      "description": "Check OpenClaw gateway connection status",
       "mode": "view"
     },
     {
       "name": "open-webchat",
       "title": "Open Webchat",
-      "description": "Open Clawdbot webchat in browser",
+      "description": "Open OpenClaw webchat in browser",
       "mode": "no-view"
     }
   ],
@@ -60,7 +60,7 @@
     {
       "name": "endpoint",
       "title": "API Endpoint",
-      "description": "Clawdbot gateway URL. Use http://127.0.0.1:18789 for local, or your Tailscale serve URL (e.g., https://machine-name.tailnet.ts.net) for remote access.",
+      "description": "OpenClaw gateway URL. Use http://127.0.0.1:18789 for local, or your Tailscale serve URL (e.g., https://machine-name.tailnet.ts.net) for remote access.",
       "type": "textfield",
       "default": "https://jeffs-macbook-air.tailca3a37.ts.net",
       "required": true
@@ -68,14 +68,14 @@
     {
       "name": "token",
       "title": "API Token",
-      "description": "Find in ~/.clawdbot/clawdbot.json under gateway.auth.token",
+      "description": "Find in ~/.openclaw/openclaw.json under gateway.auth.token",
       "type": "password",
       "required": true
     },
     {
       "name": "agentId",
       "title": "Agent ID",
-      "description": "Which Clawdbot agent to use",
+      "description": "Which OpenClaw agent to use",
       "type": "textfield",
       "default": "main",
       "required": false

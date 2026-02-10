@@ -133,19 +133,19 @@ ${
     ? `
 ## Troubleshooting
 
-1. **Check if Clawdbot gateway is running**
+1. **Check if OpenClaw gateway is running**
    \`\`\`
-   clawdbot gateway status
+   openclaw gateway status
    \`\`\`
 
 2. **Start the gateway if needed**
    \`\`\`
-   clawdbot gateway start
+   openclaw gateway start
    \`\`\`
 
 3. **Verify the endpoint URL** matches your gateway configuration
 
-4. **Check the API token** in extension preferences matches \`~/.clawdbot/clawdbot.json\`
+4. **Check the API token** in extension preferences matches \`~/.openclaw/openclaw.json\`
 `
     : ""
 }

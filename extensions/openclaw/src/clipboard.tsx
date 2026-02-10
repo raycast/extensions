@@ -30,7 +30,7 @@ ${clipboardContent.slice(0, 500)}${clipboardContent.length > 500 ? "..." : ""}
 
 ---
 
-## Clawdbot's Response
+## OpenClaw's Response
 ${answer}`;
 
   return (
@@ -121,7 +121,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Ask Clawdbot" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Ask OpenClaw" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

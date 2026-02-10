@@ -36,7 +36,7 @@ export function getPreferences(): Preferences {
 
   if (!prefs.token) {
     throw new Error(
-      "API token not configured. Please set your Clawdbot gateway token in the extension preferences.",
+      "API token not configured. Please set your OpenClaw gateway token in the extension preferences.",
     );
   }
 
@@ -52,7 +52,7 @@ export async function sendMessage(
   const agentId = prefs.agentId || "main";
 
   const body = {
-    model: `clawdbot:${agentId}`,
+    model: `openclaw:${agentId}`,
     messages,
     stream: !!onStream,
     user: "raycast-extension", // maintains session state across calls
@@ -151,7 +151,7 @@ export async function submitAsyncMessage(
       Authorization: `Bearer ${prefs.token}`,
     },
     body: JSON.stringify({
-      model: `clawdbot:${agentId}`,
+      model: `openclaw:${agentId}`,
       messages,
       sessionKey: `raycast:${conversationId}`,
       user: "raycast-extension",

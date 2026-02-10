@@ -56,7 +56,7 @@ ${question}
 
 ---
 
-*Asking Clawdbot...*`}
+*Asking OpenClaw...*`}
     />
   );
 }
@@ -106,7 +106,7 @@ function AskForm({ initialQuestion }: { initialQuestion?: string }) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Ask Clawdbot" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Ask OpenClaw" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

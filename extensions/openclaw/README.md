@@ -1,24 +1,24 @@
-# Clawdbot for Raycast
+# OpenClaw for Raycast
 
-Chat with your local [Clawdbot](https://clawd.bot) AI assistant directly from Raycast.
+Chat with your local [OpenClaw](https://github.com/openclaw/openclaw) AI assistant directly from Raycast.
 
 ## Features
 
-- **Ask Clawdbot** - Quick question and answer
-- **Chat with Clawdbot** - Persistent conversations with history
+- **Ask OpenClaw** - Quick question and answer
+- **Chat with OpenClaw** - Persistent conversations with history
 - **Ask About Clipboard** - Analyze clipboard content with custom prompts
 - **Process Selected Text** - Summarize, explain, translate, fix grammar, and more
 
 ## Requirements
 
-- [Clawdbot](https://clawd.bot) installed and running locally
-- Clawdbot Gateway with HTTP API enabled
+- [OpenClaw](https://github.com/openclaw/openclaw) installed and running locally
+- OpenClaw Gateway with HTTP API enabled
 
 ## Setup
 
-### 1. Enable the Clawdbot HTTP API
+### 1. Enable the OpenClaw HTTP API
 
-Add this to your `~/.clawdbot/clawdbot.json`:
+Add this to your `~/.openclaw/openclaw.json`:
 
 ```json
 {
@@ -38,37 +38,37 @@ The gateway will hot-reload the config automatically.
 
 ### 2. Find Your API Token
 
-Your token is in `~/.clawdbot/clawdbot.json` under `gateway.auth.token`:
+Your token is in `~/.openclaw/openclaw.json` under `gateway.auth.token`:
 
 ```bash
-cat ~/.clawdbot/clawdbot.json | grep -A 2 '"auth"' | grep token
+cat ~/.openclaw/openclaw.json | grep -A 2 '"auth"' | grep token
 ```
 
 ### 3. Choose Your Connection Method
 
-When you first run a command, Raycast will prompt for your API Endpoint and Token. The endpoint depends on where Clawdbot is running relative to Raycast:
+When you first run a command, Raycast will prompt for your API Endpoint and Token. The endpoint depends on where OpenClaw is running relative to Raycast:
 
 #### Option A: Same Machine (Local)
 
-**Use when:** Raycast and Clawdbot are on the same computer.
+**Use when:** Raycast and OpenClaw are on the same computer.
 
 | Setting | Value |
 |---------|-------|
 | API Endpoint | `http://127.0.0.1:18789` |
 
-This is the default - no configuration changes needed on Clawdbot.
+This is the default - no configuration changes needed on OpenClaw.
 
 ---
 
 #### Option B: Local Network (Same WiFi/LAN)
 
-**Use when:** Clawdbot runs on another computer on your home/office network.
+**Use when:** OpenClaw runs on another computer on your home/office network.
 
 | Setting | Value |
 |---------|-------|
-| API Endpoint | `http://<clawdbot-machine-ip>:18789` |
+| API Endpoint | `http://<openclaw-machine-ip>:18789` |
 
-**Setup required on the Clawdbot machine:**
+**Setup required on the OpenClaw machine:**
 
 1. Find the machine's local IP:
    ```bash
@@ -77,7 +77,7 @@ This is the default - no configuration changes needed on Clawdbot.
    ipconfig getifaddr en1   # Ethernet
    ```
 
-2. Edit `~/.clawdbot/clawdbot.json` and change the gateway bind setting:
+2. Edit `~/.openclaw/openclaw.json` and change the gateway bind setting:
    ```json
    {
      "gateway": {
@@ -86,7 +86,7 @@ This is the default - no configuration changes needed on Clawdbot.
    }
    ```
 
-3. Restart Clawdbot gateway for changes to take effect.
+3. Restart OpenClaw gateway for changes to take effect.
 
 4. Use the local IP as your endpoint, e.g., `http://192.168.1.50:18789`
 
@@ -95,7 +95,7 @@ This is the default - no configuration changes needed on Clawdbot.
 > - Public WiFi = public exposure
 > - If port forwarding is enabled on your router, it could be internet-accessible
 >
-> The token provides some protection, but **Tailscale (Option C) is strongly recommended** for accessing Clawdbot from other machines. Only use this option on trusted private networks.
+> The token provides some protection, but **Tailscale (Option C) is strongly recommended** for accessing OpenClaw from other machines. Only use this option on trusted private networks.
 
 ---
 
@@ -107,11 +107,11 @@ This is the default - no configuration changes needed on Clawdbot.
 |---------|-------|
 | API Endpoint | `https://<machine-name>.<tailnet>.ts.net` |
 
-**Setup required on the Clawdbot machine:**
+**Setup required on the OpenClaw machine:**
 
 1. Install [Tailscale](https://tailscale.com) on both machines and sign in to the same account.
 
-2. On the Clawdbot machine, set up Tailscale serve:
+2. On the OpenClaw machine, set up Tailscale serve:
    ```bash
    tailscale serve --bg 18789
    ```
@@ -142,10 +142,10 @@ This is the default - no configuration changes needed on Clawdbot.
 
 ## Commands
 
-### Ask Clawdbot
+### Ask OpenClaw
 Quick Q&A - type a question, get an answer. Supports passing a question as an argument for automation.
 
-### Chat with Clawdbot
+### Chat with OpenClaw
 Full conversation interface with:
 - Persistent chat history
 - Multiple conversations
@@ -179,13 +179,13 @@ Select text in any app, then run this command to:
 The HTTP API endpoint isn't enabled. Add the config shown in Setup step 1.
 
 ### "Failed to connect"
-Make sure Clawdbot gateway is running:
+Make sure OpenClaw gateway is running:
 ```bash
-clawdbot gateway status
+openclaw gateway status
 ```
 
 ### Token errors
-Verify your token matches `gateway.auth.token` in your Clawdbot config.
+Verify your token matches `gateway.auth.token` in your OpenClaw config.
 
 ## Acknowledgments
 
