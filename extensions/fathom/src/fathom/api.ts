@@ -99,8 +99,9 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
 
     const result = await client.listMeetings({
       cursor: filter.cursor,
-      calendarInvitees: filter.calendarInvitees,
       calendarInviteesDomains: filter.calendarInviteesDomains,
+      // Note: calendarInvitees (email-level filter) is not supported by the SDK;
+      // it is handled by the HTTP fallback in listMeetingsHTTP instead.
       // Include summaries and transcripts for full-text search
       includeSummary: true,
       includeTranscript: true,
