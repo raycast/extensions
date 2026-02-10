@@ -10,6 +10,7 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
+  trash,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
@@ -27,17 +28,6 @@ import {
 } from "./utils";
 import { readBaseConfig, evaluateWithView } from "./bases";
 import { clearVaultCache } from "./cache";
-
-type Prefs = {
-  basesTodoFile: string;
-  todoViewName: string;
-  basesProjectFile: string;
-  projectViewName: string;
-  showRecurrence?: boolean;
-  showPriority?: boolean;
-  showTimeTracking?: boolean;
-  maxResults?: string;
-};
 
 function formatDate(dateStr: string): string {
   try {
@@ -96,7 +86,7 @@ function isToday(dateStr: string): boolean {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchText, setSearchText] = useState<string>("");
@@ -359,7 +349,7 @@ export default function Command() {
 
   // Filter todos by search text with performance limit
   const filteredTodos = useMemo(() => {
-    const prefs = getPreferenceValues<Prefs>();
+    const prefs = getPreferenceValues<Preferences>();
     const maxResults = parseInt(prefs.maxResults || "500", 10);
 
     let filtered = todos;
@@ -665,7 +655,7 @@ function SetProjectForm({
   onProjectUpdated: () => void;
 }) {
   const { pop } = useNavigation();
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
   const [projectNotes, setProjectNotes] = useState<Note[]>([]);
   const [searchText, setSearchText] = useState<string>("");
@@ -1196,7 +1186,7 @@ function NoteItem({
   onRefresh: () => void;
   onRebuild: () => void;
 }) {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const accessories = [];
 
   // Priority (shown first if enabled)
@@ -1315,8 +1305,7 @@ function NoteItem({
 
       if (!confirmed) return;
 
-      const fs = await import("fs/promises");
-      await fs.unlink(note.path);
+      await trash(note.path);
 
       await showToast({
         style: Toast.Style.Success,

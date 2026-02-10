@@ -10,6 +10,7 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
+  trash,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
@@ -25,11 +26,6 @@ import {
 } from "./utils";
 import { readBaseConfig, evaluateWithView } from "./bases";
 import { clearVaultCache } from "./cache";
-
-type Prefs = {
-  basesProjectFile: string;
-  projectViewName: string;
-};
 
 function formatDate(dateStr: string): string {
   try {
@@ -86,7 +82,7 @@ function isToday(dateStr: string): boolean {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchText, setSearchText] = useState<string>("");
@@ -736,8 +732,7 @@ function ProjectItem({
 
       if (!confirmed) return;
 
-      const fs = await import("fs/promises");
-      await fs.unlink(note.path);
+      await trash(note.path);
 
       await showToast({
         style: Toast.Style.Success,
