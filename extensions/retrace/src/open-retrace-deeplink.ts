@@ -60,18 +60,32 @@ export async function openRetraceDeeplink(options: OpenRetraceDeeplinkOptions) {
     console.log(`[Retrace Deeplink] metadata=${JSON.stringify(options.metadata)}`);
   }
 
-  try {
-    for (let index = 0; index < urls.length; index += 1) {
-      const url = urls[index];
-      console.log(`[Retrace Deeplink] opening ${url}`);
-      await open(url);
+  let openedUrl: string | null = null;
+  let lastError: unknown = null;
 
-      // Give macOS a brief beat between compatibility URL attempts.
+  for (let index = 0; index < urls.length; index += 1) {
+    const url = urls[index];
+    const label = index === 0 ? "primary" : `fallback-${index}`;
+
+    try {
+      console.log(`[Retrace Deeplink] opening (${label}) ${url}`);
+      await open(url);
+      openedUrl = url;
+      break;
+    } catch (error: unknown) {
+      lastError = error;
+      const url = urls[index];
+      const message = stringifyError(error);
+      console.log(`[Retrace Deeplink] failed (${label}) ${url} error=${message}`);
+
       if (index < urls.length - 1) {
+        // Give macOS a brief beat before attempting a fallback URL.
         await delay(120);
       }
     }
+  }
 
+  if (openedUrl) {
     const record: DeeplinkAttemptRecord = {
       context: options.context,
       startedAt,
@@ -84,25 +98,26 @@ export async function openRetraceDeeplink(options: OpenRetraceDeeplinkOptions) {
 
     toast.style = Toast.Style.Success;
     toast.title = "Sent deeplink to Retrace";
-    toast.message = urls[0];
-  } catch (error: unknown) {
-    const message = stringifyError(error);
-    const record: DeeplinkAttemptRecord = {
-      context: options.context,
-      startedAt,
-      status: "failed",
-      urls,
-      metadata: options.metadata,
-      error: message,
-    };
-
-    await persistAttempt(record);
-
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to open Retrace";
-    toast.message = message;
-
-    console.log(`[Retrace Deeplink] failed error=${message}`);
-    await showFailureToast(error, { title: "Error opening Retrace deeplink" });
+    toast.message = openedUrl;
+    return;
   }
+
+  const message = stringifyError(lastError);
+  const record: DeeplinkAttemptRecord = {
+    context: options.context,
+    startedAt,
+    status: "failed",
+    urls,
+    metadata: options.metadata,
+    error: message,
+  };
+
+  await persistAttempt(record);
+
+  toast.style = Toast.Style.Failure;
+  toast.title = "Failed to open Retrace";
+  toast.message = message;
+
+  console.log(`[Retrace Deeplink] failed error=${message}`);
+  await showFailureToast(lastError ?? "Failed to open Retrace deeplink", { title: "Error opening Retrace deeplink" });
 }
