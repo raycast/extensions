@@ -9,7 +9,7 @@ import {
     showToast,
     openExtensionPreferences,
 } from "@raycast/api";
-import { showFailureToast, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import {} from "picgo";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { NPMSearchParams, NPMSearchResponse, NPMSearchObject } from "./types/npm";
