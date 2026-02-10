@@ -1,21 +1,22 @@
 import { getPreferenceValues } from '@raycast/api'
 import { useState } from 'react'
-import { PaystackResponse } from '../utils/types'
+import { PaystackAccount, PaystackResponse } from '../utils/types'
 
 interface PaystackError {
   status: boolean
   message: string
 }
 
-export function usePaystack() {
-  const { liveSecretKey, testSecretKey, mode } =
-    getPreferenceValues<Preferences>()
+const BASE_URL = 'https://api.paystack.co'
+
+export function usePaystack(account?: PaystackAccount) {
+  const preferences = getPreferenceValues<Preferences>()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const secretKey = mode === 'live' ? liveSecretKey : testSecretKey
-
-  const baseUrl = 'https://api.paystack.co'
+  const liveKey = account?.liveSecretKey ?? preferences.liveSecretKey
+  const testKey = account?.testSecretKey ?? preferences.testSecretKey
+  const secretKey = preferences.mode === 'live' ? liveKey : testKey
 
   async function paystackFetch<T>(
     endpoint: string,
@@ -31,7 +32,7 @@ export function usePaystack() {
     setError(null)
 
     try {
-      const response = await fetch(`${baseUrl}${endpoint}`, {
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
         ...options,
         headers: {
           Authorization: `Bearer ${secretKey}`,
