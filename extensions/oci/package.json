@@ -21,6 +21,13 @@
       "mode": "view"
     },
     {
+      "name": "email-delivery",
+      "title": "Manage Email Delivery",
+      "subtitle": "Oracle Cloud",
+      "description": "Manage Email Delivery",
+      "mode": "view"
+    },
+    {
       "name": "nosql-database",
       "title": "Manage NoSQL Databases",
       "subtitle": "Oracle Cloud",
@@ -43,10 +50,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^1.104.5",
     "@raycast/utils": "^2.2.2",
     "filesize": "^11.0.2",
-    "oci-sdk": "^2.122.2"
+    "oci-sdk": "^2.125.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
