@@ -51,6 +51,8 @@ const DEFAULT_CONFIGS: Record<string, ActionConfig> = {
 let isRunning = false;
 let lastRunTime = 0;
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function runStealthAction(
   actionId: string,
   forceEditor?: boolean,
@@ -102,6 +104,46 @@ async function showModelErrorToast(errorMsg: string) {
     };
   }
   return toast;
+}
+
+async function trySelectAllInActiveField(
+  isMac: boolean,
+  frontApp: string,
+  frontAppBundleId: string,
+) {
+  if (!isMac) return "";
+
+  try {
+    // Reactivate the target app before sending Cmd+A
+    if (frontAppBundleId && frontAppBundleId !== "com.apple.finder") {
+      execSync(
+        `osascript -e 'tell application id "${frontAppBundleId}" to activate'`,
+        { timeout: 5000 },
+      );
+    } else if (frontApp && frontApp !== "Finder") {
+      const escapedAppName = frontApp.replace(/"/g, '\\"');
+      execSync(
+        `osascript -e 'tell application "${escapedAppName}" to activate'`,
+        {
+          timeout: 5000,
+        },
+      );
+    }
+
+    await sleep(150);
+    execSync(
+      `osascript -e 'tell application "System Events" to keystroke "a" using command down'`,
+      {
+        timeout: 5000,
+      },
+    );
+    await sleep(120);
+
+    return await getSelectedText();
+  } catch (e) {
+    console.log(`[DEBUG] Auto-select-all failed: ${e}`);
+    return "";
+  }
 }
 
 async function runStealthActionInternal(
@@ -248,21 +290,22 @@ async function runStealthActionInternal(
     !selectedText ||
     selectedText.trim().length === 0
   ) {
-    const toast = await showToast({
-      style: Toast.Style.Failure,
-      title: "No text selected",
-      message: "Please select text first",
-    });
-    toast.primaryAction = {
-      title: "Configure AI Model",
-      onAction: () => {
-        launchCommand({
-          name: "configure-model",
-          type: LaunchType.UserInitiated,
-        });
-      },
-    };
-    return;
+    console.log("[DEBUG] No selection detected. Trying auto-select-all.");
+    selectedText = await trySelectAllInActiveField(
+      isMac,
+      frontApp,
+      frontAppBundleId,
+    );
+    hasRealSelection = selectedText.trim().length > 0;
+
+    if (!hasRealSelection) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No text selected",
+        message: "Could not auto-select text from the active field",
+      });
+      return;
+    }
   }
 
   // 4. Show processing toast

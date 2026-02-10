@@ -1,5 +1,11 @@
 # Stealth AI Changelog
 
+## [Auto-Select Active Field Fallback] - {PR_MERGE_DATE}
+
+- When no text is selected, the action now tries to auto-select all text in the active field (`Cmd+A`) and continues processing
+- Replace immediate "No text selected" failure with automatic retry flow
+- Keep an error toast only as last resort when auto-selection fails
+
 ## [In-App AI Configuration] - 2026-02-09
 
 - Add in-app AI provider and model configuration (no more Raycast Settings)
