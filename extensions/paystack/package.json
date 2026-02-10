@@ -68,6 +68,13 @@
       "subtitle": "Paystack",
       "description": "Quickly search for active or inactive subscriptions in your Paystack account using customer or plan ID. View subscription details and status.",
       "mode": "view"
+    },
+    {
+      "name": "manage-accounts",
+      "title": "Manage Accounts",
+      "subtitle": "Paystack",
+      "description": "Add, edit, delete, and switch between multiple Paystack accounts.",
+      "mode": "view"
     }
   ],
   "preferences": [
