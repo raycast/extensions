@@ -1,7 +1,10 @@
+import type { LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { openRetraceDeeplink } from "./open-retrace-deeplink";
 
-export default async function Command(props: { arguments: { query: string } }) {
+type Props = LaunchProps<{ arguments: Arguments.SearchRetrace }>;
+
+export default async function Command(props: Props) {
   const query = props.arguments.query?.trim();
 
   if (!query) {

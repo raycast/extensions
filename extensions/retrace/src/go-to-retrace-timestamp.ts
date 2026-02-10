@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, type LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import * as chrono from "chrono-node";
 import { openRetraceDeeplink } from "./open-retrace-deeplink";
@@ -19,7 +19,9 @@ function parseUnixTimestamp(input: string): number | null {
   return trimmed.length === 10 ? value * 1000 : value;
 }
 
-export default async function Command(props: { arguments: { time: string } }) {
+type Props = LaunchProps<{ arguments: Arguments.GoToRetraceTimestamp }>;
+
+export default async function Command(props: Props) {
   const timeInput = props.arguments.time?.trim();
 
   if (!timeInput) {
