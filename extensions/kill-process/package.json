@@ -736,7 +736,7 @@
     },
     {
       "description": "Go back to root search after killing a process.",
-      "label": "Go back to Root Search",
+      "label": "Go Back to Root Search",
       "name": "goToRootAfterKill",
       "required": false,
       "default": false,
