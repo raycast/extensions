@@ -1,6 +1,6 @@
 # Fathom for Raycast Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-10
 
 - Updated dependencies
 - Removed `calendarInvitees` parameter from SDK call with explanatory comment about HTTP fallback
