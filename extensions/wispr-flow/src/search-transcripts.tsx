@@ -15,9 +15,6 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
 import { useState, useMemo, useCallback } from "react";
-import { existsSync } from "fs";
-import { homedir } from "os";
-import { resolve } from "path";
 import { Transcript } from "./types";
 import {
   getAppName,
@@ -26,16 +23,7 @@ import {
   formatDuration,
   groupTranscriptsByDate,
 } from "./utils";
-
-const DEFAULT_DB = resolve(
-  homedir(),
-  "Library/Application Support/Wispr Flow/flow.sqlite",
-);
-
-function getDbPath(): string {
-  const { databasePath } = getPreferenceValues<Preferences>();
-  return databasePath && databasePath.trim() !== "" ? databasePath : DEFAULT_DB;
-}
+import { getDbPath, dbExists, writeSQL } from "./db";
 
 const COLUMNS = `transcriptEntityId, asrText, formattedText, editedText,
   timestamp, app, url, duration, numWords, status, language, conversationId, isArchived`;
@@ -93,7 +81,7 @@ export default function Command() {
     getPreferenceValues<Preferences>();
   const dbPath = getDbPath();
 
-  if (!existsSync(dbPath)) {
+  if (!dbExists()) {
     return (
       <Detail
         markdown={`## Wispr Flow Database Not Found\n\nCould not find the Wispr Flow database at:\n\n\`${dbPath}\`\n\nMake sure [Wispr Flow](https://wisprflow.ai) is installed and has at least one transcription recorded, or update the database path in the extension preferences.`}
@@ -296,15 +284,24 @@ function TranscriptListItem({
       if (!confirmed) return;
     }
     const escaped = transcript.transcriptEntityId.replace(/'/g, "''");
-    await executeSQL(
-      dbPath,
+    writeSQL(
       `UPDATE History SET isArchived = 1 WHERE transcriptEntityId = '${escaped}'`,
     );
+    onArchive();
     await showToast({
       style: Toast.Style.Success,
       title: "Transcript archived",
+      primaryAction: {
+        title: "Undo",
+        onAction: async (toast) => {
+          writeSQL(
+            `UPDATE History SET isArchived = 0 WHERE transcriptEntityId = '${escaped}'`,
+          );
+          onArchive();
+          await toast.hide();
+        },
+      },
     });
-    onArchive();
   }, [transcript.transcriptEntityId, confirmBeforeArchive, dbPath, onArchive]);
 
   const wisprFlowPath = appPathMap.get("com.electron.wispr-flow");
@@ -438,6 +435,14 @@ function TranscriptListItem({
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={handleArchive}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Open Extension Preferences"
+              icon={Icon.Gear}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
+              onAction={openExtensionPreferences}
             />
           </ActionPanel.Section>
         </ActionPanel>

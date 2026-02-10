@@ -1,12 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "wispr-flow-history",
-  "title": "Wispr Flow History",
-  "description": "Search and browse your Wispr Flow voice transcription history",
+  "name": "wispr-flow",
+  "title": "Wispr Flow",
+  "description": "Search transcription history, manage your custom dictionary, and control voice recording with Wispr Flow",
   "icon": "icon.png",
   "author": "carterm",
+  "contributors": ["christi4nity", "mattiacolombomc"],
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Applications"
   ],
   "platforms": ["macOS"],
   "license": "MIT",
@@ -63,11 +65,42 @@
       "title": "Search Transcripts",
       "subtitle": "Wispr Flow",
       "description": "Search and browse your Wispr Flow transcription history",
-      "mode": "view",
-      "hotkey": {
-        "modifiers": ["ctrl", "shift"],
-        "key": "v"
-      }
+      "mode": "view"
+    },
+    {
+      "name": "add-word",
+      "title": "Add Word to Dictionary",
+      "subtitle": "Wispr Flow",
+      "description": "Add a word or phrase to your Wispr Flow custom vocabulary",
+      "mode": "view"
+    },
+    {
+      "name": "manage-dictionary",
+      "title": "Manage Dictionary",
+      "subtitle": "Wispr Flow",
+      "description": "View, search, edit, and delete words in your Wispr Flow dictionary",
+      "mode": "view"
+    },
+    {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "subtitle": "Wispr Flow",
+      "description": "Start Wispr Flow voice dictation",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "Wispr Flow",
+      "description": "Stop Wispr Flow voice dictation",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-app",
+      "title": "Open Wispr Flow",
+      "subtitle": "Wispr Flow",
+      "description": "Open the Wispr Flow app",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
