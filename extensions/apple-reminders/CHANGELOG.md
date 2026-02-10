@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Fix Quick Add Reminder AI model selection] - {PR_MERGE_DATE}
+## [Fix Quick Add Reminder AI model selection] - 2026-02-10
 
 - Fix Quick Add Reminder to use user's selected AI model instead of hardcoded OpenAI GPT-4o
 - Fix date formatting bug in non-AI path when displaying success messages
