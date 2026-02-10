@@ -1,6 +1,6 @@
 # Wispr Flow Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Transcription History
 - Search and browse Wispr Flow transcription history with infinite scroll

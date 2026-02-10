@@ -5,7 +5,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -17,12 +17,8 @@ const DEFAULT_DB = resolve(
   "Library/Application Support/Wispr Flow/flow.sqlite",
 );
 
-interface WisprPreferences {
-  databasePath?: string;
-}
-
 export function getDbPath(): string {
-  const { databasePath } = getPreferenceValues<WisprPreferences>();
+  const { databasePath } = getPreferenceValues<Preferences>();
   return databasePath && databasePath.trim() !== "" ? databasePath : DEFAULT_DB;
 }
 
@@ -77,13 +73,22 @@ export function validateUUID(id: string): string {
 
 /**
  * executeSQL from @raycast/utils opens the database read-only.
- * Use this for INSERT/UPDATE/DELETE operations.
+ * Use this for INSERT/UPDATE/DELETE operations via the sqlite3 CLI.
  */
 export function writeSQL(sql: string): void {
   const dbPath = getDbPath();
-  execSync(`sqlite3 "${dbPath}"`, {
-    input: sql,
-    encoding: "utf-8",
-    timeout: 5000,
-  });
+  try {
+    execFileSync("sqlite3", [dbPath], {
+      input: sql,
+      encoding: "utf-8",
+      timeout: 5000,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("ENOENT")) {
+      throw new Error(
+        "sqlite3 not found. macOS should include it by default. Please ensure sqlite3 is installed and in your PATH.",
+      );
+    }
+    throw error;
+  }
 }
