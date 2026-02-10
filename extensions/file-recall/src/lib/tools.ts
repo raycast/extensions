@@ -989,6 +989,7 @@ const BINARY_DOC_EXTENSIONS = new Set([
   "docx",
   "xlsx",
   "pptx",
+  "ppt",
   "odt",
   "ods",
   "odp",
@@ -1007,6 +1008,97 @@ async function extractBinaryDocContent(
 ): Promise<string | null> {
   try {
     const lowerExt = ext.toLowerCase();
+
+    const decodeXmlEntities = (s: string): string => {
+      return s
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+          const code = parseInt(hex, 16);
+          return Number.isFinite(code) ? String.fromCodePoint(code) : _;
+        })
+        .replace(/&#([0-9]+);/g, (_, dec) => {
+          const code = parseInt(dec, 10);
+          return Number.isFinite(code) ? String.fromCodePoint(code) : _;
+        });
+    };
+
+    const extractTextContentViaMdimport = async (): Promise<string | null> => {
+      try {
+        const { stdout } = await execFileAsync("mdimport", ["-d2", filePath], {
+          timeout: 5000,
+          maxBuffer: 16 * 1024 * 1024,
+        });
+        const textMatch = stdout.match(
+          /kMDItemTextContent\s*(?:=|==)\s*"([^"]+)"/,
+        );
+        if (textMatch) return textMatch[1];
+        return null;
+      } catch {
+        return null;
+      }
+    };
+
+    const extractPptxText = async (): Promise<string | null> => {
+      try {
+        const { stdout: listStdout } = await execFileAsync(
+          "unzip",
+          ["-Z1", filePath],
+          { timeout: 5000, maxBuffer: 8 * 1024 * 1024 },
+        );
+        const entries = listStdout
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+        const parseIndex = (path: string): number => {
+          const m = path.match(/(\d+)\.xml$/);
+          return m ? parseInt(m[1], 10) : Number.POSITIVE_INFINITY;
+        };
+
+        const slideXmls = entries
+          .filter((e) => /^ppt\/slides\/slide\d+\.xml$/.test(e))
+          .sort((a, b) => parseIndex(a) - parseIndex(b));
+        const notesXmls = entries
+          .filter((e) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(e))
+          .sort((a, b) => parseIndex(a) - parseIndex(b));
+
+        const extractFromXml = (xml: string): string[] => {
+          const out: string[] = [];
+          const re = /<a:t[^>]*>([\s\S]*?)<\/a:t>/g;
+          let m: RegExpExecArray | null;
+          while ((m = re.exec(xml))) {
+            const raw = m[1] ?? "";
+            const decoded = decodeXmlEntities(raw).replace(/\s+/g, " ").trim();
+            if (decoded) out.push(decoded);
+          }
+          return out;
+        };
+
+        const texts: string[] = [];
+        const toRead = [...slideXmls, ...notesXmls];
+        for (const entry of toRead) {
+          try {
+            const { stdout: xml } = await execFileAsync(
+              "unzip",
+              ["-p", filePath, entry],
+              { timeout: 5000, maxBuffer: 16 * 1024 * 1024 },
+            );
+            texts.push(...extractFromXml(xml));
+          } catch {
+            // ignore unreadable entries
+          }
+        }
+
+        const merged = texts.join("\n").trim();
+        return merged.length > 0 ? merged : null;
+      } catch {
+        return null;
+      }
+    };
 
     // XMind: ZIP containing content.json
     if (lowerExt === "xmind") {
@@ -1051,19 +1143,23 @@ async function extractBinaryDocContent(
 
     // XLSX/Numbers/ODS: use mdimport for basic text extraction
     if (["xlsx", "xls", "numbers", "csv", "ods"].includes(lowerExt)) {
-      try {
-        const { stdout } = await execFileAsync("mdimport", ["-d2", filePath]);
-        // Extract text content from mdimport debug output
-        const textMatch = stdout.match(/kMDItemTextContent\s*=\s*"([^"]+)"/);
-        if (textMatch) return textMatch[1];
-      } catch {
-        // Fallback: try Spotlight metadata
-      }
-      return null;
+      return await extractTextContentViaMdimport();
     }
 
-    // PPTX/Keynote/ODP: use textutil if available
-    if (["pptx", "keynote", "odp"].includes(lowerExt)) {
+    // PPT: legacy binary; try Spotlight importer text extraction.
+    if (lowerExt === "ppt") {
+      return await extractTextContentViaMdimport();
+    }
+
+    // PPTX: textutil isn't reliable; prefer ZIP XML extraction, fallback to mdimport.
+    if (lowerExt === "pptx") {
+      const pptxText = await extractPptxText();
+      if (pptxText) return pptxText;
+      return await extractTextContentViaMdimport();
+    }
+
+    // Keynote/ODP: try textutil; fallback to mdimport.
+    if (["keynote", "odp"].includes(lowerExt)) {
       try {
         const { stdout } = await execFileAsync("textutil", [
           "-convert",
@@ -1073,7 +1169,7 @@ async function extractBinaryDocContent(
         ]);
         return stdout;
       } catch {
-        return null;
+        return await extractTextContentViaMdimport();
       }
     }
 
