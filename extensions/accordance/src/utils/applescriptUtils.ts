@@ -12,9 +12,7 @@ export const generateAccordanceAppleScript = (module: string, reference: string)
     tell application "Accordance"
       if not running then launch
       try
-        set theModule to "${escapedModule}"
-        set theReference to "${escapedReference}"
-        set verseText to «event AccdTxRf» {theModule, theReference, true}
+        set verseText to «event AccdTxRf» {"${escapedModule}", "${escapedReference}", true}
         return verseText
       on error errMsg
         return "Error: " & errMsg

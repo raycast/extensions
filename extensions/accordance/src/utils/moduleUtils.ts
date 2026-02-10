@@ -122,8 +122,7 @@ export async function isEnglishModule(moduleName: string): Promise<boolean> {
       tell application "Accordance"
         if not running then launch
         try
-          set theModule to "${escapedModule}"
-          set result to «event AccdIsEg» {theModule}
+          set result to «event AccdIsEg» {"${escapedModule}"}
           return result
         on error errMsg
           return "Error: " & errMsg
