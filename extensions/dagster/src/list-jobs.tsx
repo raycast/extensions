@@ -161,7 +161,7 @@ export default function ListJobs() {
                     <ActionPanel.Section title="Run">
                       <Action title="Launch New Run" icon={Icon.Play} onAction={() => handleLaunch(job)} />
                       <Action
-                        title="Retry Last Run (all Steps)"
+                        title="Retry Last Run (All Steps)"
                         icon={Icon.ArrowClockwise}
                         onAction={() => handleReexecute(job, "ALL_STEPS")}
                       />
