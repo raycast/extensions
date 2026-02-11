@@ -1,5 +1,10 @@
 # Statamic Docs Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added `-beta` flag for beta releases in the version switcher
+- Updated fallback results for Statamic 6
+
 ## [Update] - 2025-09-18
 
 - Added version switcher

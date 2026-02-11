@@ -8,478 +8,719 @@
             "url": "/"
         },
         {
-            "id": "requirements",
+            "id": "getting-started-requirements",
             "hierarchy_lvl0": "Getting Started",
             "hierarchy_lvl1": "Requirements",
             "search_content": null,
-            "url": "/requirements"
+            "url": "/getting-started/requirements"
         },
         {
-            "id": "quick-start-guide",
+            "id": "getting-started-licensing",
+            "hierarchy_lvl0": "Getting Started",
+            "hierarchy_lvl1": "Licensing",
+            "search_content": null,
+            "url": "/getting-started/licensing"
+        },
+        {
+            "id": "getting-started-core-concepts",
+            "hierarchy_lvl0": "Getting Started",
+            "hierarchy_lvl1": "Core Concepts",
+            "search_content": null,
+            "url": "/getting-started/core-concepts"
+        },
+        {
+            "id": "getting-started-quick-start-guide",
             "hierarchy_lvl0": "Getting Started",
             "hierarchy_lvl1": "Quick start guide",
             "search_content": null,
-            "url": "/quick-start-guide"
+            "url": "/getting-started/quick-start-guide"
         },
         {
-            "id": "upgrade-guide",
+            "id": "getting-started-installing",
+            "hierarchy_lvl0": "Getting Started",
+            "hierarchy_lvl1": "How to install Statamic",
+            "search_content": null,
+            "url": "/getting-started/installing"
+        },
+        {
+            "id": "getting-started-configuration",
+            "hierarchy_lvl0": "Getting Started",
+            "hierarchy_lvl1": "Configuration",
+            "search_content": null,
+            "url": "/getting-started/configuration"
+        },
+        {
+            "id": "getting-started-upgrade-guide",
             "hierarchy_lvl0": "Getting Started",
             "hierarchy_lvl1": "Upgrade guide",
             "search_content": null,
-            "url": "/upgrade-guide"
+            "url": "/getting-started/upgrade-guide"
         },
         {
-            "id": "installing",
-            "hierarchy_lvl0": "Getting Started",
-            "hierarchy_lvl1": "Installing",
-            "search_content": null,
-            "url": "/installing"
-        },
-        {
-            "id": "updating",
+            "id": "getting-started-updating",
             "hierarchy_lvl0": "Getting Started",
             "hierarchy_lvl1": "Updating",
             "search_content": null,
-            "url": "/updating"
+            "url": "/getting-started/updating"
         },
         {
-            "id": "deploying",
+            "id": "getting-started-deploying",
             "hierarchy_lvl0": "Getting Started",
             "hierarchy_lvl1": "Deploying",
             "search_content": null,
-            "url": "/deploying"
+            "url": "/getting-started/deploying"
         }
     ],
-    "Core Concepts": [
+    "Content Modeling": [
         {
-            "id": "core-concepts",
-            "hierarchy_lvl0": "Core Concepts",
+            "id": "content-modeling-overview",
+            "hierarchy_lvl0": "Content Modeling",
             "hierarchy_lvl1": "Overview",
             "search_content": null,
-            "url": "/core-concepts"
+            "url": "/content-modeling/overview"
         },
         {
-            "id": "assets",
-            "hierarchy_lvl0": "Core Concepts",
-            "hierarchy_lvl1": "Assets",
-            "search_content": null,
-            "url": "/assets"
-        },
-        {
-            "id": "configuration",
-            "hierarchy_lvl0": "Core Concepts",
-            "hierarchy_lvl1": "Configuration",
-            "search_content": null,
-            "url": "/configuration"
-        },
-        {
-            "id": "collections",
-            "hierarchy_lvl0": "Core Concepts",
+            "id": "content-modeling-collections",
+            "hierarchy_lvl0": "Content Modeling",
             "hierarchy_lvl1": "Collections",
             "search_content": null,
-            "url": "/collections"
+            "url": "/content-modeling/collections"
         },
         {
-            "id": "fields",
-            "hierarchy_lvl0": "Core Concepts",
-            "hierarchy_lvl1": "Fields",
-            "search_content": null,
-            "url": "/fields"
-        },
-        {
-            "id": "globals",
-            "hierarchy_lvl0": "Core Concepts",
-            "hierarchy_lvl1": "Globals",
-            "search_content": null,
-            "url": "/globals"
-        },
-        {
-            "id": "search",
-            "hierarchy_lvl0": "Core Concepts",
-            "hierarchy_lvl1": "Search",
-            "search_content": null,
-            "url": "/search"
-        },
-        {
-            "id": "navigation",
-            "hierarchy_lvl0": "Core Concepts",
-            "hierarchy_lvl1": "Navigation",
-            "search_content": null,
-            "url": "/navigation"
-        },
-        {
-            "id": "taxonomies",
-            "hierarchy_lvl0": "Core Concepts",
+            "id": "content-modeling-taxonomies",
+            "hierarchy_lvl0": "Content Modeling",
             "hierarchy_lvl1": "Taxonomies",
             "search_content": null,
-            "url": "/taxonomies"
+            "url": "/content-modeling/taxonomies"
         },
         {
-            "id": "users",
-            "hierarchy_lvl0": "Core Concepts",
-            "hierarchy_lvl1": "Users",
+            "id": "content-modeling-globals",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Globals",
             "search_content": null,
-            "url": "/users"
+            "url": "/content-modeling/globals"
         },
         {
-            "id": "yaml",
-            "hierarchy_lvl0": "Core Concepts",
-            "hierarchy_lvl1": "YAML",
+            "id": "content-modeling-navigation",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Navigation",
             "search_content": null,
-            "url": "/yaml"
-        }
-    ],
-    "Diving Deeper": [
-        {
-            "id": "augmentation",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Augmentation",
-            "search_content": null,
-            "url": "/augmentation"
+            "url": "/content-modeling/navigation"
         },
         {
-            "id": "cli",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "CLI",
-            "search_content": null,
-            "url": "/cli"
-        },
-        {
-            "id": "caching",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Caching",
-            "search_content": null,
-            "url": "/caching"
-        },
-        {
-            "id": "computed-values",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Computed Values",
-            "search_content": null,
-            "url": "/computed-values"
-        },
-        {
-            "id": "data-inheritance",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Data Inheritance",
-            "search_content": null,
-            "url": "/data-inheritance"
-        },
-        {
-            "id": "debugging",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Debugging",
-            "search_content": null,
-            "url": "/debugging"
-        },
-        {
-            "id": "forms",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Forms",
-            "search_content": null,
-            "url": "/forms"
-        },
-        {
-            "id": "oauth",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "OAuth",
-            "search_content": null,
-            "url": "/oauth"
-        },
-        {
-            "id": "multi-site",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Multi-Site",
-            "search_content": null,
-            "url": "/multi-site"
-        },
-        {
-            "id": "preferences",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Preferences",
-            "search_content": null,
-            "url": "/preferences"
-        },
-        {
-            "id": "revisions",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Revisions",
-            "search_content": null,
-            "url": "/revisions"
-        },
-        {
-            "id": "relationships",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Relationships",
-            "search_content": null,
-            "url": "/relationships"
-        },
-        {
-            "id": "routing",
-            "hierarchy_lvl0": "Diving Deeper",
+            "id": "content-modeling-routing",
+            "hierarchy_lvl0": "Content Modeling",
             "hierarchy_lvl1": "Routing",
             "search_content": null,
-            "url": "/routing"
+            "url": "/content-modeling/routing"
         },
         {
-            "id": "stache",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Stache",
+            "id": "content-modeling-blueprints",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Blueprints",
             "search_content": null,
-            "url": "/stache"
+            "url": "/content-modeling/blueprints"
         },
         {
-            "id": "structures",
-            "hierarchy_lvl0": "Diving Deeper",
+            "id": "content-modeling-fieldsets",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Fieldsets",
+            "search_content": null,
+            "url": "/content-modeling/fieldsets"
+        },
+        {
+            "id": "content-modeling-fields",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Fields",
+            "search_content": null,
+            "url": "/content-modeling/fields"
+        },
+        {
+            "id": "content-modeling-structures",
+            "hierarchy_lvl0": "Content Modeling",
             "hierarchy_lvl1": "Structures",
             "search_content": null,
-            "url": "/structures"
+            "url": "/content-modeling/structures"
         },
         {
-            "id": "email",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Sending Email",
+            "id": "content-modeling-computed-values",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Computed Values",
             "search_content": null,
-            "url": "/email"
+            "url": "/content-modeling/computed-values"
         },
         {
-            "id": "static-caching",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Static Caching",
+            "id": "content-modeling-data-inheritance",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Data Inheritance",
             "search_content": null,
-            "url": "/static-caching"
+            "url": "/content-modeling/data-inheritance"
         },
         {
-            "id": "scheduling",
-            "hierarchy_lvl0": "Diving Deeper",
-            "hierarchy_lvl1": "Task Scheduling",
+            "id": "content-modeling-relationships",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Relationships",
             "search_content": null,
-            "url": "/scheduling"
+            "url": "/content-modeling/relationships"
         },
         {
-            "id": "validation",
-            "hierarchy_lvl0": "Diving Deeper",
+            "id": "content-modeling-revisions",
+            "hierarchy_lvl0": "Content Modeling",
+            "hierarchy_lvl1": "Revisions",
+            "search_content": null,
+            "url": "/content-modeling/revisions"
+        },
+        {
+            "id": "content-modeling-validation",
+            "hierarchy_lvl0": "Content Modeling",
             "hierarchy_lvl1": "Validation",
             "search_content": null,
-            "url": "/validation"
-        }
-    ],
-    "Frontend": [
-        {
-            "id": "frontend",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Overview",
-            "search_content": null,
-            "url": "/frontend"
-        },
-        {
-            "id": "antlers",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Antlers Templates",
-            "search_content": null,
-            "url": "/antlers"
-        },
-        {
-            "id": "blade",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Blade Templates",
-            "search_content": null,
-            "url": "/blade"
-        },
-        {
-            "id": "content-queries",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Content Queries",
-            "search_content": null,
-            "url": "/content-queries"
-        },
-        {
-            "id": "controllers",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Controllers",
-            "search_content": null,
-            "url": "/controllers"
-        },
-        {
-            "id": "graphql",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "GraphQL API",
-            "search_content": null,
-            "url": "/graphql"
-        },
-        {
-            "id": "image-manipulation",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Image Manipulation",
-            "search_content": null,
-            "url": "/image-manipulation"
-        },
-        {
-            "id": "javascript-frameworks",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Front-End Frameworks",
-            "search_content": null,
-            "url": "/javascript-frameworks"
-        },
-        {
-            "id": "modifiers",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Modifiers",
-            "search_content": null,
-            "url": "/modifiers"
-        },
-        {
-            "id": "protecting-content",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Protecting Content",
-            "search_content": null,
-            "url": "/protecting-content"
-        },
-        {
-            "id": "rest-api",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "REST API",
-            "search_content": null,
-            "url": "/rest-api"
-        },
-        {
-            "id": "tags",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Tags",
-            "search_content": null,
-            "url": "/tags"
-        },
-        {
-            "id": "conditions",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Tag Conditions",
-            "search_content": null,
-            "url": "/conditions"
-        },
-        {
-            "id": "variables",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Variables",
-            "search_content": null,
-            "url": "/variables"
-        },
-        {
-            "id": "views",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "Views",
-            "search_content": null,
-            "url": "/views"
-        },
-        {
-            "id": "view-models",
-            "hierarchy_lvl0": "Frontend",
-            "hierarchy_lvl1": "View Models",
-            "search_content": null,
-            "url": "/view-models"
+            "url": "/content-modeling/validation"
         }
     ],
     "Control Panel": [
         {
-            "id": "dashboard",
+            "id": "control-panel-overview",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Overview",
+            "search_content": null,
+            "url": "/control-panel/overview"
+        },
+        {
+            "id": "control-panel-users",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Users",
+            "search_content": null,
+            "url": "/control-panel/users"
+        },
+        {
+            "id": "control-panel-dashboard",
             "hierarchy_lvl0": "Control Panel",
             "hierarchy_lvl1": "Dashboard",
             "search_content": null,
-            "url": "/dashboard"
+            "url": "/control-panel/dashboard"
         },
         {
-            "id": "customizing-the-cp-nav",
+            "id": "control-panel-command-palette",
             "hierarchy_lvl0": "Control Panel",
-            "hierarchy_lvl1": "Navigation",
+            "hierarchy_lvl1": "Command Palette",
             "search_content": null,
-            "url": "/customizing-the-cp-nav"
+            "url": "/control-panel/command-palette"
         },
         {
-            "id": "blueprints",
+            "id": "control-panel-preferences",
             "hierarchy_lvl0": "Control Panel",
-            "hierarchy_lvl1": "Blueprints",
+            "hierarchy_lvl1": "Preferences",
             "search_content": null,
-            "url": "/blueprints"
+            "url": "/control-panel/preferences"
         },
         {
-            "id": "fieldtypes",
-            "hierarchy_lvl0": "Control Panel",
-            "hierarchy_lvl1": "Fieldtypes",
-            "search_content": null,
-            "url": "/fieldtypes"
-        },
-        {
-            "id": "fieldsets",
-            "hierarchy_lvl0": "Control Panel",
-            "hierarchy_lvl1": "Fieldsets",
-            "search_content": null,
-            "url": "/fieldsets"
-        },
-        {
-            "id": "conditional-fields",
-            "hierarchy_lvl0": "Control Panel",
-            "hierarchy_lvl1": "Conditional Fields",
-            "search_content": null,
-            "url": "/conditional-fields"
-        },
-        {
-            "id": "git-automation",
+            "id": "control-panel-git-automation",
             "hierarchy_lvl0": "Control Panel",
             "hierarchy_lvl1": "Git Automation",
             "search_content": null,
-            "url": "/git-automation"
+            "url": "/control-panel/git-automation"
         },
         {
-            "id": "live-preview",
+            "id": "control-panel-live-preview",
             "hierarchy_lvl0": "Control Panel",
             "hierarchy_lvl1": "Live Preview",
             "search_content": null,
-            "url": "/live-preview"
+            "url": "/control-panel/live-preview"
         },
         {
-            "id": "multi-user-collaboration",
+            "id": "control-panel-permissions",
             "hierarchy_lvl0": "Control Panel",
-            "hierarchy_lvl1": "Multi-User Collaboration",
+            "hierarchy_lvl1": "Permissions",
             "search_content": null,
-            "url": "/multi-user-collaboration"
+            "url": "/control-panel/permissions"
         },
         {
-            "id": "cp-translations",
+            "id": "control-panel-multi-site",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Multi-Site",
+            "search_content": null,
+            "url": "/control-panel/multi-site"
+        },
+        {
+            "id": "control-panel-conditional-fields",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Conditional Fields",
+            "search_content": null,
+            "url": "/control-panel/conditional-fields"
+        },
+        {
+            "id": "control-panel-cp-translations",
             "hierarchy_lvl0": "Control Panel",
             "hierarchy_lvl1": "Translations",
             "search_content": null,
-            "url": "/cp-translations"
+            "url": "/control-panel/cp-translations"
         },
         {
-            "id": "white-labeling",
+            "id": "control-panel-white-labeling",
             "hierarchy_lvl0": "Control Panel",
             "hierarchy_lvl1": "White Labeling",
             "search_content": null,
-            "url": "/white-labeling"
+            "url": "/control-panel/white-labeling"
         },
         {
-            "id": "widgets",
+            "id": "control-panel-keyboard-shortcuts",
             "hierarchy_lvl0": "Control Panel",
-            "hierarchy_lvl1": "Widgets",
+            "hierarchy_lvl1": "Keyboard Shortcuts",
             "search_content": null,
-            "url": "/widgets"
+            "url": "/control-panel/keyboard-shortcuts"
+        },
+        {
+            "id": "control-panel-elevated-sessions",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Elevated Sessions",
+            "search_content": null,
+            "url": "/control-panel/elevated-sessions"
+        },
+        {
+            "id": "control-panel-customizing-the-cp-nav",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Customizing the Control Panel Navigation",
+            "search_content": null,
+            "url": "/control-panel/customizing-the-cp-nav"
+        },
+        {
+            "id": "control-panel-multi-user-collaboration",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Multi-User Collaboration",
+            "search_content": null,
+            "url": "/control-panel/multi-user-collaboration"
+        },
+        {
+            "id": "control-panel-utilities",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Utilities",
+            "search_content": null,
+            "url": "/control-panel/utilities"
+        },
+        {
+            "id": "control-panel-cp-navigation",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Extending CP Navigation",
+            "search_content": null,
+            "url": "/control-panel/cp-navigation"
+        },
+        {
+            "id": "control-panel-field-actions",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Field Actions",
+            "search_content": null,
+            "url": "/control-panel/field-actions"
+        },
+        {
+            "id": "control-panel-publish-forms",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Publish Forms",
+            "search_content": null,
+            "url": "/control-panel/publish-forms"
+        },
+        {
+            "id": "control-panel-toast-notifications",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Toast Notifications",
+            "search_content": null,
+            "url": "/control-panel/toast-notifications"
+        },
+        {
+            "id": "control-panel-css-javascript",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "CSS & JavaScript",
+            "search_content": null,
+            "url": "/control-panel/css-javascript"
+        },
+        {
+            "id": "control-panel-routing",
+            "hierarchy_lvl0": "Control Panel",
+            "hierarchy_lvl1": "Routing",
+            "search_content": null,
+            "url": "/control-panel/routing"
+        }
+    ],
+    "Frontend": [
+        {
+            "id": "frontend-overview",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Overview",
+            "search_content": null,
+            "url": "/frontend/overview"
+        },
+        {
+            "id": "frontend-antlers",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Antlers Templates",
+            "search_content": null,
+            "url": "/frontend/antlers"
+        },
+        {
+            "id": "frontend-blade",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Blade Templates",
+            "search_content": null,
+            "url": "/frontend/blade"
+        },
+        {
+            "id": "frontend-views",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Views",
+            "search_content": null,
+            "url": "/frontend/views"
+        },
+        {
+            "id": "frontend-augmentation",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Augmentation",
+            "search_content": null,
+            "url": "/frontend/augmentation"
+        },
+        {
+            "id": "frontend-assets",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Assets",
+            "search_content": null,
+            "url": "/frontend/assets"
+        },
+        {
+            "id": "frontend-forms",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Forms",
+            "search_content": null,
+            "url": "/frontend/forms"
+        },
+        {
+            "id": "frontend-blade-form-fields",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Blade Form Field Templates",
+            "search_content": null,
+            "url": "/frontend/blade-form-fields"
+        },
+        {
+            "id": "frontend-search",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Search",
+            "search_content": null,
+            "url": "/frontend/search"
+        },
+        {
+            "id": "frontend-image-manipulation",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Image Manipulation (Glide)",
+            "search_content": null,
+            "url": "/frontend/image-manipulation"
+        },
+        {
+            "id": "frontend-javascript-frameworks",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Front-End Frameworks",
+            "search_content": null,
+            "url": "/frontend/javascript-frameworks"
+        },
+        {
+            "id": "frontend-controllers",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Controllers",
+            "search_content": null,
+            "url": "/frontend/controllers"
+        },
+        {
+            "id": "frontend-view-models",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "View Models",
+            "search_content": null,
+            "url": "/frontend/view-models"
+        },
+        {
+            "id": "frontend-content-queries",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Content Queries",
+            "search_content": null,
+            "url": "/frontend/content-queries"
+        },
+        {
+            "id": "frontend-rest-api",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "REST API",
+            "search_content": null,
+            "url": "/frontend/rest-api"
+        },
+        {
+            "id": "frontend-graphql",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "GraphQL API",
+            "search_content": null,
+            "url": "/frontend/graphql"
+        },
+        {
+            "id": "frontend-protecting-content",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Protecting Content",
+            "search_content": null,
+            "url": "/frontend/protecting-content"
+        },
+        {
+            "id": "frontend-markdown",
+            "hierarchy_lvl0": "Frontend",
+            "hierarchy_lvl1": "Customizing Markdown",
+            "search_content": null,
+            "url": "/frontend/markdown"
+        }
+    ],
+    "Advanced Topics": [
+        {
+            "id": "advanced-topics-cli",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "CLI",
+            "search_content": null,
+            "url": "/advanced-topics/cli"
+        },
+        {
+            "id": "advanced-topics-caching",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "Caching",
+            "search_content": null,
+            "url": "/advanced-topics/caching"
+        },
+        {
+            "id": "advanced-topics-debugging",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "Debugging",
+            "search_content": null,
+            "url": "/advanced-topics/debugging"
+        },
+        {
+            "id": "advanced-topics-email",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "Sending Email",
+            "search_content": null,
+            "url": "/advanced-topics/email"
+        },
+        {
+            "id": "advanced-topics-stache",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "Stache",
+            "search_content": null,
+            "url": "/advanced-topics/stache"
+        },
+        {
+            "id": "advanced-topics-static-caching",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "Static Caching",
+            "search_content": null,
+            "url": "/advanced-topics/static-caching"
+        },
+        {
+            "id": "advanced-topics-scheduling",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "Task Scheduling",
+            "search_content": null,
+            "url": "/advanced-topics/scheduling"
+        },
+        {
+            "id": "advanced-topics-oauth",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "OAuth",
+            "search_content": null,
+            "url": "/advanced-topics/oauth"
+        },
+        {
+            "id": "advanced-topics-sites-api",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "Sites API",
+            "search_content": null,
+            "url": "/advanced-topics/sites-api"
+        },
+        {
+            "id": "advanced-topics-yaml",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "YAML",
+            "search_content": null,
+            "url": "/advanced-topics/yaml"
+        },
+        {
+            "id": "advanced-topics-lifecycle",
+            "hierarchy_lvl0": "Advanced Topics",
+            "hierarchy_lvl1": "Lifecycle",
+            "search_content": null,
+            "url": "/advanced-topics/lifecycle"
+        }
+    ],
+    "Fieldtypes": [
+        {
+            "id": "fieldtypes-overview",
+            "hierarchy_lvl0": "Fieldtypes",
+            "hierarchy_lvl1": "Overview",
+            "search_content": null,
+            "url": "/fieldtypes/overview"
+        },
+        {
+            "id": "fieldtypes-all-fieldtypes",
+            "hierarchy_lvl0": "Fieldtypes",
+            "hierarchy_lvl1": "All Fieldtypes",
+            "search_content": null,
+            "url": "/fieldtypes/all-fieldtypes"
+        },
+        {
+            "id": "fieldtypes-build-a-fieldtype",
+            "hierarchy_lvl0": "Fieldtypes",
+            "hierarchy_lvl1": "Build a Fieldtype",
+            "search_content": null,
+            "url": "/fieldtypes/build-a-fieldtype"
+        },
+        {
+            "id": "fieldtypes-dictionaries",
+            "hierarchy_lvl0": "Fieldtypes",
+            "hierarchy_lvl1": "Dictionaries",
+            "search_content": null,
+            "url": "/fieldtypes/dictionaries"
+        },
+        {
+            "id": "fieldtypes-relationship-fieldtypes",
+            "hierarchy_lvl0": "Fieldtypes",
+            "hierarchy_lvl1": "Relationship Fieldtypes",
+            "search_content": null,
+            "url": "/fieldtypes/relationship-fieldtypes"
+        }
+    ],
+    "Tags": [
+        {
+            "id": "tags-overview",
+            "hierarchy_lvl0": "Tags",
+            "hierarchy_lvl1": "Overview",
+            "search_content": null,
+            "url": "/tags/overview"
+        },
+        {
+            "id": "tags-all-tags",
+            "hierarchy_lvl0": "Tags",
+            "hierarchy_lvl1": "All Tags",
+            "search_content": null,
+            "url": "/tags/all-tags"
+        },
+        {
+            "id": "tags-conditions",
+            "hierarchy_lvl0": "Tags",
+            "hierarchy_lvl1": "Tag Conditions",
+            "search_content": null,
+            "url": "/tags/conditions"
+        },
+        {
+            "id": "tags-building-a-tag",
+            "hierarchy_lvl0": "Tags",
+            "hierarchy_lvl1": "Building Tags",
+            "search_content": null,
+            "url": "/tags/building-a-tag"
+        }
+    ],
+    "Variables": [
+        {
+            "id": "variables-overview",
+            "hierarchy_lvl0": "Variables",
+            "hierarchy_lvl1": "Overview",
+            "search_content": null,
+            "url": "/variables/overview"
+        },
+        {
+            "id": "variables-all-variables",
+            "hierarchy_lvl0": "Variables",
+            "hierarchy_lvl1": "All Variables",
+            "search_content": null,
+            "url": "/variables/all-variables"
+        }
+    ],
+    "Modifiers": [
+        {
+            "id": "modifiers-overview",
+            "hierarchy_lvl0": "Modifiers",
+            "hierarchy_lvl1": "Overview",
+            "search_content": null,
+            "url": "/modifiers/overview"
+        },
+        {
+            "id": "modifiers-all-modifiers",
+            "hierarchy_lvl0": "Modifiers",
+            "hierarchy_lvl1": "All Modifiers",
+            "search_content": null,
+            "url": "/modifiers/all-modifiers"
+        },
+        {
+            "id": "modifiers-modifiers",
+            "hierarchy_lvl0": "Modifiers",
+            "hierarchy_lvl1": "Building Modifiers",
+            "search_content": null,
+            "url": "/modifiers/modifiers"
+        }
+    ],
+    "Widgets": [
+        {
+            "id": "widgets-overview",
+            "hierarchy_lvl0": "Widgets",
+            "hierarchy_lvl1": "Overview",
+            "search_content": null,
+            "url": "/widgets/overview"
+        },
+        {
+            "id": "widgets-all-widgets",
+            "hierarchy_lvl0": "Widgets",
+            "hierarchy_lvl1": "All Widgets",
+            "search_content": null,
+            "url": "/widgets/all-widgets"
+        },
+        {
+            "id": "widgets-building-a-widget",
+            "hierarchy_lvl0": "Widgets",
+            "hierarchy_lvl1": "Building Widgets",
+            "search_content": null,
+            "url": "/widgets/building-a-widget"
         }
     ],
     "Addons": [
         {
-            "id": "addons",
+            "id": "addons-overview",
             "hierarchy_lvl0": "Addons",
             "hierarchy_lvl1": "Overview",
             "search_content": null,
-            "url": "/addons"
+            "url": "/addons/overview"
+        },
+        {
+            "id": "addons-building-an-addon",
+            "hierarchy_lvl0": "Addons",
+            "hierarchy_lvl1": "Building an Addon",
+            "search_content": null,
+            "url": "/addons/building-an-addon"
+        },
+        {
+            "id": "addons-testing",
+            "hierarchy_lvl0": "Addons",
+            "hierarchy_lvl1": "Testing",
+            "search_content": null,
+            "url": "/addons/testing"
+        },
+        {
+            "id": "addons-vite-tooling",
+            "hierarchy_lvl0": "Addons",
+            "hierarchy_lvl1": "Vite Tooling",
+            "search_content": null,
+            "url": "/addons/vite-tooling"
         }
     ],
     "Starter Kits": [
         {
-            "id": "starter-kits",
+            "id": "starter-kits-overview",
             "hierarchy_lvl0": "Starter Kits",
             "hierarchy_lvl1": "Overview",
             "search_content": null,
-            "url": "/starter-kits"
+            "url": "/starter-kits/overview"
+        },
+        {
+            "id": "starter-kits-creating-a-starter-kit",
+            "hierarchy_lvl0": "Starter Kits",
+            "hierarchy_lvl1": "Creating",
+            "search_content": null,
+            "url": "/starter-kits/creating-a-starter-kit"
         },
         {
             "id": "starter-kits-installing-a-starter-kit",
@@ -494,71 +735,173 @@
             "hierarchy_lvl1": "Updating",
             "search_content": null,
             "url": "/starter-kits/updating-a-starter-kit"
-        },
-        {
-            "id": "starter-kits-creating-a-starter-kit",
-            "hierarchy_lvl0": "Starter Kits",
-            "hierarchy_lvl1": "Creating",
-            "search_content": null,
-            "url": "/starter-kits/creating-a-starter-kit"
         }
     ],
-    "Resources": [
+    "Backend & APIs": [
         {
-            "id": "content-managers-guide",
-            "hierarchy_lvl0": "Resources",
-            "hierarchy_lvl1": "Content Manager’s Guide",
+            "id": "backend-apis-resource-apis",
+            "hierarchy_lvl0": "Backend & APIs",
+            "hierarchy_lvl1": "Resource APIs",
             "search_content": null,
-            "url": "/content-managers-guide"
+            "url": "/backend-apis/resource-apis"
         },
         {
-            "id": "from-wordpress-to-statamic",
-            "hierarchy_lvl0": "Resources",
-            "hierarchy_lvl1": "WordPress to Statamic",
+            "id": "backend-apis-repositories",
+            "hierarchy_lvl0": "Backend & APIs",
+            "hierarchy_lvl1": "Repositories",
             "search_content": null,
-            "url": "/from-wordpress-to-statamic"
+            "url": "/backend-apis/repositories"
         },
         {
-            "id": "code-of-conduct",
-            "hierarchy_lvl0": "Resources",
-            "hierarchy_lvl1": "Code of Conduct",
+            "id": "backend-apis-data",
+            "hierarchy_lvl0": "Backend & APIs",
+            "hierarchy_lvl1": "Data Retrieval and Manipulation",
             "search_content": null,
-            "url": "/code-of-conduct"
+            "url": "/backend-apis/data"
         },
         {
-            "id": "contributing",
-            "hierarchy_lvl0": "Resources",
-            "hierarchy_lvl1": "Contributing",
+            "id": "backend-apis-events",
+            "hierarchy_lvl0": "Backend & APIs",
+            "hierarchy_lvl1": "Events",
             "search_content": null,
-            "url": "/contributing"
+            "url": "/backend-apis/events"
         },
         {
-            "id": "licensing",
-            "hierarchy_lvl0": "Resources",
-            "hierarchy_lvl1": "Licensing",
+            "id": "backend-apis-query-scopes-and-filters",
+            "hierarchy_lvl0": "Backend & APIs",
+            "hierarchy_lvl1": "Query Scopes & Filters",
             "search_content": null,
-            "url": "/licensing"
+            "url": "/backend-apis/query-scopes-and-filters"
         },
         {
-            "id": "release-schedule-support-policy",
-            "hierarchy_lvl0": "Resources",
-            "hierarchy_lvl1": "Release Schedule",
+            "id": "backend-apis-hooks",
+            "hierarchy_lvl0": "Backend & APIs",
+            "hierarchy_lvl1": "Hooks",
             "search_content": null,
-            "url": "/release-schedule-support-policy"
+            "url": "/backend-apis/hooks"
         },
         {
-            "id": "tips",
-            "hierarchy_lvl0": "Resources",
+            "id": "backend-apis-actions",
+            "hierarchy_lvl0": "Backend & APIs",
+            "hierarchy_lvl1": "Actions",
+            "search_content": null,
+            "url": "/backend-apis/actions"
+        },
+        {
+            "id": "backend-apis-blink-cache",
+            "hierarchy_lvl0": "Backend & APIs",
+            "hierarchy_lvl1": "Blink Cache",
+            "search_content": null,
+            "url": "/backend-apis/blink-cache"
+        }
+    ],
+    "Vue Components": [
+        {
+            "id": "vue-components-overview",
+            "hierarchy_lvl0": "Vue Components",
+            "hierarchy_lvl1": "Overview",
+            "search_content": null,
+            "url": "/vue-components/overview"
+        },
+        {
+            "id": "https:--ui.statamic.dev",
+            "hierarchy_lvl0": "Vue Components",
+            "hierarchy_lvl1": "UI Components",
+            "search_content": null,
+            "url": "https://ui.statamic.dev"
+        },
+        {
+            "id": "vue-components-slugs",
+            "hierarchy_lvl0": "Vue Components",
+            "hierarchy_lvl1": "Slugs",
+            "search_content": null,
+            "url": "/vue-components/slugs"
+        },
+        {
+            "id": "vue-components-dirty-state-tracking",
+            "hierarchy_lvl0": "Vue Components",
+            "hierarchy_lvl1": "Dirty State Tracking",
+            "search_content": null,
+            "url": "/vue-components/dirty-state-tracking"
+        },
+        {
+            "id": "vue-components-js-events",
+            "hierarchy_lvl0": "Vue Components",
+            "hierarchy_lvl1": "Event Bus",
+            "search_content": null,
+            "url": "/vue-components/js-events"
+        },
+        {
+            "id": "vue-components-js-hooks",
+            "hierarchy_lvl0": "Vue Components",
+            "hierarchy_lvl1": "Hooks",
+            "search_content": null,
+            "url": "/vue-components/js-hooks"
+        },
+        {
+            "id": "vue-components-progress",
+            "hierarchy_lvl0": "Vue Components",
+            "hierarchy_lvl1": "Progress",
+            "search_content": null,
+            "url": "/vue-components/progress"
+        }
+    ],
+    "Knowledge Base": [
+        {
+            "id": "knowledge-base-tips",
+            "hierarchy_lvl0": "Knowledge Base",
             "hierarchy_lvl1": "Tips & Tricks",
             "search_content": null,
-            "url": "/tips"
+            "url": "/knowledge-base/tips"
         },
         {
-            "id": "troubleshooting",
-            "hierarchy_lvl0": "Resources",
+            "id": "knowledge-base-troubleshooting",
+            "hierarchy_lvl0": "Knowledge Base",
             "hierarchy_lvl1": "Troubleshooting",
             "search_content": null,
-            "url": "/troubleshooting"
+            "url": "/knowledge-base/troubleshooting"
+        },
+        {
+            "id": "knowledge-base-release-schedule-support-policy",
+            "hierarchy_lvl0": "Knowledge Base",
+            "hierarchy_lvl1": "Release Schedule",
+            "search_content": null,
+            "url": "/knowledge-base/release-schedule-support-policy"
+        },
+        {
+            "id": "knowledge-base-code-of-conduct",
+            "hierarchy_lvl0": "Knowledge Base",
+            "hierarchy_lvl1": "Code of Conduct",
+            "search_content": null,
+            "url": "/knowledge-base/code-of-conduct"
+        },
+        {
+            "id": "knowledge-base-contributing",
+            "hierarchy_lvl0": "Knowledge Base",
+            "hierarchy_lvl1": "Contributing",
+            "search_content": null,
+            "url": "/knowledge-base/contributing"
+        },
+        {
+            "id": "knowledge-base-from-wordpress-to-statamic",
+            "hierarchy_lvl0": "Knowledge Base",
+            "hierarchy_lvl1": "WordPress to Statamic",
+            "search_content": null,
+            "url": "/knowledge-base/from-wordpress-to-statamic"
+        },
+        {
+            "id": "knowledge-base-contribution-guide",
+            "hierarchy_lvl0": "Knowledge Base",
+            "hierarchy_lvl1": "Contribution Guide",
+            "search_content": null,
+            "url": "/knowledge-base/contribution-guide"
+        },
+        {
+            "id": "knowledge-base-content-managers-guide",
+            "hierarchy_lvl0": "Knowledge Base",
+            "hierarchy_lvl1": "Content Manager’s Guide",
+            "search_content": null,
+            "url": "/knowledge-base/content-managers-guide"
         }
     ]
 }

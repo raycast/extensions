@@ -24,6 +24,7 @@ type Version = {
   branch: string;
   url: string;
   alpha: boolean | false;
+  beta: boolean | false;
 };
 
 export type { Version };
