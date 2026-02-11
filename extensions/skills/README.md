@@ -12,16 +12,16 @@ Browse and search AI agent skills from [Skills](https://skills.sh) directly in R
 
 ## Commands
 
-### Browse Skills
-
-Browse AI agent skills ranking by total installs.
-
 ### Search Skills
 
-Search for specific AI agent skills.
+Search for agent skills from skills.sh with real-time results.
+
+### Trending Skills
+
+View the most trending skills from the last 24 hours.
 
 ## Screenshots
 
-![Browse Skills](metadata/skills-1.png)
-![Skill Detail](metadata/skills-2.png)
-![Search Skills](metadata/skills-3.png)
+![Browse Skills](metadata/skills-1-1.png)
+![Skill Detail](metadata/skills-2-1.png)
+![Search Skills](metadata/skills-3-1.png)

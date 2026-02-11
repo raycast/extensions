@@ -14,20 +14,35 @@ export type SearchResponse = {
 };
 
 export const API_BASE_URL = "https://skills.sh/api";
-export const REPO_URL = "https://github.com/keito4/raycast-skills-sh";
+export const REPO_URL = "https://github.com/raycast/extensions";
 
 export function formatInstalls(count: number): string {
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K`;
+  if (count >= 1_000_000_000) {
+    return `${(count / 1_000_000_000).toFixed(1)}B`;
+  }
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1)}M`;
+  }
+  if (count >= 1_000) {
+    return `${(count / 1_000).toFixed(1)}K`;
   }
   return count.toString();
 }
 
 export function buildInstallCommand(skill: Skill): string {
-  return `npx skills add https://github.com/${skill.source} --skill ${skill.skillId}`;
+  return `npx skills add ${skill.source}@${skill.skillId}`;
 }
 
-export function getCompany(skill: Skill): string {
+export function deduplicateSkills(skills: Skill[]): Skill[] {
+  const seen = new Set<string>();
+  return skills.filter((skill) => {
+    if (seen.has(skill.id)) return false;
+    seen.add(skill.id);
+    return true;
+  });
+}
+
+export function getOwner(skill: Skill): string {
   return (skill.source ?? "").split("/")[0];
 }
 

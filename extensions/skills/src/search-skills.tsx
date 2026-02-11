@@ -1,26 +1,17 @@
 import { List, ActionPanel, Action, Icon, Detail } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { SkillListItem } from "./components/SkillListItem";
+import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
-import { buildIssueUrl, getCompany } from "./shared";
+import { buildIssueUrl } from "./shared";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [company, setCompany] = useState("all");
 
   const { data, isLoading, error, revalidate, searchUrl } = useDebouncedSearch(searchText);
 
-  const allSkills = data?.skills ?? [];
-  const companyCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const s of allSkills) {
-      const c = getCompany(s);
-      counts.set(c, (counts.get(c) ?? 0) + 1);
-    }
-    return new Map([...counts.entries()].sort(([a], [b]) => a.localeCompare(b)));
-  }, [allSkills]);
-  const skills = company === "all" ? allSkills : allSkills.filter((s) => getCompany(s) === company);
+  const { owner, setOwner, ownerCounts, skills } = useOwnerFilter(data?.skills ?? []);
 
   if (error && !data) {
     return (
@@ -46,10 +37,10 @@ export default function Command() {
       searchBarPlaceholder="Search skills..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Company" storeValue onChange={setCompany}>
-          <List.Dropdown.Item title="All Companies" value="all" />
-          <List.Dropdown.Section title="Companies">
-            {[...companyCounts.entries()].map(([c, count]) => (
+        <List.Dropdown tooltip="Filter by Owner" value={owner} storeValue onChange={setOwner}>
+          <List.Dropdown.Item title="All Owners" value="all" />
+          <List.Dropdown.Section title="Owners">
+            {[...ownerCounts.entries()].map(([c, count]) => (
               <List.Dropdown.Item key={c} title={`${c} (${count})`} value={c} />
             ))}
           </List.Dropdown.Section>
