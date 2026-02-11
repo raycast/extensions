@@ -88,7 +88,8 @@
   "dependencies": {
     "@raycast/api": "^1.100.2",
     "@raycast/utils": "^2.0.1",
-    "axios": "^1.10.0"
+    "axios": "^1.10.0",
+    "which": "^6.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
@@ -96,6 +97,7 @@
     "@raycast/eslint-config": "^2.0.0",
     "@types/node": "^24.0.14",
     "@types/react": "^19.0.10",
+    "@types/which": "^3.0.4",
     "eslint": "^9.0.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
