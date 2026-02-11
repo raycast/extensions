@@ -16,7 +16,7 @@ interface RecordingDetailProps {
 }
 
 export function RecordingDetail({ recording: initialRecording }: RecordingDetailProps) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
 
   const { isLoading, data } = usePromise(
     async (id: string) => {

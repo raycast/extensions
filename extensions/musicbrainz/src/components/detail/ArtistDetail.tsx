@@ -20,7 +20,7 @@ interface ArtistDetailProps {
 }
 
 export function ArtistDetail({ artist: initialArtist }: ArtistDetailProps) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
 
   const { isLoading, data } = usePromise(
     async (id: string) => {

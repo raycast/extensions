@@ -76,7 +76,7 @@ function extractPerformances(relations: MBRelation[] | undefined): PerformanceIn
 }
 
 export function WorkDetail({ work: initialWork }: WorkDetailProps) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
 
   const { isLoading, data } = usePromise(
     async (id: string) => {

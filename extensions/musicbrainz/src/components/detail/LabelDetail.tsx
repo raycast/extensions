@@ -12,7 +12,7 @@ interface LabelDetailProps {
 }
 
 export function LabelDetail({ label: initialLabel }: LabelDetailProps) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
 
   const { isLoading, data } = usePromise(
     async (id: string) => {

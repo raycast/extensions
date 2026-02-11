@@ -16,7 +16,7 @@ interface ReleaseDetailProps {
 }
 
 export function ReleaseDetail({ release: initialRelease }: ReleaseDetailProps) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
 
   const { isLoading, data } = usePromise(
     async (id: string) => {
