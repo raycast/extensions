@@ -6,12 +6,8 @@ import { InactivityTimer } from "./utils/inactivity-timer";
 import SearchDatabase from "./components/search-database";
 import UnlockDatabase from "./components/unlock-database";
 
-interface Preference {
-  lockAfterInactivity: string;
-}
-
 // The amount of time (in minutes) after which the database should be locked due to inactivity
-const lockAfterInactivity = Number(getPreferenceValues<Preference>().lockAfterInactivity);
+const lockAfterInactivity = Number(getPreferenceValues().lockAfterInactivity);
 
 /**
  * The entry point of Search command

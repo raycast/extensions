@@ -3,10 +3,6 @@ import { parse } from "csv-parse/sync";
 import child_process from "child_process";
 import process from "process";
 
-interface Preference {
-  database: string;
-}
-
 /**
  * Utility function to show a toast message for CLI errors
  *
@@ -36,7 +32,7 @@ const showToastKeepassxcCliErrors = (error: { message: string }): void => {
 };
 
 class KeePassLoader {
-  private static database: string = getPreferenceValues<Preference>().database;
+  private static database: string = getPreferenceValues().database;
   private static databasePassword: string;
   private static keepassxcCli: string | undefined;
   private static keyFile: string;

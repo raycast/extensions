@@ -1,11 +1,7 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 
-interface Preference {
-  lockAfterInactivity: string;
-}
-
 class InactivityTimer {
-  static lockAfterInactivity: number = Number(getPreferenceValues<Preference>().lockAfterInactivity);
+  static lockAfterInactivity: number = Number(getPreferenceValues().lockAfterInactivity);
 
   /**
    * Checks whether the user has performed an activity recently

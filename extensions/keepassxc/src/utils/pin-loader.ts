@@ -1,12 +1,8 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { getEntryId } from "./entry-helper";
 
-interface Preference {
-  database: string;
-}
-
 class PinLoader {
-  private static pinnedStorageKey: string = `pinnedEntries_${getPreferenceValues<Preference>().database}`;
+  private static pinnedStorageKey: string = `pinnedEntries_${getPreferenceValues().database}`;
 
   /**
    * Load the pinned entry IDs from `LocalStorage`

@@ -21,12 +21,8 @@ import { isValidUrl } from "../utils/url-checker";
 import { getEntryId } from "../utils/entry-helper";
 import { PinLoader } from "../utils/pin-loader";
 
-interface Preference {
-  userInterfaceFavicon: boolean;
-}
-
 // Whether to show favicons in the UI
-const userInterfaceFavicon = getPreferenceValues<Preference>().userInterfaceFavicon;
+const userInterfaceFavicon = getPreferenceValues().userInterfaceFavicon;
 
 /**
  * Component representing a single KeePass entry
