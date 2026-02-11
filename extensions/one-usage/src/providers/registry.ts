@@ -6,11 +6,7 @@ import { fetchCursor } from "./cursor";
 
 // Preferences
 
-interface BasePreferences {
-  enableClaude: boolean;
-  enableCodex: boolean;
-  enableCursor: boolean;
-}
+// Preferences are auto-generated in raycast-env.d.ts
 
 // Provider Metadata
 
