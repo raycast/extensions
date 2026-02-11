@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-02-11
 
 ### Fixed
 - Fixed TypeScript build errors in API utility and component files.
