@@ -19,6 +19,10 @@ function GridItem({ item }: { item: Character }) {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard content={item.shape} />
+          <Action.OpenInBrowser
+            title="Box Drawing on Wikipedia"
+            url="https://en.wikipedia.org/wiki/Box-drawing_characters"
+          />
         </ActionPanel>
       }
     />
