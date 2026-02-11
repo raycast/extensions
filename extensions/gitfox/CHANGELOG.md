@@ -1,6 +1,6 @@
 # Gitfox Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-02-11
 
 - Fixed duplicate repositories in menu bar command
 
