@@ -11,7 +11,7 @@ export default async function main() {
 
     await Clipboard.copy(meetTab);
     await showHUD("Copied meet link to clipboard");
-  } catch (err) {
+  } catch {
     await showToast({
       style: Toast.Style.Failure,
       title: "Couldn't copy to clipboard",

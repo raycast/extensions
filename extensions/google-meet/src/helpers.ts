@@ -13,9 +13,7 @@ const openMeetTabUrl = "https://meet.google.com/new";
 
 export function getTimeout(): number {
   const regexp = /^[0-9]+$/;
-  return regexp.test(getPreferenceValues().timeout)
-    ? parseInt(getPreferenceValues().timeout)
-    : 500;
+  return regexp.test(getPreferenceValues().timeout) ? parseInt(getPreferenceValues().timeout) : 500;
 }
 
 function getPreferredBrowser() {

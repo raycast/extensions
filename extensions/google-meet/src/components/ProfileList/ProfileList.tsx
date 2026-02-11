@@ -1,4 +1,4 @@
-import { ActionPanel, Action, showHUD, Clipboard, showToast, Toast, List, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, showHUD, Clipboard, showToast, Toast, List } from "@raycast/api";
 import { FC, useCallback } from "react";
 import { getMeetTab, openMeetTabSelectedProfile, getTimeout } from "../../helpers";
 import { useCacheHelpers } from "../../hooks";
@@ -16,7 +16,7 @@ export const ProfileList: FC = () => {
 
       await Clipboard.copy(meetTab.split("?")[0]);
       await showHUD("Copied meet link to clipboard");
-    } catch (err) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't copy to clipboard",
@@ -33,7 +33,7 @@ export const ProfileList: FC = () => {
         title: "Profile removed!",
       });
     },
-    [onRemoveItem]
+    [onRemoveItem],
   );
 
   return (
@@ -46,8 +46,8 @@ export const ProfileList: FC = () => {
           subtitle={email}
           actions={
             <ActionPanel>
-              <Action title="Select profile" onAction={() => onSelect(email)} />
-              <Action title="Delete profile" onAction={() => onRemove(email)} />
+              <Action title="Select Profile" onAction={() => onSelect(email)} />
+              <Action title="Delete Profile" onAction={() => onRemove(email)} />
             </ActionPanel>
           }
         />

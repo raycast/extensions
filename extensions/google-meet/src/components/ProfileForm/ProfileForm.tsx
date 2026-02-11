@@ -17,7 +17,7 @@ export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
           style: Toast.Style.Success,
           title: "Profile created!",
         });
-      } catch (err) {
+      } catch {
         showToast({
           style: Toast.Style.Failure,
           title: "Profile already exists!",
@@ -45,7 +45,7 @@ export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add profile" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Profile" onSubmit={handleSubmit} />
           <Action.SubmitForm title="Back" onSubmit={onFinish} />
         </ActionPanel>
       }
