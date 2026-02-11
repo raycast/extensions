@@ -25,6 +25,7 @@ export interface SessionCredentials {
  * Internal state for the session manager.
  */
 let refreshPromise: Promise<SessionCredentials> | null = null;
+let setupPromise: Promise<SessionCredentials> | null = null;
 let lastRefreshTime = 0;
 
 // Minimum time between refreshes to prevent rapid-fire refresh attempts (5 seconds)
@@ -100,10 +101,11 @@ export async function refreshSessionWithMutex(): Promise<SessionCredentials> {
  * Checks if an error indicates we need to do a full fresh setup.
  * 401 = Unauthorized (token expired/invalid)
  * 403 = Forbidden/Insufficient authentication (credentials mismatch)
+ * 466 = Request signature required (installation invalidated, signature can't be verified)
  */
 function needsFullSetup(err: unknown): boolean {
   if (err instanceof BunqApiError) {
-    return err.statusCode === 401 || err.statusCode === 403;
+    return err.statusCode === 401 || err.statusCode === 403 || err.statusCode === 466;
   }
   return false;
 }
@@ -148,12 +150,51 @@ export async function refreshSessionWithFallback(): Promise<SessionCredentials> 
 }
 
 /**
+ * Performs full setup with mutex protection.
+ *
+ * Prevents concurrent full setup calls (e.g., from React double-mount)
+ * from racing on device registration and causing 409 conflicts.
+ *
+ * @returns Promise resolving to the new session credentials
+ */
+export async function performFullSetupWithMutex(): Promise<SessionCredentials> {
+  if (setupPromise) {
+    logger.debug("Full setup already in progress, waiting for it");
+    return setupPromise;
+  }
+
+  logger.info("Starting full setup with mutex lock");
+
+  setupPromise = (async () => {
+    try {
+      await performFullSetup();
+
+      const credentials = await getAllCredentials();
+      lastRefreshTime = Date.now();
+
+      logger.info("Full setup completed successfully");
+
+      return {
+        sessionToken: credentials.sessionToken || "",
+        userId: credentials.userId || "",
+        privateKey: credentials.rsaPrivateKey || "",
+      };
+    } finally {
+      setupPromise = null;
+    }
+  })();
+
+  return setupPromise;
+}
+
+/**
  * Resets the session manager state.
  *
  * Call this after clearing credentials to ensure fresh state.
  */
 export function resetSessionManager(): void {
   refreshPromise = null;
+  setupPromise = null;
   lastRefreshTime = 0;
   logger.debug("Session manager state reset");
 }

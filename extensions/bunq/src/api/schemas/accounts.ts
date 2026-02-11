@@ -9,10 +9,10 @@ import { AmountSchema, PointerSchema, AvatarSchema } from "./base";
 
 export const MonetaryAccountSettingSchema = z
   .object({
-    color: z.string().optional(),
-    icon: z.string().optional(),
-    default_avatar_status: z.string().optional(),
-    restriction_chat: z.string().optional(),
+    color: z.string().nullable().optional(),
+    icon: z.string().nullable().optional(),
+    default_avatar_status: z.string().nullable().optional(),
+    restriction_chat: z.string().nullable().optional(),
   })
   .passthrough();
 

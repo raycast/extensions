@@ -12,9 +12,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { showToast, Toast, confirmAlert, Alert } from "@raycast/api";
-import { getAllCredentials, hasCompletedSetup, clearAll, credentialsMatchPreferences } from "../lib/storage";
-import { performFullSetup } from "../api/auth";
-import { refreshSessionWithFallback, resetSessionManager } from "../lib/session-manager";
+import { hasCompletedSetup, clearAll, credentialsMatchPreferences } from "../lib/storage";
+import { refreshSessionWithFallback, performFullSetupWithMutex, resetSessionManager } from "../lib/session-manager";
 import { BunqApiError } from "../api/client";
 import { RequestOptions } from "../api/client";
 import { logger } from "../lib/logger";
@@ -130,23 +129,22 @@ export function useBunqSession(): BunqSession {
           title: "Connected to bunq",
         });
       } else {
-        // First time - perform full setup
+        // First time - perform full setup (mutex-protected against React double-mount)
         logger.info("Performing first-time setup");
         await showToast({
           style: Toast.Style.Animated,
           title: "Setting up bunq connection...",
         });
 
-        await performFullSetup();
+        const credentials = await performFullSetupWithMutex();
 
-        const credentials = await getAllCredentials();
         // Update refs immediately for sync access
         sessionTokenRef.current = credentials.sessionToken;
-        privateKeyRef.current = credentials.rsaPrivateKey;
+        privateKeyRef.current = credentials.privateKey;
         // Update state for React re-renders
         setSessionToken(credentials.sessionToken);
         setUserId(credentials.userId);
-        setPrivateKey(credentials.rsaPrivateKey);
+        setPrivateKey(credentials.privateKey);
         setConfigured(true);
 
         await showToast({
@@ -316,17 +314,16 @@ export function useBunqSession(): BunqSession {
       setPrivateKey(undefined);
       setConfigured(false);
 
-      // Perform fresh setup
-      await performFullSetup();
+      // Perform fresh setup (mutex-protected)
+      const credentials = await performFullSetupWithMutex();
 
-      const credentials = await getAllCredentials();
       // Update refs immediately for sync access
       sessionTokenRef.current = credentials.sessionToken;
-      privateKeyRef.current = credentials.rsaPrivateKey;
+      privateKeyRef.current = credentials.privateKey;
       // Update state for React re-renders
       setSessionToken(credentials.sessionToken);
       setUserId(credentials.userId);
-      setPrivateKey(credentials.rsaPrivateKey);
+      setPrivateKey(credentials.privateKey);
       setConfigured(true);
 
       await showToast({
