@@ -1,0 +1,104 @@
+{
+  "name": "jira-automation",
+  "title": "Jira Automation",
+  "description": "Automate Jira ticket updates and work logging.",
+  "icon": "icon.png",
+  "author": "sarjil_napit",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-tickets",
+      "title": "Manage Jira Tickets",
+      "description": "Fetch assigned tickets, log work and update status.",
+      "mode": "view"
+    },
+    {
+      "name": "worklog-report",
+      "title": "Worklog Report",
+      "description": "View worklog report across a time range.",
+      "mode": "view"
+    },
+    {
+      "name": "reminder",
+      "title": "Worklog Reminder",
+      "description": "Background reminder for logging work.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "config-reminder",
+      "title": "Configure Reminder",
+      "description": "Interactive configuration for worklog reminders.",
+      "mode": "view"
+    },
+    {
+      "name": "configure-work-days",
+      "title": "Configure Working Days",
+      "description": "Select the days you work (Sunday-Saturday) with checkboxes.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jiraUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira Instance URL",
+      "description": "Your Jira instance URL (e.g., https://yourbase.atlassian.net)",
+      "placeholder": "https://yourbase.atlassian.net"
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email Address",
+      "description": "The email address associated with your Jira account.",
+      "placeholder": "name@example.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Jira API Token",
+      "description": "Your Jira API token.",
+      "placeholder": "API Token"
+    },
+    {
+      "name": "workDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Working Days",
+      "description": "Enter days of the week you work, comma-separated (0=Sun, 1=Mon, ..., 6=Sat).",
+      "default": "1,2,3,4,5",
+      "placeholder": "1,2,3,4,5"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.10.0",
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@types/react": "19.0.10",
+    "react": "19.0.0"
+  },
+  "scripts": {
+    "build": "npx ray build -e dist",
+    "dev": "npx ray develop",
+    "fix-lint": "npx ray lint --fix",
+    "lint": "npx ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
