@@ -7,7 +7,7 @@ export function useDebouncedSearch(searchText: string, delay = 300) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
   const abortRef = useRef<AbortController | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchSkills = useCallback(async (query: string, signal: AbortSignal) => {
     const url = `${API_BASE_URL}/search?q=${encodeURIComponent(query)}&limit=50`;
