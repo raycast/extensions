@@ -64,7 +64,7 @@ export default function Command() {
     };
 
     return (
-        <List isLoading={installedPlugins.length === 0}>
+        <List>
             {installedPlugins.map((p) => {
                 return (
                     <List.Item
