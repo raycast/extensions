@@ -6,7 +6,7 @@ import { PasswordGeneratorOptions } from "~/types/passwords";
 
 export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): string[] {
   return Object.entries(options).flatMap(([arg, value]) => {
-    if (!value) return [];
+    if (value == null || value === "") return [];
     if (value === true) return [`--${arg}`];
     return [`--${arg}`, value];
   });
