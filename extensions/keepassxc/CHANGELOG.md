@@ -1,5 +1,16 @@
 # KeePassXC Extension Changelog
 
+## [1.9.0] - 2026-02-11
+
+### Added
+
+- Pin entries (#24543).
+- Copy and paste URL.
+
+### Fixed
+
+- Race condition when using the inactivity timer.
+
 ## [1.8.0] - 2025-10-27
 
 ### Added

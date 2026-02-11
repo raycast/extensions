@@ -96,20 +96,20 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
+    "@raycast/api": "^1.104.5",
     "@raycast/utils": "^1.19.1",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
     "csv-parse": "^5.6.0",
-    "otpauth": "^9.4.1",
+    "otpauth": "^9.5.0",
     "run-applescript": "^7.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.18.9",
-    "@types/react": "^19.2.2",
-    "eslint": "^9.37.0",
-    "prettier": "^3.6.2",
+    "@types/node": "^22.19.10",
+    "@types/react": "^19.2.13",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
   "scripts": {
