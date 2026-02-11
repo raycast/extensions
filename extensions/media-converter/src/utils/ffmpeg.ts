@@ -23,20 +23,23 @@ export async function checkFFmpegVersion(ffmpegPath: string): Promise<number | n
 }
 
 export async function findFFmpegPath(minimumVersion = 6.0): Promise<{ path: string; version: number } | null> {
-const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues();
   const customPath: string = preferences.ffmpeg_path;
 
   const storedPath = await LocalStorage.getItem<string>("ffmpeg-path");
 
   // Check whether binary valid and can be executed
-const canExecute = async (p: string | null | undefined): Promise<string | null> =>
-  p && (await access(p, constants.X_OK).then(() => true, () => false)) ? p : null;
-
+  const canExecute = async (p: string | null | undefined): Promise<string | null> =>
+    p &&
+    (await access(p, constants.X_OK).then(
+      () => true,
+      () => false,
+    ))
+      ? p
+      : null;
 
   const path =
-    (await canExecute(storedPath)) ??
-    (await canExecute(customPath)) ??
-    (await which("ffmpeg").catch(() => null));
+    (await canExecute(storedPath)) ?? (await canExecute(customPath)) ?? (await which("ffmpeg").catch(() => null));
 
   if (!path) return null;
 
