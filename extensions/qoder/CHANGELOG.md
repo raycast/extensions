@@ -1,6 +1,6 @@
 # Qoder Changelog
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.0.2] - 2026-02-11
 
 ### Fixed
 - Fix "Search Recent Projects" not showing all projects by reading from `state.vscdb` instead of `storage.json`
