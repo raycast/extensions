@@ -74,8 +74,8 @@ export default function SearchInstants() {
     async (sound: Sound) => {
       const isFav = await toggleFavorite(sound);
       if (isFav) {
-        const prefs = getPreferenceValues<Preferences>();
-        if (prefs.downloadWhenFavorite !== false) {
+        const userPreferences = getPreferenceValues();
+        if (userPreferences.downloadWhenFavorite !== false) {
           const toast = await showToast({
             style: Toast.Style.Animated,
             title: "Downloading…",
