@@ -51,9 +51,10 @@
   },
   "author": "Dori7os",
   "platforms": [
-    "Windows"
+    "Windows",
+    "macOS"
   ],
   "categories": [
-    "Productivity"
+    "Other"
   ]
 }
