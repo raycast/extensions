@@ -9,6 +9,7 @@ Manage your Git repositories from anywhere on your Mac.
 
 ## Overview <!-- omit from toc -->
 
+- [Supported Git Features](#supported-git-features)
 - [Core Features](#core-features)
   - [🚦 Control **working tree** status](#-control-working-tree-status)
   - [🧰 Resolve merge/rebase **conflicts**](#-resolve-mergerebase-conflicts)
@@ -28,6 +29,26 @@ Manage your Git repositories from anywhere on your Mac.
 - [🧑‍🚀 Future Features](#-future-features)
 - [💸 Support for the development](#-support-for-the-development)
 
+## Supported Git Features
+
+| Feature                                              | Supported | Notes                                           |
+| ---------------------------------------------------- | :-------: | ----------------------------------------------- |
+| `git status` <br> `git add` <br> `git restore`       |     ✅     |                                                 |
+| `git commit`                                         |     ✅     | + amend <br>+ generate AI message               |
+| `git log` <br> `git show` <br> `git diff`            |     ✅     | + stats                                         |
+| `git ls-files`                                       |     ✅     | + file history                                  |
+| `git grep`                                           |     🚫     |                                                 |
+| `git branch` <br> `git tag` <br> `git checkout`      |     ✅     |                                                 |
+| `git merge` <br> `git rebase` <br> `git cherry-pick` |     ✅     | + interactive rebase <br>+ conflicts resolution |
+| `git revert` <br> `git reset`                        |     ✅     | + soft/hard/mixed                               |
+| `git stash` <br> patch                               |     ✅     |                                                 |
+| `git fetch` <br> `git pull` <br> `git push`          |     ✅     | + force                                         |
+| `git remote`                                         |     ✅     |                                                 |
+| `git config`                                         |     🚫     |                                                 |
+| `git worktree`                                       |     🚫     |                                                 |
+| `git submodule`                                      |     🚫     |                                                 |
+| `git-lfs`                                            |     🚫     |                                                 |
+| `.gitignore`                                         |     ✅     |                                                 |
 
 ## Core Features
 

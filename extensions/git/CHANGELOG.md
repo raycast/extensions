@@ -18,6 +18,7 @@
   - Rename "Pick" action to "Apply Rebase" with Checkmark icon
   - Add pre-rebase guard for uncommitted changes
   - Use dynamic icons for squash and fixup actions (`arrow-down-left.svg`)
+- **Commit Details**: Improve performance by fetching commit details only when needed
 
 ### Fixed
 - **Git Clone**: Refactor clone process for improved reliability

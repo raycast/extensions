@@ -628,7 +628,6 @@ export class GitManager {
     const log = await this.git.log([
       `--max-count=${commitsPerPage}`,
       `--skip=${page * commitsPerPage}`,
-      "--name-status",
       "--first-parent",
       ...(branch ? [branch] : ["--all"]),
       "--decorate=full",
@@ -645,7 +644,6 @@ export class GitManager {
         refs?: string;
         diff?: DiffResult;
       }) => {
-        const changedFiles = this.parseCommitChangedFiles(commit.diff!);
         const parsedRefs = this.parseCommitRefs(commit.refs);
 
         return {
@@ -660,8 +658,7 @@ export class GitManager {
           remoteBranches: parsedRefs.remoteBranches,
           tags: parsedRefs.tags,
           currentBranchName: parsedRefs.currentBranchName,
-          changedFiles,
-        };
+        } as Commit;
       },
     );
   }
