@@ -8,7 +8,6 @@ import {
   List,
   Toast,
   confirmAlert,
-  environment,
   getPreferenceValues,
   openExtensionPreferences,
   showToast,
@@ -19,7 +18,7 @@ import { isValidIcaoCode } from "./utils";
 
 const FLYCHECK_MACOS_URL = "https://fractals.sg/flycheck/";
 
-// We define our data interfaces here. 
+// We define our data interfaces here.
 // Note: We do NOT define 'Preferences' here because it is auto-generated in raycast-env.d.ts
 interface DecodedMetar {
   icao: string;
@@ -65,10 +64,10 @@ const DownloadFlyCheckAction = () => (
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  
+
   // Use the global Preferences type from raycast-env.d.ts
   const { apiKey, tempUnit } = getPreferenceValues<Preferences>();
-  
+
   const { value: history, setValue: setHistory } = useLocalStorage<DecodedMetar[]>("metar-history", []);
 
   const { isLoading, data, error, revalidate } = useFetch<CheckWXResponse>(
