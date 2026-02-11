@@ -248,7 +248,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
                 icon={Icon.Clipboard}
                 shortcut={{
                   macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                  windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "c" },
                 }}
                 onAction={async () => {
                   if (!outputFormat || !currentQualitySetting) {

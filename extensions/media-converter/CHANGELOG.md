@@ -1,5 +1,11 @@
 # Media Converter Changelog
 
+## [1.5.3] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Use `which` package to search FFmpeg binary.
+
 ## [1.5.2] - 2025-10-31
 
 ### Added
