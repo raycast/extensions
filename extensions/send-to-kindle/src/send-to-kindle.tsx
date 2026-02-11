@@ -318,6 +318,7 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
                 target={
                   <AddFilterSkillList
                     readabilityHtml={state.readabilityHtml}
+                    pageUrl={state.pageUrl}
                     domain={state.skillDomain}
                     existingFilters={state.contentFilters}
                     onReload={() => setVersion((v) => v + 1)}
@@ -728,12 +729,13 @@ type CssSelectorCandidate = {
 
 type AddFilterSkillListProps = {
   readabilityHtml: string;
+  pageUrl: string;
   domain: string;
   existingFilters: string[];
   onReload: () => void;
 };
 
-function AddFilterSkillList({ readabilityHtml, domain, existingFilters, onReload }: AddFilterSkillListProps) {
+function AddFilterSkillList({ readabilityHtml, pageUrl, domain, existingFilters, onReload }: AddFilterSkillListProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<CssSelectorCandidate[]>([]);
@@ -753,7 +755,7 @@ function AddFilterSkillList({ readabilityHtml, domain, existingFilters, onReload
 
     async function loadSelectors() {
       try {
-        const selectors = await extractSelectorsFromReadability(readabilityHtml);
+        const selectors = await extractSelectorsFromReadability(readabilityHtml, pageUrl);
         if (!isMounted) return;
         setItems(selectors);
       } finally {
@@ -776,7 +778,7 @@ function AddFilterSkillList({ readabilityHtml, domain, existingFilters, onReload
     return () => {
       isMounted = false;
     };
-  }, [readabilityHtml]);
+  }, [readabilityHtml, pageUrl]);
 
   async function handleAddFilterSelector(selector: string) {
     const normalizedDomain = domain.trim();
@@ -845,7 +847,7 @@ function AddFilterSkillList({ readabilityHtml, domain, existingFilters, onReload
                     icon={isAdded ? Icon.Checkmark : Icon.Plus}
                   />
                   <Action.CopyToClipboard title="Copy CSS Selector" content={item.selector} />
-                  <Action title="Return to Preview" shortcut={{ modifiers: ["cmd"], key: "enter" }} onAction={pop} />
+                  <Action title="Return to Preview" onAction={pop} />
                 </ActionPanel>
               }
             />
@@ -856,7 +858,7 @@ function AddFilterSkillList({ readabilityHtml, domain, existingFilters, onReload
   );
 }
 
-function extractSelectorsFromReadability(readabilityHtml: string): CssSelectorCandidate[] {
+function extractSelectorsFromReadability(readabilityHtml: string, pageUrl: string): CssSelectorCandidate[] {
   if (!readabilityHtml.trim()) return [];
 
   const { document } = parseHTML(readabilityHtml);
@@ -909,19 +911,21 @@ function extractSelectorsFromReadability(readabilityHtml: string): CssSelectorCa
       }
 
       // New selector found, compute preview
-      const textContent =
-        typeof el.querySelector === "function"
-          ? Array.from(document.querySelectorAll(selector))
-              .map((node) => {
-                const n = node as unknown as { textContent?: string };
-                return n.textContent?.trim() || "";
-              })
-              .filter(Boolean)
-              .join("\n\n---\n\n")
-              .trim()
-          : "";
+      const nodes = Array.from(document.querySelectorAll(selector)) as unknown[];
+      const textContent = nodes
+        .map((node) => {
+          const n = node as unknown as { textContent?: string };
+          return n.textContent?.trim() || "";
+        })
+        .filter(Boolean)
+        .join("\n\n---\n\n")
+        .trim();
 
-      const preview = textContent || "(No text content)";
+      const imagePreviewUrl = textContent
+        ? null
+        : nodes.map((node) => extractPreviewImageUrl(node, pageUrl)).find((url): url is string => Boolean(url));
+
+      const preview = textContent || (imagePreviewUrl ? `![Content Preview](${imagePreviewUrl})` : "(No text content)");
 
       selectorMap.set(selector, { preview, count: 1 });
     }
@@ -955,6 +959,50 @@ function extractSelectorsFromReadability(readabilityHtml: string): CssSelectorCa
   });
 
   return results;
+}
+
+function extractPreviewImageUrl(node: unknown, pageUrl: string): string | null {
+  const candidate = node as unknown as {
+    tagName?: string;
+    getAttribute?: (name: string) => string | null;
+    querySelector?: (selector: string) => unknown;
+  };
+
+  let imageNode = candidate;
+  if ((candidate.tagName || "").toLowerCase() !== "img" && typeof candidate.querySelector === "function") {
+    const nestedImage = candidate.querySelector("img") as unknown;
+    if (nestedImage) {
+      imageNode = nestedImage as typeof candidate;
+    }
+  }
+
+  if ((imageNode.tagName || "").toLowerCase() !== "img" || typeof imageNode.getAttribute !== "function") {
+    return null;
+  }
+
+  const rawUrl =
+    imageNode.getAttribute("src") ||
+    imageNode.getAttribute("data-src") ||
+    imageNode.getAttribute("data-original") ||
+    imageNode.getAttribute("data-lazy-src") ||
+    imageNode.getAttribute("data-actualsrc") ||
+    pickFirstSrcsetUrl(imageNode.getAttribute("srcset")) ||
+    pickFirstSrcsetUrl(imageNode.getAttribute("data-srcset"));
+
+  if (!rawUrl) return null;
+
+  try {
+    return new URL(rawUrl, pageUrl).href;
+  } catch {
+    return rawUrl;
+  }
+}
+
+function pickFirstSrcsetUrl(srcset: string | null): string | null {
+  if (!srcset) return null;
+  const firstEntry = srcset.split(",")[0]?.trim();
+  if (!firstEntry) return null;
+  return firstEntry.split(/\s+/)[0] || null;
 }
 
 type CoverCandidateInput = {
