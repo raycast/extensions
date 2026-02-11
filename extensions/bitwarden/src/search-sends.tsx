@@ -339,7 +339,7 @@ function SearchSendsCommandContent() {
         title="Create New Send"
         target={<CreateSendCommand onSuccess={onCreateSuccess} />}
         icon={Icon.NewDocument}
-        shortcut={{ macOS: { key: "n", modifiers: ["opt"] }, windows: { key: "n", modifiers: ["alt"] } }}
+        shortcut={{ macOS: { key: "n", modifiers: ["opt"] }, Windows: { key: "n", modifiers: ["alt"] } }}
       />
       <Action
         title={syncAction.title}
@@ -390,21 +390,21 @@ function SearchSendsCommandContent() {
                   title="Remove Password"
                   onAction={() => onRemovePassword(send.id)}
                   icon={Icon.LockUnlocked}
-                  shortcut={{ macOS: { key: "p", modifiers: ["opt"] }, windows: { key: "p", modifiers: ["alt"] } }}
+                  shortcut={{ macOS: { key: "p", modifiers: ["opt"] }, Windows: { key: "p", modifiers: ["alt"] } }}
                 />
               )}
               <Action.Push
                 title="Edit Send"
                 target={<CreateSendCommand send={send} onSuccess={onEditSuccess} />}
                 icon={Icon.Pencil}
-                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, windows: { key: "e", modifiers: ["alt"] } }}
+                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, Windows: { key: "e", modifiers: ["alt"] } }}
               />
               <Action
                 title="Delete Send"
                 style={Action.Style.Destructive}
                 onAction={() => onDelete(send.id)}
                 icon={Icon.Trash}
-                shortcut={{ macOS: { key: "d", modifiers: ["opt"] }, windows: { key: "d", modifiers: ["alt"] } }}
+                shortcut={{ macOS: { key: "d", modifiers: ["opt"] }, Windows: { key: "d", modifiers: ["alt"] } }}
               />
               {sendManagementActionSection}
               <DebuggingBugReportingActionSection />

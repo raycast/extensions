@@ -64,7 +64,7 @@ function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreen
                     shortcutKey
                       ? {
                           macOS: { key: shortcutKey, modifiers: ["opt"] },
-                          windows: { key: shortcutKey, modifiers: ["alt"] },
+                          Windows: { key: shortcutKey, modifiers: ["alt"] },
                         }
                       : undefined
                   }

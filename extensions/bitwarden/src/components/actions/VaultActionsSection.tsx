@@ -28,7 +28,7 @@ export function VaultActionsSection() {
     <ActionPanel.Section title="Vault Actions">
       <Action
         title="Sync Vault"
-        shortcut={{ macOS: { key: "r", modifiers: ["opt"] }, windows: { key: "r", modifiers: ["alt"] } }}
+        shortcut={{ macOS: { key: "r", modifiers: ["opt"] }, Windows: { key: "r", modifiers: ["alt"] } }}
         icon={Icon.ArrowClockwise}
         onAction={vault.syncItems}
       />
@@ -37,7 +37,7 @@ export function VaultActionsSection() {
         title="Lock Vault"
         shortcut={{
           macOS: { key: "l", modifiers: ["opt", "shift"] },
-          windows: { key: "l", modifiers: ["alt", "shift"] },
+          Windows: { key: "l", modifiers: ["alt", "shift"] },
         }}
         onAction={handleLockVault}
       />
