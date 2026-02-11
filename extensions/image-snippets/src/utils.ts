@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../raycast-env.d";
 import {
   existsSync,
   readFileSync,
@@ -21,7 +22,7 @@ export function expandPath(path: string): string {
 }
 
 export function getImagesFolder(): string {
-  const preferences = getPreferenceValues<{ imagesFolder: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   return expandPath(preferences.imagesFolder || "~/Pictures/raycast-snippets");
 }
 
