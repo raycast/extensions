@@ -4,7 +4,6 @@ import {
   Action,
   LaunchProps,
   getPreferenceValues,
-  Clipboard,
   showToast,
   Toast,
   Color,
@@ -56,12 +55,6 @@ export default function Command(props: LaunchProps<{ arguments: { text: string }
       return result;
     },
     [text],
-    {
-      onData: (data) => {
-        Clipboard.copy(data.japanese_translation);
-        showToast({ style: Toast.Style.Success, title: "Copied Translation!" });
-      },
-    },
   );
 
   const errorMessage = error instanceof Error ? error.message : error ? "Unexpected error occurred." : "";
@@ -117,6 +110,13 @@ ${data.feedback}`
       actions={
         !isLoading && data ? (
           <ActionPanel>
+            <Action.Paste
+              title="Paste Translation"
+              content={data.japanese_translation}
+              onPaste={() => {
+                void showToast({ style: Toast.Style.Success, title: "Pasted Translation" });
+              }}
+            />
             <Action.CopyToClipboard
               title="Copy Translation"
               content={data.japanese_translation}

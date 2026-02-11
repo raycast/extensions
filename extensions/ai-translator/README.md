@@ -7,8 +7,8 @@ Translate English to natural Japanese and get concise English feedback on gramma
 - Concise English feedback on grammar, nuance, and word choice
 - Confidence score from 0 to 100
 - Tone detection (for example: Casual, Formal)
-- Auto-copies the translation to your clipboard on success
-- Quick copy actions for translation and feedback
+- Default paste action for the translated text
+- Manual copy actions for translation and feedback
 
 ## Requirements
 - Raycast installed
@@ -33,7 +33,7 @@ npm run dev
 2. Run the command: "Translate & Feedback".
 3. Enter English text.
 
-| ![Translate command input](media/usage-command.png) | ![Translation and feedback detail view](media/usage-detail.png) |
+| ![Translate command input](metadata/ai-translator-2.png) | ![Translation and feedback detail view](metadata/ai-translator-3.png) |
 |:--:|:--:|
 | Translate & Feedback command | Translation detail view |
 
@@ -43,7 +43,7 @@ The detail view shows:
 - Feedback in English
 - Score and detected tone in metadata
 
-The translation is copied to the clipboard automatically. You can also copy the translation or feedback using the action panel shortcuts.
+Use the default paste action to insert the translation into the frontmost app, or manually copy the translation and feedback using the action panel shortcuts.
 
 ## Preferences
 Set these in the Raycast extension preferences:
