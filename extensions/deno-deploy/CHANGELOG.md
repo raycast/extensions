@@ -1,5 +1,11 @@
 # Deno Deploy Changelog
 
+## [Update] - 2025-04-11
+
+- Update dependencies
+- Fix issue where the extension doesn't show organizations
+- Add AI goodies
+
 ## [Icon update] - 2024-04-18
 
 - Icon updated for better visibility

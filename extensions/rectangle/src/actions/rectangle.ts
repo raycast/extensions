@@ -65,6 +65,7 @@ export const actions = [
   "bottom-center-right-eighth",
   "bottom-right-eighth",
   "tile-all",
+  "cascade-active-app",
   "cascade-all",
 ] as const;
 
@@ -494,9 +495,21 @@ export const commandGroups: CommandGroups<RectangleAction> = {
         icon: "window-positions/restoreTemplate.png",
         description: "Restore the focused window to its previous size",
       },
+      {
+        name: "cascade-active-app",
+        title: "Cascade App",
+        icon: "window-positions/cascadeAppTemplate.png",
+        description: "Cascade application windows",
+      },
+      {
+        name: "cascade-all",
+        title: "Cascade All",
+        icon: "window-positions/cascadeAllTemplate.png",
+        description: "Cascade all windows",
+      },
     ],
   },
 };
 
 // The following commands did not have an icon template, so they've been omitted for now:
-export const actionsWithMissingIcons = ["specified", "reverse-all", "tile-all", "cascade-all"];
+export const actionsWithMissingIcons = ["specified", "reverse-all", "tile-all"];

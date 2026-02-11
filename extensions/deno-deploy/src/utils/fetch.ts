@@ -6,14 +6,9 @@ import type { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 
 import { APIError } from "./error";
 
-export type RequestOptions = RequestInit & {
-  accept?: string;
-};
+export type RequestOptions = RequestInit & { accept?: string };
 
-type APIErrorJSON = {
-  code: string;
-  message: string;
-};
+type APIErrorJSON = { code: string; message: string };
 
 /**
  * Fetcher is a class that wraps the fetch API and adds the necessary headers

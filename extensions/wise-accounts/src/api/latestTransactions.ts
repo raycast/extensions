@@ -9,6 +9,8 @@ export interface Transaction {
   primaryAmount: string;
   secondaryAmount: string;
   status: string;
+  createdOn: string;
+  updatedOn: string;
 }
 
 interface ActivitiesResponse {

@@ -1,6 +1,6 @@
 # Browser Bookmarks
 
-Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari, Arc, Sidekick, Vivaldi, or Prisma Access.
+Integrate bookmarks from Brave, ChatGPT Atlas, Chrome, Edge, Firefox, Safari, Arc, Sidekick, Vivaldi, Prisma Access, Dia, Ghost Browser, or Helium.
 
 ## Configuration
 
@@ -8,10 +8,13 @@ The extension retrieves bookmarks from two sources: your browsers and their prof
 
 If you have multiple profiles, you can select the one you want from the enabled browsers:
 
+- ChatGPT Atlas `⌘` + `⇧` + `G`
 - Brave: `⌘` + `⇧` + `B`
 - Chrome: `⌘` + `⇧` + `C`
+- Dia: `⌘` + `⇧` + `D`
 - Edge: `⌘` + `⇧` + `E`
 - Firefox: `⌘` + `⇧` + `F`
+- Helium: `⌘` + `⇧` + `H`
 - Arc: `⌘` + `⇧` + `A`
 - Vivaldi: `⌘` + `⇧` + `V`
 - Prisma Access: `⌘` + `⇧` + `P`

@@ -1,5 +1,21 @@
 # Perplexity API Changelog
 
+## [Updated Models] - 2025-02-06
+
+- Added `Sonar Reasoning 128k` and `Sonar Reasoning Pro 128k`.
+
+## [Updated Models] - 2025-01-28
+
+- Added citations for the generated answer.
+- Added `Sonar 128k` and `Sonar Pro 200k`.
+- Removed deprecated models `Llama 3.3 70B`, `Sonar Small`, `Sonar Large`, and `Sonar Huge`.
+
+## [Updated Models] - 2025-01-21
+
+- Added `Llama 3.3 70B`.
+- Added Llama 3.1 405B based `Sonar Huge`.
+- Removed deprecated models `Llama 3.1 8B`, `Llama 3.1 70B`.
+
 ## [New Command] - 2024-08-01
 
 - Added new `AI Chat` command.
@@ -18,11 +34,11 @@
 
 ## [New Models] - 2024-05-05
 
- - Added new Llama3 based Sonar models `llama-3-sonar-small-32k`, `llama-3-sonar-large-32k`.
- - Removed deprecated models `codellama-70b-instruct`, `mistral-7b-instruct`, `sonar-small`, `sonar-medium`.
- - Question of command `Ask AI` is now displayed at the top of the response.
- - Updated default sytem prompt of `Fix Grammar and Spelling` command.
- - Current time added to system prompt.
+- Added new Llama3 based Sonar models `llama-3-sonar-small-32k`, `llama-3-sonar-large-32k`.
+- Removed deprecated models `codellama-70b-instruct`, `mistral-7b-instruct`, `sonar-small`, `sonar-medium`.
+- Question of command `Ask AI` is now displayed at the top of the response.
+- Updated default sytem prompt of `Fix Grammar and Spelling` command.
+- Current time added to system prompt.
 
 ## [New Models] - 2024-04-22
 

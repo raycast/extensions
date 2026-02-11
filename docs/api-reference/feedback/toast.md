@@ -4,6 +4,10 @@ When an asynchronous operation is happening or when an error is thrown, it's usu
 
 Additionally, Toasts can have some actions associated to the action they are about. For example, you could provide a way to cancel an asynchronous operation, undo an action, or copy the stack trace of an error.
 
+{% hint style="info" %}
+The `showToast()` will fallback to [showHUD()](./hud.md#showhud) if the Raycast window is closed.
+{% endhint %}
+
 ![](../../.gitbook/assets/toast.webp)
 
 ## API Reference

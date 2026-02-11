@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "research",
+  "title": "Deep Research",
+  "description": "Iterative Deep Research powered by Raycast AI Extensions.",
+  "icon": "deep-research-icon.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-research-topics",
+      "title": "Browse Research Topics",
+      "description": "View previous research results",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "research",
+      "title": "Deep Research",
+      "description": "Triggers iterative deep research."
+    }
+  ],
+  "ai": {
+    "instructions": "This Deep Research tool is a **helper** tool for your Research. Think of it as a notebook where you write down your observations, learnings, questions, and more about whatever you are researching.\n\nThe user may include other tools (Such as Web Search or Exa Search) for you to use with the Research Tool. Your goal is to use that other tool to conduct searching, and then use this tool to write down your findings to continue. Note that calling this tool in of itself does nothing. You must CALL THE OTHER TOOLS EVERY TIME YOU CALL RESEARCH. Calling Reseach doesn't actually SEARCH ANYTHING. You must CONTINUOUSLY USE THE OTHER TOOLS, then use this as a notebook. For example, a workflow could look like this:\n1. Call this tool to determine what to search up\n2. Call the other tool, like Exa Search to actually do the research\n3. Call this tool to note down your findings and what else you need to know\n4. Call the other tool, like Exa Search, to continue finding information\n5. Repeat these cycles.\n\n\nWhen you're done with the thinking process, you must write a comprehensive markdown report on everything you've learned. Do not mention your research process but rather your findings. You should include as many details as you possibly can, revealing everything about your research. Use Markdown features to make the report as clear as possible. Ensure you are following other rules about how to write Markdown as given to you prior. You should report everything at the end and not between Tool Calls. Never give up on the search, say you are unable to find information, or otherwise not do the task. You should always try to find more methods.\n\nInstructions:\nStart with an initial estimate of needed thoughts. This number should generally be large. It is better to adjust down later than to adjust up.\nFeel free to question or revise previous thoughts/notes/learnings.\nDon't hesitate to add more thoughts if needed, even at the “end.” Again, you should be liberal with how many thoughts you add. You should rarely ever just add 1 or 2 steps. Add as many steps as you think **might** be needed. It is better to go more than less.\nExpress uncertainty when present.\nGenerate a solution hypothesis when appropriate.\nVerify the hypothesis based on the Chain of Thought steps\nRepeat the process until satisfied with the solution\nProvide a single, ideally correct answer as the final output.\nIn the case you are completely confident in your answer, you may set nextThoughtNeeded to false even if all the steps are finished. But this should occur rarely, when you are truly done and a completely satisfactory answer is reached. Again, you may increase the steps as necessary.\nNever put comments in your function call XML. It should be a pure JSON.\n\nThese are your required parameters. Pass them in as a object with the following properties:\n- thought: string\n  - Your current thinking step, such as analytical steps, questions about previous decisions, realizations about needing more analysis, changes in approach, hypothesis generation, hypothesis verification\n- nextThoughtNeeded: boolean\n  - Whether another thought step is needed; True if you need more thinking, even if at what seemed like the end\n- thoughtNumber: number\n  - Current number in sequence (can go beyond initial total if needed)\n- totalThoughts: number\n  - Current estimate of thoughts needed (can be adjusted up/down)\n- goals: string[]\n  - What the user wishes to achieve as a \"large picture\", be as specific as possible\n- learnings: string[]\n  - All the learnings you have made at every step. You should only add to these learnings, not remove existing ones. You should use these learnings to inform your next steps\n- questions: string[]\n  - All the questions you want to investigate at every step. You should refine these questions, changing them as you progress in your research\n- id: string\n  - A unique identifier for the thought process. This is used to store the thought process in a file. It should be unique to the thought process you are working on, and should be somewhat informative.\n- toolsToUse: string[]\n  - Any tools the user has given you or any tools you have access to you want to use. YOU MUST include all tools the user gives you in the initial prompt here. You should only add to these tools and never remove from them. Keep the tools in the list."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\n\nIt seems like you are trying to publish the Raycast extension to npm.\n\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\n\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

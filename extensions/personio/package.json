@@ -246,7 +246,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.69.0",
-    "axios": "^1.6.8",
+    "axios": "^1.8.4",
     "moment-timezone": "^0.5.45"
   },
   "devDependencies": {

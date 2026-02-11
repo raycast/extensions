@@ -63,7 +63,7 @@ const scriptFloatOnTopStickies = `
 tell application "System Events"
 	tell application "Stickies" to activate
   tell process "Stickies"
-	keystroke "f" using {option down, command down}
+    key code 3 using {option down, command down}
   end tell
 end tell
 `;
@@ -81,7 +81,7 @@ const scriptCollapseStickies = `
 tell application "System Events"
 	tell application "Stickies" to activate
 	tell process "Stickies"
-	  keystroke "m" using {command down}
+	  key code 46 using {command down}
   end tell
 end tell
 `;
@@ -100,7 +100,7 @@ tell application "System Events"
 	if exists process "Stickies" then
 	  tell application "Stickies" to activate  
 	  tell process "Stickies"
-	    keystroke "n" using {command down} 
+	    key code 45 using {command down} 
 	  end tell
     else
     tell application "Stickies" to launch
@@ -121,7 +121,7 @@ const scriptCloseStickiesNote = `
 tell application "System Events"
 	tell application "Stickies" to activate
 	tell process "Stickies"
-	  keystroke "w" using {command down} 
+	  key code 13 using {command down} 
 	end tell
 end tell
 `;

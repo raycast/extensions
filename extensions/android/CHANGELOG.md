@@ -1,5 +1,9 @@
 # Android Changelog
 
+## [Feature Update] - 2025-01-14
+
+- Add shake emulator action
+
 ## [Update] - 2024-12-20
 
 - Remove info item from emulators list

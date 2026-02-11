@@ -173,6 +173,12 @@ export default function viewBookings() {
                       text={a.name ? `${a.name} (${a.email})` : a.email}
                     />
                   ))}
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label
+                    title="Created"
+                    text={formatDateTime(item.createdAt)}
+                    icon={{ source: Icon.Calendar, tintColor: Color.PrimaryText }}
+                  />
                 </List.Item.Detail.Metadata>
               }
             />

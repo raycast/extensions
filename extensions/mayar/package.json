@@ -49,7 +49,7 @@
   "dependencies": {
     "@raycast/api": "^1.42.0",
     "@raycast/utils": "1.0.3",
-    "axios": "1.3.3",
+    "axios": "^1.8.4",
     "javascript-time-ago": "2.5.9",
     "moment": "2.29.4"
   },

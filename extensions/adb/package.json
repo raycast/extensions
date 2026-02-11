@@ -61,6 +61,21 @@
       "mode": "no-view"
     },
     {
+      "name": "adb-uninstall",
+      "title": "Uninstall",
+      "description": "Uninstall an app using its package name",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "appId",
+          "placeholder": "com.vendor.app",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "adb-clear-app-data",
       "title": "Clear App Data",
       "description": "Remove all files and cache for an app",

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "next-lens",
+  "title": "Next Lens",
+  "description": "Scans Next.js routes and provides quick insights in the extension.",
+  "icon": "extension-icon.png",
+  "author": "1weiho",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-api-routes",
+      "title": "List API Routes",
+      "subtitle": "Next Lens",
+      "description": "List all API routes from your Next.js project",
+      "mode": "view"
+    },
+    {
+      "name": "list-page-routes",
+      "title": "List Page Routes",
+      "subtitle": "Next Lens",
+      "description": "List all page routes from your Next.js project",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ideApp",
+      "title": "IDE Application",
+      "description": "Select your preferred IDE for opening files",
+      "type": "appPicker",
+      "required": true
+    },
+    {
+      "name": "nextLensPort",
+      "title": "next-lens Port",
+      "description": "Port for next-lens server (default: 9453)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "9453"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

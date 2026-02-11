@@ -24,36 +24,22 @@
       "mode": "view"
     },
     {
-      "name": "quickly-search",
+      "name": "quick-search",
       "title": "Quick Search",
-      "description": "Enter an instance profile and a search term to get immediate results, without browsing search history.",
+      "description": "Quickly search within a specific ServiceNow instance profile by entering a search term. If no instance name or alias is provided, it will use the selected instance profile.",
       "mode": "view",
       "arguments": [
         {
-          "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "name": "query",
+          "placeholder": "Query",
           "type": "text",
           "required": true
         },
         {
-          "name": "query",
-          "placeholder": "Query",
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
           "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "quickly-search-selected-instance",
-      "title": "Quick Search in Selected Instance",
-      "description": "Enter a search term to get immediate results from the currently selected instance, without browsing search history.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -64,30 +50,32 @@
       "mode": "no-view"
     },
     {
-      "name": "open-selected-instance",
-      "title": "Open Selected Instance",
-      "description": "Open the currently selected ServiceNow instance in the browser.",
-      "mode": "no-view"
-    },
-    {
-      "name": "open-current-url",
-      "title": "Open Current URL",
-      "description": "With the Raycast browser extension installed, open the current ServiceNow page in the specified instance.",
+      "name": "open-instance",
+      "title": "Open Instance",
+      "description": "Open a ServiceNow instance in the browser. If an instance name or alias is provided, it will open that instance; otherwise, it will open the currently selected instance.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "instanceName",
           "placeholder": "Instance name or alias",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
     {
-      "name": "open-current-url-in-selected-instance",
-      "title": "Open Current URL in Selected Instance",
-      "description": "With the Raycast browser extension installed, open the current ServiceNow page in the selected instance.",
-      "mode": "no-view"
+      "name": "open-current-page-instance",
+      "title": "Open Current Page in Instance",
+      "description": "Open the current ServiceNow page in any instance defined in your instance profiles. If no instance name or alias is provided, it will open the page in the selected instance profile.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "add-instance-profile",
@@ -116,10 +104,18 @@
       ]
     },
     {
-      "name": "login-to-selected-instance",
-      "title": "Login to Selected Instance",
+      "name": "login-to-instance",
+      "title": "Login to Instance",
       "description": "Log in to the selected instance using the credentials from the selected profile.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "explore-navigation-history",
@@ -138,25 +134,69 @@
       "title": "Explore Navigation Menu",
       "description": "Browse the list of application menus and their modules.",
       "mode": "view"
+    },
+    {
+      "name": "search-sysid",
+      "title": "Search sys_id",
+      "description": "Search for a sys_id. Admins only",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "sys_id",
+          "placeholder": "sys_id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Open content using",
+      "description": "Select how you prefer to open ServiceNow pages and content (direct link, nav_to/Polaris, or SOW view).",
+      "default": "direct",
+      "data": [
+        {
+          "title": "Direct",
+          "value": "direct"
+        },
+        {
+          "title": "Navigate",
+          "value": "navigate"
+        },
+        {
+          "title": "Service Operations Workspace",
+          "value": "sow"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
-    "debug": "^4.3.7",
+    "debug": "^4.4.0",
     "javascript-time-ago": "^2.5.11",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.13",
-    "@types/node": "22.9.3",
-    "@types/react": "18.3.12",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.7.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist -o dist",

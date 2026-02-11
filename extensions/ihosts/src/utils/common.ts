@@ -30,6 +30,7 @@ export async function isFirstTime(): Promise<string> {
     name: "Origin System Hosts",
     state: State.Enable,
     isFolder: false,
+    isRemote: false,
     content: getSysHostFile(),
     ctime: new Date().getTime(),
   };
@@ -45,6 +46,7 @@ export async function backupHostFile() {
     name: BackupSystemHostName,
     state: State.Disable,
     isFolder: false,
+    isRemote: false,
     content: getSysHostFile(),
     ctime: new Date().getTime(),
   };

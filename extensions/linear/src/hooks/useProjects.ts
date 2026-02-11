@@ -1,5 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 import type { PaginationOptions } from "@raycast/utils/dist/types";
+
 import { getProjects, type ProjectResult } from "../api/getProjects";
 
 export default function useProjects(

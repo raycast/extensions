@@ -3,6 +3,7 @@ import { formatRelative } from "date-fns";
 import type { IGif as GiphyGif } from "@giphy/js-types";
 
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
+import { getGiphyLocale } from "../preferences";
 
 const API_BASE_URL = "https://gif-search.raycast.com/api/giphy";
 
@@ -13,6 +14,8 @@ export default async function giphy(type?: "gifs" | "videos") {
       reqUrl.searchParams.set("q", term);
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
       reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
+      reqUrl.searchParams.set("lang", getGiphyLocale());
+
       if (type) {
         reqUrl.searchParams.set("type", type);
       }
@@ -21,7 +24,7 @@ export default async function giphy(type?: "gifs" | "videos") {
       if (!response.ok) {
         throw new Error("Could not search gifs from Giphy");
       }
-      const results = await response.json();
+      const results = (await response.json()) as { data: GiphyGif[] };
       return { results: results.data.map(mapGiphyResponse) };
     },
 
@@ -29,6 +32,8 @@ export default async function giphy(type?: "gifs" | "videos") {
       const reqUrl = new URL(API_BASE_URL);
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
       reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
+      reqUrl.searchParams.set("lang", getGiphyLocale());
+
       if (type) {
         reqUrl.searchParams.set("type", type);
       }
@@ -38,7 +43,7 @@ export default async function giphy(type?: "gifs" | "videos") {
         throw new Error("Could not get trending gifs from Giphy");
       }
 
-      const results = await response.json();
+      const results = (await response.json()) as { data: GiphyGif[] };
       return { results: results.data.map(mapGiphyResponse) };
     },
 
@@ -51,7 +56,7 @@ export default async function giphy(type?: "gifs" | "videos") {
       reqUrl.searchParams.set("ids", ids.join(","));
 
       const response = await fetch(reqUrl.toString());
-      const results = await response.json();
+      const results = (await response.json()) as { data: GiphyGif[] };
       return results.data.map(mapGiphyResponse);
     },
   };
@@ -64,10 +69,10 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
   const isGiphyClip = giphyResp.type === "video";
   const gif_url = giphyResp.images.original.url;
   const download_url = isGiphyClip
-    ? giphyResp.video?.assets["1080p"]?.url ??
+    ? (giphyResp.video?.assets["1080p"]?.url ??
       giphyResp.video?.assets["720p"]?.url ??
       giphyResp.video?.assets["360p"].url ??
-      gif_url
+      gif_url)
     : gif_url;
   const isMP4 = /\.mp4(\?|$)/.test(download_url);
 
@@ -78,17 +83,27 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
     slug: slugify(title),
     download_url,
     download_name: `${slug}.${isGiphyClip && isMP4 ? "mp4" : "gif"}`,
-    preview_gif_url: isGiphyClip ? gif_url : giphyResp.images.preview_gif.url,
+    small_preview_gif_url: isGiphyClip ? gif_url : giphyResp.images.preview_gif.url,
+    large_preview_gif_url: isGiphyClip ? gif_url : giphyResp.images.fixed_height_small.url,
     gif_url,
     metadata: {
       width: giphyResp.images.original.width,
       height: giphyResp.images.original.height,
       size: parseInt(giphyResp.images.original.size ?? "", 10) ?? 0,
       labels: [
-        { title: "Created", text: formatRelative(new Date(giphyResp.import_datetime), new Date()) },
+        {
+          title: "Created",
+          text: formatRelative(new Date(giphyResp.import_datetime), new Date()),
+        },
         giphyResp.username && { title: "User", text: giphyResp.username },
       ],
-      links: [giphyResp.source && { title: "Source", text: giphyResp.source_tld, target: giphyResp.source }],
+      links: [
+        giphyResp.source && {
+          title: "Source",
+          text: giphyResp.source_tld,
+          target: giphyResp.source,
+        },
+      ],
       tags: giphyResp.tags,
     },
     attribution: "giphy-logo-square-180.png",

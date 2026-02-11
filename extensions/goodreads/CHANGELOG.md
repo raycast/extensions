@@ -1,5 +1,10 @@
 # goodreads Changelog
 
+## [Recently Viewed Feature] - 2025-08-06
+
+- Add recently viewed book functionality
+- Improve caching and data retrieval logic
+
 ## [UI improvement] - 2023-08-10
 
 - Add histogram visualization for ratings

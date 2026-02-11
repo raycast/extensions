@@ -1,3 +1,9 @@
 # Control Viscosity Changelog
 
-## [Initial Version] - 2024-12-20
+## [Small Fix] - 2025-01-11
+
+Added exception handling
+
+## [Initial Version] - 2024-12-15
+
+Inital version code

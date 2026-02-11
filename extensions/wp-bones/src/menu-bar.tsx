@@ -78,15 +78,6 @@ export default function Command() {
                 />
               ),
             )}
-          <MenuBarExtra.Section>
-            <MenuBarExtra.Item
-              title="Complete Demo"
-              icon="box.svg"
-              onAction={() => {
-                open(`https://github.com/new?template_name=WPKirk&template_owner=wpbones`);
-              }}
-            />
-          </MenuBarExtra.Section>
         </MenuBarExtra.Submenu>
 
         <MenuBarExtra.Submenu icon="github-white.png" title="Create a WP Bones Repository">
@@ -104,15 +95,6 @@ export default function Command() {
                 />
               ),
             )}
-          <MenuBarExtra.Section>
-            <MenuBarExtra.Item
-              title="Complete Demo"
-              icon="box.svg"
-              onAction={() => {
-                open(`https://github.com/new?template_name=WPKirk&template_owner=wpbones`);
-              }}
-            />
-          </MenuBarExtra.Section>
         </MenuBarExtra.Submenu>
 
         <MenuBarExtra.Item
@@ -132,7 +114,7 @@ export default function Command() {
           icon="brand-discord.svg"
           title="Discord"
           onAction={() => {
-            open("https://discord.gg/dCP5NajK");
+            open("https://discord.gg/5bdVyycU8F");
           }}
         />
         <MenuBarExtra.Item

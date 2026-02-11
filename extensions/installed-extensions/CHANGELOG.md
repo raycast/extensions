@@ -1,5 +1,27 @@
 # Installed Extensions Changelog
 
+## [Cross-plaform Keyboard Shortcuts] - 2026-01-05
+
+- Update `shortcut`s to be cross-platform
+
+## [Enhancement] - 2025-11-15
+
+- Add icon path for Windows
+
+## [Enhancement] - 2025-10-08
+
+- Add support for Windows
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-08-28
+
+- Use the Raycast built-in `Action.CopyToClipboard` instead of manually copying to clipboard and showing HUD
+
+## [Enhancement] - 2025-08-26
+
+- Add support for launching target extension
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2023-12-21
 
 - Add `Open Manifest in <App>` action to open the extension manifest in the default app

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.3] - 2025-02-24
+
+- Stop transferring environment variables to opened applications
+
 ## [1.1.2] - 2024-12-04
 
 - Fix conflicing keybinds for opening in alternative editor and opening both editor and terminal

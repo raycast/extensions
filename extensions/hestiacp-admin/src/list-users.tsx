@@ -8,6 +8,7 @@ import ListMailDomainsComponent from "./components/list-mail-domains";
 import ListItemDetailComponent from "./components/ListItemDetailComponent";
 import {
   getUserAuthLog,
+  getUserBackups,
   getUserLogs,
   getUserNotifications,
   getUserPackages,
@@ -19,6 +20,7 @@ import { AddUserFormValues } from "./types/users";
 import useHestia from "./utils/hooks/useHestia";
 import InvalidUrlComponent from "./components/InvalidUrlComponent";
 import { NodeHtmlMarkdown } from "node-html-markdown";
+import ListCronJobsComponent from "./components/list-cron-jobs";
 
 export default function ListUsers() {
   if (!isValidApiUrl()) return <InvalidUrlComponent />;
@@ -48,6 +50,7 @@ export default function ListUsers() {
                     content={JSON.stringify(data)}
                   />
                   <ActionPanel.Section>
+                    {/* eslint-disable-next-line @raycast/prefer-title-case */}
                     <ActionPanel.Submenu title="Go To" icon={Icon.ArrowRight}>
                       <Action.Push
                         title="Web Domains"
@@ -60,6 +63,7 @@ export default function ListUsers() {
                         icon={Icon.Envelope}
                         target={<ListMailDomainsComponent user={user} />}
                       />
+                      <Action.Push title="Cron Jobs" icon={Icon.Clock} target={<ListCronJobsComponent user={user} />} />
                     </ActionPanel.Submenu>
                   </ActionPanel.Section>
                   <ActionPanel.Section>
@@ -75,6 +79,7 @@ export default function ListUsers() {
                       icon={Icon.Bell}
                       target={<ViewUserNotifications user={user} />}
                     />
+                    <Action.Push title="View Backups" icon={Icon.Cloud} target={<ViewUserBackups user={user} />} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
@@ -322,6 +327,40 @@ export function ViewUserNotifications({ user }: ViewUserNotificationsProps) {
               </ActionPanel>
             }
             icon={data.ACK === "yes" ? Icon.BellDisabled : { source: Icon.Bell, tintColor: Color.Yellow }}
+          />
+        ))}
+    </List>
+  );
+}
+
+type ViewUserBackupsProps = {
+  user: string;
+};
+export function ViewUserBackups({ user }: ViewUserBackupsProps) {
+  const { isLoading, data: backups } = getUserBackups(user);
+
+  return (
+    <List navigationTitle={`Users / ${user} / Backups`} isLoading={isLoading} isShowingDetail>
+      {backups &&
+        Object.entries(backups).map(([backup, data]) => (
+          <List.Item
+            key={backup}
+            title={backup}
+            detail={
+              <List.Item.Detail
+                markdown={`# File Name: ${backup} \n\n UDIR: \n ${data.UDIR}`}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    {Object.entries(data).map(([key, val]) => {
+                      const { text, icon } = getTextAndIconFromVal(val);
+                      return <List.Item.Detail.Metadata.Label key={key} title={key} text={text} icon={icon} />;
+                    })}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            accessories={[{ date: new Date(data.DATE) }]}
+            icon={Icon.Cloud}
           />
         ))}
     </List>

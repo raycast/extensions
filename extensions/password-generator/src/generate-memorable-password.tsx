@@ -13,11 +13,6 @@ import { useState } from "react";
 
 import { generateCustomPassword } from "@/helpers/helpers";
 
-interface Preferences {
-  hideAfterCopy: boolean;
-  rememberCustomFormat: boolean;
-}
-
 interface Form {
   length: string;
   useNumbers: 1 | 0;
@@ -27,7 +22,7 @@ interface Form {
 }
 
 const handleGeneratePassword = (values: Form) => {
-  const { hideAfterCopy } = getPreferenceValues<Preferences>();
+  const { hideAfterCopy } = getPreferenceValues<ExtensionPreferences>();
 
   const generatedPassword = generateCustomPassword(values.customFormat);
 
@@ -44,7 +39,7 @@ const handleGeneratePassword = (values: Form) => {
 };
 
 export default function Command() {
-  const { rememberCustomFormat } = getPreferenceValues<Preferences>();
+  const { rememberCustomFormat } = getPreferenceValues<Preferences.GenerateMemorablePassword>();
   const [formatWarning, setFormatWarning] = useState<string | null>(null);
 
   const handleFormatChange = (value: string) => {

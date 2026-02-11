@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import fs from "fs";
+import { languages } from "./lib/languages";
 
-const { private_key, client_email } = getPreferenceValues();
 function handleNewLines(text: string) {
   const newLine = getPreferenceValues<Preferences>().newLine;
 
@@ -19,13 +19,13 @@ const isTesseractInstalled = async () => {
   return fs.existsSync(getPreferenceValues<Preferences>().tesseract_path);
 };
 
-async function checkGoogleCredentials() {
-  return !(!private_key || !client_email);
-}
+const isValidLanguage = (lang: string) => {
+  return lang in languages;
+};
 
 const utils = {
   handleNewLines,
   isTesseractInstalled,
-  checkGoogleCredentials,
+  isValidLanguage,
 };
 export default utils;

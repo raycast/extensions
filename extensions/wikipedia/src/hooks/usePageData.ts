@@ -1,8 +1,8 @@
-import { Toast, popToRoot, showToast } from "@raycast/api";
+import { popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 import wiki from "wikijs";
 
-import { PageSummary, getApiUrl, getApiOptions, WikiNode } from "@/utils/api";
+import { getApiOptions, getApiUrl, type PageMetadata, PageSummary, WikiNode } from "@/utils/api";
 
 export function usePageSummary(title: string, language: string, onError?: (error: Error) => void) {
   return useFetch<PageSummary>(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
@@ -26,8 +26,6 @@ function usePageContent(title: string, language: string) {
     [title, language],
   );
 }
-
-export type PageMetadata = Record<string, unknown>;
 
 function usePageMetadata(title: string, language: string) {
   return useCachedPromise(
@@ -60,7 +58,7 @@ function usePageLinks(title: string, language: string) {
   );
 }
 
-export function useAvalableLanguages(title: string, language: string) {
+export function useAvailableLanguages(title: string, language: string) {
   return useCachedPromise(
     (title: string, language: string) =>
       wiki({
@@ -68,8 +66,8 @@ export function useAvalableLanguages(title: string, language: string) {
         headers: getApiOptions(language)?.headers,
       })
         .page(title)
-        .then((page) => page.langlinks().then((items) => items.flatMap((item) => item.lang)))
-        .catch(() => [language]),
+        .then((page) => page.langlinks())
+        .catch(() => [{ lang: language, title }]),
     [title, language],
   );
 }

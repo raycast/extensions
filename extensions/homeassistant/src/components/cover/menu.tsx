@@ -3,8 +3,9 @@ import { getIcon } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { capitalizeFirstLetter, getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import React from "react";
 
 function CoverOpenMenubarItem(props: { state: State }) {
   if (props.state.attributes.current_position >= 100) {
@@ -45,7 +46,7 @@ function CoverStopMenubarItem(props: { state: State }) {
   return <MenuBarExtra.Item title="Stop" onAction={handle} icon={Icon.XMarkCircle} />;
 }
 
-export function CoverMenubarItem(props: { state: State }): JSX.Element | null {
+export function CoverMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (s.state === "unavailable") {
     return null;

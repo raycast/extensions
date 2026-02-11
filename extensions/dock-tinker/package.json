@@ -21,19 +21,19 @@
       "description": "Add a movable spacer tile between icons on the Dock.",
       "mode": "no-view",
       "arguments": [
-      {
-        "name": "spacerStyle",
-        "type": "dropdown",
-        "required": false,
-        "placeholder": "Spacer",
-        "data": [
-          {
-            "title": "Small Spacer",
-            "value": "small-spacer-tile"
-          }
-        ]
-      }
-    ]
+        {
+          "name": "spacerStyle",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Spacer",
+          "data": [
+            {
+              "title": "Small Spacer",
+              "value": "small-spacer-tile"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "reset-dock-state",
@@ -247,5 +247,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

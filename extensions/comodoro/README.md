@@ -1,3 +1,3 @@
 # Comodoro
 
-For interacting with [Comodoro CLI](https://github.com/soywod/comodoro).
+For interacting with [Comodoro CLI](https://github.com/pimalaya/comodoro).

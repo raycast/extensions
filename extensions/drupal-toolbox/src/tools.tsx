@@ -70,7 +70,7 @@ export const tools = [
 async function Tool(
   drupalWebsite: DrupalWebsite,
   command: string,
-  messages: { inprogress: string; completed: string }
+  messages: { inprogress: string; completed: string },
 ) {
   await showToast({
     style: Toast.Style.Animated,

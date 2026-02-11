@@ -3,25 +3,11 @@ import ColorJS from "colorjs.io";
 import { Colors, Palette } from "color-namer";
 import uniqBy from "lodash/uniqBy";
 import { HistoryColor, HistoryItem } from "./types";
+import { ColorFormatType } from "./types";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
-export function getFormattedColor(
-  _color: HistoryColor,
-  format?:
-    | "hex"
-    | "hex-lower-case"
-    | "hex-no-prefix"
-    | "rgb"
-    | "rgb-percentage"
-    | "rgba"
-    | "rgba-percentage"
-    | "hsla"
-    | "hsva"
-    | "oklch"
-    | "lch"
-    | "p3",
-) {
+export function getFormattedColor(_color: HistoryColor, format?: ColorFormatType) {
   let color;
   if (typeof _color === "string") {
     color = new ColorJS(_color);

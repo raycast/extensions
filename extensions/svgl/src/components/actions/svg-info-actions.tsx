@@ -26,6 +26,15 @@ const SvgInfoAction = ({ svg, category }: { svg: Svg; category: string }) => {
       />
 
       <Action.OpenInBrowser
+        title={`Visit ${svg.title} Brand Website`}
+        url={svg.brandUrl}
+        shortcut={{
+          modifiers: ["cmd"],
+          key: "b",
+        }}
+      />
+
+      <Action.OpenInBrowser
         title="Visit This Category in Svgl"
         url={`${APP_URL}/${category !== "All" ? `directory/${category.toLowerCase()}` : ""}`}
         shortcut={{

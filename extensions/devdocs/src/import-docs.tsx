@@ -1,6 +1,7 @@
 import { ActionPanel, Form, Action, LocalStorage, showToast, Toast, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import fs from "fs";
+import React from "react";
 
 interface ImportFormValues {
   file: string[];
@@ -57,7 +58,7 @@ export default function ImportDocs() {
   );
 }
 
-export async function saveDocs(docs: string) {
+export async function saveDocs(docs: string): Promise<void> {
   await LocalStorage.setItem("docs", JSON.stringify(docs));
   popToRoot();
 }

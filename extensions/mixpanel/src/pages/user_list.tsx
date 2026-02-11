@@ -7,6 +7,7 @@ export default function UserList(props: { users: MixpanelUser[] }) {
     <List>
       {props.users.map((u) => (
         <List.Item
+          icon={Icon.Person}
           title={u.name}
           subtitle={u.email}
           key={u.id}

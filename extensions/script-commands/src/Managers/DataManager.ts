@@ -221,7 +221,7 @@ export class DataManager {
 
         if (groupCopy.scriptCommands.length > 0) {
           groupCopy.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) =>
-            left.title > right.title ? 1 : -1
+            left.title > right.title ? 1 : -1,
           );
 
           data.totalScriptCommands += groupCopy.scriptCommands.length;

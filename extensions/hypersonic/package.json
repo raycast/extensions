@@ -6,6 +6,9 @@
   "icon": "icon-purple.png",
   "author": "reboot.studio",
   "owner": "reboot",
+  "contributors": [
+    "thomasjost"
+  ],
   "access": "public",
   "version": "2.0.4",
   "categories": [
@@ -57,6 +60,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

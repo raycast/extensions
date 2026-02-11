@@ -1,5 +1,5 @@
 import { ProjectSearchList } from "./components/project_search";
 
-export default function ProjectSearchRoot(): JSX.Element {
+export default function ProjectSearchRoot() {
   return <ProjectSearchList />;
 }

@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kiro",
+  "title": "Kiro",
+  "description": "Control Kiro directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "icon": "kiro-icon.png",
+  "author": "jyothish-ram",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "kiro",
+    "ide",
+    "ai",
+    "assistant",
+    "development",
+    "claude",
+    "open with kiro",
+    "claude sonnet"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Recent Projects",
+      "subtitle": "Kiro",
+      "description": "Search and open recent projects from Kiro.",
+      "mode": "view",
+      "shortcut": {
+        "modifiers": ["cmd", "opt"],
+        "key": "k"
+      }
+    },
+    {
+      "name": "open-with-kiro",
+      "title": "Open with Kiro",
+      "subtitle": "Kiro",
+      "description": "Opens the currently selected Finder item with Kiro.",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": ["opt"],
+        "key": "k"
+      }
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "subtitle": "Kiro",
+      "description": "Opens a new Kiro window.",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": ["shift", "opt"],
+        "key": "k"
+      }
+    },
+    {
+      "name": "extensions",
+      "title": "Show Installed Extensions",
+      "subtitle": "Kiro",
+      "description": "Manage Installed Extensions",
+      "mode": "view"
+    },
+    {
+      "name": "install-extension",
+      "title": "Install Extension",
+      "subtitle": "Kiro",
+      "description": "Install Extensions from the Kiro Marketplace",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "layout",
+      "title": "View Layout",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "description": "Select the layout of the view",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    },
+    {
+      "name": "keepSectionOrder",
+      "type": "checkbox",
+      "title": "Advanced",
+      "required": false,
+      "label": "Keep Section Order",
+      "default": false,
+      "description": "Keep the order of the sections while searching folders, files, etc."
+    },
+    {
+      "name": "closeOtherWindows",
+      "type": "checkbox",
+      "title": "Usability",
+      "required": false,
+      "label": "Close Other Kiro Windows",
+      "default": false,
+      "description": "Close other Kiro windows when opening a project"
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "default": "com.apple.Terminal",
+      "required": false,
+      "title": "Terminal App",
+      "description": "Select which Terminal App to use when opening with a terminal"
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "gitBranchColor",
+      "type": "textfield",
+      "title": "Git Integration Color",
+      "required": false,
+      "label": "Git Branch Color",
+      "default": "",
+      "description": "Hexadecimal color code for Git branch tag (e.g., #00FF00). Leave empty to use default green"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "lodash.get": "^4.4.2",
+    "raycast-cross-extension": "^0.2.3",
+    "run-applescript": "^6.1.0",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/lodash.get": "^4.4.9",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "@types/sql.js": "^1.4.9",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.36.1",
+    "prettier": "^2.8.8",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

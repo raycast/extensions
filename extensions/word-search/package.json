@@ -7,12 +7,18 @@
   "author": "rishabswift",
   "contributors": [
     "thomas",
-    "bkeys818",
     "j3lte"
+  ],
+  "pastContributors": [
+    "bkeys818"
   ],
   "license": "MIT",
   "categories": [
     "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "preferences": [
     {

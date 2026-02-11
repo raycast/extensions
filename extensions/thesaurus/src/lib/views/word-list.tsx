@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { shallow } from "zustand/shallow";
+import { useShallow } from "zustand/shallow";
 import constants from "../constants";
 import useStore from "../store";
 import { SingleWord } from "../types/types";
@@ -17,11 +17,10 @@ const WordList = ({
 }) => {
   const { pop } = useNavigation();
   const { setWord, setResults } = useStore(
-    (state) => ({
+    useShallow((state) => ({
       setWord: state.setWord,
       setResults: state.setResults,
-    }),
-    shallow
+    })),
   );
 
   const copyTitle = `Copy ${type}`;

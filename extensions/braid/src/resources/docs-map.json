@@ -92,6 +92,7 @@
       { "name": "Stack", "url": "https://seek-oss.github.io/braid-design-system/components/Stack" },
       { "name": "Stepper", "url": "https://seek-oss.github.io/braid-design-system/components/Stepper" },
       { "name": "Strong", "url": "https://seek-oss.github.io/braid-design-system/components/Strong" },
+      { "name": "Table", "url": "https://seek-oss.github.io/braid-design-system/components/Table" },
       { "name": "Tabs", "url": "https://seek-oss.github.io/braid-design-system/components/Tabs" },
       { "name": "Tag", "url": "https://seek-oss.github.io/braid-design-system/components/Tag" },
       { "name": "Text", "url": "https://seek-oss.github.io/braid-design-system/components/Text" },

@@ -18,6 +18,7 @@ export type TabLocation = "topApp" | "pinned" | "unpinned";
 export type Space = {
   id: string;
   title?: string;
+  isActive: boolean;
 };
 
 export type Download = {
@@ -35,6 +36,7 @@ export type NewTabSearchConfigs = {
   yahoo: string;
   ecosia: string;
   kagi: string;
+  unduck: string;
 };
 
 export type SearchConfig = {
@@ -51,6 +53,7 @@ export type SearchConfigs = {
   yahoo: SearchConfig;
   ecosia: SearchConfig;
   kagi: SearchConfig;
+  unduck: SearchConfig;
 };
 
 export type Suggestion = {

@@ -1,5 +1,26 @@
 # Tailscale Changelog
 
+## [Show User Login Name] - 2026-02-09
+
+- Shows the user's login name as an accessory in the All Devices command
+- Shows if a device advertises allowing SSH
+
+## [Add new features] - 2025-07-30
+
+- Distinguish Mullvad exit nodes from other exit nodes and show location
+
+## [Add new features] - 2025-05-04
+
+- Add `toggle connection` command
+
+## [Fixes] - 2025-04-09
+
+- Better handling of shared exit node ([#18258](https://github.com/raycast/extensions/issues/18258))
+
+## [Add new features] - 2025-01-02
+
+- Add `netcheck` command
+
 ## [Improvement] - 2024-11-08
 
 - Provide UI indicator, and HUD message on `connect (tailscale up)` and `disconnect (tailscale down)` commands

@@ -105,6 +105,35 @@ export type FileContent = {
   to_charset: string;
 };
 
+export type FTPAccountWithDiskInformation = {
+  serverlogin: string;
+  diskusedpercent: number;
+  _diskused: string;
+  htmldir: string | null;
+  diskused: string;
+  deleteable: 0 | 1;
+  accttype: "anonymous" | "logaccess" | "main" | "sub";
+  login: string;
+  humandiskquota: string;
+  user: string;
+  dir: string;
+  reldir: string;
+  type: "anonymous" | "logaccess" | "main" | "sub";
+  _diskquota: string;
+  diskquota: string;
+  humandiskused: string;
+  diskusedpercent20: number;
+};
+
+export type APIToken = {
+  whitelist_ips: string[] | null;
+  create_time: number;
+  name: string;
+  expires_at: number | null;
+  features: string[];
+  has_full_access: 0 | 1;
+};
+
 export type ErrorResponse = {
   metadata: Record<string, never>;
   status: 0;

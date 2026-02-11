@@ -2,17 +2,20 @@ import * as React from "react";
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { convertAnswerToChat, GetModel, Run } from "./function";
+import { Shortcut } from "../shortcut";
 import { CommandAnswer } from "../../settings/enum";
 import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel } from "../../ollama/types";
 import { EditModel } from "./form/EditModel";
 import { Creativity } from "../../enum";
 import { RaycastImage } from "../../types";
+import { OllamaApiModelCapability } from "../../ollama/enum";
 
 interface props {
   prompt: string;
   command?: CommandAnswer;
   server?: string;
   model?: string;
+  capabilities?: OllamaApiModelCapability[];
   creativity?: Creativity;
   keep_alive?: string;
 }
@@ -21,7 +24,7 @@ interface props {
  * Return JSX element with generated text and relative metadata.
  * @returns Raycast Answer View.
  */
-export function AnswerView(props: props): JSX.Element {
+export function AnswerView(props: props): React.JSX.Element {
   const {
     data: Model,
     revalidate: RevalidateModel,
@@ -38,8 +41,8 @@ export function AnswerView(props: props): JSX.Element {
     },
   });
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
-  const query: React.MutableRefObject<undefined | string> = React.useRef();
-  const images: React.MutableRefObject<undefined | RaycastImage[]> = React.useRef();
+  const query: React.MutableRefObject<undefined | string> = React.useRef(undefined);
+  const images: React.MutableRefObject<undefined | RaycastImage[]> = React.useRef(undefined);
   const [imageView, setImageView]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answerMetadata, setAnswerMetadata]: [
@@ -81,6 +84,7 @@ export function AnswerView(props: props): JSX.Element {
         command={props.command}
         setShow={setShowSelectModelForm}
         revalidate={RevalidateModel}
+        capabilities={props.capabilities}
         server={!IsLoadingModel && Model ? Model.server.name : undefined}
         model={!IsLoadingModel && Model ? Model.tag.name : undefined}
         keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}
@@ -90,14 +94,14 @@ export function AnswerView(props: props): JSX.Element {
   /**
    * Answer Action Menu.
    */
-  function AnswerAction(): JSX.Element {
+  function AnswerAction(): React.JSX.Element {
     return (
       <ActionPanel title="Actions">
         <Action.CopyToClipboard content={answer} />
         <Action
           title={showAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
           icon={showAnswerMetadata ? Icon.EyeDisabled : Icon.Eye}
-          shortcut={{ modifiers: ["cmd"], key: "y" }}
+          shortcut={Shortcut.ToggleQuickLook}
           onAction={() => setShowAnswerMetadata((prevState) => !prevState)}
         />
         {props.command && (
@@ -105,7 +109,7 @@ export function AnswerView(props: props): JSX.Element {
             title="Change Model"
             icon={Icon.Box}
             onAction={() => setShowSelectModelForm(true)}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
+            shortcut={Shortcut.ChangeModel}
           />
         )}
         {Model && !loading && answer && (
@@ -115,7 +119,7 @@ export function AnswerView(props: props): JSX.Element {
             onAction={async () =>
               await convertAnswerToChat(Model, query.current, images.current, answer, answerMetadata)
             }
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Shortcut.New}
           />
         )}
       </ActionPanel>
@@ -127,7 +131,10 @@ export function AnswerView(props: props): JSX.Element {
    * @param prop.answer - Ollama Generate Response.
    * @param prop.tag - Ollama Model Tag Response.
    */
-  function AnswerMetadata(prop: { answer: OllamaApiGenerateResponse; tag: OllamaApiTagsResponseModel }): JSX.Element {
+  function AnswerMetadata(prop: {
+    answer: OllamaApiGenerateResponse;
+    tag: OllamaApiTagsResponseModel;
+  }): React.JSX.Element {
     return (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Model" text={prop.tag.name} />

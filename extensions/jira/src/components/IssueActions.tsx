@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, showToast, Toast, open } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -20,7 +20,8 @@ import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocompleteUsers, User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
-import { slugify } from "../helpers/string";
+import { generateBranchName } from "../helpers/issues";
+import { getIssueUrl } from "../helpers/urls";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
@@ -52,7 +53,7 @@ export default function IssueActions({
   showAttachmentsAction,
 }: IssueActionsProps) {
   const { siteUrl, myself } = getJiraCredentials();
-  const issueUrl = `${siteUrl.startsWith("https://") ? siteUrl : `https://${siteUrl}`}/browse/${issue.key}`;
+  const issueUrl = getIssueUrl(issue.key, siteUrl);
 
   async function mutateWithOptimisticUpdate({ asyncUpdate, optimisticUpdate }: MutateParams) {
     if (mutate) {
@@ -146,6 +147,8 @@ export default function IssueActions({
     }
   }
 
+  const { open_in, branch_name } = getPreferenceValues<Preferences>();
+
   return (
     <ActionPanel title={issue.key}>
       <ActionPanel.Section>
@@ -157,7 +160,18 @@ export default function IssueActions({
           />
         ) : null}
 
-        <Action.OpenInBrowser url={issueUrl} />
+        {open_in ? (
+          <Action
+            title={`Open in ${open_in.name}`}
+            icon={Icon.Globe}
+            onAction={async () => {
+              open(issueUrl, open_in);
+              closeMainWindow();
+            }}
+          />
+        ) : (
+          <Action.OpenInBrowser url={issueUrl} />
+        )}
 
         {showAttachmentsAction && "attachment" in issue.fields ? (
           <Action.Push
@@ -191,7 +205,7 @@ export default function IssueActions({
         <ChangeAssigneeSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
         <Action
-          title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
+          title={isAssignedToMe ? "Un-Assign from Me" : "Assign to Me"}
           icon={getUserAvatar(myself)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onAction={assignToMe}
@@ -256,7 +270,7 @@ export default function IssueActions({
 
         <Action.CopyToClipboard
           title="Copy Git Branch Name"
-          content={`${issue.key}-${slugify(issue.fields.summary)}`}
+          content={generateBranchName(issue, branch_name)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
 
@@ -342,7 +356,7 @@ function ChangePrioritySubmenu({ issue, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         priorities?.map((priority) => {
           return (
@@ -416,7 +430,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
 
   return (
     <ActionPanel.Submenu
-      title="Assign To"
+      title="Assign to"
       icon={Icon.AddPerson}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onOpen={() => setLoad(true)}
@@ -502,7 +516,7 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         transitions?.map((transition) => {
           if (transition.to.id === issue.fields.status.id) {

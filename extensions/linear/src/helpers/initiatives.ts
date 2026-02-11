@@ -1,5 +1,6 @@
-import { getIcon } from "./icons";
 import { Initiative } from "@linear/sdk";
+
+import { getIcon } from "./icons";
 
 export function getInitiativeIcon(initiative: Pick<Initiative, "icon" | "color">) {
   return getIcon({

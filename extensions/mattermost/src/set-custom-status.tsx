@@ -33,7 +33,7 @@ interface StateValue {
 
 async function getCachedPresets(): Promise<CustomProfileStatus[] | undefined> {
   return LocalStorage.getItem<string>("status-presets").then((cachedStateJson) =>
-    cachedStateJson ? (JSON.parse(cachedStateJson) as CustomProfileStatus[]) : undefined
+    cachedStateJson ? (JSON.parse(cachedStateJson) as CustomProfileStatus[]) : undefined,
   );
 }
 

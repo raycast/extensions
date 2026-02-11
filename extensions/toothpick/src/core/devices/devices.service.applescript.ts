@@ -16,9 +16,11 @@ export default class ApplescriptDevicesService implements DevicesService {
 
   connectDevice(mac: string): boolean {
     const formattedMacAddress = mac.toUpperCase().replaceAll(":", "-");
-    const script = readFileSync(resolve(__dirname, "assets/scripts/connectDevice.applescript")).toString();
+    const script = readFileSync(
+      resolve(__dirname, this._getPath("assets/scripts/connectDevice.applescript")),
+    ).toString();
     const getFirstMatchingDeviceScript = readFileSync(
-      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
+      resolve(__dirname, this._getPath("assets/scripts/getFirstMatchingDevice.applescript")),
     ).toString();
     const exitCode = runAppleScriptSync(
       `
@@ -29,16 +31,18 @@ export default class ApplescriptDevicesService implements DevicesService {
       \n
       ${script}\n
       \n
-      return connectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`
+      return connectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`,
     );
     return exitCode === "0";
   }
 
   disconnectDevice(mac: string): boolean {
     const formattedMacAddress = mac.toUpperCase().replaceAll(":", "-");
-    const script = readFileSync(resolve(__dirname, "assets/scripts/disconnectDevice.applescript")).toString();
+    const script = readFileSync(
+      resolve(__dirname, this._getPath("assets/scripts/disconnectDevice.applescript")),
+    ).toString();
     const getFirstMatchingDeviceScript = readFileSync(
-      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
+      resolve(__dirname, this._getPath("assets/scripts/getFirstMatchingDevice.applescript")),
     ).toString();
     const exitCode = runAppleScriptSync(
       `
@@ -49,14 +53,16 @@ export default class ApplescriptDevicesService implements DevicesService {
       \n
       ${script}\n
       \n
-      disconnectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`
+      disconnectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`,
     );
     return exitCode === "0";
   }
 
   private _fetchRawDevicesData(): RawDeviceData[] {
     // Fetch Bluetooth data
-    const script = readFileSync(resolve(__dirname, "assets/scripts/getAllDevices.applescript")).toString();
+    const script = readFileSync(
+      resolve(__dirname, this._getPath("assets/scripts/getAllDevices.applescript")),
+    ).toString();
     const fetchedData = runAppleScriptSync(`${script}`);
 
     // Parse fetched data
@@ -64,10 +70,10 @@ export default class ApplescriptDevicesService implements DevicesService {
 
     // Extract useful data for further processing
     const untypedConnectedDevices: RawDeviceData[] = rawData.flatMap((controller) =>
-      controller["device_connected"] ? controller["device_connected"] : []
+      controller["device_connected"] ? controller["device_connected"] : [],
     );
     const untypedDisconnectedDevices: RawDeviceData[] = rawData.flatMap((controller) =>
-      controller["device_not_connected"] ? controller["device_not_connected"] : []
+      controller["device_not_connected"] ? controller["device_not_connected"] : [],
     );
 
     // Inject connection status
@@ -98,7 +104,7 @@ export default class ApplescriptDevicesService implements DevicesService {
     try {
       scriptOutput = execSync(
         "ioreg -c AppleDeviceManagementHIDEventService | grep -e BatteryPercent -e DeviceAddress",
-        { env: { ...process.env, PATH: `${process.env.PATH}:/usr/bin:/usr/sbin:` } }
+        { env: { ...process.env, PATH: `${process.env.PATH}:/usr/bin:/usr/sbin:` } },
       ).toString();
     } catch {
       return;
@@ -142,5 +148,12 @@ export default class ApplescriptDevicesService implements DevicesService {
     }
 
     return device;
+  }
+
+  private _getPath(path: string): string {
+    if (__dirname.endsWith("/tools")) {
+      return `../${path}`;
+    }
+    return path;
   }
 }

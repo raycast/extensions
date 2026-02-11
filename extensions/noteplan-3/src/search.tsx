@@ -1,11 +1,10 @@
 import { getNoteCategory, getNoteIcon, getNoteTitle } from "./lib/note-utilities";
-import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useNoteList } from "./lib/hooks";
-import { NoteDetail, OpenNoteAction } from "./lib/components";
+import { OpenNoteAction, SaveAsQuicklinkAction, ShowDetailsAction } from "./lib/components";
 
 export default () => {
   const [notes] = useNoteList();
-  const { push } = useNavigation();
 
   return (
     <List navigationTitle="Search Notes" searchBarPlaceholder="Search your notes">
@@ -16,12 +15,9 @@ export default () => {
           accessories={[{ text: getNoteCategory(note), icon: getNoteIcon(note) }]}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
-                title="Show Details"
-                onAction={() => push(<NoteDetail entry={note} />)}
-                icon={Icon.Eye}
-              />
+              <ShowDetailsAction entry={note} />
               <OpenNoteAction entry={note} />
+              <SaveAsQuicklinkAction entry={note} />
             </ActionPanel>
           }
         />

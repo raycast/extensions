@@ -1,9 +1,9 @@
 import { LaunchProps, Toast, showToast, popToRoot } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useEffect } from "react";
-import { generateHue } from "./utils";
+import { useState, useEffect, useRef } from "react";
+import { generateHue, addHueGenerateRecord } from "./utils";
 import { Hue } from "./types";
-import HueDetail from "./hue-detail";
+import HueDetail from "./components/hue-detail";
 
 export default function Command({
   arguments: { hueName, hueColorOne, hueColorTwo },
@@ -11,6 +11,7 @@ export default function Command({
   arguments: { hueName: string; hueColorOne: string; hueColorTwo: string };
 }>) {
   const [hue, setHue] = useState<Hue | null>(null);
+  const isRecordAdded = useRef(false);
 
   const pattern = new RegExp("[a-zA-Z0-9 ]");
   const isValidHexColor = (color: string) => /^[0-9A-F]{6}$/i.test(color);
@@ -61,11 +62,21 @@ export default function Command({
   }, [hueName, hueColorOne, hueColorTwo]);
 
   const { isLoading } = useCachedPromise(async () => {
-    const hue = await generateHue(
+    const hue = (await generateHue(
       hueColorOne.replaceAll("#", ""),
       hueColorTwo.replaceAll("#", ""),
-    );
-    setHue(hue as Hue);
+    )) as Hue;
+    setHue(hue);
+
+    if (!isRecordAdded.current) {
+      await addHueGenerateRecord({
+        name: hueName,
+        colors: hue.colors,
+        tailwind_colors_name: hueName.toLowerCase().replaceAll(" ", "_"),
+        tailwind_colors: hue.tailwind_colors,
+      } as Hue);
+      isRecordAdded.current = true;
+    }
   });
 
   return (

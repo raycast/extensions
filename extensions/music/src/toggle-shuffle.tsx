@@ -9,6 +9,6 @@ export default pipe(
   music.player.shuffle.toggle,
   TE.chain(() => music.player.shuffle.get),
   handleTaskEitherError("Failed to toggle shuffle", (status) =>
-    showToast(Toast.Style.Success, `Shuffle ${status ? "On" : "Off"}`)
-  )
+    showToast(Toast.Style.Success, `Shuffle ${status ? "On" : "Off"}`),
+  ),
 );

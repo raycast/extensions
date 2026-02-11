@@ -18,13 +18,13 @@ function getBaseURL() {
 }
 
 const OpenIssue = ({ issueKey }: { issueKey: string }) => <IssueDetail issueKey={issueKey} />;
-const AuthorizedOpenIssue = withJiraCredentials(OpenIssue);
 
-export default function OpenFromClipboard() {
+function OpenFromClipboard() {
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     async function getClipboardText() {
+      const { open_in } = getPreferenceValues<Preferences>();
       const clipboardText = (await Clipboard.readText())?.trim();
       if (!clipboardText || clipboardText.length == 0) {
         await showHUD("Clipboard empty", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
@@ -42,7 +42,7 @@ export default function OpenFromClipboard() {
       // If we got a base URL configured, open the issue in the browser and close raycast
       const baseUrl = getBaseURL();
       if (baseUrl) {
-        await open(getBaseURL() + "/browse/" + clipboardText);
+        await open(getBaseURL() + "/browse/" + clipboardText, open_in ?? undefined);
         await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
         return;
       }
@@ -57,5 +57,6 @@ export default function OpenFromClipboard() {
     return <Detail isLoading />;
   }
 
-  return <AuthorizedOpenIssue issueKey={issueKey} />;
+  return <OpenIssue issueKey={issueKey} />;
 }
+export default withJiraCredentials(OpenFromClipboard);

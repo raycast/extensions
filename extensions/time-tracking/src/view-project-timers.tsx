@@ -10,15 +10,88 @@ import {
   LaunchType,
   List,
   showToast,
+  Form,
+  getPreferenceValues,
 } from "@raycast/api";
+
 import { useEffect, useState } from "react";
-import { deleteTimer, formatDuration, getDuration, getTimers, Timer, TimerList } from "./Timers";
+import {
+  deleteTimer,
+  editTimer,
+  exportTimers,
+  formatDuration,
+  getDuration,
+  getTimers,
+  Timer,
+  TimerList,
+} from "./Timers";
+import { useForm } from "@raycast/utils";
+
+function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date, name: string, tag: string) => void }) {
+  const { default_tag } = getPreferenceValues<Preferences.StartTimer>();
+  type FormValues = {
+    id: string;
+    name: string;
+    tag: string;
+    start: Date | null;
+    end: Date | null;
+  };
+  const { itemProps, handleSubmit, values, setValidationError } = useForm<FormValues>({
+    onSubmit(values) {
+      const { start, end, name, tag } = values;
+      if (!start) {
+        setValidationError("start", "The item is required");
+        return;
+      }
+      if (!end) {
+        setValidationError("end", "The item is required");
+        return;
+      }
+      props.onUpdate(start, end, name, tag);
+    },
+    initialValues: {
+      id: props.timer.id,
+      name: props.timer.name || "",
+      tag: props.timer.tag || "",
+      start: new Date(props.timer.start),
+      end: new Date(props.timer.end!),
+    },
+    validation: {
+      start(value) {
+        if (!value) return "The item is required";
+        if (value > new Date()) return "Start Date must be a date in the past";
+        if (values.end && values.end <= value) return "Start Date must be before End Date";
+      },
+      end(value) {
+        if (!value) return "The item is required";
+        if (value > new Date()) return "End Date must be a date in the past";
+        if (values.start && values.start >= value) return "End Date must be after Start Date";
+      },
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.EditShape} title="Submit" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Name" placeholder="Unnamed timer" {...itemProps.name} />
+      <Form.DatePicker title="Start Date" {...itemProps.start} />
+      <Form.DatePicker title="End Date" {...itemProps.end} />
+      <Form.TextField title="Tag" placeholder={default_tag || "Tag"} {...itemProps.tag} />
+    </Form>
+  );
+}
 
 export default function Command() {
   const [timers, setTimers] = useState<Timer[]>();
   const [filteredTimers, setFilteredTimers] = useState<Timer[]>([]);
 
   const [search, setSearch] = useState<string>("");
+
+  const [editingTimer, setEditingTimer] = useState<Timer | undefined>(undefined);
 
   useEffect(() => {
     getTimers().then(refresh);
@@ -40,6 +113,19 @@ export default function Command() {
     setFilteredTimers(sortedTimers);
   }
 
+  if (editingTimer) {
+    return (
+      <EditForm
+        timer={editingTimer}
+        onUpdate={async (start, end, name, tag) => {
+          await editTimer({ ...editingTimer, start: start.getTime(), end: end.getTime(), name, tag });
+          getTimers().then(refresh);
+          setEditingTimer(undefined);
+        }}
+      />
+    );
+  }
+
   return (
     <List
       isLoading={timers === undefined}
@@ -57,6 +143,7 @@ export default function Command() {
               : new Date(timer.start).toLocaleString()
           }
           accessories={[
+            { tag: timer.tag },
             {
               text: (timer.end ? "✅ " : "⏳ ") + formatDuration(getDuration(timer)),
             },
@@ -84,6 +171,7 @@ export default function Command() {
                       type: LaunchType.UserInitiated,
                       arguments: {
                         name: timer.name,
+                        tag: timer.tag,
                       },
                     });
                   }}
@@ -94,6 +182,14 @@ export default function Command() {
                 title={"Copy Duration"}
                 content={formatDuration(getDuration(timer))}
               />
+              {!!timer.end && (
+                <Action
+                  icon={Icon.EditShape}
+                  title={"Edit Timer"}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                  onAction={() => setEditingTimer(timer)}
+                />
+              )}
               <Action
                 icon={Icon.Trash}
                 title={"Delete Timer"}
@@ -105,7 +201,7 @@ export default function Command() {
                       message: "This action cannot be undone.",
                       icon: { source: Icon.Trash, tintColor: Color.Red },
                       primaryAction: {
-                        style: Alert.ActionStyle.Default,
+                        style: Alert.ActionStyle.Destructive,
                         title: "Delete timer",
                       },
                       rememberUserChoice: true,
@@ -118,6 +214,16 @@ export default function Command() {
                   }
                 }}
                 style={Action.Style.Destructive}
+              />
+              <Action
+                icon={Icon.Download}
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Export Timers as CSV"
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "s" },
+                  Windows: { modifiers: ["ctrl"], key: "s" },
+                }}
+                onAction={exportTimers}
               />
             </ActionPanel>
           }

@@ -15,6 +15,15 @@ function getIcon(item: FileItem): Image.ImageLike {
     default:
       break;
   }
+  if (item.mimetype === "image/x-generic") return { source: Icon.Image, tintColor: Color.Green };
+  switch (item.rawmimetype) {
+    case "text/css":
+    case "text/html":
+    case "text/x-log":
+      return { source: Icon.CodeBlock, tintColor: Color.Blue };
+    default:
+      break;
+  }
   switch (item.type) {
     case "dir":
       return { source: Icon.Folder, tintColor: Color.Yellow };
@@ -82,5 +91,12 @@ function ViewFile({ dir, file }: { dir: string; file: string }) {
   const { isLoading, data, error } = usGetFileContent(dir, file);
 
   const markdown = isLoading ? "# Loading..." : data ? data.content : `# Error \n\n ${error}`;
-  return <Detail isLoading={isLoading} markdown={markdown} navigationTitle={`View Files > ${dir}/${file}`} />;
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      navigationTitle={`View Files > ${dir}/${file}`}
+      actions={<ActionPanel>{!isLoading && data && <Action.CopyToClipboard content={data.content} />}</ActionPanel>}
+    />
+  );
 }

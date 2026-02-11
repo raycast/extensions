@@ -80,6 +80,15 @@ ${byTimeTable}
           ))
         )}
       </Detail.Metadata.TagList>
+      <Detail.Metadata.TagList title="Platforms">
+        {state.result?.platforms.map((platform, index) => (
+          <Detail.Metadata.TagList.Item
+            key={index}
+            text={""}
+            icon={{ source: "platform-icons/" + platform + ".svg" }}
+          />
+        ))}
+      </Detail.Metadata.TagList>
       <Detail.Metadata.Separator />
       {state.result?.linkWidget && (
         <Detail.Metadata.Link title="External links" target={state.result.linkWidget} text="View on steam" />
@@ -143,6 +152,13 @@ function parseDetails(html: string): DetailEntry {
     .map((index, element) => $(element).text())
     .get();
 
+  const platforms = $(".game-header-container .menu-item svg")
+    .map(function () {
+      const svg = $(this).children("use").attr("href");
+      return svg ? svg.split("#").pop() : "";
+    })
+    .toArray();
+
   return new DetailEntry(
     gameName,
     imageUrl,
@@ -151,6 +167,7 @@ function parseDetails(html: string): DetailEntry {
     priceKeyshops,
     pricesByPriceLabels,
     pricesByTimeLabels,
-    editions
+    editions,
+    platforms
   );
 }

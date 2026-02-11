@@ -4,7 +4,7 @@ interface SearchState<T> {
 }
 
 // Common Types
-type Errors = { errors?: string[] };
+export type Errors = { errors: string[] };
 
 interface User {
   id: string;
@@ -30,7 +30,6 @@ interface Urls {
 
 // Image Search
 interface SearchResult {
-  errors?: string[];
   id: number;
   created_at: string;
   title: string;
@@ -51,7 +50,7 @@ interface SearchResult {
 // Collection Search
 interface CollectionResult {
   id: number;
-  title: title;
+  title: string;
   description: string;
   published_at: string;
   last_collected_at: string;
@@ -123,17 +122,4 @@ interface LikesResult {
   };
 }
 
-// Options
-interface UnsplashPreferences {
-  accessKey: string;
-  secretKey: string;
-  orientation: "all" | "landscape" | "portrait" | "squarish";
-  downloadSize: "raw" | "full" | "regular" | "small" | "thumb";
-  collections: string;
-  wallpaperPath: string;
-  applyTo: "current" | "every";
-  includeDefaults: "yes" | "no";
-  updateTime: string;
-  gridItemSize: "small" | "medium" | "large";
-  showImageTitle: boolean;
-}
+export type Orientation = "all" | "landscape" | "portrait" | "squarish";

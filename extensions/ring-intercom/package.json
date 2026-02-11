@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ring-intercom",
+  "title": "Ring Intercom",
+  "description": "Interact with your Ring Intercom device",
+  "icon": "command-icon.png",
+  "author": "stefanbd",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "unlock",
+      "title": "Unlock Door",
+      "subtitle": "Ring Intercom",
+      "description": "Unlock using Ring Intercom",
+      "mode": "no-view"
+    },
+    {
+      "name": "authenticate",
+      "title": "Authenticate",
+      "subtitle": "Ring Intercom",
+      "description": "Create a refresh token for authentication with your Ring account",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "cross-fetch": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.9.3",
+    "@types/react": "^18.3.12",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
+    "@typescript-eslint/parser": "^8.16.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0"
+}

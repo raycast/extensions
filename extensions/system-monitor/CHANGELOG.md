@@ -1,5 +1,46 @@
 # System Monitor Changelog
 
+## [New Additions & Chore] - 2026-02-02
+- Added customisable tags for menubar entries
+    - Universal tags
+        - `<BR>` for line breaks
+        - `<MODE>` for display mode(toggles between "Free" and "Used")
+    - Module specific tags can be seen by hovering over the preferences text box
+- Made Loading tags use `…` consistently instead of `...`
+- Updated free and used preference to be per-module for cpu, memory, disk and battery usage
+- Removed displaymode field from menubar
+
+
+## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
+
+- Add a preference to toggle between free and used display modes for CPU, Memory and more (ref: [Issue #24612](https://github.com/raycast/extensions/issues/24612)).
+- Modernize extension to use latest Raycast configuration.
+- Add README.md.
+
+## [New Additions] - 2025-08-05
+
+- Add a new preference option for the `Menubar System Monitor` command to customize the menu bar icon.
+
+## [Improvements] - 2025-06-04
+
+- Improve the script to ensure it waits for the Activity Monitor to open before clicking the radio button
+
+## [Improvements] - 2025-03-17
+
+- Improve the `onAction()` so it can open the Activity Monitor directly without selecting a tab
+
+## [New Additions] - 2025-03-11
+
+- Add a new menubar feature to display system monitor information in the menubar
+
+## [Update] - 2025-03-03
+
+- Update the action to open the corresponding tab in the System Monitor
+
+## [Fix] - 2025-01-02
+
+- Fix issue when showing battery level on Intel-based Macs
+
 ## [Chore] - 2024-11-24
 
 - Fixed wording in description

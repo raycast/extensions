@@ -16,13 +16,13 @@ const useWhoisData = (input: ParsedInput & { ip?: string | null }, execute = tru
         throw new Error("Invalid response");
       }
       let markdown = `# [WHOIS](https://who.is/whois/${input.input}) 🌐\n\n`;
-      const data = await response.json();
+      const data = (await response.json()) as Record<string, unknown>;
       for (const [key, value] of Object.entries(data)) {
         const header = key.charAt(0).toUpperCase() + key.slice(1);
         markdown += `# \`${header}\`\n`;
 
-        if (typeof value === "object" && value !== null) {
-          for (const [k, v] of Object.entries(value)) {
+        if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+          for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
             markdown += `* **${k}**: ${v}\n\n`;
           }
         } else {

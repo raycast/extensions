@@ -73,6 +73,7 @@ export function Route({ route, isLoading }: { route: StravaRoute; isLoading: boo
           />
           <ActionPanel.Section>
             <Action
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Download GPX"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
@@ -81,6 +82,7 @@ export function Route({ route, isLoading }: { route: StravaRoute; isLoading: boo
               }}
             />
             <Action
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Download TCX"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}

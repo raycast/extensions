@@ -31,7 +31,7 @@ export function AddToCalendar({ race, raceDates }: { race: Race; raceDates: [str
           'tell application "Calendar"\n' +
           "set output to name of calendars where writable is true\n" +
           "end tell\n" +
-          "return output"
+          "return output",
       );
       const lines = result.split(",");
       const calendars = lines.map((value) => new Calendar(value.trim()));
@@ -53,12 +53,12 @@ export function AddToCalendar({ race, raceDates }: { race: Race; raceDates: [str
             return `make new event with properties { summary:"🏎 ${getFlag(race.Circuit.Location.country)} ${
               date[0]
             } - ${race.raceName}", start date:(date "${moment(date[1]).format(
-              "DD-MM-YYYY HH:mm"
+              "DD-MM-YYYY HH:mm",
             )}"), end date:(date "${endDate.format("DD-MM-YYYY HH:mm")}")}`;
           })
           .join("\n") +
         "\nend tell\n" +
-        "end tell\n"
+        "end tell\n",
     );
     pop();
     showHUD("All events have been added to your calendar. 🏎️💨");

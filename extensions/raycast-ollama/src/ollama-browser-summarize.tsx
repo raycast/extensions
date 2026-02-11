@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { OllamaApiModelCapability } from "./lib/ollama/enum";
 import { CommandAnswer } from "./lib/settings/enum";
 import { Preferences } from "./lib/types";
 import { AnswerView } from "./lib/ui/AnswerView/main";
@@ -6,7 +7,7 @@ import { AnswerView } from "./lib/ui/AnswerView/main";
 const pref = getPreferenceValues<Preferences>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-export default function Command(): JSX.Element {
+export default function Command(): React.JSX.Element {
   const c = CommandAnswer.TWEET;
   const p = `Summarize the provided website with the following format:
 """
@@ -25,5 +26,5 @@ Some rules to follow precisely:
 
 Here's the website information:
 {browser-tab}`;
-  return <AnswerView command={c} prompt={p} />;
+  return <AnswerView command={c} prompt={p} capabilities={[OllamaApiModelCapability.COMPLETION]} />;
 }

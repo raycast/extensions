@@ -1,19 +1,16 @@
 import HarpoonError, { ErrorCode } from "../HarpoonError";
-import { App } from "../models";
 import getList from "./getList";
 import setList from "./setList";
 import unshiftList from "./unshiftList";
 
-export default async function moveItem(item: App, position: "first" | "last"): Promise<void> {
+export default async function moveItem(index: number, position: "first" | "last"): Promise<void> {
   const list = await getList();
 
-  const index = list.findIndex(({ path }) => path === item.path);
+  const [targetItem] = list.splice(index, 1);
 
-  if (index === -1) {
+  if (!targetItem) {
     throw new HarpoonError(ErrorCode.itemNotFound);
   }
-
-  const [targetItem] = list.splice(index, 1);
 
   if (position === "first") {
     unshiftList(list, targetItem);

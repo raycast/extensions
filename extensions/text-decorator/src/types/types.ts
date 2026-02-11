@@ -4,6 +4,4 @@ export interface DecorationFont {
   icon: string;
 }
 
-export interface DecoratorArguments {
-  font: string;
-}
+export type DecoratorArguments = Arguments.DecorateText;

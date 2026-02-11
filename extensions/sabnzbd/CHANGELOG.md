@@ -1,5 +1,9 @@
 # SABnzbd Changelog
 
+## [Add README] - 2025-04-23
+
+- Add a README file with instructions on how to get started
+
 ## [Modernize Extension + Cache Results] - 2024-09-02
 
 ### Enhancements
@@ -8,7 +12,6 @@
 - New `Show Warnings` command
 - Add caching via `useCachedPromise`
 - Add CHANGELOG
-- Add README
 - Update all icons to prefer Raycast Icons
 - Add shortcut to Delete Action in "Show Queue"
 - Add more toasts

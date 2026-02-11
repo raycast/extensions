@@ -1,8 +1,12 @@
 import { showHUD, closeMainWindow } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
-  await showHUD("VPN connections up and running!");
-  await closeMainWindow();
-  await runAppleScript('tell application "Viscosity" to connectall');
+  try {
+    await showHUD("VPN connections up and running!");
+    await closeMainWindow();
+    await runAppleScript('tell application "Viscosity" to connectall');
+  } catch (error) {
+    showFailureToast(error, { title: "Could not run AppleScript" });
+  }
 }

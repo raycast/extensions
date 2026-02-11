@@ -1,16 +1,19 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import {
-  brewIsInstalled,
-  brewInstallPath,
   brewInstallCommand,
+  brewInstallPath,
+  brewIsInstalled,
   brewUninstallCommand,
   brewUpgradeCommand,
-} from "../brew";
-import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
-import { FormulaInfo } from "./formulaInfo";
-import { CaskInfo } from "./caskInfo";
+  type Cask,
+  type Formula,
+  type OutdatedCask,
+  type OutdatedFormula,
+} from "../utils";
+import { useTerminalApp } from "../utils/terminal";
 import * as Actions from "./actions";
-import { useTerminalApp } from "./runInTerminal";
+import { CaskInfo } from "./caskInfo";
+import { FormulaInfo } from "./formulaInfo";
 
 const DebugSection = (props: { obj: Cask | Formula }) => (
   <ActionPanel.Section>
@@ -37,7 +40,7 @@ export function CaskActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
@@ -56,8 +59,12 @@ export function CaskActionPanel(props: {
           <Action.ShowInFinder path={brewInstallPath(cask)} />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={cask.homepage} />
-          <Action.CopyToClipboard title="Copy URL" content={cask.homepage} />
+          <Action.OpenInBrowser title="Open Cask" url={`https://formulae.brew.sh/cask/${cask.token}`} />
+          <Action.CopyToClipboard title="Copy Cask URL" content={`https://formulae.brew.sh/cask/${cask.token}`} />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser title="Open Homepage" url={cask.homepage} />
+          <Action.CopyToClipboard title="Copy Homepage URL" content={cask.homepage} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={cask} onAction={props.onAction} />
@@ -121,8 +128,12 @@ export function CaskActionPanel(props: {
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={cask.homepage} />
-          <Action.CopyToClipboard title="Copy URL" content={cask.homepage} />
+          <Action.OpenInBrowser title="Open Cask" url={`https://formulae.brew.sh/cask/${cask.token}`} />
+          <Action.CopyToClipboard title="Copy Cask URL" content={`https://formulae.brew.sh/cask/${cask.token}`} />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser title="Open Homepage" url={cask.homepage} />
+          <Action.CopyToClipboard title="Copy Homepage URL" content={cask.homepage} />
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -140,7 +151,7 @@ export function FormulaActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
@@ -158,11 +169,18 @@ export function FormulaActionPanel(props: {
           {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
+          <Actions.FormulaShowAllInstalled onAction={props.onAction} />
         </ActionPanel.Section>
-
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={formula.homepage} />
-          <Action.CopyToClipboard title="Copy URL" content={formula.homepage} />
+          <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />
+          <Action.CopyToClipboard
+            title="Copy Formula URL"
+            content={`https://formulae.brew.sh/formula/${formula.name}`}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser title="Open Homepage" url={formula.homepage} />
+          <Action.CopyToClipboard title="Copy Homepage URL" content={formula.homepage} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={formula} onAction={props.onAction} />
@@ -216,8 +234,15 @@ export function FormulaActionPanel(props: {
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={formula.homepage} />
-          <Action.CopyToClipboard title="Copy URL" content={formula.homepage} />
+          <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />
+          <Action.CopyToClipboard
+            title="Copy Formula URL"
+            content={`https://formulae.brew.sh/formula/${formula.name}`}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser title="Open Homepage" url={formula.homepage} />
+          <Action.CopyToClipboard title="Copy Homepage URL" content={formula.homepage} />
         </ActionPanel.Section>
 
         <DebugSection obj={formula} />
@@ -235,7 +260,7 @@ export function FormulaActionPanel(props: {
 export function OutdatedActionPanel(props: {
   outdated: OutdatedCask | OutdatedFormula;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { outdated } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 

@@ -1,40 +1,9 @@
 import { Icon } from "@raycast/api";
+import { Searcher } from "fast-fuzzy";
+import { useMemo, useState } from "react";
 import { URL } from "url";
 import { ITEM_TYPE_TO_LABEL } from "~/constants/labels";
-import { Item, ItemType } from "~/types/vault";
-
-export function extractKeywords(item: Item): string[] {
-  const keywords: string[] = [item.name, ITEM_TYPE_TO_LABEL[item.type]];
-
-  if (item.type === ItemType.LOGIN) {
-    const { username, uris } = item.login ?? {};
-
-    if (username) keywords.push(username);
-    if (uris) {
-      for (const uri of uris) {
-        if (uri.uri != null) {
-          try {
-            keywords.push(...new URL(uri.uri).hostname.split("."));
-          } catch (error) {
-            // Invalid hostname
-          }
-        }
-      }
-    }
-  } else if (item.type === ItemType.CARD) {
-    const { brand, number } = item.card ?? {};
-
-    if (brand) keywords.push(brand);
-    if (number) {
-      // Similar to Bitwarden, use the last 5 digits if the card is Amex
-      const isAmex = /^3[47]/.test(number);
-      keywords.push(number.substring(number.length - (isAmex ? 5 : 4), number.length));
-    }
-  }
-
-  // remove duplicates and invalid keywords
-  return Array.from(new Set(keywords.filter(Boolean)));
-}
+import { Item } from "~/types/vault";
 
 export function faviconUrl(url: string): string {
   try {
@@ -43,4 +12,35 @@ export function faviconUrl(url: string): string {
   } catch (err) {
     return Icon.Globe;
   }
+}
+
+export function useVaultSearch(items: Item[]) {
+  const [searchText, setSearchText] = useState("");
+
+  const searcher = useMemo(() => {
+    return new Searcher(items, {
+      ignoreSymbols: false,
+      threshold: 0.7,
+      keySelector: (item) => {
+        const { login, card } = item;
+        return [
+          item.name,
+          ITEM_TYPE_TO_LABEL[item.type],
+          login?.username,
+          login?.uris?.map(({ uri }) => uri),
+          card?.brand,
+          card?.number,
+        ]
+          .flat()
+          .filter((value): value is string => !!value);
+      },
+    });
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    if (!searchText) return items;
+    return searcher.search(searchText);
+  }, [searcher, searchText]);
+
+  return { setSearchText, filteredItems };
 }

@@ -9,6 +9,16 @@
   "categories": [
     "Media"
   ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Art Downloads Directory",
+      "description": "Directory to download art.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    }
+  ],
   "commands": [
     {
       "name": "get-random-artwork",
@@ -28,10 +38,12 @@
   "dependencies": {
     "@raycast/api": "^1.86.1",
     "@raycast/utils": "^1.17.0",
+    "fs-extra": "^11.3.0",
     "run-applescript": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",

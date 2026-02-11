@@ -9,7 +9,7 @@ import {
   SectionWithTasks,
   getGroupByOptions,
   groupByAssignees,
-  groupByDueDates,
+  groupByDates,
   groupByLabels,
   groupByPriorities,
   groupByProjects,
@@ -105,13 +105,13 @@ export default function useViewTasks(name: string, { tasks, optionsToExclude, da
         sections = groupByAssignees({ tasks, collaborators, user });
         break;
       case "date": {
-        const [upcomingTasks, noDueDatesTasks] = partition(tasks, (task) => task.due);
+        const [upcomingTasks, noDatesTasks] = partition(tasks, (task) => task.due);
 
-        sections = groupByDueDates(upcomingTasks);
+        sections = groupByDates(upcomingTasks);
 
         sections.push({
-          name: "No due date",
-          tasks: noDueDatesTasks,
+          name: "No date",
+          tasks: noDatesTasks,
         });
         break;
       }

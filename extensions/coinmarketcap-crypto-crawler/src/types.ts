@@ -13,8 +13,13 @@ export type CryptoCurrency = {
   symbol: string;
 };
 
+export enum PriceDirection {
+  UP = "up",
+  DOWN = "down",
+}
+
 export type PriceData = {
   currencyPrice: string;
   priceDiff: string;
-  isUp: boolean;
+  direction?: PriceDirection;
 };

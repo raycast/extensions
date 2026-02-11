@@ -161,27 +161,27 @@ export function summaryStats(
   for (const stat of stats) {
     const category = stat.category as GameStringCategory;
 
-    if (typeof stat.homeValue === "string") {
+    if (typeof stat.homeValue === "string" && gameStrings[category]) {
       // If homeValue is a string, just insert it directly
       summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
-    } else if (typeof stat.homeValue === "number") {
+    } else if (typeof stat.homeValue === "number" && gameStrings[category]) {
       if (Number.isInteger(stat.homeValue)) {
         // If homeValue is an integer, display it as is
         summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
       } else {
         // If homeValue is a float, format it as a percentage
         // for whatever reason `goalsForPerGamePlayed` is a special case. can't score 357% goals per game lol
-        if (category === "goalsForPerGamePlayed") {
+        if (category === "goalsForPerGamePlayed" || category === "goalsAgainstPerGamePlayed") {
           summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
         } else {
           const homeValuePercentage = (stat.homeValue * 100).toFixed(2) + "%";
-          const awayValueFormatted =
+          const awayValuePercentage =
             typeof stat.awayValue === "number"
               ? Number.isInteger(stat.awayValue)
                 ? stat.awayValue.toString()
                 : (stat.awayValue * 100).toFixed(2) + "%"
               : stat.awayValue;
-          summary += `| ${homeValuePercentage} | ${gameStrings[category][languageKey]} | ${awayValueFormatted} |\n`;
+          summary += `| ${homeValuePercentage} | ${gameStrings[category][languageKey]} | ${awayValuePercentage} |\n`;
         }
       }
     }
@@ -378,7 +378,7 @@ export function generateShotsTable(shots: Period[] | undefined, awayTeam: TeamIn
 }
 
 export function teamName(team: TeamInfo, score: number | undefined, showLogo: boolean): string {
-  return `${team.abbrev} ${team.name[languageKey]} ${showLogo ? `<img alt="${team.name[languageKey]}" src="${team.logo}" height="20" width="20" />` + "" : ""} ${score ? "(" + score + ")" : ""}`;
+  return `${team.abbrev} ${team.commonName ? team.commonName[languageKey] : team.name[languageKey]} ${showLogo ? `<img alt="${team.commonName ? team.commonName[languageKey] : team.name[languageKey]}" src="${team.logo}" height="20" width="20" />` + "" : ""} ${score ? "(" + score + ")" : ""}`;
 }
 
 export function timeRemaining(clock: Clock | undefined, periodDescriptor: PeriodDescriptor | undefined): string {

@@ -1,27 +1,74 @@
-import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
-import * as alias from "./api/alias";
+import {
+  Cache,
+  Clipboard,
+  PopToRootType,
+  Toast,
+  captureException,
+  closeMainWindow,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 
-const GenerateAlias = async () => {
+import { alias, domains } from "./api";
+import * as context from "./context";
+import { formatAPIError } from "./error-handler";
+
+import type { Options } from "./api";
+import type { LaunchProps } from "@raycast/api";
+
+const cache = new Cache();
+
+async function getOptions(): Promise<Options> {
+  if (!cache.get("options")) {
+    const response = await domains.options();
+
+    cache.set("options", JSON.stringify(response));
+
+    return response;
+  }
+
+  domains.options().then((options) => {
+    cache.set("options", JSON.stringify(options));
+  });
+
+  return JSON.parse(cache.get("options") ?? "{}");
+}
+
+const GenerateAlias = async ({ launchContext: options }: LaunchProps) => {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Generating Alias",
+    title: "Generating Alias...",
   });
 
   try {
-    const newAliasEmail = await alias.create();
+    const defaults = await getOptions();
 
-    if (newAliasEmail.id?.length > 0) {
-      Clipboard.copy(newAliasEmail.email);
-      await showHUD("✅ Alias copied to clipboard");
+    const response = await alias.create({
+      description: await context.get(),
+      domain: defaults.defaultAliasDomain,
+      format: defaults.defaultAliasFormat,
+      ...options,
+    });
+
+    if (response.id) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Alias generated successfully";
+
+      await Clipboard.copy(response.email);
+      await closeMainWindow();
+      await showHUD("Alias copied to clipboard", { popToRootType: PopToRootType.Immediate });
     } else {
-      await showHUD("❌ Alias could not be generated");
+      throw new Error(`Unknown error`);
     }
   } catch (error) {
-    console.log(">>> error", error);
-    await showHUD("❌ AnonAddy API credentials are invalid");
-  }
+    captureException(error);
 
-  await toast.hide();
+    const formattedError = formatAPIError(error, "Error generating alias");
+
+    toast.style = Toast.Style.Failure;
+    toast.title = formattedError.title;
+    toast.message = formattedError.message;
+  }
 };
 
 export default GenerateAlias;

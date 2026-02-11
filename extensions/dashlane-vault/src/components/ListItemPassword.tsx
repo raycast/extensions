@@ -62,7 +62,7 @@ export const ListItemPassword = ({ item }: Props) => {
           <SyncAction />
           {environment.isDevelopment && (
             <ActionPanel.Section title="Development">
-              <Action.CopyToClipboard title="Copy Id" content={item.id} />
+              <Action.CopyToClipboard title="Copy ID" content={item.id} />
               <Action title="Print to Console" icon={Icon.Terminal} onAction={() => console.log(item)} />
             </ActionPanel.Section>
           )}
@@ -78,7 +78,7 @@ function isValidURL(url?: string): url is string {
   try {
     new URL(url);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -109,5 +109,17 @@ function getAccessories(item: VaultCredential) {
     });
   }
 
+  accessories.push({
+    icon: { source: Icon.Dot, tintColor: getStrengthColor(item.strength) },
+    tooltip: "Strength",
+  });
+
   return accessories;
+}
+
+function getStrengthColor(strength: number): Color {
+  if (strength < 25) return Color.Red;
+  if (strength < 50) return Color.Orange;
+  if (strength < 75) return Color.Yellow;
+  return Color.Green;
 }

@@ -37,7 +37,7 @@ function MessageMenubarItem(props: { message: gmail_v1.Schema$Message; onAction?
 }
 
 function UnreadMenuCommand() {
-  const query = generateQuery({ baseQuery: ["is:unread"] });
+  const query = generateQuery({ baseQuery: ["is:unread", "label:inbox"] });
   const { gmail } = getGMailClient();
   const { isLoading, data, error, mutate } = useCachedPromise(
     async (q: string) => {
@@ -87,7 +87,9 @@ function UnreadMenuCommand() {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         {!error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" icon={Icon.Envelope} />}
-        {data?.map((m) => <MessageMenubarItem key={m.data.id} message={m.data} onAction={() => onMailOpen(m.data)} />)}
+        {data?.map((m) => (
+          <MessageMenubarItem key={m.data.id} message={m.data} onAction={() => onMailOpen(m.data)} />
+        ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />

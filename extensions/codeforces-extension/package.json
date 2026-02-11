@@ -5,6 +5,11 @@
   "description": "Gives details about latest contests and details about any handle",
   "icon": "command-icon.png",
   "author": "harsh_varshney",
+  "contributors": [
+    "Mehul",
+    "pernielsentikaer",
+    "YourMCGeek"
+  ],
   "categories": [
     "Web"
   ],
@@ -39,19 +44,26 @@
       "description": "Lists upcoming contests in Menu Bar",
       "mode": "menu-bar",
       "interval": "1d"
+    },
+    {
+      "name": "search-problem",
+      "title": "Search Problem",
+      "description": "Search Codeforces problems",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.5",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -59,5 +71,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

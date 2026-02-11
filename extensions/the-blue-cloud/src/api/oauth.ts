@@ -16,7 +16,7 @@ const client = new OAuth.PKCEClient({
 export const provider = new OAuthService({
   client,
   clientId: "8tisoiv3j5fn8ts",
-  scope: "account_info.read files.metadata.read",
+  scope: "account_info.read files.metadata.read files.content.read",
   authorizeUrl: "https://www.dropbox.com/oauth2/authorize",
   tokenUrl: "https://www.dropbox.com/oauth2/token",
   extraParameters: { token_access_type: "offline" },

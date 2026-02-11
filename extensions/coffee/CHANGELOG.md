@@ -1,5 +1,22 @@
 # Coffee Changelog
 
+## [Fix] - 2026-01-27
+
+- Fixed memory leak caused by zombie processes when starting caffeination.
+- Fixed argument parsing bug in `generateArgs()`.
+- Consolidated duplicate shell commands in menu bar to reduce process spawning.
+- Added proper cleanup to prevent state updates on unmounted components.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Enhancement] - 2025-03-01
+
+- Show caffeinate duration in menu bar item.
+
+## [Enhancement] - 2025-01-31
+
+- Added `Caffeinate Until` command.
+
 ## [Enhancement] - 2024-10-18
 
 - Implemented schedule-based caffeination, allowing different schedules for different days

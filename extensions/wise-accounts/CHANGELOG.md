@@ -1,5 +1,9 @@
 # Wise Accounts Changelog
 
+## Add date to transaction list - 2025-01-17
+
+- Use `Intl.DateTimeFormat` and add date to the properties in transaction list
+
 ## Improve Get Transactions
 
 - Use Main Profile ID for Get Transactions default Profile ID

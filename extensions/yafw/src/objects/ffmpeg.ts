@@ -33,10 +33,13 @@ export class Ffmpeg {
   /**
    * @todo add validations for params?
    */
-  exec: (payload: { input: string; output?: string; params?: (string | undefined)[] }) => Promise<void> = async (
-    payload,
-  ) => {
-    const { input, params, output } = payload;
+  exec: (payload: {
+    input: string;
+    output?: string;
+    params?: (string | undefined)[];
+    inputOptions?: (string | undefined)[];
+  }) => Promise<void> = async (payload) => {
+    const { input, params, output, inputOptions } = payload;
 
     if (input === output) {
       throw new Error("Cannot override source");
@@ -62,6 +65,7 @@ export class Ffmpeg {
       const command = this.ffmpegBinary.command(
         [
           "-y",
+          ...(inputOptions ?? []),
           `-i ${sanitizeFileName(input)}`,
           ...(params ?? []),
           output ? "-progress pipe:1" : undefined,

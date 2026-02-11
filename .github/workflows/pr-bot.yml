@@ -1,8 +1,10 @@
 name: PR Bot
 on:
   pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "extensions/**"
+      - "docs/**"
     branches: [main, master]
 
 jobs:
@@ -13,11 +15,11 @@ jobs:
     steps:
       - name: Get changed extensions
         id: get_changed_extensions
-        uses: raycast/github-actions/get-changed-extensions@v1.16.0
+        uses: raycast/github-actions/get-changed-extensions@v1.18.0
         with:
           github_event_name: ${{ github.event_name }}
 
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
       - name: Setup Bot

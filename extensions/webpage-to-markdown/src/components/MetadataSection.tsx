@@ -9,7 +9,10 @@ interface MetadataSectionProps {
 export function MetadataSection({ url, metadata }: MetadataSectionProps) {
   const metadataItems = [
     { label: "Source URL", text: url },
-    { label: "Word Count", text: metadata.wordCount?.toLocaleString() || "Calculating..." },
+    {
+      label: "Word Count",
+      text: metadata.wordCount?.toLocaleString() || "Calculating...",
+    },
     { label: "Reading Time", text: metadata.readingTime || "Calculating..." },
   ];
 

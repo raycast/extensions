@@ -43,7 +43,7 @@ export default function RetrieveAllDomains() {
               if (filter === "status_active") return item.status === "ACTIVE";
               else if (filter === "status_null") return !item.status;
               else if (filter.includes("tld_")) return item.tld === filter.slice(4);
-            })
+            }),
       );
     })();
   }, [domains, filter, searchText]);
@@ -118,7 +118,7 @@ export default function RetrieveAllDomains() {
                     icon={Icon.Forward}
                     target={<GetURLForwardingComponent domain={item.domain} />}
                   />
-                  <ActionPanel.Submenu title="Go To" icon={Icon.ArrowRight}>
+                  <ActionPanel.Submenu title="Go to" icon={Icon.ArrowRight}>
                     <Action
                       title="Retrieve DNS Records"
                       icon={Icon.Text}

@@ -77,6 +77,7 @@ export default function ViewHistory() {
               <ActionPanel>
                 <Action.CopyToClipboard content={entry.uuid} />
                 <Action
+                  // eslint-disable-next-line @raycast/prefer-title-case
                   title={`${defaultAction === "copy" ? "Copy" : "Paste"} All UUIDs`}
                   icon={Icon.Clipboard}
                   onAction={copyOrPasteAllUUIDs}

@@ -1,3 +1,94 @@
+import { match, P } from "ts-pattern";
+
+export interface SlackStar {
+  state: SlackStarState;
+  created_at: Date;
+  item: SlackStarItem;
+}
+
+export function getSlackStarHtmlUrl(slack_star: SlackStar): string {
+  return match(slack_star.item)
+    .with({ type: "Message", content: P.select() }, (message) => message.url)
+    .with(
+      { type: "File", content: P.select() },
+      (file) => `https://app.slack.com/client/${file.team.id}/${file.channel.id}`,
+    )
+    .with(
+      { type: "FileComment", content: P.select() },
+      (fileComment) => `https://app.slack.com/client/${fileComment.team.id}/${fileComment.channel.id}`,
+    )
+    .with(
+      { type: "Channel", content: P.select() },
+      (channel) => `https://app.slack.com/client/${channel.team.id}/${channel.channel.id}`,
+    )
+    .with({ type: "Im", content: P.select() }, (im) => `https://app.slack.com/client/${im.team.id}/${im.channel.id}`)
+    .with(
+      { type: "Group", content: P.select() },
+      (group) => `https://app.slack.com/client/${group.team.id}/${group.channel.id}`,
+    )
+    .otherwise(() => "");
+}
+
+export enum SlackStarState {
+  StarAdded = "StarAdded",
+  StarRemoved = "StarRemoved",
+}
+
+export type SlackStarItem =
+  | { type: "Message"; content: SlackMessageDetails }
+  | { type: "File"; content: SlackFileDetails }
+  | { type: "FileComment"; content: SlackFileCommentDetails }
+  | { type: "Channel"; content: SlackChannelDetails }
+  | { type: "Im"; content: SlackImDetails }
+  | { type: "Group"; content: SlackGroupDetails };
+
+export interface SlackReaction {
+  name: string;
+  state: SlackReactionState;
+  created_at: Date;
+  item: SlackReactionItem;
+}
+
+export function getSlackReactionHtmlUrl(slack_reaction: SlackReaction): string {
+  return match(slack_reaction.item)
+    .with({ type: "Message", content: P.select() }, (message) => message.url)
+    .with(
+      { type: "File", content: P.select() },
+      (file) => `https://app.slack.com/client/${file.team.id}/${file.channel.id}`,
+    )
+    .otherwise(() => "");
+}
+
+export enum SlackReactionState {
+  ReactionAdded = "ReactionAdded",
+  ReactionRemoved = "ReactionRemoved",
+}
+
+export type SlackReactionItem =
+  | { type: "Message"; content: SlackMessageDetails }
+  | { type: "File"; content: SlackFileDetails };
+
+export interface SlackThread {
+  url: string;
+  messages: Array<SlackHistoryMessage>;
+  sender_profiles: Record<string, SlackMessageSenderDetails>;
+  subscribed: boolean;
+  last_read?: string;
+  channel: SlackChannelInfo;
+  team: SlackTeamInfo;
+  references?: SlackReferences;
+}
+
+export function getSlackThreadHtmlUrl(slack_thread: SlackThread): string {
+  return slack_thread.url;
+}
+
+export interface SlackReferences {
+  channels: Record<string, string | null>;
+  users: Record<string, string | null>;
+  usergroups: Record<string, string | null>;
+}
+
 export interface SlackPushEventCallback {
   team_id: string;
   api_app_id: string;
@@ -51,16 +142,18 @@ export interface SlackHistoryMessage {
   channel_type?: string;
   thread_ts?: string;
   client_msg_id?: string;
+  user?: string;
+  bot_id?: string;
 
   text?: string;
   blocks?: Array<SlackBlock>;
   attachments?: Array<SlackMessageAttachment>;
   upload?: boolean;
   files?: Array<SlackFile>;
-  reactions?: Array<SlackReaction>;
+  reactions?: Array<SlackReactionDetails>;
 }
 
-export interface SlackReaction {
+export interface SlackReactionDetails {
   name: string;
   count: number;
   users: Array<string>;
@@ -184,7 +277,7 @@ export interface SlackFile {
   url_private_download?: string;
   permalink?: string;
   permalink_public?: string;
-  reactions?: Array<SlackReaction>;
+  reactions?: Array<SlackReactionDetails>;
   editable?: boolean;
   is_external?: boolean;
   is_public?: boolean;

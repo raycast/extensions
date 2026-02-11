@@ -21,6 +21,10 @@ export interface XcodeProject {
    */
   filePath: string;
   /**
+   * The date when the project was last used or opened
+   */
+  lastUsed?: Date;
+  /**
    * The keywords
    */
   keywords: string[];

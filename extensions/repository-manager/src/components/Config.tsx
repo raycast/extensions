@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Icon, confirmAlert, open } from '@raycast/api'
 import { Project, getDefaultProjectConfig } from '../project'
 import { clearCache, preferences } from '../helpers'
-import fs from 'fs'
-import { exec } from 'child_process'
-import { withToast } from '../ui/toast'
+import fs from 'fs/promises'
+import { existsSync } from 'fs'
+import path from 'path'
+import { showSuccessToast, showErrorToast } from '../ui/toast'
 
 type ConfigProps = {
     project: Project
@@ -11,60 +12,71 @@ type ConfigProps = {
 
 export default function Config({ project }: ConfigProps) {
     async function createConfig() {
-        exec(`mkdir -p "$(dirname "${project.configPath}")" && touch "${project.configPath}"`, (error) => {
-            if (error) {
-                return
-            }
+        try {
+            // Safely create the directory structure using fs.mkdir
+            const configDir = path.dirname(project.configPath)
+            await fs.mkdir(configDir, { recursive: true })
 
             const defaultConfig = getDefaultProjectConfig(project)
+            await fs.writeFile(project.configPath, JSON.stringify(defaultConfig, null, 2))
 
-            fs.writeFile(project.configPath, JSON.stringify(defaultConfig), (err) => {
-                if (err) {
-                    return
-                }
+            clearCache()
 
-                clearCache()
+            // Append '.raycast' to the end of .gitignore file inside project directory
+            const gitIgnoreLines = '\n\n# Raycast Repository Manager config file\n.raycast\n'
+            const gitIgnorePath = `${project.fullPath}/.gitignore`
 
-                // append '.raycast' to the end of .gitignore file inside project directory
-                const gitIgnoreLines = '\n\n# Raycast Repository Manager config file\n.raycast\n'
+            if (existsSync(gitIgnorePath)) {
+                await fs.appendFile(gitIgnorePath, gitIgnoreLines)
+            }
 
-                fs.appendFile(`${project.fullPath}/.gitignore`, gitIgnoreLines, (err) => {
-                    if (err) {
-                        return
-                    }
-                })
-            })
+            // Check if editorApp is configured before trying to open
+            if (preferences.editorApp?.path) {
+                await open(project.configPath, preferences.editorApp.path)
+            } else {
+                await open(project.configPath)
+            }
 
-            open(project.configPath, preferences.editorApp.path)
-        })
+            await showSuccessToast('Config file has been created')
+        } catch (error) {
+            console.error('Failed to create config:', error)
+            await showErrorToast('Failed to create config file')
+        }
     }
 
     async function editConfig() {
-        open(project.configPath, preferences.editorApp.path)
+        try {
+            // Check if editorApp is configured before trying to open
+            if (preferences.editorApp?.path) {
+                await open(project.configPath, preferences.editorApp.path)
+            } else {
+                await open(project.configPath)
+            }
+        } catch (error) {
+            console.error('Failed to open config:', error)
+            await showErrorToast('Failed to open config file')
+        }
     }
 
     async function deleteConfig() {
-        const confirmed = await confirmAlert({
-            title: 'Delete Config',
-            message: 'Are you sure you want to delete config file?',
-            icon: { source: Icon.Trash, tintColor: Color.Red },
-        })
-
-        if (!confirmed) {
-            return Promise.reject()
-        }
-
-        return new Promise<void>((resolve, reject) => {
-            fs.unlink(project.configPath, (err) => {
-                if (err) {
-                    reject('Failed to delete config file')
-                    return
-                }
-
-                clearCache()
-                resolve()
+        try {
+            const confirmed = await confirmAlert({
+                title: 'Delete Config',
+                message: 'Are you sure you want to delete config file?',
+                icon: { source: Icon.Trash, tintColor: Color.Red },
             })
-        })
+
+            if (!confirmed) {
+                return
+            }
+
+            await fs.unlink(project.configPath)
+            clearCache()
+            await showSuccessToast('Config file has been deleted')
+        } catch (error) {
+            console.error('Failed to delete config:', error)
+            await showErrorToast('Failed to delete config file')
+        }
     }
 
     if (!project.hasConfig) {
@@ -74,11 +86,7 @@ export default function Config({ project }: ConfigProps) {
                 key="create-config"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
-                onAction={withToast({
-                    action: createConfig,
-                    onSuccess: () => 'Config file has been created',
-                    onFailure: () => 'Failed to create config file',
-                })}
+                onAction={createConfig}
             />
         )
     }
@@ -99,11 +107,7 @@ export default function Config({ project }: ConfigProps) {
                 title="Delete Config"
                 key="delete-config"
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                onAction={withToast({
-                    action: deleteConfig,
-                    onSuccess: () => 'Config file has been deleted',
-                    onFailure: () => 'Failed to delete config file',
-                })}
+                onAction={deleteConfig}
             />
         </ActionPanel.Submenu>
     )

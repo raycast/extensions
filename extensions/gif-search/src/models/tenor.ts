@@ -1,7 +1,7 @@
 import { formatRelative, fromUnixTime } from "date-fns";
-import fetch from "node-fetch";
 
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
+import { getTenorLocale } from "../preferences";
 
 export interface TenorResults {
   results: TenorGif[];
@@ -38,9 +38,9 @@ export default async function tenor() {
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
       const reqUrl = new URL(API_BASE_URL);
-      reqUrl.searchParams.set("locale", "en_US");
+      reqUrl.searchParams.set("locale", getTenorLocale());
       reqUrl.searchParams.set("q", term);
-      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
 
       if (opt?.next) {
@@ -58,8 +58,8 @@ export default async function tenor() {
 
     async trending(opt?: APIOpt) {
       const reqUrl = new URL(API_BASE_URL);
-      reqUrl.searchParams.set("locale", "en_US");
-      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("locale", getTenorLocale());
+      reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
 
       if (opt?.next) {
@@ -82,7 +82,7 @@ export default async function tenor() {
 
       const reqUrl = new URL(API_BASE_URL);
       reqUrl.searchParams.set("ids", ids.join(","));
-      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
 
       const response = await fetch(reqUrl.toString());
@@ -104,7 +104,8 @@ export function mapTenorResponse(response: TenorGif) {
     slug,
     download_url: medias.gif.url,
     download_name: `${slug}.gif`,
-    preview_gif_url: medias.nanogif.url,
+    small_preview_gif_url: medias.nanogif.url,
+    large_preview_gif_url: medias.tinygif?.url,
     gif_url: medias.gif.url,
     metadata: {
       width: medias.gif.dims[0],

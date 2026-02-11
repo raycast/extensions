@@ -1,185 +1,189 @@
-import { ActionPanel, List, Action, Icon, Color, Image, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { match, P } from "ts-pattern";
-import * as lunchMoney from "./lunchmoney";
-import { useMemo, useState } from "react";
-import { eachMonthOfInterval, endOfMonth, format, startOfYear } from "date-fns";
-import { alphabetical, group, sift, sort } from "radash";
+import { useState, useMemo } from "react";
+import { type Transaction, type Category, type Tag, useLunchMoney } from "./api";
+import { TransactionListItem, getDateRangeForFilter, DateRangeDropdown } from "./components";
+import { formatCurrency, buildLunchMoneyUrl, formatTransactionsAsText } from "./format";
 
-const getTransactionIcon = (transaction: lunchMoney.Transaction) =>
-  match(transaction)
-    .returnType<Image>()
-    .with({ status: lunchMoney.TransactionStatus.CLEARED, recurring_type: P.nullish }, () => ({
-      source: Icon.CheckCircle,
-      tintColor: Color.Green,
-    }))
-    .with(
-      { status: lunchMoney.TransactionStatus.CLEARED, recurring_type: lunchMoney.ReccuringTransactionType.CLEARED },
-      () => ({
-        source: Icon.RotateClockwise,
-        tintColor: Color.Blue,
-      }),
-    )
-    .with({ status: lunchMoney.TransactionStatus.UNCLEARED }, () => ({
-      source: Icon.CircleProgress50,
-      tintColor: Color.Yellow,
-    }))
-    .with({ status: lunchMoney.TransactionStatus.PENDING }, () => ({
-      source: Icon.Stopwatch,
-    }))
-    .otherwise(() => ({ source: Icon.Circle }));
+function filterTransactions(
+  transactions: Transaction[],
+  searchText: string,
+  categories: Category[],
+  tags: Tag[],
+): Transaction[] {
+  if (!searchText) return transactions;
 
-const getTransactionSubtitle = (transaction: lunchMoney.Transaction) =>
-  match(transaction)
-    .returnType<string>()
-    .with(
-      { recurring_payee: P.string.select(), recurring_type: lunchMoney.ReccuringTransactionType.CLEARED },
-      (payee) => payee,
-    )
-    .otherwise(() => transaction.payee);
+  const lowerSearch = searchText.toLowerCase();
+  return transactions.filter((t) => {
+    const category = categories.find((c) => c.id === t.category_id);
+    const isIncome = category?.is_income ?? false;
+    const transactionTags = (t.tag_ids || [])
+      .map((tagId) => tags.find((tag) => tag.id === tagId))
+      .filter((tag): tag is Tag => tag !== undefined);
 
-function TransactionListItem({
-  transaction,
-  onValidate,
-}: {
-  transaction: lunchMoney.Transaction;
-  onValidate: (transaction: lunchMoney.Transaction) => void;
-}) {
-  const validate = async () => {
-    onValidate(transaction);
-  };
-
-  return (
-    <List.Item
-      title={`${Intl.NumberFormat("en-US", { style: "currency", currency: transaction.currency }).format(transaction.to_base)}`}
-      subtitle={getTransactionSubtitle(transaction)}
-      icon={getTransactionIcon(transaction)}
-      accessories={sift([
-        { text: `${transaction.plaid_account_name ?? transaction.asset_name ?? ""}` },
-        { text: format(transaction.date, "PP"), tooltip: transaction.date },
-        transaction.is_group ? { icon: Icon.Folder, tooltip: "Group" } : undefined,
-        ...(transaction.tags?.map((tag) => ({ tag: tag.name })) ?? []),
-      ])}
-      keywords={sift([transaction.payee, transaction.recurring_payee, transaction.notes, transaction.display_note])}
-      actions={
-        <ActionPanel>
-          {transaction.status != lunchMoney.TransactionStatus.CLEARED && !transaction.is_pending && (
-            <Action title="Validate" icon={Icon.CheckCircle} onAction={validate} />
-          )}
-          <Action.OpenInBrowser
-            title="View Payee in Lunch Money"
-            url={`https://my.lunchmoney.app/transactions/${format(transaction.date, "yyyy/MM")}?match=all&payee_exact=${encodeURIComponent(transaction.payee)}&time=month`}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-const groupAndSortTransactions = (transactions: lunchMoney.Transaction[]) => {
-  const transactionsByDay = group(transactions, (t) => t.date);
-
-  const sortedTransactions: lunchMoney.Transaction[] = [];
-  const days = alphabetical(Object.keys(transactionsByDay), (k) => k, "desc");
-
-  for (const day of days) {
-    const transactions = transactionsByDay[day];
-    if (transactions != null) {
-      sortedTransactions.push(...sort(transactions, (t) => t.to_base, true));
-    }
-  }
-  return sortedTransactions;
-};
-
-function TransactionsDropdown({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const months = eachMonthOfInterval({
-    start: startOfYear(new Date()),
-    end: new Date(),
-  }).reverse();
-
-  return (
-    <List.Dropdown tooltip="Choose a month" value={value} onChange={onChange}>
-      <List.Dropdown.Section title="Month">
-        {months.map((month) => (
-          <List.Dropdown.Item
-            key={format(month, "yyyy-MM")}
-            title={format(month, "MMM yyyy")}
-            value={format(month, "yyyy-MM-dd")}
-          />
-        ))}
-      </List.Dropdown.Section>
-    </List.Dropdown>
-  );
+    return (
+      t.payee?.toLowerCase().includes(lowerSearch) ||
+      t.notes?.toLowerCase().includes(lowerSearch) ||
+      t.status?.toLowerCase().includes(lowerSearch) ||
+      category?.name?.toLowerCase().includes(lowerSearch) ||
+      (isIncome ? "income" : "expense").includes(lowerSearch) ||
+      transactionTags.some((tag) => tag.name.toLowerCase().includes(lowerSearch))
+    );
+  });
 }
 
 export default function Command() {
-  const [month, setMonth] = useState(() => format(new Date(), "yyyy-MM-dd"));
-  const { data, isLoading, mutate } = useCachedPromise(lunchMoney.getTransactions, [
-    { start_date: month, end_date: format(endOfMonth(month), "yyyy-MM-dd") },
-  ]);
+  const client = useLunchMoney();
+  const [selectedMonth, setSelectedMonth] = useState<string>("thisMonth");
+  const [searchText, setSearchText] = useState<string>("");
+  const { start, end } = useMemo(() => getDateRangeForFilter(selectedMonth), [selectedMonth]);
 
-  const [pendingTransactions, transactions] = useMemo(() => {
-    const [pendingTransactions, transactions] = (data ?? []).reduce(
-      function groupTransactions(acc, transaction) {
-        if (transaction.status === lunchMoney.TransactionStatus.PENDING || transaction.is_pending) {
-          acc[0].push(transaction);
-        } else if (transaction.group_id == null) {
-          acc[1].push(transaction);
+  const { isLoading, data, revalidate } = useCachedPromise(
+    async (startDate: string, endDate: string) => {
+      const allTransactions: Transaction[] = [];
+      let offset = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await client.GET("/transactions", {
+          params: { query: { start_date: startDate, end_date: endDate, offset } },
+        });
+        if (error) {
+          console.error("Transactions fetch error:", error);
+          throw new Error(JSON.stringify(error));
         }
-        return acc;
-      },
-      [[], []] as [lunchMoney.Transaction[], lunchMoney.Transaction[]],
-    );
-
-    return [groupAndSortTransactions(pendingTransactions), alphabetical(transactions, (t) => t.date, "desc")];
-  }, [data?.map((t) => `${t.id}:${t.status}`).join(",")]);
-
-  const onValidate = async (transaction: lunchMoney.Transaction) => {
-    const toast = await showToast({
-      title: "Validating",
-      style: Toast.Style.Animated,
-    });
-
-    try {
-      await mutate(
-        lunchMoney.updateTransaction(transaction.id, {
-          status: lunchMoney.TransactionStatus.CLEARED,
-        }),
-        {
-          optimisticUpdate: (data) => {
-            if (data == null) return data;
-            return data.map((t) => {
-              if (t.id === transaction.id) {
-                t.status = lunchMoney.TransactionStatus.CLEARED;
-              }
-              return t;
-            });
-          },
-        },
-      );
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Validated";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to validate";
-      if (error instanceof Error) {
-        toast.message = error.message;
+        allTransactions.push(...(data?.transactions || []));
+        hasMore = data?.has_more ?? false;
+        offset += data?.transactions?.length ?? 0;
       }
+
+      return allTransactions;
+    },
+    [start, end],
+  );
+
+  const { data: categoriesData } = useCachedPromise(async () => {
+    const { data, error } = await client.GET("/categories");
+    if (error) {
+      console.error("Categories fetch error:", error);
+      throw new Error(JSON.stringify(error));
     }
-  };
+    return data?.categories || [];
+  });
+
+  const { data: tagsData } = useCachedPromise(async () => {
+    const { data, error } = await client.GET("/tags");
+    if (error) {
+      console.error("Tags fetch error:", error);
+      throw new Error(JSON.stringify(error));
+    }
+    return data?.tags || [];
+  });
+
+  const transactions = (data ?? []).sort((a: Transaction, b: Transaction) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
+
+  const categories = categoriesData ?? [];
+  const tags = tagsData ?? [];
+
+  // Filter transactions based on search text
+  const filteredTransactions = useMemo(
+    () => filterTransactions(transactions, searchText, categories, tags),
+    [transactions, searchText, categories, tags],
+  );
+
+  const pendingTransactions = filteredTransactions.filter((t: Transaction) => t.is_pending);
+  const nonPendingTransactions = filteredTransactions.filter((t: Transaction) => !t.is_pending);
+
+  const allTransactionsText = useMemo(
+    () => formatTransactionsAsText(filteredTransactions, categories),
+    [filteredTransactions, categories],
+  );
+
+  // Calculate total for filtered transactions
+  const totalAmount = useMemo(() => {
+    return filteredTransactions.reduce((sum, t) => {
+      const category = categories.find((c) => c.id === t.category_id);
+      const isIncome = category?.is_income ?? false;
+      const amount = Math.abs(parseFloat(t.amount));
+      return sum + (isIncome ? amount : -amount);
+    }, 0);
+  }, [filteredTransactions, categories]);
+
+  // Calculate total for pending transactions
+  const pendingTotal = useMemo(() => {
+    return pendingTransactions.reduce((sum, t) => {
+      const category = categories.find((c) => c.id === t.category_id);
+      const isIncome = category?.is_income ?? false;
+      const amount = Math.abs(parseFloat(t.amount));
+      return sum + (isIncome ? amount : -amount);
+    }, 0);
+  }, [pendingTransactions, categories]);
+
+  // Calculate total for non-pending transactions
+  const nonPendingTotal = useMemo(() => {
+    return nonPendingTransactions.reduce((sum, t) => {
+      const category = categories.find((c) => c.id === t.category_id);
+      const isIncome = category?.is_income ?? false;
+      const amount = Math.abs(parseFloat(t.amount));
+      return sum + (isIncome ? amount : -amount);
+    }, 0);
+  }, [nonPendingTransactions, categories]);
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<TransactionsDropdown value={month} onChange={setMonth} />}>
-      <List.Section title="Pending Transactions">
-        {pendingTransactions.map((transaction) => (
-          <TransactionListItem key={String(transaction.id)} transaction={transaction} onValidate={onValidate} />
-        ))}
-      </List.Section>
-      <List.Section title="Transactions">
-        {transactions.map((transaction) => (
-          <TransactionListItem key={String(transaction.id)} transaction={transaction} onValidate={onValidate} />
-        ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search transactions..."
+      searchBarAccessory={<DateRangeDropdown value={selectedMonth} onChange={setSelectedMonth} />}
+      filtering={false}
+      onSearchTextChange={setSearchText}
+    >
+      <List.Section
+        title="Summary"
+        subtitle={`${filteredTransactions.length} transaction${filteredTransactions.length === 1 ? "" : "s"} • Total: ${formatCurrency(Math.abs(totalAmount))}${totalAmount > 0 ? " income" : " spent"}`}
+      />
+      {pendingTransactions.length > 0 && (
+        <List.Section
+          title="Pending"
+          subtitle={`${pendingTransactions.length} transaction${pendingTransactions.length === 1 ? "" : "s"} • ${formatCurrency(Math.abs(pendingTotal))}${pendingTotal > 0 ? " income" : " spent"}`}
+        >
+          {pendingTransactions.map((transaction: Transaction) => {
+            const lunchMoneyUrl = buildLunchMoneyUrl({ transaction, start, end });
+
+            return (
+              <TransactionListItem
+                key={transaction.id}
+                transaction={transaction}
+                categories={categories}
+                tags={tags}
+                onRevalidate={revalidate}
+                lunchMoneyUrl={lunchMoneyUrl}
+                copyAllText={allTransactionsText}
+              />
+            );
+          })}
+        </List.Section>
+      )}
+      <List.Section
+        title="Transactions"
+        subtitle={`${nonPendingTransactions.length} transaction${nonPendingTransactions.length === 1 ? "" : "s"} • ${formatCurrency(Math.abs(nonPendingTotal))}${nonPendingTotal > 0 ? " income" : " spent"}`}
+      >
+        {nonPendingTransactions.map((transaction: Transaction) => {
+          const lunchMoneyUrl = buildLunchMoneyUrl({ transaction, start, end });
+
+          return (
+            <TransactionListItem
+              key={transaction.id}
+              transaction={transaction}
+              categories={categories}
+              tags={tags}
+              onRevalidate={revalidate}
+              lunchMoneyUrl={lunchMoneyUrl}
+              copyAllText={allTransactionsText}
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

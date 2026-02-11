@@ -1,6 +1,7 @@
 import { Cycle, Organization, Team } from "@linear/sdk";
-import { getLinearClient } from "./linearClient";
 import { sortBy } from "lodash";
+
+import { getLinearClient } from "./linearClient";
 
 export type TeamResult = Pick<
   Team,

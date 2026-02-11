@@ -1,7 +1,7 @@
 import { Cache, LaunchType, LocalStorage, getPreferenceValues, launchCommand } from "@raycast/api";
 import { FocusText, LongBreakText, ShortBreakText } from "./constants";
-import { Interval, IntervalExecutor, IntervalType } from "./types";
 import { enableFocusWhileFocused, setDND } from "./doNotDisturb";
+import { Interval, IntervalExecutor, IntervalType } from "./types";
 
 const cache = new Cache();
 
@@ -51,7 +51,7 @@ export function isPaused({ parts }: Interval): boolean {
   return !!parts[parts.length - 1].pausedAt;
 }
 
-export function createInterval(type: IntervalType, isFreshStart?: boolean): Interval {
+export function createInterval(type: IntervalType, isFreshStart?: boolean, customDuration?: number): Interval {
   let completedCount = 0;
   if (isFreshStart) {
     cache.set(COMPLETED_POMODORO_COUNT_CACHE_KEY, completedCount.toString());
@@ -60,16 +60,18 @@ export function createInterval(type: IntervalType, isFreshStart?: boolean): Inte
     completedCount++;
     cache.set(COMPLETED_POMODORO_COUNT_CACHE_KEY, completedCount.toString());
   }
+
   const interval: Interval = {
     type,
     id: completedCount,
-    length: intervalDurations[type],
+    length: customDuration || intervalDurations[type],
     parts: [
       {
         startedAt: currentTimestamp(),
       },
     ],
   };
+
   cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
   saveIntervalHistory(interval).then();
   if (type === "focus") setDND(true);
@@ -164,7 +166,10 @@ export function getNextIntervalExecutor(): IntervalExecutor {
   let executor: IntervalExecutor | undefined;
   switch (currentInterval?.type) {
     case "short-break":
-      executor = { title: FocusText, onStart: () => createInterval("focus", false) };
+      executor = {
+        title: FocusText,
+        onStart: () => createInterval("focus", false),
+      };
       break;
     case "long-break":
       executor = { title: FocusText, onStart: () => createInterval("focus") };

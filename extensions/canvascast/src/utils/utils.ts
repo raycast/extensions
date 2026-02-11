@@ -36,8 +36,8 @@ export const getErrorTitle = (error: Error) => {
   return error === Error.INVALID_API_KEY
     ? "Invalid API Key"
     : error === Error.INVALID_DOMAIN
-    ? "Invalid Domain"
-    : "Error";
+      ? "Invalid Domain"
+      : "Error";
 };
 
 export const getErrorMessage = (error: Error) => {
@@ -50,8 +50,8 @@ export const getErrorIcon = (error: Error) => {
   return error === Error.INVALID_API_KEY
     ? Icons["InvalidAPIKey"]
     : error === Error.INVALID_DOMAIN
-    ? Icons["InvalidDomain"]
-    : Icon.ExclamationMark;
+      ? Icons["InvalidDomain"]
+      : Icon.ExclamationMark;
 };
 
 const fileTypes = [

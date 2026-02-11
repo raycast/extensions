@@ -55,7 +55,7 @@ export default function WakeDataForm(props: { upsert: (values: WakeData) => void
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={initial ? "Update" : "Crate"} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={initial ? "Update" : "Create"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

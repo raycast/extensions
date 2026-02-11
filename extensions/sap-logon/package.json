@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sap-logon",
+  "title": "SAP GUI Connector",
+  "description": "Quickly connect to SAP systems with saved credentials",
+  "icon": "extension-icon.png",
+  "author": "ginderellas",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List SAP Systems",
+      "description": "View and connect to saved SAP systems",
+      "mode": "view"
+    },
+    {
+      "name": "add-system",
+      "title": "Add New SAP System",
+      "description": "Add a new SAP system configuration",
+      "mode": "view"
+    },
+    {
+      "name": "connect",
+      "title": "Connect to SAP System",
+      "description": "Quick connect to a specific SAP system",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "systemId",
+          "placeholder": "System ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "SAP Quick Connect",
+      "description": "Quick access to SAP systems from menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

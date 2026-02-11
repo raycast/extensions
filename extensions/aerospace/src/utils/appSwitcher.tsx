@@ -1,10 +1,12 @@
-import { popToRoot } from "@raycast/api";
+import { popToRoot, closeMainWindow } from "@raycast/api";
 import { spawnSync } from "child_process";
+import { shellEnvSync } from "shell-env";
 
 interface Window {
   "app-name": string;
   "window-title"?: string;
   "window-id": number;
+  "monitor-name": string;
   "app-pid": string;
   workspace: string;
   "app-bundle-id": string;
@@ -13,11 +15,20 @@ interface Window {
 
 export interface Windows extends Array<Window> {}
 
+let cachedEnv: Record<string, string> | null = null;
+
 export function env() {
-  return { PATH: "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:" };
+  if (cachedEnv) {
+    return cachedEnv;
+  }
+
+  const env = shellEnvSync();
+
+  cachedEnv = env;
+  return cachedEnv;
 }
 
-function getAppPath(bundleId: string) {
+async function getAppPath(bundleId: string) {
   const appPath = spawnSync("mdfind", [`kMDItemCFBundleIdentifier="${bundleId}"`], {
     env: env(),
     encoding: "utf8",
@@ -27,13 +38,13 @@ function getAppPath(bundleId: string) {
   return appPath.stdout.trim();
 }
 
-export function getWindows(workspace: string) {
+export async function getWindows(workspace: string) {
   const args = [
     "list-windows",
     "--json",
     ...(workspace === "focused" ? ["--workspace", "focused"] : ["--all"]),
     "--format",
-    "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id}",
+    "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id} %{monitor-name}",
   ];
 
   const aerospaceArr = spawnSync("aerospace", args, {
@@ -46,10 +57,12 @@ export function getWindows(workspace: string) {
   try {
     const parsedWindows = JSON.parse(aerospaceArr.stdout);
 
-    windows = parsedWindows.map((window: Window) => ({
-      ...window,
-      "app-path": getAppPath(window["app-bundle-id"].toString()),
-    }));
+    windows = await Promise.all(
+      parsedWindows.map(async (window: Window) => ({
+        ...window,
+        "app-path": await getAppPath(window["app-bundle-id"].toString()),
+      })),
+    );
   } catch (error) {
     console.error("Error parsing JSON:", error);
   }
@@ -57,7 +70,7 @@ export function getWindows(workspace: string) {
   return windows;
 }
 
-export function focusWindow(windowId: string): void {
+export function focusWindow(windowId: string) {
   spawnSync("aerospace", ["focus", "--window-id", `${windowId}`], {
     env: env(),
     encoding: "utf8",
@@ -65,4 +78,5 @@ export function focusWindow(windowId: string): void {
   });
 
   popToRoot({ clearSearchBar: true });
+  closeMainWindow({ clearRootSearch: true });
 }

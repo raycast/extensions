@@ -1,5 +1,6 @@
 import { ActionPanel, List, Action, Icon, Keyboard } from "@raycast/api";
 import CreatePromptForm from "./components/CreatePromptForm";
+import EditPromptForm from "./components/EditPromptForm";
 import PromptDetail from "./components/PromptDetail";
 import { useLocalPrompts, usePrompt } from "./hooks";
 import { TAGS } from "./config";
@@ -65,6 +66,13 @@ export default function Command() {
                 onPop={loadPrompts}
                 title="View Prompt"
                 target={<PromptDetail prompt={prompt} />}
+              />
+              <Action.Push
+                icon={Icon.Pencil}
+                onPop={loadPrompts}
+                title="Edit Prompt"
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                target={<EditPromptForm promptId={prompt.id} />}
               />
               <Action
                 icon={Icon.Trash}

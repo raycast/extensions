@@ -1,0 +1,430 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "t3-chat",
+  "title": "T3 Chat",
+  "description": "Query T3 Chat directly from Raycast",
+  "icon": "raycast-t3-chat.png",
+  "author": "Lermatroid",
+  "contributors": [
+    "Sclafus",
+    "effektsvk",
+    "wxiaoyun",
+    "lukrencijus"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-t3-chat",
+      "title": "Ask T3 Chat",
+      "description": "Quickly ask T3 Chat anything",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": true,
+          "placeholder": "Query"
+        },
+        {
+          "name": "search",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Search Grounding",
+          "description": "Enable search grounding for models that support it",
+          "data": [
+            {
+              "title": "Enabled",
+              "value": "true"
+            },
+            {
+              "title": "Disabled",
+              "value": "false"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "title": "Model",
+          "description": "The model to use for the chat",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Claude 3.7 Sonnet",
+              "value": "claude-3.7"
+            },
+            {
+              "title": "Claude 3.7 Sonnet (Reasoning)",
+              "value": "claude-3.7-reasoning"
+            },
+            {
+              "title": "Claude 4 Sonnet",
+              "value": "claude-4-sonnet"
+            },
+            {
+              "title": "Claude 4 Sonnet (Reasoning)",
+              "value": "claude-4-sonnet-reasoning"
+            },
+            {
+              "title": "Claude 4.1 Opus",
+              "value": "claude-4.1-opus"
+            },
+            {
+              "title": "Claude Haiku 4.5",
+              "value": "claude-4.5-haiku"
+            },
+            {
+              "title": "Claude Haiku 4.5 (Reasoning)",
+              "value": "claude-4.5-haiku-reasoning"
+            },
+            {
+              "title": "Claude Opus 4.5",
+              "value": "claude-4.5-opus"
+            },
+            {
+              "title": "Claude Sonnet 4.5",
+              "value": "claude-4.5-sonnet"
+            },
+            {
+              "title": "Claude Sonnet 4.5 (Reasoning)",
+              "value": "claude-4.5-sonnet-reasoning"
+            },
+            {
+              "title": "DeepSeek R1 (0528)",
+              "value": "deepseek-r1-0528"
+            },
+            {
+              "title": "DeepSeek R1 (Original)",
+              "value": "deepseek-r1-openrouter"
+            },
+            {
+              "title": "DeepSeek R1 (Qwen Distilled)",
+              "value": "deepseek-r1-distill-qwen-32b"
+            },
+            {
+              "title": "DeepSeek v3 (0324)",
+              "value": "deepseek-chat-v3-0324"
+            },
+            {
+              "title": "DeepSeek v3.1",
+              "value": "deepseek-v3.1"
+            },
+            {
+              "title": "DeepSeek v3.1 (Thinking)",
+              "value": "deepseek-v3.1-thinking"
+            },
+            {
+              "title": "DeepSeek v3.1 Terminus",
+              "value": "deepseek-v3.1-terminus"
+            },
+            {
+              "title": "DeepSeek v3.1 Terminus (Thinking)",
+              "value": "deepseek-v3.1-terminus-thinking"
+            },
+            {
+              "title": "DeepSeek v3.2",
+              "value": "deepseek-v-3.2"
+            },
+            {
+              "title": "DeepSeek v3.2 (Thinking)",
+              "value": "deepseek-v-3.2-thinking"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Lite",
+              "value": "gemini-2.0-flash-lite-preview-02-05"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Flash (Thinking)",
+              "value": "gemini-2.5-flash-thinking"
+            },
+            {
+              "title": "Gemini 2.5 Flash Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash Lite (Thinking)",
+              "value": "gemini-2.5-flash-lite-thinking"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            },
+            {
+              "title": "Gemini 3 Flash",
+              "value": "gemini-3-flash"
+            },
+            {
+              "title": "Gemini 3 Flash (Thinking)",
+              "value": "gemini-3-flash-thinking"
+            },
+            {
+              "title": "Gemini 3 Pro",
+              "value": "gemini-3-pro"
+            },
+            {
+              "title": "Gemini Imagen 4",
+              "value": "gemini-imagen-4"
+            },
+            {
+              "title": "Gemini Imagen 4 Ultra",
+              "value": "gemini-imagen-4-ultra"
+            },
+            {
+              "title": "GLM 4.5",
+              "value": "glm-4.5"
+            },
+            {
+              "title": "GLM 4.5 (Thinking)",
+              "value": "glm-4.5-thinking"
+            },
+            {
+              "title": "GLM 4.5 Air",
+              "value": "glm-4.5-air"
+            },
+            {
+              "title": "GLM 4.5 Air (Thinking)",
+              "value": "glm-4.5-air-thinking"
+            },
+            {
+              "title": "GLM 4.5V",
+              "value": "glm-4.5v"
+            },
+            {
+              "title": "GLM 4.5V (Thinking)",
+              "value": "glm-4.5v-thinking"
+            },
+            {
+              "title": "GLM 4.6",
+              "value": "glm-4.6"
+            },
+            {
+              "title": "GLM 4.6 (Thinking)",
+              "value": "glm-4.6-thinking"
+            },
+            {
+              "title": "GLM 4.6V",
+              "value": "glm-4.6v"
+            },
+            {
+              "title": "GLM 4.7",
+              "value": "glm-4.7"
+            },
+            {
+              "title": "GLM 4.7 (Thinking)",
+              "value": "glm-4.7-thinking"
+            },
+            {
+              "title": "GPT ImageGen",
+              "value": "gpt-image-1"
+            },
+            {
+              "title": "GPT ImageGen 1.5",
+              "value": "gpt-image-1.5"
+            },
+            {
+              "title": "GPT OSS 120B",
+              "value": "gpt-oss-120b"
+            },
+            {
+              "title": "GPT OSS 20B",
+              "value": "gpt-oss-20b"
+            },
+            {
+              "title": "GPT-4.1",
+              "value": "gpt-4.1"
+            },
+            {
+              "title": "GPT-4.1 Mini",
+              "value": "gpt-4.1-mini"
+            },
+            {
+              "title": "GPT-4.1 Nano",
+              "value": "gpt-4.1-nano"
+            },
+            {
+              "title": "GPT-4o-mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-5",
+              "value": "gpt-5-chat"
+            },
+            {
+              "title": "GPT-5 (Reasoning)",
+              "value": "gpt-5-reasoning"
+            },
+            {
+              "title": "GPT-5 mini",
+              "value": "gpt-5-mini"
+            },
+            {
+              "title": "GPT-5 nano",
+              "value": "gpt-5-nano"
+            },
+            {
+              "title": "GPT-5.1 (Instant)",
+              "value": "gpt-5.1-instant"
+            },
+            {
+              "title": "GPT-5.1 (Reasoning)",
+              "value": "gpt-5.1-thinking"
+            },
+            {
+              "title": "GPT-5.2 (Instant)",
+              "value": "gpt-5.2-instant"
+            },
+            {
+              "title": "GPT-5.2 (Reasoning)",
+              "value": "gpt-5.2-reasoning"
+            },
+            {
+              "title": "GPT-5.2 Pro",
+              "value": "gpt-5.2-pro"
+            },
+            {
+              "title": "Grok 3",
+              "value": "grok-v3"
+            },
+            {
+              "title": "Grok 3 Mini",
+              "value": "grok-v3-mini"
+            },
+            {
+              "title": "Grok 4",
+              "value": "grok-v4"
+            },
+            {
+              "title": "Grok 4 Fast",
+              "value": "grok-v4-fast"
+            },
+            {
+              "title": "Grok 4 Fast (Reasoning)",
+              "value": "grok-v4-fast-reasoning"
+            },
+            {
+              "title": "Grok 4.1 Fast",
+              "value": "grok-4.1-fast"
+            },
+            {
+              "title": "Grok 4.1 Fast (Reasoning)",
+              "value": "grok-4.1-fast-reasoning"
+            },
+            {
+              "title": "Kimi K2 (0711)",
+              "value": "kimi-k2"
+            },
+            {
+              "title": "Kimi K2 (0905)",
+              "value": "kimi-k2-0905"
+            },
+            {
+              "title": "Kimi K2 (Thinking)",
+              "value": "kimi-k2-thinking"
+            },
+            {
+              "title": "Llama 3.3 70B",
+              "value": "llama-3.3-70b-groq"
+            },
+            {
+              "title": "Llama 4 Maverick",
+              "value": "llama-4-maverick"
+            },
+            {
+              "title": "Llama 4 Scout",
+              "value": "llama-4-scout"
+            },
+            {
+              "title": "MiniMax M2",
+              "value": "minimax-m2"
+            },
+            {
+              "title": "MiniMax M2.1",
+              "value": "minimax-m2.1"
+            },
+            {
+              "title": "Nano Banana",
+              "value": "gemini-2.5-flash-image-preview"
+            },
+            {
+              "title": "Nano Banana Pro",
+              "value": "gemini-3-pro-image-preview"
+            },
+            {
+              "title": "o3",
+              "value": "o3-full"
+            },
+            {
+              "title": "o3 Pro",
+              "value": "o3-pro"
+            },
+            {
+              "title": "o3-mini",
+              "value": "gpt-o3-mini"
+            },
+            {
+              "title": "o4-mini",
+              "value": "gpt-o4-mini"
+            },
+            {
+              "title": "Qwen 2.5 32B",
+              "value": "qwen-2.5-32b"
+            },
+            {
+              "title": "Qwen 3 235B",
+              "value": "qwen3-235b-2507"
+            },
+            {
+              "title": "Qwen 3 235B (Thinking)",
+              "value": "qwen3-235b-thinking-2507"
+            },
+            {
+              "title": "Qwen 3 32B",
+              "value": "qwen3-32b"
+            },
+            {
+              "title": "Qwen 3 Coder",
+              "value": "qwen3-coder"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

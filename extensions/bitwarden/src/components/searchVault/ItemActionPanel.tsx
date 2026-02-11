@@ -7,7 +7,7 @@ import {
   CopyUsernameAction,
   OpenUrlInBrowserAction,
   PastePasswordAction,
-  VaultManagementActions,
+  PasteUsernameAction,
   ShowCardDetailsAction,
   ShowNotesAction,
   ShowIdentityDetailsAction,
@@ -16,12 +16,16 @@ import {
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
   PasteTotpAction,
+  CopyPublicKeyAction,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
-import { BugReportOpenAction, CopyRuntimeErrorLog, BugReportCollectDataAction } from "~/components/actions";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
+import CopyKeyFingerprintAction from "./actions/CopyKeyFingerprintAction";
+import CopyPrivateKeyAction from "./actions/CopyPrivateKeyAction";
+import { VaultActionsSection } from "~/components/actions";
 
-const { primaryAction } = getPreferenceValues();
+const { primaryAction } = getPreferenceValues<Preferences.Search>();
 
 const VaultItemActionPanel = () => {
   const { type, id } = useSelectedVaultItem();
@@ -30,13 +34,14 @@ const VaultItemActionPanel = () => {
     <ActionPanel>
       {type === ItemType.LOGIN && (
         <ActionPanel.Section>
-          <ComponentReverser reverse={primaryAction === "copy"}>
-            <PastePasswordAction />
+          <ComponentReverser reverse={primaryAction === "paste"}>
             <CopyPasswordAction />
+            <PastePasswordAction />
           </ComponentReverser>
           <CopyTotpAction />
           <PasteTotpAction />
           <CopyUsernameAction />
+          <PasteUsernameAction />
           <OpenUrlInBrowserAction />
           <CopyLoginUrisActions />
           <ShowNotesAction />
@@ -73,20 +78,21 @@ const VaultItemActionPanel = () => {
           <ShowNotesAction />
         </ActionPanel.Section>
       )}
+      {type === ItemType.SSH_KEY && (
+        <ActionPanel.Section>
+          <CopyPublicKeyAction />
+          <CopyKeyFingerprintAction />
+          <CopyPrivateKeyAction />
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section title="Custom Fields">
         <CopyCustomFieldsActions />
       </ActionPanel.Section>
       <ActionPanel.Section title="Item Actions">
         <FavoriteItemActions />
       </ActionPanel.Section>
-      <ActionPanel.Section title="Vault Management">
-        <VaultManagementActions />
-      </ActionPanel.Section>
-      <ActionPanel.Section title="Debugging & Bug Reporting">
-        <CopyRuntimeErrorLog />
-        <BugReportOpenAction />
-        <BugReportCollectDataAction />
-      </ActionPanel.Section>
+      <VaultActionsSection />
+      <DebuggingBugReportingActionSection />
       {environment.isDevelopment && (
         <ActionPanel.Section title="Development">
           <Action.CopyToClipboard title="Copy item UUID" content={id} />

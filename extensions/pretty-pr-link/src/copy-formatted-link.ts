@@ -1,0 +1,14 @@
+import { getPreferenceValues } from "@raycast/api";
+import { copyActiveGithubLink } from "./utils/copy-active-github-link";
+import { ensureBrowserExtensionAccess } from "./utils/ensure-browser-extension-access";
+
+export default async function main() {
+  const canAccessBrowserExtension = await ensureBrowserExtensionAccess();
+  if (!canAccessBrowserExtension) {
+    return;
+  }
+
+  const { nonUrgentPrefix } =
+    await getPreferenceValues<Preferences.CopyFormattedLink>();
+  await copyActiveGithubLink({ prefix: nonUrgentPrefix });
+}

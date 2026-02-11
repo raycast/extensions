@@ -42,7 +42,7 @@ export function useApps(options?: UseAppsOptions) {
             secret: token.secret,
             options: token.options,
           };
-        })
+        }),
     );
   }
 

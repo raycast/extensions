@@ -31,7 +31,7 @@ export function NotificationTaskActions({ notification, detailsTarget, mutate }:
         onAction={() => deleteNotification(notification, mutate)}
       />
       <Action
-        title="Unsubscribe From Notification"
+        title="Unsubscribe from Notification"
         icon={Icon.BellDisabled}
         shortcut={{ modifiers: ["ctrl"], key: "u" }}
         onAction={() => unsubscribeFromNotification(notification, mutate)}
@@ -49,7 +49,7 @@ export function NotificationTaskActions({ notification, detailsTarget, mutate }:
         onAction={() => completeTask(notification, mutate)}
       />
       <Action.Push
-        title="Plan Task..."
+        title="Plan Task…"
         icon={Icon.Calendar}
         shortcut={{ modifiers: ["ctrl"], key: "t" }}
         target={<PlanTask notification={notification} mutate={mutate} />}
@@ -68,7 +68,7 @@ async function completeTask(notification: Notification, mutate: MutatePromise<Pa
   try {
     await mutate(
       handleErrors(
-        fetch(`${preferences.universalInboxBaseUrl}/api/tasks/${notification.task.id}`, {
+        fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/tasks/${notification.task.id}`, {
           method: "PATCH",
           body: JSON.stringify({ status: TaskStatus.Done }),
           headers: {

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yazio-tracker",
+  "title": "Yazio Tracker",
+  "description": "View your daily goals and calories in Yazio, and log food directly from Raycast.",
+  "icon": "yazio.png",
+  "author": "zsombor_biro",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-daily-goals",
+      "title": "View Daily Goals",
+      "description": "View your daily goals in Yazio.",
+      "mode": "view",
+      "subtitle": "Yazio"
+    },
+    {
+      "name": "view-daily-foods",
+      "title": "View Daily Foods",
+      "description": "View your daily foods in Yazio.",
+      "mode": "view",
+      "subtitle": "Yazio"
+    },
+    {
+      "name": "log-food",
+      "title": "Log Food",
+      "description": "Log your food in Yazio.",
+      "mode": "view",
+      "subtitle": "Yazio"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "yazio": "^1.1.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Yazio Username",
+      "description": "Your Yazio username (email).",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Yazio Password",
+      "description": "Your Yazio password.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "useMockData",
+      "title": "Use Mock Data",
+      "label": "Use Mock Data",
+      "description": "Enable mock data for development and store screenshots (no Yazio account needed).",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
+}

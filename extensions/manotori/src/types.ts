@@ -32,6 +32,23 @@ export type DomainDetails = Omit<Domain, "zone_id"> & {
   glue_records: string[] | null;
 };
 
+export type DNSZone = {
+  zone_id: number;
+  zone: string;
+  status: "ACTIVE" | "INACTIVE";
+  ns_resource_records: string;
+};
+export type DNSRecord = {
+  zone_id: number;
+  dns_record_id: number;
+  zone: string;
+  name: string;
+  type: string;
+  content: string;
+  ttl: number;
+  prio: number;
+};
+
 export type DomainEvent = {
   domain: string;
   status: string;
@@ -39,8 +56,32 @@ export type DomainEvent = {
   created_at: string;
 };
 
+export type NameserverSet = {
+  nameserver_set_id: number;
+  provider_id: number | null;
+  name: string;
+  type: "INTERNAL" | "EXTERNAL";
+  nameservers: Array<{
+    nameserver: string;
+  }>;
+  is_editable: 0 | 1;
+  is_deletable: 0 | 1;
+  is_deprecated: 0 | 1;
+};
+
+export type ErrorResponse = {
+  data:
+    | []
+    | {
+        code: number;
+        file: string;
+        line: number;
+      };
+  msg: string;
+  msg_key: null;
+};
 export type SuccessResult<T> = {
   data: T;
-  msg: string;
+  msg: string | null;
   msg_key: null;
 };

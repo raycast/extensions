@@ -17,37 +17,37 @@
     "search",
     "code",
     "codesearch",
-    "code search"
+    "ai"
   ],
   "preferences": [
+    {
+      "name": "customInstance",
+      "title": "Sourcegraph connection: URL",
+      "description": "Required to use 'Sourcegraph' commands - Sourcegraph URL you want to connect to.",
+      "placeholder": "https://example.sourcegraph.app",
+      "required": false,
+      "type": "textfield"
+    },
+    {
+      "name": "customInstanceToken",
+      "title": "Sourcegraph connection: Access token",
+      "description": "If set, takes precedence over OAuth login. Available under 'Profile' -> 'Access token' in Sourcegraph.",
+      "required": false,
+      "type": "password"
+    },
+    {
+      "name": "customInstanceProxy",
+      "title": "Sourcegraph connection: Proxy",
+      "description": "Optional proxy to use when using a custom Sourcegraph connection - presently, only Unix domain sockets are supported.",
+      "required": false,
+      "type": "textfield"
+    },
     {
       "name": "cloudToken",
       "title": "Public code on Sourcegraph.com: Access token",
       "description": "Configures 'Sourcegraph.com' commands - available under 'Profile' -> 'Access token' on Sourcegraph.com",
       "required": false,
       "type": "password"
-    },
-    {
-      "name": "customInstance",
-      "title": "Sourcegraph: URL",
-      "description": "Required to use 'Sourcegraph' commands - Sourcegraph URL you want to connect to.",
-      "placeholder": "https://sourcegraph.my-company.com",
-      "required": false,
-      "type": "textfield"
-    },
-    {
-      "name": "customInstanceToken",
-      "title": "Sourcegraph: Access token",
-      "description": "Required to use 'Sourcegraph' commands - available under 'Profile' -> 'Access token' in Sourcegraph.",
-      "required": false,
-      "type": "password"
-    },
-    {
-      "name": "customInstanceProxy",
-      "title": "Sourcegraph: Proxy",
-      "description": "Optional proxy to use when using a custom Sourcegraph connection - presently, only Unix domain sockets are supported.",
-      "required": false,
-      "type": "textfield"
     },
     {
       "name": "featureSearchPatternDropdown",
@@ -61,7 +61,7 @@
     {
       "name": "featureDisableTelemetry",
       "label": "Disable telemetry",
-      "description": "Telemetry is only reported to the connected Sourcegraph instance, but can be disabled with this toggle.",
+      "description": "Telemetry is only reported to the connected Sourcegraph instance or workspace, but can be disabled with this toggle.",
       "required": false,
       "type": "checkbox",
       "default": false
@@ -69,9 +69,92 @@
   ],
   "commands": [
     {
+      "name": "deepSearchInstance",
+      "title": "Ask Deep Search",
+      "subtitle": "Sourcegraph",
+      "description": "Agentic, natural language code search.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "deep search",
+        "code search",
+        "ai"
+      ],
+      "disabledByDefault": false
+    },
+    {
+      "name": "deepSearchConversationsInstance",
+      "title": "Deep Search Conversations",
+      "subtitle": "Sourcegraph",
+      "description": "List and manage Deep Search conversations.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "deep search",
+        "list",
+        "history"
+      ],
+      "disabledByDefault": false
+    },
+    {
+      "name": "searchInstance",
+      "title": "Search Code",
+      "subtitle": "Sourcegraph",
+      "description": "Search code on a Sourcegraph instance or workspace.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "code search",
+        "src"
+      ],
+      "preferences": [
+        {
+          "name": "customInstanceDefaultContext",
+          "title": "Default context",
+          "description": "Default search context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "searchHistoryInstance",
+      "title": "Code Search History",
+      "subtitle": "Sourcegraph",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
+      ]
+    },
+    {
+      "name": "manageBatchChangesInstance",
+      "title": "Manage Batch Changes",
+      "subtitle": "Sourcegraph",
+      "description": "Manage Batch Changes in Sourcegraph.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "batch",
+        "changes",
+        "bc"
+      ],
+      "disabledByDefault": true,
+      "preferences": []
+    },
+    {
       "name": "searchDotCom",
       "title": "Search Public Code",
       "subtitle": "Sourcegraph",
+      "icon": "logo-bw.png",
       "description": "Search public repositories on Sourcegraph.com",
       "mode": "view",
       "keywords": [
@@ -93,34 +176,10 @@
       ]
     },
     {
-      "name": "searchInstance",
-      "icon": "logo-bw.png",
-      "title": "Search Code",
-      "subtitle": "Sourcegraph",
-      "description": "Search code on Sourcegraph.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "search",
-        "code",
-        "code search",
-        "src"
-      ],
-      "preferences": [
-        {
-          "name": "customInstanceDefaultContext",
-          "title": "Default context",
-          "description": "Default search context to set on all queries",
-          "placeholder": "global",
-          "required": false,
-          "type": "textfield"
-        }
-      ]
-    },
-    {
       "name": "searchHistoryDotCom",
       "title": "Search Public Code History",
       "subtitle": "Sourcegraph",
+      "icon": "logo-bw.png",
       "description": "Browse and launch recent code searches.",
       "mode": "view",
       "keywords": [
@@ -131,58 +190,12 @@
         "history",
         "recent"
       ]
-    },
-    {
-      "name": "searchHistoryInstance",
-      "icon": "logo-bw.png",
-      "title": "Code Search History",
-      "subtitle": "Sourcegraph",
-      "description": "Browse and launch recent code searches.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "search",
-        "code",
-        "search code",
-        "history",
-        "recent"
-      ]
-    },
-    {
-      "name": "findNotebooksInstance",
-      "icon": "logo-bw.png",
-      "title": "Find Search Notebooks",
-      "subtitle": "Sourcegraph",
-      "description": "Browse search notebooks in Sourcegraph.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "search",
-        "notebook",
-        "snb"
-      ],
-      "preferences": []
-    },
-    {
-      "name": "manageBatchChangesInstance",
-      "icon": "logo-bw.png",
-      "title": "Manage Batch Changes",
-      "subtitle": "Sourcegraph",
-      "description": "Manage batch changes in Sourcegraph.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "batch",
-        "changes",
-        "bc"
-      ],
-      "preferences": []
     }
   ],
   "dependencies": {
     "@apollo/client": "^3.11.10",
-    "@raycast/api": "^1.86.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2",
     "@sourcegraph/telemetry": "^0.18.0",
     "@types/uuid": "^10.0.0",
     "cross-fetch": "^4.0.0",
@@ -202,8 +215,8 @@
     "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@types/eventsource": "^1.1.15",
     "@types/luxon": "^3.4.2",
-    "@types/node": "~22.10.1",
-    "@types/react": "^18.3.12",
+    "@types/node": "~22.14.0",
+    "@types/react": "^19.1.8",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.16.0",
@@ -220,5 +233,8 @@
     "raycast-publish": ".scripts/raycast-publish.sh",
     "gql": "graphql-codegen --config graphql-codegen.yml && npm run fmt",
     "postinstall": "patch-package"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

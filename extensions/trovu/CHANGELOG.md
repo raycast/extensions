@@ -1,5 +1,9 @@
 # Trovu Changelog
 
+## [1.2.1] - 2025-04-22
+
+- Fix error when loading environment [#508](https://github.com/trovu/trovu/issues/508)
+
 ## [1.2.0] - 2024-10-08
 
 - Fix missing escape of RegExp [#456](https://github.com/trovu/trovu/issues/456)

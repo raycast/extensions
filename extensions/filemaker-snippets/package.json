@@ -54,10 +54,24 @@
       "icon": "FM12App512.png",
       "description": "View favorited files from FileMaker Pro",
       "mode": "view"
+    },
+    {
+      "name": "fm-to-xml",
+      "title": "Convert FM to XML",
+      "subtitle": "FileMaker Snippets",
+      "description": "Convert FileMaker clipboard to XML text",
+      "mode": "no-view"
+    },
+    {
+      "name": "xml-to-fm",
+      "title": "Convert XML to FM",
+      "subtitle": "FileMaker Snippets",
+      "description": "Convert XML text to FileMaker clipboard",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
+    "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.11.1",
     "@total-typescript/ts-reset": "^0.4.2",
     "bplist-parser": "^0.3.2",
@@ -73,7 +87,7 @@
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.185",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/react": "^18.3.3",
     "@types/uuid": "^8.3.4",
     "@types/xml2js": "^0.4.11",
     "eslint": "^7.32.0",
@@ -87,5 +101,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,20 +1,19 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { ProjectResult } from "../api/getProjects";
-
 import { getLinearClient } from "../api/linearClient";
-import { getProjectIcon, projectStatusIcon, projectStatusText } from "../helpers/projects";
-import { getUserIcon } from "../helpers/users";
-import { getErrorMessage } from "../helpers/errors";
-
-import ProjectIssues from "./ProjectIssues";
-import EditProjectForm from "./EditProjectForm";
 import { getDateIcon } from "../helpers/dates";
+import { getErrorMessage } from "../helpers/errors";
+import { getProjectIcon, projectStatusIcon } from "../helpers/projects";
+import { getUserIcon } from "../helpers/users";
+
 import CreateMilestoneForm from "./CreateMilestoneForm";
+import EditProjectForm from "./EditProjectForm";
 import OpenInLinear from "./OpenInLinear";
+import ProjectIssues from "./ProjectIssues";
 import ProjectUpdates from "./ProjectUpdates";
 import { DocumentList } from "./docs/DocumentList";
 
@@ -30,7 +29,7 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
 
   const progress = `${Math.round(project.progress * 100)}%`;
 
-  const keywords = [project.state, projectStatusText[project.state], ...project.teams.nodes.map((t) => t.key)];
+  const keywords = [project.status.name, ...project.teams.nodes.map((t) => t.key)];
 
   if (project.lead) {
     keywords.push(project.lead.displayName, project.lead?.email);
@@ -97,7 +96,7 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
           text: teams.length > 1 ? `${teams.length}` : teams[0].key,
           tooltip: `Teams: ${teams.map((team) => team.key).join(", ")}`,
         },
-        { icon: { source: projectStatusIcon[project.state] }, tooltip: projectStatusText[project.state] },
+        { icon: { source: projectStatusIcon[project.status.type] }, tooltip: project.status.name },
         {
           icon: getUserIcon(project.lead),
           tooltip: project.lead ? `Lead: ${project.lead?.displayName} (${project.lead?.email})` : "Unassigned",
@@ -116,7 +115,10 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
           <Action.Push
             target={<CreateMilestoneForm projectId={project.id} />}
             title="Create Milestone"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "m" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+            }}
             icon={{ source: "linear-icons/milestone.svg", tintColor: Color.PrimaryText }}
           />
 
@@ -124,21 +126,27 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
             <Action.Push
               title="Edit Project"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
               target={<EditProjectForm project={project} mutateProjects={mutateProjects} />}
             />
 
             <Action.Push
               title="See Project Updates"
               icon={Icon.Heartbeat}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "u" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+              }}
               target={<ProjectUpdates project={project} />}
             />
 
             <Action.Push
               title="See Project Documents"
               icon={Icon.Document}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+              }}
               target={<DocumentList project={project} />}
             />
 
@@ -156,14 +164,17 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
               icon={Icon.Clipboard}
               content={project.url}
               title="Copy Project URL"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
             />
 
             <Action.CopyToClipboard
               icon={Icon.Clipboard}
               content={project.name}
               title="Copy Project Title"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "'" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "'" },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

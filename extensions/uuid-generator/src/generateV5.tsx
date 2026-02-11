@@ -33,7 +33,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.GenerateV5 }>) =
         () => uuidV5(name, uuidNamespace),
         parseableNumber,
         upperCaseLetters,
-        UUIDType.UUIDV5
+        UUIDType.UUIDV5,
       );
 
       if (defaultAction === "copy") {

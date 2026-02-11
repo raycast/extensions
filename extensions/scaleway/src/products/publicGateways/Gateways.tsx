@@ -10,7 +10,7 @@ export const Gateways = () => {
   const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
-  const { data: gateways = [], isLoading } = useAllZonesGatewaysQuery({
+  const { data: gateways, isLoading } = useAllZonesGatewaysQuery({
     orderBy: 'created_at_asc',
     organizationId: clientSetting.defaultOrganizationId,
   })
@@ -23,7 +23,7 @@ export const Gateways = () => {
       isShowingDetail={isDetailOpen}
       searchBarPlaceholder="Search Public Gateways …"
     >
-      {gateways.map((gateway) => (
+      {gateways?.map((gateway) => (
         <List.Item
           key={gateway.id}
           title={gateway.name}

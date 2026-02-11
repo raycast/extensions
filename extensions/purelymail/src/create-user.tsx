@@ -1,10 +1,11 @@
 import { showToast, Toast, ActionPanel, Action, Form, LaunchProps, Icon, popToRoot } from "@raycast/api";
-import { useForm, FormValidation, useCachedState } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { createUser, getDomains } from "./utils/api";
-import { CreateUserRequest, Domain, Response } from "./utils/types";
+import { useForm, FormValidation } from "@raycast/utils";
+import { useState } from "react";
+import { createUser } from "./utils/api";
+import { CreateUserRequest } from "./utils/types";
 import { getFavicon } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
+import { useDomains } from "./utils/hooks";
 
 interface DomainArgs {
   domain: string;
@@ -12,24 +13,9 @@ interface DomainArgs {
 
 export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>) {
   const propDomain = props.arguments.domain;
+  const { isLoading: isLoadingDomains, data: domains, error } = useDomains({ includeShared: true });
 
-  const [error, setError] = useState("");
-  const [domains, setDomains] = useCachedState<Domain[]>("domains");
   const [isLoading, setIsLoading] = useState(true);
-
-  async function getFromApi() {
-    const response: Response = await getDomains(true);
-
-    if (response.type === "error") {
-      setError(response.message);
-    } else {
-      setDomains(response.result.domains);
-    }
-    setIsLoading(false);
-  }
-  useEffect(() => {
-    getFromApi();
-  }, []);
 
   const { handleSubmit, itemProps } = useForm<CreateUserRequest & { confirmPassword: string }>({
     async onSubmit(values) {
@@ -75,10 +61,10 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
   });
 
   return error ? (
-    <ErrorComponent error={error} />
+    <ErrorComponent error={error.message} />
   ) : (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDomains}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create User" onSubmit={handleSubmit} icon={Icon.AddPerson} />

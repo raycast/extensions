@@ -54,12 +54,12 @@ const matches = (haystack: string, needles: string[]) => {
   return didMatch;
 };
 
-const useFormula1DriverUrl = (season: string | null, constructor: Constructor | null): string | null => {
-  const [state, setState] = usePersistentState<State>("driver-urls", {});
+const useFormula1ConstructorUrl = (season: string | null, constructor: Constructor | null): string | null => {
+  const [state, setState] = usePersistentState<State>("constructor-urls", {});
   const key = `${season || ""}-${constructor?.constructorId || ""}`;
 
   useEffect(() => {
-    async function fetchFormula1DriverUrl() {
+    async function fetchFormula1ConstructorUrl() {
       if (!season) {
         return;
       }
@@ -73,7 +73,7 @@ const useFormula1DriverUrl = (season: string | null, constructor: Constructor | 
         if (response.status !== 200) {
           return;
         }
-        const $ = load(await response.text(), { xml: { normalizeWhitespace: true } });
+        const $ = load(await response.text());
         $(`table.resultsarchive-table tr td a`).each((_, el) => {
           const $el = $(el);
           if (!matches($el.text(), [constructor.name, alternateConstructorName(constructor.name)])) {
@@ -90,10 +90,10 @@ const useFormula1DriverUrl = (season: string | null, constructor: Constructor | 
         // swallow error
       }
     }
-    fetchFormula1DriverUrl();
+    fetchFormula1ConstructorUrl();
   }, [constructor, season, key, setState]);
 
   return state[key] || null;
 };
 
-export default useFormula1DriverUrl;
+export default useFormula1ConstructorUrl;

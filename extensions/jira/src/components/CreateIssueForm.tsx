@@ -23,11 +23,11 @@ import {
 } from "../api/issues";
 import { getLabels } from "../api/labels";
 import { getProjects } from "../api/projects";
-import { getBaseUrl } from "../api/request";
 import { getUsers } from "../api/users";
 import { getProjectAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue } from "../helpers/issues";
+import { getIssueUrl } from "../helpers/urls";
 
 import FormParentDropdown from "./FormParentDropdown";
 import FormUserDropdown from "./FormUserDropdown";
@@ -38,15 +38,15 @@ export type IssueFormValues = {
   projectId: string;
   issueTypeId: string;
   summary: string;
-  description: string;
-  parent: string;
-  assigneeId: string;
-  priorityId: string;
+  description?: string;
+  parent?: string;
+  assigneeId?: string;
+  priorityId?: string;
   labels?: string[];
   components?: string[];
   fixVersions?: string[];
   dueDate?: Date | null;
-  attachments: string[];
+  attachments?: string[];
 } & Record<string, unknown>;
 
 type CreateIssueFormProps = {
@@ -80,7 +80,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
       function getNewIssueURL(key: string) {
-        return getBaseUrl() + `/browse/${key}`;
+        return getIssueUrl(key);
       }
 
       try {
@@ -124,7 +124,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
 
           focus("summary");
 
-          if (values.attachments.length > 0) {
+          if (values.attachments && values.attachments.length > 0) {
             const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
             try {
               toast.message = `Uploading ${attachmentWord}…`;

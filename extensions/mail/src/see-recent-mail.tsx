@@ -1,14 +1,14 @@
-import { useCallback, useRef, useState } from "react";
-import { Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useCallback, useRef, useState } from "react";
 
-import { Account, Mailbox } from "./types";
 import { MessageListItem } from "./components";
 import { getAccounts } from "./scripts/accounts";
 import { getMessages } from "./scripts/messages";
+import { Account, Mailbox } from "./types";
 import { invoke } from "./utils";
-import { isInbox } from "./utils/mailbox";
 import { Cache } from "./utils/cache";
+import { isInbox } from "./utils/mailbox";
 
 export default function SeeRecentMail() {
   const [account, setAccount] = useState<Account>();
@@ -26,7 +26,7 @@ export default function SeeRecentMail() {
         if (!mailbox) {
           return [];
         }
-        return getMessages(account, mailbox, true);
+        return getMessages(account, mailbox, getPreferenceValues().unreadonly);
       }),
     );
 
@@ -72,6 +72,10 @@ export default function SeeRecentMail() {
     );
   }, []);
 
+  const handleRefresh = useCallback(() => {
+    mutateAccounts();
+  }, [mutateAccounts]);
+
   const numMessages =
     accounts
       ?.filter((a) => account === undefined || a.id === account.id)
@@ -109,7 +113,7 @@ export default function SeeRecentMail() {
           .map((account) => {
             const recentMailbox = account.mailboxes.find(isInbox);
             return recentMailbox ? (
-              <List.Section key={account.id} title={account.name} subtitle={account.email}>
+              <List.Section key={account.id} title={account.name} subtitle={account.emails[0]}>
                 {account.messages?.map((message) => (
                   <MessageListItem
                     key={message.id}
@@ -119,6 +123,7 @@ export default function SeeRecentMail() {
                     onAction={(action) => {
                       handleAction(action, recentMailbox);
                     }}
+                    onRefresh={handleRefresh}
                   />
                 ))}
               </List.Section>

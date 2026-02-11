@@ -89,7 +89,7 @@
   "dependencies": {
     "@raycast/api": "^1.72.1",
     "@multiavatar/multiavatar": "^1.0.7",
-    "axios": "1.6.0",
+    "axios": "^1.8.4",
     "d3-color": "^3.1.0",
     "fs-extra": "^11.2.0"
   },

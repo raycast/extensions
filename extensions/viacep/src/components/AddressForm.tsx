@@ -7,16 +7,19 @@ interface AddressFormProps {
 }
 
 export default function AddressForm({ onSubmit }: AddressFormProps) {
-  const [CityError, setCityError] = useState<string | undefined>();
+  const [cityError, setCityError] = useState<string | undefined>();
   const [streetNameError, setStreetNameError] = useState<string | undefined>();
+  const [stateError, setStateError] = useState<string | undefined>();
 
   const dropCityError = () => setCityError(undefined);
   const dropStreetNameError = () => setStreetNameError(undefined);
+  const dropStateError = () => setStateError(undefined);
 
   const handleSubmit = (values: { uf: string; city: string; streetName: string }) => {
-    if (!values.city || !values.streetName) {
+    if (!values.city || !values.streetName || values.uf === "–") {
       if (!values.city) setCityError("Required");
       if (!values.streetName) setStreetNameError("Required");
+      if (values.uf === "–") setStateError("Required");
       return;
     }
     onSubmit(values);
@@ -48,7 +51,7 @@ export default function AddressForm({ onSubmit }: AddressFormProps) {
         id="city"
         title="City"
         placeholder="São Paulo"
-        error={CityError}
+        error={cityError}
         onChange={dropCityError}
         onBlur={(event) => {
           if (!event.target.value) {
@@ -58,7 +61,19 @@ export default function AddressForm({ onSubmit }: AddressFormProps) {
           }
         }}
       />
-      <Form.Dropdown id="uf" title="State Code" defaultValue="SP">
+      <Form.Dropdown
+        id="uf"
+        title="State Code"
+        error={stateError}
+        onChange={dropStateError}
+        onBlur={(event) => {
+          if (event.target.value === "–") {
+            setStateError("Required");
+          } else {
+            dropStateError();
+          }
+        }}
+      >
         {STATE_CODES.map((code) => (
           <Form.Dropdown.Item key={code} value={code} title={code} />
         ))}

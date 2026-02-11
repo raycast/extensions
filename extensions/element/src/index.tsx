@@ -4,7 +4,7 @@ import rawData from "./data/elements.json";
 import { renderDetails } from "./renderDetails";
 
 export default function Command() {
-  const elements = (rawData as any).elements;
+  const elements = (rawData as { elements: SingleElement[] }).elements;
 
   return (
     <List isShowingDetail searchBarPlaceholder="Search element by Name">

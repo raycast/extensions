@@ -1,5 +1,29 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2026-01-05
+
+- Fixed `Toast` causing error when MenuBar refreshed (ref: [Issue #23821](https://github.com/raycast/extensions/issues/23821))
+- Modernized extension to use latest Raycast API
+
+## [Enhancements] - 2025-11-24
+
+- Add Windows support
+- Fixed stopping running time entry shortcut issue
+- Add ability to cache API responses to support users on free tier that have lower rate limits
+
+## [Enhancements] - 2025-04-23
+
+- Add preferences to select the history lookback window
+
+## [Enhancements] - 2025-03-17
+
+- Add preferences to show/hide clients, projects, tasks, and tags in the time entry form
+
+## [New Feature] - 2025-02-05
+
+- Add ability to update time entry start and stop date
+- Add ability to change the start time for a running time entry
+
 ## [New Feature] - 2025-12-12
 
 - Add shortcut to "Create Similar Time Entry"
@@ -19,7 +43,7 @@
 
 ## [Bug Fixes] - 2024-08-02
 
-- Resolve issue when stopping a running time entry doesn't work
+- Resolve issue when stopping a running time entry doesn't work.
 
 ## [Bug Fixes] - 2024-07-31
 

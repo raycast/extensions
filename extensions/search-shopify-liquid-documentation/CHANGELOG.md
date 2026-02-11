@@ -1,5 +1,13 @@
 # Search Shopify Liquid Documentation Changelog
 
+## [Update Documentation] - 2025-01-08
+
+- New Tags: `content_for`
+- New Filters: `avatar`, `structured_data`, `class_list`, `inline_asset_content`
+- New Objects: `product_option_value`, `swatch`, `taxonomy_category`
+- Fix typo and Reorder Change Log History
+- Renamed extenion to `Shopify Liquid Documentation`
+
 ## [New Additions] - 2023-12-11
 
 - Enable search with keywords of the main categories and subcategories

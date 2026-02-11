@@ -27,7 +27,7 @@ export const VAULT_LOCK_MESSAGES = {
   CLI_UPDATED: "Bitwarden has been updated. Please login again.",
 } as const;
 
-export const SHORTCUT_KEY_SEQUENCE: Keyboard.Shortcut["key"][] = [
+export const SHORTCUT_KEY_SEQUENCE: Keyboard.KeyEquivalent[] = [
   "1",
   "2",
   "3",
@@ -86,4 +86,5 @@ export const ITEM_TYPE_TO_ICON_MAP: Record<ItemType, Icon> = {
   [ItemType.CARD]: Icon.CreditCard,
   [ItemType.IDENTITY]: Icon.Person,
   [ItemType.NOTE]: Icon.Document,
+  [ItemType.SSH_KEY]: Icon.Key,
 };

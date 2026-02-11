@@ -1,8 +1,7 @@
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-
 import CreateIssueForm, { CreateIssueValues } from "./components/CreateIssueForm";
 import View from "./components/View";
+import useMe from "./hooks/useMe";
+import usePriorities from "./hooks/usePriorities";
 
 function Form({ draftValues }: { draftValues?: CreateIssueValues }) {
   const { priorities, isLoadingPriorities } = usePriorities();

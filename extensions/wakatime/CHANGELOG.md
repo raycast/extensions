@@ -1,5 +1,23 @@
 # WakaTime Changelog
 
+## [Summary Command Fixes] - 2025-04-17
+
+- Upgrade to `@raycast/api` - v1.96.0
+
+### Added
+
+- Use of `getAvatarIcon` util to generate fallback icons
+
+### Fixed
+
+- Handles API reported with the `errors` property key
+
+## [Customizing API Endpoint] - 2025-02-28
+
+### Added
+
+- Add support for customizing the API endpoint
+
 ## [Fixes Data Range Names] - 2023-02-18
 
 ### Fixed

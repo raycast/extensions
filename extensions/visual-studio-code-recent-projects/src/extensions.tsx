@@ -1,22 +1,14 @@
 import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { getErrorMessage } from "./utils";
-import { Extension, getLocalExtensions } from "./lib/vscode";
+import { useEffect, useState } from "react";
 import {
   OpenExtensionByIDInBrowserAction,
   OpenExtensionByIDInVSCodeAction,
   UninstallExtensionByIDAction,
-} from "./extension-actions";
+} from "./lib/extension-actions";
+import { Extension, getLocalExtensions } from "./lib/vscode";
+import { getErrorMessage } from "./lib/utils";
 
-function OpenExtensionInVSCodeAction(props: { extension: Extension }): JSX.Element {
-  return <OpenExtensionByIDInVSCodeAction extensionID={props.extension.id} />;
-}
-
-function OpenExtensionInBrowserAction(props: { extension: Extension }): JSX.Element {
-  return <OpenExtensionByIDInBrowserAction extensionID={props.extension.id} />;
-}
-
-function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }): JSX.Element {
+function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }) {
   const e = props.extension;
   return (
     <List.Item
@@ -33,8 +25,8 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenExtensionInVSCodeAction extension={e} />
-            <OpenExtensionInBrowserAction extension={e} />
+            <OpenExtensionByIDInVSCodeAction extensionID={e.id} />
+            <OpenExtensionByIDInBrowserAction extensionID={e.id} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -56,7 +48,11 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <UninstallExtensionByIDAction extensionID={e.id} afterUninstall={props.reloadExtension} />
+            <UninstallExtensionByIDAction
+              extensionID={e.id}
+              extensionName={e.name}
+              afterUninstall={props.reloadExtension}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -64,7 +60,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
   );
 }
 
-export default function ExtensionsRootCommand(): JSX.Element {
+export default function ExtensionsRootCommand() {
   const { extensions, isLoading, error, refresh } = useLocalExtensions();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
@@ -74,7 +70,7 @@ export default function ExtensionsRootCommand(): JSX.Element {
     <List isLoading={isLoading} searchBarPlaceholder="Search Installed Extensions">
       <List.Section title="Installed Extensions" subtitle={`${extensionsSorted?.length}`}>
         {extensionsSorted?.map((e) => (
-          <ExtensionListItem key={e.id} extension={e} reloadExtension={refresh} />
+          <ExtensionListItem key={`${e.id}-${e.version}`} extension={e} reloadExtension={refresh} />
         ))}
       </List.Section>
     </List>

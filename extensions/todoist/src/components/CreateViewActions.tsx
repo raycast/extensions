@@ -1,7 +1,7 @@
 import { Action, environment } from "@raycast/api";
 
-import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { QuickLinkView } from "../home";
+import { useIsTodoistInstalled } from "../hooks/useIsTodoistInstalled";
 
 function createDeeplink(view: string) {
   const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
@@ -10,6 +10,8 @@ function createDeeplink(view: string) {
 }
 
 export default function CreateViewActions({ title, view, todoistLink }: QuickLinkView) {
+  const isTodoistInstalled = useIsTodoistInstalled();
+
   return (
     <>
       <Action.CreateQuicklink

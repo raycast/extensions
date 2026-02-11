@@ -1,6 +1,9 @@
 import { DropboxResponseError } from "dropbox";
 import { Error as DropboxError, files } from "dropbox/types/dropbox_types";
-import { getDropboxClient } from "./oauth";
+import { getDropboxClient, provider } from "./oauth";
+import { getPreferenceValues, openExtensionPreferences, popToRoot, showInFinder, showToast, Toast } from "@raycast/api";
+import { join } from "path";
+import { writeFile } from "fs/promises";
 
 export interface ListFileResp {
   entries: Array<files.FileMetadataReference | files.FolderMetadataReference>;
@@ -91,6 +94,10 @@ function convertSearchResult(res: files.SearchV2Result): ListFileResp {
   };
 }
 
+export function getDirectoryViewURL(path: string) {
+  return `https://www.dropbox.com/home${path}`;
+}
+
 export function getFilePreviewURL(path: string): string {
   return `https://www.dropbox.com/preview${path}`;
 }
@@ -103,4 +110,53 @@ function convertError(err: unknown): string {
   }
   if (e instanceof Error) return e.message;
   return `${e}`;
+}
+
+export async function downloadFile(name: string, path: string) {
+  const { download_directory } = getPreferenceValues<Preferences>();
+  const toast = await showToast(Toast.Style.Animated, "Downloading", name);
+
+  if (!download_directory) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Download directory not set";
+    toast.message = "Please set the download directory in the extension preferences";
+    toast.primaryAction = {
+      title: "Open Extension Preferences",
+      onAction: openExtensionPreferences,
+    };
+    return;
+  }
+
+  const dbx = getDropboxClient();
+  try {
+    const res = await dbx.filesDownload({ path });
+    const result = res.result as files.FileMetadata & { fileBinary: Buffer };
+    const file = join(download_directory, result.name);
+    const binary = result.fileBinary;
+    await writeFile(file, binary, "binary");
+    toast.style = Toast.Style.Success;
+    toast.title = "Downloaded";
+    toast.primaryAction = {
+      title: "Show in Finder",
+      async onAction() {
+        await showInFinder(file);
+      },
+    };
+  } catch (error) {
+    const message = convertError(error);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not download";
+    toast.message = message;
+    if (message.includes("scope")) {
+      toast.message = "Please re-authorize to be able to download";
+      toast.primaryAction = {
+        title: "Re-authorize",
+        async onAction() {
+          await provider.client.removeTokens();
+          await provider.authorize();
+          await popToRoot();
+        },
+      };
+    }
+  }
 }

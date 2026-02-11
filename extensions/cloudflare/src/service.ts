@@ -54,12 +54,15 @@ interface Zone {
 }
 
 interface DnsRecordItem {
+  id: string;
   name: string;
   type: string;
   content: string;
+  ttl: number;
 }
 
 interface DnsRecord {
+  id: string;
   name: string;
   type: string;
   content: string;
@@ -167,6 +170,29 @@ interface Member {
   role: string;
 }
 
+interface WorkerItem {
+  id: string;
+  etag: string;
+  created_on: string;
+  modified_on: string;
+  logpush?: boolean;
+  placement_mode?: string;
+  usage_model?: string;
+  has_assets?: boolean;
+  has_modules?: boolean;
+}
+
+interface Worker {
+  id: string;
+  createdOn: string;
+  modifiedOn: string;
+  logpush: boolean;
+  placementMode?: string;
+  usageModel?: string;
+  hasAssets: boolean;
+  hasModules: boolean;
+}
+
 class Service {
   client: AxiosInstance;
   cache: Cache = new Cache();
@@ -213,7 +239,7 @@ class Service {
       try {
         result = JSON.parse(this.cache.get(`zones-${id}`)!) as ZoneItem[];
         return result.map((item) => formatZone(item));
-      } catch (e) {
+      } catch {
         // Whenever the cache can't be parsed, clear it and fetch from API
         this.cache.remove(`zones-${id}`);
       }
@@ -246,9 +272,30 @@ class Service {
       `zones/${zoneId}/dns_records`,
     );
     return response.data.result.map((item) => {
-      const { name, type, content } = item;
-      return { name, type, content };
+      const { id, name, type, content } = item;
+      return { id, name, type, content };
     });
+  }
+
+  async createDnsRecord(
+    zoneId: string,
+    record: Omit<DnsRecordItem, 'id'>,
+  ): Promise<DnsRecordItem> {
+    const response = await this.client.post<Response<DnsRecordItem>>(
+      `zones/${zoneId}/dns_records`,
+      record,
+    );
+    return response.data.result;
+  }
+
+  async deleteDnsRecord(
+    zoneId: string,
+    recordId: string,
+  ): Promise<{ id: string }> {
+    const response = await this.client.delete<Response<{ id: string }>>(
+      `zones/${zoneId}/dns_records/${recordId}`,
+    );
+    return response.data.result;
   }
 
   async purgeFilesbyURL(
@@ -337,6 +384,13 @@ class Service {
       };
     });
   }
+
+  async listWorkers(accountId: string): Promise<Worker[]> {
+    const response = await this.client.get<Response<WorkerItem[]>>(
+      `accounts/${accountId}/workers/scripts`,
+    );
+    return response.data.result.map((item) => formatWorker(item));
+  }
 }
 
 function formatZone(item: ZoneItem): Zone {
@@ -384,6 +438,29 @@ function formatDeployment(item: DeploymentItem): Deployment {
   };
 }
 
+function formatWorker(item: WorkerItem): Worker {
+  const {
+    id,
+    created_on,
+    modified_on,
+    logpush,
+    placement_mode,
+    usage_model,
+    has_assets,
+    has_modules,
+  } = item;
+  return {
+    id,
+    createdOn: created_on,
+    modifiedOn: modified_on,
+    logpush: logpush ?? false,
+    placementMode: placement_mode,
+    usageModel: usage_model,
+    hasAssets: has_assets ?? false,
+    hasModules: has_modules ?? false,
+  };
+}
+
 export default Service;
 export type {
   Account,
@@ -396,6 +473,7 @@ export type {
   MemberStatus,
   Page,
   Source,
+  Worker,
   Zone,
   ZoneStatus,
 };

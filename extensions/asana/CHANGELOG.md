@@ -1,6 +1,31 @@
 # Asana Changelog
 
-## [Added Copy Task Formatted URL command] - 2024-03-27
+## [Add subtasks support and tag management] - 2026-01-23
+
+- Added ability to view subtasks for a task in the detail view
+- Added action to create subtasks under a parent task
+- Added ability to convert tasks to subtasks and subtasks to tasks
+- Added actions to add and remove tags from existing tasks
+- Added ability to rename tasks and subtasks
+
+## [Add support for Asana sections] - 2025-10-28
+
+- Added option for assigning a section when creating a task. User can select from a list of existing sections.
+- Added action on tasks returned from My Tasks allowing user to move a task to another section
+- Added option for assigning tags when creating a task. User can select from a list of existing tags.
+- Added ability to filter My Tasks by section and tag
+- Section and tags are now displayed in the task detail view
+
+## [Auto-close window after task creation & configuration modernization] - 2025-04-16
+
+- Introduced a preference to automatically close the Raycast window and show a HUD notification after creating a task, streamlining the workflow.
+- Modernized the extension by adopting the latest configuration standards for improved maintainability and compatibility.
+
+## [Add option to hide the "Start Date" field] - 2025-02-12
+
+- Add a preference to allow the user to hide the `Start Date` field in the `Create Task` command
+
+## [Add "Copy Task Formatted URL" action] - 2024-03-27
 
 - Added a new task command - "Copy Task Formatted URL"
 
@@ -18,7 +43,7 @@
 
 - Remove Raycast signature preference from the `Create Task` command
 
-## [Bugfix] - 2022-11-24
+## [Fix a bug] - 2022-11-24
 
 Fixed an issue where the Asana extension would timeout when querying for projects in workspaces with a lot of projects.
 

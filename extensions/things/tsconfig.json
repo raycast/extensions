@@ -9,7 +9,7 @@
       "ES2023"
     ],
     "module": "commonjs",
-    "target": "es2021",
+    "target": "es2023",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

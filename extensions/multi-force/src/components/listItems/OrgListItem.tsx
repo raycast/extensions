@@ -9,12 +9,42 @@ import {
   Toast,
   confirmAlert,
   Alert,
+  Color,
 } from "@raycast/api";
 import { deleteOrg, openOrg } from "../../utils";
 import { useMultiForceContext, useLoadingContext } from "../providers/OrgListProvider";
 import { OrgListReducerType, DeveloperOrg } from "../../types";
 import { AuthenticateNewOrg, DeveloperOrgDetails } from "../pages";
 import { HOME_PATH, SETUP_PATH } from "../../constants";
+
+// Helper function to get expiration status
+const getExpirationStatus = (org: DeveloperOrg): { icon?: Icon; tooltip?: string; tintColor?: Color } => {
+  if (!org.expirationDate) return {};
+
+  // Parse the date and set it to midnight in local timezone
+  const [year, month, day] = org.expirationDate.split("-").map(Number);
+  const expirationDate = new Date(year, month - 1, day); // month is 0-based in JS
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // midnight today
+
+  const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (daysUntilExpiration <= 0) {
+    return {
+      icon: Icon.ExclamationMark,
+      tooltip: "Scratch org has expired",
+      tintColor: Color.Red,
+    };
+  }
+  if (daysUntilExpiration <= 7) {
+    return {
+      icon: Icon.Warning,
+      tooltip: `Scratch org expires in ${daysUntilExpiration} day${daysUntilExpiration === 1 ? "" : "s"}`,
+      tintColor: Color.Yellow,
+    };
+  }
+  return {};
+};
 
 export function OrgListItem(props: { index: number; org: DeveloperOrg }) {
   const { index, org } = props;
@@ -30,6 +60,10 @@ export function OrgListItem(props: { index: number; org: DeveloperOrg }) {
     });
     try {
       await openOrg(orgAlias, url);
+      dispatch({
+        type: OrgListReducerType.UPDATE_ORG,
+        updatedOrg: { ...org, lastViewedAt: Date.now() },
+      });
       setIsLoading(false);
       toast.hide();
       popToRoot();
@@ -67,11 +101,27 @@ export function OrgListItem(props: { index: number; org: DeveloperOrg }) {
     }
   };
 
+  const expirationStatus = getExpirationStatus(org);
+
   return (
     <List.Item
       key={index}
       icon={{ source: "Salesforce.com_logo.svg.png", tintColor: org.color ?? "#0000FF" }}
       title={org.label ? `${org.label} (${org.alias})` : org.alias}
+      accessories={
+        expirationStatus.icon
+          ? [
+              {
+                icon: expirationStatus.icon,
+                tooltip: expirationStatus.tooltip,
+                tag: {
+                  value: expirationStatus.tooltip || "",
+                  color: expirationStatus.tintColor,
+                },
+              },
+            ]
+          : undefined
+      }
       actions={
         <ActionPanel>
           <Action

@@ -2,8 +2,9 @@ import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getErrorMessage } from "@lib/utils";
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import React from "react";
 
-export function InputTextForm(props: { state: State }): JSX.Element {
+export function InputTextForm(props: { state: State }): React.ReactElement {
   const s = props.state;
   const { pop } = useNavigation();
   const handle = async (input: Form.Values) => {

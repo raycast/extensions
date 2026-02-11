@@ -393,7 +393,7 @@ export const docList: DocType[] = [
         `,
         },
         {
-          title: "Raw",
+          title: "raw",
           url: "https://shopify.dev/docs/api/liquid/tags/raw",
           keyword: ["tags", "syntax"],
           category: "Tags",
@@ -413,6 +413,22 @@ export const docList: DocType[] = [
     section: {
       sectionTitle: "Tags: Theme",
       items: [
+        {
+          title: "content_for",
+          url: "https://shopify.dev/docs/api/liquid/tags/content_for",
+          keyword: ["tags", "theme"],
+          category: "Tags",
+          subcategory: "Theme",
+          description: `Creates a surface for rendering a block or blocks. \n\n The content_for tag requires a type to indicate whether it will render a single static block or a number of theme blocks defined in the JSON templates or section groups. \n\n Renders block elements within sections or other blocks as configured in the JSON template or section groups. See [theme blocks](https://shopify.dev/themes/architecture/blocks/theme-blocks) to see how to create theme blocks that can be used this way.
+
+    {% 
+      content_for "block", 
+      type: "button", 
+      id: "static-block-1" 
+    %}
+
+        `,
+        },
         {
           title: "include",
           url: "https://shopify.dev/docs/api/liquid/tags/include",
@@ -1111,6 +1127,18 @@ export const docList: DocType[] = [
       sectionTitle: "Filters: Customer",
       items: [
         {
+          title: "avatar",
+          url: "https://shopify.dev/docs/api/liquid/filters/avatar",
+          keyword: ["filters", "customer"],
+          category: "Filters",
+          subcategory: "Customer",
+          description: `Generates HTML to render a customer's avatar, if available. Use with the \`customer.has_avatar?\` method to determine if the customer has an avatar.
+
+    {{ customer | avatar }}
+
+        `,
+        },
+        {
           title: "customer_login_link",
           url: "https://shopify.dev/docs/api/liquid/filters/customer_login_link",
           keyword: ["filters", "customer"],
@@ -1283,6 +1311,20 @@ export const docList: DocType[] = [
         `,
         },
         {
+          title: "structured_data",
+          url: "https://shopify.dev/docs/api/liquid/filters/structured_data",
+          keyword: ["filters", "format"],
+          category: "Filters",
+          subcategory: "Format",
+          description: `Converts an object into a schema.org structured data format. \n\n The \`structured_data\` filter can be used on the [product](https://shopify.dev/docs/api/liquid/objects/product) and [article](https://shopify.dev/docs/api/liquid/objects/article) objects. \n\n Product objects are output as a [schema.org Product](https://schema.org/Product) if they have no variants, and a [ProductGroup](https://schema.org/ProductGroup) if they have one or more variants. \n\n Article objects are output as a [schema.org Article](https://schema.org/Article).
+
+    <script type="application/ld+json">
+      {{ product | structured_data }}
+    </script>
+
+        `,
+        },
+        {
           title: "weight_with_unit",
           url: "https://shopify.dev/docs/api/liquid/filters/weight_with_unit",
           keyword: ["filters", "format"],
@@ -1304,6 +1346,24 @@ export const docList: DocType[] = [
       sectionTitle: "Filters: HTML",
       items: [
         {
+          title: "class_list",
+          url: "https://shopify.dev/docs/api/liquid/filters/class_list",
+          keyword: ["filters", "html"],
+          category: "Filters",
+          subcategory: "HTML",
+          description: `Wraps all instances of a specific string, within a given string, with an HTML \`<strong>\` tag with a \`class\` attribute of \`highlight\`.
+
+    {% for item in search.results %}
+      {% if item.object_type == 'product' %}
+        {{ item.description | highlight: search.terms }}
+      {% else %}
+        {{ item.content | highlight: search.terms }}
+      {% endif %}
+    {% endfor %}
+
+        `,
+        },
+        {
           title: "highlight",
           url: "https://shopify.dev/docs/api/liquid/filters/highlight",
           keyword: ["filters", "html"],
@@ -1318,6 +1378,18 @@ export const docList: DocType[] = [
         {{ item.content | highlight: search.terms }}
       {% endif %}
     {% endfor %}
+
+        `,
+        },
+        {
+          title: "inline_asset_content",
+          url: "https://shopify.dev/docs/api/liquid/filters/inline_asset_content",
+          keyword: ["filters", "html"],
+          category: "Filters",
+          subcategory: "HTML",
+          description: `Outputs the content of an asset inline in the template. The asset must be either a \`SVG\`, \`JS\`, or \`CSS\` file. \n\n The asset size must be less than \`15KB\` to be inlined.
+
+    {{ 'icon.svg' | inline_asset_content }}
 
         `,
         },
@@ -2009,18 +2081,6 @@ export const docList: DocType[] = [
           description: `Decodes a string in [Base64 format](https://developer.mozilla.org/en-US/docs/Glossary/Base64).
 
     {{ 'b25lIHR3byB0aHJlZQ==' | base64_decode }}
-
-        `,
-        },
-        {
-          title: "base64_encode",
-          url: "https://shopify.dev/docs/api/liquid/filters/base64_encode",
-          keyword: ["filters", "string"],
-          category: "Filters",
-          subcategory: "String",
-          description: `Encodes a string to [Base64 format](https://developer.mozilla.org/en-US/docs/Glossary/Base64).
-
-    {{ 'one two three' | base64_encode }}
 
         `,
         },
@@ -4782,6 +4842,34 @@ export const docList: DocType[] = [
           `,
         },
         {
+          title: "product_option_value",
+          url: "https://shopify.dev/docs/api/liquid/objects/product_option_value",
+          keyword: ["objects"],
+          category: "Objects",
+          objectProperties: [
+            { name: "available", type: "boolean" },
+            { name: "id", type: "number" },
+            { name: "name", type: "string" },
+            { name: "product_url", type: "string" },
+            { name: "selected", type: "boolean" },
+            { name: "swatch", type: "swatch" },
+            { name: "variant", type: "variant" },
+          ],
+          description: `A product option value, such as "red" for the option "color"..
+          
+    {
+      "available": true,
+      "id": 2070385033281,
+      "name": "Bronze",
+      "product_url": null,
+      "selected": true,
+      "swatch": {},
+      "variant": {}
+    }
+          
+          `,
+        },
+        {
           title: "quantity_price_break",
           url: "https://shopify.dev/docs/api/liquid/objects/quantity_price_break",
           keyword: ["objects"],
@@ -5514,6 +5602,25 @@ export const docList: DocType[] = [
           `,
         },
         {
+          title: "swatch",
+          url: "https://shopify.dev/docs/api/liquid/objects/swatch",
+          keyword: ["objects"],
+          category: "Objects",
+          objectProperties: [
+            { name: "color", type: "color" },
+            { name: "image", type: "image" },
+          ],
+          description: `Color and image for visual representation. Available for [product option values](https://shopify.dev/docs/api/liquid/objects/product_option_value) and [filter](https://shopify.dev/docs/api/liquid/objects/filter_value) values.
+          
+          
+    {
+      "color": {},
+      "image": {}
+    }
+          
+          `,
+        },
+        {
           title: "tablerowloop",
           url: "https://shopify.dev/docs/api/liquid/objects/tablerowloop",
           keyword: ["objects"],
@@ -5570,6 +5677,28 @@ export const docList: DocType[] = [
       "rate": 0.05,
       "rate_percentage": 5,
       "title": "GST"
+    }
+          
+          `,
+        },
+        {
+          title: "taxonomy_category",
+          url: "https://shopify.dev/docs/api/liquid/objects/taxonomy_category",
+          keyword: ["objects"],
+          category: "Objects",
+          objectProperties: [
+            { name: "ancestors", type: "array of taxonomy category" },
+            { name: "gid", type: "string" },
+            { name: "id", type: "string" },
+            { name: "name", type: "string" },
+          ],
+          description: `The taxonomy category for a product
+          
+    {
+      "ancestors": [],
+      "gid": "gid://shopify/TaxonomyCategory/hb-1-9-6",
+      "id": "hb-1-9-6",
+      "name": "Vitamins & Supplements"
     }
           
           `,

@@ -1,5 +1,5 @@
 import { GroupList } from "./components/groups";
 
-export default function MyGroupsRoot(): JSX.Element {
+export default function MyGroupsRoot() {
   return <GroupList />;
 }

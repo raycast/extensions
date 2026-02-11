@@ -35,6 +35,15 @@ const brands = [
         ]
     },
     {
+        name: 'Gateron',
+        switchSets: [
+            {
+                name: 'Milky Yellow',
+                color: '#feedac'
+            }
+        ]
+    },
+    {
         name: 'NovelKeys',
         switchSets: [
             {

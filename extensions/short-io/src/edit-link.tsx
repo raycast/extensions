@@ -8,10 +8,7 @@ import { ShortLink } from "./types/types";
 import { MutatePromise } from "@raycast/utils";
 import Style = Toast.Style;
 
-export default function EditLink(props: {
-  shortLink: ShortLink;
-  mutate: MutatePromise<ShortLink[] | undefined, ShortLink[] | undefined>;
-}) {
+export default function EditLink(props: { shortLink: ShortLink; mutate: MutatePromise<ShortLink[]> }) {
   const { shortLink, mutate } = props;
   const [slug, setSlug] = useState<string>(shortLink.path);
   const [title, setTitle] = useState<string>(isEmpty(shortLink.title) ? "" : shortLink.title + "");

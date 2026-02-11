@@ -4,7 +4,7 @@ import { OBJECTS } from "./objects";
 export const queryGetCustomerOutstandingInvoicesCustomerStatement = `
     query($businessId: ID!, $customerId: ID!) {
         business(id: $businessId) {
-            invoices(customerId: $customerId, status: OVERDUE, sort: [INVOICE_DATE_ASC]) {
+            invoices(customerId: $customerId, sort: [INVOICE_DATE_ASC]) {
                 edges {
                     node {
                         ${NODES.Invoice}
@@ -75,4 +75,38 @@ export const QUERIES = {
             }
         }
     }`,
+  getCurrencies: `
+        query {
+            currencies {
+                ${OBJECTS.Currency}
+            }
+        }
+    `,
+  getCountries: `
+        query {
+            countries {
+                code
+                name
+            }
+        }
+    `,
+  getValidIncomeAccounts: `
+        query ($businessId: ID!, $subtypes: [AccountSubtypeValue!]) {
+            business(id: $businessId) {
+                id
+                accounts(subtypes: $subtypes) {
+                    edges {
+                        node {
+                            id
+                            name
+                            subtype {
+                                name
+                                value
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `,
 };

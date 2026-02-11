@@ -12,8 +12,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props || []);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
-  const timer1 = useRef<number | undefined | NodeJS.Timer>();
-  const timer2 = useRef<number | undefined | NodeJS.Timer>();
+  const timer1 = useRef<NodeJS.Timeout | undefined>(undefined);
+  const timer2 = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const debouncedSetData = debounce(setData, 10);
 

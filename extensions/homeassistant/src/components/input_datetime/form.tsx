@@ -2,9 +2,10 @@ import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getErrorMessage } from "@lib/utils";
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import React from "react";
 import { dateToUnixTimestamp, unixTimestampToDate } from "./utils";
 
-export function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTime: boolean }): JSX.Element {
+export function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTime: boolean }): React.ReactElement {
   const s = props.state;
   const hasDate = props.hasDate;
   const hasTime = props.hasTime;

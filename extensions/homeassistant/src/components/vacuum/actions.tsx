@@ -1,6 +1,7 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 import {
   callVacuumLocateService,
   callVacuumPauseService,
@@ -12,7 +13,7 @@ import {
   isVacuumEditable,
 } from "./utils";
 
-export function VacuumLocateAction(props: { state: State }): JSX.Element | null {
+export function VacuumLocateAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isVacuumEditable(s)) {
     return null;
@@ -26,7 +27,7 @@ export function VacuumLocateAction(props: { state: State }): JSX.Element | null 
   );
 }
 
-export function VacuumStartAction(props: { state: State }): JSX.Element | null {
+export function VacuumStartAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isVacuumEditable(s)) {
     return null;
@@ -40,7 +41,7 @@ export function VacuumStartAction(props: { state: State }): JSX.Element | null {
   );
 }
 
-export function VacuumPauseAction(props: { state: State }): JSX.Element | null {
+export function VacuumPauseAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isVacuumEditable(s)) {
     return null;
@@ -55,7 +56,7 @@ export function VacuumPauseAction(props: { state: State }): JSX.Element | null {
   );
 }
 
-export function VacuumStopAction(props: { state: State }): JSX.Element | null {
+export function VacuumStopAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isVacuumEditable(s)) {
     return null;
@@ -70,7 +71,7 @@ export function VacuumStopAction(props: { state: State }): JSX.Element | null {
   );
 }
 
-export function VacuumTurnOnAction(props: { state: State }): JSX.Element | null {
+export function VacuumTurnOnAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isVacuumEditable(s)) {
     return null;
@@ -85,7 +86,7 @@ export function VacuumTurnOnAction(props: { state: State }): JSX.Element | null 
   );
 }
 
-export function VacuumTurnOffAction(props: { state: State }): JSX.Element | null {
+export function VacuumTurnOffAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isVacuumEditable(s)) {
     return null;
@@ -100,7 +101,7 @@ export function VacuumTurnOffAction(props: { state: State }): JSX.Element | null
   );
 }
 
-export function VacuumReturnToBaseAction(props: { state: State }): JSX.Element | null {
+export function VacuumReturnToBaseAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isVacuumEditable(s)) {
     return null;

@@ -1,27 +1,23 @@
-import { Grid, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { Grid, ActionPanel, Action, Icon } from "@raycast/api";
 
 import { getImageUrl } from "../lib/cloudinary";
 import type { Asset } from "../types/asset";
 
 import ViewResource from "./ViewResource";
+import { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 
 interface ViewResourcesProps {
   isLoading: boolean;
-  resources?: Array<Asset>;
+  resources: Array<Asset>;
+  pagination?: UseCachedPromiseReturnType<Asset[], Asset[]>["pagination"];
 }
 
-function ViewResources({ resources, isLoading }: ViewResourcesProps) {
-  const { push } = useNavigation();
-
+function ViewResources({ resources, isLoading, pagination }: ViewResourcesProps) {
   return (
-    <Grid isLoading={isLoading}>
-      {Array.isArray(resources) && resources.length > 0 && (
+    <Grid isLoading={isLoading} pagination={pagination}>
+      {resources.length > 0 && (
         <Grid.Section title="Results" subtitle={String(resources.length)}>
           {resources.map((resource) => {
-            function handleOnViewItem() {
-              push(<ViewResource resource={resource} />);
-            }
-
             return (
               <Grid.Item
                 key={resource.public_id}
@@ -29,7 +25,7 @@ function ViewResources({ resources, isLoading }: ViewResourcesProps) {
                 title={resource.public_id}
                 actions={
                   <ActionPanel>
-                    <Action title="Item" onAction={handleOnViewItem} />
+                    <Action.Push icon={Icon.Eye} title="View Item" target={<ViewResource resource={resource} />} />
                     <Action.CopyToClipboard
                       content={getImageUrl(resource.secure_url, {
                         quality: "auto",

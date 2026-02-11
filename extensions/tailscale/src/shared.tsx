@@ -3,11 +3,22 @@ import { execSync } from "node:child_process";
 
 export const MULLVAD_DEVICE_TAG = "tag:mullvad-exit-node";
 
+export type Location = {
+  Country: string;
+  CountryCode: string;
+  City: string;
+  CityCode: string;
+  Latitude: number;
+  Longitude: number;
+  Priority: number;
+};
+
 export interface Device {
   self: boolean;
   key: string;
   name: string;
   userid: string;
+  loginName?: string;
   dns: string;
   ipv4: string;
   ipv6: string;
@@ -16,7 +27,9 @@ export interface Device {
   lastseen: Date;
   exitnode: boolean;
   exitnodeoption: boolean;
+  ssh?: boolean;
   tags?: string[];
+  location?: Location;
 }
 
 export class InvalidPathError extends Error {}
@@ -37,7 +50,10 @@ export type StatusDevice = {
   LastSeen: string;
   UserID: number;
   HostName: string;
+  /** Present when the device advertises Tailscale SSH (sshHostKeys in status --json). */
+  sshHostKeys?: string[];
   Tags?: string[];
+  Location?: Location;
 };
 
 /**
@@ -60,6 +76,56 @@ export type StatusResponse = {
   >;
 };
 
+/**
+ * NetcheckResponse are the fields returned by `tailscale netcheck --format json`.
+ * These are mentioned to not be stable and may change in the future. Doubtful, but possible.
+ */
+export type NetcheckResponse = {
+  UDP: boolean;
+  IPv4: boolean;
+  GlobalV4: string;
+  IPv6: boolean;
+  GlobalV6: string;
+  MappingVariesByDestIP: boolean;
+  UPnP: boolean;
+  PMP: boolean;
+  PCP: boolean;
+  PreferredDERP: number;
+  RegionLatency: Record<string, number>;
+  RegionV4Latency: Record<string, number>;
+  RegionV6Latency: Record<string, number>;
+};
+
+export type DerpRegion = {
+  RegionId: number;
+  RegionCode: string;
+  RegionName: string;
+  Latitude: number;
+  Longitude: number;
+  Nodes: DerpNode[];
+};
+
+type DerpNode = {
+  Name: string;
+  RegionID: number;
+  HostName: string;
+  IPv4: string;
+  IPv6: string;
+  CanPort80: boolean;
+};
+
+export type Derp = {
+  id: string;
+  code: string;
+  name: string;
+  latency: string | undefined;
+  latencies: {
+    v4: string | undefined;
+    v6: string | undefined;
+  };
+  nodes: DerpNode[];
+};
+
 export function getStatus(peers = true) {
   const resp = tailscale(`status --json --peers=${peers}`);
   const data = JSON.parse(resp) as StatusResponse;
@@ -69,15 +135,30 @@ export function getStatus(peers = true) {
   return data;
 }
 
+export function getNetcheck() {
+  const resp = tailscale("netcheck --format json");
+  return JSON.parse(resp);
+}
+
+/**
+ * This funtion relies on a debug command, so it may not be stable on the returned value.
+ */
+export function getDerpMap() {
+  const resp = tailscale("debug netmap");
+  return JSON.parse(resp).DERPMap.Regions as DerpRegion[];
+}
+
 export function getDevices(status: StatusResponse) {
   const devices: Device[] = [];
   const self = status.Self;
 
+  const selfUser = status.User?.[self.UserID.toString()];
   const me = {
     self: true,
     key: self.ID,
     name: self.DNSName.split(".")[0],
     userid: self.UserID.toString(),
+    loginName: selfUser?.LoginName,
     dns: self.DNSName,
     ipv4: self.TailscaleIPs[0],
     ipv6: self.TailscaleIPs[1],
@@ -86,17 +167,20 @@ export function getDevices(status: StatusResponse) {
     lastseen: new Date(self.LastSeen),
     exitnode: self.ExitNode,
     exitnodeoption: self.ExitNodeOption,
+    ssh: (self.sshHostKeys?.length ?? 0) > 0,
     tags: self.Tags,
   };
 
   devices.push(me);
 
   for (const [, peer] of Object.entries(status.Peer)) {
+    const peerUser = status.User?.[peer.UserID.toString()];
     const device = {
       self: false,
       key: peer.ID,
       name: peer.DNSName.split(".")[0],
       userid: peer.UserID.toString(),
+      loginName: peerUser?.LoginName,
       dns: peer.DNSName,
       ipv4: peer.TailscaleIPs[0],
       ipv6: peer.TailscaleIPs[1],
@@ -105,7 +189,9 @@ export function getDevices(status: StatusResponse) {
       lastseen: new Date(peer.LastSeen),
       exitnode: peer.ExitNode,
       exitnodeoption: peer.ExitNodeOption,
+      ssh: (peer.sshHostKeys?.length ?? 0) > 0,
       tags: peer.Tags,
+      location: peer.Location,
     };
     devices.push(device);
   }

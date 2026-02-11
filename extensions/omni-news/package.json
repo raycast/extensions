@@ -20,20 +20,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
+    "@raycast/api": "^1.94.3",
     "json2md": "^2.0.0",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@types/json2md": "^1.5.1",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.8.3",
-    "typescript": "^4.4.3"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "preferences": [
     {
@@ -41,7 +39,7 @@
       "title": "News Limit",
       "description": "The amount of articles to be fetched",
       "type": "textfield",
-      "default": "10",
+      "default": "100",
       "required": false
     },
     {

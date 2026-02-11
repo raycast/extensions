@@ -5,6 +5,7 @@ import { getFavicon } from "@raycast/utils";
 import { NAMESILO_LINKS } from "./lib/constants";
 import NameServers from "./lib/components/name-servers";
 import DNSRecords from "./lib/components/dns-records";
+import EmailForwards from "./lib/components/email-forwards";
 
 export default function Domains() {
   const { isLoading, data } = useNameSilo<{ domains: Domain[] | { domain: Domain } }>("listDomains");
@@ -46,6 +47,11 @@ export default function Domains() {
                     icon={Icon.List}
                     title="View NameServers"
                     target={<NameServers domain={domain.domain} />}
+                  />
+                  <Action.Push
+                    icon={Icon.Envelope}
+                    title="View Email Forwards"
+                    target={<EmailForwards domain={domain.domain} />}
                   />
                 </ActionPanel>
               }

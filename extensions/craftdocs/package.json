@@ -4,11 +4,11 @@
   "title": "Craft",
   "description": "Search documents in Craft",
   "icon": "command-icon.png",
-  "author": "bgnfu7re",
+  "author": "sfkmk",
   "contributors": [
+    "bgnfu7re",
     "mafredri",
-    "0x77dev",
-    "sfkmk"
+    "0x77dev"
   ],
   "license": "MIT",
   "categories": [
@@ -50,6 +50,76 @@
       "subtitle": "Craft",
       "description": "Navigate to your daily notes",
       "mode": "view"
+    },
+    {
+      "name": "addToDailyNote",
+      "title": "Add to Daily Note",
+      "subtitle": "Craft",
+      "description": "Add content to your daily note",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Append Position",
+          "name": "appendPosition",
+          "type": "dropdown",
+          "required": false,
+          "default": "end",
+          "data": [
+            {
+              "title": "Add at End",
+              "value": "end"
+            },
+            {
+              "title": "Add at Beginning",
+              "value": "beginning"
+            }
+          ],
+          "description": "Choose whether to add content at the beginning or end of the daily note"
+        },
+        {
+          "title": "Add Timestamp",
+          "name": "addTimestamp",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Add timestamp to content",
+          "description": "Automatically add current time before your content"
+        },
+        {
+          "title": "Time Format",
+          "name": "timeFormat",
+          "type": "textfield",
+          "required": false,
+          "default": "HH:mm",
+          "placeholder": "HH:mm",
+          "description": "Custom time format pattern. Examples: HH:mm (14:30), h:mm A (2:30 PM), HH:mm:ss (14:30:45). Patterns: H/HH=24h, h/hh=12h, mm=minutes, ss=seconds, A/a=AM/PM"
+        },
+        {
+          "title": "Prefix",
+          "name": "contentPrefix",
+          "type": "textfield",
+          "required": false,
+          "default": ": ",
+          "placeholder": "Enter prefix text",
+          "description": "Text to add after timestamp (if enabled) and before your content"
+        },
+        {
+          "title": "Suffix",
+          "name": "contentSuffix",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "placeholder": "Enter suffix text",
+          "description": "Text to add after your content"
+        }
+      ]
+    },
+    {
+      "name": "manageSpaces",
+      "title": "Manage Spaces",
+      "subtitle": "Craft",
+      "description": "Manage your Craft spaces: rename, enable/disable",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -71,6 +141,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

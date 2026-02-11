@@ -1,6 +1,5 @@
 import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
-import { handleError, silentlyOpenThingsURL } from './api';
-import qs from 'qs';
+import { addTodo, handleError } from './api';
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
@@ -61,7 +60,7 @@ Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
         .join('\n');
     }
 
-    await silentlyOpenThingsURL(`things:///add?${qs.stringify(json)}`);
+    await addTodo(json);
 
     await showToast({
       style: Toast.Style.Success,

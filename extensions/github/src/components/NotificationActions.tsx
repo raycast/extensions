@@ -41,6 +41,27 @@ export default function NotificationActions({ notification, userId, mutateList }
     }
   }
 
+  async function markNotificationAsDone() {
+    await showToast({ style: Toast.Style.Animated, title: "Marking notification as done" });
+
+    try {
+      await octokit.activity.markThreadAsDone({ thread_id: parseInt(notification.id) });
+      await mutateList();
+      await launchCommand({ name: "unread-notifications", type: LaunchType.UserInitiated });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Marked notification as done",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed marking notification as done",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   async function openNotification(isUnreadNotification: boolean) {
     try {
       if (url) {
@@ -145,6 +166,13 @@ export default function NotificationActions({ notification, userId, mutateList }
           />
         </>
       ) : null}
+
+      <Action
+        title="Mark as Done"
+        icon={Icon.Circle}
+        onAction={markNotificationAsDone}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      />
 
       <Action
         title="Unsubscribe"

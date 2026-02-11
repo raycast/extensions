@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Icon,
   LaunchType,
   List,

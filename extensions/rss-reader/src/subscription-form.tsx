@@ -55,6 +55,7 @@ function AddFeedForm() {
         message: feedItem.title,
       });
       navigation.push(<StoriesList feeds={[feedItem]} />);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,

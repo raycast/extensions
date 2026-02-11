@@ -21,10 +21,16 @@ export type Character = {
   v: string;
   /** Name */
   n: string;
+  /** Unicode Version */
+  u: string;
+  /** Mirror Code */
+  m?: number;
   /** Aliases */
   a: string[];
   /** Old name */
   o: string;
+  /** Number */
+  nn?: string;
   recentlyUsed?: boolean;
   isExtra?: boolean;
   score?: number;
@@ -37,4 +43,18 @@ export type CharAlias = {
 export type CharacterSection = {
   sectionTitle: string;
   items: Character[];
+  lowestScore?: number;
+};
+
+// Enhanced types for better type safety
+export type SearchResult = {
+  character: Character;
+  score: number;
+  matchType: "exact" | "fuzzy" | "partial";
+};
+
+export type FilterOptions = {
+  blockName?: string;
+  characterType?: "all" | "symbols" | "letters" | "numbers" | "punctuation";
+  unicodeVersion?: string;
 };

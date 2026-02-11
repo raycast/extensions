@@ -1,5 +1,13 @@
 # YAFW Changelog
 
+## [Add video trim command] - 2026-01-28
+
+- Add new "Trim" command to trim videos by specifying start time and either end time or duration
+
+## [Maintenance] - 2025-02-12
+
+- Remove unused `bun.lockb` file
+
 ## [Fix special characters handling in selected file's name] - 2024-05-20
 
 - Fixes #12439 : fix how `sanitizeFileName` method handles special characters

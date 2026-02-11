@@ -223,8 +223,6 @@ function getChartUrl(grades, categories) {
   const dataPoints = grades.map((grade, index) => {
     const gradesUpToIndex = grades.slice(0, index + 1).filter((grade) => grade.exception !== 1 && grade.grade !== null);
 
-    let totalPoints = 0;
-    let totalMaxPoints = 0;
     let overallGrade = 0;
     let totalWeights = 0;
 
@@ -241,9 +239,6 @@ function getChartUrl(grades, categories) {
         overallGrade += categoryGrade * categoryWeight;
         totalWeights += categoryWeight;
       }
-
-      totalPoints += categoryPoints;
-      totalMaxPoints += categoryMaxPoints;
     });
 
     overallGrade = totalWeights > 0 ? overallGrade / totalWeights : 0;
@@ -350,8 +345,6 @@ async function gradesInBrowser({ grades, categories }) {
   const dataPoints = grades.map((grade, index) => {
     const gradesUpToIndex = grades.slice(0, index + 1).filter((grade) => grade.exception !== 1 && grade.grade !== null);
 
-    let totalPoints = 0;
-    let totalMaxPoints = 0;
     let overallGrade = 0;
     let totalWeights = 0;
 
@@ -368,9 +361,6 @@ async function gradesInBrowser({ grades, categories }) {
         overallGrade += categoryGrade * categoryWeight;
         totalWeights += categoryWeight;
       }
-
-      totalPoints += categoryPoints;
-      totalMaxPoints += categoryMaxPoints;
     });
 
     overallGrade = totalWeights > 0 ? overallGrade / totalWeights : 0;

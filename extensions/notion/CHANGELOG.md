@@ -1,5 +1,29 @@
 # Notion Changelog
 
+## [Use Clipboard in Create + Update Shortcuts] - 2025-12-01
+
+- New `Preference` allowing to use Clipboard for auto-filling **Name (Title)** or **Content** (ref: [Issue #23086](https://github.com/raycast/extensions/issues/23086))
+- Update most `shortcut` to be cross-platform
+
+## [Fix opening a page in the App on Windows] - 2025-08-27
+
+- Fix opening a page in the App on Windows
+
+## [Use Bookmark Block for Quick Capture As Bookmark] - 2025-08-13
+
+- Refactor Quick Capture to create a bookmark block instead of a markdown link when "Capture As" is set to "bookmark"
+
+## [Show page properties in page previews] - 2025-07-08
+
+- Page previews now display page properties
+- Added a checkbox to the extension preferences to control this behaviour, defaults to off.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Use pagination for fetching users list] - 2025-01-24
+
+- User Notion pagination to fetch the list of Notion users. This allows fetching more than 100 users.
+
 ## [Refactor - No functional changes] - 2024-10-21
 
 - Move code around and derives more types from `@notionhq/client` (2024-07-03)
@@ -15,7 +39,7 @@
 
 ## [Close Raycast after create new database page] - 2024-04-22
 
-- Add settings to close Raycast after create a new database
+- Add settings to close Raycast after create a new database.
 
 ## [Support inline Markdown for text properties] - 2024-04-18
 

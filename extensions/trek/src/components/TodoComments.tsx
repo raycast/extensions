@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { fetchComments, markComplete, postComment } from "../oauth/auth";
 import { htmlToMarkdown } from "../utils/markdown";
+import { showFailureToast } from "@raycast/utils";
 
 interface TodoDetailProps {
   todo: BasecampTodo;
@@ -21,21 +22,15 @@ export function TodoComments({ todo, accountId, projectId }: TodoDetailProps) {
       setIsLoadingComments(true);
       try {
         const fetchedComments = await fetchComments(todo.comments_url);
-        fetchedComments.forEach((comment) => {
-          console.log("Fetched comment:", {
-            content: htmlToMarkdown(comment.content),
-          });
-        });
         setComments(fetchedComments);
       } catch (error) {
-        console.error("Error fetching comments:", error);
+        showFailureToast(error, { title: "Error fetching comments" });
       } finally {
         setIsLoadingComments(false);
       }
     };
 
     if (todo.comments_count > 0) {
-      console.log("Fetching comments for todo:", todo.app_url);
       loadComments();
     }
   }, [todo]);
@@ -47,8 +42,7 @@ export function TodoComments({ todo, accountId, projectId }: TodoDetailProps) {
       await showToast(Toast.Style.Success, "Comment added successfully");
       pop();
     } catch (error) {
-      console.error("Error posting comment:", error);
-      await showToast(Toast.Style.Failure, "Failed to add comment");
+      showFailureToast(error, { title: "Error posting comment" });
     }
   };
 
@@ -58,7 +52,7 @@ export function TodoComments({ todo, accountId, projectId }: TodoDetailProps) {
       await showToast(Toast.Style.Success, "Todo marked as complete");
       pop();
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to mark todo as complete");
+      showFailureToast(error, { title: "Error marking todo as complete" });
     }
   };
 

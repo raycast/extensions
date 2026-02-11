@@ -84,7 +84,7 @@
     "@raycast/api": "^1.69.3",
     "@raycast/utils": "^1.16.1",
     "abi-coder": "^5.0.0",
-    "axios": "^1.6.8",
+    "axios": "^1.8.4",
     "ethers": "^6.11.1"
   },
   "devDependencies": {
@@ -100,6 +100,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

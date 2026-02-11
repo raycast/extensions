@@ -1,5 +1,16 @@
 # NHL Changelog
 
+## [Version 1.0.2] - 2025-10-17
+
+- Add translation for faceoff wins
+- Add support for Windows platform
+- Bump all dependencies to the latest
+
+## [Version 1.0.1] - 2024-12-24
+
+- Bugfix: Fixed game detail due to the NHL changing how they represent team names
+- Bugfix: Fixed a bug that showed GAA and GFA as % instead of decimal points
+
 ## [Initial Version] - 2024-12-06
 
 - Adds NHL extension

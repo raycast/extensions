@@ -1,5 +1,3 @@
-import "./fetch-polyfill";
-
 import { useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
@@ -96,6 +94,11 @@ export default function GifSearch() {
               title="Tenor"
               value={GIF_SERVICE.TENOR}
               icon={{ source: "tenor-logo-square-180.png" }}
+            />
+            <Grid.Dropdown.Item
+              title="Klipy"
+              value={GIF_SERVICE.KLIPY}
+              icon={{ source: "klipy-logo-square-180.png" }}
             />
             <Grid.Dropdown.Item
               title="Finer Gifs Club"

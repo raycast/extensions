@@ -2,7 +2,7 @@
 // All important constants for all commands should be defined here.
 //--------------------------------------------------------------------------------
 
-import { Color, Image } from "@raycast/api";
+import { Image } from "@raycast/api";
 
 export const MAX_RENDERED_NOTES = 1000;
 export const BYTES_PER_KILOBYTE = 1024;
@@ -130,3 +130,8 @@ export const ObsidianIcon: Image = {
   source: "obsidian_icon.svg",
   tintColor: { dark: "#E6E6E6", light: "#262626", adjustContrast: false },
 };
+
+export const SUMMARY_PROMPT = `Please summarize this content to 5 key
+takeaway bulletpoints followed by a short summary:
+
+Content:\n\n`;

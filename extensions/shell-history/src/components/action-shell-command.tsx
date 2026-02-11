@@ -16,11 +16,11 @@ import { useTerminals } from "../hooks/useTerminals";
 import { clearShellHistory, getShellHistoryPath, getShellIcon, runShellCommand } from "../utils/shell-utils";
 import { Cli, Shell, ShellHistory } from "../types/types";
 import { MutatePromise } from "@raycast/utils/dist/types";
-import KeyEquivalent = Keyboard.KeyEquivalent;
-import ActionStyle = Alert.ActionStyle;
 import { useFrontmostApp } from "../hooks/useFrontmostApp";
 import { CacheKey } from "../utils/constants";
 import { showCustomHud } from "../utils/common-utils";
+import KeyEquivalent = Keyboard.KeyEquivalent;
+import ActionStyle = Alert.ActionStyle;
 
 export function ActionShellCommand(props: {
   shell: Shell;
@@ -92,13 +92,13 @@ export function ActionShellCommand(props: {
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {data?.map((terminal, index) => {
+        {data?.map((terminal) => {
           return (
             <Action
               key={terminal.application.path}
               title={`Run in ${terminal.application.name}`}
               icon={{ fileIcon: terminal.application.path }}
-              shortcut={{ modifiers: ["ctrl"], key: `${index + 1}` as KeyEquivalent }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: terminal.key as KeyEquivalent }}
               onAction={async () => {
                 await runShellCommand(shellCommand, terminal);
               }}

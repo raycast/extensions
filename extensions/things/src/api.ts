@@ -3,65 +3,92 @@ import { promisify } from 'util';
 
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
 import { runAppleScript } from '@raycast/utils';
-import qs from 'qs';
+import queryString from 'query-string';
+import {
+  Area,
+  CommandListName,
+  List,
+  Project,
+  Todo,
+  AddTodoParams,
+  UpdateTodoParams,
+  AddProjectParams,
+  UpdateProjectParams,
+} from './types';
 
-export const preferences: Preferences = getPreferenceValues<Preferences>();
+export const preferences = getPreferenceValues<Preferences>();
 
-export type TodoGroup = {
-  id: string;
-  name: string;
-  tags: string;
-  area?: TodoGroup;
-};
+export class ThingsError extends Error {
+  constructor(
+    message: string,
+    public readonly type: 'APP_NOT_FOUND' | 'PERMISSION_DENIED' | 'EXECUTION_ERROR' | 'UNKNOWN_ERROR',
+    public readonly originalError?: string,
+    public readonly operation?: string,
+  ) {
+    super(operation ? `${operation}: ${message}` : message);
+    this.name = 'ThingsError';
+  }
+}
 
-export type Todo = {
-  id: string;
-  name: string;
-  status: 'open' | 'completed' | 'canceled';
-  tags: string;
-  project?: TodoGroup;
-  area?: TodoGroup;
-  dueDate: string;
-  activationDate: string;
-  notes: string;
-};
-
-export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday';
-
-export const executeJxa = async (script: string) => {
+export const executeJxa = async (script: string, operation?: string) => {
   try {
     const result = await runAppleScript(`(function(){${script}})()`, {
       humanReadableOutput: false,
       language: 'JavaScript',
+      timeout: 60 * 1000, // 60 seconds
     });
-    return JSON.parse(result);
+
+    // Some calls only update data and don't return anything
+    if (!result) {
+      return;
+    }
+
+    // JXA's non-human-readable output is similar to JSON, but is actually a JSON-like representation of the JavaScript object.
+    // While values should not be `undefined`, JXA will include {"key": undefined} in its output if they are.
+    // This is not valid JSON, so we replace those values with `null` to make it valid JSON.
+    return JSON.parse(result.replace(/:\s*undefined/g, ': null'));
   } catch (err: unknown) {
-    if (typeof err === 'string') {
-      const message = err.replace('execution error: Error: ', '');
-      if (message.match(/Application can't be found/)) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Application not found',
-          message: 'Things must be running',
-        });
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Something went wrong',
-          message: message,
-        });
-      }
+    const errorMessage = typeof err === 'string' ? err : err instanceof Error ? err.message : String(err);
+    const message = errorMessage.replace('execution error: Error: ', '');
+
+    if (message.match(/Application can't be found/i)) {
+      throw new ThingsError(
+        'Things application not found. Please make sure Things is installed and running.',
+        'APP_NOT_FOUND',
+        message,
+        operation,
+      );
+      // https://developer.apple.com/documentation/coreservices/1527221-anonymous/erraeeventnotpermitted
+    } else if (
+      message.match(/not allowed assistive access/i) ||
+      message.match(/permission/i) ||
+      message.match(/-1743/)
+    ) {
+      throw new ThingsError(
+        'Permission denied. Please grant Raycast access to Things in System Settings > Privacy & Security > Automation > Raycast > Things.',
+        'PERMISSION_DENIED',
+        message,
+        operation,
+      );
+    } else if (message.match(/doesn't understand/i) || message.match(/can't get/i)) {
+      throw new ThingsError(
+        'Things automation interface error. This might be due to a Things version incompatibility or the app not being ready.',
+        'EXECUTION_ERROR',
+        message,
+        operation,
+      );
+    } else if (message.match(/timed out/i)) {
+      throw new ThingsError(
+        'Command timed out. Things may be unresponsive or not running.',
+        'EXECUTION_ERROR',
+        message,
+        operation,
+      );
+    } else {
+      throw new ThingsError(`Unexpected error: ${message}`, 'UNKNOWN_ERROR', message, operation);
     }
   }
 };
-
-export const thingsNotRunningError = `
-  ## Things Not Running
-  Please make sure Things is installed and running before using this extension.
-  
-  ### But my Things app is running!
-  If Things is running, you may need to grant Raycast access to Things in *System Settings > Privacy & Security > Automation > Raycast > Things*
-`;
 
 const commandListNameToListIdMapping: Record<CommandListName, string> = {
   inbox: 'TMInboxListSource',
@@ -69,151 +96,237 @@ const commandListNameToListIdMapping: Record<CommandListName, string> = {
   anytime: 'TMNextListSource',
   upcoming: 'TMCalendarListSource',
   someday: 'TMSomedayListSource',
+  logbook: 'TMLogbookListSource',
+  trash: 'TMTrashListSource',
 };
 
 export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> => {
-  return executeJxa(`
+  return executeJxa(
+    `
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
-  return todos.map(todo => ({
-    id: todo.id(),
-    name: todo.name(),
-    status: todo.status(),
-    notes: todo.notes(),
-    tags: todo.tagNames(),
-    dueDate: todo.dueDate() && todo.dueDate().toISOString(),
-    activationDate: todo.activationDate() && todo.activationDate().toISOString(),
-    project: todo.project() && {
-      id: todo.project().id(),
-      name: todo.project().name(),
-      tags: todo.project().tagNames(),
-      area: todo.project().area() && {
-        id: todo.project().area().id(),
-        name: todo.project().area().name(),
-        tags: todo.project().area().tagNames(),
-      },
-    },
-    area: todo.area() && {
-      id: todo.area().id(),
-      name: todo.area().name(),
-      tags: todo.area().tagNames(),
-    },
-  }));
-`);
+
+  return todos.map(todo => {
+    const props = todo.properties();
+
+    let project = null;
+    const projectRef = props.project;
+    if (projectRef) {
+      const projectProps = projectRef.properties();
+      let projectArea = null;
+      const projectAreaRef = projectProps.area;
+      if (projectAreaRef) {
+        const areaProps = projectAreaRef.properties();
+        projectArea = { id: areaProps.id, name: areaProps.name };
+      }
+      project = {
+        id: projectProps.id,
+        name: projectProps.name,
+        status: projectProps.status,
+        tags: projectRef.tagNames(),
+        dueDate: projectProps.dueDate ? projectProps.dueDate.toISOString() : null,
+        activationDate: projectProps.activationDate ? projectProps.activationDate.toISOString() : null,
+        area: projectArea,
+      };
+    }
+
+    let area = null;
+    const areaRef = props.area;
+    if (areaRef && !projectRef) {
+      const areaProps = areaRef.properties();
+      area = { id: areaProps.id, name: areaProps.name };
+    }
+
+    return {
+      id: props.id,
+      name: props.name,
+      status: props.status,
+      notes: props.notes,
+      tags: todo.tagNames(),
+      dueDate: props.dueDate ? props.dueDate.toISOString() : null,
+      activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+      isProject: props.pcls === "project",
+      project,
+      area,
+    };
+  });
+`,
+    `Get ${commandListName} list`,
+  );
 };
+
+export const getTodoName = (todoId: string) =>
+  executeJxa(
+    `
+  const things = Application('${preferences.thingsAppIdentifier}');
+  const todo = things.toDos.byId('${todoId}')
+
+  return todo.name();
+`,
+    'Get todo name',
+  );
+
+export const getProjectName = (projectId: string) =>
+  executeJxa(
+    `
+  const things = Application('${preferences.thingsAppIdentifier}');
+  const project = things.projects.byId('${projectId}')
+
+  return project.name();
+`,
+    'Get project name',
+  );
 
 export const setTodoProperty = (todoId: string, key: string, value: string) =>
-  executeJxa(`
+  executeJxa(
+    `
   const things = Application('${preferences.thingsAppIdentifier}');
   things.toDos.byId('${todoId}').${key} = '${value}';
-`);
+`,
+    'Set todo property',
+  );
 
 export const deleteTodo = (todoId: string) =>
-  executeJxa(`
+  executeJxa(
+    `
   const things = Application('${preferences.thingsAppIdentifier}');
   things.delete(things.toDos.byId('${todoId}'));
-`);
+`,
+    'Delete todo',
+  );
 
-export const getTags = (): Promise<string[]> =>
-  executeJxa(`
+export const deleteProject = (projectId: string) =>
+  executeJxa(
+    `
   const things = Application('${preferences.thingsAppIdentifier}');
-  return things.tags().map(tag => tag.name());
-`);
+  things.delete(things.projects.byId('${projectId}'));
+`,
+    'Delete project',
+  );
 
-type Project = {
-  id: string;
-  name: string;
-  area?: { id: string } | null;
+// JXA mapping templates - reusable across individual and combined queries
+// Uses properties() batching to minimize Apple Event overhead
+const mapTagJxa = `tag => tag.name()`;
+
+const mapProjectTodoJxa = `todo => {
+  const props = todo.properties();
+  return {
+    id: props.id,
+    name: props.name,
+    status: props.status,
+    notes: props.notes,
+    tags: todo.tagNames(),
+    dueDate: props.dueDate ? props.dueDate.toISOString() : null,
+    activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+  };
+}`;
+
+const mapProjectJxa = `project => {
+  const props = project.properties();
+  const areaRef = props.area;
+  let area = null;
+  if (areaRef) {
+    const areaProps = areaRef.properties();
+    area = { id: areaProps.id, name: areaProps.name, tags: areaRef.tagNames() };
+  }
+  return {
+    id: props.id,
+    name: props.name,
+    status: props.status,
+    notes: props.notes,
+    tags: project.tagNames(),
+    dueDate: props.dueDate ? props.dueDate.toISOString() : null,
+    activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+    area,
+    todos: project.toDos().map(${mapProjectTodoJxa})
+  };
+}`;
+
+const mapAreaTodoJxa = `todo => {
+  const props = todo.properties();
+  return {
+    id: props.id,
+    name: props.name,
+    status: props.status,
+    notes: props.notes,
+    tags: todo.tagNames(),
+    dueDate: props.dueDate ? props.dueDate.toISOString() : null,
+    activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+    isProject: props.pcls === "project",
+  };
+}`;
+
+const mapAreaJxa = `area => {
+  const props = area.properties();
+  return {
+    id: props.id,
+    name: props.name,
+    tags: area.tagNames(),
+    todos: area.toDos().map(${mapAreaTodoJxa})
+  };
+}`;
+
+type CollectionMap = {
+  tags: string[];
+  projects: Project[];
+  areas: Area[];
+  lists: List[];
 };
 
-export const getProjects = async (): Promise<Project[]> => {
-  return executeJxa(`
-    const things = Application('${preferences.thingsAppIdentifier}');
-    const projects = things.projects();
+const jxaFetches = [
+  { name: 'tags', needs: ['tags'], expr: `things.tags().map(${mapTagJxa})` },
+  { name: 'projects', needs: ['projects', 'lists'], expr: `things.projects().map(${mapProjectJxa})` },
+  { name: 'areas', needs: ['areas', 'lists'], expr: `things.areas().map(${mapAreaJxa})` },
+];
 
-    return projects.map(project => ({
-      id: project.id(),
-      name: project.name(),
-      area: project.area() && {
-        id: project.area().id(),
-      },
-    }));
-  `);
-};
+export async function getCollections<K extends keyof CollectionMap>(...keys: K[]): Promise<Pick<CollectionMap, K>> {
+  const keySet = new Set<string>(keys);
 
-type Area = {
-  id: string;
-  name: string;
-};
+  const script = [
+    `const things = Application('${preferences.thingsAppIdentifier}');`,
+    `const result = {};`,
+    ...jxaFetches
+      .filter(({ needs }) => needs.some((k) => keySet.has(k)))
+      .map(({ name, expr }) => `result.${name} = ${expr};`),
+    `return result;`,
+  ].join('\n');
 
-export const getAreas = async (): Promise<Area[]> => {
-  return executeJxa(`
-    const things = Application('${preferences.thingsAppIdentifier}');
-    const areas = things.areas();
+  const raw = await executeJxa(script, `Get ${keys.join(', ')}`);
 
-    return areas.map(area => ({
-      id: area.id(),
-      name: area.name(),
-    }));
-  `);
-};
+  return Object.fromEntries(
+    keys.map((key) => [key, key === 'lists' ? organizeLists(raw.projects, raw.areas) : raw[key]]),
+  ) as Pick<CollectionMap, K>;
+}
 
-export type List = { id: string; name: string; type: 'area' | 'project' };
-
-export const getLists = async (): Promise<List[]> => {
-  const projects = await getProjects();
-  const areas = await getAreas();
-
+function organizeLists(projects: Project[] = [], areas: Area[] = []): List[] {
   const projectsWithoutAreas = projects
     .filter((project) => !project.area)
     .map((project) => ({ ...project, type: 'project' as const }));
 
-  const organizedAreasAndProjects: { name: string; id: string; type: 'area' | 'project' }[] = [];
+  const organizedAreasAndProjects: List[] = [];
   areas.forEach((area) => {
-    organizedAreasAndProjects.push({
-      ...area,
-      type: 'area' as const,
-    });
+    organizedAreasAndProjects.push({ ...area, type: 'area' as const });
 
     const associatedProjects = projects
       .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({
-        ...project,
-        type: 'project' as const,
-      }));
+      .map((project) => ({ ...project, type: 'project' as const }));
     organizedAreasAndProjects.push(...associatedProjects);
   });
 
   return [...projectsWithoutAreas, ...organizedAreasAndProjects];
-};
-
-export type UpdateTodoParams = {
-  title?: string;
-  notes?: string;
-  'prepend-notes'?: string;
-  'append-notes'?: string;
-  when?: string | null;
-  deadline?: string;
-  tags?: string;
-  'add-tags'?: string;
-  'checklist-items'?: string;
-  'prepend-checklist-items'?: string;
-  'append-checklist-items'?: string;
-  'list-id'?: string;
-  list?: string;
-  'heading-id'?: string;
-  heading?: string;
-  completed?: boolean;
-  canceled?: boolean;
-  reveal?: boolean;
-  duplicate?: boolean;
-  'creation-date'?: string;
-  'completion-date'?: string;
-};
+}
 
 export async function silentlyOpenThingsURL(url: string) {
   const asyncExec = promisify(exec);
   await asyncExec(`open -g "${url}"`);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateQueryString(params: Record<string, any>): string {
+  return queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
 }
 
 export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
@@ -222,12 +335,34 @@ export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update?${qs.stringify({
+    `things:///update?${generateQueryString({
       'auth-token': authToken,
       id,
       ...todoParams,
     })}`,
   );
+}
+
+export async function updateProject(id: string, projectParams: UpdateProjectParams) {
+  const { authToken } = getPreferenceValues<Preferences>();
+
+  if (!authToken) throw new Error('unauthorized');
+
+  await silentlyOpenThingsURL(
+    `things:///update-project?${generateQueryString({
+      'auth-token': authToken,
+      id,
+      ...projectParams,
+    })}`,
+  );
+}
+
+export async function addTodo(todoParams: AddTodoParams) {
+  await silentlyOpenThingsURL(`things:///add?${generateQueryString(todoParams)}`);
+}
+
+export async function addProject(projectParams: AddProjectParams) {
+  await silentlyOpenThingsURL(`things:///add-project?${generateQueryString(projectParams)}`);
 }
 
 export function handleError(error: unknown, title?: string) {

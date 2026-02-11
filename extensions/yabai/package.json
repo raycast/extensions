@@ -8,7 +8,8 @@
   "contributors": [
     "rubentsirunyan",
     "webdesus",
-    "d34dh0r53"
+    "d34dh0r53",
+    "lhy-a"
   ],
   "categories": [
     "Developer Tools",
@@ -220,6 +221,25 @@
       "subtitle": "Yabai",
       "description": "Warp at window to the west of the focused window.",
       "mode": "no-view"
+    },
+    {
+      "name": "search-windows",
+      "title": "Search Windows",
+      "subtitle": "Yabai",
+      "description": "Search and focus Yabai managed windows",
+      "mode": "view",
+      "keywords": [
+        "s",
+        "window",
+        "search"
+      ]
+    },
+    {
+      "name": "focus-next-same-app",
+      "title": "Focus Next Window of Same App",
+      "subtitle": "Yabai",
+      "description": "Focus the next window of the current application",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -235,7 +255,8 @@
     "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.10.1",
     "execa": "^8.0.1",
-    "ray": "^0.0.1"
+    "ray": "^0.0.1",
+    "tiny-pinyin": "^1.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",

@@ -1,15 +1,22 @@
-import { ActionPanel, Form, Action, useNavigation, showToast, Toast, Icon, confirmAlert } from "@raycast/api";
+import { Note, NoteWithContent, ObsidianVault } from "@/obsidian";
+import { Action, ActionPanel, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import fs from "fs";
-import { NoteReducerAction, NoteReducerActionType } from "../utils/data/reducers";
-import { Note, Vault } from "../utils/interfaces";
-import { applyTemplates } from "../utils/utils";
+import { updateNoteInCache } from "../api/cache/cache.service";
+import { Logger } from "../api/logger/logger.service";
+import { applyTemplates } from "../api/templating/templating.service";
+
+const logger = new Logger("EditNote");
 
 interface FormValue {
   content: string;
 }
 
-export function EditNote(props: { note: Note; vault: Vault; dispatch: (action: NoteReducerAction) => void }) {
-  const { note, vault } = props;
+export function EditNote(props: {
+  note: NoteWithContent;
+  vault: ObsidianVault;
+  onNoteUpdated?: (notePath: string, updates: Partial<Note>) => void;
+}) {
+  const { note, vault, onNoteUpdated } = props;
   const { pop } = useNavigation();
 
   async function writeToNote(form: FormValue) {
@@ -22,9 +29,17 @@ export function EditNote(props: { note: Note; vault: Vault; dispatch: (action: N
       icon: Icon.ExclamationMark,
     };
     if (await confirmAlert(options)) {
+      logger.info(`Writing content to note: ${note.path}`);
       fs.writeFileSync(note.path, content);
+
+      // Update cache and notify parent
+      const stats = fs.statSync(note.path);
+      const updates = { lastModified: stats.mtime };
+      logger.info(`Updating cache and notifying parent for: ${note.path}`);
+      updateNoteInCache(vault.path, note.path, updates);
+      onNoteUpdated?.(note.path, updates);
+
       showToast({ title: "Edited note", style: Toast.Style.Success });
-      props.dispatch({ type: NoteReducerActionType.Update, payload: { note: note, vault: vault } });
       pop();
     }
   }

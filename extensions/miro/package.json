@@ -6,7 +6,8 @@
   "icon": "miro-logo.png",
   "author": "felixhaeberle",
   "contributors": [
-    "mathieudutour"
+    "mathieudutour",
+    "silv"
   ],
   "categories": [
     "Productivity",
@@ -18,13 +19,22 @@
     {
       "name": "create-board",
       "title": "Create Board",
+      "subtitle": "Miro",
       "description": "Create a Miro board straight from Raycast",
       "mode": "view"
     },
     {
       "name": "list-boards",
       "title": "My Boards",
+      "subtitle": "Miro",
       "description": "Search & Open your Miro boards in seconds",
+      "mode": "view"
+    },
+    {
+      "name": "list-recent-boards",
+      "title": "Recent Boards",
+      "subtitle": "Miro",
+      "description": "Search & Open recent Miro boards in seconds",
       "mode": "view"
     }
   ],
@@ -50,6 +60,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

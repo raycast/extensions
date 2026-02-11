@@ -37,13 +37,15 @@
       "title": "Webflow API Token",
       "description": "Generate at: https://www.peeks.co/raycast",
       "type": "password",
-      "required": true,
+      "required": false,
       "placeholder": "Paste Webflow API Token"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "cross-fetch": "^4.0.0",
+    "webflow-api": "^3.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

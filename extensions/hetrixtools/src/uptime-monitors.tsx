@@ -32,7 +32,7 @@ export default function UptimeMonitors() {
         const markdown = `
 | Location | Uptime Status | Response Time | Last Check |
 |----------|---------------|---------------|------------|
-${Object.entries(monitor.locations)
+${Object.entries(monitor.locations ?? {})
   .filter(([, val]) => !!val)
   .map(
     ([location, val]) =>
@@ -82,6 +82,13 @@ ${Object.entries(monitor.locations)
                       </List.Item.Detail.Metadata.TagList>
                     ) : (
                       <List.Item.Detail.Metadata.Label title="Keyword" icon={Icon.Minus} />
+                    )}
+                    {monitor.category ? (
+                      <List.Item.Detail.Metadata.TagList title="Category">
+                        <List.Item.Detail.Metadata.TagList.Item text={monitor.category} />
+                      </List.Item.Detail.Metadata.TagList>
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Category" icon={Icon.Minus} />
                     )}
                     <List.Item.Detail.Metadata.Label title="Timeout" text={`${monitor.timeout} seconds`} />
                     <List.Item.Detail.Metadata.Label

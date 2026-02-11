@@ -1,24 +1,34 @@
-import nodeFetch, { RequestInit, Response } from "node-fetch";
+import { getPreferenceValues } from "@raycast/api";
+import AddyError from "./error";
 
-import preferences from "../preferences";
+type Init = { body?: Record<string, unknown> | null | undefined } & Omit<RequestInit, "body">;
 
-const fetch = async (pathname: string, init: RequestInit = {}): Promise<Response> => {
-  const response = await nodeFetch(`https://app.addy.io/api/v1/${pathname.replace(/^\//, "")}`, {
+async function fetch<R = void>(path: string, init: Init = {}): Promise<R> {
+  const { apiKey, endpoint } = getPreferenceValues<ExtensionPreferences>();
+  const base = endpoint ?? "https://app.addy.io/";
+  const baseUrl = new URL("api/v1/", base.endsWith("/") ? base : `${base}/`);
+  const url = new URL(path, baseUrl);
+
+  const response = await global.fetch(url.toString(), {
     ...init,
+    body: JSON.stringify(init.body),
     headers: {
-      ...init?.headers,
       Accept: "application/json",
-      Authorization: `Bearer ${preferences.apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       "X-Requested-With": "XMLHttpRequest",
     },
   });
 
-  if (response.status === 401) {
-    throw new Error("Addy API credentials are invalid");
+  if (!response.ok) {
+    throw new AddyError(response);
   }
 
-  return response;
-};
+  try {
+    return (await response.json()) as R;
+  } catch {
+    return undefined as R;
+  }
+}
 
 export default fetch;

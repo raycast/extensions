@@ -49,3 +49,17 @@ Access preferences through the Action Panel or Raycast preferences:
 ## Data Source
 
 This extension uses data from the [React Native Directory](https://github.com/react-native-community/directory) project, which is maintained by the React Native community.
+
+## In Action
+
+<div style="display: flex; gap: 8px;">
+  <a href="https://x.com/expo/status/1847346917669556659">
+    <img width="33%" src="https://github.com/user-attachments/assets/4f26ca31-a4e1-44ed-aac1-7d8cb7e295b5" />
+  </a>
+  <a href="https://x.com/notbrent/status/1847346620717027545">
+    <img width="33%" src="https://github.com/user-attachments/assets/60efebaa-1222-4b11-bf74-4dfb870f159a" />
+  </a>
+  <a href="https://x.com/shubhporwal24/status/1841499533697839309">
+    <img width="33%" src="https://github.com/user-attachments/assets/ba272c2b-9fc2-47d9-9d7a-f377c87121a3" />
+  </a>
+</div>

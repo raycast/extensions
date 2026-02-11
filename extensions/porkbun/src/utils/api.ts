@@ -13,7 +13,6 @@ import {
   RetrieveAllDomainsResponse,
 } from "./types";
 import { Toast, showToast } from "@raycast/api";
-import fetch from "node-fetch";
 import { API_HEADERS, API_KEY, API_METHOD, API_URL, SECRET_API_KEY } from "./constants";
 import { useFetch } from "@raycast/utils";
 
@@ -43,6 +42,7 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?: Reque
       showError(response.message);
     }
     return response;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     const message = "Failed to execute request. Please try again later";
     showError(message);
@@ -69,13 +69,13 @@ export async function editRecordByDomainSubdomainAndType(
   domain: string,
   subdomain: string,
   type: DNSRecordType,
-  { ...params }: EditDNSRecordByDomainSubdomainAndIdRequest
+  { ...params }: EditDNSRecordByDomainSubdomainAndIdRequest,
 ) {
   const body = { ...params };
   return await callApi(
     `dns/editByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
     "Editing DNS Record",
-    body
+    body,
   );
 }
 export async function deleteRecordByDomainAndId(domain: string, id: number) {
@@ -84,7 +84,7 @@ export async function deleteRecordByDomainAndId(domain: string, id: number) {
 export async function deleteRecordByDomainSubdomainAndType(domain: string, subdomain: string, type: DNSRecordType) {
   return await callApi(
     `dns/deleteByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
-    "Deleting DNS Record(s)"
+    "Deleting DNS Record(s)",
   );
 }
 export async function retrieveRecordsByDomainOrId(domain: string, id: number) {
@@ -93,7 +93,7 @@ export async function retrieveRecordsByDomainOrId(domain: string, id: number) {
 export async function retrieveRecordsByDomainSubdomainAndType(domain: string, subdomain: string, type: DNSRecordType) {
   return await callApi(
     `dns/retrieveByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
-    "Retrieving DNS Record(s)"
+    "Retrieving DNS Record(s)",
   );
 }
 

@@ -5,7 +5,7 @@ import { Assignment } from "./assignment";
 import { Announcement } from "./announcement";
 import { Icons } from "../utils/utils";
 
-export const Course = (props: { course: course; announcements: announcement[] }) => {
+export const Course = (props: { course: course }) => {
   const preferences: Preferences = getPreferenceValues();
 
   return (
@@ -27,11 +27,10 @@ export const Course = (props: { course: course; announcements: announcement[] })
             <Action.Push
               title="See Assignments"
               icon={{ source: Icons["Assignment"], tintColor: Color.PrimaryText }}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
               target={
                 <List>
-                  {props.course.assignments.map((assignment: assignment, index: number) => (
-                    <Assignment key={index} {...assignment} />
+                  {props.course.assignments.map((assignment: assignment) => (
+                    <Assignment key={assignment.id} assignment={assignment} />
                   ))}
                 </List>
               }
@@ -39,14 +38,11 @@ export const Course = (props: { course: course; announcements: announcement[] })
             <Action.Push
               title="See Announcements"
               icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
-              shortcut={{ modifiers: ["cmd"], key: "m" }}
               target={
                 <List>
-                  {props.announcements
-                    .filter((announcement: announcement) => announcement.course_id === props.course.id)
-                    .map((announcement: announcement, index: number) => (
-                      <Announcement key={index} {...announcement} />
-                    ))}
+                  {props.course.announcements.map((announcement: announcement) => (
+                    <Announcement key={announcement.id} announcement={announcement} />
+                  ))}
                 </List>
               }
             />

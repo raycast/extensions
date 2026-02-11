@@ -4,33 +4,14 @@ import _ from "lodash";
 import { homedir } from "os";
 import { resolve } from "path";
 import { Device, LocalTab, RemoteTab } from "../types";
-import { executeJxa, safariAppIdentifier } from "../utils";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { safariAppIdentifier } from "../utils";
+import { JSX, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { getLocalTabs } from "swift:../../swift/SafariTabs";
 
 const DATABASE_PATH = `${resolve(homedir(), `Library/Containers/com.apple.Safari/Data/Library/Safari`)}/CloudTabs.db`;
 
 function fetchLocalTabs(): Promise<LocalTab[]> {
-  return executeJxa(`
-    const safari = Application("${safariAppIdentifier}");
-    const tabs = [];
-    safari.windows().map(window => {
-      const windowTabs = window.tabs();
-      if (windowTabs) {
-        return windowTabs.map(tab => {
-          tabs.push({
-            uuid: window.id() + '-' + tab.index(),
-            title: tab.name(),
-            url: tab.url() || '',
-            window_id: window.id(),
-            index: tab.index(),
-            is_local: true
-          });
-        })
-      } 
-    });
-
-    return tabs;
-  `);
+  return getLocalTabs(safariAppIdentifier) as Promise<LocalTab[]>;
 }
 
 function useRemoteTabs() {
@@ -57,7 +38,7 @@ export default function useDevices() {
   const { data: deviceName } = useDeviceName();
   const localTabs = useLocalTabs();
   const remoteTabs = useRemoteTabs();
-  const devices = useRef<Device[]>([]);
+  const [devices, setDevices] = useState<Device[]>([]);
   const permissionView = useRef<JSX.Element | null>(null);
 
   const localDevice: Device = useMemo(
@@ -84,10 +65,12 @@ export default function useDevices() {
         .reject(["name", deviceName])
         .value();
 
-      devices.current = [localDevice, ...remoteDevices];
+      setDevices([localDevice, ...remoteDevices]);
       permissionView.current = remoteTabs.permissionView || null;
+    } else {
+      setDevices([localDevice]);
     }
-  }, [localTabs, remoteTabs, deviceName]);
+  }, [localTabs.data, remoteTabs.data, deviceName]);
 
   return { devices, permissionView, refreshDevices: localTabs.revalidate };
 }

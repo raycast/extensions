@@ -1,5 +1,9 @@
 # Day One Changelog
 
+## [Bug fix] - 2025-03-17
+
+- Fixed an issue where adding an entry when the journal name contains a space character causes an error.
+
 ## [Feature] - 2024-02-06
 
 - Capture a complete timestamp when creating an entry, instead of just the date

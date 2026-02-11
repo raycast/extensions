@@ -1,5 +1,19 @@
 # Pomodoro Changelog
 
+## [Fixes] - 2025-08-04
+
+- Fixed typo ("cycless" to "cycles") in the `View Pomodoro Stats` command
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Improvement] - 2025-01-07
+
+- Add support for hiding timer when stopped
+
+## [Chore] - 2025-01-03
+
+- Update preferences organization
+
 ## [Update] - 2024-12-12
 
 - Move timer to dropdown menu if it's hidden

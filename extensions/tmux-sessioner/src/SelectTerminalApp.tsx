@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 const ALLOWED_APPS_BUNDLEID = [
   "net.kovidgoyal.kitty",
   "org.alacritty",
+  "com.mitchellh.ghostty",
   "com.googlecode.iterm2",
   "com.apple.Terminal",
   "dev.warp.Warp-Stable",

@@ -26,24 +26,34 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.9.3";
-  buildNumber = 29;
-  versionDate = "2024-09-13";
+  version = "2.11.0";
+  buildNumber = 30;
+  versionDate = "2025-07-01";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 🐞 修复
+### ✨ 新功能
 
-- 修复了 Bing 语种识别 API 失败，导致查询过程卡住问题。https://github.com/raycast/extensions/issues/14357
+- 添加 DeepLX 翻译支持
+- 添加 Gemini 翻译支持
+
+### 💎 改进
+
+- 更新依赖并优化稳定性
 
 ---
 
-### 🐞 Fixed
+### ✨ New Features
 
-- Fixed Bing language detection API failed, which caused the query process to hang. https://github.com/raycast/extensions/issues/14357
+- Add DeepLX support
+- Add support for Gemini translation
+
+### 💎 Improvement
+
+- Update dependencies and improve stability
 `;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;

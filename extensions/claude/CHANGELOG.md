@@ -1,13 +1,42 @@
 # Claude Changelog
 
-## [Update] -  2024-12-20
+## [Fix memory leak] - 2026-02-01
+
+- Fix: Resolved JS heap out of memory error by throttling UI updates during streaming responses
+- Fix: Removed duplicate history entries that were being created when streaming was enabled
+- Fix: Added proper stream cleanup on component unmount to prevent orphaned handlers
+
+## [Update] - 2025-11-03
+
+- Feature: Added dynamic model retrieval removing the need to update the extension with each model release.
+
+## [Update] - 2025-05-23
+
+- Feature: Added new [Claude Sonnet 4](https://www.anthropic.com/news/claude-4)
+
+## [Added missing contributor] - 2025-03-03
+
+## [Update] - 2025-02-26
+
+- Fix: Don't append default model when local models exist
+
+## [Update] - 2025-02-25
+
+- Feature: Added new [Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet)
+
+## [Update] - 2025-01-30
+
+- Fix: History now saves as expected
+- Fix: "Got your answer!" now only displays after the full answer has been streamed
+
+## [Update] - 2024-12-20
 
 - Fix: Models dropdown not displaying all models correctly
 
 ## [Update] - 2024-12-12
 
 - Fix: Remove duplicated "Copy Question" action, use existing with tweaked conditions
-- Fix: Use Claude 3.5 Haiku as default fallback modal
+- Fix: Use Claude 3.5 Haiku as default fallback model
 
 ## [Update] - 2024-12-09
 

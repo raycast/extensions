@@ -1,0 +1,49 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "disk-usage",
+	"title": "Disk Usage",
+	"description": "Analyze disk space usage and identify large files and folders in your home directory",
+	"icon": "icon.png",
+	"author": "easymikey",
+	"platforms": [
+		"macOS"
+	],
+	"license": "MIT",
+	"categories": [
+		"Developer Tools",
+		"System"
+	],
+	"commands": [
+		{
+			"name": "disk-usage",
+			"title": "Disk Usage",
+			"subtitle": "Analyze disk space",
+			"description": "Scan and analyze disk space usage in your home directory",
+			"mode": "view"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.104.1",
+		"@xstate/react": "^6.0.0",
+		"xstate": "^5.25.0"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.1.1",
+		"@types/node": "^22.13.0",
+		"@types/react": "^19.2.7",
+		"eslint": "^9.39.2",
+		"prettier": "^3.7.4",
+		"react": "^19.2.3",
+		"react-dom": "^19.2.3",
+		"typescript": "^5.9.3"
+	},
+	"scripts": {
+		"build": "ray build",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"test": "bun test",
+		"test:coverage": "bun test --coverage",
+		"publish": "npx @raycast/api@latest publish"
+	}
+}

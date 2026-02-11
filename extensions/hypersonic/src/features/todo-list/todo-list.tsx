@@ -7,6 +7,7 @@ import { SetLabelAction } from '@/components/set-todo-label-action'
 import { RemindAction } from '@/components/remind-todo-action'
 import { CopyToDoAction } from '@/components/copy-todo-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
+import { EditTodoTitleAction } from '@/features/todo-list/components/edit-todo-title-action'
 import { SetProjectAction } from './components/set-todo-project-action'
 import { SetUserAction } from './components/set-todo-user-action'
 import { SetFilter } from './components/set-filter-action'
@@ -35,6 +36,7 @@ export function TodoList() {
     handleSetTag,
     handleSetDate,
     handleDelete,
+    handleUpdateTitle,
     projects,
     projectsById,
     handleSetProject,
@@ -172,7 +174,6 @@ export function TodoList() {
                           onSetStatus={handleSetStatus}
                         />
                       )}
-
                       {hasTagProperty ||
                       hasAssigneeProperty ||
                       hasProjectProperty ||
@@ -186,6 +187,10 @@ export function TodoList() {
                           onSetFilter={handleSetFilter}
                         />
                       ) : null}
+                      <EditTodoTitleAction
+                        todo={todo}
+                        onUpdateTitle={handleUpdateTitle}
+                      />
                       {todo.contentUrl ? (
                         <OpenAttachedLink url={todo.contentUrl} />
                       ) : null}

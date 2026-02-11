@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "streamshare-uploader",
   "title": "Streamshare Uploader",
-  "description": "Upload files to streamshare.",
+  "description": "Upload files to streamshare",
   "icon": "logo.png",
   "author": "PandaDEV",
+  "contributors": [
+    "britown"
+  ],
   "categories": [
     "Data",
     "Developer Tools",
@@ -14,28 +17,57 @@
   "commands": [
     {
       "name": "index",
-      "title": "Upload File",
-      "subtitle": "Streamshare Uploader",
-      "description": "Upload a file to streamshare.",
+      "title": "Upload Selected File",
+      "description": "Upload a file selected in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "uploadFromClipboard",
+      "title": "Upload File from Clipboard",
+      "description": "Upload a file from clipboard (path or copied file)",
+      "mode": "no-view"
+    },
+    {
+      "name": "viewHistory",
+      "title": "View Upload History",
+      "description": "View and manage your uploaded files",
+      "mode": "view"
+    },
+    {
+      "name": "copyLastUploadURL",
+      "title": "Copy Last Upload URL",
+      "description": "Copy the URL of the most recently uploaded file",
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "copyUrlToClipboard",
+      "type": "checkbox",
+      "required": false,
+      "title": "Copy URL to Clipboard",
+      "description": "Automatically copy URL to clipboard when an upload completes",
+      "default": true,
+      "label": "Copy URL to Clipboard"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.77.3",
-    "@types/archiver": "^6.0.2",
-    "@types/ws": "^8.5.11",
+    "@raycast/api": "^1.91.2",
     "archiver": "^7.0.1",
-    "axios": "^1.7.2",
+    "axios": "^1.8.4",
+    "file-type": "^20.1.0",
     "form-data": "^4.0.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@types/archiver": "^6.0.3",
+    "@types/node": "22.13.4",
+    "@types/react": "^18.3.18",
+    "@types/ws": "^8.5.11",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.1",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

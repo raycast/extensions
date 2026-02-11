@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "inkeep",
+  "title": "Inkeep",
+  "description": "Interact with Inkeep Completions API to get AI-powered answers from your knowledge base.",
+  "icon": "icon.png",
+  "author": "marcklingen",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-inkeep",
+      "title": "Search Inkeep",
+      "description": "Search Inkeep to get answers from your knowledge base.",
+      "mode": "view",
+      "icon": "icon.png",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "What would you like to ask?",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "inkeep",
+      "title": "Inkeep",
+      "description": "Interact with Inkeep to get answers from your knowledge base.",
+      "icon": "icon.png"
+    }
+  ],
+  "ai": {
+    "instructions": "When using Inkeep, always provide relevant links and confidence scores with the responses. If the response includes code snippets, format them properly in markdown. Describe the searchQuery in a way that is easy to understand.",
+    "evals": [
+      {
+        "input": "@inkeep How does the decorator work?",
+        "mocks": {
+          "inkeep": " \n\nThe Langfuse Python SDK provides an `@observe()` decorator that automatically captures:\n\n- Nesting via context vars [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n- Timings/durations [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n- Function name [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n- Args and kwargs as input dict [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n- Returned values as output [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n\nHere's a basic example:\n\n```python\nfrom langfuse.decorators import observe\n\n@observe()\ndef fn():\n    pass\n\n@observe()\ndef main():\n    fn()\n\nmain()\n```\n[(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n\nThe decorator will automatically create a trace for the top-level function and spans for any nested functions [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments). You can also configure additional parameters like disabling input/output capture using `capture_input=False` and `capture_output=False` [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments).\n\nFor short-lived environments like AWS Lambda, make sure to call `flush()` before the function terminates to avoid losing events [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments).\n\nThe decorator integrates seamlessly with OpenAI, LangChain, and LlamaIndex frameworks [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchQuery": {
+                  "includes": "decorator"
+                }
+              },
+              "name": "inkeep"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Inkeep API Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "aiApiBaseUrl",
+      "title": "API Base URL",
+      "description": "The base URL for the Inkeep API (e.g., https://api.inkeep.com/v1)",
+      "type": "textfield",
+      "default": "https://api.inkeep.com/v1",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "The Inkeep model to use",
+      "type": "textfield",
+      "default": "inkeep-qa-expert",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

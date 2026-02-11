@@ -1,4 +1,4 @@
-import { URLConstants } from "@constants";
+import { URLConstants } from "Const";
 
 import { ContentType } from "@types";
 

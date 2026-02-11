@@ -15,6 +15,13 @@ enum ToneType {
   Angry = "Angry",
 }
 
+export type State = {
+  command: CommandType;
+  toneType: ToneType;
+  isLoading: boolean;
+  chat: Chat;
+};
+
 export interface Chat {
   question: string;
   answer: string;

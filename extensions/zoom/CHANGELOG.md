@@ -1,5 +1,13 @@
 # Zoom Changelog
 
+## [Windows Support] - 2026-01-05
+
+- Added Windows support for starting, joining, and scheduling Zoom meetings.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Added AI tools for creating and editing meetings.
+
 ## [Log out the user if re-authentication fails] - 2024-07-11
 
 - Automatically log out users if re-authentication fails, instead of displaying an error message.

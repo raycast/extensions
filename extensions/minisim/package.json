@@ -44,5 +44,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "version": "1.0.2"
+  "version": "1.0.2",
+  "platforms": [
+    "macOS"
+  ]
 }

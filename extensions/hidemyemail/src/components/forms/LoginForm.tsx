@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
 interface Credentials {
@@ -28,7 +28,11 @@ export function LoginForm({ submit }: { submit: (credentials: Credentials) => vo
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Login" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Login"
+            icon={{ source: Icon.Person, tintColor: "#4798FF" }}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
@@ -37,7 +41,7 @@ export function LoginForm({ submit }: { submit: (credentials: Credentials) => vo
         text="Please enter your iCloud credentials. A session will be established after a successful login. Your password will not be stored."
       />
       <Form.TextField title="Email" {...itemProps.appleID} />
-      <Form.PasswordField title="Password" {...itemProps.password} />
+      <Form.PasswordField title="Password" {...itemProps.password} autoFocus={true} />
     </Form>
   );
 }

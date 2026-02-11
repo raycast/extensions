@@ -1,5 +1,14 @@
 # FFmpeg Changelog
 
+## [Updates] - 2025-12-08
+
+- Update dependencies to latest versions.
+- Fix linting errors.
+- Add AI tools to get help (so you can create a command yourself) and list a variety of things (formats, codecs, etc.)
+- Update fileDetail component to use proper React formatting.
+
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Added conversion option and percentage progress] - 2023-10-17
 
 - I added a new video file conversion option, called VideoLoop Converter. This uses FFMPEG to create a h.264 .mp4 file without sound, at a bitrate of 4000kbps. This is intended to be used as a replacement for GIFs on certain websites.

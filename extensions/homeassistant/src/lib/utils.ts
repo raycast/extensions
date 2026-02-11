@@ -1,9 +1,9 @@
-import { State } from "./haapi";
-import plist from "plist";
 import * as fs from "fs";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
+import plist from "plist";
 import { setTimeout } from "timers/promises";
+import { State } from "./haapi";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -16,7 +16,10 @@ export function stringToDate(ds: string | null | undefined): Date | undefined {
     if (!isNaN(Date.parse(ds))) {
       return new Date(ds);
     }
-  } catch (error) {
+  } catch (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    error
+  ) {
     return;
   }
 }
@@ -32,7 +35,10 @@ export function formatToHumanDateTime(input: Date | string | undefined): string 
       return undefined;
     }
     return timeAgo.format(date) as string;
-  } catch (error) {
+  } catch (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    error
+  ) {
     return undefined;
   }
 }

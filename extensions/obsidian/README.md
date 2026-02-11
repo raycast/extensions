@@ -4,7 +4,7 @@
 
 # Obsidian for Raycast
 
-This is a raycast extension with commands for the note taking and knowledge management app [Obsidian]( https://obsidian.md/). To use it, install the extension from the [Raycast Store](https://www.raycast.com/KevinBatdorf/obsidian), open Raycast Search and type one of the following commands.
+This is a raycast extension with commands for the note taking and knowledge management app [Obsidian](https://obsidian.md/). To use it, install the extension from the [Raycast Store](https://www.raycast.com/KevinBatdorf/obsidian), open Raycast Search and type one of the following commands.
 
 ## Overview
 
@@ -18,15 +18,16 @@ This is a raycast extension with commands for the note taking and knowledge mana
 - [Create Note](https://github.com/KevinBatdorf/obsidian-raycast#create-note)
 - [Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#daily-note)
 - [Append to Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#append-to-daily-note)
+- [Custom Append Actions](https://github.com/KevinBatdorf/obsidian-raycast#custom-append-actions)
 - [Bookmarked Note](https://github.com/KevinBatdorf/obsidian-raycast#bookmarked-notes)
 - [Obsidian Menu Bar Item](https://github.com/KevinBatdorf/obsidian-raycast#obsidian-menu-bar-item)
 
 ## Search Note
 
-This command allows for quick access to all of your notes. By default you can search notes by title. Enabeling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
+This command allows for quick access to all of your notes. By default you can search notes by title. Enabling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
 Use the tag filter in the top right corner to filter notes based on their tags (both YAML frontmatter and inline tags).
 
-Enabeling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
+Enabling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
 
 - Note content
 - Character Count
@@ -120,6 +121,7 @@ Both the note name and note content support these templates:
 - `{millisecond}`
 - `{timestamp}`, `{zettelkastenID}`
 - `{clipboard}`, `{clip}`
+- `{selection}`, `{selected}`
 - `{\n}`, `{nl}`, `{newline}`
 
 But also the table of tokens defined in the [luxon documentation](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) (such as dd, MM, YYYY,...).
@@ -136,6 +138,19 @@ It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plu
 This command will append text to the daily note from the selected vault. If a daily note doesn't exist it will create one and open it. To append as efficiently as possible, the text is provided as a parameter to the command, so there's no form to fill out.
 
 It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
+
+## Custom Append Actions
+
+This command allows you to create your own "Append to Note" actions. You can configure specific notes, templates, and behaviors, and even assign global keyboard shortcuts to them.
+
+1.  Use the `Create New Action` command (CMD+N in the list) to define a new action.
+2.  Set the **Path** (supports variables like `{date}`, `{year}`, `{week}`).
+3.  Set the **Template** (supports `{clipboard}`, `{content}`).
+4.  Run the action from the list or create a **Quicklink** (CMD+SHIFT+C) to run it directly with a hotkey.
+
+**Action Types:**
+- **Capture text:** Standard input mode. What you type fills the `{content}` placeholder in your template.
+- **Pre-fill with template:** Loads the resolved template into the input box so you can edit it before sending. Ideal for daily logs or structured entries.
 
 ## Bookmarked Notes
 
@@ -209,10 +224,6 @@ Clicking it will reveal a list of your vaults. You can view your bookmarked note
 
 - exclude folders, files and paths so they don't show up in the search
 - select image size (small, medium, large)
-
-## Previous Developer / Maintainer
-
-This extension was originally developed by [Marc Julian Schwarz](https://marc-julian.de/). As of 15th May 2023, Marc Julian is no longer maintaining this extension due to time constraints related to his university studies. This extension will now be further developed and maintained by [Kevin Batdorf](https://github.com/KevinBatdorf/). "Thank you for taking over this extension and keeping it alive for the community." -Marc Julian
 
 ## Blog posts:
 

@@ -2,9 +2,7 @@ import { Action, ActionPanel, Icon } from "@raycast/api";
 import { useState } from "react";
 
 import { IssueResult, IssueState } from "../../api/getIssues";
-
 import { getOrderedStates, getStatusIcon } from "../../helpers/states";
-
 import useStates from "../../hooks/useStates";
 
 import { UpdateIssueParams } from "./IssueActions";
@@ -48,11 +46,14 @@ export default function StateSubmenu({
     <ActionPanel.Submenu
       icon={Icon.Circle}
       title="Set Status"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "s" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+      }}
       onOpen={() => setLoad(true)}
     >
       {orderedStates.length === 0 && isLoadingStates ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         orderedStates.map((state) => (
           <Action

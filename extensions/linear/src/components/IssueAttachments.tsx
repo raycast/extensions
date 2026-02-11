@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { Attachment, IssueResult } from "../api/getIssues";
 import { format } from "date-fns";
+
+import { Attachment, IssueResult } from "../api/getIssues";
+
 import { IssueAttachmentsForm } from "./IssueAttachmentsForm";
 
 type IssueAttachmentProps = {

@@ -111,7 +111,7 @@ export async function getAttendancesAPI(
     }));
     await showToast({
       title: "Loaded Attendances",
-      message: `${attendances.length} Attendances in 2024 loaded successfully!`,
+      message: `${attendances.length} Attendances in ${selectedMonth}/${currentYear} loaded successfully!`,
     });
     return attendances;
   } catch (error) {

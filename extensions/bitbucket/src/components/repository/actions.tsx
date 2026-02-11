@@ -1,56 +1,60 @@
-import { ActionPanel, Color, Icon, Action } from "@raycast/api";
+import { Color, Icon, Action } from "@raycast/api";
 import { PipelinesList } from "./pipelinesList";
 import { PullRequestsList } from "./pullRequestsList";
 
-export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ShowPipelinesActions(props: { repo: any }) {
   return (
     <Action.Push
-      title="Show pipelines"
+      title="Show Pipelines"
       target={<PipelinesList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "p" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+      }}
     />
   );
 }
 
-export function ShowPullRequestsActions(props: { repo: any }): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ShowPullRequestsActions(props: { repo: any }) {
   return (
     <Action.Push
-      title="Show pull requests"
+      title="Show Pull Requests"
       target={<PullRequestsList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "r" },
+        Windows: { modifiers: ["ctrl"], key: "r" },
+      }}
     />
   );
 }
 
-export function GoesToNextPipelinePage({
-  setPageNumber,
-  pageNumber,
-}: {
-  setPageNumber: any;
-  pageNumber: number;
-}): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any; pageNumber: number }) {
   return (
     <Action
-      title="Goes to next page"
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      title="Goes to Next Page"
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "n" },
+        Windows: { modifiers: ["ctrl"], key: "n" },
+      }}
       onAction={() => setPageNumber(pageNumber + 1)}
     />
   );
 }
 
-export function GoesToPreviousPipelinePage({
-  setPageNumber,
-  pageNumber,
-}: {
-  setPageNumber: any;
-  pageNumber: number;
-}): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function GoesToPreviousPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any; pageNumber: number }) {
   return (
     <Action
-      title="Goes to previous page"
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      title="Goes to Previous Page"
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "p" },
+        Windows: { modifiers: ["ctrl"], key: "p" },
+      }}
       onAction={() => setPageNumber(pageNumber - 1)}
     />
   );

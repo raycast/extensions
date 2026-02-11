@@ -1,8 +1,8 @@
 import { closeMainWindow, launchCommand, LaunchProps, LaunchType, open, showInFinder, Toast } from "@raycast/api";
 import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./utils/input-item-utils";
 import { createNewFileWithText, getFinderPath, getNewFileType, isEmpty, showCustomHUD } from "./utils/common-utils";
-import Style = Toast.Style;
 import { createdAction, defaultFileContent, defaultFileType, nullArgumentsAction } from "./types/preferences";
+import Style = Toast.Style;
 
 interface NewFileWithTextArguments {
   fileName: string;
@@ -23,7 +23,6 @@ export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }
   await showCustomHUD({ title: "Creating...", style: Style.Animated });
 
   try {
-    const curFinderPath = await getFinderPath();
     let autoContent = "";
     switch (defaultFileContent) {
       case "empty": {
@@ -40,18 +39,23 @@ export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }
       }
     }
     const inputText = fileContent ? fileContent : autoContent;
-
-    const inputFileType = getNewFileType(fileName ? fileName : defaultFileType);
-    const createdFile = await createNewFileWithText(
-      inputFileType ? inputFileType.extension : defaultFileType,
-      curFinderPath,
-      inputFileType.inputContent ? inputText : "",
-      !isEmpty(fileName)
+    let ext: string | undefined;
+    let content = inputText;
+    let name = "";
+    if (fileName.startsWith(".") && fileName.length > 1) {
+      ext = fileName.split(".").length > 1 ? fileName.split(".")[1] : "";
+    } else {
+      const inputFileType = getNewFileType(fileName ? fileName : defaultFileType);
+      ext = inputFileType ? inputFileType.extension : defaultFileType;
+      content = inputFileType.inputContent ? inputText : defaultFileContent;
+      name = !isEmpty(fileName)
         ? inputFileType
           ? inputFileType.name
           : fileName
-        : inputText.replaceAll(".", "_").substring(0, 10),
-    );
+        : inputText.replaceAll(".", "_").substring(0, 10);
+    }
+    const curFinderPath = await getFinderPath();
+    const createdFile = await createNewFileWithText(ext, curFinderPath, content, name);
     switch (createdAction) {
       case "no": {
         break;

@@ -16,6 +16,7 @@ export type TeamInfo = {
   };
   commonName?: {
     default: string;
+    fr?: string;
   };
   placeNameWithPreposition?: {
     default: string;
@@ -669,6 +670,7 @@ export type GameStringCategory =
   | "linescore"
   | "sog"
   | "faceoffWinningPctg"
+  | "faceoffWins"
   | "powerPlay"
   | "powerPlayPctg"
   | "takeaways"

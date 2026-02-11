@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   List,
   Toast,
   getPreferenceValues,
@@ -20,27 +21,29 @@ function Devices() {
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   if (myDevicesError) {
-    <List isLoading={myDevicesIsLoading}>
-      <List.EmptyView
-        title="Unable to load devices"
-        description={getErrorMessage(myDevicesError)}
-        actions={
-          <ActionPanel>
-            <Action
-              icon={Icon.Repeat}
-              title="Refresh"
-              onAction={async () => {
-                myDevicesRevalidate();
-              }}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>;
+    return (
+      <List isLoading={myDevicesIsLoading}>
+        <List.EmptyView
+          title="Unable to load devices"
+          description={getErrorMessage(myDevicesError)}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Repeat}
+                title="Refresh"
+                onAction={async () => {
+                  myDevicesRevalidate();
+                }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
-  if (myDevicesData?.devices?.length === 0) {
+  if (!Array.isArray(myDevicesData?.devices)) {
     return (
       <List isLoading={myDevicesIsLoading}>
         <List.EmptyView
@@ -54,7 +57,7 @@ function Devices() {
                 onAction={async () => {
                   myDevicesRevalidate();
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
@@ -65,7 +68,7 @@ function Devices() {
 
   return (
     <List isLoading={myDevicesIsLoading}>
-      {myDevicesData?.devices!.map((device) => (
+      {myDevicesData.devices.map((device) => (
         <List.Item
           key={device.id}
           title={device.name ?? "Unknown"}
@@ -110,7 +113,7 @@ function Devices() {
                 onAction={async () => {
                   myDevicesRevalidate();
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }

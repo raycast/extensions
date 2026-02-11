@@ -33,7 +33,9 @@ export default function LightsMenuCommand() {
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Lights">
-        {entities?.map((e) => <LightMenubarItem key={e.entity_id} state={e} />)}
+        {entities?.map((e) => (
+          <LightMenubarItem key={e.entity_id} state={e} />
+        ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <RUIMenuBarExtra.ConfigureCommand />

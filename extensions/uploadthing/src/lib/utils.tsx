@@ -6,6 +6,8 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   Icon,
+  Color,
+  Image,
 } from "@raycast/api";
 import { ACL } from "@uploadthing/shared";
 import { readFile } from "node:fs/promises";
@@ -64,7 +66,6 @@ export const getACLInfoForApp = async () => {
 export const readFilesFromClipboard = async () => {
   const files: string[] = [];
   let offset = 0;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const cb = await Clipboard.read({ offset });
     if (!cb.file) break;
@@ -80,7 +81,7 @@ export const filePathsToFile = async (filePaths: string[]) => {
       const filepath = file.startsWith("file://") ? fileURLToPath(file) : file;
       const filename = basename(filepath);
       const buf = await readFile(filepath);
-      return new UTFile([buf], filename);
+      return new UTFile([new Uint8Array(buf)], filename);
     }),
   );
   return files;
@@ -121,4 +122,11 @@ export const getSignedUrls = async (files: { key: string }[]) => {
       return url;
     }),
   );
+};
+
+export const StatusIconMap: Record<string, Image.ImageLike> = {
+  "Deletion Pending": { source: Icon.Document, tintColor: Color.Orange },
+  Failed: { source: Icon.Document, tintColor: Color.Red },
+  Uploaded: { source: Icon.Document, tintColor: Color.Green },
+  Uploading: { source: Icon.Document, tintColor: Color.Blue },
 };

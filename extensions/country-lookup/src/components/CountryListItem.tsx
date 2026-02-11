@@ -137,7 +137,7 @@ export default function CountryListItem({
             <Action.OpenInBrowser title="Open in Google Maps" url={country.maps.googleMaps} />
           )}
           {country.maps.openStreetMaps && (
-            <Action.OpenInBrowser title="Open in OpenStreet Maps" url={country.maps.openStreetMaps} />
+            <Action.OpenInBrowser title="Open in Openstreet Maps" url={country.maps.openStreetMaps} />
           )}
           <Action.CopyToClipboard icon={Icon.Clipboard} title="Copy Country JSON" content={JSON.stringify(country)} />
         </ActionPanel>

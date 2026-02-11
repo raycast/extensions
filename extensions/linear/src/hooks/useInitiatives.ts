@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 
-import { getInitiatives } from "../api/initiatives";
+import { getInitiatives } from "../tools/get-initiatives";
 
 export function useInitiatives() {
   const { data, error, isLoading, mutate } = useCachedPromise(getInitiatives, [], {

@@ -21,38 +21,56 @@ export default function Command() {
   `;
 
   const model_settings = {
-    model: AI.Model["OpenAI_GPT3.5-turbo"],
+    model: AI.Model["OpenAI_GPT4o-mini"],
     creativity: "high" as const,
   };
 
-  const fetchData = async () => {
+  const fetchData = async (signal: AbortSignal) => {
     setIsLoading(true);
     setAnswer("");
     try {
-      const aiResult = await AI.ask(prompt, model_settings);
+      const aiResult = await AI.ask(prompt, {
+        ...model_settings,
+        signal,
+      });
 
       for await (const data of aiResult) {
         setAnswer((prevAnswer) => prevAnswer + data);
       }
     } catch (error) {
-      console.error("Error:", error);
-      showToast(Toast.Style.Failure, "An error occurred");
+      if (error instanceof Error && error.name === "AbortError") {
+        // Silent abort
+      } else {
+        console.error("Error:", error);
+        showToast(Toast.Style.Failure, "An error occurred");
+      }
     } finally {
-      setIsLoading(false);
+      if (!signal.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchData();
+    const controller = new AbortController();
+    fetchData(controller.signal);
+    return () => controller.abort();
   }, []);
 
   return (
     <Detail
       isLoading={isLoading}
-      markdown={isLoading ? "Generating..." : answer || "No duck fact found"}
+      markdown={answer || (isLoading ? "Generating..." : "No duck fact found")}
       actions={
         <ActionPanel>
-          <Action title="New Fact" icon="duck.svg" onAction={fetchData} />
+          <Action
+            title="New Fact"
+            icon="duck.svg"
+            onAction={() => {
+              const controller = new AbortController();
+              fetchData(controller.signal);
+            }}
+          />
         </ActionPanel>
       }
     />

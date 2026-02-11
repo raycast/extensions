@@ -6,7 +6,8 @@
   "icon": "obs-control.png",
   "author": "Yukai",
   "contributors": [
-    "j3lte"
+    "j3lte",
+    "cyrusyip"
   ],
   "categories": [
     "Productivity"
@@ -61,6 +62,13 @@
       "subtitle": "OBS Control",
       "description": "Toggle Scene Items",
       "mode": "view"
+    },
+    {
+      "name": "toggle-replay-buffer",
+      "title": "Toggle Replay Buffer",
+      "subtitle": "OBS Control",
+      "description": "Toggle Replay Buffer",
+      "mode": "no-view"
     }
   ],
   "preferences": [

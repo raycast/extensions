@@ -1,8 +1,19 @@
-import { LocalStorage } from "@raycast/api";
+import {
+  getPreferenceValues,
+  LocalStorage,
+  open,
+  openExtensionPreferences,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { writeFile } from "fs/promises";
+import { dirname, join } from "path";
 
 export type Timer = {
   id: string;
   name: string | null;
+  tag?: string;
   start: number;
   end: number | null;
 };
@@ -11,7 +22,7 @@ export type TimerList = {
   [key: string]: Timer;
 };
 
-export async function startTimer(name: string | null = null): Promise<Timer> {
+export async function startTimer(name: string | null = null, tag?: string): Promise<Timer> {
   await stopTimer();
 
   const timerId = generateTimerId();
@@ -20,6 +31,7 @@ export async function startTimer(name: string | null = null): Promise<Timer> {
   const timer: Timer = {
     id: timerId,
     name: name,
+    tag,
     start: new Date().getTime(),
     end: null,
   };
@@ -50,6 +62,29 @@ export async function stopTimer(): Promise<Timer | null> {
   await LocalStorage.removeItem("projecttimer.runningTimer");
 
   return timers[timerId];
+}
+
+export async function editTimer(timer: Timer): Promise<Timer | null> {
+  // Disallow setting end time before start time.
+  if (timer.end != null && timer.end <= timer.start) {
+    return null;
+  }
+
+  const timers = await getTimers();
+  // Don't allow editing a running timer.
+  const currentTimerId = await runningTimerId();
+  if (!timers[timer.id] || currentTimerId === timer.id) {
+    return null;
+  }
+
+  timers[timer.id].name = timer.name;
+  timers[timer.id].start = timer.start;
+  timers[timer.id].end = timer.end;
+  timers[timer.id].tag = timer.tag;
+
+  await LocalStorage.setItem("projecttimer.timers", JSON.stringify(timers));
+
+  return timer;
 }
 
 export async function runningTimerId(): Promise<string | null> {
@@ -102,4 +137,71 @@ export async function deleteTimer(timerId: string): Promise<TimerList> {
   }
 
   return timers;
+}
+
+export async function exportTimers() {
+  const { exportDirectory, commaReplacement } = getPreferenceValues<ExtensionPreferences>();
+  if (!exportDirectory) {
+    await showToast({
+      title: "Export directory not set",
+      message: "Please set the export directory in the extension preferences",
+      style: Toast.Style.Failure,
+      primaryAction: {
+        title: "Open Preferences",
+        onAction: () => {
+          openExtensionPreferences();
+        },
+      },
+    });
+    return;
+  }
+
+  const toast = await showToast(Toast.Style.Animated, "Fetching Timers");
+  const timers = await getTimers();
+  toast.title = "Exporting CSV";
+  const csv =
+    "id,name,tag,start,end,duration,formatted\n" +
+    Object.values(timers)
+      .map((timer) => {
+        const duration = getDuration(timer);
+        return [
+          ...Object.values(timer).map((v) => `${v}`.replaceAll(",", commaReplacement)),
+          duration,
+          formatDuration(duration),
+        ].join(",");
+      })
+      .join("\n");
+
+  const file = join(exportDirectory, `projecttimer.runningTimer-${new Date().getTime()}.csv`);
+  try {
+    await writeFile(file, csv, "utf8");
+    toast.message = file;
+    toast.style = Toast.Style.Success;
+    toast.title = "Exported CSV";
+    toast.primaryAction = {
+      title: getFileManagerActionTitle(),
+      async onAction() {
+        await revealExportedFile(file);
+      },
+    };
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Export failed";
+    toast.message = `${error}`;
+  }
+}
+
+const isMacOS = process.platform === "darwin";
+
+function getFileManagerActionTitle(): string {
+  return isMacOS ? "Show in Finder" : "Open File Location";
+}
+
+async function revealExportedFile(file: string): Promise<void> {
+  if (isMacOS) {
+    await showInFinder(file);
+    return;
+  }
+
+  await open(dirname(file));
 }

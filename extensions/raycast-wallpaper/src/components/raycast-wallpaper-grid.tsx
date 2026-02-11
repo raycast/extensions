@@ -1,4 +1,4 @@
-import { Grid, Icon } from "@raycast/api";
+import { Color, Grid, Icon } from "@raycast/api";
 import React from "react";
 import { RaycastWallpaperWithInfo } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
@@ -44,7 +44,14 @@ export function RaycastWallpaperGrid(props: {
                 setSelectedItem={setSelectedItem}
               />
             }
-            accessory={value.exclude ? { icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" } : {}}
+            accessory={
+              value.exclude
+                ? {
+                    icon: { source: Icon.XMarkTopRightSquare, tintColor: Color.SecondaryText },
+                    tooltip: "Excluded From Auto Switch",
+                  }
+                : undefined
+            }
           />
         );
       })}

@@ -2,11 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "trek",
   "title": "Trek",
-  "keywords": [
-    "base",
-    "camp",
-    "basecamp"
-  ],
   "description": "View Basecamp Projects and Manage Todos",
   "icon": "extension-icon.png",
   "author": "opti21",
@@ -30,16 +25,62 @@
       "mode": "view"
     },
     {
+      "name": "quick-create-todo",
+      "title": "Quick Create Todo",
+      "subtitle": "Basecamp",
+      "description": "Create a todo in a default todo list. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "todo-name",
+          "placeholder": "Describe this to-do...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "todo-description",
+          "placeholder": "Add more details about this to-do...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-todo-default-list",
+      "title": "Create Todo - Default List",
+      "subtitle": "Basecamp",
+      "description": "Create a todo in default todo list with more details. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
+      "mode": "view"
+    },
+    {
       "name": "create-todo",
       "title": "Create Todo",
       "subtitle": "Basecamp",
-      "description": "Create a todo in default todo list. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
+      "description": "Create a todo by selecting account, project, and todo list",
       "mode": "view"
+    },
+    {
+      "name": "schedule-meeting",
+      "title": "Schedule Meeting",
+      "subtitle": "Basecamp",
+      "description": "Schedule a meeting in a Basecamp project",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyMeetingUrl",
+          "title": "Copy Meeting URL",
+          "description": "Automatically copy the meeting URL after creating a meeting",
+          "label": "Copy Meeting URL",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.10",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
     "turndown": "^7.2.0"

@@ -113,6 +113,21 @@ export type ListUserNotificationsResponse = {
     DATE: string;
   };
 };
+export type ListUserBackupsResponse = {
+  [key: string]: {
+    TYPE: string;
+    SIZE: string;
+    WEB: string;
+    DNS: string;
+    MAIL: string;
+    DB: string;
+    CRON: string;
+    UDIR: string;
+    RUNTIME: string;
+    TIME: string;
+    DATE: string;
+  };
+};
 export type AddUserRequest = {
   user: string;
   password: string;
