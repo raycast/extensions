@@ -54,16 +54,18 @@ export function SearchProjectActionPanel(props: Readonly<SearchProjectActionPane
           onOpen={() => addToRecentlyAccessedCache(props.repo)}
         />
 
-        <Action.CreateQuicklink
-          title="Create Project Quicklink"
-          icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-          quicklink={{
-            name: props.repo.name,
-            link: props.repo.fullPath,
-            application: openWith.bundleId,
-          }}
-        />
+        {openWith.bundleId && openWith.bundleId !== "-" && (
+          <Action.CreateQuicklink
+            title="Create Project Quicklink"
+            icon={Icon.Link}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+            quicklink={{
+              name: props.repo.name,
+              link: props.repo.fullPath,
+              application: openWith.bundleId,
+            }}
+          />
+        )}
 
         {props.preferences.openWith2 && (
           <Action.Open
