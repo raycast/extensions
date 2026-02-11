@@ -10,7 +10,7 @@ import {
   simpleGit,
   SimpleGit,
 } from "simple-git";
-import { showToast, Toast, getPreferenceValues, Alert, confirmAlert } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, Alert, confirmAlert, environment } from "@raycast/api";
 import { readFileSync, writeFileSync, mkdtempSync, chmodSync, rmSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import {
@@ -36,7 +36,7 @@ import {
 import { basename, join } from "path";
 import { promises as fs } from "fs";
 import { showFailureToast } from "@raycast/utils";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { shellEnvironmentVariables } from "./environment-utils";
 
 /**
@@ -1559,6 +1559,39 @@ __REBASE_TODO__
   }
 
   /**
+   * Checks which files would be ignored by a given pattern.
+   * Temporarily adds the pattern to .gitignore for checking.
+   */
+  async checkIgnorePattern(filePaths: string[]): Promise<string[]> {
+    const ignored = await this.git.raw([
+      "ls-files",
+      "--cached",
+      "--others",
+      "--exclude-standard",
+      ...filePaths.map((pattern) => pattern),
+    ]);
+
+    return ignored.trim().split("\n").filter(Boolean);
+  }
+
+  /**
+   * Adds a pattern to .gitignore.
+   */
+  async addToGitignore(patterns: string[]): Promise<void> {
+    const gitignorePath = join(this.repoPath, ".gitignore");
+    const originalContent = existsSync(gitignorePath) ? readFileSync(gitignorePath, "utf-8") : "";
+    const tempContent =
+      originalContent +
+      (originalContent.endsWith("\n") || originalContent === "" ? "" : "\n") +
+      patterns.join("\n") +
+      "\n";
+    await fs.writeFile(gitignorePath, tempContent, { encoding: "utf-8" });
+
+    // Remove all tracked files that match the patterns
+    await this.git.raw(["rm", "--cached", "--ignore-unmatch", ...patterns]);
+  }
+
+  /**
    * Returns commit history for a specific file (follows renames).
    */
   async getFileHistory(relativePath: string): Promise<Commit[]> {
@@ -1704,7 +1737,9 @@ __REBASE_TODO__
     await gitManager.initRepository(url);
 
     // Create temp tracking directory and files outside of the repo dir
-    const tempDir = await fs.mkdtemp(join(tmpdir(), "raycast-git-clone-"));
+    const tempDir = environment.isDevelopment
+      ? join(targetPath, "temp")
+      : await fs.mkdtemp(join(tmpdir(), "raycast-git-clone-"));
     await fs.mkdir(tempDir, { recursive: true });
 
     const stderrPath = join(tempDir, ".git-clone-stderr.log");
@@ -1717,7 +1752,6 @@ __REBASE_TODO__
 
     // Detached bash script: fetch with progress, set default branch, checkout
     const bashScript = `#!/bin/zsh
-
 echo $$ > "${pidPath}"
 export PATH="${shellEnvironmentVariables.PATH}"
 cd "${targetPath}"
@@ -1742,9 +1776,17 @@ rm -f "${scriptPath}"
     await fs.writeFile(scriptPath, bashScript, { encoding: "utf-8" });
     // Set executable permissions for the script: 0o755 means rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
     chmodSync(scriptPath, 0o755);
-
-    // Run script detached so it survives the parent process
-    exec(`nohup "${scriptPath}" > /dev/null 2>&1 &`, { shell: "/bin/zsh" });
+    // Run script detached so it survives Raycast extension process termination
+    const child = spawn(scriptPath, [], {
+      detached: true,
+      stdio: "ignore",
+      cwd: targetPath,
+      env: { ...process.env, PATH: shellEnvironmentVariables.PATH },
+    });
+    child.on("error", (err) => {
+      showFailureToast(err instanceof Error ? err.message : "Failed to start clone script");
+    });
+    child.unref();
 
     return { url, stderrPath, pidPath, exitCodePath, scriptPath };
   }

@@ -202,6 +202,10 @@ export function RemoteDeleteAction(context: RepositoryContext & { remote: Remote
       await context.gitManager.removeRemote(context.remote.name);
       await showToast({ style: Toast.Style.Success, title: `Remote '${context.remote.name}' removed` });
       await context.remotes.revalidate();
+      await context.branches.revalidate();
+      await context.commits.revalidate();
+      await context.tags.revalidate();
+      await context.status.revalidate();
     } catch {
       // error toast shown by manager
     }

@@ -11,6 +11,7 @@ import { existsSync } from "fs";
 import { RepositoryContext } from "../../open-repository";
 import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../actions/ToggleDetailAction";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { GravatarIcon } from "../icons/GravatarIcon";
 
 export function FileHistoryAction(
   context: RepositoryContext & {
@@ -155,10 +156,22 @@ function CommitListItem(
           metadata={
             context.toggleMetadataController.isShowingDetail ? (
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Author" text={context.commit.author} />
-                <List.Item.Detail.Metadata.Label title="Email" text={context.commit.authorEmail} />
-                <List.Item.Detail.Metadata.Label title="Date" text={context.commit.date.toLocaleString()} />
-                <List.Item.Detail.Metadata.Label title="Hash" text={context.commit.hash} />
+                <List.Item.Detail.Metadata.Label
+                  title="Author"
+                  text={context.commit.author}
+                  icon={GravatarIcon(context.commit)}
+                />
+                <List.Item.Detail.Metadata.Link
+                  title="Email"
+                  text={context.commit.authorEmail}
+                  target={`mailto:${context.commit.authorEmail}`}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Date"
+                  text={context.commit.date.toLocaleString()}
+                  icon={Icon.Calendar}
+                />
+                <List.Item.Detail.Metadata.Label title="SHA" text={context.commit.hash} icon={Icon.Hashtag} />
               </List.Item.Detail.Metadata>
             ) : undefined
           }

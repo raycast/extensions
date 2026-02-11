@@ -1,5 +1,28 @@
 # Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+- **GitIgnore**: Add "Add to .gitignore" action for files in status view
+  - Introduce `GitIgnoreAction` with form for adding patterns to `.gitignore`
+  - Add `checkIgnorePattern` and `addToGitignore` methods to `GitManager`
+  - Preview matched files before adding patterns
+- **Preferences**: Add user icon display options in commits list
+  - Add `userIconProvider` preference (None, Author's initials, Gravatar variants)
+  - Implement `GravatarIcon` component for Gravatar and initials-based avatars
+  - Support Retro, Identicon, Mystery Person, Monsterid, Robohash, Wavatar styles
+
+### Changed
+- **Interactive Rebase**: Improve UX and safety
+  - Add search bar placeholder ("Pick, reword, edit, drop, squash, fixup")
+  - Rename "Pick" action to "Apply Rebase" with Checkmark icon
+  - Add pre-rebase guard for uncommitted changes
+  - Use dynamic icons for squash and fixup actions (`arrow-down-left.svg`)
+
+### Fixed
+- **Git Clone**: Refactor clone process for improved reliability
+- **Upstream Branch**: Enhance null safety in upstream branch handling
+
 ## [Update] - 2026-02-06
 
 ### Added

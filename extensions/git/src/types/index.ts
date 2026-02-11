@@ -21,6 +21,8 @@ export type Preferences = {
   maxTagsToLoad: string;
   /** Automatically generate a commit message using AI when opening the commit view. */
   autoGenerateCommitMessage: boolean;
+  /** User icon provider to use for displaying user icon in the commits list. */
+  userIconProvider: "none" | "initials" | "mp" | "identicon" | "retro" | "monsterid" | "robohash" | "wavatar";
 };
 
 /**

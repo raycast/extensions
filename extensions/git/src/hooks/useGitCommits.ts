@@ -32,7 +32,7 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
         } else if (branchesState.currentBranch) {
           if (branchFilter.upstream) {
             if (!branchesState.currentBranch.upstream) return undefined;
-            const upstreamName = branchesState.currentBranch.upstream!.fullName;
+            const upstreamName = branchesState.currentBranch.upstream?.fullName;
             return {
               kind: "branch",
               ...branchesState.remoteBranches[branchesState.currentBranch.upstream.remote]?.find(
@@ -114,7 +114,7 @@ function evaluateBranchName(branchFilter: BranchFilter, branchesState: BranchesS
         return branchesState.detachedHead.commitHash;
       } else if (branchesState.currentBranch) {
         if (branchFilter.upstream) {
-          return branchesState.currentBranch.upstream!.fullName;
+          return branchesState.currentBranch.upstream?.fullName;
         } else {
           return branchesState.currentBranch.name;
         }

@@ -219,7 +219,7 @@ function RepositoryListItem({
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
             />
-            <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
+            <Action.Trash paths={[repo.path]} onTrash={onRemove} />
           </ActionPanel.Section>
 
           <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
@@ -520,7 +520,7 @@ function CloningRepositoryListItem({
                 onAction={onRemove}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
               />
-              <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
+              <Action.Trash paths={[repo.path]} onTrash={onRemove} />
             </>
           ) : (
             <>

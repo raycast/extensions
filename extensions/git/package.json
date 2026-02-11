@@ -138,6 +138,48 @@
       "label": "Auto Generate Commit Message",
       "default": false,
       "description": "Automatically generate a commit message using AI when opening the commit message view."
+    },
+    {
+      "name": "userIconProvider",
+      "required": true,
+      "type": "dropdown",
+      "title": "User Icon Provider",
+      "default": "none",
+      "description": "The user icon provider to use for displaying user icon in the commits list.",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Author's initials",
+          "value": "initials"
+        },
+        {
+          "title": "Gravatar: Retro (Recommended)",
+          "value": "retro"
+        },
+        {
+          "title": "Gravatar: Identicon (Classic)",
+          "value": "identicon"
+        },
+        {
+          "title": "Gravatar: Mystery Person",
+          "value": "mp"
+        },
+        {
+          "title": "Gravatar: Monsterid",
+          "value": "monsterid"
+        },
+        {
+          "title": "Gravatar: Robohash",
+          "value": "robohash"
+        },
+        {
+          "title": "Gravatar: Wavatar",
+          "value": "wavatar"
+        }
+      ]
     }
   ],
   "dependencies": {
