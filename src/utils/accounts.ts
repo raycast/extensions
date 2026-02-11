@@ -31,6 +31,9 @@ export async function ensureDefaultAccount(): Promise<void> {
 
   const { liveSecretKey, testSecretKey } =
     getPreferenceValues<Preferences>()
+
+  if (!liveSecretKey || !testSecretKey) return
+
   const id = randomUUID()
   const defaultAccount: PaystackAccount = {
     id,
@@ -84,7 +87,11 @@ export async function deleteAccount(id: string): Promise<void> {
   await saveAccounts(remaining)
 
   const activeId = await getActiveAccountId()
-  if (activeId === id && remaining.length > 0) {
-    await setActiveAccountId(remaining[0].id)
+  if (activeId === id) {
+    if (remaining.length > 0) {
+      await setActiveAccountId(remaining[0].id)
+    } else {
+      await LocalStorage.removeItem(ACTIVE_ACCOUNT_KEY)
+    }
   }
 }
