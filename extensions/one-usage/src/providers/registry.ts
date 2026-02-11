@@ -30,7 +30,7 @@ export const PROVIDER_META: Record<string, ProviderMeta> = {
 // Provider Registry
 
 function getEnabledProviders(): ProviderConfig[] {
-  const prefs = getPreferenceValues<BasePreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const all: ProviderConfig[] = [
     { id: "claude", name: "Claude", enabled: prefs.enableClaude, fetch: fetchClaude },
