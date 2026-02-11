@@ -1,6 +1,6 @@
 # Picgo Changelog
 
-## [New Commands and Preferences] - {PR_MERGE_DATE}
+## [New Commands and Preferences] - 2026-02-11
 
 - The config you selected in command `Uploader Images` now will only be remember in **Raycast LocalStorage** once you use this config to conduct an upload.
 - Add command `Manage Uploader Configs` to view, edit, duplicate and delete your configurations of uploaders or create a new one within Raycast.
