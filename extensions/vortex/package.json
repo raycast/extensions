@@ -91,7 +91,7 @@
     },
     {
       "name": "listtransactions",
-      "title": "Recent Transactions",
+      "title": "Transactions",
       "keywords": [
         "wallet",
         "payments",
@@ -99,7 +99,7 @@
         "transactions"
       ],
       "description": "Show recent transactions",
-      "icon": "vortex.png",
+      "icon": "transactions.svg",
       "mode": "view",
       "script": "src/ListTransactions.tsx"
     },

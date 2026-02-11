@@ -29,14 +29,13 @@ Umbrel and Start9 users can also use Vortex with NWC wallets available in their 
 
 - Send: pay a Lightning invoice or Lightning Address (LNURL-pay)
 - Receive: create a Lightning invoice with QR code and payment status
-- Recent Transactions: list recent activity, details, and current balance
+- Transactions: list recent activity and details
 - Redeem Sats: claim LNURL-withdraw vouchers or Cashu tokens
 
 ## Features
 
 - Pay lightning invoices or send to lightning address
 - Create bitcoin & fiat denominated invoices
-- View balance
 - View transaction list
 - See transaction details
 - Redeem Cashu Tokens
