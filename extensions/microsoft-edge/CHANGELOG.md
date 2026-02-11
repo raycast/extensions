@@ -1,6 +1,6 @@
 # Microsoft Edge Changelog
 
-## [Search Workspace] - 2026-02-11
+## [Search Workspace] - {PR_MERGE_DATE}
 
 - New **Search Workspace** command to browse and launch Edge Workspaces
 
