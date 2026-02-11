@@ -3,7 +3,7 @@ import { List, Icon, Color } from "@raycast/api";
 type Props = {
     error: Error;
     description?: string;
-    actions?: React.ReactElement;
+    actions?: React.ReactNode;
 };
 
 export default function ErrorView({ error, description, actions }: Props) {
