@@ -1,6 +1,7 @@
 import { detectLockStateWithInfo } from "./detector";
 import { loadState, loadMetrics, saveState, saveMetrics } from "./storage";
 import { StateData } from "./types";
+import { logEvent } from "./logger";
 
 /**
  * 间隙检测阈值：90 秒
@@ -13,6 +14,33 @@ import { StateData } from "./types";
  * 因此间隙检测主要作为兜底方案，正常情况下通过 Swift CGSession 直接检测锁屏状态。
  */
 const GAP_THRESHOLD_MS = 90 * 1000;
+
+/**
+ * 计算 elapsed 中属于"今天"的部分（严格按本地时间 0 点切割）
+ *
+ * 场景：lastChangeAt=昨天23:00, now=今天08:00, elapsed=9h
+ * → todayStart=今天00:00
+ * → todayPortion = now - todayStart = 8h（只算今天的部分）
+ *
+ * 如果 lastChangeAt 已经在今天，则全部算今天：
+ * → todayPortion = now - lastChangeAt = elapsed
+ *
+ * @param lastChangeAt - 上一次状态变更时间戳（Unix ms）
+ * @param now - 当前时间戳（Unix ms）
+ * @returns 属于今天的时长（ms）
+ */
+function getTodayPortionMs(lastChangeAt: number, now: number): number {
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayStartMs = todayStart.getTime();
+
+  if (lastChangeAt >= todayStartMs) {
+    // lastChangeAt 在今天内，全部 elapsed 属于今天
+    return now - lastChangeAt;
+  }
+  // lastChangeAt 在今天之前，只计入 0 点之后的部分
+  return now - todayStartMs;
+}
 
 /**
  * 状态机核心处理函数
@@ -46,28 +74,68 @@ export async function processStateChange(): Promise<void> {
   const [prevState, metrics] = await Promise.all([loadState(), loadMetrics()]);
 
   // 2. 检测当前锁屏状态（使用带诊断信息的版本）
-  const detectResult = detectLockStateWithInfo();
+  const detectResult = await detectLockStateWithInfo();
 
   const elapsed = now - prevState.lastChangeAt;
 
-  // 如果检测失败，保持上一次状态不变，仅更新时间戳
+  // 如果检测失败，保持上一次状态不变。lastChangeAt 仅在上次为 locked 时推进（已计入时长），
+  // 否则保持不变，避免在「实际已锁屏但检测失败」时丢失 elapsed 时间：
+  // 若推进 lastChangeAt，下次成功检测时的 duration 会从失败时刻算起，真实锁屏时长将永久丢失。
   if (!detectResult.success) {
-    const newState: StateData = {
+    let metricsChangedOnFailure = false;
+
+    // 上一状态为 locked 时，检测失败期间仍应累计锁屏时长，并推进 lastChangeAt（避免下次重复累计）。
+    if (prevState.current === "locked" && elapsed > 0 && elapsed <= 24 * 60 * 60 * 1000) {
+      const todayPortion = getTodayPortionMs(prevState.lastChangeAt, now);
+      metrics.todayLockedMs += todayPortion;
+      metricsChangedOnFailure = true;
+    }
+
+    const newStateOnFailure: StateData = {
       current: prevState.current,
-      lastChangeAt: now,
+      lastChangeAt: prevState.current === "locked" ? now : prevState.lastChangeAt,
     };
-    await saveState(newState);
+
+    logEvent({
+      timestamp: now,
+      action: "detection_failed",
+      prevState: prevState.current,
+      currentState: prevState.current,
+      elapsed,
+      method: "none",
+      todayLockedMs: metrics.todayLockedMs,
+      detail: "Detection failed, state unchanged",
+    });
+
+    if (metricsChangedOnFailure) {
+      await Promise.all([saveState(newStateOnFailure), saveMetrics(metrics)]);
+    } else {
+      await saveState(newStateOnFailure);
+    }
+
     return;
   }
 
   const currentLockState = detectResult.state;
 
-  // 防御：如果时间差异常（负值或超过 24 小时），跳过本次处理
+  // 防御：如果时间差异常（负值或超过 24 小时），记录异常日志并跳过本次处理
   if (elapsed < 0 || elapsed > 24 * 60 * 60 * 1000) {
     const newState: StateData = {
       current: currentLockState,
       lastChangeAt: now,
     };
+
+    logEvent({
+      timestamp: now,
+      action: "anomaly",
+      prevState: prevState.current,
+      currentState: currentLockState,
+      elapsed,
+      method: detectResult.method,
+      todayLockedMs: metrics.todayLockedMs,
+      detail: `Abnormal elapsed time: ${elapsed}ms (${elapsed / 1000 / 3600}h)`,
+    });
+
     await saveState(newState);
     return;
   }
@@ -80,26 +148,101 @@ export async function processStateChange(): Promise<void> {
     // ─── 直接状态转换 ───
     if (prevState.current === "unlocked" && currentLockState === "locked") {
       // UNLOCKED → LOCKED：记录解锁持续时长
-      metrics.lastUnlockIntervalMs = elapsed;
-      metricsChanged = true;
+      // 若 elapsed > 间隙阈值，推断间隙期间为锁屏，先累加今日锁屏时长，避免丢失
+      if (elapsed > GAP_THRESHOLD_MS) {
+        const todayPortion = getTodayPortionMs(prevState.lastChangeAt, now);
+        metrics.todayLockedMs += todayPortion;
+        metrics.lastLockDurationMs = elapsed;
+        metrics.lastUnlockIntervalMs = 0; // 间隙期间推断为锁屏，解锁间隔视为 0
+        metricsChanged = true;
+
+        logEvent({
+          timestamp: now,
+          action: "state_change",
+          prevState: prevState.current,
+          currentState: currentLockState,
+          elapsed,
+          method: detectResult.method,
+          todayLockedMs: metrics.todayLockedMs,
+          detail: `UNLOCKED → LOCKED (gap inferred as locked: ${todayPortion}ms)`,
+        });
+      } else {
+        metrics.lastUnlockIntervalMs = elapsed;
+        metricsChanged = true;
+
+        logEvent({
+          timestamp: now,
+          action: "state_change",
+          prevState: prevState.current,
+          currentState: currentLockState,
+          elapsed,
+          method: detectResult.method,
+          todayLockedMs: metrics.todayLockedMs,
+          detail: "UNLOCKED → LOCKED",
+        });
+      }
     } else if (prevState.current === "locked" && currentLockState === "unlocked") {
       // LOCKED → UNLOCKED：记录锁屏持续时长，累加今日锁屏时长
       metrics.lastLockDurationMs = elapsed;
-      metrics.todayLockedMs += elapsed;
+      const todayPortion = getTodayPortionMs(prevState.lastChangeAt, now);
+      metrics.todayLockedMs += todayPortion;
       metricsChanged = true;
+
+      logEvent({
+        timestamp: now,
+        action: "state_change",
+        prevState: prevState.current,
+        currentState: currentLockState,
+        elapsed,
+        method: detectResult.method,
+        todayLockedMs: metrics.todayLockedMs,
+        detail: `LOCKED → UNLOCKED (today portion: ${todayPortion}ms)`,
+      });
     }
   } else if (currentLockState === "locked") {
     // ─── 持续锁屏：累加今日锁屏时长 ───
-    metrics.todayLockedMs += elapsed;
+    const todayPortion = getTodayPortionMs(prevState.lastChangeAt, now);
+    metrics.todayLockedMs += todayPortion;
     metricsChanged = true;
+
+    // 降频日志：每 5 分钟记录一次持续锁屏状态（避免日志量过大）
+    const shouldLog = elapsed > 5 * 60 * 1000 || prevState.lastChangeAt === 0;
+    if (shouldLog) {
+      logEvent({
+        timestamp: now,
+        action: "poll",
+        prevState: prevState.current,
+        currentState: currentLockState,
+        elapsed,
+        method: detectResult.method,
+        todayLockedMs: metrics.todayLockedMs,
+        detail: `Continuous locked (today portion: ${todayPortion}ms)`,
+      });
+    }
   } else if (currentLockState === "unlocked" && elapsed > GAP_THRESHOLD_MS) {
     // ─── 间隙检测（Gap Detection）兜底 ───
     // 前后状态都是 "unlocked"，但时间间隔远超正常轮询间隔。
-    // 这说明 Mac 在此期间处于锁屏/休眠状态，Raycast 后台任务未执行。
-    // 将整个间隙记为锁屏时长。
-    metrics.lastLockDurationMs = elapsed;
-    metrics.todayLockedMs += elapsed;
-    metricsChanged = true;
+    // 推断该间隙为锁屏/休眠，显式建模为 locked 区间：保存 current=locked、lastChangeAt=间隙起点。
+    // 不在本 tick 累加 todayLockedMs，由下一 tick 的 LOCKED→UNLOCKED 一次性计入完整 elapsed，
+    // 避免「本次累加 + 后续 locked 累积/解锁转换」重复计入重叠时间。
+    const gapState: StateData = {
+      current: "locked",
+      lastChangeAt: prevState.lastChangeAt,
+    };
+
+    logEvent({
+      timestamp: now,
+      action: "gap_detected",
+      prevState: prevState.current,
+      currentState: currentLockState,
+      elapsed,
+      method: detectResult.method,
+      todayLockedMs: metrics.todayLockedMs,
+      detail: `Gap inferred as locked, will add on next LOCKED→UNLOCKED (elapsed: ${elapsed}ms)`,
+    });
+
+    await saveState(gapState);
+    return;
   }
 
   // 4. 保存状态和指标（优化：并行写入，且只在有变化时写入 metrics）

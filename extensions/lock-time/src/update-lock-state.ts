@@ -20,11 +20,9 @@ export default async function Command() {
   try {
     // 手动触发时先做诊断检测
     if (isManual) {
-      const detectResult = detectLockStateWithInfo();
+      const detectResult = await detectLockStateWithInfo();
       if (!detectResult.success) {
-        await showHUD(
-          `⚠️ Detection failed: ${detectResult.error?.substring(0, 80) || "Unknown error"}`,
-        );
+        await showHUD(`⚠️ Detection failed: ${detectResult.error?.substring(0, 80) || "Unknown error"}`);
         return;
       }
     }
@@ -35,9 +33,7 @@ export default async function Command() {
     if (isManual) {
       const state = await loadState();
       const metrics = await loadMetrics();
-      await showHUD(
-        `✓ State: ${state.current} | Today locked: ${formatDuration(metrics.todayLockedMs)}`,
-      );
+      await showHUD(`✓ State: ${state.current} | Today locked: ${formatDuration(metrics.todayLockedMs)}`);
     }
   } catch (error) {
     if (isManual) {

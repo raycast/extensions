@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { spawn } from "child_process";
 import { LockState } from "./types";
 
 /**
@@ -46,6 +46,7 @@ type DetectMethod = "swift-cgsession" | "applescript" | "fallback";
  */
 let cachedResult: { result: DetectResult; timestamp: number } | null = null;
 const CACHE_DURATION_MS = 5000; // 5 秒缓存
+const MAX_OUTPUT_SIZE = 1024 * 1024; // 1MB，防止子进程输出异常
 
 /**
  * 检测结果（包含诊断信息）
@@ -62,6 +63,77 @@ export interface DetectResult {
   error?: string;
 }
 
+interface CommandOptions {
+  input?: string;
+  timeoutMs: number;
+}
+
+async function runCommand(command: string, args: string[], options: CommandOptions): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: "pipe" });
+    let stdout = "";
+    let stderr = "";
+    let finished = false;
+
+    const timeoutId = setTimeout(() => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      child.kill("SIGKILL");
+      reject(new Error(`${command} timed out after ${options.timeoutMs}ms`));
+    }, options.timeoutMs);
+
+    const appendOutput = (chunk: Buffer, target: "stdout" | "stderr") => {
+      if (finished) return;
+      const text = chunk.toString("utf-8");
+      if (target === "stdout") {
+        stdout += text;
+      } else {
+        stderr += text;
+      }
+      if (stdout.length > MAX_OUTPUT_SIZE || stderr.length > MAX_OUTPUT_SIZE) {
+        finished = true;
+        clearTimeout(timeoutId);
+        child.kill("SIGKILL");
+        reject(new Error(`${command} output exceeded ${MAX_OUTPUT_SIZE} bytes`));
+      }
+    };
+
+    child.stdout.on("data", (chunk: Buffer) => appendOutput(chunk, "stdout"));
+    child.stderr.on("data", (chunk: Buffer) => appendOutput(chunk, "stderr"));
+
+    child.on("error", (error) => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      clearTimeout(timeoutId);
+      reject(error);
+    });
+
+    child.on("close", (code, signal) => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      clearTimeout(timeoutId);
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        reject(
+          new Error(`${command} exited with code ${code ?? "unknown"} (${signal ?? "no signal"}): ${stderr.trim()}`),
+        );
+      }
+    });
+
+    if (options.input) {
+      child.stdin.write(options.input);
+    }
+    child.stdin.end();
+  });
+}
+
 /**
  * 方法 1（推荐）：通过 Swift + CoreGraphics 检测锁屏状态
  *
@@ -73,13 +145,9 @@ export interface DetectResult {
  *
  * @returns 检测结果，或 null 表示此方法不可用
  */
-function detectViaSwiftCGSession(): DetectResult | null {
+async function detectViaSwiftCGSession(): Promise<DetectResult | null> {
   try {
-    const rawOutput = execSync("swift -", {
-      input: SWIFT_DETECT_SCRIPT,
-      timeout: 10000,
-      encoding: "utf-8",
-    }).trim();
+    const rawOutput = (await runCommand("swift", ["-"], { input: SWIFT_DETECT_SCRIPT, timeoutMs: 10000 })).trim();
 
     let parsed: { state: string; keys: string[] };
     try {
@@ -118,14 +186,10 @@ function detectViaSwiftCGSession(): DetectResult | null {
  *
  * @returns 检测结果，或 null 表示此方法不可用
  */
-function detectViaAppleScript(): DetectResult | null {
+async function detectViaAppleScript(): Promise<DetectResult | null> {
   try {
-    const script =
-      'tell application "System Events" to get name of first application process whose frontmost is true';
-    const result = execSync(`osascript -e '${script}'`, {
-      timeout: 5000,
-      encoding: "utf-8",
-    }).trim();
+    const script = 'tell application "System Events" to get name of first application process whose frontmost is true';
+    const result = (await runCommand("osascript", ["-e", script], { timeoutMs: 5000 })).trim();
 
     const isLocked = LOCKED_PROCESSES.includes(result);
     return {
@@ -152,7 +216,9 @@ function detectViaAppleScript(): DetectResult | null {
  * @param skipCache - 是否跳过缓存（默认 false）
  * @returns 检测结果，包含状态、方法、详情和是否成功
  */
-export function detectLockStateWithInfo(skipCache = false): DetectResult {
+let inflight: Promise<DetectResult> | null = null;
+
+export async function detectLockStateWithInfo(skipCache = false): Promise<DetectResult> {
   // 检查缓存（5 秒内直接返回）
   if (!skipCache && cachedResult) {
     const age = Date.now() - cachedResult.timestamp;
@@ -161,36 +227,54 @@ export function detectLockStateWithInfo(skipCache = false): DetectResult {
     }
   }
 
-  // 方法 1: Swift CGSession (macOS 26 上最可靠)
-  const swiftResult = detectViaSwiftCGSession();
-  if (swiftResult) {
-    cachedResult = { result: swiftResult, timestamp: Date.now() };
-    return swiftResult;
+  if (!skipCache && inflight) {
+    return inflight;
   }
 
-  // 方法 2: AppleScript (备用)
-  const asResult = detectViaAppleScript();
-  if (asResult) {
-    cachedResult = { result: asResult, timestamp: Date.now() };
-    return asResult;
+  const detectionPromise = (async () => {
+    // 方法 1: Swift CGSession (macOS 26 上最可靠)
+    const swiftResult = await detectViaSwiftCGSession();
+    if (swiftResult) {
+      cachedResult = { result: swiftResult, timestamp: Date.now() };
+      return swiftResult;
+    }
+
+    // 方法 2: AppleScript (备用)
+    const asResult = await detectViaAppleScript();
+    if (asResult) {
+      cachedResult = { result: asResult, timestamp: Date.now() };
+      return asResult;
+    }
+
+    // 全部失败
+    const fallbackResult: DetectResult = {
+      state: "unlocked",
+      method: "fallback",
+      detail: "All detection methods failed",
+      success: false,
+      error: "Swift CGSession and AppleScript detection both failed.",
+    };
+
+    // 失败结果不缓存（下次重试）
+    return fallbackResult;
+  })();
+
+  if (!skipCache) {
+    inflight = detectionPromise;
   }
 
-  // 全部失败
-  const fallbackResult: DetectResult = {
-    state: "unlocked",
-    method: "fallback",
-    detail: "All detection methods failed",
-    success: false,
-    error: "Swift CGSession and AppleScript detection both failed.",
-  };
-
-  // 失败结果不缓存（下次重试）
-  return fallbackResult;
+  try {
+    return await detectionPromise;
+  } finally {
+    if (inflight === detectionPromise) {
+      inflight = null;
+    }
+  }
 }
 
 /**
  * 简单版本：仅返回锁屏状态（向后兼容）
  */
-export function detectLockState(): LockState {
-  return detectLockStateWithInfo().state;
+export async function detectLockState(): Promise<LockState> {
+  return (await detectLockStateWithInfo()).state;
 }

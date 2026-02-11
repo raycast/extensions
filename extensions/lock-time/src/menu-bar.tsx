@@ -18,21 +18,12 @@ export default function Command() {
   return (
     <MenuBarExtra icon={Icon.Lock} title={title} isLoading={isLoading}>
       <MenuBarExtra.Section title="Today">
-        <MenuBarExtra.Item
-          title={`Today Locked: ${formatDuration(metrics.todayLockedMs)}`}
-          icon={Icon.Clock}
-        />
+        <MenuBarExtra.Item title={`Today Locked: ${formatDuration(metrics.todayLockedMs)}`} icon={Icon.Clock} />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Last Session">
-        <MenuBarExtra.Item
-          title={`Last Lock: ${formatDuration(metrics.lastLockDurationMs)}`}
-          icon={Icon.Lock}
-        />
-        <MenuBarExtra.Item
-          title={`Last Focus: ${formatDuration(metrics.lastUnlockIntervalMs)}`}
-          icon={Icon.Monitor}
-        />
+        <MenuBarExtra.Item title={`Last Lock: ${formatDuration(metrics.lastLockDurationMs)}`} icon={Icon.Lock} />
+        <MenuBarExtra.Item title={`Last Focus: ${formatDuration(metrics.lastUnlockIntervalMs)}`} icon={Icon.Monitor} />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>

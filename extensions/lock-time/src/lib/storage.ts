@@ -25,6 +25,15 @@ export function getDefaultMetrics(): MetricsData {
 }
 
 /**
+ * 计算今天已经过去的时长（ms），用于 todayLockedMs 合理性校验
+ */
+function getTodayElapsedMs(now = Date.now()): number {
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  return now - todayStart.getTime();
+}
+
+/**
  * 从 LocalStorage 读取状态数据
  */
 export async function loadState(): Promise<StateData> {
@@ -56,6 +65,15 @@ export async function loadMetrics(): Promise<MetricsData> {
         ...metrics,
         todayLockedMs: 0,
         todayDate: today,
+      };
+    }
+
+    // 合理性校验：todayLockedMs 不应超过今天已过去时长，也不应为负数
+    const maxTodayMs = getTodayElapsedMs();
+    if (metrics.todayLockedMs < 0 || metrics.todayLockedMs > maxTodayMs) {
+      return {
+        ...metrics,
+        todayLockedMs: Math.min(Math.max(metrics.todayLockedMs, 0), maxTodayMs),
       };
     }
 

@@ -1,9 +1,10 @@
 import { List, ActionPanel, Action, Icon, Color, showToast, Toast, Clipboard } from "@raycast/api";
 import { useLockData } from "./hooks/use-lock-data";
 import { formatDuration } from "./lib/formatter";
-import { resetToday, resetAll } from "./lib/storage";
+import { resetToday, resetAll, loadState, loadMetrics } from "./lib/storage";
 import { detectLockStateWithInfo } from "./lib/detector";
 import { processStateChange } from "./lib/state-machine";
+import { readRecentLogs, getLogFileSize, getLogFilePath } from "./lib/logger";
 import { useState } from "react";
 
 /**
@@ -17,6 +18,7 @@ import { useState } from "react";
 export default function Command() {
   const { state, metrics, isLoading, revalidate } = useLockData();
   const [diagnosticInfo, setDiagnosticInfo] = useState<string | null>(null);
+  const [metaInfo, setMetaInfo] = useState<string | null>(null);
 
   /**
    * 运行一次状态检测并刷新数据
@@ -32,9 +34,19 @@ export default function Command() {
    */
   async function handleDiagnostic() {
     // 诊断时跳过缓存，强制重新检测
-    const result = detectLockStateWithInfo(true);
+    const result = await detectLockStateWithInfo(true);
+
+    // 获取元信息（从 storage 实时读取，避免使用可能过时的 React state）
+    const currentState = await loadState();
+    const lastChangeAgo = Date.now() - currentState.lastChangeAt;
+    const logSize = getLogFileSize();
+    const logSizeKB = (logSize / 1024).toFixed(1);
+
     if (result.success) {
       setDiagnosticInfo(`✓ Detection OK — [${result.method}] ${result.detail} → ${result.state}`);
+      setMetaInfo(
+        `Last change: ${formatDuration(lastChangeAgo)} ago | Log: ${logSizeKB}KB | Date: ${metrics.todayDate}`,
+      );
       await showToast({
         style: Toast.Style.Success,
         title: "Detection works!",
@@ -42,6 +54,7 @@ export default function Command() {
       });
     } else {
       setDiagnosticInfo(`✗ Detection failed — ${result.error}`);
+      setMetaInfo(`Last change: ${formatDuration(lastChangeAgo)} ago | Log: ${logSizeKB}KB`);
       await showToast({
         style: Toast.Style.Failure,
         title: "Detection failed",
@@ -85,6 +98,89 @@ export default function Command() {
     await showToast({ style: Toast.Style.Success, title: "Stats copied to clipboard" });
   }
 
+  /**
+   * 查看事件日志：读取最近 20 条日志并复制到剪贴板
+   */
+  async function handleViewEventLog() {
+    try {
+      const logs = readRecentLogs(20);
+      if (logs.length === 0) {
+        await showToast({ style: Toast.Style.Failure, title: "No event logs found" });
+        return;
+      }
+
+      const logText = [
+        `Lock Time Event Log (recent ${logs.length} entries)`,
+        `Log file: ${getLogFilePath()}`,
+        `═══════════════════════════════════════`,
+        "",
+        ...logs.map((log) => {
+          const elapsedSec = (log.elapsed / 1000).toFixed(1);
+          const todayMin = (log.todayLockedMs / 1000 / 60).toFixed(1);
+          return [
+            `[${log.iso}]`,
+            `  Action:   ${log.action}`,
+            `  Transition: ${log.prevState} → ${log.currentState}`,
+            `  Elapsed:  ${elapsedSec}s`,
+            `  Method:   ${log.method}`,
+            `  Today Locked: ${todayMin}min`,
+            log.detail ? `  Detail:   ${log.detail}` : null,
+            "",
+          ]
+            .filter(Boolean)
+            .join("\n");
+        }),
+      ].join("\n");
+
+      await Clipboard.copy(logText);
+      await showToast({ style: Toast.Style.Success, title: `${logs.length} log entries copied` });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to read logs",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  /**
+   * 导出原始数据：state + metrics JSON + 最近日志
+   */
+  async function handleExportRawData() {
+    try {
+      const [currentState, currentMetrics] = await Promise.all([loadState(), loadMetrics()]);
+      const logs = readRecentLogs(10);
+      const logSize = getLogFileSize();
+
+      const exportData = {
+        timestamp: Date.now(),
+        iso: new Date().toISOString(),
+        state: currentState,
+        metrics: currentMetrics,
+        meta: {
+          lastChangeAgo: Date.now() - currentState.lastChangeAt,
+          logFileSize: logSize,
+          logFilePath: getLogFilePath(),
+        },
+        recentLogs: logs,
+      };
+
+      const jsonText = JSON.stringify(exportData, null, 2);
+      await Clipboard.copy(jsonText);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Raw data exported",
+        message: `${logs.length} logs included`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Export failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
   // 公共 Actions 面板
   const sharedActions = (
     <ActionPanel>
@@ -101,14 +197,23 @@ export default function Command() {
         shortcut={{ modifiers: ["cmd"], key: "t" }}
         onAction={handleDiagnostic}
       />
-      <Action title="Copy Stats" icon={Icon.Clipboard} onAction={handleCopyStats} />
-      <ActionPanel.Section title="Reset">
+      <ActionPanel.Section title="Debug">
         <Action
-          title="Reset Today"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={handleResetToday}
+          title="View Event Log"
+          icon={Icon.List}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          onAction={handleViewEventLog}
         />
+        <Action
+          title="Export Raw Data"
+          icon={Icon.Document}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+          onAction={handleExportRawData}
+        />
+        <Action title="Copy Stats" icon={Icon.Clipboard} onAction={handleCopyStats} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Reset">
+        <Action title="Reset Today" icon={Icon.Trash} style={Action.Style.Destructive} onAction={handleResetToday} />
         <Action
           title="Reset All Data"
           icon={Icon.ExclamationMark}
@@ -170,6 +275,14 @@ export default function Command() {
             }}
             actions={sharedActions}
           />
+          {metaInfo && (
+            <List.Item
+              title="Meta Info"
+              subtitle={metaInfo}
+              icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
+              actions={sharedActions}
+            />
+          )}
         </List.Section>
       )}
     </List>

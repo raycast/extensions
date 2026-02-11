@@ -9,7 +9,7 @@
 - `processStateChange()`: parallelized LocalStorage read/write, conditional writes reduce unnecessary I/O
 - Manual diagnosis (Cmd+T) forces cache skip for real-time status
 
-## [Fixed Lock Detection on macOS 26] - 2026-02-08
+## [Fixed Lock Detection on macOS 26] - {PR_MERGE_DATE}
 
 - Fixed lock detection completely broken on macOS 26
   - JXA ObjC bridge cannot properly bridge `CFDictionary`, causing `CGSSessionScreenIsLocked` field to be lost
@@ -21,7 +21,7 @@
 - Upgraded detection to multi-level fallback: Swift CGSession → AppleScript → Gap Detection
 - Background no-view command logs now use `fs.appendFileSync()` to prevent async log loss
 
-## [Initial Version] - 2026-02-07
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Core lock time tracking
   - Today Locked Time: cumulative lock duration for today
