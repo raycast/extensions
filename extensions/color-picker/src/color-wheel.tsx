@@ -21,15 +21,17 @@ export default function Command({
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
-        let pickColor: () => Promise<Color | undefined | null>;
+        let pickColor: () => Promise<Color | null | undefined>;
         if (isMac) {
           const { pickColor: pickColorSwift } = await import("swift:../swift/color-picker");
           pickColor = pickColorSwift;
         } else {
           const { pick_color: pickColorRust } = await import("rust:../rust/color-picker");
-          pickColor = pickColorRust;
+          // colorSpace is accessible in runtime, but typescript definitions are generated wrong by raycast/api
+          // hopefully will be fixed in future versions of raycast/api
+          pickColor = pickColorRust as () => Promise<Color | null | undefined>;
         }
-        const pickedColor = (await pickColor()) as Color | undefined | null;
+        const pickedColor = await pickColor();
         if (!pickedColor) {
           return;
         }

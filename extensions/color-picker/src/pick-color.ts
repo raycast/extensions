@@ -17,7 +17,7 @@ export default async function Command(props: PickColorCommandLaunchProps) {
       pickColor = pickColorSwift;
     } else {
       const { pick_color: pickColorRust } = await import("rust:../rust/color-picker");
-      pickColor = pickColorRust;
+      pickColor = pickColorRust as () => Promise<Color | undefined | null>;
     }
 
     const pickedColor = (await pickColor()) as Color | undefined | null;

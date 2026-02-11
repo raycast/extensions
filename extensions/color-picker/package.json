@@ -210,7 +210,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.5",
+    "@raycast/api": "^1.104.6",
     "@raycast/utils": "^2.2.2",
     "color-namer": "^1.4.0",
     "colorjs.io": "^0.5.1",
