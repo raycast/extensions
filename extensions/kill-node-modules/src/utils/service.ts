@@ -80,7 +80,7 @@ export class NodeModuleService {
         onlyDirectories: true,
         absolute: true,
         stats: true,
-        ignore: ["**/node_modules/*"],
+        ignore: ["**/node_modules/**/node_modules"],
         dot: true,
         followSymbolicLinks: false,
         unique: true,
