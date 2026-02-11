@@ -3,7 +3,7 @@ import { Sound } from "../types";
 
 function getCacheTTL(): number {
   try {
-    const prefs = getPreferenceValues<{ cacheDurationMinutes?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
     const minutes = parseInt(prefs.cacheDurationMinutes ?? "60", 10);
     if (Number.isFinite(minutes) && minutes > 0) return minutes * 60 * 1000;
   } catch {

@@ -1,11 +1,7 @@
-import { showToast, Toast, closeMainWindow, PopToRootType } from "@raycast/api";
+import { LaunchProps, showToast, Toast, closeMainWindow, PopToRootType } from "@raycast/api";
 import { runPlayFavoriteAndClose } from "./utils/playFavorite";
 
-interface PlayFavoriteProps {
-  arguments?: { number?: string };
-}
-
-export default async function Command(props: PlayFavoriteProps) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.PlayFavorite }>) {
   const raw = props.arguments?.number;
   const index = raw ? parseInt(String(raw).trim(), 10) : NaN;
 

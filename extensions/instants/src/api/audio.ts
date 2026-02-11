@@ -1,4 +1,4 @@
-import { exec, ChildProcess } from "child_process";
+import { execFile, spawn, ChildProcess } from "child_process";
 import { writeFile, unlink, mkdir, readdir } from "fs/promises";
 import { existsSync } from "fs";
 import * as path from "path";
@@ -53,16 +53,11 @@ async function resolveToFilePath(urlOrPath: string): Promise<string> {
   throw new Error("File not found: " + urlOrPath);
 }
 
-/** Escape path for use in shell (double-quote escaping). */
-function escapePath(filePath: string): string {
-  return filePath.replace(/"/g, '\\"');
-}
-
 /**
  * Play a sound and resolve when playback finishes (foreground).
  * Stops any currently playing sound first.
  * If a play is already in progress, returns immediately so the sound only plays once.
- * On Windows, starts the default app and resolves immediately (no stop support).
+ * On Windows, opens the file with the default app via cmd /c start (using execFile to avoid shell injection).
  */
 export async function playSound(urlOrPath: string): Promise<void> {
   if (playSoundInProgress) {
@@ -72,11 +67,9 @@ export async function playSound(urlOrPath: string): Promise<void> {
   stopCurrentSound();
   try {
     const filePath = await resolveToFilePath(urlOrPath);
-    const quoted = escapePath(filePath);
 
     if (isWindows) {
-      const cmd = `start "" "${quoted}"`;
-      exec(cmd, { shell: "cmd.exe" });
+      execFile("cmd", ["/c", "start", "", filePath]);
       playSoundInProgress = false;
       return;
     }
@@ -86,7 +79,7 @@ export async function playSound(urlOrPath: string): Promise<void> {
       const done = () => {
         playSoundInProgress = false;
       };
-      currentProcess = exec(`afplay "${quoted}"`, (error) => {
+      currentProcess = execFile("afplay", [filePath], (error) => {
         currentProcess = null;
         if (isTemp) {
           unlink(filePath).catch(() => {});
@@ -109,7 +102,7 @@ export async function playSound(urlOrPath: string): Promise<void> {
 
 /**
  * Start playback in the background and return immediately.
- * macOS: nohup afplay so it survives process exit. Windows: start (default app).
+ * macOS: spawns afplay detached so it survives process exit. Windows: opens with default app via execFile.
  * Debounced: if called again within BACKGROUND_PLAY_DEBOUNCE_MS, does nothing so the sound only plays once.
  */
 export async function playSoundInBackground(urlOrPath: string): Promise<void> {
@@ -120,16 +113,17 @@ export async function playSoundInBackground(urlOrPath: string): Promise<void> {
   lastBackgroundPlayTime = now;
 
   const filePath = await resolveToFilePath(urlOrPath);
-  const quoted = escapePath(filePath);
 
   if (isWindows) {
-    const cmd = `start "" "${quoted}"`;
-    exec(cmd, { shell: "cmd.exe" });
+    execFile("cmd", ["/c", "start", "", filePath]);
     return;
   }
 
-  const bgCmd = `nohup afplay "${quoted}" </dev/null >/dev/null 2>&1 &`;
-  exec(bgCmd, { shell: "/bin/sh" });
+  const child = spawn("afplay", [filePath], {
+    detached: true,
+    stdio: "ignore",
+  });
+  child.unref();
 
   const isTemp = isUrl(urlOrPath);
   if (isTemp) {
