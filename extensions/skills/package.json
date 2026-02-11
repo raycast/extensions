@@ -14,15 +14,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "browse-skills",
-      "title": "Browse Skills",
-      "description": "Browse AI agent skills ranking by total installs",
+      "name": "search-skills",
+      "title": "Search Skills",
+      "description": "Search for agent skills",
       "mode": "view"
     },
     {
-      "name": "search-skills",
-      "title": "Search Skills",
-      "description": "Search for AI agent skills",
+      "name": "trending-skills",
+      "title": "Trending Skills",
+      "description": "Browse trending skills",
       "mode": "view"
     }
   ],
