@@ -1,6 +1,6 @@
 # Projects Changelog
 
-## [Support for "Create Quicklink" action + Raycast API update + formatting] - 2026-01-09
+## [Support for "Create Quicklink" action + Raycast API update + formatting] - {PR_MERGE_DATE}
 
 - Added support for the "Create Quicklink" action for projects.
 - Migrated deprecated `List.Item` accessory props to the `accessories` API.

@@ -8,11 +8,8 @@
   "contributors": [
     "pedro_dcc"
   ],
-  "categories": [
-    "Developer Tools",
-    "Productivity"
-  ],
   "license": "MIT",
+  "private": true,
   "commands": [
     {
       "name": "projects",
@@ -103,6 +100,10 @@
       "default": ""
     }
   ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "uuid": "^8.3.2"
@@ -118,7 +119,6 @@
     "prettier": "^3.7.4",
     "typescript": "^5.4.5"
   },
-  "private": true,
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
