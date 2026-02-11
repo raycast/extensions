@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../raycast-env.d";
 import {
   existsSync,
   readFileSync,
