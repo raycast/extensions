@@ -53,7 +53,7 @@ export function NodeModulesList({ rootFolder, useDeepScan, scanDepth }: NodeModu
   const [sortWith, setSortWith] = useState<"size" | "lastModified">("lastModified");
   const abortable = useRef<AbortController | null>(null);
 
-  const effectiveScanDepth = useDeepScan ? Infinity : (scanDepth ?? 3);
+  const effectiveScanDepth = useDeepScan || scanDepth === -1 ? -1 : (scanDepth ?? 3);
 
   const {
     data: allItems,
@@ -131,9 +131,10 @@ export function NodeModulesList({ rootFolder, useDeepScan, scanDepth }: NodeModu
         return;
       }
 
-      mutate(new Promise((resolve) => resolve(true)), {
+      const idsSet = new Set(idsToDelete);
+      const updatedModules = (allItems || []).filter((item) => !idsSet.has(item.id));
+      mutate(Promise.resolve(updatedModules), {
         optimisticUpdate(data) {
-          const idsSet = new Set(idsToDelete);
           return data?.filter((item) => !idsSet.has(item.id));
         },
       });

@@ -46,7 +46,7 @@ export function AddFolderForm({ onFolderAdded, existingFolder }: AddFolderFormPr
 
     const selectedPath = folderPath[0];
     const useDeepScan = scanDepthValue === "unlimited";
-    const scanDepth = useDeepScan ? 5 : parseInt(scanDepthValue, 10);
+    const scanDepth = useDeepScan ? -1 : parseInt(scanDepthValue, 10);
 
     const folder: FolderConfig = {
       id: existingFolder?.id ?? Date.now().toString(),
