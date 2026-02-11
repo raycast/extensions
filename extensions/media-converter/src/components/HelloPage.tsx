@@ -319,23 +319,19 @@ Enjoy using the converter!
 
           {/* Show additional context for lost FFmpeg scenario */}
           {isLostFFmpegScenario && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action title="Specify Custom FFmpeg Path" icon={Icon.Gear} onAction={handleSpecifyCustomPath} />
           )}
 
           {/* Always show all three options */}
           {ffmpegStatus?.systemFound && primaryAction.title !== "Continue (Use System FFmpeg)" && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action title="Continue (Use System FFmpeg)" icon={Icon.Checkmark} onAction={handleContinueWithSystem} />
           )}
 
           {primaryAction.title !== "Continue (Download FFmpeg)" && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action title="Continue (Download FFmpeg)" icon={Icon.Download} onAction={handleDownloadFFmpeg} />
           )}
 
           {!isLostFFmpegScenario && !ffmpegStatus?.customValid && !ffmpegStatus?.customPath && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action title="Specify Custom FFmpeg Path" icon={Icon.Gear} onAction={handleSpecifyCustomPath} />
           )}
         </ActionPanel>

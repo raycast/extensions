@@ -53,7 +53,7 @@ type Input = {
   // Want to try?
   // Uncomment AllOutputExtension in import in ../types/media.ts
   outputFileType: // VIDEO
-  | ".mp4"
+    | ".mp4"
     | ".avi"
     | ".mov"
     | ".mkv"
