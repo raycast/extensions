@@ -100,7 +100,7 @@ export default function MenuBarUsage() {
     keepPreviousData: true,
   });
 
-  const prefs = getPreferenceValues<MenuBarPreferences>();
+  const prefs = getPreferenceValues<Preferences.MenuBarUsage>();
   const selectedProvider = prefs.menuBarProvider ?? "all";
   const title = data && data.length > 0 ? buildMenuBarTitle(data, selectedProvider) : "Usage";
 
