@@ -4,6 +4,8 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { getWeek } from "date-fns";
 import { useCachedPromise } from "@raycast/utils";
 
+const WEEK_DAYS_AZ = ["Bazar", "Bazar ertəsi", "Çərşənbə axşamı", "Çərşənbə", "Cümə axşamı", "Cümə", "Şənbə"];
+
 const DAY_TRANSLATION: Record<string, string> = {
   "Bazar ertəsi": "Monday",
   "Çərşənbə axşamı": "Tuesday",
@@ -124,11 +126,7 @@ export default function Command() {
         Object.entries(schedule.data).map(([dayAz, classes]) => {
           const dayEn = DAY_TRANSLATION[dayAz] || dayAz;
           const filteredClasses = classes.filter(shouldShowClass);
-          const isToday =
-            dayAz ===
-            ["Bazar", "Bazar ertəsi", "Çərşənbə axşamı", "Çərşənbə", "Cümə axşamı", "Cümə", "Şənbə"][
-              new Date().getDay()
-            ];
+          const isToday = dayAz === WEEK_DAYS_AZ[new Date().getDay()];
 
           if (filteredClasses.length === 0) return null;
 

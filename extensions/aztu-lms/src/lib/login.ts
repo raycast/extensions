@@ -12,8 +12,10 @@ import { fetchWithCookies } from "./utils";
 
 export async function getSSOUrl({
   forLogin,
+  retryCount = 0,
 }: {
   forLogin: boolean;
+  retryCount?: number;
 }): Promise<{ status: "old" | "new"; loginLink: string } | undefined> {
   const now = Date.now();
 
@@ -52,15 +54,26 @@ export async function getSSOUrl({
   const followUpResponse = await fetchWithCookies(nextUrl, { headers: commonHeaders });
 
   const html = await followUpResponse.text();
-  const match = html.match(/<a[^>]+href="([^"]*admin_menu\/login\.php\?param=[^"]+)"[^>]*>/i)!;
+
+  const match = html.match(/<a[^>]+href="([^"]*admin_menu\/login\.php\?param=[^"]+)"[^>]*>/i);
+
+  if (!match) {
+    console.error("helpers.tsx: getSSOUrl() Login link not found in HTML");
+    return undefined;
+  }
 
   const loginLink = match[1];
 
   const checkLoginLinkResponse = await fetchWithCookies(loginLink, { headers: commonHeaders });
   const text = await checkLoginLinkResponse.text();
+
   if (text === "\nuğursuz cəhd") {
+    if (retryCount >= 3) {
+      console.error("helpers.tsx: getSSOUrl() Max retries exceeded");
+      return undefined;
+    }
     console.error("helpers.tsx: getSSOUrl() Uğursuz cəhd. Trying Again...!");
-    return await getSSOUrl({ forLogin });
+    return await getSSOUrl({ forLogin, retryCount: retryCount + 1 });
   }
 
   await Promise.all([
@@ -112,7 +125,7 @@ async function generateJWTToken(retryCount = 0): Promise<string | undefined> {
 
   const data = (await loginResponse.json()) as ApiLoginResult;
 
-  if (retryCount < 3 && data.status && data.status === "success") return data.token;
+  if (data.status && data.status === "success") return data.token;
   else if (retryCount < 3) {
     console.warn(`helpers.tsx: generateJWTToken(). Retrying...`);
     return await generateJWTToken(retryCount + 1);

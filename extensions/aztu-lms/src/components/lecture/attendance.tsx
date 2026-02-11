@@ -30,9 +30,9 @@ export function Attendance({ lectureId }: { lectureId: string }) {
   };
 
   const getMethodName = (method: string | null): string => {
-    if (method === "M") return "Mühazirə";
-    if (method === "S") return "Seminar";
-    if (method === "L") return "Laboratoriya";
+    if (method === "M") return "Lecture";
+    if (method === "S") return "Practice";
+    if (method === "L") return "Laboratory";
     return "";
   };
 
@@ -58,13 +58,13 @@ export function Attendance({ lectureId }: { lectureId: string }) {
     // Professors
     report += `## Professors\n`;
     if (summary.professor.lecture_professor_name) {
-      report += `- **Mühazirə:** ${summary.professor.lecture_professor_name}\n`;
+      report += `- **Lecture:** ${summary.professor.lecture_professor_name}\n`;
     }
     if (summary.professor.training_professor_name) {
-      report += `- **Seminar:** ${summary.professor.training_professor_name}\n`;
+      report += `- **Practice:** ${summary.professor.training_professor_name}\n`;
     }
     if (summary.professor.laboratory_professor_name) {
-      report += `- **Laboratoriya:** ${summary.professor.laboratory_professor_name}\n`;
+      report += `- **Laboratory:** ${summary.professor.laboratory_professor_name}\n`;
     }
 
     // Summary
@@ -152,7 +152,7 @@ export function Attendance({ lectureId }: { lectureId: string }) {
             <List.Section title="👨‍🏫 Professors">
               {summary.professor.lecture_professor_name && (
                 <List.Item
-                  title="Mühazirə (Lecture)"
+                  title="Lecture"
                   subtitle={summary.professor.lecture_professor_name}
                   icon={{
                     source: Icon.Book,
@@ -172,7 +172,7 @@ export function Attendance({ lectureId }: { lectureId: string }) {
 
               {summary.professor.training_professor_name && (
                 <List.Item
-                  title="Seminar (Training)"
+                  title="Practice"
                   subtitle={summary.professor.training_professor_name}
                   icon={{
                     source: Icon.Pencil,
@@ -192,7 +192,7 @@ export function Attendance({ lectureId }: { lectureId: string }) {
 
               {summary.professor.laboratory_professor_name && (
                 <List.Item
-                  title="Laboratoriya (Laboratory)"
+                  title="Laboratory"
                   subtitle={summary.professor.laboratory_professor_name}
                   icon={{
                     source: Icon.ComputerChip,

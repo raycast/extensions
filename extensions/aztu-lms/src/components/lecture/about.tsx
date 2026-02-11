@@ -28,47 +28,47 @@ export function About({ lectureId }: { lectureId: string }) {
     // Professors
     markdown += `## Professors\n\n`;
     if (data?.professor?.lecture_professor_name) {
-      markdown += `- **Mühazirə:** ${data.professor.lecture_professor_name}\n`;
+      markdown += `- **Lecture:** ${data.professor.lecture_professor_name}\n`;
     }
     if (data?.professor?.training_professor_name) {
-      markdown += `- **Məşğələ:** ${data.professor.training_professor_name}\n`;
+      markdown += `- **Practice:** ${data.professor.training_professor_name}\n`;
     }
     if (data?.professor?.laboratory_professor_name) {
-      markdown += `- **Laboratoriya:** ${data.professor.laboratory_professor_name}\n`;
+      markdown += `- **Laboratory:** ${data.professor.laboratory_professor_name}\n`;
     }
     markdown += `\n`;
 
     // Objective
     if (plan?.object) {
-      markdown += `## Fənnin məqsədi\n\n`;
+      markdown += `## Course Objective\n\n`;
       markdown += `${plan.object}\n\n`;
     }
 
     // Teaching Method
     if (plan?.teaching_method) {
-      markdown += `## Tədris metodu\n\n`;
+      markdown += `## Teaching Method\n\n`;
       markdown += `${plan.teaching_method}\n\n`;
     }
 
     // Scores Distribution
     if (plan?.scores) {
-      markdown += `## Qiymətləndirmə\n\n`;
+      markdown += `## Assessment\n\n`;
       markdown += `| Component | Score |\n`;
       markdown += `|-----------|-------|\n`;
       if (plan.scores.lecture_score) {
-        markdown += `| Sərbəst iş | ${plan.scores.lecture_score} |\n`;
+        markdown += `| Independent Work | ${plan.scores.lecture_score} |\n`;
       }
       if (plan.scores.training_score) {
-        markdown += `| Məşğələ | ${plan.scores.training_score} |\n`;
+        markdown += `| Practice | ${plan.scores.training_score} |\n`;
       }
       if (plan.scores.laboratory_score) {
-        markdown += `| Laboratoriya | ${plan.scores.laboratory_score} |\n`;
+        markdown += `| Laboratory | ${plan.scores.laboratory_score} |\n`;
       }
-      markdown += `| **Davamiyyət** | **${plan.scores.attend_percent}** |\n`;
+      markdown += `| **Attendance** | **${plan.scores.attend_percent}** |\n`;
       if (plan.scores.middle_percent !== "0") {
-        markdown += `| **Ara yoxlama** | **${plan.scores.middle_percent}** |\n`;
+        markdown += `| **Midterm** | **${plan.scores.middle_percent}** |\n`;
       }
-      markdown += `| **Yekun imtahan** | **${plan.scores.last_percent}** |\n`;
+      markdown += `| **Final Exam** | **${plan.scores.last_percent}** |\n`;
     }
 
     return markdown;

@@ -19,8 +19,8 @@ export default function Command() {
           title={semester.semester_name}
           accessories={[
             {
-              text: `${semester.total_score} / ${semester.require_score} kredit`,
-              tooltip: "Qazandığınız Kreditlər",
+              text: `${semester.total_score} / ${semester.require_score} credit`,
+              tooltip: "Earned Credits",
             },
             { text: `${semester.avg_total2}`, tooltip: "Average Score" },
           ]}
