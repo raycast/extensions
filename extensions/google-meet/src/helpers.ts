@@ -11,24 +11,15 @@ import type { SupportedBrowsers } from "./utils/scripts";
 
 const openMeetTabUrl = "https://meet.google.com/new";
 
-type Preferences = {
-  preferredBrowser?: {
-    name: SupportedBrowsers;
-    path: string;
-    bundleId: string;
-  };
-  timeout: string;
-};
-
 export function getTimeout(): number {
   const regexp = /^[0-9]+$/;
-  return regexp.test(getPreferenceValues<Preferences>().timeout)
-    ? parseInt(getPreferenceValues<Preferences>().timeout)
+  return regexp.test(getPreferenceValues().timeout)
+    ? parseInt(getPreferenceValues().timeout)
     : 500;
 }
 
 function getPreferredBrowser() {
-  return getPreferenceValues<Preferences>().preferredBrowser;
+  return getPreferenceValues().preferredBrowser;
 }
 
 async function getOpenTabs(): Promise<string> {
