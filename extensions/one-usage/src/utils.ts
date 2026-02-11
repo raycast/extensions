@@ -1,7 +1,22 @@
+import { Cache } from "@raycast/api";
 import { execSync } from "child_process";
 import { homedir } from "os";
 import { join } from "path";
 import { MetricLine } from "./types";
+
+// Shared cache key for cross-command communication (menu bar provider selection)
+const SELECTED_PROVIDER_KEY = "menu-bar-selected-provider";
+const sharedCache = new Cache();
+
+/** Get the user-selected menu bar provider (set from View Usage). Returns undefined if not set. */
+export function getSelectedMenuBarProvider(): string | undefined {
+  return sharedCache.get(SELECTED_PROVIDER_KEY) || undefined;
+}
+
+/** Set the menu bar provider (called from View Usage). Use "all" to show all providers. */
+export function setSelectedMenuBarProvider(providerId: string): void {
+  sharedCache.set(SELECTED_PROVIDER_KEY, providerId);
+}
 
 /**
  * Expand ~ to the user's home directory.

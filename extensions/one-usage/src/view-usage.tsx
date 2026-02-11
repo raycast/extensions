@@ -1,8 +1,14 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showHUD } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { PROVIDER_META, fetchAllProviders } from "./providers/registry";
 import { MetricLine } from "./types";
-import { formatProgressBar, formatProgressValue } from "./utils";
+import {
+  formatProgressBar,
+  formatProgressValue,
+  getSelectedMenuBarProvider,
+  setSelectedMenuBarProvider,
+} from "./utils";
 
 // List Item Helpers
 
@@ -37,12 +43,38 @@ function getLineAccessories(line: MetricLine): List.Item.Accessory[] {
 
 // Reusable Action Panel
 
-function ProviderActions(props: { providerId: string; providerName: string; onRefresh: () => void }) {
+function ProviderActions(props: {
+  providerId: string;
+  providerName: string;
+  currentMenuBarProvider: string | undefined;
+  onRefresh: () => void;
+  onSetMenuBarProvider: (providerId: string) => void;
+}) {
   const meta = PROVIDER_META[props.providerId];
+  const isPinned = props.currentMenuBarProvider === props.providerId;
+
   return (
     <ActionPanel>
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={props.onRefresh} />
       {meta && <Action.OpenInBrowser title={`Open ${props.providerName}`} url={meta.url} />}
+      <ActionPanel.Section title="Menu Bar">
+        {!isPinned && (
+          <Action
+            title="Pin to Menu Bar"
+            icon={Icon.Pin}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            onAction={() => props.onSetMenuBarProvider(props.providerId)}
+          />
+        )}
+        {props.currentMenuBarProvider && props.currentMenuBarProvider !== "all" && (
+          <Action
+            title="Show All in Menu Bar"
+            icon={Icon.AppWindowGrid3x3}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            onAction={() => props.onSetMenuBarProvider("all")}
+          />
+        )}
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
@@ -51,6 +83,14 @@ function ProviderActions(props: { providerId: string; providerName: string; onRe
 
 export default function ViewUsage() {
   const { data, isLoading, revalidate } = usePromise(fetchAllProviders);
+  const [menuBarProvider, setMenuBarProvider] = useState<string | undefined>(getSelectedMenuBarProvider);
+
+  function handleSetMenuBarProvider(providerId: string) {
+    setSelectedMenuBarProvider(providerId);
+    setMenuBarProvider(providerId);
+    const label = providerId === "all" ? "All Providers" : (PROVIDER_META[providerId]?.name ?? providerId);
+    showHUD(`Menu Bar → ${label}`);
+  }
 
   return (
     <List isLoading={isLoading}>
@@ -62,13 +102,25 @@ export default function ViewUsage() {
         />
       )}
       {data?.map((result) => (
-        <List.Section key={result.id} title={result.name} subtitle={result.error ? "⚠️ Error" : undefined}>
+        <List.Section
+          key={result.id}
+          title={result.name}
+          subtitle={result.error ? "⚠️ Error" : menuBarProvider === result.id ? "📌 Menu Bar" : undefined}
+        >
           {result.error ? (
             <List.Item
               title={result.error}
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
               accessories={PROVIDER_META[result.id] ? [{ icon: PROVIDER_META[result.id].icon }] : []}
-              actions={<ProviderActions providerId={result.id} providerName={result.name} onRefresh={revalidate} />}
+              actions={
+                <ProviderActions
+                  providerId={result.id}
+                  providerName={result.name}
+                  currentMenuBarProvider={menuBarProvider}
+                  onRefresh={revalidate}
+                  onSetMenuBarProvider={handleSetMenuBarProvider}
+                />
+              }
             />
           ) : (
             result.lines?.map((line, i) => (
@@ -78,7 +130,15 @@ export default function ViewUsage() {
                 subtitle={getLineSubtitle(line)}
                 icon={getProviderIcon(result.id)}
                 accessories={getLineAccessories(line)}
-                actions={<ProviderActions providerId={result.id} providerName={result.name} onRefresh={revalidate} />}
+                actions={
+                  <ProviderActions
+                    providerId={result.id}
+                    providerName={result.name}
+                    currentMenuBarProvider={menuBarProvider}
+                    onRefresh={revalidate}
+                    onSetMenuBarProvider={handleSetMenuBarProvider}
+                  />
+                }
               />
             ))
           )}

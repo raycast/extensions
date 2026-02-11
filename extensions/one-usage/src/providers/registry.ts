@@ -25,6 +25,27 @@ export const PROVIDER_META: Record<string, ProviderMeta> = {
 
 // Provider Registry
 
+/** Check if a specific provider is enabled in preferences. */
+export function isProviderEnabled(providerId: string): boolean {
+  const prefs = getPreferenceValues<Preferences>();
+  const map: Record<string, boolean> = {
+    claude: prefs.enableClaude,
+    codex: prefs.enableCodex,
+    cursor: prefs.enableCursor,
+  };
+  return map[providerId] ?? false;
+}
+
+/** Return sorted IDs of currently enabled providers (for cache invalidation). */
+export function getEnabledProviderIds(): string[] {
+  const prefs = getPreferenceValues<Preferences>();
+  const ids: string[] = [];
+  if (prefs.enableClaude) ids.push("claude");
+  if (prefs.enableCodex) ids.push("codex");
+  if (prefs.enableCursor) ids.push("cursor");
+  return ids;
+}
+
 function getEnabledProviders(): ProviderConfig[] {
   const prefs = getPreferenceValues<Preferences>();
 

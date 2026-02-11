@@ -28,32 +28,6 @@
       "interval": "5m",
       "preferences": [
         {
-          "name": "menuBarProvider",
-          "title": "Show in Menu Bar",
-          "description": "Which provider's usage to display in the menu bar title",
-          "type": "dropdown",
-          "required": false,
-          "default": "all",
-          "data": [
-            {
-              "title": "All Providers",
-              "value": "all"
-            },
-            {
-              "title": "Claude",
-              "value": "claude"
-            },
-            {
-              "title": "Codex",
-              "value": "codex"
-            },
-            {
-              "title": "Cursor",
-              "value": "cursor"
-            }
-          ]
-        },
-        {
           "name": "refreshInterval",
           "title": "Refresh Interval",
           "description": "How often to fetch fresh usage data in the background",

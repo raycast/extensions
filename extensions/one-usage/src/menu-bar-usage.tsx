@@ -1,8 +1,8 @@
 import { Cache, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { PROVIDER_META, fetchAllProviders } from "./providers/registry";
+import { PROVIDER_META, fetchAllProviders, getEnabledProviderIds, isProviderEnabled } from "./providers/registry";
 import { MetricLine, ProviderResult } from "./types";
-import { formatProgressValue, getPrimaryPercentage } from "./utils";
+import { formatProgressValue, getPrimaryPercentage, getSelectedMenuBarProvider } from "./utils";
 
 // Preferences
 
@@ -13,6 +13,7 @@ import { formatProgressValue, getPrimaryPercentage } from "./utils";
 const cache = new Cache();
 const LAST_FETCH_KEY = "menu-bar-last-fetch";
 const CACHED_DATA_KEY = "menu-bar-cached-data";
+const CACHED_PROVIDERS_KEY = "menu-bar-cached-providers";
 
 const INTERVAL_MS: Record<string, number> = {
   "5m": 5 * 60 * 1000,
@@ -36,16 +37,23 @@ async function fetchWithThrottle(): Promise<ProviderResult[]> {
   const intervalMs = getRefreshIntervalMs(prefs.refreshInterval);
   const now = Date.now();
 
-  const lastFetchStr = cache.get(LAST_FETCH_KEY);
-  if (lastFetchStr) {
-    const elapsed = now - parseInt(lastFetchStr, 10);
-    if (elapsed < intervalMs) {
-      const cachedData = cache.get(CACHED_DATA_KEY);
-      if (cachedData) {
-        try {
-          return JSON.parse(cachedData) as ProviderResult[];
-        } catch {
-          // Corrupted cache — fall through to fresh fetch
+  // Invalidate cache when the set of enabled providers changes
+  const currentProviders = getEnabledProviderIds().join(",");
+  const cachedProviders = cache.get(CACHED_PROVIDERS_KEY);
+  const providersChanged = cachedProviders !== currentProviders;
+
+  if (!providersChanged) {
+    const lastFetchStr = cache.get(LAST_FETCH_KEY);
+    if (lastFetchStr) {
+      const elapsed = now - parseInt(lastFetchStr, 10);
+      if (elapsed < intervalMs) {
+        const cachedData = cache.get(CACHED_DATA_KEY);
+        if (cachedData) {
+          try {
+            return JSON.parse(cachedData) as ProviderResult[];
+          } catch {
+            // Corrupted cache — fall through to fresh fetch
+          }
         }
       }
     }
@@ -54,6 +62,7 @@ async function fetchWithThrottle(): Promise<ProviderResult[]> {
   const results = await fetchAllProviders();
   cache.set(LAST_FETCH_KEY, String(now));
   cache.set(CACHED_DATA_KEY, JSON.stringify(results));
+  cache.set(CACHED_PROVIDERS_KEY, currentProviders);
   return results;
 }
 
@@ -100,8 +109,10 @@ export default function MenuBarUsage() {
     keepPreviousData: true,
   });
 
-  const prefs = getPreferenceValues<Preferences.MenuBarUsage>();
-  const selectedProvider = prefs.menuBarProvider ?? "all";
+  // Read provider selection from shared cache (set via "Pin to Menu Bar" in View Usage)
+  const rawProvider = getSelectedMenuBarProvider() ?? "all";
+  // Fall back to "all" if the selected provider is disabled
+  const selectedProvider = rawProvider !== "all" && !isProviderEnabled(rawProvider) ? "all" : rawProvider;
   const title = data && data.length > 0 ? buildMenuBarTitle(data, selectedProvider) : "Usage";
 
   const menuBarIcon =
