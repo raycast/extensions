@@ -1,6 +1,6 @@
 # Kill Node Modules Changelog
 
-## [Multi-Folder Support] - {PR_MERGE_DATE}
+## [Multi-Folder Support] - 2026-02-11
 
 - Add folder list view to manage multiple scan directories with individual settings.
 - Add "Delete All" action to batch delete all node_modules in a folder.
