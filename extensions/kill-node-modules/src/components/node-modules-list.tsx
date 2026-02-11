@@ -51,7 +51,7 @@ function NodeModulesListItem({ item, isDeleting, onDelete, onDeleteAll }: NodeMo
 export function NodeModulesList({ rootFolder, useDeepScan, scanDepth }: NodeModulesListProps) {
   const [itemsToDeleteSet, setItemsToDeleteSet] = useState<Set<string>>(new Set());
   const [sortWith, setSortWith] = useState<"size" | "lastModified">("lastModified");
-  const abortable = useRef<AbortController>(null);
+  const abortable = useRef<AbortController | null>(null);
 
   const effectiveScanDepth = useDeepScan ? Infinity : (scanDepth ?? 3);
 
