@@ -32,7 +32,7 @@ function getRefreshIntervalMs(interval?: string): number {
  * Returns cached data otherwise.
  */
 async function fetchWithThrottle(): Promise<ProviderResult[]> {
-  const prefs = getPreferenceValues<MenuBarPreferences>();
+  const prefs = getPreferenceValues<Preferences.MenuBarUsage>();
   const intervalMs = getRefreshIntervalMs(prefs.refreshInterval);
   const now = Date.now();
 
