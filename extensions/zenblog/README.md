@@ -9,6 +9,7 @@ This is a Raycast extension for [Zenblog](https://www.zenblog.com/) - _A tiny bl
 ## ⚙️ Configuration
 
 For each blog you want to add to the extension:
-1. `Navigate` to Blog **Settings**
-2. `Copy` "Blog ID"
-3. `Paste` in **Preferences**
+1. `Run` the command
+2. In Zenblog, `Navigate` to Blog **Settings**
+3. `Copy` "Blog ID"
+4. `Paste` in **Form**
