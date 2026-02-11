@@ -19,6 +19,8 @@ import { isValidIcaoCode } from "./utils";
 
 const FLYCHECK_MACOS_URL = "https://fractals.sg/flycheck/";
 
+// We define our data interfaces here. 
+// Note: We do NOT define 'Preferences' here because it is auto-generated in raycast-env.d.ts
 interface DecodedMetar {
   icao: string;
   station?: { name: string };
@@ -63,7 +65,10 @@ const DownloadFlyCheckAction = () => (
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  
+  // Use the global Preferences type from raycast-env.d.ts
   const { apiKey, tempUnit } = getPreferenceValues<Preferences>();
+  
   const { value: history, setValue: setHistory } = useLocalStorage<DecodedMetar[]>("metar-history", []);
 
   const { isLoading, data, error, revalidate } = useFetch<CheckWXResponse>(
@@ -77,7 +82,9 @@ export default function Command() {
         if (newData.results > 0 && newData.data.length > 0) {
           const metar = newData.data[0];
           const prevHistory = history || [];
+          // Remove duplicates if the airport is already in history
           const filtered = prevHistory.filter((item) => item.icao !== metar.icao);
+          // Add new result to top, keep max 10
           setHistory([metar, ...filtered].slice(0, 10));
         }
       },
@@ -85,6 +92,7 @@ export default function Command() {
   );
 
   useEffect(() => {
+    // Ignore 401 errors here because we handle them with a specific UI state below
     if (error && !error.message.includes("401")) {
       showToast({
         style: Toast.Style.Failure,
@@ -146,11 +154,9 @@ export default function Command() {
                       setHistory(newHistory);
                     }}
                   />
-                  {environment.platform === "macOS" && (
-                    <ActionPanel.Section>
-                      <DownloadFlyCheckAction />
-                    </ActionPanel.Section>
-                  )}
+                  <ActionPanel.Section>
+                    <DownloadFlyCheckAction />
+                  </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action
                       title="Clear All History"
@@ -238,16 +244,12 @@ export default function Command() {
                       title="Barometer"
                       text={`${metar.barometer?.hg || 0} inHg (${metar.barometer?.hpa || 0} hPa)`}
                     />
-                    {environment.platform === "macOS" && (
-                      <>
-                        <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Link
-                          title="Download App"
-                          text="FlyCheck for macOS Menu Bar"
-                          target={FLYCHECK_MACOS_URL}
-                        />
-                      </>
-                    )}
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Link
+                      title="Download App"
+                      text="FlyCheck for macOS Menu Bar"
+                      target={FLYCHECK_MACOS_URL}
+                    />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -264,11 +266,9 @@ export default function Command() {
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                   />
                 </ActionPanel.Section>
-                {environment.platform === "macOS" && (
-                  <ActionPanel.Section>
-                    <DownloadFlyCheckAction />
-                  </ActionPanel.Section>
-                )}
+                <ActionPanel.Section>
+                  <DownloadFlyCheckAction />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
