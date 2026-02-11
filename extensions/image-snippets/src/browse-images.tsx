@@ -11,9 +11,10 @@ import {
   Color,
   Form,
   useNavigation,
+  trash,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { readdirSync, statSync, unlinkSync, existsSync } from "fs";
+import { readdirSync, statSync, existsSync } from "fs";
 import { join, extname, basename } from "path";
 import { execSync } from "child_process";
 import {
@@ -162,7 +163,7 @@ function EditSnippetForm({
         title: `Updated "${name}"`,
       });
       onSave();
-      pop(); // retour à browse, pas fermeture de raycast
+      pop(); // return to browse, not close raycast
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -259,7 +260,7 @@ export default function BrowseImages() {
 
     if (confirmed) {
       try {
-        unlinkSync(image.path);
+        await trash(image.path);
         deleteSnippet(image.id);
         await showToast({
           style: Toast.Style.Success,

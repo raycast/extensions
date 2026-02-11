@@ -10,7 +10,3 @@ export interface ImageSnippet {
 export interface SnippetsData {
   snippets: ImageSnippet[];
 }
-
-export interface Preferences {
-  imagesFolder: string;
-}

@@ -9,7 +9,7 @@ import {
 import { join } from "path";
 import { homedir } from "os";
 import { execSync } from "child_process";
-import { ImageSnippet, SnippetsData, Preferences } from "./types";
+import { ImageSnippet, SnippetsData } from "./types";
 
 const SNIPPETS_FILE = "snippets.json";
 
@@ -21,7 +21,7 @@ export function expandPath(path: string): string {
 }
 
 export function getImagesFolder(): string {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<{ imagesFolder: string }>();
   return expandPath(preferences.imagesFolder || "~/Pictures/raycast-snippets");
 }
 

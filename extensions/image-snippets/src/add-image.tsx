@@ -160,7 +160,7 @@ export default function AddImage() {
         title: `🤠 Saved "${name}"!`,
       });
 
-      popToRoot(); // ferme proprement
+      popToRoot(); // close properly
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,

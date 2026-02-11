@@ -1,6 +1,6 @@
 # Image Snippets Changelog
 
-## [1.0.0] - 2025-02-11
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add "Browse Image Snippets" command to view and copy saved images
 - Add "Add Image to Snippets" command to save clipboard images with name and keywords
