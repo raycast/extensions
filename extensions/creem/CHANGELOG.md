@@ -1,6 +1,6 @@
 # Creem Changelog
 
-## [Update Logo + Improve Error Message] - {PR_MERGE_DATE}
+## [Update Logo + Improve Error Message] - 2026-02-11
 
 - Update extension to reflect Creem's latest logo
 - Better error messages returned by SDK
