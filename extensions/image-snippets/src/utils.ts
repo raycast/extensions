@@ -62,7 +62,7 @@ export function getSnippet(id: string): ImageSnippet | undefined {
 
 export function addSnippet(snippet: ImageSnippet): void {
   const data = loadSnippetsData();
-  // remove existing with same id if any
+  // remove existing snippet with same id if any
   data.snippets = data.snippets.filter((s) => s.id !== snippet.id);
   data.snippets.push(snippet);
   saveSnippetsData(data);
