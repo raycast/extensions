@@ -50,6 +50,8 @@ export async function findFFmpegPath(minimumVersion = 6.0): Promise<{ path: stri
     return null;
   }
 
+  await LocalStorage.setItem("ffmpeg-path", path);
+
   return { path, version };
 }
 
