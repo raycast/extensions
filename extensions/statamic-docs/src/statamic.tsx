@@ -23,8 +23,8 @@ type Version = {
   version: string;
   branch: string;
   url: string;
-  alpha: boolean | false;
-  beta: boolean | false;
+  alpha: boolean;
+  beta: boolean;
 };
 
 export type { Version };
