@@ -6,13 +6,7 @@ import { formatProgressValue, getPrimaryPercentage } from "./utils";
 
 // Preferences
 
-interface MenuBarPreferences {
-  enableClaude: boolean;
-  enableCodex: boolean;
-  enableCursor: boolean;
-  menuBarProvider: "all" | "claude" | "codex" | "cursor";
-  refreshInterval: "5m" | "15m" | "30m" | "1h";
-}
+// Preferences are auto-generated in raycast-env.d.ts
 
 // Refresh Interval Cache
 
