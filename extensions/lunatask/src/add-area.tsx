@@ -6,13 +6,14 @@ export interface Values {
   areaIDField: string;
 }
 
-async function addArea(values: Values, fieldRefs: React.RefObject<Form.ItemReference>[]) {
+// Allow null in RefObject to match useRef<Type>(null)
+async function addArea(values: Values, fieldRefs: React.RefObject<Form.ItemReference | null>[]) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Adding area...",
   });
   try {
-    const areaID = await LocalStorage.getItem(values.areaNameField);
+    const areaID = await LocalStorage.getItem<string>(values.areaNameField);
 
     if (areaID) {
       // Confirm if user wants to update the Area ID
@@ -56,9 +57,10 @@ export default function Command() {
   const [areaIDError, setAreaIDError] = useState<string | undefined>();
 
   const areaNameFieldRef = useRef<Form.TextField>(null);
-  const areaIDFieldRef = useRef<Form.TextArea>(null);
+  const areaIDFieldRef = useRef<Form.PasswordField>(null);
 
-  const fieldRefs = [areaNameFieldRef, areaIDFieldRef];
+  // Cast refs to general Form.ItemReference to match array type, preserving possible nulls
+  const fieldRefs = [areaNameFieldRef, areaIDFieldRef] as unknown as React.RefObject<Form.ItemReference | null>[];
 
   function dropAreaNameErrorIfNeeded() {
     if (areaNameError && areaNameError.length > 0) {
@@ -92,7 +94,7 @@ export default function Command() {
         onChange={dropAreaNameErrorIfNeeded}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
-            setAreaNameError("The field should't be empty!");
+            setAreaNameError("The field shouldn't be empty!");
           } else {
             dropAreaNameErrorIfNeeded();
           }

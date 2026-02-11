@@ -1,5 +1,15 @@
 # Granola Changelog
 
+## [2.1.2] - 2026-02-03
+
+### 🎨 Visual Updates
+
+- **"A New Look for Granola"** – Refreshed Granola's appearance to match the new brand identity, including new logo, colors and more. See [granola.ai/blog/a-new-look-for-granola](https://www.granola.ai/blog/a-new-look-for-granola) for details.
+- Updated extension icon with new Granola branding
+- Added dark mode extension icon support
+- Refreshed store screenshots with new visual style
+- Updated color palette across all commands
+
 ## [2.1.1] - 2026-01-30
 
 ### 🚀 New Features

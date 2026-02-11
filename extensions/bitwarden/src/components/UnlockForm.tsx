@@ -91,7 +91,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}
                 onAction={() => setShowPassword((prev) => !prev)}
-                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, windows: { key: "e", modifiers: ["alt"] } }}
+                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, Windows: { key: "e", modifiers: ["alt"] } }}
               />
             </>
           )}

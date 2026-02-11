@@ -6,7 +6,7 @@ let cachedClient: Fathom | null = null;
 /**
  * Get or create a singleton Fathom SDK client instance
  *
- * Note: SDK v0.0.30 has strict Zod validation that sometimes fails even when
+ * Note: The SDK uses strict Zod validation that sometimes fails even when
  * the API returns valid data. API functions handle this with HTTP fallbacks.
  *
  * @throws Error if API key is not configured

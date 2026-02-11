@@ -1,0 +1,166 @@
+{
+  "name": "minimax-ai",
+  "title": "MiniMax",
+  "description": "MiniMax AI Chat for Raycast",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "author": "monfortegg",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MonforteGG/raycast-minimax"
+  },
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "apiVersion": "1.93.0",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "subtitle": "Quick Question",
+      "description": "Ask a quick question to AI and get a streaming response",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "ai-chat",
+      "title": "AI Chat",
+      "subtitle": "Conversation",
+      "description": "Chat with AI - includes conversation history",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "minimaxApiKey",
+      "type": "password",
+      "required": true,
+      "title": "MiniMax API Key",
+      "description": "Your MiniMax API key for authentication",
+      "placeholder": "Enter your MiniMax API key"
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "title": "Model",
+      "description": "MiniMax model to use for AI responses",
+      "default": "MiniMax-M2.1",
+      "data": [
+        {
+          "title": "MiniMax M2.1 (Recommended)",
+          "value": "MiniMax-M2.1"
+        },
+        {
+          "title": "MiniMax M2 (200k context)",
+          "value": "MiniMax-M2"
+        }
+      ]
+    },
+    {
+      "name": "systemPrompt",
+      "type": "textfield",
+      "required": false,
+      "title": "System Prompt",
+      "description": "Custom system prompt for AI responses (optional)",
+      "placeholder": "You are a helpful assistant..."
+    },
+    {
+      "name": "temperature",
+      "type": "dropdown",
+      "required": false,
+      "title": "Temperature",
+      "description": "Controls randomness of responses",
+      "default": "0.7",
+      "data": [
+        {
+          "title": "0.3 (Focused)",
+          "value": "0.3"
+        },
+        {
+          "title": "0.7 (Balanced)",
+          "value": "0.7"
+        },
+        {
+          "title": "1.0 (Creative)",
+          "value": "1.0"
+        },
+        {
+          "title": "1.5 (Very Creative)",
+          "value": "1.5"
+        }
+      ]
+    },
+    {
+      "name": "maxTokens",
+      "type": "dropdown",
+      "required": false,
+      "title": "Max Tokens",
+      "description": "Maximum length of AI responses",
+      "default": "4096",
+      "data": [
+        {
+          "title": "1024 (Short)",
+          "value": "1024"
+        },
+        {
+          "title": "2048 (Medium)",
+          "value": "2048"
+        },
+        {
+          "title": "4096 (Long)",
+          "value": "4096"
+        },
+        {
+          "title": "8192 (Very Long)",
+          "value": "8192"
+        }
+      ]
+    },
+    {
+      "name": "streamResponses",
+      "type": "checkbox",
+      "required": false,
+      "title": "Stream Responses",
+      "description": "Enable real-time streaming of AI responses",
+      "default": true,
+      "label": "Enable streaming"
+    },
+    {
+      "name": "conciseMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Concise Mode",
+      "description": "Enable shorter, more direct responses",
+      "default": true,
+      "label": "Enable concise responses"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.2",
+    "@types/react": "19.2.13",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

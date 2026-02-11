@@ -1,5 +1,9 @@
 # Confluence Changelog
 
+## [Allow Windows to use this Extension] - 2026-02-10
+
+- Add `Windows` to allowed platforms
+
 ## [Improved Search for Whiteboards] - 2026-01-14
 
 - Add `Whiteboards` to global Search results with a distinct icon

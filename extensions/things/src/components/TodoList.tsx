@@ -2,7 +2,7 @@ import { List, Detail } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useState } from 'react';
 
-import { getListTodos, getLists, getTags } from '../api';
+import { getListTodos, getCollections } from '../api';
 import { plural } from '../utils';
 
 import TodoListEmptyView from './TodoListEmptyView';
@@ -16,8 +16,9 @@ type TodoListProps = {
 };
 
 export default function TodoList({ commandListName, displayActivationDates }: TodoListProps) {
-  const { data: tags } = useCachedPromise(() => getTags());
-  const { data: lists } = useCachedPromise(() => getLists());
+  const { data: collections } = useCachedPromise(() => getCollections('tags', 'lists'));
+  const tags = collections?.tags;
+  const lists = collections?.lists;
 
   const [searchText, setSearchText] = useState('');
 

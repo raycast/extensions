@@ -1,5 +1,10 @@
 # Tailscale Changelog
 
+## [Show User Login Name] - 2026-02-09
+
+- Shows the user's login name as an accessory in the All Devices command
+- Shows if a device advertises allowing SSH
+
 ## [Add new features] - 2025-07-30
 
 - Distinguish Mullvad exit nodes from other exit nodes and show location

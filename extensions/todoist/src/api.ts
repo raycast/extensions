@@ -72,7 +72,7 @@ export async function syncRequest(params: Record<string, unknown>) {
 
   if (data.sync_status) {
     const uuid = Object.keys(data.sync_status)[0];
-    if (data.sync_status[uuid] !== "ok") {
+    if (uuid && data.sync_status[uuid] !== "ok") {
       const error = data.sync_status[uuid] as { error: string; error_code: number; error_tag?: string };
       throw new SyncError(error.error, error.error_code, error.error_tag);
     }

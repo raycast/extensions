@@ -35,6 +35,13 @@
       "mode": "view"
     },
     {
+      "name": "assign-issue",
+      "title": "Assign Issue to Copilot",
+      "subtitle": "GitHub Copilot",
+      "description": "Assign an open issue to Copilot coding agent",
+      "mode": "view"
+    },
+    {
       "name": "copilot-usage",
       "title": "Copilot Usage",
       "subtitle": "GitHub Copilot",

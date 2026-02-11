@@ -1,5 +1,31 @@
 # Audio Device Changelog
 
+## [Fix] - 2026-02-10
+- Improved windows requirement auto install logic
+- Suppressed PowerShell warnings — Set $WarningPreference = 'SilentlyContinue' and -WarningAction SilentlyContinue on Import-Module to prevent warnings from corrupting JSON output.
+- Stripped ANSI escape codes — PS7 outputs color codes in warnings; these are now stripped before JSON parsing.
+- Handled both PS5 and PS7
+
+
+## Chore - 2026-02-07
+- Fix issues in lint due to newer ESlint package
+
+## [Fix] - 2026-02-04
+
+- Hidden devices tracked per input/output and shared across manual lists and auto-switch
+
+## [Update] - 2026-02-06
+
+- Add Windows support via platform abstraction
+- Refactor audio handling into a platform abstraction layer.
+- Moves macOS binary logic to src/platform/macos and adds
+- Windows support via PowerShell AudioDeviceCmdlets.
+- Update raycast package
+
+## [Update] - 2026-02-02
+
+- Added auto-switch commands with device order customization and toggles
+
 ## [Fix] - 2025-09-11
 
 - Remove problematic "airplay support" toggle

@@ -11,12 +11,13 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, getFavicon, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, useCachedPromise, useCachedState, useForm, usePromise } from "@raycast/utils";
 import { mxroute } from "./mxroute";
 import EmailAccounts from "./email-accounts";
 import EmailForwarders from "./email-forwarders";
 import Advanced from "./advanced";
 import DNSInfo from "./dns-info";
+import { DomainVerificationKey } from "./types";
 
 export default function ManageDomains() {
   const {
@@ -78,6 +79,11 @@ export default function ManageDomains() {
 
 function AddDomain({ firstDomainName }: { firstDomainName: string }) {
   const { pop, push } = useNavigation();
+  const [data, setData] = useCachedState<DomainVerificationKey>("domain-verification-key");
+  const { isLoading } = usePromise(mxroute.getDomainVerificationKey, [], {
+    onData: setData,
+    execute: !data,
+  });
   const { handleSubmit, itemProps } = useForm<{ domain: string }>({
     async onSubmit(values) {
       const { domain } = values;
@@ -111,9 +117,24 @@ function AddDomain({ firstDomainName }: { firstDomainName: string }) {
   });
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Plus} title="Add Domain" onSubmit={handleSubmit} />
+          {data && (
+            <ActionPanel.Section>
+              <Action.CopyToClipboard
+                title="Copy Name to Clipboard"
+                content={data.record.name}
+                shortcut={Keyboard.Shortcut.Common.CopyName}
+              />
+              <Action.CopyToClipboard
+                title="Copy Value to Clipboard"
+                content={data.record.value}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     >
@@ -123,6 +144,15 @@ function AddDomain({ firstDomainName }: { firstDomainName: string }) {
         info="Enter the domain without www (e.g., example.com)"
         {...itemProps.domain}
       />
+      <Form.Separator />
+      {data && (
+        <>
+          <Form.Description text={data.description} />
+          <Form.Description title="Type" text={data.record.type} />
+          <Form.Description title="Name" text={data.record.name} />
+          <Form.Description title="Value" text={data.record.value} />
+        </>
+      )}
     </Form>
   );
 }
