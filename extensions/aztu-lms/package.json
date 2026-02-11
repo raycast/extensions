@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aztu-lms",
+  "title": "AzTU LMS",
+  "version": "1.0.0",
+  "description": "Quickly access and manage your AzTU LMS account.",
+  "icon": "icon.png",
+  "author": "yusifaliyevpro",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "login-account",
+      "title": "Login in Browser",
+      "description": "Login to your AzTU LMS account in browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete-session",
+      "title": "Delete Session",
+      "description": "Delete old session to get new link and token",
+      "mode": "no-view"
+    },
+    {
+      "name": "schedule",
+      "title": "Class Schedule",
+      "description": "View and manage your upcoming classes and schedule",
+      "mode": "view"
+    },
+    {
+      "name": "announcements",
+      "title": "Announcements",
+      "description": "Get important updates from AzTU LMS",
+      "mode": "view"
+    },
+    {
+      "name": "profile-info",
+      "title": "Profile Information",
+      "description": "View and manage your AzTU LMS profile information",
+      "mode": "view"
+    },
+    {
+      "name": "transcript",
+      "title": "Academic Transcript",
+      "description": "View your academic transcript and grades",
+      "mode": "view"
+    },
+    {
+      "name": "attendance",
+      "title": "Attendance",
+      "description": "View your attendance and results",
+      "mode": "view"
+    },
+    {
+      "name": "lectures",
+      "title": "Lectures",
+      "description": "View your lectures",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "userid",
+      "title": "User ID",
+      "description": "Enter your AzTU LMS user ID",
+      "placeholder": "202501234",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Enter your AzTU LMS password",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Enter the directory path where materials will be downloaded",
+      "type": "directory",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "date-fns": "^4.1.0",
+    "fetch-cookie": "^3.2.0",
+    "tough-cookie": "^6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.18.3",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
