@@ -95,11 +95,12 @@ export default function Command() {
 
   // If we have a result, show it
   if (status) {
-    let icon = status.online
-      ? { source: Icon.CheckCircle, tintColor: Color.Green }
-      : { source: Icon.XMarkCircle, tintColor: Color.Red };
+    let icon: { source: Icon | string; tintColor?: Color | null | undefined } =
+      status.online
+        ? { source: Icon.CheckCircle, tintColor: Color.Green }
+        : { source: Icon.XMarkCircle, tintColor: Color.Red };
     if (status.icon) {
-      icon = { source: status.icon as Icon, tintColor: undefined };
+      icon = { source: status.icon, tintColor: undefined };
     }
 
     /* Large hero image, name, and clean MOTD */
