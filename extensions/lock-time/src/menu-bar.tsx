@@ -1,6 +1,6 @@
 import { MenuBarExtra, Icon, LaunchType, launchCommand } from "@raycast/api";
 import { useLockData } from "./hooks/use-lock-data";
-import { formatDuration } from "./lib/formatter";
+import { formatDuration, formatTimeRange } from "./lib/formatter";
 import { resetToday } from "./lib/storage";
 
 /**
@@ -11,6 +11,7 @@ import { resetToday } from "./lib/storage";
  */
 export default function Command() {
   const { metrics, isLoading, revalidate } = useLockData();
+  const hasValidLastLockRange = metrics.lastLockStartAt > 0 && metrics.lastLockEndAt >= metrics.lastLockStartAt;
 
   // 菜单栏标题：显示今日锁屏时长
   const title = `${formatDuration(metrics.todayLockedMs)} locked`;
@@ -22,7 +23,12 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Last Session">
-        <MenuBarExtra.Item title={`Last Lock: ${formatDuration(metrics.lastLockDurationMs)}`} icon={Icon.Lock} />
+        <MenuBarExtra.Item
+          title={`Last Lock: ${formatDuration(metrics.lastLockDurationMs)}${
+            hasValidLastLockRange ? `  (${formatTimeRange(metrics.lastLockStartAt, metrics.lastLockEndAt)})` : ""
+          }`}
+          icon={Icon.Lock}
+        />
         <MenuBarExtra.Item title={`Last Focus: ${formatDuration(metrics.lastUnlockIntervalMs)}`} icon={Icon.Monitor} />
       </MenuBarExtra.Section>
 

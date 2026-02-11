@@ -4,10 +4,11 @@ Quietly tracks how long your Mac stays locked — and how long you stay focused 
 
 ## Features
 
-- **Today Locked Time** — Cumulative lock duration for today
-- **Last Lock Duration** — How long your last lock session lasted
+- **Today Locked Time** — Cumulative lock duration for today, press Enter to view session breakdown
+- **Today Lock Sessions** — Drill down to see each lock session's time range and duration
+- **Last Lock Duration** — How long your last lock session lasted, with time range (e.g. `12:57 → 13:48`)
 - **Last Unlock Interval** — How long you worked continuously between unlocks
-- **Menu Bar** — Real-time lock time displayed in your menu bar
+- **Menu Bar** — Real-time lock time displayed in your menu bar with time range info
 - **Zero Config** — Works immediately after installation, no setup required
 - **Local-First** — All data stored locally, nothing leaves your Mac
 - **Fast** — First load in under 0.5s, cached loads under 0.1s

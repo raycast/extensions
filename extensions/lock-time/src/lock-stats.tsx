@@ -1,10 +1,11 @@
 import { List, ActionPanel, Action, Icon, Color, showToast, Toast, Clipboard } from "@raycast/api";
 import { useLockData } from "./hooks/use-lock-data";
-import { formatDuration } from "./lib/formatter";
+import { formatDuration, formatTimeRange } from "./lib/formatter";
 import { resetToday, resetAll, loadState, loadMetrics } from "./lib/storage";
 import { detectLockStateWithInfo } from "./lib/detector";
 import { processStateChange } from "./lib/state-machine";
 import { readRecentLogs, getLogFileSize, getLogFilePath } from "./lib/logger";
+import { LockSession } from "./lib/types";
 import { useState } from "react";
 
 /**
@@ -19,6 +20,7 @@ export default function Command() {
   const { state, metrics, isLoading, revalidate } = useLockData();
   const [diagnosticInfo, setDiagnosticInfo] = useState<string | null>(null);
   const [metaInfo, setMetaInfo] = useState<string | null>(null);
+  const hasValidLastLockRange = metrics.lastLockStartAt > 0 && metrics.lastLockEndAt >= metrics.lastLockStartAt;
 
   /**
    * 运行一次状态检测并刷新数据
@@ -231,15 +233,72 @@ export default function Command() {
           title="Today Locked Time"
           subtitle={formatDuration(metrics.todayLockedMs)}
           icon={{ source: Icon.Clock, tintColor: Color.Blue }}
-          accessories={[{ text: "Cumulative lock time today" }]}
-          actions={sharedActions}
+          accessories={[
+            ...(metrics.todaySessions.length > 0 ? [{ tag: `${metrics.todaySessions.length} sessions` }] : []),
+            { text: "Cumulative lock time today" },
+          ]}
+          actions={
+            <ActionPanel>
+              {metrics.todaySessions.length > 0 && (
+                <Action.Push
+                  title="View Today Sessions"
+                  icon={Icon.List}
+                  target={<SessionDetailView sessions={metrics.todaySessions} todayLockedMs={metrics.todayLockedMs} />}
+                />
+              )}
+              <Action
+                title="Update Now"
+                icon={Icon.Play}
+                shortcut={{ modifiers: ["cmd"], key: "u" }}
+                onAction={handleUpdateNow}
+              />
+              <Action title="Refresh View" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action
+                title="Test Detection"
+                icon={Icon.Heartbeat}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                onAction={handleDiagnostic}
+              />
+              <ActionPanel.Section title="Debug">
+                <Action
+                  title="View Event Log"
+                  icon={Icon.List}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  onAction={handleViewEventLog}
+                />
+                <Action
+                  title="Export Raw Data"
+                  icon={Icon.Document}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                  onAction={handleExportRawData}
+                />
+                <Action title="Copy Stats" icon={Icon.Clipboard} onAction={handleCopyStats} />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Reset">
+                <Action
+                  title="Reset Today"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={handleResetToday}
+                />
+                <Action
+                  title="Reset All Data"
+                  icon={Icon.ExclamationMark}
+                  style={Action.Style.Destructive}
+                  onAction={handleResetAll}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
         />
       </List.Section>
 
       <List.Section title="Last Session">
         <List.Item
           title="Last Lock Duration"
-          subtitle={formatDuration(metrics.lastLockDurationMs)}
+          subtitle={`${formatDuration(metrics.lastLockDurationMs)}${
+            hasValidLastLockRange ? `  (${formatTimeRange(metrics.lastLockStartAt, metrics.lastLockEndAt)})` : ""
+          }`}
           icon={{ source: Icon.Lock, tintColor: Color.Orange }}
           accessories={[{ text: "Duration of last lock" }]}
           actions={sharedActions}
@@ -285,6 +344,30 @@ export default function Command() {
           )}
         </List.Section>
       )}
+    </List>
+  );
+}
+
+/**
+ * 今日锁屏会话明细视图
+ *
+ * 通过 Action.Push 从 Today Locked Time 行进入，
+ * 展示今日各次锁屏会话的时间区间和持续时长。
+ */
+function SessionDetailView({ sessions, todayLockedMs }: { sessions: LockSession[]; todayLockedMs: number }) {
+  return (
+    <List navigationTitle="Today Lock Sessions">
+      <List.Section title={`${sessions.length} sessions — Total: ${formatDuration(todayLockedMs)}`}>
+        {sessions.map((s, i) => (
+          <List.Item
+            key={`${s.lockAt}-${s.unlockAt}`}
+            title={formatTimeRange(s.lockAt, s.unlockAt)}
+            subtitle={formatDuration(s.durationMs)}
+            icon={{ source: Icon.Lock, tintColor: Color.Orange }}
+            accessories={[{ text: `#${i + 1}` }]}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

@@ -1,5 +1,19 @@
 # Lock Time Changelog
 
+## [Session History & Time Range] - {PR_MERGE_DATE}
+
+- Added lock time range display for Last Lock Duration (e.g. `12:57 → 13:48`)
+  - Shows lock start/end time alongside the duration, no more mental math to recall when the lock happened
+- Added Today Lock Sessions drill-down detail view
+  - Press Enter on Today Locked Time to see each session's time range and duration
+  - Provides full visibility into work/rest rhythm throughout the day
+- Menu Bar now displays time range info for last lock session
+- Added `LockSession` data structure (lockAt / unlockAt / durationMs) and extended `MetricsData` with session tracking fields
+- State machine records complete session on LOCKED→UNLOCKED transition, with cross-midnight splitting
+- Added `formatTime()` / `formatTimeRange()` formatting utilities
+- Added `SessionDetailView` component with `Action.Push` drill-down interaction
+- Backward compatible: automatically fills default values for missing new fields in old data
+
 ## [Performance Optimization] - {PR_MERGE_DATE}
 
 - Improved first-screen loading speed by 83% (from ~3s to ~0.5s)

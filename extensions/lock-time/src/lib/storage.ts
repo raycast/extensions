@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { StateData, MetricsData, STORAGE_KEYS } from "./types";
 import { getTodayDateString } from "./formatter";
+import { MAX_TODAY_SESSIONS } from "./constants";
 
 /**
  * 默认状态数据（首次运行时使用）
@@ -21,6 +22,9 @@ export function getDefaultMetrics(): MetricsData {
     lastLockDurationMs: 0,
     lastUnlockIntervalMs: 0,
     todayDate: getTodayDateString(),
+    lastLockStartAt: 0,
+    lastLockEndAt: 0,
+    todaySessions: [],
   };
 }
 
@@ -59,11 +63,20 @@ export async function loadMetrics(): Promise<MetricsData> {
     const metrics = JSON.parse(raw) as MetricsData;
     const today = getTodayDateString();
 
-    // 日期切换：重置今日累计锁屏时长
+    // 兼容旧数据：补充新增字段默认值
+    if (metrics.lastLockStartAt === undefined) metrics.lastLockStartAt = 0;
+    if (metrics.lastLockEndAt === undefined) metrics.lastLockEndAt = 0;
+    if (!Array.isArray(metrics.todaySessions)) metrics.todaySessions = [];
+    if (metrics.todaySessions.length > MAX_TODAY_SESSIONS) {
+      metrics.todaySessions = metrics.todaySessions.slice(-MAX_TODAY_SESSIONS);
+    }
+
+    // 日期切换：重置今日累计锁屏时长和会话列表
     if (metrics.todayDate !== today) {
       return {
         ...metrics,
         todayLockedMs: 0,
+        todaySessions: [],
         todayDate: today,
       };
     }
@@ -103,6 +116,7 @@ export async function saveMetrics(metrics: MetricsData): Promise<void> {
 export async function resetToday(): Promise<void> {
   const metrics = await loadMetrics();
   metrics.todayLockedMs = 0;
+  metrics.todaySessions = [];
   metrics.todayDate = getTodayDateString();
   await saveMetrics(metrics);
 }

@@ -1,6 +1,7 @@
 import { detectLockStateWithInfo } from "./detector";
 import { loadState, loadMetrics, saveState, saveMetrics } from "./storage";
-import { StateData } from "./types";
+import { MetricsData, StateData } from "./types";
+import { MAX_TODAY_SESSIONS } from "./constants";
 import { logEvent } from "./logger";
 
 /**
@@ -14,7 +15,6 @@ import { logEvent } from "./logger";
  * 因此间隙检测主要作为兜底方案，正常情况下通过 Swift CGSession 直接检测锁屏状态。
  */
 const GAP_THRESHOLD_MS = 90 * 1000;
-
 /**
  * 计算 elapsed 中属于"今天"的部分（严格按本地时间 0 点切割）
  *
@@ -40,6 +40,16 @@ function getTodayPortionMs(lastChangeAt: number, now: number): number {
   }
   // lastChangeAt 在今天之前，只计入 0 点之后的部分
   return now - todayStartMs;
+}
+
+/**
+ * 追加今日会话，并限制列表长度，避免 LocalStorage 无限增长。
+ */
+function appendTodaySession(metrics: MetricsData, lockAt: number, unlockAt: number, durationMs: number): void {
+  metrics.todaySessions.push({ lockAt, unlockAt, durationMs });
+  if (metrics.todaySessions.length > MAX_TODAY_SESSIONS) {
+    metrics.todaySessions = metrics.todaySessions.slice(-MAX_TODAY_SESSIONS);
+  }
 }
 
 /**
@@ -154,6 +164,10 @@ export async function processStateChange(): Promise<void> {
         metrics.todayLockedMs += todayPortion;
         metrics.lastLockDurationMs = elapsed;
         metrics.lastUnlockIntervalMs = 0; // 间隙期间推断为锁屏，解锁间隔视为 0
+        // 记录推断的锁屏会话到今日列表
+        const todayStartMs = new Date(now).setHours(0, 0, 0, 0);
+        const sessionLockAt = Math.max(prevState.lastChangeAt, todayStartMs);
+        appendTodaySession(metrics, sessionLockAt, now, todayPortion);
         metricsChanged = true;
 
         logEvent({
@@ -184,8 +198,17 @@ export async function processStateChange(): Promise<void> {
     } else if (prevState.current === "locked" && currentLockState === "unlocked") {
       // LOCKED → UNLOCKED：记录锁屏持续时长，累加今日锁屏时长
       metrics.lastLockDurationMs = elapsed;
+      metrics.lastLockEndAt = now;
+      // lastLockStartAt 取 prevState.lastChangeAt（即锁屏开始时间点）
+      metrics.lastLockStartAt = prevState.lastChangeAt;
       const todayPortion = getTodayPortionMs(prevState.lastChangeAt, now);
       metrics.todayLockedMs += todayPortion;
+
+      // 记录锁屏会话到今日列表（跨天时只记录今天部分）
+      const todayStartMs = new Date(now).setHours(0, 0, 0, 0);
+      const sessionLockAt = Math.max(prevState.lastChangeAt, todayStartMs);
+      appendTodaySession(metrics, sessionLockAt, now, todayPortion);
+
       metricsChanged = true;
 
       logEvent({

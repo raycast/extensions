@@ -33,6 +33,31 @@ export function formatDuration(ms: number): string {
 }
 
 /**
+ * 将时间戳格式化为 HH:MM 格式的本地时间字符串
+ *
+ * @param timestamp Unix 时间戳（ms）
+ * @returns 格式化后的时间字符串，如 "14:30"
+ */
+export function formatTime(timestamp: number): string {
+  const date = new Date(timestamp);
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+/**
+ * 将起止时间戳格式化为时间区间字符串
+ *
+ * @param startMs 开始时间戳（Unix ms）
+ * @param endMs 结束时间戳（Unix ms）
+ * @returns 格式化后的时间区间，如 "12:57 → 13:48"；若时间戳无效则返回空字符串
+ */
+export function formatTimeRange(startMs: number, endMs: number): string {
+  if (startMs <= 0 || endMs <= 0) return "";
+  return `${formatTime(startMs)} → ${formatTime(endMs)}`;
+}
+
+/**
  * 获取当前日期字符串（YYYY-MM-DD 格式）
  *
  * @returns 当前日期字符串
