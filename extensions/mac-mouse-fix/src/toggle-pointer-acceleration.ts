@@ -96,6 +96,9 @@ end repeat
 return newState
 `);
 
+    // Mouse → Advanced "Pointer acceleration" checkbox uses inverted semantics: value "1" = acceleration
+    // OFF, "0" = acceleration ON (opposite of typical AX checkbox 1=on). Verified by testing; using
+    // result === "1" for isEnabled showed the wrong state in the HUD. See: Apple Support "Mouse settings".
     const isEnabled = result !== "1";
     await showHUD(`Pointer Acceleration: ${isEnabled ? "ON" : "OFF"}`);
   } catch (error) {
