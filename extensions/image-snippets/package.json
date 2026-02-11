@@ -1,0 +1,52 @@
+{
+  "name": "image-snippets",
+  "title": "Image Snippets",
+  "description": "Save and organize images as reusable snippets with keywords and quick copy",
+  "icon": "extension-icon.png",
+  "author": "thibault_dassise",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-images",
+      "title": "Browse Image Snippets",
+      "description": "Browse and copy images to clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "add-image",
+      "title": "Add Image to Snippets",
+      "description": "Save current clipboard image with name and keywords",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "imagesFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Images Folder",
+      "description": "Folder containing your image snippets",
+      "default": "~/Pictures/raycast-snippets"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.10.0",
+    "@types/react": "18.2.38",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
