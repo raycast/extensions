@@ -125,15 +125,15 @@ export const removeWorktree = ({
   worktreeName: string;
   force?: boolean;
 }) => {
-  return executeCommand(`git -C ${parentPath} worktree remove ${force ? "-f" : ""} ./${worktreeName}`);
+  return executeCommand(`git -C "${parentPath}" worktree remove ${force ? "-f" : ""} "./${worktreeName}"`);
 };
 
 export const pruneWorktrees = async ({ path }: { path: string }) => {
-  return executeCommand(`git -C ${path} worktree prune`);
+  return executeCommand(`git -C "${path}" worktree prune`);
 };
 
 export const removeBranch = async ({ path, branch }: { path: string; branch: string }) => {
-  return executeCommand(`git -C ${path} branch -D ${branch}`);
+  return executeCommand(`git -C "${path}" branch -D "${branch}"`);
 };
 
 export const moveWorktree = async ({

@@ -24,39 +24,47 @@ export const RemoveWorktree = ({
     const projectName = path.basename(projectPath);
 
     try {
-      await removeWorktree({ parentPath: projectPath, worktreeName });
+      try {
+        await removeWorktree({ parentPath: projectPath, worktreeName });
+      } catch (e) {
+        if (!(e instanceof Error)) throw e;
+
+        const errorMessage = e.message;
+
+        if (!errorMessage.includes(UNTRACKED_OR_MODIFIED_FILES_ERROR)) throw e;
+
+        const confirmed = await confirmAlert({
+          title: "Worktree has unsaved changes",
+          message: "This action cannot be undone, are you sure?",
+        });
+
+        if (!confirmed) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Aborted Removal";
+          toast.message = "The worktree was not removed";
+          return;
+        }
+
+        await removeWorktree({ parentPath: projectPath, worktreeName, force: true });
+      }
+
+      toast.title = "Running Cleanup";
+      toast.message = "Cleaning up worktrees and branches";
+      if (worktree.branch) await removeBranch({ path: projectPath, branch: worktree.branch });
+      await pruneWorktrees({ path: projectPath });
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Worktree Removed";
+      toast.message = "The worktree has been removed";
+
+      removeWorktreeFromCache({ projectName, worktreeId: worktree.id, onSuccess: revalidateProjects });
     } catch (e) {
       if (!(e instanceof Error)) throw e;
 
-      const errorMessage = e.message;
-
-      if (!errorMessage.includes(UNTRACKED_OR_MODIFIED_FILES_ERROR)) throw e;
-
-      const confirmed = await confirmAlert({
-        title: "Worktree has unsaved changes",
-        message: "This action cannot be undone, are you sure?",
-      });
-
-      if (!confirmed) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Aborted Removal";
-        toast.message = "The worktree was not removed";
-        return;
-      }
-
-      await removeWorktree({ parentPath: projectPath, worktreeName, force: true });
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to Remove";
+      toast.message = e.message;
     }
-
-    toast.title = "Running Cleanup";
-    toast.message = "Cleaning up worktrees and branches";
-    if (worktree.branch) await removeBranch({ path: projectPath, branch: worktree.branch });
-    await pruneWorktrees({ path: projectPath });
-
-    toast.style = Toast.Style.Success;
-    toast.title = "Worktree Removed";
-    toast.message = "The worktree has been removed";
-
-    removeWorktreeFromCache({ projectName, worktreeId: worktree.id, onSuccess: revalidateProjects });
   };
 
   return (
