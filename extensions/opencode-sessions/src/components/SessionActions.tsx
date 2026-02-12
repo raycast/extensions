@@ -157,7 +157,7 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
             title="Open Share Link"
             url={session.share.url}
             icon={Icon.Link}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           />
         )}
         <Action
