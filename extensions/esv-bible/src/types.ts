@@ -1,5 +1,7 @@
 export interface Preferences {
   ESVApiToken: string;
+  searchMode: "live" | "manual";
+  defaultAction: string;
   includePassageReferences: boolean;
   includeVerseNumbers: boolean;
   includeFirstVerseNumbers: boolean;
@@ -25,7 +27,7 @@ export interface PassageResponse {
       next_verse: number;
       prev_chapter: number[];
       next_chapter: number[];
-    }
+    },
   ];
   passages: string[];
 }
