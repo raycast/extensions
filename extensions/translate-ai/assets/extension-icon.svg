@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1e2e"/>
+      <stop offset="100%" style="stop-color:#313244"/>
+    </linearGradient>
+    <clipPath id="r4">
+      <rect width="512" height="512" rx="112" ry="112"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#r4)">
+    <rect width="512" height="512" fill="url(#bg4)"/>
+
+    <!-- speech bubble left (source) -->
+    <!-- rect top=108, height=140, center=178 -->
+    <rect x="72" y="108" width="200" height="140" rx="24" ry="24" fill="#a78bfa" opacity="0.9"/>
+    <polygon points="122,248 105,284 168,248" fill="#a78bfa" opacity="0.9"/>
+    <text x="172" y="208" font-family="SF Pro Rounded, -apple-system, Helvetica Neue, Arial, sans-serif" font-size="78" font-weight="700" fill="white" text-anchor="middle">En</text>
+
+    <!-- speech bubble right (target) -->
+    <!-- rect top=228, height=140, center=298 -->
+    <rect x="240" y="228" width="200" height="140" rx="24" ry="24" fill="#22d3ee" opacity="0.9"/>
+    <polygon points="390,368 407,404 344,368" fill="#22d3ee" opacity="0.9"/>
+    <text x="340" y="326" font-family="SF Pro Rounded, -apple-system, Helvetica Neue, Arial, sans-serif" font-size="78" font-weight="700" fill="#1e1e2e" text-anchor="middle">Pl</text>
+
+    <!-- sparkle / AI indicator -->
+    <g fill="#fbbf24">
+      <polygon points="264,168 269,186 287,191 269,196 264,214 259,196 241,191 259,186"/>
+      <polygon points="298,142 301,152 311,155 301,158 298,168 295,158 285,155 295,152" opacity="0.7"/>
+      <polygon points="236,146 239,154 247,157 239,160 236,168 233,160 225,157 233,154" opacity="0.5"/>
+    </g>
+  </g>
+</svg>
