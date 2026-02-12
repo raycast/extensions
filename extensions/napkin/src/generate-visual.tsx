@@ -30,11 +30,6 @@ interface FormValues {
   sort_strategy: "relevance" | "variation" | "random";
 }
 
-interface Preferences {
-  napkinApiKey: string;
-  savePath?: string;
-}
-
 interface VisualResultProps {
   files: GeneratedFile[];
   format: "png" | "svg";

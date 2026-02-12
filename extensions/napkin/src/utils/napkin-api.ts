@@ -4,8 +4,8 @@ import { CreateVisualRequest, VisualStatusResponse, ApiError } from "./types";
 const API_BASE_URL = "https://api.napkin.ai/v1";
 
 function getApiKey(): string {
-  const preferences = getPreferenceValues<{ napkinApiKey: string }>();
-  return preferences.napkinApiKey;
+  const { napkinApiKey } = getPreferenceValues<Preferences>();
+  return napkinApiKey;
 }
 
 async function handleApiError(response: Response): Promise<never> {
