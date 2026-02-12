@@ -77,7 +77,7 @@ const templates: Template[] = [
     id: "news",
     name: "News & Media",
     description: "Hacker News, Reddit, TechCrunch, The Verge",
-    icon: Icon.Newspaper,
+    icon: Icon.Book,
     keywords: ["news", "hn", "reddit", "tech", "media"],
     sites: ["news.ycombinator.com", "reddit.com", "techcrunch.com", "theverge.com"],
   },
