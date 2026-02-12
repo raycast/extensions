@@ -4,7 +4,10 @@
   "description": "Translate selected text using Raycast AI and auto-replace",
   "icon": "icon.png",
   "author": "jacksonLiu",
-  "categories": ["Productivity", "Applications"],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -23,24 +26,36 @@
       "description": "The language to translate to",
       "default": "auto",
       "data": [
-        { "title": "Auto (CN <-> EN)", "value": "auto" },
-        { "title": "English", "value": "english" },
-        { "title": "Simplified Chinese", "value": "chinese" },
-        { "title": "Japanese", "value": "japanese" }
+        {
+          "title": "Auto (CN <-> EN)",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "english"
+        },
+        {
+          "title": "Simplified Chinese",
+          "value": "chinese"
+        },
+        {
+          "title": "Japanese",
+          "value": "japanese"
+        }
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.83.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",

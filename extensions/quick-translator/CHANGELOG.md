@@ -1,6 +1,6 @@
 # Quick Translator Changelog
 
-## {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
 - Translate selected text using Raycast AI

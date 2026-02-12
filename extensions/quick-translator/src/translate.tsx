@@ -8,10 +8,6 @@ import {
   Toast,
 } from "@raycast/api";
 
-interface Preferences {
-  targetLanguage: "auto" | "english" | "chinese" | "japanese";
-}
-
 const languageNames: Record<string, string> = {
   english: "English",
   chinese: "Simplified Chinese",
