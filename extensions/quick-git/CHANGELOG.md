@@ -1,6 +1,6 @@
 # Quick Git Changelog
 
-## [Working with worktrees] - {PR_MERGE_DATE}
+## [Working with worktrees] - 2026-02-12
 
 Added support for navigating and managing worktrees.
 
