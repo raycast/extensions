@@ -32,7 +32,7 @@ export default function CalendarGrid() {
 
   useEffect(() => {
     delaySetSelectedId(format(new Date(), "yyyy-MM-dd"));
-  }, []);
+  }, [delaySetSelectedId]);
 
   const { days, currentMonthName } = useMemo(() => {
     const monthStart = startOfMonth(currentDate);
