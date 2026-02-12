@@ -2,7 +2,7 @@
 
 ## [Mention Windows + Add Images] - {PR_MERGE_DATE}
 
-- Added `metadata` images
+- Added `metadata` images.
 - Edited README and descriptions to mention Windows.
 
 ## [Windows Support] - 2025-06-18
