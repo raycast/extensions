@@ -8,15 +8,13 @@ const SELECTED_PROVIDER_KEY = "menu-bar-selected-provider";
 const PROVIDER_ORDER_KEY = "provider-order";
 const sharedCache = new Cache();
 
-export function getSelectedMenuBarProvider(): string | undefined {
-  return sharedCache.get(SELECTED_PROVIDER_KEY) || undefined;
-}
+export const getSelectedMenuBarProvider = (): string | undefined => sharedCache.get(SELECTED_PROVIDER_KEY) || undefined;
 
-export function setSelectedMenuBarProvider(providerId: string): void {
+export const setSelectedMenuBarProvider = (providerId: string): void => {
   sharedCache.set(SELECTED_PROVIDER_KEY, providerId);
-}
+};
 
-export function getProviderOrder(): string[] | undefined {
+export const getProviderOrder = (): string[] | undefined => {
   const raw = sharedCache.get(PROVIDER_ORDER_KEY);
   if (!raw) return undefined;
   try {
@@ -25,13 +23,13 @@ export function getProviderOrder(): string[] | undefined {
   } catch {
     return undefined;
   }
-}
+};
 
-export function setProviderOrder(providerIds: string[]): void {
+export const setProviderOrder = (providerIds: string[]): void => {
   sharedCache.set(PROVIDER_ORDER_KEY, JSON.stringify(providerIds));
-}
+};
 
-export function reorderProviders(data: ProviderResult[] | undefined, order: string[] | undefined): ProviderResult[] {
+export const reorderProviders = (data: ProviderResult[] | undefined, order: string[] | undefined): ProviderResult[] => {
   if (!data?.length) return data ?? [];
   if (!order?.length) return data;
   const byId = new Map(data.map((r) => [r.id, r]));
@@ -44,22 +42,22 @@ export function reorderProviders(data: ProviderResult[] | undefined, order: stri
     if (!order.includes(r.id)) ordered.push(r);
   }
   return ordered;
-}
+};
 
-export function expandPath(path: string): string {
+export const expandPath = (path: string): string => {
   if (path.startsWith("~/")) {
     return join(homedir(), path.slice(2));
   }
   return path;
-}
+};
 
-export function readSqliteValue(
+export const readSqliteValue = (
   dbPath: string,
   key: string,
   table = "ItemTable",
   keyColumn = "key",
   valueColumn = "value",
-): string {
+): string => {
   const escapedKey = key.replace(/'/g, "''");
   const query = `SELECT ${valueColumn} FROM ${table} WHERE ${keyColumn}='${escapedKey}'`;
   try {
@@ -74,9 +72,9 @@ export function readSqliteValue(
   } catch (e) {
     throw new Error(`SQLite read failed for key: ${key}: ${e instanceof Error ? e.message : String(e)}`);
   }
-}
+};
 
-export function readKeychainPassword(service: string): string | null {
+export const readKeychainPassword = (service: string): string | null => {
   try {
     const result = execSync(`/usr/bin/security find-generic-password -s "${service}" -w 2>/dev/null`, {
       encoding: "utf-8",
@@ -86,9 +84,9 @@ export function readKeychainPassword(service: string): string | null {
   } catch {
     return null;
   }
-}
+};
 
-export function isJwtExpired(jwt: string, bufferSeconds = 300): boolean {
+export const isJwtExpired = (jwt: string, bufferSeconds = 300): boolean => {
   const parts = jwt.split(".");
   if (parts.length < 2) return true;
 
@@ -102,9 +100,9 @@ export function isJwtExpired(jwt: string, bufferSeconds = 300): boolean {
   } catch {
     return true;
   }
-}
+};
 
-export function formatResetTime(date: Date): string {
+export const formatResetTime = (date: Date): string => {
   const secondsRemaining = (date.getTime() - Date.now()) / 1000;
   if (secondsRemaining <= 0) return "Resets soon";
 
@@ -117,36 +115,33 @@ export function formatResetTime(date: Date): string {
   if (hours > 0) return `Resets in ${hours}h ${minutes}m`;
   if (minutes > 0) return `Resets in ${minutes}m`;
   return "Resets in <1m";
-}
+};
 
-export function formatResetTimeFromISO(isoString: string): string | undefined {
+export const formatResetTimeFromISO = (isoString: string): string | undefined => {
   const date = new Date(isoString);
   if (isNaN(date.getTime())) return undefined;
   return formatResetTime(date);
-}
+};
 
-export function formatResetTimeFromUnixSeconds(seconds: number): string | undefined {
-  return formatResetTime(new Date(seconds * 1000));
-}
+export const formatResetTimeFromUnixSeconds = (seconds: number): string | undefined =>
+  formatResetTime(new Date(seconds * 1000));
 
-export function formatResetTimeFromUnixMilliseconds(ms: number): string | undefined {
-  return formatResetTime(new Date(ms));
-}
+export const formatResetTimeFromUnixMilliseconds = (ms: number): string | undefined => formatResetTime(new Date(ms));
 
-export function formatResetTimeFromUnixMillisecondsString(msString: string): string | undefined {
+export const formatResetTimeFromUnixMillisecondsString = (msString: string): string | undefined => {
   const ms = parseInt(msString, 10);
   if (isNaN(ms)) return undefined;
   return formatResetTimeFromUnixMilliseconds(ms);
-}
+};
 
-export function formatProgressBar(percentage: number, length = 10): string {
+export const formatProgressBar = (percentage: number, length = 10): string => {
   const clamped = Math.max(0, Math.min(100, percentage));
   const filled = Math.round((clamped / 100) * length);
   const empty = length - filled;
   return "■".repeat(filled) + "□".repeat(empty);
-}
+};
 
-export function formatProgressValue(value: number, max: number, unit?: "percent" | "dollars"): string {
+export const formatProgressValue = (value: number, max: number, unit?: "percent" | "dollars"): string => {
   switch (unit) {
     case "percent":
       return `${Math.round(value)}%`;
@@ -155,20 +150,20 @@ export function formatProgressValue(value: number, max: number, unit?: "percent"
     default:
       return value.toFixed(1);
   }
-}
+};
 
 /** Format a timestamp (ms) as relative time for "last updated" display. */
-export function formatLastUpdatedAt(ms: number): string {
+export const formatLastUpdatedAt = (ms: number): string => {
   const elapsed = Date.now() - ms;
   if (elapsed < 60 * 1000) return "just now";
   if (elapsed < 60 * 60 * 1000) return `${Math.floor(elapsed / 60000)}m ago`;
   if (elapsed < 24 * 60 * 60 * 1000) return `${Math.floor(elapsed / 3600000)}h ago`;
   if (elapsed < 7 * 24 * 60 * 60 * 1000) return `${Math.floor(elapsed / 86400000)}d ago`;
   return new Date(ms).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
+};
 
 /** Prefer a percent-unit progress line; otherwise first progress line with max > 0. */
-export function getPrimaryPercentage(lines: MetricLine[]): number | undefined {
+export const getPrimaryPercentage = (lines: MetricLine[]): number | undefined => {
   let fallback: number | undefined;
   for (const line of lines) {
     if (line.type !== "progress" || line.max <= 0) continue;
@@ -177,4 +172,4 @@ export function getPrimaryPercentage(lines: MetricLine[]): number | undefined {
     if (fallback === undefined) fallback = pct;
   }
   return fallback;
-}
+};

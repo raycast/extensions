@@ -29,13 +29,13 @@ interface ClaudeUsageResponse {
 
 const CENTS_PER_DOLLAR = 100;
 
-function isExpired(expiresAtMs?: number): boolean {
+const isExpired = (expiresAtMs?: number): boolean => {
   if (!expiresAtMs) return false;
   const bufferSeconds = 300;
   return Date.now() / 1000 > expiresAtMs / 1000 - bufferSeconds;
-}
+};
 
-function loadFromKeychain(): ClaudeCredentials | null {
+const loadFromKeychain = (): ClaudeCredentials | null => {
   const raw = readKeychainPassword("Claude Code-credentials");
   if (!raw) return null;
   try {
@@ -50,9 +50,9 @@ function loadFromKeychain(): ClaudeCredentials | null {
   } catch {
     return null;
   }
-}
+};
 
-function loadFromFile(): ClaudeCredentials {
+const loadFromFile = (): ClaudeCredentials => {
   const path = expandPath("~/.claude/.credentials.json");
   if (!existsSync(path)) {
     throw new Error("Claude not found. Sign in with Claude Code.");
@@ -67,15 +67,15 @@ function loadFromFile(): ClaudeCredentials {
     expiresAt: oauth.expiresAt,
     subscriptionType: oauth.subscriptionType,
   };
-}
+};
 
-function loadCredentials(): ClaudeCredentials {
+const loadCredentials = (): ClaudeCredentials => {
   const keychain = loadFromKeychain();
   if (keychain) return keychain;
   return loadFromFile();
-}
+};
 
-function formatPlanLabel(subscriptionType?: string): string | undefined {
+const formatPlanLabel = (subscriptionType?: string): string | undefined => {
   if (!subscriptionType) return undefined;
   const type = subscriptionType.toLowerCase();
   switch (type) {
@@ -93,9 +93,9 @@ function formatPlanLabel(subscriptionType?: string): string | undefined {
     default:
       return subscriptionType.charAt(0).toUpperCase() + subscriptionType.slice(1);
   }
-}
+};
 
-function makeProgressLine(window: ClaudeWindow | undefined, label: string): MetricLine | undefined {
+const makeProgressLine = (window: ClaudeWindow | undefined, label: string): MetricLine | undefined => {
   if (!window) return undefined;
   const subtitle = window.resets_at ? formatResetTimeFromISO(window.resets_at) : undefined;
   return {
@@ -106,9 +106,9 @@ function makeProgressLine(window: ClaudeWindow | undefined, label: string): Metr
     unit: "percent",
     subtitle,
   };
-}
+};
 
-function makeExtraUsageLine(extra: ClaudeExtraUsage | undefined): MetricLine | undefined {
+const makeExtraUsageLine = (extra: ClaudeExtraUsage | undefined): MetricLine | undefined => {
   if (!extra || !extra.is_enabled || extra.used_credits == null || !extra.monthly_limit || extra.monthly_limit <= 0) {
     return undefined;
   }
@@ -121,9 +121,9 @@ function makeExtraUsageLine(extra: ClaudeExtraUsage | undefined): MetricLine | u
     unit: "dollars",
     subtitle: `Limit: $${limitDollars.toFixed(2)}`,
   };
-}
+};
 
-export async function fetchClaude(): Promise<MetricLine[]> {
+export const fetchClaude = async (): Promise<MetricLine[]> => {
   const credentials = loadCredentials();
 
   if (isExpired(credentials.expiresAt)) {
@@ -174,4 +174,4 @@ export async function fetchClaude(): Promise<MetricLine[]> {
   }
 
   return lines;
-}
+};

@@ -1,7 +1,7 @@
 /* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PROVIDER_META } from "./providers/registry";
 import { ProviderResult } from "./types";
 import { clearCache, fetchFromCacheOrNetwork, getLastUpdatedFormatted } from "./usage-cache";
@@ -15,24 +15,23 @@ import {
   setSelectedMenuBarProvider,
 } from "./utils";
 
-function getProviderIcon(providerId: string): Image.ImageLike {
-  return PROVIDER_META[providerId]?.icon ?? { source: Icon.Info, tintColor: Color.PrimaryText };
-}
+const getProviderIcon = (providerId: string): Image.ImageLike =>
+  PROVIDER_META[providerId]?.icon ?? { source: Icon.Info, tintColor: Color.PrimaryText };
 
 /** Push "Resets" row once per result when a line has subtitle. */
-function pushResetOnce(
+const pushResetOnce = (
   meta: { label: string; value: string }[],
   subtitle: string | undefined,
   resetAdded: { current: boolean },
-): void {
+): void => {
   if (subtitle && !resetAdded.current) {
     meta.push({ label: "Resets", value: subtitle });
     resetAdded.current = true;
   }
-}
+};
 
 /** All lines as label/value for detail metadata (no markdown). */
-function getDetailMeta(result: ProviderResult): { label: string; value: string }[] {
+const getDetailMeta = (result: ProviderResult): { label: string; value: string }[] => {
   if (result.error) return [{ label: "Error", value: result.error }];
   if (!result.lines?.length) return [];
   const meta: { label: string; value: string }[] = [];
@@ -56,12 +55,12 @@ function getDetailMeta(result: ProviderResult): { label: string; value: string }
     }
   }
   return meta;
-}
+};
 
 type ReorderAction = "top" | "up" | "down";
 
 /** Returns new order after reorder action, or null if action is not allowed. */
-function applyReorder(orderedIds: string[], providerId: string, action: ReorderAction): string[] | null {
+const applyReorder = (orderedIds: string[], providerId: string, action: ReorderAction): string[] | null => {
   const index = orderedIds.indexOf(providerId);
   if (index < 0) return null;
   const next = [...orderedIds];
@@ -80,9 +79,9 @@ function applyReorder(orderedIds: string[], providerId: string, action: ReorderA
     return next;
   }
   return null;
-}
+};
 
-function ProviderActions(props: {
+const ProviderActions = (props: {
   providerId: string;
   providerName: string;
   currentMenuBarProvider: string | undefined;
@@ -90,7 +89,7 @@ function ProviderActions(props: {
   onRefresh: () => void;
   onSetMenuBarProvider: (providerId: string) => void;
   onReorder: (newOrder: string[]) => void;
-}) {
+}) => {
   const meta = PROVIDER_META[props.providerId];
   const isPinned = props.currentMenuBarProvider === props.providerId;
   const index = props.orderedIds.indexOf(props.providerId);
@@ -103,13 +102,13 @@ function ProviderActions(props: {
     down: `Moved ${props.providerName} down`,
   };
 
-  function handleReorder(action: ReorderAction) {
+  const handleReorder = (action: ReorderAction) => {
     const next = applyReorder(props.orderedIds, props.providerId, action);
     if (next) {
       props.onReorder(next);
       showToast({ style: Toast.Style.Success, title: titles[action] });
     }
-  }
+  };
 
   return (
     <ActionPanel>
@@ -158,17 +157,22 @@ function ProviderActions(props: {
       </ActionPanel.Section>
     </ActionPanel>
   );
-}
+};
 
-export default function ViewUsage() {
+const ViewUsage = () => {
   const { data, isLoading, revalidate } = useCachedPromise(fetchFromCacheOrNetwork, [], {
     keepPreviousData: true,
   });
 
-  function handleRefresh() {
+  const handleRefresh = () => {
     clearCache();
     revalidate();
-  }
+  };
+
+  useEffect(() => {
+    handleRefresh();
+  }, []);
+
   const [menuBarProvider, setMenuBarProvider] = useState<string | undefined>(getSelectedMenuBarProvider);
   const [providerOrder, setProviderOrderState] = useState<string[] | undefined>(getProviderOrder);
 
@@ -178,17 +182,17 @@ export default function ViewUsage() {
 
   const lastUpdatedText = getLastUpdatedFormatted();
 
-  function handleSetMenuBarProvider(providerId: string) {
+  const handleSetMenuBarProvider = (providerId: string) => {
     setSelectedMenuBarProvider(providerId);
     setMenuBarProvider(providerId);
     const label = providerId === "all" ? "All Providers" : (PROVIDER_META[providerId]?.name ?? providerId);
     showToast({ style: Toast.Style.Success, title: `Menu Bar → ${label}` });
-  }
+  };
 
-  function handleReorder(newOrder: string[]) {
+  const handleReorder = (newOrder: string[]) => {
     setProviderOrder(newOrder);
     setProviderOrderState(newOrder);
-  }
+  };
 
   return (
     <List isLoading={isLoading} isShowingDetail>
@@ -218,12 +222,8 @@ export default function ViewUsage() {
                     {detailMeta.map(({ label, value }, i) => (
                       <List.Item.Detail.Metadata.Label key={`${label}-${i}`} title={label} text={value} />
                     ))}
-                    {lastUpdatedText ? (
-                      <>
-                        <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label title="Last updated" text={lastUpdatedText} />
-                      </>
-                    ) : null}
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Last Updated" text={lastUpdatedText || ""} />
                     {detailMeta.length > 0 && meta ? <List.Item.Detail.Metadata.Separator /> : null}
                     {meta ? (
                       <>
@@ -251,4 +251,6 @@ export default function ViewUsage() {
       })}
     </List>
   );
-}
+};
+
+export default ViewUsage;

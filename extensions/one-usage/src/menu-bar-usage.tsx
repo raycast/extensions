@@ -1,8 +1,9 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
+import { getPreferenceValues, Icon, MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { PROVIDER_META, isProviderEnabled } from "./providers/registry";
+import { useEffect } from "react";
+import { fetchAllProviders, isProviderEnabled, PROVIDER_META } from "./providers/registry";
 import { MetricLine, ProviderResult } from "./types";
-import { fetchFromCacheOrNetwork, getLastUpdatedFormatted } from "./usage-cache";
+import { fetchFromCacheOrNetwork, getLastUpdatedFormatted, writeCache } from "./usage-cache";
 import {
   formatProgressValue,
   getPrimaryPercentage,
@@ -11,7 +12,7 @@ import {
   reorderProviders,
 } from "./utils";
 
-function buildMenuBarTitle(results: ProviderResult[], selectedProvider: string): string {
+const buildMenuBarTitle = (results: ProviderResult[], selectedProvider: string): string => {
   const filtered = selectedProvider === "all" ? results : results.filter((r) => r.id === selectedProvider);
 
   const parts: string[] = [];
@@ -24,10 +25,10 @@ function buildMenuBarTitle(results: ProviderResult[], selectedProvider: string):
     parts.push(selectedProvider === "all" ? `${result.name.charAt(0)}:${rounded}` : rounded);
   }
   return parts.length > 0 ? parts.join(" ") : "Usage";
-}
+};
 
 /** Format a MetricLine for display in the menu bar dropdown. */
-function formatMenuBarLine(line: MetricLine): string {
+const formatMenuBarLine = (line: MetricLine): string => {
   switch (line.type) {
     case "badge":
       return `${line.label}: ${line.text}`;
@@ -39,12 +40,37 @@ function formatMenuBarLine(line: MetricLine): string {
     case "text":
       return `${line.label}: ${line.value}`;
   }
-}
+};
 
-export default function MenuBarUsage() {
-  const { data, isLoading } = useCachedPromise(fetchFromCacheOrNetwork, [], {
+const getRefreshIntervalMs = (): number => {
+  const prefs = getPreferenceValues<{ refreshInterval?: string }>();
+  const v = prefs.refreshInterval ?? "5m";
+  switch (v) {
+    case "15m":
+      return 15 * 60 * 1000;
+    case "30m":
+      return 30 * 60 * 1000;
+    case "1h":
+      return 60 * 60 * 1000;
+    default:
+      return 5 * 60 * 1000;
+  }
+};
+
+const MenuBarUsage = () => {
+  const { data, isLoading, revalidate } = useCachedPromise(fetchFromCacheOrNetwork, [], {
     keepPreviousData: true,
   });
+
+  useEffect(() => {
+    const ms = getRefreshIntervalMs();
+    const id = setInterval(async () => {
+      const results = await fetchAllProviders();
+      writeCache(results);
+      revalidate();
+    }, ms);
+    return () => clearInterval(id);
+  }, [revalidate]);
 
   const orderedData = data ? reorderProviders(data, getProviderOrder()) : undefined;
 
@@ -79,11 +105,9 @@ export default function MenuBarUsage() {
               />
             ))
           )}
-          {lastUpdatedAt && (
-            <MenuBarExtra.Section>
-              <MenuBarExtra.Item title={`Last updated at ${lastUpdatedAt}`} icon={Icon.Clock} onAction={() => {}} />
-            </MenuBarExtra.Section>
-          )}
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item title={`Last Updated: ${lastUpdatedAt || ""}`} icon={Icon.Clock} onAction={() => {}} />
+          </MenuBarExtra.Section>
           {PROVIDER_META[result.id] && (
             <MenuBarExtra.Section>
               <MenuBarExtra.Item
@@ -102,4 +126,6 @@ export default function MenuBarUsage() {
       ))}
     </MenuBarExtra>
   );
-}
+};
+
+export default MenuBarUsage;

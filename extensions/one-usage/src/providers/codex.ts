@@ -29,11 +29,11 @@ interface CodexUsageResponse {
   };
 }
 
-function makeProgressLine(
+const makeProgressLine = (
   window: CodexWindow,
   label: string,
   formatReset: (seconds: number) => string | undefined,
-): MetricLine {
+): MetricLine => {
   const subtitle = window.reset_at ? formatReset(window.reset_at) : undefined;
   return {
     type: "progress",
@@ -43,9 +43,9 @@ function makeProgressLine(
     unit: "percent",
     subtitle,
   };
-}
+};
 
-function loadAuth(): CodexAuth {
+const loadAuth = (): CodexAuth => {
   const path = expandPath("~/.codex/auth.json");
   if (!existsSync(path)) {
     throw new Error("Codex not found. Sign in with Codex CLI.");
@@ -59,9 +59,9 @@ function loadAuth(): CodexAuth {
     accessToken: tokens.access_token,
     accountId: tokens.account_id,
   };
-}
+};
 
-export async function fetchCodex(): Promise<MetricLine[]> {
+export const fetchCodex = async (): Promise<MetricLine[]> => {
   const auth = loadAuth();
 
   const headers: Record<string, string> = {
@@ -115,4 +115,4 @@ export async function fetchCodex(): Promise<MetricLine[]> {
   }
 
   return lines;
-}
+};

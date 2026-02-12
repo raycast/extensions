@@ -36,7 +36,7 @@ interface CursorPlanInfo {
   };
 }
 
-async function refreshToken(dbPath: string): Promise<string> {
+const refreshToken = async (dbPath: string): Promise<string> => {
   const refreshTokenValue = readSqliteValue(dbPath, "cursorAuth/refreshToken");
 
   const response = await fetch(`${BASE_URL}/oauth/token`, {
@@ -63,9 +63,9 @@ async function refreshToken(dbPath: string): Promise<string> {
   }
 
   return data.access_token;
-}
+};
 
-async function fetchUsageAndPlan(token: string): Promise<[CursorPeriodUsage, CursorPlanInfo]> {
+const fetchUsageAndPlan = async (token: string): Promise<[CursorPeriodUsage, CursorPlanInfo]> => {
   const headers = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
@@ -92,9 +92,9 @@ async function fetchUsageAndPlan(token: string): Promise<[CursorPeriodUsage, Cur
   const usage = (await usageResp.json()) as CursorPeriodUsage;
   const plan = (await planResp.json()) as CursorPlanInfo;
   return [usage, plan];
-}
+};
 
-export async function fetchCursor(): Promise<MetricLine[]> {
+export const fetchCursor = async (): Promise<MetricLine[]> => {
   const dbPath = expandPath(STATE_DB_PATH);
   if (!existsSync(dbPath)) {
     throw new Error("Cursor not found. Open Cursor and sign in.");
@@ -158,4 +158,4 @@ export async function fetchCursor(): Promise<MetricLine[]> {
   }
 
   return lines;
-}
+};

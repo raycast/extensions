@@ -39,24 +39,20 @@ const FETCHERS: Record<string, () => Promise<MetricLine[]>> = {
   cursor: fetchCursor,
 };
 
-function getPreferenceMap(): Record<string, boolean> {
+const getPreferenceMap = (): Record<string, boolean> => {
   const prefs = getPreferenceValues<Preferences>();
   return {
     claude: prefs.enableClaude,
     codex: prefs.enableCodex,
     cursor: prefs.enableCursor,
   };
-}
+};
 
-export function isProviderEnabled(providerId: string): boolean {
-  return getPreferenceMap()[providerId] ?? false;
-}
+export const isProviderEnabled = (providerId: string): boolean => getPreferenceMap()[providerId] ?? false;
 
-export function getEnabledProviderIds(): string[] {
-  return PROVIDER_IDS.filter((id) => getPreferenceMap()[id]);
-}
+export const getEnabledProviderIds = (): string[] => PROVIDER_IDS.filter((id) => getPreferenceMap()[id]);
 
-function getEnabledProviders(): ProviderConfig[] {
+const getEnabledProviders = (): ProviderConfig[] => {
   const enabled = getPreferenceMap();
   return PROVIDER_IDS.filter((id) => enabled[id]).map((id) => ({
     id,
@@ -64,9 +60,9 @@ function getEnabledProviders(): ProviderConfig[] {
     enabled: true,
     fetch: FETCHERS[id],
   }));
-}
+};
 
-export async function fetchAllProviders(): Promise<ProviderResult[]> {
+export const fetchAllProviders = async (): Promise<ProviderResult[]> => {
   const providers = getEnabledProviders();
   if (providers.length === 0) return [];
 
@@ -83,4 +79,4 @@ export async function fetchAllProviders(): Promise<ProviderResult[]> {
       error: result.reason instanceof Error ? result.reason.message : String(result.reason),
     };
   });
-}
+};
