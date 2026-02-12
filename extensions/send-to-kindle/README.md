@@ -1,201 +1,249 @@
 # Send to Kindle (Raycast)
 
-Send any web article to your Kindle with clean extraction, optional cover image, custom CSS filters, and a very fast email delivery mode.
+Send the current browser article to Kindle as a clean EPUB, with domain-based cleanup skills, cover control, edit-before-send, and delivery by email or the Send to Kindle desktop app.
 
-## Why This Extension
+## What This Extension Does
 
-This extension is built to produce clean, readable EPUB files for Kindle, even when source pages are full of ads, widgets, and noisy layout blocks.
-
-Key strengths:
-
-- Robust extraction powered by `@mozilla/readability`
-- Advanced per-domain cleanup with custom CSS filters
-- Cover image selection using CSS (`Cover CSS`)
-- Extension preference to disable EPUB cover sharing
-- Extension preference to remove all article links before sending
-- Edit before sending (title + Markdown content)
-- Two delivery methods:
-  - Send to Kindle app installed on Mac
-  - SMTP email delivery (recommended, faster)
-- EPUB metadata optimized for reading: site name as source/author (instead of article author name)
-- Send with or without preview
+- Extracts readable article content from the active browser tab
+- Applies per-domain "skills" (CSS filters + cover selectors)
+- Lets you preview and edit title/content before sending
+- Generates a Kindle-friendly EPUB with inlined images
+- Delivers through:
+  - `Email (Recommended)` via SMTP
+  - `Send to Kindle app (Mac)` local app handoff
 
 ## Advantages vs Official "Send to Kindle" Chrome Extension
 
-| Feature                                                | This Raycast extension | Official Chrome extension |
+| Feature | This Raycast extension | Official Chrome extension |
 | ------------------------------------------------------ | ---------------------- | ------------------------- |
-| Outdated UX                        | ❌                    | ✅                        |
-| Readability.js-based extraction for better results                        | ✅                     | ❌                        |
-| Custom per-domain CSS filters                          | ✅                     | ❌                        |
-| Manual cover photo selection (`Cover CSS`)             | ✅                     | ❌                        |
-| Edit content before sending                            | ✅                     | ❌                        |
-| Faster in email mode                                   | ✅                     | ❌                        |
-| Uses site name instead of article author name          | ✅                     | ❌                        |
-| Import/export filter profiles (JSON)                   | ✅                     | ❌                        |
-| Two delivery methods (local app or email)              | ✅                     | ❌                        |
-| Optional removal of all article links before sending   | ✅                     | ❌                        |
-| Sending history   | ✅                     | ❌                        |
+| Outdated UX | ❌ | ✅ |
+| Readability.js-based extraction for better results | ✅ | ❌ |
+| Custom per-domain CSS filters | ✅ | ❌ |
+| Manual cover photo selection (`Cover CSS`) | ✅ | ❌ |
+| Guided cover selector picker (`Add Cover Skill`) | ✅ | ❌ |
+| Guided filter selector (`Add Filter Skill`) | ✅ | ❌ |
+| Cover preview before sending | ✅ | ❌ |
+| Edit content before sending | ✅ | ❌ |
+| Faster (in email mode) | ✅ | ❌ |
+| Uses site name instead of article author name | ✅ | ❌ |
+| Import/export filter profiles (JSON) | ✅ | ❌ |
+| Two delivery methods (local app or email) | ✅ | ❌ |
+| Optional removal of all article links before sending | ✅ | ❌ |
+| Sending history | ✅ | ❌ |
 
-## Requirements
+## Cover Skill vs Filter Skill
 
-1. Raycast installed.
-2. This Raycast extension installed.
-3. Raycast browser extension installed and active (required to access the active tab and page HTML).
-4. A Kindle account configured on Amazon.
-5. If using email mode:
-   - a Kindle address (`...@kindle.com`),
-   - your sender email added to Amazon's approved senders list,
-   - a valid SMTP server.
-6. If using Gmail: use an app password (not your main Google account password).
+The extension uses 2 complementary skill types per domain. 
 
-## Installation and First Run
+When a skill is added, it is applied to all the future articles you will send from that domain.
 
-1. Install the extension in Raycast.
-2. Run `Set / Change Sending Method`.
-3. Choose your preferred mode:
-   - `Email (Recommended)` for faster daily use.
-   - `Send to Kindle app (Mac)` if you prefer Amazon's local app flow.
-4. Save your setup.
-   - In email mode, SMTP settings are validated before saving.
+- `Filter Skill`
+  - Removes unwanted page blocks before extraction (ads, sidebars, popups, cookie walls, related-content blocks).
+  - Goal: cleaner article body and better readability output.
+  
+- `Cover Skill`
+  - Targets the best image to use as the Kindle cover.
+  - Goal: consistent, high-quality cover image instead of random inline article images (or no image at all with the official "Send to Kindle Chrome extension").
+
+In short:
+
+- `Filter Skill` improves article content quality.
+- `Cover Skill` improves book cover quality.
+
+## Current Command Set
+
+### `Send to Kindle`
+
+Direct send with no preview UI.
+
+- Loads active tab content
+- Builds EPUB
+- Sends immediately with your configured delivery method
+- Adds entry to history
+
+### `Preview and Send to Kindle`
+
+Full preview workflow with metadata and actions.
+
+Main actions:
+
+- `Send to Kindle`
+- `View Cover` (if cover can be resolved)
+- `Add Cover Skill` (guided image candidate picker)
+- `Add Filter Skill` (guided selector suggestion list with ranking)
+- `Edit Content` (title + markdown body)
+- `Copy Original Source Code`
+- `Copy Markdown`
+- `Reset Cover Skills for This Domain`
+- `Reset Filter Skills for This Domain`
+- `Reset All Skills for This Domain`
+- `Reveal Output Folder`
+
+### `Add a Skill`
+
+Create/update a domain skill manually:
+
+- `Domain`
+- `CSS Filter` (elements to remove)
+- `Cover CSS` (cover image selector(s))
+
+Includes JSON import action from the form.
+
+### `My Skills`
+
+Manage existing skills:
+
+- Search by domain/selector
+- Edit
+- Delete
+- Export skill JSON
+- Add a new skill
+
+### `Send to Kindle History`
+
+View previous sends with:
+
+- Timestamp
+- Open in browser
+- Remove one entry
+- Clear all history
+
+### `Set / Change Sending Method`
+
+Configure and validate delivery mode:
+
+- `Send to Kindle app (Mac)`
+- `Email (Recommended)` with SMTP test before save
 
 ## Delivery Modes
 
-### 1) Email (recommended, faster)
+### Email (Recommended)
 
-Email mode sends the generated EPUB directly as an attachment to your Kindle address.
+Sends the EPUB attachment directly to your Kindle email address.
 
-Fields to configure:
+Required fields:
 
-- `Kindle Address` (example: `yourname@kindle.com`)
-- `Sender Address` (your email)
+- `Kindle Address` (for example `name@kindle.com`)
+- `Sender Address` (Need to be in your Amazon Send to Kindle allowlist)
 - `SMTP Server`
-- `SMTP Port` (commonly `465` for SSL/TLS)
-- `SMTP Security` (`SSL/TLS`, `STARTTLS`, or `None`)
+- `SMTP Port`
+- `SMTP Security` (`SSL/TLS`, `STARTTLS`, `None`)
 - `SMTP Username`
-- `SMTP Password` (app password if using Gmail)
+- `SMTP Password`
 
-Benefits:
+During setup, the extension tests SMTP connection/authentication and recipient acceptance before saving.
 
-- Very fast day-to-day workflow
-- No need to open the Send to Kindle desktop app
-- Immediate feedback in Raycast
+### Send to Kindle app (Mac)
 
-### 2) Send to Kindle App (Mac)
+Writes the EPUB and opens it with the Amazon Send to Kindle app. If Raycast cannot open the app directly, it tries to find a compatible app by name.
 
-The extension generates the EPUB and opens it with the "Send to Kindle" app.
+## Skill System
 
-Benefits:
+A skill is a per-domain profile:
 
-- No SMTP setup required
+- `domain`
+- `selector` (content cleanup)
+- `coverSelector` (cover lookup)
 
-Limitations:
+Behavior:
 
-- Slower day-to-day flow
-- Depends on Amazon's app being installed locally
+- Skills are unique per domain
+- Adding a skill on an existing domain merges selectors (deduplicated)
+- Domain matching supports subdomains (`news.example.com` can reuse `example.com`)
+- You can reset only cover selectors, only content selectors, or all skills for a domain
 
-## Available Commands
+### Guided Skill Creation in Preview
 
-- `Send to Kindle`
-  - Direct send (no preview).
-  - Best for speed.
-- `Preview and Send to Kindle`
-  - Full preview of the extracted article.
-  - `Edit content` action to modify title and Markdown before sending.
-- `Set / Change Sending Method`
-  - Configure App or Email mode.
-- `Add a Skill`
-  - Add a domain filter profile:
-    - `CSS Filter` to remove blocks (ads, sidebars, popups, etc.)
-    - `Cover CSS` to select the cover image
-- `My Skills`
-  - Manage filters (edit/delete)
-  - Export a filter profile as JSON
+`Add Cover Skill`:
+
+- Scans source images
+- Shows visual candidates (width/height + selector)
+- Saves selected selector as `Cover CSS`
+
+`Add Filter Skill`:
+
+- Extracts selector candidates from readable content
+- Ranks them with confidence/specificity/risk scores
+- Shows recommended subset first, with option to load all selectors
+
+### Skill Import/Export
+
+Skills can be transferred as JSON files.
+
+- Export format: `send-to-kindle-skill` v1 payload
+- Import accepts the same format (or direct filter object)
 
 ## Extension Preferences
 
-In Raycast (Extension Preferences), you can configure:
+In Raycast extension preferences:
 
-- `Share EPUB cover image` (default: enabled)
-  - If disabled, no cover image is embedded in generated EPUB files.
-- `Disable article links` (default: disabled)
-  - If enabled, all links are removed from the article content before sending to Kindle.
+- `Share EPUB cover image` (default: on)
+  - If off, no cover is embedded in EPUB.
+- `Disable article links` (default: off)
+  - If on, links are stripped while keeping link text.
 
-## How Extraction Works
+## How the Pipeline Works
 
-Main pipeline:
+1. Read active tab HTML through the Raycast browser extension.
+2. Apply domain skill filters (`CSS Filter`).
+3. Extract article content with `@mozilla/readability`.
+4. Convert extracted content to markdown.
+5. Build EPUB-compatible HTML from markdown.
+6. Fetch and inline images into EPUB resources.
+7. Resolve cover:
+   - first from skill cover selectors,
+   - fallback to first valid article image.
+8. Build EPUB and send using configured delivery method.
 
-1. Fetch active tab HTML via the Raycast browser extension.
-2. Apply CSS filters configured for the domain.
-3. Extract primary readable content with `Readability`.
-4. Convert to Markdown, then rebuild HTML for EPUB.
-5. Inline images (with WebP conversion support when needed).
-6. Resolve cover image:
-   - first try `Cover CSS` selectors,
-   - fallback to the first relevant article image.
-7. Build EPUB (including cover if available).
-8. Deliver via SMTP email or open in Send to Kindle app.
+## Requirements
 
-## Skills System (CSS Filter Profiles)
+1. Raycast installed
+2. This extension installed
+3. Raycast browser extension enabled (required to access active tab content)
+4. Amazon Kindle account configured
+5. For email mode:
+   - Kindle email address
+   - sender approved in Amazon Send-to-Kindle settings
+   - valid SMTP credentials
 
-A "skill" is a per-domain profile:
+## Platform Notes (macOS + Windows)
 
-- `domain`: e.g. `example.com`
-- `selector`: elements to remove from article content
-- `coverSelector`: targets used to find the cover image
+- Extension platform target is `macOS` and `Windows`.
+- Email workflow is the most reliable cross-platform path.
+- `Send to Kindle app` mode is intended for the macOS Amazon app.
+- Some image conversion/resizing paths rely on macOS `sips`, so behavior can differ on Windows for WebP/AVIF-heavy pages.
 
-Useful for:
+## Gmail Setup (If You Use Gmail SMTP)
 
-- removing ads/popups/sidebars
-- forcing a better cover image
-- improving extraction on difficult websites
+Use an app password, not your main Google password.
 
-Bonus:
+Suggested values:
 
-- JSON import/export for sharing filter profiles across machines.
+- SMTP server: `smtp.gmail.com`
+- Port: `587`
+- Security: `STARTTLS`
+- Username: your Gmail address
+- Password: Google App Password
 
-## Gmail App Password (Important)
+Useful docs:
 
-If you use Gmail SMTP:
+- [Gmail SMTP setup](https://support.google.com/mail/answer/7104828?hl=en&visit_id=639059758371114804-114182322&rd=1)
+- [Google App Passwords](https://support.google.com/mail/answer/185833?sjid=16238667612725057818-EU)
 
-1. Enable POP in Gmail settings.
-2. Use this SMTP configuration:
-   - `SMTP Server`: `smtp.gmail.com`
-   - `SMTP Port`: `587`
-   - `SMTP Security`: `STARTTLS`
-   - `SMTP Username`: your Gmail address
-   - `SMTP Password`: your Google App Password
-3. Enable 2-Step Verification on your Google account.
-4. Generate an app password.
-5. Use that app password in `SMTP Password`.
-6. Do not use your main Google account password.
-
-Gmail docs:
-
-- SMTP setup: https://support.google.com/mail/answer/7104828?hl=en&visit_id=639059758371114804-114182322&rd=1
-- App Password: https://support.google.com/mail/answer/185833?sjid=16238667612725057818-EU
-
-Otherwise, SMTP authentication will fail.
-
-## Amazon Setup Tips
-
-- Confirm your Kindle email address in Amazon Send to Kindle settings.
-- Add your sender email (`Sender Address`) to Amazon's approved sender list.
-- Without this, Amazon may reject delivery.
-
-## Quick Troubleshooting
+## Troubleshooting
 
 - `Raycast browser extension is not available`
-  - Install/enable the Raycast browser extension.
-- Missing cover image
-  - Add a `Cover CSS` selector targeting the article hero/cover image.
-- SMTP error
-  - Check host/port/security/username/password,
-  - use a Gmail app password if needed,
-  - verify sender address is approved in Amazon settings.
+  - Install/enable the Raycast browser extension and retry.
+- `Unable to load page` / extraction fails
+  - Try `Preview and Send to Kindle`, then add filter skills for that domain.
+- Cover missing
+  - Add a `Cover CSS` selector with `Add Cover Skill`.
+- SMTP setup failed
+  - Recheck host/port/security/credentials and Amazon sender allowlist.
 - Send to Kindle app not found
-  - Install the Amazon app or switch to email mode.
+  - Install Amazon app or switch to `Email (Recommended)`.
 
-## Useful Notes
+## Data & Storage
 
-- Email mode is generally the best choice for speed and reliability.
-- Preview mode is ideal when you want to review/edit content first.
+- Skills, history, and sending settings are stored in Raycast LocalStorage.
+- Generated EPUB files are created in the extension support path and cleaned after send attempts.

@@ -31,6 +31,9 @@ import {
   extractDomainFromUrl,
   getFiltersForDomain,
   parseCssSelectors,
+  resetAllSkillsForDomain,
+  resetCoverSkillsForDomain,
+  resetFilterSkillsForDomain,
 } from "./filters";
 import { buildEpubBuffer, EpubResource } from "./epub";
 import crypto from "crypto";
@@ -256,6 +259,48 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
     }
   }
 
+  async function handleResetSkills(
+    mode: "cover" | "filter" | "all",
+    title:
+      | "Reset Cover Skills for this Domain"
+      | "Reset Filter Skills for this Domain"
+      | "Reset All Skills for this Domain",
+  ) {
+    try {
+      const domain = state.skillDomain.trim();
+      if (!domain) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Missing domain",
+          message: "No domain found for this page.",
+        });
+        return;
+      }
+
+      if (mode === "cover") {
+        await resetCoverSkillsForDomain(domain);
+      } else if (mode === "filter") {
+        await resetFilterSkillsForDomain(domain);
+      } else {
+        await resetAllSkillsForDomain(domain);
+      }
+
+      setVersion((v) => v + 1);
+      await showToast({
+        style: Toast.Style.Success,
+        title,
+        message: "Preview reloaded.",
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to reset skills",
+        message,
+      });
+    }
+  }
+
   const markdown = buildMarkdown(state.title, state.markdownBody, { includeTitle: true });
 
   return (
@@ -318,6 +363,7 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
                 target={
                   <AddFilterSkillList
                     readabilityHtml={state.readabilityHtml}
+                    sourceHtml={state.sourceHtml}
                     pageUrl={state.pageUrl}
                     domain={state.skillDomain}
                     existingFilters={state.contentFilters}
@@ -347,6 +393,24 @@ export function SendToKindleCommand({ autoSend = false }: SendToKindleCommandPro
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 content={state.sourceHtml}
               />
+              <Action.CopyToClipboard title="Copy Markdown" content={markdown} />
+              <ActionPanel.Section title="Skills">
+                <Action
+                  title="Reset Cover Skills for This Domain"
+                  style={Action.Style.Destructive}
+                  onAction={() => handleResetSkills("cover", "Reset Cover Skills for this Domain")}
+                />
+                <Action
+                  title="Reset Filter Skills for This Domain"
+                  style={Action.Style.Destructive}
+                  onAction={() => handleResetSkills("filter", "Reset Filter Skills for this Domain")}
+                />
+                <Action
+                  title="Reset All Skills for This Domain"
+                  style={Action.Style.Destructive}
+                  onAction={() => handleResetSkills("all", "Reset All Skills for this Domain")}
+                />
+              </ActionPanel.Section>
             </>
           )}
           <Action title="Reveal Output Folder" onAction={() => showInFinder(environment.supportPath)} />
@@ -438,10 +502,11 @@ async function loadArticle(): Promise<ArticleData> {
     codeBlockStyle: "fenced",
     bulletListMarker: "-",
   });
+  const normalizedContent = absolutizeHtmlUrls(article.content, pageUrl);
 
   return {
     title: article.title?.trim() || activeTab?.title || "Reading",
-    markdownBody: turndownService.turndown(article.content),
+    markdownBody: normalizeImageOnlyLinkMarkdown(turndownService.turndown(normalizedContent)),
     author: sourceDomain || domain || "",
     skillDomain: sourceDomain || domain || "",
     pageUrl,
@@ -450,6 +515,96 @@ async function loadArticle(): Promise<ArticleData> {
     readabilityHtml: article.content,
     contentFilters,
   };
+}
+
+function absolutizeHtmlUrls(html: string, baseUrl: string): string {
+  if (!html.trim()) return html;
+
+  const { document } = parseHTML(`<article>${html}</article>`);
+  const article = document.querySelector("article");
+  if (!article) return html;
+
+  const srcAttributes = ["src", "data-src", "data-original", "data-lazy-src", "data-actualsrc"];
+  const imageNodes = Array.from(article.querySelectorAll("img, source")) as Array<{
+    getAttribute: (name: string) => string | null;
+    setAttribute: (name: string, value: string) => void;
+  }>;
+  for (const node of imageNodes) {
+    for (const attribute of srcAttributes) {
+      const value = node.getAttribute(attribute);
+      const absolute = absolutizeUrl(value, baseUrl);
+      if (absolute) {
+        node.setAttribute(attribute, absolute);
+      }
+    }
+
+    const srcset = node.getAttribute("srcset");
+    if (srcset) {
+      node.setAttribute("srcset", absolutizeSrcset(srcset, baseUrl));
+    }
+
+    const dataSrcset = node.getAttribute("data-srcset");
+    if (dataSrcset) {
+      node.setAttribute("data-srcset", absolutizeSrcset(dataSrcset, baseUrl));
+    }
+  }
+
+  const anchors = Array.from(article.querySelectorAll("a")) as Array<{
+    getAttribute: (name: string) => string | null;
+    setAttribute: (name: string, value: string) => void;
+  }>;
+  for (const anchor of anchors) {
+    const href = anchor.getAttribute("href");
+    const absolute = absolutizeUrl(href, baseUrl);
+    if (absolute) {
+      anchor.setAttribute("href", absolute);
+    }
+  }
+
+  return article.innerHTML;
+}
+
+function normalizeImageOnlyLinkMarkdown(markdown: string): string {
+  if (!markdown.trim()) return markdown;
+
+  // Turndown can emit image-only links across multiple lines:
+  // [\n\n![alt](img-url)\n\n](target-url)
+  // This renders poorly in Raycast Detail (visible brackets + URL), so unwrap to plain image markdown.
+  return markdown.replace(/\[\s*(!\[[^\]]*\]\([^)]+\))\s*\]\([^)]+\)/gs, "$1");
+}
+
+function absolutizeSrcset(srcset: string, baseUrl: string): string {
+  return srcset
+    .split(",")
+    .map((entry) => {
+      const trimmed = entry.trim();
+      if (!trimmed) return trimmed;
+      const parts = trimmed.split(/\s+/);
+      const absolute = absolutizeUrl(parts[0], baseUrl) ?? parts[0];
+      const descriptor = parts.slice(1).join(" ");
+      return descriptor ? `${absolute} ${descriptor}` : absolute;
+    })
+    .join(", ");
+}
+
+function absolutizeUrl(value: string | null | undefined, baseUrl: string): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("javascript:") ||
+    trimmed.startsWith("#")
+  ) {
+    return trimmed;
+  }
+
+  try {
+    return new URL(trimmed, baseUrl).href;
+  } catch {
+    return trimmed;
+  }
 }
 
 async function sendArticle(inputState: ArticleData, options?: { direct?: boolean }) {
@@ -724,21 +879,35 @@ function AddCoverSkillGrid({ sourceHtml, pageUrl, domain, onSaved }: AddCoverSki
 type CssSelectorCandidate = {
   selector: string;
   preview: string;
-  count: number;
+  matchCount: number;
+  specificityScore: number;
+  riskScore: number;
+  confidenceScore: number;
+  sourceKind: "id" | "class" | "tag-class" | "tag";
 };
 
 type AddFilterSkillListProps = {
   readabilityHtml: string;
+  sourceHtml: string;
   pageUrl: string;
   domain: string;
   existingFilters: string[];
   onReload: () => void;
 };
 
-function AddFilterSkillList({ readabilityHtml, pageUrl, domain, existingFilters, onReload }: AddFilterSkillListProps) {
+function AddFilterSkillList({
+  readabilityHtml,
+  sourceHtml,
+  pageUrl,
+  domain,
+  existingFilters,
+  onReload,
+}: AddFilterSkillListProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<CssSelectorCandidate[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [showAllSelectors, setShowAllSelectors] = useState(false);
   const [addedSelectors, setAddedSelectors] = useState<Set<string>>(new Set(existingFilters));
   const hasChangesRef = useRef(false);
 
@@ -755,7 +924,7 @@ function AddFilterSkillList({ readabilityHtml, pageUrl, domain, existingFilters,
 
     async function loadSelectors() {
       try {
-        const selectors = await extractSelectorsFromReadability(readabilityHtml, pageUrl);
+        const selectors = await extractSelectorsFromReadability(readabilityHtml, sourceHtml, pageUrl);
         if (!isMounted) return;
         setItems(selectors);
       } finally {
@@ -778,7 +947,7 @@ function AddFilterSkillList({ readabilityHtml, pageUrl, domain, existingFilters,
     return () => {
       isMounted = false;
     };
-  }, [readabilityHtml, pageUrl]);
+  }, [readabilityHtml, sourceHtml, pageUrl]);
 
   async function handleAddFilterSelector(selector: string) {
     const normalizedDomain = domain.trim();
@@ -801,26 +970,44 @@ function AddFilterSkillList({ readabilityHtml, pageUrl, domain, existingFilters,
     });
   }
 
+  const normalizedSearchText = searchText.trim().toLowerCase();
+  const isSearching = normalizedSearchText.length > 0;
+  const recommendedItems = buildRecommendedSelectorSubset(items);
+  const defaultItems = buildAdaptiveVisibleSelectors(recommendedItems);
+  const hiddenCount = Math.max(0, items.length - defaultItems.length);
+  const filteredItems = isSearching
+    ? items.filter((item) => `${item.selector}\n${item.preview}`.toLowerCase().includes(normalizedSearchText))
+    : showAllSelectors
+      ? items
+      : defaultItems;
+
   return (
     <List
       isLoading={isLoading}
       navigationTitle="Add filter skill"
-      searchBarPlaceholder="Search by selector"
+      searchBarPlaceholder="Search selector or preview"
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering={false}
       isShowingDetail
     >
-      {items.length === 0 && !isLoading ? (
+      {filteredItems.length === 0 && !isLoading ? (
         <List.EmptyView
-          title="No selectors found"
-          description="No CSS selectors could be extracted from the article content."
+          title={items.length === 0 ? "No selectors found" : "No matching result"}
+          description={
+            items.length === 0
+              ? "No CSS selectors could be extracted from the article content."
+              : "Try a selector fragment or text visible in Content Preview."
+          }
         />
       ) : (
-        items.map((item) => {
+        filteredItems.map((item) => {
           const isAdded = addedSelectors.has(item.selector);
           return (
             <List.Item
               key={item.selector}
               title={item.selector}
-              subtitle={`${item.count} element${item.count > 1 ? "s" : ""}`}
+              subtitle={`${item.matchCount} element${item.matchCount > 1 ? "s" : ""}`}
               icon={isAdded ? { source: Icon.Checkmark, tintColor: Color.Green } : undefined}
               detail={
                 <List.Item.Detail
@@ -829,9 +1016,12 @@ function AddFilterSkillList({ readabilityHtml, pageUrl, domain, existingFilters,
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="CSS Selector" text={item.selector} />
                       <List.Item.Detail.Metadata.Label
-                        title="Elements Found"
-                        text={`${item.count} element${item.count > 1 ? "s" : ""}`}
+                        title="Elements Found (Source HTML)"
+                        text={`${item.matchCount} element${item.matchCount > 1 ? "s" : ""}`}
                       />
+                      <List.Item.Detail.Metadata.Label title="Confidence Score" text={`${item.confidenceScore}`} />
+                      <List.Item.Detail.Metadata.Label title="Specificity Score" text={`${item.specificityScore}`} />
+                      <List.Item.Detail.Metadata.Label title="Risk Score" text={`${item.riskScore}`} />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label title="Domain" text={domain} />
                       {isAdded && <List.Item.Detail.Metadata.Label title="Status" text="✓ Added to filters" />}
@@ -854,16 +1044,57 @@ function AddFilterSkillList({ readabilityHtml, pageUrl, domain, existingFilters,
           );
         })
       )}
+      {!isSearching && !showAllSelectors && hiddenCount > 0 && (
+        <List.Item
+          key="load-all-selectors"
+          title={`Load all selectors (${hiddenCount} hidden)`}
+          icon={Icon.List}
+          detail={
+            <List.Item.Detail
+              markdown={`### Recommended View\n\nShowing ${defaultItems.length} selectors ranked by confidence and safety.\n\nUse this action to load all ${items.length} selectors.`}
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Load All Selectors" onAction={() => setShowAllSelectors(true)} icon={Icon.List} />
+              <Action title="Return to Preview" onAction={pop} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!isSearching && showAllSelectors && hiddenCount > 0 && (
+        <List.Item
+          key="show-recommended-only"
+          title="Show recommended only"
+          icon={Icon.Filter}
+          detail={
+            <List.Item.Detail
+              markdown={`### All Selectors Loaded\n\nCurrently showing all ${items.length} selectors.\n\nUse this action to go back to the recommended subset.`}
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Show Recommended Only" onAction={() => setShowAllSelectors(false)} icon={Icon.Filter} />
+              <Action title="Return to Preview" onAction={pop} />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }
 
-function extractSelectorsFromReadability(readabilityHtml: string, pageUrl: string): CssSelectorCandidate[] {
+function extractSelectorsFromReadability(
+  readabilityHtml: string,
+  sourceHtml: string,
+  pageUrl: string,
+): CssSelectorCandidate[] {
   if (!readabilityHtml.trim()) return [];
 
-  const { document } = parseHTML(readabilityHtml);
-  const allElements = document.querySelectorAll("*");
-  const selectorMap = new Map<string, { preview: string; count: number }>();
+  const { document: readabilityDocument } = parseHTML(readabilityHtml);
+  const { document: sourceDocument } = sourceHtml.trim() ? parseHTML(sourceHtml) : parseHTML(readabilityHtml);
+  const allElements = readabilityDocument.querySelectorAll("*");
+  const selectorMap = new Map<string, CssSelectorCandidate>();
 
   // Filter out document-level elements
   const excludedTags = new Set(["html", "head", "body", "script", "style", "meta", "link"]);
@@ -875,43 +1106,43 @@ function extractSelectorsFromReadability(readabilityHtml: string, pageUrl: strin
     const tagName = el.tagName.toLowerCase();
     if (excludedTags.has(tagName)) continue;
 
-    const possibleSelectors: string[] = [];
+    const possibleSelectors = new Set<string>();
 
     // 1. ID Selector
     if (el.id && typeof el.id === "string" && el.id.trim()) {
-      possibleSelectors.push(`#${escapeCssId(el.id.trim())}`);
+      possibleSelectors.add(`#${escapeCssId(el.id.trim())}`);
     }
 
     // 2. Class Selectors
     if (el.className && typeof el.className === "string") {
       const classes = el.className.split(/\s+/).filter(Boolean);
       for (const cls of classes) {
-        possibleSelectors.push(`.${escapeCssClass(cls)}`);
+        possibleSelectors.add(`.${escapeCssClass(cls)}`);
         // 3. Tag + Class combination (for slightly more specificity)
-        possibleSelectors.push(`${tagName}.${escapeCssClass(cls)}`);
+        possibleSelectors.add(`${tagName}.${escapeCssClass(cls)}`);
       }
     }
 
     // 4. Specific Tags (if no class/id, but interesting tag)
     if (["figure", "aside", "blockquote", "img", "video", "iframe", "canvas", "code", "pre"].includes(tagName)) {
-      possibleSelectors.push(tagName);
+      possibleSelectors.add(tagName);
     }
 
     // Process all found selectors for this element
     for (const selector of possibleSelectors) {
-      // Get preview text content (first 200 chars)
-      // We process preview only if we haven't computed this selector globally yet,
-      // OR if we want to ensure we count it correctly.
-      // Since map key is selector, we just update count if exists.
-
-      if (selectorMap.has(selector)) {
-        const existing = selectorMap.get(selector)!;
-        existing.count += 1;
+      if (!selector.trim() || selector.startsWith("#readability")) {
         continue;
       }
+      if (selectorMap.has(selector)) continue;
 
       // New selector found, compute preview
-      const nodes = Array.from(document.querySelectorAll(selector)) as unknown[];
+      let nodes: unknown[];
+      try {
+        nodes = Array.from(readabilityDocument.querySelectorAll(selector)) as unknown[];
+      } catch {
+        continue;
+      }
+      if (nodes.length === 0) continue;
       const textContent = nodes
         .map((node) => {
           const n = node as unknown as { textContent?: string };
@@ -921,44 +1152,182 @@ function extractSelectorsFromReadability(readabilityHtml: string, pageUrl: strin
         .join("\n\n---\n\n")
         .trim();
 
-      const imagePreviewUrl = textContent
-        ? null
-        : nodes.map((node) => extractPreviewImageUrl(node, pageUrl)).find((url): url is string => Boolean(url));
+      const imagePreviewUrl = nodes
+        .map((node) => extractPreviewImageUrl(node, pageUrl))
+        .find((url): url is string => Boolean(url));
 
-      const preview = textContent || (imagePreviewUrl ? `![Content Preview](${imagePreviewUrl})` : "(No text content)");
+      const preview = buildMixedSelectorPreview(textContent, imagePreviewUrl);
+      let sourceMatchCount = nodes.length;
+      try {
+        sourceMatchCount = Array.from(sourceDocument.querySelectorAll(selector)).length;
+      } catch {
+        sourceMatchCount = nodes.length;
+      }
+      const sourceKind = inferSelectorSourceKind(selector);
+      const specificityScore = getSpecificityScore(sourceKind);
+      const riskScore = getRiskScore(sourceMatchCount);
+      const previewScore = preview === NO_CONTENT_PREVIEW ? -8 : 8;
+      const broadPenalty = getBroadSelectorPenalty(selector, sourceKind);
+      const confidenceScore = specificityScore + riskScore + previewScore + broadPenalty;
 
-      selectorMap.set(selector, { preview, count: 1 });
+      selectorMap.set(selector, {
+        selector,
+        preview,
+        matchCount: sourceMatchCount,
+        specificityScore,
+        riskScore,
+        confidenceScore,
+        sourceKind,
+      });
     }
   }
 
   // Convert to array
-  const results: CssSelectorCandidate[] = [];
-  for (const [selector, data] of selectorMap.entries()) {
-    results.push({
-      selector,
-      preview: data.preview,
-      count: data.count,
-    });
-  }
+  const results: CssSelectorCandidate[] = Array.from(selectorMap.values());
 
-  // Sort: prioritize selectors that might be more useful (e.g., classes over tags)
+  // Sort by confidence (high to low), then safest/smallest match count, then alpha.
   results.sort((a, b) => {
-    // 1. Selectors with content/previews are better than empty
-    const aHasContent = a.preview !== "(No text content)";
-    const bHasContent = b.preview !== "(No text content)";
-    if (aHasContent !== bHasContent) return aHasContent ? -1 : 1;
-
-    // 2. Sort by count (fewer matches usually means more specific, BUT for blocking maybe we want to block ALL 'ad-box'?)
-    // Actually, widespread classes might be generic. Let's stick to simple alpha or groupings?
-    // Let's try: Class/ID first, then Tag.
-    const aType = a.selector.startsWith("#") ? 3 : a.selector.startsWith(".") ? 2 : 1;
-    const bType = b.selector.startsWith("#") ? 3 : b.selector.startsWith(".") ? 2 : 1;
-    if (aType !== bType) return bType - aType; // High priority first
+    if (a.confidenceScore !== b.confidenceScore) return b.confidenceScore - a.confidenceScore;
+    if (a.matchCount !== b.matchCount) return a.matchCount - b.matchCount;
 
     return a.selector.localeCompare(b.selector);
   });
 
   return results;
+}
+
+const HIGH_CONFIDENCE_THRESHOLD = 28;
+const RECOMMENDED_SELECTOR_TARGET = 20;
+const NO_CONTENT_PREVIEW = "(No text content)";
+const VERY_BROAD_TAGS = new Set(["div", "section", "p", "span", "article", "main", "ul", "ol", "li"]);
+const GENERIC_CLASS_TOKENS = new Set([
+  "container",
+  "content",
+  "wrapper",
+  "inner",
+  "outer",
+  "main",
+  "body",
+  "layout",
+  "grid",
+  "row",
+  "col",
+  "module",
+  "block",
+]);
+
+function inferSelectorSourceKind(selector: string): CssSelectorCandidate["sourceKind"] {
+  if (selector.startsWith("#")) return "id";
+  if (selector.startsWith(".")) return "class";
+  if (selector.includes(".")) return "tag-class";
+  return "tag";
+}
+
+function getSpecificityScore(sourceKind: CssSelectorCandidate["sourceKind"]): number {
+  if (sourceKind === "id") return 45;
+  if (sourceKind === "tag-class") return 35;
+  if (sourceKind === "class") return 30;
+  return 5;
+}
+
+function getRiskScore(matchCount: number): number {
+  if (matchCount === 1) return 15;
+  if (matchCount >= 2 && matchCount <= 4) return 8;
+  if (matchCount >= 5 && matchCount <= 10) return -8;
+  if (matchCount > 20) return -35;
+  if (matchCount > 10) return -20;
+  return 0;
+}
+
+function getBroadSelectorPenalty(selector: string, sourceKind: CssSelectorCandidate["sourceKind"]): number {
+  let penalty = 0;
+
+  if (sourceKind === "tag" && VERY_BROAD_TAGS.has(selector.toLowerCase())) {
+    penalty -= 20;
+  }
+
+  const classTokens = extractClassTokens(selector);
+  if (classTokens.some((token) => GENERIC_CLASS_TOKENS.has(token.toLowerCase()))) {
+    penalty -= 10;
+  }
+
+  return penalty;
+}
+
+function extractClassTokens(selector: string): string[] {
+  if (selector.startsWith(".")) {
+    return selector
+      .slice(1)
+      .split(".")
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+
+  if (!selector.includes(".")) return [];
+  const [, ...classParts] = selector.split(".");
+  return classParts.map((part) => part.trim()).filter(Boolean);
+}
+
+function getCanonicalSelectorGroupKey(selector: string): string {
+  if (!selector) return "";
+  if (selector.startsWith("#")) return selector;
+
+  const classTokens = extractClassTokens(selector)
+    .map((token) => token.toLowerCase())
+    .sort((a, b) => a.localeCompare(b));
+  if (classTokens.length > 0) {
+    return `class:${classTokens.join(".")}`;
+  }
+
+  return `tag:${selector.toLowerCase()}`;
+}
+
+function buildRecommendedSelectorSubset(items: CssSelectorCandidate[]): CssSelectorCandidate[] {
+  const grouped = new Set<string>();
+  const deduplicated: CssSelectorCandidate[] = [];
+
+  for (const item of items) {
+    const groupKey = getCanonicalSelectorGroupKey(item.selector);
+    if (grouped.has(groupKey)) continue;
+    grouped.add(groupKey);
+    deduplicated.push(item);
+  }
+
+  return deduplicated;
+}
+
+function buildAdaptiveVisibleSelectors(items: CssSelectorCandidate[]): CssSelectorCandidate[] {
+  if (items.length <= RECOMMENDED_SELECTOR_TARGET) return items;
+
+  const selected = new Map<string, CssSelectorCandidate>();
+  for (const item of items) {
+    if (item.confidenceScore >= HIGH_CONFIDENCE_THRESHOLD) {
+      selected.set(item.selector, item);
+    }
+  }
+
+  if (selected.size < RECOMMENDED_SELECTOR_TARGET) {
+    for (const item of items) {
+      if (selected.has(item.selector)) continue;
+      selected.set(item.selector, item);
+      if (selected.size >= RECOMMENDED_SELECTOR_TARGET) break;
+    }
+  }
+
+  return Array.from(selected.values());
+}
+
+function buildMixedSelectorPreview(textContent: string, imagePreviewUrl: string | undefined): string {
+  const hasText = textContent.trim().length > 0;
+  const hasImage = Boolean(imagePreviewUrl);
+
+  if (hasText && hasImage) {
+    return `${textContent}\n\n---\n\n![Content Preview](${imagePreviewUrl})`;
+  }
+
+  if (hasText) return textContent;
+  if (hasImage) return `![Content Preview](${imagePreviewUrl})`;
+  return NO_CONTENT_PREVIEW;
 }
 
 function extractPreviewImageUrl(node: unknown, pageUrl: string): string | null {

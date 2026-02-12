@@ -280,6 +280,95 @@ export async function deleteFilter(id: string): Promise<void> {
   await writeFilters(next);
 }
 
+export async function resetCoverSkillsForDomain(domain: string): Promise<number> {
+  const normalizedDomain = normalizeDomain(domain);
+  if (!normalizedDomain) return 0;
+
+  const filters = await readFilters();
+  const now = new Date().toISOString();
+  let changes = 0;
+  const next: DomainFilter[] = [];
+
+  for (const filter of filters) {
+    if (filter.domain !== normalizedDomain) {
+      next.push(filter);
+      continue;
+    }
+
+    if (!filter.coverSelector.trim()) {
+      next.push(filter);
+      continue;
+    }
+
+    changes += 1;
+    if (filter.selector.trim()) {
+      next.push({
+        ...filter,
+        coverSelector: "",
+        updatedAt: now,
+      });
+    }
+  }
+
+  if (changes > 0) {
+    await writeFilters(next);
+  }
+
+  return changes;
+}
+
+export async function resetFilterSkillsForDomain(domain: string): Promise<number> {
+  const normalizedDomain = normalizeDomain(domain);
+  if (!normalizedDomain) return 0;
+
+  const filters = await readFilters();
+  const now = new Date().toISOString();
+  let changes = 0;
+  const next: DomainFilter[] = [];
+
+  for (const filter of filters) {
+    if (filter.domain !== normalizedDomain) {
+      next.push(filter);
+      continue;
+    }
+
+    if (!filter.selector.trim()) {
+      next.push(filter);
+      continue;
+    }
+
+    changes += 1;
+    if (filter.coverSelector.trim()) {
+      next.push({
+        ...filter,
+        selector: "",
+        updatedAt: now,
+      });
+    }
+  }
+
+  if (changes > 0) {
+    await writeFilters(next);
+  }
+
+  return changes;
+}
+
+export async function resetAllSkillsForDomain(domain: string): Promise<number> {
+  const normalizedDomain = normalizeDomain(domain);
+  if (!normalizedDomain) return 0;
+
+  const filters = await readFilters();
+  const next = filters.filter((filter) => filter.domain !== normalizedDomain);
+  const removed = filters.length - next.length;
+
+  if (removed > 0) {
+    await writeFilters(next);
+  }
+
+  return removed;
+}
+
 export async function getFiltersForDomain(domain: string): Promise<DomainFilter[]> {
   const filters = await readFilters();
   const normalized = normalizeDomain(domain);

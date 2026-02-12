@@ -1,5 +1,12 @@
 # Send to Kindle Changelog
 
+## [Smarter Skills, Cleaner Previews] - {PR_MERGE_DATE}
+
+- New CSS selector algorithm: smarter ranking now highlights high-confidence selectors first, so you find the right filter faster with fewer trial-and-error steps.
+- Filter and cover reset controls in Preview mode
+- Content search in Add Filter Skill: cleaner skill management and quicker discovery, directly where you work.
+- Fixed absolute image handling in Markdown: image links are now reliably normalized, for more stable previews and cleaner Kindle rendering.
+
 ## [Skills and Preview Improvements] - {PR_MERGE_DATE}
 
 - Added guided cover skill creator action in the Preview and Send to Kindle command
