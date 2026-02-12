@@ -25,8 +25,8 @@ export async function findWorktreeDir(currentDir: string, worktree: string): Pro
   const path = join(repoDir, ".git", "worktrees", worktree, "gitdir");
   return readFile(path, "utf8")
     .then(parseGitDir)
-    .catch((err: Error) => {
-      if (err.message.startsWith("ENOENT")) {
+    .catch((err: NodeJS.ErrnoException) => {
+      if (err.code === "ENOENT") {
         return repoDir;
       }
 

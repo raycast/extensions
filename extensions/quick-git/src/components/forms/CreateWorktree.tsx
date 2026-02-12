@@ -36,7 +36,7 @@ export function CreateWorktree({ checkBranches }: Props) {
       newWorktree: (value) => {
         const error = validateBranchName(value);
         if (error) {
-          return "Worktree name" + error;
+          return `Worktree name ${error}`;
         }
       },
     },
