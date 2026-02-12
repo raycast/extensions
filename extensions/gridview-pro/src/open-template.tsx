@@ -65,9 +65,7 @@ const templates: Template[] = [
     keywords: ["freelance", "work", "business", "client", "money"],
     sites: ["upwork.com", "gmail.com", "stripe.com", "notion.so", "calendar.google.com"],
   },
-  {
-    id: "research",
-    name: "Deep Research",
+  
     description: "Google Scholar, Wikipedia, Perplexity, Zotero",
     icon: Icon.MagnifyingGlass,
     keywords: ["research", "study", "academic", "learning", "wiki"],
