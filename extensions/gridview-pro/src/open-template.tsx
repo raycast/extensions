@@ -61,7 +61,7 @@ const templates: Template[] = [
     id: "freelance",
     name: "Freelancer HQ",
     description: "Upwork, Gmail, Stripe, Notion, Calendar",
-    icon: Icon.Briefcase,
+    icon: Icon.Folder,
     keywords: ["freelance", "work", "business", "client", "money"],
     sites: ["upwork.com", "gmail.com", "stripe.com", "notion.so", "calendar.google.com"],
   },
