@@ -2,8 +2,8 @@
 
 Query IP address geolocation and display on map.
 
-![Screenshot 1](assets/screenshot-1.png)
-![Screenshot 2](assets/screenshot-2.png)
+![Screenshot 1](metadata/screenshot-1.png)
+![Screenshot 2](metadata/screenshot-2.png)
 
 ## Features
 
@@ -11,7 +11,7 @@ Query IP address geolocation and display on map.
 - **Search**: Enter any IP address to query its location.
 - **Map View**: Visualizes the location on a map.
 - **History**: Keeps track of your search history.
-- **Multi-language**: Supports English and Simplified Chinese (Auto-detects based on location).
+- **Multi-language**: Supports English and Simplified Chinese.
 - **Details**: Shows ISP, Timezone, City, Region, Country, Latitude, Longitude.
 
 ## Usage
@@ -23,4 +23,4 @@ Query IP address geolocation and display on map.
 
 ## Preferences
 
-- **Language**: You can force the display language to English or Simplified Chinese in the extension preferences. Default is "Auto".
+- **Language**: You can force the display language to English or Simplified Chinese in the extension preferences.

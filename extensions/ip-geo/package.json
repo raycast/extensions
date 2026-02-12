@@ -29,12 +29,8 @@
       "required": false,
       "title": "Language",
       "description": "Select the display language.",
-      "default": "auto",
+      "default": "en",
       "data": [
-        {
-          "title": "Auto",
-          "value": "auto"
-        },
         {
           "title": "English",
           "value": "en"

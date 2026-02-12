@@ -62,17 +62,7 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  const getEffectiveLanguage = () => {
-    if (preferences.language === "auto") {
-      if (myIp && myIp.isChina) {
-        return "zh";
-      }
-      return "en";
-    }
-    return preferences.language;
-  };
-
-  const language = getEffectiveLanguage();
+  const language = preferences.language;
   const t = dictionary[language === "zh" ? "zh" : "en"];
 
   // 2. Fetch IP info using myip.ipip.net result (Source A - Step 2)
