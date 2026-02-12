@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.0.1 - 2026-02-11
+## 0.1.0 - {PR_MERGE_DATE}
 
 - Initial Raycast extension release with `Quick Save`, `Search Cards`, and `Favorites`.

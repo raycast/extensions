@@ -51,7 +51,6 @@
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
     "publish": "ray publish",
-    "screenshots:check": "bash ./scripts/check-store-screenshots.sh",
     "typecheck": "tsc --noEmit",
     "test": "bun test src/__tests__ --coverage --dots"
   },

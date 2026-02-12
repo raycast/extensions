@@ -8,12 +8,10 @@ import {
   getUserFacingErrorMessage,
   type RaycastCard,
 } from "./lib/api";
+import { formatDate } from "./lib/dateFormat";
 import { getPreferences } from "./lib/preferences";
 
 const TEAK_HOME = "https://app.teakvault.com";
-
-const formatDate = (value: number): string =>
-  new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(value);
 
 export default function FavoritesCommand() {
   const [query, setQuery] = useState("");
@@ -47,13 +45,7 @@ export default function FavoritesCommand() {
       return;
     }
 
-    const timeout = setTimeout(() => {
-      void loadCards(query);
-    }, 250);
-
-    return () => {
-      clearTimeout(timeout);
-    };
+    void loadCards(query);
   }, [query, hasApiKey, loadCards]);
 
   if (!hasApiKey) {

@@ -1,6 +1,7 @@
 import { environment } from "@raycast/api";
 import {
   buildCardsSearchParams,
+  DEFAULT_LIMIT,
   RaycastApiError,
   type RaycastApiErrorCode,
   toErrorCode,
@@ -24,7 +25,6 @@ export {
 
 export type { RaycastCard } from "./apiParsers";
 
-const DEFAULT_LIMIT = 50;
 const DEV_CONVEX_SITE_URL = "https://reminiscent-kangaroo-59.convex.site";
 const PROD_CONVEX_SITE_URL = "https://uncommon-ladybug-882.convex.site";
 
@@ -55,14 +55,22 @@ const parseJson = async (response: Response): Promise<unknown> => {
   return response.json().catch(() => null);
 };
 
-const request = async <T>(
+const buildHeaders = (apiKey: string, initHeaders?: HeadersInit): Headers => {
+  const headers = new Headers(initHeaders);
+  headers.set("Content-Type", "application/json");
+  headers.set("Authorization", `Bearer ${apiKey}`);
+  return headers;
+};
+
+export const request = async <T>(
   path: string,
   parseResponse: (payload: unknown) => T,
   init?: RequestInit,
 ): Promise<T> => {
   const { apiKey } = getPreferences();
+  const normalizedApiKey = apiKey?.trim();
 
-  if (!apiKey?.trim()) {
+  if (!normalizedApiKey) {
     throw new RaycastApiError("MISSING_API_KEY");
   }
 
@@ -71,11 +79,7 @@ const request = async <T>(
   try {
     response = await fetch(`${getConvexBaseUrl()}${path}`, {
       ...init,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey.trim()}`,
-        ...(init?.headers ?? {}),
-      },
+      headers: buildHeaders(normalizedApiKey, init?.headers),
     });
   } catch {
     throw new RaycastApiError("NETWORK_ERROR");

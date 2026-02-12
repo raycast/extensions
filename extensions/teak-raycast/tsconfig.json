@@ -9,6 +9,6 @@
     "noEmit": true,
     "types": ["node", "@raycast/api"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["raycast-env.d.ts", "src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "src/__tests__"]
 }

@@ -1,22 +1,17 @@
 import { Action, ActionPanel, Detail, Icon, open } from "@raycast/api";
 import type { RaycastCard } from "../lib/api";
+import { formatDateTime } from "../lib/dateFormat";
 import { SetRaycastKeyAction } from "./SetRaycastKeyAction";
 
 const TEAK_HOME = "https://app.teakvault.com";
-
-const formatTimestamp = (value: number): string =>
-  new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(value);
 
 export function CardDetail({ card }: { card: RaycastCard }) {
   const markdown = [
     `# ${card.metadataTitle || card.content.slice(0, 80) || "Card"}`,
     "",
     `**Type:** ${card.type}`,
-    `**Created:** ${formatTimestamp(card.createdAt)}`,
-    `**Updated:** ${formatTimestamp(card.updatedAt)}`,
+    `**Created:** ${formatDateTime(card.createdAt)}`,
+    `**Updated:** ${formatDateTime(card.updatedAt)}`,
     card.url ? `**URL:** ${card.url}` : "",
     card.notes ? `**Notes:**\n${card.notes}` : "",
     card.aiSummary ? `**AI Summary:**\n${card.aiSummary}` : "",
