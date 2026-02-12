@@ -2,6 +2,7 @@ import { Icon, MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { PROVIDER_META, isProviderEnabled } from "./providers/registry";
 import { MetricLine, ProviderResult } from "./types";
+import { fetchFromCacheOrNetwork, getLastUpdatedFormatted } from "./usage-cache";
 import {
   formatProgressValue,
   getPrimaryPercentage,
@@ -9,7 +10,6 @@ import {
   getSelectedMenuBarProvider,
   reorderProviders,
 } from "./utils";
-import { fetchFromCacheOrNetwork, getLastUpdatedFormatted } from "./usage-cache";
 
 function buildMenuBarTitle(results: ProviderResult[], selectedProvider: string): string {
   const filtered = selectedProvider === "all" ? results : results.filter((r) => r.id === selectedProvider);
@@ -49,7 +49,8 @@ export default function MenuBarUsage() {
   const orderedData = data ? reorderProviders(data, getProviderOrder()) : undefined;
 
   const rawProvider = getSelectedMenuBarProvider() ?? orderedData?.[0]?.id ?? "all";
-  const selectedProvider = rawProvider !== "all" && !isProviderEnabled(rawProvider) ? orderedData?.[0]?.id ?? "all" : rawProvider;
+  const selectedProvider =
+    rawProvider !== "all" && !isProviderEnabled(rawProvider) ? (orderedData?.[0]?.id ?? "all") : rawProvider;
   const title = orderedData && orderedData.length > 0 ? buildMenuBarTitle(orderedData, selectedProvider) : "Usage";
 
   const menuBarIcon =

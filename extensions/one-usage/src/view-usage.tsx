@@ -50,7 +50,7 @@ function getDetailMeta(result: ProviderResult): { label: string; value: string }
       const bar = formatProgressBar(pct);
       meta.push({
         label: line.label,
-        value: `${bar} ${valueText} / ${line.max}${line.unit === "percent" ? "%" : ""}`,
+        value: `${bar} ${valueText}${line.unit === "percent" ? "" : ` / $${line.max.toFixed(2)}`}`,
       });
       pushResetOnce(meta, line.subtitle, resetAdded);
     }
@@ -212,7 +212,6 @@ export default function ViewUsage() {
             }
             detail={
               <List.Item.Detail
-                // markdown={result.error ? `# ${result.name}\n\n⚠️ ${result.error}` : `# ${result.name}`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={result.name} />
