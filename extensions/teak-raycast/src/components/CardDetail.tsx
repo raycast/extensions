@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Detail, Icon, open } from "@raycast/api";
 import type { RaycastCard } from "../lib/api";
+import { TEAK_APP_URL } from "../lib/constants";
 import { formatDateTime } from "../lib/dateFormat";
 import { SetRaycastKeyAction } from "./SetRaycastKeyAction";
-
-const TEAK_HOME = "https://app.teakvault.com";
 
 export function CardDetail({ card }: { card: RaycastCard }) {
   const markdown = [
@@ -36,7 +35,7 @@ export function CardDetail({ card }: { card: RaycastCard }) {
           ) : null}
           <Action
             icon={Icon.House}
-            onAction={() => open(TEAK_HOME)}
+            onAction={() => open(TEAK_APP_URL)}
             title="Open Teak App"
           />
           <SetRaycastKeyAction />

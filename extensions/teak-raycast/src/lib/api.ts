@@ -1,4 +1,3 @@
-import { environment } from "@raycast/api";
 import {
   buildCardsSearchParams,
   DEFAULT_LIMIT,
@@ -13,6 +12,7 @@ import {
   type CardsResponse,
   type QuickSaveResponse,
 } from "./apiParsers";
+import { getConvexBaseUrl } from "./constants";
 import { getPreferences } from "./preferences";
 
 export {
@@ -24,17 +24,6 @@ export {
 } from "./apiErrors";
 
 export type { RaycastCard } from "./apiParsers";
-
-const DEV_CONVEX_SITE_URL = "https://reminiscent-kangaroo-59.convex.site";
-const PROD_CONVEX_SITE_URL = "https://uncommon-ladybug-882.convex.site";
-
-const normalizeUrl = (url: string): string =>
-  url.endsWith("/") ? url.slice(0, -1) : url;
-
-const getConvexBaseUrl = (): string =>
-  normalizeUrl(
-    environment.isDevelopment ? DEV_CONVEX_SITE_URL : PROD_CONVEX_SITE_URL,
-  );
 
 const getErrorCodeFromResponse = (
   payloadCode: string | undefined,

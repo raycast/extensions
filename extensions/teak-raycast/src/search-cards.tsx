@@ -8,10 +8,9 @@ import {
   type RaycastCard,
   searchCards,
 } from "./lib/api";
+import { TEAK_APP_URL } from "./lib/constants";
 import { formatDate } from "./lib/dateFormat";
 import { getPreferences } from "./lib/preferences";
-
-const TEAK_HOME = "https://app.teakvault.com";
 
 export default function SearchCardsCommand() {
   const [query, setQuery] = useState("");
@@ -84,7 +83,7 @@ export default function SearchCardsCommand() {
           card.metadataTitle || card.content.slice(0, 70) || "Untitled";
         const subtitle =
           card.url || card.metadataDescription || card.notes || "";
-        const targetUrl = card.url || TEAK_HOME;
+        const targetUrl = card.url || TEAK_APP_URL;
 
         return (
           <List.Item
@@ -110,7 +109,7 @@ export default function SearchCardsCommand() {
                 ) : null}
                 <Action
                   icon={Icon.House}
-                  onAction={() => open(TEAK_HOME)}
+                  onAction={() => open(TEAK_APP_URL)}
                   title="Open Teak App"
                 />
                 <SetRaycastKeyAction />

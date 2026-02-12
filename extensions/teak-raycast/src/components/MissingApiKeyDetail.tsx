@@ -1,9 +1,6 @@
-import { Action, ActionPanel, Detail, environment } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
+import { TEAK_SETTINGS_URL } from "../lib/constants";
 import { SetRaycastKeyAction } from "./SetRaycastKeyAction";
-
-const SETTINGS_URL = environment.isDevelopment
-  ? "http://localhost:3000/settings"
-  : "https://app.teakvault.com/settings";
 
 export function MissingApiKeyDetail() {
   return (
@@ -11,7 +8,10 @@ export function MissingApiKeyDetail() {
       actions={
         <ActionPanel>
           <SetRaycastKeyAction />
-          <Action.OpenInBrowser title="Open Teak Settings" url={SETTINGS_URL} />
+          <Action.OpenInBrowser
+            title="Open Teak Settings"
+            url={TEAK_SETTINGS_URL}
+          />
         </ActionPanel>
       }
       markdown={[
