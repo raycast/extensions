@@ -98,7 +98,13 @@ export default function DeepSearchSessions() {
       throttle
     >
       {results.map((session) => (
-        <SearchResultItem key={session.id} session={session} />
+        <SearchResultItem
+          key={session.id}
+          session={session}
+          onDelete={() =>
+            setResults((prev) => prev.filter((s) => s.id !== session.id))
+          }
+        />
       ))}
 
       {results.length === 0 && (
@@ -112,7 +118,13 @@ export default function DeepSearchSessions() {
   );
 }
 
-function SearchResultItem({ session }: { session: SessionMetadata }) {
+function SearchResultItem({
+  session,
+  onDelete,
+}: {
+  session: SessionMetadata;
+  onDelete: () => void;
+}) {
   const title = session.firstMessage || session.summary || session.id;
   const truncatedTitle = title.length > 60 ? title.slice(0, 60) + "..." : title;
 
@@ -195,6 +207,7 @@ function SearchResultItem({ session }: { session: SessionMetadata }) {
       });
       try {
         await deleteSession(session.id);
+        onDelete();
         await showToast({
           style: Toast.Style.Success,
           title: "Session deleted",
