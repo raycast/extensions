@@ -1,15 +1,17 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getEventsForYear } from "./utils/holidays";
-import { format } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { getDateDiff } from "./utils/date-utils";
 import DayDetailView from "./view-day-detail";
 
 export default function ViewEvents() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
 
-  const { sections } = useMemo(() => {
+  const { sections, nearestEventId } = useMemo(() => {
     const events = getEventsForYear(currentYear);
+    const today = new Date();
 
     // Group by month
     const sections = [];
@@ -23,8 +25,27 @@ export default function ViewEvents() {
       }
     }
 
-    return { events, sections };
+    // Find nearest event to today
+    let nearestEventId: string | undefined;
+    let minDiff = Infinity;
+    events.forEach((event) => {
+      const diff = Math.abs(differenceInDays(event.date, today));
+      if (diff < minDiff) {
+        minDiff = diff;
+        nearestEventId = event.date.toISOString() + event.name;
+      }
+    });
+
+    return { events, sections, nearestEventId };
   }, [currentYear]);
+
+  useEffect(() => {
+    if (nearestEventId) {
+      setTimeout(() => {
+        setSelectedItemId(nearestEventId);
+      }, 200);
+    }
+  }, [nearestEventId]);
 
   const handleNextYear = () => setCurrentYear(currentYear + 1);
   const handlePreviousYear = () => setCurrentYear(currentYear - 1);
@@ -34,12 +55,14 @@ export default function ViewEvents() {
     <List
       navigationTitle={`Events in ${currentYear}`}
       searchBarPlaceholder={`Search events in ${currentYear}...`}
-      isLoading={false}
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => setSelectedItemId(id || undefined)}
     >
       {sections.map((section) => (
         <List.Section key={section.monthName} title={section.monthName}>
           {section.events.map((event) => (
             <List.Item
+              id={event.date.toISOString() + event.name}
               key={event.date.toISOString() + event.name}
               title={event.name}
               subtitle={`${format(event.date, "EEE, MMM d")} ${event.type === "lunar" ? `(AL: ${event.lunarDate})` : ""}`}

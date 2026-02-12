@@ -6,6 +6,9 @@
   "description": "A comprehensive Vietnamese Lunar Calendar for Raycast. View Solar and Lunar dates, check holidays with anniversary counts, and navigate easily with shortcuts.",
   "icon": "command-icon.png",
   "author": "hoando",
+  "contributors": [
+    "dangkhoipro"
+  ],
   "categories": [
     "Productivity"
   ],
