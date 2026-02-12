@@ -9,6 +9,13 @@ export interface Account {
   accountId: number
   displayName: string
 }
+export interface EmailMessage {
+  subject: string
+  messageId: string
+  fromAddress: string
+  status: "0" | "1"
+}
+
 export interface Result<T> {
   "status": {
     "code": number
