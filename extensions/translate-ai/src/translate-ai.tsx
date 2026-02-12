@@ -9,12 +9,12 @@ import {
   Clipboard,
   getPreferenceValues,
 } from "@raycast/api";
-import { type TargetLanguage, type Preferences, LANGUAGES, TOAST_MESSAGES } from "./types";
+import { type TargetLanguage, LANGUAGES, TOAST_MESSAGES } from "./types";
 import { translateText as translateWithClaude } from "./claude-api";
 import { translateText as translateWithOpenAI } from "./openai-api";
 
 export default function Command() {
-  const { claudeApiKey, openaiApiKey, copyToClipboard } = getPreferenceValues<Preferences>();
+  const { claudeApiKey, openaiApiKey, copyToClipboard } = getPreferenceValues();
   const [text, setText] = useState<string>("");
   const [translation, setTranslation] = useState<string>("");
   const [isTranslating, setIsTranslating] = useState<boolean>(false);

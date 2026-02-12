@@ -2,6 +2,8 @@
 
 A Raycast extension for quick text translation powered by Claude or OpenAI.
 
+![Translate AI Screenshot](metadata/translate-ai-1.png)
+
 ## Features
 
 - Automatically captures selected text from any app

@@ -66,10 +66,3 @@ export const TOAST_MESSAGES = {
   successCopied: { title: "Translation complete", message: "Copied to clipboard" },
   failure: { title: "Translation failed" },
 } as const;
-
-// raycast preferences
-export interface Preferences {
-  claudeApiKey?: string;
-  openaiApiKey?: string;
-  copyToClipboard: boolean;
-}

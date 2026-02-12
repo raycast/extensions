@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 - Initial Release
+## 1.0.0 - {PR_MERGE_DATE}
 
 - Translate text using Claude or OpenAI APIs
 - Auto-detect selected text from any application
