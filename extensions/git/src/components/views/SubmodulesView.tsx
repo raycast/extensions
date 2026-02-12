@@ -42,7 +42,11 @@ export default function SubmodulesView(context: RepositoryContext & NavigationCo
           icon={Icon.ExclamationMark}
         />
       ) : !context.submodules.isLoading && context.submodules.data.length === 0 ? (
-        <List.EmptyView title="No submodules" description="This repository has no submodules." icon={Icon.Link} />
+        <List.EmptyView
+          title="No submodules"
+          description="This repository has no submodules."
+          icon={`submodule-folder.svg`}
+        />
       ) : (
         context.submodules.data.map((submodule: Submodule) => (
           <SubmoduleListItem key={submodule.fullPath} submodule={submodule} {...context} />
@@ -97,7 +101,7 @@ function SubmoduleListItem(
       return stats.data[0].color;
     }
 
-    return { source: `git-project.svg`, tintColor: Color.SecondaryText };
+    return { source: `submodule-folder.svg`, tintColor: Color.SecondaryText };
   }, [stats.data]);
 
   return (
@@ -135,7 +139,7 @@ function SubmoduleListItem(
               contents={[
                 { title: "Name", content: context.submodule.name, icon: Icon.Clipboard },
                 { title: "Relative Path", content: context.submodule.relativePath, icon: Icon.Folder },
-                { title: "Absolute Path", content: context.submodule.fullPath, icon: Icon.Document },
+                { title: "Absolute Path", content: context.submodule.fullPath, icon: Icon.Folder },
               ]}
             />
             <RepositoryAttachedLinksAction remotes={remotes.data} />

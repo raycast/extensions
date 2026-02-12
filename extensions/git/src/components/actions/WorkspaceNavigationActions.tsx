@@ -21,7 +21,12 @@ export function WorkspaceNavigationDropdown(context: NavigationContext) {
       <List.Dropdown.Item title="Branches" value="branches" keywords={["graph", "remote"]} icon={`git-branch.svg`} />
       <List.Dropdown.Item title="Tags" value="tags" icon={Icon.Tag} />
       <List.Dropdown.Item title="Remotes" value="remotes" keywords={["origin"]} icon={Icon.Network} />
-      <List.Dropdown.Item title="Submodules" value="submodules" keywords={["submodule"]} icon={Icon.Folder} />
+      <List.Dropdown.Item
+        title="Submodules"
+        value="submodules"
+        keywords={["submodule"]}
+        icon={`submodule-folder.svg`}
+      />
       <List.Dropdown.Item title="Stashes" value="stashes" keywords={["bookmark"]} icon={Icon.Bookmark} />
       <List.Dropdown.Item
         title="Files"
@@ -70,7 +75,7 @@ export function WorkspaceNavigationActions(context: NavigationContext & Reposito
         <Action
           title="Go to Submodules"
           onAction={() => context.navigateTo("submodules")}
-          icon={Icon.Folder}
+          icon={`submodule-folder.svg`}
           shortcut={{ modifiers: ["cmd"], key: "6" }}
         />
         <Action
