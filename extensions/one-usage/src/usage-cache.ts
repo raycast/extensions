@@ -38,9 +38,8 @@ export const getCachedData = (): string | undefined => cache.get(CACHED_DATA_KEY
 
 export const getLastFetchKey = (): string | undefined => cache.get(LAST_FETCH_KEY);
 
-/** Clear cache (e.g. before manual refresh so next read will fetch). */
+/** Clear cache (e.g. before manual refresh so next read will fetch). Keeps LAST_FETCH_KEY so "last updated" stays visible until the new fetch completes. */
 export const clearCache = (): void => {
-  cache.remove(LAST_FETCH_KEY);
   cache.remove(CACHED_DATA_KEY);
   cache.remove(CACHED_PROVIDERS_KEY);
 };

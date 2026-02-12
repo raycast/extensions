@@ -2,21 +2,7 @@
 
 A [Raycast](https://raycast.com) extension that tracks **Claude**, **Codex**, and **Cursor** usage in one place. View usage in a list or from the menu bar, with quick links to each provider’s dashboard and status page.
 
-### View Usage
-
-- **Detail view**: Plan name, usage progress (percent/dollars), reset time, last updated.
-- **Actions**:
-  - **Refresh** – Clear cache and refetch all providers.
-  - **Usage Dashboard** / **Status Page** – Open the provider’s dashboard or status page.
-  - **Order**: Move to Top, Move Up, Move Down to reorder providers in the list.
-  - **Pin to Menu Bar** – Use this provider as the single one shown in the menu bar (or show “All”).
-- **Selected** tag (blue) indicates the provider currently pinned to the menu bar.
-
-### Menu Bar Usage
-
-- Shows a compact title (e.g. usage percentages) and a dropdown with each provider’s metrics.
-- **Refresh interval** (extension preference): 5m, 15m, or 30m for background refresh.
-- Dropdown items: usage lines, last updated, and links to Usage Dashboard and Status Page per provider.
+**Extension preferences** (Raycast → Extensions → One Usage → Preferences): enable or disable **Claude**, **Codex**, and **Cursor**. At least one provider must be enabled; if all are disabled, View Usage shows “No Providers Enabled”.
 
 ## Supported Providers
 

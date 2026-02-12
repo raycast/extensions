@@ -25,7 +25,7 @@
       "title": "Menu Bar Usage",
       "description": "Show AI provider usage in the menu bar",
       "mode": "menu-bar",
-      "interval": "5m",
+      "interval": "1m",
       "preferences": [
         {
           "name": "refreshInterval",
