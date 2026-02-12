@@ -66,11 +66,10 @@ const templates: Template[] = [
     sites: ["upwork.com", "gmail.com", "stripe.com", "notion.so", "calendar.google.com"],
   },
   
+      {id: "research",
+    name: "Deep Research",
     description: "Google Scholar, Wikipedia, Perplexity, Zotero",
     icon: Icon.MagnifyingGlass,
-    keywords: ["research", "study", "academic", "learning", "wiki"],
-    sites: ["scholar.google.com", "wikipedia.org", "perplexity.ai", "zotero.org"],
-  },
   {
     id: "news",
     name: "News & Media",
