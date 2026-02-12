@@ -65,11 +65,14 @@ const templates: Template[] = [
     keywords: ["freelance", "work", "business", "client", "money"],
     sites: ["upwork.com", "gmail.com", "stripe.com", "notion.so", "calendar.google.com"],
   },
-  
-      {id: "research",
+  {
+    id: "research",
     name: "Deep Research",
     description: "Google Scholar, Wikipedia, Perplexity, Zotero",
     icon: Icon.MagnifyingGlass,
+    keywords: ["research", "study", "academic", "learning", "wiki"],
+    sites: ["scholar.google.com", "wikipedia.org", "perplexity.ai", "zotero.org"],
+  },
   {
     id: "news",
     name: "News & Media",
@@ -79,10 +82,6 @@ const templates: Template[] = [
     sites: ["news.ycombinator.com", "reddit.com", "techcrunch.com", "theverge.com"],
   },
 ];
-
-interface Preferences {
-  gridviewPath?: string;
-}
 
 function getTemplateRequestPath(): string {
   const gridviewDir = join(homedir(), ".gridview");
@@ -112,20 +111,17 @@ async function copySitesToClipboard(sites: string[]) {
 }
 
 async function launchGridView(template?: Template) {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
   const appPath = prefs.gridviewPath || "/Applications/GridViewPro.app";
 
   try {
-    // Check if app exists
     await execAsync(`test -d "${appPath}"`);
 
-    // Save template request for future GridView Pro integration
     if (template) {
       await saveTemplateRequest(template);
       await copySitesToClipboard(template.sites);
     }
 
-    // Launch GridView Pro
     await execAsync(`open "${appPath}"`);
 
     if (template) {
