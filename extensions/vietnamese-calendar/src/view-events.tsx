@@ -32,7 +32,7 @@ export default function ViewEvents() {
       const diff = Math.abs(differenceInDays(event.date, today));
       if (diff < minDiff) {
         minDiff = diff;
-        nearestEventId = event.date.toISOString() + event.name;
+        nearestEventId = event.id;
       }
     });
 
@@ -62,8 +62,8 @@ export default function ViewEvents() {
         <List.Section key={section.monthName} title={section.monthName}>
           {section.events.map((event) => (
             <List.Item
-              id={event.date.toISOString() + event.name}
-              key={event.date.toISOString() + event.name}
+              id={event.id}
+              key={event.id}
               title={event.name}
               subtitle={`${format(event.date, "EEE, MMM d")} ${event.type === "lunar" ? `(AL: ${event.lunarDate})` : ""}`}
               accessories={[

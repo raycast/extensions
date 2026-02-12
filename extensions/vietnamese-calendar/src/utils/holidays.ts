@@ -185,6 +185,7 @@ export interface CalendarEvent {
   name: string;
   type: "solar" | "lunar";
   lunarDate?: string;
+  id: string;
 }
 
 export function getEventsForYear(year: number): CalendarEvent[] {
@@ -222,6 +223,7 @@ export function getEventsForYear(year: number): CalendarEvent[] {
           name: solarHoliday,
           type: "solar",
           lunarDate: lunarDateString,
+          id: day.toISOString() + solarHoliday,
         });
       }
     }
