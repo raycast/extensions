@@ -4,9 +4,6 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-interface Preferences {
-  gridviewPath?: string;
-}
 
 export default async function Command() {
   const prefs = getPreferenceValues<Preferences>();
