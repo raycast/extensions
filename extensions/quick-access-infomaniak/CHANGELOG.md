@@ -1,5 +1,5 @@
 # Infomaniak Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-12
 
 - Browse your organizations (domains, hostings and email services)
