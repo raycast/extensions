@@ -104,9 +104,7 @@ const quickActions: QuickAction[] = [
   },
 
   // AI Tools
-  {
-    id: "chatgpt",
-    title: "ChatGPT",
+  
     subtitle: "OpenAI chat",
     icon: Icon.Stars,
     keywords: ["chatgpt", "gpt", "ai"],
