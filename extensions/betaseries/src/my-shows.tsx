@@ -4,16 +4,17 @@ import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
-  hasToken,
   parseBetaSeriesResponse,
 } from "./api/client";
 import { Show } from "./types/betaseries";
 import { ShowListItem } from "./components/ShowListItem";
 import { TokenRequiredView } from "./components/TokenRequiredView";
+import { useAuthToken } from "./hooks/useAuthToken";
 
 export default function Command() {
   const [filter, setFilter] = useState("active"); // active, archived
-  const tokenAvailable = hasToken();
+  const { token, isLoading: isTokenLoading, setToken, logout } = useAuthToken();
+  const tokenAvailable = Boolean(token);
 
   const {
     data: items = [],
@@ -25,8 +26,8 @@ export default function Command() {
       status: filter === "active" ? "current" : "archived",
     }),
     {
-      headers: getHeaders(),
-      execute: tokenAvailable,
+      headers: getHeaders(token),
+      execute: tokenAvailable && !isTokenLoading,
       keepPreviousData: true,
       initialData: [],
       parseResponse: (response) =>
@@ -42,9 +43,22 @@ export default function Command() {
     },
   );
 
-  if (!tokenAvailable) {
-    return <TokenRequiredView />;
+  if (isTokenLoading) {
+    return <List isLoading />;
   }
+
+  if (!tokenAvailable) {
+    return <TokenRequiredView onTokenSaved={setToken} />;
+  }
+
+  const handleLogout = async () => {
+    await logout();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Logged out",
+      message: "Your BetaSeries token has been removed.",
+    });
+  };
 
   return (
     <List
@@ -65,6 +79,7 @@ export default function Command() {
           key={show.id}
           show={show}
           isMyShow
+          onLogout={() => void handleLogout()}
           onArchiveChange={(showId, archived) => {
             void mutate(Promise.resolve(), {
               shouldRevalidateAfter: false,

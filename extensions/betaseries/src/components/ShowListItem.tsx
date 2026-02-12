@@ -15,12 +15,14 @@ interface ShowListItemProps {
   show: Show;
   isMyShow?: boolean;
   onArchiveChange?: (showId: number, archived: boolean) => void;
+  onLogout?: () => void;
 }
 
 export function ShowListItem({
   show,
   isMyShow = false,
   onArchiveChange,
+  onLogout,
 }: ShowListItemProps) {
   const [isAdded, setIsAdded] = useState(show.in_account);
   const isArchived = show.user?.archived ?? false;
@@ -125,6 +127,13 @@ export function ShowListItem({
                 url={show.resource_url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               />
+              {onLogout && (
+                <Action
+                  title="Logout"
+                  icon={Icon.XMarkCircle}
+                  onAction={onLogout}
+                />
+              )}
               <Action
                 title={isArchived ? "Unarchive Show" : "Archive Show"}
                 icon={isArchived ? Icon.ArrowCounterClockwise : Icon.Tray}

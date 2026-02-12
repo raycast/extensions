@@ -3,20 +3,21 @@ import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
-  hasToken,
   markEpisodeAsWatched,
   parseBetaSeriesResponse,
 } from "../api/client";
 import { Show, Episode } from "../types/betaseries";
 import { EpisodeListItem } from "./EpisodeListItem";
 import { TokenRequiredView } from "./TokenRequiredView";
+import { useAuthToken } from "../hooks/useAuthToken";
 
 interface ShowEpisodesListProps {
   show: Show;
 }
 
 export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
-  const tokenAvailable = hasToken();
+  const { token, isLoading: isTokenLoading, setToken, logout } = useAuthToken();
+  const tokenAvailable = Boolean(token);
 
   const {
     data: episodes = [],
@@ -25,8 +26,8 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
   } = useFetch<{ shows: Array<{ unseen: Episode[] }> }, Episode[], Episode[]>(
     buildBetaSeriesUrl("/episodes/list", { showId: String(show.id) }),
     {
-      headers: getHeaders(),
-      execute: tokenAvailable,
+      headers: getHeaders(token),
+      execute: tokenAvailable && !isTokenLoading,
       initialData: [],
       keepPreviousData: true,
       parseResponse: (response) =>
@@ -51,8 +52,12 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
     },
   );
 
+  if (isTokenLoading) {
+    return <List isLoading />;
+  }
+
   if (!tokenAvailable) {
-    return <TokenRequiredView />;
+    return <TokenRequiredView onTokenSaved={setToken} />;
   }
 
   const handleMarkAsWatched = async (episodeId: number) => {
@@ -82,6 +87,15 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Logged out",
+      message: "Your BetaSeries token has been removed.",
+    });
+  };
+
   return (
     <List isLoading={isLoading} navigationTitle={show.title}>
       {!isLoading && episodes.length === 0 && (
@@ -95,6 +109,7 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
           key={episode.id}
           episode={episode}
           onMarkAsWatched={handleMarkAsWatched}
+          onLogout={() => void handleLogout()}
         />
       ))}
     </List>

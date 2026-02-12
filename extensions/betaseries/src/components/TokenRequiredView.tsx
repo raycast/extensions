@@ -1,39 +1,61 @@
 import {
   Action,
   ActionPanel,
-  Detail,
+  Form,
   openExtensionPreferences,
+  showToast,
+  Toast,
 } from "@raycast/api";
+import { useState } from "react";
+import { authenticateMember, saveToken } from "../api/client";
 
-const TOKEN_COMMAND = `curl -X POST "https://api.betaseries.com/members/auth" \\
-  -d "key=APIKEY" \\
-  -d "login=LOGIN" \\
-  -d "password=$(echo -n 'PASSWORD' | md5)"`;
+type TokenRequiredViewProps = {
+  onTokenSaved?: (token: string) => Promise<void>;
+};
 
-const markdown = `# BetaSeries Token Required
+export function TokenRequiredView({ onTokenSaved }: TokenRequiredViewProps) {
+  const [isLoading, setIsLoading] = useState(false);
 
-Get your Auth Token for user-specific features.
+  const handleSubmit = async (values: { login: string; password: string }) => {
+    try {
+      setIsLoading(true);
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Authenticating...",
+      });
 
-For now, this version only supports classic login and password authentication (Apple, Facebook, and Google logins are not yet supported).
+      const token = await authenticateMember(values.login, values.password);
 
-Run the following command in your terminal:
+      if (onTokenSaved) {
+        await onTokenSaved(token);
+      } else {
+        await saveToken(token);
+      }
 
-\`\`\`bash
-${TOKEN_COMMAND}
-\`\`\`
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Connected",
+        message: "Your BetaSeries token has been saved.",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Authentication failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-Copy the token from the response and paste it into the **BetaSeries Token** field in extension preferences.
-`;
-
-export function TokenRequiredView() {
   return (
-    <Detail
-      markdown={markdown}
+    <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Auth Command"
-            content={TOKEN_COMMAND}
+          <Action.SubmitForm
+            title="Connect to Betaseries"
+            onSubmit={handleSubmit}
           />
           <Action
             title="Open Extension Preferences"
@@ -41,6 +63,18 @@ export function TokenRequiredView() {
           />
         </ActionPanel>
       }
-    />
+    >
+      <Form.Description text="Sign in with your BetaSeries credentials to generate and save your auth token automatically." />
+      <Form.TextField
+        id="login"
+        title="Login or Email"
+        placeholder="username"
+      />
+      <Form.PasswordField
+        id="password"
+        title="Password"
+        placeholder="Your BetaSeries password"
+      />
+    </Form>
   );
 }

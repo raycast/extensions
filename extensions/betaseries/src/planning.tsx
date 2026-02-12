@@ -10,12 +10,12 @@ import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
-  hasToken,
   markEpisodeAsWatched,
   parseBetaSeriesResponse,
 } from "./api/client";
 import { MemberPlanning } from "./types/betaseries";
 import { TokenRequiredView } from "./components/TokenRequiredView";
+import { useAuthToken } from "./hooks/useAuthToken";
 
 interface PlanningItem {
   date?: string;
@@ -34,7 +34,8 @@ interface PlanningItem {
 }
 
 export default function Command() {
-  const tokenAvailable = hasToken();
+  const { token, isLoading: isTokenLoading, setToken, logout } = useAuthToken();
+  const tokenAvailable = Boolean(token);
 
   const {
     data: items = [],
@@ -45,8 +46,8 @@ export default function Command() {
     MemberPlanning[],
     MemberPlanning[]
   >(buildBetaSeriesUrl("/planning/member"), {
-    headers: getHeaders(),
-    execute: tokenAvailable,
+    headers: getHeaders(token),
+    execute: tokenAvailable && !isTokenLoading,
     initialData: [],
     parseResponse: (response) =>
       parseBetaSeriesResponse<
@@ -81,8 +82,12 @@ export default function Command() {
     },
   });
 
+  if (isTokenLoading) {
+    return <List isLoading />;
+  }
+
   if (!tokenAvailable) {
-    return <TokenRequiredView />;
+    return <TokenRequiredView onTokenSaved={setToken} />;
   }
 
   const handleMarkAsWatched = async (id: number) => {
@@ -102,6 +107,15 @@ export default function Command() {
         });
       }
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Logged out",
+      message: "Your BetaSeries token has been removed.",
+    });
   };
 
   return (
@@ -126,6 +140,11 @@ export default function Command() {
               <Action.OpenInBrowser
                 url={`https://www.betaseries.com/episode/${item.show_title}/${item.code}`}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              />
+              <Action
+                title="Logout"
+                icon={Icon.XMarkCircle}
+                onAction={() => void handleLogout()}
               />
             </ActionPanel>
           }

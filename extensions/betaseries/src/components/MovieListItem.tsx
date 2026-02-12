@@ -17,6 +17,7 @@ import { useState } from "react";
 interface MovieListItemProps {
   movie: Movie;
   isMyMovie?: boolean;
+  onLogout?: () => void;
 }
 
 function isValidUrl(urlString: string | undefined | null): boolean {
@@ -41,6 +42,7 @@ function generateSlug(title: string): string {
 export function MovieListItem({
   movie,
   isMyMovie = false,
+  onLogout,
 }: MovieListItemProps) {
   const [isAdded, setIsAdded] = useState(movie.user?.status === 1);
   const [isWatched, setIsWatched] = useState(movie.user?.status === 1);
@@ -171,6 +173,13 @@ export function MovieListItem({
                 url={browserUrl}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               />
+              {onLogout && (
+                <Action
+                  title="Logout"
+                  icon={Icon.XMarkCircle}
+                  onAction={onLogout}
+                />
+              )}
             </>
           ) : (
             <>

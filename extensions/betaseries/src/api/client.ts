@@ -1,4 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { createHash } from "crypto";
 import { URLSearchParams } from "url";
 import {
   BetaSeriesResponse,
@@ -11,11 +12,12 @@ import {
 export const BASE_URL = "https://api.betaseries.com";
 type BetaSeriesPreferences = {
   apiKey: string;
-  token?: string;
 };
 
-export const getHeaders = () => {
-  const { apiKey, token } = getPreferenceValues<BetaSeriesPreferences>();
+const TOKEN_STORAGE_KEY = "betaseries-token";
+
+export const getHeaders = (token?: string) => {
+  const { apiKey } = getPreferenceValues<BetaSeriesPreferences>();
   const headers: Record<string, string> = {
     "X-BetaSeries-Key": apiKey,
     "X-BetaSeries-Version": "3.0",
@@ -27,10 +29,48 @@ export const getHeaders = () => {
   return headers;
 };
 
-export const hasToken = () => {
-  const { token } = getPreferenceValues<BetaSeriesPreferences>();
-  return Boolean(token);
+export const getTokenFromStorage = async () => {
+  const token = await LocalStorage.getItem<string>(TOKEN_STORAGE_KEY);
+  return token?.trim() || "";
 };
+
+export const getToken = async () => {
+  return getTokenFromStorage();
+};
+
+export const saveToken = async (token: string) => {
+  await LocalStorage.setItem(TOKEN_STORAGE_KEY, token.trim());
+};
+
+export const clearToken = async () => {
+  await LocalStorage.removeItem(TOKEN_STORAGE_KEY);
+};
+
+export async function authenticateMember(login: string, password: string) {
+  const passwordHash = createHash("md5").update(password).digest("hex");
+  const response = await fetch(`${BASE_URL}/members/auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      key: getPreferenceValues<BetaSeriesPreferences>().apiKey,
+      login,
+      password: passwordHash,
+    }).toString(),
+  });
+
+  const result = await parseBetaSeriesResponse<{
+    token?: string;
+    errors?: { text: string }[];
+  }>(response);
+
+  if (!result.token) {
+    throw new Error("Authentication failed: no token returned by BetaSeries.");
+  }
+
+  return result.token;
+}
 
 export const buildBetaSeriesUrl = (
   endpoint: string,
@@ -48,7 +88,7 @@ export async function parseBetaSeriesResponse<T>(
   if (!response.ok) {
     if (response.status === 401) {
       throw new Error(
-        "Unauthorized. Please check your BetaSeries Token in extension preferences.",
+        "Unauthorized. Please reconnect your BetaSeries account.",
       );
     }
 
@@ -68,7 +108,7 @@ export async function parseBetaSeriesResponse<T>(
         errorText.includes('parameter "id" is missing')
       ) {
         throw new Error(
-          "Invalid Token. You may have entered the API Key instead of the OAuth Token, or the token is expired.",
+          "Invalid token. Please reconnect your BetaSeries account.",
         );
       }
       throw new Error(`BetaSeries Error: ${errorText}`);
@@ -96,7 +136,7 @@ async function fetchBetaSeries<T>(
     body?: string;
   } = {
     method,
-    headers: getHeaders(),
+    headers: getHeaders(await getToken()),
   };
 
   if (method === "GET") {
@@ -130,10 +170,10 @@ export async function searchMovies(title: string): Promise<Movie[]> {
 export async function getMyShows(status?: string): Promise<Show[]> {
   // status: active, archived, etc.
   // /shows/member
-  const { token } = getPreferenceValues<BetaSeriesPreferences>();
+  const token = await getToken();
   if (!token) {
     throw new Error(
-      "This command requires a BetaSeries Token. Please add it in the extension preferences.",
+      "This command requires a BetaSeries token. Please reconnect your account.",
     );
   }
   const params: Record<string, string> = { limit: "100" };
@@ -148,10 +188,10 @@ export async function getMyShows(status?: string): Promise<Show[]> {
 
 export async function getMyMovies(state?: number): Promise<Movie[]> {
   // state: 0 = to watch, 1 = watched
-  const { token } = getPreferenceValues<BetaSeriesPreferences>();
+  const token = await getToken();
   if (!token) {
     throw new Error(
-      "This command requires a BetaSeries Token. Please add it in the extension preferences.",
+      "This command requires a BetaSeries token. Please reconnect your account.",
     );
   }
   const params: Record<string, string> = { limit: "100" };
@@ -186,10 +226,10 @@ interface PlanningResponse {
 }
 
 export async function getPlanning(): Promise<MemberPlanning[]> {
-  const { token } = getPreferenceValues<BetaSeriesPreferences>();
+  const token = await getToken();
   if (!token) {
     throw new Error(
-      "This command requires a BetaSeries Token. Please add it in the extension preferences.",
+      "This command requires a BetaSeries token. Please reconnect your account.",
     );
   }
   const response = await fetchBetaSeries<PlanningResponse | PlanningItem[]>(
@@ -223,10 +263,10 @@ export async function getPlanning(): Promise<MemberPlanning[]> {
 }
 
 export async function getUnwatchedEpisodes(showId: number): Promise<Episode[]> {
-  const { token } = getPreferenceValues<BetaSeriesPreferences>();
+  const token = await getToken();
   if (!token) {
     throw new Error(
-      "This command requires a BetaSeries Token. Please add it in the extension preferences.",
+      "This command requires a BetaSeries token. Please reconnect your account.",
     );
   }
   const data = await fetchBetaSeries<{ shows: Array<{ unseen: Episode[] }> }>(

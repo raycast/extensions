@@ -14,14 +14,9 @@ Manage your TV shows and movies with BetaSeries directly from Raycast.
 ## Setup
 
 1. Get your BetaSeries API Key from [BetaSeries Developer Portal](https://www.betaseries.com/api/)
-2. Get your OAuth Token for user-specific features. For now, this version only supports classic login and password authentication (Apple, Facebook, and Google logins are not yet supported). Run the following command in your terminal:
-   ```bash
-   curl -X POST "https://api.betaseries.com/members/auth" \
-     -d "key=APIKEY" \
-     -d "login=LOGIN" \
-     -d "password=$(echo -n 'PASSWORD' | md5)"
-   ```
-3. Copy the token from the response and paste it into the extension's configuration settings.
+2. Open one of the member commands (**My Shows**, **My Movies**, or **Planning**).
+3. Sign in with your BetaSeries login/email and password directly in the extension form.  
+   The extension will request the token and save it automatically.
 
 ## Commands
 
@@ -44,7 +39,7 @@ See your upcoming episodes for the week.
 
 The extension requires:
 - **API Key** : Your BetaSeries Developer API Key
-- **OAuth Token** : For accessing user-specific features like your library and planning
+- **OAuth Token** : For accessing user-specific features like your library and planning (generated and saved automatically from the login form)
 
 ## License
 

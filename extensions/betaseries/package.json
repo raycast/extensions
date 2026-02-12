@@ -83,14 +83,6 @@
       "title": "BetaSeries API Key",
       "description": "Your BetaSeries API Key (Developer Key)",
       "placeholder": "Enter your API Key"
-    },
-    {
-      "name": "token",
-      "type": "password",
-      "required": false,
-      "title": "BetaSeries Token",
-      "description": "Auth token used for member features (My Shows, My Movies, Planning).",
-      "placeholder": "Enter your BetaSeries Token"
     }
   ]
 }

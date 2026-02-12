@@ -4,24 +4,25 @@ import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
-  hasToken,
   parseBetaSeriesResponse,
 } from "./api/client";
 import { Movie } from "./types/betaseries";
 import { MovieListItem } from "./components/MovieListItem";
 import { TokenRequiredView } from "./components/TokenRequiredView";
+import { useAuthToken } from "./hooks/useAuthToken";
 
 export default function Command() {
   const [filter, setFilter] = useState("0"); // 0 = To Watch, 1 = Watched
-  const tokenAvailable = hasToken();
+  const { token, isLoading: isTokenLoading, setToken, logout } = useAuthToken();
+  const tokenAvailable = Boolean(token);
 
   const { data: items = [], isLoading } = useFetch<
     { movies: Movie[] },
     Movie[],
     Movie[]
   >(buildBetaSeriesUrl("/movies/member", { limit: "100", state: filter }), {
-    headers: getHeaders(),
-    execute: tokenAvailable,
+    headers: getHeaders(token),
+    execute: tokenAvailable && !isTokenLoading,
     keepPreviousData: true,
     initialData: [],
     parseResponse: (response) =>
@@ -36,9 +37,22 @@ export default function Command() {
     },
   });
 
-  if (!tokenAvailable) {
-    return <TokenRequiredView />;
+  if (isTokenLoading) {
+    return <List isLoading />;
   }
+
+  if (!tokenAvailable) {
+    return <TokenRequiredView onTokenSaved={setToken} />;
+  }
+
+  const handleLogout = async () => {
+    await logout();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Logged out",
+      message: "Your BetaSeries token has been removed.",
+    });
+  };
 
   return (
     <List
@@ -55,7 +69,12 @@ export default function Command() {
         description="Your list is empty for this filter."
       />
       {items.map((movie) => (
-        <MovieListItem key={movie.id} movie={movie} isMyMovie={true} />
+        <MovieListItem
+          key={movie.id}
+          movie={movie}
+          isMyMovie={true}
+          onLogout={() => void handleLogout()}
+        />
       ))}
     </List>
   );

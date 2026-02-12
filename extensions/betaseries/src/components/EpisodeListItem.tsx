@@ -4,11 +4,13 @@ import { Episode } from "../types/betaseries";
 interface EpisodeListItemProps {
   episode: Episode;
   onMarkAsWatched?: (episodeId: number) => void;
+  onLogout?: () => void;
 }
 
 export function EpisodeListItem({
   episode,
   onMarkAsWatched,
+  onLogout,
 }: EpisodeListItemProps) {
   const title = `S${String(episode.season).padStart(2, "0")}E${String(episode.episode).padStart(2, "0")} - ${episode.title}`;
   const formattedDate = episode.date
@@ -34,6 +36,13 @@ export function EpisodeListItem({
             url={episode.resource_url}
             shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           />
+          {onLogout && (
+            <Action
+              title="Logout"
+              icon={Icon.XMarkCircle}
+              onAction={onLogout}
+            />
+          )}
         </ActionPanel>
       }
     />
