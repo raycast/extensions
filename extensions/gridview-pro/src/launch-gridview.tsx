@@ -4,7 +4,6 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-
 export default async function Command() {
   const prefs = getPreferenceValues<Preferences>();
   const appPath = prefs.gridviewPath || "/Applications/GridViewPro.app";
