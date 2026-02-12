@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.3.3] - {PR_MERGE_DATE}
+## [1.3.3] - 2026-02-12
 
 - feat: Add Vietnamese day labels (T2-CN) to calendar grid for better readability.
 - feat: Auto-select nearest event to today in Events view for quick access.
