@@ -1,11 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "title": "Nano Games",
-  "category": "Fun",
+  "name": "nano-games",
   "title": "Nano Games",
   "description": "Play Snake and other games in the Raycast search bar using braille characters.",
   "icon": "nano-games.png",
   "author": "alexi.build",
+  "categories": [
+    "Fun"
+  ],
   "platforms": [
     "macOS",
     "Windows"
