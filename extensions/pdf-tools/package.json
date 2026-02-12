@@ -9,6 +9,9 @@
   "categories": [
     "Productivity"
   ],
+  "contributors": [
+    "yusifaliyevpro"
+  ],
   "keywords": [
     "pdf",
     "split",
@@ -217,6 +220,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
