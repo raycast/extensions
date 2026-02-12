@@ -40,7 +40,7 @@ A powerful Raycast extension for quickly generating various reverse shell comman
 
 </div>
 
-## �📦 Supported Shell Types
+## Supported Shell Types
 
 ### Shell Tools
 
