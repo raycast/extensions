@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-02-12
 
 - Added Eyedropper and color extractor for Windows using Rust
 - Updated Dependencies
