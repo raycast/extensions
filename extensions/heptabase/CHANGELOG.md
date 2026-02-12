@@ -1,6 +1,6 @@
 # Heptabase Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-12
 
 - Add semantic search across cards, PDFs, journals, and highlights
 - Add whiteboard search with hierarchical object navigation
