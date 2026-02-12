@@ -23,12 +23,15 @@ function BrowseOrganizations() {
 
         setOrganizations(organizations);
       })
-      .catch((error) => {
-        if (error.status === 401) {
-          setStatus(401);
-        } else if (error.status === 429) {
-          setStatus(429);
+      .catch((error: unknown) => {
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 401) {
+            setStatus(401);
+          } else if (error.response?.status === 429) {
+            setStatus(429);
+          }
         }
+      })
       })
       .finally(() => setLoading(false));
   }, []);
