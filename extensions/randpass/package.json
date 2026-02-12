@@ -20,7 +20,7 @@
     "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^8.57.1",
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^20.19.33",
     "@types/react": "^18.3.28",
