@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, List, showToast, Toast, Detail, Icon, getPre
 import { useState } from "react";
 import { getHeptabaseMCPClient } from "./heptabase-mcp-client";
 import { authorize } from "./heptabase-oauth";
-import { Preferences, buildHeptabaseUrl } from "./shared-types";
+import { buildHeptabaseUrl } from "./shared-types";
 import { parseHeptabaseList } from "./xml-parser";
 
 /**

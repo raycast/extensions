@@ -1,13 +1,6 @@
 import { Icon } from "@raycast/api";
 
 /**
- * Extension preferences
- */
-export interface Preferences {
-  spaceId?: string;
-}
-
-/**
  * Build a Heptabase URL for an object
  * @param spaceId - The Heptabase space ID from preferences
  * @param type - The object type (card, journal, whiteboard, etc.)

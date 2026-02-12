@@ -3,15 +3,11 @@ import { useState, useEffect } from "react";
 import { getHeptabaseMCPClient } from "./heptabase-mcp-client";
 import { authorize } from "./heptabase-oauth";
 
-interface AppendToJournalArguments {
-  content?: string;
-}
-
 /**
  * Append to Heptabase Journal
  * Add content to today's Heptabase journal
  */
-export default function AppendToJournal(props: LaunchProps<{ arguments: AppendToJournalArguments }>) {
+export default function AppendToJournal(props: LaunchProps<{ arguments: Arguments.AppendToJournal }>) {
   const [content, setContent] = useState(props.arguments.content || "");
   const [isLoading, setIsLoading] = useState(false);
 
