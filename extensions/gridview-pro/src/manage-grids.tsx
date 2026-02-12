@@ -98,7 +98,7 @@ export default function Command() {
   }
 
   function getLayoutIcon(layout: string): Icon {
-    if (layout.includes("2x2")) return Icon.AppWindowGrid4x4;
+    if (layout.includes("2x2")) return Icon.AppWindowGrid2x2;
     if (layout.includes("1x")) return Icon.AppWindowList;
     return Icon.AppWindowGrid3x3;
   }
