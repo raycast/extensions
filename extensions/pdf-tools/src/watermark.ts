@@ -49,6 +49,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
         await watermark(item.path, text, transparency, rotation, fontSize ? parseInt(fontSize) : undefined);
       }
     }
+
     // Windows implementation using @libpdf/core
     if (isWindows) {
       for (const item of selectedItems) {
