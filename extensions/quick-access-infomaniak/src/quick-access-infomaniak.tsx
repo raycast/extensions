@@ -33,7 +33,6 @@ function BrowseOrganizations() {
           }
         }
       })
-      })
       .finally(() => setLoading(false));
   }, []);
 
