@@ -51,7 +51,7 @@
       "description": "Path to GridView Pro app (auto-detected if in Applications)",
       "type": "textfield",
       "required": false,
-      "placeholder": "/Applications/GridView Pro.app"
+      "placeholder": "/Applications/GridViewPro.app"
     }
   ],
   "dependencies": {
