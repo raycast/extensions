@@ -1,59 +1,33 @@
-import { showToast, Toast, getSelectedFinderItems, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { openInWindsurf, checkWindsurfInstalled } from "./utils/windsurf";
-import path from "path";
+import { getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { openProjectInWindsurf } from "./windsurf";
 
-export default async function OpenWithWindsurf() {
+export default async function Command() {
   try {
-    // Check if Windsurf is installed
-    const isInstalled = await checkWindsurfInstalled();
-    if (!isInstalled) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Windsurf not found",
-        message: "Please install Windsurf IDE to use this extension",
-      });
-      return;
-    }
-
-    // Get selected items from Finder
-    let selectedItems;
-    try {
-      selectedItems = await getSelectedFinderItems();
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No file selected",
-        message: "Please select a file or folder in Finder first",
-      });
-      return;
-    }
+    const selectedItems = await getSelectedFinderItems();
 
     if (selectedItems.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No file selected",
-        message: "Please select a file or folder in Finder first",
-      });
+      showToast(Toast.Style.Failure, "No items selected in Finder");
       return;
     }
 
-    // Open the first selected item in Windsurf
-    const targetPath = selectedItems[0].path;
-    const opened = await openInWindsurf(targetPath);
-
-    // Show success HUD only when the item was opened successfully
-    if (opened) {
-      await showHUD(`Opened ${path.basename(targetPath)} in Windsurf`);
+    // Open each selected item in Windsurf
+    for (const item of selectedItems) {
+      // Remove file:// prefix if present
+      const path = item.path.startsWith("file://")
+        ? decodeURIComponent(item.path.slice(7))
+        : item.path;
+      await openProjectInWindsurf(path);
     }
-  } catch (_error) {
-    console.error("Error in OpenWithWindsurf:", _error);
-    await showFailureToast(_error, {
-      title: "Failed to open in Windsurf",
-      primaryAction: {
-        title: "Retry",
-        onAction: () => OpenWithWindsurf(),
-      },
-    });
+
+    showToast(
+      Toast.Style.Success,
+      `Opened ${selectedItems.length} item(s) in Windsurf`
+    );
+  } catch (error) {
+    showToast(
+      Toast.Style.Failure,
+      "Failed to open with Windsurf",
+      String(error)
+    );
   }
 }

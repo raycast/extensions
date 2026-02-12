@@ -1,62 +1,136 @@
-# Windsurf Extension for Raycast
+# Windsurf Raycast Extension
 
-A Raycast extension that provides quick access to Windsurf IDE functionality.
+Control Windsurf directly from Raycast - Search and open recent projects from Windsurf.
 
 ## Features
 
-### 🚀 Open with Windsurf
-- Quickly open any file or folder in Windsurf IDE
-- Supports path expansion (use `~` for home directory)
-- Automatically saves opened folders to recent projects
-
-### 📁 Windsurf Projects
-- View all folders previously opened with Windsurf
-- Quick access to recent projects with timestamps
-- **Add Project** - Manually add folders to your projects list
-- Remove projects from the list
-- Show in Finder or copy path to clipboard
-- Smart icons based on file types
-- **Note**: Only folders can be added as projects (files are not supported)
+- 🔍 **Search Recent Projects**: Quickly search through your recently opened projects in Windsurf
+- 📌 **Pin Favorites**: Pin your favorite projects for quick access
+- 🌿 **Git Integration**: Display current Git branch for projects
+- 🖥️ **Multiple Open Modes**: Open with Windsurf, close other windows, or open in new window
+- 📂 **File Management**: Copy paths, show in Finder
+- 🎨 **Customizable Layout**: Choose between List and Grid views
 
 ## Commands
 
-1. **Open with Windsurf** - Open a specific file or folder in Windsurf
-2. **Windsurf Projects** - Browse and manage your recent Windsurf projects
+### 1. Search Recent Projects
+Search and open recent projects from Windsurf with filtering options.
 
-## Requirements
+**Default Shortcut**: `Cmd + Shift + Enter` to open in new window
 
-- Windsurf IDE must be installed on your system
-- The extension will check for Windsurf installation and show a message if not found
+**Keyboard Shortcuts**:
+- `Cmd + O` - Open with system default app
+- `Cmd + Shift + O` - Open with Terminal
+- `Cmd + .` - Copy project name
+- `Cmd + Shift + .` - Copy project path
+- `Cmd + Shift + P` - Toggle pin
+- `Cmd + Opt + ↑/↓` - Move pinned entry
+- `Ctrl + X` - Remove from recent
+
+### 2. Open with Windsurf
+Opens the currently selected Finder item with Windsurf.
+
+### 3. Open New Window
+Opens a new Windsurf window.
+
+### 4. Show Installed Extensions
+View and manage your installed Windsurf extensions.
+
+### 5. Install Extension
+Search and install extensions from the VS Code Marketplace.
 
 ## Installation
 
-Install the extension from the [Raycast Store](https://raycast.com/store).
+### From Source
 
-## Usage
+```bash
+git clone https://github.com/ma-samsik/raycast-windsurf-extension.git
+cd raycast-windsurf-extension
+npm install
+npm run dev
+```
 
-### Opening Files/Folders
-1. Use the "Open with Windsurf" command
-2. Enter the path to your file or folder
-3. Press Enter to open in Windsurf
-4. Opened folders will be automatically added to your recent projects
+This will open Raycast development mode where you can test the extension.
 
-### Managing Projects
-1. Use the "Windsurf Projects" command
-2. Browse your recent projects
-3. Press Enter to open a project in Windsurf
-4. Use keyboard shortcuts for additional actions:
-   - `Cmd+N` - Add Project (manually select a folder)
-   - `Cmd+F` - Show in Finder
-   - `Cmd+C` - Copy path to clipboard
-   - `Cmd+R` - Remove from list
+### Build for Distribution
 
-### Adding Projects Manually
-1. In the "Windsurf Projects" command, press `Cmd+N` or use the action panel
-2. The extension will first try to use any folder selected in Finder
-3. If no Finder selection, it will open a folder picker dialog
-4. Select a folder to add it to your projects list
-5. **Note**: Only folders can be added as projects
+```bash
+npm run build
+```
+
+## Development
+
+### Project Structure
+
+```
+src/
+├── index.tsx              # Main command - Search Recent Projects
+├── open-with-windsurf.tsx # Open selected Finder item
+├── open-new-window.tsx    # Open new Windsurf window
+├── database.ts            # Windsurf DB access & recent entries
+├── windsurf.ts            # Open project functionality
+├── pinned.ts              # Pinned entries management
+├── preferences.tsx        # User preferences
+├── types.ts               # Type definitions
+├── constants.ts           # Constants (DB paths, app name)
+├── utils.ts               # Utility functions
+├── grid-or-list.tsx       # Adaptive UI components
+├── contexts/
+│   └── ProjectContext.tsx # Project context provider
+└── utils/
+    ├── git.ts             # Git branch detection
+    └── exec.ts            # Command execution helpers
+```
+
+### Environment Variables
+
+None required, but Windsurf must be installed on your system.
+
+## Prerequisites
+
+- macOS 11 or later
+- Windsurf installed and in PATH or Applications folder
+- Raycast 1.83+
+
+## Configuration
+
+Open Raycast preferences for this extension to configure:
+
+- **View Layout**: Choose between List and Grid view
+- **Keep Section Order**: Maintain section order while searching
+- **Close Other Windows**: Close other Windsurf windows when opening a project
+- **Terminal App**: Select terminal app for folder operations
+- **Git Integration**: Show/hide Git branch information
+- **Git Branch Color**: Customize Git branch tag color
+
+## Troubleshooting
+
+### Database Not Found
+If you see "Failed to load recent projects":
+1. Ensure Windsurf is installed
+2. Check if `~/.windsurf/` directory exists
+3. Open a project in Windsurf to create the database
+
+### Windsurf Not Found
+If the extension can't find Windsurf:
+1. Try installing via: `windsurf --install` (if available)
+2. Or use `open -a Windsurf` to verify installation
+3. Add Windsurf to PATH if needed
+
+### Database File Locations Checked
+- `~/.windsurf/User/globalStorage/state.vscdb`
+- `~/Library/Application Support/Windsurf/User/globalStorage/state.vscdb`
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT
+MIT License - see LICENSE file for details
+
+## Related
+
+- [Windsurf](https://www.codeium.com/windsurf)
+- [Raycast](https://raycast.com)
+- [Cursor Recent Projects Extension](https://github.com/raycast/extensions/tree/main/extensions/cursor-recent-projects) (Original inspiration)
