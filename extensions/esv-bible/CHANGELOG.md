@@ -1,6 +1,6 @@
 # ESV-Bible Changelog
 
-## [1.1.0] - 2026-02-11
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Fixed
 
