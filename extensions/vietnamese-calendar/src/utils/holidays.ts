@@ -223,7 +223,7 @@ export function getEventsForYear(year: number): CalendarEvent[] {
           name: solarHoliday,
           type: "solar",
           lunarDate: lunarDateString,
-          id: day.toISOString() + solarHoliday,
+          id: day.toISOString(),
         });
       }
     }
@@ -243,6 +243,7 @@ export function getEventsForYear(year: number): CalendarEvent[] {
         name: "🤱 Ngày của mẹ",
         type: "solar",
         lunarDate: lunarDateString,
+        id: day.toISOString(),
       });
     } else if (solarKey === getFathersDay(solarYear)) {
       events.push({
@@ -250,6 +251,7 @@ export function getEventsForYear(year: number): CalendarEvent[] {
         name: "👨‍👧‍👦 Ngày của cha",
         type: "solar",
         lunarDate: lunarDateString,
+        id: day.toISOString(),
       });
     } else {
       // Check Lunar
@@ -260,6 +262,7 @@ export function getEventsForYear(year: number): CalendarEvent[] {
           name: LUNAR_HOLIDAYS[lunarKey],
           type: "lunar",
           lunarDate: lunarDateString,
+          id: day.toISOString(),
         });
       } else {
         // Generic Lunar
@@ -269,6 +272,7 @@ export function getEventsForYear(year: number): CalendarEvent[] {
             name: `🌑 Mùng 1 tháng ${lunarInfo.month}`,
             type: "lunar",
             lunarDate: lunarDateString,
+            id: day.toISOString(),
           });
         } else if (lunarInfo.day === 15) {
           events.push({
@@ -276,6 +280,7 @@ export function getEventsForYear(year: number): CalendarEvent[] {
             name: `🌕 Rằm tháng ${lunarInfo.month}`,
             type: "lunar",
             lunarDate: lunarDateString,
+            id: day.toISOString(),
           });
         }
       }
