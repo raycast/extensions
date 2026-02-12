@@ -768,6 +768,7 @@ export class Bitwarden {
           await (listener as any)?.(...args);
         } catch (error) {
           captureException(`Error calling bitwarden action listener for ${action}`, error);
+          if (action === "unlock") throw error;
         }
       }
     }
