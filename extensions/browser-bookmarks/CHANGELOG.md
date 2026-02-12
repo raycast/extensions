@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-02-12
 
 - Fixed permission errors (EPERM) when accessing Chrome and Arc browser Local State files ([#16481](https://github.com/raycast/extensions/issues/16481))
 - Improved error handling for file access operations to gracefully handle permission restrictions
