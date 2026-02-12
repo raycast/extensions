@@ -82,7 +82,7 @@ const quickActions: QuickAction[] = [
     id: "hn",
     title: "Hacker News",
     subtitle: "Tech news and discussions",
-    icon: Icon.Newspaper,
+    icon: Icon.Book,
     keywords: ["hn", "hackernews", "tech"],
     url: "https://news.ycombinator.com",
   },
