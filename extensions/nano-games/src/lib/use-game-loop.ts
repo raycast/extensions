@@ -16,22 +16,28 @@ export function useGameLoop() {
   const tickSpeedRef = useRef(getTickSpeed(stateRef.current.snake.length));
 
   useEffect(() => {
-    const id = setInterval(() => {
+    if (gameOver) return;
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const runTick = () => {
       const { state: nextState, gameOver: isGameOver } = tick(stateRef.current);
 
       if (isGameOver) {
         setGameOver(true);
-        clearInterval(id);
       } else {
         stateRef.current = nextState;
         tickSpeedRef.current = getTickSpeed(nextState.snake.length);
+        timeoutId = setTimeout(runTick, tickSpeedRef.current);
       }
 
       setRenderState({ ...stateRef.current });
-    }, tickSpeedRef.current);
+    };
 
-    return () => clearInterval(id);
-  }, [gameOver]);
+    timeoutId = setTimeout(runTick, tickSpeedRef.current);
+
+    return () => clearTimeout(timeoutId);
+  }, [gameOver, tick]);
 
   const changeDirection = (dir: Point) => {
     stateRef.current = enqueueDirection(stateRef.current, dir);
