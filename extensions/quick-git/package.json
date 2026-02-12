@@ -50,7 +50,7 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.14.0",
     "@types/react": "19.1.10",
-    "eslint": "^10.0.0",
+    "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
