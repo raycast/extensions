@@ -46,7 +46,7 @@ Manage your Git repositories from anywhere on your Mac.
 | `git remote`                                         |     ✅     |                                                 |
 | `git config`                                         |     🚫     |                                                 |
 | `git worktree`                                       |     🚫     |                                                 |
-| `git submodule`                                      |     🚫     |                                                 |
+| `git submodule`                                      |     ✅     |                                                 |
 | `git-lfs`                                            |     🚫     |                                                 |
 | `.gitignore`                                         |     ✅     |                                                 |
 

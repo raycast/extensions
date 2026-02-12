@@ -29,6 +29,7 @@ import {
   PatchScope,
   RepositoryCloningProcess,
   RepositoryCloningState,
+  Submodule,
   Tag,
   StatusMode,
   StashScope,
@@ -1478,6 +1479,72 @@ __REBASE_TODO__
     } else {
       // Push specific tag to remote
       await this.git.push(remote, tagName);
+    }
+  }
+
+  /**
+   * Gets a list of all submodules in the repository.
+   * Parses output of `git submodule status` (format: [mode][hash][path]).
+   */
+  async getSubmodules(): Promise<Submodule[]> {
+    const raw = await this.git.subModule(["status"]);
+    return raw
+      .trim()
+      .split("\n")
+      .filter((line) => !!line.trim())
+      .map((line) => {
+        // Matches lines like "23ad236b39dc90ea56572297bf266ad16de5a44e Submodules/ABTool (2.1.1)"
+        const match = line.trim().match(/^[0-9a-f]{40}\s+(?<path>.+)$/);
+        if (!match || !match.groups) return null;
+        let path = match.groups.path.trim();
+        const parenIdx = path.indexOf(" (");
+        if (parenIdx >= 0) path = path.slice(0, parenIdx).trim();
+
+        return {
+          name: basename(path),
+          relativePath: path,
+          fullPath: join(this.repoPath, path),
+        } as Submodule;
+      })
+      .filter((s): s is Submodule => s !== null);
+  }
+
+  /**
+   * Updates a submodule to the commit recorded in the superproject.
+   * Uses --init --recursive to initialize and update nested submodules.
+   */
+  async updateSubmodule(path: string): Promise<void> {
+    await this.git.subModule(["update", "--init", "--recursive", path]);
+  }
+
+  /**
+   * Updates all submodules to the commit recorded in the superproject.
+   * Uses --init --recursive to initialize and update all nested submodules.
+   */
+  async updateAllSubmodules(): Promise<void> {
+    await this.git.subModule(["update", "--init", "--recursive"]);
+  }
+
+  /**
+   * Adds a new submodule to the repository.
+   * @param url - Repository URL to add as submodule.
+   * @param path - Relative path where the submodule will be placed (e.g. "libs/foo").
+   */
+  async addSubmodule(url: string, path: string): Promise<void> {
+    await this.git.submoduleAdd(url, path);
+  }
+
+  /**
+   * Removes a submodule from the repository.
+   * Deinitializes the submodule first, then removes it from the index (Git 1.9.3+).
+   */
+  async deleteSubmodule(path: string): Promise<void> {
+    await this.git.subModule(["deinit", "--force", path]);
+    await this.git.raw(["rm", "--force", path]);
+
+    const modulesPath = join(this.repoPath, ".git", "modules", path);
+    if (existsSync(modulesPath)) {
+      rmSync(modulesPath, { recursive: true, force: true });
     }
   }
 

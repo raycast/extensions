@@ -11,6 +11,13 @@
   - Add `userIconProvider` preference (None, Author's initials, Gravatar variants)
   - Implement `GravatarIcon` component for Gravatar and initials-based avatars
   - Support Retro, Identicon, Mystery Person, Monsterid, Robohash, Wavatar styles
+- **Submodules**: Add "Show Repository" action for submodules
+  - Introduce `SubmoduleShowRepositoryAction` component
+  - Enable opening submodules in a new window
+  - Add "Update Submodule" action for updating submodules
+  - Add "Delete Submodule" action for deleting submodules
+  - Add "Add New Submodule" action for adding new submodules
+  - Add "Update All Submodules" action for updating all submodules
 
 ### Changed
 - **Interactive Rebase**: Improve UX and safety

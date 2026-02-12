@@ -16,7 +16,7 @@ import {
 } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
-import { RepositoryDirectoryActions } from "./components/actions/RepositoryDirectoryActions";
+import { RepositoryDirectoryActions, RepositoryQuickLinkAction } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
 import { Repository, RepositoryCloningState, RepositoryCloningProcess, Remote } from "./types";
 import { useRepositoriesView } from "./hooks/useRepositoriesView";
@@ -137,7 +137,7 @@ function RepositoryListItem({
     }
 
     return result;
-  }, [repo.languageStats, remotes]);
+  }, [remotes]);
 
   const icon: Image.ImageLike = useMemo(() => {
     if (repo.languageStats && repo.languageStats.length > 0 && repo.languageStats[0].color) {
@@ -203,15 +203,7 @@ function RepositoryListItem({
               ]}
             />
             <RepositoryAttachedLinksAction remotes={remotes} />
-            <Action.CreateQuicklink
-              title="Create Quicklink"
-              quicklink={{
-                link: `raycast://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(
-                  JSON.stringify({ path: repo.path }),
-                )}`,
-                name: `Show ${repo.name} in Git`,
-              }}
-            />
+            <RepositoryQuickLinkAction repositoryPath={repo.path} />
             <Action
               title="Remove from List"
               onAction={handleRemove}

@@ -246,7 +246,7 @@ export function CommitInteractiveRebaseAction(context: RepositoryContext & Navig
   const { push } = useNavigation();
 
   const handleInteractiveRebase = () => {
-    const hasUncommittedChanges = (context.status.data?.files?.length ?? 0) > 0;
+    const hasUncommittedChanges = context.status.data.files.length !== 0;
 
     if (hasUncommittedChanges) {
       confirmAlert({

@@ -242,6 +242,18 @@ export type Remote = {
 };
 
 /**
+ * Represents a Git submodule.
+ */
+export interface Submodule {
+  /** Submodule path/name (e.g. "libs/foo"). */
+  name: string;
+  /** Relative path from repo root. */
+  relativePath: string;
+  /** Absolute path to the submodule. */
+  fullPath: string;
+}
+
+/**
  * Represents a Git tag.
  */
 export interface Tag {
