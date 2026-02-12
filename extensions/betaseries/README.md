@@ -43,7 +43,7 @@ See your upcoming episodes for the week.
 ## Configuration
 
 The extension requires:
-- **API Key** (required): Your BetaSeries Developer API Key
+- **API Key** : Your BetaSeries Developer API Key
 - **OAuth Token** : For accessing user-specific features like your library and planning
 
 ## License
