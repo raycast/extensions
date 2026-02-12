@@ -197,8 +197,8 @@
     }
   ],
   "dependencies": {
-    "@libpdf/core": "^0.2.5",
-    "@raycast/api": "^1.104.5",
+    "@libpdf/core": "^0.2.7",
+    "@raycast/api": "^1.104.6",
     "universal-selection": "^0.1.10"
   },
   "devDependencies": {

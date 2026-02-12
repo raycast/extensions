@@ -70,11 +70,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
         pdf.removeProtection();
 
         const unlockedBytes = await pdf.save();
-        const originalFileName = path.parse(item.path).name;
-        const dirPath = path.dirname(item.path);
-        const newFilePath = path.join(dirPath, `${originalFileName} [unlocked].pdf`);
-
-        await fs.writeFile(newFilePath, unlockedBytes);
+        await fs.writeFile(item.path, unlockedBytes);
       }
     }
 

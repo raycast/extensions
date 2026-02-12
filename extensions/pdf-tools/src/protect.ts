@@ -71,11 +71,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
         });
 
         const protectedBytes = await pdf.save();
-        const originalFileName = path.parse(item.path).name;
-        const dirPath = path.dirname(item.path);
-        const newFilePath = path.join(dirPath, `${originalFileName} [protected].pdf`);
-
-        await fs.writeFile(newFilePath, protectedBytes);
+        await fs.writeFile(item.path, protectedBytes);
       }
 
       await showToast({
