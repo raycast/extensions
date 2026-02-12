@@ -1,5 +1,10 @@
 # PDF Tools Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Updated Dependencies
+- Added Windows support using @libpdf/core library
+
 ## [Improvements] - 2026-01-19
 
 - Add support for third-party file managers.
