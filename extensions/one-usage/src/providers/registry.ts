@@ -1,5 +1,5 @@
 import { Image, getPreferenceValues } from "@raycast/api";
-import { ProviderConfig, ProviderResult } from "../types";
+import { MetricLine, ProviderConfig, ProviderResult } from "../types";
 import { fetchClaude } from "./claude";
 import { fetchCodex } from "./codex";
 import { fetchCursor } from "./cursor";
@@ -32,35 +32,38 @@ export const PROVIDER_META: Record<string, ProviderMeta> = {
   },
 };
 
-export function isProviderEnabled(providerId: string): boolean {
+const PROVIDER_IDS = Object.keys(PROVIDER_META) as string[];
+const FETCHERS: Record<string, () => Promise<MetricLine[]>> = {
+  claude: fetchClaude,
+  codex: fetchCodex,
+  cursor: fetchCursor,
+};
+
+function getPreferenceMap(): Record<string, boolean> {
   const prefs = getPreferenceValues<Preferences>();
-  const map: Record<string, boolean> = {
+  return {
     claude: prefs.enableClaude,
     codex: prefs.enableCodex,
     cursor: prefs.enableCursor,
   };
-  return map[providerId] ?? false;
+}
+
+export function isProviderEnabled(providerId: string): boolean {
+  return getPreferenceMap()[providerId] ?? false;
 }
 
 export function getEnabledProviderIds(): string[] {
-  const prefs = getPreferenceValues<Preferences>();
-  const ids: string[] = [];
-  if (prefs.enableClaude) ids.push("claude");
-  if (prefs.enableCodex) ids.push("codex");
-  if (prefs.enableCursor) ids.push("cursor");
-  return ids;
+  return PROVIDER_IDS.filter((id) => getPreferenceMap()[id]);
 }
 
 function getEnabledProviders(): ProviderConfig[] {
-  const prefs = getPreferenceValues<Preferences>();
-
-  const all: ProviderConfig[] = [
-    { id: "claude", name: "Claude", enabled: prefs.enableClaude, fetch: fetchClaude },
-    { id: "codex", name: "Codex", enabled: prefs.enableCodex, fetch: fetchCodex },
-    { id: "cursor", name: "Cursor", enabled: prefs.enableCursor, fetch: fetchCursor },
-  ];
-
-  return all.filter((p) => p.enabled);
+  const enabled = getPreferenceMap();
+  return PROVIDER_IDS.filter((id) => enabled[id]).map((id) => ({
+    id,
+    name: PROVIDER_META[id].name,
+    enabled: true,
+    fetch: FETCHERS[id],
+  }));
 }
 
 export async function fetchAllProviders(): Promise<ProviderResult[]> {

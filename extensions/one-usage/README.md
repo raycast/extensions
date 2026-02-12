@@ -4,8 +4,8 @@ Track your AI coding tool usage — [Claude](https://claude.ai), [Codex](https:/
 
 ## Features
 
-- **View Usage** — See usage details for all enabled providers in a Raycast list: plan type, rate-limit windows, spend tracking, and reset countdowns. Open **Usage Dashboard** or **Status Page** per provider from the action panel.
-- **Menu Bar Usage** — Keep usage visible in the macOS menu bar. Shows all providers (e.g. one percentage per provider) or a single pinned provider (e.g. `45%`), with configurable refresh intervals.
+- **View Usage** — See usage details for all enabled providers in a Raycast list: plan type, rate-limit windows, spend tracking, and reset countdowns. From the action panel: open **Usage Dashboard** or **Status Page** per provider, or **Refresh** to refetch usage data.
+- **Menu Bar Usage** — Keep usage visible in the macOS menu bar. Shows all providers (e.g. one percentage per provider) or a single pinned provider (e.g. `45%`). Data is cached; use **Refresh** in View Usage to refetch.
 - **Pin to Menu Bar** — From View Usage, pin any provider to the menu bar via the action panel (`⌘⇧P`). Use **Show All in Menu Bar** (`⌘⇧A`) to show all providers again.
 - **Reorder Providers** — In View Usage, change the order of providers with **Move to Top** (`⌘⇧T`), **Move Up** (`⌘↑`), and **Move Down** (`⌘↓`). Order is shared with the menu bar dropdown.
 

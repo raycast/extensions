@@ -1,9 +1,10 @@
 /* eslint-disable @raycast/prefer-title-case */
-import { Action, ActionPanel, Color, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { fetchAllProviders, PROVIDER_META } from "./providers/registry";
-import { MetricLine } from "./types";
+import { PROVIDER_META } from "./providers/registry";
+import { ProviderResult } from "./types";
+import { clearCache, fetchFromCacheOrNetwork, getLastUpdatedFormatted } from "./usage-cache";
 import {
   formatProgressBar,
   formatProgressValue,
@@ -18,29 +19,67 @@ function getProviderIcon(providerId: string): Image.ImageLike {
   return PROVIDER_META[providerId]?.icon ?? { source: Icon.Info, tintColor: Color.PrimaryText };
 }
 
-function getLineTitle(line: MetricLine): string {
-  if (line.type === "text") {
-    return `${line.label}: ${line.value}`;
+/** Push "Resets" row once per result when a line has subtitle. */
+function pushResetOnce(
+  meta: { label: string; value: string }[],
+  subtitle: string | undefined,
+  resetAdded: { current: boolean },
+): void {
+  if (subtitle && !resetAdded.current) {
+    meta.push({ label: "Resets", value: subtitle });
+    resetAdded.current = true;
   }
-  return line.label;
 }
 
-function getLineSubtitle(line: MetricLine): string | undefined {
-  if (line.type !== "progress") return undefined;
-
-  const percentage = line.max > 0 ? Math.round((line.value / line.max) * 100) : 0;
-  const valueText = formatProgressValue(line.value, line.max, line.unit);
-  return `${formatProgressBar(percentage)} ${valueText}`;
+/** All lines as label/value for detail metadata (no markdown). */
+function getDetailMeta(result: ProviderResult): { label: string; value: string }[] {
+  if (result.error) return [{ label: "Error", value: result.error }];
+  if (!result.lines?.length) return [];
+  const meta: { label: string; value: string }[] = [];
+  const resetAdded = { current: false };
+  for (const line of result.lines) {
+    if (line.type === "text") {
+      meta.push({ label: line.label, value: line.value });
+      pushResetOnce(meta, line.subtitle, resetAdded);
+    } else if (line.type === "badge") {
+      meta.push({ label: line.label, value: line.text });
+      pushResetOnce(meta, line.subtitle, resetAdded);
+    } else if (line.type === "progress") {
+      const pct = line.max > 0 ? Math.round((line.value / line.max) * 100) : 0;
+      const valueText = formatProgressValue(line.value, line.max, line.unit);
+      const bar = formatProgressBar(pct);
+      meta.push({
+        label: line.label,
+        value: `${bar} ${valueText} / ${line.max}${line.unit === "percent" ? "%" : ""}`,
+      });
+      pushResetOnce(meta, line.subtitle, resetAdded);
+    }
+  }
+  return meta;
 }
 
-function getLineAccessories(line: MetricLine): List.Item.Accessory[] {
-  if (line.type === "progress" && line.subtitle) {
-    return [{ text: { value: line.subtitle, color: Color.SecondaryText } }];
+type ReorderAction = "top" | "up" | "down";
+
+/** Returns new order after reorder action, or null if action is not allowed. */
+function applyReorder(orderedIds: string[], providerId: string, action: ReorderAction): string[] | null {
+  const index = orderedIds.indexOf(providerId);
+  if (index < 0) return null;
+  const next = [...orderedIds];
+  if (action === "top") {
+    if (index <= 0) return null;
+    next.splice(index, 1);
+    next.unshift(providerId);
+    return next;
   }
-  if (line.type === "badge") {
-    return [{ tag: { value: line.text, color: Color.Blue } }];
+  if (action === "up" && index > 0) {
+    [next[index - 1], next[index]] = [next[index], next[index - 1]];
+    return next;
   }
-  return [];
+  if (action === "down" && index < next.length - 1) {
+    [next[index], next[index + 1]] = [next[index + 1], next[index]];
+    return next;
+  }
+  return null;
 }
 
 function ProviderActions(props: {
@@ -58,29 +97,18 @@ function ProviderActions(props: {
   const canMoveUp = index > 0;
   const canMoveDown = index >= 0 && index < props.orderedIds.length - 1;
 
-  function moveToTop() {
-    if (index <= 0) return;
-    const next = [...props.orderedIds];
-    next.splice(index, 1);
-    next.unshift(props.providerId);
-    props.onReorder(next);
-    showToast({ style: Toast.Style.Success, title: `Moved ${props.providerName} to top` });
-  }
+  const titles: Record<ReorderAction, string> = {
+    top: `Moved ${props.providerName} to top`,
+    up: `Moved ${props.providerName} up`,
+    down: `Moved ${props.providerName} down`,
+  };
 
-  function moveUp() {
-    if (!canMoveUp) return;
-    const next = [...props.orderedIds];
-    [next[index - 1], next[index]] = [next[index], next[index - 1]];
-    props.onReorder(next);
-    showToast({ style: Toast.Style.Success, title: `Moved ${props.providerName} up` });
-  }
-
-  function moveDown() {
-    if (!canMoveDown) return;
-    const next = [...props.orderedIds];
-    [next[index], next[index + 1]] = [next[index + 1], next[index]];
-    props.onReorder(next);
-    showToast({ style: Toast.Style.Success, title: `Moved ${props.providerName} down` });
+  function handleReorder(action: ReorderAction) {
+    const next = applyReorder(props.orderedIds, props.providerId, action);
+    if (next) {
+      props.onReorder(next);
+      showToast({ style: Toast.Style.Success, title: titles[action] });
+    }
   }
 
   return (
@@ -98,7 +126,7 @@ function ProviderActions(props: {
             title="Move to Top"
             icon={Icon.ArrowUp}
             shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-            onAction={moveToTop}
+            onAction={() => handleReorder("top")}
           />
         )}
         {canMoveUp && (
@@ -106,7 +134,7 @@ function ProviderActions(props: {
             title="Move Up"
             icon={Icon.ChevronUp}
             shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
-            onAction={moveUp}
+            onAction={() => handleReorder("up")}
           />
         )}
         {canMoveDown && (
@@ -114,7 +142,7 @@ function ProviderActions(props: {
             title="Move Down"
             icon={Icon.ChevronDown}
             shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
-            onAction={moveDown}
+            onAction={() => handleReorder("down")}
           />
         )}
       </ActionPanel.Section>
@@ -127,32 +155,34 @@ function ProviderActions(props: {
             onAction={() => props.onSetMenuBarProvider(props.providerId)}
           />
         )}
-        {props.currentMenuBarProvider && props.currentMenuBarProvider !== "all" && (
-          <Action
-            title="Show All in Menu Bar"
-            icon={Icon.AppWindowGrid3x3}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-            onAction={() => props.onSetMenuBarProvider("all")}
-          />
-        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
 export default function ViewUsage() {
-  const { data, isLoading, revalidate } = usePromise(fetchAllProviders);
+  const { data, isLoading, revalidate } = useCachedPromise(fetchFromCacheOrNetwork, [], {
+    keepPreviousData: true,
+  });
+
+  function handleRefresh() {
+    clearCache();
+    revalidate();
+  }
   const [menuBarProvider, setMenuBarProvider] = useState<string | undefined>(getSelectedMenuBarProvider);
   const [providerOrder, setProviderOrderState] = useState<string[] | undefined>(getProviderOrder);
 
   const orderedData = useMemo(() => reorderProviders(data, providerOrder), [data, providerOrder]);
   const orderedIds = useMemo(() => orderedData?.map((r) => r.id) ?? [], [orderedData]);
+  const effectiveMenuBarProvider = menuBarProvider ?? orderedIds[0];
+
+  const lastUpdatedText = getLastUpdatedFormatted();
 
   function handleSetMenuBarProvider(providerId: string) {
     setSelectedMenuBarProvider(providerId);
     setMenuBarProvider(providerId);
     const label = providerId === "all" ? "All Providers" : (PROVIDER_META[providerId]?.name ?? providerId);
-    showHUD(`Menu Bar → ${label}`);
+    showToast({ style: Toast.Style.Success, title: `Menu Bar → ${label}` });
   }
 
   function handleReorder(newOrder: string[]) {
@@ -161,7 +191,7 @@ export default function ViewUsage() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} isShowingDetail>
       {data && data.length === 0 && !isLoading && (
         <List.EmptyView
           title="No Providers Enabled"
@@ -169,53 +199,57 @@ export default function ViewUsage() {
           icon={Icon.Gear}
         />
       )}
-      {orderedData?.map((result) => (
-        <List.Section
-          key={result.id}
-          title={result.name}
-          subtitle={result.error ? "⚠️ Error" : menuBarProvider === result.id ? "📌 Menu Bar" : undefined}
-        >
-          {result.error ? (
-            <List.Item
-              title={result.error}
-              icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-              accessories={PROVIDER_META[result.id] ? [{ icon: PROVIDER_META[result.id].icon }] : []}
-              actions={
-                <ProviderActions
-                  providerId={result.id}
-                  providerName={result.name}
-                  currentMenuBarProvider={menuBarProvider}
-                  orderedIds={orderedIds}
-                  onRefresh={revalidate}
-                  onSetMenuBarProvider={handleSetMenuBarProvider}
-                  onReorder={handleReorder}
-                />
-              }
-            />
-          ) : (
-            result.lines?.map((line, i) => (
-              <List.Item
-                key={`${line.type}-${line.label}-${i}`}
-                title={getLineTitle(line)}
-                subtitle={getLineSubtitle(line)}
-                icon={getProviderIcon(result.id)}
-                accessories={getLineAccessories(line)}
-                actions={
-                  <ProviderActions
-                    providerId={result.id}
-                    providerName={result.name}
-                    currentMenuBarProvider={menuBarProvider}
-                    orderedIds={orderedIds}
-                    onRefresh={revalidate}
-                    onSetMenuBarProvider={handleSetMenuBarProvider}
-                    onReorder={handleReorder}
-                  />
+      {orderedData?.map((result) => {
+        const meta = PROVIDER_META[result.id];
+        const detailMeta = getDetailMeta(result);
+        return (
+          <List.Item
+            key={result.id}
+            title={result.name}
+            icon={result.error ? { source: Icon.ExclamationMark, tintColor: Color.Red } : getProviderIcon(result.id)}
+            accessories={
+              effectiveMenuBarProvider === result.id ? [{ tag: { value: "Selected", color: Color.Blue } }] : []
+            }
+            detail={
+              <List.Item.Detail
+                // markdown={result.error ? `# ${result.name}\n\n⚠️ ${result.error}` : `# ${result.name}`}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Name" text={result.name} />
+                    {detailMeta.map(({ label, value }, i) => (
+                      <List.Item.Detail.Metadata.Label key={`${label}-${i}`} title={label} text={value} />
+                    ))}
+                    {lastUpdatedText ? (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label title="Last updated" text={lastUpdatedText} />
+                      </>
+                    ) : null}
+                    {detailMeta.length > 0 && meta ? <List.Item.Detail.Metadata.Separator /> : null}
+                    {meta ? (
+                      <>
+                        <List.Item.Detail.Metadata.Link title="Usage Dashboard" target={meta.usageUrl} text="View" />
+                        <List.Item.Detail.Metadata.Link title="Status Page" target={meta.statusUrl} text="View" />
+                      </>
+                    ) : null}
+                  </List.Item.Detail.Metadata>
                 }
               />
-            ))
-          )}
-        </List.Section>
-      ))}
+            }
+            actions={
+              <ProviderActions
+                providerId={result.id}
+                providerName={result.name}
+                currentMenuBarProvider={menuBarProvider}
+                orderedIds={orderedIds}
+                onRefresh={handleRefresh}
+                onSetMenuBarProvider={handleSetMenuBarProvider}
+                onReorder={handleReorder}
+              />
+            }
+          />
+        );
+      })}
     </List>
   );
 }

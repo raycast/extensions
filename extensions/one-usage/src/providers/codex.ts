@@ -29,6 +29,22 @@ interface CodexUsageResponse {
   };
 }
 
+function makeProgressLine(
+  window: CodexWindow,
+  label: string,
+  formatReset: (seconds: number) => string | undefined,
+): MetricLine {
+  const subtitle = window.reset_at ? formatReset(window.reset_at) : undefined;
+  return {
+    type: "progress",
+    label,
+    value: window.used_percent,
+    max: 100,
+    unit: "percent",
+    subtitle,
+  };
+}
+
 function loadAuth(): CodexAuth {
   const path = expandPath("~/.codex/auth.json");
   if (!existsSync(path)) {
@@ -75,44 +91,15 @@ export async function fetchCodex(): Promise<MetricLine[]> {
   const planLabel = planType.charAt(0).toUpperCase() + planType.slice(1);
   lines.push({ type: "badge", label: "Plan", text: planLabel });
 
-  if (usage.rate_limit) {
-    const primary = usage.rate_limit.primary_window;
-    if (primary) {
-      const subtitle = primary.reset_at ? formatResetTimeFromUnixSeconds(primary.reset_at) : undefined;
-      lines.push({
-        type: "progress",
-        label: "Session",
-        value: primary.used_percent,
-        max: 100,
-        unit: "percent",
-        subtitle,
-      });
-    }
-    const secondary = usage.rate_limit.secondary_window;
-    if (secondary) {
-      const subtitle = secondary.reset_at ? formatResetTimeFromUnixSeconds(secondary.reset_at) : undefined;
-      lines.push({
-        type: "progress",
-        label: "Weekly",
-        value: secondary.used_percent,
-        max: 100,
-        unit: "percent",
-        subtitle,
-      });
-    }
+  const formatReset = formatResetTimeFromUnixSeconds;
+  if (usage.rate_limit?.primary_window) {
+    lines.push(makeProgressLine(usage.rate_limit.primary_window, "Session", formatReset));
   }
-
+  if (usage.rate_limit?.secondary_window) {
+    lines.push(makeProgressLine(usage.rate_limit.secondary_window, "Weekly", formatReset));
+  }
   if (usage.code_review_rate_limit?.primary_window) {
-    const crl = usage.code_review_rate_limit.primary_window;
-    const subtitle = crl.reset_at ? formatResetTimeFromUnixSeconds(crl.reset_at) : undefined;
-    lines.push({
-      type: "progress",
-      label: "Reviews",
-      value: crl.used_percent,
-      max: 100,
-      unit: "percent",
-      subtitle,
-    });
+    lines.push(makeProgressLine(usage.code_review_rate_limit.primary_window, "Reviews", formatReset));
   }
 
   if (usage.credits?.has_credits) {

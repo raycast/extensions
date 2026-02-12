@@ -1,6 +1,6 @@
-import { Cache, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
+import { Icon, MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { PROVIDER_META, fetchAllProviders, getEnabledProviderIds, isProviderEnabled } from "./providers/registry";
+import { PROVIDER_META, isProviderEnabled } from "./providers/registry";
 import { MetricLine, ProviderResult } from "./types";
 import {
   formatProgressValue,
@@ -9,55 +9,7 @@ import {
   getSelectedMenuBarProvider,
   reorderProviders,
 } from "./utils";
-
-const cache = new Cache();
-const LAST_FETCH_KEY = "menu-bar-last-fetch";
-const CACHED_DATA_KEY = "menu-bar-cached-data";
-const CACHED_PROVIDERS_KEY = "menu-bar-cached-providers";
-
-const INTERVAL_MS: Record<string, number> = {
-  "5m": 5 * 60 * 1000,
-  "15m": 15 * 60 * 1000,
-  "30m": 30 * 60 * 1000,
-  "1h": 60 * 60 * 1000,
-};
-
-function getRefreshIntervalMs(interval?: string): number {
-  return INTERVAL_MS[interval ?? "5m"] ?? INTERVAL_MS["5m"];
-}
-
-async function fetchWithThrottle(): Promise<ProviderResult[]> {
-  const prefs = getPreferenceValues<Preferences.MenuBarUsage>();
-  const intervalMs = getRefreshIntervalMs(prefs.refreshInterval);
-  const now = Date.now();
-
-  const currentProviders = getEnabledProviderIds().join(",");
-  const cachedProviders = cache.get(CACHED_PROVIDERS_KEY);
-  const providersChanged = cachedProviders !== currentProviders;
-
-  if (!providersChanged) {
-    const lastFetchStr = cache.get(LAST_FETCH_KEY);
-    if (lastFetchStr) {
-      const elapsed = now - parseInt(lastFetchStr, 10);
-      if (elapsed < intervalMs) {
-        const cachedData = cache.get(CACHED_DATA_KEY);
-        if (cachedData) {
-          try {
-            return JSON.parse(cachedData) as ProviderResult[];
-          } catch {
-            // No actions
-          }
-        }
-      }
-    }
-  }
-
-  const results = await fetchAllProviders();
-  cache.set(LAST_FETCH_KEY, String(now));
-  cache.set(CACHED_DATA_KEY, JSON.stringify(results));
-  cache.set(CACHED_PROVIDERS_KEY, currentProviders);
-  return results;
-}
+import { fetchFromCacheOrNetwork, getLastUpdatedFormatted } from "./usage-cache";
 
 function buildMenuBarTitle(results: ProviderResult[], selectedProvider: string): string {
   const filtered = selectedProvider === "all" ? results : results.filter((r) => r.id === selectedProvider);
@@ -90,14 +42,14 @@ function formatMenuBarLine(line: MetricLine): string {
 }
 
 export default function MenuBarUsage() {
-  const { data, isLoading, revalidate } = useCachedPromise(fetchWithThrottle, [], {
+  const { data, isLoading } = useCachedPromise(fetchFromCacheOrNetwork, [], {
     keepPreviousData: true,
   });
 
   const orderedData = data ? reorderProviders(data, getProviderOrder()) : undefined;
 
-  const rawProvider = getSelectedMenuBarProvider() ?? "all";
-  const selectedProvider = rawProvider !== "all" && !isProviderEnabled(rawProvider) ? "all" : rawProvider;
+  const rawProvider = getSelectedMenuBarProvider() ?? orderedData?.[0]?.id ?? "all";
+  const selectedProvider = rawProvider !== "all" && !isProviderEnabled(rawProvider) ? orderedData?.[0]?.id ?? "all" : rawProvider;
   const title = orderedData && orderedData.length > 0 ? buildMenuBarTitle(orderedData, selectedProvider) : "Usage";
 
   const menuBarIcon =
@@ -105,9 +57,14 @@ export default function MenuBarUsage() {
       ? PROVIDER_META[selectedProvider].icon
       : "extension-icon.png";
 
+  // In dropdown, only show pinned provider when one is selected; otherwise show all
+  const displayData = selectedProvider === "all" ? orderedData : orderedData?.filter((r) => r.id === selectedProvider);
+
+  const lastUpdatedAt = getLastUpdatedFormatted();
+
   return (
     <MenuBarExtra icon={menuBarIcon} title={title} isLoading={isLoading}>
-      {orderedData?.map((result) => (
+      {displayData?.map((result) => (
         <MenuBarExtra.Section title={result.name} key={result.id}>
           {result.error ? (
             <MenuBarExtra.Item title={`⚠️ ${result.error}`} />
@@ -121,25 +78,27 @@ export default function MenuBarUsage() {
               />
             ))
           )}
+          {lastUpdatedAt && (
+            <MenuBarExtra.Section>
+              <MenuBarExtra.Item title={`Last updated at ${lastUpdatedAt}`} icon={Icon.Clock} onAction={() => {}} />
+            </MenuBarExtra.Section>
+          )}
+          {PROVIDER_META[result.id] && (
+            <MenuBarExtra.Section>
+              <MenuBarExtra.Item
+                title="Usage Dashboard"
+                icon={Icon.Globe}
+                onAction={() => open(PROVIDER_META[result.id].usageUrl)}
+              />
+              <MenuBarExtra.Item
+                title="Status Page"
+                icon={Icon.Cog}
+                onAction={() => open(PROVIDER_META[result.id].statusUrl)}
+              />
+            </MenuBarExtra.Section>
+          )}
         </MenuBarExtra.Section>
       ))}
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-          onAction={() => {
-            cache.remove(LAST_FETCH_KEY);
-            revalidate();
-          }}
-        />
-        <MenuBarExtra.Item
-          title="Preferences…"
-          icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          onAction={() => openCommandPreferences()}
-        />
-      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

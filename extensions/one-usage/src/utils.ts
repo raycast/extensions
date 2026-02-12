@@ -157,17 +157,24 @@ export function formatProgressValue(value: number, max: number, unit?: "percent"
   }
 }
 
-export function getPrimaryPercentage(lines: MetricLine[]): number | undefined {
-  for (const line of lines) {
-    if (line.type === "progress" && line.unit === "percent" && line.max > 0) {
-      return Math.min(100, Math.max(0, (line.value / line.max) * 100));
-    }
-  }
+/** Format a timestamp (ms) as relative time for "last updated" display. */
+export function formatLastUpdatedAt(ms: number): string {
+  const elapsed = Date.now() - ms;
+  if (elapsed < 60 * 1000) return "just now";
+  if (elapsed < 60 * 60 * 1000) return `${Math.floor(elapsed / 60000)}m ago`;
+  if (elapsed < 24 * 60 * 60 * 1000) return `${Math.floor(elapsed / 3600000)}h ago`;
+  if (elapsed < 7 * 24 * 60 * 60 * 1000) return `${Math.floor(elapsed / 86400000)}d ago`;
+  return new Date(ms).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
+/** Prefer a percent-unit progress line; otherwise first progress line with max > 0. */
+export function getPrimaryPercentage(lines: MetricLine[]): number | undefined {
+  let fallback: number | undefined;
   for (const line of lines) {
-    if (line.type === "progress" && line.max > 0) {
-      return Math.min(100, Math.max(0, (line.value / line.max) * 100));
-    }
+    if (line.type !== "progress" || line.max <= 0) continue;
+    const pct = Math.min(100, Math.max(0, (line.value / line.max) * 100));
+    if (line.unit === "percent") return pct;
+    if (fallback === undefined) fallback = pct;
   }
-  return undefined;
+  return fallback;
 }

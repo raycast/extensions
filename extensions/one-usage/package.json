@@ -24,7 +24,13 @@
       "name": "menu-bar-usage",
       "title": "Menu Bar Usage",
       "description": "Show AI provider usage in the menu bar",
-      "mode": "menu-bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "refresh-usage",
+      "title": "Refresh Usage",
+      "description": "Fetch usage data in the background (keeps menu bar up to date)",
+      "mode": "no-view",
       "interval": "5m",
       "preferences": [
         {
