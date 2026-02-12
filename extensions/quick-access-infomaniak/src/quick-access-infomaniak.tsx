@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Organization } from "./types/Organization";
 import { InfomaniakResponse } from "./types/InfomaniakResponse";
 import BrowseOrganizationProducts from "./browse/browse-organization-products";
+import { AxiosError } from "axios";
 
 function BrowseOrganizations() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
