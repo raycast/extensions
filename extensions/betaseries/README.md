@@ -26,7 +26,7 @@ Manage your TV shows and movies with BetaSeries directly from Raycast.
 ## Commands
 
 ### Search Shows
-Search for TV shows on BetaSeries and add them to your library.
+Search for TV shows on BetaSeries database and add them to your library.
 
 ### Search Movies
 Search for movies on BetaSeries and add them to your collection.
