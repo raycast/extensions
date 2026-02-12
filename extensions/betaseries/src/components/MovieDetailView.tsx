@@ -27,7 +27,7 @@ export function MovieDetailView({ movie: initialMovie }: MovieDetailViewProps) {
     data: movie = initialMovie,
     isLoading,
     mutate,
-  } = useFetch<{ movie: Movie }, Movie>(
+  } = useFetch<{ movie: Movie }, Movie, Movie>(
     buildBetaSeriesUrl("/movies/movie", { id: String(initialMovie.id) }),
     {
       headers: getHeaders(),
@@ -49,7 +49,7 @@ export function MovieDetailView({ movie: initialMovie }: MovieDetailViewProps) {
   const handleMarkAsWatched = async () => {
     try {
       await mutate(markMovieAsWatched(movie.id), {
-        revalidate: false,
+        shouldRevalidateAfter: false,
         optimisticUpdate: (previous) => ({
           ...(previous || movie),
           user: {
@@ -77,7 +77,7 @@ export function MovieDetailView({ movie: initialMovie }: MovieDetailViewProps) {
   const handleMarkAsUnwatched = async () => {
     try {
       await mutate(markMovieAsUnwatched(movie.id), {
-        revalidate: false,
+        shouldRevalidateAfter: false,
         optimisticUpdate: (previous) => ({
           ...(previous || movie),
           user: {

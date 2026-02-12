@@ -38,6 +38,7 @@ export default function Command() {
     mutate,
   } = useFetch<
     { planning?: PlanningItem[]; episodes?: PlanningItem[] } | PlanningItem[],
+    MemberPlanning[],
     MemberPlanning[]
   >(buildBetaSeriesUrl("/planning/member"), {
     headers: getHeaders(),
@@ -80,7 +81,7 @@ export default function Command() {
       await mutate(markEpisodeAsWatched(String(id)), {
         optimisticUpdate: (previous = []) =>
           previous.filter((item) => item.episode_id !== id),
-        revalidate: false,
+        shouldRevalidateAfter: false,
       });
     } catch (error) {
       console.error(error);

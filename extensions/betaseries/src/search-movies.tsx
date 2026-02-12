@@ -15,6 +15,7 @@ export default function Command() {
 
   const { data: items = [], isLoading } = useFetch<
     { movies: Movie[] },
+    Movie[],
     Movie[]
   >(buildBetaSeriesUrl("/movies/search", { title: searchText }), {
     headers: getHeaders(),

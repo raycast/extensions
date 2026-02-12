@@ -13,18 +13,19 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const shouldSearch = searchText.trim().length > 0;
 
-  const { data: items = [], isLoading } = useFetch<{ shows: Show[] }, Show[]>(
-    buildBetaSeriesUrl("/shows/search", { title: searchText }),
-    {
-      headers: getHeaders(),
-      execute: shouldSearch,
-      keepPreviousData: shouldSearch,
-      initialData: [],
-      parseResponse: (response) =>
-        parseBetaSeriesResponse<{ shows: Show[] }>(response),
-      mapResult: (result) => ({ data: result.shows || [] }),
-    },
-  );
+  const { data: items = [], isLoading } = useFetch<
+    { shows: Show[] },
+    Show[],
+    Show[]
+  >(buildBetaSeriesUrl("/shows/search", { title: searchText }), {
+    headers: getHeaders(),
+    execute: shouldSearch,
+    keepPreviousData: shouldSearch,
+    initialData: [],
+    parseResponse: (response) =>
+      parseBetaSeriesResponse<{ shows: Show[] }>(response),
+    mapResult: (result) => ({ data: result.shows || [] }),
+  });
 
   return (
     <List

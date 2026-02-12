@@ -16,7 +16,7 @@ export default function Command() {
     data: items = [],
     isLoading,
     mutate,
-  } = useFetch<{ shows: Show[] }, Show[]>(
+  } = useFetch<{ shows: Show[] }, Show[], Show[]>(
     buildBetaSeriesUrl("/shows/member", {
       limit: "100",
       status: filter === "active" ? "current" : "archived",
@@ -59,7 +59,7 @@ export default function Command() {
           isMyShow
           onArchiveChange={(showId, archived) => {
             void mutate(Promise.resolve(), {
-              revalidate: false,
+              shouldRevalidateAfter: false,
               optimisticUpdate: (previous = []) =>
                 previous.flatMap((item) => {
                   if (item.id !== showId) return [item];

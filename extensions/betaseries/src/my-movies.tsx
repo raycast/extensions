@@ -14,6 +14,7 @@ export default function Command() {
 
   const { data: items = [], isLoading } = useFetch<
     { movies: Movie[] },
+    Movie[],
     Movie[]
   >(buildBetaSeriesUrl("/movies/member", { limit: "100", state: filter }), {
     headers: getHeaders(),

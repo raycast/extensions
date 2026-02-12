@@ -18,7 +18,7 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
     data: episodes = [],
     isLoading,
     mutate,
-  } = useFetch<{ shows: Array<{ unseen: Episode[] }> }, Episode[]>(
+  } = useFetch<{ shows: Array<{ unseen: Episode[] }> }, Episode[], Episode[]>(
     buildBetaSeriesUrl("/episodes/list", { showId: String(show.id) }),
     {
       headers: getHeaders(),
@@ -49,7 +49,7 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
   const handleMarkAsWatched = async (episodeId: number) => {
     try {
       await mutate(markEpisodeAsWatched(String(episodeId)), {
-        revalidate: false,
+        shouldRevalidateAfter: false,
         optimisticUpdate: (previous = []) =>
           previous.map((ep) =>
             ep.id === episodeId
