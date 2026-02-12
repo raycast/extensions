@@ -4,13 +4,16 @@ import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
+  hasToken,
   parseBetaSeriesResponse,
 } from "./api/client";
 import { Show } from "./types/betaseries";
 import { ShowListItem } from "./components/ShowListItem";
+import { TokenRequiredView } from "./components/TokenRequiredView";
 
 export default function Command() {
   const [filter, setFilter] = useState("active"); // active, archived
+  const tokenAvailable = hasToken();
 
   const {
     data: items = [],
@@ -23,6 +26,7 @@ export default function Command() {
     }),
     {
       headers: getHeaders(),
+      execute: tokenAvailable,
       keepPreviousData: true,
       initialData: [],
       parseResponse: (response) =>
@@ -37,6 +41,10 @@ export default function Command() {
       },
     },
   );
+
+  if (!tokenAvailable) {
+    return <TokenRequiredView />;
+  }
 
   return (
     <List

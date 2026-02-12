@@ -10,10 +10,12 @@ import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
+  hasToken,
   markEpisodeAsWatched,
   parseBetaSeriesResponse,
 } from "./api/client";
 import { MemberPlanning } from "./types/betaseries";
+import { TokenRequiredView } from "./components/TokenRequiredView";
 
 interface PlanningItem {
   date?: string;
@@ -32,6 +34,8 @@ interface PlanningItem {
 }
 
 export default function Command() {
+  const tokenAvailable = hasToken();
+
   const {
     data: items = [],
     isLoading,
@@ -42,6 +46,7 @@ export default function Command() {
     MemberPlanning[]
   >(buildBetaSeriesUrl("/planning/member"), {
     headers: getHeaders(),
+    execute: tokenAvailable,
     initialData: [],
     parseResponse: (response) =>
       parseBetaSeriesResponse<
@@ -75,6 +80,10 @@ export default function Command() {
       });
     },
   });
+
+  if (!tokenAvailable) {
+    return <TokenRequiredView />;
+  }
 
   const handleMarkAsWatched = async (id: number) => {
     try {

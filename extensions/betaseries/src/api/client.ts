@@ -9,14 +9,13 @@ import {
 } from "../types/betaseries";
 
 export const BASE_URL = "https://api.betaseries.com";
-
-interface Preferences {
+type BetaSeriesPreferences = {
   apiKey: string;
   token?: string;
-}
+};
 
 export const getHeaders = () => {
-  const { apiKey, token } = getPreferenceValues<Preferences>();
+  const { apiKey, token } = getPreferenceValues<BetaSeriesPreferences>();
   const headers: Record<string, string> = {
     "X-BetaSeries-Key": apiKey,
     "X-BetaSeries-Version": "3.0",
@@ -26,6 +25,11 @@ export const getHeaders = () => {
     headers["X-BetaSeries-Token"] = token;
   }
   return headers;
+};
+
+export const hasToken = () => {
+  const { token } = getPreferenceValues<BetaSeriesPreferences>();
+  return Boolean(token);
 };
 
 export const buildBetaSeriesUrl = (
@@ -126,7 +130,7 @@ export async function searchMovies(title: string): Promise<Movie[]> {
 export async function getMyShows(status?: string): Promise<Show[]> {
   // status: active, archived, etc.
   // /shows/member
-  const { token } = getPreferenceValues<Preferences>();
+  const { token } = getPreferenceValues<BetaSeriesPreferences>();
   if (!token) {
     throw new Error(
       "This command requires a BetaSeries Token. Please add it in the extension preferences.",
@@ -144,7 +148,7 @@ export async function getMyShows(status?: string): Promise<Show[]> {
 
 export async function getMyMovies(state?: number): Promise<Movie[]> {
   // state: 0 = to watch, 1 = watched
-  const { token } = getPreferenceValues<Preferences>();
+  const { token } = getPreferenceValues<BetaSeriesPreferences>();
   if (!token) {
     throw new Error(
       "This command requires a BetaSeries Token. Please add it in the extension preferences.",
@@ -182,7 +186,7 @@ interface PlanningResponse {
 }
 
 export async function getPlanning(): Promise<MemberPlanning[]> {
-  const { token } = getPreferenceValues<Preferences>();
+  const { token } = getPreferenceValues<BetaSeriesPreferences>();
   if (!token) {
     throw new Error(
       "This command requires a BetaSeries Token. Please add it in the extension preferences.",
@@ -219,7 +223,7 @@ export async function getPlanning(): Promise<MemberPlanning[]> {
 }
 
 export async function getUnwatchedEpisodes(showId: number): Promise<Episode[]> {
-  const { token } = getPreferenceValues<Preferences>();
+  const { token } = getPreferenceValues<BetaSeriesPreferences>();
   if (!token) {
     throw new Error(
       "This command requires a BetaSeries Token. Please add it in the extension preferences.",

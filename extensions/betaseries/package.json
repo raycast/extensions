@@ -89,8 +89,8 @@
       "type": "password",
       "required": false,
       "title": "BetaSeries Token",
-      "description": "Your BetaSeries OAuth Token (Optional, for user features)",
-      "placeholder": "Enter your OAuth Token"
+      "description": "Auth token used for member features (My Shows, My Movies, Planning).",
+      "placeholder": "Enter your BetaSeries Token"
     }
   ]
 }

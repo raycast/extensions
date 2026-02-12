@@ -4,13 +4,16 @@ import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
+  hasToken,
   parseBetaSeriesResponse,
 } from "./api/client";
 import { Movie } from "./types/betaseries";
 import { MovieListItem } from "./components/MovieListItem";
+import { TokenRequiredView } from "./components/TokenRequiredView";
 
 export default function Command() {
   const [filter, setFilter] = useState("0"); // 0 = To Watch, 1 = Watched
+  const tokenAvailable = hasToken();
 
   const { data: items = [], isLoading } = useFetch<
     { movies: Movie[] },
@@ -18,6 +21,7 @@ export default function Command() {
     Movie[]
   >(buildBetaSeriesUrl("/movies/member", { limit: "100", state: filter }), {
     headers: getHeaders(),
+    execute: tokenAvailable,
     keepPreviousData: true,
     initialData: [],
     parseResponse: (response) =>
@@ -31,6 +35,10 @@ export default function Command() {
       });
     },
   });
+
+  if (!tokenAvailable) {
+    return <TokenRequiredView />;
+  }
 
   return (
     <List

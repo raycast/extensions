@@ -3,17 +3,21 @@ import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
+  hasToken,
   markEpisodeAsWatched,
   parseBetaSeriesResponse,
 } from "../api/client";
 import { Show, Episode } from "../types/betaseries";
 import { EpisodeListItem } from "./EpisodeListItem";
+import { TokenRequiredView } from "./TokenRequiredView";
 
 interface ShowEpisodesListProps {
   show: Show;
 }
 
 export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
+  const tokenAvailable = hasToken();
+
   const {
     data: episodes = [],
     isLoading,
@@ -22,6 +26,7 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
     buildBetaSeriesUrl("/episodes/list", { showId: String(show.id) }),
     {
       headers: getHeaders(),
+      execute: tokenAvailable,
       initialData: [],
       keepPreviousData: true,
       parseResponse: (response) =>
@@ -45,6 +50,10 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
       },
     },
   );
+
+  if (!tokenAvailable) {
+    return <TokenRequiredView />;
+  }
 
   const handleMarkAsWatched = async (episodeId: number) => {
     try {
