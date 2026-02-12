@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix unhandled error when unlocking vault
+- Fix mismatched Windows CLI binary hash
+
 ## [Fix Password Generation] - 2026-02-11
 
 - Fix password generation failing due to values passed to boolean options
