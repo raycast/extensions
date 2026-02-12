@@ -12,17 +12,17 @@ export default function TypeMetadata(props: {
       : List.Item.Detail.Metadata.TagList;
 
   return (
-    <Detail.Metadata.TagList key="type" title="Type">
+    <TagListComponent key="type" title="Type">
       {props.types.map((type) => {
         return (
           <TagListComponent.Item
             key={type.type.name}
-            text={type.type.typenames[0].name}
+            text={type.type.typenames[0]?.name || type.type.name}
             color={typeColor[type.type.name]}
             icon={`types/${type.type.name.toLowerCase()}.svg`}
           />
         );
       })}
-    </Detail.Metadata.TagList>
+    </TagListComponent>
   );
 }
