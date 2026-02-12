@@ -11,16 +11,40 @@ import shuffle from "lodash.shuffle";
 import { useEffect, useState } from "react";
 import PokeProfile from "./components/profile";
 import TypeDropdown from "./components/type_dropdown";
-import pokedex from "./statics/pokedex.json";
+import pokedexData from "./statics/pokedex.json";
 import { getContentImg, localeName, nationalDexNumber } from "./utils";
 
 const { language } = getPreferenceValues();
 
-export default function NationalPokedex() {
+interface LocalPokemon {
+  id: number;
+  name: string;
+  types: string[];
+  artwork: string;
+  generation: string;
+  image_s: string;
+  image_m: string;
+  localization: Record<string, string>;
+  stats?: {
+    hp: number;
+    attack: number;
+    defense: number;
+    special_attack: number;
+    special_defense: number;
+    speed: number;
+  };
+}
+
+const pokedex = pokedexData as LocalPokemon[];
+
+export default function NationalPokedex(props: {
+  arguments: { search?: string };
+}) {
+  const { search } = props.arguments;
   const [type, setType] = useState<string>("all");
   const [sort, setSort] = useState<string>("lowest");
   const [randomization, setRandomization] = useState<boolean>(false);
-  const [pokemons, setPokemons] = useState(pokedex);
+  const [pokemons, setPokemons] = useState<LocalPokemon[]>(pokedex);
 
   useEffect(() => {
     const shuffled = shuffle(pokemons);
@@ -30,10 +54,22 @@ export default function NationalPokedex() {
   useEffect(() => {
     const sorted = orderBy(pokedex, ...sort.split("|"));
     const filtered =
-      type != "all" ? sorted.filter((p) => p.types.includes(type)) : sorted;
+      type != "all"
+        ? sorted.filter((p) =>
+            p.types.map((t) => t.toLowerCase()).includes(type),
+          )
+        : sorted;
 
-    setPokemons(filtered);
-  }, [type, sort]);
+    const searched = search
+      ? filtered.filter(
+          (p) =>
+            p.name.toLowerCase().includes(search.toLowerCase()) ||
+            p.id.toString() === search,
+        )
+      : filtered;
+
+    setPokemons(searched);
+  }, [type, sort, search]);
 
   return (
     <Grid
@@ -49,12 +85,16 @@ export default function NationalPokedex() {
           return (
             <Grid.Section title={generation} key={generation}>
               {pokemonList.map((pokemon) => {
+                const statsString = pokemon.stats
+                  ? `H:${pokemon.stats.hp} A:${pokemon.stats.attack} D:${pokemon.stats.defense} C:${pokemon.stats.special_attack} S:${pokemon.stats.special_defense} Sp:${pokemon.stats.speed}`
+                  : "";
+
                 return (
                   <Grid.Item
                     key={pokemon.id}
                     content={getContentImg(pokemon.id)}
                     title={localeName(pokemon, language)}
-                    subtitle={nationalDexNumber(pokemon.id)}
+                    subtitle={`${nationalDexNumber(pokemon.id)} ${statsString}`}
                     keywords={[pokemon.id.toString(), pokemon.name]}
                     actions={
                       <ActionPanel>

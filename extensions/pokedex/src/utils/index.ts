@@ -1,5 +1,5 @@
 import { Detail, getPreferenceValues } from "@raycast/api";
-import { PokemonV2Pokemon, PokemonV2Pokemontype } from "../types";
+import { PokemonFormType, PokemonType, TypeChartType } from "../types";
 
 const { artwork } = getPreferenceValues();
 
@@ -15,7 +15,7 @@ export const getOfficialArtworkImg = (id: number, order?: number) => {
   const name = order
     ? `${id.toString().padStart(3, "0")}_f${order + 1}`
     : id.toString().padStart(3, "0");
-  return `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${name}.png`;
+  return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${name}.png`;
 };
 
 export const getContentImg = (id: number, order?: number) => {
@@ -48,25 +48,32 @@ export const typeColor: Record<string, string> = {
   fairy: "#dab4d4",
 };
 
-export const calculateEffectiveness = (types: PokemonV2Pokemontype[]) => {
+export const calculateEffectiveness = (
+  types: PokemonType[],
+  allTypes: TypeChartType[],
+) => {
   const effectivenessMap = new Map<string, number>();
   const typeNameMap = new Map<string, string>();
 
-  types.forEach((type) => {
-    type.pokemon_v2_type.pokemonV2TypeefficaciesByTargetTypeId.forEach(
-      (efficacy) => {
-        const relationName = efficacy.pokemon_v2_type.name;
-        const currentFactor = effectivenessMap.get(relationName) || 1;
-        effectivenessMap.set(
-          relationName,
-          (currentFactor * efficacy.damage_factor) / 100,
-        );
-        typeNameMap.set(
-          relationName,
-          efficacy.pokemon_v2_type.pokemon_v2_typenames[0].name,
-        );
-      },
-    );
+  allTypes.forEach((attacker) => {
+    let factor = 1;
+    types.forEach((pType) => {
+      const efficacy = attacker.typeefficacies.find(
+        (eff) => eff.target_type_id === pType.type.id,
+      );
+      if (efficacy) {
+        factor = (factor * efficacy.damage_factor) / 100;
+      }
+    });
+
+    if (factor !== 1) {
+      const relationName = attacker.name;
+      effectivenessMap.set(relationName, factor);
+      typeNameMap.set(
+        relationName,
+        attacker.typenames[0]?.name || attacker.name,
+      );
+    }
   });
 
   const normal: Detail.Metadata.TagList.Item.Props[] = [];
@@ -105,10 +112,12 @@ export const localeName = (
     : pokemon.name;
 };
 
-export const filterPokemonForms = (
+export const filterPokemonForms = <
+  T extends { name: string; pokemonforms: PokemonFormType[] },
+>(
   id: number,
-  pokemons: PokemonV2Pokemon[],
-) => {
+  pokemons: T[],
+): T[] => {
   // removes Pokemon forms without official images on pokemon.com
   let formNames: string[] = [];
   let varieties: string[] = [];
@@ -116,8 +125,14 @@ export const filterPokemonForms = (
     case 25:
       formNames = ["pikachu", "pikachu-gmax"];
       break;
+    case 445:
+      formNames = ["garchomp", "garchomp-mega"];
+      break;
     case 555:
       formNames = ["darmanitan-standard", "darmanitan-galar-standard"];
+      break;
+    case 658:
+      formNames = ["greninja", "greninja-ash", "greninja-mega"];
       break;
     case 666:
       varieties = [
@@ -128,15 +143,12 @@ export const filterPokemonForms = (
         "marine",
         "high-plains",
         "river",
+        "fancy",
       ];
       break;
     // case 668:
     //   // male, female
     //   break
-    case 670:
-      formNames = ["floette"];
-      varieties = ["red"];
-      break;
     case 671:
       varieties = ["red"];
       break;
@@ -148,6 +160,7 @@ export const filterPokemonForms = (
         "zygarde-10-power-construct",
         "zygarde-50-power-construct",
         "zygarde-complete",
+        "zygarde-mega",
       ];
       break;
     case 744:
@@ -158,6 +171,9 @@ export const filterPokemonForms = (
       break;
     case 778:
       formNames = ["mimikyu-disguised"];
+      break;
+    case 801:
+      formNames = ["magearna", "magearna-mega"];
       break;
     case 845:
       formNames = ["cramorant"];
@@ -190,19 +206,19 @@ export const filterPokemonForms = (
     pokemons = pokemons.filter((p) => formNames.includes(p.name));
   }
 
-  const forms: PokemonV2Pokemon[] = [];
+  const forms: T[] = [];
 
   pokemons.forEach((p) => {
     if (varieties.length) {
       varieties.forEach((variety) => {
-        const pokemonforms = p.pokemon_v2_pokemonforms.filter(
+        const pokemonforms = p.pokemonforms.filter(
           (f) => f.form_name === variety,
         );
 
         forms.push({
           ...p,
-          pokemon_v2_pokemonforms: pokemonforms,
-        });
+          pokemonforms: pokemonforms,
+        } as T);
       });
     } else {
       forms.push(p);

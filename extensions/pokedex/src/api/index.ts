@@ -2,7 +2,14 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { PokeAPI, PokemonV2Move, PokemonV2Pokemon } from "../types";
+import {
+  PokeAPI,
+  Pokemon,
+  TypeChartType,
+  Nature,
+  Move,
+  Ability,
+} from "../types";
 
 const cache = new Cache();
 const { language: language_id, duration } = getPreferenceValues();
@@ -17,8 +24,18 @@ async function fetchDataWithCaching<T>(
   query: string,
   variables: Record<string, number>,
   prefix: string,
+  isArray = false,
 ): Promise<T | undefined> {
-  const key = `${prefix}-${JSON.stringify(variables)}`;
+  // Create a simple hash of the query to include in the cache key
+  const queryHash = query
+    .split("")
+    .reduce((a, b) => {
+      a = (a << 5) - a + b.charCodeAt(0);
+      return a & a;
+    }, 0)
+    .toString(36);
+
+  const key = `${prefix}-${JSON.stringify(variables)}-${isArray}-${queryHash}`;
   const now = Date.now();
 
   // Check for cache expiration only if expiration is defined
@@ -46,7 +63,7 @@ async function fetchDataWithCaching<T>(
   // Fetch fresh data if cache is expired or not enabled
   const config: AxiosRequestConfig = {
     method: "post",
-    url: "https://beta.pokeapi.co/graphql/v1beta",
+    url: "https://graphql.pokeapi.co/v1beta2",
     headers: {
       "Content-Type": "application/json",
     },
@@ -63,7 +80,9 @@ async function fetchDataWithCaching<T>(
       return undefined;
     }
 
-    const fetchedData = data.data[prefix][0];
+    const fetchedData = (isArray
+      ? data.data[prefix]
+      : data.data[prefix][0]) as unknown as T;
 
     // Cache the fresh data with a timestamp
     const dataToCache: CachedData<T> = { timestamp: now, value: fetchedData };
@@ -77,138 +96,141 @@ async function fetchDataWithCaching<T>(
   }
 }
 
-export const fetchPokemonWithCaching = async (
+export const fetchPokemon = async (
   pokemon_id: number,
-): Promise<PokemonV2Pokemon | undefined> => {
+): Promise<Pokemon | undefined> => {
   const query = `query pokemon($language_id: Int, $pokemon_id: Int) {
-    pokemon_v2_pokemon(where: {id: {_eq: $pokemon_id}}) {
+    pokemon(where: {id: {_eq: $pokemon_id}}) {
       base_experience
       id
       name
       height
       weight
-      pokemon_v2_encounters {
-        pokemon_v2_locationarea {
+      encounters {
+        locationarea {
           name
-          pokemon_v2_locationareanames(where: {language_id: {_eq: $language_id}}) {
+          locationareanames(where: {language_id: {_eq: $language_id}}) {
             name
           }
         }
-        pokemon_v2_version {
+        version {
           id
           name
-          pokemon_v2_versiongroup {
+          versiongroup {
             name
-            pokemon_v2_generation {
+            generation {
               name
-              pokemon_v2_generationnames(where: {language_id: {_eq: 9}}) {
+              generationnames(where: {language_id: {_eq: 9}}) {
                 name
               }
             }
           }
-          pokemon_v2_versionnames(where: {language_id: {_eq: $language_id}}) {
+          versionnames(where: {language_id: {_eq: $language_id}}) {
             name
           }
         }
       }
-      pokemon_v2_pokemonabilities {
+      pokemonabilities {
         is_hidden
-        pokemon_v2_ability {
-          pokemon_v2_abilitynames(where: {language_id: {_eq: $language_id}}) {
+        ability {
+          abilitynames(where: {language_id: {_eq: $language_id}}, distinct_on: [name]) {
             name
           }
         }
       }
-      pokemon_v2_pokemonmoves(order_by: {move_learn_method_id: asc, level: asc}) {
+      pokemonmoves(order_by: {move_learn_method_id: asc, level: asc}) {
         level
         move_id
         move_learn_method_id
         order
-        pokemon_v2_move {
+        move {
           id
           accuracy
           name
           move_effect_chance
           power
           pp
-          pokemon_v2_machines {
+          machines {
             machine_number
             version_group_id
           }
-          pokemon_v2_movedamageclass {
-            pokemon_v2_movedamageclassnames(where: {language_id: {_eq: 9}}) {
+          movedamageclass {
+            name
+            movedamageclassnames(where: {language_id: {_eq: $language_id}}) {
               name
             }
           }
-          pokemon_v2_moveeffect {
-            pokemon_v2_moveeffecteffecttexts(where: {language_id: {_eq: $language_id}}) {
+          moveeffect {
+            moveeffecteffecttexts(where: {language_id: {_eq: $language_id}}) {
               short_effect
             }
           }
-          pokemon_v2_movenames(where: {language_id: {_eq: $language_id}}) {
+          movenames(where: {language_id: {_eq: $language_id}}) {
             name
           }
-          pokemon_v2_type {
+          type {
+            id
             name
-            pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
+            typenames(where: {language_id: {_eq: $language_id}}) {
               name
             }
           }
         }
-        pokemon_v2_movelearnmethod {
+        movelearnmethod {
           name
-          pokemon_v2_movelearnmethodnames(where: {language_id: {_eq: 9}}) {
+          movelearnmethodnames(where: {language_id: {_eq: 9}}) {
             name
           }
         }
-        pokemon_v2_versiongroup {
+        versiongroup {
           id
           generation_id
           name
-          pokemon_v2_generation {
+          generation {
             name
-            pokemon_v2_generationnames(where: {language_id: {_eq: 9}}) {
+            generationnames(where: {language_id: {_eq: 9}}) {
               name
             }
           }
-          pokemon_v2_versions {
+          versions {
             name
-            pokemon_v2_versionnames(where: {language_id: {_eq: $language_id}}) {
+            versionnames(where: {language_id: {_eq: $language_id}}) {
               name
             }
           }
         }
       }
-      pokemon_v2_pokemonstats {
+      pokemonstats {
         base_stat
         effort
-        pokemon_v2_stat {
+        stat {
           name
-          pokemon_v2_statnames(where: {language_id: {_eq: $language_id}}) {
+          statnames(where: {language_id: {_eq: $language_id}}) {
             name
           }
         }
       }
-      pokemon_v2_pokemontypes {
-        pokemon_v2_type {
+      pokemontypes {
+        type {
+          id
           name
-          pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
+          typenames(where: {language_id: {_eq: $language_id}}) {
             name
           }
-          pokemonV2TypeefficaciesByTargetTypeId {
+          typeefficacies(where: {damage_factor: {_neq: 100}}) {
             damage_factor
             damage_type_id
             target_type_id
-            pokemon_v2_type {
+            type {
               name
-              pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
+              typenames(where: {language_id: {_eq: $language_id}}) {
                 name
               }
             }
           }
         }
       }
-      pokemon_v2_pokemonspecy {
+      pokemonspecy {
         base_happiness
         capture_rate
         gender_rate
@@ -219,17 +241,17 @@ export const fetchPokemonWithCaching = async (
         is_mythical
         name
         pokemon_shape_id
-        pokemon_v2_pokemondexnumbers {
+        pokemondexnumbers {
           pokedex_number
-          pokemon_v2_pokedex {
-            pokemon_v2_pokedexversiongroups {
+          pokedex {
+            pokedexversiongroups {
               version_group_id
-              pokemon_v2_versiongroup {
+              versiongroup {
                 name
-                pokemon_v2_versions {
+                versions {
                   id
                   name
-                  pokemon_v2_versionnames(where: {language_id: {_eq: $language_id}}) {
+                  versionnames(where: {language_id: {_eq: $language_id}}) {
                     name
                   }
                 }
@@ -237,59 +259,60 @@ export const fetchPokemonWithCaching = async (
             }
           }
         }
-        pokemon_v2_evolutionchain {
-          pokemon_v2_pokemonspecies(order_by: {order: asc}) {
+        evolutionchain {
+          pokemonspecies(order_by: {order: asc}) {
             id
             name
             evolves_from_species_id
-            pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
+            pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
               genus
               name
               language_id
             }
           }
         }
-        pokemon_v2_pokemonegggroups {
-          pokemon_v2_egggroup {
+        pokemonegggroups {
+          egggroup {
             name
-            pokemon_v2_egggroupnames(where: {language_id: {_eq: $language_id}}) {
+            egggroupnames(where: {language_id: {_eq: $language_id}}) {
               name
             }
           }
         }
-        pokemon_v2_pokemons(order_by: {id: asc}, where: {pokemon_v2_pokemonforms: {form_name: {_nin: ["starter", "totem", "totem-alola"]}}}) {
+        pokemons(order_by: {id: asc}, where: {pokemonforms: {form_name: {_nin: ["starter", "totem", "totem-alola"]}}}) {
           name
           height
           weight
-          pokemon_v2_pokemonforms {
+          pokemonforms {
             form_name
             pokemon_id
-            pokemon_v2_pokemonformnames(where: {language_id: {_eq: $language_id}}) {
+            pokemonformnames(where: {language_id: {_eq: $language_id}}) {
               name
               pokemon_name
             }
           }
-          pokemon_v2_pokemonabilities {
+          pokemonabilities {
             is_hidden
-            pokemon_v2_ability {
-              pokemon_v2_abilitynames(where: {language_id: {_eq: $language_id}}) {
+            ability {
+              abilitynames(where: {language_id: {_eq: $language_id}}, distinct_on: [name]) {
                 name
               }
             }
           }
-          pokemon_v2_pokemontypes {
-            pokemon_v2_type {
+          pokemontypes {
+            type {
+              id
               name
-              pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
+              typenames(where: {language_id: {_eq: $language_id}}) {
                 name
               }
-              pokemonV2TypeefficaciesByTargetTypeId {
+              typeefficacies(where: {damage_factor: {_neq: 100}}) {
                 damage_factor
                 damage_type_id
                 target_type_id
-                pokemon_v2_type {
+                type {
                   name
-                  pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
+                  typenames(where: {language_id: {_eq: $language_id}}) {
                     name
                   }
                 }
@@ -297,27 +320,35 @@ export const fetchPokemonWithCaching = async (
             }
           }
         }
-        pokemon_v2_pokemonspeciesflavortexts(where: {language_id: {_eq: $language_id}}, order_by: {version_id: asc}) {
+        pokemonspeciesflavortexts(where: {language_id: {_eq: $language_id}}, order_by: {version_id: asc}) {
           flavor_text
-          pokemon_v2_version {
+          version {
             id
             name
-            pokemon_v2_versiongroup {
+            versiongroup {
+              id
               name
               generation_id
-              pokemon_v2_generation {
+              generation {
                 name
-                pokemon_v2_generationnames(where: {language_id: {_eq: 9}}) {
+                generationnames(where: {language_id: {_eq: 9}}) {
+                  name
+                }
+              }
+              versions {
+                id
+                name
+                versionnames(where: {language_id: {_eq: $language_id}}) {
                   name
                 }
               }
             }
-            pokemon_v2_versionnames(where: {language_id: {_eq: $language_id}}) {
+            versionnames(where: {language_id: {_eq: $language_id}}) {
               name
             }
           }
         }
-        pokemon_v2_pokemonspeciesnames {
+        pokemonspeciesnames {
           genus
           name
           language_id
@@ -328,42 +359,85 @@ export const fetchPokemonWithCaching = async (
 
   const variables = { language_id, pokemon_id };
 
-  return fetchDataWithCaching(query, variables, "pokemon_v2_pokemon");
+  return fetchDataWithCaching(query, variables, "pokemon");
 };
 
-export const fetchMoveWithCaching = async (
-  move_id: number,
-): Promise<PokemonV2Move | undefined> => {
-  const query = `query move($language_id: Int, $move_id: Int) {
-    pokemon_v2_move(where: {id: {_eq: $move_id}}) {
+export const fetchMoves = async (): Promise<Move[] | undefined> => {
+  const query = `query moves($language_id: Int) {
+    move(order_by: [{generation_id: asc}, {name: asc}]) {
       id
       accuracy
       name
       power
       pp
       move_effect_chance
-      pokemon_v2_pokemonmoves(order_by: {move_learn_method_id: asc, level: asc}) {
+      move_effect_id
+      move_target_id
+      generation {
+        generationnames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+      }
+      movedamageclass {
+        name
+        movedamageclassnames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+      }
+      type {
+        name
+        typenames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+      }
+      moveeffect {
+        moveeffecteffecttexts(where: {language_id: {_eq: $language_id}}) {
+          short_effect
+          effect
+        }
+      }
+      movenames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+    }
+  }`;
+
+  const variables = { language_id };
+
+  return fetchDataWithCaching(query, variables, "move", true);
+};
+
+export const fetchMove = async (move_id: number): Promise<Move | undefined> => {
+  const query = `query move($language_id: Int, $move_id: Int) {
+    move(where: {id: {_eq: $move_id}}) {
+      id
+      accuracy
+      name
+      power
+      pp
+      move_effect_chance
+      pokemonmoves(order_by: {move_learn_method_id: asc, level: asc}) {
         level
         move_learn_method_id
         pokemon_id
-        pokemon_v2_movelearnmethod {
+        movelearnmethod {
           name
-          pokemon_v2_movelearnmethodnames(where: {language_id: {_eq: 9}}) {
+          movelearnmethodnames(where: {language_id: {_eq: 9}}) {
             name
           }
         }
-        pokemon_v2_pokemon {
+        pokemon {
           pokemon_species_id
-          pokemon_v2_pokemonspecy {
-            pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
+          pokemonspecy {
+            pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
               name
             }
-            pokemon_v2_pokemons(order_by: {id: asc}, where: {pokemon_v2_pokemonforms: {form_name: {_nin: ["starter", "totem", "totem-alola"]}}}) {
+              pokemons(order_by: {id: asc}, where: {pokemonforms: {form_name: {_nin: ["starter", "totem", "totem-alola"]}}}) {
               name
-              pokemon_v2_pokemonforms {
+              pokemonforms {
                 form_name
                 pokemon_id
-                pokemon_v2_pokemonformnames(where: {language_id: {_eq: $language_id}}) {
+                pokemonformnames(where: {language_id: {_eq: $language_id}}) {
                   name
                   pokemon_name
                 }
@@ -372,47 +446,48 @@ export const fetchMoveWithCaching = async (
           }
         }
       }
-      pokemon_v2_generation {
-        pokemon_v2_generationnames(where: {language_id: {_eq: 9}}) {
+      generation {
+        generationnames(where: {language_id: {_eq: 9}}) {
           name
         }
       }
-      pokemon_v2_movedamageclass {
-        pokemon_v2_movedamageclassnames(where: {language_id: {_eq: 9}}) {
-          name
-        }
-      }
-      pokemon_v2_type {
+      movedamageclass {
         name
-        pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
+        movedamageclassnames(where: {language_id: {_eq: $language_id}}) {
           name
         }
       }
-      pokemon_v2_moveflavortexts(where: {language_id: {_eq: $language_id}}) {
+      type {
+        name
+        typenames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+      }
+      moveflavortexts(where: {language_id: {_eq: $language_id}}) {
         flavor_text
-        pokemon_v2_versiongroup {
+        versiongroup {
           name
-          pokemon_v2_generation {
+          generation {
             name
-            pokemon_v2_generationnames(where: {language_id: {_eq: 9}}) {
+            generationnames(where: {language_id: {_eq: 9}}) {
               name
             }
           }
-          pokemon_v2_versions {
+          versions {
             name
-            pokemon_v2_versionnames(where: {language_id: {_eq: $language_id}}) {
+            versionnames(where: {language_id: {_eq: $language_id}}) {
               name
             }
           }
         }
       }
-      pokemon_v2_moveeffect {
-        pokemon_v2_moveeffecteffecttexts(where: {language_id: {_eq: $language_id}}) {
+      moveeffect {
+        moveeffecteffecttexts(where: {language_id: {_eq: $language_id}}) {
           short_effect
           effect
         }
       }
-      pokemon_v2_movenames(where: {language_id: {_eq: $language_id}}) {
+      movenames(where: {language_id: {_eq: $language_id}}) {
         name
       }
     }
@@ -420,5 +495,87 @@ export const fetchMoveWithCaching = async (
 
   const variables = { language_id, move_id };
 
-  return fetchDataWithCaching(query, variables, "pokemon_v2_move");
+  return fetchDataWithCaching(query, variables, "move");
+};
+
+export const fetchTypes = async (): Promise<TypeChartType[] | undefined> => {
+  const query = `query types($language_id: Int) {
+    type(where: {id: {_lte: 18}}) {
+      name
+      id
+      typenames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+      typeefficacies {
+        damage_factor
+        target_type_id
+        target_type: type {
+          name
+          typenames(where: {language_id: {_eq: $language_id}}) {
+            name
+          }
+        }
+      }
+    }
+  }`;
+
+  const variables = { language_id };
+
+  return fetchDataWithCaching(query, variables, "type", true);
+};
+
+export const fetchNatures = async (): Promise<Nature[] | undefined> => {
+  const query = `query natures($language_id: Int) {
+    nature {
+      id
+      name
+      naturenames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+      increased_stat_id
+      decreased_stat_id
+      increased_stat: StatByIncreasedStatId {
+        name
+        statnames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+      }
+      decreased_stat: stat {
+        name
+        statnames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+      }
+    }
+  }`;
+
+  const variables = { language_id };
+
+  return fetchDataWithCaching(query, variables, "nature", true);
+};
+
+export const fetchAbilities = async (): Promise<Ability[] | undefined> => {
+  const query = `query abilities($language_id: Int) {
+    ability(order_by: [{generation_id: asc}, {name: asc}]) {
+      id
+      name
+      abilitynames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+      abilityeffecttexts(where: {language_id: {_eq: $language_id}}) {
+        short_effect
+        effect
+      }
+      generation {
+        name
+        generationnames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+      }
+    }
+  }`;
+
+  const variables = { language_id };
+
+  return fetchDataWithCaching(query, variables, "ability", true);
 };

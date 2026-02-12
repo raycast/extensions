@@ -1,23 +1,30 @@
 import { Detail, List } from "@raycast/api";
-import { PokemonV2Pokemontype } from "../../types";
+import { usePromise } from "@raycast/utils";
+import { fetchTypes } from "../../api";
+import { PokemonType } from "../../types";
 import { calculateEffectiveness } from "../../utils";
 
 export default function WeaknessMetadata(props: {
   type?: string;
-  types: PokemonV2Pokemontype[];
+  types: PokemonType[];
 }) {
   const TagListComponent =
     props.type === "detail"
       ? Detail.Metadata.TagList
       : List.Item.Detail.Metadata.TagList;
 
-  const { weak, resistant, immune } = calculateEffectiveness(props.types);
+  const { data: allTypes } = usePromise(fetchTypes);
+
+  const { weak, resistant, immune } = calculateEffectiveness(
+    props.types,
+    allTypes || [],
+  );
 
   const tagList = [];
 
   if (weak.length) {
     tagList.push(
-      <TagListComponent title="Weak to" key="weak">
+      <TagListComponent title="Weak To" key="weak">
         {weak.map(({ text, color }, index) => (
           <TagListComponent.Item key={index} text={text} color={color} />
         ))}
@@ -27,7 +34,7 @@ export default function WeaknessMetadata(props: {
 
   if (immune.length) {
     tagList.push(
-      <TagListComponent title="Immune to" key="immute">
+      <TagListComponent title="Immune To" key="immute">
         {immune.map(({ text, color }, index) => (
           <TagListComponent.Item key={index} text={text} color={color} />
         ))}
@@ -37,7 +44,7 @@ export default function WeaknessMetadata(props: {
 
   if (resistant.length) {
     tagList.push(
-      <TagListComponent title="Resistant to" key="resistant">
+      <TagListComponent title="Resistant To" key="resistant">
         {resistant.map(({ text, color }, index) => (
           <TagListComponent.Item key={index} text={text} color={color} />
         ))}
