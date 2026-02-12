@@ -104,7 +104,9 @@ const quickActions: QuickAction[] = [
   },
 
   // AI Tools
-  
+  {
+    id: "chatgpt",
+    title: "ChatGPT",
     subtitle: "OpenAI chat",
     icon: Icon.Stars,
     keywords: ["chatgpt", "gpt", "ai"],
@@ -188,12 +190,8 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-interface Preferences {
-  gridviewPath?: string;
-}
-
 async function launchInGridView(action: QuickAction) {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
   const appPath = prefs.gridviewPath || "/Applications/GridViewPro.app";
 
   try {
