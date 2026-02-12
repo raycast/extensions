@@ -16,12 +16,12 @@ import {
 import { useFetch } from "@raycast/utils";
 
 // types
-import { PassageResponse, Preferences, Passage } from "./types";
+import { PassageResponse, Passage } from "./types";
 
 import { reorderActions } from "./helpers";
 
 // get user Prefs
-const { ESVApiToken, searchMode, defaultAction } = getPreferenceValues<Preferences>();
+const { ESVApiToken, searchMode, defaultAction } = getPreferenceValues<Preferences.PassageLookup>();
 
 // dropdown styling options
 import { stylingOptions } from "./stylingOptions";

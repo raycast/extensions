@@ -1,19 +1,3 @@
-export interface Preferences {
-  ESVApiToken: string;
-  searchMode: "live" | "manual";
-  defaultAction: string;
-  includePassageReferences: boolean;
-  includeVerseNumbers: boolean;
-  includeFirstVerseNumbers: boolean;
-  includeSelahs: boolean;
-  includeFootnotes: boolean;
-  includeHeadings: boolean;
-  indentParagraphs: boolean;
-  indentPoetry: boolean;
-  includeCopyright: string;
-  indentUsing: "spaces" | "tabs";
-}
-
 export interface PassageResponse {
   query: string;
   canonical: string;

@@ -15,12 +15,12 @@ import {
 import { useFetch } from "@raycast/utils";
 
 // types
-import { SearchResponse, Preferences, Search } from "./types";
+import { SearchResponse, Search } from "./types";
 
 import { reorderActions } from "./helpers";
 
 // get user Prefs
-const { ESVApiToken, searchMode, defaultAction } = getPreferenceValues<Preferences>();
+const { ESVApiToken, searchMode, defaultAction } = getPreferenceValues<Preferences.PassageSearch>();
 
 const cache = new Cache({ namespace: "bible-search", capacity: 1000000 });
 
