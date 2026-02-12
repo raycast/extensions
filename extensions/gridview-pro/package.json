@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gridview-pro",
+  "title": "GridView Pro",
+  "description": "Launch GridView Pro layouts, templates, and manage your multi-browser grids",
+  "icon": "extension-icon.png",
+  "author": "matt2build",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-template",
+      "title": "Open Template",
+      "subtitle": "GridView Pro",
+      "description": "Launch GridView Pro with a 1-click template (Crypto, Trading, AI, etc.)",
+      "mode": "view"
+    },
+    {
+      "name": "quick-launch",
+      "title": "Quick Launch",
+      "subtitle": "GridView Pro",
+      "description": "Type keywords to instantly load research panels (BTC, AAPL, eth address, etc.)",
+      "mode": "view"
+    },
+    {
+      "name": "manage-grids",
+      "title": "Manage Grids",
+      "subtitle": "GridView Pro",
+      "description": "List and open your saved grid layouts",
+      "mode": "view"
+    },
+    {
+      "name": "launch-gridview",
+      "title": "Launch App",
+      "subtitle": "GridView Pro",
+      "description": "Open GridView Pro Mac app",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gridviewPath",
+      "title": "GridView Pro App Path",
+      "description": "Path to GridView Pro app (auto-detected if in Applications)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/Applications/GridView Pro.app"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
