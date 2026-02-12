@@ -6,7 +6,7 @@
   "icon": "lock.png",
   "author": "norayesnir",
   "license": "MIT",
-  "version": "1.0.0",
+  "categories": ["Security"],
   "commands": [
     {
       "name": "generate-password",
