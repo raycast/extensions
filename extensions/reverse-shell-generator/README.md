@@ -203,8 +203,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions or suggestions, please contact us through:
 
-- Submit an [Issue](https://github.com/yourusername/reverse-shell/issues)
-- Email: <your.email@example.com>
+- Submit an [Issue](https://github.com/raycast/extensions/issues)
 
 ---
 
