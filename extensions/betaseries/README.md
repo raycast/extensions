@@ -26,7 +26,7 @@ Manage your TV shows and movies with BetaSeries directly from Raycast.
 ## Commands
 
 ### Search Shows
-Search for TV shows on BetaSeries database and add them to your library.
+Search for TV shows on BetaSeries and add them to your library.
 
 ### Search Movies
 Search for movies on BetaSeries and add them to your collection.
@@ -45,13 +45,6 @@ See your upcoming episodes for the week.
 The extension requires:
 - **API Key** (required): Your BetaSeries Developer API Key
 - **OAuth Token** : For accessing user-specific features like your library and planning
-
-## Screenshots
-
-![My Shows](./metadata/betaseries-1.png)
-![My Movies](./metadata/betaseries-2.png)
-![Planning](./metadata/betaseries-3.png)
-![Search movies](./metadata/betaseries-4.png)
 
 ## License
 
