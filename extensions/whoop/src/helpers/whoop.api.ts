@@ -93,7 +93,7 @@ export type SleepScore = {
 };
 export type Sleep = {
   /** Unique identifier for the sleep activity */
-  id: string;
+  id: string | number;
   /** Unique identifier for the cycle this sleep belongs to */
   cycle_id: number;
   /** Previous generation identifier for the activity. Will not exist past 09/01/2025 */
@@ -210,7 +210,7 @@ export type WorkoutScore = {
 };
 export type WorkoutV2 = {
   /** Unique identifier for the workout activity */
-  id: string;
+  id: string | number;
   /** Previous generation identifier for the activity. Will not exist past 09/01/2025 */
   v1_id?: number;
   /** The WHOOP User who performed the workout */
@@ -241,8 +241,12 @@ export type WorkoutCollection = {
 };
 /**
  * Get V2 UUID for V1 Activity ID
+ *
+ * Note: this endpoint remains on `/v1` (WHOOP does not currently expose a `/v2` equivalent).
+ * It's only needed when you still have legacy numeric V1 activity IDs (e.g. persisted IDs or
+ * responses that still include `v1_id`). Once your flow is fully V2-ID-based, this can be removed.
  */
-export function getActivityMapping(activityV1Id: number, opts?: Oazapfts.RequestOpts) {
+export function getActivityMapping(activityV1Id: number | string, opts?: Oazapfts.RequestOpts) {
   return oazapfts.fetchJson<
     | {
         status: 200;
@@ -254,7 +258,7 @@ export function getActivityMapping(activityV1Id: number, opts?: Oazapfts.Request
     | {
         status: 500;
       }
-  >(`/v1/activity-mapping/${encodeURIComponent(activityV1Id)}`, {
+  >(`/v1/activity-mapping/${encodeURIComponent(String(activityV1Id))}`, {
     ...opts,
   });
 }
@@ -441,7 +445,7 @@ export function getRecoveryForCycle(cycleId: number, opts?: Oazapfts.RequestOpts
 /**
  * Get the sleep for the specified ID
  */
-export function getSleepById(sleepId: string, opts?: Oazapfts.RequestOpts) {
+export function getSleepById(sleepId: string | number, opts?: Oazapfts.RequestOpts) {
   return oazapfts.fetchJson<
     | {
         status: 200;
@@ -462,7 +466,7 @@ export function getSleepById(sleepId: string, opts?: Oazapfts.RequestOpts) {
     | {
         status: 500;
       }
-  >(`/v2/activity/sleep/${encodeURIComponent(sleepId)}`, {
+  >(`/v2/activity/sleep/${encodeURIComponent(String(sleepId))}`, {
     ...opts,
   });
 }
@@ -576,7 +580,7 @@ export function revokeUserOAuthAccess(opts?: Oazapfts.RequestOpts) {
 /**
  * Get the workout for the specified ID
  */
-export function getWorkoutById(workoutId: string, opts?: Oazapfts.RequestOpts) {
+export function getWorkoutById(workoutId: string | number, opts?: Oazapfts.RequestOpts) {
   return oazapfts.fetchJson<
     | {
         status: 200;
@@ -597,7 +601,7 @@ export function getWorkoutById(workoutId: string, opts?: Oazapfts.RequestOpts) {
     | {
         status: 500;
       }
-  >(`/v2/activity/workout/${encodeURIComponent(workoutId)}`, {
+  >(`/v2/activity/workout/${encodeURIComponent(String(workoutId))}`, {
     ...opts,
   });
 }

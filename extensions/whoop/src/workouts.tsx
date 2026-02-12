@@ -23,12 +23,12 @@ function CycleListItem({ workout, isLoading, units }: { workout: WorkoutV2; isLo
   const maxHeartRate = formatHeartRate(workout.score?.max_heart_rate);
   const cals = calcCals(workout.score?.kilojoule);
 
-  const zoneFiveMilli = workout.score?.zone_durations.zone_five_milli || 0;
-  const zoneFourMilli = workout.score?.zone_durations.zone_four_milli || 0;
-  const zoneThreeMilli = workout.score?.zone_durations.zone_three_milli || 0;
-  const zoneTwoMilli = workout.score?.zone_durations.zone_two_milli || 0;
-  const zoneOneMilli = workout.score?.zone_durations.zone_one_milli || 0;
-  const zoneZeroMilli = workout.score?.zone_durations.zone_zero_milli || 0;
+  const zoneFiveMilli = workout.score?.zone_durations?.zone_five_milli ?? 0;
+  const zoneFourMilli = workout.score?.zone_durations?.zone_four_milli ?? 0;
+  const zoneThreeMilli = workout.score?.zone_durations?.zone_three_milli ?? 0;
+  const zoneTwoMilli = workout.score?.zone_durations?.zone_two_milli ?? 0;
+  const zoneOneMilli = workout.score?.zone_durations?.zone_one_milli ?? 0;
+  const zoneZeroMilli = workout.score?.zone_durations?.zone_zero_milli ?? 0;
 
   const durationMilli = new Date(workout.end).getTime() - new Date(workout.start).getTime();
 

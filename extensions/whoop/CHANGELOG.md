@@ -6,7 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Updated the API to use V2 endpoints since V1 got deprecated.
+- Updated to use WHOOP API V2 (V1 was deprecated)
+- API now provides sport names directly, removing need for sport ID lookup table
 
 ## [1.0.3] - 2024-10-19
 

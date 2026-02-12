@@ -213,7 +213,8 @@ function BiometricsCommand() {
   };
 
   const findSleepForRecovery = (sleepId: string) => {
-    return sleepCollection?.records?.find((sleep: Sleep) => sleep.id === sleepId);
+    // Be tolerant of legacy numeric IDs (V1) vs V2 string IDs.
+    return sleepCollection?.records?.find((sleep: Sleep) => String(sleep.id) === String(sleepId));
   };
 
   return (
