@@ -37,7 +37,7 @@ export default function Command() {
 
     try {
       // 1. Check if it's a Drug Monograph and open if yes
-      const drugRes = await fetch(drugUrl, { method: "GET", headers });
+      const drugRes = await fetch(drugUrl, { method: "HEAD", headers });
       if (drugRes.ok && !drugRes.url.includes("search")) {
         await open(drugUrl);
         toast.style = Toast.Style.Success;
@@ -46,7 +46,7 @@ export default function Command() {
       }
 
       // 2.  Check if it's a Treatment Summary and open if yes
-      const treatRes = await fetch(treatmentUrl, { method: "GET", headers });
+      const treatRes = await fetch(treatmentUrl, { method: "HEAD", headers });
       if (treatRes.ok && !treatRes.url.includes("search")) {
         await open(treatmentUrl);
         toast.style = Toast.Style.Success;

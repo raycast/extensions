@@ -1,8 +1,8 @@
-# BNF Search Tool (and dosage calculator)
+# BNF Search Tool
 
 A fast, efficient Raycast extension designed for nurses, students, and healthcare professionals. It allows you to search the **British National Formulary (BNF)** and **BNFC (Children's Formulary)** directly from your keyboard.
 
-At this point, the tool does not search directly for NICE guidelines. 
+At this point, the tool does not search directly for NICE guidelines.
 
 ## Features
 
@@ -12,7 +12,7 @@ At this point, the tool does not search directly for NICE guidelines.
   - If a direct drug page is not found (e.g., for a condition like "Acne" or a typo), a search is performed for a treatment summary. For example, "Acne" would bring up this treatment summary, where medications can be found.
   - If there is no drug or treatment summary, the tool will redirect to a BNF search, which could highlight typos or different terminology.
 - **Fast & Lightweight:** Uses a "Head" request to verify links instantly without downloading full pages.
-- **Medusa Integration:** A quick link is provided for Medusa (sign in required). Search at this point isn't possible.
+- **Medusa Integration:** A quick link is provided for Medusa (sign in required). Search at this point isn't implemented.
 - **Privacy Focused:** No patient data is entered or stored; it is purely a reference search tool.
 
 
