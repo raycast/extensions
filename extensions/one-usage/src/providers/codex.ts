@@ -2,8 +2,6 @@ import { existsSync, readFileSync } from "fs";
 import { MetricLine } from "../types";
 import { expandPath, formatResetTimeFromUnixSeconds } from "../utils";
 
-// Private Types
-
 interface CodexAuth {
   accessToken: string;
   accountId?: string;
@@ -31,11 +29,6 @@ interface CodexUsageResponse {
   };
 }
 
-// Auth Loading
-
-/**
- * Load Codex auth from ~/.codex/auth.json
- */
 function loadAuth(): CodexAuth {
   const path = expandPath("~/.codex/auth.json");
   if (!existsSync(path)) {
@@ -52,12 +45,6 @@ function loadAuth(): CodexAuth {
   };
 }
 
-// Main Fetch
-
-/**
- * Fetch Codex usage data.
- * API: GET https://chatgpt.com/backend-api/wham/usage
- */
 export async function fetchCodex(): Promise<MetricLine[]> {
   const auth = loadAuth();
 
@@ -84,12 +71,10 @@ export async function fetchCodex(): Promise<MetricLine[]> {
   const usage = (await response.json()) as CodexUsageResponse;
   const lines: MetricLine[] = [];
 
-  // Plan badge
   const planType = usage.plan_type ?? "free";
   const planLabel = planType.charAt(0).toUpperCase() + planType.slice(1);
   lines.push({ type: "badge", label: "Plan", text: planLabel });
 
-  // Rate limits: Session (primary) and Weekly (secondary)
   if (usage.rate_limit) {
     const primary = usage.rate_limit.primary_window;
     if (primary) {
@@ -117,7 +102,6 @@ export async function fetchCodex(): Promise<MetricLine[]> {
     }
   }
 
-  // Code review rate limit
   if (usage.code_review_rate_limit?.primary_window) {
     const crl = usage.code_review_rate_limit.primary_window;
     const subtitle = crl.reset_at ? formatResetTimeFromUnixSeconds(crl.reset_at) : undefined;
@@ -131,7 +115,6 @@ export async function fetchCodex(): Promise<MetricLine[]> {
     });
   }
 
-  // Credits
   if (usage.credits?.has_credits) {
     if (usage.credits.unlimited) {
       lines.push({ type: "text", label: "Credits", value: "Unlimited" });
@@ -140,7 +123,6 @@ export async function fetchCodex(): Promise<MetricLine[]> {
     }
   }
 
-  // If only the plan badge, add "No usage data"
   if (lines.length === 1) {
     lines.push({ type: "text", label: "Status", value: "No usage data" });
   }

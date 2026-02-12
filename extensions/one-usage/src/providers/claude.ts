@@ -2,11 +2,9 @@ import { existsSync, readFileSync } from "fs";
 import { MetricLine } from "../types";
 import { expandPath, formatResetTimeFromISO, readKeychainPassword } from "../utils";
 
-// Private Types
-
 interface ClaudeCredentials {
   accessToken: string;
-  expiresAt?: number; // milliseconds since epoch
+  expiresAt?: number;
   subscriptionType?: string;
 }
 
@@ -17,8 +15,8 @@ interface ClaudeWindow {
 
 interface ClaudeExtraUsage {
   is_enabled?: boolean;
-  used_credits?: number; // cents
-  monthly_limit?: number; // cents
+  used_credits?: number;
+  monthly_limit?: number;
   currency?: string;
 }
 
@@ -29,8 +27,6 @@ interface ClaudeUsageResponse {
   extra_usage?: ClaudeExtraUsage;
 }
 
-// Credential Resolution
-
 const CENTS_PER_DOLLAR = 100;
 
 function isExpired(expiresAtMs?: number): boolean {
@@ -38,11 +34,6 @@ function isExpired(expiresAtMs?: number): boolean {
   const bufferSeconds = 300;
   return Date.now() / 1000 > expiresAtMs / 1000 - bufferSeconds;
 }
-
-/**
- * Attempt to load Claude credentials from macOS Keychain.
- * Service: "Claude Code-credentials"
- */
 
 function loadFromKeychain(): ClaudeCredentials | null {
   const raw = readKeychainPassword("Claude Code-credentials");
@@ -61,9 +52,6 @@ function loadFromKeychain(): ClaudeCredentials | null {
   }
 }
 
-/**
- * Load Claude credentials from ~/.claude/.credentials.json
- */
 function loadFromFile(): ClaudeCredentials {
   const path = expandPath("~/.claude/.credentials.json");
   if (!existsSync(path)) {
@@ -81,16 +69,11 @@ function loadFromFile(): ClaudeCredentials {
   };
 }
 
-/**
- * Resolve credentials: keychain first, then file fallback.
- */
 function loadCredentials(): ClaudeCredentials {
   const keychain = loadFromKeychain();
   if (keychain) return keychain;
   return loadFromFile();
 }
-
-// Output Building
 
 function formatPlanLabel(subscriptionType?: string): string | undefined {
   if (!subscriptionType) return undefined;
@@ -129,21 +112,17 @@ function makeExtraUsageLine(extra: ClaudeExtraUsage | undefined): MetricLine | u
   if (!extra || !extra.is_enabled || extra.used_credits == null || !extra.monthly_limit || extra.monthly_limit <= 0) {
     return undefined;
   }
+  const limitDollars = extra.monthly_limit / CENTS_PER_DOLLAR;
   return {
     type: "progress",
     label: "Extra",
     value: extra.used_credits / CENTS_PER_DOLLAR,
-    max: extra.monthly_limit / CENTS_PER_DOLLAR,
+    max: limitDollars,
     unit: "dollars",
+    subtitle: `Limit: $${limitDollars.toFixed(2)}`,
   };
 }
 
-// Main Fetch
-
-/**
- * Fetch Claude usage data.
- * API: GET https://api.anthropic.com/api/oauth/usage
- */
 export async function fetchClaude(): Promise<MetricLine[]> {
   const credentials = loadCredentials();
 
@@ -171,13 +150,11 @@ export async function fetchClaude(): Promise<MetricLine[]> {
   const usage = (await response.json()) as ClaudeUsageResponse;
   const lines: MetricLine[] = [];
 
-  // Plan badge
   const planLabel = formatPlanLabel(credentials.subscriptionType);
   if (planLabel) {
     lines.push({ type: "badge", label: "Plan", text: planLabel });
   }
 
-  // Usage windows: Session (5h), Weekly (7d), Opus (7d opus)
   const windowConfigs: [ClaudeWindow | undefined, string][] = [
     [usage.five_hour, "Session"],
     [usage.seven_day, "Weekly"],
@@ -189,7 +166,6 @@ export async function fetchClaude(): Promise<MetricLine[]> {
     if (line) lines.push(line);
   }
 
-  // Extra usage (overages)
   const extraLine = makeExtraUsageLine(usage.extra_usage);
   if (extraLine) lines.push(extraLine);
 

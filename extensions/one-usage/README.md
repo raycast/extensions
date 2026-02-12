@@ -4,61 +4,46 @@ Track your AI coding tool usage — [Claude](https://claude.ai), [Codex](https:/
 
 ## Features
 
-- **View Usage** — See usage details for all enabled providers in a Raycast list, including plan type, rate limit windows, spend tracking, and reset countdowns.
-- **Menu Bar Usage** — Keep usage percentages visible in your macOS menu bar at a glance. Shows all providers (e.g. `C:45% X:18% R:62%`) or a single pinned provider (e.g. `45%`), with configurable refresh intervals.
-- **Pin to Menu Bar** — From the View Usage command, pin any provider to the menu bar via the action panel (`⌘⇧P`). Use `⌘⇧A` to switch back to showing all providers.
+- **View Usage** — See usage details for all enabled providers in a Raycast list: plan type, rate-limit windows, spend tracking, and reset countdowns. Open **Usage Dashboard** or **Status Page** per provider from the action panel.
+- **Menu Bar Usage** — Keep usage visible in the macOS menu bar. Shows all providers (e.g. one percentage per provider) or a single pinned provider (e.g. `45%`), with configurable refresh intervals.
+- **Pin to Menu Bar** — From View Usage, pin any provider to the menu bar via the action panel (`⌘⇧P`). Use **Show All in Menu Bar** (`⌘⇧A`) to show all providers again.
+- **Reorder Providers** — In View Usage, change the order of providers with **Move to Top** (`⌘⇧T`), **Move Up** (`⌘↑`), and **Move Down** (`⌘↓`). Order is shared with the menu bar dropdown.
 
 ### What Each Provider Shows
 
-| Provider | Metrics |
-| -------- | ------- |
-| Claude   | Plan type, Session (5h) usage %, Weekly (7d) usage %, Opus usage %, Extra usage (dollar spend) |
-| Codex    | Plan type, Session usage %, Weekly usage %, Code Review usage %, Credits balance |
-| Cursor   | Plan name, Overall usage %, Included spend ($), On-demand spend ($) |
+| Provider | Metrics                                                                                 |
+| -------- | --------------------------------------------------------------------------------------- |
+| Claude   | Plan type, Session (5h) %, Weekly (7d) %, Opus %, Extra (dollar spend vs monthly limit) |
+| Codex    | Plan type, Session %, Weekly %, Reviews % (code review), Credits balance                |
+| Cursor   | Plan name, Usage %, Included spend ($), On-demand spend ($)                             |
 
-All progress metrics include a "Resets in X" countdown when available.
+Progress metrics show a “Resets in X” countdown when the provider supplies a reset time.
 
 ## Setup
 
-This extension reads locally stored credentials from each AI tool. **No API keys or manual tokens are needed** — just sign in to each tool normally.
+This extension reads locally stored credentials from each AI tool. **No API keys or manual tokens are needed** — sign in to each tool as usual.
 
 ### Claude
 
-Sign in to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) via the CLI (`claude` command). The extension resolves credentials in this order:
+Sign in to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (e.g. via the `claude` CLI). The extension resolves credentials in this order:
 
-1. **macOS Keychain** — reads the `Claude Code-credentials` entry (preferred)
-2. **File fallback** — reads `~/.claude/.credentials.json`
+1. **macOS Keychain** — `Claude Code-credentials` (preferred)
+2. **File** — `~/.claude/.credentials.json`
 
 ### Codex
 
-Sign in to [Codex CLI](https://github.com/openai/codex) (`codex` command). The extension reads your auth token from `~/.codex/auth.json`.
+Sign in to [Codex](https://chatgpt.com) via the Codex CLI (`codex`). The extension reads your auth token from `~/.codex/auth.json`.
 
 ### Cursor
 
-Sign in to [Cursor](https://cursor.sh) (the editor). The extension reads your session token from Cursor's local SQLite database at `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`. If your token has expired, the extension will automatically refresh it using the stored refresh token.
+Sign in to [Cursor](https://cursor.sh) in the editor. The extension reads the session token from Cursor’s local SQLite DB at `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`. If the token is expired, it is refreshed automatically using the stored refresh token.
 
-## Preferences
+## Development
 
-### Extension Preferences
-
-| Preference    | Description        | Default |
-| ------------- | ------------------ | ------- |
-| Enable Claude | Show Claude usage  | On      |
-| Enable Codex  | Show Codex usage   | On      |
-| Enable Cursor | Show Cursor usage  | On      |
-
-### Menu Bar Command Preferences
-
-| Preference       | Description                                          | Default         |
-| ---------------- | ---------------------------------------------------- | --------------- |
-| Refresh Interval | How often to fetch fresh usage data in the background | Every 5 minutes |
-
-> **Tip:** To choose which provider is shown in the menu bar, use the **Pin to Menu Bar** action in the View Usage command rather than a separate preference.
-
-## Data & Privacy
-
-This extension only reads locally stored credentials to fetch your usage data directly from each provider's API. **No data is collected, stored remotely, or shared.** All communication happens between your machine and the official provider APIs:
-
-- Claude: `api.anthropic.com`
-- Codex: `chatgpt.com`
-- Cursor: `api2.cursor.sh`
+```bash
+npm install
+npm run dev      # Run in Raycast development mode
+npm run build    # Build the extension
+npm run lint     # Lint
+npm run fix-lint # Lint with auto-fix
+```

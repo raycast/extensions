@@ -1,31 +1,37 @@
-import { Color, Image, getPreferenceValues } from "@raycast/api";
+import { Image, getPreferenceValues } from "@raycast/api";
 import { ProviderConfig, ProviderResult } from "../types";
 import { fetchClaude } from "./claude";
 import { fetchCodex } from "./codex";
 import { fetchCursor } from "./cursor";
 
-// Preferences
-
-// Preferences are auto-generated in raycast-env.d.ts
-
-// Provider Metadata
-
 export interface ProviderMeta {
   name: string;
   icon: Image.ImageLike;
-  color: Color;
-  url: string;
+  usageUrl: string;
+  statusUrl: string;
 }
 
 export const PROVIDER_META: Record<string, ProviderMeta> = {
-  claude: { name: "Claude", icon: "provider-icons/claude.svg", color: Color.Orange, url: "https://claude.ai" },
-  codex: { name: "Codex", icon: "provider-icons/codex.svg", color: Color.Green, url: "https://chatgpt.com" },
-  cursor: { name: "Cursor", icon: "provider-icons/cursor.svg", color: Color.Blue, url: "https://cursor.sh" },
+  claude: {
+    name: "Claude",
+    icon: "provider-icons/claude.svg",
+    usageUrl: "https://platform.claude.com/settings/billing",
+    statusUrl: "https://status.claude.com/",
+  },
+  codex: {
+    name: "Codex",
+    icon: "provider-icons/codex.svg",
+    usageUrl: "https://chatgpt.com/codex/settings/usage",
+    statusUrl: "https://status.openai.com/",
+  },
+  cursor: {
+    name: "Cursor",
+    icon: "provider-icons/cursor.svg",
+    usageUrl: "https://cursor.com/dashboard?tab=usage",
+    statusUrl: "https://status.cursor.com/",
+  },
 };
 
-// Provider Registry
-
-/** Check if a specific provider is enabled in preferences. */
 export function isProviderEnabled(providerId: string): boolean {
   const prefs = getPreferenceValues<Preferences>();
   const map: Record<string, boolean> = {
@@ -36,7 +42,6 @@ export function isProviderEnabled(providerId: string): boolean {
   return map[providerId] ?? false;
 }
 
-/** Return sorted IDs of currently enabled providers (for cache invalidation). */
 export function getEnabledProviderIds(): string[] {
   const prefs = getPreferenceValues<Preferences>();
   const ids: string[] = [];
@@ -58,12 +63,6 @@ function getEnabledProviders(): ProviderConfig[] {
   return all.filter((p) => p.enabled);
 }
 
-// Data Fetching
-
-/**
- * Fetch usage data from all enabled providers in parallel.
- * Returns a ProviderResult for each enabled provider, including errors.
- */
 export async function fetchAllProviders(): Promise<ProviderResult[]> {
   const providers = getEnabledProviders();
   if (providers.length === 0) return [];

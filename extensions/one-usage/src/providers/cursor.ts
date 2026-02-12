@@ -2,13 +2,9 @@ import { existsSync } from "fs";
 import { MetricLine } from "../types";
 import { expandPath, formatResetTimeFromUnixMillisecondsString, isJwtExpired, readSqliteValue } from "../utils";
 
-// Constants
-
 const STATE_DB_PATH = "~/Library/Application Support/Cursor/User/globalStorage/state.vscdb";
 const BASE_URL = "https://api2.cursor.sh";
 const CLIENT_ID = "KbZUR41cY7W6zRSdpSUJ7I7mLYBKOCmB";
-
-// Private Types
 
 interface CursorPlanUsage {
   totalSpend?: number;
@@ -40,12 +36,6 @@ interface CursorPlanInfo {
   };
 }
 
-// Token Refresh
-
-/**
- * Refresh an expired Cursor access token using the stored refresh token.
- * Uses OAuth endpoint: POST https://api2.cursor.sh/oauth/token
- */
 async function refreshToken(dbPath: string): Promise<string> {
   const refreshTokenValue = readSqliteValue(dbPath, "cursorAuth/refreshToken");
 
@@ -75,14 +65,6 @@ async function refreshToken(dbPath: string): Promise<string> {
   return data.access_token;
 }
 
-// API Requests
-
-/**
- * Fetch usage and plan info in parallel.
- * APIs:
- *   POST https://api2.cursor.sh/aiserver.v1.DashboardService/GetCurrentPeriodUsage
- *   POST https://api2.cursor.sh/aiserver.v1.DashboardService/GetPlanInfo
- */
 async function fetchUsageAndPlan(token: string): Promise<[CursorPeriodUsage, CursorPlanInfo]> {
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -112,13 +94,6 @@ async function fetchUsageAndPlan(token: string): Promise<[CursorPeriodUsage, Cur
   return [usage, plan];
 }
 
-// Main Fetch
-
-/**
- * Fetch Cursor usage data.
- * Auth source: SQLite database at ~/Library/Application Support/Cursor/User/globalStorage/state.vscdb
- * Includes automatic JWT token refresh when expired.
- */
 export async function fetchCursor(): Promise<MetricLine[]> {
   const dbPath = expandPath(STATE_DB_PATH);
   if (!existsSync(dbPath)) {
@@ -132,7 +107,6 @@ export async function fetchCursor(): Promise<MetricLine[]> {
     throw new Error("Cursor token not found. Sign in to Cursor.");
   }
 
-  // Refresh expired token automatically
   if (isJwtExpired(token)) {
     token = await refreshToken(dbPath);
   }
@@ -155,7 +129,6 @@ export async function fetchCursor(): Promise<MetricLine[]> {
     },
   ];
 
-  // Included spend
   if (pu.limit && pu.limit > 0) {
     const remaining = (pu.remaining ?? 0) / 100;
     const limit = pu.limit / 100;
@@ -169,7 +142,6 @@ export async function fetchCursor(): Promise<MetricLine[]> {
     });
   }
 
-  // On-demand spend limit
   if (usage.spendLimitUsage) {
     const su = usage.spendLimitUsage;
     if (su.individualLimit && su.individualLimit > 0) {

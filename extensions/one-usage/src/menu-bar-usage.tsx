@@ -2,13 +2,13 @@ import { Cache, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences 
 import { useCachedPromise } from "@raycast/utils";
 import { PROVIDER_META, fetchAllProviders, getEnabledProviderIds, isProviderEnabled } from "./providers/registry";
 import { MetricLine, ProviderResult } from "./types";
-import { formatProgressValue, getPrimaryPercentage, getSelectedMenuBarProvider } from "./utils";
-
-// Preferences
-
-// Preferences are auto-generated in raycast-env.d.ts
-
-// Refresh Interval Cache
+import {
+  formatProgressValue,
+  getPrimaryPercentage,
+  getProviderOrder,
+  getSelectedMenuBarProvider,
+  reorderProviders,
+} from "./utils";
 
 const cache = new Cache();
 const LAST_FETCH_KEY = "menu-bar-last-fetch";
@@ -26,18 +26,11 @@ function getRefreshIntervalMs(interval?: string): number {
   return INTERVAL_MS[interval ?? "5m"] ?? INTERVAL_MS["5m"];
 }
 
-// Data Fetching
-
-/**
- * Throttled fetch: only calls APIs when the user's preferred interval has elapsed.
- * Returns cached data otherwise.
- */
 async function fetchWithThrottle(): Promise<ProviderResult[]> {
   const prefs = getPreferenceValues<Preferences.MenuBarUsage>();
   const intervalMs = getRefreshIntervalMs(prefs.refreshInterval);
   const now = Date.now();
 
-  // Invalidate cache when the set of enabled providers changes
   const currentProviders = getEnabledProviderIds().join(",");
   const cachedProviders = cache.get(CACHED_PROVIDERS_KEY);
   const providersChanged = cachedProviders !== currentProviders;
@@ -52,7 +45,7 @@ async function fetchWithThrottle(): Promise<ProviderResult[]> {
           try {
             return JSON.parse(cachedData) as ProviderResult[];
           } catch {
-            // Corrupted cache — fall through to fresh fetch
+            // No actions
           }
         }
       }
@@ -66,12 +59,6 @@ async function fetchWithThrottle(): Promise<ProviderResult[]> {
   return results;
 }
 
-// Menu Bar Helpers
-
-/**
- * Build the menu bar title showing primary percentage for selected provider(s).
- * Single provider: "45%"  —  All providers: "C:45% X:18% R:62%"
- */
 function buildMenuBarTitle(results: ProviderResult[], selectedProvider: string): string {
   const filtered = selectedProvider === "all" ? results : results.filter((r) => r.id === selectedProvider);
 
@@ -102,18 +89,16 @@ function formatMenuBarLine(line: MetricLine): string {
   }
 }
 
-// Component
-
 export default function MenuBarUsage() {
   const { data, isLoading, revalidate } = useCachedPromise(fetchWithThrottle, [], {
     keepPreviousData: true,
   });
 
-  // Read provider selection from shared cache (set via "Pin to Menu Bar" in View Usage)
+  const orderedData = data ? reorderProviders(data, getProviderOrder()) : undefined;
+
   const rawProvider = getSelectedMenuBarProvider() ?? "all";
-  // Fall back to "all" if the selected provider is disabled
   const selectedProvider = rawProvider !== "all" && !isProviderEnabled(rawProvider) ? "all" : rawProvider;
-  const title = data && data.length > 0 ? buildMenuBarTitle(data, selectedProvider) : "Usage";
+  const title = orderedData && orderedData.length > 0 ? buildMenuBarTitle(orderedData, selectedProvider) : "Usage";
 
   const menuBarIcon =
     selectedProvider !== "all" && PROVIDER_META[selectedProvider]
@@ -122,7 +107,7 @@ export default function MenuBarUsage() {
 
   return (
     <MenuBarExtra icon={menuBarIcon} title={title} isLoading={isLoading}>
-      {data?.map((result) => (
+      {orderedData?.map((result) => (
         <MenuBarExtra.Section title={result.name} key={result.id}>
           {result.error ? (
             <MenuBarExtra.Item title={`⚠️ ${result.error}`} />

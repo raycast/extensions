@@ -2,25 +2,50 @@ import { Cache } from "@raycast/api";
 import { execSync } from "child_process";
 import { homedir } from "os";
 import { join } from "path";
-import { MetricLine } from "./types";
+import { MetricLine, ProviderResult } from "./types";
 
-// Shared cache key for cross-command communication (menu bar provider selection)
 const SELECTED_PROVIDER_KEY = "menu-bar-selected-provider";
+const PROVIDER_ORDER_KEY = "provider-order";
 const sharedCache = new Cache();
 
-/** Get the user-selected menu bar provider (set from View Usage). Returns undefined if not set. */
 export function getSelectedMenuBarProvider(): string | undefined {
   return sharedCache.get(SELECTED_PROVIDER_KEY) || undefined;
 }
 
-/** Set the menu bar provider (called from View Usage). Use "all" to show all providers. */
 export function setSelectedMenuBarProvider(providerId: string): void {
   sharedCache.set(SELECTED_PROVIDER_KEY, providerId);
 }
 
-/**
- * Expand ~ to the user's home directory.
- */
+export function getProviderOrder(): string[] | undefined {
+  const raw = sharedCache.get(PROVIDER_ORDER_KEY);
+  if (!raw) return undefined;
+  try {
+    const arr = JSON.parse(raw) as unknown;
+    return Array.isArray(arr) && arr.every((x) => typeof x === "string") ? (arr as string[]) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function setProviderOrder(providerIds: string[]): void {
+  sharedCache.set(PROVIDER_ORDER_KEY, JSON.stringify(providerIds));
+}
+
+export function reorderProviders(data: ProviderResult[] | undefined, order: string[] | undefined): ProviderResult[] {
+  if (!data?.length) return data ?? [];
+  if (!order?.length) return data;
+  const byId = new Map(data.map((r) => [r.id, r]));
+  const ordered: ProviderResult[] = [];
+  for (const id of order) {
+    const r = byId.get(id);
+    if (r) ordered.push(r);
+  }
+  for (const r of data) {
+    if (!order.includes(r.id)) ordered.push(r);
+  }
+  return ordered;
+}
+
 export function expandPath(path: string): string {
   if (path.startsWith("~/")) {
     return join(homedir(), path.slice(2));
@@ -28,10 +53,6 @@ export function expandPath(path: string): string {
   return path;
 }
 
-/**
- * Read a single string value from a SQLite key-value table using the sqlite3 CLI.
- * Matches the Swift SQLiteHelper.readValue behavior.
- */
 export function readSqliteValue(
   dbPath: string,
   key: string,
@@ -55,10 +76,6 @@ export function readSqliteValue(
   }
 }
 
-/**
- * Read a password from the macOS Keychain using the `security` CLI.
- * Returns null if not found or access denied.
- */
 export function readKeychainPassword(service: string): string | null {
   try {
     const result = execSync(`/usr/bin/security find-generic-password -s "${service}" -w 2>/dev/null`, {
@@ -71,10 +88,6 @@ export function readKeychainPassword(service: string): string | null {
   }
 }
 
-/**
- * Check if a JWT token is expired (with a 5-minute buffer).
- * Matches the Swift isTokenExpired behavior.
- */
 export function isJwtExpired(jwt: string, bufferSeconds = 300): boolean {
   const parts = jwt.split(".");
   if (parts.length < 2) return true;
@@ -91,10 +104,6 @@ export function isJwtExpired(jwt: string, bufferSeconds = 300): boolean {
   }
 }
 
-/**
- * Format a Date to a human-readable "Resets in X" string.
- * Matches the Swift ResetTimeFormatter.format behavior.
- */
 export function formatResetTime(date: Date): string {
   const secondsRemaining = (date.getTime() - Date.now()) / 1000;
   if (secondsRemaining <= 0) return "Resets soon";
@@ -110,34 +119,26 @@ export function formatResetTime(date: Date): string {
   return "Resets in <1m";
 }
 
-/** Format an ISO 8601 date string to "Resets in X" */
 export function formatResetTimeFromISO(isoString: string): string | undefined {
   const date = new Date(isoString);
   if (isNaN(date.getTime())) return undefined;
   return formatResetTime(date);
 }
 
-/** Format a Unix timestamp (seconds) to "Resets in X" */
 export function formatResetTimeFromUnixSeconds(seconds: number): string | undefined {
   return formatResetTime(new Date(seconds * 1000));
 }
 
-/** Format a Unix timestamp (milliseconds) to "Resets in X" */
 export function formatResetTimeFromUnixMilliseconds(ms: number): string | undefined {
   return formatResetTime(new Date(ms));
 }
 
-/** Format a Unix timestamp string (milliseconds) to "Resets in X" */
 export function formatResetTimeFromUnixMillisecondsString(msString: string): string | undefined {
   const ms = parseInt(msString, 10);
   if (isNaN(ms)) return undefined;
   return formatResetTimeFromUnixMilliseconds(ms);
 }
 
-/**
- * Generate a visual progress bar string using ■/□ characters.
- * Example: "■■■■■■□□□□ 60%"
- */
 export function formatProgressBar(percentage: number, length = 10): string {
   const clamped = Math.max(0, Math.min(100, percentage));
   const filled = Math.round((clamped / 100) * length);
@@ -145,10 +146,6 @@ export function formatProgressBar(percentage: number, length = 10): string {
   return "■".repeat(filled) + "□".repeat(empty);
 }
 
-/**
- * Format a progress value for display.
- * Matches the Swift MetricLine.formatProgressValue behavior.
- */
 export function formatProgressValue(value: number, max: number, unit?: "percent" | "dollars"): string {
   switch (unit) {
     case "percent":
@@ -160,18 +157,13 @@ export function formatProgressValue(value: number, max: number, unit?: "percent"
   }
 }
 
-/**
- * Get the primary percentage (0–100) from a list of MetricLines.
- * Matches the Swift ProviderOutput.primaryPercentage behavior.
- */
 export function getPrimaryPercentage(lines: MetricLine[]): number | undefined {
-  // Prefer the first percent-unit progress line
   for (const line of lines) {
     if (line.type === "progress" && line.unit === "percent" && line.max > 0) {
       return Math.min(100, Math.max(0, (line.value / line.max) * 100));
     }
   }
-  // Fall back to any progress line
+
   for (const line of lines) {
     if (line.type === "progress" && line.max > 0) {
       return Math.min(100, Math.max(0, (line.value / line.max) * 100));
