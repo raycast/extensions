@@ -6,6 +6,7 @@ import { GitBranchItem } from "./GitBranches/GitBranchItem.js";
 import { CreateNewBranch } from "./actions/CreateNewBranch.js";
 import { SwitchToLastBranch } from "./actions/SwitchToLastBranch.js";
 import { useRepoStorage } from "../hooks/useRepo.js";
+import { parseBranches } from "../utils/git-branch/branch.js";
 
 interface Props {
   checkStatus: () => void;
@@ -16,7 +17,7 @@ export function GitBranches({ checkStatus }: Props) {
   const { data, isLoading, revalidate } = useExec("git", ["branch", "--sort=-committerdate", "--no-color"], {
     cwd: repo.value,
     parseOutput: ({ stdout }) => {
-      return stdout.split("\n");
+      return parseBranches(stdout);
     },
     onData: () => {
       checkStatus();
@@ -28,14 +29,14 @@ export function GitBranches({ checkStatus }: Props) {
   });
 
   const branchItems = useMemo(() => {
-    if (!data) {
+    if (!data?.length) {
       return <List.EmptyView title="There are no branches" />;
     }
 
     return data.map((branch) => (
-      <GitBranchItem key={branch.replace(/^\*\s/, "")} branch={branch.trim()} checkBranches={revalidate} />
+      <GitBranchItem key={branch.name} branch={branch} checkBranches={revalidate} updateRepo={repo.setValue} />
     ));
-  }, [data, revalidate]);
+  }, [data, repo.setValue, revalidate]);
 
   return (
     <Providers repo={repo.value} checkStatus={checkStatus}>

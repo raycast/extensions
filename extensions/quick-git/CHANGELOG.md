@@ -1,5 +1,13 @@
 # Quick Git Changelog
 
+## [Working with worktrees] - {PR_MERGE_DATE}
+
+Added support for navigating and managing worktrees.
+
+- Create, delete and change to a worktree
+- Better support for identifing submodules
+- Updated shortcuts to support Windows
+
 ## [Smoother repo selection] - 2025-08-18
 
 Updated how repos are selected so that it is quicker to change between them.

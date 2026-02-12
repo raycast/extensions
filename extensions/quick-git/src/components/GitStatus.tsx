@@ -40,7 +40,14 @@ export function GitStatus() {
 
   const statusItems = useMemo(() => {
     if (!data?.files.length) {
-      return <GitStatusEmpty branch={data?.branch} />;
+      return (
+        <GitStatusEmpty
+          ahead={data?.branch.ahead}
+          behind={data?.branch.behind}
+          name={data?.branch.name}
+          upstream={data?.branch.upstream}
+        />
+      );
     }
 
     return data.files.map((item) => <GitStatusItem key={item.fileName} status={item} branch={data.branch} />);
