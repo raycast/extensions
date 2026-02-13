@@ -2,6 +2,7 @@
 import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
+import { DEFAULT_TITLE } from "./constants";
 import { formatLastUpdatedAt, formatProgressBar, formatProgressValue } from "./format";
 import { useLocalUsage } from "./hooks/use-local-usage";
 import { fetchAllProviders, PROVIDER_META } from "./providers/registry";
@@ -12,6 +13,11 @@ const getProviderIcon = (providerId: string): Image.ImageLike => {
   return PROVIDER_META[providerId]?.icon ?? { source: Icon.Info, tintColor: Color.PrimaryText };
 };
 
+const getProviderTitle = (providerId: string): string => {
+  if (providerId === "all") return DEFAULT_TITLE;
+  return PROVIDER_META[providerId]?.name ?? providerId;
+};
+
 const lineToDisplayValue = (line: MetricLine): string => {
   switch (line.type) {
     case "text":
@@ -20,7 +26,7 @@ const lineToDisplayValue = (line: MetricLine): string => {
       return line.text;
     case "progress": {
       const pct = line.max > 0 ? Math.round((line.value / line.max) * 100) : 0;
-      const valueText = formatProgressValue(line.value, line.max, line.unit);
+      const valueText = formatProgressValue(line.value, line.unit);
       const bar = formatProgressBar(pct);
       return `${bar} ${valueText}${line.unit === "percent" ? "" : ` / $${line.max.toFixed(2)}`}`;
     }
@@ -69,7 +75,7 @@ interface ProviderActionsProps {
   onReorder: (newOrder: string[]) => void;
 }
 
-const ProviderActions = ({
+const ProviderActions: React.FC<ProviderActionsProps> = ({
   providerId,
   providerName,
   selectedProvider,
@@ -77,7 +83,7 @@ const ProviderActions = ({
   onRefresh,
   onSetMenuBarProvider,
   onReorder,
-}: ProviderActionsProps) => {
+}) => {
   const meta = PROVIDER_META[providerId];
   const isPinned = selectedProvider === providerId;
   const index = orderedIds.indexOf(providerId);
@@ -148,9 +154,15 @@ const ProviderActions = ({
   );
 };
 
-const ProviderDetail = ({ result, lastUpdatedText }: { result: ProviderResult; lastUpdatedText: string | null }) => {
+interface ProviderDetailProps {
+  result: ProviderResult;
+  lastUpdated: number | null;
+}
+
+const ProviderDetail: React.FC<ProviderDetailProps> = ({ result, lastUpdated }) => {
   const meta = PROVIDER_META[result.id];
   const detailMeta = getDetailMeta(result);
+  const lastUpdatedAtText = formatLastUpdatedAt(lastUpdated);
 
   return (
     <List.Item.Detail
@@ -161,7 +173,7 @@ const ProviderDetail = ({ result, lastUpdatedText }: { result: ProviderResult; l
             <List.Item.Detail.Metadata.Label key={`${label}-${i}`} title={label} text={value} />
           ))}
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Last Updated" text={lastUpdatedText || ""} />
+          <List.Item.Detail.Metadata.Label title="Last Updated" text={lastUpdatedAtText || ""} />
           {detailMeta.length > 0 && meta ? <List.Item.Detail.Metadata.Separator /> : null}
           {meta && (
             <>
@@ -175,14 +187,18 @@ const ProviderDetail = ({ result, lastUpdatedText }: { result: ProviderResult; l
   );
 };
 
-const ViewUsage = () => {
-  const { providerOrder, selectedProvider, lastUpdatedMs, setLastUpdatedMs, setSelectedProvider, setProviderOrder } =
+const ViewUsage: React.FC = () => {
+  const { providerOrder, selectedProvider, lastUpdated, setLastUpdated, setSelectedProvider, setProviderOrder } =
     useLocalUsage();
 
-  const { data, isLoading, revalidate } = useCachedPromise(
+  const {
+    data = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
     async () => {
       const results = await fetchAllProviders();
-      setLastUpdatedMs(Date.now());
+      setLastUpdated(Date.now());
       return results;
     },
     [],
@@ -191,13 +207,11 @@ const ViewUsage = () => {
 
   const orderedData = useMemo(() => reorderProviders(data, providerOrder), [data, providerOrder]);
   const orderedIds = useMemo(() => orderedData.map((r) => r.id), [orderedData]);
-  const selectedProviderId = selectedProvider === "all" ? orderedIds[0] : selectedProvider;
 
   const handleSetMenuBarProvider = (providerId: string) => {
     setSelectedProvider(providerId);
-
-    const label = providerId === "all" ? "All Providers" : (PROVIDER_META[providerId]?.name ?? providerId);
-    showToast({ style: Toast.Style.Success, title: `Menu Bar → ${label}` });
+    const title = getProviderTitle(providerId);
+    showToast({ style: Toast.Style.Success, title: `Menu Bar → ${title}` });
   };
 
   return (
@@ -214,8 +228,8 @@ const ViewUsage = () => {
           key={result.id}
           title={result.name}
           icon={result.error ? { source: Icon.ExclamationMark, tintColor: Color.Red } : getProviderIcon(result.id)}
-          accessories={selectedProviderId === result.id ? [{ tag: { value: "Selected", color: Color.Blue } }] : []}
-          detail={<ProviderDetail result={result} lastUpdatedText={formatLastUpdatedAt(lastUpdatedMs ?? 0)} />}
+          accessories={selectedProvider === result.id ? [{ tag: { value: "Selected", color: Color.Blue } }] : []}
+          detail={<ProviderDetail result={result} lastUpdated={lastUpdated} />}
           actions={
             <ProviderActions
               providerId={result.id}

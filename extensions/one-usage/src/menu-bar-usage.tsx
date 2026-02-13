@@ -1,22 +1,25 @@
 import { getPreferenceValues, Icon, Image, MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
+import { DEFAULT_ICON, DEFAULT_TITLE } from "./constants";
 import { formatLastUpdatedAt, formatProgressValue, getPrimaryPercentage } from "./format";
 import { useLocalUsage } from "./hooks/use-local-usage";
-import { fetchAllProviders, isProviderEnabled, PROVIDER_META } from "./providers/registry";
+import { fetchAllProviders, PROVIDER_META } from "./providers/registry";
 import { MetricLine, ProviderResult } from "./types";
-import { reorderProviders } from "./util";
 
-const DEFAULT_TITLE = "Usage";
-const DEFAULT_ICON = "extension-icon.png";
 const MIN_REFRESH_MS = 60 * 1000;
 
 const formatMenuBarTitle = (results: ProviderResult[], selectedProvider: string): string => {
   if (selectedProvider === "all") return DEFAULT_TITLE;
-  const result = results.find((r) => r.id === selectedProvider);
+  const result = results?.find((r) => r.id === selectedProvider);
   if (!result?.lines) return DEFAULT_TITLE;
   const pct = getPrimaryPercentage(result.lines);
   return pct !== undefined ? `${Math.round(pct)}%` : DEFAULT_TITLE;
+};
+
+const getMenuBarIcon = (provider: string): Image.ImageLike => {
+  if (provider === "all") return DEFAULT_ICON;
+  return PROVIDER_META[provider]?.icon ?? DEFAULT_ICON;
 };
 
 const refreshIntervalToMs = (value: string): number => {
@@ -25,23 +28,12 @@ const refreshIntervalToMs = (value: string): number => {
   return Math.max(MIN_REFRESH_MS, parseInt(match[1], 10) * 60 * 1000);
 };
 
-const getSelectedProvider = (provider: string | undefined, orderedData: ProviderResult[] | undefined): string => {
-  if (provider && isProviderEnabled(provider)) return provider;
-  if (provider && !isProviderEnabled(provider)) return "all";
-  return orderedData?.[0]?.id ?? "all";
-};
-
-const getMenuBarIcon = (provider: string): Image.ImageLike => {
-  if (provider === "all") return DEFAULT_ICON;
-  return PROVIDER_META[provider]?.icon ?? DEFAULT_ICON;
-};
-
 const formatMenuBarLine = (line: MetricLine): string => {
   switch (line.type) {
     case "badge":
       return `${line.label}: ${line.text}`;
     case "progress": {
-      const value = formatProgressValue(line.value, line.max, line.unit);
+      const value = formatProgressValue(line.value, line.unit);
       const subtitle = line.subtitle ? `  ·  ${line.subtitle}` : "";
       return `${line.label}: ${value}${subtitle}`;
     }
@@ -50,14 +42,21 @@ const formatMenuBarLine = (line: MetricLine): string => {
   }
 };
 
-const ProviderMenuSection = ({ result, lastUpdatedAt }: { result: ProviderResult; lastUpdatedAt: string | null }) => {
-  const meta = PROVIDER_META[result.id];
+interface ProviderMenuSectionProps {
+  provider: ProviderResult;
+  lastUpdated: number | null;
+}
+
+const ProviderMenuSection: React.FC<ProviderMenuSectionProps> = ({ provider, lastUpdated }) => {
+  const meta = PROVIDER_META[provider.id];
+  const lastUpdatedAtText = formatLastUpdatedAt(lastUpdated);
+
   return (
-    <MenuBarExtra.Section title={result.name}>
-      {result.error ? (
-        <MenuBarExtra.Item title={`⚠️ ${result.error}`} onAction={() => {}} />
+    <MenuBarExtra.Section title={provider.name}>
+      {provider.error ? (
+        <MenuBarExtra.Item title={`⚠️ ${provider.error}`} onAction={() => {}} />
       ) : (
-        result.lines?.map((line, i) => (
+        provider.lines?.map((line, i) => (
           <MenuBarExtra.Item
             key={`${line.type}-${line.label}-${i}`}
             icon={meta?.icon}
@@ -67,7 +66,7 @@ const ProviderMenuSection = ({ result, lastUpdatedAt }: { result: ProviderResult
         ))
       )}
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title={`Last Updated: ${lastUpdatedAt ?? ""}`} icon={Icon.Clock} onAction={() => {}} />
+        <MenuBarExtra.Item title={`Last Updated: ${lastUpdatedAtText}`} icon={Icon.Clock} onAction={() => {}} />
       </MenuBarExtra.Section>
       {meta && (
         <MenuBarExtra.Section>
@@ -79,22 +78,18 @@ const ProviderMenuSection = ({ result, lastUpdatedAt }: { result: ProviderResult
   );
 };
 
-const MenuBarUsage = () => {
+const MenuBarUsage: React.FC = () => {
   const { refreshInterval } = getPreferenceValues<Preferences.MenuBarUsage>();
-  const intervalMs = refreshIntervalToMs(refreshInterval);
+  const { isLoading: isLoadingLocalUsage, selectedProvider, lastUpdated, setLastUpdated } = useLocalUsage();
 
   const {
-    isLoading: isLoadingLocalUsage,
-    providerOrder,
-    selectedProvider,
-    lastUpdatedMs,
-    setLastUpdatedMs,
-  } = useLocalUsage();
-
-  const { data, isLoading, revalidate } = useCachedPromise(
+    data = [],
+    isLoading: isLoadingProviders,
+    revalidate,
+  } = useCachedPromise(
     async () => {
       const results = await fetchAllProviders();
-      setLastUpdatedMs(Date.now());
+      setLastUpdated(Date.now());
       return results;
     },
     [],
@@ -103,26 +98,20 @@ const MenuBarUsage = () => {
 
   useEffect(() => {
     if (isLoadingLocalUsage) return;
-    if (lastUpdatedMs == null || Date.now() - lastUpdatedMs > intervalMs) {
+    const intervalMs = refreshIntervalToMs(refreshInterval);
+    if (lastUpdated == null || Date.now() - lastUpdated > intervalMs) {
       revalidate();
     }
-  }, [intervalMs, isLoadingLocalUsage, lastUpdatedMs]);
+  }, [isLoadingLocalUsage]);
 
-  if (isLoadingLocalUsage) {
-    return <MenuBarExtra icon={DEFAULT_ICON} title={DEFAULT_TITLE} isLoading />;
-  }
-
-  const orderedData = data ? reorderProviders(data, providerOrder) : undefined;
-  const provider = getSelectedProvider(selectedProvider, orderedData);
-  const icon = getMenuBarIcon(provider);
-  const title = orderedData?.length ? formatMenuBarTitle(orderedData, provider) : DEFAULT_TITLE;
-  const displayData = selectedProvider === "all" ? null : orderedData?.find((r) => r.id === selectedProvider);
+  const icon = isLoadingLocalUsage ? DEFAULT_ICON : getMenuBarIcon(selectedProvider);
+  const title = isLoadingLocalUsage ? DEFAULT_TITLE : formatMenuBarTitle(data, selectedProvider);
+  const provider = isLoadingLocalUsage ? null : data.find((r) => r.id === selectedProvider);
+  const isLoading = isLoadingLocalUsage || isLoadingProviders;
 
   return (
     <MenuBarExtra icon={icon} title={title} isLoading={isLoading}>
-      {displayData && (
-        <ProviderMenuSection result={displayData} lastUpdatedAt={formatLastUpdatedAt(lastUpdatedMs ?? 0)} />
-      )}
+      {provider && <ProviderMenuSection provider={provider} lastUpdated={lastUpdated} />}
     </MenuBarExtra>
   );
 };

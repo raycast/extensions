@@ -1,6 +1,6 @@
 import { ProviderResult } from "./types";
 
-export const reorderProviders = (data: ProviderResult[] | undefined, order: string[] | undefined): ProviderResult[] => {
+export const reorderProviders = (data: ProviderResult[], order: string[]): ProviderResult[] => {
   if (!data?.length) return data ?? [];
   if (!order?.length) return data;
   const byId = new Map(data.map((r) => [r.id, r]));

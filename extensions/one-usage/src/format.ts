@@ -1,6 +1,6 @@
-import { MetricLine } from "./types";
+import { MetricLine, ProgressUnit } from "./types";
 
-const formatResetTime = (date: Date): string => {
+export const formatResetTime = (date: Date): string => {
   const secondsRemaining = (date.getTime() - Date.now()) / 1000;
   if (secondsRemaining <= 0) return "Resets soon";
 
@@ -38,7 +38,7 @@ export const formatProgressBar = (percentage: number, length = 10): string => {
   return "■".repeat(filled) + "□".repeat(empty);
 };
 
-export const formatProgressValue = (value: number, max: number, unit?: "percent" | "dollars"): string => {
+export const formatProgressValue = (value: number, unit?: ProgressUnit): string => {
   switch (unit) {
     case "percent":
       return `${Math.round(value)}%`;
@@ -49,7 +49,8 @@ export const formatProgressValue = (value: number, max: number, unit?: "percent"
   }
 };
 
-export const formatLastUpdatedAt = (ms: number): string => {
+export const formatLastUpdatedAt = (ms: number | null): string => {
+  if (ms == null) return "None";
   const elapsed = Date.now() - ms;
   if (elapsed < 60 * 1000) return "just now";
   if (elapsed < 60 * 60 * 1000) return `${Math.floor(elapsed / 60000)}m ago`;

@@ -7,18 +7,18 @@ const LAST_UPDATED_KEY = "last-updated";
 export const useLocalUsage = () => {
   const {
     isLoading: isProviderOrderLoading,
-    value: providerOrder,
+    value: providerOrder = [],
     setValue: setProviderOrder,
   } = useLocalStorage<string[]>(PROVIDER_ORDER_KEY, []);
   const {
     isLoading: isSelectedProviderLoading,
-    value: selectedProvider,
+    value: selectedProvider = "all",
     setValue: setSelectedProvider,
   } = useLocalStorage<string>(SELECTED_PROVIDER_KEY, "all");
   const {
     isLoading: isLastUpdatedLoading,
-    value: lastUpdatedMs,
-    setValue: setLastUpdatedMs,
+    value: lastUpdated = null,
+    setValue: setLastUpdated,
   } = useLocalStorage<number | null>(LAST_UPDATED_KEY, null);
 
   const isLoading = isProviderOrderLoading || isSelectedProviderLoading || isLastUpdatedLoading;
@@ -27,9 +27,9 @@ export const useLocalUsage = () => {
     isLoading,
     providerOrder,
     selectedProvider,
-    lastUpdatedMs,
+    lastUpdated,
     setProviderOrder,
     setSelectedProvider,
-    setLastUpdatedMs,
+    setLastUpdated,
   };
 };

@@ -119,7 +119,11 @@ export const fetchCursor = async (): Promise<MetricLine[]> => {
   const resetsIn = usage.billingCycleEnd ? formatResetTimeFromUnixMillisecondsString(usage.billingCycleEnd) : undefined;
 
   const lines: MetricLine[] = [
-    { type: "badge", label: "Plan", text: planName },
+    {
+      type: "badge",
+      label: "Plan",
+      text: planName,
+    },
     {
       type: "progress",
       label: "Usage",
