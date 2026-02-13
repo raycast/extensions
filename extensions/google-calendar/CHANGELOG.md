@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.4.1] - {PR_MERGE_DATE}
+## [1.4.1] - 2026-02-13
 
 - Add new command: create-quick-event – create Google Calendar events using a rule-based natural language parser (no AI setup required)
 
