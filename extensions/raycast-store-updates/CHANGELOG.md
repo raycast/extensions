@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Now includes Extension Updates] - {PR_MERGE_DATE}
+## [Now includes Extension Updates] - 2026-02-13
 
 - Now includes extension updates!
 - Platform filter preference (All/macOS/Windows) to show/hide preferred platforms
