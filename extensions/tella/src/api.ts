@@ -36,7 +36,7 @@ export class MissingApiKeyError extends Error {
 }
 
 function getAuthHeaders() {
-  const { tellaApiKey } = getPreferenceValues<{ tellaApiKey: string }>();
+  const { tellaApiKey } = getPreferenceValues<Preferences>();
   if (!tellaApiKey) {
     throw new MissingApiKeyError();
   }
