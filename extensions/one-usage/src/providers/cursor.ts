@@ -1,6 +1,7 @@
 import { existsSync } from "fs";
+import { formatResetTimeFromUnixMillisecondsString } from "../format";
+import { expandPath, isJwtExpired, readSqliteValue } from "../system";
 import { MetricLine } from "../types";
-import { expandPath, formatResetTimeFromUnixMillisecondsString, isJwtExpired, readSqliteValue } from "../utils";
 
 const STATE_DB_PATH = "~/Library/Application Support/Cursor/User/globalStorage/state.vscdb";
 const BASE_URL = "https://api2.cursor.sh";

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "fs";
+import { formatResetTimeFromUnixSeconds } from "../format";
+import { expandPath } from "../system";
 import { MetricLine } from "../types";
-import { expandPath, formatResetTimeFromUnixSeconds } from "../utils";
 
 interface CodexAuth {
   accessToken: string;

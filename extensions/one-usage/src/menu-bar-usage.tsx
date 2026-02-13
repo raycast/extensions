@@ -1,58 +1,47 @@
 import { getPreferenceValues, Icon, Image, MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { formatProgressValue, getPrimaryPercentage } from "./format";
+import {
+  getProviderOrder,
+  getSelectedMenuBarProvider,
+  hydratePreferencesFromStorage,
+  reorderProviders,
+} from "./preferences";
 import { isProviderEnabled, PROVIDER_META } from "./providers/registry";
 import { MetricLine, ProviderResult } from "./types";
 import { clearCache, fetchFromCacheOrNetwork, getLastFetchKey, getLastUpdatedFormatted } from "./usage-cache";
-import {
-  formatProgressValue,
-  getPrimaryPercentage,
-  getProviderOrder,
-  getSelectedMenuBarProvider,
-  reorderProviders,
-} from "./utils";
 
 const DEFAULT_TITLE = "Usage";
 const DEFAULT_ICON = "extension-icon.png";
 const MIN_REFRESH_MS = 60 * 1000;
 
 const buildMenuBarTitle = (results: ProviderResult[], selectedProvider: string): string => {
-  const filtered = selectedProvider === "all" ? results : results.filter((r) => r.id === selectedProvider);
-  const parts = filtered
-    .map((result) => {
-      if (!result.lines) return null;
-      const pct = getPrimaryPercentage(result.lines);
-      if (pct === undefined) return null;
-      return selectedProvider === "all" ? "Usage" : `${Math.round(pct)}%`;
-    })
-    .filter((s): s is string => s !== null);
-  return parts.length > 0 ? parts.join(" ") : DEFAULT_TITLE;
+  if (selectedProvider === "all") return DEFAULT_TITLE;
+  const result = results.find((r) => r.id === selectedProvider);
+  if (!result?.lines) return DEFAULT_TITLE;
+  const pct = getPrimaryPercentage(result.lines);
+  return pct !== undefined ? `${Math.round(pct)}%` : DEFAULT_TITLE;
 };
 
-/** Parse refresh interval preference (e.g. "1m", "30m") to milliseconds. */
 const refreshIntervalToMs = (value: string): number => {
   const match = value.match(/^(\d+)m$/);
   if (!match) return MIN_REFRESH_MS;
   return Math.max(MIN_REFRESH_MS, parseInt(match[1], 10) * 60 * 1000);
 };
 
-/** Resolve the effective menu bar provider (handles disabled provider fallback). */
-const resolveSelectedProvider = (
-  orderedData: ProviderResult[] | undefined,
-  rawProvider: string | undefined,
-): string => {
-  const fallback = orderedData?.[0]?.id ?? "all";
-  if (!rawProvider || rawProvider === "all") return "all";
-  return isProviderEnabled(rawProvider) ? rawProvider : fallback;
+const resolveSelectedProvider = (orderedData: ProviderResult[] | undefined): string => {
+  const stored = getSelectedMenuBarProvider();
+  if (stored === "all") return "all";
+  if (stored && isProviderEnabled(stored)) return stored;
+  return orderedData?.[0]?.id ?? "all";
 };
 
-/** Icon for the menu bar: provider icon when one is selected, else default. */
 const getMenuBarIcon = (selectedProvider: string): Image.ImageLike => {
   if (selectedProvider === "all") return DEFAULT_ICON;
   return PROVIDER_META[selectedProvider]?.icon ?? DEFAULT_ICON;
 };
 
-/** Format a MetricLine for display in the menu bar dropdown. */
 const formatMenuBarLine = (line: MetricLine): string => {
   switch (line.type) {
     case "badge":
@@ -67,12 +56,7 @@ const formatMenuBarLine = (line: MetricLine): string => {
   }
 };
 
-interface ProviderMenuSectionProps {
-  result: ProviderResult;
-  lastUpdatedAt: string | null;
-}
-
-const ProviderMenuSection = ({ result, lastUpdatedAt }: ProviderMenuSectionProps) => {
+const ProviderMenuSection = ({ result, lastUpdatedAt }: { result: ProviderResult; lastUpdatedAt: string | null }) => {
   const meta = PROVIDER_META[result.id];
   return (
     <MenuBarExtra.Section title={result.name}>
@@ -109,32 +93,37 @@ const MenuBarUsage = () => {
     keepPreviousData: true,
   });
 
+  const [hydrated, setHydrated] = useState(false);
+
   const handleRefresh = useCallback(() => {
     clearCache();
     revalidate();
   }, [revalidate]);
 
   useEffect(() => {
-    const lastFetchKey = getLastFetchKey();
-    const lastRefreshTime = lastFetchKey ? parseInt(lastFetchKey, 10) : 0;
-    if (lastRefreshTime === 0 || Date.now() - lastRefreshTime > intervalMs) {
+    hydratePreferencesFromStorage().then(() => setHydrated(true));
+  }, []);
+
+  useEffect(() => {
+    const raw = getLastFetchKey();
+    const lastFetchMs = raw ? parseInt(raw, 10) : NaN;
+    if (isNaN(lastFetchMs) || Date.now() - lastFetchMs > intervalMs) {
       handleRefresh();
     }
   }, [intervalMs, handleRefresh]);
 
+  if (!hydrated) {
+    return <MenuBarExtra icon={DEFAULT_ICON} title={DEFAULT_TITLE} isLoading={true} />;
+  }
+
   const orderedData = data ? reorderProviders(data, getProviderOrder()) : undefined;
-  const rawProvider = getSelectedMenuBarProvider() ?? orderedData?.[0]?.id ?? "all";
-  const selectedProvider = resolveSelectedProvider(orderedData, rawProvider);
-  const title =
-    orderedData && orderedData.length > 0 ? buildMenuBarTitle(orderedData, selectedProvider) : DEFAULT_TITLE;
-  const displayData = selectedProvider === "all" ? orderedData : orderedData?.filter((r) => r.id === selectedProvider);
-  const lastUpdatedAt = getLastUpdatedFormatted();
+  const selectedProvider = resolveSelectedProvider(orderedData);
+  const title = orderedData?.length ? buildMenuBarTitle(orderedData, selectedProvider) : DEFAULT_TITLE;
+  const displayData = selectedProvider === "all" ? null : orderedData?.find((r) => r.id === selectedProvider);
 
   return (
     <MenuBarExtra icon={getMenuBarIcon(selectedProvider)} title={title} isLoading={isLoading}>
-      {displayData?.map((result) => (
-        <ProviderMenuSection result={result} lastUpdatedAt={lastUpdatedAt} key={result.id} />
-      ))}
+      {displayData && <ProviderMenuSection result={displayData} lastUpdatedAt={getLastUpdatedFormatted()} />}
     </MenuBarExtra>
   );
 };

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "fs";
+import { formatResetTimeFromISO } from "../format";
+import { expandPath, readKeychainPassword } from "../system";
 import { MetricLine } from "../types";
-import { expandPath, formatResetTimeFromISO, readKeychainPassword } from "../utils";
 
 interface ClaudeCredentials {
   accessToken: string;

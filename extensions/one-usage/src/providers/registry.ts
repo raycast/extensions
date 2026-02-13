@@ -1,5 +1,5 @@
 import { Image, getPreferenceValues } from "@raycast/api";
-import { MetricLine, ProviderConfig, ProviderResult } from "../types";
+import { MetricLine, ProviderResult } from "../types";
 import { fetchClaude } from "./claude";
 import { fetchCodex } from "./codex";
 import { fetchCursor } from "./cursor";
@@ -9,6 +9,7 @@ export interface ProviderMeta {
   icon: Image.ImageLike;
   usageUrl: string;
   statusUrl: string;
+  fetch: () => Promise<MetricLine[]>;
 }
 
 export const PROVIDER_META: Record<string, ProviderMeta> = {
@@ -17,27 +18,25 @@ export const PROVIDER_META: Record<string, ProviderMeta> = {
     icon: "provider-icons/claude.svg",
     usageUrl: "https://platform.claude.com/settings/billing",
     statusUrl: "https://status.claude.com/",
+    fetch: fetchClaude,
   },
   codex: {
     name: "Codex",
     icon: "provider-icons/codex.svg",
     usageUrl: "https://chatgpt.com/codex/settings/usage",
     statusUrl: "https://status.openai.com/",
+    fetch: fetchCodex,
   },
   cursor: {
     name: "Cursor",
     icon: "provider-icons/cursor.svg",
     usageUrl: "https://cursor.com/dashboard?tab=usage",
     statusUrl: "https://status.cursor.com/",
+    fetch: fetchCursor,
   },
 };
 
-const PROVIDER_IDS = Object.keys(PROVIDER_META) as string[];
-const FETCHERS: Record<string, () => Promise<MetricLine[]>> = {
-  claude: fetchClaude,
-  codex: fetchCodex,
-  cursor: fetchCursor,
-};
+const PROVIDER_IDS = Object.keys(PROVIDER_META);
 
 const getPreferenceMap = (): Record<string, boolean> => {
   const prefs = getPreferenceValues<Preferences>();
@@ -48,35 +47,24 @@ const getPreferenceMap = (): Record<string, boolean> => {
   };
 };
 
-export const isProviderEnabled = (providerId: string): boolean => getPreferenceMap()[providerId] ?? false;
+export const isProviderEnabled = (id: string): boolean => getPreferenceMap()[id] ?? false;
 
-export const getEnabledProviderIds = (): string[] => PROVIDER_IDS.filter((id) => getPreferenceMap()[id]);
-
-const getEnabledProviders = (): ProviderConfig[] => {
+export const getEnabledProviderIds = (): string[] => {
   const enabled = getPreferenceMap();
-  return PROVIDER_IDS.filter((id) => enabled[id]).map((id) => ({
-    id,
-    name: PROVIDER_META[id].name,
-    enabled: true,
-    fetch: FETCHERS[id],
-  }));
+  return PROVIDER_IDS.filter((id) => enabled[id]);
 };
 
 export const fetchAllProviders = async (): Promise<ProviderResult[]> => {
-  const providers = getEnabledProviders();
-  if (providers.length === 0) return [];
+  const ids = getEnabledProviderIds();
+  if (ids.length === 0) return [];
 
-  const results = await Promise.allSettled(providers.map((p) => p.fetch()));
+  const results = await Promise.allSettled(ids.map((id) => PROVIDER_META[id].fetch()));
 
-  return providers.map((provider, index) => {
-    const result = results[index];
-    if (result.status === "fulfilled") {
-      return { id: provider.id, name: provider.name, lines: result.value };
-    }
-    return {
-      id: provider.id,
-      name: provider.name,
-      error: result.reason instanceof Error ? result.reason.message : String(result.reason),
-    };
+  return ids.map((id, i) => {
+    const result = results[i];
+    const { name } = PROVIDER_META[id];
+    return result.status === "fulfilled"
+      ? { id, name, lines: result.value }
+      : { id, name, error: result.reason instanceof Error ? result.reason.message : String(result.reason) };
   });
 };

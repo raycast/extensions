@@ -11,10 +11,3 @@ export interface ProviderResult {
   lines?: MetricLine[];
   error?: string;
 }
-
-export interface ProviderConfig {
-  id: string;
-  name: string;
-  enabled: boolean;
-  fetch: () => Promise<MetricLine[]>;
-}
