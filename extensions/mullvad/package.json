@@ -5,6 +5,7 @@
   "description": "Fastest way to connect, disconnect, and check if you are connected to Mullvad VPN.",
   "icon": "mullvad-icon.png",
   "author": "0x46616c6b",
+  "platforms": ["macOS", "Windows"],
   "contributors": [
     "sebastiankranz",
     "svenhofman"
@@ -60,15 +61,15 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/react": "^19.2.14",
     "eslint": "8.40.0",
     "prettier": "^2.5.1",
-    "react": "^18.2.0",
+    "react": "^19.2.4",
     "typescript": "^5.3.3"
   },
   "scripts": {
