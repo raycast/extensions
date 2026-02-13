@@ -1,5 +1,7 @@
 # Mullvad Changelog
 
+## [Add support for Windows] - 2026-02-13
+
 ## [Changed mullvad installation check] - 2025-05-26
 
 ## [Added config to select server for location based on ranking, added actions to reset ranking] - 2025-03-13
