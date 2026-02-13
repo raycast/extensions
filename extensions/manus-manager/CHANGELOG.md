@@ -1,6 +1,6 @@
 # Manus Manager Changelog
 
-## [Fix preferences persistence] - {PR_MERGE_DATE}
+## [Fix preferences persistence] - 2026-02-13
 
 - Fix agent profile and mode selection not being remembered between sessions
 
