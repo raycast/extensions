@@ -38,8 +38,17 @@ export async function findFFmpegPath(minimumVersion = 6.0): Promise<{ path: stri
       ? p
       : null;
 
-  const path =
-    (await canExecute(storedPath)) ?? (await canExecute(customPath)) ?? (await which("ffmpeg").catch(() => null));
+  let validStoredPath: string | null = null;
+
+  if (storedPath && (await canExecute(storedPath))) {
+    const version = await checkFFmpegVersion(storedPath);
+
+    if (version !== null && version >= minimumVersion) {
+      validStoredPath = storedPath;
+    }
+  }
+
+  const path = validStoredPath ?? (await canExecute(customPath)) ?? (await which("ffmpeg").catch(() => null));
 
   if (!path) return null;
 
