@@ -31,12 +31,6 @@ const oauthClient = new OAuth.PKCEClient({
   description: "Connect your Inoreader account to manage followed feeds.",
 });
 
-type Preferences = {
-  clientId: string;
-  clientSecret?: string;
-  scope?: string;
-};
-
 type InoreaderCategory = {
   id: string;
   label?: string;
@@ -99,7 +93,7 @@ function normalizeErrorMessage(error: unknown): string {
   return "Unknown error";
 }
 
-function getScope(preferences: Preferences): string {
+function getScope(preferences: Preferences.Sources): string {
   return preferences.scope?.trim() ? preferences.scope.trim() : "read write";
 }
 
@@ -130,7 +124,7 @@ function parseVipSourceIds(raw: string | undefined): Set<string> {
 
 async function fetchTokens(
   params: URLSearchParams,
-  preferences: Preferences,
+  preferences: Preferences.Sources,
   previousRefreshToken?: string,
 ): Promise<OAuthTokenResponse> {
   const clientId = preferences.clientId.trim();
@@ -180,7 +174,7 @@ async function fetchTokens(
   throw lastError ?? new InoreaderApiError(500, "Unknown token exchange failure");
 }
 
-async function authorizeAndGetToken(preferences: Preferences): Promise<string> {
+async function authorizeAndGetToken(preferences: Preferences.Sources): Promise<string> {
   const authRequest = await oauthClient.authorizationRequest({
     endpoint: AUTHORIZE_ENDPOINT,
     clientId: preferences.clientId.trim(),
@@ -201,7 +195,7 @@ async function authorizeAndGetToken(preferences: Preferences): Promise<string> {
   return tokenResponse.access_token;
 }
 
-async function getAccessToken(preferences: Preferences, interactive: boolean): Promise<string | undefined> {
+async function getAccessToken(preferences: Preferences.Sources, interactive: boolean): Promise<string | undefined> {
   const tokens = await oauthClient.getTokens();
   if (tokens?.accessToken) {
     return tokens.accessToken;
@@ -254,7 +248,7 @@ function getFolderNames(subscription: InoreaderSubscription): string[] {
 }
 
 export default function Command() {
-  const rawPreferences = getPreferenceValues<Preferences>();
+  const rawPreferences = getPreferenceValues<Preferences.Sources>();
   const preferences = useMemo(
     () => ({
       clientId: rawPreferences.clientId,

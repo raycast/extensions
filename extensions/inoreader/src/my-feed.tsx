@@ -12,6 +12,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -36,15 +37,6 @@ const oauthClient = new OAuth.PKCEClient({
   providerIcon: Icon.Rss,
   description: "Connect your Inoreader account to read and manage followed feeds.",
 });
-
-type Preferences = {
-  clientId: string;
-  clientSecret?: string;
-  scope?: string;
-  unreadOnly: boolean;
-  itemsPerPage: string;
-  showSiteName: boolean;
-};
 
 type InoreaderCategory = {
   id: string;
@@ -114,7 +106,7 @@ class InoreaderApiError extends Error {
   }
 }
 
-function getScope(preferences: Preferences): string {
+function getScope(preferences: Preferences.MyFeed): string {
   return preferences.scope?.trim() ? preferences.scope.trim() : "read write";
 }
 
@@ -146,7 +138,7 @@ function isInvalidClientTokenError(status: number, body: string): boolean {
 
 async function fetchTokens(
   params: URLSearchParams,
-  preferences: Preferences,
+  preferences: Preferences.MyFeed,
   previousRefreshToken?: string,
 ): Promise<OAuthTokenResponse> {
   const clientId = preferences.clientId.trim();
@@ -201,7 +193,7 @@ async function fetchTokens(
   throw lastError ?? new InoreaderApiError(500, "Unknown token exchange failure");
 }
 
-async function authorizeAndGetToken(preferences: Preferences): Promise<string> {
+async function authorizeAndGetToken(preferences: Preferences.MyFeed): Promise<string> {
   const authRequest = await oauthClient.authorizationRequest({
     endpoint: AUTHORIZE_ENDPOINT,
     clientId: preferences.clientId.trim(),
@@ -222,7 +214,7 @@ async function authorizeAndGetToken(preferences: Preferences): Promise<string> {
   return tokenResponse.access_token;
 }
 
-async function getAccessToken(preferences: Preferences, interactive: boolean): Promise<string | undefined> {
+async function getAccessToken(preferences: Preferences.MyFeed, interactive: boolean): Promise<string | undefined> {
   const tokens = await oauthClient.getTokens();
   if (tokens?.accessToken) {
     return tokens.accessToken;
@@ -303,49 +295,22 @@ function normalizeIconUrl(url?: string): string | undefined {
   return value;
 }
 
-function getHostname(url?: string): string | undefined {
-  if (!url) {
-    return undefined;
-  }
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return undefined;
-  }
-}
-
-function getFaviconHostname(article: InoreaderArticle): string | undefined {
-  const hostname = getHostname(article.origin?.htmlUrl) ?? getHostname(getArticleUrl(article));
-  return hostname;
-}
-
-function getFallbackFaviconUrl(article: InoreaderArticle): string | undefined {
-  const hostname = getFaviconHostname(article);
-  if (!hostname) {
-    return undefined;
-  }
-  return `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(`https://${hostname}`)}`;
-}
-
-function getPrimaryDomainIconUrl(article: InoreaderArticle): string | undefined {
-  const hostname = getFaviconHostname(article);
-  if (!hostname) {
-    return undefined;
-  }
-  return `https://icons.duckduckgo.com/ip3/${encodeURIComponent(hostname)}.ico`;
-}
-
 function getItemIcon(article: InoreaderArticle, subscriptionIcon?: string): Image.ImageLike {
-  const preferredUrl = getPrimaryDomainIconUrl(article) || subscriptionIcon || getFallbackFaviconUrl(article);
-  const fallbackUrl = subscriptionIcon || getFallbackFaviconUrl(article);
+  const faviconTarget = article.origin?.htmlUrl ?? getArticleUrl(article);
+  if (faviconTarget) {
+    return getFavicon(faviconTarget, {
+      fallback: subscriptionIcon || Icon.Rss,
+      mask: Image.Mask.RoundedRectangle,
+    });
+  }
 
-  if (!preferredUrl) {
+  if (!subscriptionIcon) {
     return Icon.Rss;
   }
 
   return {
-    source: preferredUrl,
-    fallback: fallbackUrl || Icon.Rss,
+    source: subscriptionIcon,
+    fallback: Icon.Rss,
     mask: Image.Mask.RoundedRectangle,
   };
 }
@@ -461,7 +426,7 @@ export function FeedView({
   defaultStreamTitle = "All Followed Feeds",
   enableStreamSelection = true,
 }: FeedViewProps) {
-  const rawPreferences = getPreferenceValues<Preferences>();
+  const rawPreferences = getPreferenceValues<Preferences.MyFeed>();
   const preferences = useMemo(
     () => ({
       clientId: rawPreferences.clientId,
