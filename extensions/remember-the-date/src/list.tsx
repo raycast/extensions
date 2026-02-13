@@ -1,6 +1,6 @@
-import { List, ActionPanel, Action, Icon, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
 import moment from "moment";
-import { refreshCommands, pluralize } from "./utils";
+import { refreshCommands, pluralize, getEffectiveDate, getRepeatLabel } from "./utils";
 import { Item, ListItems, Preferences } from "./types";
 import { EditForm } from "./editForm";
 import { getItems, saveItems } from "./storage";
@@ -60,15 +60,22 @@ function Accessories(item: Item) {
   const preferences = getPreferenceValues<Preferences>();
   const { showDate, showCountdownByDay } = preferences;
   const items = [];
+  const effectiveDate = getEffectiveDate(item);
+
+  if (item.repeat && item.repeat !== "none") {
+    items.push({
+      tag: { value: getRepeatLabel(item.repeat), color: Color.Blue },
+    });
+  }
 
   if (showDate) {
-    items.push({ text: moment(item.date).format("YYYY-MM-DD"), icon: Icon.Calendar });
+    items.push({ text: effectiveDate.format("YYYY-MM-DD"), icon: Icon.Calendar });
   }
 
   if (showCountdownByDay) {
-    items.push({ text: moment(item.date).diff(new Date(), "days") + " days", icon: Icon.Clock });
+    items.push({ text: effectiveDate.diff(moment().startOf("day"), "days") + " days", icon: Icon.Clock });
   } else {
-    items.push({ text: moment(item.date).fromNow(), icon: Icon.Clock });
+    items.push({ text: effectiveDate.fromNow(), icon: Icon.Clock });
   }
 
   return items;
@@ -112,18 +119,28 @@ function Actions({
 
 export async function getFormattedList() {
   const items: Item[] = await getItems();
-  const now = new Date().getTime();
+  const now = moment().startOf("day");
   const dates = [];
 
-  const futureDates = items.filter((item) => Date.parse(item.date) >= now);
+  const futureDates = items.filter((item) => {
+    const effective = getEffectiveDate(item);
+    return effective.isSameOrAfter(now);
+  });
   futureDates.sort(function (a, b) {
-    return a.date > b.date ? 1 : a.date < b.date ? -1 : 0;
+    const aDate = getEffectiveDate(a);
+    const bDate = getEffectiveDate(b);
+    return aDate.diff(bDate);
   });
   dates.push({ title: "Upcoming Dates", items: futureDates } as ListItems);
 
-  const pastDates = items.filter((item) => Date.parse(item.date) < now);
+  const pastDates = items.filter((item) => {
+    const effective = getEffectiveDate(item);
+    return effective.isBefore(now);
+  });
   pastDates.sort(function (a, b) {
-    return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+    const aDate = getEffectiveDate(a);
+    const bDate = getEffectiveDate(b);
+    return bDate.diff(aDate);
   });
 
   dates.push({ title: "Past Dates", items: pastDates } as ListItems);

@@ -2,6 +2,7 @@ import { MenuBarExtra, launchCommand, LaunchType, Icon, getPreferenceValues } fr
 import moment from "moment";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getFormattedList } from "./list";
+import { getEffectiveDate } from "./utils";
 
 export default function Command() {
   const { data: datesList, isLoading } = useCachedPromise(getFormattedList, []);
@@ -19,9 +20,10 @@ export default function Command() {
     return null;
   }
 
+  const nextEffective = getEffectiveDate(nextDate);
   const difference = showCountdownByDay
-    ? "in " + moment(nextDate.date).diff(new Date(), "days") + " days"
-    : moment(nextDate.date).fromNow();
+    ? "in " + nextEffective.diff(moment().startOf("day"), "days") + " days"
+    : nextEffective.fromNow();
   const untilNextDate = `${
     nextDate.name.length > 15 ? nextDate.name.substring(0, 15) + "..." : nextDate.name
   } ${difference}`;
@@ -30,9 +32,10 @@ export default function Command() {
     <MenuBarExtra icon={nextDate.icon} title={untilNextDate}>
       <MenuBarExtra.Section>
         {upcomingDates.map((item) => {
+          const itemEffective = getEffectiveDate(item);
           const until = showCountdownByDay
-            ? moment(item.date).diff(new Date(), "days") + " days"
-            : moment(item.date).fromNow();
+            ? itemEffective.diff(moment().startOf("day"), "days") + " days"
+            : itemEffective.fromNow();
           return (
             <MenuBarExtra.Item
               key={item.name}

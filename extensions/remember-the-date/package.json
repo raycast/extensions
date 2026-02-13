@@ -383,6 +383,86 @@
             "callsTool": "delete-date"
           }
         ]
+      },
+      {
+        "input": "@remember-the-date add my birthday on March 15th as a yearly recurring date",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Added \"my birthday\" on 2024-03-15",
+            "item": {
+              "id": "test-id-recurring-1",
+              "name": "my birthday",
+              "subtitle": "",
+              "date": "2024-03-15",
+              "icon": "calendar",
+              "color": "blue",
+              "repeat": "yearly"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "my birthday",
+              "date": "2024-03-15",
+              "repeat": "yearly"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date add team standup every week on Monday",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Added \"team standup\" on 2024-12-02",
+            "item": {
+              "id": "test-id-recurring-2",
+              "name": "team standup",
+              "subtitle": "",
+              "date": "2024-12-02",
+              "icon": "calendar",
+              "color": "blue",
+              "repeat": "weekly"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "repeat": "weekly"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date add rent payment on the 1st of every month",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Added \"rent payment\" on 2024-12-01",
+            "item": {
+              "id": "test-id-recurring-3",
+              "name": "rent payment",
+              "subtitle": "",
+              "date": "2024-12-01",
+              "icon": "calendar",
+              "color": "blue",
+              "repeat": "monthly"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "repeat": "monthly"
+            }
+          }
+        ]
       }
     ]
   },
