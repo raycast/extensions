@@ -1,6 +1,6 @@
 # Wifi Password Reveal Changelog
 
-## [Mention Windows + Add Images] - {PR_MERGE_DATE}
+## [Mention Windows + Add Images] - 2026-02-13
 
 - Added `metadata` images.
 - Edited README and descriptions to mention Windows.
