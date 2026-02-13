@@ -1,4 +1,3 @@
-import * as OTPAuth from "otpauth";
 import { useEffect, useMemo, useState } from "react";
 import {
   Action,
@@ -14,7 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { createSteamTotpGenerator } from "~/utils/steamTotp";
+import { getGenerator as getTotpGenerator } from "~/utils/authenticatorTotp";
 
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider } from "~/context/bitwarden";
@@ -28,14 +27,14 @@ import VaultItemContext, { useSelectedVaultItem } from "~/components/searchVault
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { showCopySuccessMessage } from "~/utils/clipboard";
-import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
-import { Err, Ok, Result, tryCatch } from "~/utils/errors";
+import { Err, tryCatch } from "~/utils/errors";
 import { useVaultSearch } from "~/utils/search";
 import ListFolderDropdown from "~/components/ListFolderDropdown";
 import ComponentReverser from "~/components/ComponentReverser";
 import { useStateEffect } from "~/utils/hooks/useStateEffect";
+import { captureException } from "~/utils/development";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
@@ -118,7 +117,7 @@ function ListItem({ item }: { item: Item }) {
   const preferences = getPreferenceValues<Preferences.Authenticator>();
 
   const [canGenerate, setCanGenerate] = useState(!item.reprompt);
-  const { code, time, error, isLoading } = authenticator.useCode(item, canGenerate);
+  const { code, time, error, isLoading } = useVaultItemCodeGenerator({ item, canGenerate });
 
   function getAccessories(): List.Item.Props["accessories"] {
     if (!canGenerate) {
@@ -236,7 +235,7 @@ function useGetCodeForAction(action: "copy" | "paste") {
       const totp = await getVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...");
       if (!totp) throw new Error("Failed to get totp");
 
-      const [generator, error] = authenticator.getGenerator(totp);
+      const [generator, error] = getTotpGenerator(totp);
       if (error) throw error;
 
       return generator.generate();
@@ -260,115 +259,72 @@ function useActiveTab() {
   });
 }
 
-type AuthenticatorOptions = {
-  secret: string;
-  period: number;
-  algorithm: string;
-  digits: number;
+type UseVaultItemCodeGeneratorArgs = {
+  item: Item;
+  canGenerate: boolean;
 };
 
-const authenticator = {
-  parseTotp(totpString: string): AuthenticatorOptions {
-    if (totpString.includes("otpauth")) {
-      const [totp, parseError] = tryCatch(() => OTPAuth.URI.parse(totpString));
-      if (parseError) throw parseError;
-      if (!(totp instanceof OTPAuth.TOTP)) throw new Error("Invalid authenticator key");
+function useVaultItemCodeGenerator(args: UseVaultItemCodeGeneratorArgs) {
+  const { item, canGenerate } = args;
 
-      return {
-        algorithm: totp.algorithm,
-        secret: totp.secret.base32.toString(),
-        period: totp.period,
-        digits: totp.digits,
-      };
-    }
+  const [[generator, error, isLoading = false], setState] = useStateEffect(() => {
+    const { totp } = item.login ?? {};
+    if (!canGenerate) return Loading(new Error("Needs confirmation..."));
+    if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
+    if (!totp) return Err(new Error("No TOTP found"));
 
-    return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
-  },
-  getGenerator(totpString: string): Result<OTPAuth.TOTP | ReturnType<typeof createSteamTotpGenerator>> {
-    if (totpString.startsWith("steam://")) {
-      const secret = totpString.slice("steam://".length).trim();
-      if (!secret) return Err(new Error("Invalid Steam Guard key"));
-      const [generator, initError] = tryCatch(() => createSteamTotpGenerator(secret));
-      if (initError) {
-        captureException("Failed to initialize Steam Guard", initError);
-        return Err(new Error("Failed to parse Steam Guard key"));
-      }
-      return Ok(generator);
-    }
+    return getTotpGenerator(totp);
+  }, [item, canGenerate]);
 
-    const [options, parseError] = tryCatch(() => authenticator.parseTotp(totpString));
-    if (parseError) {
-      captureException("Failed to parse key", parseError);
-      return Err(new Error("Failed to parse authenticator key"));
-    }
-    const [generator, initError] = tryCatch(() => new OTPAuth.TOTP(options));
-    if (initError) {
-      captureException("Failed to initialize authenticator", initError);
-      return Err(new Error("Failed to initialize authenticator"));
-    }
+  const [code, setCode] = useState<string | null>(null);
+  const [time, setTime] = useState<number | null>(null);
 
-    return Ok(generator);
-  },
-  useCode(item: Item, canGenerate = true) {
-    const [[generator, error, isLoading = false], setState] = useStateEffect(() => {
-      const { totp } = item.login ?? {};
-      if (!canGenerate) return Loading(new Error("Needs confirmation..."));
-      if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
-      if (!totp) return Err(new Error("No TOTP found"));
+  useEffect(() => {
+    if (error) return;
 
-      return authenticator.getGenerator(totp);
-    }, [item, canGenerate]);
+    let interval: NodeJS.Timeout | undefined;
+    let timeout: NodeJS.Timeout | undefined;
 
-    const [code, setCode] = useState<string | null>(null);
-    const [time, setTime] = useState<number | null>(null);
+    const cleanup = () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
 
-    useEffect(() => {
-      if (error) return;
-
-      let interval: NodeJS.Timeout | undefined;
-      let timeout: NodeJS.Timeout | undefined;
-
-      const cleanup = () => {
-        clearTimeout(timeout);
-        clearInterval(interval);
-      };
-
-      const setTimeAndCode = () => {
-        try {
-          const timeRemaining = Math.ceil(generator.remaining() / 1000);
-          setTime(timeRemaining);
-
-          if (timeRemaining === generator.period) {
-            setCode(generator.generate());
-          }
-        } catch (error) {
-          setState(Err(new Error("Failed to regenerate")));
-          cleanup();
-          captureException("Failed to regenerate", error);
-        }
-      };
-
+    const setTimeAndCode = () => {
       try {
-        // set an initial timeout to ensure the first evaluation is time accurate
-        // and then keep evaluating every second
-        timeout = setTimeout(() => {
-          setTimeAndCode();
-          interval = setInterval(setTimeAndCode, 1000);
-        }, generator.remaining() % 1000);
+        const timeRemaining = Math.ceil(generator.remaining() / 1000);
+        setTime(timeRemaining);
 
-        setCode(generator.generate()); // first generation before the interval starts
+        if (timeRemaining === generator.period) {
+          setCode(generator.generate());
+        }
       } catch (error) {
-        setState(Err(new Error("Failed to generate")));
+        setState(Err(new Error("Failed to regenerate")));
         cleanup();
-        captureException("Failed to generate", error);
+        captureException("Failed to regenerate", error);
       }
+    };
 
-      return cleanup;
-    }, [item, generator]);
+    try {
+      // set an initial timeout to ensure the first evaluation is time accurate
+      // and then keep evaluating every second
+      timeout = setTimeout(() => {
+        setTimeAndCode();
+        interval = setInterval(setTimeAndCode, 1000);
+      }, generator.remaining() % 1000);
 
-    return { code, time, error, isLoading };
-  },
-};
+      setCode(generator.generate()); // first generation before the interval starts
+    } catch (error) {
+      setState(Err(new Error("Failed to generate")));
+      cleanup();
+      captureException("Failed to generate", error);
+    }
+
+    return cleanup;
+  }, [item, generator]);
+
+  return { code, time, error, isLoading };
+}
 
 function Loading(error: Error) {
   return [null, error, true] as const;
