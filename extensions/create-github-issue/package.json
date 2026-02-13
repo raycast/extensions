@@ -3,7 +3,7 @@
   "title": "Create GitHub Issue from Obsidian Note",
   "description": "Create a GitHub issue using an Obsidian note as the body",
   "icon": "icon.png",
-  "author": "murray",
+  "author": "murray_collier",
   "license": "MIT",
   "commands": [
     {
