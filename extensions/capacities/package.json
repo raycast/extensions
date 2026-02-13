@@ -15,11 +15,11 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "bearerToken",
+      "name": "communicationToken",
       "type": "password",
-      "title": "API Key",
-      "description": "Your personal API key to access Capacities API. It can be created in the app settings.",
-      "placeholder": "API Key",
+      "title": "Communication Token",
+      "description": "Enter the communication token from your Raycast settings in the Capacities desktop app.",
+      "placeholder": "Communication Token",
       "required": true
     }
   ],
@@ -27,32 +27,60 @@
     {
       "name": "open-spaces",
       "title": "Open Space",
+      "subtitle": "Capacities",
       "description": "Open a space in the Capacities app",
       "mode": "view"
     },
     {
       "name": "search-content",
       "title": "Search Content",
+      "subtitle": "Capacities",
       "description": "Search content in Capacities",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "search",
+        "capacities"
+      ]
     },
     {
       "name": "create-weblink",
       "title": "Save Weblink",
+      "subtitle": "Capacities",
       "description": "Create a weblink in Capacities",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "create",
+        "weblink",
+        "url",
+        "capacities"
+      ]
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Capacities",
+      "description": "Create a task in Capacities",
+      "mode": "view",
+      "keywords": [
+        "create",
+        "task",
+        "capacities"
+      ]
     },
     {
       "name": "save-to-daily-note",
       "title": "Save to Daily Note",
+      "subtitle": "Capacities",
       "description": "Saves a text to today's daily note in Capacities. The text can be formatted in markdown.",
-      "mode": "view"
-    },
-    {
-      "name": "load-space-info",
-      "title": "Synchronize Data",
-      "description": "If your spaces or object types are outdated, you can reload them with this command.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "save",
+        "capture",
+        "daily note",
+        "text",
+        "markdown",
+        "capacities"
+      ]
     }
   ],
   "dependencies": {

@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Update Shortcuts] - 2026-01-06
+
+- Updated shortcuts to make them cross-platform
+- Updated README with information
+
 ## [Notification improvements] - 2025-10-29
 
 - Improved notification display to support all notification types by reading directly from the API

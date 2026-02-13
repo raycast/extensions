@@ -1,7 +1,8 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, LocalStorage, popToRoot } from "@raycast/api";
+import { LocalStorage, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
@@ -56,10 +57,7 @@ export async function openNewTab({
   profileOriginal?: string;
   openTabInProfile: SettingsProfileOpenBehaviour;
 }): Promise<boolean | string> {
-  setTimeout(() => {
-    popToRoot({ clearSearchBar: true });
-  }, 3000);
-  await Promise.all([closeMainWindow({ clearRootSearch: true }), checkAppInstalled()]);
+  await checkAppInstalled();
 
   let script = "";
 
@@ -111,7 +109,14 @@ export async function openNewTab({
       break;
   }
 
-  return await runAppleScript(script);
+  try {
+    await runAppleScriptRaycast(script);
+    await popToRoot({ clearSearchBar: true });
+    return true;
+  } catch (error) {
+    await showFailureToast(error);
+    return false;
+  }
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {

@@ -1,6 +1,6 @@
 import { closeMainWindow, getApplications, Image } from "@raycast/api";
 import { runAppleScript, useCachedPromise } from "@raycast/utils";
-import { preferences } from "../preferences";
+import { preferences } from "../utils";
 
 type TerminalApp = (typeof preferences)["terminalApp"];
 

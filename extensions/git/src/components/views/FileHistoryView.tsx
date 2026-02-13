@@ -167,6 +167,7 @@ function CommitListItem(
       quickLook={fileExists ? { path: absolutePath, name: absolutePath } : undefined}
       actions={
         <ActionPanel>
+          <FileManagerActions filePath={absolutePath} />
           <ToggleDetailAction controller={context.toggleDetailController} />
 
           {context.toggleDetailController.isShowingDetail && (
@@ -177,7 +178,6 @@ function CommitListItem(
           )}
 
           <ActionPanel.Section title={basename(context.file.path)}>
-            <FileManagerActions filePath={absolutePath} />
             <FileRestoreAction filePath={absolutePath} before={false} {...context} />
             <FileRestoreAction filePath={absolutePath} before={true} {...context} />
           </ActionPanel.Section>

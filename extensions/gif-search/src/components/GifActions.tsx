@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Action,
   ActionPanel,
@@ -148,7 +149,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
           },
         });
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not download GIF",
@@ -202,7 +203,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     />
   );
 
-  let toggleFav: JSX.Element | undefined;
+  let toggleFav: React.JSX.Element | undefined;
   if (favIds) {
     toggleFav = isInFavorites ? (
       <Action
@@ -271,7 +272,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     />
   );
 
-  const actions: Array<(JSX.Element | undefined)[]> = [
+  const actions: Array<(React.JSX.Element | undefined)[]> = [
     [copyFile, pasteFile, copyGifUrl, copyGifMarkdown, pasteGifMarkdown],
     [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser, downloadFileAction],

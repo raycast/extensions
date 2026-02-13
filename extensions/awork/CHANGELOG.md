@@ -1,5 +1,11 @@
 # awork Changelog
 
+## [Raycast AI & Windows support] - 2025-12-17
+
+- Added Raycast AI support
+    - Use natural language to search awork projects and tasks or log time. Raycast AI understands awork's structure (projects → tasks → status & details) for faster, more intuitive workflows.
+- Added Windows support
+
 ## [Bugfix] - 2025-08-26
 
 - Fix login

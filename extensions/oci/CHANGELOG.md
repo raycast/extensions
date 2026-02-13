@@ -1,5 +1,12 @@
 # Oracle Cloud Changelog
 
+## [Manage Vaults, Secrets, Versions and Bundle] - 2026-01-01
+
+- view vaults
+    - view secrets
+        - view versions
+            - view bundle
+
 ## [Manage Bucket Objects + View NoSQL Database] - 2025-09-15
 
 - view NoSQL Databases

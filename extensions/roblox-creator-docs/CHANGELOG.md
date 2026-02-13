@@ -1,5 +1,18 @@
 # Roblox Creator Docs Changelog
 
+## [1.0.2] - 2025-12-16
+
+### Fixed
+- Fixed critical memory issues causing "JS heap out of memory" crashes during cache refresh
+- Switched from JSZip to streaming ZIP extraction (unzip-stream) for lower memory usage
+- Stale cache is now preserved during refresh, eliminating downtime
+
+### Changed
+- Reduced memory footprint by removing keywords, content, and metadata fields from cached items
+- Reduced description limit from 200 to 100 characters
+- Limited subitems to 15 per category (was 30)
+- Simplified detail view to show description and link to full documentation
+
 ## [1.0.1] - 2025-11-04
 
 ### Added

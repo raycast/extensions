@@ -20,6 +20,11 @@ export const RestrictedSection: FC<{ items: FileNode[] }> = ({ items }) => {
                 target="x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
               />
               <Action.ShowInFinder path={node.path} />
+              <Action.CopyToClipboard
+                title="Copy Path"
+                content={node.path}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
             </ActionPanel>
           }
         />

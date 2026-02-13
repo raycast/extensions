@@ -27,6 +27,16 @@
     "pomdtr",
     "Lemon"
   ],
+  "keywords": [
+    "chat",
+    "gpt",
+    "openai",
+    "vision"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools",
@@ -139,12 +149,6 @@
       "mode": "view",
       "icon": "icon.png"
     }
-  ],
-  "keywords": [
-    "chat",
-    "gpt",
-    "openai",
-    "vision"
   ],
   "preferences": [
     {
@@ -341,8 +345,8 @@
   ],
   "dependencies": {
     "@nem035/gpt-3-encoder": "^1.1.7",
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2",
     "@types/uuid": "^10.0.0",
     "cross-fetch": "^4.1.0",
     "csv-parse": "^5.6.0",
@@ -357,13 +361,13 @@
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/plist": "^3.0.5",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/node": "^22.19.1",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -372,8 +376,5 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "pull": "ray pull-contributions"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

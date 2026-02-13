@@ -16,13 +16,18 @@ Control [Music Assistant](https://github.com/music-assistant/server) from anywhe
 
 Works with:
 
-- A standalone Music Assistant server (`ws://HOST:8095/ws`)
-- The Home Assistant add-on (just expose port `8095` in the add-on’s settings)
-
-![Expose port 8095 in Home Assistant add-on settings](./media/expose-port.png)
+- A standalone Music Assistant server
+- The Home Assistant add-on
 
 ## Configuration
 
 | Parameter | Description                                                                                                    |
 | --------- | -------------------------------------------------------------------------------------------------------------- |
 | `host`    | Local Music Assistant IP address and port (use the direct IP; mDNS is not reliable in the Raycast environment) |
+| `token`   | Long-lived Music Assistant access token (Settings > Users > Tokens). Required for the authenticated API.       |
+
+How to create a token:
+
+1. Open Music Assistant in your browser.
+2. Go to Settings > Users > Tokens.
+3. Generate a new long-lived token and paste it into the Raycast preference.

@@ -1,5 +1,13 @@
 # Prusa Printer Control Changelog
 
+## [Bug Fix] - 2026-01-31
+
+Fixed error when accessing job progress while printer is idle
+
+## [Menu Bar Progress] - 2026-01-30
+
+Added menu bar command to display real-time print progress and time remaining
+
 ## [Initial Version] - 2025-03-03
 
 ### Added

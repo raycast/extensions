@@ -5,6 +5,9 @@
   "description": "DICOM tag lookup",
   "icon": "dicom.png",
   "author": "sedghi",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Data",
     "Documentation",
@@ -21,21 +24,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.0"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
   },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

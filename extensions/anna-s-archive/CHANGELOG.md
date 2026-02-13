@@ -1,5 +1,9 @@
 # Anna's Archive Changelog
 
+## [Bugfix] - 2026-01-15
+
+- Fix an issue where the standard mirrors have been removed, replacing with `.li`, `.pm`, and `.in` domains (see [#24510](https://github.com/raycast/extensions/issues/24510))
+
 ## [Improvements] - 2025-11-07
 
 - Update dependencies

@@ -9,7 +9,8 @@ export interface IGif {
   slug: string;
   download_url: string;
   download_name: string;
-  preview_gif_url: string;
+  small_preview_gif_url: string;
+  large_preview_gif_url?: string;
   gif_url: string;
   metadata?: {
     width?: number;

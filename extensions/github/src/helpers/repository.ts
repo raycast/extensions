@@ -158,10 +158,16 @@ export const buildCloneCommand = (
   options?: Partial<AdditionalCloneFormatOptions>,
 ): string => {
   const gitFlag = options?.gitFlags?.join(" ") ?? "";
-  const targetDir = options?.targetDir ?? "";
+  const targetDir = (options?.targetDir ?? "").replace(/"/g, '\\"');
 
   const cloneUrl = formatRepositoryUrl(repoNameWithOwner, cloneProtocol);
-  return `git clone ${gitFlag} ${cloneUrl} "${targetDir.replace(/"/g, '\\"')}"`;
+  let cloneCmd = `git clone ${gitFlag} ${cloneUrl}`;
+
+  if (targetDir) {
+    cloneCmd += ` "${targetDir}"`;
+  }
+
+  return cloneCmd;
 };
 
 type AdditionalCloneFormatOptions = {

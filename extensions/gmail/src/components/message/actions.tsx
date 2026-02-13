@@ -262,7 +262,7 @@ export function FilterMessagesLikeGivenAction(props: {
   };
   return (
     <Action
-      title="Filter Mails From Sender"
+      title="Filter Mails from Sender"
       icon={Icon.Person}
       shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
       onAction={handle}
@@ -355,7 +355,7 @@ export function MessageDebugDump(props: { message: gmail_v1.Schema$Message; toFi
     return null;
   }
   return (
-    <Action title={props.toFile === true ? "Dump to File" : "Dump To Console"} icon={Icon.Bug} onAction={handle} />
+    <Action title={props.toFile === true ? "Dump to File" : "Dump to Console"} icon={Icon.Bug} onAction={handle} />
   );
 }
 
@@ -520,16 +520,16 @@ export function TimeThanFilterAddAction(props: {
   return (
     <ActionPanel.Submenu title={props.title} icon={Icon.Clock} shortcut={props.shortcut}>
       {days.map((d) => (
-        <Days days={d} />
+        <Days key={`days-${d}`} days={d} />
       ))}
       {weeks.map((w) => (
-        <Weeks weeks={w} />
+        <Weeks key={`weeks-${w}`} weeks={w} />
       ))}
       {months.map((m) => (
-        <Months months={m} />
+        <Months key={`months-${m}`} months={m} />
       ))}
       {years.map((y) => (
-        <Years years={y} />
+        <Years key={`years-${y}`} years={y} />
       ))}
     </ActionPanel.Submenu>
   );
@@ -560,12 +560,22 @@ export function FilterAddAction(props: {
     <ActionPanel.Submenu title={props.title} shortcut={props.shortcut} icon={Icon.Book}>
       <ActionPanel.Submenu title="Match">
         {labelsAll.map((l) => (
-          <Action title={getLabelName(l) || "?"} icon={getLabelIcon(l)} onAction={() => handle(l, "")} />
+          <Action
+            key={l.id || `match-${generateLabelFilter(l)}`}
+            title={getLabelName(l) || "?"}
+            icon={getLabelIcon(l)}
+            onAction={() => handle(l, "")}
+          />
         ))}
       </ActionPanel.Submenu>
       <ActionPanel.Submenu title="Not Match">
         {labelsAll.map((l) => (
-          <Action title={getLabelName(l) || "?"} icon={getLabelIcon(l)} onAction={() => handle(l, "-")} />
+          <Action
+            key={l.id || `not-match-${generateLabelFilter(l)}`}
+            title={getLabelName(l) || "?"}
+            icon={getLabelIcon(l)}
+            onAction={() => handle(l, "-")}
+          />
         ))}
       </ActionPanel.Submenu>
     </ActionPanel.Submenu>

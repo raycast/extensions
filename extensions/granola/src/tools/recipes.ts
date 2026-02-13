@@ -1,6 +1,7 @@
 import { showFailureToast } from "@raycast/utils";
 import { getRecipesFromApi } from "../utils/fetchData";
 import { RecipesListResult, Recipe, DefaultRecipe } from "../utils/types";
+import { toError } from "../utils/errorUtils";
 
 type ListInput = {
   action?: "list" | "get" | "search";
@@ -10,32 +11,46 @@ type ListInput = {
 
 type ListResult = RecipesListResult;
 
-function slugifyRecipeSlug(input: string): string {
-  return input.trim().replace(/^\//, "").toLowerCase().replace(/\s+/g, "-");
+function normalizeRecipeSlug(input: string): string {
+  return input
+    .trim()
+    .replace(/^\//, "")
+    .toLowerCase()
+    .replace(/[_\s]+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function findRecipeBySlug(recipes: Recipe[], slug: string): Recipe | undefined {
+  return recipes.find((recipe) => normalizeRecipeSlug(recipe.slug) === slug);
 }
 
 export default async function tool(input: ListInput = {}): Promise<Recipe[] | Recipe | ListResult | []> {
   const action = input.action ?? "list";
 
   try {
-    const { featureEnabled, userRecipes, defaultRecipes, sharedRecipes } = await getRecipesFromApi();
+    const { featureEnabled, userRecipes, defaultRecipes, sharedRecipes, unlistedRecipes } = await getRecipesFromApi();
 
     const normalizeDefaultRecipes = (defaults?: DefaultRecipe[]): Recipe[] =>
       (defaults || []).map((d) => ({ slug: d.slug, config: d.defaultConfig }));
 
     if (action === "list") {
-      return { featureEnabled, userRecipes, defaultRecipes, sharedRecipes };
+      return { featureEnabled, userRecipes, defaultRecipes, sharedRecipes, unlistedRecipes };
     }
 
     if (action === "get") {
       if (!input.slug) return [];
-      const normalizedSlug = slugifyRecipeSlug(input.slug);
-      const foundUser = userRecipes.find((r) => r.slug === normalizedSlug);
+      const normalizedSlug = normalizeRecipeSlug(input.slug);
+      if (!normalizedSlug) return [];
+      const foundUser = findRecipeBySlug(userRecipes, normalizedSlug);
       if (foundUser) return foundUser;
-      const foundDefault = (defaultRecipes || []).find((r) => r.slug === normalizedSlug);
+      const foundDefault = (defaultRecipes || []).find((r) => normalizeRecipeSlug(r.slug) === normalizedSlug);
       if (foundDefault) return { slug: foundDefault.slug, config: foundDefault.defaultConfig };
-      const foundShared = (sharedRecipes || []).find((r) => r.slug === normalizedSlug);
-      return foundShared ?? [];
+      const foundShared = findRecipeBySlug(sharedRecipes || [], normalizedSlug);
+      if (foundShared) return foundShared;
+      const foundUnlisted = findRecipeBySlug(unlistedRecipes || [], normalizedSlug);
+      return foundUnlisted ?? [];
     }
 
     if (action === "search") {
@@ -50,12 +65,14 @@ export default async function tool(input: ListInput = {}): Promise<Recipe[] | Re
       if (fromUser.length > 0) return fromUser;
       const fromDefault = haystack(normalizeDefaultRecipes(defaultRecipes));
       if (fromDefault.length > 0) return fromDefault;
-      return haystack(sharedRecipes || []);
+      const fromShared = haystack(sharedRecipes || []);
+      if (fromShared.length > 0) return fromShared;
+      return haystack(unlistedRecipes || []);
     }
 
     return [];
   } catch (error) {
-    showFailureToast(error, { title: "Failed to load recipes" });
+    showFailureToast(toError(error), { title: "Failed to load recipes" });
     return [];
   }
 }

@@ -11,7 +11,8 @@
     "damian_duchnowski",
     "xilopaint",
     "aidenkt",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "kemar.christie"
   ],
   "categories": [
     "Productivity",
@@ -313,6 +314,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

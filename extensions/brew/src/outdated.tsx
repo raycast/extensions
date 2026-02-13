@@ -1,16 +1,19 @@
-import { ReactElement } from "react";
+/**
+ * Outdated view for displaying outdated brew packages.
+ */
 
+import React, { useState } from "react";
 import { Color, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
-import { OutdatedCask, OutdatedFormula, OutdatedResults, brewFetchOutdated } from "./brew";
+import { getProgressIcon } from "@raycast/utils";
+import { OutdatedCask, OutdatedFormula, OutdatedResults } from "./utils";
+import { useBrewOutdated } from "./hooks/useBrewOutdated";
 import { OutdatedActionPanel } from "./components/actionPanels";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
-import { preferences } from "./preferences";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
-export default function Main() {
+function OutdatedContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const { isLoading, data, revalidate } = useCachedPromise(() => brewFetchOutdated(preferences.greedyUpgrades));
+  const { isLoading, data, revalidate } = useBrewOutdated();
 
   return (
     <OutdatedList
@@ -20,6 +23,14 @@ export default function Main() {
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       onAction={() => revalidate()}
     />
+  );
+}
+
+export default function Main() {
+  return (
+    <ErrorBoundary>
+      <OutdatedContent />
+    </ErrorBoundary>
   );
 }
 
@@ -60,7 +71,7 @@ function OutdatedFormulaeListItem(props: { outdated: OutdatedFormula; onAction: 
 interface OutdatedListProps {
   outdated?: OutdatedResults;
   isLoading: boolean;
-  searchBarAccessory?: ReactElement<List.Dropdown.Props, string>;
+  searchBarAccessory?: React.ComponentProps<typeof List>["searchBarAccessory"];
   filterType: InstallableFilterType;
   onAction: () => void;
 }
@@ -68,23 +79,62 @@ interface OutdatedListProps {
 function OutdatedList(props: OutdatedListProps) {
   const formulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
   const casks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
+  const hasResults = formulae.length > 0 || casks.length > 0;
+
+  // Determine empty state message based on filter
+  const getEmptyMessage = () => {
+    switch (props.filterType) {
+      case InstallableFilterType.formulae:
+        return "No formulae are outdated";
+      case InstallableFilterType.casks:
+        return "No casks are outdated";
+      default:
+        return "No casks or formulae are outdated";
+    }
+  };
+
+  // Determine search bar placeholder based on loading state
+  const searchBarPlaceholder = props.isLoading ? "Checking for outdated packages…" : placeholder(props.filterType);
 
   return (
     <List
-      searchBarPlaceholder={placeholder(props.filterType)}
+      searchBarPlaceholder={searchBarPlaceholder}
       searchBarAccessory={props.searchBarAccessory}
       isLoading={props.isLoading}
     >
-      <List.Section title="Formulae">
-        {formulae.map((formula) => (
-          <OutdatedFormulaeListItem key={formula.name} outdated={formula} onAction={props.onAction} />
-        ))}
-      </List.Section>
-      <List.Section title="Casks">
-        {casks.map((cask) => (
-          <OutdatedCaskListItem key={cask.name} outdated={cask} onAction={props.onAction} />
-        ))}
-      </List.Section>
+      {/* Loading state */}
+      {props.isLoading && !props.outdated && (
+        <List.EmptyView
+          icon={getProgressIcon(0.5)}
+          title="Checking for outdated packages..."
+          description="Running brew outdated"
+        />
+      )}
+
+      {/* Empty state when no outdated packages */}
+      {!props.isLoading && !hasResults && props.outdated !== undefined && (
+        <List.EmptyView
+          icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+          title={getEmptyMessage()}
+          description="All your packages are up to date"
+        />
+      )}
+
+      {/* Results */}
+      {hasResults && (
+        <>
+          <List.Section title="Formulae">
+            {formulae.map((formula) => (
+              <OutdatedFormulaeListItem key={formula.name} outdated={formula} onAction={props.onAction} />
+            ))}
+          </List.Section>
+          <List.Section title="Casks">
+            {casks.map((cask) => (
+              <OutdatedCaskListItem key={cask.name} outdated={cask} onAction={props.onAction} />
+            ))}
+          </List.Section>
+        </>
+      )}
     </List>
   );
 }

@@ -6,6 +6,8 @@ import { usePromise } from "@raycast/utils";
 
 import { Actions } from "../components/Actions";
 import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
+import { getPreferenceValues } from "@raycast/api";
+const { displayModeCpu } = getPreferenceValues<ExtensionPreferences>();
 
 export default function CpuMonitor() {
   const { revalidate, data: cpu } = usePromise(() => {
@@ -23,7 +25,7 @@ export default function CpuMonitor() {
       id="cpu"
       title="CPU"
       icon={Icon.Monitor}
-      accessories={[{ text: !cpu ? "Loading…" : `${cpu} %` }]}
+      accessories={[{ text: !cpu ? "Loading…" : displayModeCpu === "free" ? `${100 - +cpu} %` : `${cpu} %` }]}
       detail={<CpuMonitorDetail cpu={(cpu as string) || ""} />}
       actions={<Actions radioButtonNumber={1} />}
     />

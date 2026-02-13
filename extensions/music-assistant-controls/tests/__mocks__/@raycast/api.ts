@@ -1,5 +1,6 @@
 export const getPreferenceValues = jest.fn(() => ({
   host: "http://localhost:8095",
+  token: "token-123",
 }));
 
 export const showToast = jest.fn();

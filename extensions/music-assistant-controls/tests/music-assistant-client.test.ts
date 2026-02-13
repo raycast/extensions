@@ -289,12 +289,20 @@ describe("MusicAssistantClient", () => {
     });
 
     describe("getDisplayTitle", () => {
-      it("should return current item name when available", () => {
+      it("should return current item name when available and playing", () => {
         const queue = createMockQueue("queue1", "Living Room", PlayerState.PLAYING, "Great Song");
 
         const result = client.getDisplayTitle(queue);
 
         expect(result).toBe("Great Song");
+      });
+
+      it("should return undefined when not playing even if a current item exists", () => {
+        const queue = createMockQueue("queue1", "Living Room", PlayerState.PAUSED, "Paused Song");
+
+        const result = client.getDisplayTitle(queue);
+
+        expect(result).toBeUndefined();
       });
 
       it("should return undefined when no current item", () => {
@@ -317,8 +325,13 @@ describe("MusicAssistantClient", () => {
         expect(result).toBe(false);
       });
 
-      it("should return false when new title is undefined", () => {
+      it("should return true when new title is undefined and current title exists", () => {
         const result = client.shouldUpdateTitle("Current Song", undefined);
+        expect(result).toBe(true);
+      });
+
+      it("should return false when both titles are undefined", () => {
+        const result = client.shouldUpdateTitle(undefined, undefined);
         expect(result).toBe(false);
       });
     });

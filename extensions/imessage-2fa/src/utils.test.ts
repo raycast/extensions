@@ -1,4 +1,4 @@
-import { extractCode, extractVerificationLink } from "./utils";
+import { extractCode, extractVerificationLink, extractTextFromBinaryData, escapeSqlLikePattern } from "./utils";
 
 describe("Testing matching logic", () => {
   test("Alphanumeric codes", () => {
@@ -186,5 +186,168 @@ describe("Testing verification link extraction", () => {
     const result = extractVerificationLink(message);
     // This link has no keywords, so it should not be detected as verification/sign-in
     expect(result).toBeNull();
+  });
+});
+
+describe("Testing binary data extraction from iMessage", () => {
+  test("Extract text from NSArchiver binary format", () => {
+    // Real example from iMessage with 2FA code
+    const binaryData =
+      "\x04\x0Bstreamtyped\x81è\x03\x84\x01@\x84\x84\x84\x19NSMutableAttributedString\x00\x84\x84\x12NSAttributedString\x00\x84\x84\bNSObject\x00\x85\x92\x84\x84\x84\x0FNSMutableString\x01\x84\x84\bNSString\x01\x95\x84\x01+\x81\x85\x00DO NOT share. We will NEVER call you to ask for this code. Didn't request? Contact support. Your HealthSafe ID access code is: 643066\x86\x84\x02iI\x01\x7F\x92\x84\x84\x84\fNSDictionary\x00\x95\x84\x01i\x01\x92\x84\x98\x98\x1D__kIMMessagePartAttributeName\x86\x92\x84\x84\x84\bNSNumber\x00\x84\x84\x07NSValue\x00\x95\x84\x01*\x84\x9B\x9B\x00\x86\x86\x99\x02\x06\x92\x84\x9A\x9B\x03\x92\x84\x98\x98\x1D__kIMMessagePartAttributeName\x86\x92\x9C\x92\x84\x98\x98\x1D__kIMOneTimeCodeAttributeName\x86\x92\x84\x9A\x9B\x02\x92\x84\x98\x98\x04code\x86\x92\x84\x98\x98\x06643066\x86\x92\x84\x98\x98\x0BdisplayCode\x86\x92¥\x86\x92\x84\x98\x98\x1E__kIMDataDetectedAttributeName\x86";
+
+    const result = extractTextFromBinaryData(binaryData);
+    expect(result).toContain("DO NOT share");
+    expect(result).toContain("643066");
+    expect(result).toContain("HealthSafe");
+    // Should not contain class names
+    expect(result).not.toContain("NSMutable");
+    expect(result).not.toContain("__kIM");
+  });
+
+  test("Plain text passes through unchanged", () => {
+    const plainText = "Your verification code is: 123456";
+    const result = extractTextFromBinaryData(plainText);
+    expect(result).toBe(plainText);
+  });
+
+  test("Empty or null input returns empty string", () => {
+    expect(extractTextFromBinaryData("")).toBe("");
+    expect(extractTextFromBinaryData(null as unknown as string)).toBe("");
+    expect(extractTextFromBinaryData(undefined as unknown as string)).toBe("");
+  });
+
+  test("Extract from binary data with shorter message", () => {
+    // Simulated binary format with a simple message
+    const binaryData = "\x04\x0Bstreamtyped\x81NSMutableString\x00Your code is: 98765\x86NSDictionary";
+    const result = extractTextFromBinaryData(binaryData);
+    expect(result).toBe("Your code is: 98765");
+  });
+
+  test("Plain text containing similar strings is not misidentified as binary", () => {
+    // Edge case: plain text that mentions these class names should pass through
+    const plainText = "The NSAttributedString class is used for rich text";
+    const result = extractTextFromBinaryData(plainText);
+    // Should return as-is since it doesn't have the actual binary markers
+    expect(result).toBe(plainText);
+  });
+
+  test("Binary data detected by NSArchiver class names even without streamtyped", () => {
+    // Test that binary data can be detected by class name markers alone
+    // (in case streamtyped is missing due to encoding issues)
+    const binaryData = "NSMutableAttributedString\x00\x84\x84\x12NSAttributedString\x00Your code: 12345\x86";
+    const result = extractTextFromBinaryData(binaryData);
+    // Should extract the code, not return the raw binary
+    expect(result).toContain("12345");
+    expect(result).not.toContain("NSMutableAttributedString");
+  });
+
+  test("NSKeyedArchiver signature detected", () => {
+    // Test detection via NSKeyedArchiver string signature
+    const binaryData = "NSKeyedArchiver\x00\x84\x84\x12Your verification code is: 987654\x86";
+    const result = extractTextFromBinaryData(binaryData);
+    expect(result).toContain("987654");
+    expect(result).not.toContain("NSKeyedArchiver");
+  });
+
+  test("NSArchiver signature detected", () => {
+    // Test detection via NSArchiver string signature (legacy format)
+    const binaryData = "NSArchiver\x00\x84\x84\x12Your code: 456789\x86";
+    const result = extractTextFromBinaryData(binaryData);
+    expect(result).toContain("456789");
+    expect(result).not.toContain("NSArchiver");
+  });
+
+  test("NSMutableString and NSString class names detected", () => {
+    // Test detection via NSString class names
+    const binaryData = "NSMutableString\x00\x84\x84\x12NSString\x00Your code: 111222\x86";
+    const result = extractTextFromBinaryData(binaryData);
+    expect(result).toContain("111222");
+  });
+
+  test("Extract text with emoji and non-Latin characters", () => {
+    // Test that Unicode characters (emoji, non-Latin scripts) are properly extracted
+    const binaryData = "NSKeyedArchiver\x00\x84\x84\x12Your verification code is: 123456 🎉 验证码：123456\x86";
+    const result = extractTextFromBinaryData(binaryData);
+    expect(result).toContain("123456");
+    expect(result).toContain("验证码");
+    // Emoji might be filtered out by the filtering logic, but Unicode text should be preserved
+  });
+
+  test("Extract text with Arabic and Japanese characters", () => {
+    // Test extraction of non-Latin scripts
+    const binaryData = "streamtyped\x81\x85\x00Your code: 789012 コード：789012 رمز: 789012\x86";
+    const result = extractTextFromBinaryData(binaryData);
+    expect(result).toContain("789012");
+    // Non-Latin characters should be preserved if they're part of the message
+  });
+
+  test("Extract short codes when no messages with spaces", () => {
+    // Test that short codes (OTP codes) are preserved when there are no messages with spaces
+    // This simulates binary data where only codes are present without surrounding text
+    // Using a format where codes are embedded with enough context to be extracted
+    const binaryData = "streamtyped\x81\x85\x00NSMutableString\x00CodeABC123DEF\x86\x84\x84\x12NSDictionary";
+    const result = extractTextFromBinaryData(binaryData);
+    // Should extract codes even without spaces (they contain digits or mixed case)
+    // The codes are part of a longer string "CodeABC123DEF" which should be extracted
+    expect(result).toMatch(/ABC123|CodeABC123DEF/);
+  });
+
+  test("Prefer messages with spaces over short tokens", () => {
+    // Test that messages with spaces are preferred over short tokens
+    const binaryData = "NSKeyedArchiver\x00\x84\x84\x12Your code is: 789012\x86\x84\x84\x12ABC123\x86";
+    const result = extractTextFromBinaryData(binaryData);
+    // Should prefer the message with spaces
+    expect(result).toContain("Your code is: 789012");
+    expect(result).not.toContain("ABC123");
+  });
+
+  test("Extract pure numeric OTP codes without spaces", () => {
+    // Test that pure numeric OTP codes (digit-heavy) are preserved when no messages with spaces
+    // Using format similar to working test cases with embedded codes
+    const binaryData = "streamtyped\x81\x85\x00NSMutableString\x00Code123456\x86\x84\x84\x12NSDictionary";
+    const result = extractTextFromBinaryData(binaryData);
+    // Should extract codes even when embedded (the "Code123456" contains digits)
+    expect(result).toMatch(/123456|Code123456/);
+  });
+
+  test("Extract short alphanumeric codes", () => {
+    // Test extraction of short alphanumeric codes without spaces
+    // Using format with embedded codes that will be extracted
+    const binaryData = "NSKeyedArchiver\x00\x84\x84\x12CodeABC123\x86\x84\x84\x12DEF456\x86";
+    const result = extractTextFromBinaryData(binaryData);
+    // Should extract codes that contain digits (even without spaces)
+    expect(result).toMatch(/ABC123|DEF456|CodeABC123/);
+  });
+});
+
+describe("Testing SQL LIKE pattern escaping", () => {
+  test("Escapes single quotes", () => {
+    expect(escapeSqlLikePattern("test'string")).toBe("test''string");
+    expect(escapeSqlLikePattern("O'Brien")).toBe("O''Brien");
+    expect(escapeSqlLikePattern("don't")).toBe("don''t");
+    expect(escapeSqlLikePattern("O'Brien's code")).toBe("O''Brien''s code");
+  });
+
+  test("Preserves LIKE wildcards for user search functionality", () => {
+    expect(escapeSqlLikePattern("test%string")).toBe("test%string");
+    expect(escapeSqlLikePattern("test_string")).toBe("test_string");
+    expect(escapeSqlLikePattern("50% off")).toBe("50% off");
+  });
+
+  test("Handles multiple single quotes", () => {
+    expect(escapeSqlLikePattern("test'%_string")).toBe("test''%_string");
+    expect(escapeSqlLikePattern("O'Brien's 50% discount")).toBe("O''Brien''s 50% discount");
+  });
+
+  test("Handles empty and null inputs", () => {
+    expect(escapeSqlLikePattern("")).toBe("");
+    expect(escapeSqlLikePattern(null as unknown as string)).toBe("");
+    expect(escapeSqlLikePattern(undefined as unknown as string)).toBe("");
+  });
+
+  test("Normal text passes through unchanged", () => {
+    expect(escapeSqlLikePattern("normal text")).toBe("normal text");
+    expect(escapeSqlLikePattern("123456")).toBe("123456");
+    expect(escapeSqlLikePattern("test@example.com")).toBe("test@example.com");
   });
 });

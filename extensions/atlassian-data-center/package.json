@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "atlassian-data-center",
-  "version": "1.0.0",
-  "title": "Atlassian Data Center",
-  "description": "Search and manage Confluence and Jira Data Center",
+  "version": "1.0.1",
+  "title": "Atlassian Data Center (Self-Hosted)",
+  "description": "Search and manage Confluence contents and Jira issues",
   "icon": "logo-atlassian.png",
   "author": "tofrankie",
   "homepage": "https://github.com/tofrankie/raycast-atlassian-data-center",
@@ -19,7 +19,8 @@
     "Windows"
   ],
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Developer Tools"
   ],
   "keywords": [
     "atlassian",
@@ -40,20 +41,20 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@raycast/api": "^1.103.4",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^1.19.1",
-    "@tanstack/react-query": "~5.90.7",
-    "dayjs": "^1.11.18",
-    "ky": "^1.13.0"
+    "@tanstack/react-query": "~5.90.12",
+    "dayjs": "^1.11.19",
+    "ky": "^1.14.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
     "type-fest": "^5.2.0",
-    "typescript": "^5.8.2",
+    "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
   "preferences": [
@@ -61,7 +62,7 @@
       "type": "textfield",
       "name": "confluenceBaseUrl",
       "title": "Confluence Base URL",
-      "description": "Base URL of your Confluence Data Center instance (e.g. https://confluence.example.com)",
+      "description": "Base URL of your Confluence site (e.g. https://confluence.example.com)",
       "required": true,
       "placeholder": "e.g. https://confluence.example.com"
     },
@@ -77,7 +78,7 @@
       "type": "textfield",
       "name": "jiraBaseUrl",
       "title": "Jira Base URL",
-      "description": "Base URL of your Jira Data Center instance (e.g. https://jira.example.com)",
+      "description": "Base URL of your Jira site (e.g. https://jira.example.com)",
       "required": true,
       "placeholder": "e.g. https://jira.example.com"
     },
@@ -139,7 +140,7 @@
     {
       "name": "confluence-search-content",
       "title": "Search Contents",
-      "subtitle": "Confluence Data Center",
+      "subtitle": "Confluence",
       "description": "Search Confluence contents, including pages, blog posts, comments, and attachments",
       "mode": "view",
       "icon": "logo-confluence.png"
@@ -147,7 +148,7 @@
     {
       "name": "confluence-search-user",
       "title": "Search Users",
-      "subtitle": "Confluence Data Center",
+      "subtitle": "Confluence",
       "description": "Search Confluence users",
       "mode": "view",
       "icon": "logo-confluence.png"
@@ -155,7 +156,7 @@
     {
       "name": "confluence-search-space",
       "title": "Search Spaces",
-      "subtitle": "Confluence Data Center",
+      "subtitle": "Confluence",
       "description": "Search Confluence spaces",
       "mode": "view",
       "icon": "logo-confluence.png"
@@ -163,7 +164,7 @@
     {
       "name": "jira-search-issue",
       "title": "Search Issues",
-      "subtitle": "Jira Data Center",
+      "subtitle": "Jira",
       "description": "Search Jira issues",
       "mode": "view",
       "icon": "logo-jira.png"
@@ -171,7 +172,7 @@
     {
       "name": "jira-board-view",
       "title": "Board View",
-      "subtitle": "Jira Data Center",
+      "subtitle": "Jira",
       "description": "View Jira board",
       "mode": "view",
       "icon": "logo-jira.png"
@@ -179,7 +180,7 @@
     {
       "name": "jira-worklog-view",
       "title": "Worklog View",
-      "subtitle": "Jira Data Center",
+      "subtitle": "Jira",
       "description": "View Jira worklog",
       "mode": "view",
       "icon": "logo-jira.png"
@@ -187,7 +188,7 @@
     {
       "name": "jira-notification-view",
       "title": "Notification View",
-      "subtitle": "Jira Data Center",
+      "subtitle": "Jira",
       "description": "View Jira notifications",
       "mode": "view",
       "icon": "logo-jira.png"
@@ -195,7 +196,7 @@
     {
       "name": "jira-manage-field",
       "title": "Manage Fields",
-      "subtitle": "Jira Data Center",
+      "subtitle": "Jira",
       "description": "Manage custom fields for Jira issue search",
       "mode": "view",
       "icon": "logo-jira.png"

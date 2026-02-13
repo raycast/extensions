@@ -61,6 +61,12 @@
       ]
     },
     {
+      "name": "open-last-visited-repository",
+      "title": "Open Last Visited Git Repository",
+      "description": "Open the most recently visited Git repository",
+      "mode": "view"
+    },
+    {
       "name": "configure-issue-trackers",
       "icon": "issue-trackers-icon.png",
       "title": "Configure Issue Trackers",

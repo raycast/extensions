@@ -1,5 +1,15 @@
 # Kagi Search Changelog
 
+## [1.2.4] - 2026-02-06
+
+* Add `Action` to Remove History when API disabled
+
+## [1.2.3] - 2026-02-01
+
+* Add `Action` to Remove History (ref: [Issue #24958](https://github.com/raycast/extensions/issues/24958))
+* Made all `shortcut` cross-platform
+* Modernized + Opted for Raycast deps where possible
+
 ## [1.2.2] - 2025-11-17
 
 * Fix api key length error.

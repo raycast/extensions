@@ -1,5 +1,10 @@
 # shell Changelog
 
+## [Edit executed command] - 2026-01-05
+
+Add an option to edit an executed command in the input field to run it again faster.
+Closes [#24012](https://github.com/raycast/extensions/issues/24012#issuecomment-3694486201).
+
 ## [Add Windows support] - 2025-12-12
 
 Adds the options to run commands in `PowerShell`, `PowerShell 7` or `Command Prompt` on Windows.

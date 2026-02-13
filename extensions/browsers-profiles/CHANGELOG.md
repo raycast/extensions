@@ -1,5 +1,19 @@
 # Raycast Browsers Profiles
 
+## [Add Arc browser support] - 2026-02-04
+
+- Adding Arc browser to supported browser list
+
+## [Fix crash when reading Chromium profiles] - 2026-01-16
+
+- Fix ENOENT error when iterating over non-profile directories in browser data folder
+
+## [Allow the user to filter out non-interesting profiles] - 2026-01-13
+
+- Adding an option to let the users select only a subset of the available browsers
+- Chromium: display meaningful profile names (ie. the ones used in the Browser UI)
+- Migrate to the latest raycast framework
+
 ## [Fix Chromium invalid profile names] - 2025-11-27
 
 - Read chromium profiles from `Local State` file to get their custom names

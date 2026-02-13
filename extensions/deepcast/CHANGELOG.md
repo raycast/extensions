@@ -1,5 +1,8 @@
 # Deepcast Changelog
 
+## [Newlines] - 2025-12-16
+- Fixed issue where newlines in translations were not displayed correctly in the Raycast detail view because markdown requires double newlines for line breaks.
+
 ## [Maintenance] - 2025-11-12
 
 - Add support for Windows platform.

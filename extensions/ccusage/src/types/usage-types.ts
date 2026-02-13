@@ -118,6 +118,16 @@ export const SessionUsageCommandResponseSchema = z.object({
   }),
 });
 
+export const LimitWindowSchema = z.object({
+  utilization: z.number(),
+  resets_at: z.string(),
+});
+
+export const UsageLimitDataSchema = z.object({
+  five_hour: LimitWindowSchema,
+  seven_day: LimitWindowSchema,
+});
+
 export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
 export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
 export type SessionData = z.infer<typeof SessionDataSchema>;
@@ -130,3 +140,5 @@ export type SessionResponse = z.infer<typeof SessionResponseSchema>;
 export type DailyUsageCommandResponse = z.infer<typeof DailyUsageCommandResponseSchema>;
 export type MonthlyUsageCommandResponse = z.infer<typeof MonthlyUsageCommandResponseSchema>;
 export type SessionUsageCommandResponse = z.infer<typeof SessionUsageCommandResponseSchema>;
+export type LimitWindow = z.infer<typeof LimitWindowSchema>;
+export type UsageLimitData = z.infer<typeof UsageLimitDataSchema>;

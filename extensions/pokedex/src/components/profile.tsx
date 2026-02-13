@@ -101,7 +101,7 @@ export default function PokeProfile(props: { id: number }) {
         h3: nameByLang[language].genus,
       },
       {
-        p: flavors[0]?.flavor_text.split("\n").join(" "),
+        p: flavors[0]?.flavor_text.split("\n").join(" ") || "",
       },
       {
         img: {

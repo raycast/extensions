@@ -1,5 +1,15 @@
 # Badges Changelog
 
+## [Enhancement] - 2026-02-13
+
+- Expose color picker ability to Windows
+
+## [Enhancement] - 2025-12-25
+
+- Add support for Windows
+- Change tag active color to blue for better accessibility
+- Bump all dependencies to the latest
+
 ## [Improvement] - 2025-08-08
 
 - Add shortcut for picking logo
@@ -45,4 +55,4 @@
 
 ## [Initial Version] - 2024-04-30
 
-Concise, consistent, and legible badges with [shields.io](https://github.com/badges/shields).
+Concise, consistent, and legible badges with [Shields.io](https://github.com/badges/shields).

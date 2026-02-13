@@ -188,7 +188,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@trivago/prettier-plugin-sort-imports": "4.2.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",

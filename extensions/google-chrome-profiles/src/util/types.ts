@@ -59,7 +59,7 @@ type GoogleChromeBookmark = GoogleChromeBookmarkFolder | GoogleChromeBookmarkURL
 
 export interface GoogleChromeBookmarkURL extends GoogleChromeBookmarkBase {
   type: "url";
-  url: string;
+  url?: string; // url can be null (cf. bookmarklet)
 }
 
 export interface GoogleChromeBookmarkFolder extends GoogleChromeBookmarkBase {
@@ -81,6 +81,5 @@ export type GoogleChromeBookmarkFile = {
 };
 
 export interface Preferences {
-  newBlankTabURL: string;
   newTabURL: string;
 }

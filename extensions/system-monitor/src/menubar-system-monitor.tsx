@@ -13,7 +13,11 @@ import { getBatteryData } from "./Power/PowerUtils";
 import { formatBytes, isObjectEmpty } from "./utils";
 
 export default function Command() {
-  const { customIconUrl } = getPreferenceValues();
+  const { customIconUrl } = getPreferenceValues<Preferences.MenubarSystemMonitor>();
+  const { displayModeCpu, displayModeBattery, displayModeDisk, displayModeMemory } =
+    getPreferenceValues<ExtensionPreferences>();
+  const { cpuMenubarFormat, memoryMenubarFormat, powerMenubarFormat, networkMenubarFormat, diskMenubarFormat } =
+    getPreferenceValues<Preferences.MenubarSystemMonitor>();
 
   const {
     data: systemInfo,
@@ -80,6 +84,21 @@ export default function Command() {
     };
   });
 
+  const formatTags = (
+    formatString: string,
+    value: string = "",
+    total: string = "",
+    percent: string = "",
+    displayMode: string = "free",
+  ): string => {
+    return formatString
+      .replaceAll("<BR>", `\n`)
+      .replaceAll("<MODE>", displayMode === "free" ? "Free" : "Used")
+      .replace("<VALUE>", value)
+      .replace("<TOTAL>", total)
+      .replace("<PERCENT>", percent);
+  };
+
   const { data: batteryData, revalidate: revalidateBattery } = usePromise(async () => {
     const batteryData = await getBatteryData();
     const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
@@ -122,7 +141,17 @@ export default function Command() {
           <MenuBarExtra.Item
             key={index}
             title={disk.diskName}
-            subtitle={`${disk.totalAvailableStorage} GB available of ${disk.totalSize} GB` || "Loading..."}
+            subtitle={
+              disk
+                ? formatTags(
+                    diskMenubarFormat,
+                    displayModeDisk === "free" ? disk.totalAvailableStorage : disk.usedStorage,
+                    disk.totalSize,
+                    "",
+                    displayModeDisk,
+                  )
+                : "Loading…"
+            }
             icon={Icon.HardDrive}
             onAction={() => runAppleScript(openActivityMonitorAppleScript(4))}
           />
@@ -132,7 +161,17 @@ export default function Command() {
       <MenuBarExtra.Section title="CPU">
         <MenuBarExtra.Item
           title="CPU Usage"
-          subtitle={cpuUsage ? `${cpuUsage} %` : "Loading..."}
+          subtitle={
+            cpuUsage
+              ? formatTags(
+                  cpuMenubarFormat,
+                  "",
+                  "",
+                  `${displayModeCpu === "free" ? 100 - +cpuUsage : cpuUsage}`,
+                  displayModeCpu,
+                )
+              : "Loading..."
+          }
           icon={Icon.Monitor}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
         />
@@ -141,7 +180,23 @@ export default function Command() {
       <MenuBarExtra.Section title="Memory">
         <MenuBarExtra.Item
           title="Memory Usage"
-          subtitle={`${memoryUsage?.freeMemPercentage} % (~ ${memoryUsage?.freeMem} GB)` || "Loading..."}
+          subtitle={
+            memoryUsage
+              ? displayModeMemory === "free"
+                ? formatTags(
+                    memoryMenubarFormat,
+                    memoryUsage.freeMem,
+                    memoryUsage.totalMem,
+                    memoryUsage.freeMemPercentage,
+                  )
+                : formatTags(
+                    memoryMenubarFormat,
+                    (+memoryUsage.totalMem - +memoryUsage.freeMem).toString(),
+                    memoryUsage.totalMem,
+                    (100 - +memoryUsage.freeMemPercentage).toString(),
+                  )
+              : "Loading…"
+          }
           icon={Icon.MemoryChip}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(2))}
         />
@@ -151,9 +206,11 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Network Usage"
           subtitle={
-            `↓ ${networkUsage?.download !== undefined ? formatBytes(networkUsage.download) : "0 B"}/s ↑ ${
-              networkUsage?.upload !== undefined ? formatBytes(networkUsage.upload) : "0 B"
-            }/s` || "Loading..."
+            networkUsage
+              ? formatTags(networkMenubarFormat)
+                  .replace("<UP>", formatBytes(networkUsage.upload))
+                  .replace("<DOWN>", formatBytes(networkUsage.download))
+              : "Loading…"
           }
           icon={Icon.Network}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(5))}
@@ -163,7 +220,18 @@ export default function Command() {
       <MenuBarExtra.Section title="Power">
         <MenuBarExtra.Item
           title="Battery"
-          subtitle={batteryData?.batteryData ? `${batteryData?.batteryData?.batteryLevel} %` : "Loading..."}
+          subtitle={
+            batteryData
+              ? formatTags(
+                  powerMenubarFormat,
+                  "",
+                  "",
+                  displayModeBattery === "free"
+                    ? batteryData.batteryData.batteryLevel
+                    : (100 - +batteryData.batteryData.batteryLevel).toString(),
+                )
+              : "Loading…"
+          }
           icon={Icon.Plug}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(3))}
         />

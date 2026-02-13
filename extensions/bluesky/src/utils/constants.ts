@@ -11,7 +11,7 @@ export const MenuBarNotificationCacheKey = "menu-bar-notification";
 export const BlueskyUrl = "https://staging.bsky.app";
 export const BlueskyProfileUrlBase = `${BlueskyUrl}/profile`;
 export const BlueskySearchUrlBase = `https://search.bsky.social/search/posts?q=`;
-export const MenuBarIconUrl = `extension-icon.png`;
+export const MenuBarIconUrl = "bsky-logo-1.png";
 
 export const BlueskyFeedType = "app.bsky.feed.post";
 export const BlueskyQuoteType = "app.bsky.embed.record";

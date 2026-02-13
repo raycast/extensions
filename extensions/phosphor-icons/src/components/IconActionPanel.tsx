@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Clipboard, showHUD } from "@raycast/api";
 import { getIconUrl } from "../utils/helpers";
-import fetch from "node-fetch";
 import { FC } from "react";
 
 type Props = {

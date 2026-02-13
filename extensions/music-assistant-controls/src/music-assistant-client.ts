@@ -160,6 +160,7 @@ export default class MusicAssistantClient {
 
   /**
    * Extracts the display title for the menu bar from the current queue item
+   * Only returns a title while the queue is actively playing
    *
    * @param queue - The player queue to extract title from
    * @returns The name of the current item, or undefined if no current item
@@ -172,7 +173,11 @@ export default class MusicAssistantClient {
    * ```
    */
   getDisplayTitle(queue?: PlayerQueue): string | undefined {
-    return queue?.current_item?.name;
+    if (!queue || queue.state !== PlayerState.PLAYING) {
+      return undefined;
+    }
+
+    return queue.current_item?.name;
   }
 
   /**
@@ -189,7 +194,7 @@ export default class MusicAssistantClient {
    * ```
    */
   shouldUpdateTitle(currentTitle: string | undefined, newTitle: string | undefined): boolean {
-    return newTitle !== undefined && newTitle !== currentTitle;
+    return newTitle !== currentTitle;
   }
 
   /**

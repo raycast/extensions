@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chrome-profiles",
   "title": "Google Chrome Profiles",
-  "description": "Search, open, manage your Google Chrome profiles / workspaces",
+  "description": "Switch between Chrome profiles and access their bookmarks instantly",
   "icon": "command-icon.png",
   "author": "frouo",
   "contributors": [
@@ -13,44 +13,26 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show Profiles",
+      "title": "Switch Profiles",
       "subtitle": "Google Chrome",
-      "description": "Navigate though your Google Chrome profiles and bookmarks, open and focus the right window.",
+      "description": "Select a Chrome profile to bring its window to front, browse its bookmarks, or open a new tab.",
       "mode": "view"
     },
     {
       "name": "open-profile",
-      "title": "Open Profile",
+      "title": "Open Profile with Context",
       "subtitle": "Google Chrome",
-      "description": "Open a Chrome profile",
-      "mode": "no-view",
-      "disabledByDefault": true
-    },
-    {
-      "name": "open-profile-url",
-      "title": "Open Profile with URL",
-      "subtitle": "Google Chrome",
-      "description": "Open a Chrome profile with a specific URL",
-      "mode": "no-view",
-      "disabledByDefault": true
+      "description": "Background command for handling profile quicklinks and deeplinks.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
     {
-      "title": "New Tab (blank)",
-      "name": "newBlankTabURL",
-      "default": "about:blank",
-      "required": false,
-      "description": "The URL to launch when opening a profile, or a blank tab.",
-      "type": "textfield",
-      "placeholder": "cannot be empty"
-    },
-    {
-      "title": "New Tab (search)",
+      "title": "Search Engine URL",
       "name": "newTabURL",
       "default": "https://google.com/search?q=%query%",
       "required": false,
-      "description": "The URL to launch when opening a profile with a search. The text \"%query%\" will be replaced with the search text.",
+      "description": "The URL to use when searching. The text \"%query%\" will be replaced with the search text.",
       "type": "textfield",
       "placeholder": "cannot be empty"
     }

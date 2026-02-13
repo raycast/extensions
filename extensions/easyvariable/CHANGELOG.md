@@ -1,5 +1,9 @@
 # EasyVariable Changelog
 
+## [Enhancements] - 2026-01-08
+
+- Remove incoming arguments
+
 ## [Enhancements] - 2025-12-09
 
 - Add Windows platform support

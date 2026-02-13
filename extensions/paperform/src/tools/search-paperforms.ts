@@ -182,6 +182,8 @@ type ParsedQuery = {
   createdBefore?: Date;
   createdAfter?: Date;
   olderThanMs?: number;
+  /** Exact slug match filter, supports comma-separated list via query 'slug:foo,bar' */
+  slugEquals?: string[];
   minSubmissions?: number;
   maxSubmissions?: number;
   requireAnySubmissions?: boolean;
@@ -223,9 +225,18 @@ function parseQuery(q: string): ParsedQuery {
   if (/sorted by\s+most recent submission/.test(query)) parsed.sort = parsed.sort ?? "created_desc"; // proxy
   if (/created before/.test(query)) parsed.sort = parsed.sort ?? "created_asc";
 
-  // IDs only question
-  if (/what\s+form\s+ids?/.test(query)) parsed.returnIdsOnly = true;
-  if (/what\s+form\s+slugs?/.test(query)) parsed.returnIdsOnly = true;
+  // IDs/slugs only question (we return slugs)
+  if (/what\s+form\s+ids?/.test(query) || /what\s+form\s+slugs?/.test(query) || /ids?\s+only/.test(query))
+    parsed.returnIdsOnly = true;
+  // Inline slug filters: slug:foo or slug:foo,bar
+  const slugList = query.match(/slug[s]?:\s*([a-z0-9\-_,]+)/i);
+  if (slugList) {
+    const list = slugList[1]
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    if (list.length) parsed.slugEquals = list;
+  }
 
   return parsed;
 }
@@ -320,6 +331,11 @@ function mergeParsed(base: ParsedQuery, input: Input): ParsedQuery {
 function applyFilters(forms: PaperformForm[], p: ParsedQuery) {
   const now = Date.now();
   return forms.filter((f) => {
+    // Slug whitelist filter (exact matches)
+    if (p.slugEquals && p.slugEquals.length > 0) {
+      const currentSlug = (f.custom_slug || f.slug || "").toLowerCase();
+      if (!p.slugEquals.includes(currentSlug)) return false;
+    }
     const created = parseDate(getCreated(f));
     if (p.createdBefore && created && created > p.createdBefore) return false;
     if (p.createdAfter && created && created < p.createdAfter) return false;

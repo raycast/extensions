@@ -1,5 +1,11 @@
 # Bitwarden Changelog
 
+## [Fix Password Generation] - 2026-02-11
+
+- Fix password generation failing due to values passed to boolean options
+
+## [Added PasteUsernameAction] - 2026-01-01
+
 ## [Added support for Windows] - 2025-10-15
 
 ## [New Command] - 2025-10-07

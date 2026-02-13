@@ -10,7 +10,7 @@ export const ModelListView = ({
   title: string;
   models: Model[];
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => React.JSX.Element;
 }) => (
   <List.Section title={title} subtitle={models.length.toLocaleString()}>
     {models.map((model) => (
@@ -26,7 +26,7 @@ export const ModelListItem = ({
 }: {
   model: Model;
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => React.JSX.Element;
 }) => {
   return (
     <List.Item

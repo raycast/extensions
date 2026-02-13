@@ -14,7 +14,8 @@
     "michalzuch",
     "validate",
     "hrishabhn",
-    "bogdan_bucur"
+    "bogdan_bucur",
+    "xmok"
   ],
   "license": "MIT",
   "keywords": [
@@ -286,6 +287,48 @@
         "volume",
         "volume-down",
         "decrease"
+      ]
+    },
+    {
+      "name": "currently-playing-menu-bar",
+      "title": "Menu Bar Player",
+      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause. Refreshes every 10 seconds.",
+      "disabledByDefault": true,
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "hideIconWhenIdle",
+          "description": "If enabled, the icon in the Menu Bar will be hidden when Music is not running or when nothing is playing",
+          "type": "checkbox",
+          "label": "Hide icon when idle",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "hideArtistName",
+          "description": "If enabled, the artist's name will be hidden in the Menu Bar",
+          "type": "checkbox",
+          "label": "Hide artist's name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cleanupTitle",
+          "description": "If enabled cleans up extra info like remix titles or versions from the song name",
+          "type": "checkbox",
+          "label": "Cleanup song title",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "maxTextLength",
+          "title": "Now Playing Text Length",
+          "description": "Maximum number of characters to show for the currently playing track in the menu bar. Leave empty to use default (30 characters)",
+          "type": "textfield",
+          "default": "30",
+          "required": false
+        }
       ]
     }
   ],
@@ -1277,24 +1320,20 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.19.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
     "run-applescript": "^6.0.0",
     "ts-pattern": "^4.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.3.0",
-    "@types/react": "^18.2.11",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.4",
-    "react-devtools": "^5.2.0"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "platforms": [
     "macOS"

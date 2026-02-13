@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useGetBusinesses, useGetBusinessInvoices } from "./lib/wave";
-import { Business, InvoiceStatus } from "./lib/types";
-import { getInvoiceStatusColor } from "./lib/utils";
+import { Business, InvoiceSendMethod, InvoiceStatus } from "./lib/types";
+import { calculateInvoiceItemAmount, formatInvoiceDate, getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState, withAccessToken } from "@raycast/utils";
 import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
 import { provider } from "./lib/oauth";
@@ -9,6 +9,7 @@ import OpenInWave from "./lib/components/open-in-wave";
 import { useState } from "react";
 import BusinessCustomers from "./lib/components/business-customers";
 import BusinessProductsAndServices from "./lib/components/business-products-and-services";
+import CreateInvoice from "./lib/components/create-invoice";
 
 export default withAccessToken(provider)(ManageWave);
 
@@ -55,7 +56,8 @@ function BusinessInvoices({ business }: { business: Business }) {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("details-invoices", false);
   const [status, setStatus] = useState("");
 
-  const { isLoading, data: invoices } = useGetBusinessInvoices(business.id);
+  const { isLoading, data: invoices, revalidate } = useGetBusinessInvoices(business.id);
+  const filteredInvoices = invoices.filter((invoice) => !status || invoice.status === status);
   const isEmpty = !isLoading && !invoices.length;
 
   return (
@@ -89,83 +91,118 @@ function BusinessInvoices({ business }: { business: Business }) {
             </ActionPanel>
           }
         />
+      ) : !filteredInvoices.length ? (
+        <List.EmptyView
+          title="Time to get paid for your work."
+          actions={
+            <ActionPanel>
+              <Action.Push
+                icon={Icon.NewDocument}
+                title="Create a New Invoice"
+                target={<CreateInvoice businessId={business.id} onCreate={revalidate} />}
+              />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.Section title={`Businesses / ${business.name} / Invoices`}>
-          {invoices
-            .filter((invoice) => !status || invoice.status === status)
-            .map((invoice) => {
-              const title = `${invoice.title} - ${invoice.invoiceNumber}`;
-              const markdown = `# ${title}
-| ${invoice.itemTitle} | ${invoice.unitTitle} | ${invoice.priceTitle} | ${invoice.amountTitle} |
-|----------------------|----------------------|-----------------------|------------------------|
-${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}
+          {filteredInvoices.map((invoice) => {
+            const title = `${invoice.title} - ${invoice.invoiceNumber}`;
+            const markdown = `# ${title}
+| BILL TO | - | - | - |
+| ------- | - | - | - |
+| ${invoice.customer.name} | | **Invoice Date** | ${invoice.invoiceDate} |
+| | | **Payment Due** | ${invoice.dueDate} |
+| | | **Amount Due** (${invoice.amountDue.currency.code}) | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value}
 
-|  |  | Total | ${invoice.total.currency.symbol}${invoice.total.value} |
+
+| **${invoice.itemTitle}** | **${invoice.unitTitle}** | **${invoice.priceTitle}** | **${invoice.amountTitle}** |
+|----------------------|----------------------|-----------------------|------------------------|
+${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.unitPrice} | ${item.subtotal.currency.symbol}${calculateInvoiceItemAmount(item)}`).join(`\n`)}
+
+|  |  | **Subtotal** | ${invoice.subtotal.currency.symbol}${invoice.subtotal.value} |
+|--|--|-------|--------------------------------------------------------|
+${invoice.discounts.length ? `| | | ${invoice.discounts[0].name} | (${invoice.discountTotal.currency.symbol}${invoice.discountTotal.value}) |` : ""}
+
+|  |  | **Total** | ${invoice.total.currency.symbol}${invoice.total.value} |
 |--|--|-------|--------------------------------------------------------|
 | | | Paid | ${invoice.amountPaid.currency.symbol}${invoice.amountPaid.value} |
 
-|  |  | Amount Due (${invoice.amountDue.currency.code}) | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value} |
+|  |  | **Amount Due (${invoice.amountDue.currency.code})** | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value} |
 |--|--|-------|--------------------------------------------------------|`;
 
-              return (
-                <List.Item
-                  key={invoice.id}
-                  icon={{
-                    source: Icon.Receipt,
-                    tintColor: getInvoiceStatusColor(invoice.status),
-                    tooltip: invoice.status,
-                  }}
-                  title={title}
-                  subtitle={isShowingDetail ? undefined : invoice.subhead}
-                  accessories={
-                    isShowingDetail
-                      ? undefined
-                      : [
-                          { tag: { value: invoice.status, color: getInvoiceStatusColor(invoice.status) } },
-                          { date: new Date(invoice.modifiedAt) },
-                        ]
-                  }
-                  detail={
-                    <List.Item.Detail
-                      markdown={markdown}
-                      metadata={
-                        <List.Item.Detail.Metadata>
-                          <List.Item.Detail.Metadata.Label
-                            title="Created At"
-                            text={new Date(invoice.createdAt).toISOString()}
-                          />
-                          <List.Item.Detail.Metadata.Label
-                            title="Modified At"
-                            text={new Date(invoice.modifiedAt).toISOString()}
-                          />
-                          <List.Item.Detail.Metadata.Link
-                            title="View PDF"
-                            text={invoice.pdfUrl}
-                            target={invoice.pdfUrl}
-                          />
-                          <List.Item.Detail.Metadata.Link
-                            title="View in Wave"
-                            text={invoice.viewUrl}
-                            target={invoice.viewUrl}
-                          />
-                          <List.Item.Detail.Metadata.Label title="Status" text={INVOICE_STATUSES[invoice.status]} />
-                          <List.Item.Detail.Metadata.Label title="Customer" text={invoice.customer.name} />
-                        </List.Item.Detail.Metadata>
-                      }
+            return (
+              <List.Item
+                key={invoice.id}
+                icon={{
+                  source: Icon.Receipt,
+                  tintColor: getInvoiceStatusColor(invoice.status),
+                  tooltip: invoice.status,
+                }}
+                title={title}
+                subtitle={isShowingDetail ? undefined : invoice.subhead}
+                accessories={
+                  isShowingDetail
+                    ? undefined
+                    : [
+                        { tag: { value: invoice.status, color: getInvoiceStatusColor(invoice.status) } },
+                        { date: new Date(invoice.modifiedAt) },
+                      ]
+                }
+                detail={
+                  <List.Item.Detail
+                    markdown={markdown}
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label
+                          title="Created At"
+                          text={new Date(invoice.createdAt).toISOString()}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Modified At"
+                          text={new Date(invoice.modifiedAt).toISOString()}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Last sent"
+                          text={`${invoice.lastSentVia === InvoiceSendMethod.NOT_SENT ? "" : `via ${invoice.lastSentVia} `}${invoice.lastSentAt ? formatInvoiceDate(invoice.lastSentAt) : "Never"}`}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Last viewed by customer"
+                          text={`${invoice.lastViewedAt ? formatInvoiceDate(invoice.lastViewedAt) : "Never"}`}
+                        />
+                        <List.Item.Detail.Metadata.Link
+                          title="View PDF"
+                          text={invoice.pdfUrl}
+                          target={invoice.pdfUrl}
+                        />
+                        <List.Item.Detail.Metadata.Link
+                          title="View in Wave"
+                          text={invoice.viewUrl}
+                          target={invoice.viewUrl}
+                        />
+                        <List.Item.Detail.Metadata.Label title="Status" text={INVOICE_STATUSES[invoice.status]} />
+                        <List.Item.Detail.Metadata.Label title="Customer" text={invoice.customer.name} />
+                      </List.Item.Detail.Metadata>
+                    }
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <Action
+                      icon={Icon.AppWindowSidebarLeft}
+                      title="Toggle Details"
+                      onAction={() => setIsShowingDetail((prev) => !prev)}
                     />
-                  }
-                  actions={
-                    <ActionPanel>
-                      <Action
-                        icon={Icon.AppWindowSidebarLeft}
-                        title="Toggle Details"
-                        onAction={() => setIsShowingDetail((prev) => !prev)}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
+                    <Action.Push
+                      icon={Icon.NewDocument}
+                      title="Create a New Invoice"
+                      target={<CreateInvoice businessId={business.id} onCreate={revalidate} />}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>

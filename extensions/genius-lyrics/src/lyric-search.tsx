@@ -68,7 +68,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.LyricS
                   <Action.Push
                     title="Show Lyrics"
                     icon={Icon.Paragraph}
-                    target={<Lyrics url={hit.result.url} title={hit.result.full_title} />}
+                    target={<Lyrics url={hit.result.url} title={hit.result.full_title} songId={hit.result.id} />}
                     onPush={() => {
                       const existingIdx = history!.findIndex(
                         (i) => i.title.toLowerCase() === hit.result.full_title.toLowerCase(),

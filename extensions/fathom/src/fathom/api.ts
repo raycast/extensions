@@ -99,8 +99,13 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
 
     const result = await client.listMeetings({
       cursor: filter.cursor,
-      calendarInvitees: filter.calendarInvitees,
       calendarInviteesDomains: filter.calendarInviteesDomains,
+      // Note: calendarInvitees (email-level filter) is not supported by the SDK;
+      // it is handled by the HTTP fallback in listMeetingsHTTP instead.
+      // Include summaries and transcripts for full-text search
+      includeSummary: true,
+      includeTranscript: true,
+      includeActionItems: true,
     });
 
     const items: Meeting[] = [];
@@ -114,6 +119,7 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
       break; // Only get first page
     }
 
+    logger.log(`[API] ✅ SDK returned ${items.length} meetings`);
     return { items, nextCursor };
   } catch (error) {
     // Fallback to direct HTTP for network/connection errors

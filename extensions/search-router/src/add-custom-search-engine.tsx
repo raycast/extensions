@@ -4,6 +4,7 @@ import type { SearchEngine } from "./types";
 import { getCustomSearchEngines, addCustomSearchEngine } from "./data/custom-search-engines";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { isValidUrl } from "./utils";
+import { platform } from "os";
 
 type AddCustomSearchEngineProps = {
   engine?: SearchEngine;
@@ -11,6 +12,7 @@ type AddCustomSearchEngineProps = {
 };
 
 export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCustomSearchEngineProps) {
+  const isWindows = platform() === "win32";
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [triggerError, setTriggerError] = useState<string | undefined>();
@@ -169,14 +171,20 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
             <Action
               title="Add Another URL"
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "n" },
+                Windows: { modifiers: ["ctrl"], key: "n" },
+              }}
               onAction={addUrl}
             />
             {urls.length > 1 && (
               <Action
                 title="Remove Last URL"
                 icon={Icon.Minus}
-                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "backspace" },
+                  Windows: { modifiers: ["ctrl"], key: "backspace" },
+                }}
                 onAction={() => removeUrl(urls.length - 1)}
               />
             )}
@@ -214,8 +222,8 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
       <Form.Description
         text={
           urls.length > 1
-            ? "💡 Press Cmd+N to add more URLs, Cmd+Backspace to remove the last one. Multiple URLs will open in separate tabs."
-            : "💡 Press Cmd+N to add more search URLs (will open in separate tabs)."
+            ? `💡 Press ${isWindows ? "Ctrl+N" : "Cmd+N"} to add more URLs, ${isWindows ? "Ctrl+Backspace" : "Cmd+Backspace"} to remove the last one. Multiple URLs will open in separate tabs.`
+            : `💡 Press ${isWindows ? "Ctrl+N" : "Cmd+N"} to add more search URLs (will open in separate tabs).`
         }
       />
       <Form.TextField

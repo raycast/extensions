@@ -12,7 +12,7 @@ const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: strin
       <Action.OpenInBrowser url={`${BaseUrl}/tasks/${props.taskId}`} />
       <Action.CopyToClipboard title={"Copy URL to Clipboard"} content={`${BaseUrl}/tasks/${props.taskId}`} />
       <Action.CopyToClipboard
-        title={"Copy Task ID"} // eslint-disable-line
+        title={"Copy Task ID"}
         content={props.taskId}
         shortcut={{ modifiers: ["ctrl"], key: "i" }}
       />

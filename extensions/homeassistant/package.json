@@ -10,7 +10,8 @@
     "amuelli",
     "xilopaint",
     "krsntn",
-    "mikikiv"
+    "mikikiv",
+    "techmaved"
   ],
   "license": "MIT",
   "description": "Manage your smart home with Raycast",
@@ -683,6 +684,7 @@
     "@raycast-community/ui": "^0.1.1",
     "@raycast/api": "^1.101.0",
     "@raycast/utils": "^1.19.1",
+    "echarts": "^6.0.0",
     "home-assistant-js-websocket": "^8.2.0",
     "javascript-time-ago": "^2.5.11",
     "lodash-es": "^4.17.21",

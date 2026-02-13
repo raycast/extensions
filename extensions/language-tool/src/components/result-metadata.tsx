@@ -6,6 +6,26 @@ type ResultMetadataProps = {
   appliedSuggestions: Set<number>;
 };
 
+/**
+ * Formats text for display by removing newlines and handling whitespace
+ * @param text - The text to format
+ * @returns Formatted text with newlines removed, or empty string if only whitespace/newlines
+ */
+function formatTextForDisplay(text: string): string {
+  // Remove newlines completely (replace with empty string)
+  const normalized = text
+    .replace(/\r\n/g, "")
+    .replace(/\n/g, "")
+    .replace(/\r/g, "");
+
+  // If after normalizing it's only whitespace or empty, return empty string
+  if (normalized.trim().length === 0) {
+    return "";
+  }
+
+  return normalized.trim();
+}
+
 export function ResultMetadata({
   result,
   appliedSuggestions,
@@ -47,6 +67,8 @@ export function ResultMetadata({
               match.context.offset,
               match.context.offset + match.context.length,
             );
+            const formattedOriginal = formatTextForDisplay(original);
+            const formattedReplacement = formatTextForDisplay(replacement);
 
             return (
               <Detail.Metadata.Label
@@ -56,7 +78,7 @@ export function ResultMetadata({
                     ? "✅ " + (match.shortMessage || match.message)
                     : match.shortMessage || match.message
                 }
-                text={`"${original}" → "${replacement}"`}
+                text={`"${formattedOriginal}" → "${formattedReplacement}"`}
               />
             );
           })}

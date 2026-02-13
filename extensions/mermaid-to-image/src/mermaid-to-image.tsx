@@ -3,7 +3,7 @@ import { showToast, Toast, Detail, Icon, ActionPanel, Action, getSelectedText } 
 import { showFailureToast } from "@raycast/utils";
 import { ImagePreview } from "./components/ImagePreview";
 import { generateMermaidDiagram } from "./utils/diagram";
-import { cleanupTempFile } from "./utils/files";
+import { cleanupTempFile, cleanupOldTempFiles } from "./utils/files";
 import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { Preferences } from "./types";
 
@@ -168,6 +168,9 @@ export default function Command() {
   }
 
   useEffect(() => {
+    // Clean up old temporary files on component mount (prevents accumulation)
+    cleanupOldTempFiles();
+
     processMermaidCode(); // Process input on component mount
   }, []);
 
