@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  Toast,
+  showToast,
+  useNavigation,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useState } from "react";
 import { addEnv, getConfig, removeEnv, setCurrentEnv, Config, OktaEnv } from "./api/config";
 
@@ -16,7 +27,16 @@ export default function ManageEnvironments() {
   }
 
   async function handleDelete(name: string) {
-    if (confirm(`Delete environment "${name}"?`)) {
+    if (
+      await confirmAlert({
+        title: `Delete environment "${name}"?`,
+        message: "This action cannot be undone.",
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
+      })
+    ) {
       removeEnv(name);
       refresh();
       showToast({ style: Toast.Style.Success, title: "Deleted", message: name });
@@ -28,7 +48,12 @@ export default function ManageEnvironments() {
       searchBarPlaceholder="Search environments..."
       actions={
         <ActionPanel>
-          <Action.Push title="Create Environment" icon={Icon.Plus} target={<EnvironmentForm onSave={refresh} />} />
+          <Action.Push
+            title="Create Environment"
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            target={<EnvironmentForm onSave={refresh} />}
+          />
         </ActionPanel>
       }
     >
@@ -51,6 +76,7 @@ export default function ManageEnvironments() {
                 <Action.Push
                   title="Create Environment"
                   icon={Icon.Plus}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
                   target={<EnvironmentForm onSave={refresh} />}
                 />
                 <Action
