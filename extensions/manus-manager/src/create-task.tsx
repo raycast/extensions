@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Toast,
+  getPreferenceValues,
+  open,
+  showToast,
+} from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useState } from "react";
 
@@ -25,20 +33,27 @@ const MODES = [
 ];
 
 export default function Command() {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     value: agentProfile,
     setValue: setAgentProfile,
     isLoading: isLoadingAgent,
   } = useLocalStorage("agentProfile", DEFAULT_AGENT_PROFILE);
-  const { value: mode, setValue: setMode, isLoading: isLoadingMode } = useLocalStorage("mode", DEFAULT_MODE);
+  const {
+    value: mode,
+    setValue: setMode,
+    isLoading: isLoadingMode,
+  } = useLocalStorage("mode", DEFAULT_MODE);
   const isLoading = isLoadingAgent || isLoadingMode;
 
   const handleSubmit = async (values: FormValues) => {
     const prompt = values.prompt?.trim();
     if (!prompt) {
-      await showToast({ style: Toast.Style.Failure, title: "Prompt is required" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Prompt is required",
+      });
       return;
     }
     if (!apiKey) {
@@ -47,7 +62,10 @@ export default function Command() {
     }
 
     setIsSubmitting(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Creating task",
+    });
     try {
       const response = await fetch(API_BASE_URL, {
         method: "POST",
@@ -57,7 +75,8 @@ export default function Command() {
         },
         body: JSON.stringify({
           prompt,
-          agentProfile: values.agentProfile || agentProfile || DEFAULT_AGENT_PROFILE,
+          agentProfile:
+            values.agentProfile || agentProfile || DEFAULT_AGENT_PROFILE,
           mode: values.mode || mode || DEFAULT_MODE,
         }),
       });
@@ -95,17 +114,40 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="prompt" title="Instructions" placeholder="Describe what you want Manus to do..." autoFocus />
+      <Form.TextArea
+        id="prompt"
+        title="Instructions"
+        placeholder="Describe what you want Manus to do..."
+        autoFocus
+      />
       {!isLoading && (
         <>
-          <Form.Dropdown id="agentProfile" title="Agent" value={agentProfile} onChange={(v) => void setAgentProfile(v)}>
+          <Form.Dropdown
+            id="agentProfile"
+            title="Agent"
+            value={agentProfile}
+            onChange={(v) => void setAgentProfile(v)}
+          >
             {AGENT_PROFILES.map((profile) => (
-              <Form.Dropdown.Item key={profile} title={profile} value={profile} />
+              <Form.Dropdown.Item
+                key={profile}
+                title={profile}
+                value={profile}
+              />
             ))}
           </Form.Dropdown>
-          <Form.Dropdown id="mode" title="Mode" value={mode} onChange={(v) => void setMode(v)}>
+          <Form.Dropdown
+            id="mode"
+            title="Mode"
+            value={mode}
+            onChange={(v) => void setMode(v)}
+          >
             {MODES.map((modeOption) => (
-              <Form.Dropdown.Item key={modeOption.value} title={modeOption.title} value={modeOption.value} />
+              <Form.Dropdown.Item
+                key={modeOption.value}
+                title={modeOption.title}
+                value={modeOption.value}
+              />
             ))}
           </Form.Dropdown>
         </>

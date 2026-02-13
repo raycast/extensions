@@ -4,6 +4,4 @@
 
 - Fix agent profile and mode selection not being remembered between sessions
 
-## [Initial Version] - {PR_MERGE_DATE}
-
-Initial version code
+## [Initial Version] - 2026-02-04
