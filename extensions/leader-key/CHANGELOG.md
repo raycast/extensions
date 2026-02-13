@@ -1,6 +1,6 @@
 # Leader Key Changelog
 
-## Update Extension Icon - {PR_MERGE_DATE}
+## Update Extension Icon - 2026-02-13
 
 ## [Initial Version] - 2026-01-07
 
