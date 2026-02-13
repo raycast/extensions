@@ -1,13 +1,14 @@
 import { showHUD, Clipboard, showToast, Toast } from "@raycast/api";
-import { getMeetTab, openMeetTabDefaultProfile, getTimeout } from "./helpers";
+import { getMeetTab, openMeetTabDefaultProfile, getTimeout, sleep } from "./helpers";
 
 export default async function main() {
   try {
     await openMeetTabDefaultProfile();
-    const meetTab = await getMeetTab();
 
     const timeout = getTimeout();
-    await new Promise((r) => setTimeout(r, timeout));
+    await sleep(timeout);
+
+    const meetTab = await getMeetTab();
 
     await Clipboard.copy(meetTab);
     await showHUD("Copied meet link to clipboard");

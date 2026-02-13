@@ -65,7 +65,7 @@ export function getOpenedUrlForFirefox(browserName: string) {
   `;
 }
 
-const supportedBrowsers = [
+export const supportedBrowsers = [
   "Arc",
   "Brave",
   "Firefox",

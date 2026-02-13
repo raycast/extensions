@@ -5,19 +5,30 @@ import {
   getOpenedUrlForArc,
   getOpenedUrlForFirefox,
   getOpenedUrlsScript,
+  supportedBrowsers,
 } from "./utils/scripts";
 
 import type { SupportedBrowsers } from "./utils/scripts";
 
 const openMeetTabUrl = "https://meet.google.com/new";
+const timeoutRegex = /^[0-9]+$/;
+const defaultTimeoutMs = 500;
+
+function isSupportedBrowserName(name: string): name is SupportedBrowsers {
+  return supportedBrowsers.includes(name as SupportedBrowsers);
+}
 
 export function getTimeout(): number {
-  const regexp = /^[0-9]+$/;
-  return regexp.test(getPreferenceValues().timeout) ? parseInt(getPreferenceValues().timeout) : 500;
+  const prefs = getPreferenceValues<Preferences>();
+  return timeoutRegex.test(prefs.timeout) ? Number.parseInt(prefs.timeout, 10) : defaultTimeoutMs;
 }
 
 function getPreferredBrowser() {
-  return getPreferenceValues().preferredBrowser;
+  return getPreferenceValues<Preferences>().preferredBrowser;
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function getOpenTabs(): Promise<string> {
@@ -34,10 +45,10 @@ async function getOpenTabs(): Promise<string> {
   return await runAppleScript(getOpenedUrlsScript(browserName));
 }
 
-export async function getOpenedBrowser() {
+export async function getOpenedBrowser(): Promise<SupportedBrowsers> {
   const preferredBrowser = getPreferredBrowser();
 
-  if (preferredBrowser?.name) {
+  if (preferredBrowser?.name && isSupportedBrowserName(preferredBrowser.name)) {
     return preferredBrowser.name;
   }
 
