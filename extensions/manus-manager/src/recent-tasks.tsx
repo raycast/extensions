@@ -12,7 +12,6 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-
 type TaskStatus = "pending" | "running" | "completed" | "failed";
 
 type Task = {
@@ -46,11 +45,11 @@ const STATUS_ICONS: Record<TaskStatus, { source: Icon; tintColor: Color }> = {
 };
 
 function buildTaskTitle(task: Task) {
-  return task.metadata.task_title || `Task ${task.id}`;
+  return task.metadata.task_title;
 }
 
 export default function Command() {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
   const [searchText, setSearchText] = useState("");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | TaskStatus>("all");
@@ -93,6 +92,7 @@ export default function Command() {
   }, [error]);
 
   const tasks = data?.data ?? [];
+  console.log(tasks);
 
   const handleDelete = async (taskId: string) => {
     const confirmed = await confirmAlert({
