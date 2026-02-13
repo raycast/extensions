@@ -18,7 +18,7 @@
     {
       "name": "index",
       "title": "BNF and BNFC",
-      "subtitle": "Search",
+      "subtitle": "Search the BNF or BNFC",
       "description": "Search the BNF or BNFC",
       "mode": "view"
     }
