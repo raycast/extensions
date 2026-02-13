@@ -1,5 +1,5 @@
 {
-  "name": "Obsidian2GH",
+  "name": "create-github-issue",
   "title": "Create GitHub Issue from Obsidian Note",
   "description": "Create a GitHub issue using an Obsidian note as the body",
   "icon": "icon.png",
