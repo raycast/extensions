@@ -64,6 +64,14 @@ describe("getNextOccurrence", () => {
       const result = getNextOccurrence("2026-01-04", "weekly"); // Sunday
       expect(result.format("YYYY-MM-DD")).toBe("2026-02-22");
     });
+
+    it("crosses year boundary correctly", () => {
+      // 2026-12-31 is Thursday, base is Tuesday
+      mockToday("2026-12-31");
+      const result = getNextOccurrence("2026-01-06", "weekly"); // Jan 6 2026 = Tuesday
+      expect(result.day()).toBe(2);
+      expect(result.format("YYYY-MM-DD")).toBe("2027-01-05");
+    });
   });
 
   describe("monthly", () => {
@@ -147,6 +155,30 @@ describe("getNextOccurrence", () => {
       const result = getNextOccurrence("2025-01-01", "monthly");
       expect(result.format("YYYY-MM-DD")).toBe("2026-03-01");
     });
+
+    it("rolls Jan 31 to Feb 28 via add(1, month) without overflow to Mar", () => {
+      mockToday("2026-01-31");
+      const result = getNextOccurrence("2025-01-31", "monthly");
+      expect(result.format("YYYY-MM-DD")).toBe("2026-01-31");
+    });
+
+    it("after Jan 31 passes, next is Feb 28 not Mar 3", () => {
+      mockToday("2026-02-01");
+      const result = getNextOccurrence("2025-01-31", "monthly");
+      expect(result.format("YYYY-MM-DD")).toBe("2026-02-28");
+    });
+
+    it("recovers from short month back to full day in longer month", () => {
+      mockToday("2026-03-01");
+      const result = getNextOccurrence("2025-01-31", "monthly");
+      expect(result.format("YYYY-MM-DD")).toBe("2026-03-31");
+    });
+
+    it("returns today when today is month-end and base day exceeds it", () => {
+      mockToday("2026-04-30");
+      const result = getNextOccurrence("2025-01-31", "monthly");
+      expect(result.format("YYYY-MM-DD")).toBe("2026-04-30");
+    });
   });
 
   describe("yearly", () => {
@@ -196,6 +228,12 @@ describe("getNextOccurrence", () => {
       mockToday("2027-01-01");
       const result = getNextOccurrence("2020-12-31", "yearly");
       expect(result.format("YYYY-MM-DD")).toBe("2027-12-31");
+    });
+
+    it("returns today when today is exactly Dec 31", () => {
+      mockToday("2026-12-31");
+      const result = getNextOccurrence("2020-12-31", "yearly");
+      expect(result.format("YYYY-MM-DD")).toBe("2026-12-31");
     });
   });
 });
