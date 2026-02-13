@@ -1,7 +1,7 @@
 import { List, Icon, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
-import { Preferences, Feed, GitHubPR, StoreItem, FilterValue } from "./types";
+import { Feed, GitHubPR, StoreItem, FilterValue } from "./types";
 import { parseExtensionUrl, fetchExtensionPackageInfo, convertPRsToStoreItems } from "./utils";
 import { ExtensionListItem } from "./components/ExtensionListItem";
 
