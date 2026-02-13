@@ -22,41 +22,34 @@ WezTerm's CLI cannot switch workspaces externally — this is a [known limitatio
 local wezterm = require("wezterm")
 
 -- Named pipe for Raycast workspace switching
-local PIPE_PATH = os.getenv("HOME") .. "/.wezterm-workspace-pipe"
+local IPC_FILE = os.getenv("HOME") .. "/.wezterm-workspace-switch"
 
 wezterm.on("update-status", function(window, pane)
-  local f = io.open(PIPE_PATH, "r")
+  local f = io.open(IPC_FILE, "r")
   if not f then return end
-
+  
   local workspace_name = f:read("*line")
   f:close()
-
+  
   if workspace_name and workspace_name ~= "" then
+    -- Switch to the requested workspace
     window:perform_action(
       wezterm.action.SwitchToWorkspace({ name = workspace_name }),
       pane
     )
+    -- Clean up the IPC file
+    os.remove(IPC_FILE)
   end
 end)
 ```
 
 **Or** run the **Setup WezTerm IPC** command in Raycast to copy this snippet.
 
-### First-Time Setup
-
-Create the named pipe (FIFO) that enables communication:
-
-```bash
-mkfifo ~/.wezterm-workspace-pipe
-```
-
 ### How it works
 
-1. When you select a tab in another workspace from Raycast, it writes the workspace name to the named pipe `~/.wezterm-workspace-pipe`
+1. When you select a tab in another workspace from Raycast, it writes the workspace name to `~/.wezterm-workspace-switch`
 2. WezTerm polls the pipe via the `update-status` event
 3. When data is available, WezTerm switches to that workspace immediately
-
-Named pipes provide cleaner IPC than files — data flows immediately without cleanup.
 
 > **Without this setup**: Tab navigation and creation still work within the current workspace. Only cross-workspace switching requires the snippet above.
 
