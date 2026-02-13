@@ -46,7 +46,7 @@
     {
       "name": "extract-color",
       "title": "Extract Color from Selected Image",
-      "description": "Extract colors from the selected Finder image",
+      "description": "Extract colors from the selected File Manager image",
       "mode": "view"
     },
     {

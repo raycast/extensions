@@ -15,9 +15,13 @@ use windows::{
         Graphics::GdiPlus::{GdiplusShutdown, GdiplusStartup, GdiplusStartupInput},
         System::LibraryLoader::GetModuleHandleW,
         UI::HiDpi::{SetProcessDpiAwarenessContext, DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2},
+        UI::Input::KeyboardAndMouse::VK_ESCAPE,
         UI::WindowsAndMessaging::*,
     },
 };
+
+// Global keyboard hook handle
+static mut KEYBOARD_HOOK: HHOOK = unsafe { mem::zeroed() };
 
 static mut PREVIEW_HEIGHT: i32 = 0;
 static mut TOTAL_HEIGHT: i32 = WINDOW_SIZE;
@@ -40,6 +44,23 @@ static mut SNAP_BMP: HBITMAP = unsafe { mem::zeroed() };
 static mut SNAP_OLD: HGDIOBJ = unsafe { mem::zeroed() };
 static mut SNAP_PIXEL: COLORREF = COLORREF(0);
 static mut GDIP_TOKEN: usize = 0;
+
+/// Low-level keyboard hook to capture ESC globally without taking focus
+unsafe extern "system" fn keyboard_hook(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+    unsafe {
+        if code >= 0 && wparam.0 == WM_KEYDOWN as usize {
+            // lparam points to a KBDLLHOOKSTRUCT
+            // The vkCode is at offset 0 (u32)
+            let vk_code = *(lparam.0 as *const u32);
+            if vk_code == VK_ESCAPE.0 as u32 {
+                CANCELLED = true;
+                PostQuitMessage(0);
+                return LRESULT(1); // Return 1 to block the key
+            }
+        }
+        CallNextHookEx(Some(KEYBOARD_HOOK), code, wparam, lparam)
+    }
+}
 
 /// Window procedure for the magnifier loupe overlay.
 unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
@@ -209,14 +230,23 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam:
                 let _ = InvalidateRect(Some(LOUPE_HWND), None, false);
                 LRESULT(0)
             }
-            WM_LBUTTONDOWN | WM_RBUTTONDOWN => {
-                if msg == WM_LBUTTONDOWN {
-                    // Use cached pixel color (not live GetPixel which would capture the loupe)
-                    let color = RgbColor::from_colorref(SNAP_PIXEL);
-                    PICKED_COLOR = Some((color.r, color.g, color.b));
-                } else {
-                    CANCELLED = true;
-                }
+            WM_KEYDOWN => {
+                LRESULT(0)
+            }
+            WM_LBUTTONDOWN => {
+                // Left click picks the color
+                let color = RgbColor::from_colorref(SNAP_PIXEL);
+                PICKED_COLOR = Some((color.r, color.g, color.b));
+                PostQuitMessage(0);
+                LRESULT(0)
+            }
+            WM_RBUTTONDOWN => {
+                // Right click does nothing and prevents context menu
+                LRESULT(0)
+            }
+            WM_MBUTTONDOWN => {
+                // Middle click cancels
+                CANCELLED = true;
                 PostQuitMessage(0);
                 LRESULT(0)
             }
@@ -358,8 +388,13 @@ fn pick_color() -> std::result::Result<Option<Color>, String> {
         // Fully transparent input window
         let _ = SetLayeredWindowAttributes(input_hwnd, COLORREF(0), ALPHA_TRANSPARENT, LWA_ALPHA);
 
+        // Show windows WITHOUT taking focus (preserves Raycast window)
         let _ = ShowWindow(input_hwnd, SW_SHOWNOACTIVATE);
         let _ = ShowWindow(hwnd, SW_SHOWNOACTIVATE);
+
+        // Install global keyboard hook to capture ESC without requiring focus
+        let hmod = GetModuleHandleW(None).unwrap_or_default();
+        KEYBOARD_HOOK = SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard_hook), Some(HINSTANCE(hmod.0)), 0).unwrap_or_default();
 
 
         // Hide the real cursor
@@ -377,6 +412,9 @@ fn pick_color() -> std::result::Result<Option<Color>, String> {
 
         // Cleanup
         let _ = KillTimer(Some(hwnd), TIMER_ID);
+        if KEYBOARD_HOOK.0 as *mut _ as usize != 0 {
+            let _ = UnhookWindowsHookEx(KEYBOARD_HOOK);
+        }
         let _ = DestroyWindow(hwnd);
         let _ = DestroyWindow(input_hwnd);
         let _ = UnregisterClassW(class_name, Some(hinstance));
