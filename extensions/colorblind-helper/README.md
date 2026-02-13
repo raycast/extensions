@@ -2,9 +2,9 @@
 
 Pick any color from your screen and get a human-readable description with colorblind simulation.
 
-![Colorblind Helper Screenshot](metadata/Screenshot.png)
+![Colorblind Helper Screenshot](images/Screenshot.png)
 
-![Colorblind Helper Demo](metadata/colorblindhelper.gif)
+![Colorblind Helper Demo](images/colorblindhelper.gif)
 
 ## Features
 
