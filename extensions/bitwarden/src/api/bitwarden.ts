@@ -402,6 +402,7 @@ export class Bitwarden {
   async unlock(password: string): Promise<MaybeError<string>> {
     try {
       const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"], { resetVaultTimeout: true });
+      if (!sessionToken.trim()) throw new Error("Invalid session token");
       this.setSessionToken(sessionToken);
       await this.saveLastVaultStatus("unlock", "unlocked");
       await this.callActionListeners("unlock", password, sessionToken);
