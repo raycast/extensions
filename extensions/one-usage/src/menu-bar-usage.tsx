@@ -27,6 +27,7 @@ const refreshIntervalToMs = (value: string): number => {
 
 const getSelectedProvider = (provider: string | undefined, orderedData: ProviderResult[] | undefined): string => {
   if (provider && isProviderEnabled(provider)) return provider;
+  if (provider && !isProviderEnabled(provider)) return "all";
   return orderedData?.[0]?.id ?? "all";
 };
 
