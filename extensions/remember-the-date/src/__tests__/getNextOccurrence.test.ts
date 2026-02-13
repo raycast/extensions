@@ -1,5 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import moment from "moment";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { getNextOccurrence } from "../utils";
 
 // Helper to freeze "today" for deterministic tests
