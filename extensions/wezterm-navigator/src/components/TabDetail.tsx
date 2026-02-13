@@ -10,7 +10,7 @@ export function TabDetail({ tab }: { tab: WezTermTab }) {
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Tab" text={tab.tabTitle || tab.title} />
+          <List.Item.Detail.Metadata.Label title="Tab" text={tab.tabTitle} />
           <List.Item.Detail.Metadata.Label title="Workspace" text={tab.workspace} />
           <List.Item.Detail.Metadata.TagList title="Status">
             {tab.isActive ? (
@@ -23,10 +23,7 @@ export function TabDetail({ tab }: { tab: WezTermTab }) {
 
           <List.Item.Detail.Metadata.Label title="Tab ID" text={String(tab.tabId)} />
           <List.Item.Detail.Metadata.Label title="Window ID" text={String(tab.windowId)} />
-          <List.Item.Detail.Metadata.Label
-            title="Panes"
-            text={`${paneCount} pane${paneCount !== 1 ? "s" : ""}`}
-          />
+          <List.Item.Detail.Metadata.Label title="Panes" text={`${paneCount} pane${paneCount !== 1 ? "s" : ""}`} />
           <List.Item.Detail.Metadata.Separator />
 
           {activePane && (
@@ -36,11 +33,7 @@ export function TabDetail({ tab }: { tab: WezTermTab }) {
                 text={shortenPath(activePane.cwd)}
                 icon={Icon.Folder}
               />
-              <List.Item.Detail.Metadata.Label
-                title="Process"
-                text={activePane.title}
-                icon={Icon.Terminal}
-              />
+              <List.Item.Detail.Metadata.Label title="Process" text={activePane.title} icon={Icon.Terminal} />
               <List.Item.Detail.Metadata.Label
                 title="Terminal Size"
                 text={activePane.size ? formatSize(activePane.size) : "Unknown"}
