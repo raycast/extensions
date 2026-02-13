@@ -1,7 +1,9 @@
 # Bitwarden Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Fix & Feature] - {PR_MERGE_DATE}
 
+- Fix unhandled error when unlocking vault
+- Fix mismatched Windows CLI binary hash
 - Add support for Steam Guard TOTP
 
 ## [Fix Password Generation] - 2026-02-11
