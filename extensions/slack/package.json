@@ -223,7 +223,7 @@
     "@types/node": "^22.19.11",
     "@types/node-emoji": "^2.1.0",
     "@types/react": "^19.2.14",
-    "eslint": "^10.0.0",
+    "eslint": "^9.39.2",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
