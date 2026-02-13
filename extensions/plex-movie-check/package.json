@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "plex-movie-check",
+  "title": "Plex Movie Check",
+  "description": "Check whether a movie exists in Plex movie libraries.",
+  "icon": "icon.png",
+  "author": "leoincedo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-movie",
+      "title": "Search Plex Movie",
+      "subtitle": "Find in Plex libraries",
+      "description": "Search movie availability across Plex movie sections",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Plex Base URL",
+      "description": "Example: http://127.0.0.1:32400"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Plex Token",
+      "description": "Authentication token for your Plex server"
+    },
+    {
+      "name": "defaultExactTitle",
+      "type": "checkbox",
+      "required": false,
+      "title": "Default Exact Title",
+      "label": "Use exact normalized title by default",
+      "description": "If enabled, exact normalized title matching is preselected in the search form."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "fast-xml-parser": "^4.5.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^20.16.11",
+    "eslint": "^9.39.2",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  },
+  "raycast": {
+    "schemaVersion": 1,
+    "id": "com.leo.plexmoviecheck"
+  }
+}
