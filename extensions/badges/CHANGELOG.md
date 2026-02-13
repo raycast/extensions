@@ -1,5 +1,9 @@
 # Badges Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Expose color picker ability to Windows
+
 ## [Enhancement] - 2025-12-25
 
 - Add support for Windows
