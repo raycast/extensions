@@ -42,17 +42,24 @@ export function getNextOccurrence(date: string, repeat?: RepeatType): moment.Mom
   }
 
   if (repeat === "yearly") {
-    let next = base.clone().year(today.year());
+    const baseMonth = base.month();
+    const baseDay = base.date();
+    let next = moment({ year: today.year(), month: baseMonth, day: 1 });
+    next = next.date(Math.min(baseDay, next.daysInMonth()));
     if (next.isBefore(today)) {
-      next = next.add(1, "year");
+      next = moment({ year: today.year() + 1, month: baseMonth, day: 1 });
+      next = next.date(Math.min(baseDay, next.daysInMonth()));
     }
     return next;
   }
 
   if (repeat === "monthly") {
-    let next = base.clone().year(today.year()).month(today.month());
+    const baseDay = base.date();
+    let next = moment({ year: today.year(), month: today.month(), day: 1 });
+    next = next.date(Math.min(baseDay, next.daysInMonth()));
     if (next.isBefore(today)) {
-      next = next.add(1, "month");
+      next = moment({ year: today.year(), month: today.month() + 1, day: 1 });
+      next = next.date(Math.min(baseDay, next.daysInMonth()));
     }
     return next;
   }
