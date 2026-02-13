@@ -4,7 +4,7 @@
 
 - Initial release of BNF Search tool.
 
-## [Medusa and Treatment Summary search added] - 2026-02-05
+## [Medusa and Treatment Summary search added] - {PR_MERGE_DATE}
 
 - Dedicated to my daughter, born 2026-01-19.
 - Added link to Medusa from the BNF screen (push `Cmd + M` to access).
