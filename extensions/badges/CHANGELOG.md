@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-02-13
 
 - Expose color picker ability to Windows
 
