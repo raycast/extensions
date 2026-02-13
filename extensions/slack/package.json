@@ -235,8 +235,8 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "volta": {
-    "node": "22.22.0",
-    "npm": "10.9.4"
+    "node": "20.15.1",
+    "npm": "10.7.0"
   },
   "platforms": [
     "macOS",
