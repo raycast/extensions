@@ -23,7 +23,7 @@ export default async function Command({
     const parsedUrl = new URL(instagramUrl);
     const pathParts = parsedUrl.pathname.replace(/^\/+|\/+$/g, "").split("/");
 
-    if (pathParts.length < 2 || !["p", "reel"].includes(pathParts[0])) {
+    if (pathParts.length < 2 || !["p", "reel", "reels"].includes(pathParts[0])) {
       await showToast({
         title: "Error",
         message: "Invalid Instagram post or reel URL format.",
