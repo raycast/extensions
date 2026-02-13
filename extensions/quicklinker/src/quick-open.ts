@@ -12,9 +12,6 @@ import {
 
 const MAGIC_KEY_REGEX = /^ql_[0-9a-f]{32}$/;
 
-interface Preferences {
-  magicKey: string;
-}
 
 export default async function Command(
   props: LaunchProps<{ arguments: Arguments.QuickOpen }>,
