@@ -125,7 +125,7 @@ function generatePreview(hash: string, width: number, height: number): string {
   const rawPath = path.join(os.tmpdir(), `blurhash-raw-${Date.now()}.rgba`);
   const pngPath = path.join(os.tmpdir(), `blurhash-preview-${Date.now()}.png`);
 
-  fs.writeFileSync(rawPath, Buffer.from(pixels));
+  fs.writeFileSync(rawPath, Buffer.from(pixels.buffer));
   execSync(
     `"${ffmpeg}" -y -f rawvideo -pix_fmt rgba -s ${pw}x${ph} -i "${rawPath}" "${pngPath}"`,
     { stdio: "pipe" },
