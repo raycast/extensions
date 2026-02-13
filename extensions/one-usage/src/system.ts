@@ -2,7 +2,9 @@ import { execSync } from "child_process";
 import { homedir } from "os";
 import { join } from "path";
 
-export const expandPath = (path: string): string => (path.startsWith("~/") ? join(homedir(), path.slice(2)) : path);
+export const expandPath = (path: string): string => {
+  return path.startsWith("~/") ? join(homedir(), path.slice(2)) : path;
+};
 
 export const readSqliteValue = (
   dbPath: string,

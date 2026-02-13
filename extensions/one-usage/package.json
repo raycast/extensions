@@ -36,6 +36,10 @@
           "default": "5m",
           "data": [
             {
+              "title": "Every 1 minutes",
+              "value": "1m"
+            },
+            {
               "title": "Every 5 minutes",
               "value": "5m"
             },

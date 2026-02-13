@@ -1,6 +1,6 @@
 import { MetricLine } from "./types";
 
-export const formatResetTime = (date: Date): string => {
+const formatResetTime = (date: Date): string => {
   const secondsRemaining = (date.getTime() - Date.now()) / 1000;
   if (secondsRemaining <= 0) return "Resets soon";
 
@@ -21,15 +21,14 @@ export const formatResetTimeFromISO = (isoString: string): string | undefined =>
   return formatResetTime(date);
 };
 
-export const formatResetTimeFromUnixSeconds = (seconds: number): string | undefined =>
-  formatResetTime(new Date(seconds * 1000));
-
-export const formatResetTimeFromUnixMilliseconds = (ms: number): string | undefined => formatResetTime(new Date(ms));
+export const formatResetTimeFromUnixSeconds = (seconds: number): string | undefined => {
+  return formatResetTime(new Date(seconds * 1000));
+};
 
 export const formatResetTimeFromUnixMillisecondsString = (msString: string): string | undefined => {
   const ms = parseInt(msString, 10);
   if (isNaN(ms)) return undefined;
-  return formatResetTimeFromUnixMilliseconds(ms);
+  return formatResetTime(new Date(ms));
 };
 
 export const formatProgressBar = (percentage: number, length = 10): string => {

@@ -1,22 +1,16 @@
 /* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
-import { formatProgressBar, formatProgressValue } from "./format";
-import {
-  getProviderOrder,
-  getSelectedMenuBarProvider,
-  hydratePreferencesFromStorage,
-  reorderProviders,
-  setProviderOrder,
-  setSelectedMenuBarProvider,
-} from "./preferences";
-import { PROVIDER_META } from "./providers/registry";
+import { useMemo } from "react";
+import { formatLastUpdatedAt, formatProgressBar, formatProgressValue } from "./format";
+import { useLocalUsage } from "./hooks/use-local-usage";
+import { fetchAllProviders, PROVIDER_META } from "./providers/registry";
 import { MetricLine, ProviderResult } from "./types";
-import { clearCache, fetchFromCacheOrNetwork, getLastUpdatedFormatted } from "./usage-cache";
+import { reorderProviders } from "./util";
 
-const getProviderIcon = (providerId: string): Image.ImageLike =>
-  PROVIDER_META[providerId]?.icon ?? { source: Icon.Info, tintColor: Color.PrimaryText };
+const getProviderIcon = (providerId: string): Image.ImageLike => {
+  return PROVIDER_META[providerId]?.icon ?? { source: Icon.Info, tintColor: Color.PrimaryText };
+};
 
 const lineToDisplayValue = (line: MetricLine): string => {
   switch (line.type) {
@@ -68,7 +62,7 @@ const applyReorder = (orderedIds: string[], providerId: string, action: ReorderA
 interface ProviderActionsProps {
   providerId: string;
   providerName: string;
-  currentMenuBarProvider: string | undefined;
+  selectedProvider: string | undefined;
   orderedIds: string[];
   onRefresh: () => void;
   onSetMenuBarProvider: (providerId: string) => void;
@@ -78,14 +72,14 @@ interface ProviderActionsProps {
 const ProviderActions = ({
   providerId,
   providerName,
-  currentMenuBarProvider,
+  selectedProvider,
   orderedIds,
   onRefresh,
   onSetMenuBarProvider,
   onReorder,
 }: ProviderActionsProps) => {
   const meta = PROVIDER_META[providerId];
-  const isPinned = currentMenuBarProvider === providerId;
+  const isPinned = selectedProvider === providerId;
   const index = orderedIds.indexOf(providerId);
   const canMoveUp = index > 0;
   const canMoveDown = index >= 0 && index < orderedIds.length - 1;
@@ -93,12 +87,15 @@ const ProviderActions = ({
   const handleReorder = (action: ReorderAction) => {
     const next = applyReorder(orderedIds, providerId, action);
     if (!next) return;
+
     onReorder(next);
+
     const titles: Record<ReorderAction, string> = {
       top: `Moved ${providerName} to top`,
       up: `Moved ${providerName} up`,
       down: `Moved ${providerName} down`,
     };
+
     showToast({ style: Toast.Style.Success, title: titles[action] });
   };
 
@@ -154,6 +151,7 @@ const ProviderActions = ({
 const ProviderDetail = ({ result, lastUpdatedText }: { result: ProviderResult; lastUpdatedText: string | null }) => {
   const meta = PROVIDER_META[result.id];
   const detailMeta = getDetailMeta(result);
+
   return (
     <List.Item.Detail
       metadata={
@@ -178,77 +176,59 @@ const ProviderDetail = ({ result, lastUpdatedText }: { result: ProviderResult; l
 };
 
 const ViewUsage = () => {
-  const { data, isLoading, revalidate } = useCachedPromise(fetchFromCacheOrNetwork, [], {
-    keepPreviousData: true,
-  });
+  const { providerOrder, selectedProvider, lastUpdatedMs, setLastUpdatedMs, setSelectedProvider, setProviderOrder } =
+    useLocalUsage();
 
-  const handleRefresh = () => {
-    clearCache();
-    revalidate();
-  };
-
-  const [menuBarProvider, setMenuBarProvider] = useState<string | undefined>(getSelectedMenuBarProvider);
-  const [providerOrder, setProviderOrderState] = useState<string[] | undefined>(getProviderOrder);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    hydratePreferencesFromStorage().then(() => {
-      setMenuBarProvider(getSelectedMenuBarProvider());
-      setProviderOrderState(getProviderOrder());
-      setHydrated(true);
-      handleRefresh();
-    });
-  }, []);
+  const { data, isLoading, revalidate } = useCachedPromise(
+    async () => {
+      const results = await fetchAllProviders();
+      setLastUpdatedMs(Date.now());
+      return results;
+    },
+    [],
+    { keepPreviousData: true },
+  );
 
   const orderedData = useMemo(() => reorderProviders(data, providerOrder), [data, providerOrder]);
   const orderedIds = useMemo(() => orderedData.map((r) => r.id), [orderedData]);
-  const effectiveMenuBarProvider = menuBarProvider ?? orderedIds[0];
-  const lastUpdatedText = getLastUpdatedFormatted();
+  const selectedProviderId = selectedProvider === "all" ? orderedIds[0] : selectedProvider;
 
   const handleSetMenuBarProvider = (providerId: string) => {
-    setSelectedMenuBarProvider(providerId);
-    setMenuBarProvider(providerId);
+    setSelectedProvider(providerId);
+
     const label = providerId === "all" ? "All Providers" : (PROVIDER_META[providerId]?.name ?? providerId);
     showToast({ style: Toast.Style.Success, title: `Menu Bar → ${label}` });
   };
 
-  const handleReorder = (newOrder: string[]) => {
-    setProviderOrder(newOrder);
-    setProviderOrderState(newOrder);
-  };
-
   return (
-    <List isLoading={isLoading || !hydrated} isShowingDetail>
-      {hydrated && data && data.length === 0 && !isLoading && (
+    <List isLoading={isLoading} isShowingDetail>
+      {data && data.length === 0 && !isLoading && (
         <List.EmptyView
           title="No Providers Enabled"
           description="Enable at least one provider in the extension preferences."
           icon={Icon.Gear}
         />
       )}
-      {hydrated &&
-        orderedData.map((result) => (
-          <List.Item
-            key={result.id}
-            title={result.name}
-            icon={result.error ? { source: Icon.ExclamationMark, tintColor: Color.Red } : getProviderIcon(result.id)}
-            accessories={
-              effectiveMenuBarProvider === result.id ? [{ tag: { value: "Selected", color: Color.Blue } }] : []
-            }
-            detail={<ProviderDetail result={result} lastUpdatedText={lastUpdatedText} />}
-            actions={
-              <ProviderActions
-                providerId={result.id}
-                providerName={result.name}
-                currentMenuBarProvider={menuBarProvider}
-                orderedIds={orderedIds}
-                onRefresh={handleRefresh}
-                onSetMenuBarProvider={handleSetMenuBarProvider}
-                onReorder={handleReorder}
-              />
-            }
-          />
-        ))}
+      {orderedData.map((result) => (
+        <List.Item
+          key={result.id}
+          title={result.name}
+          icon={result.error ? { source: Icon.ExclamationMark, tintColor: Color.Red } : getProviderIcon(result.id)}
+          accessories={selectedProviderId === result.id ? [{ tag: { value: "Selected", color: Color.Blue } }] : []}
+          detail={<ProviderDetail result={result} lastUpdatedText={formatLastUpdatedAt(lastUpdatedMs ?? 0)} />}
+          actions={
+            <ProviderActions
+              providerId={result.id}
+              providerName={result.name}
+              selectedProvider={selectedProvider}
+              orderedIds={orderedIds}
+              onRefresh={revalidate}
+              onSetMenuBarProvider={handleSetMenuBarProvider}
+              onReorder={setProviderOrder}
+            />
+          }
+        />
+      ))}
     </List>
   );
 };

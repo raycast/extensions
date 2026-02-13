@@ -36,22 +36,22 @@ export const PROVIDER_META: Record<string, ProviderMeta> = {
   },
 };
 
-const PROVIDER_IDS = Object.keys(PROVIDER_META);
-
 const getPreferenceMap = (): Record<string, boolean> => {
-  const prefs = getPreferenceValues<Preferences>();
+  const data = getPreferenceValues<Preferences>();
   return {
-    claude: prefs.enableClaude,
-    codex: prefs.enableCodex,
-    cursor: prefs.enableCursor,
+    claude: data.enableClaude,
+    codex: data.enableCodex,
+    cursor: data.enableCursor,
   };
 };
 
-export const isProviderEnabled = (id: string): boolean => getPreferenceMap()[id] ?? false;
+export const isProviderEnabled = (id: string): boolean => {
+  return getPreferenceMap()[id] ?? false;
+};
 
 export const getEnabledProviderIds = (): string[] => {
   const enabled = getPreferenceMap();
-  return PROVIDER_IDS.filter((id) => enabled[id]);
+  return Object.keys(PROVIDER_META).filter((id) => enabled[id]);
 };
 
 export const fetchAllProviders = async (): Promise<ProviderResult[]> => {
