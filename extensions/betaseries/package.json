@@ -84,5 +84,8 @@
       "description": "Your BetaSeries API Key (Developer Key)",
       "placeholder": "Enter your API Key"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
