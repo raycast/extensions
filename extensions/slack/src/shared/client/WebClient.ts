@@ -35,7 +35,7 @@ export interface SlackMember {
   is_workflow_bot?: boolean;
 }
 
-const { accessToken, proxyUrl: proxyUrlPref } = getPreferenceValues<{ accessToken: string; proxyUrl?: string }>();
+const { accessToken, proxyUrl: proxyUrlPref } = getPreferenceValues<Preferences>();
 let slackWebClient: WebClient | null = null;
 
 function getProxyAgent(): HttpsProxyAgent<string> | undefined {
