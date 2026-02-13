@@ -114,7 +114,8 @@ interface BlurHashResult {
 
 function generatePreview(hash: string, width: number, height: number): string {
   const ffmpeg = findBinary("ffmpeg");
-  if (!ffmpeg) throw new Error("ffmpeg not found");
+  if (!ffmpeg)
+    throw new Error("ffmpeg not found — install with: brew install ffmpeg");
 
   // Generate large — Raycast's markdown renderer will scale it to fill the panel
   const pw = 1200;
@@ -211,6 +212,16 @@ function resolveClipboardFile(clip: {
 }
 
 function ResultView({ result }: { result: BlurHashResult }) {
+  useEffect(() => {
+    return () => {
+      try {
+        fs.unlinkSync(result.previewPath);
+      } catch {
+        /* already gone */
+      }
+    };
+  }, []);
+
   const markdown = `\n\n\n\n![preview](${result.previewPath})`;
 
   return (
@@ -302,12 +313,38 @@ function FallbackMenu() {
   );
 }
 
+function cleanupStaleTempFiles() {
+  try {
+    const tmpDir = os.tmpdir();
+    for (const f of fs.readdirSync(tmpDir)) {
+      if (f.startsWith("blurhash-preview-") || f.startsWith("blurhash-raw-")) {
+        try {
+          fs.unlinkSync(path.join(tmpDir, f));
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export default function Command() {
   const [showPicker, setShowPicker] = useState(false);
+  const [missingFfmpeg, setMissingFfmpeg] = useState(false);
   const [result, setResult] = useState<BlurHashResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    cleanupStaleTempFiles();
+
+    if (!findBinary("ffmpeg") || !findBinary("ffprobe")) {
+      setMissingFfmpeg(true);
+      setIsLoading(false);
+      return;
+    }
+
     (async () => {
       try {
         await showToast({
@@ -347,6 +384,26 @@ export default function Command() {
       }
     })();
   }, []);
+
+  if (missingFfmpeg) {
+    return (
+      <Detail
+        markdown={`# ffmpeg not found\n\nThis extension requires ffmpeg to process images and videos.\n\nInstall it with Homebrew:\n\n\`\`\`\nbrew install ffmpeg\n\`\`\``}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard
+              title="Copy Install Command"
+              content="brew install ffmpeg"
+            />
+            <Action.OpenInBrowser
+              title="Open Homebrew Formula"
+              url="https://formulae.brew.sh/formula/ffmpeg"
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   if (showPicker) {
     return <FallbackMenu />;
