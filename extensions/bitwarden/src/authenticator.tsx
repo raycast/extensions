@@ -14,6 +14,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { createSteamTotpGenerator } from "~/utils/steamTotp";
 
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider } from "~/context/bitwarden";
@@ -283,7 +284,18 @@ const authenticator = {
 
     return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
   },
-  getGenerator(totpString: string): Result<OTPAuth.TOTP> {
+  getGenerator(totpString: string): Result<OTPAuth.TOTP | ReturnType<typeof createSteamTotpGenerator>> {
+    if (totpString.startsWith("steam://")) {
+      const secret = totpString.slice("steam://".length).trim();
+      if (!secret) return Err(new Error("Invalid Steam Guard key"));
+      const [generator, initError] = tryCatch(() => createSteamTotpGenerator(secret));
+      if (initError) {
+        captureException("Failed to initialize Steam Guard", initError);
+        return Err(new Error("Failed to parse Steam Guard key"));
+      }
+      return Ok(generator);
+    }
+
     const [options, parseError] = tryCatch(() => authenticator.parseTotp(totpString));
     if (parseError) {
       captureException("Failed to parse key", parseError);
