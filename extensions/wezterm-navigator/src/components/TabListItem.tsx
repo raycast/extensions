@@ -2,6 +2,7 @@ import { Action, ActionPanel, closeMainWindow, confirmAlert, Alert, Icon, List, 
 import { WezTermTab } from "../types";
 import { getTabAccessories, getTabDisplayTitle, getTabIcon, getTabKeywords, getTabSubtitle } from "../utils/formatting";
 import { activatePane, focusWezTerm, killPane, setTabTitle, switchWorkspace } from "../utils/wezterm";
+import { CreateTabForm } from "../create-tab";
 import { TabDetail } from "./TabDetail";
 import { RenameForm } from "./RenameForm";
 
@@ -72,6 +73,12 @@ export function TabListItem({ tab, onTabChanged }: TabListItemProps) {
         <ActionPanel>
           <ActionPanel.Section title="Navigation">
             <Action title="Switch to Tab" icon={Icon.ArrowRight} onAction={handleSwitchTab} />
+            <Action.Push
+              title="Create Tab…"
+              icon={Icon.Plus}
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              target={<CreateTabForm defaultWorkspace={tab.workspace} />}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Manage">
             <Action.Push

@@ -149,6 +149,30 @@ export function buildListCommand(): string {
 }
 
 /**
+ * Find an existing tab in a workspace whose pane's CWD matches the given directory.
+ * Optionally excludes a specific tab (e.g. the currently selected one) from the search.
+ * Returns the matching pane entry, or null if no match found.
+ */
+export function findExistingTab(workspace: string, cwd: string, excludeTabId?: number): WezTermPaneEntry | null {
+  try {
+    const output = execSync(`"${getWezTermBinary()}" cli list --format json`, {
+      env: ENV,
+      encoding: "utf-8",
+    });
+    const entries: WezTermPaneEntry[] = JSON.parse(output);
+    return (
+      entries.find((e) => {
+        if (excludeTabId != null && e.tab_id === excludeTabId) return false;
+        const entryCwd = parseCwd(e.cwd);
+        return e.workspace === workspace && entryCwd === cwd;
+      }) ?? null
+    );
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Activate a specific pane (and its tab) by pane_id.
  */
 export function activateTab(paneId: number): Promise<void> {
