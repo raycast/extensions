@@ -2,23 +2,26 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "renaming",
   "title": "Renaming",
-  "description": "Renaming is a simple tool to rename files and folders in a batch.",
-  "version": "1.0.1",
+  "description": "A powerful batch file renaming tool with regex support, case transformation, undo history, and presets.",
+  "version": "2.0.0",
   "keywords": [
     "rename",
     "finder",
     "file",
     "folder",
-    "directory",
+    "batch",
+    "regex",
+    "case",
+    "undo",
     "productivity",
-    "utility",
-    "system"
+    "utility"
   ],
   "icon": "renaming-icon.png",
   "author": "theo_daguier",
   "contributors": [
     "pernielsentikaer",
-    "ridemountainpig"
+    "ridemountainpig",
+    "TurboCoder13"
   ],
   "categories": [
     "Productivity",
@@ -29,35 +32,44 @@
   "commands": [
     {
       "name": "index",
-      "title": "Rename File(s)",
-      "description": "Rename file(s) in a batch.",
-      "mode": "view"
-    },
-    {
-      "name": "replace",
-      "title": "Replace File(s) Characters",
-      "description": "Replace characters in file(s) names.",
+      "title": "Renaming",
+      "description": "Batch rename files with regex, case transformation, undo history, and presets.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.1",
-    "@raycast/utils": "^1.12.5"
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2",
+    "exifreader": "^4.36.1",
+    "mime-types": "^3.0.2",
+    "safe-regex": "^2.1.1",
+    "transliteration": "^2.6.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^25.2.0",
+    "@types/react": "^19.2.10",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck && npm run test"
   },
   "platforms": [
     "macOS"

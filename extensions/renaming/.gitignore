@@ -9,5 +9,8 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 
+# test coverage
+/coverage
+
 # misc
 .DS_Store
