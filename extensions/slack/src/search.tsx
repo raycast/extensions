@@ -61,7 +61,7 @@ function CopyIdAction({ id }: { id: string }) {
       content={id}
       shortcut={{
         macOS: { modifiers: ["cmd", "shift"], key: "c" },
-        windows: { modifiers: ["ctrl", "shift"], key: "c" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
       }}
     />
   );
