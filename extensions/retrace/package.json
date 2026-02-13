@@ -13,7 +13,7 @@
     {
       "name": "go-to-retrace-timestamp",
       "title": "Go to Retrace Timestamp",
-      "subtitle": "Open Retrace at a specific timestamp",
+      "subtitle": "Retrace",
       "description": "Enter a time in natural language (e.g. '2nd day of march', '3 minutes ago', 'Feb 1 2am', 'yesterday 8am')",
       "mode": "no-view",
       "arguments": [
@@ -28,14 +28,14 @@
     {
       "name": "go-to-last-retrace-timestamp",
       "title": "Go to Last Retrace Timestamp",
-      "subtitle": "Launches Previous Retrace Timestamp",
+      "subtitle": "Retrace",
       "description": "Launches Previous Retrace Timestamp",
       "mode": "no-view"
     },
     {
       "name": "search-retrace",
       "title": "Search Retrace",
-      "subtitle": "Open Retrace search for a query",
+      "subtitle": "Retrace",
       "description": "Search in Retrace using retrace://search?q=...",
       "mode": "no-view",
       "arguments": [
