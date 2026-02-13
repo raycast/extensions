@@ -9,6 +9,7 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   open,
+  popToRoot,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
@@ -225,6 +226,7 @@ export default function SearchShortcuts() {
                   <Action.OpenInBrowser
                     title="Open in Browser"
                     url={item.url}
+                    onOpen={() => popToRoot({ clearSearchBar: true })}
                   />
                   <Action.CopyToClipboard
                     title="Copy URL"

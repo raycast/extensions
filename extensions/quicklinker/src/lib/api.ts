@@ -31,7 +31,7 @@ export async function fetchShortcuts(apiToken: string): Promise<Shortcut[]> {
   if (!response.ok) {
     let errorMessage = "An unexpected error occurred";
     try {
-      const body = await response.json();
+      const body = (await response.json()) as { error?: string };
       if (body && typeof body.error === "string") {
         errorMessage = body.error;
       }
@@ -53,7 +53,7 @@ export async function fetchShortcuts(apiToken: string): Promise<Shortcut[]> {
     throw new ApiError(errorMessage, response.status, retryAfterSeconds);
   }
 
-  const data: ShortcutsApiResponse = await response.json();
+  const data = (await response.json()) as ShortcutsApiResponse;
 
   if (!data || !Array.isArray(data.shortcuts)) {
     throw new ApiError("Invalid API response format", 500);
