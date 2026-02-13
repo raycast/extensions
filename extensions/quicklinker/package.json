@@ -28,7 +28,7 @@
       "name": "search-shortcuts",
       "title": "Search Shortcuts",
       "subtitle": "QuickLinker",
-      "description": "Search and open your QuickLinker shortcuts. Requires API access to be enabled in your QuickLinker dashboard.",
+      "description": "Search and open your QuickLinker shortcuts. Requires an optional API token — enable API access in your QuickLinker dashboard to use this command.",
       "mode": "view",
       "keywords": ["ql", "quicklinker", "shortcut", "link", "search"]
     }
@@ -44,8 +44,8 @@
     },
     {
       "name": "apiToken",
-      "title": "API Token",
-      "description": "Your QuickLinker API token — go to Dashboard > Settings > Advanced > Enable API Access to generate one",
+      "title": "API Token (Optional)",
+      "description": "Optional — only needed for Search Shortcuts. Go to Dashboard > Settings > Advanced > Enable API Access to generate one",
       "type": "password",
       "placeholder": "qlapi_0e4f8a1b2c3d5f6a7890abcdef123456",
       "required": false
