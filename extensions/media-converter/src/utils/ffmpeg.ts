@@ -48,10 +48,15 @@ export async function findFFmpegPath(minimumVersion = 6.0): Promise<{ path: stri
     }
   }
 
-  const customPathValidated = customPath && (await canExecute(customPath)) ? await checkFFmpegVersion(customPath).then(v => v && v >= minimumVersion ? customPath : null) : null;
+  const customPathValidated =
+    customPath && (await canExecute(customPath))
+      ? await checkFFmpegVersion(customPath).then((v) => (v && v >= minimumVersion ? customPath : null))
+      : null;
   const whichPath = await which("ffmpeg").catch(() => null);
-  const whichPathValidated = whichPath ? await checkFFmpegVersion(whichPath).then(v => v && v >= minimumVersion ? whichPath : null) : null;
-  
+  const whichPathValidated = whichPath
+    ? await checkFFmpegVersion(whichPath).then((v) => (v && v >= minimumVersion ? whichPath : null))
+    : null;
+
   const path = validStoredPath ?? customPathValidated ?? whichPathValidated;
 
   if (!path) return null;
