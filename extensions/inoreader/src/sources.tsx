@@ -66,6 +66,8 @@ type FolderOption = {
   title: string;
 };
 
+type OAuthPreferences = Pick<Preferences.Sources, "clientId" | "clientSecret" | "scope">;
+
 class InoreaderApiError extends Error {
   constructor(
     readonly status: number,
@@ -93,7 +95,7 @@ function normalizeErrorMessage(error: unknown): string {
   return "Unknown error";
 }
 
-function getScope(preferences: Preferences.Sources): string {
+function getScope(preferences: OAuthPreferences): string {
   return preferences.scope?.trim() ? preferences.scope.trim() : "read write";
 }
 
@@ -124,7 +126,7 @@ function parseVipSourceIds(raw: string | undefined): Set<string> {
 
 async function fetchTokens(
   params: URLSearchParams,
-  preferences: Preferences.Sources,
+  preferences: OAuthPreferences,
   previousRefreshToken?: string,
 ): Promise<OAuthTokenResponse> {
   const clientId = preferences.clientId.trim();
@@ -174,7 +176,7 @@ async function fetchTokens(
   throw lastError ?? new InoreaderApiError(500, "Unknown token exchange failure");
 }
 
-async function authorizeAndGetToken(preferences: Preferences.Sources): Promise<string> {
+async function authorizeAndGetToken(preferences: OAuthPreferences): Promise<string> {
   const authRequest = await oauthClient.authorizationRequest({
     endpoint: AUTHORIZE_ENDPOINT,
     clientId: preferences.clientId.trim(),
@@ -195,7 +197,7 @@ async function authorizeAndGetToken(preferences: Preferences.Sources): Promise<s
   return tokenResponse.access_token;
 }
 
-async function getAccessToken(preferences: Preferences.Sources, interactive: boolean): Promise<string | undefined> {
+async function getAccessToken(preferences: OAuthPreferences, interactive: boolean): Promise<string | undefined> {
   const tokens = await oauthClient.getTokens();
   if (tokens?.accessToken) {
     return tokens.accessToken;
