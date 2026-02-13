@@ -1,0 +1,25 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+
+# Raycast
+.raycast
+
+# build
+dist
+
+# Swift
+.build
+.swiftpm
+
+# environment variables
+.env
+.env.local
+
+# macOS
+.DS_Store
+assets/compiled_raycast_swift/
+swift/color-picker/.raycast-swift-build/
+swift/color-picker/Package.resolved
+raycast-env.d.ts

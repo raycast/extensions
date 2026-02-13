@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "colorblind-helper",
+  "title": "Colorblind Helper",
+  "description": "Pick any color from your screen and get a human-readable description. Includes colorblind simulation and confusion warnings.",
+  "icon": "icon.png",
+  "author": "pjtat5",
+  "categories": ["Design Tools", "Other"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "pick-and-describe",
+      "title": "Pick Color & Describe",
+      "description": "Pick a color from your screen and see its description",
+      "mode": "no-view"
+    },
+    {
+      "name": "describe-color",
+      "title": "Describe Color",
+      "description": "Pick or enter a color to see a detailed description with colorblind simulation",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2",
+    "color-namer": "^1.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.0",
+    "@types/node": "^22.13.1",
+    "@types/react": "^19.0.8",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
