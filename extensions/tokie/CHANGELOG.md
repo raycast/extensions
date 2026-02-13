@@ -1,12 +1,6 @@
 # Changelog
 
-## [Unreleased]
-
-- Added Microsoft Outlook/Hotmail support via Microsoft Graph API
-- Background refresh to keep OTPs cached when extension is closed
-- Configurable background refresh interval
-
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - Initial release of OTP Fetcher for macOS
 
 - Fetch OTP codes from iMessage/SMS, Gmail, and iCloud Mail
 - Auto-copy codes to clipboard with single action
