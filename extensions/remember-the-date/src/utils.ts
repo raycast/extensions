@@ -58,7 +58,7 @@ export function getNextOccurrence(date: string, repeat?: RepeatType): moment.Mom
     let next = moment({ year: today.year(), month: today.month(), day: 1 });
     next = next.date(Math.min(baseDay, next.daysInMonth()));
     if (next.isBefore(today)) {
-      next = moment({ year: today.year(), month: today.month() + 1, day: 1 });
+      next = today.clone().startOf("month").add(1, "month");
       next = next.date(Math.min(baseDay, next.daysInMonth()));
     }
     return next;
