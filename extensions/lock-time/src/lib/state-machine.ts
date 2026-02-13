@@ -164,6 +164,7 @@ export async function processStateChange(): Promise<void> {
         metrics.todayLockedMs += todayPortion;
         metrics.lastLockDurationMs = elapsed;
         metrics.lastUnlockIntervalMs = 0; // 间隙期间推断为锁屏，解锁间隔视为 0
+        metrics.lastLockStartAt = prevState.lastChangeAt; // 推断锁屏开始于间隙起点
         // 记录推断的锁屏会话到今日列表
         const todayStartMs = new Date(now).setHours(0, 0, 0, 0);
         const sessionLockAt = Math.max(prevState.lastChangeAt, todayStartMs);
@@ -181,7 +182,11 @@ export async function processStateChange(): Promise<void> {
           detail: `UNLOCKED → LOCKED (gap inferred as locked: ${todayPortion}ms)`,
         });
       } else {
-        metrics.lastUnlockIntervalMs = elapsed;
+        // 使用 lastLockEndAt（上次解锁时间）计算真实解锁持续时长，
+        // 而非 elapsed（elapsed 仅为最后一次 poll 间隔 ~60s，因为 lastChangeAt 每次 poll 都会更新）
+        metrics.lastUnlockIntervalMs = metrics.lastLockEndAt > 0 ? now - metrics.lastLockEndAt : elapsed;
+        // 记录锁屏开始时间，供后续 LOCKED→UNLOCKED 使用
+        metrics.lastLockStartAt = now;
         metricsChanged = true;
 
         logEvent({
@@ -197,17 +202,22 @@ export async function processStateChange(): Promise<void> {
       }
     } else if (prevState.current === "locked" && currentLockState === "unlocked") {
       // LOCKED → UNLOCKED：记录锁屏持续时长，累加今日锁屏时长
-      metrics.lastLockDurationMs = elapsed;
+      // 使用 lastLockStartAt（在 UNLOCKED→LOCKED 时记录的锁屏开始时间）计算真实锁屏持续时长，
+      // 而非 elapsed（如果锁屏期间有 LOCKED→LOCKED poll，elapsed 仅为最后一次 poll 间隔 ~60s）
+      const lockStartAt = metrics.lastLockStartAt > 0 ? metrics.lastLockStartAt : prevState.lastChangeAt;
+      metrics.lastLockDurationMs = now - lockStartAt;
       metrics.lastLockEndAt = now;
-      // lastLockStartAt 取 prevState.lastChangeAt（即锁屏开始时间点）
-      metrics.lastLockStartAt = prevState.lastChangeAt;
+      metrics.lastLockStartAt = lockStartAt; // 保留供 UI 展示时间范围
+
+      // todayLockedMs 增量累加：仅加最后一个 poll 间隔（之前的已在 LOCKED→LOCKED 中累加）
       const todayPortion = getTodayPortionMs(prevState.lastChangeAt, now);
       metrics.todayLockedMs += todayPortion;
 
-      // 记录锁屏会话到今日列表（跨天时只记录今天部分）
+      // 记录锁屏会话到今日列表：使用真实的锁屏开始时间（跨天时按 0 点切割）
       const todayStartMs = new Date(now).setHours(0, 0, 0, 0);
-      const sessionLockAt = Math.max(prevState.lastChangeAt, todayStartMs);
-      appendTodaySession(metrics, sessionLockAt, now, todayPortion);
+      const sessionLockAt = Math.max(lockStartAt, todayStartMs);
+      const sessionDuration = getTodayPortionMs(lockStartAt, now);
+      appendTodaySession(metrics, sessionLockAt, now, sessionDuration);
 
       metricsChanged = true;
 
