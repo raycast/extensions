@@ -1,6 +1,6 @@
 # Instagram Media Downloader Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-13
 
 - Add support for downloading Instagram Reels.
 
