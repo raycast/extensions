@@ -1,24 +1,12 @@
-import {
-  showToast,
-  Toast,
-  LaunchProps,
-  getPreferenceValues,
-} from "@raycast/api";
+import { showToast, Toast, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { extractTaskFromJan } from "./utils/janApi";
-import {
-  createReminder,
-  verifyReminderList,
-  createReminderList,
-  showRemindersInApp,
-} from "./utils/reminderUtils";
+import { createReminder, verifyReminderList, createReminderList, showRemindersInApp } from "./utils/reminderUtils";
 
 interface Arguments {
   text: string;
 }
 
-export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
-) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
   const { text } = props.arguments;
   const preferences = getPreferenceValues<Preferences>();
   const listName = preferences.reminderList || "To Do";
@@ -92,8 +80,7 @@ export default async function Command(
       await showToast({
         style: Toast.Style.Success,
         title: `${tasks.length} reminders created`,
-        message:
-          summary.length > 100 ? `${summary.substring(0, 100)}...` : summary,
+        message: summary.length > 100 ? `${summary.substring(0, 100)}...` : summary,
       });
     }
   } catch (error) {
@@ -102,8 +89,7 @@ export default async function Command(
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to create reminder",
-      message:
-        error instanceof Error ? error.message : "Unknown error occurred",
+      message: error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
 }

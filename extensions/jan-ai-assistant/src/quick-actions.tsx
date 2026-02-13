@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Clipboard,
-  showToast,
-  Toast,
-  Icon,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Clipboard, showToast, Toast, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { sendToJanAi } from "./utils/janApi";
 
@@ -155,9 +147,7 @@ export default function Command() {
         title: `${action.title}...`,
       });
 
-      const response = await sendToJanAi([
-        { role: "user", content: `${action.prompt}\n\n${text}` },
-      ]);
+      const response = await sendToJanAi([{ role: "user", content: `${action.prompt}\n\n${text}` }]);
 
       await Clipboard.copy(response);
 
@@ -179,10 +169,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search actions...">
-      <List.Section
-        title="Clipboard Text"
-        subtitle={clipboardText.substring(0, 50) + "..."}
-      >
+      <List.Section title="Clipboard Text" subtitle={clipboardText.substring(0, 50) + "..."}>
         {QUICK_ACTIONS.map((action) => (
           <List.Item
             key={action.id}
@@ -191,10 +178,7 @@ export default function Command() {
             icon={action.icon}
             actions={
               <ActionPanel>
-                <Action
-                  title={`${action.title}`}
-                  onAction={() => executeAction(action)}
-                />
+                <Action title={`${action.title}`} onAction={() => executeAction(action)} />
               </ActionPanel>
             }
           />

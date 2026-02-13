@@ -59,13 +59,10 @@ except Exception as e:
 
     console.log(`[extractTextFromImage] Running OCR...`);
 
-    const { stdout, stderr } = await execAsync(
-      `python3 -c '${pythonScript.replace(/'/g, "'\\''")}'`,
-      {
-        maxBuffer: 10 * 1024 * 1024,
-        timeout: 60000,
-      },
-    );
+    const { stdout, stderr } = await execAsync(`python3 -c '${pythonScript.replace(/'/g, "'\\''")}'`, {
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: 60000,
+    });
 
     if (stderr && stderr.includes("Error")) {
       throw new Error(`OCR failed: ${stderr}`);
@@ -79,27 +76,21 @@ except Exception as e:
 
     // Truncate if too long
     if (text.length > 50000) {
-      console.log(
-        `[extractTextFromImage] Truncating from ${text.length} to 50000 chars`,
-      );
+      console.log(`[extractTextFromImage] Truncating from ${text.length} to 50000 chars`);
       text = text.substring(0, 50000) + "\n\n[... truncated ...]";
     }
 
-    console.log(
-      `[extractTextFromImage] ✓ Extracted ${text.length} chars via OCR`,
-    );
+    console.log(`[extractTextFromImage] ✓ Extracted ${text.length} chars via OCR`);
     return text;
   } catch (error) {
     console.error(`[extractTextFromImage] Failed:`, error);
-    throw new Error(
-      "Failed to extract text from image. Make sure Tesseract is installed for OCR support.",
-    );
+    throw new Error("Failed to extract text from image. Make sure Tesseract is installed for OCR support.");
   } finally {
     // Clean up temp file
     if (tempPath) {
       try {
         await fs.unlink(tempPath);
-      } catch (e) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -109,9 +100,7 @@ except Exception as e:
 /**
  * Extract text from multiple images
  */
-export async function extractTextFromMultipleImages(
-  imagePaths: string[],
-): Promise<Map<string, string>> {
+export async function extractTextFromMultipleImages(imagePaths: string[]): Promise<Map<string, string>> {
   const results = new Map<string, string>();
 
   for (const path of imagePaths) {
@@ -119,14 +108,8 @@ export async function extractTextFromMultipleImages(
       const text = await extractTextFromImage(path);
       results.set(path, text);
     } catch (error) {
-      console.error(
-        `[extractTextFromMultipleImages] Failed for ${path}:`,
-        error,
-      );
-      results.set(
-        path,
-        `ERROR: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
+      console.error(`[extractTextFromMultipleImages] Failed for ${path}:`, error);
+      results.set(path, `ERROR: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 

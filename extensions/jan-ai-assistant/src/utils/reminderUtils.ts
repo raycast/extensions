@@ -15,10 +15,7 @@ function escapeAppleScript(str: string): string {
  * Create a reminder in Apple Reminders using AppleScript
  * Returns the reminder ID for later selection
  */
-export async function createReminder(
-  task: ParsedTask,
-  listName: string,
-): Promise<string> {
+export async function createReminder(task: ParsedTask, listName: string): Promise<string> {
   const escapedTitle = escapeAppleScript(task.title);
 
   // Build notes with amount if present
@@ -102,16 +99,12 @@ export async function createReminder(
   `;
 
   try {
-    const { stdout } = await execAsync(
-      `osascript -e '${script.replace(/'/g, "'\\''")}'`,
-    );
+    const { stdout } = await execAsync(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
     return stdout.trim();
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes("execution error")) {
-        throw new Error(
-          `Failed to create reminder. Make sure the "${listName}" list exists in Apple Reminders.`,
-        );
+        throw new Error(`Failed to create reminder. Make sure the "${listName}" list exists in Apple Reminders.`);
       }
       throw new Error(`AppleScript error: ${error.message}`);
     }
@@ -122,10 +115,7 @@ export async function createReminder(
 /**
  * Show created reminders in the Reminders app
  */
-export async function showRemindersInApp(
-  reminderIds: string[],
-  listName: string,
-): Promise<void> {
+export async function showRemindersInApp(reminderIds: string[], listName: string): Promise<void> {
   if (reminderIds.length === 0) return;
 
   const escapedListName = escapeAppleScript(listName);
@@ -157,12 +147,10 @@ export async function verifyReminderList(listName: string): Promise<boolean> {
   `;
 
   try {
-    const { stdout } = await execAsync(
-      `osascript -e '${script.replace(/'/g, "'\\''")}'`,
-    );
+    const { stdout } = await execAsync(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
     const lists = stdout.trim().split(", ");
     return lists.includes(listName);
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -182,8 +170,6 @@ export async function createReminderList(listName: string): Promise<void> {
   try {
     await execAsync(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
   } catch (error) {
-    throw new Error(
-      `Failed to create reminder list: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
+    throw new Error(`Failed to create reminder list: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }

@@ -34,12 +34,9 @@ except Exception as e:
     sys.exit(1)
 `;
 
-  const { stdout, stderr } = await promisify(exec)(
-    `python3 -c '${pythonScript.replace(/'/g, "'\\''")}'`,
-    {
-      maxBuffer: 10 * 1024 * 1024,
-    },
-  );
+  const { stdout, stderr } = await promisify(exec)(`python3 -c '${pythonScript.replace(/'/g, "'\\''")}'`, {
+    maxBuffer: 10 * 1024 * 1024,
+  });
 
   if (stderr && stderr.includes("No text extracted")) {
     throw new Error("No text in PDF - may be image-based");
@@ -148,13 +145,10 @@ except Exception as e:
 
   console.log(`[extractWithOCR] Running OCR on PDF...`);
 
-  const { stdout, stderr } = await promisify(exec)(
-    `python3 -c '${pythonScript.replace(/'/g, "'\\''")}'`,
-    {
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: 60000, // OCR can take a while
-    },
-  );
+  const { stdout, stderr } = await promisify(exec)(`python3 -c '${pythonScript.replace(/'/g, "'\\''")}'`, {
+    maxBuffer: 10 * 1024 * 1024,
+    timeout: 60000, // OCR can take a while
+  });
 
   if (stderr && stderr.includes("Error")) {
     throw new Error(`OCR failed: ${stderr}`);
@@ -199,17 +193,13 @@ export async function extractTextFromPDF(pdfPath: string): Promise<string> {
 
       // Truncate if too long
       if (text.length > 50000) {
-        console.log(
-          `[extractTextFromPDF] Truncating from ${text.length} to 50000 chars`,
-        );
+        console.log(`[extractTextFromPDF] Truncating from ${text.length} to 50000 chars`);
         text = text.substring(0, 50000) + "\n\n[... truncated ...]";
       }
 
-      console.log(
-        `[extractTextFromPDF] ✓ Extracted ${text.length} chars via pdfplumber`,
-      );
+      console.log(`[extractTextFromPDF] ✓ Extracted ${text.length} chars via pdfplumber`);
       return text;
-    } catch (pdfplumberError) {
+    } catch {
       console.warn(`[extractTextFromPDF] pdfplumber failed, trying OCR...`);
 
       // Fallback to OCR for image-based PDFs
@@ -217,28 +207,22 @@ export async function extractTextFromPDF(pdfPath: string): Promise<string> {
 
       // Truncate if too long
       if (text.length > 50000) {
-        console.log(
-          `[extractTextFromPDF] Truncating from ${text.length} to 50000 chars`,
-        );
+        console.log(`[extractTextFromPDF] Truncating from ${text.length} to 50000 chars`);
         text = text.substring(0, 50000) + "\n\n[... truncated ...]";
       }
 
-      console.log(
-        `[extractTextFromPDF] ✓ Extracted ${text.length} chars via OCR`,
-      );
+      console.log(`[extractTextFromPDF] ✓ Extracted ${text.length} chars via OCR`);
       return text;
     }
   } catch (error) {
     console.error(`[extractTextFromPDF] All methods failed:`, error);
-    throw new Error(
-      "Failed to extract text from PDF. Make sure Tesseract is installed for OCR support.",
-    );
+    throw new Error("Failed to extract text from PDF. Make sure Tesseract is installed for OCR support.");
   } finally {
     // Clean up temp file
     if (tempPath) {
       try {
         await fs.unlink(tempPath);
-      } catch (e) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -248,9 +232,7 @@ export async function extractTextFromPDF(pdfPath: string): Promise<string> {
 /**
  * Extract text from multiple PDF files
  */
-export async function extractTextFromMultiplePDFs(
-  pdfPaths: string[],
-): Promise<Map<string, string>> {
+export async function extractTextFromMultiplePDFs(pdfPaths: string[]): Promise<Map<string, string>> {
   const results = new Map<string, string>();
 
   for (const path of pdfPaths) {
@@ -259,10 +241,7 @@ export async function extractTextFromMultiplePDFs(
       results.set(path, text);
     } catch (error) {
       console.error(`[extractTextFromMultiplePDFs] Failed for ${path}:`, error);
-      results.set(
-        path,
-        `ERROR: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
+      results.set(path, `ERROR: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 
@@ -296,21 +275,17 @@ export async function pdfToBase64(pdfPath: string): Promise<string> {
   try {
     const fileBuffer = await fs.readFile(workingPath);
     const base64 = fileBuffer.toString("base64");
-    console.log(
-      `[pdfToBase64] ✓ Converted ${fileBuffer.length} bytes to base64`,
-    );
+    console.log(`[pdfToBase64] ✓ Converted ${fileBuffer.length} bytes to base64`);
     return base64;
   } catch (error) {
     console.error(`[pdfToBase64] Failed:`, error);
-    throw new Error(
-      `Failed to convert PDF to base64: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
+    throw new Error(`Failed to convert PDF to base64: ${error instanceof Error ? error.message : "Unknown error"}`);
   } finally {
     // Clean up temp file
     if (tempPath) {
       try {
         await fs.unlink(tempPath);
-      } catch (e) {
+      } catch {
         // Ignore cleanup errors
       }
     }

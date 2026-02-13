@@ -1,26 +1,15 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import {
-  Message,
-  JanApiResponse,
-  JanApiError,
-  ParsedTask,
-  MessageContentText,
-  MessageContentImageUrl,
-} from "./types";
+import { Message, JanApiResponse, JanApiError, ParsedTask, MessageContentText, MessageContentImageUrl } from "./types";
 import { pdfToBase64, getPDFSize } from "./pdfUtils";
 
 /**
  * Send a message to Jan.ai API for general text processing
  */
-export async function sendToJanAi(
-  messages: Message[],
-  model?: string,
-): Promise<string> {
+export async function sendToJanAi(messages: Message[], model?: string): Promise<string> {
   const preferences = getPreferenceValues<Preferences>();
 
-  const apiUrl =
-    preferences.apiUrl || "http://localhost:1337/v1/chat/completions";
+  const apiUrl = preferences.apiUrl || "http://localhost:1337/v1/chat/completions";
   const { apiKey } = preferences;
   const temperature = parseFloat(preferences.temperature || "0.7");
   const maxTokens = parseInt(preferences.maxTokens || "2000", 10);
@@ -62,13 +51,8 @@ export async function sendToJanAi(
     return data.choices[0].message.content;
   } catch (error) {
     if (error instanceof Error) {
-      if (
-        error.message.includes("ECONNREFUSED") ||
-        error.message.includes("fetch failed")
-      ) {
-        throw new Error(
-          "Cannot connect to Jan.ai. Please ensure Jan.ai is running and the API server is enabled.",
-        );
+      if (error.message.includes("ECONNREFUSED") || error.message.includes("fetch failed")) {
+        throw new Error("Cannot connect to Jan.ai. Please ensure Jan.ai is running and the API server is enabled.");
       }
       throw error;
     }
@@ -88,8 +72,7 @@ export async function sendToJanAiWithPDF(
 ): Promise<string> {
   const preferences = getPreferenceValues<Preferences>();
 
-  const apiUrl =
-    preferences.apiUrl || "http://localhost:1337/v1/chat/completions";
+  const apiUrl = preferences.apiUrl || "http://localhost:1337/v1/chat/completions";
   const { apiKey } = preferences;
   const temperature = parseFloat(preferences.temperature || "0.7");
   const maxTokens = parseInt(preferences.maxTokens || "2000", 10);
@@ -100,9 +83,7 @@ export async function sendToJanAiWithPDF(
   // Check file size (warn if > 10MB)
   const fileSize = await getPDFSize(pdfPath);
   if (fileSize > 10 * 1024 * 1024) {
-    console.warn(
-      `[sendToJanAiWithPDF] Large PDF detected: ${(fileSize / 1024 / 1024).toFixed(2)}MB`,
-    );
+    console.warn(`[sendToJanAiWithPDF] Large PDF detected: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
   }
 
   // Convert PDF to base64
@@ -175,13 +156,8 @@ export async function sendToJanAiWithPDF(
     return data.choices[0].message.content;
   } catch (error) {
     if (error instanceof Error) {
-      if (
-        error.message.includes("ECONNREFUSED") ||
-        error.message.includes("fetch failed")
-      ) {
-        throw new Error(
-          "Cannot connect to Jan.ai. Please ensure Jan.ai is running and the API server is enabled.",
-        );
+      if (error.message.includes("ECONNREFUSED") || error.message.includes("fetch failed")) {
+        throw new Error("Cannot connect to Jan.ai. Please ensure Jan.ai is running and the API server is enabled.");
       }
       throw error;
     }
@@ -211,7 +187,7 @@ export async function getAvailableModels(): Promise<string[]> {
 
     const data = (await response.json()) as { data: Array<{ id: string }> };
     return data.data.map((model) => model.id);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -252,9 +228,7 @@ function buildReminderPrompt(input: string): string {
 
   // Simple reminder detection: no dollar signs, no invoice numbers, no NET terms
   const isSimpleReminder =
-    !input.includes("$") &&
-    !input.toLowerCase().includes("invoice") &&
-    !input.toLowerCase().includes("net ");
+    !input.includes("$") && !input.toLowerCase().includes("invoice") && !input.toLowerCase().includes("net ");
 
   if (isSimpleReminder) {
     return `Extract task and output JSON. Today is ${dateInfo.today}.
@@ -353,9 +327,7 @@ Output ONLY the JSON array.`;
 /**
  * Extract tasks from a PDF file using Jan.ai with text extraction fallback
  */
-export async function extractTaskFromPDF(
-  pdfPath: string,
-): Promise<ParsedTask[]> {
+export async function extractTaskFromPDF(pdfPath: string): Promise<ParsedTask[]> {
   const preferences = getPreferenceValues<Preferences>();
   const { defaultModel } = preferences;
 
@@ -469,35 +441,26 @@ Output ONLY the JSON array, no other text.`;
       const userPrompt =
         "Extract the invoice payment information. Create ONE payment reminder with invoice number, customer name, due date, and total amount. If there are split payment terms, create one task per payment.";
 
-      const response = await sendToJanAiWithPDF(
-        pdfPath,
-        userPrompt,
-        systemPrompt,
-      );
+      const response = await sendToJanAiWithPDF(pdfPath, userPrompt, systemPrompt);
 
       // If we got here, native PDF worked - parse and return
       return await parseTaskResponse(response, "extractTaskFromPDF");
     } catch (pdfError) {
       // Check if it's a vision/multimodal error
-      const errorMsg =
-        pdfError instanceof Error ? pdfError.message : String(pdfError);
+      const errorMsg = pdfError instanceof Error ? pdfError.message : String(pdfError);
       if (
         errorMsg.includes("image input is not supported") ||
         errorMsg.includes("mmproj") ||
         errorMsg.includes("multimodal")
       ) {
-        console.log(
-          `[extractTaskFromPDF] Model doesn't support vision, falling back to text extraction...`,
-        );
+        console.log(`[extractTaskFromPDF] Model doesn't support vision, falling back to text extraction...`);
 
         // Import text extraction utility
         const { extractTextFromPDF } = await import("./pdfUtils");
 
         // Extract text from PDF
         const pdfText = await extractTextFromPDF(pdfPath);
-        console.log(
-          `[extractTaskFromPDF] Extracted ${pdfText.length} chars of text`,
-        );
+        console.log(`[extractTaskFromPDF] Extracted ${pdfText.length} chars of text`);
 
         // Send extracted text to Jan.ai
         const messages: Message[] = [
@@ -522,13 +485,8 @@ Output ONLY the JSON array, no other text.`;
     if (error instanceof Error) {
       console.error(`[extractTaskFromPDF] Error: ${error.message}`);
 
-      if (
-        error.message.includes("ECONNREFUSED") ||
-        error.message.includes("fetch failed")
-      ) {
-        throw new Error(
-          "Cannot connect to Jan.ai. Ensure it's running with API enabled.",
-        );
+      if (error.message.includes("ECONNREFUSED") || error.message.includes("fetch failed")) {
+        throw new Error("Cannot connect to Jan.ai. Ensure it's running with API enabled.");
       }
 
       throw error;
@@ -540,10 +498,7 @@ Output ONLY the JSON array, no other text.`;
 /**
  * Parse task response from Jan.ai (extracted to avoid duplication)
  */
-async function parseTaskResponse(
-  response: string,
-  context: string,
-): Promise<ParsedTask[]> {
+async function parseTaskResponse(response: string, context: string): Promise<ParsedTask[]> {
   // Parse the response
   let jsonStr = response.trim();
 
@@ -573,7 +528,7 @@ async function parseTaskResponse(
   try {
     const result = JSON.parse(jsonStr);
     parsed = Array.isArray(result) ? result : [result];
-  } catch (jsonError) {
+  } catch {
     console.error(`[${context}] JSON parse failed`);
     console.error(`[${context}] Attempted: ${jsonStr.substring(0, 500)}`);
     throw new Error(`Couldn't parse JSON from model response.`);
@@ -589,16 +544,12 @@ async function parseTaskResponse(
     if (task.dueDate) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(task.dueDate)) {
-        console.warn(
-          `[${context}] Invalid date format: ${task.dueDate}, removing`,
-        );
+        console.warn(`[${context}] Invalid date format: ${task.dueDate}, removing`);
         task.dueDate = undefined;
       } else {
         const year = parseInt(task.dueDate.split("-")[0]);
         if (year < 2020 || year > 2100) {
-          console.warn(
-            `[${context}] Unreasonable year: ${year}, removing date`,
-          );
+          console.warn(`[${context}] Unreasonable year: ${year}, removing date`);
           task.dueDate = undefined;
         }
       }
@@ -623,8 +574,7 @@ async function parseTaskResponse(
 
 export async function extractTaskFromJan(input: string): Promise<ParsedTask[]> {
   const preferences = getPreferenceValues<Preferences>();
-  const apiUrl =
-    preferences.apiUrl || "http://localhost:1337/v1/chat/completions";
+  const apiUrl = preferences.apiUrl || "http://localhost:1337/v1/chat/completions";
   const { apiKey, defaultModel } = preferences;
 
   console.log(`[extractTaskFromJan] Input: "${input}"`);
@@ -670,7 +620,7 @@ export async function extractTaskFromJan(input: string): Promise<ParsedTask[]> {
 
     try {
       data = JSON.parse(rawResponse) as JanApiResponse;
-    } catch (parseError) {
+    } catch {
       throw new Error("Invalid JSON response from Jan.ai API");
     }
 
@@ -683,20 +633,14 @@ export async function extractTaskFromJan(input: string): Promise<ParsedTask[]> {
 
     // For reasoning models, content is in reasoning_content
     let rawContent = "";
-    const hasReasoningContent =
-      "reasoning_content" in choice.message && choice.message.reasoning_content;
+    const hasReasoningContent = "reasoning_content" in choice.message && choice.message.reasoning_content;
 
     if (hasReasoningContent) {
-      rawContent = (choice.message as { reasoning_content: string })
-        .reasoning_content;
-      console.log(
-        `[extractTaskFromJan] Using reasoning_content (${rawContent.length} chars)`,
-      );
+      rawContent = (choice.message as { reasoning_content: string }).reasoning_content;
+      console.log(`[extractTaskFromJan] Using reasoning_content (${rawContent.length} chars)`);
     } else {
       rawContent = choice.message.content || "";
-      console.log(
-        `[extractTaskFromJan] Using content (${rawContent.length} chars)`,
-      );
+      console.log(`[extractTaskFromJan] Using content (${rawContent.length} chars)`);
     }
 
     if (!rawContent || rawContent.trim() === "") {
@@ -731,19 +675,15 @@ export async function extractTaskFromJan(input: string): Promise<ParsedTask[]> {
       }
     }
 
-    console.log(
-      `[extractTaskFromJan] Parsing JSON: ${jsonStr.substring(0, 300)}...`,
-    );
+    console.log(`[extractTaskFromJan] Parsing JSON: ${jsonStr.substring(0, 300)}...`);
 
     let parsed: ParsedTask[];
     try {
       const result = JSON.parse(jsonStr);
       parsed = Array.isArray(result) ? result : [result];
-    } catch (jsonError) {
+    } catch {
       console.error("[extractTaskFromJan] JSON parse failed");
-      console.error(
-        `[extractTaskFromJan] Attempted: ${jsonStr.substring(0, 500)}`,
-      );
+      console.error(`[extractTaskFromJan] Attempted: ${jsonStr.substring(0, 500)}`);
       throw new Error(`Couldn't parse JSON from model response.`);
     }
 
@@ -758,17 +698,13 @@ export async function extractTaskFromJan(input: string): Promise<ParsedTask[]> {
         // Check if date is in valid YYYY-MM-DD format
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(task.dueDate)) {
-          console.warn(
-            `[extractTaskFromJan] Invalid date format: ${task.dueDate}, removing`,
-          );
+          console.warn(`[extractTaskFromJan] Invalid date format: ${task.dueDate}, removing`);
           task.dueDate = undefined;
         } else {
           // Check if date is reasonable (not year 4000!)
           const year = parseInt(task.dueDate.split("-")[0]);
           if (year < 2020 || year > 2100) {
-            console.warn(
-              `[extractTaskFromJan] Unreasonable year: ${year}, removing date`,
-            );
+            console.warn(`[extractTaskFromJan] Unreasonable year: ${year}, removing date`);
             task.dueDate = undefined;
           }
         }
@@ -781,9 +717,7 @@ export async function extractTaskFromJan(input: string): Promise<ParsedTask[]> {
       throw new Error("No valid tasks found in response");
     }
 
-    console.log(
-      `[extractTaskFromJan] ✓ Success: ${validTasks.length} task(s) extracted`,
-    );
+    console.log(`[extractTaskFromJan] ✓ Success: ${validTasks.length} task(s) extracted`);
     validTasks.forEach((task, i) => {
       console.log(
         `[extractTaskFromJan]   ${i + 1}. "${task.title}" due:${task.dueDate || "none"} amount:${task.amount ? `$${task.amount}` : "none"}`,
@@ -795,13 +729,8 @@ export async function extractTaskFromJan(input: string): Promise<ParsedTask[]> {
     if (error instanceof Error) {
       console.error(`[extractTaskFromJan] Error: ${error.message}`);
 
-      if (
-        error.message.includes("ECONNREFUSED") ||
-        error.message.includes("fetch failed")
-      ) {
-        throw new Error(
-          "Cannot connect to Jan.ai. Ensure it's running with API enabled.",
-        );
+      if (error.message.includes("ECONNREFUSED") || error.message.includes("fetch failed")) {
+        throw new Error("Cannot connect to Jan.ai. Ensure it's running with API enabled.");
       }
 
       throw error;

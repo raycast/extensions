@@ -12,12 +12,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { sendToJanAiWithPDF, extractTaskFromPDF } from "./utils/janApi";
-import {
-  createReminder,
-  verifyReminderList,
-  createReminderList,
-  showRemindersInApp,
-} from "./utils/reminderUtils";
+import { createReminder, verifyReminderList, createReminderList, showRemindersInApp } from "./utils/reminderUtils";
 
 type ActionType = "extract-tasks" | "summarize" | "custom";
 
@@ -60,9 +55,7 @@ export default function Command() {
             .filter(
               (line) =>
                 line.toLowerCase().endsWith(".pdf") &&
-                (line.startsWith("/") ||
-                  line.startsWith("~") ||
-                  line.startsWith("file://")),
+                (line.startsWith("/") || line.startsWith("~") || line.startsWith("file://")),
             )
             .map((line) => {
               if (line.startsWith("file://")) {
@@ -110,9 +103,7 @@ export default function Command() {
         return path;
       });
 
-      console.log(
-        `[ProcessPDF] Processing ${pdfPaths.length} PDF(s) with action: ${values.action}`,
-      );
+      console.log(`[ProcessPDF] Processing ${pdfPaths.length} PDF(s) with action: ${values.action}`);
 
       // Handle different actions
       if (values.action === "extract-tasks") {
@@ -136,8 +127,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to process PDF",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     }
   }
@@ -216,8 +206,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Success,
         title: `${allTasks.length} reminders created`,
-        message:
-          summary.length > 100 ? `${summary.substring(0, 100)}...` : summary,
+        message: summary.length > 100 ? `${summary.substring(0, 100)}...` : summary,
       });
     }
   }
@@ -255,10 +244,7 @@ export default function Command() {
         markdown={finalResult}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy to Clipboard"
-              content={finalResult}
-            />
+            <Action.CopyToClipboard title="Copy to Clipboard" content={finalResult} />
             <Action.Paste content={finalResult} />
           </ActionPanel>
         }
@@ -268,10 +254,7 @@ export default function Command() {
     await showToast({
       style: Toast.Style.Success,
       title: "Summary copied to clipboard",
-      message:
-        pdfPaths.length > 1
-          ? `Summarized ${pdfPaths.length} PDFs`
-          : "Summary complete",
+      message: pdfPaths.length > 1 ? `Summarized ${pdfPaths.length} PDFs` : "Summary complete",
     });
   }
 
@@ -305,10 +288,7 @@ export default function Command() {
         markdown={finalResult}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy to Clipboard"
-              content={finalResult}
-            />
+            <Action.CopyToClipboard title="Copy to Clipboard" content={finalResult} />
             <Action.Paste content={finalResult} />
           </ActionPanel>
         }
@@ -318,10 +298,7 @@ export default function Command() {
     await showToast({
       style: Toast.Style.Success,
       title: "Result copied to clipboard",
-      message:
-        pdfPaths.length > 1
-          ? `Processed ${pdfPaths.length} PDFs`
-          : "Processing complete",
+      message: pdfPaths.length > 1 ? `Processed ${pdfPaths.length} PDFs` : "Processing complete",
     });
   }
 
@@ -329,7 +306,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Process Pdf" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Process PDF" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -340,29 +317,12 @@ export default function Command() {
         />
       )}
 
-      <Form.FilePicker
-        id="pdfFiles"
-        title="PDF Files"
-        allowMultipleSelection={true}
-        canChooseDirectories={false}
-      />
+      <Form.FilePicker id="pdfFiles" title="PDF Files" allowMultipleSelection={true} canChooseDirectories={false} />
 
       <Form.Dropdown id="action" title="Action" defaultValue="extract-tasks">
-        <Form.Dropdown.Item
-          value="extract-tasks"
-          title="Extract Tasks & Create Reminders"
-          icon={Icon.CheckCircle}
-        />
-        <Form.Dropdown.Item
-          value="summarize"
-          title="Summarize PDF"
-          icon={Icon.Document}
-        />
-        <Form.Dropdown.Item
-          value="custom"
-          title="Custom Prompt"
-          icon={Icon.Pencil}
-        />
+        <Form.Dropdown.Item value="extract-tasks" title="Extract Tasks & Create Reminders" icon={Icon.CheckCircle} />
+        <Form.Dropdown.Item value="summarize" title="Summarize PDF" icon={Icon.Document} />
+        <Form.Dropdown.Item value="custom" title="Custom Prompt" icon={Icon.Pencil} />
       </Form.Dropdown>
 
       <Form.TextArea

@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Detail,
-  LaunchProps,
-  Clipboard,
-  showToast,
-  Toast,
-  Icon,
-} from "@raycast/api";
+import { ActionPanel, Action, Detail, LaunchProps, Clipboard, showToast, Toast, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { sendToJanAi } from "./utils/janApi";
 import { formatForDisplay } from "./utils/textHelpers";
@@ -47,9 +38,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
 
     setIsLoading(true);
     try {
-      const response = await sendToJanAi([
-        { role: "user", content: `${prompt}\n\n${inputText}` },
-      ]);
+      const response = await sendToJanAi([{ role: "user", content: `${prompt}\n\n${inputText}` }]);
       setOutputText(formatForDisplay(response));
       await showToast({
         style: Toast.Style.Success,
@@ -79,33 +68,21 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Quick Actions">
-            <Action
-              title="Summarize"
-              icon={Icon.Text}
-              onAction={() => processText("Summarize this text concisely:")}
-            />
+            <Action title="Summarize" icon={Icon.Text} onAction={() => processText("Summarize this text concisely:")} />
             <Action
               title="Improve Writing"
               icon={Icon.Pencil}
-              onAction={() =>
-                processText(
-                  "Improve the writing of this text while maintaining its meaning:",
-                )
-              }
+              onAction={() => processText("Improve the writing of this text while maintaining its meaning:")}
             />
             <Action
               title="Fix Grammar"
               icon={Icon.CheckCircle}
-              onAction={() =>
-                processText("Fix any grammar and spelling errors in this text:")
-              }
+              onAction={() => processText("Fix any grammar and spelling errors in this text:")}
             />
             <Action
               title="Make Professional"
               icon={Icon.Envelope}
-              onAction={() =>
-                processText("Rewrite this text in a professional tone:")
-              }
+              onAction={() => processText("Rewrite this text in a professional tone:")}
             />
             <Action
               title="Explain"
@@ -115,10 +92,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
           </ActionPanel.Section>
           {outputText && (
             <ActionPanel.Section title="Output Actions">
-              <Action.CopyToClipboard
-                title="Copy Result"
-                content={outputText}
-              />
+              <Action.CopyToClipboard title="Copy Result" content={outputText} />
               <Action.Paste title="Paste Result" content={outputText} />
             </ActionPanel.Section>
           )}

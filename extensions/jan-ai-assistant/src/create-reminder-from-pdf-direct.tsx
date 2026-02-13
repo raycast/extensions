@@ -11,12 +11,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { extractTaskFromPDF } from "./utils/janApi";
-import {
-  createReminder,
-  verifyReminderList,
-  createReminderList,
-  showRemindersInApp,
-} from "./utils/reminderUtils";
+import { createReminder, verifyReminderList, createReminderList, showRemindersInApp } from "./utils/reminderUtils";
 
 export default function Command() {
   const [pdfPath, setPdfPath] = useState<string>("");
@@ -53,9 +48,7 @@ export default function Command() {
             .filter(
               (line) =>
                 line.toLowerCase().endsWith(".pdf") &&
-                (line.startsWith("/") ||
-                  line.startsWith("~") ||
-                  line.startsWith("file://")),
+                (line.startsWith("/") || line.startsWith("~") || line.startsWith("file://")),
             )
             .map((line) => {
               if (line.startsWith("file://")) {
@@ -166,8 +159,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Success,
           title: `${tasks.length} reminders created`,
-          message:
-            summary.length > 100 ? `${summary.substring(0, 100)}...` : summary,
+          message: summary.length > 100 ? `${summary.substring(0, 100)}...` : summary,
         });
       }
 
@@ -179,8 +171,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to process PDF",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -210,10 +201,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Reminder from Pdf"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Create Reminder from PDF" onSubmit={handleSubmit} />
           {clipboardFiles.length > 0 && (
             <Action
               title="Paste from Clipboard"

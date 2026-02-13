@@ -1,11 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  Clipboard,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, Clipboard } from "@raycast/api";
 import { useState } from "react";
 import { sendToJanAi } from "./utils/janApi";
 

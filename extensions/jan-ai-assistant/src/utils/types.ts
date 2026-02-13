@@ -10,9 +10,7 @@ export interface MessageContentImageUrl {
   };
 }
 
-export type MessageContent =
-  | string
-  | Array<MessageContentText | MessageContentImageUrl>;
+export type MessageContent = string | Array<MessageContentText | MessageContentImageUrl>;
 
 export interface Message {
   role: "system" | "user" | "assistant";
