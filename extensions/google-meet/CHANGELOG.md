@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-02-13
 
 - Make delay configurable by user
 - Add support for Zen Browser
