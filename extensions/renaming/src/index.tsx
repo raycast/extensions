@@ -1,188 +1,148 @@
-import { useEffect, useState } from "react";
-import { runAppleScript, useCachedState } from "@raycast/utils";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  closeMainWindow,
-  popToRoot,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-} from "@raycast/api";
-import { statSync } from "fs";
-import { basename, extname } from "path";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import RenameCommand from "./commands/rename";
+import ReplaceCommand from "./commands/replace";
+import HistoryCommand from "./commands/history";
+import PresetsCommand from "./commands/presets";
+import ClipboardRenameCommand from "./commands/clipboard-rename";
+import AISuggestCommand from "./commands/ai-suggest";
+import { SelectionMode } from "./types";
+
+interface MenuItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: Icon;
+  color: Color;
+  component: React.ComponentType<{ mode?: SelectionMode }>;
+  mode?: SelectionMode;
+  section?: "main" | "advanced";
+}
+
+const MENU_ITEMS: MenuItem[] = [
+  {
+    id: "rename",
+    title: "Rename File(s)",
+    subtitle: "Batch rename with prefix, suffix, numbering, and case transformation",
+    icon: Icon.Pencil,
+    color: Color.Blue,
+    component: RenameCommand,
+    mode: SelectionMode.FILES,
+    section: "main",
+  },
+  {
+    id: "rename-folders",
+    title: "Rename Folder(s)",
+    subtitle: "Batch rename folders with prefix, suffix, numbering, and case transformation",
+    icon: Icon.Folder,
+    color: Color.Blue,
+    component: RenameCommand,
+    mode: SelectionMode.FOLDERS,
+    section: "main",
+  },
+  {
+    id: "replace",
+    title: "Replace in File Names",
+    subtitle: "Find and replace in filenames with optional regex",
+    icon: Icon.MagnifyingGlass,
+    color: Color.Orange,
+    component: ReplaceCommand,
+    mode: SelectionMode.FILES,
+    section: "main",
+  },
+  {
+    id: "replace-folders",
+    title: "Replace in Folder Names",
+    subtitle: "Find and replace in folder names with optional regex",
+    icon: Icon.MagnifyingGlass,
+    color: Color.Orange,
+    component: ReplaceCommand,
+    mode: SelectionMode.FOLDERS,
+    section: "main",
+  },
+  {
+    id: "clipboard",
+    title: "Rename from Clipboard",
+    subtitle: "Use names from clipboard to rename selected files",
+    icon: Icon.Clipboard,
+    color: Color.Purple,
+    component: ClipboardRenameCommand,
+    mode: SelectionMode.FILES,
+    section: "advanced",
+  },
+  {
+    id: "ai-suggest",
+    title: "AI Smart Rename",
+    subtitle: "Generate descriptive names using AI (Pro)",
+    icon: Icon.Stars,
+    color: Color.Magenta,
+    component: AISuggestCommand,
+    mode: SelectionMode.FILES,
+    section: "advanced",
+  },
+  {
+    id: "history",
+    title: "Rename History",
+    subtitle: "View and undo recent rename operations",
+    icon: Icon.Clock,
+    color: Color.Green,
+    component: HistoryCommand,
+    section: "main",
+  },
+  {
+    id: "presets",
+    title: "Presets",
+    subtitle: "Manage saved rename configurations",
+    icon: Icon.Bookmark,
+    color: Color.Yellow,
+    component: PresetsCommand,
+    section: "main",
+  },
+];
 
 export default function Command() {
-  const [files, setFiles] = useState<string[]>([]);
-  const [newName, setNewName] = useState<string>("");
-  const [prefix, setPrefix] = useState<string>("");
-  const [suffix, setSuffix] = useState<string>("");
-  const [preserveName, setPreserveName] = useCachedState<boolean>("preserveName", false);
-  const [preview, setPreview] = useState<string>("");
-  const [separator, setSeparator] = useState<string>("_");
-  const [indexSeparator, setIndexSeparator] = useState<string>("-");
-
-  const getSelectedFiles = async () => {
-    try {
-      const files = await getSelectedFinderItems();
-      const fileList = files.map((file) => file.path);
-      console.log("Fetched files:", fileList);
-
-      if (fileList.length === 0) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Please select at least one file or open a Finder window",
-        });
-        popToRoot();
-        return;
-      }
-
-      setFiles(fileList);
-    } catch (error) {
-      console.error(error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch files",
-        message: "Please make sure a Finder window is open and files are selected",
-      });
-      popToRoot();
-    }
-  };
-
-  const handleSeparatorChange = async (separatorType: "separator" | "indexSeparator", value: string) => {
-    if (value.includes("/")) {
-      if (separatorType === "separator") {
-        setSeparator("");
-      } else {
-        setIndexSeparator("");
-      }
-
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid separator",
-        message: "The separator cannot be a forward slash (/)",
-      });
-    } else {
-      if (separatorType === "separator") {
-        setSeparator(value);
-      } else {
-        setIndexSeparator(value);
-      }
-    }
-  };
-
-  useEffect(() => {
-    getSelectedFiles();
-  }, []);
-
-  const generateNewName = (index: number): string => {
-    const selectedFile = files[index];
-    if (!selectedFile) {
-      // Handle the case where files[index] is undefined
-      return "";
-    }
-
-    const isDirectory = statSync(selectedFile).isDirectory();
-
-    const fullName = basename(selectedFile);
-    const extension = isDirectory ? "" : extname(selectedFile);
-    const baseName = isDirectory ? fullName : basename(selectedFile, extension);
-
-    const prefixWithUnderscore = prefix ? `${prefix}${separator}` : "";
-    const suffixWithUnderscore = suffix ? `${separator}${suffix}` : "";
-
-    const newBaseName = preserveName
-      ? `${prefixWithUnderscore}${baseName}${suffixWithUnderscore}`
-      : `${prefixWithUnderscore}${newName}${indexSeparator}${index + 1}${suffixWithUnderscore}`;
-
-    return isDirectory || !extension ? newBaseName : `${newBaseName}${extension}`;
-  };
-
-  const renameFiles = async () => {
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const newNameWithExtension = generateNewName(i);
-        const escapedFilePath = file.replaceAll('"', '\\"');
-        const escapedNewName = newNameWithExtension.replaceAll('"', '\\"');
-
-        await runAppleScript(`
-          tell application "Finder"
-            set theItem to POSIX file "${escapedFilePath}" as alias
-            set name of theItem to "${escapedNewName}"
-          end tell
-        `);
-      }
-
-      console.log("Finished renaming files.");
-      setPreserveName(false);
-      await closeMainWindow();
-      await popToRoot();
-    } catch (error) {
-      console.error(error);
-
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to rename files",
-        message: (error as Error).message,
-      });
-    }
-  };
-
-  useEffect(() => {
-    setPreview(generateNewName(0));
-  }, [newName, prefix, suffix, preserveName, files, separator, indexSeparator]);
+  const mainItems = MENU_ITEMS.filter((item) => item.section !== "advanced");
+  const advancedItems = MENU_ITEMS.filter((item) => item.section === "advanced");
 
   return (
-    <>
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm title="Rename" onSubmit={renameFiles} />
-          </ActionPanel>
-        }
-      >
-        {files.length > 1 && (
-          <>
-            <Form.Checkbox
-              id="preserveName"
-              label="Preserve base name"
-              value={preserveName}
-              onChange={setPreserveName}
-            />
-            {!preserveName && (
-              <Form.TextField
-                id="newName"
-                title="New Name"
-                value={newName}
-                onChange={setNewName}
-                placeholder="Enter new name"
-              />
-            )}
-            <Form.TextField id="prefix" title="Prefix" value={prefix} onChange={setPrefix} placeholder="Enter prefix" />
-            <Form.TextField id="suffix" title="Suffix" value={suffix} onChange={setSuffix} placeholder="Enter suffix" />
-            <Form.TextField
-              id="separator"
-              title="Separator"
-              value={separator}
-              onChange={(newValue) => handleSeparatorChange("separator", newValue)}
-              placeholder="Enter separator"
-            />
-            {!preserveName && (
-              <Form.TextField
-                id="indexSeparator"
-                title="Index Separator"
-                value={indexSeparator}
-                onChange={(newValue) => handleSeparatorChange("indexSeparator", newValue)}
-                placeholder="Enter Index separator"
-              />
-            )}
-            <Form.Description title="Preview" text={preview} />
-          </>
-        )}
-        <Form.Separator />
-      </Form>
-    </>
+    <List searchBarPlaceholder="Select an action...">
+      <List.Section title="Actions">
+        {mainItems.map((item) => (
+          <List.Item
+            key={item.id}
+            title={item.title}
+            subtitle={item.subtitle}
+            icon={{ source: item.icon, tintColor: item.color }}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title={`Open ${item.title}`}
+                  icon={item.icon}
+                  target={<item.component mode={item.mode} />}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+      <List.Section title="Advanced">
+        {advancedItems.map((item) => (
+          <List.Item
+            key={item.id}
+            title={item.title}
+            subtitle={item.subtitle}
+            icon={{ source: item.icon, tintColor: item.color }}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title={`Open ${item.title}`}
+                  icon={item.icon}
+                  target={<item.component mode={item.mode} />}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+    </List>
   );
 }
