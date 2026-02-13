@@ -38,21 +38,19 @@ export interface SlackMember {
 const { accessToken, proxyUrl: proxyUrlPref } = getPreferenceValues<Preferences>();
 let slackWebClient: WebClient | null = null;
 
+function getHttpProxy() {
+  if (process.env.HTTPS_PROXY) return "HTTPS_PROXY";
+  if (process.env.HTTP_PROXY) return "HTTP_PROXY";
+  return null;
+}
+
 function getProxyAgent(): HttpsProxyAgent<string> | undefined {
-  const source = proxyUrlPref ? "preference" : process.env.HTTPS_PROXY ? "HTTPS_PROXY" : process.env.HTTP_PROXY ? "HTTP_PROXY" : null;
+  const source = proxyUrlPref ? "preference" : getHttpProxy();
   const proxyUrl = proxyUrlPref || process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
 
   if (!proxyUrl || !source) {
-    console.log(
-      "[proxy] no proxy configured (preference=%s, HTTPS_PROXY=%s, HTTP_PROXY=%s)",
-      proxyUrlPref ?? "unset",
-      process.env.HTTPS_PROXY ?? "unset",
-      process.env.HTTP_PROXY ?? "unset",
-    );
     return undefined;
   }
-
-  console.log("[proxy] using proxy from %s: %s", source, proxyUrl);
   return new HttpsProxyAgent(proxyUrl);
 }
 
@@ -61,7 +59,6 @@ export const slack = OAuthService.slack({
     "users:read channels:read groups:read im:read mpim:read chat:write channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read",
   personalAccessToken: accessToken,
   onAuthorize({ token }) {
-    console.log("[slack] onAuthorize");
     const agent = getProxyAgent();
     slackWebClient = new WebClient(token, { rejectRateLimitedCalls: true, ...(agent && { agent }) });
   },
