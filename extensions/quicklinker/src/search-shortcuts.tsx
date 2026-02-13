@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
-import { Shortcut, Preferences, API_TOKEN_REGEX } from "./lib/types";
+import { Shortcut, API_TOKEN_REGEX } from "./lib/types";
 import { fetchShortcuts, ApiError } from "./lib/api";
 import { getCacheState, setCache, clearCache } from "./lib/cache";
 

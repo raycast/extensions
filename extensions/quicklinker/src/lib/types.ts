@@ -18,7 +18,6 @@ export type CacheState =
   | { status: "stale"; shortcuts: Shortcut[] }
   | { status: "miss" };
 
-
 export const API_BASE_URL = "https://quicklinker.app";
 export const API_TOKEN_REGEX = /^qlapi_[0-9a-f]{32}$/;
 export const CACHE_KEY = "shortcuts-cache";
