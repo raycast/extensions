@@ -1,11 +1,11 @@
 {
   "name": "notilight-controller",
   "title": "NotiLight Controller",
-  "description": "Control NotiLightapp via deep links",
+  "description": "Control NotiLight app via deep links",
   "icon": "icon.png",
   "author": "shail_antani",
   "categories": [
-    "Other"
+    "Applications"
   ],
   "license": "MIT",
   "commands": [
