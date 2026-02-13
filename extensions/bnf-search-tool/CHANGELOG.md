@@ -6,6 +6,6 @@
 - Added link to Medusa from the BNF screen (push `Cmd + M` to access).
 - Added fallback to treatment summaries if for example "Hypertension" is searched for instead of a drug itself.
 
-## [Initial Release] - {2026-01-19}
+## [Initial Release] - 2026-01-19
 
 - Initial release of BNF Search tool.
