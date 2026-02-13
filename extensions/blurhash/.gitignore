@@ -1,0 +1,6 @@
+node_modules/
+build/
+*.js
+!src/**/*.js
+!eslint.config.js
+.DS_Store
