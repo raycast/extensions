@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Windows: Enhancement] - 2026-02-12
+## [Windows: Enhancement] - {PR_MERGE_DATE}
 
 - Add ability to cancel color picker with Esc key
 - Fix typos
