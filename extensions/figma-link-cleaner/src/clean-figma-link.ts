@@ -41,8 +41,8 @@ const MAX_RETRIES = 1;
 export default async function Command() {
   try {
     // Step 1: Check if Figma is frontmost or at least running
-    const figmaIsActive = isFigmaFrontmost();
-    const figmaIsRunning = figmaIsActive || isFigmaRunning();
+    const figmaIsActive = await isFigmaFrontmost();
+    const figmaIsRunning = figmaIsActive || (await isFigmaRunning());
 
     // Step 2: Get current clipboard to detect changes later
     const clipboardBefore = await Clipboard.readText();
@@ -153,11 +153,11 @@ async function tryCopyFromFigma(
       // Send Cmd+L to Figma (focus first if needed)
       if (needsFocus && attempts === 0) {
         // Combined AppleScript: focus Figma → verify frontmost → send Cmd+L
-        focusFigmaAndCopyLink();
+        await focusFigmaAndCopyLink();
         // Extra wait since Figma was just brought to front
         await sleep(FOCUS_EXTRA_DELAY);
       } else {
-        sendCopyLinkKeystroke();
+        await sendCopyLinkKeystroke();
       }
 
       // Wait for clipboard to update

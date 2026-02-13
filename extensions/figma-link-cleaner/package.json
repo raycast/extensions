@@ -5,9 +5,21 @@
   "description": "Clean and shorten Figma URLs instantly. Removes tracking parameters, file slugs, and creates ultra-short fgma.cc links with one hotkey.",
   "icon": "icon.png",
   "author": "iamshubhransh",
-  "categories": ["Productivity", "Developer Tools", "Design Tools"],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Design Tools"
+  ],
   "license": "MIT",
-  "keywords": ["figma", "url", "link", "shortener", "clean", "design", "clipboard"],
+  "keywords": [
+    "figma",
+    "url",
+    "link",
+    "shortener",
+    "clean",
+    "design",
+    "clipboard"
+  ],
   "commands": [
     {
       "name": "clean-figma-link",
@@ -16,10 +28,19 @@
       "description": "Copies the current Figma selection link (via Cmd+L), cleans it by removing tracking params, and optionally shortens via fgma.cc",
       "mode": "no-view",
       "hotkey": {
-        "modifiers": ["ctrl"],
+        "modifiers": [
+          "ctrl"
+        ],
         "key": "l"
       },
-      "keywords": ["figma", "link", "url", "clean", "shorten", "copy"]
+      "keywords": [
+        "figma",
+        "link",
+        "url",
+        "clean",
+        "shorten",
+        "copy"
+      ]
     }
   ],
   "preferences": [

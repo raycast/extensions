@@ -3,22 +3,25 @@
  * Used to send keystrokes to Figma and check frontmost app.
  */
 
-import { execSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 
 /**
- * Runs an AppleScript via stdin for reliable multi-line support.
+ * Runs an AppleScript asynchronously to avoid blocking the event loop.
  * @param script - The AppleScript code to execute
  * @returns The trimmed output from osascript
  * @throws Error if AppleScript execution fails
  */
-export function runAppleScript(script: string): string {
+export async function runAppleScript(script: string): Promise<string> {
   try {
-    const result = execSync("osascript -", {
-      input: script,
+    const { stdout } = await execFileAsync("osascript", ["-e", script], {
       encoding: "utf-8",
       timeout: 10000, // 10 second timeout (scripts with delays need more time)
+      maxBuffer: 1024 * 1024,
     });
-    return result.trim();
+    return stdout.trim();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`AppleScript failed: ${message}`);
@@ -29,7 +32,7 @@ export function runAppleScript(script: string): string {
  * Gets the name of the frontmost (active) application.
  * @returns The name of the frontmost app (e.g., "Figma")
  */
-export function getFrontmostApp(): string {
+export async function getFrontmostApp(): Promise<string> {
   return runAppleScript(`
     tell application "System Events"
       set frontApp to name of first process whose frontmost is true
@@ -42,9 +45,9 @@ export function getFrontmostApp(): string {
  * Checks if Figma is the frontmost application.
  * @returns true if Figma is in the foreground
  */
-export function isFigmaFrontmost(): boolean {
+export async function isFigmaFrontmost(): Promise<boolean> {
   try {
-    const frontApp = getFrontmostApp();
+    const frontApp = await getFrontmostApp();
     return frontApp.toLowerCase().includes("figma");
   } catch {
     return false;
@@ -55,9 +58,9 @@ export function isFigmaFrontmost(): boolean {
  * Checks if Figma is currently running (even if not frontmost).
  * @returns true if Figma is running
  */
-export function isFigmaRunning(): boolean {
+export async function isFigmaRunning(): Promise<boolean> {
   try {
-    const count = runAppleScript(`
+    const count = await runAppleScript(`
       tell application "System Events"
         set figmaProcesses to (name of every process whose name contains "Figma")
       end tell
@@ -72,8 +75,8 @@ export function isFigmaRunning(): boolean {
 /**
  * Brings Figma to the front and waits briefly for it to activate.
  */
-export function focusFigma(): void {
-  runAppleScript(`
+export async function focusFigma(): Promise<void> {
+  await runAppleScript(`
     tell application "System Events"
       set figmaProcess to first process whose name contains "Figma"
       set frontmost of figmaProcess to true
@@ -85,9 +88,9 @@ export function focusFigma(): void {
  * Gets the name of the running Figma process (handles "Figma" and "Figma Beta").
  * @returns The exact process name, or null if not running
  */
-export function getFigmaProcessName(): string | null {
+export async function getFigmaProcessName(): Promise<string | null> {
   try {
-    return runAppleScript(`
+    return await runAppleScript(`
       tell application "System Events"
         set figmaProcess to first process whose name contains "Figma"
         return name of figmaProcess
@@ -108,14 +111,14 @@ export function getFigmaProcessName(): string | null {
  *
  * This handles the race condition where Raycast might briefly steal focus back.
  */
-export function focusFigmaAndCopyLink(): void {
-  const figmaName = getFigmaProcessName();
+export async function focusFigmaAndCopyLink(): Promise<void> {
+  const figmaName = await getFigmaProcessName();
   if (!figmaName) {
     throw new Error("Figma is not running");
   }
 
   try {
-    runAppleScript(`
+    await runAppleScript(`
       -- Activate Figma
       tell application "${figmaName}" to activate
 
@@ -160,9 +163,9 @@ export function focusFigmaAndCopyLink(): void {
  * IMPORTANT: This requires Accessibility permissions for Raycast.
  * If permission is not granted, this will throw an error.
  */
-export function sendCopyLinkKeystroke(): void {
+export async function sendCopyLinkKeystroke(): Promise<void> {
   try {
-    runAppleScript(`
+    await runAppleScript(`
       tell application "System Events"
         keystroke "l" using {command down}
       end tell

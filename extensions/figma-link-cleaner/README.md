@@ -14,8 +14,8 @@ Clean and shorten Figma URLs instantly with one hotkey. Perfect for sharing clea
 
 ### Before & After
 
-| Original (~90 chars) | Cleaned (~50 chars) | Shortened (~21 chars) |
-|---------------------|---------------------|----------------------|
+| Original (~90 chars)                                                             | Cleaned (~50 chars)                               | Shortened (~21 chars)    |
+| -------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------ |
 | `https://www.figma.com/design/ABC123/My-Design?node-id=123%3A456&t=abc&fuid=999` | `https://figma.com/design/ABC123?node-id=123:456` | `https://fgma.cc/x7k9m2` |
 
 ### What Gets Removed
@@ -48,10 +48,10 @@ Clean and shorten Figma URLs instantly with one hotkey. Perfect for sharing clea
 
 ## Preferences
 
-| Setting | Description |
-|---------|-------------|
+| Setting                       | Description                          |
+| ----------------------------- | ------------------------------------ |
 | **Enable fgma.cc shortening** | Create ultra-short links via fgma.cc |
-| **API Key** | Optional authentication for fgma.cc |
+| **API Key**                   | Optional authentication for fgma.cc  |
 
 ## Supported URL Formats
 
@@ -68,12 +68,15 @@ Clean and shorten Figma URLs instantly with one hotkey. Perfect for sharing clea
 ## Troubleshooting
 
 ### "Accessibility permission required"
+
 Enable Raycast in System Settings → Privacy & Security → Accessibility
 
 ### "Couldn't copy from Figma"
+
 Make sure you have a layer or frame selected in Figma, then try again.
 
 ### "No Figma link found"
+
 Either select something in Figma, or copy a Figma URL to your clipboard first.
 
 ## Author

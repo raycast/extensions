@@ -4,13 +4,13 @@
  */
 
 /**
- * List of Figma URL path patterns we support.
- * - /file/ - Standard file links
- * - /design/ - New design links
- * - /proto/ - Prototype links
- * - /board/ - FigJam board links
+ * List of Figma URL path types we support.
+ * - file - Standard file links
+ * - design - New design links
+ * - proto - Prototype links
+ * - board - FigJam board links
  */
-const FIGMA_PATH_PATTERNS = ["/file/", "/design/", "/proto/", "/board/"];
+const FIGMA_PATH_TYPES = new Set(["file", "design", "proto", "board"]);
 
 /**
  * Query parameters to preserve when cleaning URLs.
@@ -18,6 +18,26 @@ const FIGMA_PATH_PATTERNS = ["/file/", "/design/", "/proto/", "/board/"];
  * - page-id: Identifies which page to show
  */
 const PARAMS_TO_KEEP = ["node-id", "page-id"];
+
+/**
+ * Extracts and validates the key path segments from a Figma URL.
+ * Expected format: /{type}/{fileKey}/optional-slug
+ */
+function getFigmaPathParts(
+  pathname: string,
+): { fileType: string; fileKey: string } | null {
+  const pathParts = pathname.split("/").filter(Boolean);
+  if (pathParts.length < 2) {
+    return null;
+  }
+
+  const [fileType, fileKey] = pathParts;
+  if (!FIGMA_PATH_TYPES.has(fileType) || !fileKey) {
+    return null;
+  }
+
+  return { fileType, fileKey };
+}
 
 /**
  * Checks if a string is a valid Figma URL.
@@ -40,10 +60,8 @@ export function isFigmaUrl(text: string): boolean {
       return false;
     }
 
-    // Must match one of our supported path patterns
-    return FIGMA_PATH_PATTERNS.some((pattern) =>
-      url.pathname.includes(pattern),
-    );
+    // Must match supported path shape: /{type}/{fileKey}
+    return getFigmaPathParts(url.pathname) !== null;
   } catch {
     // Not a valid URL
     return false;
@@ -99,13 +117,13 @@ export function cleanFigmaUrl(url: string): CleanResult {
 
   // 2. Remove the file name slug from the path
   // Path format: /design/FILEKEY/optional-slug or /file/FILEKEY/optional-slug
-  const pathParts = parsed.pathname.split("/").filter(Boolean);
-  // pathParts example: ["design", "ABC123", "My-File-Name"] or ["design", "ABC123"]
-  const fileType = pathParts[0]; // "design", "file", "proto", "board"
-  const fileKey = pathParts[1]; // The actual file key (required)
+  const figmaPath = getFigmaPathParts(parsed.pathname);
+  if (!figmaPath) {
+    throw new Error("Not a valid Figma URL");
+  }
 
   // Rebuild path with only type and key (no slug)
-  const cleanPath = `/${fileType}/${fileKey}`;
+  const cleanPath = `/${figmaPath.fileType}/${figmaPath.fileKey}`;
 
   // 3. Build clean query params (only keep node-id and page-id)
   const newParams = new URLSearchParams();
