@@ -15,6 +15,11 @@ export type SteamTotpGenerator = {
 /**
  * Creates a Steam Guard TOTP generator.
  * Steam uses HMAC-SHA1 with a custom 5-character output encoding.
+ *
+ * Implementation based on:
+ * - Bitwarden SDK-internal: https://github.com/bitwarden/sdk-internal/blob/main/crates/bitwarden-vault/src/totp.rs
+ * - Bitwarden browser extension steam:// format (see bitwarden.com/help/authenticator-keys/#steam-guard-totps)
+ *
  * @param secretBase32 - Base32-encoded shared secret (from steam://SECRET or otpauth URI)
  */
 export function createSteamTotpGenerator(secretBase32: string): SteamTotpGenerator {
