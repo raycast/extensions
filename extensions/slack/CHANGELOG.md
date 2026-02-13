@@ -1,5 +1,11 @@
 # Slack Changelog
 
+## [Add proxy support for corporate networks] - 2026-02-13
+
+- Add optional "Proxy URL" preference for routing Slack API requests through a corporate proxy
+- Proxy is resolved from the Raycast preference, `HTTPS_PROXY`, or `HTTP_PROXY` environment variables
+- Note: proxy applies to Slack API calls only; OAuth login uses Raycast's built-in networking
+
 ## [Multi-word search support] - 2026-01-20
 
 - Improved search in "Open Channel" and "Send Message" commands to support multi-word queries
