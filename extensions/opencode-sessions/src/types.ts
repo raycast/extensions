@@ -1,7 +1,8 @@
 export interface Project {
   id: string;
   worktree: string;
-  vcs: string;
+  vcs: string | null;
+  name: string | null;
   sandboxes: unknown[];
   time: {
     created: number;

@@ -47,7 +47,7 @@ export function formatAccessoryDate(timestamp: number): string {
   const daysSinceMonday = (now.getDay() + 6) % 7;
   const startOfWeek = startOfDay - daysSinceMonday * 86400000;
 
-  const time = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const time = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
   if (timestamp >= startOfDay) {
     return time;
@@ -58,16 +58,16 @@ export function formatAccessoryDate(timestamp: number): string {
   }
 
   if (timestamp >= startOfWeek) {
-    const day = date.toLocaleDateString("en-US", { weekday: "short" });
+    const day = date.toLocaleDateString(undefined, { weekday: "short" });
 
     return `${day} ${time}`;
   }
 
   if (date.getFullYear() === now.getFullYear()) {
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
 
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function shellEscape(s: string): string {
@@ -86,11 +86,11 @@ export function repoName(worktree: string): string {
 }
 
 export function formatDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleDateString("en-US", {
+  return new Date(timestamp).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
   });
 }
@@ -120,8 +120,8 @@ export function formatTokens(count: number): string {
 }
 
 function formatTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString("en-US", {
-    hour: "2-digit",
+  return new Date(timestamp).toLocaleTimeString(undefined, {
+    hour: "numeric",
     minute: "2-digit",
   });
 }

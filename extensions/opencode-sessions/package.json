@@ -22,12 +22,12 @@
   ],
   "preferences": [
     {
-      "name": "storagePath",
+      "name": "databasePath",
       "type": "textfield",
       "required": false,
-      "title": "Storage Path",
-      "description": "Override OpenCode storage path (defaults to ~/.local/share/opencode/storage)",
-      "placeholder": "~/.local/share/opencode/storage"
+      "title": "Database Path",
+      "description": "Override OpenCode database path (defaults to ~/.local/share/opencode/opencode.db)",
+      "placeholder": "~/.local/share/opencode/opencode.db"
     }
   ],
   "dependencies": {

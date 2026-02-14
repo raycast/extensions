@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 
-import { checkStorageVersion, loadProjects, loadSessions } from "../lib/storage";
+import { checkDatabase, loadProjects, loadSessions } from "../lib/storage";
 import { Project, SessionWithProject } from "../types";
 
 interface UseSessionsResult {
@@ -12,7 +12,7 @@ interface UseSessionsResult {
 }
 
 export function useSessions(): UseSessionsResult {
-  const { data: versionError, isLoading: versionLoading } = useCachedPromise(checkStorageVersion);
+  const { data: versionError, isLoading: versionLoading } = useCachedPromise(checkDatabase);
 
   const storageOk = !versionLoading && versionError === null;
 

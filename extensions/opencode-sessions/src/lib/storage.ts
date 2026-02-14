@@ -1,222 +1,295 @@
 import { getPreferenceValues } from "@raycast/api";
-import { readdir, readFile, rm } from "fs/promises";
+import { executeSQL } from "@raycast/utils";
+import { execSync } from "child_process";
+import { existsSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
 import { Message, Part, Project, Session, TranscriptEntry } from "../types";
 
-const SUPPORTED_MIGRATION = 2;
-
-function getStoragePath(): string {
+function getDbPath(): string {
   const prefs = getPreferenceValues<ExtensionPreferences>();
 
-  if (prefs.storagePath) {
-    return prefs.storagePath.replace(/^~/, homedir());
+  if (prefs.databasePath) {
+    return prefs.databasePath.replace(/^~/, homedir());
   }
 
-  return join(homedir(), ".local", "share", "opencode", "storage");
+  return join(homedir(), ".local", "share", "opencode", "opencode.db");
 }
 
-export async function checkStorageVersion(): Promise<string | null> {
-  const base = getStoragePath();
+export async function checkDatabase(): Promise<string | null> {
+  const dbPath = getDbPath();
+
+  if (!existsSync(dbPath)) {
+    return "No OpenCode database found. Run opencode (v1.2.0+) at least once to create the database.";
+  }
 
   try {
-    const raw = await readFile(join(base, "migration"), "utf-8");
-    const version = parseInt(raw.trim(), 10);
+    const rows = await executeSQL<{ name: string }>(
+      dbPath,
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='session'",
+    );
 
-    if (isNaN(version)) {
-      return "Could not read OpenCode storage version.";
-    }
-
-    if (version !== SUPPORTED_MIGRATION) {
-      return (
-        `Opencode storage format has changed (version ${version} — this extension only supports version ${SUPPORTED_MIGRATION}). ` +
-        `This extension needs to be updated.`
-      );
+    if (rows.length === 0) {
+      return "OpenCode database exists but is missing expected tables. Try running opencode to complete the migration.";
     }
 
     return null;
   } catch (error) {
-    if (error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT") {
-      return "No OpenCode data found. Run opencode at least once to create the storage directory.";
+    if (error instanceof Error) {
+      return `Could not open OpenCode database: ${error.message}`;
     }
 
-    return "Could not read OpenCode storage version.";
+    return "Could not open OpenCode database.";
   }
 }
 
-async function readJsonFiles<T>(dirPath: string): Promise<T[]> {
-  let entries: string[];
+interface ProjectRow {
+  id: string;
+  worktree: string;
+  vcs: string | null;
+  name: string | null;
+  time_created: number;
+  time_updated: number;
+  sandboxes: string;
+}
+
+interface SessionRow {
+  id: string;
+  project_id: string;
+  parent_id: string | null;
+  slug: string;
+  directory: string;
+  title: string;
+  version: string;
+  share_url: string | null;
+  summary_additions: number | null;
+  summary_deletions: number | null;
+  summary_files: number | null;
+  time_created: number;
+  time_updated: number;
+  time_compacting: number | null;
+  time_archived: number | null;
+}
+
+interface MessageRow {
+  id: string;
+  session_id: string;
+  data: string;
+}
+
+interface PartRow {
+  id: string;
+  message_id: string;
+  session_id: string;
+  data: string;
+}
+
+interface TranscriptRow {
+  message_id: string;
+  message_data: string;
+  part_id: string | null;
+  part_message_id: string | null;
+  part_session_id: string | null;
+  part_data: string | null;
+}
+
+function toProject(row: ProjectRow): Project {
+  let sandboxes: unknown[] = [];
 
   try {
-    entries = await readdir(dirPath);
+    sandboxes = JSON.parse(row.sandboxes);
   } catch {
-    return [];
+    // ignore malformed JSON
   }
 
-  const jsonFiles = entries.filter((f) => f.endsWith(".json"));
-  const results: T[] = [];
+  return {
+    id: row.id,
+    worktree: row.worktree,
+    vcs: row.vcs,
+    name: row.name,
+    sandboxes,
+    time: {
+      created: row.time_created,
+      updated: row.time_updated,
+    },
+  };
+}
 
-  const reads = jsonFiles.map(async (file) => {
-    try {
-      const raw = await readFile(join(dirPath, file), "utf-8");
-      return JSON.parse(raw) as T;
-    } catch {
-      return null;
-    }
-  });
+function toSession(row: SessionRow): Session {
+  const session: Session = {
+    id: row.id,
+    slug: row.slug,
+    version: row.version,
+    projectID: row.project_id,
+    directory: row.directory,
+    parentID: row.parent_id ?? undefined,
+    title: row.title,
+    time: {
+      created: row.time_created,
+      updated: row.time_updated,
+      compacting: row.time_compacting ?? undefined,
+      archived: row.time_archived ?? undefined,
+    },
+  };
 
-  const settled = await Promise.all(reads);
-
-  for (const item of settled) {
-    if (item !== null) {
-      results.push(item);
-    }
+  if (row.summary_files != null) {
+    session.summary = {
+      additions: row.summary_additions ?? 0,
+      deletions: row.summary_deletions ?? 0,
+      files: row.summary_files,
+    };
   }
 
-  return results;
+  if (row.share_url) {
+    session.share = { url: row.share_url };
+  }
+
+  return session;
+}
+
+function toMessage(id: string, sessionID: string, dataJson: string): Message {
+  const data = JSON.parse(dataJson) as Record<string, unknown>;
+
+  return {
+    id,
+    sessionID,
+    role: data.role as "user" | "assistant",
+    time: data.time as { created: number; completed?: number },
+    parentID: data.parentID as string | undefined,
+    modelID: data.modelID as string | undefined,
+    providerID: data.providerID as string | undefined,
+    agent: data.agent as string | undefined,
+    mode: data.mode as string | undefined,
+    cost: data.cost as number | undefined,
+    tokens: data.tokens as Message["tokens"] | undefined,
+    finish: data.finish as string | undefined,
+  };
+}
+
+function toPart(id: string, messageID: string, sessionID: string, dataJson: string): Part {
+  const data = JSON.parse(dataJson) as Record<string, unknown>;
+
+  return {
+    id,
+    messageID,
+    sessionID,
+    type: data.type as string,
+    text: data.text as string | undefined,
+    tool: data.tool as string | undefined,
+    state: data.state as Part["state"] | undefined,
+  };
 }
 
 export async function loadProjects(): Promise<Project[]> {
-  const base = getStoragePath();
+  const rows = await executeSQL<ProjectRow>(
+    getDbPath(),
+    "SELECT id, worktree, vcs, name, time_created, time_updated, sandboxes FROM project",
+  );
 
-  return readJsonFiles<Project>(join(base, "project"));
+  return rows.map(toProject);
 }
 
 export async function loadSessions(): Promise<Session[]> {
-  const base = getStoragePath();
-  const sessionDir = join(base, "session");
+  const rows = await executeSQL<SessionRow>(
+    getDbPath(),
+    `SELECT id, project_id, parent_id, slug, directory, title, version,
+            share_url, summary_additions, summary_deletions, summary_files,
+            time_created, time_updated, time_compacting, time_archived
+     FROM session
+     WHERE parent_id IS NULL
+     ORDER BY time_updated DESC`,
+  );
 
-  let projectDirs: string[];
-
-  try {
-    projectDirs = await readdir(sessionDir);
-  } catch {
-    return [];
-  }
-
-  const allSessions: Session[] = [];
-
-  const reads = projectDirs.map(async (projectID) => {
-    return readJsonFiles<Session>(join(sessionDir, projectID));
-  });
-
-  const results = await Promise.all(reads);
-
-  for (const sessions of results) {
-    allSessions.push(...sessions);
-  }
-
-  // Filter out sub-agent sessions (those with a parentID)
-  const topLevel = allSessions.filter((s) => !s.parentID);
-
-  // Sort by updated time descending (most recent first)
-  topLevel.sort((a, b) => b.time.updated - a.time.updated);
-
-  return topLevel;
+  return rows.map(toSession);
 }
 
 export async function loadMessages(sessionID: string): Promise<Message[]> {
-  const base = getStoragePath();
-  const messages = await readJsonFiles<Message>(join(base, "message", sessionID));
+  const rows = await executeSQL<MessageRow>(
+    getDbPath(),
+    `SELECT id, session_id, data FROM message WHERE session_id = '${escapeSql(sessionID)}' ORDER BY id ASC`,
+  );
 
-  // Sort by ID ascending (IDs are ULID-based, ascending = chronological)
-  messages.sort((a, b) => a.id.localeCompare(b.id));
-
-  return messages;
+  return rows.map((row) => toMessage(row.id, row.session_id, row.data));
 }
 
 export async function loadParts(messageID: string): Promise<Part[]> {
-  const base = getStoragePath();
+  const rows = await executeSQL<PartRow>(
+    getDbPath(),
+    `SELECT id, message_id, session_id, data FROM part WHERE message_id = '${escapeSql(messageID)}' ORDER BY id ASC`,
+  );
 
-  return readJsonFiles<Part>(join(base, "part", messageID));
+  return rows.map((row) => toPart(row.id, row.message_id, row.session_id, row.data));
 }
 
 export async function loadTranscript(sessionID: string): Promise<TranscriptEntry[]> {
-  const messages = await loadMessages(sessionID);
-  const entries: TranscriptEntry[] = [];
+  const sid = escapeSql(sessionID);
+  const rows = await executeSQL<TranscriptRow>(
+    getDbPath(),
+    `SELECT m.id AS message_id, m.data AS message_data,
+            p.id AS part_id, p.message_id AS part_message_id,
+            p.session_id AS part_session_id, p.data AS part_data
+     FROM message m
+     LEFT JOIN part p ON p.message_id = m.id
+     WHERE m.session_id = '${sid}'
+     ORDER BY m.id ASC, p.id ASC`,
+  );
 
-  const partLoads = messages.map(async (message) => {
-    const parts = await loadParts(message.id);
+  // Group rows by message
+  const entriesMap = new Map<string, TranscriptEntry>();
 
-    return { message, parts };
-  });
+  for (const row of rows) {
+    let entry = entriesMap.get(row.message_id);
 
-  const results = await Promise.all(partLoads);
+    if (!entry) {
+      entry = {
+        message: toMessage(row.message_id, sessionID, row.message_data),
+        parts: [],
+      };
+      entriesMap.set(row.message_id, entry);
+    }
 
-  for (const entry of results) {
-    const relevantParts = entry.parts.filter((p) => (p.type === "text" && p.text) || p.type === "tool");
+    if (row.part_id && row.part_data && row.part_message_id && row.part_session_id) {
+      const part = toPart(row.part_id, row.part_message_id, row.part_session_id, row.part_data);
 
-    if (relevantParts.length > 0) {
-      entries.push({ message: entry.message, parts: relevantParts });
+      if ((part.type === "text" && part.text) || part.type === "tool") {
+        entry.parts.push(part);
+      }
     }
   }
 
-  // Maintain chronological order from the message sort
-  entries.sort((a, b) => a.message.id.localeCompare(b.message.id));
-
-  return entries;
+  // Only include entries that have relevant parts
+  return Array.from(entriesMap.values()).filter((entry) => entry.parts.length > 0);
 }
 
-function safePath(base: string, ...segments: string[]): string {
-  const resolved = join(base, ...segments);
+function runSql(query: string): void {
+  const dbPath = getDbPath();
 
-  if (!resolved.startsWith(base)) {
-    throw new Error(`Path traversal detected: ${resolved}`);
-  }
-
-  return resolved;
-}
-
-async function deleteSessionData(base: string, session: Session): Promise<void> {
-  // Load messages first so we know which part dirs to remove
-  const messages = await loadMessages(session.id);
-
-  // Remove part directories for each message
-  await Promise.all(messages.map((msg) => rm(safePath(base, "part", msg.id), { recursive: true, force: true })));
-
-  // Remove message directory
-  await rm(safePath(base, "message", session.id), { recursive: true, force: true });
-
-  // Remove session file
-  await rm(safePath(base, "session", session.projectID, `${session.id}.json`), { force: true });
-
-  // Remove session diff file if it exists
-  await rm(safePath(base, "session_diff", `${session.id}.json`), { force: true });
-
-  // Remove share file if it exists
-  await rm(safePath(base, "share", `${session.id}.json`), { force: true });
-}
-
-function collectDescendants(sessionID: string, allSessions: Session[]): Session[] {
-  const children = allSessions.filter((s) => s.parentID === sessionID);
-
-  return children.flatMap((child) => [child, ...collectDescendants(child.id, allSessions)]);
+  execSync(`sqlite3 "${dbPath}"`, {
+    input: query,
+    timeout: 10000,
+  });
 }
 
 export async function deleteSession(session: Session): Promise<void> {
-  const base = getStoragePath();
+  const sid = escapeSql(session.id);
 
-  // Load all project sessions to find the full descendant tree
-  const allProjectSessions = await readJsonFiles<Session>(join(base, "session", session.projectID));
-  const descendants = collectDescendants(session.id, allProjectSessions);
-
-  // Delete descendants and the session itself in parallel
-  await Promise.all([...descendants, session].map((s) => deleteSessionData(base, s)));
+  runSql(
+    `WITH RECURSIVE descendants(id) AS (` +
+      `SELECT id FROM session WHERE id = '${sid}' ` +
+      `UNION ALL ` +
+      `SELECT s.id FROM session s JOIN descendants d ON s.parent_id = d.id` +
+      `) ` +
+      `DELETE FROM session WHERE id IN (SELECT id FROM descendants);`,
+  );
 }
 
 export async function deleteAllProjectSessions(projectID: string): Promise<void> {
-  const base = getStoragePath();
+  const pid = escapeSql(projectID);
 
-  // Load ALL sessions for this project (including sub-agents)
-  const sessions = await readJsonFiles<Session>(safePath(base, "session", projectID));
+  runSql(`DELETE FROM session WHERE project_id = '${pid}'; DELETE FROM project WHERE id = '${pid}';`);
+}
 
-  // Delete all sessions' messages and parts in parallel
-  await Promise.all(sessions.map((session) => deleteSessionData(base, session)));
-
-  // Remove the entire session directory for this project
-  await rm(safePath(base, "session", projectID), { recursive: true, force: true });
-
-  // Remove the project file
-  await rm(safePath(base, "project", `${projectID}.json`), { force: true });
+function escapeSql(value: string): string {
+  return value.replace(/'/g, "''");
 }
