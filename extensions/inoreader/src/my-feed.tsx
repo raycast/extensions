@@ -412,7 +412,7 @@ function decodeHtmlEntities(input?: string): string {
     .replace(/&([a-zA-Z][a-zA-Z0-9]+);/g, (entity, name) => NAMED_HTML_ENTITY_MAP[name] ?? entity);
 }
 
-function htmlToPlainText(input?: string): string {
+function htmlToPlainText(input?: string | null): string {
   if (!input) {
     return "";
   }
@@ -493,9 +493,9 @@ async function fetchArticleHtml(url: string): Promise<string> {
 async function extractReadableContent(url: string): Promise<ReadableContent> {
   const html = (await fetchArticleHtml(url)).slice(0, MAX_HTML_CHARS);
   const document = new DOMParser().parseFromString(html, "text/html");
-  const reader = new Readability(document);
+  const reader = new Readability(document as unknown as Document);
   const parsed = reader.parse();
-  const fallbackTitle = normalizeWhitespace(document.title || "Article");
+  const fallbackTitle = normalizeWhitespace(document.querySelector("title")?.textContent || "Article");
   const rawContent = parsed?.textContent || htmlToPlainText(parsed?.content);
   const content = normalizeWhitespace(rawContent);
 
@@ -732,7 +732,7 @@ export function FeedView({
   enableStreamSelection = true,
 }: FeedViewProps) {
   const rawPreferences = getPreferenceValues<Preferences.MyFeed>();
-  const preferences = useMemo(
+  const preferences: Preferences.MyFeed = useMemo(
     () => ({
       clientId: rawPreferences.clientId,
       clientSecret: rawPreferences.clientSecret,
@@ -740,6 +740,7 @@ export function FeedView({
       unreadOnly: rawPreferences.unreadOnly,
       itemsPerPage: rawPreferences.itemsPerPage,
       showSiteName: rawPreferences.showSiteName,
+      aiSummaryLanguage: rawPreferences.aiSummaryLanguage,
     }),
     [
       rawPreferences.clientId,
@@ -748,6 +749,7 @@ export function FeedView({
       rawPreferences.unreadOnly,
       rawPreferences.itemsPerPage,
       rawPreferences.showSiteName,
+      rawPreferences.aiSummaryLanguage,
     ],
   );
   const pageSize = useMemo(() => {
