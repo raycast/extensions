@@ -1,16 +1,15 @@
 import { BrowserExtension, type LaunchProps, open, showToast, Toast } from "@raycast/api";
+import { stripUrl } from "./lib/strip-url";
 
 interface Arguments {
   url?: string;
 }
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const url = props.arguments.url;
+  let urlToOpen: string;
 
-  let processedUrl: string;
-
-  if (url) {
-    processedUrl = url.replace(/^https?:\/\//, "");
+  if (props.arguments.url) {
+    urlToOpen = props.arguments.url;
   } else {
     const tabs = await BrowserExtension.getTabs();
 
@@ -25,8 +24,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
       return;
     }
 
-    processedUrl = activeTab.url.replace(/^https?:\/\//, "");
+    urlToOpen = activeTab.url;
   }
 
-  await open(`https://codewiki.google/${processedUrl}`);
+  await open(`https://codewiki.google/${stripUrl(urlToOpen)}`);
 }
