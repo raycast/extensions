@@ -14,11 +14,37 @@ import { DatabaseProperty } from "./property";
 export type { PropertyConfig } from "./property";
 export type { DatabaseProperty };
 
+async function resolveDataSourceId(notion: Client, databaseOrDataSourceId: string): Promise<string> {
+  try {
+    await notion.dataSources.retrieve({
+      data_source_id: databaseOrDataSourceId,
+    });
+    return databaseOrDataSourceId;
+  } catch {
+    // Fall through and try resolving from database metadata.
+  }
+
+  try {
+    const database = await notion.databases.retrieve({
+      database_id: databaseOrDataSourceId,
+    });
+
+    if ("data_sources" in database && database.data_sources[0]?.id) {
+      return database.data_sources[0].id;
+    }
+  } catch {
+    // Fall back to the provided id if it cannot be resolved.
+  }
+
+  return databaseOrDataSourceId;
+}
+
 export async function fetchDatabase(pageId: string, silent: boolean = true) {
   try {
     const notion = getNotionClient();
+    const dataSourceId = await resolveDataSourceId(notion, pageId);
     const page = await notion.dataSources.retrieve({
-      data_source_id: pageId,
+      data_source_id: dataSourceId,
     });
 
     return pageMapper(page);
@@ -59,7 +85,8 @@ export async function fetchDatabases() {
 export async function fetchDatabaseProperties(databaseId: string) {
   try {
     const notion = getNotionClient();
-    const dataSource = await notion.dataSources.retrieve({ data_source_id: databaseId });
+    const dataSourceId = await resolveDataSourceId(notion, databaseId);
+    const dataSource = await notion.dataSources.retrieve({ data_source_id: dataSourceId });
 
     if (!("properties" in dataSource)) return [];
 
@@ -95,8 +122,9 @@ export async function queryDatabase(
 ) {
   try {
     const notion = getNotionClient();
+    const dataSourceId = await resolveDataSourceId(notion, databaseId);
     const database = await notion.dataSources.query({
-      data_source_id: databaseId,
+      data_source_id: dataSourceId,
       page_size: 20,
       sorts: [
         {
@@ -126,13 +154,31 @@ export async function queryDatabase(
 
 type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
+async function resolveParentDatabaseId(notion: Client, databaseOrDataSourceId: string): Promise<string> {
+  try {
+    const dataSourceId = await resolveDataSourceId(notion, databaseOrDataSourceId);
+    const dataSource = await notion.dataSources.retrieve({
+      data_source_id: dataSourceId,
+    });
+
+    if ("parent" in dataSource && "database_id" in dataSource.parent) {
+      return dataSource.parent.database_id;
+    }
+  } catch {
+    // Fall back to the provided id for workspaces still passing database ids.
+  }
+
+  return databaseOrDataSourceId;
+}
+
 export async function createDatabasePage(values: Form.Values) {
   try {
     const notion = getNotionClient();
     const { database, content, ...props } = values;
+    const parentDatabaseId = await resolveParentDatabaseId(notion, database);
 
     const arg: CreateRequest = {
-      parent: { database_id: database },
+      parent: { database_id: parentDatabaseId },
       properties: {},
     };
 
@@ -166,6 +212,7 @@ export async function createDatabasePage(values: Form.Values) {
 export async function deleteDatabase(databaseId: string) {
   try {
     const notion = getNotionClient();
+    const parentDatabaseId = await resolveParentDatabaseId(notion, databaseId);
 
     await showToast({
       style: Toast.Style.Animated,
@@ -173,7 +220,7 @@ export async function deleteDatabase(databaseId: string) {
     });
 
     await notion.databases.update({
-      database_id: databaseId,
+      database_id: parentDatabaseId,
       in_trash: true,
     });
 
