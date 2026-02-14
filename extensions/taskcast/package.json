@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "taskcast",
+  "title": "TaskCast",
+  "description": "Google Tasks integration for Raycast",
+  "icon": "icon.png",
+  "author": "divya_sahithi",
+  "license": "MIT",
+  "version": "0.1.0",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "googleClientId",
+      "type": "textfield",
+      "required": true,
+      "title": "Google OAuth Client ID",
+      "description": "Client ID from your Google Cloud OAuth app"
+    },
+    {
+      "name": "googleClientSecret",
+      "type": "password",
+      "required": true,
+      "title": "Google OAuth Client Secret",
+      "description": "Client secret from your Google Cloud OAuth app"
+    }
+  ],
+  "oauth": {
+    "clientId": "GOOGLE_CLIENT_ID_PLACEHOLDER",
+    "clientSecret": "GOOGLE_CLIENT_SECRET_PLACEHOLDER",
+    "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "scope": "https://www.googleapis.com/auth/tasks"
+  },
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "New Task",
+      "description": "Create a new task",
+      "mode": "view"
+    },
+    {
+      "name": "clip-to-task",
+      "title": "Quick Task (Clipboard)",
+      "description": "Create tasks from clipboard lines",
+      "mode": "no-view"
+    },
+    {
+      "name": "today",
+      "title": "Today's Tasks",
+      "description": "View tasks due today",
+      "mode": "view"
+    },
+    {
+      "name": "lists",
+      "title": "To Do Lists",
+      "description": "Browse task lists",
+      "mode": "view"
+    },
+    {
+      "name": "create-list",
+      "title": "Create List",
+      "description": "Create a new task list",
+      "mode": "view"
+    },
+    {
+      "name": "sign-in",
+      "title": "Sign in to Google Tasks",
+      "description": "Sign in to Tasks",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.2",
+    "open": "^11.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "18.18.4",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
