@@ -1,6 +1,12 @@
 import { showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { clearAuth, getRememberedUserId, isTokenExpired, loadStoredAuth, storeAuth } from "../lib/auth";
+import {
+  clearAuth,
+  getRememberedUserId,
+  isTokenExpired,
+  loadStoredAuth,
+  storeAuth,
+} from "../lib/auth";
 import { COPY } from "../lib/constants";
 
 interface UseAuthReturn {
@@ -28,7 +34,10 @@ export function useAuth(): UseAuthReturn {
   // Load stored auth and remembered user ID on mount
   useEffect(() => {
     (async () => {
-      const [stored, remembered] = await Promise.all([loadStoredAuth(), getRememberedUserId()]);
+      const [stored, remembered] = await Promise.all([
+        loadStoredAuth(),
+        getRememberedUserId(),
+      ]);
       setAccessToken(stored.accessToken);
       setTokenTimestamp(stored.tokenTimestamp);
       setUserId(stored.userId);
@@ -37,17 +46,20 @@ export function useAuth(): UseAuthReturn {
     })();
   }, []);
 
-  const onLoginSuccess = useCallback(async (enctoken: string, newUserId: string) => {
-    await storeAuth(enctoken, newUserId);
-    setAccessToken(enctoken);
-    setTokenTimestamp(new Date().toISOString());
-    setUserId(newUserId);
-    await showToast({
-      style: Toast.Style.Success,
-      title: COPY.TOAST_LOGIN_SUCCESS_TITLE,
-      message: COPY.TOAST_LOGIN_SUCCESS_MESSAGE,
-    });
-  }, []);
+  const onLoginSuccess = useCallback(
+    async (enctoken: string, newUserId: string) => {
+      await storeAuth(enctoken, newUserId);
+      setAccessToken(enctoken);
+      setTokenTimestamp(new Date().toISOString());
+      setUserId(newUserId);
+      await showToast({
+        style: Toast.Style.Success,
+        title: COPY.TOAST_LOGIN_SUCCESS_TITLE,
+        message: COPY.TOAST_LOGIN_SUCCESS_MESSAGE,
+      });
+    },
+    [],
+  );
 
   const logout = useCallback(async () => {
     await clearAuth();

@@ -10,7 +10,12 @@ interface MarginsSectionProps {
   onLogout?: () => Promise<void>;
 }
 
-export function MarginsSection({ margins, isLoggedIn, onRefresh, onLogout }: MarginsSectionProps) {
+export function MarginsSection({
+  margins,
+  isLoggedIn,
+  onRefresh,
+  onLogout,
+}: MarginsSectionProps) {
   if (!margins) return null;
 
   const equity = margins.equity;
@@ -31,12 +36,18 @@ export function MarginsSection({ margins, isLoggedIn, onRefresh, onLogout }: Mar
           { text: `Opening: ${formatCurrencyCompact(opening)}` },
           { text: `Used: ${formatCurrencyCompact(used)}` },
           {
-            text: { value: `Net: ${formatCurrencyCompact(net)}`, color: getColor(net) },
+            text: {
+              value: `Net: ${formatCurrencyCompact(net)}`,
+              color: getColor(net),
+            },
           },
         ]}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open in Kite" url={`${KITE_WEB_URL}/funds`} />
+            <Action.OpenInBrowser
+              title="Open in Kite"
+              url={`${KITE_WEB_URL}/funds`}
+            />
             {isLoggedIn && onRefresh && (
               <Action
                 title="Refresh"
@@ -45,7 +56,9 @@ export function MarginsSection({ margins, isLoggedIn, onRefresh, onLogout }: Mar
                 onAction={onRefresh}
               />
             )}
-            {isLoggedIn && onLogout && <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />}
+            {isLoggedIn && onLogout && (
+              <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />
+            )}
           </ActionPanel>
         }
       />

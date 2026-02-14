@@ -10,7 +10,12 @@ interface MFOrdersSectionProps {
   onLogout?: () => Promise<void>;
 }
 
-export function MFOrdersSection({ orders, isLoggedIn, onRefresh, onLogout }: MFOrdersSectionProps) {
+export function MFOrdersSection({
+  orders,
+  isLoggedIn,
+  onRefresh,
+  onLogout,
+}: MFOrdersSectionProps) {
   if (orders.length === 0) return null;
 
   return (
@@ -18,8 +23,10 @@ export function MFOrdersSection({ orders, isLoggedIn, onRefresh, onLogout }: MFO
       {orders.map((o) => {
         let statusColor = Color.PrimaryText;
         if (o.status === "COMPLETE") statusColor = Color.Green;
-        else if (o.status === "REJECTED" || o.status === "CANCELLED") statusColor = Color.Red;
-        else if (o.status === "OPEN" || o.status.includes("PENDING")) statusColor = Color.Yellow;
+        else if (o.status === "REJECTED" || o.status === "CANCELLED")
+          statusColor = Color.Red;
+        else if (o.status === "OPEN" || o.status.includes("PENDING"))
+          statusColor = Color.Yellow;
 
         return (
           <List.Item
@@ -31,7 +38,10 @@ export function MFOrdersSection({ orders, isLoggedIn, onRefresh, onLogout }: MFO
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser title="Open in Coin" url={COIN_WEB_URL} />
-                <Action.CopyToClipboard title="Copy Fund Name" content={o.fund} />
+                <Action.CopyToClipboard
+                  title="Copy Fund Name"
+                  content={o.fund}
+                />
                 {isLoggedIn && onRefresh && (
                   <Action
                     title="Refresh"
@@ -40,7 +50,13 @@ export function MFOrdersSection({ orders, isLoggedIn, onRefresh, onLogout }: MFO
                     onAction={onRefresh}
                   />
                 )}
-                {isLoggedIn && onLogout && <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />}
+                {isLoggedIn && onLogout && (
+                  <Action
+                    title="Logout"
+                    icon={Icon.Logout}
+                    onAction={onLogout}
+                  />
+                )}
               </ActionPanel>
             }
           />

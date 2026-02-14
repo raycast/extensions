@@ -33,7 +33,8 @@ export const COPY = {
   // Login Banner (Expired State)
   LOGIN_BANNER_TITLE: "Login to Zerodha",
   LOGIN_BANNER_SUBTITLE: "Login required to refresh today's portfolio",
-  TRUST_LINE: "Powered by Zerodha · Your credentials are only used to authenticate",
+  TRUST_LINE:
+    "Powered by Zerodha · Your credentials are only used to authenticate",
 
   // Toasts
   TOAST_LOGIN_SUCCESS_TITLE: "Logged in successfully",

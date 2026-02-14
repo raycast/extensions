@@ -15,7 +15,12 @@ export function isTokenExpired(tokenTimestamp: string): boolean {
   const now = new Date();
   const tokenDate = new Date(tokenTimestamp);
   const nextExpiry = new Date(tokenDate);
-  nextExpiry.setUTCHours(TOKEN_EXPIRY_UTC_HOURS, TOKEN_EXPIRY_UTC_MINUTES, 0, 0);
+  nextExpiry.setUTCHours(
+    TOKEN_EXPIRY_UTC_HOURS,
+    TOKEN_EXPIRY_UTC_MINUTES,
+    0,
+    0,
+  );
   if (nextExpiry <= tokenDate) {
     nextExpiry.setUTCDate(nextExpiry.getUTCDate() + 1);
   }
@@ -45,10 +50,16 @@ export async function loadStoredAuth(): Promise<{
 /**
  * Store auth tokens in LocalStorage.
  */
-export async function storeAuth(accessToken: string, userId: string): Promise<void> {
+export async function storeAuth(
+  accessToken: string,
+  userId: string,
+): Promise<void> {
   await Promise.all([
     LocalStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken),
-    LocalStorage.setItem(STORAGE_KEYS.TOKEN_TIMESTAMP, new Date().toISOString()),
+    LocalStorage.setItem(
+      STORAGE_KEYS.TOKEN_TIMESTAMP,
+      new Date().toISOString(),
+    ),
     LocalStorage.setItem(STORAGE_KEYS.USER_ID, userId),
   ]);
 }
@@ -99,7 +110,11 @@ export async function clearRememberedUserId(): Promise<void> {
  * Step 1: POST /api/login with user_id + password → get request_id
  * Step 2: POST /api/twofa with user_id + request_id + twofa_value → get enctoken from Set-Cookie
  */
-export async function performLogin(userId: string, password: string, totpCode: string): Promise<string> {
+export async function performLogin(
+  userId: string,
+  password: string,
+  totpCode: string,
+): Promise<string> {
   // Step 1: Login with credentials
   const loginResponse = await fetch(KITE_LOGIN_ENDPOINT, {
     method: "POST",
@@ -115,7 +130,9 @@ export async function performLogin(userId: string, password: string, totpCode: s
     throw new Error(`Login failed (${status})`);
   }
 
-  const loginData = (await loginResponse.json()) as { data: { request_id: string } };
+  const loginData = (await loginResponse.json()) as {
+    data: { request_id: string };
+  };
   const requestId = loginData.data.request_id;
 
   // Step 2: Two-factor auth with TOTP

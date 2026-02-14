@@ -14,21 +14,39 @@ interface LoginItemProps {
 /**
  * Login prompt shown as the first list item in the expired-session state.
  */
-export function LoginItem({ onLoginSuccess, storedUserId, rememberedUserId, lastSynced, onLogout }: LoginItemProps) {
+export function LoginItem({
+  onLoginSuccess,
+  storedUserId,
+  rememberedUserId,
+  lastSynced,
+  onLogout,
+}: LoginItemProps) {
   return (
     <List.Item
       icon={Icon.Key}
       title={COPY.LOGIN_BANNER_TITLE}
       subtitle={COPY.LOGIN_BANNER_SUBTITLE}
-      accessories={lastSynced ? [{ text: `Last synced: ${formatTimestamp(lastSynced)}` }] : []}
+      accessories={
+        lastSynced
+          ? [{ text: `Last synced: ${formatTimestamp(lastSynced)}` }]
+          : []
+      }
       actions={
         <ActionPanel>
           <Action.Push
             title={COPY.LOGIN_ACTION}
             icon={Icon.Key}
-            target={<LoginForm onSuccess={onLoginSuccess} storedUserId={storedUserId} rememberedUserId={rememberedUserId} />}
+            target={
+              <LoginForm
+                onSuccess={onLoginSuccess}
+                storedUserId={storedUserId}
+                rememberedUserId={rememberedUserId}
+              />
+            }
           />
-          {onLogout && <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />}
+          {onLogout && (
+            <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />
+          )}
         </ActionPanel>
       }
     />

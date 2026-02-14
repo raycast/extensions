@@ -10,7 +10,12 @@ interface OrdersSectionProps {
   onLogout?: () => Promise<void>;
 }
 
-export function OrdersSection({ orders, isLoggedIn, onRefresh, onLogout }: OrdersSectionProps) {
+export function OrdersSection({
+  orders,
+  isLoggedIn,
+  onRefresh,
+  onLogout,
+}: OrdersSectionProps) {
   if (orders.length === 0) return null;
 
   return (
@@ -24,8 +29,14 @@ export function OrdersSection({ orders, isLoggedIn, onRefresh, onLogout }: Order
           accessories={[{ text: o.status }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open in Kite" url={`${KITE_WEB_URL}/orders`} />
-              <Action.CopyToClipboard title="Copy Symbol" content={o.tradingsymbol} />
+              <Action.OpenInBrowser
+                title="Open in Kite"
+                url={`${KITE_WEB_URL}/orders`}
+              />
+              <Action.CopyToClipboard
+                title="Copy Symbol"
+                content={o.tradingsymbol}
+              />
               {isLoggedIn && onRefresh && (
                 <Action
                   title="Refresh"
@@ -34,7 +45,9 @@ export function OrdersSection({ orders, isLoggedIn, onRefresh, onLogout }: Order
                   onAction={onRefresh}
                 />
               )}
-              {isLoggedIn && onLogout && <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />}
+              {isLoggedIn && onLogout && (
+                <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />
+              )}
             </ActionPanel>
           }
         />

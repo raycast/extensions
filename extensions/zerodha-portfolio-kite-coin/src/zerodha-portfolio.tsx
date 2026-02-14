@@ -22,18 +22,23 @@ export default function ZerodhaPortfolio() {
   const portfolio = usePortfolio(auth.accessToken, auth.isLoggedIn);
   const mf = useMutualFunds(auth.accessToken, auth.isLoggedIn);
 
-  const isLoading = auth.isLoading || (view === "stocks" ? portfolio.isLoading : mf.isLoading);
+  const isLoading =
+    auth.isLoading || (view === "stocks" ? portfolio.isLoading : mf.isLoading);
 
   // State 1: No token at all (first run)
   const hasNoToken = !auth.isLoading && !auth.accessToken;
 
   // State 4: Token exists but expired
-  const hasExpiredToken = !auth.isLoading && !!auth.accessToken && auth.isExpired;
+  const hasExpiredToken =
+    !auth.isLoading && !!auth.accessToken && auth.isExpired;
 
   // Determine if we have any cached data to show
   const hasCachedStocks =
-    portfolio.holdings.length > 0 || portfolio.positions.length > 0 || portfolio.orders.length > 0;
-  const hasCachedMF = mf.mfHoldings.length > 0 || mf.sips.length > 0 || mf.mfOrders.length > 0;
+    portfolio.holdings.length > 0 ||
+    portfolio.positions.length > 0 ||
+    portfolio.orders.length > 0;
+  const hasCachedMF =
+    mf.mfHoldings.length > 0 || mf.sips.length > 0 || mf.mfOrders.length > 0;
 
   return (
     <List
@@ -52,7 +57,13 @@ export default function ZerodhaPortfolio() {
               <Action.Push
                 title={COPY.LOGIN_ACTION}
                 icon={Icon.Key}
-                target={<LoginForm onSuccess={auth.onLoginSuccess} storedUserId={auth.userId} rememberedUserId={auth.rememberedUserId} />}
+                target={
+                  <LoginForm
+                    onSuccess={auth.onLoginSuccess}
+                    storedUserId={auth.userId}
+                    rememberedUserId={auth.rememberedUserId}
+                  />
+                }
               />
             </ActionPanel>
           }
@@ -60,12 +71,15 @@ export default function ZerodhaPortfolio() {
       )}
 
       {/* State 4: Expired token — show login banner + cached data */}
-      {(hasExpiredToken || (hasNoToken && (hasCachedStocks || hasCachedMF))) && (
+      {(hasExpiredToken ||
+        (hasNoToken && (hasCachedStocks || hasCachedMF))) && (
         <LoginItem
           onLoginSuccess={auth.onLoginSuccess}
           storedUserId={auth.userId}
           rememberedUserId={auth.rememberedUserId}
-          lastSynced={view === "stocks" ? portfolio.lastUpdated : mf.lastUpdated}
+          lastSynced={
+            view === "stocks" ? portfolio.lastUpdated : mf.lastUpdated
+          }
           onLogout={auth.logout}
         />
       )}
@@ -106,8 +120,16 @@ export default function ZerodhaPortfolio() {
               description={COPY.EMPTY_HOLDINGS_DESCRIPTION}
               actions={
                 <ActionPanel>
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={portfolio.refresh} />
-                  <Action title="Logout" icon={Icon.Logout} onAction={auth.logout} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    onAction={portfolio.refresh}
+                  />
+                  <Action
+                    title="Logout"
+                    icon={Icon.Logout}
+                    onAction={auth.logout}
+                  />
                 </ActionPanel>
               }
             />
@@ -125,7 +147,12 @@ export default function ZerodhaPortfolio() {
             onRefresh={mf.refresh}
             onLogout={auth.logout}
           />
-          <SIPsSection sips={mf.sips} isLoggedIn={auth.isLoggedIn} onRefresh={mf.refresh} onLogout={auth.logout} />
+          <SIPsSection
+            sips={mf.sips}
+            isLoggedIn={auth.isLoggedIn}
+            onRefresh={mf.refresh}
+            onLogout={auth.logout}
+          />
           <MFOrdersSection
             orders={mf.mfOrders}
             isLoggedIn={auth.isLoggedIn}
@@ -140,8 +167,16 @@ export default function ZerodhaPortfolio() {
               description={COPY.EMPTY_MF_DESCRIPTION}
               actions={
                 <ActionPanel>
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={mf.refresh} />
-                  <Action title="Logout" icon={Icon.Logout} onAction={auth.logout} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    onAction={mf.refresh}
+                  />
+                  <Action
+                    title="Logout"
+                    icon={Icon.Logout}
+                    onAction={auth.logout}
+                  />
                 </ActionPanel>
               }
             />

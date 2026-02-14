@@ -10,7 +10,12 @@ interface SIPsSectionProps {
   onLogout?: () => Promise<void>;
 }
 
-export function SIPsSection({ sips, isLoggedIn, onRefresh, onLogout }: SIPsSectionProps) {
+export function SIPsSection({
+  sips,
+  isLoggedIn,
+  onRefresh,
+  onLogout,
+}: SIPsSectionProps) {
   const active = sips.filter((s) => s.status === "active");
   if (active.length === 0) return null;
 
@@ -35,7 +40,9 @@ export function SIPsSection({ sips, isLoggedIn, onRefresh, onLogout }: SIPsSecti
                   onAction={onRefresh}
                 />
               )}
-              {isLoggedIn && onLogout && <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />}
+              {isLoggedIn && onLogout && (
+                <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />
+              )}
             </ActionPanel>
           }
         />

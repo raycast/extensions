@@ -1,6 +1,13 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { COIN_WEB_URL, COPY } from "../../lib/constants";
-import { formatPnL, formatPercent, formatTimestamp, pnlIcon, computePnlPercent, getColor } from "../../lib/formatters";
+import {
+  formatPnL,
+  formatPercent,
+  formatTimestamp,
+  pnlIcon,
+  computePnlPercent,
+  getColor,
+} from "../../lib/formatters";
 import { MFHolding } from "../../lib/types";
 
 interface MFHoldingsSectionProps {
@@ -11,7 +18,13 @@ interface MFHoldingsSectionProps {
   onLogout?: () => Promise<void>;
 }
 
-export function MFHoldingsSection({ holdings, lastUpdated, isLoggedIn, onRefresh, onLogout }: MFHoldingsSectionProps) {
+export function MFHoldingsSection({
+  holdings,
+  lastUpdated,
+  isLoggedIn,
+  onRefresh,
+  onLogout,
+}: MFHoldingsSectionProps) {
   if (holdings.length === 0) return null;
 
   const subtitle = lastUpdated
@@ -45,7 +58,10 @@ export function MFHoldingsSection({ holdings, lastUpdated, isLoggedIn, onRefresh
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser title="Open in Coin" url={COIN_WEB_URL} />
-                <Action.CopyToClipboard title="Copy Fund Name" content={h.fund} />
+                <Action.CopyToClipboard
+                  title="Copy Fund Name"
+                  content={h.fund}
+                />
                 {isLoggedIn && onRefresh && (
                   <Action
                     title="Refresh"
@@ -54,7 +70,13 @@ export function MFHoldingsSection({ holdings, lastUpdated, isLoggedIn, onRefresh
                     onAction={onRefresh}
                   />
                 )}
-                {isLoggedIn && onLogout && <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />}
+                {isLoggedIn && onLogout && (
+                  <Action
+                    title="Logout"
+                    icon={Icon.Logout}
+                    onAction={onLogout}
+                  />
+                )}
               </ActionPanel>
             }
           />

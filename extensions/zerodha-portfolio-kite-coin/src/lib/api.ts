@@ -1,5 +1,13 @@
 import { KITE_API_BASE } from "./constants";
-import { Holding, MarginsResponse, MFHolding, MFOrder, Order, PositionsResponse, SIP } from "./types";
+import {
+  Holding,
+  MarginsResponse,
+  MFHolding,
+  MFOrder,
+  Order,
+  PositionsResponse,
+  SIP,
+} from "./types";
 
 /**
  * Make an authenticated request to the Kite API.
@@ -12,7 +20,9 @@ async function kiteRequest<T>(path: string, accessToken: string): Promise<T> {
   });
 
   if (!response.ok) {
-    const error = new Error(`Kite API error: ${response.status}`) as Error & { status: number };
+    const error = new Error(`Kite API error: ${response.status}`) as Error & {
+      status: number;
+    };
     error.status = response.status;
     throw error;
   }
@@ -27,7 +37,9 @@ export async function fetchHoldings(accessToken: string): Promise<Holding[]> {
   return kiteRequest<Holding[]>("/portfolio/holdings", accessToken);
 }
 
-export async function fetchPositions(accessToken: string): Promise<PositionsResponse> {
+export async function fetchPositions(
+  accessToken: string,
+): Promise<PositionsResponse> {
   return kiteRequest<PositionsResponse>("/portfolio/positions", accessToken);
 }
 
@@ -35,13 +47,17 @@ export async function fetchOrders(accessToken: string): Promise<Order[]> {
   return kiteRequest<Order[]>("/orders", accessToken);
 }
 
-export async function fetchMargins(accessToken: string): Promise<MarginsResponse> {
+export async function fetchMargins(
+  accessToken: string,
+): Promise<MarginsResponse> {
   return kiteRequest<MarginsResponse>("/user/margins", accessToken);
 }
 
 // ---- Mutual Funds ----
 
-export async function fetchMFHoldings(accessToken: string): Promise<MFHolding[]> {
+export async function fetchMFHoldings(
+  accessToken: string,
+): Promise<MFHolding[]> {
   return kiteRequest<MFHolding[]>("/mf/holdings", accessToken);
 }
 

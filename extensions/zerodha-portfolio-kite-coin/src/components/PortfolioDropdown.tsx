@@ -8,7 +8,11 @@ interface PortfolioDropdownProps {
 
 export function PortfolioDropdown({ value, onChange }: PortfolioDropdownProps) {
   return (
-    <List.Dropdown tooltip="Select portfolio view" value={value} onChange={(v) => onChange(v as PortfolioView)}>
+    <List.Dropdown
+      tooltip="Select portfolio view"
+      value={value}
+      onChange={(v) => onChange(v as PortfolioView)}
+    >
       <List.Dropdown.Item title="Stocks (Kite)" value="stocks" />
       <List.Dropdown.Item title="Mutual Funds (Coin)" value="mutualfunds" />
     </List.Dropdown>

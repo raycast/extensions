@@ -1,6 +1,11 @@
 import { showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { fetchHoldings, fetchMargins, fetchOrders, fetchPositions } from "../lib/api";
+import {
+  fetchHoldings,
+  fetchMargins,
+  fetchOrders,
+  fetchPositions,
+} from "../lib/api";
 import { readCache, writeCache } from "../lib/cache";
 import { COPY, STORAGE_KEYS } from "../lib/constants";
 import { Holding, MarginsResponse, Order, Position } from "../lib/types";
@@ -15,7 +20,10 @@ interface PortfolioData {
   refresh: () => Promise<void>;
 }
 
-export function usePortfolio(accessToken: string | null, isLoggedIn: boolean): PortfolioData {
+export function usePortfolio(
+  accessToken: string | null,
+  isLoggedIn: boolean,
+): PortfolioData {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -24,12 +32,13 @@ export function usePortfolio(accessToken: string | null, isLoggedIn: boolean): P
   const [isLoading, setIsLoading] = useState(true);
 
   const loadCached = useCallback(async () => {
-    const [cachedHoldings, cachedPositions, cachedOrders, cachedMargins] = await Promise.all([
-      readCache<Holding[]>(STORAGE_KEYS.HOLDINGS),
-      readCache<Position[]>(STORAGE_KEYS.POSITIONS),
-      readCache<Order[]>(STORAGE_KEYS.ORDERS),
-      readCache<MarginsResponse>(STORAGE_KEYS.MARGINS),
-    ]);
+    const [cachedHoldings, cachedPositions, cachedOrders, cachedMargins] =
+      await Promise.all([
+        readCache<Holding[]>(STORAGE_KEYS.HOLDINGS),
+        readCache<Position[]>(STORAGE_KEYS.POSITIONS),
+        readCache<Order[]>(STORAGE_KEYS.ORDERS),
+        readCache<MarginsResponse>(STORAGE_KEYS.MARGINS),
+      ]);
 
     if (cachedHoldings) setHoldings(cachedHoldings.data);
     else setHoldings([]);
@@ -44,7 +53,12 @@ export function usePortfolio(accessToken: string | null, isLoggedIn: boolean): P
     else setMargins(null);
 
     // Use the most recent cache timestamp
-    const timestamps = [cachedHoldings, cachedPositions, cachedOrders, cachedMargins]
+    const timestamps = [
+      cachedHoldings,
+      cachedPositions,
+      cachedOrders,
+      cachedMargins,
+    ]
       .filter(Boolean)
       .map((c) => c!.timestamp);
     if (timestamps.length > 0) {
@@ -117,7 +131,15 @@ export function usePortfolio(accessToken: string | null, isLoggedIn: boolean): P
     });
   }, [accessToken, isLoggedIn, fetchAll]);
 
-  return { holdings, positions, orders, margins, lastUpdated, isLoading, refresh };
+  return {
+    holdings,
+    positions,
+    orders,
+    margins,
+    lastUpdated,
+    isLoading,
+    refresh,
+  };
 }
 
 async function handleApiError(err: unknown) {
@@ -131,10 +153,19 @@ async function handleApiError(err: unknown) {
       message: COPY.TOAST_SESSION_ENDED_MESSAGE,
     });
   } else if (status === 429) {
-    await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_RATE_LIMITED });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: COPY.TOAST_RATE_LIMITED,
+    });
   } else if (status && status >= 500) {
-    await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_SERVER_ERROR });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: COPY.TOAST_SERVER_ERROR,
+    });
   } else {
-    await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_NETWORK_ERROR });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: COPY.TOAST_NETWORK_ERROR,
+    });
   }
 }

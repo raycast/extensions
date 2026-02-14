@@ -1,6 +1,13 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { KITE_WEB_URL } from "../../lib/constants";
-import { formatCurrency, formatPnL, formatPercent, pnlIcon, computePnlPercent, getColor } from "../../lib/formatters";
+import {
+  formatCurrency,
+  formatPnL,
+  formatPercent,
+  pnlIcon,
+  computePnlPercent,
+  getColor,
+} from "../../lib/formatters";
 import { Position } from "../../lib/types";
 
 interface PositionsSectionProps {
@@ -10,7 +17,12 @@ interface PositionsSectionProps {
   onLogout?: () => Promise<void>;
 }
 
-export function PositionsSection({ positions, isLoggedIn, onRefresh, onLogout }: PositionsSectionProps) {
+export function PositionsSection({
+  positions,
+  isLoggedIn,
+  onRefresh,
+  onLogout,
+}: PositionsSectionProps) {
   // Only show positions with non-zero quantity
   const active = positions.filter((p) => p.quantity !== 0);
   if (active.length === 0) return null;
@@ -45,8 +57,14 @@ export function PositionsSection({ positions, isLoggedIn, onRefresh, onLogout }:
             ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Kite" url={`${KITE_WEB_URL}/positions`} />
-                <Action.CopyToClipboard title="Copy Symbol" content={p.tradingsymbol} />
+                <Action.OpenInBrowser
+                  title="Open in Kite"
+                  url={`${KITE_WEB_URL}/positions`}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Symbol"
+                  content={p.tradingsymbol}
+                />
                 {isLoggedIn && onRefresh && (
                   <Action
                     title="Refresh"
@@ -55,7 +73,13 @@ export function PositionsSection({ positions, isLoggedIn, onRefresh, onLogout }:
                     onAction={onRefresh}
                   />
                 )}
-                {isLoggedIn && onLogout && <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />}
+                {isLoggedIn && onLogout && (
+                  <Action
+                    title="Logout"
+                    icon={Icon.Logout}
+                    onAction={onLogout}
+                  />
+                )}
               </ActionPanel>
             }
           />

@@ -57,7 +57,10 @@ function formatIndianNumber(num: number, decimals: number): string {
   const [intPart, decPart] = num.toFixed(decimals).split(".");
   const lastThree = intPart.slice(-3);
   const rest = intPart.slice(0, -3);
-  const formatted = rest.length > 0 ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + lastThree : lastThree;
+  const formatted =
+    rest.length > 0
+      ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + lastThree
+      : lastThree;
   return decimals > 0 ? `${formatted}.${decPart}` : formatted;
 }
 
@@ -93,7 +96,11 @@ export function formatTimestamp(isoString: string): string {
 }
 
 function isSameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 /**

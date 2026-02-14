@@ -19,7 +19,13 @@ interface HoldingsSectionProps {
   onLogout?: () => Promise<void>;
 }
 
-export function HoldingsSection({ holdings, lastUpdated, isLoggedIn, onRefresh, onLogout }: HoldingsSectionProps) {
+export function HoldingsSection({
+  holdings,
+  lastUpdated,
+  isLoggedIn,
+  onRefresh,
+  onLogout,
+}: HoldingsSectionProps) {
   if (holdings.length === 0) return null;
 
   const subtitle = lastUpdated
@@ -51,8 +57,14 @@ export function HoldingsSection({ holdings, lastUpdated, isLoggedIn, onRefresh, 
             ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Kite" url={`${KITE_WEB_URL}/holdings`} />
-                <Action.CopyToClipboard title="Copy Symbol" content={h.tradingsymbol} />
+                <Action.OpenInBrowser
+                  title="Open in Kite"
+                  url={`${KITE_WEB_URL}/holdings`}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Symbol"
+                  content={h.tradingsymbol}
+                />
                 {isLoggedIn && onRefresh && (
                   <Action
                     title="Refresh"
@@ -61,7 +73,13 @@ export function HoldingsSection({ holdings, lastUpdated, isLoggedIn, onRefresh, 
                     onAction={onRefresh}
                   />
                 )}
-                {isLoggedIn && onLogout && <Action title="Logout" icon={Icon.Logout} onAction={onLogout} />}
+                {isLoggedIn && onLogout && (
+                  <Action
+                    title="Logout"
+                    icon={Icon.Logout}
+                    onAction={onLogout}
+                  />
+                )}
               </ActionPanel>
             }
           />

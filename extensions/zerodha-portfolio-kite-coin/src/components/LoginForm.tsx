@@ -1,6 +1,18 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { clearRememberedUserId, performLogin, storeRememberedUserId } from "../lib/auth";
+import {
+  clearRememberedUserId,
+  performLogin,
+  storeRememberedUserId,
+} from "../lib/auth";
 import { COPY } from "../lib/constants";
 
 interface LoginFormProps {
@@ -9,11 +21,17 @@ interface LoginFormProps {
   rememberedUserId?: string | null;
 }
 
-export function LoginForm({ onSuccess, storedUserId, rememberedUserId }: LoginFormProps) {
+export function LoginForm({
+  onSuccess,
+  storedUserId,
+  rememberedUserId,
+}: LoginFormProps) {
   const { pop } = useNavigation();
   const passwordRef = useRef<Form.PasswordField>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState<string>(storedUserId ?? rememberedUserId ?? "");
+  const [userId, setUserId] = useState<string>(
+    storedUserId ?? rememberedUserId ?? "",
+  );
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(!!rememberedUserId);
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +50,10 @@ export function LoginForm({ onSuccess, storedUserId, rememberedUserId }: LoginFo
     const currentUserId = userId.toUpperCase();
 
     if (!currentUserId || !password || !totpCode) {
-      await showToast({ style: Toast.Style.Failure, title: "All fields are required" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "All fields are required",
+      });
       return;
     }
 
@@ -53,13 +74,25 @@ export function LoginForm({ onSuccess, storedUserId, rememberedUserId }: LoginFo
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       if (message === "INVALID_CREDENTIALS") {
-        await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_INVALID_CREDENTIALS });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: COPY.TOAST_INVALID_CREDENTIALS,
+        });
       } else if (message === "INVALID_TOTP") {
-        await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_INVALID_TOTP });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: COPY.TOAST_INVALID_TOTP,
+        });
       } else if (message.includes("fetch")) {
-        await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_NETWORK_ERROR });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: COPY.TOAST_NETWORK_ERROR,
+        });
       } else {
-        await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_LOGIN_FAILED });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: COPY.TOAST_LOGIN_FAILED,
+        });
       }
     } finally {
       setIsLoading(false);
@@ -119,9 +152,19 @@ export function LoginForm({ onSuccess, storedUserId, rememberedUserId }: LoginFo
           onChange={setPassword}
         />
       )}
-      <Form.Description text={process.platform === "win32" ? "Alt+E to show/hide password" : "⌥E to show/hide password"} />
+      <Form.Description
+        text={
+          process.platform === "win32"
+            ? "Alt+E to show/hide password"
+            : "⌥E to show/hide password"
+        }
+      />
 
-      <Form.TextField id="totpCode" title="TOTP Code" placeholder="6-digit TOTP code" />
+      <Form.TextField
+        id="totpCode"
+        title="TOTP Code"
+        placeholder="6-digit TOTP code"
+      />
     </Form>
   );
 }

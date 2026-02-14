@@ -14,7 +14,10 @@ interface MutualFundsData {
   refresh: () => Promise<void>;
 }
 
-export function useMutualFunds(accessToken: string | null, isLoggedIn: boolean): MutualFundsData {
+export function useMutualFunds(
+  accessToken: string | null,
+  isLoggedIn: boolean,
+): MutualFundsData {
   const [mfHoldings, setMfHoldings] = useState<MFHolding[]>([]);
   const [sips, setSips] = useState<SIP[]>([]);
   const [mfOrders, setMfOrders] = useState<MFOrder[]>([]);
@@ -37,7 +40,9 @@ export function useMutualFunds(accessToken: string | null, isLoggedIn: boolean):
     if (cachedOrders) setMfOrders(cachedOrders.data);
     else setMfOrders([]);
 
-    const timestamps = [cachedMF, cachedSIPs, cachedOrders].filter(Boolean).map((c) => c!.timestamp);
+    const timestamps = [cachedMF, cachedSIPs, cachedOrders]
+      .filter(Boolean)
+      .map((c) => c!.timestamp);
     if (timestamps.length > 0) {
       setLastUpdated(timestamps.sort().pop()!);
     } else {
@@ -48,7 +53,11 @@ export function useMutualFunds(accessToken: string | null, isLoggedIn: boolean):
   const fetchAll = useCallback(
     async (token: string) => {
       try {
-        const [h, s, o] = await Promise.all([fetchMFHoldings(token), fetchSIPs(token), fetchMFOrders(token)]);
+        const [h, s, o] = await Promise.all([
+          fetchMFHoldings(token),
+          fetchSIPs(token),
+          fetchMFOrders(token),
+        ]);
 
         setMfHoldings(h);
         setSips(s);
@@ -110,10 +119,19 @@ async function handleApiError(err: unknown) {
       message: COPY.TOAST_SESSION_ENDED_MESSAGE,
     });
   } else if (status === 429) {
-    await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_RATE_LIMITED });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: COPY.TOAST_RATE_LIMITED,
+    });
   } else if (status && status >= 500) {
-    await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_SERVER_ERROR });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: COPY.TOAST_SERVER_ERROR,
+    });
   } else {
-    await showToast({ style: Toast.Style.Failure, title: COPY.TOAST_NETWORK_ERROR });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: COPY.TOAST_NETWORK_ERROR,
+    });
   }
 }
