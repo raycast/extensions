@@ -557,7 +557,6 @@ export default function Command() {
               ) : (
                 <Action title="Add Source as VIP" icon={Icon.Star} onAction={() => void addSourceToVip(subscription)} />
               )}
-              <Action title="Refresh Sources" icon={Icon.ArrowClockwise} onAction={() => void loadSubscriptions()} />
               <Action
                 title="Reload Sources from Inoreader"
                 icon={Icon.Download}

@@ -99,11 +99,22 @@
       "label": "Show site name",
       "default": false,
       "required": false
+    },
+    {
+      "name": "aiSummaryLanguage",
+      "title": "AI Summary Language",
+      "description": "Default language used for AI summaries",
+      "type": "textfield",
+      "placeholder": "English",
+      "default": "English",
+      "required": false
     }
   ],
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "linkedom": "^0.18.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

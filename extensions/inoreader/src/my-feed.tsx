@@ -1,4 +1,5 @@
 import {
+  AI,
   Action,
   ActionPanel,
   Detail,
@@ -8,12 +9,15 @@ import {
   LocalStorage,
   OAuth,
   Toast,
+  environment,
   getPreferenceValues,
   openExtensionPreferences,
   showToast,
   useNavigation,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
+import { Readability } from "@mozilla/readability";
+import { DOMParser } from "linkedom";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -30,6 +34,9 @@ const SUBSCRIPTION_CACHE_KEY = "inoreader-subscriptions-cache-v1";
 const VIP_SOURCE_IDS_STORAGE_KEY = "inoreader-vip-source-ids-v1";
 const SUBSCRIPTION_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const INITIAL_STREAM_LOAD_DEBOUNCE_MS = 150;
+const ARTICLE_FETCH_TIMEOUT_MS = 20_000;
+const MAX_READABLE_CONTENT_CHARS = 18_000;
+const MAX_HTML_CHARS = 1_500_000;
 const execFileAsync = promisify(execFile);
 
 const oauthClient = new OAuth.PKCEClient({
@@ -441,6 +448,212 @@ function getQuickLookMarkdown(item: InoreaderArticle): string {
   return [...headerLines, "", content || "_No RSS preview content available for this article._"].join("\n");
 }
 
+type ReadableContent = {
+  title: string;
+  content: string;
+  excerpt?: string;
+  byline?: string;
+  siteName?: string;
+};
+
+function normalizeWhitespace(input: string): string {
+  return input
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+async function fetchArticleHtml(url: string): Promise<string> {
+  const abortController = new AbortController();
+  const timeout = setTimeout(() => abortController.abort(), ARTICLE_FETCH_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: abortController.signal,
+      headers: {
+        Accept: "text/html,application/xhtml+xml",
+        "User-Agent": "Raycast Inoreader Extension/1.0",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Article fetch failed with status ${response.status}`);
+    }
+
+    return await response.text();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function extractReadableContent(url: string): Promise<ReadableContent> {
+  const html = (await fetchArticleHtml(url)).slice(0, MAX_HTML_CHARS);
+  const document = new DOMParser().parseFromString(html, "text/html");
+  const reader = new Readability(document);
+  const parsed = reader.parse();
+  const fallbackTitle = normalizeWhitespace(document.title || "Article");
+  const rawContent = parsed?.textContent || htmlToPlainText(parsed?.content);
+  const content = normalizeWhitespace(rawContent);
+
+  if (!content) {
+    throw new Error("Unable to extract readable content from this page");
+  }
+
+  return {
+    title: decodeHtmlEntities(parsed?.title?.trim() || fallbackTitle),
+    content: content.slice(0, MAX_READABLE_CONTENT_CHARS),
+    excerpt: normalizeWhitespace(parsed?.excerpt || ""),
+    byline: normalizeWhitespace(parsed?.byline || ""),
+    siteName: normalizeWhitespace(parsed?.siteName || ""),
+  };
+}
+
+function getSummaryLanguage(value: string | undefined): string {
+  const language = value?.trim();
+  return language ? language : "English";
+}
+
+function buildSummaryPrompt(
+  item: InoreaderArticle,
+  articleUrl: string,
+  readableContent: ReadableContent,
+  language: string,
+): string {
+  const title = decodeHtmlEntities(item.title?.trim() || readableContent.title || "Untitled article");
+  const source = decodeHtmlEntities(item.origin?.title || readableContent.siteName || "");
+  const date = getArticleDate(item)?.toISOString() ?? "";
+  const excerpt = readableContent.excerpt || "";
+  const byline = readableContent.byline || "";
+
+  return [
+    "Please act as an expert synthesizer. Read the provided text below and generate a concise summary.",
+    "",
+    `Output Language: ${language}. The entire summary must be written in this language.`,
+    "",
+    "Guidelines:",
+    "",
+    "Core Thesis: Start with one sentence clearly stating the article's main argument or purpose.",
+    "",
+    "Key Points: Provide 3-5 bullet points extracting the most critical evidence, arguments, or findings.",
+    "",
+    "Tone/Clarity: Use simple, professional language (aim for an 8th-grade reading level) and avoid jargon.",
+    "",
+    "Length: Keep the total output under 150 words.",
+    "",
+    "Text to Summarize:",
+    `- URL: ${articleUrl}`,
+    `- Title: ${title}`,
+    source ? `- Source: ${source}` : "",
+    byline ? `- Author: ${byline}` : "",
+    date ? `- Date: ${date}` : "",
+    excerpt ? `- Readability Excerpt: ${excerpt}` : "",
+    "",
+    "[Insert Article Here]",
+    "```text",
+    readableContent.content,
+    "```",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getAiSummaryMarkdown(item: InoreaderArticle, articleUrl: string, summary: string): string {
+  const title = decodeHtmlEntities(item.title?.trim() || "Untitled article");
+
+  const headerLines = [`# AI Summary: ${title}`, ""];
+
+  return [...headerLines, summary.trim()].join("\n");
+}
+
+function AISummaryArticleDetail({ item }: { item: InoreaderArticle }) {
+  const { pop } = useNavigation();
+  const preferences = getPreferenceValues<Preferences.MyFeed>();
+  const articleUrl = getArticleUrl(item);
+  const summaryLanguage = getSummaryLanguage(preferences.aiSummaryLanguage);
+  const [isLoading, setIsLoading] = useState(false);
+  const [markdown, setMarkdown] = useState<string>("Preparing AI summary...");
+
+  const runSummary = useCallback(async () => {
+    if (!articleUrl) {
+      setMarkdown("# AI Summary\n\nUnable to summarize this item because no article URL is available.");
+      return;
+    }
+
+    if (!environment.canAccess(AI)) {
+      setMarkdown("# AI Summary\n\nYou don't have access to Raycast AI. Enable Raycast Pro to use this action.");
+      return;
+    }
+
+    setIsLoading(true);
+    setMarkdown("Preparing AI summary...");
+
+    try {
+      const readableContent = await extractReadableContent(articleUrl);
+      const prompt = buildSummaryPrompt(item, articleUrl, readableContent, summaryLanguage);
+      const summary = await AI.ask(prompt);
+      setMarkdown(getAiSummaryMarkdown(item, articleUrl, summary));
+    } catch (error) {
+      setMarkdown(
+        ["# AI Summary", "", "Unable to generate summary.", "", `Error: ${normalizeErrorMessage(error)}`].join("\n"),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [articleUrl, item, summaryLanguage]);
+
+  useEffect(() => {
+    void runSummary();
+  }, [runSummary]);
+
+  return (
+    <Detail
+      navigationTitle="AI Summary"
+      markdown={markdown}
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          {articleUrl ? (
+            <Action
+              title="Open Article in Background"
+              icon={Icon.Globe}
+              shortcut={{ modifiers: [], key: "return" }}
+              onAction={async () => {
+                try {
+                  await openUrlInBackground(articleUrl);
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Couldn't open article in background",
+                    message: normalizeErrorMessage(error),
+                  });
+                }
+              }}
+            />
+          ) : null}
+          <Action title="Back" icon={Icon.ArrowLeft} shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={pop} />
+          {articleUrl ? (
+            <Action.OpenInBrowser
+              title="Open Article"
+              url={articleUrl}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
+            />
+          ) : null}
+          <Action
+            title="Regenerate Summary"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["opt"], key: "r" }}
+            onAction={() => void runSummary()}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 function QuickLookArticleDetail({ item }: { item: InoreaderArticle }) {
   const { pop } = useNavigation();
   const articleUrl = getArticleUrl(item);
@@ -467,6 +680,14 @@ function QuickLookArticleDetail({ item }: { item: InoreaderArticle }) {
                   });
                 }
               }}
+            />
+          ) : null}
+          {articleUrl ? (
+            <Action.Push
+              title="AI Summary"
+              icon={Icon.Stars}
+              shortcut={{ modifiers: [], key: "arrowRight" }}
+              target={<AISummaryArticleDetail item={item} />}
             />
           ) : null}
           <Action
@@ -1047,6 +1268,20 @@ export function FeedView({
                   shortcut={{ modifiers: ["cmd"], key: "return" }}
                 />
               ) : null}
+              <Action.Push
+                title="Quick Look"
+                icon={Icon.Sidebar}
+                shortcut={{ modifiers: [], key: "arrowRight" }}
+                target={<QuickLookArticleDetail item={item} />}
+              />
+              {articleUrl ? (
+                <Action.Push
+                  title="AI Summary"
+                  icon={Icon.Stars}
+                  shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                  target={<AISummaryArticleDetail item={item} />}
+                />
+              ) : null}
               {sourceStreamId && isVipSource ? (
                 <Action
                   title="Remove Source from VIP"
@@ -1087,12 +1322,6 @@ export function FeedView({
               />
               <Action title="Reconnect Inoreader" icon={Icon.Link} onAction={connect} />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-              <Action.Push
-                title="Quick Look"
-                icon={Icon.Sidebar}
-                shortcut={{ modifiers: [], key: "arrowRight" }}
-                target={<QuickLookArticleDetail item={item} />}
-              />
             </ActionPanel>
           }
         />
