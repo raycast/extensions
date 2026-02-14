@@ -79,11 +79,7 @@ function Search() {
   const filteredRecents = recents.filter((item) => matchesAllWords(item.name, searchText));
 
   return (
-    <List
-      isLoading={isLoading || isLoadingChannels}
-      filtering={false}
-      onSearchTextChange={setSearchText}
-    >
+    <List isLoading={isLoading || isLoadingChannels} filtering={false} onSearchTextChange={setSearchText}>
       {filteredRecents.map((item) => {
         const isUser = item.id.startsWith("U");
 
