@@ -15,7 +15,7 @@ export async function removeAppPreferredDevice(bundleId: string): Promise<void> 
 }
 
 export async function clearAllAppPreferredDevices(): Promise<void> {
-  const items = await LocalStorage.allItems<string>();
+  const items = await LocalStorage.allItems<LocalStorage.Values>();
   const keys = Object.keys(items).filter((key) => key.startsWith(PREF_PREFIX));
   await Promise.all(keys.map((key) => LocalStorage.removeItem(key)));
 }
