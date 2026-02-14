@@ -4,7 +4,7 @@ import { queryDatabase } from "../utils/notion/database";
 import { notionService } from "../utils/notion/oauth";
 
 type Input = {
-  /** The ID of the database to search. */
+  /** The ID of the data source to search. */
   databaseId: string;
   /** The query to search for. Only use plain text: it doesn't support any operators */
   query: string;

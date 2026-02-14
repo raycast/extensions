@@ -56,10 +56,10 @@ export async function fetchDatabases() {
   }
 }
 
-export async function fetchDatabaseProperties(databaseId: string) {
+export async function fetchDatabaseProperties(dataSourceId: string) {
   try {
     const notion = getNotionClient();
-    const dataSource = await notion.dataSources.retrieve({ data_source_id: databaseId });
+    const dataSource = await notion.dataSources.retrieve({ data_source_id: dataSourceId });
 
     if (!("properties" in dataSource)) return [];
 
@@ -89,14 +89,14 @@ export async function fetchDatabaseProperties(databaseId: string) {
 }
 
 export async function queryDatabase(
-  databaseId: string,
+  dataSourceId: string,
   query: string | undefined,
   sort: "last_edited_time" | "created_time" = "last_edited_time",
 ) {
   try {
     const notion = getNotionClient();
-    const database = await notion.dataSources.query({
-      data_source_id: databaseId,
+    const dataSource = await notion.dataSources.query({
+      data_source_id: dataSourceId,
       page_size: 20,
       sorts: [
         {
@@ -118,7 +118,7 @@ export async function queryDatabase(
         : undefined,
     });
 
-    return database.results.map(pageMapper);
+    return dataSource.results.map(pageMapper);
   } catch (err) {
     return handleError(err, "Failed to query database", []);
   }
@@ -163,7 +163,7 @@ export async function createDatabasePage(values: Form.Values) {
   }
 }
 
-export async function deleteDatabase(databaseId: string) {
+export async function deleteDatabase(dataSourceId: string) {
   try {
     const notion = getNotionClient();
 
@@ -172,8 +172,8 @@ export async function deleteDatabase(databaseId: string) {
       title: "Deleting database",
     });
 
-    await notion.databases.update({
-      database_id: databaseId,
+    await notion.dataSources.update({
+      data_source_id: dataSourceId,
       in_trash: true,
     });
 
