@@ -1,5 +1,10 @@
 # OTP Inbox Changelog
 
+## [Extension Improvement] - 2026-02-13
+
+- Add Windows support
+
+
 ## [Initial Version] - 2024-04-16
 
 - Automatically detects the OTP code from the email
