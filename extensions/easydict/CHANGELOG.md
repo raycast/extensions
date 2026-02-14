@@ -1,5 +1,12 @@
 # `Easydict` Changelog
 
+## [v2.11.1] - {PR_MERGE_DATE}
+
+### 💎 Improvement
+
+- Include Norwegian ("no") in language preference
+- Update dependencies and improve stability
+
 ## [Bugfix] - 2025-07-09
 
 - Remove the unused file Icon file
