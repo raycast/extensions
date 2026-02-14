@@ -25,10 +25,6 @@ import { EventDetailView } from "./views/event-detail-view";
 import { TimeWindowPickerView } from "./views/time-window-picker-view";
 import { WaitlistFormView } from "./views/waitlist-form-view";
 
-type Preferences = {
-  locale: string;
-};
-
 const DEFAULT_QUERY = "";
 const FALLBACK_API_QUERY = "what's on this week";
 const HOME_ZONE_STORAGE_KEY = "townspot-home-zone-id";
@@ -217,7 +213,7 @@ const windowHintForApi = (timeWindow: TimeWindow): string => {
 
 export default function Command(
 ) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<{ locale: string }>();
   const initialQuery = DEFAULT_QUERY;
 
   const [zones, setZones] = useState<ActiveZoneOption[]>([]);

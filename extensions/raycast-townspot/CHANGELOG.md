@@ -1,6 +1,6 @@
 # TownSpot Changelog
 
-## [Initial Version] - 2026-02-14
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added a new TownSpot Raycast extension for local event discovery.
 - Added hometown selection with country-grouped town lists in onboarding and dropdown.

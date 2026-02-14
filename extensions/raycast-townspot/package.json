@@ -4,6 +4,9 @@
   "description": "Raycast command to ask TownSpot what's on.",
   "version": "0.0.1",
   "private": true,
+  "categories": [
+    "Fun"
+  ],
   "main": "dist/index.js",
   "author": "mikegyi",
   "license": "MIT",
