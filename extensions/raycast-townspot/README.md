@@ -20,7 +20,7 @@ If your Raycast CLI binary is not on PATH, `npm run dev` uses the local `ray` CL
 
 ## API + Preferences
 
-- API is hardcoded to production: `https://townspot.co/api`.
+- API is hardcoded to production: `https://api.townspot.co/api`.
 - The only command preference is `Locale` (`en-GB`, `es-ES`, `ca-ES`).
 
 For local API testing, temporarily change `PROD_API_BASE_URL` in `src/ask.tsx`.

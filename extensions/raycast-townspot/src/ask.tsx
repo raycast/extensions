@@ -35,7 +35,7 @@ const NO_ZONE_VALUE = "__unset__";
 const ZONE_VALUE_PREFIX = "zone:";
 const SMALL_DOT = "·";
 const API_EVENT_FETCH_LIMIT = 120;
-const PROD_API_BASE_URL = "https://townspot.co/api";
+const PROD_API_BASE_URL = "https://api.townspot.co/api";
 
 const useDebouncedValue = <T,>(value: T, waitMs: number): T => {
   const [debounced, setDebounced] = useState(value);
@@ -604,7 +604,7 @@ export default function Command(
               !selectionHydrated
                 ? "Loading Hometown..."
                 : needsHomeZone
-                  ? "Set Hometown..."
+                  ? "Set hometown..."
                   : selectedZoneTitle || `${activeTownName} ${SMALL_DOT} ${activeThisWeekLabel}`
             }
             icon={Icon.Pin}
