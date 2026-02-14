@@ -1,0 +1,53 @@
+{
+  "name": "raycast-townspot",
+  "title": "TownSpot",
+  "description": "Raycast command to ask TownSpot what's on.",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/index.js",
+  "author": "mikegyi",
+  "license": "MIT",
+  "icon": "icon.png",
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.89.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "@typescript-eslint/parser": "^8.55.0",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "commands": [
+    {
+      "name": "ask",
+      "title": "TownSpot",
+      "icon": "icon.png",
+      "description": "Ask what's on in your town with conversational search.",
+      "mode": "view",
+      "path": "ask",
+      "keywords": [
+        "events",
+        "townspot",
+        "weekend",
+        "music"
+      ],
+      "preferences": [
+        {
+          "name": "locale",
+          "title": "Locale",
+          "description": "API locale (en-GB, es-ES, ca-ES)",
+          "type": "textfield",
+          "required": true,
+          "default": "en-GB"
+        }
+      ]
+    }
+  ]
+}
