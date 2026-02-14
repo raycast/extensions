@@ -36,6 +36,7 @@ const ZONE_VALUE_PREFIX = "zone:";
 const SMALL_DOT = "·";
 const API_EVENT_FETCH_LIMIT = 120;
 const PROD_API_BASE_URL = "https://api.townspot.co/api";
+const WAITLIST_URL = "https://www.townspot.co/?tell-us-your-town=1";
 
 const useDebouncedValue = <T,>(value: T, waitMs: number): T => {
   const [debounced, setDebounced] = useState(value);
@@ -650,6 +651,20 @@ export default function Command(
               }
             />
           ))}
+          <List.Item
+            key="waitlist-town"
+            title="Not from around here, huh?"
+            subtitle="Tell us your town →"
+            icon={Icon.SpeechBubble}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Tell us your town"
+                  url={WAITLIST_URL}
+                />
+              </ActionPanel>
+            }
+          />
         </List.Section>
       ) : (
         <>
@@ -900,6 +915,27 @@ export default function Command(
             title="Active towns unavailable"
             subtitle={zonesError}
             icon={Icon.ExclamationMark}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Tell us your town"
+                  url={WAITLIST_URL}
+                />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title="Not from around here, huh?"
+            subtitle="Tell us your town →"
+            icon={Icon.SpeechBubble}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Tell us your town"
+                  url={WAITLIST_URL}
+                />
+              </ActionPanel>
+            }
           />
         </List.Section>
       ) : null}
