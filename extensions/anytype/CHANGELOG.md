@@ -1,6 +1,6 @@
 # Anytype Changelog
 
-## [Bug Fixes & Dependency Updates] - {PR_MERGE_DATE}
+## [Bug Fixes & Dependency Updates] - 2026-02-14
 
 - Fix object property dropdowns interfering with each other's search results in create and update forms
 - Update dependencies to latest versions
