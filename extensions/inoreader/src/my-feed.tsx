@@ -11,6 +11,7 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   showToast,
+  useNavigation,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { execFile } from "node:child_process";
@@ -402,6 +403,89 @@ function decodeHtmlEntities(input?: string): string {
     .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number.parseInt(dec, 10)))
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
     .replace(/&([a-zA-Z][a-zA-Z0-9]+);/g, (entity, name) => NAMED_HTML_ENTITY_MAP[name] ?? entity);
+}
+
+function htmlToPlainText(input?: string): string {
+  if (!input) {
+    return "";
+  }
+
+  return decodeHtmlEntities(
+    input
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>/gi, "\n\n")
+      .replace(/<li\b[^>]*>/gi, "- ")
+      .replace(/<\/li>/gi, "\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n"),
+  ).trim();
+}
+
+function getQuickLookMarkdown(item: InoreaderArticle): string {
+  const title = decodeHtmlEntities(item.title?.trim() || "Untitled article");
+  const source = decodeHtmlEntities(item.origin?.title);
+  const date = getArticleDate(item)?.toLocaleString();
+  const articleUrl = getArticleUrl(item);
+  const content = htmlToPlainText(item.summary?.content);
+
+  const headerLines = [
+    `# ${title}`,
+    source ? `Source: ${source}` : undefined,
+    date ? `Published: ${date}` : undefined,
+    articleUrl ? `[Open Original Article](${articleUrl})` : undefined,
+  ].filter(Boolean);
+
+  return [...headerLines, "", content || "_No RSS preview content available for this article._"].join("\n");
+}
+
+function QuickLookArticleDetail({ item }: { item: InoreaderArticle }) {
+  const { pop } = useNavigation();
+  const articleUrl = getArticleUrl(item);
+
+  return (
+    <Detail
+      navigationTitle="Quick Look"
+      markdown={getQuickLookMarkdown(item)}
+      actions={
+        <ActionPanel>
+          {articleUrl ? (
+            <Action
+              title="Open Article in Background"
+              icon={Icon.Globe}
+              shortcut={{ modifiers: [], key: "return" }}
+              onAction={async () => {
+                try {
+                  await openUrlInBackground(articleUrl);
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Couldn't open article in background",
+                    message: normalizeErrorMessage(error),
+                  });
+                }
+              }}
+            />
+          ) : null}
+          <Action
+            title="Back to Feed"
+            icon={Icon.ArrowLeft}
+            shortcut={{ modifiers: [], key: "arrowLeft" }}
+            onAction={pop}
+          />
+          {articleUrl ? (
+            <Action.OpenInBrowser
+              title="Open Article"
+              url={articleUrl}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
+            />
+          ) : null}
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 function parseVipSourceIds(raw: string | undefined): Set<string> {
@@ -1003,6 +1087,12 @@ export function FeedView({
               />
               <Action title="Reconnect Inoreader" icon={Icon.Link} onAction={connect} />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.Push
+                title="Quick Look"
+                icon={Icon.Sidebar}
+                shortcut={{ modifiers: [], key: "arrowRight" }}
+                target={<QuickLookArticleDetail item={item} />}
+              />
             </ActionPanel>
           }
         />
