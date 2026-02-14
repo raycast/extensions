@@ -2,7 +2,7 @@ import { List, Detail, getPreferenceValues, Icon } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 
-import { getListTodos, getCollections, getTagsWithHierarchy, getAreaTagsForTodos, TagWithParent } from '../api';
+import { getListTodos, getCollections, TagWithParent } from '../api';
 import { plural } from '../utils';
 
 import TodoListEmptyView from './TodoListEmptyView';
@@ -67,28 +67,23 @@ function buildTagHierarchy(tags: TagWithParent[]) {
 
 export default function TodoList({ commandListName, displayActivationDates }: TodoListProps) {
   const preferences = getPreferenceValues<Preferences>();
-  const { data: tagsWithHierarchy } = useCachedPromise(() => getTagsWithHierarchy());
-  const { data: collections } = useCachedPromise(() => getCollections('lists'));
-  const lists = collections?.lists;
 
   const [searchText, setSearchText] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>(ALL_TAGS);
 
   const { data: todos, isLoading, error, mutate } = useCachedPromise((name) => getListTodos(name), [commandListName]);
 
-  const { data: areaTags, isLoading: isLoadingAreaTags } = useCachedPromise(
-    (name) => getAreaTagsForTodos(name),
-    [commandListName],
-    { execute: selectedTag !== ALL_TAGS },
-  );
+  const { data: collections } = useCachedPromise(() => getCollections('tagsWithHierarchy', 'lists'), [], {
+    execute: !!todos,
+  });
+  const tagsWithHierarchy = collections?.tagsWithHierarchy;
+  const lists = collections?.lists;
 
   const tagHierarchy = useMemo(() => {
     if (!tagsWithHierarchy) return null;
     return buildTagHierarchy(tagsWithHierarchy);
   }, [tagsWithHierarchy]);
 
-  // Collect tags present in the current list's todos (direct + project + area tags)
-  // Area tags are lazy-loaded, so we include them when filtering is active
   const applicableTags = useMemo(() => {
     if (!todos || !tagHierarchy) return new Set<string>();
 
@@ -97,7 +92,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
     for (const todo of todos) {
       for (const tag of parseTags(todo.tags)) tagSet.add(tag);
       for (const tag of parseTags(todo.project?.tags)) tagSet.add(tag);
-      for (const tag of parseTags(areaTags?.[todo.id])) tagSet.add(tag);
+      for (const tag of parseTags(todo.areaTags)) tagSet.add(tag);
     }
 
     // Include ancestor tags so users can filter by parent
@@ -110,7 +105,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
     }
 
     return withAncestors;
-  }, [todos, areaTags, tagHierarchy]);
+  }, [todos, tagHierarchy]);
 
   const applicableTagsWithHierarchy = useMemo(() => {
     if (!tagsWithHierarchy) return [];
@@ -138,7 +133,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
 
     if (selectedTag === NO_TAG) {
       return todos?.filter((todo) => {
-        const allTags = [...parseTags(todo.tags), ...parseTags(todo.project?.tags), ...parseTags(areaTags?.[todo.id])];
+        const allTags = [...parseTags(todo.tags), ...parseTags(todo.project?.tags), ...parseTags(todo.areaTags)];
         return allTags.length === 0;
       });
     }
@@ -146,10 +141,10 @@ export default function TodoList({ commandListName, displayActivationDates }: To
     if (!expandedTags) return todos;
 
     return todos?.filter((todo) => {
-      const allTags = [...parseTags(todo.tags), ...parseTags(todo.project?.tags), ...parseTags(areaTags?.[todo.id])];
+      const allTags = [...parseTags(todo.tags), ...parseTags(todo.project?.tags), ...parseTags(todo.areaTags)];
       return allTags.some((tag) => expandedTags.has(tag));
     });
-  }, [selectedTag, todos, areaTags, expandedTags]);
+  }, [selectedTag, todos, expandedTags]);
 
   if (error) {
     return <ErrorView error={error} onRetry={() => mutate()} />;
@@ -176,7 +171,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
 
   return (
     <List
-      isLoading={isLoading || (selectedTag !== ALL_TAGS && isLoadingAreaTags)}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter by name, notes, project or area"
       onSearchTextChange={setSearchText}
       filtering
