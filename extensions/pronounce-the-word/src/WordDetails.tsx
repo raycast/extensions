@@ -20,6 +20,7 @@ function getPlayCommand(filePath: string): string {
 }
 
 const modKey = process.platform === "win32" ? "Ctrl" : "⌘";
+const shortcutModifier = process.platform === "win32" ? "ctrl" : "cmd";
 
 function sortPhonetics(phonetics: WordData["phonetics"]): WordData["phonetics"] {
   const order: Record<string, number> = { US: 0, UK: 1 };
@@ -109,7 +110,7 @@ export function WordDetails({ wordData, onBack }: WordDetailsProps) {
                   title={isLoading ? `Playing ${label}...` : `Play: ${label}`}
                   icon={Icon.Speaker}
                   onAction={() => playAudio(phonetic.audio, label)}
-                  {...(shortcutKey && { shortcut: { modifiers: ["cmd"], key: shortcutKey } })}
+                  {...(shortcutKey && { shortcut: { modifiers: [shortcutModifier], key: shortcutKey } })}
                 />
               );
             })}
