@@ -44,7 +44,7 @@ Manage your Git repositories from anywhere on your Mac.
 | `git stash` <br> patch                               |     ✅     |                                                 |
 | `git fetch` <br> `git pull` <br> `git push`          |     ✅     | + force                                         |
 | `git remote`                                         |     ✅     |                                                 |
-| `git config`                                         |     🚫     |                                                 |
+| `git config`                                         |     ✅     |                                                 |
 | `git worktree`                                       |     🚫     |                                                 |
 | `git submodule`                                      |     ✅     |                                                 |
 | `git-lfs`                                            |     🚫     |                                                 |

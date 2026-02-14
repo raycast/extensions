@@ -33,7 +33,10 @@ import {
   Tag,
   StatusMode,
   StashScope,
+  GitLocalConfig,
+  GitLocalConfigUpdates,
 } from "../types";
+import { GitConfigScope } from "simple-git";
 import { basename, join } from "path";
 import { promises as fs } from "fs";
 import { showFailureToast } from "@raycast/utils";
@@ -70,6 +73,17 @@ export class GitManager {
    */
   get repoName(): string {
     return basename(this.repoPath) || "Unknown Repository";
+  }
+
+  /**
+   * Gets the path to the git config file.
+   */
+  get localConfigPath(): string {
+    return join(this.repoPath, ".git", "config");
+  }
+
+  get globalConfigPath(): string {
+    return join(process.env.HOME || process.env.USERPROFILE || "", ".gitconfig");
   }
 
   static validateDirectory(repoPath: string) {
@@ -1094,6 +1108,8 @@ __REBASE_TODO__
     const pullArgs = ["--prune", "--tags"];
     if (rebase) {
       pullArgs.push("--rebase");
+    } else {
+      pullArgs.push("--no-rebase");
     }
     await this.git.pull(undefined, undefined, pullArgs);
   }
@@ -1545,6 +1561,51 @@ __REBASE_TODO__
     const modulesPath = join(this.repoPath, ".git", "modules", path);
     if (existsSync(modulesPath)) {
       rmSync(modulesPath, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * Reads all local git config values.
+   * Only returns values present in the local config; does not read inherited (global/system) values.
+   */
+  async getConfig(): Promise<GitLocalConfig> {
+    const list = await this.git.listConfig();
+
+    const result: GitLocalConfig = {
+      global: {},
+      local: {},
+    };
+    for (const fileName in list.values) {
+      for (const [key, value] of Object.entries(list.values[fileName])) {
+        if (Array.isArray(value)) continue;
+
+        if (fileName.endsWith(".git/config")) {
+          result.local[key] = value;
+        } else if (fileName.endsWith(".gitconfig")) {
+          result.global[key] = value;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Updates local git config with the given values.
+   * Empty string removes (unsets) the respective config key.
+   * On error, reverts all applied changes.
+   * @param config - Map of key to string value; empty string = unset.
+   */
+  async updateLocalConfig(config: GitLocalConfigUpdates): Promise<void> {
+    for (const [key, value] of Object.entries(config)) {
+      if (value === undefined) {
+        const existing = await this.git.getConfig(key, GitConfigScope.local);
+        if (existing.value !== undefined && existing.value !== null) {
+          await this.git.raw(["config", "--local", "--unset", key]);
+        }
+      } else {
+        await this.git.raw(["config", "--local", key, value]);
+      }
     }
   }
 

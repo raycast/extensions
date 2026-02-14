@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useGitRepository } from "./hooks/useGitRepository";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
@@ -24,6 +24,7 @@ import {
   Submodule,
   Branch,
   Remote,
+  Preferences,
 } from "./types";
 import { useGitRemotes } from "./hooks/useGitRemotes";
 import RemotesView from "./components/views/RemotesView";
@@ -102,9 +103,13 @@ export type NavigationContext = {
 };
 
 export default function OpenRepository({ arguments: args }: { arguments: Arguments }) {
+  const preferences = getPreferenceValues<Preferences>();
   const [currentView, setCurrentView] = args.currentView
     ? useState<GitView>(args.currentView)
-    : useCachedState<GitView>("git-current-view", "branches");
+    : preferences.initialTab === "recent"
+      ? useCachedState<GitView>("git-current-view", "branches")
+      : useState<GitView>(preferences.initialTab as GitView);
+
   const [repositoryPath, setRepositoryPath] = useState<string>(args.path);
 
   // Hook for working with a Git repository (synchronous validation)

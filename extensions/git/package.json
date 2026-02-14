@@ -180,6 +180,36 @@
           "value": "wavatar"
         }
       ]
+    },
+    {
+      "name": "initialTab",
+      "required": false,
+      "type": "dropdown",
+      "title": "Initial Tab",
+      "default": "recent",
+      "description": "The tab to show when opening a repository",
+      "data": [
+        {
+          "title": "Recently Opened",
+          "value": "recent"
+        },
+        {
+          "title": "Status",
+          "value": "status"
+        },
+        {
+          "title": "Commits",
+          "value": "commits"
+        },
+        {
+          "title": "Branches",
+          "value": "branches"
+        },
+        {
+          "title": "Files",
+          "value": "files"
+        }
+      ]
     }
   ],
   "dependencies": {

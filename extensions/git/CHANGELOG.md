@@ -18,6 +18,8 @@
   - Add "Delete Submodule" action for deleting submodules
   - Add "Add New Submodule" action for adding new submodules
   - Add "Update All Submodules" action for updating all submodules
+- **Git Config**: Add "Git Config" view for managing local git config
+- **Preferences**: Add "Initial Tab" preference for opening repositories
 
 ### Changed
 - **Interactive Rebase**: Improve UX and safety

@@ -23,6 +23,8 @@ export type Preferences = {
   autoGenerateCommitMessage: boolean;
   /** User icon provider to use for displaying user icon in the commits list. */
   userIconProvider: "none" | "initials" | "mp" | "identicon" | "retro" | "monsterid" | "robohash" | "wavatar";
+  /** Initial tab when opening a repository. "recent" remembers the last selected tab. */
+  initialTab: "recent" | "status" | "commits" | "branches" | "files";
 };
 
 /**
