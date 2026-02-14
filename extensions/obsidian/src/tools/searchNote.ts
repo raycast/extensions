@@ -25,6 +25,9 @@ const logger = new Logger("Tool SearchNote");
 
 const MAX_RESULTS = 50;
 
+/**
+ * Search for notes in Obsidian vaults and return a list of matching notes with their title, vault, and path
+ */
 export default async function tool(input: Input) {
   const vaults = await Obsidian.getVaultsFromPreferencesOrObsidianJson();
 
