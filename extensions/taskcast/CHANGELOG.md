@@ -1,6 +1,6 @@
 # TaskCast Changelog
 
-## [OAuth + UX + Reliability Update] - 2026-02-14
+## [OAuth + UX + Reliability Update] - {PR_MERGE_DATE}
 
 - Add Raycast extension preferences for `googleClientId` and `googleClientSecret`
 - Move OAuth credential input from local env to Raycast preferences UI
@@ -13,13 +13,13 @@
 - Add project ESLint config and resolve lint/prettier issues
 - Keep emoji-based priority markers and matching task sorting behavior
 
-## [Added Task Management Commands] - 2026-02-13
+## [Added Task Management Commands] - {PR_MERGE_DATE}
 
 - Add `New Task` command for creating tasks with optional due date
 - Add `Quick Task (Clipboard)` for fast task capture
 - Add `To Do Lists` and `Today's Tasks` views
 - Add `Create List` and task completion actions
 
-## [Initial Release] - 2026-02-12
+## [Initial Release] - {PR_MERGE_DATE}
 
 Initial version code

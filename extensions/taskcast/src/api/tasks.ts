@@ -1,4 +1,3 @@
-import fetch, { type RequestInit } from "node-fetch";
 import { getAccessToken } from "./auth";
 
 const BASE_URL = "https://tasks.googleapis.com/tasks/v1";

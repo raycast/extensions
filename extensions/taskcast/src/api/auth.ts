@@ -1,14 +1,8 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 
 const GOOGLE_TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
 const GOOGLE_AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-
-type AuthPreferences = {
-  googleClientId: string;
-  googleClientSecret: string;
-};
 
 function requirePreference(name: string, value: string | undefined): string {
   if (!value) {
@@ -83,7 +77,7 @@ async function refreshAccessToken(
 }
 
 export async function getAccessToken(): Promise<string> {
-  const preferences = getPreferenceValues<AuthPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const clientId = requirePreference(
     "googleClientId",
     preferences.googleClientId,
