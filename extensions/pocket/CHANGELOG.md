@@ -1,6 +1,6 @@
 # Pocket Changelog
 
-## [Deprecating Pocket] - {PR_MERGE_DATE}
+## [Deprecating Pocket] - 2026-02-14
 
 ## [Add Alert to Go to Export] - 2025-06-30
 
