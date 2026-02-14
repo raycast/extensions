@@ -16,7 +16,7 @@ export const TimeWindowPickerView = ({
   options,
   selectedTimeWindow,
   onSelect,
-}: TimeWindowPickerViewProps): JSX.Element => {
+}: TimeWindowPickerViewProps) => {
   const { pop } = useNavigation();
 
   return (

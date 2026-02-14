@@ -176,7 +176,7 @@ const EventMetadata = ({
   timezone: string;
   event: RaycastEvent;
   url: string;
-}): JSX.Element => {
+}) => {
   const effectiveTimezone = details?.resolvedTimezone || details?.timezone || timezone;
   const startValue = details?.startTimeLocal || details?.startTime || event.startTime;
   const endValue = details?.endTimeLocal || details?.endTime || event.endTime;
@@ -237,7 +237,7 @@ export const EventDetailView = ({
   timezone,
   url,
   apiBaseUrl,
-}: EventDetailViewProps): JSX.Element => {
+}: EventDetailViewProps) => {
   const [details, setDetails] = useState<EventDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

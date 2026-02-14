@@ -216,7 +216,7 @@ const windowHintForApi = (timeWindow: TimeWindow): string => {
 };
 
 export default function Command(
-): JSX.Element {
+) {
   const preferences = getPreferenceValues<Preferences>();
   const initialQuery = DEFAULT_QUERY;
 

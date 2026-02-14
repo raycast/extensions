@@ -14,7 +14,7 @@ type WaitlistFormViewProps = {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const WaitlistFormView = ({ endpointUrl }: WaitlistFormViewProps): JSX.Element => {
+export const WaitlistFormView = ({ endpointUrl }: WaitlistFormViewProps) => {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 

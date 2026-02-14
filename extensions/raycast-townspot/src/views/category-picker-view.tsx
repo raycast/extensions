@@ -10,7 +10,7 @@ export const CategoryPickerView = ({
   categories,
   selectedCategory,
   onSelect,
-}: CategoryPickerViewProps): JSX.Element => {
+}: CategoryPickerViewProps) => {
   const { pop } = useNavigation();
 
   return (
