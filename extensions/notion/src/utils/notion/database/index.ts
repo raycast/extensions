@@ -129,10 +129,10 @@ type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 export async function createDatabasePage(values: Form.Values) {
   try {
     const notion = getNotionClient();
-    const { database, content, ...props } = values;
+    const { database: dataSourceId, content, ...props } = values;
 
     const arg: CreateRequest = {
-      parent: { database_id: database },
+      parent: { data_source_id: dataSourceId },
       properties: {},
     };
 

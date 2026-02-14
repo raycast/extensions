@@ -4,7 +4,7 @@ import { createDatabasePage } from "../utils/notion";
 import { getNotionClient, notionService } from "../utils/notion/oauth";
 
 type Input = {
-  /** The database id to create the page in. */
+  /** The data source id to create the page in. */
   databaseId: string;
   /** The title of the page to create. */
   title: string;
@@ -31,11 +31,11 @@ export default withAccessToken(notionService)(async ({ databaseId, title, conten
 
 export const confirmation = withAccessToken(notionService)(async (params: Input) => {
   const notion = getNotionClient();
-  const database = await notion.databases.retrieve({ database_id: params.databaseId });
+  const dataSource = await notion.dataSources.retrieve({ data_source_id: params.databaseId });
 
   let databaseName = params.databaseId;
-  if ("title" in database) {
-    databaseName = database.title[0].plain_text;
+  if ("title" in dataSource) {
+    databaseName = dataSource.title[0]?.plain_text ?? databaseName;
   }
 
   return {
