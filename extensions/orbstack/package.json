@@ -57,6 +57,11 @@
       "name": "machine_create",
       "title": "Machine Create",
       "description": "Create a new machine"
+    },
+    {
+      "name": "machine_clone",
+      "title": "Machine Clone",
+      "description": "Clone a machine"
     }
   ],
   "ai": {

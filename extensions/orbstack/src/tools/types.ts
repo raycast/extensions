@@ -139,3 +139,28 @@ export function validateCreateArgs(args: CreateArgs) {
     throw new Error("user_name cannot be empty. Ask the user for the username.");
   }
 }
+
+export interface CloneArgs {
+  /**
+   * REQUIRED
+   * The name of the existing OrbStack machine to clone from.
+   */
+  old_name: string;
+  /**
+   * REQUIRED
+   * The target name for the cloned machine. Must not contain underscores and must differ from old_name.
+   */
+  new_name: string;
+}
+
+export function validateCloneArgs(args: CloneArgs) {
+  if (!args.old_name || !args.new_name) {
+    throw new Error("old_name and new_name are required");
+  }
+  if (args.new_name.includes("_")) {
+    throw new Error("new_name must not contain underscores");
+  }
+  if (args.old_name === args.new_name) {
+    throw new Error("new_name must be different from old_name");
+  }
+}

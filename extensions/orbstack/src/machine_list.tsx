@@ -3,6 +3,7 @@ import { useState } from "react";
 import { getStatusIcon } from "./utils";
 import CommandExecute from "./command_execute";
 import MachineCreate from "./machine_create";
+import MachineClone from "./machine_clone";
 import { useMachineList, useMachineStateTransition, useMachineInfo, useMachineToggleAll } from "./hooks";
 
 export default function MachineList() {
@@ -127,6 +128,11 @@ export default function MachineList() {
                 title="Create"
                 target={<MachineCreate refresh={revalidateMachineList} />}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
+              <Action.Push
+                title="Clone"
+                target={<MachineClone oldName={machine.name} refresh={revalidateMachineList} />}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
               <Action.Push
                 title="Delete"
