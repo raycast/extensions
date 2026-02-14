@@ -1,6 +1,6 @@
 import { showHUD, showToast, Toast, LaunchProps } from "@raycast/api";
 import {
-  isLunarInstalled,
+  ensureLunarReady,
   getDisplays,
   getCursorDisplay,
   getBrightnessForDisplay,
@@ -31,15 +31,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     return;
   }
 
-  // Check Lunar installation
-  const status = isLunarInstalled();
-
-  if (!status.app || !status.cli) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Lunar Not Installed",
-      message: !status.app ? "Install Lunar: brew install --cask lunar" : "Run: Lunar install-cli",
-    });
+  if (!(await ensureLunarReady())) {
     return;
   }
 

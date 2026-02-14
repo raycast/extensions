@@ -20,18 +20,4 @@ Instantly set brightness to 100% on the display where your cursor is located. Us
 
 The **Brightness Up** and **Brightness Down** commands work without any additional setup.
 
-The **Set Brightness** and **Max Brightness** commands require [Lunar](https://lunar.fyi/):
-
-1. Install the Lunar app:
-
-   ```bash
-   brew install --cask lunar
-   ```
-
-2. Install the Lunar CLI:
-
-   ```bash
-   /Applications/Lunar.app/Contents/MacOS/Lunar install-cli
-   ```
-
-Lunar is free for basic brightness control.
+The **Set Brightness** and **Max Brightness** commands require [Lunar](https://lunar.fyi/) (free for basic brightness control). The extension will automatically install Lunar and its CLI on first use via Homebrew. If auto-install fails, you'll get actionable prompts to open the Lunar website or copy the install command.

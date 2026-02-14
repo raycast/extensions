@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { homedir } from "os";
 import { existsSync } from "fs";
+import { showToast, Toast, open, Clipboard } from "@raycast/api";
 
 const execAsync = promisify(exec);
 
@@ -72,20 +73,6 @@ export function getLunarPath(): string {
 }
 
 /**
- * Get the current brightness using the Lunar CLI.
- */
-export async function getBrightnessWithLunar(): Promise<number | null> {
-  try {
-    const lunarPath = getLunarPath();
-    const { stdout } = await execAsync(`"${lunarPath}" get brightness`);
-    const match = stdout.match(/brightness:\s*(\d+)/);
-    return match ? parseInt(match[1], 10) : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Check if Lunar is installed (both the app and the CLI).
  */
 export function isLunarInstalled(): { app: boolean; cli: boolean } {
@@ -95,15 +82,113 @@ export function isLunarInstalled(): { app: boolean; cli: boolean } {
 }
 
 /**
+ * Find the Homebrew binary path.
+ */
+function getBrewPath(): string | null {
+  const paths = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"];
+  return paths.find((p) => existsSync(p)) || null;
+}
+
+/**
+ * Install the Lunar app via Homebrew.
+ */
+async function installLunarApp(): Promise<boolean> {
+  const brewPath = getBrewPath();
+  if (!brewPath) return false;
+
+  try {
+    await execAsync(`"${brewPath}" install --cask lunar`, { timeout: 120000 });
+    return existsSync("/Applications/Lunar.app");
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Install the Lunar CLI from the Lunar app bundle.
  */
-export async function installLunarCLI(): Promise<boolean> {
+async function installLunarCLI(): Promise<boolean> {
   try {
     await execAsync("/Applications/Lunar.app/Contents/MacOS/Lunar install-cli");
     return true;
   } catch {
     return false;
   }
+}
+
+/**
+ * Ensure Lunar is ready to use. Checks app and CLI installation,
+ * auto-installs both if possible, and returns true if ready.
+ * Shows actionable toasts so users can install manually if auto-install fails.
+ */
+export async function ensureLunarReady(): Promise<boolean> {
+  let status = isLunarInstalled();
+  let didInstall = false;
+
+  if (!status.app) {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Installing Lunar",
+      message: "Running brew install --cask lunar...",
+    });
+
+    const appInstalled = await installLunarApp();
+
+    if (!appInstalled) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Lunar Installation Failed",
+        message: "Install Lunar to use this command",
+        primaryAction: {
+          title: "Open Lunar Website",
+          onAction: () => open("https://lunar.fyi/"),
+        },
+        secondaryAction: {
+          title: "Copy Brew Command",
+          onAction: () => Clipboard.copy("brew install --cask lunar"),
+        },
+      });
+      return false;
+    }
+
+    didInstall = true;
+    status = isLunarInstalled();
+  }
+
+  if (!status.cli) {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Installing Lunar CLI",
+      message: "One moment...",
+    });
+
+    const cliInstalled = await installLunarCLI();
+
+    if (!cliInstalled) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "CLI Installation Failed",
+        message: "Hover for actions",
+        primaryAction: {
+          title: "Copy Install Command",
+          onAction: () => Clipboard.copy("/Applications/Lunar.app/Contents/MacOS/Lunar install-cli"),
+        },
+      });
+      return false;
+    }
+
+    didInstall = true;
+  }
+
+  if (didInstall) {
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Lunar Ready",
+      message: "All set!",
+    });
+  }
+
+  return true;
 }
 
 /**
