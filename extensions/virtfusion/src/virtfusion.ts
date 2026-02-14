@@ -7,7 +7,8 @@ class VirtFusion {
     this.panel = panel;
   }
   protected async request<T>(endpoint: string, options?: RequestInit) {
-    const response = await fetch(new URL(`api/${endpoint}`, this.panel.virtfusion_url), {
+    const base = this.panel.virtfusion_url.endsWith("/") ? this.panel.virtfusion_url : `${this.panel.virtfusion_url}/`;
+    const response = await fetch(new URL(`api/${endpoint}`, base), {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

@@ -30,9 +30,9 @@ export default function Servers({ panel }: { panel: Panel }) {
           accessories={[
             { icon: Icon.MemoryChip, text: server.memory, tooltip: "Memory" },
             { icon: Icon.ComputerChip, text: server.cpu, tooltip: "CPU" },
-            { icon: Icon.HardDrive, text: server.storage[0].capacity, tooltip: "Capacity" },
+            { icon: Icon.HardDrive, text: server.storage[0]?.capacity, tooltip: "Capacity" },
             { icon: Icon.Heartbeat, text: server.network.primary.limit, tooltip: "Traffic" },
-            { icon: Icon.Network, tag: server.network.primary.ipv4[0].address },
+            { icon: Icon.Network, tag: server.network.primary.ipv4[0]?.address },
           ]}
           actions={
             <ActionPanel>
