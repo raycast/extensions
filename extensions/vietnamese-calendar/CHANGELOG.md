@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3] - 2026-02-12
+
+- feat: Add Vietnamese day labels (T2-CN) to calendar grid for better readability.
+- feat: Auto-select nearest event to today in Events view for quick access.
+- feat: Enhanced search keywords in calendar (day number and lunar date).
+- fix: Improve selection state management to prevent UI flash when navigating.
+
 ## [1.3.2] - 2026-02-04
 
 - Added "Week Count Cycle" view to support recurring holidays like Mother's Day and Father's Day.

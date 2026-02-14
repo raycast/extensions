@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bed-time-calculator",
   "title": "Bed Time Calculator",
-  "description": "This is a simple extension for Raycast that will help you calculate the best time to sleep or wake up.",
+  "description": "Calculate optimal sleep and wake times with color-coded quality indicators and natural language time input.",
   "icon": "extension_icon.png",
   "author": "khlebobul",
   "categories": [
@@ -32,7 +32,7 @@
     },
     {
       "name": "wake-up-at",
-      "title": "Wake Up At",
+      "title": "Wake up At",
       "description": "I know when I'll wake up and want to know when I should fall asleep",
       "mode": "view",
       "arguments": [
@@ -46,7 +46,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.2"
+    "@raycast/api": "^1.75.2",
+    "chrono-node": "^2.7.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
@@ -62,5 +63,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

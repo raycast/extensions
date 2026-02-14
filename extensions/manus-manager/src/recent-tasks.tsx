@@ -46,7 +46,7 @@ const STATUS_ICONS: Record<TaskStatus, { source: Icon; tintColor: Color }> = {
 };
 
 function buildTaskTitle(task: Task) {
-  return task.metadata.task_title || `Task ${task.id}`;
+  return task.metadata.task_title;
 }
 
 export default function Command() {
@@ -111,7 +111,10 @@ export default function Command() {
       return;
     }
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Deleting task",
+    });
     try {
       const response = await fetch(`${API_BASE_URL}/${taskId}`, {
         method: "DELETE",
@@ -131,7 +134,8 @@ export default function Command() {
     } catch (deleteError) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to delete task";
-      toast.message = deleteError instanceof Error ? deleteError.message : "Unknown error";
+      toast.message =
+        deleteError instanceof Error ? deleteError.message : "Unknown error";
     }
   };
 
@@ -181,19 +185,28 @@ export default function Command() {
             key={task.id}
             icon={statusIcon}
             title={buildTaskTitle(task)}
-            subtitle={task.status === "failed" ? (task.error ?? "Failed") : undefined}
+            subtitle={
+              task.status === "failed" ? (task.error ?? "Failed") : undefined
+            }
             accessories={accessories}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`${TASK_URL_BASE}/${task.id}`} />
-                <Action.CopyToClipboard title="Copy Task URL" content={`${TASK_URL_BASE}/${task.id}`} />
+                <Action.CopyToClipboard
+                  title="Copy Task URL"
+                  content={`${TASK_URL_BASE}/${task.id}`}
+                />
                 <Action
                   title="Delete Task"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => handleDelete(task.id)}
                 />
-                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={revalidate}
+                />
               </ActionPanel>
             }
           />

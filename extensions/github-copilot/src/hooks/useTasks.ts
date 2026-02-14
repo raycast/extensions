@@ -10,6 +10,7 @@ const minutesAgoISO8601Timestamp = (n: number): string => {
 const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   {
     key: "1",
+    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -42,6 +43,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "2",
+    premiumRequests: 4,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -74,6 +76,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "3",
+    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -106,6 +109,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "3.1",
+    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -138,6 +142,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "4",
+    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -170,6 +175,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "5",
+    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -202,6 +208,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "6",
+    premiumRequests: 4,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -234,6 +241,7 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "7",
+    premiumRequests: 0,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",

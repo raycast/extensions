@@ -8,7 +8,7 @@ import {
 import groupBy from "lodash.groupby";
 import orderBy from "lodash.orderby";
 import uniqBy from "lodash.uniqby";
-import { PokemonV2Move } from "../types";
+import { PokemonMove } from "../types";
 import { filterPokemonForms, getContentImg, nationalDexNumber } from "../utils";
 import PokeProfile from "./profile";
 
@@ -16,11 +16,11 @@ const { artwork } = getPreferenceValues();
 
 export default function MoveLearnset(props: {
   name: string;
-  moves: PokemonV2Move[];
+  moves: PokemonMove[];
 }) {
   const learnset = groupBy(
     props.moves,
-    (m) => m.pokemon_v2_movelearnmethod.pokemon_v2_movelearnmethodnames[0].name,
+    (m) => m.movelearnmethod.movelearnmethodnames[0].name,
   );
 
   return (
@@ -29,21 +29,17 @@ export default function MoveLearnset(props: {
         const filteredMoves = moves
           .map((move) => {
             // removes Pokemon forms without official images on pokemon.com
-            move.pokemon_v2_pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemons =
-              filterPokemonForms(
-                move.pokemon_v2_pokemon.pokemon_species_id,
-                move.pokemon_v2_pokemon.pokemon_v2_pokemonspecy
-                  .pokemon_v2_pokemons,
-              );
+            move.pokemon.pokemonspecy.pokemons = filterPokemonForms(
+              move.pokemon.pokemon_species_id,
+              move.pokemon.pokemonspecy.pokemons,
+            );
 
             return move;
           })
           .filter((move) => {
-            const formIdx =
-              move.pokemon_v2_pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemons.findIndex(
-                (p) =>
-                  p.pokemon_v2_pokemonforms[0].pokemon_id === move.pokemon_id,
-              );
+            const formIdx = move.pokemon.pokemonspecy.pokemons.findIndex(
+              (p) => p.pokemonforms[0].pokemon_id === move.pokemon_id,
+            );
 
             return formIdx > -1;
           });
@@ -51,33 +47,27 @@ export default function MoveLearnset(props: {
         const orderedMoves = orderBy(
           // not sure why some pokemon_id is duplicated here
           uniqBy(filteredMoves, "pokemon_id"),
-          (p) => p.pokemon_v2_pokemon.pokemon_species_id,
+          (p) => p.pokemon.pokemon_species_id,
         );
 
         return (
           <Grid.Section title={method} key={method}>
             {orderedMoves.map((move) => {
-              const nationalDex = move.pokemon_v2_pokemon.pokemon_species_id;
-              const forms =
-                move.pokemon_v2_pokemon.pokemon_v2_pokemonspecy
-                  .pokemon_v2_pokemons;
+              const nationalDex = move.pokemon.pokemon_species_id;
+              const forms = move.pokemon.pokemonspecy.pokemons;
 
               const form = forms.find(
-                (f) =>
-                  f.pokemon_v2_pokemonforms[0].pokemon_id === move.pokemon_id,
+                (f) => f.pokemonforms[0].pokemon_id === move.pokemon_id,
               );
               const formIdx = forms.findIndex(
-                (f) =>
-                  f.pokemon_v2_pokemonforms[0].pokemon_id === move.pokemon_id,
+                (f) => f.pokemonforms[0].pokemon_id === move.pokemon_id,
               );
               const pokeId =
                 artwork === "pixel" ? move.pokemon_id : nationalDex;
 
               const title =
-                form?.pokemon_v2_pokemonforms[0].pokemon_v2_pokemonformnames[0]
-                  ?.pokemon_name ||
-                move.pokemon_v2_pokemon.pokemon_v2_pokemonspecy
-                  .pokemon_v2_pokemonspeciesnames[0].name;
+                form?.pokemonforms[0].pokemonformnames[0]?.pokemon_name ||
+                move.pokemon.pokemonspecy.pokemonspeciesnames[0].name;
 
               return (
                 <Grid.Item

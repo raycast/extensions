@@ -1,5 +1,12 @@
 # Audio Device Changelog
 
+## [Fix] - 2026-02-10
+- Improved windows requirement auto install logic
+- Suppressed PowerShell warnings — Set $WarningPreference = 'SilentlyContinue' and -WarningAction SilentlyContinue on Import-Module to prevent warnings from corrupting JSON output.
+- Stripped ANSI escape codes — PS7 outputs color codes in warnings; these are now stripped before JSON parsing.
+- Handled both PS5 and PS7
+
+
 ## Chore - 2026-02-07
 - Fix issues in lint due to newer ESlint package
 

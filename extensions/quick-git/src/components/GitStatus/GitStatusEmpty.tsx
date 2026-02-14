@@ -1,47 +1,46 @@
 import { useMemo } from "react";
 import { List } from "@raycast/api";
-import type { BranchInfo } from "../../utils/git-status/branch.js";
 import { useRepo } from "../../hooks/useRepo.js";
 
 interface Props {
-  branch?: BranchInfo;
+  name?: string;
+  ahead?: number;
+  behind?: number;
+  upstream?: string;
 }
 
-export function GitStatusEmpty({ branch }: Props) {
+export function GitStatusEmpty({ name, ahead, behind, upstream }: Props) {
   const repo = useRepo();
 
   const title = useMemo(() => {
-    if (repo && branch) {
-      return `On branch ${branch.name}`;
+    if (repo && name) {
+      return `On branch ${name}`;
     }
 
     return "Please select a repo";
-  }, [branch, repo]);
+  }, [name, repo]);
 
   const description = useMemo(() => {
-    if (!repo || !branch) {
+    if (!repo) {
       return;
     }
 
-    const { ahead, behind, upstream } = branch;
-    if (upstream) {
-      if (ahead && behind) {
-        return `Ahead of '${upstream}' by ${ahead}, and behind by ${behind} commits`;
-      }
-
-      if (ahead && !behind) {
-        return `Ahead of '${upstream}' by ${ahead} commits.`;
-      }
-
-      if (!ahead && behind) {
-        return `Behind '${upstream}' by ${behind} commits.`;
-      }
-
-      return `Up to date with ${upstream}`;
+    if (ahead && behind) {
+      return `Ahead of '${upstream}' by ${ahead}, and behind by ${behind} commits`;
     }
 
+    if (ahead && !behind) {
+      return `Ahead of '${upstream}' by ${ahead} commits.`;
+    }
+
+    if (!ahead && behind) {
+      return `Behind '${upstream}' by ${behind} commits.`;
+    }
+
+    return `Up to date with ${upstream}`;
+
     return "Nothing to commit, working tree clean";
-  }, [branch, repo]);
+  }, [ahead, behind, repo, upstream]);
 
   return <List.EmptyView title={title} description={description} />;
 }

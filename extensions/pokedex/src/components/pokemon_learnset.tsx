@@ -4,43 +4,37 @@ import groupBy from "lodash.groupby";
 import orderBy from "lodash.orderby";
 import { useMemo, useState } from "react";
 import PokeMoves from "../move";
-import { PokemonV2Move } from "../types";
+import { Move, PokemonMove } from "../types";
 import MoveMetadata from "./metadata/move";
 
-const getMoveName = (move: PokemonV2Move) => {
-  return move.pokemon_v2_movenames[0]?.name || move.name;
+const getMoveName = (move: Move) => {
+  return move.movenames[0]?.name || move.name;
 };
 
 export default function PokemonLearnset(props: {
   name: string;
-  moves: PokemonV2Move[];
+  moves: PokemonMove[];
 }) {
   const moves = props.moves.map((m) => {
-    m.pokemon_v2_move.pokemon_v2_machines =
-      m.pokemon_v2_move.pokemon_v2_machines.filter(
-        (tm) => tm.version_group_id === m.pokemon_v2_versiongroup.id,
-      );
+    m.move.machines = m.move.machines.filter(
+      (tm) => tm.version_group_id === m.versiongroup.id,
+    );
     return m;
   });
 
   let generations = Object.entries(
-    groupBy(moves, (m) => m.pokemon_v2_versiongroup.generation_id),
+    groupBy(moves, (m) => m.versiongroup.generation_id),
   ).map(([generation_id, groups]) => {
-    const versiongroups = groupBy(
-      groups,
-      (g) => g.pokemon_v2_versiongroup.name,
-    );
+    const versiongroups = groupBy(groups, (g) => g.versiongroup.name);
 
     return {
       generation_id,
-      generation:
-        groups[0].pokemon_v2_versiongroup.pokemon_v2_generation
-          .pokemon_v2_generationnames[0].name,
+      generation: groups[0].versiongroup.generation.generationnames[0].name,
       version_groups: Object.entries(versiongroups).map(([name, entries]) => ({
         key: name,
         value: name,
-        title: entries[0].pokemon_v2_versiongroup.pokemon_v2_versions
-          .map((v) => v.pokemon_v2_versionnames[0].name)
+        title: entries[0].versiongroup.versions
+          .map((v) => v.versionnames[0].name)
           .join(" & "),
       })),
     };
@@ -52,23 +46,19 @@ export default function PokemonLearnset(props: {
 
   const pokemonMoves = useMemo(() => {
     const moves = versionGroup
-      ? props.moves.filter(
-          (m) => m.pokemon_v2_versiongroup.name === versionGroup,
-        )
+      ? props.moves.filter((m) => m.versiongroup.name === versionGroup)
       : props.moves;
 
     // split evolution moves to another section
     moves.forEach((move) => {
       if (move.move_learn_method_id === 1 && move.level === 0) {
-        move.pokemon_v2_movelearnmethod.pokemon_v2_movelearnmethodnames[0].name =
-          "Evolution";
+        move.movelearnmethod.movelearnmethodnames[0].name = "Evolution";
       }
     });
 
     return groupBy(
       moves,
-      (m) =>
-        m.pokemon_v2_movelearnmethod.pokemon_v2_movelearnmethodnames[0].name,
+      (m) => m.movelearnmethod.movelearnmethodnames[0].name,
     );
   }, [versionGroup]);
 
@@ -102,13 +92,13 @@ export default function PokemonLearnset(props: {
           case "Machine":
             sortedMoves = orderBy(
               moves,
-              (m) => m.pokemon_v2_move.pokemon_v2_machines[0]?.machine_number,
+              (m) => m.move.machines[0]?.machine_number,
             );
             break;
           case "Egg":
           case "Evolution":
           case "Tutor":
-            sortedMoves = orderBy(moves, (m) => getMoveName(m.pokemon_v2_move));
+            sortedMoves = orderBy(moves, (m) => getMoveName(m.move));
             break;
           case "Level up":
             sortedMoves = orderBy(moves, (m) => m.level);
@@ -127,8 +117,8 @@ export default function PokemonLearnset(props: {
                   text = move.level ? move.level.toString() : undefined;
                   break;
                 case 4:
-                  text = move.pokemon_v2_move.pokemon_v2_machines[0]
-                    ? `TM${move.pokemon_v2_move.pokemon_v2_machines[0]?.machine_number
+                  text = move.move.machines[0]
+                    ? `TM${move.move.machines[0]?.machine_number
                         .toString()
                         .padStart(3, "0")}`
                     : "";
@@ -137,36 +127,33 @@ export default function PokemonLearnset(props: {
                   break;
               }
 
-              const moveName = getMoveName(move.pokemon_v2_move);
+              const moveName = getMoveName(move.move);
 
               return (
                 <List.Item
-                  key={`${move.pokemon_v2_versiongroup.name}-${move.move_learn_method_id}-${move.level}-${move.move_id}`}
+                  key={`${move.versiongroup.name}-${move.move_learn_method_id}-${move.level}-${move.move_id}`}
                   title={moveName}
                   keywords={[moveName]}
-                  icon={`moves/${move.pokemon_v2_move.pokemon_v2_movedamageclass.pokemon_v2_movedamageclassnames[0].name}.svg`}
+                  icon={`moves/${move.move.movedamageclass.name}.svg`}
                   accessories={[{ text }]}
                   detail={
                     <List.Item.Detail
                       markdown={
-                        move.pokemon_v2_move.pokemon_v2_moveeffect
-                          ?.pokemon_v2_moveeffecteffecttexts.length
+                        move.move.moveeffect?.moveeffecteffecttexts.length
                           ? json2md([
                               {
                                 h1: moveName,
                               },
                               {
-                                p: move.pokemon_v2_move.pokemon_v2_moveeffect.pokemon_v2_moveeffecteffecttexts[0].short_effect.replace(
+                                p: move.move.moveeffect.moveeffecteffecttexts[0].short_effect.replace(
                                   "$effect_chance",
-                                  String(
-                                    move.pokemon_v2_move.move_effect_chance,
-                                  ),
+                                  String(move.move.move_effect_chance),
                                 ),
                               },
                             ])
                           : undefined
                       }
-                      metadata={<MoveMetadata move={move.pokemon_v2_move} />}
+                      metadata={<MoveMetadata move={move.move} />}
                     />
                   }
                   actions={
@@ -175,7 +162,7 @@ export default function PokemonLearnset(props: {
                         <Action.Push
                           title="View Details"
                           icon={Icon.Sidebar}
-                          target={<PokeMoves id={move.pokemon_v2_move.id} />}
+                          target={<PokeMoves id={move.move.id} />}
                         />
                       </ActionPanel.Section>
                     </ActionPanel>

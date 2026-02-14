@@ -1,134 +1,134 @@
-import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
+import { List, Icon, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-
-// =============================================================================
-// Types
-// =============================================================================
-
-interface FeedAuthor {
-  name: string;
-  url: string;
-}
-
-interface FeedItem {
-  id: string;
-  url: string;
-  title: string;
-  summary: string;
-  image: string;
-  date_modified: string;
-  author: FeedAuthor;
-}
-
-interface Feed {
-  version: string;
-  title: string;
-  home_page_url: string;
-  description: string;
-  icon: string;
-  items: FeedItem[];
-}
+import { useState, useMemo, useEffect } from "react";
+import { Feed, GitHubPR, StoreItem, FilterValue } from "./types";
+import { parseExtensionUrl, fetchExtensionPackageInfo, convertPRsToStoreItems } from "./utils";
+import { ExtensionListItem } from "./components/ExtensionListItem";
 
 // =============================================================================
 // Constants
 // =============================================================================
 
 const FEED_URL = "https://www.raycast.com/store/feed.json";
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-/**
- * Parses the Raycast Store URL to extract author and extension name.
- * URL format: https://www.raycast.com/{author}/{extension}
- */
-function parseExtensionUrl(url: string): { author: string; extension: string } {
-  const path = url.replace("https://www.raycast.com/", "");
-  const [author, extension] = path.split("/");
-  return { author, extension };
-}
-
-/**
- * Creates a Raycast deeplink to open an extension in the Store.
- * Format: raycast://extensions/{author}/{extension}
- */
-function createStoreDeeplink(url: string): string {
-  const { author, extension } = parseExtensionUrl(url);
-  return `raycast://extensions/${author}/${extension}`;
-}
-
-// =============================================================================
-// Components
-// =============================================================================
-
-function ExtensionActions({ item }: { item: FeedItem }) {
-  const storeDeeplink = createStoreDeeplink(item.url);
-
-  return (
-    <ActionPanel>
-      <ActionPanel.Section>
-        <Action.OpenInBrowser
-          title="Open in Raycast Store"
-          url={storeDeeplink}
-          icon={Icon.RaycastLogoNeg}
-          shortcut={Keyboard.Shortcut.Common.Open}
-        />
-        <Action.OpenInBrowser title="Open in Browser" url={item.url} icon={Icon.Globe} />
-        <Action.CopyToClipboard
-          title="Copy Extension URL"
-          content={item.url}
-          shortcut={Keyboard.Shortcut.Common.Copy}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action.OpenInBrowser title="View Author Profile" url={item.author.url} icon={Icon.Person} />
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
-}
-
-function ExtensionListItem({ item }: { item: FeedItem }) {
-  const modifiedDate = new Date(item.date_modified);
-
-  return (
-    <List.Item
-      icon={{ source: item.image, fallback: Icon.Box }}
-      title={item.title}
-      subtitle={item.summary}
-      accessories={[
-        {
-          icon: Icon.Person,
-          text: item.author.name,
-          tooltip: `Author: ${item.author.name}`,
-        },
-        {
-          date: modifiedDate,
-          tooltip: `Modified: ${modifiedDate.toLocaleString()}`,
-        },
-      ]}
-      actions={<ExtensionActions item={item} />}
-    />
-  );
-}
+const GITHUB_PRS_URL =
+  "https://api.github.com/repos/raycast/extensions/pulls?state=closed&sort=updated&direction=desc&per_page=50";
 
 // =============================================================================
 // Command
 // =============================================================================
 
 export default function Command() {
-  const { data, isLoading } = useFetch<Feed>(FEED_URL, {
+  const { platformFilter } = getPreferenceValues<Preferences>();
+  const [filter, setFilter] = useState<FilterValue>("all");
+
+  const { data: feedData, isLoading: feedLoading } = useFetch<Feed>(FEED_URL, {
     keepPreviousData: true,
   });
 
-  const items = data?.items ?? [];
+  const { data: prsData, isLoading: prsLoading } = useFetch<GitHubPR[]>(GITHUB_PRS_URL, {
+    keepPreviousData: true,
+    headers: {
+      Accept: "application/vnd.github.v3+json",
+    },
+  });
+
+  const isLoading = feedLoading || prsLoading;
+
+  const [updatedItems, setUpdatedItems] = useState<StoreItem[]>([]);
+
+  const [newItems, setNewItems] = useState<StoreItem[]>([]);
+
+  // Build new items and fetch their platforms from package.json
+  useEffect(() => {
+    if (!feedData) return;
+    const items = feedData.items ?? [];
+    Promise.all(
+      items.map(async (item) => {
+        const { extension } = parseExtensionUrl(item.url);
+        const pkgInfo = await fetchExtensionPackageInfo(extension);
+        return {
+          id: item.id,
+          title: item.title,
+          summary: item.summary,
+          image: item.image,
+          date: item.date_modified,
+          authorName: item.author.name,
+          authorUrl: item.author.url,
+          url: item.url,
+          type: "new" as const,
+          extensionSlug: extension,
+          platforms: pkgInfo?.platforms ?? ["macOS"],
+          version: pkgInfo?.version,
+          categories: pkgInfo?.categories,
+        };
+      }),
+    ).then(setNewItems);
+  }, [feedData]);
+
+  // Fetch updated items from PRs (async because we need to fetch package.json for each)
+  useEffect(() => {
+    if (!prsData) return;
+    const newSlugs = new Set(newItems.map((i) => i.extensionSlug).filter(Boolean));
+    convertPRsToStoreItems(prsData, newSlugs as Set<string>).then(setUpdatedItems);
+  }, [prsData, newItems]);
+
+  const allItems = useMemo(() => {
+    return [...newItems, ...updatedItems].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [newItems, updatedItems]);
+
+  const displayItems = useMemo(() => {
+    let items: StoreItem[];
+    switch (filter) {
+      case "new":
+        items = newItems;
+        break;
+      case "updated":
+        items = updatedItems;
+        break;
+      default:
+        items = allItems;
+    }
+
+    // Apply platform preference filter
+    if (platformFilter && platformFilter !== "all") {
+      const targetPlatform = platformFilter === "windows" ? "windows" : "macos";
+      items = items.filter(
+        (item) => item.platforms?.some((p) => p.toLowerCase() === targetPlatform) ?? targetPlatform === "macos",
+      );
+    }
+
+    return items;
+  }, [filter, newItems, updatedItems, allItems, platformFilter]);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search extensions...">
-      {items.length === 0 && !isLoading ? (
-        <List.EmptyView icon={Icon.MagnifyingGlass} title="No Extensions Found" description="Unable to load the feed" />
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarPlaceholder={
+        platformFilter === "macOS"
+          ? "Search macOS extensions..."
+          : platformFilter === "windows"
+            ? "Search Windows extensions..."
+            : "Search extensions..."
+      }
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter" storeValue onChange={(val) => setFilter(val as FilterValue)}>
+          <List.Dropdown.Item title="Show All" value="all" />
+          <List.Dropdown.Item title="New Only" value="new" />
+          <List.Dropdown.Item title="Updated Only" value="updated" />
+        </List.Dropdown>
+      }
+    >
+      {displayItems.length === 0 && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No Extensions Found"
+          description={filter === "all" ? "Unable to load the feed" : `No ${filter} extensions found`}
+        />
       ) : (
-        items.map((item) => <ExtensionListItem key={item.id} item={item} />)
+        displayItems.map((item) => (
+          <ExtensionListItem key={item.id} item={item} filter={filter} platformFilter={platformFilter} />
+        ))
       )}
     </List>
   );

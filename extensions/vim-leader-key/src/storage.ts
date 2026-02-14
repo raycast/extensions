@@ -14,16 +14,41 @@ const STORAGE_KEY = "leader-key-config";
 const LEGACY_STORAGE_KEY = "key-mappings";
 const CURRENT_VERSION = 1;
 
-const DEFAULT_CONFIG: RootConfig = {
-  type: "group",
-  actions: [
-    {
-      id: "default-c",
-      key: "c",
-      type: "application",
+type Platform = "mac" | "windows";
+
+const platform: Platform = process.platform === "win32" ? "windows" : "mac";
+
+const platformApps = {
+  mac: {
+    browser: { label: "Safari", value: "/Applications/Safari.app" },
+    fileManager: {
+      label: "Finder",
+      value: "/System/Library/CoreServices/Finder.app",
+    },
+    terminal: {
+      label: "Terminal",
+      value: "/System/Applications/Utilities/Terminal.app",
+    },
+    calculator: {
       label: "Calculator",
       value: "/System/Applications/Calculator.app",
     },
+    notes: { label: "Notes", value: "/System/Applications/Notes.app" },
+  },
+  windows: {
+    browser: { label: "Edge", value: "msedge.exe" },
+    fileManager: { label: "Explorer", value: "explorer.exe" },
+    terminal: { label: "Command Prompt", value: "cmd.exe" },
+    calculator: { label: "Calculator", value: "calc.exe" },
+    notes: { label: "Notepad", value: "notepad.exe" },
+  },
+} as const;
+
+const apps = platformApps[platform];
+
+const DEFAULT_CONFIG: RootConfig = {
+  type: "group",
+  actions: [
     {
       id: "default-a",
       key: "a",
@@ -31,18 +56,61 @@ const DEFAULT_CONFIG: RootConfig = {
       label: "Applications",
       actions: [
         {
-          id: "default-af",
-          key: "f",
+          id: "default-ab",
+          key: "b",
           type: "application",
-          label: "Finder",
-          value: "/System/Library/CoreServices/Finder.app",
+          label: apps.browser.label,
+          value: apps.browser.value,
         },
         {
           id: "default-at",
           key: "t",
           type: "application",
-          label: "Terminal",
-          value: "/System/Applications/Utilities/Terminal.app",
+          label: apps.terminal.label,
+          value: apps.terminal.value,
+        },
+        {
+          id: "default-af",
+          key: "f",
+          type: "application",
+          label: apps.fileManager.label,
+          value: apps.fileManager.value,
+        },
+        {
+          id: "default-ac",
+          key: "c",
+          type: "application",
+          label: apps.calculator.label,
+          value: apps.calculator.value,
+        },
+        {
+          id: "default-an",
+          key: "n",
+          type: "application",
+          label: apps.notes.label,
+          value: apps.notes.value,
+        },
+      ],
+    },
+    {
+      id: "default-u",
+      key: "u",
+      type: "group",
+      label: "URLs",
+      actions: [
+        {
+          id: "default-ug",
+          key: "g",
+          type: "url",
+          label: "Google",
+          value: "https://google.com",
+        },
+        {
+          id: "default-uh",
+          key: "h",
+          type: "url",
+          label: "GitHub",
+          value: "https://github.com",
         },
       ],
     },
@@ -175,6 +243,26 @@ export function findItemByPath(
   return parent.actions.find((a) => a.id === itemId) || null;
 }
 
+export function resolveBrowser(
+  config: RootConfig,
+  actionPath: string[],
+): string | undefined {
+  const item = findItemByPath(config, actionPath);
+  if (item && !isGroup(item) && item.browser) {
+    return item.browser;
+  }
+
+  for (let i = actionPath.length - 1; i >= 1; i--) {
+    const ancestorPath = actionPath.slice(0, i);
+    const ancestor = findItemByPath(config, ancestorPath);
+    if (ancestor && isGroup(ancestor) && ancestor.browser) {
+      return ancestor.browser;
+    }
+  }
+
+  return undefined;
+}
+
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
@@ -296,6 +384,7 @@ export interface LeaderKeyAction {
   type: "application" | "url" | "folder" | "command";
   value: string;
   label?: string;
+  browser?: string;
 }
 
 export interface LeaderKeyGroup {
@@ -303,6 +392,7 @@ export interface LeaderKeyGroup {
   type: "group";
   label?: string;
   actions: LeaderKeyItem[];
+  browser?: string;
 }
 
 export type LeaderKeyItem = LeaderKeyAction | LeaderKeyGroup;
@@ -329,6 +419,7 @@ export function importLeaderKeyConfig(external: LeaderKeyConfig): RootConfig {
         actions: group.actions.map((child) =>
           convertItem(child, prefix + group.key),
         ),
+        ...(group.browser ? { browser: group.browser } : {}),
       } as Group;
     } else {
       const action = item as LeaderKeyAction;
@@ -338,6 +429,7 @@ export function importLeaderKeyConfig(external: LeaderKeyConfig): RootConfig {
         type: action.type,
         label: action.label,
         value: action.value,
+        ...(action.browser ? { browser: action.browser } : {}),
       } as Action;
     }
   }
@@ -359,6 +451,9 @@ export function exportLeaderKeyConfig(config: RootConfig): LeaderKeyConfig {
       if (item.label) {
         result.label = item.label;
       }
+      if (item.browser) {
+        result.browser = item.browser;
+      }
       return result;
     } else {
       const action = item as Action;
@@ -369,6 +464,9 @@ export function exportLeaderKeyConfig(config: RootConfig): LeaderKeyConfig {
       };
       if (action.label) {
         result.label = action.label;
+      }
+      if (action.browser) {
+        result.browser = action.browser;
       }
       return result;
     }

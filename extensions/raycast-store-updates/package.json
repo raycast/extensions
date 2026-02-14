@@ -13,6 +13,21 @@
     "Other"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "platformFilter",
+      "title": "Platforms to Show",
+      "description": "Filter extensions by platform support",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "data": [
+        { "title": "All Platforms", "value": "all" },
+        { "title": "macOS Only", "value": "macOS" },
+        { "title": "Windows Only", "value": "windows" }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "view-store-updates",
