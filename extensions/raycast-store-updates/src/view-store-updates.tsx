@@ -20,10 +20,6 @@ const FEED_URL = "https://www.raycast.com/store/feed.json";
 const GITHUB_PRS_URL =
   "https://api.github.com/repos/raycast/extensions/pulls?state=closed&sort=updated&direction=desc&per_page=50";
 
-interface Preferences {
-  trackReadStatus: boolean;
-}
-
 // =============================================================================
 // Command
 // =============================================================================
