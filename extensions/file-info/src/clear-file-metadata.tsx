@@ -2,6 +2,7 @@ import { getSelectedFinderItems, showToast, Toast, confirmAlert, Alert, Clipboar
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { existsSync } from "fs";
+import { utimes } from "fs/promises";
 import * as path from "path";
 
 const execFilePromise = promisify(execFile);
@@ -129,12 +130,19 @@ async function clearMacOSMetadata(file: string): Promise<void> {
 }
 
 async function clearWindowsMetadata(file: string): Promise<void> {
-  // Escape single quotes for PowerShell: ' becomes ''
-  const escapedFile = file.replace(/'/g, "''");
-
   try {
-    const command = `Get-Item -Path '${escapedFile}' | Clear-ItemProperty -Name *`;
-    await execFilePromise("powershell", ["-Command", command]);
+    // Clear all metadata properties using PowerShell safely
+    await execFilePromise("powershell", [
+      "-NoProfile",
+      "-Command",
+      "Clear-ItemProperty",
+      "-LiteralPath",
+      file,
+      "-Name",
+      "*",
+      "-ErrorAction",
+      "SilentlyContinue",
+    ]);
   } catch (e) {
     console.error("Failed to clear Windows attributes", e);
   }
@@ -142,8 +150,9 @@ async function clearWindowsMetadata(file: string): Promise<void> {
   // Try to take ownership and set to current user
   try {
     const currentUser = process.env.USERNAME || "Everyone";
-    const takeOwnCmd = `TakeOwn /F '${escapedFile}' /A; icacls '${escapedFile}' /setowner '${currentUser}' /T`;
-    await execFilePromise("powershell", ["-Command", takeOwnCmd]);
+    // Using icacls directly instead of PowerShell to avoid injection
+    await execFilePromise("takeown", ["/F", file, "/A"]);
+    await execFilePromise("icacls", [file, "/setowner", currentUser, "/T"]);
   } catch {
     // Ignore permission errors
   }
@@ -169,49 +178,32 @@ export default async function Command() {
       const hasPackageManager = await isPackageManagerInstalled();
 
       if (!hasPackageManager) {
-        // Prepare installation instructions
-        let installCommand: string;
         let title: string;
         let description: string;
+        let url: string;
 
         if (process.platform === "win32") {
-          installCommand =
-            "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))";
+          url = "https://chocolatey.org/install";
           title = "Install Chocolatey";
           description = "Chocolatey helps us install the tools needed to clear file metadata.";
         } else {
-          // Use standard Homebrew install script
-          installCommand =
-            '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"';
+          url = "https://brew.sh";
           title = "Install Homebrew";
           description = "Homebrew helps us install the tools needed to clear file metadata.";
         }
 
         const action = await confirmAlert({
           title: title,
-          message: `${description}\n\nPlease install the package manager manually using the command below, then try again.`,
+          message: `${description}\n\nPlease install the package manager manually using the link below, then try again.`,
           primaryAction: {
-            title: "Copy Command",
+            title: "Open Website",
             style: Alert.ActionStyle.Default,
           },
           dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
         });
 
         if (action) {
-          await Clipboard.copy(installCommand);
-          await showToast({
-            style: Toast.Style.Success,
-            title: "Command copied",
-            message: "Paste in your terminal to install",
-          });
-
-          if (process.platform !== "win32") {
-            try {
-              await open("terminal://");
-            } catch {
-              // ignore
-            }
-          }
+          await open(url);
         }
         return;
       }
@@ -343,12 +335,8 @@ export default async function Command() {
 
         // Step 3: Update modification date
         try {
-          if (process.platform === "win32") {
-            const escapedFile = file.replace(/'/g, "''");
-            await execFilePromise("powershell", ["-Command", `(Get-Item '${escapedFile}').LastWriteTime = Get-Date`]);
-          } else {
-            await execFilePromise("touch", ["-m", file]);
-          }
+          const now = new Date();
+          await utimes(file, now, now);
         } catch {
           // Ignore timestamp update errors
         }
