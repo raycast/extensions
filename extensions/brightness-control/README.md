@@ -1,6 +1,6 @@
 # Brightness Control
 
-Quickly control the brightness levels of your display. Includes simple step-based controls and precise Lunar-based commands with multi-monitor support.
+Quickly control the brightness levels of your display. Includes simple step-based controls and precise Lunar-based commands.
 
 ## Commands
 
@@ -10,12 +10,7 @@ Increase or decrease the brightness by one system step (~10%) using simulated ke
 
 ### Set Brightness
 
-Set the brightness of a specific display to an exact level (1-100) using [Lunar](https://lunar.fyi/). Features:
-
-- Automatic cursor-based display detection
-- Manual display selection for multi-monitor setups
-- Sync mode toggle for non-main displays (adaptive mode)
-- Visual feedback with old and new brightness values
+Set the brightness of your display to an exact level (1-100) directly from the search bar using [Lunar](https://lunar.fyi/). Automatically detects the display where your cursor is located.
 
 ### Max Brightness
 
@@ -33,7 +28,7 @@ The **Set Brightness** and **Max Brightness** commands require [Lunar](https://l
    brew install --cask lunar
    ```
 
-2. Install the Lunar CLI (the extension will guide you through this on first use, or run manually):
+2. Install the Lunar CLI:
 
    ```bash
    /Applications/Lunar.app/Contents/MacOS/Lunar install-cli

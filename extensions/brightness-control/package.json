@@ -30,9 +30,17 @@
     {
       "name": "set-brightness",
       "title": "Set Brightness",
-      "description": "Set the brightness level of a specific display using Lunar",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "description": "Set the brightness level of your display using Lunar",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "Brightness (1-100)",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "max-brightness",
