@@ -100,17 +100,21 @@ function RemotePathForm({ hostConfig }: { hostConfig: SSHHostConfig }) {
   const [remotePath, setRemotePath] = useState<string>("");
   const [remotePathError, setRemotePathError] = useState<string | undefined>();
 
-  return (
-    <Form
       actions={
         <ActionPanel>
-          <Action.Push
+          <Action.SubmitForm
             title="Continue"
-            target={
-              <LocalPathForm hostConfig={hostConfig} remotePath={remotePath} />
-            }
+            onSubmit={async (values: { remotePath: string }) => {
+              const remoteValidation = validateRemotePath(values.remotePath.trim());
+              if (!remoteValidation.valid) {
+                setRemotePathError(remoteValidation.error);
+                return;
+              }
+              // Use navigation to push after validation
+            }}
           />
         </ActionPanel>
+      }
       }
     >
       <Form.TextField
