@@ -6,7 +6,7 @@ import { PROVIDERS_FILE_PATH } from "./utils/yaml-handler";
 import { Provider, Model } from "./types";
 
 export default function Command() {
-  const { providers, isLoading, error, removeProvider, removeModel, loadProviders } = useProviders();
+  const { providers, isLoading, error, removeProvider, removeModel, revalidate } = useProviders();
 
   return (
     <List
@@ -14,9 +14,9 @@ export default function Command() {
       isShowingDetail={providers.length > 0}
       actions={
         <ActionPanel>
-          {!error && <AddNewProviderAction onSave={loadProviders} />}
+          {!error && <AddNewProviderAction onSave={revalidate} />}
           <OpenConfigurationFileAction />
-          <ReloadConfigAction loadProviders={loadProviders} />
+          <ReloadConfigAction onReload={revalidate} />
         </ActionPanel>
       }
     >
@@ -41,15 +41,15 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title={provider.name}>
-                      <AddNewModelAction provider={provider} onSave={loadProviders} />
-                      <EditProviderAction provider={provider} onSave={loadProviders} />
+                      <AddNewModelAction provider={provider} onSave={revalidate} />
+                      <EditProviderAction provider={provider} onSave={revalidate} />
                       <RemoveProviderAction provider={provider} removeProvider={removeProvider} />
                     </ActionPanel.Section>
 
                     <ActionPanel.Section title="Configuration">
-                      <AddNewProviderAction onSave={loadProviders} />
+                      <AddNewProviderAction onSave={revalidate} />
                       <OpenConfigurationFileAction />
-                      <ReloadConfigAction loadProviders={loadProviders} />
+                      <ReloadConfigAction onReload={revalidate} />
                     </ActionPanel.Section>
                   </ActionPanel>
                 }
@@ -127,22 +127,22 @@ export default function Command() {
                       <Action.Push
                         title="Edit Model"
                         icon={{ source: Icon.Pencil }}
-                        target={<ModelForm provider={provider} model={model} onSave={loadProviders} />}
+                        target={<ModelForm provider={provider} model={model} onSave={revalidate} />}
                         shortcut={{ modifiers: ["cmd"], key: "e" }}
                       />
                       <RemoveModelAction provider={provider} model={model} removeModel={removeModel} />
                     </ActionPanel.Section>
 
                     <ActionPanel.Section title={provider.name}>
-                      <AddNewModelAction provider={provider} onSave={loadProviders} />
-                      <EditProviderAction provider={provider} onSave={loadProviders} />
+                      <AddNewModelAction provider={provider} onSave={revalidate} />
+                      <EditProviderAction provider={provider} onSave={revalidate} />
                       <RemoveProviderAction provider={provider} removeProvider={removeProvider} />
                     </ActionPanel.Section>
 
                     <ActionPanel.Section title="Configuration">
-                      <AddNewProviderAction onSave={loadProviders} />
+                      <AddNewProviderAction onSave={revalidate} />
                       <OpenConfigurationFileAction />
-                      <ReloadConfigAction loadProviders={loadProviders} />
+                      <ReloadConfigAction onReload={revalidate} />
                     </ActionPanel.Section>
                   </ActionPanel>
                 }
@@ -260,13 +260,13 @@ function RemoveProviderAction({
   );
 }
 
-function ReloadConfigAction({ loadProviders }: { loadProviders: () => void }) {
+function ReloadConfigAction({ onReload }: { onReload: () => void }) {
   return (
     <Action
       title="Reload Config File"
       icon={Icon.ArrowClockwise}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
-      onAction={loadProviders}
+      onAction={onReload}
     />
   );
 }
