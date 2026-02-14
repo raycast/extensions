@@ -1,6 +1,6 @@
 # Phosphor Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-02-14
 
 Added copy raw svg code action
 
