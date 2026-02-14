@@ -18,13 +18,12 @@
     {
       "name": "search-tureng",
       "title": "Tureng Translate",
-      "subtitle": "English-Turkish Dictionary",
       "description": "Translate a word or phrase on Tureng.",
       "mode": "view",
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Kelime yazın...",
+          "placeholder": "Search word or phrase...",
           "type": "text",
           "required": true
         }
@@ -33,21 +32,18 @@
     {
       "name": "tureng-search",
       "title": "Tureng Search",
-      "subtitle": "English-Turkish Dictionary",
       "description": "Search Tureng with autocomplete suggestions as you type.",
       "mode": "view"
     },
     {
       "name": "tureng-favorites",
       "title": "Tureng Favorites",
-      "subtitle": "English-Turkish Dictionary",
       "description": "Browse and manage your saved favorite words.",
       "mode": "view"
     },
     {
       "name": "clipboard-lookup",
       "title": "Tureng Selected Text Lookup",
-      "subtitle": "English-Turkish Dictionary",
       "description": "Look up the currently selected text.",
       "mode": "view"
     }
