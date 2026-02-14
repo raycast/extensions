@@ -531,6 +531,14 @@ export default function Command(
     await setHomeZone(zone);
   };
 
+  const resetHomeZone = async (): Promise<void> => {
+    setSelectedTownValue(NO_ZONE_VALUE);
+    setHomeZoneId(null);
+    setResponse(null);
+    setErrorMessage("");
+    await LocalStorage.removeItem(HOME_ZONE_STORAGE_KEY);
+  };
+
   const applyCategory = (category: string): void => {
     setManualCategoryQuery(normalizedQuery);
     setSelectedCategory(category);
@@ -623,25 +631,25 @@ export default function Command(
       throttle
     >
       {!selectionHydrated ? null : needsHomeZone ? (
-        <List.Section title="Setup">
-          <List.Item
-            title="Set your hometown to continue"
-            subtitle="Open the hometown dropdown above and choose your town."
-            icon={Icon.Pin}
-            actions={
-              <ActionPanel>
-                {zones.map((zone) => (
+        <List.Section title="Choose your hometown">
+          {zones.map((zone) => (
+            <List.Item
+              key={zone.id}
+              title={zone.name}
+              subtitle={zoneActivityLabel(zone) || "Active town"}
+              icon={Icon.Pin}
+              actions={
+                <ActionPanel>
                   <Action
-                    key={zone.id}
                     title={`Set hometown: ${zone.name}`}
                     onAction={() => {
                       void setHomeZone(zone);
                     }}
                   />
-                ))}
-              </ActionPanel>
-            }
-          />
+                </ActionPanel>
+              }
+            />
+          ))}
         </List.Section>
       ) : (
         <>
@@ -680,6 +688,13 @@ export default function Command(
                       onAction={() => applyTimeWindow(option.id)}
                     />
                   ))}
+                  <Action
+                    title="Reset hometown"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                    onAction={() => {
+                      void resetHomeZone();
+                    }}
+                  />
                 </ActionPanel>
               }
             />
