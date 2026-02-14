@@ -98,11 +98,12 @@ function RemotePathForm({ hostConfig }: { hostConfig: SSHHostConfig }) {
   const [remotePathError, setRemotePathError] = useState<string | undefined>();
   const { push } = useNavigation();
 
-  async function handleSubmit(values: { remotePath: string }) {
-    const remotePathValue = values.remotePath.trim() || "~";
+  async function validateAndNavigate(
+    remotePathValue: string,
+  ): Promise<boolean> {
+    const pathToUse = remotePathValue.trim() || "~";
 
-    // Validate remote path
-    const remoteValidation = validateRemotePath(remotePathValue);
+    const remoteValidation = validateRemotePath(pathToUse);
     if (!remoteValidation.valid) {
       console.error("Remote path validation failed:", remoteValidation.error);
       setRemotePathError(remoteValidation.error);
@@ -111,10 +112,9 @@ function RemotePathForm({ hostConfig }: { hostConfig: SSHHostConfig }) {
         title: "Invalid Remote Path",
         message: remoteValidation.error || "The remote path format is invalid",
       });
-      return;
+      return false;
     }
 
-    // Validate host config
     const hostValidation = validateHostConfig(hostConfig);
     if (!hostValidation.valid) {
       console.error("Host config validation failed:", hostValidation.error);
@@ -125,16 +125,17 @@ function RemotePathForm({ hostConfig }: { hostConfig: SSHHostConfig }) {
           hostValidation.error ||
           "The host configuration is incomplete or invalid",
       });
-      return;
+      return false;
     }
 
-    // Navigate to file list after successful validation
     push(
-      <RemoteFileListLoader
-        hostConfig={hostConfig}
-        remotePath={remotePathValue}
-      />,
+      <RemoteFileListLoader hostConfig={hostConfig} remotePath={pathToUse} />,
     );
+    return true;
+  }
+
+  async function handleSubmit(values: { remotePath: string }) {
+    await validateAndNavigate(values.remotePath);
   }
 
   return (
@@ -144,24 +145,7 @@ function RemotePathForm({ hostConfig }: { hostConfig: SSHHostConfig }) {
           <Action.SubmitForm title="Browse" onSubmit={handleSubmit} />
           <Action
             title="Browse Directory"
-            onAction={async () => {
-              const remoteValidation = validateRemotePath(remotePath);
-              if (!remoteValidation.valid) {
-                setRemotePathError(remoteValidation.error);
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Invalid Remote Path",
-                  message: remoteValidation.error || "The remote path format is invalid",
-                });
-                return;
-              }
-              push(
-                <RemoteFileListLoader
-                  hostConfig={hostConfig}
-                  remotePath={remotePath}
-                />
-              );
-            }}
+            onAction={() => validateAndNavigate(remotePath)}
           />
         </ActionPanel>
       }
