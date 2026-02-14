@@ -1,0 +1,180 @@
+ curl -X POST 'http://ws.tureng.com/TurengSearchServiceV4.svc/Search' \
+    -H 'User-Agent: CFNetwork/548.0.3 Darwin/11.2.0' \
+    -H 'Content-Type: application/json' \
+    -d '{"Term":"hello","Code":"cd787ce613a7c11400703d6202f5cc3a"}' | python3 -m json.tool
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  2622  100  2564  100    58  15141    342 --:--:-- --:--:-- --:--:-- 15514
+{
+    "ExceptionMessage": null,
+    "IsSuccessful": true,
+    "MobileResult": {
+        "IsFound": 1,
+        "IsTRToEN": 1,
+        "Results": [
+            {
+                "CategoryEN": "Common Usage (en->tr)",
+                "CategoryTR": "Yayg\u0131n Kullan\u0131m (en->tr)",
+                "Term": "merhaba",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "merhaba deme",
+                "TypeEN": "n.",
+                "TypeTR": "i."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "merhaba demek",
+                "TypeEN": "v.",
+                "TypeTR": "f."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "merhaba diye ba\u011f\u0131rmak",
+                "TypeEN": "v.",
+                "TypeTR": "f."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "(birine) merhaba demek",
+                "TypeEN": "v.",
+                "TypeTR": "f."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "ba\u011f\u0131rmak",
+                "TypeEN": "v.",
+                "TypeTR": "f."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "hayk\u0131rmak",
+                "TypeEN": "v.",
+                "TypeTR": "f."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "selam",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "merhaba",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "alo",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "\u015fa\u015f\u0131rma belirten bir \u00fcnlem",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "g\u00fcnayd\u0131n!",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "hey",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "g\u00fcnayd\u0131n",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "General (en->tr)",
+                "CategoryTR": "Genel (en->tr)",
+                "Term": "hayda",
+                "TypeEN": "interj.",
+                "TypeTR": "\u00fcnl."
+            },
+            {
+                "CategoryEN": "Colloquial (en->tr)",
+                "CategoryTR": "Konu\u015fma Dili (en->tr)",
+                "Term": "ne safs\u0131n",
+                "TypeEN": "expr.",
+                "TypeTR": "expr."
+            },
+            {
+                "CategoryEN": "Colloquial (en->tr)",
+                "CategoryTR": "Konu\u015fma Dili (en->tr)",
+                "Term": "yeni mi anlad\u0131n",
+                "TypeEN": "expr.",
+                "TypeTR": "expr."
+            },
+            {
+                "CategoryEN": "Speaking (en->tr)",
+                "CategoryTR": "Konu\u015fma (en->tr)",
+                "Term": "merhabalar",
+                "TypeEN": "n.",
+                "TypeTR": "i."
+            }
+        ],
+        "Suggestions": [],
+        "Term": "hello",
+        "VoiceURLs": [
+            "http://voices.tureng.co/TR/AmE/d5/d5c81016-4ad2-40b3-8768-5886451afe0a.mp3",
+            "http://voices.tureng.co/TR/BrE/d5/d5c81016-4ad2-40b3-8768-5886451afe0a.mp3",
+            "http://voices.tureng.co/TR/AuE/d5/d5c81016-4ad2-40b3-8768-5886451afe0a.mp3"
+        ]
+    }
+}
+❯ curl -X POST 'http://ws.tureng.com/TurengSearchServiceV4.svc/Search' \
+    -H 'User-Agent: CFNetwork/548.0.3 Darwin/11.2.0' \
+    -H 'Content-Type: application/json' \
+    -d '{"Term":"hellko","Code":"cd787ce613a7c11400703d6202f5cc3a"}' | python3 -m json.tool
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   302  100   243  100    59    335     81 --:--:-- --:--:-- --:--:--   416
+{
+    "ExceptionMessage": null,
+    "IsSuccessful": true,
+    "MobileResult": {
+        "IsFound": 0,
+        "IsTRToEN": 0,
+        "Results": null,
+        "Suggestions": [
+            "hell of",
+            "hellion",
+            "hello!",
+            "hello?",
+            "hellim",
+            "hellas",
+            "hell no!",
+            "hellhole",
+            "hellene",
+            "helluva"
+        ],
+        "Term": null,
+        "VoiceURLs": []
+    }
+}
