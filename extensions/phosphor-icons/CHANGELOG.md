@@ -1,5 +1,9 @@
 # Phosphor Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+Added copy raw svg code action
+
 ## [Windows Support] - 2026-01-09
 
 Added Windows Support (ref: [Issue #24247](https://github.com/raycast/extensions/issues/24247))
