@@ -1,13 +1,40 @@
-import { List, Color } from "@raycast/api";
+import { List, Color, Icon } from "@raycast/api";
 import { StoreItem } from "../types";
 import { createStoreDeeplink } from "../utils";
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Applications: "#8E44AD",
+  Communication: "#E67E22",
+  Data: "#16A085",
+  Documentation: "#7F8C8D",
+  "Design Tools": "#E91E63",
+  "Developer Tools": "#2980B9",
+  Finance: "#27AE60",
+  Fun: "#F39C12",
+  Media: "#E74C3C",
+  News: "#3498DB",
+  Productivity: "#9B59B6",
+  Security: "#C0392B",
+  System: "#34495E",
+  Web: "#1ABC9C",
+  Other: "#95A5A6",
+};
 
 export function ExtensionItemDetail({ item }: { item: StoreItem }) {
   const storeDeeplink = createStoreDeeplink(item.url);
   const hasMac = item.platforms?.some((p) => p.toLowerCase() === "macos") ?? true;
   const hasWindows = item.platforms?.some((p) => p.toLowerCase() === "windows") ?? false;
 
-  // No markdown area — keep sidebar compact with metadata only
+  const validCategories = (item.categories ?? []).filter(
+    (c) => typeof c === "string" && c.trim().length > 0 && c in CATEGORY_COLORS,
+  );
+
+  const dateLabel = item.type === "new" ? "Published" : "Updated";
+  const formattedDate = new Date(item.date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
   return (
     <List.Item.Detail
@@ -17,32 +44,44 @@ export function ExtensionItemDetail({ item }: { item: StoreItem }) {
 
           <List.Item.Detail.Metadata.TagList title="Type">
             <List.Item.Detail.Metadata.TagList.Item
-              text={item.type === "new" ? "New" : "Updated"}
+              text={item.type === "new" ? "New" : "Update"}
+              icon={item.type === "new" ? Icon.StarCircle : Icon.ArrowUpCircle}
               color={item.type === "new" ? Color.Green : Color.Blue}
             />
           </List.Item.Detail.Metadata.TagList>
 
-          {item.version && <List.Item.Detail.Metadata.Label title="Version" text={item.version} />}
-
           <List.Item.Detail.Metadata.TagList title="Platforms">
-            {hasMac && <List.Item.Detail.Metadata.TagList.Item text="macOS" color={Color.PrimaryText} />}
-            {hasWindows && <List.Item.Detail.Metadata.TagList.Item text="Windows" color={Color.PrimaryText} />}
+            {hasMac && (
+              <List.Item.Detail.Metadata.TagList.Item icon={{ source: "platform-macos.svg", tintColor: "#0A64F0" }} />
+            )}
+            {hasWindows && (
+              <List.Item.Detail.Metadata.TagList.Item icon={{ source: "platform-windows.svg", tintColor: "#0078D7" }} />
+            )}
           </List.Item.Detail.Metadata.TagList>
 
-          {item.categories && item.categories.length > 0 && (
+          {validCategories.length > 0 && (
             <List.Item.Detail.Metadata.TagList title="Categories">
-              {item.categories.map((cat) => (
-                <List.Item.Detail.Metadata.TagList.Item key={cat} text={cat} color={Color.SecondaryText} />
+              {validCategories.map((cat) => (
+                <List.Item.Detail.Metadata.TagList.Item
+                  key={cat}
+                  text={cat}
+                  color={CATEGORY_COLORS[cat] ?? Color.SecondaryText}
+                />
               ))}
             </List.Item.Detail.Metadata.TagList>
           )}
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Link title="Author" text={item.authorName} target={item.authorUrl} />
-          <List.Item.Detail.Metadata.Link title="Store" text="Open in Store" target={storeDeeplink} />
+          <List.Item.Detail.Metadata.Label title={dateLabel} text={formattedDate} />
 
+          {item.version && <List.Item.Detail.Metadata.Label title="Version" text={item.version} />}
           {item.prUrl && <List.Item.Detail.Metadata.Link title="Pull Request" text={`View PR`} target={item.prUrl} />}
+
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Link title="Author" text={item.authorName} target={item.authorUrl} />
+          <List.Item.Detail.Metadata.Link title="Store" text="Open in Raycast Store" target={storeDeeplink} />
         </List.Item.Detail.Metadata>
       }
     />

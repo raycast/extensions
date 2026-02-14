@@ -15,17 +15,13 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "platformFilter",
-      "title": "Platforms to Show",
-      "description": "Filter extensions by platform support",
-      "type": "dropdown",
+      "name": "trackReadStatus",
+      "title": "Track Read/Unread Status",
+      "label": "Enable",
+      "description": "When enabled, items can be marked as read and hidden from the list",
+      "type": "checkbox",
       "required": false,
-      "default": "all",
-      "data": [
-        { "title": "All Platforms", "value": "all" },
-        { "title": "macOS Only", "value": "macOS" },
-        { "title": "Windows Only", "value": "windows" }
-      ]
+      "default": false
     }
   ],
   "commands": [

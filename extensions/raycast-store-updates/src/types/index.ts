@@ -56,6 +56,8 @@ interface StoreItem {
   version?: string;
   /** Extension categories from package.json */
   categories?: string[];
+  /** Extension icon filename from package.json */
+  extensionIcon?: string;
 }
 
 type FilterValue = "all" | "new" | "updated";

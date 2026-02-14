@@ -1,4 +1,7 @@
 import { GitHubPR, StoreItem } from "../types";
+import { environment } from "@raycast/api";
+import { readdirSync, readFileSync, existsSync } from "fs";
+import { join, dirname } from "path";
 
 const RAW_CONTENT_BASE = "https://raw.githubusercontent.com/raycast/extensions/main/extensions";
 
@@ -83,7 +86,7 @@ export function extractLatestChanges(changelog: string): string {
 
 /**
  * Fetches the package.json for an extension to get the correct owner/title.
- * Returns { owner, title } or null if not found.
+ * Returns extension metadata or null if not found.
  */
 export async function fetchExtensionPackageInfo(slug: string): Promise<{
   owner: string;
@@ -93,6 +96,7 @@ export async function fetchExtensionPackageInfo(slug: string): Promise<{
   platforms: string[];
   version: string;
   categories: string[];
+  icon: string;
 } | null> {
   try {
     const response = await fetch(`${RAW_CONTENT_BASE}/${slug}/package.json`);
@@ -106,6 +110,7 @@ export async function fetchExtensionPackageInfo(slug: string): Promise<{
       platforms?: string[];
       version?: string;
       categories?: string[];
+      icon?: string;
     };
     const owner = pkg.owner ?? pkg.author ?? slug;
     const title = pkg.title ?? pkg.name ?? slug;
@@ -113,11 +118,20 @@ export async function fetchExtensionPackageInfo(slug: string): Promise<{
     const description = pkg.description ?? "";
     const platforms = pkg.platforms ?? ["macOS"];
     const version = pkg.version ?? "";
-    const categories = pkg.categories ?? [];
-    return { owner, title, name, description, platforms, version, categories };
+    const categories = (pkg.categories ?? []).filter((c) => typeof c === "string" && c.trim().length > 0);
+    const icon = pkg.icon ?? "";
+    return { owner, title, name, description, platforms, version, categories, icon };
   } catch {
     return null;
   }
+}
+
+/**
+ * Builds the URL for an extension's icon from the GitHub repo.
+ */
+export function getExtensionIconUrl(slug: string, iconFilename: string): string {
+  if (!iconFilename) return "";
+  return `${RAW_CONTENT_BASE}/${slug}/${iconFilename.startsWith("assets/") ? iconFilename : `assets/${iconFilename}`}`;
 }
 
 /**
@@ -155,12 +169,13 @@ export async function convertPRsToStoreItems(prs: GitHubPR[], existingNewIds: Se
           .join(" ");
 
       const description = pkgInfo?.description ?? pr.title;
+      const iconUrl = pkgInfo?.icon ? getExtensionIconUrl(slug, pkgInfo.icon) : "";
 
       return {
         id: `pr-${pr.number}`,
         title,
         summary: description,
-        image: pr.user.avatar_url,
+        image: iconUrl || pr.user.avatar_url,
         date: pr.merged_at!,
         authorName: pr.user.login,
         authorUrl: pr.user.html_url,
@@ -171,9 +186,54 @@ export async function convertPRsToStoreItems(prs: GitHubPR[], existingNewIds: Se
         platforms: pkgInfo?.platforms ?? ["macOS"],
         version: pkgInfo?.version,
         categories: pkgInfo?.categories,
+        extensionIcon: pkgInfo?.icon,
       };
     }),
   );
 
   return results;
+}
+
+/**
+ * Gets the set of installed extension slugs by reading from the Raycast
+ * application support directory.
+ *
+ * Extensions are stored in:
+ *   ~/Library/Application Support/com.raycast.macos/extensions/
+ * Each extension directory contains a package.json with `name` field.
+ *
+ * We use the Raycast environment.assetsPath to locate the support directory.
+ */
+export function getInstalledExtensionSlugs(): Set<string> {
+  const slugs = new Set<string>();
+
+  try {
+    // environment.assetsPath is like:
+    // ~/Library/Application Support/com.raycast.macos/extensions/<ext-id>/assets
+    // We go up to the extensions directory
+    const assetsPath = environment.assetsPath;
+    const extensionsDir = dirname(dirname(assetsPath));
+
+    if (!existsSync(extensionsDir)) return slugs;
+
+    const entries = readdirSync(extensionsDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const pkgPath = join(extensionsDir, entry.name, "package.json");
+      try {
+        if (!existsSync(pkgPath)) continue;
+        const raw = readFileSync(pkgPath, "utf-8");
+        const pkg = JSON.parse(raw) as { name?: string };
+        if (pkg.name) {
+          slugs.add(pkg.name);
+        }
+      } catch {
+        // Skip unreadable extensions
+      }
+    }
+  } catch {
+    // If we can't read the directory, return empty set
+  }
+
+  return slugs;
 }
