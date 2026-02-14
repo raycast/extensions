@@ -12,12 +12,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run lint:fix` - Fix ESLint issues
 - `npm run typecheck` - Run TypeScript type checking
 
-### Testing
-
-- `npm test` - Run tests with Vitest
-- `npm run test:ui` - Run tests with Vitest UI
-- `npm run test:coverage` - Run tests with coverage report
-
 ### Single Test Execution
 
 - `npx vitest run <file-pattern>` - Run specific test files
