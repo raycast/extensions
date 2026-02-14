@@ -30,10 +30,10 @@ export function useRelations(properties: DatabaseProperty[]) {
       await Promise.all(
         properties.map(async (property) => {
           if (!isType(property, "relation")) return null;
-          const relationId = property.config.database_id;
-          if (!relationId) return null;
-          const pages = await queryDatabase(relationId, undefined);
-          relationPages[relationId] = pages;
+          const relationDataSourceId = property.config.data_source_id || property.config.database_id;
+          if (!relationDataSourceId) return null;
+          const pages = await queryDatabase(relationDataSourceId, undefined);
+          relationPages[relationDataSourceId] = pages;
           return pages;
         }),
       );

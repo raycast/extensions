@@ -57,8 +57,8 @@ export function PagePropertyField({
       if (databaseProperty.type == "multi_select") options = databaseProperty.config.options;
       else if (databaseProperty.type == "people") options = users;
       else if (relationPages && databaseProperty.type == "relation") {
-        const relationId = databaseProperty.config.database_id;
-        if (relationId) options = relationPages[relationId];
+        const relationDataSourceId = databaseProperty.config.data_source_id || databaseProperty.config.database_id;
+        if (relationDataSourceId) options = relationPages[relationDataSourceId];
       }
       return (
         <Form.TagPicker {...itemProps} {...sharedProps} key={itemProps.id}>
