@@ -11,7 +11,7 @@ struct PickedColor: Encodable {
 
 @raycast func pickColor() async -> PickedColor? {
     let colorSampler = NSColorSampler()
-    guard let color = await colorSampler.sample()?.usingColorSpace(.displayP3) else {
+    guard let color = await colorSampler.sample()?.usingColorSpace(.sRGB) else {
         return nil
     }
     return PickedColor(
@@ -19,6 +19,6 @@ struct PickedColor: Encodable {
         green: Float(color.greenComponent),
         blue: Float(color.blueComponent),
         alpha: Float(color.alphaComponent),
-        colorSpace: "p3"
+        colorSpace: "srgb"
     )
 }

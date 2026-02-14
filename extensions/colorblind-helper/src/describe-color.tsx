@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Detail,
-  Icon,
-  List,
-  closeMainWindow,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Detail, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { pickColor } from "swift:../swift/color-picker";
 import { describePickedColor, describeRgb, hexToRgb } from "./lib/color-describer";
@@ -73,17 +63,11 @@ function ColorDetailView({ desc }: { desc: ColorDescription }) {
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Hex" text={desc.hex} />
           <Detail.Metadata.Label title="RGB" text={`${desc.rgb.r}, ${desc.rgb.g}, ${desc.rgb.b}`} />
-          <Detail.Metadata.Label
-            title="HSL"
-            text={`${desc.hsl.h}\u00B0, ${desc.hsl.s}%, ${desc.hsl.l}%`}
-          />
+          <Detail.Metadata.Label title="HSL" text={`${desc.hsl.h}\u00B0, ${desc.hsl.s}%, ${desc.hsl.l}%`} />
           <Detail.Metadata.Separator />
           {desc.simulations.map((sim) => (
             <Detail.Metadata.TagList key={sim.type} title={sim.label}>
-              <Detail.Metadata.TagList.Item
-                text={`${sim.basicName} (${sim.hex})`}
-                color={sim.hex as Color}
-              />
+              <Detail.Metadata.TagList.Item text={`${sim.basicName} (${sim.hex})`} color={sim.hex as Color} />
             </Detail.Metadata.TagList>
           ))}
           {desc.confusionWarnings.length > 0 && <Detail.Metadata.Separator />}
@@ -94,11 +78,7 @@ function ColorDetailView({ desc }: { desc: ColorDescription }) {
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Hex"
-            content={desc.hex}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy Hex" content={desc.hex} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           <Action.CopyToClipboard
             title="Copy Description"
             content={desc.detailedDescription}
@@ -128,7 +108,6 @@ export default function Command() {
   }
 
   async function handlePickColor() {
-    await closeMainWindow();
     const color = (await pickColor()) as PickedColor | undefined;
     if (!color) return;
     const desc = describePickedColor(color);
@@ -193,11 +172,7 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View Details"
-                  icon={Icon.Eye}
-                  target={<ColorDetailView desc={preview} />}
-                />
+                <Action.Push title="View Details" icon={Icon.Eye} target={<ColorDetailView desc={preview} />} />
                 <Action.CopyToClipboard
                   title="Copy Hex"
                   content={preview.hex}
@@ -223,11 +198,7 @@ export default function Command() {
               icon={{ source: Icon.CircleFilled, tintColor: entry.hex as Color }}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="View Details"
-                    icon={Icon.Eye}
-                    onAction={() => handleViewHistoryEntry(entry)}
-                  />
+                  <Action title="View Details" icon={Icon.Eye} onAction={() => handleViewHistoryEntry(entry)} />
                   <Action.CopyToClipboard
                     title="Copy Hex"
                     content={entry.hex}

@@ -8,17 +8,11 @@ import type { ColorblindType, RGB } from "./types";
  */
 const SIMULATION_MATRICES: Record<ColorblindType, number[]> = {
   // Red-blind: L-cone deficiency
-  protanopia: [
-    0.152286, 1.052583, -0.204868, 0.114503, 0.786281, 0.099216, -0.003882, -0.048116, 1.051998,
-  ],
+  protanopia: [0.152286, 1.052583, -0.204868, 0.114503, 0.786281, 0.099216, -0.003882, -0.048116, 1.051998],
   // Green-blind: M-cone deficiency
-  deuteranopia: [
-    0.367322, 0.860646, -0.227968, 0.280085, 0.672501, 0.047413, -0.01182, 0.04294, 0.968881,
-  ],
+  deuteranopia: [0.367322, 0.860646, -0.227968, 0.280085, 0.672501, 0.047413, -0.01182, 0.04294, 0.968881],
   // Blue-blind: S-cone deficiency
-  tritanopia: [
-    1.255528, -0.076749, -0.178779, -0.078411, 0.930809, 0.147602, 0.004733, 0.691367, 0.3039,
-  ],
+  tritanopia: [1.255528, -0.076749, -0.178779, -0.078411, 0.930809, 0.147602, 0.004733, 0.691367, 0.3039],
 };
 
 /** Convert sRGB (0-255) to linear RGB (0-1) */
@@ -50,8 +44,8 @@ export function simulateColorblind(rgb: RGB, type: ColorblindType): RGB {
 }
 
 /**
- * Calculate the perceptual color difference (CIE76 delta E in Lab space, simplified).
- * Returns a value where 0 = identical, >30 = very different colors.
+ * Calculate the perceptual color difference using the redmean approximation in RGB space.
+ * Returns a value where 0 = identical, >50 = very different colors.
  */
 export function colorDistance(a: RGB, b: RGB): number {
   // Use a simple weighted Euclidean distance in RGB space
