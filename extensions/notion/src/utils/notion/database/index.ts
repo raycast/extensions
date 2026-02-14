@@ -1,104 +1,243 @@
-import type {
-  BlockObjectRequest,
-  PageObjectResponse,
-  PartialPageObjectResponse,
-  DataSourceObjectResponse,
-  PartialDataSourceObjectResponse,
-  DatabaseObjectResponse,
-  PartialDatabaseObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints";
-import { Color, Icon } from "@raycast/api";
+import { Client } from "@notionhq/client";
+import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
+import { type Form, showToast, Toast } from "@raycast/api";
+import { markdownToBlocks } from "@tryfabric/martian";
 
-import { DatabaseProperty } from "./database/property";
-import { PageProperty } from "./page";
+import { isMarkdownPageContent, isReadableProperty } from "..";
+import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
+import { getNotionClient } from "../oauth";
+import { formValueToPropertyValue } from "../page/property";
+import { standardize } from "../standardize";
 
-export * from "./database";
-export * from "./page";
-export * from "./user";
+import { DatabaseProperty } from "./property";
 
-export type NotionObject =
-  | PageObjectResponse
-  | PartialPageObjectResponse
-  | DataSourceObjectResponse
-  | PartialDataSourceObjectResponse
-  | DatabaseObjectResponse
-  | PartialDatabaseObjectResponse;
+export type { PropertyConfig } from "./property";
+export type { DatabaseProperty };
 
-type Markdown = string;
-export type PageContent = Markdown | BlockObjectRequest[];
-export function isMarkdownPageContent(content: PageContent): content is Markdown {
-  return typeof content === "string";
-}
-
-// prettier-ignore
-const readablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const
-export type ReadablePropertyType = (typeof readablePropertyTypes)[number];
-export function isReadableProperty<T extends { type: PageProperty["type"] }>(
-  property: T,
-): property is Extract<T, { type: ReadablePropertyType }> {
-  return (readablePropertyTypes as readonly string[]).includes(property.type);
-}
-export function isType<P extends DatabaseProperty | PageProperty, T extends PageProperty["type"]>(
-  property: DatabaseProperty | PageProperty,
-  ...types: T[]
-): property is Extract<P, { type: T }> {
-  return types.includes(property.type as T);
-}
-
-export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
-  // ordered by appearance in option configuration
-  // colors obtained by inspecting the notion app
-  // default for light mode is a RGBA, but the background is #FFFFFF, so color was manually converted to RGB
-  const colorMapper: Record<string, Color.ColorLike> = {
-    default: { light: "#F1F0F0", dark: "#373737" }, // AKA "light gray in an option"
-    gray: { light: "#E3E2E0", dark: "#5A5A5A" },
-    brown: { light: "#EEE0DA", dark: "#603B2C" },
-    orange: { light: "#FADEC9", dark: "#854C1D" },
-    yellow: { light: "#FDECC8", dark: "#89632A" },
-    green: { light: "#DBEDDB", dark: "#2B593F" },
-    blue: { light: "#D3E5EF", dark: "#28456C" },
-    purple: { light: "#E8DEEE", dark: "#492F64" },
-    pink: { light: "#F5E0E9", dark: "#69314C" },
-    red: { light: "#FFE2DD", dark: "#6E3630" },
-  };
-
-  return notionColor ? colorMapper[notionColor] : colorMapper["default"];
-}
-
-export function getPropertyIcon(property: DatabaseProperty | PageProperty) {
-  switch (property.type) {
-    case "checkbox":
-      return Icon.Circle;
-    case "date":
-      return Icon.Calendar;
-    case "email":
-      return Icon.Envelope;
-    case "files":
-      return Icon.Paperclip;
-    case "formula":
-      return "./icon/formula.png";
-    case "select":
-    case "multi_select":
-      return Icon.BulletPoints;
-    case "number":
-      return Icon.Hashtag;
-    case "people":
-      return Icon.Person;
-    case "phone_number":
-      return Icon.Phone;
-    case "relation":
-      return Icon.ArrowNe;
-    case "rich_text":
-      return Icon.Paragraph;
-    case "rollup":
-      return Icon.MagnifyingGlass;
-    case "title":
-      return Icon.Text;
-    case "url":
-      return Icon.Link;
-    case "status":
-      return "./icon/kanban_status_backlog.png";
-    default:
-      return Icon.QuestionMark;
+async function resolveDataSourceId(notion: Client, databaseOrDataSourceId: string): Promise<string> {
+  try {
+    await notion.dataSources.retrieve({
+      data_source_id: databaseOrDataSourceId,
+    });
+    return databaseOrDataSourceId;
+  } catch {
+    // Fall through and try resolving from database metadata.
   }
+
+  try {
+    const database = await notion.databases.retrieve({
+      database_id: databaseOrDataSourceId,
+    });
+
+    if ("data_sources" in database && database.data_sources[0]?.id) {
+      return database.data_sources[0].id;
+    }
+  } catch {
+    // Fall back to the provided id if it cannot be resolved.
+  }
+
+  return databaseOrDataSourceId;
+}
+
+export async function fetchDatabase(pageId: string, silent: boolean = true) {
+  try {
+    const notion = getNotionClient();
+    const dataSourceId = await resolveDataSourceId(notion, pageId);
+    const page = await notion.dataSources.retrieve({
+      data_source_id: dataSourceId,
+    });
+
+    return pageMapper(page);
+  } catch (err) {
+    if (!silent) return handleError(err, "Failed to fetch database", undefined);
+  }
+}
+
+export async function fetchDatabases() {
+  try {
+    const notion = getNotionClient();
+    const databases = await notion.search({
+      sort: {
+        direction: "descending",
+        timestamp: "last_edited_time",
+      },
+      filter: { property: "object", value: "data_source" },
+    });
+    return databases.results
+      .map((x) => (x.object === "data_source" && "last_edited_time" in x ? x : undefined))
+      .filter(isNotNullOrUndefined)
+      .map(
+        (x) =>
+          ({
+            id: x.id,
+            last_edited_time: new Date(x.last_edited_time).getTime(),
+            title: x.title[0]?.plain_text,
+            icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
+            icon_file: x.icon?.type === "file" ? x.icon.file.url : null,
+            icon_external: x.icon?.type === "external" ? x.icon.external.url : null,
+          }) as Database,
+      );
+  } catch (err) {
+    return handleError(err, "Failed to fetch databases", []);
+  }
+}
+
+export async function fetchDatabaseProperties(databaseId: string) {
+  try {
+    const notion = getNotionClient();
+    const dataSourceId = await resolveDataSourceId(notion, databaseId);
+    const dataSource = await notion.dataSources.retrieve({ data_source_id: dataSourceId });
+
+    if (!("properties" in dataSource)) return [];
+
+    const propertyNames = Object.keys(dataSource.properties).reverse();
+
+    const databaseProperties: DatabaseProperty[] = [];
+
+    propertyNames.forEach((name) => {
+      const property = dataSource.properties[name];
+      if (isReadableProperty(property)) {
+        if (property.type == "select")
+          property.select.options.unshift({
+            id: "_select_null_",
+            name: "No Selection",
+            color: "default",
+            description: "No selection",
+          });
+
+        databaseProperties.push(standardize(property, "config"));
+      }
+    });
+
+    return databaseProperties;
+  } catch (err) {
+    return handleError(err, "Failed to fetch database properties", []);
+  }
+}
+
+export async function queryDatabase(
+  databaseId: string,
+  query: string | undefined,
+  sort: "last_edited_time" | "created_time" = "last_edited_time",
+) {
+  try {
+    const notion = getNotionClient();
+    const dataSourceId = await resolveDataSourceId(notion, databaseId);
+    const database = await notion.dataSources.query({
+      data_source_id: dataSourceId,
+      page_size: 20,
+      sorts: [
+        {
+          direction: "descending",
+          timestamp: sort,
+        },
+      ],
+      filter: query
+        ? {
+            and: [
+              {
+                property: "title",
+                title: {
+                  contains: query,
+                },
+              },
+            ],
+          }
+        : undefined,
+    });
+
+    return database.results.map(pageMapper);
+  } catch (err) {
+    return handleError(err, "Failed to query database", []);
+  }
+}
+
+type CreateRequest = Parameters<Client["pages"]["create"]>[0];
+
+async function resolveParentDatabaseId(notion: Client, databaseOrDataSourceId: string): Promise<string> {
+  try {
+    const dataSourceId = await resolveDataSourceId(notion, databaseOrDataSourceId);
+    const dataSource = await notion.dataSources.retrieve({
+      data_source_id: dataSourceId,
+    });
+
+    if ("parent" in dataSource && "database_id" in dataSource.parent) {
+      return dataSource.parent.database_id;
+    }
+  } catch {
+    // Fall back to the provided id for workspaces still passing database ids.
+  }
+
+  return databaseOrDataSourceId;
+}
+
+export async function createDatabasePage(values: Form.Values) {
+  try {
+    const notion = getNotionClient();
+    const { database, content, ...props } = values;
+    const parentDatabaseId = await resolveParentDatabaseId(notion, database);
+
+    const arg: CreateRequest = {
+      parent: { database_id: parentDatabaseId },
+      properties: {},
+    };
+
+    if (content) {
+      arg.children = isMarkdownPageContent(content)
+        ? // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
+          (markdownToBlocks(content) as BlockObjectRequest[])
+        : content;
+    }
+
+    Object.keys(props).forEach((formId) => {
+      const type = formId.match(/(?<=property::).*(?=::)/g)?.[0] as DatabaseProperty["type"] | null;
+      if (!type) return;
+      const propId = formId.match(new RegExp("(?<=property::" + type + "::).*", "g"))?.[0];
+      const value = values[formId];
+      if (value == "_select_null_") return;
+      if (!propId || !value) return;
+
+      const formatted = formValueToPropertyValue(type, value);
+      if (formatted) arg.properties![propId] = formatted;
+    });
+
+    const page = await notion.pages.create(arg);
+
+    return pageMapper(page);
+  } catch (err) {
+    throw new Error("Failed to create page", { cause: err });
+  }
+}
+
+export async function deleteDatabase(databaseId: string) {
+  try {
+    const notion = getNotionClient();
+    const dataSourceId = await resolveDataSourceId(notion, databaseId);
+
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Deleting database",
+    });
+
+    await notion.dataSources.update({
+      data_source_id: dataSourceId,
+      in_trash: true,
+    });
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Database deleted",
+    });
+  } catch (err) {
+    return handleError(err, "Failed to delete database", undefined);
+  }
+}
+
+export interface Database {
+  id: string;
+  last_edited_time: number;
+  title: string | null;
+  icon_emoji: string | null;
+  icon_file: string | null;
+  icon_external: string | null;
 }
