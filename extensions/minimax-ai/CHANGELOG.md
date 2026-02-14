@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-02-14
 
 - Add MiniMax M2.5 model support (now default)
 - Remove non-existent highspeed model variants
