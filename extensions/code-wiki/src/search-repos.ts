@@ -6,6 +6,6 @@ type SearchReposArguments = {
 
 export default async function Command(props: LaunchProps<{ arguments: SearchReposArguments }>) {
   const { query } = props.arguments;
-  const url = `https://codewiki.google/search?q=${wencodeURIComponent(query)}`;
+  const url = `https://codewiki.google/search?q=${encodeURIComponent(query)}`;
   await open(url);
 }

@@ -14,7 +14,9 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
   } else {
     const tabs = await BrowserExtension.getTabs();
 
-    if (tabs.length === 0) {
+    const activeTab = tabs.find((tab) => tab.active);
+
+    if (!activeTab) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No browser tabs found",
@@ -23,8 +25,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
       return;
     }
 
-    const currentTab = tabs[0];
-    processedUrl = currentTab.url.replace(/^https?:\/\//, "");
+    processedUrl = activeTab.url.replace(/^https?:\/\//, "");
   }
 
   await open(`https://codewiki.google/${processedUrl}`);
