@@ -9,6 +9,8 @@ export type GitView = "branches" | "status" | "commits" | "files" | "stashes" | 
  * User preferences for the Git Client extension.
  */
 export type Preferences = {
+  /** Path to the git binary to use for git commands. */
+  binaryPath: string;
   /** Default terminal for opening repository directory. */
   defaultTerminal: Application;
   /** External git client for git commands. */

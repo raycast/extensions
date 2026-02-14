@@ -86,6 +86,14 @@ function GitIgnoreForm(context: RepositoryContext & { filePath?: string }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add" onSubmit={handleSubmit} icon={Icon.Plus} />
+
+          <Action.Open
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="Open .gitignore"
+            icon={Icon.Document}
+            target={context.gitManager.gitignorePath}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+          />
         </ActionPanel>
       }
     >

@@ -8,14 +8,15 @@
   "keywords": [
     "repository",
     "project",
+    "workspace",
     "clone",
     "commit",
+    "branches",
+    "submodules",
     "worktree",
     "github",
     "gitlab",
-    "bitbucket",
-    "azure devops",
-    "gitea"
+    "bitbucket"
   ],
   "platforms": [
     "macOS"
@@ -91,6 +92,14 @@
     }
   ],
   "preferences": [
+    {
+    "name": "binaryPath",
+    "required": true,
+    "type": "textfield",
+    "title": "Binary Path",
+    "default": "git",
+    "description": "The path to the git binary to use for git commands"
+    },
     {
       "name": "defaultTerminal",
       "required": true,

@@ -9,6 +9,8 @@ import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../acti
 import { FileAttachedLinksAction } from "../actions/StatusActions";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 import { useTrackedFilesSearch } from "../../hooks/useTrackedFilesSearch";
+import { GitIgnoreAction } from "../actions/GitIgnoreAction";
+import { GitLFSAction } from "../actions/GitLFSAction";
 
 export default function FilesView(context: RepositoryContext & NavigationContext) {
   const [searchText, setSearchText] = useState("");
@@ -121,6 +123,12 @@ function FileListItem(
           <ActionPanel.Section>
             <FileAttachedLinksAction {...context} filePath={context.filePath} />
           </ActionPanel.Section>
+
+          <ActionPanel.Section title="Tracking">
+            <GitIgnoreAction {...context} />
+            <GitLFSAction {...context} />
+          </ActionPanel.Section>
+
           <SharedActionsSection {...context} />
         </ActionPanel>
       }

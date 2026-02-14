@@ -54,6 +54,7 @@ export class GitManager {
   constructor(repoPath: string) {
     this.repoPath = repoPath;
     this.git = simpleGit(repoPath, {
+      binary: getPreferenceValues<Preferences>().binaryPath,
       errors: (error, _result) => {
         if (error) {
           showFailureToast(error, { title: `Error running command` });
@@ -73,6 +74,10 @@ export class GitManager {
    */
   get repoName(): string {
     return basename(this.repoPath) || "Unknown Repository";
+  }
+
+  get gitignorePath(): string {
+    return join(this.repoPath, ".gitignore");
   }
 
   /**
@@ -1703,17 +1708,75 @@ __REBASE_TODO__
    * Adds a pattern to .gitignore.
    */
   async addToGitignore(patterns: string[]): Promise<void> {
-    const gitignorePath = join(this.repoPath, ".gitignore");
-    const originalContent = existsSync(gitignorePath) ? readFileSync(gitignorePath, "utf-8") : "";
+    const originalContent = existsSync(this.gitignorePath) ? readFileSync(this.gitignorePath, "utf-8") : "";
     const tempContent =
       originalContent +
       (originalContent.endsWith("\n") || originalContent === "" ? "" : "\n") +
       patterns.join("\n") +
       "\n";
-    await fs.writeFile(gitignorePath, tempContent, { encoding: "utf-8" });
+    await fs.writeFile(this.gitignorePath, tempContent, { encoding: "utf-8" });
 
     // Remove all tracked files that match the patterns
     await this.git.raw(["rm", "--cached", "--ignore-unmatch", ...patterns]);
+  }
+
+  /**
+   * Checks if Git LFS filters are setup.
+   */
+  async checkLFSFilters(): Promise<boolean> {
+    try {
+      const filters = await this.git.raw(["config", "--get-regexp", "filter.lfs"]);
+      return filters.trim().length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Sets up Git LFS filters.
+   */
+  async setupLFSFilters(): Promise<void> {
+    await this.git.raw(["lfs", "install", "--local"]);
+  }
+
+  /**
+   * Checks which files would be tracked by Git LFS for given patterns.
+   */
+  async checkLFSPattern(filePaths: string[]): Promise<string[]> {
+    const tracked = await this.git.raw([
+      "ls-files",
+      "--cached",
+      "--others",
+      "--exclude-standard",
+      ...filePaths.map((pattern) => pattern),
+    ]);
+
+    return tracked.trim().split("\n").filter(Boolean);
+  }
+
+  /**
+   * Adds patterns to .gitattributes for Git LFS tracking.
+   */
+  async addToGitLFS(patterns: string[], updateIndex: boolean): Promise<void> {
+    const gitattributesPath = join(this.repoPath, ".gitattributes");
+    const originalContent = existsSync(gitattributesPath) ? readFileSync(gitattributesPath, "utf-8") : "";
+
+    const lfsRules = patterns.map((pattern) => `${pattern} filter=lfs diff=lfs merge=lfs -text`);
+    const nextContent =
+      originalContent +
+      (originalContent.endsWith("\n") || originalContent === "" ? "" : "\n") +
+      lfsRules.join("\n") +
+      "\n";
+    await fs.writeFile(gitattributesPath, nextContent, { encoding: "utf-8" });
+
+    if (updateIndex) {
+      await this.git.raw(["rm", "--cached", "--ignore-unmatch", "--", ...patterns]);
+      try {
+        await this.git.raw(["add", "--", ...patterns]);
+      } catch {
+        /* Ignore error when no files are found */
+      }
+    }
   }
 
   /**

@@ -13,6 +13,8 @@ import { FileAttachedLinksAction, FileRestoreAction } from "../actions/StatusAct
 import { FileHistoryAction } from "./FileHistoryView";
 import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../actions/ToggleDetailAction";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { GitLFSAction } from "../actions/GitLFSAction";
+import { GitIgnoreAction } from "../actions/GitIgnoreAction";
 
 export function CommitDetailsView(
   context: RepositoryContext &
@@ -239,6 +241,11 @@ function FileListItem(
               ]}
             />
             <FileAttachedLinksAction {...context} filePath={context.file.path} commit={context.commit} />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Tracking">
+            <GitIgnoreAction filePath={context.file.path} {...context} />
+            <GitLFSAction filePath={context.file.path} {...context} />
           </ActionPanel.Section>
 
           {context.onMoveToCommit && <CommitNavigationActions onMoveToCommit={context.onMoveToCommit} />}
