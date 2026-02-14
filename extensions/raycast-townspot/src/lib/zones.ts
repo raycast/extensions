@@ -9,6 +9,12 @@ export type ActiveZoneOption = {
   weeklyEventsCount?: number;
 };
 
+export type ActiveZoneGroup = {
+  countryCode: string;
+  countryName: string;
+  zones: ActiveZoneOption[];
+};
+
 type RawZone = {
   id?: number;
   name?: string;
@@ -89,4 +95,34 @@ export const fetchActiveZones = async (
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return options;
+};
+
+const COUNTRY_LABELS: Record<string, string> = {
+  uk: "United Kingdom",
+  es: "Spain",
+  us: "United States",
+  ca: "Canada",
+  au: "Australia",
+};
+
+const toCountryName = (countryCode: string): string =>
+  COUNTRY_LABELS[countryCode] || countryCode.toUpperCase();
+
+export const groupZonesByCountry = (zones: ActiveZoneOption[]): ActiveZoneGroup[] => {
+  const grouped = new Map<string, ActiveZoneOption[]>();
+
+  for (const zone of zones) {
+    const countryCode = String(zone.countryCode || "other").trim().toLowerCase() || "other";
+    const existing = grouped.get(countryCode) || [];
+    existing.push(zone);
+    grouped.set(countryCode, existing);
+  }
+
+  return Array.from(grouped.entries())
+    .map(([countryCode, items]) => ({
+      countryCode,
+      countryName: countryCode === "other" ? "Other" : toCountryName(countryCode),
+      zones: [...items].sort((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .sort((a, b) => a.countryName.localeCompare(b.countryName));
 };

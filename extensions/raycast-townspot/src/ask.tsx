@@ -18,11 +18,12 @@ import {
 } from "./lib/event-listing";
 import { splitEventTags } from "./lib/event-tags";
 import { askTownspot } from "./lib/townspot";
-import { ActiveZoneOption, fetchActiveZones } from "./lib/zones";
+import { ActiveZoneOption, fetchActiveZones, groupZonesByCountry } from "./lib/zones";
 import { RaycastResponse } from "./types";
 import { CategoryPickerView } from "./views/category-picker-view";
 import { EventDetailView } from "./views/event-detail-view";
 import { TimeWindowPickerView } from "./views/time-window-picker-view";
+import { WaitlistFormView } from "./views/waitlist-form-view";
 
 type Preferences = {
   locale: string;
@@ -36,7 +37,7 @@ const ZONE_VALUE_PREFIX = "zone:";
 const SMALL_DOT = "·";
 const API_EVENT_FETCH_LIMIT = 120;
 const PROD_API_BASE_URL = "https://api.townspot.co/api";
-const WAITLIST_URL = "https://www.townspot.co/?tell-us-your-town=1";
+const WAITLIST_ENDPOINT = "https://api.townspot.co/api/waitlist";
 
 const useDebouncedValue = <T,>(value: T, waitMs: number): T => {
   const [debounced, setDebounced] = useState(value);
@@ -433,6 +434,7 @@ export default function Command(
   const activeThisWeekLabel = Number.isFinite(activeThisWeek)
     ? `${activeThisWeek} locals active this week`
     : "locals active this week";
+  const zoneGroups = useMemo(() => groupZonesByCountry(zones), [zones]);
   const selectedZoneTitle = selectedZone ? zoneDropdownTitle(selectedZone) : "";
   const personalizedPlaceholder = `What's on in ${activeTownName}? Try kids, free, music, now...`;
 
@@ -618,54 +620,62 @@ export default function Command(
             }
             icon={Icon.Pin}
           />
-          <List.Dropdown.Section title="Active Towns">
-            {zones.map((zone) => (
-              <List.Dropdown.Item
-                key={zone.id}
-                value={toZoneValue(zone.id)}
-                title={zoneDropdownTitle(zone)}
-              />
-            ))}
-          </List.Dropdown.Section>
+          {zoneGroups.map((group) => (
+            <List.Dropdown.Section key={group.countryCode} title={group.countryName}>
+              {group.zones.map((zone) => (
+                <List.Dropdown.Item
+                  key={zone.id}
+                  value={toZoneValue(zone.id)}
+                  title={zoneDropdownTitle(zone)}
+                />
+              ))}
+            </List.Dropdown.Section>
+          ))}
         </List.Dropdown>
       }
       throttle
     >
       {!selectionHydrated ? null : needsHomeZone ? (
-        <List.Section title="Choose your hometown">
-          {zones.map((zone) => (
+        <>
+          {zoneGroups.map((group) => (
+            <List.Section key={group.countryCode} title={group.countryName}>
+              {group.zones.map((zone) => (
+                <List.Item
+                  key={zone.id}
+                  title={zone.name}
+                  subtitle={zoneActivityLabel(zone) || "Active town"}
+                  icon={Icon.Pin}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title={`Set hometown: ${zone.name}`}
+                        onAction={() => {
+                          void setHomeZone(zone);
+                        }}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          ))}
+          <List.Section title="Not from around here?">
             <List.Item
-              key={zone.id}
-              title={zone.name}
-              subtitle={zoneActivityLabel(zone) || "Active town"}
-              icon={Icon.Pin}
+              key="waitlist-town"
+              title="Not from around here, huh?"
+              subtitle="Tell us your town →"
+              icon={Icon.SpeechBubble}
               actions={
                 <ActionPanel>
-                  <Action
-                    title={`Set hometown: ${zone.name}`}
-                    onAction={() => {
-                      void setHomeZone(zone);
-                    }}
+                  <Action.Push
+                    title="Tell us your town"
+                    target={<WaitlistFormView endpointUrl={WAITLIST_ENDPOINT} />}
                   />
                 </ActionPanel>
               }
             />
-          ))}
-          <List.Item
-            key="waitlist-town"
-            title="Not from around here, huh?"
-            subtitle="Tell us your town →"
-            icon={Icon.SpeechBubble}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Tell us your town"
-                  url={WAITLIST_URL}
-                />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
+          </List.Section>
+        </>
       ) : (
         <>
           <List.Section title="Filters">
@@ -917,9 +927,9 @@ export default function Command(
             icon={Icon.ExclamationMark}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
+                <Action.Push
                   title="Tell us your town"
-                  url={WAITLIST_URL}
+                  target={<WaitlistFormView endpointUrl={WAITLIST_ENDPOINT} />}
                 />
               </ActionPanel>
             }
@@ -930,9 +940,9 @@ export default function Command(
             icon={Icon.SpeechBubble}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
+                <Action.Push
                   title="Tell us your town"
-                  url={WAITLIST_URL}
+                  target={<WaitlistFormView endpointUrl={WAITLIST_ENDPOINT} />}
                 />
               </ActionPanel>
             }
