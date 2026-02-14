@@ -3,7 +3,7 @@
   "name": "code-wiki",
   "title": "Code Wiki",
   "description": "Code Wiki - A new perspective on development for the agentic era. Gemini-generated documentation, always up-to-date.",
-  "icon": "extension-icon.png",
+  "icon": "code-wiki.png",
   "author": "alexi.build",
   "platforms": [
     "macOS",
