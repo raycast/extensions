@@ -56,9 +56,15 @@ function downloadBinary(url, dest, redirectCount = 0) {
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
         file.close();
         fs.unlink(dest, () => {
-          resolve(downloadBinary(response.headers.location, dest, redirectCount + 1));
+          const location = response.headers.location;
+          if (!location.startsWith("https://")) {
+            reject(new Error(`Redirect to non-HTTPS URL is not allowed: ${location}`));
+            return;
+          }
+          resolve(downloadBinary(location, dest, redirectCount + 1));
         });
         return;
+      }
       }
 
       if (response.statusCode !== 200) {
