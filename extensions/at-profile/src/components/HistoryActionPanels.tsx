@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, Icon, Clipboard, Keyboard } from "@raycast/api";
 import { HistoryItem } from "../types";
 import { EditProfileForm } from "./EditProfile";
 import { safeAsyncOperation, showSuccess } from "../utils/errors";
@@ -46,13 +46,13 @@ export function HistoryActionPanels({
             onUpdate={onRefreshHistory}
           />
         }
-        shortcut={{ modifiers: ["cmd"], key: "e" }}
+        shortcut={Keyboard.Shortcut.Common.Edit}
       />
       <Action.Push
         title={`Open @${item.profile} on…`}
         icon={Icon.Terminal}
         target={<OpenProfileCommand arguments={{ profile: item.profile }} />}
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
       <Action
         title={`Copy Profile URL`}
@@ -68,20 +68,20 @@ export function HistoryActionPanels({
             { toastTitle: "Error" },
           );
         }}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
       />
       <Action
         title={item.isStarred ? `Unstar Profile on ${item.appName}` : `Star Profile on ${item.appName}`}
         icon={item.isStarred ? Icon.XMarkCircle : Icon.Star}
         onAction={() => onToggleStar(item.profile, item.app)}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Pin}
       />
       <Action
         title="Delete History Item"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
         onAction={() => onDeleteHistoryItem(item.profile, item.app)}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.Remove}
       />
       <Action
         title="Clear Starred Profiles"

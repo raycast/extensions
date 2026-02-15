@@ -4,6 +4,7 @@
 
 - Added starring functionality for profile history
 - Added AI tool support for starring and unstarring profiles
+- Updated action shortcut keys to align with Raycast conventions
 - Added YouTube brand profile support (@brand)
 - Updated dependencies and ESLint configuration
 
