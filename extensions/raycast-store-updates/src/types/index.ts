@@ -60,6 +60,6 @@ interface StoreItem {
   extensionIcon?: string;
 }
 
-type FilterValue = "all" | "new" | "updated";
+type FilterValue = "all" | "new" | "updated" | "my-updates";
 
 export type { FeedAuthor, FeedItem, Feed, GitHubPR, StoreItem, FilterValue };

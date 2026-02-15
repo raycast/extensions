@@ -14,11 +14,11 @@ interface ExtensionListItemProps {
   toggles: FilterToggles;
   onToggleMacOS: () => Promise<void>;
   onToggleWindows: () => Promise<void>;
-  onToggleInstalledOnly: () => Promise<void>;
   onMarkAsRead?: (itemId: string) => Promise<void>;
   onMarkAllAsRead?: () => Promise<void>;
   onUndo?: () => Promise<void>;
   onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function ExtensionListItem({
@@ -30,11 +30,11 @@ export function ExtensionListItem({
   toggles,
   onToggleMacOS,
   onToggleWindows,
-  onToggleInstalledOnly,
   onMarkAsRead,
   onMarkAllAsRead,
   onUndo,
   onRefresh,
+  isRefreshing,
 }: ExtensionListItemProps) {
   const showTypeTag = filter === "all";
 
@@ -75,11 +75,11 @@ export function ExtensionListItem({
           toggles={toggles}
           onToggleMacOS={onToggleMacOS}
           onToggleWindows={onToggleWindows}
-          onToggleInstalledOnly={onToggleInstalledOnly}
           onMarkAsRead={onMarkAsRead}
           onMarkAllAsRead={onMarkAllAsRead}
           onUndo={onUndo}
           onRefresh={onRefresh}
+          isRefreshing={isRefreshing}
         />
       }
     />

@@ -15,11 +15,11 @@ interface ExtensionActionsProps {
   toggles: FilterToggles;
   onToggleMacOS: () => Promise<void>;
   onToggleWindows: () => Promise<void>;
-  onToggleInstalledOnly: () => Promise<void>;
   onMarkAsRead?: (itemId: string) => Promise<void>;
   onMarkAllAsRead?: () => Promise<void>;
   onUndo?: () => Promise<void>;
   onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function ExtensionActions({
@@ -30,11 +30,11 @@ export function ExtensionActions({
   toggles,
   onToggleMacOS,
   onToggleWindows,
-  onToggleInstalledOnly,
   onMarkAsRead,
   onMarkAllAsRead,
   onUndo,
   onRefresh,
+  isRefreshing,
 }: ExtensionActionsProps) {
   const storeDeeplink = createStoreDeeplink(item.url);
   const changelogBrowserUrl = item.extensionSlug
@@ -92,10 +92,10 @@ export function ExtensionActions({
 
       <ActionPanel.Section>
         <Action
-          title="Refresh"
+          title={isRefreshing ? "Refreshing…" : "Refresh"}
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={() => onRefresh?.()}
+          onAction={() => !isRefreshing && onRefresh?.()}
         />
       </ActionPanel.Section>
 
@@ -111,11 +111,6 @@ export function ExtensionActions({
           title={toggles.showWindows ? "Hide Windows-only Extensions" : "Show Windows-only Extensions"}
           icon={{ source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }}
           onAction={onToggleWindows}
-        />
-        <Action
-          title={toggles.installedOnly ? "Show All Updates" : "Only Show Updates for Installed"}
-          icon={toggles.installedOnly ? Icon.CheckCircle : Icon.Circle}
-          onAction={onToggleInstalledOnly}
         />
       </ActionPanel.Section>
 
