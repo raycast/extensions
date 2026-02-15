@@ -5,7 +5,7 @@
 - Added tag filter dropdown to list views (matches Things native behavior)
 - Tag filtering supports full inheritance: todo → project → area tags
 - Tag filtering supports hierarchy: selecting a parent tag matches all descendants
-- Tags display with hierarchy indicator (e.g., "bikes › masi")
+- Tags display with hierarchy indicator (e.g., "Work › Design")
 - Added "No Tag" filter option for untagged todos
 - Area tags and tag hierarchy are fetched inline with existing JXA calls, deferred until the list renders
 - Added preference to toggle grouping by project or area
