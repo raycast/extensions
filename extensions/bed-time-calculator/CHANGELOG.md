@@ -1,6 +1,6 @@
 # Bed Time Calculator Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-02-15
 
 ### Added
 - **Windows platform support**: Added Windows to supported platforms alongside macOS
