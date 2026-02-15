@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "relaunch-tool",
+  "title": "ReLaunch Tool",
+  "description": "Force quit and relaunch a target app",
+  "version": "1.0.0",
+  "author": "Afcoo",
+  "icon": "icon.png",
+  "license": "MIT",
+  "private": true,
+  "commands": [
+    {
+      "name": "force-quit-and-relaunch",
+      "title": "Force Quit and Relaunch",
+      "icon": "icon.png",
+      "description": "Force quit selected app, wait until stopped, and reopen",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "stopTimeoutMs",
+          "title": "Stop Timeout (ms)",
+          "description": "How long to wait for the app to fully stop before failing",
+          "type": "textfield",
+          "required": false,
+          "default": "8000"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.0",
+    "@types/node": "^20.19.17",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
