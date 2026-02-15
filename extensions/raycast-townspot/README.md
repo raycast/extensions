@@ -45,7 +45,7 @@ For local API testing, temporarily change `PROD_API_BASE_URL` in `src/ask.tsx`.
   - Uses Raycast AI to generate a natural-language answer.
   - Grounded by verified listings fetched from TownSpot API (no invented events by design).
   - Reads your saved Hometown by default, but auto-matches a town if the prompt contains one (for example `what's on in kentish town`).
-  - Returns an AI summary plus a verified listings block with direct links.
+  - Returns a clean AI summary, with listing links available via command actions.
   - Launch with an argument, for example: `kids events this weekend`.
 
 ## Endpoint Contract

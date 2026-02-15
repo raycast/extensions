@@ -56,7 +56,6 @@ const buildResultMarkdown = (
   prompt: string,
   townName: string,
   aiAnswer: string,
-  response: RaycastResponse | null,
   errorMessage: string,
 ): string => {
   if (!prompt) return formatFallbackMarkdown(prompt);
@@ -71,10 +70,6 @@ const buildResultMarkdown = (
     sections.push("", `> ${errorMessage}`);
   } else {
     sections.push("", aiAnswer || "_Generating grounded answer…_");
-  }
-
-  if (response) {
-    sections.push("", "## Verified Listings", "", buildVerifiedEventsMarkdown(response.events));
   }
 
   return sections.join("\n");
@@ -166,8 +161,8 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
   }, [locale, prompt]);
 
   const markdown = useMemo(
-    () => buildResultMarkdown(prompt, townName, aiAnswer, response, errorMessage),
-    [aiAnswer, errorMessage, prompt, response, townName],
+    () => buildResultMarkdown(prompt, townName, aiAnswer, errorMessage),
+    [aiAnswer, errorMessage, prompt, townName],
   );
 
   const subtitle =
