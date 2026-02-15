@@ -70,7 +70,7 @@ const buildResultMarkdown = (
   if (errorMessage) {
     sections.push("", `> ${errorMessage}`);
   } else {
-    sections.push("", aiAnswer || "_Generating grounded answer..._");
+    sections.push("", aiAnswer || "_Generating grounded answer…_");
   }
 
   if (response) {
