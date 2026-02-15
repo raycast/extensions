@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kaneo-for-raycast",
+  "title": "Kaneo",
+  "description": "Quickly check and manage your Kaneo projects",
+  "icon": "kaneo.png",
+  "author": "Baldy",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List Kaneo projects",
+      "mode": "view",
+      "subtitle": "Kaneo"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a new task",
+      "mode": "view",
+      "subtitle": "Kaneo"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "List Kaneo notifications",
+      "mode": "view",
+      "subtitle": "Kaneo"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instanceUrl",
+      "type": "textfield",
+      "title": "API URL",
+      "description": "Your instance API URL",
+      "default": "https://cloud.kaneo.app",
+      "required": true
+    },
+    {
+      "name": "webInstanceUrl",
+      "type": "textfield",
+      "title": "Client URL",
+      "description": "Your instance client URL",
+      "default": "https://cloud.kaneo.app",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "Your instance API token",
+      "required": true
+    },
+    {
+      "name": "workspaceId",
+      "type": "textfield",
+      "title": "Workspace ID",
+      "description": "Your workspace ID",
+      "required": true
+    },
+    {
+      "name": "sort",
+      "type": "dropdown",
+      "title": "Sort Tasks",
+      "description": "Sort tasks by priority or due date",
+      "required": true,
+      "default": "priority",
+      "data": [
+        {
+          "value": "priority",
+          "title": "Priority"
+        },
+        {
+          "value": "dueDate",
+          "title": "Due Date"
+        }
+      ]
+    }
+  ],
+  "keywords": [
+    "kaneo",
+    "task",
+    "productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}
