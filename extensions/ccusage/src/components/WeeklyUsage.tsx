@@ -6,10 +6,12 @@ import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { StandardActions } from "./common/StandardActions";
 import { ReactNode } from "react";
 
+import { WeeklyUsageData } from "../types/usage-types";
+
 export function WeeklyUsage() {
   const { data, isLoading, error, revalidate } = useWeeklyUsage();
 
-  const renderDetailMetadata = (item: any): ReactNode => {
+  const renderDetailMetadata = (item: WeeklyUsageData): ReactNode => {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label
@@ -50,7 +52,7 @@ export function WeeklyUsage() {
           <>
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="Model Breakdown" />
-            {item.modelBreakdowns.map((model: any) => (
+            {item.modelBreakdowns.map((model) => (
               <List.Item.Detail.Metadata.Label
                 key={model.modelName}
                 title={model.modelName}

@@ -6,10 +6,12 @@ import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { StandardActions } from "./common/StandardActions";
 import { ReactNode } from "react";
 
+import { SessionBlockData } from "../types/usage-types";
+
 export function BlocksUsage() {
   const { data, isLoading, error, revalidate } = useBlocksUsage();
 
-  const renderDetailMetadata = (block: any): ReactNode => {
+  const renderDetailMetadata = (block: SessionBlockData): ReactNode => {
     const isActive = block.isActive;
     const isGap = block.isGap;
 
