@@ -7,7 +7,7 @@
 - Tag filtering supports hierarchy: selecting a parent tag matches all descendants
 - Tags display with hierarchy indicator (e.g., "bikes › masi")
 - Added "No Tag" filter option for untagged todos
-- Area tags are lazy-loaded only when filtering (preserves fast initial load)
+- Area tags and tag hierarchy are fetched inline with existing JXA calls, deferred until the list renders
 - Added preference to toggle grouping by project or area
 
 ## [Reduce JXA Latency for List Fetching] - 2026-02-09
