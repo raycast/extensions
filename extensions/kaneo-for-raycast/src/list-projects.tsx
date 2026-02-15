@@ -421,7 +421,6 @@ function ProjectTasksList({ project }: { project: Project }) {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-    await revalidate();
   };
 
   const deleteTask = async (taskId: string, taskTitle: string) => {
