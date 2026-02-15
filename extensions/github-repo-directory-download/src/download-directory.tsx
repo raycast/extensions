@@ -15,11 +15,6 @@ import path from "path";
 import os from "os";
 import yauzl from "yauzl";
 import { mkdirp } from "mkdirp";
-import { pipeline } from "stream";
-import { promisify } from "util";
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const streamPipeline = promisify(pipeline);
 
 interface FormValues {
   url: string;
@@ -32,11 +27,6 @@ interface ParsedUrl {
   type: "tree" | "blob" | "root";
   ref?: string; // branch or commit
   path?: string;
-}
-
-interface Preferences {
-  githubToken?: string;
-  autoLoadUrl: boolean;
 }
 
 export default function Command() {
@@ -375,6 +365,13 @@ async function downloadGitHubContent(
               // Extract
               const relativePath = entry.fileName.substring(prefix.length);
               const entryDest = path.join(finalDest, relativePath);
+
+              // Zip Slip protection
+              if (!entryDest.startsWith(finalDest)) {
+                zipfile.readEntry();
+                return;
+              }
+
               const entryDir = path.dirname(entryDest);
 
               mkdirp(entryDir).then(() => {
