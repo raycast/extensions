@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, Icon, Keyboard, useNavigation } from "@raycast/api";
 import { StoreItem } from "../types";
 import { extractLatestChanges } from "../utils";
 import { ChangelogDetail } from "./ChangelogDetail";
@@ -10,6 +10,8 @@ interface ChangelogActionsProps {
 }
 
 export function ChangelogActions({ items, currentIndex, changelog }: ChangelogActionsProps) {
+  const { pop } = useNavigation();
+
   if (!items.length || currentIndex < 0 || currentIndex >= items.length) {
     return null;
   }
@@ -41,18 +43,11 @@ export function ChangelogActions({ items, currentIndex, changelog }: ChangelogAc
           />
         )}
         {previousItem && previousItem.extensionSlug && (
-          <Action.Push
+          <Action
             title="Previous Changelog"
             icon={Icon.ArrowUp}
             shortcut={Keyboard.Shortcut.Common.MoveUp}
-            target={
-              <ChangelogDetail
-                slug={previousItem.extensionSlug}
-                title={previousItem.title}
-                items={items}
-                currentIndex={currentIndex - 1}
-              />
-            }
+            onAction={pop}
           />
         )}
       </ActionPanel.Section>

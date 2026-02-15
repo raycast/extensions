@@ -6,17 +6,15 @@ const FILTER_KEY = "filter-toggles";
 export interface FilterToggles {
   showMacOS: boolean;
   showWindows: boolean;
-  installedOnly: boolean;
 }
 
 const DEFAULT_TOGGLES: FilterToggles = {
   showMacOS: true,
   showWindows: true,
-  installedOnly: false,
 };
 
 /**
- * Hook to manage persistent filter toggles (platforms & installed-only).
+ * Hook to manage persistent platform filter toggles.
  * Stored in LocalStorage so they persist between sessions.
  */
 export function useFilterToggles() {
@@ -74,23 +72,10 @@ export function useFilterToggles() {
     });
   }, [persist]);
 
-  const toggleInstalledOnly = useCallback(async () => {
-    setToggles((prev) => {
-      const updated = { ...prev, installedOnly: !prev.installedOnly };
-      persist(updated);
-      showToast({
-        style: Toast.Style.Success,
-        title: updated.installedOnly ? "Showing installed updates only" : "Showing all updates",
-      });
-      return updated;
-    });
-  }, [persist]);
-
   return {
     toggles,
     loaded,
     toggleMacOS,
     toggleWindows,
-    toggleInstalledOnly,
   };
 }

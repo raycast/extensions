@@ -86,7 +86,7 @@ export function ExtensionActions({
         <Action.CopyToClipboard
           title="Copy Extension URL"
           content={item.url}
-          shortcut={Keyboard.Shortcut.Common.Copy}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
 
