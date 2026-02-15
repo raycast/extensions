@@ -3,6 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const https = require("https");
+const crypto = require("crypto");
 
 const assetsDir = path.join(__dirname, "..", "assets");
 
@@ -10,6 +11,24 @@ function ensureAssetsDir() {
   if (!fs.existsSync(assetsDir)) {
     fs.mkdirSync(assetsDir, { recursive: true });
   }
+}
+
+function verifyChecksum(filePath, expectedChecksum) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    const stream = fs.createReadStream(filePath);
+
+    stream.on("error", (error) => reject(error));
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => {
+      const actualChecksum = hash.digest("hex");
+      if (actualChecksum.toLowerCase() === expectedChecksum.toLowerCase()) {
+        resolve(true);
+      } else {
+        reject(new Error(`Checksum mismatch. Expected: ${expectedChecksum}, Got: ${actualChecksum}`));
+      }
+    });
+  });
 }
 
 function copyBinary(source, dest) {
@@ -70,11 +89,14 @@ if (process.platform === "darwin") {
   const dest = path.join(assetsDir, "audio-devices");
   copyBinary(source, dest);
 } else if (process.platform === "win32") {
-  const url = "https://github.com/Inovvia/go-win-audio-cli/releases/download/1.0.0/win-audio-cli.exe";
+  const WINDOWS_BINARY_URL = "https://github.com/Inovvia/go-win-audio-cli/releases/download/1.1.0/win-audio-cli.exe";
+  const WINDOWS_BINARY_CHECKSUM = "569fe05624f410b565b92fa0c729e29f170bb78907dcff7ef2cf66a01465e365";
   const dest = path.join(assetsDir, "win-audio-cli.exe");
-  downloadBinary(url, dest)
+
+  downloadBinary(WINDOWS_BINARY_URL, dest)
+    .then(() => verifyChecksum(dest, WINDOWS_BINARY_CHECKSUM))
     .then(() => {
-      console.log("Downloaded win-audio-cli.exe to assets/.");
+      console.log("Downloaded and verified win-audio-cli.exe to assets/.");
     })
     .catch((error) => {
       console.error("Failed to download Windows audio binary:", error.message);

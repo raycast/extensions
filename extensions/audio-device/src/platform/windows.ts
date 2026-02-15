@@ -180,10 +180,10 @@ export const windowsAudioAPI: PlatformAudioAPI = {
   },
 
   async setDefaultCommunicationOutputDevice(deviceId: string) {
-    await runBinary<WindowsAudioSwitchResult>(["switch-output", "--id", deviceId]);
+    await runBinary<WindowsAudioSwitchResult>(["switch-output-communication", "--id", deviceId]);
   },
 
   async setDefaultCommunicationInputDevice(deviceId: string) {
-    await runBinary<WindowsAudioSwitchResult>(["switch-input", "--id", deviceId]);
+    await runBinary<WindowsAudioSwitchResult>(["switch-input-communication", "--id", deviceId]);
   },
 };
