@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "syn",
+  "title": "Syn",
+  "description": "Look up synonyms, antonyms, and related words using Thesaurus.com and Datamuse.",
+  "icon": "extension-icon.png",
+  "author": "gokce",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "synonyms",
+      "title": "Synonyms",
+      "description": "Look up synonyms and antonyms for a word",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "word",
+          "placeholder": "Word",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "synonyms-from-selection",
+      "title": "Synonyms from Selection",
+      "description": "Look up the selected word in Synonyms",
+      "mode": "no-view"
+    },
+    {
+      "name": "word-explorer",
+      "title": "Word Explorer",
+      "description": "Explore rhymes, similar sounds, related words, and more",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "word",
+          "placeholder": "Word",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.3",
+    "@types/react": "19.2.14",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
