@@ -327,13 +327,13 @@ async function downloadGitHubContent(
 
         const canWrite = fileStream.write(Buffer.from(value));
         if (!canWrite) {
-          await new Promise((resolve) => fileStream.once("drain", resolve));
+          await new Promise<void>((resolve) => fileStream.once("drain", resolve));
         }
       }
     }
 
     fileStream.end();
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       fileStream.on("finish", resolve);
       fileStream.on("error", reject);
     });
