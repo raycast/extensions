@@ -34,6 +34,7 @@ export default function Command() {
       title: FormValidation.Required,
       projectId: FormValidation.Required,
     },
+  });
 
   const priorityOptions = [
     { value: "no-priority", title: "No Priority" },
