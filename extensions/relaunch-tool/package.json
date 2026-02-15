@@ -7,6 +7,12 @@
   "author": "Afcoo",
   "icon": "icon.png",
   "license": "MIT",
+  "categories": [
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "private": true,
   "commands": [
     {
@@ -28,7 +34,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.1"
+    "@raycast/api": "^1.104.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.0",
