@@ -555,11 +555,9 @@ export const IMAGE_QUALITY_PRESET_MAPPINGS = {
 type ImageQualityPresetFormat = keyof typeof IMAGE_QUALITY_PRESET_MAPPINGS;
 type ImageQualityPresetMap = (typeof IMAGE_QUALITY_PRESET_MAPPINGS)[ImageQualityPresetFormat];
 
-export function getDefaultImageQuality(format: AllOutputExtension, preferences: PreferenceValues): QualitySettings {
+export function getDefaultImageQuality(format: OutputImageExtension, preferences: PreferenceValues): QualitySettings {
   const imagePreset = (preferences.defaultImageQualityPreset as string | undefined) ?? "80";
-  const mapping = (IMAGE_QUALITY_PRESET_MAPPINGS as Record<ImageQualityPresetFormat, ImageQualityPresetMap>)[
-    format as ImageQualityPresetFormat
-  ];
+  const mapping = (IMAGE_QUALITY_PRESET_MAPPINGS as Record<ImageQualityPresetFormat, ImageQualityPresetMap>)[format];
   const toFormatQuality = (qualityNumber: number): QualitySettings => {
     if (format === ".png") {
       return {
@@ -647,7 +645,7 @@ export function getDefaultQuality(
   }
 
   if (getMediaType(format) === "image") {
-    return getDefaultImageQuality(format, preferences);
+    return getDefaultImageQuality(format as OutputImageExtension, preferences);
   }
 
   if (preferences.moreConversionSettings) {
