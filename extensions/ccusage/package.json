@@ -44,8 +44,16 @@
           "value": "today"
         },
         {
+          "title": "Weekly Usage",
+          "value": "weekly"
+        },
+        {
           "title": "Session Usage",
           "value": "session"
+        },
+        {
+          "title": "Session Blocks",
+          "value": "blocks"
         },
         {
           "title": "Cost Analysis",

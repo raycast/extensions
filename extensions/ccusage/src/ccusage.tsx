@@ -1,6 +1,8 @@
 import { List } from "@raycast/api";
 import { DailyUsage } from "./components/DailyUsage";
+import { WeeklyUsage } from "./components/WeeklyUsage";
 import { SessionUsage } from "./components/SessionUsage";
+import { BlocksUsage } from "./components/BlocksUsage";
 import { CostAnalysis } from "./components/CostAnalysis";
 import { ModelBreakdown } from "./components/ModelBreakdown";
 import { UsageLimits } from "./components/UsageLimits";
@@ -12,7 +14,9 @@ export default function CCUsage() {
   return (
     <List selectedItemId={selectedItemId} isShowingDetail>
       <DailyUsage />
+      <WeeklyUsage />
       <SessionUsage />
+      <BlocksUsage />
       <CostAnalysis />
       <ModelBreakdown />
       <UsageLimits />
