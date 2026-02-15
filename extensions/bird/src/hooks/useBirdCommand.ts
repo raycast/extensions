@@ -5,17 +5,13 @@ import { useMemo, useState, useCallback } from "react";
 import { Tweet } from "../types";
 import { sanitizeString, safeParseTweet } from "../utils/sanitize";
 
-interface Preferences {
-  birdPath?: string;
-}
-
 const defaultBirdPath = cpus()[0].model.includes("Apple") ? "/opt/homebrew/bin/bird" : "/usr/local/bin/bird";
 
 const BATCH_SIZE = 20;
 const MAX_COUNT = 500;
 
 export function useBirdCommand(command: "bookmarks" | "likes") {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
   const birdBin = prefs.birdPath || defaultBirdPath;
   const [count, setCount] = useState(BATCH_SIZE);
 
