@@ -1,6 +1,6 @@
 # Kommand Changelog
 
-## [Initial Version] - 2026-02-15
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add "Show Frontmost App Shortcuts" command
 - Add "Search All Shortcuts" command
