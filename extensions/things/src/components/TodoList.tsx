@@ -177,16 +177,20 @@ export default function TodoList({ commandListName, displayActivationDates }: To
       filtering
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Tag" value={selectedTag} onChange={setSelectedTag} placeholder="Tag">
-          <List.Dropdown.Item title="All Tags" value={ALL_TAGS} />
-          <List.Dropdown.Item title="No Tag" value={NO_TAG} icon={Icon.CircleDisabled} />
-          {applicableTagsWithHierarchy.map((tag) => (
-            <List.Dropdown.Item
-              key={tag.name}
-              title={tagDisplayNames[tag.name] || tag.name}
-              value={tag.name}
-              icon={Icon.Tag}
-            />
-          ))}
+          <List.Dropdown.Section>
+            <List.Dropdown.Item title="All Tags" value={ALL_TAGS} />
+            <List.Dropdown.Item title="No Tag" value={NO_TAG} />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section>
+            {applicableTagsWithHierarchy.map((tag) => (
+              <List.Dropdown.Item
+                key={tag.name}
+                title={tagDisplayNames[tag.name] || tag.name}
+                value={tag.name}
+                icon={Icon.Tag}
+              />
+            ))}
+          </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
