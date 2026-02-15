@@ -73,7 +73,9 @@ export default function Command() {
     const items = feedData.items ?? [];
     Promise.all(
       items.map(async (item) => {
-        const { extension } = parseExtensionUrl(item.url);
+        const parsed = parseExtensionUrl(item.url);
+        if (!parsed) return null;
+        const { extension } = parsed;
         const pkgInfo = await fetchExtensionPackageInfo(extension);
         return {
           id: item.id,
@@ -92,7 +94,7 @@ export default function Command() {
           extensionIcon: pkgInfo?.icon,
         };
       }),
-    ).then(setNewItems);
+    ).then((results) => setNewItems(results.filter((item): item is NonNullable<typeof item> => item !== null)));
   }, [feedData]);
 
   // Fetch updated items from PRs (async because we need to fetch package.json for each)
