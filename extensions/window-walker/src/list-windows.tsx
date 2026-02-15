@@ -12,8 +12,8 @@ import {
   ScreenInfo,
 } from "./lib/windows";
 import {
-  getPinnedWindows,
   getPermaPinnedWindows,
+  getSessionPinnedWindows,
   getCachedPermaPinnedWindows,
   pinWindow,
   permaPinWindow,
@@ -34,13 +34,26 @@ export default function Command() {
   const refreshWindows = useCallback(async (isSilent = false) => {
     if (!isSilent) setIsLoading(true);
     try {
-      const [windowList, pinnedList, permaPinnedList, cachedPermaPinnedList, screenList] = await Promise.all([
+      // Fetch all data in parallel - avoiding duplicate calls
+      // Note: getPinnedWindows() internally calls getPermaPinnedWindows() AND getSessionPinnedWindows(),
+      // so calling it AND getPermaPinnedWindows() separately causes redundant storage ops.
+      // Instead, fetch the base data once and combine locally.
+      const [windowList, sessionPinnedList, permaPinnedList, cachedPermaPinnedList, screenList] = await Promise.all([
         Promise.resolve(listWindows()),
-        getPinnedWindows(),
+        getSessionPinnedWindows(),
         getPermaPinnedWindows(),
         getCachedPermaPinnedWindows(),
         Promise.resolve(getAllScreens()),
       ]);
+
+      // Combine perma pins + session pins (avoiding duplicates) - same logic as getPinnedWindows()
+      const pinnedList = [...permaPinnedList];
+      for (const sp of sessionPinnedList) {
+        const exists = pinnedList.some((w) => w.processName === sp.processName && w.titlePattern === sp.titlePattern);
+        if (!exists) {
+          pinnedList.push(sp);
+        }
+      }
 
       // Filter and enhance windows
       const enhanced: WindowWithMeta[] = windowList

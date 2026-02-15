@@ -49,7 +49,7 @@ ${
     ? `
 ## Locations
 
-${quest.locations.map((loc) => `- ${loc}`).join("\n")}
+${quest.locations.map((loc) => `- ${loc.map}`).join("\n")}
 `
     : ""
 }

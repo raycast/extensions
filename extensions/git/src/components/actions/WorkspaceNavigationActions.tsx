@@ -2,6 +2,7 @@ import { NavigationContext, RepositoryContext } from "../../open-repository";
 import { GitView } from "../../types";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { RepositoryDirectoryActions } from "./RepositoryDirectoryActions";
+import { SwitchRepositoryAction } from "./SwitchRepositoryAction";
 
 export function WorkspaceNavigationDropdown(context: NavigationContext) {
   return (
@@ -80,6 +81,7 @@ export function WorkspaceNavigationActions(context: NavigationContext & Reposito
       </ActionPanel.Section>
 
       <RepositoryDirectoryActions repositoryPath={context.gitManager.repoPath} />
+      <SwitchRepositoryAction repositoryPath={context.gitManager.repoPath} onSwitch={context.switchTo} />
     </>
   );
 }

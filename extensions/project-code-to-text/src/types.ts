@@ -1,5 +1,6 @@
 // src/types.ts
 import ignore from "ignore";
+import { WriteStream } from "fs";
 
 /**
  * Represents a file or directory within the project structure.
@@ -53,6 +54,7 @@ export interface ProcessDirectoryOptions {
     filesProcessed: number;
     totalSize: number;
   };
+  writeStream?: WriteStream;
 }
 
 /**
@@ -86,6 +88,7 @@ export interface FinderSelectionInfo {
   suggestedDirectory: string;
   /** Display names for UI */
   fileNames: string[];
+  /** Name of the suggested directory, if available. */
   directoryName?: string;
 }
 

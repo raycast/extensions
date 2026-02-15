@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Windows/Linux Compatibility] - {PR_MERGE_DATE}
+## [Windows/Linux Compatibility] - 2026-01-07
 
 - Add Windows to the list of supported platforms.
 

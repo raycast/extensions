@@ -1,5 +1,11 @@
 # Linkding Changelog
 
+## [Frecency + Refactor] - 2026-01-26
+
+- chore: npm audit fix
+- feat: implement frecency sorting
+- refactor: use context for state management
+
 ## [Refactor + Features] - 2025-11-26
 
 - feat: add archive action

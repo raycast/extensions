@@ -1,5 +1,17 @@
 # Changelog
 
+## [Fixes] - 2026-01-15
+
+### Fixed
+
+- **Request Timeout**: Fixed error where request to get window list would timeout after 5 seconds.
+
+## [Encoding Fixes] - 2026-01-15
+
+### Fixed
+
+- **Window name encoding** Missing special characters like é, ő, etc. and emojis from titles caused by not specifying encoding in PS script
+
 ## [Performance & Pin Fixes] - 2026-01-05
 
 ### Fixed

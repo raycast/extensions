@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="./assets/attio@dark.png" width="150" height="150" />
+</p>
+
 # Attio
 
 This is a **Raycast** extension for [Attio](https://attio.com/) - _The next gen of CRM_.

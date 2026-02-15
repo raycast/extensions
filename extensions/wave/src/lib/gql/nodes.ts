@@ -11,6 +11,9 @@ const Invoice = `
     subhead
     invoiceNumber
     invoiceDate
+    lastSentAt
+    lastSentVia
+    lastViewedAt
     customer {
         name
     }

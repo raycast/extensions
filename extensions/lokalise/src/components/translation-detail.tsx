@@ -1,7 +1,6 @@
 import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { client } from "../api/client";
-import { getLanguageName } from "../data/languages";
+import { getKeyById } from "../api/database";
 import { DuplicateTranslationForm } from "./duplicate-translation-form";
 
 interface TranslationDetailProps {
@@ -11,8 +10,7 @@ interface TranslationDetailProps {
 export function TranslationDetail({ keyId }: TranslationDetailProps) {
   const { data: keyToDisplay, isLoading } = useCachedPromise(
     async (id: number) => {
-      const key = await client.getKey(id);
-      return client.processKey(key, getLanguageName);
+      return await getKeyById(id);
     },
     [keyId],
   );
@@ -32,7 +30,6 @@ export function TranslationDetail({ keyId }: TranslationDetailProps) {
 
   const markdown = `${keyInfoMarkdown}${screenshotsMarkdown}`;
 
-  // Extract assigned files that have values
   const assignedFiles = keyToDisplay.filenames
     ? Object.entries(keyToDisplay.filenames).filter(([, filename]) => filename !== null && filename !== "")
     : [];

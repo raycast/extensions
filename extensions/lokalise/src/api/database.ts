@@ -31,9 +31,6 @@ let indexCache: DatabaseIndex | null = null;
 let metadata: Metadata | null = null;
 const chunkCache: Map<number, ProcessedTranslationKey[]> = new Map();
 
-/**
- * Ensure support directories exist
- */
 function ensureSupportDir(): void {
   const supportDir = environment.supportPath;
   if (!existsSync(supportDir)) {
@@ -44,9 +41,6 @@ function ensureSupportDir(): void {
   }
 }
 
-/**
- * Load index from disk
- */
 function loadIndex(): DatabaseIndex {
   if (indexCache) {
     return indexCache;
@@ -69,9 +63,6 @@ function loadIndex(): DatabaseIndex {
   return indexCache;
 }
 
-/**
- * Load a specific chunk from disk (no caching - always read from disk)
- */
 function loadChunk(chunkIndex: number): ProcessedTranslationKey[] {
   ensureSupportDir();
 
@@ -91,9 +82,6 @@ function loadChunk(chunkIndex: number): ProcessedTranslationKey[] {
   return [];
 }
 
-/**
- * Load metadata from disk
- */
 function loadMetadata(): Metadata {
   if (metadata) {
     return metadata;
@@ -116,36 +104,24 @@ function loadMetadata(): Metadata {
   return metadata;
 }
 
-/**
- * Save database chunk to disk
- */
 function saveChunk(keys: ProcessedTranslationKey[], chunkIndex: number): void {
   ensureSupportDir();
   const chunkPath = join(DB_DIR, `chunk-${String(chunkIndex).padStart(4, "0")}.json`);
   writeFileSync(chunkPath, JSON.stringify(keys), "utf-8");
 }
 
-/**
- * Save index to disk
- */
 function saveIndex(index: DatabaseIndex): void {
   ensureSupportDir();
   writeFileSync(INDEX_PATH, JSON.stringify(index), "utf-8");
   indexCache = index;
 }
 
-/**
- * Save metadata to disk
- */
 function saveMetadata(data: Metadata): void {
   ensureSupportDir();
   writeFileSync(METADATA_PATH, JSON.stringify(data, null, 2), "utf-8");
   metadata = data;
 }
 
-/**
- * Filters for querying keys
- */
 export type SortOption = "name-asc" | "name-desc" | "created-desc" | "created-asc" | "modified-desc" | "modified-asc";
 
 export interface DatabaseFilters {
@@ -153,12 +129,9 @@ export interface DatabaseFilters {
   searchQuery?: string;
   searchInTranslations?: boolean;
   limit?: number; // Max results to return (default 200)
-  sortBy?: SortOption; // Sort option
+  sortBy?: SortOption;
 }
 
-/**
- * Get a single key by ID from the database
- */
 export async function getKeyById(keyId: number): Promise<ProcessedTranslationKey | null> {
   const index = loadIndex();
   const keyIndex = index.keys.find((k) => k.i === keyId);
@@ -173,14 +146,10 @@ export async function getKeyById(keyId: number): Promise<ProcessedTranslationKey
   return fullKey || null;
 }
 
-/**
- * Query all keys with optional filtering using the index
- */
 export async function getAllKeys(filters: DatabaseFilters = {}): Promise<ProcessedTranslationKey[]> {
   const index = loadIndex();
   let matchingIndices = index.keys;
 
-  // Filter by platforms
   if (filters.platforms && filters.platforms.length > 0) {
     matchingIndices = matchingIndices.filter((keyIndex) => {
       return filters.platforms!.some((platform) => keyIndex.p.includes(platform));
@@ -204,7 +173,6 @@ export async function getAllKeys(filters: DatabaseFilters = {}): Promise<Process
     matchingIndices = results.map((result) => result.item);
   }
 
-  // Sort the index before limiting
   if (filters.sortBy) {
     matchingIndices = matchingIndices.slice().sort((a, b) => {
       switch (filters.sortBy) {
@@ -230,11 +198,9 @@ export async function getAllKeys(filters: DatabaseFilters = {}): Promise<Process
     });
   }
 
-  // Apply limit to prevent loading too many results
   const limit = filters.limit || 200;
   matchingIndices = matchingIndices.slice(0, limit);
 
-  // Load chunks one at a time and find matching keys
   // Group by chunk to minimize chunk loads
   const chunkGroups = new Map<number, KeyIndex[]>();
   for (const keyIndex of matchingIndices) {
@@ -246,7 +212,7 @@ export async function getAllKeys(filters: DatabaseFilters = {}): Promise<Process
 
   const results: ProcessedTranslationKey[] = [];
 
-  // Process one chunk at a time to minimize memory usage
+  // Load chunks one at a time to minimize memory usage
   for (const [chunkIndex, keyIndices] of chunkGroups.entries()) {
     const chunk = loadChunk(chunkIndex);
 
@@ -285,9 +251,6 @@ export async function getAllKeys(filters: DatabaseFilters = {}): Promise<Process
   return results;
 }
 
-/**
- * Write a chunk of keys and update index (used during sync)
- */
 export async function writeChunk(keys: ProcessedTranslationKey[], chunkIndex: number): Promise<void> {
   saveChunk(keys, chunkIndex);
 
@@ -308,33 +271,26 @@ export async function writeChunk(keys: ProcessedTranslationKey[], chunkIndex: nu
   saveIndex(index);
 }
 
-/**
- * Add a single key to the database (used after creating a new key)
- */
 export async function addSingleKey(key: ProcessedTranslationKey): Promise<void> {
   const index = loadIndex();
 
   // Find the last chunk or create a new one
   let lastChunkIndex = 0;
   if (index.keys.length > 0) {
-    // Get the max chunk index
     lastChunkIndex = Math.max(...index.keys.map((k) => k.c));
   }
 
-  // Load the last chunk to see if we can append to it
   let lastChunk = loadChunk(lastChunkIndex);
 
-  // If chunk is full or doesn't exist, create a new chunk
+  // If chunk is full, create a new chunk
   if (lastChunk.length >= 100) {
     lastChunkIndex++;
     lastChunk = [];
   }
 
-  // Add the new key to the chunk
   lastChunk.push(key);
   saveChunk(lastChunk, lastChunkIndex);
 
-  // Update index
   const newIndexEntry: KeyIndex = {
     i: key.keyId,
     n: key.keyName,
@@ -349,9 +305,6 @@ export async function addSingleKey(key: ProcessedTranslationKey): Promise<void> 
   saveIndex(index);
 }
 
-/**
- * Clear all data from the database
- */
 export async function clearDatabase(): Promise<void> {
   ensureSupportDir();
 
@@ -365,16 +318,12 @@ export async function clearDatabase(): Promise<void> {
     }
   }
 
-  // Clear index
   saveIndex({ keys: [] });
 
   indexCache = null;
   chunkCache.clear();
 }
 
-/**
- * Get the last sync timestamp
- */
 export async function getLastSyncTime(): Promise<number | null> {
   const meta = loadMetadata();
   return meta.lastSyncTime;

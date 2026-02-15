@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, Detail, Clipboard, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, Detail, Clipboard, Icon, open } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState, useRef, useEffect } from "react";
 import { createNoteFromTranscript, CreateNoteProgress, CreateNoteResult } from "./utils/granolaApi";
@@ -108,7 +108,11 @@ ${markdownContent}`}
         navigationTitle={`Note: ${result.title}`}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open in Granola Web" url={result.noteUrl} icon={Icon.Globe} />
+            <Action
+              title="Open in Granola"
+              icon={Icon.Window}
+              onAction={() => open(`granola://open-document?document_id=${result.documentId}`)}
+            />
             <Action.CopyToClipboard title="Copy Note URL" content={result.noteUrl} icon={Icon.CopyClipboard} />
             <Action.CopyToClipboard title="Copy Notes as Markdown" content={markdownContent} icon={Icon.Document} />
             <Action.CopyToClipboard title="Copy Notes as Html" content={result.summaryContent} icon={Icon.CodeBlock} />

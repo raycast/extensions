@@ -2,18 +2,28 @@ import * as Types from "./types";
 import * as React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getProgressIcon, usePromise, useLocalStorage } from "@raycast/utils";
-import { DeleteModel, DeleteServer, GetModels, UpdateModel } from "./function";
+import { DeleteModel, DeleteServer, GetModels, LoadModel, UnloadModel, UpdateModel } from "./function";
 import { Shortcut } from "../shortcut";
 import { FormPullModel } from "./form/PullModel";
 import { FormEditServer } from "./form/EditServer";
-import { GetServerArray } from "../function";
+import { FormatOllamaPsModelExpireAtFormat, GetServerArray } from "../function";
 import { GetOllamaServers } from "../../settings/settings";
+
+const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+
+const IconsCapabilities: Record<string, Icon> = {
+  completion: Icon.SpeechBubbleActive,
+  vision: Icon.Eye,
+  thinking: Icon.Glasses,
+  tools: Icon.Hammer,
+  image: Icon.Brush,
+};
 
 /**
  * Return JSX element for managing Ollama models.
- * @returns {JSX.Element} Raycast Model View.
+ * @returns {React.JSX.Element} Raycast Model View.
  */
-export function ModelView() {
+export function ModelView(): React.JSX.Element {
   const abort = React.useRef(new AbortController());
   const {
     value: SelectedServer,
@@ -33,7 +43,7 @@ export function ModelView() {
   ] = React.useState([] as Types.UiModelDownload[]);
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
-  function SearchBarAccessory() {
+  function SearchBarAccessory(): React.JSX.Element {
     return (
       <List.Dropdown
         tooltip="Available Server"
@@ -50,7 +60,7 @@ export function ModelView() {
    * @param model
    * @returns List.Item.Detail
    */
-  function ModelDetail(prop: { model: Types.UiModel }) {
+  function ModelDetail(prop: { model: Types.UiModel }): React.JSX.Element {
     return (
       <List.Item.Detail
         metadata={
@@ -60,7 +70,7 @@ export function ModelView() {
             {prop.model.show.capabilities && prop.model.show.capabilities.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Capabilities">
                 {prop.model.show.capabilities.map((c) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={c} color={Color.Purple} />
+                  <List.Item.Detail.Metadata.TagList.Item icon={IconsCapabilities[c]} text={c} color={Color.Purple} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
@@ -79,7 +89,7 @@ export function ModelView() {
             <List.Item.Detail.Metadata.Label
               title="Modified At"
               icon={Icon.Calendar}
-              text={prop.model.detail.modified_at}
+              text={new Date(prop.model.detail.modified_at).toLocaleString(locale)}
             />
             <List.Item.Detail.Metadata.Label
               title="Size"
@@ -87,7 +97,16 @@ export function ModelView() {
               text={`${(prop.model.detail.size / 1e9).toPrecision(2).toString()} GB`}
             />
             {prop.model.ps && (
-              <List.Item.Detail.Metadata.Label title="Memory freed at" text={prop.model.ps.expires_at} />
+              <React.Fragment>
+                <List.Item.Detail.Metadata.Label
+                  title="Context Length"
+                  text={`${prop.model.ps.context_length.toLocaleString(locale)}`}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Memory freed at"
+                  text={new Date(prop.model.ps.expires_at).toLocaleString(locale)}
+                />
+              </React.Fragment>
             )}
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="System Prompt" text={prop.model.show.system} />
@@ -115,7 +134,7 @@ export function ModelView() {
    * @param model
    * @returns ActionPanel
    */
-  function ModelAction(prop: { model: Types.UiModel }) {
+  function ModelAction(prop: { model: Types.UiModel }): React.JSX.Element {
     return (
       <ActionPanel>
         <ActionPanel.Section title="Ollama Model">
@@ -130,6 +149,22 @@ export function ModelView() {
             content={prop.model.detail.name as string}
             shortcut={Shortcut.Copy}
           />
+          {!prop.model.ps && (
+            <Action
+              title="Load Model on Memory"
+              icon={Icon.Upload}
+              onAction={() => LoadModel(prop.model, RevalidateModels)}
+              shortcut={Shortcut.LoadUnloadModel}
+            />
+          )}
+          {prop.model.ps && (
+            <Action
+              title="Unload Model From Memory"
+              icon={Icon.Eject}
+              onAction={() => UnloadModel(prop.model, RevalidateModels)}
+              shortcut={Shortcut.LoadUnloadModel}
+            />
+          )}
           <Action
             title="Update Model"
             icon={Icon.Repeat}
@@ -177,11 +212,28 @@ export function ModelView() {
     );
   }
 
-  function ModelAccessories(SelectedServer: string | undefined, Model: Types.UiModel) {
-    const accessories = [];
-
-    if (SelectedServer === "All") accessories.push({ tag: Model.server.name, icon: Icon.HardDrive });
-    if (Model.ps) accessories.push({ tag: { color: Color.Green, value: "In Memory" } });
+  function ModelAccessories(SelectedServer: string | undefined, Model: Types.UiModel): List.Item.Accessory[] {
+    const accessories: List.Item.Accessory[] = [];
+    /* Ollama Server Name */
+    if (SelectedServer === "All") {
+      accessories.push({ tag: Model.server.name, icon: Icon.HardDrive });
+      /* Skip other accessories if details are showed */
+      if (showDetail) return accessories;
+    }
+    /* Model Ps Data */
+    if (Model.ps) {
+      accessories.push({ tag: { color: Color.Green, value: "In Memory" } });
+      /* Skip other accessories if details are showed */
+      if (showDetail) return accessories;
+      accessories.push({
+        tag: { color: Color.PrimaryText, value: `${(Model.ps.size_vram / 1e9).toPrecision(2).toString()} GB` },
+        icon: Icon.MemoryChip,
+      });
+      accessories.push({
+        tag: { color: Color.PrimaryText, value: FormatOllamaPsModelExpireAtFormat(Model.ps.expires_at) },
+        icon: Icon.Hourglass,
+      });
+    }
 
     return accessories;
   }

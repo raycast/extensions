@@ -23,9 +23,9 @@ export default function Functions({ searchBarAccessory }: FunctionsProps) {
     <ListViewController<FunctionItem>
       commandName="Functions"
       navigationTitle="Functions"
-      searchPlaceholder="Search functions..."
+      searchPlaceholder="Search Functions..."
       icon={Icon.Code}
-      tintColor={MODERN_COLORS.primary}
+      tintColor={MODERN_COLORS.purple}
       itemType="function"
       itemTypePlural="functions"
       parser={parseFunctions}
@@ -87,7 +87,7 @@ Function bodies are not parsed from the zshrc file. Use the "Open ~/.Zshrc" acti
             text={func.name}
             icon={{
               source: Icon.Code,
-              tintColor: MODERN_COLORS.primary,
+              tintColor: MODERN_COLORS.purple,
             }}
           />
           <List.Item.Detail.Metadata.Label

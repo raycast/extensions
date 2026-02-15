@@ -5,8 +5,8 @@
  * section statistics (alias counts, export counts, etc.)
  */
 
-import { Icon, List } from "@raycast/api";
-import { LogicalSection } from "../lib/parse-zshrc";
+import { Icon, type List } from "@raycast/api";
+import type { LogicalSection } from "../lib/parse-zshrc";
 import { MODERN_COLORS } from "../constants";
 
 /**
@@ -29,39 +29,33 @@ export function generateSectionAccessories(section: LogicalSection): List.Item.A
   }
 
   if (section.exportCount > 0) {
-    accessories.push(
-      {
-        icon: {
-          source: Icon.Box,
-          tintColor: MODERN_COLORS.primary,
-        },
+    accessories.push({
+      icon: {
+        source: Icon.Upload,
+        tintColor: MODERN_COLORS.primary,
       },
-      { text: `${section.exportCount}` },
-    );
+      text: `${section.exportCount}`,
+    });
   }
 
   if (section.functionCount > 0) {
-    accessories.push(
-      {
-        icon: {
-          source: Icon.Code,
-          tintColor: MODERN_COLORS.primary,
-        },
+    accessories.push({
+      icon: {
+        source: Icon.Code,
+        tintColor: MODERN_COLORS.purple,
       },
-      { text: `${section.functionCount}` },
-    );
+      text: `${section.functionCount}`,
+    });
   }
 
   if (section.pluginCount > 0) {
-    accessories.push(
-      {
-        icon: {
-          source: Icon.Box,
-          tintColor: MODERN_COLORS.warning,
-        },
+    accessories.push({
+      icon: {
+        source: Icon.Plug,
+        tintColor: MODERN_COLORS.warning,
       },
-      { text: `${section.pluginCount}` },
-    );
+      text: `${section.pluginCount}`,
+    });
   }
 
   return accessories;

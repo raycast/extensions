@@ -6,10 +6,6 @@ interface SearchTranslationKeysArgs {
   platform?: Platform;
 }
 
-/**
- * AI Tool: Search for translation keys in Lokalise
- * This tool allows Raycast AI to search through existing translation keys
- */
 export default async function SearchTranslationKeys(args: SearchTranslationKeysArgs) {
   try {
     const { query, platform } = args;
@@ -21,12 +17,11 @@ export default async function SearchTranslationKeys(args: SearchTranslationKeysA
       };
     }
 
-    // Search in the local database for fast results
     const keys = await client.listKeysFromDatabase({
       searchQuery: query,
       platforms: platform ? [platform] : undefined,
       searchInTranslations: true,
-      limit: 20, // Limit results for AI context
+      limit: 20,
     });
 
     if (keys.length === 0) {
@@ -37,7 +32,6 @@ export default async function SearchTranslationKeys(args: SearchTranslationKeysA
       };
     }
 
-    // Format results for AI consumption
     const formattedKeys = keys.map((key) => ({
       keyName: key.keyName,
       defaultTranslation: key.defaultTranslation,

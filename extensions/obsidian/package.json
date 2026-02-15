@@ -19,7 +19,8 @@
     "denis_ufimtsev",
     "sapoepsilon",
     "theherk",
-    "chris_van_es"
+    "chris_van_es",
+    "vicampuzano"
   ],
   "license": "MIT",
   "preferences": [
@@ -622,6 +623,13 @@
           "type": "checkbox"
         }
       ]
+    },
+    {
+      "name": "runActionCommand",
+      "title": "Custom Actions",
+      "subtitle": "Obsidian",
+      "description": "Manage and run custom append actions",
+      "mode": "view"
     }
   ],
   "tools": [

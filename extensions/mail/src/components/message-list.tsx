@@ -87,8 +87,10 @@ export const MessageList = (props: MessageListProps) => {
   );
 };
 
-export const MessageListItem = (props: MessageProps) => {
-  const { message } = props;
+export type MessageListItemProps = MessageProps & { onRefresh?: () => void };
+
+export const MessageListItem = (props: MessageListItemProps) => {
+  const { message, onRefresh } = props;
 
   return (
     <List.Item
@@ -105,7 +107,7 @@ export const MessageListItem = (props: MessageProps) => {
         { text: shortenText(message.senderName, 20), icon: Icon.PersonCircle },
         isValidDate(message.date) ? { text: toRelative(message.date), icon: Icon.Calendar } : {},
       ]}
-      actions={<MessageActions {...props} />}
+      actions={<MessageActions {...props} onRefresh={onRefresh} />}
     />
   );
 };

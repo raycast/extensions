@@ -1,5 +1,13 @@
 # Terminal Finder Changelog
 
+## [Better "Finder" Errors] - 2026-01-12
+
+- Show a better error message when no **Finder** window open or when trying to pass non-filesystem folder (e.g. **Recents**) (ref: [Issue #24386](https://github.com/raycast/extensions/issues/24386))
+
+## [Fix Kitty Casing] - 2026-01-12
+
+- Fix "Kitty" terminal not working due to different casing (ref: [Issue #24377](https://github.com/raycast/extensions/issues/24377))
+
 ## [Enhancements] - 2026-01-05
 
 - A new quick command to jump from X to Y

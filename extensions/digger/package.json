@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "digger",
+  "title": "Digger",
+  "description": "Like dig but for the web. Comprehensive website intelligence and metadata extraction.",
+  "icon": "digger.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "crossExtensions": [
+    "pernielsentikaer/wayback-machine"
+  ],
+  "preferences": [
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "description": "Enable extra diagnostics for troubleshooting and bug reports.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "digger",
+      "title": "Digger",
+      "subtitle": "Digger",
+      "description": "Get comprehensive website intelligence and metadata",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://raycast.com",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "autoLoadUrlFromClipboard",
+          "title": "Auto Load URL from Clipboard",
+          "description": "Automatically load the URL from the clipboard when the command is executed",
+          "type": "checkbox",
+          "label": "Enable",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "autoLoadUrlFromSelectedText",
+          "title": "Auto Load URL from Selected Text",
+          "description": "Automatically load the URL from the selected text when the command is executed",
+          "type": "checkbox",
+          "label": "Enable",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "enableBrowserExtensionSupport",
+          "title": "Enable Browser Extension Support",
+          "description": "Automatically load the URL from the active browser tab when the command is executed",
+          "type": "checkbox",
+          "label": "Enable",
+          "default": false,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.2.1",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "cheerio": "^1.1.2",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

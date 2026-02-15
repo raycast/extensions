@@ -222,7 +222,7 @@ async function GetImageFromFile(file: string): Promise<RaycastImage> {
   if (!file.match(/(file:)?([/|.|\w|\s|-])/g)) throw new Error("Only PNG and JPG are supported");
   file = file.replace("file://", "");
   const buffer = fs.readFileSync(decodeURI(file));
-  const fileType = await fileTypeFromBuffer(buffer);
+  const fileType = await fileTypeFromBuffer(new Uint8Array(buffer));
   if (fileType && (fileType.mime === "image/jpeg" || fileType.mime === "image/png")) {
     return {
       path: file,

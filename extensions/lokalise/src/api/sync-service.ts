@@ -22,17 +22,10 @@ interface SyncState {
 let syncState: SyncState = { status: "idle" };
 let backgroundSyncTimer: NodeJS.Timeout | null = null;
 
-/**
- * Get the current sync status
- */
 export function getSyncStatus(): SyncState {
   return { ...syncState };
 }
 
-/**
- * Sync all keys from Lokalise to the local database
- * Fetches keys in batches and stores them in a transaction
- */
 export async function syncFromLokalise(
   onProgress?: (current: number, total: number) => void,
 ): Promise<{ success: boolean; error?: Error; keysCount: number }> {
@@ -44,22 +37,18 @@ export async function syncFromLokalise(
   syncState = { status: "syncing" };
 
   try {
-    // Clear existing data before fetching new data
     await clearDatabase();
 
-    // Fetch keys page by page, process in smaller batches
     let page = 1;
     let hasMore = true;
     let totalProcessed = 0;
 
-    // Write keys in chunks to separate files
     let currentBatch: ProcessedTranslationKey[] = [];
     let chunkIndex = 0;
 
     while (hasMore) {
       console.log(`Fetching page ${page} with limit ${LOKALISE_API_PAGE_SIZE}...`);
 
-      // Fetch one page at a time
       let keys = await client.listKeys({
         limit: LOKALISE_API_PAGE_SIZE,
         page,
@@ -76,7 +65,6 @@ export async function syncFromLokalise(
         break;
       }
 
-      // Process keys from this page
       let processed = client.processKeys(keys, getLanguageName);
 
       // Clear raw keys from memory immediately
@@ -93,7 +81,6 @@ export async function syncFromLokalise(
           currentBatch = []; // Clear batch to free memory
         }
 
-        // Update progress periodically
         if (totalProcessed % CHUNK_SIZE === 0) {
           const estimatedTotal = totalProcessed + (keysCount === LOKALISE_API_PAGE_SIZE ? LOKALISE_API_PAGE_SIZE : 0);
           onProgress?.(totalProcessed, estimatedTotal);
@@ -127,10 +114,9 @@ export async function syncFromLokalise(
       return { success: true, keysCount: 0 };
     }
 
-    // Update last sync time
     await setLastSyncTime(Date.now());
 
-    // Force cache invalidation so next read loads all chunks
+    // Force cache invalidation so next read loads fresh data
     invalidateCache();
 
     syncState = { status: "idle" };
@@ -143,15 +129,9 @@ export async function syncFromLokalise(
   }
 }
 
-/**
- * Start background sync with a specified interval
- * @param intervalMinutes - Interval in minutes between syncs
- */
 export function startBackgroundSync(intervalMinutes: number = DEFAULT_BACKGROUND_SYNC_INTERVAL_MINUTES): void {
-  // Clear any existing timer
   stopBackgroundSync();
 
-  // Set up new timer
   backgroundSyncTimer = setInterval(
     () => {
       // Only sync if not already syncing
@@ -165,9 +145,6 @@ export function startBackgroundSync(intervalMinutes: number = DEFAULT_BACKGROUND
   );
 }
 
-/**
- * Stop background sync
- */
 export function stopBackgroundSync(): void {
   if (backgroundSyncTimer) {
     clearInterval(backgroundSyncTimer);
@@ -175,9 +152,6 @@ export function stopBackgroundSync(): void {
   }
 }
 
-/**
- * Check if an initial sync is needed (database is empty)
- */
 export async function needsInitialSync(): Promise<boolean> {
   return !(await hasKeys());
 }

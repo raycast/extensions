@@ -1,6 +1,6 @@
 # Genius Lyrics Changelog
 
-## [Add Metadata Details] - {PR_MERGE_DATE}
+## [Add Metadata Details] - 2026-01-05
 - Add artist, album, release date, producers, and writers metadata about the currently displayed lyrics.
 - Add Windows support.
 

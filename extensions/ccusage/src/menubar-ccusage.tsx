@@ -2,13 +2,22 @@ import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@rayc
 import { useDailyUsage } from "./hooks/useDailyUsage";
 import { useMonthlyUsage } from "./hooks/useMonthlyUsage";
 import { useTotalUsage } from "./hooks/useTotalUsage";
+import { useClaudeUsageLimits } from "./hooks/useClaudeUsageLimits";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
+import { formatTimeRemaining } from "./utils/usage-limits-formatter";
 import { TotalUsageData } from "./types/usage-types";
 
 export default function MenuBarccusage() {
   const { data: todayUsage, isLoading: dailyLoading, error: dailyError } = useDailyUsage();
   const { data: monthlyUsage, isLoading: monthlyLoading, error: monthlyError } = useMonthlyUsage();
   const { data: totalUsage, isLoading: totalLoading, error: totalError } = useTotalUsage();
+  const {
+    data: limitsData,
+    isLoading: limitsLoading,
+    error: limitsError,
+    isStale,
+    revalidate,
+  } = useClaudeUsageLimits();
 
   const hasError = dailyError || monthlyError || totalError;
   const isLoading = dailyLoading || monthlyLoading || totalLoading;
@@ -97,6 +106,44 @@ export default function MenuBarccusage() {
               icon={Icon.Coins}
               onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
             />
+          </MenuBarExtra.Section>
+
+          <MenuBarExtra.Section title="Usage Limits">
+            {limitsError && !limitsData && (
+              <MenuBarExtra.Item
+                title="Unable to fetch limits"
+                subtitle="Check Claude Code authentication"
+                icon={Icon.ExclamationMark}
+                onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+              />
+            )}
+            {limitsData && (
+              <>
+                <MenuBarExtra.Item
+                  title={`5-Hour: ${limitsData.five_hour.utilization.toFixed(0)}%`}
+                  subtitle={`Resets in ${formatTimeRemaining(limitsData.five_hour.resets_at)}${isStale ? " ⚠️ " : ""}`}
+                  icon={Icon.Gauge}
+                  onAction={revalidate}
+                />
+                <MenuBarExtra.Item
+                  title={`7-Day: ${limitsData.seven_day.utilization.toFixed(0)}%`}
+                  subtitle={`Resets in ${formatTimeRemaining(limitsData.seven_day.resets_at)}${isStale ? " ⚠️" : ""}`}
+                  icon={Icon.Gauge}
+                  onAction={revalidate}
+                />
+                {isStale && (
+                  <MenuBarExtra.Item
+                    title="Refresh Limits"
+                    subtitle="Data may be stale"
+                    icon={Icon.ArrowClockwise}
+                    onAction={revalidate}
+                  />
+                )}
+              </>
+            )}
+            {!limitsData && !limitsError && limitsLoading && (
+              <MenuBarExtra.Item title="Loading limits..." icon={Icon.Clock} />
+            )}
           </MenuBarExtra.Section>
         </>
       )}

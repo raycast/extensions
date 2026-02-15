@@ -1,8 +1,8 @@
 import { AI, Action, ActionPanel, Grid, LaunchProps } from "@raycast/api";
 import { showFailureToast, useAI } from "@raycast/utils";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
-import { addToHistory } from "./history";
-import { getFormattedColor, getPreviewColor } from "./utils";
+import { addToHistory } from "./lib/history";
+import { getFormattedColor, getPreviewColor } from "./lib/utils";
 
 export default function GenerateColors(props: LaunchProps<{ arguments: Arguments.GenerateColors }>) {
   const { data, isLoading } = useAI(
@@ -20,7 +20,7 @@ Examples:
 Prompt: ${props.arguments.prompt}
 JSON colors:`,
     {
-      model: AI.Model.OpenAI_GPT4o,
+      model: AI.Model["OpenAI_GPT-5_mini"],
       stream: false,
     },
   );

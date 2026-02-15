@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { WebsocketBuilder, Websocket, LinearBackoff } from "websocket-ts";
-
 import {
   type Artist,
   type Album,
@@ -15,13 +13,9 @@ import {
   type QueueItem,
   QueueOption,
   type ProviderInstance,
-  type MassEvent,
   EventType,
-  type EventMessage,
   type ServerInfoMessage,
-  type SuccessResultMessage,
   type ErrorResultMessage,
-  type CommandMessage,
   type SyncTask,
   RepeatMode,
   SearchResults,
@@ -50,11 +44,11 @@ export enum ConnectionState {
   CONNECTED = 2,
 }
 /**
- * ripped and adapted from https://github.com/music-assistant/frontend/blob/main/src/plugins/api/index.ts
+ * REST API client for Music Assistant
+ * Adapted from https://github.com/music-assistant/frontend/blob/main/src/plugins/api/index.ts
+ * Uses HTTP REST API instead of WebSocket for simpler integration with Raycast
  */
 export class MusicAssistantApi {
-  private ws?: Websocket;
-  private commandCounter = 0;
   private authToken?: string;
   public baseUrl?: string;
   public state: ConnectionState = ConnectionState.DISCONNECTED;
@@ -64,162 +58,96 @@ export class MusicAssistantApi {
   public providers: { [instance_id: string]: ProviderInstance } = {};
   public providerManifests: { [domain: string]: ProviderManifest } = {};
   public syncTasks: SyncTask[] = [];
-  public fetchesInProgress: string[] = [];
+
   public get hasStreamingProviders() {
     return Object.values(this.providers).some((p) => p.is_streaming_provider);
   }
-  private eventCallbacks: Array<[EventType, string, CallableFunction]>;
-  private partialResult: { [msg_id: string]: Array<any> };
-  private commands: Map<
-    string,
-    {
-      resolve: (result?: any) => void;
-      reject: (err: any) => void;
-    }
-  >;
 
-  constructor(private debug = false) {
-    this.eventCallbacks = [];
-    this.commands = new Map();
-    this.partialResult = {};
-  }
+  constructor(private debug = false) {}
+
   private log(...args: any[]) {
     if (this.debug) {
       console.log("[MusicAssistantApi]", ...args);
     }
   }
+
   public close() {
-    this.ws?.close();
+    // No-op for REST API, kept for compatibility
   }
 
   public initialize(baseUrl: string, authToken: string) {
-    if (this.ws) throw new Error("already initialized");
+    if (this.state === ConnectionState.CONNECTED) throw new Error("already initialized");
     if (!authToken) throw new Error("Authentication token is required");
     if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
     this.authToken = authToken;
     this.baseUrl = baseUrl;
-    const wsUrl = baseUrl.replace("http", "ws") + "/ws";
-    this.log(`Connecting to Music Assistant API ${wsUrl}`);
-    this.state = ConnectionState.CONNECTING;
-    let isAuthenticated = false;
-    let authMessageId: string | null = null;
-    let pendingServerInfo: ServerInfoMessage | null = null;
-    // connect to the websocket api
-    const wsBuilder = new WebsocketBuilder(wsUrl)
-      .onOpen((i, ev) => {
-        this.log("connection opened");
-        isAuthenticated = false;
-        authMessageId = null;
-        pendingServerInfo = null;
-        // state is updated on first message to be sure data is coming in
-      })
-      .onClose((i, ev) => {
-        this.log("connection closed");
-        this.state = ConnectionState.DISCONNECTED;
-        this.signalEvent({
-          event: EventType.DISCONNECTED,
-          object_id: "",
-        });
-      })
-      .onError((i, ev) => {
-        this.log("error on connection", ev);
-        this.state = ConnectionState.DISCONNECTED;
-        this.signalEvent({
-          event: EventType.Error,
-          object_id: "",
-          data: (ev as ErrorEvent).error,
-        });
-      })
-      .onMessage((i, ev) => {
-        // Message retrieved on the websocket
-        const msg = JSON.parse(ev.data);
-        if ("server_version" in msg && !pendingServerInfo && !isAuthenticated) {
-          pendingServerInfo = msg as ServerInfoMessage;
-          authMessageId = this._genCmdId();
-          const authCommand: CommandMessage = {
-            command: "auth",
-            message_id: authMessageId,
-            args: { token: this.authToken },
-          };
-          this.log("sending auth command", authMessageId);
-          i.send(JSON.stringify(authCommand));
-          return;
-        }
-
-        if (authMessageId && !isAuthenticated && "message_id" in msg && msg.message_id === authMessageId) {
-          if ("error_code" in msg || "error" in msg) {
-            const err =
-              (msg as ErrorResultMessage).details || (msg as ErrorResultMessage).error_code || (msg as any).error;
-            this.log("authentication failed", msg);
-            this.state = ConnectionState.DISCONNECTED;
-            this.signalEvent({
-              event: EventType.Error,
-              object_id: "",
-              data: err ?? "Authentication failed",
-            });
-            this.ws?.close();
-            return;
-          }
-          isAuthenticated = true;
-          if (pendingServerInfo) {
-            this.handleServerInfoMessage(pendingServerInfo);
-            pendingServerInfo = null;
-          }
-          return;
-        }
-
-        if (!isAuthenticated) {
-          this.log("received message before authentication", msg);
-          return;
-        }
-
-        if ("event" in msg) {
-          this.handleEventMessage(msg as EventMessage);
-        } else if ("server_version" in msg) {
-          this.handleServerInfoMessage(msg as ServerInfoMessage);
-        } else if ("message_id" in msg) {
-          this.handleResultMessage(msg);
-        } else {
-          // unknown message received
-          console.error("received unknown message", msg);
-        }
-      })
-      .onRetry((i, ev) => {
-        this.log("retry");
-        this.state = ConnectionState.CONNECTING;
-      })
-      .withBackoff(new LinearBackoff(0, 1000, 2000));
-    this.ws = wsBuilder.build();
+    this.state = ConnectionState.CONNECTED;
+    this.log(`Connected to Music Assistant API at ${baseUrl}`);
   }
 
-  public subscribe(eventFilter: EventType, callback: CallableFunction, object_id: string = "*") {
-    // subscribe a listener for events
-    // returns handle to remove the listener
-    const listener: [EventType, string, CallableFunction] = [eventFilter, object_id, callback];
-    this.eventCallbacks.push(listener);
-    const removeCallback = () => {
-      const index = this.eventCallbacks.indexOf(listener);
-      if (index > -1) {
-        this.eventCallbacks.splice(index, 1);
+  /**
+   * Send a command to the Music Assistant REST API
+   * @param command - The command to execute (e.g., "players/all")
+   * @param args - Optional arguments for the command
+   * @returns Promise with the command result
+   */
+  public async sendCommand<Result>(command: string, args?: Record<string, any>): Promise<Result> {
+    if (!this.baseUrl || !this.authToken) {
+      throw new Error("API not initialized");
+    }
+
+    const url = `${this.baseUrl}/api`;
+    const body = JSON.stringify({ command, args: args || {} });
+
+    this.log("[sendCommand]", { command, args });
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+          "Content-Type": "application/json",
+        },
+        body,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
-    };
-    return removeCallback;
+
+      const data = await response.json();
+
+      if (data && typeof data === "object" && ("error_code" in data || "error" in data)) {
+        const err = (data as ErrorResultMessage).details || (data as ErrorResultMessage).error_code || data.error;
+        throw new Error(err || "Unknown API error");
+      }
+
+      this.log("[sendCommand] response", data);
+      return data?.result || data;
+    } catch (error) {
+      this.log("[sendCommand] error", error);
+      throw error;
+    }
+  }
+
+  // Legacy methods - no-op for REST API but kept for compatibility
+  public subscribe(eventFilter: EventType, callback: CallableFunction, object_id: string = "*") {
+    // No-op for REST API (events not supported)
+    return () => {}; // Return no-op unsubscribe function
   }
 
   public subscribe_multi(eventFilters: EventType[], callback: CallableFunction, object_id: string = "*") {
-    // subscribe a listener for multiple events
-    // returns handle to remove the listener
-    const removeCallbacks: CallableFunction[] = [];
-    for (const eventFilter of eventFilters) {
-      removeCallbacks.push(this.subscribe(eventFilter, callback, object_id));
-    }
-    const removeCallback = () => {
-      for (const cb of removeCallbacks) {
-        cb();
-      }
-    };
-    return removeCallback;
+    // No-op for REST API (events not supported)
+    return () => {}; // Return no-op unsubscribe function
   }
+
+  // Library functions - now using REST API
+
+  /* PLACEHOLDER_START - WebSocket code removed */
+  /* This section previously contained WebSocket connection handling */
+  /* Now replaced with simple REST API calls via sendCommand() */
+  /* PLACEHOLDER_END */
 
   public getLibraryTracks(
     favorite?: boolean,
@@ -801,18 +729,18 @@ export class MusicAssistantApi {
     // Toggle dont_stop_the_music mode of a queue
     this.queueCommandDontStopTheMusic(queueId, !this.queues[queueId].dont_stop_the_music_enabled);
   }
-  public playerQueueCommand(queue_id: string, command: string, args?: Record<string, any>) {
+  public playerQueueCommand(queue_id: string, command: string, args?: Record<string, any>): Promise<void> {
     /*
-      Handle (throttled) command to player
+      Handle command to player queue
     */
-    this._sendCommand(`player_queues/${command}`, {
+    return this.sendCommand(`player_queues/${command}`, {
       queue_id,
       ...args,
     });
   }
-  public queueCommandTransfer(sourceQueue: string, targetQueue: string, autoPlay?: boolean) {
+  public queueCommandTransfer(sourceQueue: string, targetQueue: string, autoPlay?: boolean): Promise<void> {
     // Transfer queue to another queue.
-    this._sendCommand("player_queues/transfer", {
+    return this.sendCommand("player_queues/transfer", {
       source_queue_id: sourceQueue,
       target_queue_id: targetQueue,
       auto_play: autoPlay,
@@ -869,7 +797,6 @@ export class MusicAssistantApi {
     await this.playerCommand(playerId, "volume_set", {
       volume_level: newVolume,
     });
-    this.players[playerId].volume_level = newVolume;
   }
   public playerCommandVolumeUp(playerId: string): Promise<void> {
     return this.playerCommand(playerId, "volume_up");
@@ -881,7 +808,6 @@ export class MusicAssistantApi {
     await this.playerCommand(playerId, "volume_mute", {
       muted,
     });
-    this.players[playerId].volume_muted = muted;
   }
 
   public playerCommandMuteToggle(playerId: string): Promise<void> {
@@ -1237,195 +1163,5 @@ export class MusicAssistantApi {
       return this.providerManifests[prov.domain];
     }
     return undefined;
-  }
-
-  private handleEventMessage(msg: EventMessage) {
-    // Handle incoming MA event message
-    if (msg.event == EventType.QUEUE_ADDED) {
-      const queue = msg.data as PlayerQueue;
-      this.queues[queue.queue_id] = queue;
-    } else if (msg.event == EventType.QUEUE_UPDATED) {
-      const queue = msg.data as PlayerQueue;
-      if (queue.queue_id in this.queues) Object.assign(this.queues[queue.queue_id], queue);
-      else this.queues[queue.queue_id] = queue;
-    } else if (msg.event == EventType.QUEUE_TIME_UPDATED) {
-      const queueId = msg.object_id as string;
-      if (queueId in this.queues) this.queues[queueId].elapsed_time = msg.data as unknown as number;
-    } else if (msg.event == EventType.PLAYER_ADDED) {
-      const player = msg.data as Player;
-      this.players[player.player_id] = player;
-    } else if (msg.event == EventType.PLAYER_UPDATED) {
-      const player = msg.data as Player;
-      if (player.player_id in this.players) Object.assign(this.players[player.player_id], player);
-      else this.players[player.player_id] = player;
-    } else if (msg.event == EventType.PLAYER_REMOVED) {
-      delete this.players[msg.object_id!];
-      delete this.queues[msg.object_id!];
-    } else if (msg.event == EventType.SYNC_TASKS_UPDATED) {
-      this.syncTasks = msg.data as SyncTask[];
-    } else if (msg.event == EventType.PROVIDERS_UPDATED) {
-      const providers: { [instance_id: string]: ProviderInstance } = {};
-      for (const prov of msg.data as ProviderInstance[]) {
-        providers[prov.instance_id] = prov;
-      }
-      this.providers = providers;
-    }
-    // signal + log all events
-    if (msg.event !== EventType.QUEUE_TIME_UPDATED) {
-      this.log("[event]", msg);
-    }
-    this.signalEvent(msg);
-  }
-
-  private handleResultMessage(msg: SuccessResultMessage | ErrorResultMessage) {
-    // Handle result of a command
-    if (msg.message_id === undefined || msg.message_id === null) {
-      console.error("[resultMessage] Missing message_id", msg);
-      return;
-    }
-    const messageId = String(msg.message_id);
-    const resultPromise = this.commands.get(messageId);
-
-    if ("error_code" in msg) {
-      // always handle error (as we may be missing a resolve promise for this command)
-      msg = msg as ErrorResultMessage;
-      console.error("[resultMessage]", msg);
-    } else if (this.debug) {
-      this.log("[resultMessage]", msg);
-    }
-
-    if (!resultPromise) return;
-
-    if ("partial" in msg && msg.partial) {
-      // handle partial results (for large listings that are split in multiple messages)
-      if (!(messageId in this.partialResult)) {
-        this.partialResult[messageId] = [];
-      }
-      this.partialResult[messageId].push(...msg.result);
-      return;
-    } else if (messageId in this.partialResult) {
-      // if we have partial results, append them to the final result
-      if ("result" in msg) msg.result = this.partialResult[messageId].concat(msg.result);
-      delete this.partialResult[messageId];
-    }
-
-    this.commands.delete(messageId);
-    this.fetchesInProgress = this.fetchesInProgress.filter((x) => x != messageId);
-
-    if ("error_code" in msg) {
-      resultPromise.reject(msg.details || msg.error_code);
-    } else {
-      msg = msg as SuccessResultMessage;
-      resultPromise.resolve(msg.result);
-    }
-  }
-
-  private handleServerInfoMessage(msg: ServerInfoMessage) {
-    // Handle ServerInfo message which is sent as first message on connect
-    if (this.debug) {
-      this.log("[serverInfo]", msg);
-    }
-    this.serverInfo = msg;
-    this.state = ConnectionState.CONNECTED;
-    void this._fetchState();
-    this.signalEvent({
-      event: EventType.CONNECTED,
-      object_id: "",
-      data: msg,
-    });
-  }
-
-  private signalEvent(evt: MassEvent) {
-    // signal event to all listeners
-    for (const listener of this.eventCallbacks) {
-      if (listener[0] === EventType.ALL || listener[0] === evt.event) {
-        if (listener[1] == "*" || listener[1] === evt.object_id) {
-          listener[2](evt);
-        }
-      }
-    }
-  }
-
-  public sendCommand<Result>(command: string, args?: Record<string, any>): Promise<Result> {
-    // send command to the server and return promise where the result can be returned
-    const cmdId = this._genCmdId();
-    return new Promise((resolve, reject) => {
-      this.commands.set(cmdId, { resolve, reject });
-      this.fetchesInProgress.push(cmdId);
-      this._sendCommand(command, args, cmdId);
-    });
-  }
-
-  private _sendCommand(command: string, args?: Record<string, any>, msgId?: string): void {
-    if (this.state !== ConnectionState.CONNECTED) {
-      throw new Error(`Connection lost, currently ${ConnectionState[this.state]}, command: ${command}`);
-    }
-
-    if (!msgId) {
-      msgId = this._genCmdId();
-    }
-
-    const msg: CommandMessage = {
-      command: command,
-      message_id: msgId,
-      args,
-    };
-
-    this.log("[sendCommand]", msg);
-
-    this.ws!.send(JSON.stringify(msg));
-  }
-
-  private async _fetchState() {
-    try {
-      const [players, queues, manifests, providers, syncTasks] = await Promise.all([
-        this.getPlayers(),
-        this.getPlayerQueues(),
-        this.sendCommand<ProviderManifest[]>("providers/manifests"),
-        this.sendCommand<ProviderInstance[]>("providers"),
-        this.sendCommand<SyncTask[]>("music/synctasks"),
-      ]);
-
-      this.players = {};
-      for (const player of players) {
-        if (!player.available) continue;
-        this.players[player.player_id] = player;
-      }
-
-      this.queues = {};
-      for (const queue of queues) {
-        this.queues[queue.queue_id] = queue;
-      }
-
-      this.providerManifests = {};
-      for (const manifest of manifests) {
-        this.providerManifests[manifest.domain] = manifest;
-      }
-
-      this.providers = {};
-      for (const provider of providers) {
-        this.providers[provider.instance_id] = provider;
-      }
-
-      this.syncTasks = syncTasks;
-    } catch (error) {
-      this.log("Failed to fetch initial state", error);
-    }
-  }
-
-  private _genCmdId(): string {
-    const cryptoObj = typeof globalThis !== "undefined" ? (globalThis as any).crypto : undefined;
-    if (cryptoObj?.randomUUID) {
-      return cryptoObj.randomUUID();
-    }
-    if (cryptoObj?.getRandomValues) {
-      return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c: string) => {
-        const num = Number(c);
-        const rnd = cryptoObj.getRandomValues(new Uint8Array(1))[0];
-        return (num ^ (rnd & (15 >> (num / 4)))).toString(16);
-      });
-    }
-    this.commandCounter += 1;
-    return this.commandCounter.toString();
   }
 }

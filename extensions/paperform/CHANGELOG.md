@@ -1,6 +1,6 @@
 # Paperform Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-12-17
 - Added support for deeplinking to submissions
 
 ## [Improvement] - 2025-05-15

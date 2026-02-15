@@ -166,7 +166,9 @@ public class WinEnum {
 function runPowerShell(script: string): string {
   const tempFile = join(tmpdir(), `${TEMP_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.ps1`);
   try {
-    writeFileSync(tempFile, script, "utf-8");
+    // Force UTF-8 encoding for PowerShell output
+    const utf8Script = `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n${script}`;
+    writeFileSync(tempFile, utf8Script, "utf-8");
     const result = execSync(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tempFile}"`, {
       encoding: "utf-8",
       windowsHide: true,

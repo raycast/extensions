@@ -4,15 +4,10 @@ interface GetTranslationKeyDetailsArgs {
   keyName: string;
 }
 
-/**
- * AI Tool: Get detailed information about a translation key
- * This tool allows Raycast AI to retrieve full details about a specific key
- */
 export default async function GetTranslationKeyDetails(args: GetTranslationKeyDetailsArgs) {
   try {
     const { keyName } = args;
 
-    // Validate input
     if (!keyName || keyName.trim().length === 0) {
       return {
         success: false,
@@ -20,7 +15,6 @@ export default async function GetTranslationKeyDetails(args: GetTranslationKeyDe
       };
     }
 
-    // Search for the exact key
     const keys = await client.listKeysFromDatabase({
       searchQuery: keyName,
       limit: 10,

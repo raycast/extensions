@@ -29,6 +29,7 @@ import { CloudRunView } from "./services/cloudrun";
 import { CloudFunctionsView } from "./services/cloudfunctions";
 import { LogsView } from "./services/logs-service";
 import { StreamerModeAction } from "./components/StreamerModeAction";
+import { CloudShellAction } from "./components/CloudShellAction";
 
 const execPromise = promisify(exec);
 
@@ -367,6 +368,11 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
             onAction={refreshAll}
           />
           <Action title="Switch Account" icon={Icon.Person} onAction={loginWithDifferentAccount} />
+          {selectedProject && (
+            <ActionPanel.Section title="Cloud Shell">
+              <CloudShellAction projectId={selectedProject} />
+            </ActionPanel.Section>
+          )}
           <StreamerModeAction />
         </ActionPanel>
       }
@@ -396,6 +402,11 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                     content={resource.name}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
+                  {selectedProject && (
+                    <ActionPanel.Section title="Cloud Shell">
+                      <CloudShellAction projectId={selectedProject} />
+                    </ActionPanel.Section>
+                  )}
                   <StreamerModeAction />
                 </ActionPanel>
               }
@@ -436,6 +447,11 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={refreshAll}
                   />
+                  {selectedProject && (
+                    <ActionPanel.Section title="Cloud Shell">
+                      <CloudShellAction projectId={selectedProject} />
+                    </ActionPanel.Section>
+                  )}
                   <StreamerModeAction />
                 </ActionPanel>
               }

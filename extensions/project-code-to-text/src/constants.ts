@@ -50,20 +50,72 @@ export const MAX_MAX_FILE_SIZE_MB = 50; // 50MB, to prevent accidental excessive
 
 /**
  * Safety limits to prevent extension crashes with large directories.
- * Reduced limits to prevent memory issues.
+ * With chunk-based streaming, we can handle much larger projects.
  */
 export const SAFETY_LIMITS = {
   /** Maximum number of files to process before stopping */
-  MAX_FILES: 3000, // Reduced from 5000 to prevent memory issues
+  MAX_FILES: 10000, // Increased from 3000 - streaming allows more files
   /** Maximum directory scan time in milliseconds */
-  MAX_SCAN_TIME_MS: 30000, // 30 seconds
+  MAX_SCAN_TIME_MS: 120000, // 2 minutes - increased for large projects
   /** Maximum total size of all included files in bytes */
-  MAX_TOTAL_SIZE_BYTES: 50 * 1024 * 1024, // 50MB, reduced from 100MB to prevent memory issues
+  MAX_TOTAL_SIZE_BYTES: 2 * 1024 * 1024 * 1024, // 2GB - streaming allows much larger projects
   /** Show warning after this many files */
-  FILES_WARNING_THRESHOLD: 500, // Reduced from 1000
+  FILES_WARNING_THRESHOLD: 1000, // Increased from 500
   /** Batch size for processing files to reduce memory usage */
   BATCH_SIZE: 100, // Process files in batches of 100
 } as const;
+
+/**
+ * Chunk size for writing to file stream in bytes.
+ * Used to control memory usage during file writing operations.
+ */
+export const CHUNK_WRITE_SIZE = 64 * 1024; // 64KB
+
+/**
+ * Threshold for considering a project "large" in bytes.
+ * Projects above this size will trigger Large Project Mode optimizations.
+ */
+export const LARGE_PROJECT_THRESHOLD = 50 * 1024 * 1024; // 50MB
+
+/**
+ * Maximum number of files to scan for preview statistics.
+ */
+export const PREVIEW_MAX_FILES = 1000;
+
+/**
+ * Maximum number of paths to process for preview statistics.
+ */
+export const PREVIEW_MAX_PATHS = 50;
+
+/**
+ * Threshold in bytes for considering a file "large" and using streaming read.
+ * Files larger than this will use streaming instead of loading into memory.
+ */
+export const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10MB
+
+/**
+ * Threshold in bytes for using direct streaming to output stream.
+ * Files larger than this will be written directly to stream without buffering.
+ */
+export const STREAMING_FILE_THRESHOLD_BYTES = 5 * 1024 * 1024; // 5MB
+
+/**
+ * Maximum file size in bytes that can be copied to clipboard.
+ * Files larger than this will skip clipboard copy to prevent memory issues.
+ */
+export const CLIPBOARD_MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
+/**
+ * Chunk size for buffer operations in bytes.
+ * Used when reading/writing data in chunks to control memory usage.
+ */
+export const BUFFER_CHUNK_SIZE = 64 * 1024; // 64KB
+
+/**
+ * Maximum buffer size in bytes before forcing a write.
+ * Prevents buffer from growing too large in memory.
+ */
+export const MAX_BUFFER_SIZE = 128 * 1024; // 128KB
 
 // Re-export ignore patterns from config file
 export { HARDCODED_BASE_IGNORE_PATTERNS } from "./config/default-ignores";

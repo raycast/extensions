@@ -7,18 +7,18 @@ export function useSync() {
 
   const handleSync = async (onSuccess?: () => void) => {
     setIsSyncing(true);
-    const toast = await showToast({
+    const progressToast = await showToast({
       style: Toast.Style.Animated,
       title: "Syncing translations...",
     });
 
     try {
-      const result = await client.syncFromLokalise((current, total) => {
-        toast.message = `${current} of ~${total} keys`;
+      const result = await client.syncFromLokalise((current) => {
+        progressToast.message = `~${current} keys synced`;
       });
 
       if (result.success) {
-        await toast.hide();
+        await progressToast.hide();
         await showToast({
           style: Toast.Style.Success,
           title: "Sync Complete",
@@ -26,7 +26,7 @@ export function useSync() {
         });
         onSuccess?.();
       } else {
-        await toast.hide();
+        await progressToast.hide();
         await showToast({
           style: Toast.Style.Failure,
           title: "Sync Failed",
@@ -34,7 +34,7 @@ export function useSync() {
         });
       }
     } catch (error) {
-      await toast.hide();
+      await progressToast.hide();
       await showToast({
         style: Toast.Style.Failure,
         title: "Sync Failed",

@@ -20,6 +20,7 @@ import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { LogsView } from "../logs-service";
 import { CreateFunctionForm } from "./components/CreateFunctionForm";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 interface CloudFunctionsViewProps {
   projectId: string;
@@ -223,6 +224,9 @@ ${
             title="Open Cloud Functions Console"
             url={`https://console.cloud.google.com/functions/list?project=${projectId}`}
           />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -244,6 +248,9 @@ ${
                 url={`https://console.cloud.google.com/functions/list?project=${projectId}`}
               />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchFunctions} />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -328,6 +335,9 @@ ${
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchFunctions} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Cloud Shell">
+                    <CloudShellAction projectId={projectId} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }

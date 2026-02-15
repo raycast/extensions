@@ -1,5 +1,12 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fixes] - 2026-02-12
+
+- Fixed permission errors (EPERM) when accessing Chrome and Arc browser Local State files ([#16481](https://github.com/raycast/extensions/issues/16481))
+- Improved error handling for file access operations to gracefully handle permission restrictions
+- Fixed dependency conflicts by downgrading ESLint to version 9 for compatibility with existing plugins
+- Fixed linting issues by removing unused catch variables and invalid ESLint rule references
+
 ## [Support for Helium Browser] - 2025-12-08
 
 - Added support for `Helium` browser.

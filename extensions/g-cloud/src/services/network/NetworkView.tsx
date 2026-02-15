@@ -5,6 +5,7 @@ import IPAddressView from "./IPAddressView";
 import FirewallRulesView from "./FirewallRulesView";
 import { NetworkService } from "./NetworkService";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 interface NetworkViewProps {
   projectId: string;
@@ -74,6 +75,9 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
                   push(<VPCView projectId={projectId} gcloudPath={gcloudPath} />);
                 }}
               />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -94,6 +98,9 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
                   push(<IPAddressView projectId={projectId} gcloudPath={gcloudPath} />);
                 }}
               />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -114,6 +121,9 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
                   push(<FirewallRulesView projectId={projectId} gcloudPath={gcloudPath} />);
                 }}
               />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

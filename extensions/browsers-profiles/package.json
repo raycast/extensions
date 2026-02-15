@@ -11,7 +11,8 @@
   "contributors": [
     "kytta",
     "emilshr",
-    "chingweih"
+    "chingweih",
+    "nilleb"
   ],
   "scripts": {
     "build": "ray build",
@@ -22,18 +23,18 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.103.0",
     "ini": "^3.0.0"
   },
   "devDependencies": {
     "@types/ini": "^1.3.31",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-prettier": "^8.10.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "icon": "command-icon.png",
@@ -42,7 +43,17 @@
       "name": "index",
       "title": "Open Browser Profile",
       "description": "Access your browsers profiles from Raycast",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Filter the browsers to show (comma separated list - this will be compared to the browser title or family)",
+          "required": false,
+          "name": "browsers.filter",
+          "type": "textfield",
+          "title": "Browsers Filter",
+          "default": "Chrome,Firefox,Brave,Edge,Chromium"
+        }
+      ]
     }
   ],
   "title": "Open Browsers Profiles",

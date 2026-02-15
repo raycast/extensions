@@ -1,5 +1,15 @@
 # Change Case Changelog
 
+## [Fix Swap Case] - 2026-02-09
+
+- Prevents pre-lowercasing of input for case-sensitive transforms: Swap Case, Alternating Case, Random Case, Lower First, and Upper First
+
+## [Refactor and ESLint Compatibility] - 2026-01-19
+
+- Added a proper `alternatingCase` transformation alongside the existing `randomCase` option
+- Updated function names and aliases to prioritize "alternating" while maintaining backward compatibility
+- Removed duplicate ESLint config files
+
 ## [Enable `fallback text`. support] - 2025-12-16
 
 - You can use the extension in fallback mode (ref: [Issue #23577](https://github.com/raycast/extensions/issues/23577))

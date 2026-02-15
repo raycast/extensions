@@ -6,6 +6,7 @@ A Raycast extension to quickly add translation keys to your Lokalise project.
 
 - **Add Translation**: Add new translation keys directly from Raycast
 - **View Translations**: Browse and search all translation keys in your Lokalise project
+- **Sync Translations**: Automatically keep your local translations up to date with Lokalise
 - **AI Tools for Raycast AI**: Let Raycast AI search, add, and manage translation keys with natural language
 - Support for multiple platforms (Web, iOS, Android, Other)
 - Plural form support
@@ -55,6 +56,25 @@ A Raycast extension to quickly add translation keys to your Lokalise project.
    - **⌘C**: Copy translation to clipboard
    - **View Details**: See all translations and metadata for a key
    - **⌘R**: Refresh the list
+
+### Sync Translations
+
+The extension includes an automatic background sync feature that keeps your local translation database up to date with Lokalise:
+
+1. **How it works**: The extension automatically syncs translations from Lokalise every hour (by default)
+2. **Status indicator**: The command subtitle in Raycast shows when the last sync occurred and the sync status
+3. **Initial setup**: You must run the command manually once after installation to complete the initial sync
+4. **Configuration**: 
+   - Background sync is disabled by default when first installed
+   - Enable it in the command preferences (Raycast will add these automatically)
+   - The sync runs silently in the background without interrupting your work
+5. **Manual trigger**: You can also run "Sync Translations" manually from Raycast to force an immediate sync
+
+**Why use background sync?**
+- Always have the latest translations available offline
+- Faster search and browsing (no API calls needed)
+- Works even when you're offline (uses cached data)
+- Reduces API rate limit usage
 
 ### Using Raycast AI with Lokalise
 

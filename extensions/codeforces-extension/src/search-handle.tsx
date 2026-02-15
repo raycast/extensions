@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Action, ActionPanel, Detail, Icon, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useFetch } from "@raycast/utils";
 import { getColorHexCode } from "./func/HexCode";
-import { UserData, initialUserData } from "./interface/UserData";
-import { CODEFORCES_API_BASE, CODEFORCES_BASE } from "./constants";
+import { useCodeforces } from "./func/useCodeforces";
+import type { User } from "./types/codeforces";
+import { initialUserData } from "./types/codeforces";
+import { CODEFORCES_BASE } from "./constants";
 import { UserSubmissions } from "./components/UserSubmissions";
 import { Contest } from "./components/Contest";
 
@@ -12,39 +12,40 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   return <User value={props.arguments.handle} />;
 }
 
-function unString(str: string) {
-  return str || "Not Found";
+function unString(value?: string | number | null) {
+  if (value === undefined || value === null || value === "") return "Not Found";
+  return String(value);
 }
 
-function User(name: { value: any }) {
+function User(name: { value: string }) {
   const userHandle = name.value;
-  const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}user.info?handles=${userHandle}`, {
-    keepPreviousData: true,
-  });
+
+  // typed hook: returns ApiResponse.result as `User[]` in `result`
+  const { isLoading, result } = useCodeforces<User[]>("user.info", { handles: userHandle });
+
   const [formattedString, setFormattedString] = useState("Fetching Results...");
-  const [userData, setUserData] = useState<UserData>(initialUserData);
-
-  if (error) {
-    console.log(`Error while fetching details: \n ${error}`);
-  }
+  const [userData, setUserData] = useState<User>(initialUserData);
 
   useEffect(() => {
-    if (!isLoading) {
-      setUserData((data as any).result[0]);
+    const first = result && result.length > 0 ? result[0] : undefined;
+    if (first) {
+      setUserData(first);
     }
-  }, [isLoading]);
+  }, [result]);
 
   useEffect(() => {
-    setFormattedString(
-      `# ${userData.handle} ${userData.firstName || userData.lastName ? "-" : ""} ${userData.firstName || ""} ${
-        userData.lastName || ""
-      }\n\n![Title Photo](${unString(userData.titlePhoto)})`,
-    );
+    const handle = userData?.handle ?? "";
+    const first = userData?.firstName ?? "";
+    const last = userData?.lastName ?? "";
+    const sep = first || last ? " - " : "";
+    setFormattedString(`# ${handle}${sep}${first} ${last}\n\n![Title Photo](${unString(userData?.titlePhoto)})`);
   }, [userData]);
 
-  function convertToTitleCase(str: string) {
-    if (!str) return "";
-    return str.toLowerCase().replace(/\b\w/g, (s: string) => s.toUpperCase());
+  function convertToTitleCase(str?: string | number | null) {
+    if (str === undefined || str === null) return "";
+    const s = String(str);
+    if (!s) return "";
+    return s.toLowerCase().replace(/\b\w/g, (sChar: string) => sChar.toUpperCase());
   }
 
   return (
@@ -55,7 +56,7 @@ function User(name: { value: any }) {
       actions={
         <ActionPanel title="Codeforces Handle">
           <Action.Push
-            title="Contest Histroy"
+            title="Contest History"
             icon={{ source: Icon.AppWindowList }}
             target={<Contest name={name.value} />}
           />
@@ -80,51 +81,37 @@ function User(name: { value: any }) {
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Max Rating">
             <Detail.Metadata.TagList.Item
-              text={convertToTitleCase(`${userData.maxRating}`)}
-              color={getColorHexCode(userData.maxRating)}
+              text={convertToTitleCase(`${userData.maxRating ?? 0}`)}
+              color={getColorHexCode(userData.maxRating ?? 0)}
             />
             <Detail.Metadata.TagList.Item
               text={convertToTitleCase(`${unString(userData.maxRank)}`)}
-              color={getColorHexCode(userData.maxRating)}
+              color={getColorHexCode(userData.maxRating ?? 0)}
             />
           </Detail.Metadata.TagList>
+
           <Detail.Metadata.TagList title="Current Rank">
             <Detail.Metadata.TagList.Item
-              text={convertToTitleCase(`${userData.rating}`)}
-              color={getColorHexCode(userData.rating)}
+              text={convertToTitleCase(`${userData.rating ?? 0}`)}
+              color={getColorHexCode(userData.rating ?? 0)}
             />
             <Detail.Metadata.TagList.Item
               text={convertToTitleCase(`${unString(userData.rank)}`)}
-              color={getColorHexCode(userData.rating)}
+              color={getColorHexCode(userData.rating ?? 0)}
             />
           </Detail.Metadata.TagList>
+
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Friend of" text={`${unString(userData.friendOfCount)}`} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Organisation" text={`${unString(userData.organization)}`} />
           <Detail.Metadata.Label
             title="Last Online"
-            text={`${new Date(userData.lastOnlineTimeSeconds * 1000).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })} ${new Date(userData.lastOnlineTimeSeconds * 1000).toLocaleDateString([], {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}`}
+            text={`${new Date((userData.lastOnlineTimeSeconds ?? 0) * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} ${new Date((userData.lastOnlineTimeSeconds ?? 0) * 1000).toLocaleDateString([], { weekday: "short", year: "numeric", month: "short", day: "numeric" })}`}
           />
           <Detail.Metadata.Label
             title="Registered On"
-            text={`${new Date(userData.registrationTimeSeconds * 1000).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })} ${new Date(userData.registrationTimeSeconds * 1000).toLocaleDateString([], {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}`}
+            text={`${new Date((userData.registrationTimeSeconds ?? 0) * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} ${new Date((userData.registrationTimeSeconds ?? 0) * 1000).toLocaleDateString([], { weekday: "short", year: "numeric", month: "short", day: "numeric" })}`}
           />
         </Detail.Metadata>
       }

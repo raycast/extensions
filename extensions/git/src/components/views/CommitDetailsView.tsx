@@ -197,8 +197,8 @@ function FileListItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section title={basename(context.file.path)}>
-            <ToggleDetailAction controller={context.toggleController} />
             <FileManagerActions filePath={absolutePath} />
+            <ToggleDetailAction controller={context.toggleController} />
             <FileHistoryAction filePath={absolutePath} {...context} />
             <FileRestoreAction filePath={absolutePath} before={false} {...context} />
             <FileRestoreAction before={true} filePath={absolutePath} {...context} />

@@ -2,7 +2,7 @@ import { useFetch } from "@raycast/utils";
 import { extractDescription, extractTitle } from "../util/extract-html";
 import { isValidUrl } from "../util/is-valid-url";
 
-const useUrlMetadata = (url: string) => {
+export const useUrlMetadata = (url: string) => {
   const { data: metadata } = useFetch(url, {
     mapResult: (html: string) => {
       // assume what we need is in the first few KB
@@ -20,5 +20,3 @@ const useUrlMetadata = (url: string) => {
   });
   return metadata;
 };
-
-export default useUrlMetadata;

@@ -5,7 +5,9 @@ exports[`parseZedWorkspace > parse WSL workspace with port 1`] = `
   "host": "localhost",
   "id": 2,
   "lastOpened": 1757750879527,
-  "path": "home/wsluser/project",
+  "paths": [
+    "home/wsluser/project",
+  ],
   "type": "remote",
   "uri": "ssh://wsluser@localhost:2222/home/wsluser/project",
   "wsl": {
@@ -20,7 +22,9 @@ exports[`parseZedWorkspace > parse WSL workspace with user and distro 1`] = `
   "host": "localhost",
   "id": 1,
   "lastOpened": 1757750879526,
-  "path": "home/wsluser/project",
+  "paths": [
+    "home/wsluser/project",
+  ],
   "type": "remote",
   "uri": "ssh://wsluser@localhost/home/wsluser/project",
   "wsl": {
@@ -30,13 +34,42 @@ exports[`parseZedWorkspace > parse WSL workspace with user and distro 1`] = `
 }
 `;
 
+exports[`parseZedWorkspace > parse local workspace with multiple paths 1`] = `
+{
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "paths": [
+    "/Users/raycast/Projects/zed-project-1",
+    "/Users/raycast/Projects/zed-project-2",
+  ],
+  "type": "local",
+  "uri": "file:///Users/raycast/Projects/zed-project-1",
+}
+`;
+
 exports[`parseZedWorkspace > parse local workspace with single path 1`] = `
 {
   "id": 1,
   "lastOpened": 1757750879526,
-  "path": "/Users/raycast/Projects/zed-project-1",
+  "paths": [
+    "/Users/raycast/Projects/zed-project-1",
+  ],
   "type": "local",
   "uri": "file:///Users/raycast/Projects/zed-project-1",
+}
+`;
+
+exports[`parseZedWorkspace > parse remote workspace with multiple paths 1`] = `
+{
+  "host": "example.com",
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "paths": [
+    "home/user/project1",
+    "home/user/project2",
+  ],
+  "type": "remote",
+  "uri": "ssh://testuser@example.com:22/home/user/project1",
 }
 `;
 
@@ -45,7 +78,9 @@ exports[`parseZedWorkspace > parse remote workspace with single path, no user, n
   "host": "example.com",
   "id": 1,
   "lastOpened": 1757750879526,
-  "path": "home/user/project",
+  "paths": [
+    "home/user/project",
+  ],
   "type": "remote",
   "uri": "ssh://example.com/home/user/project",
 }
@@ -56,7 +91,9 @@ exports[`parseZedWorkspace > parse remote workspace with single path, no user, w
   "host": "example.com",
   "id": 1,
   "lastOpened": 1757750879526,
-  "path": "home/user/project",
+  "paths": [
+    "home/user/project",
+  ],
   "type": "remote",
   "uri": "ssh://example.com:22/home/user/project",
 }
@@ -67,7 +104,9 @@ exports[`parseZedWorkspace > parse remote workspace with single path, with user 
   "host": "example.com",
   "id": 1,
   "lastOpened": 1757750879526,
-  "path": "home/user/project",
+  "paths": [
+    "home/user/project",
+  ],
   "type": "remote",
   "uri": "ssh://testuser@example.com:22/home/user/project",
 }
@@ -78,7 +117,9 @@ exports[`parseZedWorkspace > parse remote workspace with single path, with user,
   "host": "example.com",
   "id": 1,
   "lastOpened": 1757750879526,
-  "path": "home/user/project",
+  "paths": [
+    "home/user/project",
+  ],
   "type": "remote",
   "uri": "ssh://testuser@example.com/home/user/project",
 }
@@ -89,7 +130,9 @@ exports[`parseZedWorkspace > skips WSL workspace without distro 1`] = `
   "host": "localhost",
   "id": 1,
   "lastOpened": 1757750879526,
-  "path": "home/wsluser/project",
+  "paths": [
+    "home/wsluser/project",
+  ],
   "type": "remote",
   "uri": "ssh://wsluser@localhost/home/wsluser/project",
 }
@@ -100,12 +143,10 @@ exports[`parseZedWorkspace > skips WSL workspace without user 1`] = `
   "host": "localhost",
   "id": 1,
   "lastOpened": 1757750879526,
-  "path": "home/wsluser/project",
+  "paths": [
+    "home/wsluser/project",
+  ],
   "type": "remote",
   "uri": "ssh://localhost/home/wsluser/project",
 }
 `;
-
-exports[`parseZedWorkspace > skips local workspace with multiple paths 1`] = `null`;
-
-exports[`parseZedWorkspace > skips remote workspace with multiple paths 1`] = `null`;

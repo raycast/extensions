@@ -1,7 +1,7 @@
-import dayjs from 'dayjs';
-import Duration from 'dayjs/plugin/duration';
-import RelativeTime from 'dayjs/plugin/relativeTime';
-import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+import dayjs from "dayjs";
+import Duration from "dayjs/plugin/duration";
+import RelativeTime from "dayjs/plugin/relativeTime";
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
 
 dayjs.extend(Duration);
 dayjs.extend(RelativeTime);
@@ -20,5 +20,5 @@ export function timeFormat(time: DateParam, inMillisecond: true): string;
 export function timeFormat(time: number, inMillisecond?: false): string;
 export function timeFormat(time: DateParam, inMillisecond = false): string {
   const origin = inMillisecond ? dayjs(time) : dayjs.unix(time as number);
-  return origin.format('lll');
+  return origin.format("lll");
 }

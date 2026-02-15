@@ -1,9 +1,5 @@
 import { client } from "../api/client";
 
-/**
- * AI Tool: List all available files in Lokalise
- * This tool allows Raycast AI to retrieve the list of files that can be assigned to translation keys
- */
 export default async function ListFiles() {
   try {
     const files = await client.listFiles();

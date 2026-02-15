@@ -20,6 +20,9 @@ import {
   Servers,
   ServerInfo,
   ServerWithStatus,
+  AIHubTenant,
+  AIHubMonthlyUsage,
+  AIHubSpendLogsPaginated,
 } from "../type";
 import {
   getTemplateQuery,
@@ -38,6 +41,9 @@ import {
   redeployServiceQuery,
   getServersQuery,
   getServerWithStatusQuery,
+  getAIHubTenantQuery,
+  getAIHubMonthlyUsageQuery,
+  getAIHubSpendLogsQuery,
 } from "../constants/queries";
 
 const preferences = getPreferenceValues();
@@ -369,4 +375,50 @@ export async function getServerWithStatus(serverID: string) {
   });
   const json = (await res.json()) as ServerWithStatus;
   return json.data.server;
+}
+
+export async function getAIHubTenant() {
+  const res = await fetch(api, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${zeaburToken}`,
+    },
+    body: JSON.stringify(getAIHubTenantQuery),
+  });
+
+  const json = (await res.json()) as AIHubTenant;
+  return json.data.aihubTenant;
+}
+
+export async function getAIHubMonthlyUsage(month?: string) {
+  const query = { ...getAIHubMonthlyUsageQuery };
+  query.variables = { month: month || "" };
+  const res = await fetch(api, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${zeaburToken}`,
+    },
+    body: JSON.stringify(query),
+  });
+
+  const json = (await res.json()) as AIHubMonthlyUsage;
+  return json.data.aihubMonthlyUsage;
+}
+
+export async function getAIHubSpendLogs(startDate: string, endDate: string, page: number = 1, pageSize: number = 25) {
+  const query = { ...getAIHubSpendLogsQuery };
+  query.variables = { pageSize, page, startDate, endDate };
+  const res = await fetch(api, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${zeaburToken}`,
+    },
+    body: JSON.stringify(query),
+  });
+
+  const json = (await res.json()) as AIHubSpendLogsPaginated;
+  return json.data.aihubSpendLogsPaginated;
 }

@@ -1,6 +1,6 @@
 # Ray Code Changelog
 
-## [Fix the issue with accessing the user shell properly] - {PR_MERGE_DATE}
+## [Fix the issue with accessing the user shell properly] - 2026-01-02
 
 - `process.env.SHELL` is undefined, use the shell-env package instead
 

@@ -18,6 +18,7 @@ import CreateSecretForm from "./components/CreateSecretForm";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 interface SecretListViewProps {
   projectId: string;
@@ -292,6 +293,9 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
         <ActionPanel>
           <Action title="Create Secret" icon={Icon.Plus} onAction={handleCreateSecret} />
           <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshSecrets} />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -310,6 +314,9 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
             <ActionPanel>
               <Action title="Create Secret" icon={Icon.Plus} onAction={handleCreateSecret} />
               {!isLoading && <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshSecrets} />}
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -360,6 +367,9 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Privacy">
                     <StreamerModeAction />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Cloud Shell">
+                    <CloudShellAction projectId={projectId} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }

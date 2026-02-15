@@ -1,0 +1,313 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cursor-costs",
+  "title": "Cursor Costs",
+  "description": "Track your Cursor costs in real-time directly from macOS menu bar",
+  "icon": "extension_icon.png",
+  "platforms": [
+    "macOS"
+  ],
+  "author": "shadeov",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadeov/cursor-costs-raycast.git"
+  },
+  "homepage": "https://github.com/shadeov/cursor-costs-raycast",
+  "bugs": {
+    "url": "https://github.com/shadeov/cursor-costs-raycast/issues"
+  },
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "cursor",
+    "ai",
+    "costs",
+    "pricing",
+    "tracking",
+    "menu bar",
+    "claude",
+    "gpt"
+  ],
+  "commands": [
+    {
+      "name": "cursor-costs-menu",
+      "title": "Show Cursor Costs on Menu Bar",
+      "description": "Shows Cursor costs information in the menu bar",
+      "mode": "menu-bar",
+      "background": true,
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "menuBarDisplay",
+          "title": "Title Display",
+          "description": "What to show in the menu bar title",
+          "type": "dropdown",
+          "required": false,
+          "default": "percent",
+          "data": [
+            {
+              "title": "Percent (60%)",
+              "value": "percent"
+            },
+            {
+              "title": "Cost ($12.07)",
+              "value": "cost"
+            },
+            {
+              "title": "Usage ($12.07/$20.00)",
+              "value": "usage"
+            },
+            {
+              "title": "Cost + Percent ($12.07 • 60%)",
+              "value": "both"
+            }
+          ]
+        },
+        {
+          "name": "menuBarIcon",
+          "title": "Icon",
+          "description": "Menu bar icon style",
+          "type": "dropdown",
+          "required": false,
+          "default": "cursor",
+          "data": [
+            {
+              "title": "Cursor Logo",
+              "value": "cursor"
+            },
+            {
+              "title": "Progress Circle",
+              "value": "progress"
+            }
+          ]
+        },
+        {
+          "name": "displayFormat",
+          "title": "Cost Format",
+          "description": "Format for displaying dollar amounts",
+          "type": "dropdown",
+          "required": false,
+          "default": "2",
+          "data": [
+            {
+              "title": "$12 (no decimals)",
+              "value": "0"
+            },
+            {
+              "title": "$12.0 (one decimal)",
+              "value": "1"
+            },
+            {
+              "title": "$12.07 (two decimals)",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "name": "showDollarSign",
+          "title": "Dollar Sign",
+          "description": "Show or hide the dollar sign",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show dollar sign ($)"
+        },
+        {
+          "name": "showSubscriptionSection",
+          "title": "Subscription Section",
+          "description": "Show billing period and plan info",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show subscription section"
+        },
+        {
+          "name": "showCostSection",
+          "title": "Cost Section",
+          "description": "Show total cost summary",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show cost section"
+        },
+        {
+          "name": "showModelsSection",
+          "title": "Models Section",
+          "description": "Show models breakdown",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show models section"
+        },
+        {
+          "name": "modelInfoDisplay",
+          "title": "Model Info",
+          "description": "What info to show next to model name",
+          "type": "dropdown",
+          "required": false,
+          "default": "both",
+          "data": [
+            {
+              "title": "Cost + Tokens ($12.07 • 15.8m)",
+              "value": "both"
+            },
+            {
+              "title": "Only Cost ($12.07)",
+              "value": "cost"
+            },
+            {
+              "title": "Only Tokens (15.8m)",
+              "value": "tokens"
+            },
+            {
+              "title": "None",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "name": "showModelPercent",
+          "title": "",
+          "description": "Show percentage in model info",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show percent in model info"
+        },
+        {
+          "name": "showTokensSection",
+          "title": "Tokens Section",
+          "description": "Show total tokens breakdown",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show tokens section"
+        },
+        {
+          "name": "tokenFormat",
+          "title": "Token Format",
+          "description": "How to display token numbers",
+          "type": "dropdown",
+          "required": false,
+          "default": "short",
+          "data": [
+            {
+              "title": "Short (15.8m)",
+              "value": "short"
+            },
+            {
+              "title": "Full (15,800,000)",
+              "value": "full"
+            }
+          ]
+        },
+        {
+          "name": "showRefreshButton",
+          "title": "Refresh Button",
+          "description": "Show refresh button in menu",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show refresh button"
+        },
+        {
+          "name": "showSettingsButton",
+          "title": "Settings Button",
+          "description": "Show settings button in menu",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show settings button"
+        }
+      ]
+    },
+    {
+      "name": "cursor-costs-list",
+      "title": "Cursor Costs",
+      "description": "View detailed Cursor costs and usage statistics",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workosSessionToken",
+      "title": "WorkOS Session Token",
+      "description": "WorkOS session token from WorkosCursorSessionToken cookie. Open cursor.com → DevTools (F12) → Application → Cookies → copy WorkosCursorSessionToken value completely",
+      "type": "password",
+      "required": true,
+      "placeholder": "user_xxxxx::eyJhbGciOiJ..."
+    },
+    {
+      "name": "revalidationIntervalMinutes",
+      "title": "Refresh Interval",
+      "description": "Frequency of automatic data refresh",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "1 minute",
+          "value": "1"
+        },
+        {
+          "title": "2 minutes",
+          "value": "2"
+        },
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        }
+      ]
+    },
+    {
+      "name": "dateRangeSource",
+      "title": "Date Range",
+      "description": "Period for statistics calculation",
+      "type": "dropdown",
+      "required": false,
+      "default": "billing",
+      "data": [
+        {
+          "title": "Billing Cycle (e.g., Nov 21 - Dec 21)",
+          "value": "billing"
+        },
+        {
+          "title": "Calendar Month (e.g., Dec 1 - Dec 31)",
+          "value": "month"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.1",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "0.1.1"
+}

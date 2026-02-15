@@ -1,6 +1,6 @@
 # Claude Code Launcher
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-01-07
 
 ### Added
 - Support for Warp terminal

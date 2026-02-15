@@ -1,6 +1,6 @@
 # Rename Images with AI Changelog
 
-## [Updated] - {PR_MERGE_DATE}
+## [Updated] - 2026-01-01
 
 - Upgraded the AI model from `gemini-2.0-flash` to `gemini-2.5-flash` because the previous model will be deprecated and to enhance performance
 

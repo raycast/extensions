@@ -72,10 +72,19 @@
   ],
   "preferences": [
     {
-      "key": "token",
-      "title": "Oura Personal Access Token",
-      "name": "oura_token",
-      "description": "Your personal access token from the Oura API.",
+      "key": "client_id",
+      "title": "Oura Client ID",
+      "name": "client_id",
+      "description": "Your Oura OAuth client ID.",
+      "required": true,
+      "type": "password",
+      "defaultValue": ""
+    },
+    {
+      "key": "client_secret",
+      "title": "Oura Client Secret",
+      "name": "client_secret",
+      "description": "Your Oura OAuth client secret.",
       "required": true,
       "type": "password",
       "defaultValue": ""
@@ -119,5 +128,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

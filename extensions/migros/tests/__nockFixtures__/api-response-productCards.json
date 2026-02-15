@@ -1,0 +1,80 @@
+[
+  {
+    "uid": 100064790,
+    "migrosId": "251434112000",
+    "name": "Sashimi Lachs",
+    "brand": "Migros Sélection",
+    "title": "Migros Sélection · Sashimi Lachs",
+    "description": "Migros Sélection Sashimi Lachs ",
+    "productRange": "STANDARD",
+    "productAvailability": "INSTORE_ONLY",
+    "gtins": [
+      "7613269475194"
+    ],
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/05d7a9279b37482343cb946bb931e679ceba9dcb/selection-asc-sashimi-lachs.jpg"
+      }
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/05d7a9279b37482343cb946bb931e679ceba9dcb/selection-asc-sashimi-lachs.png"
+    },
+    "breadcrumb": [
+      {
+        "id": "7494730",
+        "name": "Fleisch & Fisch",
+        "slugs": [
+          "fleisch-fisch"
+        ]
+      },
+      {
+        "id": "7494749",
+        "name": "Fisch",
+        "slugs": [
+          "fleisch-fisch",
+          "fisch"
+        ]
+      },
+      {
+        "id": "7494858",
+        "name": "Frischfisch & Schalentiere",
+        "slugs": [
+          "fleisch-fisch",
+          "fisch",
+          "frischfisch-schalentiere"
+        ]
+      }
+    ],
+    "productUrls": "https://www.migros.ch/de/product/251434112000",
+    "isMgbCompatible": true,
+    "isConsignmentProduct": false,
+    "offer": {
+      "price": {
+        "displayUnitPrice": true,
+        "advertisedDisplayValue": "9.40",
+        "effectiveDisplayValue": "9.40",
+        "multiplier": 1,
+        "effectiveValue": 9.4,
+        "advertisedValue": 9.4,
+        "unitPrice": {
+          "value": 6.71,
+          "unit": "100g"
+        }
+      },
+      "quantity": "140g",
+      "quantityPrice": "6.71/100g",
+      "isVariableWeight": false,
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "maxOrderableQuantityV2": 96,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "displayPrice": true,
+      "type": "STANDARD"
+    }
+  }
+]
