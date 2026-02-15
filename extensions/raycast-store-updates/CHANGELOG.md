@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Filter Toggles, Read Tracking & UI Polish] - {PR_MERGE_DATE}
+## [Filter Toggles, Read Tracking & UI Polish] - 2026-02-15
 
 - Replaced platform preference dropdown with in-context filter toggles for macOS and Windows (cross-platform extensions always shown)
 - Added "Only Show Installed Updates" toggle to filter updated extensions to ones you have installed
