@@ -346,7 +346,8 @@ export async function buildChunkedCache<T>(
   const buildStartTime = Date.now();
   cacheLogger.log("Building chunked cache", { type: config.type, sourcePath });
 
-  // Ensure directory exists
+  // Reset and ensure directory exists
+  await rm(config.baseDir, { recursive: true, force: true }).catch(() => {});
   await mkdir(config.baseDir, { recursive: true });
 
   // Get last modified time from source file (will use this for cache validity)
