@@ -1,0 +1,51 @@
+{
+  "name": "markup-to-docs",
+  "title": "Markup to Docs",
+  "description": "Create PDF, DOCX, ODT, and RTF files from AI-provided HTML and CSS.",
+  "icon": "extension-icon.png",
+  "author": "shaynelarocque",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "markup-to-docs",
+      "title": "Markup to Docs",
+      "description": "Manually create PDF, DOCX, ODT, or RTF from HTML/CSS files.",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "generate-document",
+      "title": "Generate Document",
+      "description": "Create a PDF, DOCX, ODT, or RTF file from HTML/CSS and an output directory.",
+      "icon": "tool-icon.png"
+    }
+  ],
+  "ai": {
+    "instructions": "Use generate-document whenever the user asks to produce a PDF, DOCX, ODT, or RTF document. Always pass html, fileType (pdf, docx, odt, or rtf), and outputDirectory. Pass css and fileName when useful."
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "puppeteer": "^24.37.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.2.3",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  }
+}
