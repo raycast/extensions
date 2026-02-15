@@ -60,14 +60,14 @@ ${item.loot_area ? `| **Loot Area** | ${item.loot_area} |` : ""}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/items/${item.id}`}
+            target={`https://metaforge.app/arc-raiders/database/item/${item.id}`}
             text="View on MetaForge"
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
           <Action.CopyToClipboard title="Copy Blueprint Name" content={item.name} />
         </ActionPanel>
       }
@@ -239,7 +239,7 @@ export default function Blueprints() {
                   )}
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+                  <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
                   <Action.CopyToClipboard title="Copy Blueprint Name" content={item.name} />
                 </ActionPanel.Section>
               </ActionPanel>
