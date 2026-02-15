@@ -51,6 +51,38 @@
           "default": "en-GB"
         }
       ]
+    },
+    {
+      "name": "ask-townspot-ai",
+      "title": "Ask TownSpot AI",
+      "icon": "icon.png",
+      "description": "Ask with Raycast AI, grounded by verified TownSpot listings.",
+      "mode": "view",
+      "path": "ask-townspot-ai",
+      "keywords": [
+        "ai",
+        "townspot",
+        "events",
+        "chat"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Ask TownSpot AI",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "locale",
+          "title": "Locale",
+          "description": "API locale (en-GB, es-ES, ca-ES)",
+          "type": "textfield",
+          "required": true,
+          "default": "en-GB"
+        }
+      ]
     }
   ]
 }

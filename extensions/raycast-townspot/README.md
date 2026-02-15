@@ -41,6 +41,13 @@ For local API testing, temporarily change `PROD_API_BASE_URL` in `src/ask.tsx`.
   - Event detail includes map actions (Apple Maps / Google Maps) when event coordinates are available.
   - Hometown is saved locally after selection and reused on next launch.
 
+- **Ask TownSpot AI** (`ask-townspot-ai`)
+  - Uses Raycast AI to generate a natural-language answer.
+  - Grounded by verified listings fetched from TownSpot API (no invented events by design).
+  - Reads your saved Hometown and queries that town context first.
+  - Returns an AI summary plus a verified listings block with direct links.
+  - Launch with an argument, for example: `kids events this weekend`.
+
 ## Endpoint Contract
 
 POST to `/api/raycast/query` with:
