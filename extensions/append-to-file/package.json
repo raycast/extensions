@@ -34,6 +34,7 @@
     {
       "name": "append-clipboard-to-file",
       "title": "Append Text from Clipboard to File",
+      "subtitle": "Append Text to File",
       "description": "Pick an entry from the clipboard history and append it to a file.",
       "mode": "view"
     },
