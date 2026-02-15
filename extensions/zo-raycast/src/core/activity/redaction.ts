@@ -1,12 +1,4 @@
-const SECRET_KEY_PATTERNS = [
-  "key",
-  "token",
-  "secret",
-  "password",
-  "authorization",
-  "cookie",
-  "bearer",
-];
+const SECRET_KEY_PATTERNS = ["key", "token", "secret", "password", "authorization", "cookie", "bearer"];
 
 function isSecretKey(key: string): boolean {
   const normalized = key.toLowerCase();

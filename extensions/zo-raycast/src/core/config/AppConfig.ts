@@ -4,14 +4,6 @@ const DEFAULT_ZO_API_BASE_URL = "https://api.zo.computer";
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
 
-export type ExtensionPreferences = {
-  zoApiKey: string;
-  zoApiBaseUrl?: string;
-  requestTimeoutMs?: string;
-  maxRetries?: string;
-  enableChatStreaming?: boolean;
-};
-
 export type AppConfig = {
   apiKey: string;
   zoApiBaseUrl: string;
@@ -39,8 +31,8 @@ function parseBooleanSetting(value: boolean | undefined, fallback: boolean): boo
 }
 
 export class AppConfigManager {
-  static readPreferences(): ExtensionPreferences {
-    return getPreferenceValues<ExtensionPreferences>();
+  static readPreferences(): Preferences {
+    return getPreferenceValues<Preferences>();
   }
 
   static getConfig(): AppConfig {

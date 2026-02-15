@@ -37,9 +37,7 @@ function toPreview(text: string): string {
 }
 
 function hasThinking(message: ChatMessage | undefined): boolean {
-  return Boolean(
-    message && message.role === "assistant" && (message.thinking ?? "").trim().length > 0,
-  );
+  return Boolean(message && message.role === "assistant" && (message.thinking ?? "").trim().length > 0);
 }
 
 function detailMarkdownForMessage(message: ChatMessage, showThinking: boolean): string {
@@ -111,14 +109,9 @@ export default function ZoChatCommand() {
 
     try {
       const { apiClient } = createClients();
-      const [models, defaultModelId] = await Promise.all([
-        apiClient.listModels(),
-        UserSettings.getDefaultModel(),
-      ]);
+      const [models, defaultModelId] = await Promise.all([apiClient.listModels(), UserSettings.getDefaultModel()]);
       const selectedModelId =
-        defaultModelId && models.some((model) => model.id === defaultModelId)
-          ? defaultModelId
-          : (models[0]?.id ?? "");
+        defaultModelId && models.some((model) => model.id === defaultModelId) ? defaultModelId : (models[0]?.id ?? "");
 
       setState((current) => ({
         ...current,
@@ -255,8 +248,7 @@ export default function ZoChatCommand() {
                   return {
                     ...message,
                     content: streamedAnswerText.length > 0 ? streamedAnswerText : message.content,
-                    thinking:
-                      streamedThinkingText.length > 0 ? streamedThinkingText : message.thinking,
+                    thinking: streamedThinkingText.length > 0 ? streamedThinkingText : message.thinking,
                   };
                 }),
               }));
@@ -286,8 +278,7 @@ export default function ZoChatCommand() {
                   ? streamedAnswerText
                   : message.content,
             thinking:
-              response.thinkingText ??
-              (streamedThinkingText.length > 0 ? streamedThinkingText : message.thinking),
+              response.thinkingText ?? (streamedThinkingText.length > 0 ? streamedThinkingText : message.thinking),
           };
         }),
         conversationId: response.conversationId ?? current.conversationId,
@@ -377,10 +368,7 @@ export default function ZoChatCommand() {
         <Action.CopyToClipboard title="Copy Selected Message" content={selectedMessage.content} />
       ) : null}
       {selectedAssistantMessage && hasThinking(selectedAssistantMessage) ? (
-        <Action.CopyToClipboard
-          title="Copy Selected Thinking"
-          content={selectedAssistantMessage.thinking ?? ""}
-        />
+        <Action.CopyToClipboard title="Copy Selected Thinking" content={selectedAssistantMessage.thinking ?? ""} />
       ) : null}
       {state.conversation.length > 0 ? (
         <Action.CopyToClipboard

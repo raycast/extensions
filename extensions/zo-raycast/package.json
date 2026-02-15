@@ -5,9 +5,9 @@
   "description": "Chat with Zo models, manage defaults, and review activity",
   "icon": "icon.png",
   "screenshots": [
-    "assets/zo-chat.png",
-    "assets/zo-models.png",
-    "assets/zo-activity.png"
+    "metadata/zo-chat.png",
+    "metadata/zo-models.png",
+    "metadata/zo-activity.png"
   ],
   "author": "skeletorjs",
   "license": "MIT",
@@ -112,6 +112,7 @@
     "react": "^19.0.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.10.1",
     "@types/react": "^19.0.10",
     "@typescript-eslint/eslint-plugin": "^8.18.1",

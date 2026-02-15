@@ -61,19 +61,12 @@ const ASK_OUTPUT_SCHEMA: Record<string, unknown> = {
     },
     thinking: {
       type: "string",
-      description:
-        "Internal reasoning text only. Use an empty string when there is no hidden reasoning to return.",
+      description: "Internal reasoning text only. Use an empty string when there is no hidden reasoning to return.",
     },
   },
 };
 
-const FINAL_EVENT_MARKERS = [
-  "final",
-  "final_result",
-  "finalresult",
-  "finalresultevent",
-  "final_output",
-];
+const FINAL_EVENT_MARKERS = ["final", "final_result", "finalresult", "finalresultevent", "final_output"];
 
 const STREAM_EVENT_FRONTEND_MODEL_RESPONSE = "frontendmodelresponse";
 const STREAM_EVENT_END = "end";
@@ -175,16 +168,7 @@ function findStructuredOutput(value: unknown, depth = 0): ZoStructuredAskOutput 
     return undefined;
   }
 
-  const keys = [
-    "output",
-    "result",
-    "final_result",
-    "finalResult",
-    "final",
-    "response",
-    "data",
-    "value",
-  ];
+  const keys = ["output", "result", "final_result", "finalResult", "final", "response", "data", "value"];
 
   for (const key of keys) {
     const nested = findStructuredOutput(value[key], depth + 1);
@@ -201,13 +185,10 @@ function extractExplicitThinkingTags(content: string): ParsedChatOutput {
   let outputText = normalizedContent;
   const thinkingChunks: string[] = [];
 
-  outputText = outputText.replace(
-    /<(thinking|think|reasoning)>([\s\S]*?)<\/\1>/gi,
-    (_m, _t, body) => {
-      thinkingChunks.push(normalizeLineEndings(String(body)));
-      return "";
-    },
-  );
+  outputText = outputText.replace(/<(thinking|think|reasoning)>([\s\S]*?)<\/\1>/gi, (_m, _t, body) => {
+    thinkingChunks.push(normalizeLineEndings(String(body)));
+    return "";
+  });
 
   outputText = outputText.replace(
     /<details>\s*<summary>\s*thinking\s*<\/summary>([\s\S]*?)<\/details>/gi,
@@ -277,8 +258,7 @@ function normalizeModelEntry(entry: RawModelEntry): ZoModel {
     readStringByKeyPattern(entry, ["model", "id", "key"]) ??
     "unknown-model";
 
-  const label =
-    readString(entry, ["label", "title", "display_name", "displayName", "name", "model"]) ?? id;
+  const label = readString(entry, ["label", "title", "display_name", "displayName", "name", "model"]) ?? id;
 
   const description = readString(entry, ["description", "desc", "summary", "details"]);
 
@@ -323,10 +303,7 @@ function readBoolean(record: Record<string, unknown>, keys: string[]): boolean |
   return undefined;
 }
 
-function readStringByKeyPattern(
-  record: Record<string, unknown>,
-  patterns: string[],
-): string | undefined {
+function readStringByKeyPattern(record: Record<string, unknown>, patterns: string[]): string | undefined {
   const entries = Object.entries(record);
   for (const [key, value] of entries) {
     const loweredKey = key.toLowerCase();
@@ -402,14 +379,7 @@ function isFinalStreamEvent(payload: unknown): boolean {
     return false;
   }
 
-  const candidates = [
-    payload.event_kind,
-    payload.eventKind,
-    payload.event,
-    payload.type,
-    payload.kind,
-    payload.name,
-  ];
+  const candidates = [payload.event_kind, payload.eventKind, payload.event, payload.type, payload.kind, payload.name];
 
   for (const candidate of candidates) {
     if (typeof candidate !== "string") {
@@ -492,17 +462,7 @@ function parseFinalOutputValue(value: unknown, depth = 0): ParsedStreamFinalOutp
     return undefined;
   }
 
-  const keys = [
-    "output",
-    "data",
-    "result",
-    "response",
-    "final_result",
-    "finalResult",
-    "final",
-    "value",
-    "content",
-  ];
+  const keys = ["output", "data", "result", "response", "final_result", "finalResult", "final", "value", "content"];
 
   for (const key of keys) {
     const parsed = parseFinalOutputValue(value[key], depth + 1);
@@ -685,13 +645,7 @@ function extractStreamDelta(payload: unknown): StreamDelta | undefined {
     };
   }
 
-  const fallbackDelta = readRawString(payload, [
-    "delta",
-    "text",
-    "token",
-    "output_text",
-    "content",
-  ]);
+  const fallbackDelta = readRawString(payload, ["delta", "text", "token", "output_text", "content"]);
   if (fallbackDelta) {
     return {
       kind: inferDeltaKindFromRecord(payload),
@@ -699,11 +653,7 @@ function extractStreamDelta(payload: unknown): StreamDelta | undefined {
     };
   }
 
-  if (
-    Array.isArray(payload.choices) &&
-    payload.choices.length > 0 &&
-    isRecord(payload.choices[0])
-  ) {
+  if (Array.isArray(payload.choices) && payload.choices.length > 0 && isRecord(payload.choices[0])) {
     const first = payload.choices[0];
     if (typeof first.text === "string" && first.text.length > 0) {
       return {
@@ -896,12 +846,8 @@ export class ZoApiClient {
       if (normalizedEventName === STREAM_EVENT_ERROR) {
         const streamError =
           extractStreamErrorMessage(parsedPayload) ??
-          (isRecord(parsedPayload)
-            ? readRawString(parsedPayload, ["message", "detail", "text"])
-            : undefined) ??
-          (typeof parsedPayload === "string"
-            ? parsedPayload
-            : "Zo stream returned an error event.");
+          (isRecord(parsedPayload) ? readRawString(parsedPayload, ["message", "detail", "text"]) : undefined) ??
+          (typeof parsedPayload === "string" ? parsedPayload : "Zo stream returned an error event.");
         throw new Error(streamError);
       }
 
@@ -910,10 +856,7 @@ export class ZoApiClient {
         conversationId = streamConversationId;
       }
 
-      const finalFromPayload = extractFinalOutputFromStreamPayload(
-        parsedPayload,
-        normalizedEventName,
-      );
+      const finalFromPayload = extractFinalOutputFromStreamPayload(parsedPayload, normalizedEventName);
       if (finalFromPayload) {
         finalOutput = finalFromPayload;
         return;
@@ -1038,9 +981,7 @@ export class ZoApiClient {
     }
 
     if (outputText.length === 0 && thinkingText.length === 0) {
-      throw new UnexpectedAskOutputFormatError(
-        "stream ended without structured output or text deltas",
-      );
+      throw new UnexpectedAskOutputFormatError("stream ended without structured output or text deltas");
     }
 
     return {

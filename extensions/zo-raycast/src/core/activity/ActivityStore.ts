@@ -12,11 +12,7 @@ function safeParse(raw: string): ToolExecutionRecord[] {
     }
 
     return parsed.filter((item): item is ToolExecutionRecord => {
-      return (
-        typeof item === "object" &&
-        item !== null &&
-        typeof (item as { id?: unknown }).id === "string"
-      );
+      return typeof item === "object" && item !== null && typeof (item as { id?: unknown }).id === "string";
     });
   } catch {
     return [];

@@ -62,10 +62,8 @@ export default function ZoActivityCommand() {
     async (record: ToolExecutionRecord) => {
       try {
         if (record.target === "zo-api" && record.toolName === "zo.chat") {
-          const model =
-            typeof record.parameters.model === "string" ? record.parameters.model : undefined;
-          const prompt =
-            typeof record.parameters.prompt === "string" ? record.parameters.prompt : undefined;
+          const model = typeof record.parameters.model === "string" ? record.parameters.model : undefined;
+          const prompt = typeof record.parameters.prompt === "string" ? record.parameters.prompt : undefined;
           if (!model || !prompt) {
             throw new Error("Replay requires stored model and prompt values.");
           }
@@ -133,25 +131,16 @@ export default function ZoActivityCommand() {
           title={record.toolName}
           subtitle={subtitleForRecord(record)}
           icon={iconForOutcome(record)}
-          accessories={
-            record.errorMessage ? [{ icon: Icon.ExclamationMark, text: "Error" }] : undefined
-          }
+          accessories={record.errorMessage ? [{ icon: Icon.ExclamationMark, text: "Error" }] : undefined}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard
-                title="Copy Parameters"
-                content={JSON.stringify(record.parameters, null, 2)}
-              />
+              <Action.CopyToClipboard title="Copy Parameters" content={JSON.stringify(record.parameters, null, 2)} />
               <Action.CopyToClipboard
                 title="Copy Record"
                 content={JSON.stringify(record, null, 2)}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={() => void loadRecords()}
-              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void loadRecords()} />
               <Action
                 title="Replay"
                 icon={Icon.Play}
@@ -170,10 +159,7 @@ export default function ZoActivityCommand() {
       ))}
 
       {!state.loading && state.records.length === 0 ? (
-        <List.EmptyView
-          title="No activity yet"
-          description="Run Zo Chat actions to populate history."
-        />
+        <List.EmptyView title="No activity yet" description="Run Zo Chat actions to populate history." />
       ) : null}
     </List>
   );

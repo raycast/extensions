@@ -27,10 +27,7 @@ export default function ZoModelsCommand() {
 
     try {
       const { apiClient } = createClients();
-      const [models, defaultModelId] = await Promise.all([
-        apiClient.listModels(),
-        UserSettings.getDefaultModel(),
-      ]);
+      const [models, defaultModelId] = await Promise.all([apiClient.listModels(), UserSettings.getDefaultModel()]);
 
       setState({
         models,
@@ -103,11 +100,7 @@ export default function ZoModelsCommand() {
                     void setDefaultModel(model.id);
                   }}
                 />
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  onAction={() => void loadModels()}
-                />
+                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void loadModels()} />
               </ActionPanel>
             }
           />
@@ -115,10 +108,7 @@ export default function ZoModelsCommand() {
       })}
 
       {!state.loading && !state.error && state.models.length === 0 ? (
-        <List.EmptyView
-          title="No models returned"
-          description="Zo API responded without any available models."
-        />
+        <List.EmptyView title="No models returned" description="Zo API responded without any available models." />
       ) : null}
     </List>
   );

@@ -10,11 +10,7 @@ const RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
 function isRetryableError(error: unknown): boolean {
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
-    return (
-      message.includes("timeout") ||
-      message.includes("network") ||
-      message.includes("failed to fetch")
-    );
+    return message.includes("timeout") || message.includes("network") || message.includes("failed to fetch");
   }
 
   return false;

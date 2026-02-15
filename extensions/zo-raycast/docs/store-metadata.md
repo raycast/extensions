@@ -21,7 +21,7 @@
 
 ## Screenshots
 
-- assets/zo-chat.png
-- assets/zo-models.png
-- assets/zo-activity.png
+- metadata/zo-chat.png
+- metadata/zo-models.png
+- metadata/zo-activity.png
 - Add one more screenshot for `Zo Setup` before final publish.

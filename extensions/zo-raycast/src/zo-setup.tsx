@@ -131,11 +131,7 @@ export default function ZoSetupCommand() {
       isLoading={state.loading}
       actions={
         <ActionPanel>
-          <Action
-            title="Run Diagnostics Again"
-            icon={Icon.ArrowClockwise}
-            onAction={() => void runDiagnostics()}
-          />
+          <Action title="Run Diagnostics Again" icon={Icon.ArrowClockwise} onAction={() => void runDiagnostics()} />
         </ActionPanel>
       }
     >
@@ -147,11 +143,7 @@ export default function ZoSetupCommand() {
           subtitle={item.detail}
           actions={
             <ActionPanel>
-              <Action
-                title="Run Diagnostics Again"
-                icon={Icon.ArrowClockwise}
-                onAction={() => void runDiagnostics()}
-              />
+              <Action title="Run Diagnostics Again" icon={Icon.ArrowClockwise} onAction={() => void runDiagnostics()} />
               <Action
                 title="Copy Status"
                 icon={Icon.Clipboard}
