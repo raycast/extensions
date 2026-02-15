@@ -14,14 +14,14 @@
     {
       "name": "bookmarks",
       "title": "View Bookmarks",
-      "subtitle": "Bird Bookmarks",
+      "subtitle": "Bird",
       "description": "View your X/Twitter bookmarks",
       "mode": "view"
     },
     {
       "name": "likes",
       "title": "View Likes",
-      "subtitle": "Bird Bookmarks",
+      "subtitle": "Bird",
       "description": "View your X/Twitter likes",
       "mode": "view"
     }
