@@ -7,13 +7,7 @@
 
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import {
-  brewFetchInstalled,
-  InstalledMap,
-  isBrewLockError,
-  getErrorMessage,
-  brewLogger,
-} from "../utils";
+import { brewFetchInstalled, InstalledMap, isBrewLockError, getErrorMessage, brewLogger } from "../utils";
 
 /**
  * Hook to fetch and cache installed brew packages.

@@ -58,11 +58,7 @@ const caskRemote: ChunkedRemote<Cask> = {
 };
 
 /** Extract index entry from a Formula */
-const extractFormulaIndex: IndexExtractor<Formula> = (
-  item,
-  chunkNumber,
-  indexInChunk,
-): IndexEntry => {
+const extractFormulaIndex: IndexExtractor<Formula> = (item, chunkNumber, indexInChunk): IndexEntry => {
   return {
     id: item.name,
     n: item.name.toLowerCase(),
@@ -91,10 +87,7 @@ const extractCaskIndex: IndexExtractor<Cask> = (item, chunkNumber, indexInChunk)
  */
 export async function hasSearchCache(): Promise<boolean> {
   try {
-    const [formulaStats, caskStats] = await Promise.all([
-      fs.stat(formulaCachePath),
-      fs.stat(caskCachePath),
-    ]);
+    const [formulaStats, caskStats] = await Promise.all([fs.stat(formulaCachePath), fs.stat(caskCachePath)]);
     // Both files must exist and have content
     return formulaStats.size > 0 && caskStats.size > 0;
   } catch {
@@ -147,9 +140,7 @@ function parseListVersionsOutput(output: string): InstalledListItem[] {
  *
  * @returns Minimal installed package data for quick initial display
  */
-export async function brewFetchInstalledFast(
-  cancel?: AbortSignal,
-): Promise<InstalledMap | undefined> {
+export async function brewFetchInstalledFast(cancel?: AbortSignal): Promise<InstalledMap | undefined> {
   const startTime = Date.now();
 
   try {
@@ -255,10 +246,7 @@ function createMinimalCask(item: InstalledListItem): Cask {
 /**
  * Fetch all installed packages with full metadata.
  */
-export async function brewFetchInstalled(
-  useCache: boolean,
-  cancel?: AbortSignal,
-): Promise<InstalledMap | undefined> {
+export async function brewFetchInstalled(useCache: boolean, cancel?: AbortSignal): Promise<InstalledMap | undefined> {
   const startTime = Date.now();
   const results = await brewFetchInstallableResults(useCache, cancel);
   const mapped = brewMapInstalled(results);
@@ -282,8 +270,7 @@ async function brewFetchInstallableResults(
   cancel?: AbortSignal,
 ): Promise<InstallableResults | undefined> {
   async function installed(): Promise<string> {
-    return (await execBrew(`info --json=v2 --installed`, cancel ? { signal: cancel } : undefined))
-      .stdout;
+    return (await execBrew(`info --json=v2 --installed`, cancel ? { signal: cancel } : undefined)).stdout;
   }
 
   if (!useCache) {
@@ -342,12 +329,7 @@ async function brewFetchInstallableResults(
     // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
     const homebrewTime = await mtimeMs(brewPath("var/homebrew"));
 
-    if (
-      homebrewTime < cacheTime &&
-      caskroomTime < cacheTime &&
-      locksTime < cacheTime &&
-      pinnedTime < cacheTime
-    ) {
+    if (homebrewTime < cacheTime && caskroomTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
       const cacheBuffer = await fs.readFile(installedCachePath);
       const cached = JSON.parse(cacheBuffer.toString()) as InstallableResults;
       cacheLogger.log("Using cached installed data", {
@@ -466,22 +448,14 @@ async function ensureChunkedCache<T>(
 
   // Now build the chunked cache from the downloaded file
   // This streams through the file and writes chunks incrementally
-  await buildChunkedCache(
-    remote.cachePath,
-    remote.url,
-    remote.chunkedConfig,
-    extractIndex,
-    onProgress,
-  );
+  await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress);
 }
 
 /**
  * Fetch the chunked index for formulae.
  * Builds chunked cache if it doesn't exist or is stale.
  */
-export async function fetchFormulaIndex(
-  onProgress?: DownloadProgressCallback,
-): Promise<CacheIndex> {
+export async function fetchFormulaIndex(onProgress?: DownloadProgressCallback): Promise<CacheIndex> {
   // Check if already cached in memory
   if (formulaRemote.index) {
     return formulaRemote.index;
@@ -499,11 +473,7 @@ export async function fetchFormulaIndex(
       brewLogger.log("Waiting for existing formula chunked cache build");
       await formulaeChunkedBuildInProgress;
     } else {
-      formulaeChunkedBuildInProgress = ensureChunkedCache(
-        formulaRemote,
-        extractFormulaIndex,
-        onProgress,
-      );
+      formulaeChunkedBuildInProgress = ensureChunkedCache(formulaRemote, extractFormulaIndex, onProgress);
       try {
         await formulaeChunkedBuildInProgress;
       } finally {
@@ -587,18 +557,12 @@ export async function fetchCaskItems(entries: IndexEntry[]): Promise<Cask[]> {
  * Fetch info for a single formula by name.
  * Much faster than fetching all installed packages.
  */
-export async function brewFetchFormulaInfo(
-  name: string,
-  cancel?: AbortSignal,
-): Promise<Formula | undefined> {
+export async function brewFetchFormulaInfo(name: string, cancel?: AbortSignal): Promise<Formula | undefined> {
   const startTime = Date.now();
   brewLogger.log("Fetching formula info", { name });
 
   try {
-    const output = await execBrew(
-      `info --json=v2 ${name}`,
-      cancel ? { signal: cancel } : undefined,
-    );
+    const output = await execBrew(`info --json=v2 ${name}`, cancel ? { signal: cancel } : undefined);
     const results = JSON.parse(output.stdout) as InstallableResults;
     const duration = Date.now() - startTime;
 
@@ -619,18 +583,12 @@ export async function brewFetchFormulaInfo(
  * Fetch info for a single cask by token.
  * Much faster than fetching all installed packages.
  */
-export async function brewFetchCaskInfo(
-  token: string,
-  cancel?: AbortSignal,
-): Promise<Cask | undefined> {
+export async function brewFetchCaskInfo(token: string, cancel?: AbortSignal): Promise<Cask | undefined> {
   const startTime = Date.now();
   brewLogger.log("Fetching cask info", { token });
 
   try {
-    const output = await execBrew(
-      `info --json=v2 ${token}`,
-      cancel ? { signal: cancel } : undefined,
-    );
+    const output = await execBrew(`info --json=v2 ${token}`, cancel ? { signal: cancel } : undefined);
     const results = JSON.parse(output.stdout) as InstallableResults;
     const duration = Date.now() - startTime;
 

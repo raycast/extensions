@@ -86,9 +86,7 @@ export async function brewSearch(
     matchingFormulaEntries = formulaIndex.entries
       .filter((entry) => {
         return (
-          entry.n.includes(target) ||
-          entry.d?.includes(target) ||
-          entry.a?.some((alias) => alias.includes(target))
+          entry.n.includes(target) || entry.d?.includes(target) || entry.a?.some((alias) => alias.includes(target))
         );
       })
       .sort((a, b) => brewCompare(a.id, b.id, target));
@@ -110,9 +108,7 @@ export async function brewSearch(
   const casksLen = matchingCaskEntries.length;
 
   // Phase 3: Slice BEFORE loading chunks (key optimization)
-  const limitedFormulaEntries = limit
-    ? matchingFormulaEntries.slice(0, limit)
-    : matchingFormulaEntries;
+  const limitedFormulaEntries = limit ? matchingFormulaEntries.slice(0, limit) : matchingFormulaEntries;
   const limitedCaskEntries = limit ? matchingCaskEntries.slice(0, limit) : matchingCaskEntries;
 
   // Phase 4: Load only needed chunks
@@ -144,9 +140,7 @@ export async function brewSearch(
   // Report final progress with total counts
   onProgress?.({
     phase: "complete",
-    formulaeProgress: formulaeProgress
-      ? { ...formulaeProgress, totalItems: formulaeLen }
-      : undefined,
+    formulaeProgress: formulaeProgress ? { ...formulaeProgress, totalItems: formulaeLen } : undefined,
     casksProgress: casksProgress ? { ...casksProgress, totalItems: casksLen } : undefined,
   });
 

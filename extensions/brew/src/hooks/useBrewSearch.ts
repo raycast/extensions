@@ -327,12 +327,7 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
   const indexTotals: IndexTotals | undefined = useMemo(() => {
     const casksTotal = downloadProgress.casksProgress?.totalItems;
     const formulaeTotal = downloadProgress.formulaeProgress?.totalItems;
-    if (
-      casksTotal !== undefined &&
-      formulaeTotal !== undefined &&
-      casksTotal > 0 &&
-      formulaeTotal > 0
-    ) {
+    if (casksTotal !== undefined && formulaeTotal !== undefined && casksTotal > 0 && formulaeTotal > 0) {
       return { formulae: formulaeTotal, casks: casksTotal };
     }
     // Fallback to rawData totalLength if available (for warm cache starts)
@@ -344,11 +339,7 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
       }
     }
     return undefined;
-  }, [
-    downloadProgress.casksProgress?.totalItems,
-    downloadProgress.formulaeProgress?.totalItems,
-    rawData,
-  ]);
+  }, [downloadProgress.casksProgress?.totalItems, downloadProgress.formulaeProgress?.totalItems, rawData]);
 
   return {
     isLoading,
@@ -371,8 +362,7 @@ function applyInstalledStatus(results: InstallableResults, installed?: Installed
   }
 
   for (const formula of results.formulae) {
-    const info =
-      installed.formulae instanceof Map ? installed.formulae.get(formula.name) : undefined;
+    const info = installed.formulae instanceof Map ? installed.formulae.get(formula.name) : undefined;
     if (info && isFormula(info)) {
       formula.installed = info.installed;
       formula.outdated = info.outdated;

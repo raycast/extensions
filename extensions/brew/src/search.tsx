@@ -25,11 +25,7 @@ export default function SearchView() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
 
-  const {
-    isLoading: isLoadingInstalled,
-    data: installed,
-    revalidate: revalidateInstalled,
-  } = useBrewInstalled();
+  const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
 
   // useBrewSearch automatically applies installed status via useMemo
   // whenever either search results or installed data changes
@@ -48,10 +44,7 @@ export default function SearchView() {
   const casks = filter != InstallableFilterType.formulae ? (results?.casks ?? []) : [];
 
   // Memoize isInstalled callback to avoid creating a new function every render
-  const isInstalledCallback = useCallback(
-    (name: string) => isInstalled(name, installed),
-    [installed],
-  );
+  const isInstalledCallback = useCallback((name: string) => isInstalled(name, installed), [installed]);
 
   // Track toast reference for updating progress
   const initToastRef = useRef<Toast | null>(null);
@@ -84,19 +77,14 @@ export default function SearchView() {
     }
 
     // Track max progress to avoid jumps backwards when values update independently
-    maxCasksPercentRef.current = Math.max(
-      maxCasksPercentRef.current,
-      Math.max(0, Math.min(100, casksPercent)),
-    );
+    maxCasksPercentRef.current = Math.max(maxCasksPercentRef.current, Math.max(0, Math.min(100, casksPercent)));
     maxFormulaePercentRef.current = Math.max(
       maxFormulaePercentRef.current,
       Math.max(0, Math.min(100, formulaePercent)),
     );
 
     // Calculate combined progress (both downloads happen concurrently)
-    const combinedPercent = Math.round(
-      (maxCasksPercentRef.current + maxFormulaePercentRef.current) / 2,
-    );
+    const combinedPercent = Math.round((maxCasksPercentRef.current + maxFormulaePercentRef.current) / 2);
 
     const message = combinedPercent > 0 ? `${combinedPercent}%` : undefined;
 
@@ -119,12 +107,7 @@ export default function SearchView() {
 
   // Show completion toast only on cold start when fully complete
   useEffect(() => {
-    if (
-      phase === "complete" &&
-      !hasShownCompletionToast.current &&
-      results &&
-      hasCacheFiles === false
-    ) {
+    if (phase === "complete" && !hasShownCompletionToast.current && results && hasCacheFiles === false) {
       hasShownCompletionToast.current = true;
       const totalFormulae = indexTotals?.formulae || 0;
       const totalCasks = indexTotals?.casks || 0;

@@ -31,10 +31,7 @@ let homebrewEnvLogged = false;
 /**
  * Execute a brew command.
  */
-export async function execBrew(
-  cmd: string,
-  options?: { signal?: AbortSignal },
-): Promise<ExecResult> {
+export async function execBrew(cmd: string, options?: { signal?: AbortSignal }): Promise<ExecResult> {
   try {
     const env = await execBrewEnv();
     return await execp(`${brewExecutable()} ${cmd}`, {

@@ -77,16 +77,12 @@ interface OutdatedListProps {
 }
 
 function OutdatedList(props: OutdatedListProps) {
-  const formulae =
-    props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
-  const casks =
-    props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
+  const formulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
+  const casks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
   const hasResults = formulae.length > 0 || casks.length > 0;
 
   // Determine search bar placeholder based on loading state
-  const searchBarPlaceholder = props.isLoading
-    ? "Checking for outdated packages…"
-    : placeholder(props.filterType);
+  const searchBarPlaceholder = props.isLoading ? "Checking for outdated packages…" : placeholder(props.filterType);
 
   return (
     <List
@@ -116,11 +112,7 @@ function OutdatedList(props: OutdatedListProps) {
         <>
           <List.Section title="Formulae">
             {formulae.map((formula) => (
-              <OutdatedFormulaeListItem
-                key={formula.name}
-                outdated={formula}
-                onAction={props.onAction}
-              />
+              <OutdatedFormulaeListItem key={formula.name} outdated={formula} onAction={props.onAction} />
             ))}
           </List.Section>
           <List.Section title="Casks">
