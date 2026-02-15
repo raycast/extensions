@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+{PR_MERGE_DATE} [Update] - 2026-02-15
+- Used https://github.com/Inovvia/go-win-audio-cli instead of cmdlet to prevent issues regarding powershell and administrator privileges
+- Listing audio devices on windows is now a lot faster!
+
 ## [Fix] - 2026-02-10
 - Improved windows requirement auto install logic
 - Suppressed PowerShell warnings — Set $WarningPreference = 'SilentlyContinue' and -WarningAction SilentlyContinue on Import-Module to prevent warnings from corrupting JSON output.

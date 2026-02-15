@@ -1,160 +1,87 @@
+import path from "path";
+import fs from "fs";
 import { execa } from "execa";
-import { showToast, Toast } from "@raycast/api";
+import { environment } from "@raycast/api";
 import type { PlatformAudioAPI, AudioDevice } from "./index";
 
-interface WindowsAudioDevice {
-  ID: string;
-  Name: string;
-  Type: string;
-  Index: number;
-  Default: boolean;
-  DefaultComm: boolean;
-  State: string;
-}
+type WindowsAudioDevice = {
+  id: string;
+  name: string;
+  isDefault?: boolean;
+  isDefaultCom?: boolean;
+};
 
-let resolvedShell: string | null = null;
+type WindowsAudioList = {
+  inputs: WindowsAudioDevice[];
+  outputs: WindowsAudioDevice[];
+};
 
-async function getPowerShellExe(): Promise<string> {
-  if (resolvedShell) return resolvedShell;
+type WindowsAudioSwitchResult = {
+  type: "input" | "output";
+  device: WindowsAudioDevice;
+};
 
-  try {
-    await execa("pwsh", ["-NoProfile", "-Command", "exit 0"]);
-    resolvedShell = "pwsh";
-  } catch {
-    resolvedShell = "powershell";
-  }
-  return resolvedShell;
-}
+const binaryAsset = path.join(environment.assetsPath, "win-audio-cli.exe");
+const binary = path.join(environment.supportPath, "win-audio-cli.exe");
+let hasLoggedBinaryInfo = false;
 
-function stripAnsi(str: string): string {
-  // eslint-disable-next-line no-control-regex
-  return str.replace(/\x1B\[[0-9;]*m/g, "");
-}
-
-async function runPowerShell(command: string): Promise<string> {
-  const shell = await getPowerShellExe();
-  try {
-    const { stdout } = await execa(shell, ["-NoProfile", "-Command", command]);
-    return stripAnsi(stdout);
-  } catch (error) {
-    const errorMessage =
-      (error as { stderr?: string; message?: string }).stderr ||
-      (error as Error).message ||
-      "PowerShell command failed";
-    console.error("PowerShell command failed", { command, errorMessage });
-    throw new Error(errorMessage);
-  }
-}
-
-let ensureModulePromise: Promise<void> | null = null;
-
-function ensureAudioModule(): Promise<void> {
-  if (!ensureModulePromise) {
-    ensureModulePromise = doEnsureAudioModule().catch((err) => {
-      ensureModulePromise = null;
-      throw err;
-    });
-  }
-  return ensureModulePromise;
-}
-
-async function doEnsureAudioModule(): Promise<void> {
-  let moduleAvailable = false;
-  try {
-    const result = await runPowerShell(
-      "Get-Module -ListAvailable -Name AudioDeviceCmdlets | Select-Object -First 1 | ConvertTo-Json",
-    );
-    moduleAvailable = !!(result && result.trim() !== "" && result.trim() !== "null");
-  } catch {
-    moduleAvailable = false;
-  }
-
-  if (moduleAvailable) {
+async function ensureBinary() {
+  const shouldCopy = !fs.existsSync(binary);
+  if (shouldCopy) {
+    fs.copyFileSync(binaryAsset, binary);
+    await logBinaryInfo();
     return;
   }
 
-  showToast({
-    style: Toast.Style.Animated,
-    title: "Installing AudioDeviceCmdlets",
-    message: "This may take a moment...",
-  });
+  try {
+    const assetStat = fs.statSync(binaryAsset);
+    const binaryStat = fs.statSync(binary);
+    if (assetStat.mtimeMs > binaryStat.mtimeMs) {
+      fs.copyFileSync(binaryAsset, binary);
+      await logBinaryInfo();
+      return;
+    }
+  } catch (error) {
+    console.warn("Failed to sync Windows audio binary", error);
+  }
+
+  await logBinaryInfo();
+}
+
+async function logBinaryInfo() {
+  if (hasLoggedBinaryInfo) {
+    return;
+  }
+  hasLoggedBinaryInfo = true;
 
   try {
-    const shell = await getPowerShellExe();
-    const installCmd =
-      shell === "pwsh"
-        ? "Install-PSResource -Name AudioDeviceCmdlets -Scope CurrentUser -TrustRepository -Quiet *>&1 | Out-String"
-        : "Set-PSRepository -Name PSGallery -InstallationPolicy Trusted; Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser -Force -SkipPublisherCheck *>&1 | Out-String";
-    const installOutput = await runPowerShell(installCmd);
-    if (installOutput && installOutput.trim()) {
-      console.log("Install-Module output:", installOutput);
-    }
-
-    const checkResult = await runPowerShell(
-      "Get-Module -ListAvailable -Name AudioDeviceCmdlets | Select-Object -First 1 | ConvertTo-Json",
-    );
-
-    if (!checkResult || checkResult.trim() === "" || checkResult.trim() === "null") {
-      const modulePath = await runPowerShell("$env:PSModulePath");
-      const errorDetail = `Module not found after install. PSModulePath: ${modulePath}`;
-      console.error("AudioDeviceCmdlets missing after install", { modulePath, installOutput });
-      showToast({
-        style: Toast.Style.Failure,
-        title: "AudioDeviceCmdlets Install Failed",
-        message: errorDetail,
-      });
-      throw new Error(errorDetail);
-    }
-
-    showToast({
-      style: Toast.Style.Success,
-      title: "AudioDeviceCmdlets Installed",
+    const { stdout } = await execa(binary, ["version"]);
+    const info = parseJson<{ version: string; commit: string; buildDate: string }>(stdout);
+    console.log("Windows audio binary", {
+      path: binary,
+      version: info.version,
+      commit: info.commit,
+      buildDate: info.buildDate,
     });
   } catch (error) {
-    const msg = (error as Error).message || "Unknown error";
-    console.error("AudioDeviceCmdlets install failed", msg);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Installation Failed",
-      message: msg,
-    });
-    throw error;
+    console.warn("Failed to read Windows audio binary version", error);
   }
 }
 
-function buildAudioModuleCommand(command: string) {
-  return `$WarningPreference = 'SilentlyContinue'; Import-Module AudioDeviceCmdlets -ErrorAction Stop -WarningAction SilentlyContinue; ${command}`;
+function parseJson<T>(stdout: string): T {
+  return JSON.parse(stdout) as T;
 }
 
-async function getDevices(type?: "Playback" | "Recording"): Promise<WindowsAudioDevice[]> {
-  await ensureAudioModule();
-
-  let command = "Get-AudioDevice -List";
-  if (type) {
-    command = `Get-AudioDevice -List | Where-Object { $_.Type -eq '${type}' }`;
-  }
-
-  const result = await runPowerShell(buildAudioModuleCommand(`(${command} | ConvertTo-Json -Depth 3)`));
-  const devices: WindowsAudioDevice[] = JSON.parse(result);
-
-  if (!Array.isArray(devices)) {
-    return [devices];
-  }
-
-  return devices;
-}
-
-function mapToDevice(windowsDevice: WindowsAudioDevice, type: "input" | "output"): AudioDevice {
+function mapToDevice(device: WindowsAudioDevice, type: "input" | "output"): AudioDevice {
   return {
-    id: windowsDevice.ID,
-    uid: windowsDevice.ID,
-    name: windowsDevice.Name,
+    id: device.id,
+    uid: device.id,
+    name: device.name,
     isInput: type === "input",
     isOutput: type === "output",
-    transportType: mapTransportType(windowsDevice.Name),
-    index: windowsDevice.Index,
-    isDefault: windowsDevice.Default,
-    isCommunication: windowsDevice.DefaultComm,
+    transportType: mapTransportType(device.name),
+    isDefault: device.isDefault,
+    isCommunication: device.isDefaultCom,
   };
 }
 
@@ -195,92 +122,68 @@ function mapTransportType(deviceName: string): string {
   return "speakers";
 }
 
-async function setDefault(deviceId: string, type: "input" | "output", communication = false): Promise<void> {
-  await ensureAudioModule();
+async function runBinary<T>(args: string[]): Promise<T> {
+  await ensureBinary();
+  const { stdout } = await execa(binary, args);
+  return parseJson<T>(stdout);
+}
 
-  const safeId = deviceId.replace(/'/g, "''");
-  const setCommand = `Set-AudioDevice -ID '${safeId}' ${communication ? "-CommunicationOnly" : "-DefaultOnly"}`;
-
-  await runPowerShell(buildAudioModuleCommand(setCommand));
+async function getDevices(): Promise<WindowsAudioList> {
+  return runBinary<WindowsAudioList>(["list", "--json"]);
 }
 
 export const windowsAudioAPI: PlatformAudioAPI = {
   async getAllDevices(): Promise<AudioDevice[]> {
-    const playbackDevices = await getDevices("Playback");
-    const recordingDevices = await getDevices("Recording");
-
-    const outputDevices = playbackDevices.map((d) => mapToDevice(d, "output"));
-    const inputDevices = recordingDevices.map((d) => mapToDevice(d, "input"));
-
-    return [...outputDevices, ...inputDevices];
+    const devices = await getDevices();
+    return [
+      ...devices.outputs.map((device) => mapToDevice(device, "output")),
+      ...devices.inputs.map((device) => mapToDevice(device, "input")),
+    ];
   },
 
   async getInputDevices(): Promise<AudioDevice[]> {
-    const devices = await getDevices("Recording");
-    return devices.map((d) => mapToDevice(d, "input"));
+    const devices = await getDevices();
+    return devices.inputs.map((device) => mapToDevice(device, "input"));
   },
 
   async getOutputDevices(): Promise<AudioDevice[]> {
-    const devices = await getDevices("Playback");
-    return devices.map((d) => mapToDevice(d, "output"));
+    const devices = await getDevices();
+    return devices.outputs.map((device) => mapToDevice(device, "output"));
   },
 
   async getDefaultOutputDevice(): Promise<AudioDevice> {
-    await ensureAudioModule();
-    const command = "Get-AudioDevice -List | Where-Object { $_.Type -eq 'Playback' -and $_.Default -eq $true }";
-    const result = await runPowerShell(buildAudioModuleCommand(`(${command} | ConvertTo-Json)`));
-
-    if (!result || result.trim() === "" || result === "null") {
+    const devices = await getDevices();
+    const device = devices.outputs.find((output) => output.isDefault);
+    if (!device) {
       throw new Error("No default output device found");
-    }
-
-    const device: WindowsAudioDevice = JSON.parse(result);
-    if (!device || !device.ID) {
-      throw new Error("No valid default output device found");
     }
 
     return mapToDevice(device, "output");
   },
 
   async getDefaultInputDevice(): Promise<AudioDevice> {
-    await ensureAudioModule();
-    const command = "Get-AudioDevice -List | Where-Object { $_.Type -eq 'Recording' -and $_.Default -eq $true }";
-    const result = await runPowerShell(buildAudioModuleCommand(`(${command} | ConvertTo-Json)`));
-
-    if (!result || result.trim() === "" || result === "null") {
+    const devices = await getDevices();
+    const device = devices.inputs.find((input) => input.isDefault);
+    if (!device) {
       throw new Error("No default input device found");
-    }
-
-    const device: WindowsAudioDevice = JSON.parse(result);
-    if (!device || !device.ID) {
-      throw new Error("No valid default input device found");
     }
 
     return mapToDevice(device, "input");
   },
 
   async setDefaultOutputDevice(deviceId: string) {
-    await setDefault(deviceId, "output", false);
+    await runBinary<WindowsAudioSwitchResult>(["switch-output", "--id", deviceId]);
   },
 
   async setDefaultInputDevice(deviceId: string) {
-    await setDefault(deviceId, "input", false);
+    await runBinary<WindowsAudioSwitchResult>(["switch-input", "--id", deviceId]);
   },
 
   async setDefaultCommunicationOutputDevice(deviceId: string) {
-    await setDefault(deviceId, "output", true);
+    await runBinary<WindowsAudioSwitchResult>(["switch-output", "--id", deviceId]);
   },
 
   async setDefaultCommunicationInputDevice(deviceId: string) {
-    await setDefault(deviceId, "input", true);
-  },
-
-  async getOutputDeviceVolume() {
-    return undefined;
-  },
-
-  async setOutputDeviceVolume() {
-    // Volume control not yet implemented for Windows
-    return Promise.resolve();
+    await runBinary<WindowsAudioSwitchResult>(["switch-input", "--id", deviceId]);
   },
 };
