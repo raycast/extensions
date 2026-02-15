@@ -32,13 +32,8 @@ export default function Command() {
     },
     validation: {
       title: FormValidation.Required,
-      projectId: (value) => {
-        if (projects.length > 0 && !value) {
-          return "A project must be selected";
-        }
-      },
+      projectId: FormValidation.Required,
     },
-  });
 
   const priorityOptions = [
     { value: "no-priority", title: "No Priority" },
