@@ -3,7 +3,10 @@ import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import AdmZip from "adm-zip";
+import yauzl from "yauzl";
+import { mkdirp } from "mkdirp";
+import { pipeline } from "stream";
+import { promisify } from "util";
 
 interface FormValues {
   url: string;
@@ -184,12 +187,11 @@ async function downloadGitHubDirectory(
 
     if (!response.body) throw new Error("Empty response body");
 
-    // Create a write stream
-    const fileStream = fs.createWriteStream(tempFile);
+    // Use ReadableStream to process chunks
     const reader = response.body.getReader();
+    const fileStream = fs.createWriteStream(tempFile);
     let downloadedBytes = 0;
 
-    // Read the stream chunk by chunk
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -198,18 +200,27 @@ async function downloadGitHubDirectory(
         downloadedBytes += value.length;
         const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
 
-        // Update progress every chunk might be too frequent, but React handles it or we can throttle
-        // For Raycast toast, frequent updates are okay-ish, but let's just update text
-        onProgress(`Downloading... ${downloadedMB} MB`);
+        let progressMsg = `Downloading... ${downloadedMB} MB`;
+        if (repoSizeMB > 0) {
+          const percent = Math.min(Math.round((downloadedBytes / (repoSizeMB * 1024 * 1024)) * 100), 100);
+          progressMsg += ` / ${repoSizeMB} MB (${percent}%)`;
+        }
 
-        // Write to file
-        fileStream.write(Buffer.from(value));
+        onProgress(progressMsg);
+
+        // Write chunk to file manually since we are consuming the stream
+        // Note: fs.createWriteStream returns a Writable stream, we can write buffers
+        // We handle backpressure simply by awaiting if needed, but synchronous write is usually fine for temp files
+        // However, correct way with streams is to pipe. But since we need progress, we intercept.
+        // Let's use a simpler approach: write directly.
+        const canWrite = fileStream.write(value);
+        if (!canWrite) {
+          await new Promise((resolve) => fileStream.once("drain", resolve));
+        }
       }
     }
 
     fileStream.end();
-
-    // Wait for file to be fully written
     await new Promise((resolve, reject) => {
       fileStream.on("finish", resolve);
       fileStream.on("error", reject);
@@ -217,47 +228,75 @@ async function downloadGitHubDirectory(
 
     // 3. Extract
     onProgress("Extracting files...");
-    const zip = new AdmZip(tempFile);
-    const zipEntries = zip.getEntries();
-
-    const firstEntry = zipEntries[0];
-    if (!firstEntry) throw new Error("Empty zip archive");
-
-    // GitHub zip structure is `repo-branch/...`
-    const rootFolder = firstEntry.entryName.split("/")[0];
-    const prefix = dirPath ? `${rootFolder}/${dirPath}/` : `${rootFolder}/`;
 
     // Determine extract destination
     const folderName = dirPath ? path.basename(dirPath) : repo;
     const finalDest = path.join(destPath, folderName);
 
     if (!fs.existsSync(finalDest)) {
-      fs.mkdirSync(finalDest, { recursive: true });
+      await mkdirp(finalDest);
     }
 
-    let extractedCount = 0;
+    // Use yauzl for memory-efficient extraction
+    await new Promise<void>((resolve, reject) => {
+      yauzl.open(tempFile, { lazyEntries: true }, (err, zipfile) => {
+        if (err) return reject(err);
 
-    for (const entry of zipEntries) {
-      if (entry.isDirectory) continue;
+        let extractedCount = 0;
+        let rootFolder = ""; // Will be detected from first entry
 
-      if (entry.entryName.startsWith(prefix)) {
-        // Remove prefix to get relative path inside the target folder
-        const relativePath = entry.entryName.substring(prefix.length);
-        const entryDest = path.join(finalDest, relativePath);
-        const entryDir = path.dirname(entryDest);
+        zipfile.readEntry();
 
-        if (!fs.existsSync(entryDir)) {
-          fs.mkdirSync(entryDir, { recursive: true });
-        }
+        zipfile.on("entry", (entry) => {
+          // Detect root folder from first entry if not set
+          if (!rootFolder) {
+            rootFolder = entry.fileName.split("/")[0] + "/";
+          }
 
-        fs.writeFileSync(entryDest, entry.getData());
-        extractedCount++;
-      }
-    }
+          const prefix = dirPath ? `${rootFolder}${dirPath}/` : rootFolder;
 
-    if (extractedCount === 0) {
-      throw new Error(`No files found in '${dirPath || "repository"}'`);
-    }
+          if (entry.fileName.endsWith("/")) {
+            // Directory entry - skip or create if needed (mkdirp handles parent dirs)
+            zipfile.readEntry();
+          } else {
+            // File entry
+            if (entry.fileName.startsWith(prefix)) {
+              // Extract
+              const relativePath = entry.fileName.substring(prefix.length);
+              const entryDest = path.join(finalDest, relativePath);
+              const entryDir = path.dirname(entryDest);
+
+              mkdirp(entryDir).then(() => {
+                zipfile.openReadStream(entry, (err, readStream) => {
+                  if (err) return reject(err);
+                  const writeStream = fs.createWriteStream(entryDest);
+                  readStream.pipe(writeStream);
+
+                  writeStream.on("finish", () => {
+                    extractedCount++;
+                    zipfile.readEntry();
+                  });
+                  writeStream.on("error", reject);
+                });
+              });
+            } else {
+              // Skip irrelevant files
+              zipfile.readEntry();
+            }
+          }
+        });
+
+        zipfile.on("end", () => {
+          if (extractedCount === 0) {
+            reject(new Error(`No files found in '${dirPath || "repository"}'`));
+          } else {
+            resolve();
+          }
+        });
+
+        zipfile.on("error", reject);
+      });
+    });
 
     return finalDest;
   } finally {

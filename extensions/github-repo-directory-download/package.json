@@ -25,13 +25,15 @@
   "dependencies": {
     "@raycast/api": "^1.104.0",
     "@raycast/utils": "^1.17.0",
-    "adm-zip": "^0.5.16"
+    "mkdirp": "^3.0.1",
+    "yauzl": "^3.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/adm-zip": "^0.5.7",
+    "@types/mkdirp": "^1.0.2",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@types/yauzl": "^2.10.3",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
