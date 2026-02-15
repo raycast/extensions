@@ -2,7 +2,15 @@ import React from "react";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { HistoryActionPanels } from "./components";
-import { getUsageHistory, getAppFavicon, removeUsageHistoryItem } from "./helpers/apps";
+import {
+  getUsageHistory,
+  getAppFavicon,
+  removeUsageHistoryItem,
+  getStarredHistoryPairs,
+  getHistoryPairKey,
+  toggleStarredHistoryItem,
+  clearStarredHistoryItems,
+} from "./helpers/apps";
 import { openProfile } from "./helpers/open-profile";
 import { getAppByValue } from "./helpers/custom-app-utils";
 import { safeAsyncOperation } from "./utils/errors";
@@ -16,7 +24,8 @@ export default function HistoryCommand() {
     revalidate,
   } = useCachedPromise(
     async () => {
-      const usageHistory = await getUsageHistory();
+      const [usageHistory, starredPairs] = await Promise.all([getUsageHistory(), getStarredHistoryPairs()]);
+      const starredSet = new Set(starredPairs);
 
       // Load favicons for each history item and generate URLs
       const itemsWithFavicons = await Promise.all(
@@ -28,17 +37,22 @@ export default function HistoryCommand() {
           let url = "";
           if (app) {
             const requiresAtSymbol = app.urlTemplate.includes("@{profile}");
-            const profileToUse = requiresAtSymbol
-              ? item.profile.startsWith("@")
-                ? item.profile
-                : `@${item.profile}`
-              : item.profile.startsWith("@")
-                ? item.profile.slice(1)
-                : item.profile;
+            const hasAtSymbol = item.profile.startsWith("@");
+            let profileToUse = item.profile;
+            if (requiresAtSymbol && !hasAtSymbol) {
+              profileToUse = `@${item.profile}`;
+            } else if (!requiresAtSymbol && hasAtSymbol) {
+              profileToUse = item.profile.slice(1);
+            }
             url = app.urlTemplate.replace("{profile}", profileToUse);
           }
 
-          return { ...item, favicon, url };
+          return {
+            ...item,
+            favicon,
+            url,
+            isStarred: starredSet.has(getHistoryPairKey(item.profile, item.app)),
+          };
         }),
       );
 
@@ -68,13 +82,19 @@ export default function HistoryCommand() {
     });
     // Sort apps alphabetically by name
     apps.sort((a, b) => a.name.localeCompare(b.name));
-    return [{ value: "__all__", name: "Show All", favicon: undefined }, ...apps];
+    return [
+      { value: "__all__", name: "Show All", favicon: undefined },
+      { value: "__starred__", name: "Starred Profiles", favicon: Icon.Star },
+      ...apps,
+    ];
   }, [historyItems]);
 
   // Filter items - first by appFilter (unless "all"), then by searchText
   const filteredItems = (historyItems ?? []).filter((item) => {
-    // First filter by app
-    if (appFilter !== "__all__" && item.app !== appFilter) {
+    // Filter by app or starred mode
+    if (appFilter === "__starred__") {
+      if (!item.isStarred) return false;
+    } else if (appFilter !== "__all__" && item.app !== appFilter) {
       return false;
     }
 
@@ -118,6 +138,34 @@ export default function HistoryCommand() {
     );
   };
 
+  const handleToggleStar = async (profile: string, app: string) => {
+    await safeAsyncOperation(
+      async () => {
+        await toggleStarredHistoryItem(profile, app);
+        revalidate();
+      },
+      "toggling starred history item",
+      {
+        showToastOnError: true,
+        rethrow: false,
+      },
+    );
+  };
+
+  const handleClearStarredProfiles = async () => {
+    await safeAsyncOperation(
+      async () => {
+        await clearStarredHistoryItems();
+        await revalidate();
+      },
+      "clearing starred history items",
+      {
+        showToastOnError: true,
+        rethrow: false,
+      },
+    );
+  };
+
   return (
     <List
       isLoading={isLoading}
@@ -147,7 +195,10 @@ export default function HistoryCommand() {
               title={`@${item.profile}`}
               subtitle={item.appName}
               icon={item.favicon || Icon.Globe}
-              accessories={[{ text: formatRelativeDate(item.timestamp) }]}
+              accessories={[
+                ...(item.isStarred ? [{ icon: Icon.Star }] : []),
+                { text: formatRelativeDate(item.timestamp) },
+              ]}
               actions={
                 <HistoryActionPanels
                   item={{
@@ -156,10 +207,13 @@ export default function HistoryCommand() {
                     appName: item.appName,
                     favicon: typeof item.favicon === "string" ? item.favicon : undefined,
                     url: item.url || "",
+                    isStarred: item.isStarred,
                     timestamp: item.timestamp,
                   }}
                   onOpenProfile={handleOpenProfile}
                   onDeleteHistoryItem={handleDeleteHistoryItem}
+                  onToggleStar={handleToggleStar}
+                  onClearStarredProfiles={handleClearStarredProfiles}
                   onSetSearchText={setSearchText}
                   onSetAppFilter={setAppFilter}
                   onFilterByApp={filterByApp}

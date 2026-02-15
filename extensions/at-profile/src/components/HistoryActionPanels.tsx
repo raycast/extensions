@@ -7,6 +7,8 @@ interface HistoryActionPanelsProps {
   item: HistoryItem;
   onOpenProfile: (profile: string, app: string) => void;
   onDeleteHistoryItem: (profile: string, app: string) => void;
+  onToggleStar: (profile: string, app: string) => void;
+  onClearStarredProfiles: () => void;
   onSetSearchText: (text: string) => void;
   onSetAppFilter: (filter: string) => void;
   onFilterByApp: (app: string) => void;
@@ -18,6 +20,8 @@ export function HistoryActionPanels({
   item,
   onOpenProfile,
   onDeleteHistoryItem,
+  onToggleStar,
+  onClearStarredProfiles,
   onSetSearchText,
   onSetAppFilter,
   onFilterByApp,
@@ -45,14 +49,12 @@ export function HistoryActionPanels({
         shortcut={{ modifiers: ["cmd"], key: "e" }}
       />
       <Action.Push
-        // eslint-disable-next-line @raycast/prefer-title-case
         title={`Open @${item.profile} on…`}
         icon={Icon.Terminal}
         target={<OpenProfileCommand arguments={{ profile: item.profile }} />}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
       />
       <Action
-        // eslint-disable-next-line @raycast/prefer-title-case
         title={`Copy Profile URL`}
         icon={Icon.Clipboard}
         onAction={async () => {
@@ -69,11 +71,23 @@ export function HistoryActionPanels({
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
       <Action
+        title={item.isStarred ? `Unstar Profile on ${item.appName}` : `Star Profile on ${item.appName}`}
+        icon={item.isStarred ? Icon.XMarkCircle : Icon.Star}
+        onAction={() => onToggleStar(item.profile, item.app)}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
+      />
+      <Action
         title="Delete History Item"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
         onAction={() => onDeleteHistoryItem(item.profile, item.app)}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      />
+      <Action
+        title="Clear Starred Profiles"
+        icon={Icon.Star}
+        style={Action.Style.Destructive}
+        onAction={onClearStarredProfiles}
       />
       <ActionPanel.Section>
         <Action
