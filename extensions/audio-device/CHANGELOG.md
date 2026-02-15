@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-{PR_MERGE_DATE} [Update] - 2026-02-15
+## [Update] - {PR_MERGE_DATE}
 - Used https://github.com/Inovvia/go-win-audio-cli instead of cmdlet to prevent issues regarding powershell and administrator privileges
 - Listing audio devices on windows is now a lot faster!
 
