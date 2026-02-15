@@ -1,16 +1,9 @@
-import { List, Icon, ActionPanel, Action } from "@raycast/api"
-import { useBirdCommand } from "./hooks/useBirdCommand"
-import { TweetItem } from "./components/TweetItem"
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { useBirdCommand } from "./hooks/useBirdCommand";
+import { TweetItem } from "./components/TweetItem";
 
 export default function LikesCommand() {
-  const {
-    data: tweets,
-    isLoading,
-    error,
-    loadMore,
-    canLoadMore,
-    maxCount,
-  } = useBirdCommand("likes")
+  const { data: tweets, isLoading, error, loadMore, canLoadMore, maxCount } = useBirdCommand("likes");
 
   return (
     <List
@@ -20,19 +13,11 @@ export default function LikesCommand() {
       navigationTitle={`Likes (${tweets.length}${canLoadMore ? `/${maxCount}` : ""})`}
     >
       {error ? (
-        <List.EmptyView
-          title="Failed to load likes"
-          description={error.message}
-        />
+        <List.EmptyView title="Failed to load likes" description={error.message} />
       ) : (
         <>
           {tweets?.map((tweet) => (
-            <TweetItem
-              key={tweet.id}
-              tweet={tweet}
-              loadMore={loadMore}
-              canLoadMore={canLoadMore}
-            />
+            <TweetItem key={tweet.id} tweet={tweet} loadMore={loadMore} canLoadMore={canLoadMore} />
           ))}
           {canLoadMore && (
             <List.Item
@@ -41,11 +26,7 @@ export default function LikesCommand() {
               icon={Icon.Download}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Load More"
-                    icon={Icon.Download}
-                    onAction={loadMore}
-                  />
+                  <Action title="Load More" icon={Icon.Download} onAction={loadMore} />
                 </ActionPanel>
               }
             />
@@ -53,5 +34,5 @@ export default function LikesCommand() {
         </>
       )}
     </List>
-  )
+  );
 }

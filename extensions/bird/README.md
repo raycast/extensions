@@ -45,14 +45,15 @@ If the extension doesn't work with the default path, paste this path into the **
 
 ## Preferences
 
-| Preference | Description |
-|------------|-------------|
+| Preference    | Description                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------ |
 | Bird CLI Path | Full path to bird binary. Default: `/opt/homebrew/bin/bird` (Apple Silicon) or `/usr/local/bin/bird` (Intel) |
-| Default Count | Number of tweets to fetch (default: 20) |
+| Default Count | Number of tweets to fetch (default: 20)                                                                      |
 
 ## Troubleshooting
 
 **"command not found" error:**
+
 1. Run `which bird` in your terminal
 2. Copy the full path
 3. Open Raycast preferences for this extension
