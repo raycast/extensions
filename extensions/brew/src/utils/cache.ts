@@ -16,7 +16,13 @@ import { parser } from "stream-json";
 import { filter } from "stream-json/filters/Filter";
 import { streamArray } from "stream-json/streamers/StreamArray";
 import { pipeline as streamPipeline } from "stream/promises";
-import { DownloadProgressCallback, ChunkedCacheConfig, ChunkedCacheMeta, CacheIndex, IndexEntry } from "./types";
+import {
+  DownloadProgressCallback,
+  ChunkedCacheConfig,
+  ChunkedCacheMeta,
+  CacheIndex,
+  IndexEntry,
+} from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
 import { NetworkError, ParseError, ensureError } from "./errors";
 
@@ -89,8 +95,12 @@ export async function clearCache(): Promise<void> {
         }),
       ),
       // Clear chunked cache directories
-      rm(path.join(environment.supportPath, "formula"), { recursive: true, force: true }).catch(() => {}),
-      rm(path.join(environment.supportPath, "cask"), { recursive: true, force: true }).catch(() => {}),
+      rm(path.join(environment.supportPath, "formula"), { recursive: true, force: true }).catch(
+        () => {},
+      ),
+      rm(path.join(environment.supportPath, "cask"), { recursive: true, force: true }).catch(
+        () => {},
+      ),
     ]);
 
     cacheLogger.log("Cache clear completed", {
@@ -289,7 +299,10 @@ function getChunkPath(config: ChunkedCacheConfig, chunkNumber: number): string {
 /**
  * Check if chunked cache is valid (exists and not stale).
  */
-export async function isChunkedCacheValid(config: ChunkedCacheConfig, remoteUrl: string): Promise<boolean> {
+export async function isChunkedCacheValid(
+  config: ChunkedCacheConfig,
+  remoteUrl: string,
+): Promise<boolean> {
   try {
     const metaContent = await readFile(config.metaPath, "utf-8");
     const meta = JSON.parse(metaContent) as ChunkedCacheMeta;
@@ -387,7 +400,12 @@ export async function buildChunkedCache<T>(
     // Pending write operations
     const writePromises: Promise<void>[] = [];
 
-    const pipeline = chain([fs.createReadStream(sourcePath), parser(), filter({ filter: keysRe }), streamArray()]);
+    const pipeline = chain([
+      fs.createReadStream(sourcePath),
+      parser(),
+      filter({ filter: keysRe }),
+      streamArray(),
+    ]);
 
     pipeline.on("data", (data) => {
       if (data && typeof data === "object" && "value" in data) {
@@ -516,7 +534,10 @@ export async function loadIndex(config: ChunkedCacheConfig): Promise<CacheIndex>
  * Load specific chunks from chunked cache.
  * Returns a map of chunk number to items array.
  */
-export async function loadChunks<T>(config: ChunkedCacheConfig, chunkNumbers: Set<number>): Promise<Map<number, T[]>> {
+export async function loadChunks<T>(
+  config: ChunkedCacheConfig,
+  chunkNumbers: Set<number>,
+): Promise<Map<number, T[]>> {
   const chunks = new Map<number, T[]>();
 
   if (chunkNumbers.size === 0) {
@@ -548,7 +569,10 @@ export async function loadChunks<T>(config: ChunkedCacheConfig, chunkNumbers: Se
  * Load specific items from chunked cache based on index entries.
  * Groups entries by chunk to minimize file reads.
  */
-export async function loadItemsFromChunks<T>(config: ChunkedCacheConfig, entries: IndexEntry[]): Promise<T[]> {
+export async function loadItemsFromChunks<T>(
+  config: ChunkedCacheConfig,
+  entries: IndexEntry[],
+): Promise<T[]> {
   if (entries.length === 0) {
     return [];
   }
