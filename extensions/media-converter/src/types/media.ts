@@ -564,16 +564,16 @@ export function getDefaultImageQuality(format: AllOutputExtension, preferences: 
     if (format === ".png") {
       return {
         [format]: qualityNumber >= 80 ? "png-24" : "png-8",
-      } as QualitySettings;
+      } as unknown as QualitySettings;
     }
     if (format === ".tiff") {
       return {
         [format]: "deflate",
-      } as QualitySettings;
+      } as unknown as QualitySettings;
     }
     return {
       [format]: qualityNumber,
-    } as QualitySettings;
+    } as unknown as QualitySettings;
   };
 
   const legacyPreset = imagePreset as QualityLevel;
@@ -582,33 +582,33 @@ export function getDefaultImageQuality(format: AllOutputExtension, preferences: 
     if (legacyValue !== undefined) {
       return {
         [format]: legacyValue,
-      } as QualitySettings;
+      } as unknown as QualitySettings;
     }
   }
 
   if (imagePreset === "lossless") {
     if (format === ".webp") {
-      return { [format]: "lossless" } as QualitySettings;
+      return { [format]: "lossless" } as unknown as QualitySettings;
     }
     return toFormatQuality(100);
   }
 
   if (imagePreset === "png-24" || imagePreset === "png-8") {
     if (format === ".png") {
-      return { [format]: imagePreset } as QualitySettings;
+      return { [format]: imagePreset } as unknown as QualitySettings;
     }
     return {
       [format]: DEFAULT_QUALITIES[format],
-    } as QualitySettings;
+    } as unknown as QualitySettings;
   }
 
   if (imagePreset === "deflate" || imagePreset === "lzw") {
     if (format === ".tiff") {
-      return { [format]: imagePreset } as QualitySettings;
+      return { [format]: imagePreset } as unknown as QualitySettings;
     }
     return {
       [format]: DEFAULT_QUALITIES[format],
-    } as QualitySettings;
+    } as unknown as QualitySettings;
   }
 
   const numericPreset = Number(imagePreset);
@@ -619,7 +619,7 @@ export function getDefaultImageQuality(format: AllOutputExtension, preferences: 
 
   return {
     [format]: DEFAULT_QUALITIES[format],
-  } as QualitySettings;
+  } as unknown as QualitySettings;
 }
 
 // =============================================================================

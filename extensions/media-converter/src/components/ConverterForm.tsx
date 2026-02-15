@@ -141,24 +141,27 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       setCurrentFiles(processedFiles);
       setSelectedFileType(primaryFileType);
 
-      const availableImageFormats =
-        process.platform === "darwin"
-          ? OUTPUT_IMAGE_EXTENSIONS
-          : OUTPUT_IMAGE_EXTENSIONS.filter((format) => format !== ".heic");
+      const preferredImageFormat = preferences.defaultImageOutputFormat as OutputImageExtension | undefined;
+      const sanitizedImageFormat =
+        process.platform !== "darwin" && preferredImageFormat === ".heic" ? ".jpg" : preferredImageFormat;
+      const defaultImageFormat =
+        sanitizedImageFormat && OUTPUT_IMAGE_EXTENSIONS.includes(sanitizedImageFormat)
+          ? sanitizedImageFormat
+          : (".jpg" as const);
+
+      const preferredVideoFormat = preferences.defaultVideoOutputFormat as OutputVideoExtension | undefined;
+      const defaultVideoFormat =
+        preferredVideoFormat && OUTPUT_VIDEO_EXTENSIONS.includes(preferredVideoFormat)
+          ? preferredVideoFormat
+          : (".mp4" as const);
 
       // Initialize default output format and quality based on file type
       const defaultFormat =
         primaryFileType === "image"
-          ? (preferences.defaultImageOutputFormat as OutputImageExtension) &&
-            availableImageFormats.includes(preferences.defaultImageOutputFormat as OutputImageExtension)
-            ? (preferences.defaultImageOutputFormat as OutputImageExtension)
-            : (".jpg" as const)
+          ? defaultImageFormat
           : primaryFileType === "audio"
             ? (".mp3" as const)
-            : (((preferences.defaultVideoOutputFormat as OutputVideoExtension) &&
-              OUTPUT_VIDEO_EXTENSIONS.includes(preferences.defaultVideoOutputFormat as OutputVideoExtension)
-                ? (preferences.defaultVideoOutputFormat as OutputVideoExtension)
-                : (".mp4" as const)) as AllOutputExtension);
+            : (defaultVideoFormat as AllOutputExtension);
 
       setOutputFormat(defaultFormat);
 
