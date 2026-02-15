@@ -220,12 +220,7 @@ function TaskDetailView({
   onPriorityUpdate: (taskId: string, newPriority: string, taskTitle: string) => Promise<void>;
 }) {
   const api = new KaneoAPI();
-  const { webInstanceUrl, workspaceId } = getPreferenceValues<{
-    instanceUrl: string;
-    apiToken: string;
-    webInstanceUrl: string;
-    workspaceId: string;
-  }>();
+  const { webInstanceUrl, workspaceId } = getPreferenceValues<Preferences>();
 
   const { isLoading, data: task, revalidate } = usePromise((id: string) => api.getTask(id), [taskId]);
 
