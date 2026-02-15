@@ -5,23 +5,37 @@ import { join, dirname } from "path";
 
 const RAW_CONTENT_BASE = "https://raw.githubusercontent.com/raycast/extensions/main/extensions";
 
+// Platform icon colors (tintColor format)
+export const MACOS_TINT_COLOR = "#000000CC"; // 80% black
+export const WINDOWS_TINT_COLOR = "#0078D7"; // Windows blue
+
 /**
  * Parses the Raycast Store URL to extract author and extension name.
  * URL format: https://www.raycast.com/{author}/{extension}
  */
-export function parseExtensionUrl(url: string): { author: string; extension: string } {
+export function parseExtensionUrl(url: string): { author: string; extension: string } | null {
+  if (!url || !url.startsWith("https://www.raycast.com/")) {
+    return null;
+  }
   const path = url.replace("https://www.raycast.com/", "");
   const [author, extension] = path.split("/");
+  if (!author || !extension) {
+    return null;
+  }
   return { author, extension };
 }
 
 /**
  * Creates a Raycast deeplink to open an extension in the Store.
  * Format: raycast://extensions/{author}/{extension}
+ * Returns original URL if parsing fails.
  */
 export function createStoreDeeplink(url: string): string {
-  const { author, extension } = parseExtensionUrl(url);
-  return `raycast://extensions/${author}/${extension}`;
+  const parsed = parseExtensionUrl(url);
+  if (!parsed) {
+    return url;
+  }
+  return `raycast://extensions/${parsed.author}/${parsed.extension}`;
 }
 
 /**

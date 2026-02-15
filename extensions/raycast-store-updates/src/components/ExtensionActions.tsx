@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 import { StoreItem } from "../types";
 import { FilterToggles } from "../hooks/useFilterToggles";
-import { createStoreDeeplink, extractLatestChanges } from "../utils";
+import { createStoreDeeplink, extractLatestChanges, MACOS_TINT_COLOR, WINDOWS_TINT_COLOR } from "../utils";
 import { useChangelog } from "../hooks/useChangelog";
 import { ChangelogDetail } from "./ChangelogDetail";
 
@@ -9,6 +9,8 @@ const GITHUB_EXTENSIONS_BASE = "https://github.com/raycast/extensions/blob/main/
 
 interface ExtensionActionsProps {
   item: StoreItem;
+  items: StoreItem[];
+  currentIndex: number;
   trackReadStatus: boolean;
   toggles: FilterToggles;
   onToggleMacOS: () => Promise<void>;
@@ -17,10 +19,13 @@ interface ExtensionActionsProps {
   onMarkAsRead?: (itemId: string) => Promise<void>;
   onMarkAllAsRead?: () => Promise<void>;
   onUndo?: () => Promise<void>;
+  onRefresh?: () => void;
 }
 
 export function ExtensionActions({
   item,
+  items,
+  currentIndex,
   trackReadStatus,
   toggles,
   onToggleMacOS,
@@ -29,6 +34,7 @@ export function ExtensionActions({
   onMarkAsRead,
   onMarkAllAsRead,
   onUndo,
+  onRefresh,
 }: ExtensionActionsProps) {
   const storeDeeplink = createStoreDeeplink(item.url);
   const changelogBrowserUrl = item.extensionSlug
@@ -45,14 +51,16 @@ export function ExtensionActions({
           <Action.Push
             title="View Changelog"
             icon={Icon.Document}
-            target={<ChangelogDetail slug={item.extensionSlug} title={item.title} />}
+            target={
+              <ChangelogDetail slug={item.extensionSlug} title={item.title} items={items} currentIndex={currentIndex} />
+            }
           />
           {latestChanges && (
             <Action.CopyToClipboard
               title="Copy Recent Changes"
               content={latestChanges}
               icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           )}
           {changelogBrowserUrl && (
@@ -66,7 +74,12 @@ export function ExtensionActions({
         </ActionPanel.Section>
       )}
 
-      <Action.OpenInBrowser title="Open in Browser" url={item.url} icon={Icon.Globe} />
+      <Action.OpenInBrowser
+        title="Open in Browser"
+        url={item.url}
+        icon={Icon.Globe}
+        shortcut={Keyboard.Shortcut.Common.Open}
+      />
 
       <ActionPanel.Section>
         <Action.OpenInBrowser title="Open in Raycast Store" url={storeDeeplink} icon={Icon.RaycastLogoNeg} />
@@ -77,17 +90,26 @@ export function ExtensionActions({
         />
       </ActionPanel.Section>
 
+      <ActionPanel.Section>
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={() => onRefresh?.()}
+        />
+      </ActionPanel.Section>
+
       <ActionPanel.Section title="Filters">
         <Action
           // eslint-disable-next-line @raycast/prefer-title-case
           title={toggles.showMacOS ? "Hide macOS-only Extensions" : "Show macOS-only Extensions"}
-          icon={{ source: "platform-macos.svg", tintColor: "#0A64F0" }}
+          icon={{ source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }}
           onAction={onToggleMacOS}
         />
         <Action
           // eslint-disable-next-line @raycast/prefer-title-case
           title={toggles.showWindows ? "Hide Windows-only Extensions" : "Show Windows-only Extensions"}
-          icon={{ source: "platform-windows.svg", tintColor: "#0078D7" }}
+          icon={{ source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }}
           onAction={onToggleWindows}
         />
         <Action

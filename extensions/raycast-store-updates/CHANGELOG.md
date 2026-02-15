@@ -1,5 +1,14 @@
 # Raycast Store Updates Changelog
 
+## [Add refresh action, improve platform icon colors, and enhance CHANGELOG navigation] - {PR_MERGE_DATE}
+
+- Add CHANGELOG up/down reading navigation
+- Add refresh action (⌘R) to ExtensionActions that revalidates both feed and PR data
+- Change macOS platform icon from blue (#0A64F0) to 80% black (#000000CC) for better contrast
+- Update Windows platform icon to use currentColor in SVG for consistent theming
+- Add ChangelogActions component to changelog detail view
+- Improve URL parsing
+
 ## [Filter Toggles, Read Tracking & UI Polish] - 2026-02-15
 
 - Replaced platform preference dropdown with in-context filter toggles for macOS and Windows (cross-platform extensions always shown)

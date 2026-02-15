@@ -1,6 +1,6 @@
 import { List, Color, Icon } from "@raycast/api";
 import { StoreItem } from "../types";
-import { createStoreDeeplink } from "../utils";
+import { createStoreDeeplink, MACOS_TINT_COLOR, WINDOWS_TINT_COLOR } from "../utils";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Applications: "#8E44AD",
@@ -25,9 +25,7 @@ export function ExtensionItemDetail({ item }: { item: StoreItem }) {
   const hasMac = item.platforms?.some((p) => p.toLowerCase() === "macos") ?? true;
   const hasWindows = item.platforms?.some((p) => p.toLowerCase() === "windows") ?? false;
 
-  const validCategories = (item.categories ?? []).filter(
-    (c) => typeof c === "string" && c.trim().length > 0 && c in CATEGORY_COLORS,
-  );
+  const validCategories = (item.categories ?? []).filter((c) => typeof c === "string" && c.trim().length > 0);
 
   const dateLabel = item.type === "new" ? "Published" : "Updated";
   const formattedDate = new Date(item.date).toLocaleDateString("en-US", {
@@ -50,12 +48,16 @@ export function ExtensionItemDetail({ item }: { item: StoreItem }) {
             />
           </List.Item.Detail.Metadata.TagList>
 
-          <List.Item.Detail.Metadata.TagList title="Platforms">
+          <List.Item.Detail.Metadata.TagList title="Compatibility">
             {hasMac && (
-              <List.Item.Detail.Metadata.TagList.Item icon={{ source: "platform-macos.svg", tintColor: "#0A64F0" }} />
+              <List.Item.Detail.Metadata.TagList.Item
+                icon={{ source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }}
+              />
             )}
             {hasWindows && (
-              <List.Item.Detail.Metadata.TagList.Item icon={{ source: "platform-windows.svg", tintColor: "#0078D7" }} />
+              <List.Item.Detail.Metadata.TagList.Item
+                icon={{ source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }}
+              />
             )}
           </List.Item.Detail.Metadata.TagList>
 

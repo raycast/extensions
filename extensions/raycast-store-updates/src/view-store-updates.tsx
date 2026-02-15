@@ -29,16 +29,29 @@ export default function Command() {
   const [filter, setFilter] = useState<FilterValue>("all");
   const { toggles, toggleMacOS, toggleWindows, toggleInstalledOnly } = useFilterToggles();
 
-  const { data: feedData, isLoading: feedLoading } = useFetch<Feed>(FEED_URL, {
+  const {
+    data: feedData,
+    isLoading: feedLoading,
+    revalidate: revalidateFeed,
+  } = useFetch<Feed>(FEED_URL, {
     keepPreviousData: true,
   });
 
-  const { data: prsData, isLoading: prsLoading } = useFetch<GitHubPR[]>(GITHUB_PRS_URL, {
+  const {
+    data: prsData,
+    isLoading: prsLoading,
+    revalidate: revalidatePRs,
+  } = useFetch<GitHubPR[]>(GITHUB_PRS_URL, {
     keepPreviousData: true,
     headers: {
       Accept: "application/vnd.github.v3+json",
     },
   });
+
+  const handleRefresh = () => {
+    revalidateFeed();
+    revalidatePRs();
+  };
 
   const isLoading = feedLoading || prsLoading;
 
@@ -175,10 +188,12 @@ export default function Command() {
           }
         />
       ) : (
-        displayItems.map((item) => (
+        displayItems.map((item, index) => (
           <ExtensionListItem
             key={item.id}
             item={item}
+            items={displayItems}
+            currentIndex={index}
             filter={filter}
             trackReadStatus={trackReadStatus}
             toggles={toggles}
@@ -188,6 +203,7 @@ export default function Command() {
             onMarkAsRead={markAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onUndo={undo}
+            onRefresh={handleRefresh}
           />
         ))
       )}
