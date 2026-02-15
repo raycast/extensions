@@ -212,7 +212,7 @@ export default function Command() {
         <List.Dropdown tooltip="Filter" storeValue onChange={(val) => setFilter(val as FilterValue)}>
           <List.Dropdown.Item title="Show All" value="all" icon={Icon.AppWindowGrid3x3} />
           <List.Dropdown.Item title="New" value="new" icon={Icon.StarCircle} />
-          <List.Dropdown.Item title="Updated" value="updated" icon={Icon.ArrowUpCircle} />
+          <List.Dropdown.Item title="Updates" value="updated" icon={Icon.ArrowUpCircle} />
           <List.Dropdown.Item title="My Updates" value="my-updates" icon={Icon.Person} />
         </List.Dropdown>
       }

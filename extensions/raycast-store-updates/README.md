@@ -13,7 +13,7 @@ Never miss new extensions or extension updates ever again!
 - **Platform Filter Toggles** — Show or hide macOS-only and Windows-only extensions directly from the action panel (cross-platform extensions are always shown)
 - **My Updates Filter** — Filter the dropdown to show only updates for extensions you have installed locally
 - **Read/Unread Tracking** — Optionally mark items as read to keep your list tidy, with "Mark All as Read" and undo (⌘Z) support
-- **Filter Dropdown** — Quickly switch between Show All, New, Updated, and My Updates views
+- **Filter Dropdown** — Quickly switch between Show All, New, Updates, and My Updates views
 
 ## Preferences
 
