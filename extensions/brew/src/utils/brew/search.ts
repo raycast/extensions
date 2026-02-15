@@ -47,35 +47,27 @@ export async function brewSearch(
   let casksProgress: DownloadProgress | undefined;
   let formulaeProgress: DownloadProgress | undefined;
 
-  // Phase 1: Load indexes (small, ~600KB each)
-  // Download casks first (they have descriptions and are shown first in the UI)
+  // Phase 1: Load indexes concurrently (small, ~600KB each)
   onProgress?.({ phase: "casks" });
 
-  const caskIndex = await fetchCaskIndex((progress) => {
-    casksProgress = progress;
-    onProgress?.({
-      phase: "casks",
-      casksProgress: progress,
-      formulaeProgress,
-    });
-  });
-
-  if (signal?.aborted) {
-    const error = new Error("Aborted");
-    error.name = "AbortError";
-    throw error;
-  }
-
-  onProgress?.({ phase: "formulae", casksProgress, formulaeProgress });
-
-  const formulaIndex = await fetchFormulaIndex((progress) => {
-    formulaeProgress = progress;
-    onProgress?.({
-      phase: "formulae",
-      casksProgress,
-      formulaeProgress: progress,
-    });
-  });
+  const [caskIndex, formulaIndex] = await Promise.all([
+    fetchCaskIndex((progress) => {
+      casksProgress = progress;
+      onProgress?.({
+        phase: "casks",
+        casksProgress: progress,
+        formulaeProgress,
+      });
+    }),
+    fetchFormulaIndex((progress) => {
+      formulaeProgress = progress;
+      onProgress?.({
+        phase: "formulae",
+        casksProgress,
+        formulaeProgress: progress,
+      });
+    }),
+  ]);
 
   if (signal?.aborted) {
     const error = new Error("Aborted");
@@ -94,7 +86,9 @@ export async function brewSearch(
     matchingFormulaEntries = formulaIndex.entries
       .filter((entry) => {
         return (
-          entry.n.includes(target) || entry.d?.includes(target) || entry.a?.some((alias) => alias.includes(target))
+          entry.n.includes(target) ||
+          entry.d?.includes(target) ||
+          entry.a?.some((alias) => alias.includes(target))
         );
       })
       .sort((a, b) => brewCompare(a.id, b.id, target));
@@ -116,7 +110,9 @@ export async function brewSearch(
   const casksLen = matchingCaskEntries.length;
 
   // Phase 3: Slice BEFORE loading chunks (key optimization)
-  const limitedFormulaEntries = limit ? matchingFormulaEntries.slice(0, limit) : matchingFormulaEntries;
+  const limitedFormulaEntries = limit
+    ? matchingFormulaEntries.slice(0, limit)
+    : matchingFormulaEntries;
   const limitedCaskEntries = limit ? matchingCaskEntries.slice(0, limit) : matchingCaskEntries;
 
   // Phase 4: Load only needed chunks
@@ -148,7 +144,9 @@ export async function brewSearch(
   // Report final progress with total counts
   onProgress?.({
     phase: "complete",
-    formulaeProgress: formulaeProgress ? { ...formulaeProgress, totalItems: formulaeLen } : undefined,
+    formulaeProgress: formulaeProgress
+      ? { ...formulaeProgress, totalItems: formulaeLen }
+      : undefined,
     casksProgress: casksProgress ? { ...casksProgress, totalItems: casksLen } : undefined,
   });
 
