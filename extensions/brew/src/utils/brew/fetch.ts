@@ -75,6 +75,7 @@ const extractCaskIndex: IndexExtractor<Cask> = (item, chunkNumber, indexInChunk)
     id: item.token,
     n: item.token.toLowerCase(),
     d: item.desc?.toLowerCase().slice(0, 100),
+    a: item.name?.length > 0 ? item.name.map((n) => n.toLowerCase()) : undefined,
     c: chunkNumber,
     i: indexInChunk,
   };
