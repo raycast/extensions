@@ -1,4 +1,14 @@
-import { ActionPanel, Action, List, Icon, Color, Detail } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  Color,
+  Detail,
+  showToast,
+  Toast,
+  Clipboard,
+} from "@raycast/api";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -13,6 +23,25 @@ function scoreColor(score: number): Color {
   if (score >= 0.8) return Color.Green;
   if (score >= 0.5) return Color.Orange;
   return Color.SecondaryText;
+}
+
+function unitTypeIcon(unitType?: string): Icon {
+  switch (unitType) {
+    case "insight":
+      return Icon.LightBulb;
+    case "decision":
+      return Icon.Hammer;
+    case "experience":
+      return Icon.Book;
+    case "fact":
+      return Icon.Document;
+    case "procedure":
+      return Icon.List;
+    case "preference":
+      return Icon.Heart;
+    default:
+      return Icon.MemoryChip;
+  }
 }
 
 function truncate(text: string, max: number): string {
@@ -36,6 +65,26 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+function formatFullDate(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function relevanceLabel(score: number): string {
+  if (score >= 0.9) return "Excellent";
+  if (score >= 0.7) return "Strong";
+  if (score >= 0.5) return "Good";
+  if (score >= 0.3) return "Partial";
+  return "Weak";
+}
+
 // --- Search result detail ---
 
 function SearchMemoryDetail({
@@ -45,24 +94,54 @@ function SearchMemoryDetail({
   memory: SearchMemory;
   score?: number;
 }) {
-  const md = [
-    `# ${memory.title || "Untitled"}`,
-    "",
-    memory.content,
-    "",
-    "---",
-    "",
-    score !== undefined ? `**Relevance:** ${(score * 100).toFixed(0)}%` : "",
-    memory.labels?.length ? `**Labels:** ${memory.labels.join(", ")}` : "",
-    memory.unit_type ? `**Type:** ${memory.unit_type}` : "",
-    memory.created_at ? `**Created:** ${formatDate(memory.created_at)}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-
   return (
     <Detail
-      markdown={md}
+      markdown={memory.content}
+      metadata={
+        <Detail.Metadata>
+          {score !== undefined && (
+            <Detail.Metadata.Label
+              title="Relevance"
+              text={`${(score * 100).toFixed(0)}% — ${relevanceLabel(score)}`}
+              icon={score >= 0.5 ? Icon.CheckCircle : Icon.Circle}
+            />
+          )}
+          {memory.unit_type && (
+            <Detail.Metadata.Label
+              title="Type"
+              text={memory.unit_type}
+              icon={unitTypeIcon(memory.unit_type)}
+            />
+          )}
+          {memory.created_at && (
+            <Detail.Metadata.Label
+              title="Created"
+              text={formatFullDate(memory.created_at)}
+              icon={Icon.Calendar}
+            />
+          )}
+          {memory.labels?.length > 0 && (
+            <>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.TagList title="Labels">
+                {memory.labels.map((label) => (
+                  <Detail.Metadata.TagList.Item
+                    key={label}
+                    text={label}
+                    color={Color.Blue}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+            </>
+          )}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link
+            title="Open in App"
+            text="Nowledge Mem"
+            target={`nowledgemem://memory/${memory.id}`}
+          />
+        </Detail.Metadata>
+      }
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
@@ -72,7 +151,7 @@ function SearchMemoryDetail({
           <Action.CopyToClipboard
             title="Copy Title"
             content={memory.title || ""}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
           />
           <Action.Open
             title="Open in Nowledge Mem"
@@ -89,21 +168,67 @@ function SearchMemoryDetail({
 // --- Recent memory detail ---
 
 function ListMemoryDetail({ memory }: { memory: ListMemory }) {
-  const md = [
-    `# ${memory.title || "Untitled"}`,
-    "",
-    memory.content,
-    "",
-    "---",
-    "",
-    memory.time ? `**Saved:** ${memory.time}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-
   return (
     <Detail
-      markdown={md}
+      markdown={memory.content}
+      metadata={
+        <Detail.Metadata>
+          {memory.confidence > 0 && (
+            <Detail.Metadata.Label
+              title="Confidence"
+              text={`${(memory.confidence * 100).toFixed(0)}%`}
+              icon={Icon.Signal3}
+            />
+          )}
+          {memory.rating > 0 && (
+            <Detail.Metadata.Label
+              title="Importance"
+              text={
+                memory.rating >= 0.8
+                  ? "High"
+                  : memory.rating >= 0.5
+                    ? "Normal"
+                    : "Low"
+              }
+              icon={memory.rating >= 0.8 ? Icon.ExclamationMark : Icon.Minus}
+            />
+          )}
+          {memory.time && (
+            <Detail.Metadata.Label
+              title="Saved"
+              text={memory.time}
+              icon={Icon.Calendar}
+            />
+          )}
+          {memory.source && (
+            <Detail.Metadata.Label
+              title="Source"
+              text={memory.source}
+              icon={Icon.Globe}
+            />
+          )}
+          {memory.label_ids?.length > 0 && (
+            <>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.TagList title="Labels">
+                {memory.label_ids.map((label) => (
+                  <Detail.Metadata.TagList.Item
+                    key={label}
+                    text={label}
+                    color={Color.Blue}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+            </>
+          )}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link
+            title="Open in App"
+            text="Nowledge Mem"
+            target={`nowledgemem://memory/${memory.id}`}
+          />
+        </Detail.Metadata>
+      }
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
@@ -113,7 +238,7 @@ function ListMemoryDetail({ memory }: { memory: ListMemory }) {
           <Action.CopyToClipboard
             title="Copy Title"
             content={memory.title || ""}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
           />
           <Action.Open
             title="Open in Nowledge Mem"
@@ -148,6 +273,33 @@ export default function SearchMemories() {
 
   const isLoading = searchText ? searchLoading : recentLoading;
 
+  const highRelevanceResults = searchResults?.filter(
+    (r) => r.similarity_score >= 0.5,
+  );
+
+  async function copyHighRelevance() {
+    if (!highRelevanceResults?.length) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No results above 50%",
+      });
+      return;
+    }
+    const text = highRelevanceResults
+      .map((r) => {
+        const title = r.memory.title || "Untitled";
+        const score = `${(r.similarity_score * 100).toFixed(0)}%`;
+        return `## ${title} (${score})\n\n${r.memory.content}`;
+      })
+      .join("\n\n---\n\n");
+    await Clipboard.copy(text);
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Copied ${highRelevanceResults.length} memories`,
+      message: "All results with relevance above 50%",
+    });
+  }
+
   // --- Search results view ---
   if (searchText && searchResults) {
     return (
@@ -159,12 +311,15 @@ export default function SearchMemories() {
       >
         <List.Section
           title="Results"
-          subtitle={`${searchResults.length} memories`}
+          subtitle={`${searchResults.length} memories${highRelevanceResults?.length ? ` · ${highRelevanceResults.length} above 50%` : ""}`}
         >
           {searchResults.map((result: SearchResult) => (
             <List.Item
               key={result.memory.id}
-              icon={Icon.Dot}
+              icon={{
+                source: unitTypeIcon(result.memory.unit_type),
+                tintColor: scoreColor(result.similarity_score),
+              }}
               title={result.memory.title || "Untitled"}
               subtitle={truncate(result.memory.content, 60)}
               accessories={[
@@ -197,10 +352,16 @@ export default function SearchMemories() {
                     title="Copy Content"
                     content={result.memory.content}
                   />
+                  <Action
+                    title={`Copy All Above 50% (${highRelevanceResults?.length ?? 0})`}
+                    icon={Icon.CopyClipboard}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onAction={copyHighRelevance}
+                  />
                   <Action.CopyToClipboard
                     title="Copy Title"
                     content={result.memory.title || ""}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                   />
                   <Action.Open
                     title="Open in Nowledge Mem"
@@ -253,7 +414,7 @@ export default function SearchMemories() {
                 <Action.CopyToClipboard
                   title="Copy Title"
                   content={memory.title || ""}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                 />
                 <Action.Open
                   title="Open in Nowledge Mem"

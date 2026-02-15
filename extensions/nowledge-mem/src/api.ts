@@ -1,8 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
-
-interface Preferences {
-  serverUrl: string;
-}
+import { readFileSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
 
 function getBaseUrl(): string {
   const { serverUrl } = getPreferenceValues<Preferences>();
@@ -94,11 +93,7 @@ export async function createMemory(
 }
 
 export async function readWorkingMemory(): Promise<string> {
-  const { readFileSync } = await import("fs");
-  const { homedir } = await import("os");
-  const { join } = await import("path");
   const filePath = join(homedir(), "ai-now", "memory.md");
-
   try {
     return readFileSync(filePath, "utf-8");
   } catch {
