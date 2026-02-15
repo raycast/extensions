@@ -6,39 +6,44 @@ A fast, lightweight [Tureng](https://tureng.com) English-Turkish dictionary for 
 
 #### Features
 
-- Results grouped by **EN → TR** and **TR → EN** directions
-- **Autocomplete** suggestions as you type
-- **Drill-down** — select any translation to look it up further
-- **Paste** translations directly into whatever app you're working in
-- **Suggestions** when a word isn't found
-- **Favorites** for vocabulary building
-- **Pronunciation** playback
-- **Deeplink** support for automation
+- **Bilingual results** — `EN → TR` and `TR → EN` translations grouped separately
+- **Live autocomplete** — suggestions from Tureng as you type
+- **Drill-down navigation** — look up any result to go deeper
+- **Paste into app** — insert translations directly at your cursor
+- **Selected text lookup** — translate from any app with a hotkey
+- **Did you mean?** — smart suggestions when a word isn't found
+- **Favorites** — save and manage words for vocabulary building
+- **Pronunciation** — listen to how words are pronounced
+- **Deeplinks** — trigger lookups from scripts and automation tools
+
+## Commands
 
 ### Tureng Translate
 
-Enter a word or phrase and get English-Turkish and Turkish-English translations instantly. Drill into any result to translate it further. Copy terms, paste them into your frontmost app, or open the full Tureng page in your browser.
+Look up any word or phrase. Results are split into `EN → TR` and `TR → EN` sections showing the term, category, and type. Select any result to drill down further, paste it into your current app, or open the Tureng page in your browser.
 
 https://github.com/user-attachments/assets/4233b0f8-ca46-4dd2-9f28-d51d7addf164
 
-### Tureng Search
-
-Search with live autocomplete powered by Tureng's suggestion engine. Results appear as you type — select any suggestion to see its full translations.
-
-https://github.com/user-attachments/assets/952e2dd8-df5e-4497-afc8-229af709dd5a
+> <kbd>Tab</kbd> to enter a word, <kbd>⏎</kbd> to drill down into a result, <kbd>⌫</kbd>/<kbd>␛</kbd> to go back.
 
 ### Tureng Selected Text Lookup
 
-Select any text in any app — a browser, editor, PDF reader — and instantly look it up on Tureng. Assign a global hotkey for one-keystroke translations without leaving your current window.
+Select any text in any app — browser, editor, PDF reader, terminal — and translate it instantly without switching windows. Pair it with a global hotkey for the fastest possible workflow.
 
 https://github.com/user-attachments/assets/28175247-5eb8-4bb1-bcdd-95760686bcd6
 
 > In this demo, <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> is assigned as the hotkey.
 > To assign a hotkey, right click the command → Configure Command → Record Hotkey.
 
+### Tureng Search
+
+Start typing and get live autocomplete suggestions from Tureng. Pick any suggestion to see its full translations. Great when you're unsure about spelling or want to explore related words.
+
+https://github.com/user-attachments/assets/952e2dd8-df5e-4497-afc8-229af709dd5a
+
 ### Tureng Favorites
 
-Save words you want to remember. Browse, filter, look up, or remove them anytime. Great for vocabulary building.
+Build your personal word list. Save words from any translation view with <kbd>Cmd</kbd>+<kbd>S</kbd>, then browse, filter, or look them up again anytime.
 
 ## Shortcuts
 
@@ -60,6 +65,23 @@ Trigger a lookup from scripts, Shortcuts, or any app:
 raycast://extensions/gokce/tureng/search-tureng?arguments=%7B%22query%22%3A%22hello%22%7D
 ```
 
-# License
+## Development
+
+```bash
+git clone https://github.com/agmmnn/tureng-raycast.git
+cd tureng-raycast
+npm install
+npm run dev
+```
+
+This opens the extension in Raycast in development mode. Changes are rebuilt automatically.
+
+```bash
+npm run build    # production build
+npm run lint     # check for lint errors
+npm run fix-lint # auto-fix lint errors
+```
+
+## License
 
 MIT
