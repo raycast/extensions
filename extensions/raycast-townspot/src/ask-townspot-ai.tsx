@@ -15,7 +15,7 @@ import { askTownspot } from "./lib/townspot";
 import {
   buildTownspotAiPrompt,
   buildVerifiedEventsMarkdown,
-  resolveActiveTown,
+  resolveTownForPrompt,
 } from "./lib/townspot-ai";
 import { RaycastResponse } from "./types";
 
@@ -90,6 +90,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
   const [errorMessage, setErrorMessage] = useState("");
   const [aiAnswer, setAiAnswer] = useState("");
   const [response, setResponse] = useState<RaycastResponse | null>(null);
+  const [townSource, setTownSource] = useState<"home" | "query">("home");
 
   useEffect(() => {
     let cancelled = false;
@@ -97,6 +98,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
     const run = async () => {
       if (!prompt) {
         setTownName("");
+        setTownSource("home");
         setErrorMessage("");
         setAiAnswer("");
         setResponse(null);
@@ -110,9 +112,11 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       setResponse(null);
 
       try {
-        const town = await resolveActiveTown(PROD_API_BASE_URL);
+        const resolvedTown = await resolveTownForPrompt(PROD_API_BASE_URL, prompt);
+        const town = resolvedTown.town;
         if (cancelled) return;
         setTownName(town.name);
+        setTownSource(resolvedTown.source);
 
         const groundedResponse = await askTownspot({
           query: prompt,
@@ -166,10 +170,18 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
     [aiAnswer, errorMessage, prompt, response, townName],
   );
 
+  const subtitle =
+    townName && townSource === "query"
+      ? `Matched town from query: ${townName}`
+      : townName
+        ? `Using hometown: ${townName}`
+        : "Ask TownSpot AI";
+
   const firstEventUrl = response?.events?.[0]?.url;
 
   return (
     <Detail
+      navigationTitle={subtitle}
       isLoading={isLoading}
       markdown={markdown}
       actions={

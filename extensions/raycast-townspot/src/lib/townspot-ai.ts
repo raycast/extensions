@@ -10,6 +10,11 @@ export type ActiveTown = {
   slug: string;
 };
 
+export type ResolvedTown = {
+  town: ActiveTown;
+  source: "home" | "query";
+};
+
 type BuildAiPromptInput = {
   query: string;
   townName: string;
@@ -68,22 +73,80 @@ export const buildVerifiedEventsMarkdown = (events: RaycastEvent[]): string => {
     .join("\n");
 };
 
-export const resolveActiveTown = async (apiBaseUrl: string): Promise<ActiveTown> => {
+const normalizeForMatch = (value: string): string =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const escapeRegex = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const containsPhrase = (query: string, phrase: string): boolean => {
+  if (!query || !phrase) return false;
+  const pattern = new RegExp(`(^|\\s)${escapeRegex(phrase)}(\\s|$)`, "i");
+  return pattern.test(query);
+};
+
+const inferTownFromQuery = (query: string, towns: ActiveTown[]): ActiveTown | null => {
+  const normalizedQuery = normalizeForMatch(query);
+  if (!normalizedQuery) return null;
+
+  let bestTown: ActiveTown | null = null;
+  let bestScore = 0;
+
+  for (const town of towns) {
+    const normalizedName = normalizeForMatch(town.name);
+    const normalizedSlug = normalizeForMatch(town.slug);
+    if (!normalizedName && !normalizedSlug) continue;
+
+    let score = 0;
+    if (containsPhrase(normalizedQuery, normalizedName)) score += 100 + normalizedName.length;
+    if (containsPhrase(normalizedQuery, normalizedSlug)) score += 90 + normalizedSlug.length;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestTown = town;
+    }
+  }
+
+  return bestScore > 0 ? bestTown : null;
+};
+
+export const resolveTownForPrompt = async (
+  apiBaseUrl: string,
+  prompt: string,
+): Promise<ResolvedTown> => {
   const zones = await fetchActiveZones(apiBaseUrl);
   if (!zones.length) {
     throw new Error("No active towns are available right now.");
   }
 
-  const storedId = await LocalStorage.getItem<string>(HOME_ZONE_STORAGE_KEY);
-  const parsedId = Number(storedId || "");
-  const selectedZone = Number.isFinite(parsedId)
-    ? zones.find((zone) => zone.id === parsedId)
-    : undefined;
-
-  const zone = selectedZone || zones[0];
-  return {
+  const towns: ActiveTown[] = zones.map((zone) => ({
     id: zone.id,
     name: zone.name,
     slug: zone.slug,
+  }));
+
+  const storedId = await LocalStorage.getItem<string>(HOME_ZONE_STORAGE_KEY);
+  const parsedId = Number(storedId || "");
+  const homeTown = Number.isFinite(parsedId)
+    ? towns.find((town) => town.id === parsedId)
+    : undefined;
+
+  const inferredTown = inferTownFromQuery(prompt, towns);
+  if (inferredTown) {
+    return {
+      town: inferredTown,
+      source: "query",
+    };
+  }
+
+  const zone = homeTown || towns[0];
+  return {
+    town: zone,
+    source: "home",
   };
 };
