@@ -1,6 +1,12 @@
 # Raycast Port Changelog
 
-## [Chore: Fixed typo] - 2025-03-10
+## [Routine Maintenance] - {PR_MERGE_DATE}
+
+- Bump all dependencies to the latest
+
+## [Chore] - 2025-03-10
+
+- Fix typo
 
 ## [New Feature] - 2025-03-05
 
