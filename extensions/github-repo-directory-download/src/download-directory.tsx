@@ -4,10 +4,6 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import AdmZip from "adm-zip";
-import { promisify } from "util";
-import { pipeline, Readable } from "stream";
-
-const streamPipeline = promisify(pipeline);
 
 interface FormValues {
   url: string;
@@ -68,23 +64,26 @@ export default function Command() {
     }
 
     setIsLoading(true);
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Starting Download...",
+    });
+
     try {
       const destPath = values.downloadPath[0];
       await LocalStorage.setItem("lastDownloadPath", destPath);
 
-      const result = await downloadGitHubDirectory(values.url, destPath);
+      const result = await downloadGitHubDirectory(values.url, destPath, (msg) => {
+        toast.message = msg;
+      });
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Download Complete",
-        message: `Saved to ${path.basename(result)}`,
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Download Complete";
+      toast.message = `Saved to ${path.basename(result)}`;
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Download Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      toast.style = Toast.Style.Failure;
+      toast.title = "Download Failed";
+      toast.message = error instanceof Error ? error.message : "Unknown error";
     } finally {
       setIsLoading(false);
     }
@@ -140,25 +139,36 @@ function parseGitHubUrl(urlStr: string): ParsedUrl {
   return { owner, repo, branch, dirPath };
 }
 
-async function getDefaultBranch(owner: string, repo: string): Promise<string> {
-  try {
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
-    if (!response.ok) {
-      return "main"; // Fallback
-    }
-    const data = (await response.json()) as { default_branch: string };
-    return data.default_branch || "main";
-  } catch {
-    return "main";
-  }
-}
-
-async function downloadGitHubDirectory(url: string, destPath: string): Promise<string> {
+async function downloadGitHubDirectory(
+  url: string,
+  destPath: string,
+  onProgress: (message: string) => void,
+): Promise<string> {
   const { owner, repo, branch, dirPath } = parseGitHubUrl(url);
 
-  const targetBranch = branch || (await getDefaultBranch(owner, repo));
+  // 1. Get Repo Metadata (Size & Default Branch)
+  onProgress("Fetching repository info...");
+  let targetBranch = branch;
+  let repoSizeMB = 0;
 
-  // Download zip
+  try {
+    const apiRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+    if (apiRes.ok) {
+      const data = (await apiRes.json()) as { default_branch: string; size: number };
+      if (!targetBranch) targetBranch = data.default_branch;
+      // GitHub API returns size in KB
+      repoSizeMB = Math.round(data.size / 1024);
+    }
+  } catch {
+    // Ignore API errors, fallback to defaults
+  }
+
+  if (!targetBranch) targetBranch = "main";
+
+  // 2. Start Download
+  const sizeMsg = repoSizeMB > 0 ? `~${repoSizeMB} MB` : "";
+  onProgress(`Downloading ${sizeMsg}...`);
+
   const zipUrl = `https://github.com/${owner}/${repo}/archive/refs/heads/${targetBranch}.zip`;
   const tempDir = os.tmpdir();
   const tempFile = path.join(tempDir, `${repo}-${Date.now()}.zip`);
@@ -166,16 +176,47 @@ async function downloadGitHubDirectory(url: string, destPath: string): Promise<s
   try {
     const response = await fetch(zipUrl);
     if (!response.ok) {
-      throw new Error(`Failed to download repository: ${response.statusText}`);
+      if (response.status === 404) {
+        throw new Error(`Branch '${targetBranch}' not found.`);
+      }
+      throw new Error(`Failed to download: ${response.statusText}`);
     }
 
     if (!response.body) throw new Error("Empty response body");
 
-    // Use Readable.fromWeb to convert Web Stream to Node Stream
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await streamPipeline(Readable.fromWeb(response.body as any), fs.createWriteStream(tempFile));
+    // Create a write stream
+    const fileStream = fs.createWriteStream(tempFile);
+    const reader = response.body.getReader();
+    let downloadedBytes = 0;
 
-    // Extract
+    // Read the stream chunk by chunk
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      if (value) {
+        downloadedBytes += value.length;
+        const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
+
+        // Update progress every chunk might be too frequent, but React handles it or we can throttle
+        // For Raycast toast, frequent updates are okay-ish, but let's just update text
+        onProgress(`Downloading... ${downloadedMB} MB`);
+
+        // Write to file
+        fileStream.write(Buffer.from(value));
+      }
+    }
+
+    fileStream.end();
+
+    // Wait for file to be fully written
+    await new Promise((resolve, reject) => {
+      fileStream.on("finish", resolve);
+      fileStream.on("error", reject);
+    });
+
+    // 3. Extract
+    onProgress("Extracting files...");
     const zip = new AdmZip(tempFile);
     const zipEntries = zip.getEntries();
 
