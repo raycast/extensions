@@ -42,7 +42,7 @@ const execFileAsync = promisify(execFile);
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Inoreader",
-  providerIcon: Icon.Rss,
+  providerIcon: "inoreader-logo.png",
   description: "Connect your Inoreader account to read and manage followed feeds.",
 });
 

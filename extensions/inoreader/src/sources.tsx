@@ -27,7 +27,7 @@ const NO_FOLDER_VALUE = "__no_folder__";
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Inoreader",
-  providerIcon: Icon.Rss,
+  providerIcon: "inoreader-logo.png",
   description: "Connect your Inoreader account to manage followed feeds.",
 });
 
