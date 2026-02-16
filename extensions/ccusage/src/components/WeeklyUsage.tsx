@@ -69,7 +69,9 @@ export function WeeklyUsage() {
               <List.Item.Detail.Metadata.Label
                 key={model.modelName}
                 title={model.modelName}
-                text={`${formatCost(model.cost)} (${formatNumber(model.totalTokens || model.inputTokens + model.outputTokens)})`}
+                text={`${formatCost(model.cost)} (${formatNumber(
+                  model.totalTokens || model.inputTokens + model.outputTokens,
+                )})`}
               />
             ))}
           </>
