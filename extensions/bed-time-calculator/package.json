@@ -5,6 +5,9 @@
   "description": "Calculate optimal sleep and wake times with color-coded quality indicators and natural language time input.",
   "icon": "extension_icon.png",
   "author": "khlebobul",
+  "contributors": [
+    "nazzy_wazzy_lu"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -38,7 +41,7 @@
       "arguments": [
         {
           "name": "wakeUpTime",
-          "placeholder": "Wake up Time (HH:MM)",
+          "placeholder": "Wake Up Time (HH:MM)",
           "type": "text",
           "required": true
         }
@@ -65,6 +68,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
