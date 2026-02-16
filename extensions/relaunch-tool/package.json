@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "relaunch-tool",
-  "title": "ReLaunch Tool",
+  "title": "Relaunch Tool",
   "description": "Force quit and relaunch a target app",
   "version": "1.0.0",
   "author": "Afcoo",
@@ -11,7 +11,8 @@
     "System"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "private": true,
   "commands": [
