@@ -27,11 +27,27 @@ export async function executeRaycastCommand(raycastCommand: RaycastCommand): Pro
   const args = raycastCommand.arguments;
   const hasArgs = Boolean(args && typeof args === "object");
 
-  await launchCommand({
+  const launchOptions = {
     ownerOrAuthorName: parsed.ownerOrAuthorName,
     extensionName: parsed.extensionName,
     name: parsed.name,
     type: raycastCommand.type === "user-initiated" ? LaunchType.UserInitiated : LaunchType.Background,
     ...(hasArgs ? { arguments: args } : {}),
-  });
+  };
+
+  try {
+    await launchCommand(launchOptions);
+  } catch (error) {
+    // If a "view" command was launched with Background type, Raycast rejects it.
+    // Retry as UserInitiated so the command still executes on schedule.
+    if (
+      launchOptions.type === LaunchType.Background &&
+      error instanceof Error &&
+      error.message.includes("cannot launch mode")
+    ) {
+      await launchCommand({ ...launchOptions, type: LaunchType.UserInitiated });
+    } else {
+      throw error;
+    }
+  }
 }
