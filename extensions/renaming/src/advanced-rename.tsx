@@ -7,7 +7,6 @@ import {
   showToast,
   Toast,
   confirmAlert,
-  Alert,
   closeMainWindow,
   popToRoot,
 } from "@raycast/api";

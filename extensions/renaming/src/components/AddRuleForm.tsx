@@ -1,6 +1,14 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { useState } from "react";
-import { RenameRule, RuleType } from "../lib/rules";
+import { useState, useMemo } from "react";
+import {
+  RenameRule,
+  RuleType,
+  ReplaceOptions,
+  AddOptions,
+  CaseOptions,
+  NumberOptions,
+  ExtensionOptions,
+} from "../lib/rules";
 import { v4 as uuidv4 } from "uuid";
 
 interface AddRuleFormProps {
@@ -13,41 +21,67 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
   const [type, setType] = useState<RuleType>(initialRule?.type || "replace");
 
   // Rule State
-  const [find, setFind] = useState(initialRule?.options.find || "");
-  const [replace, setReplace] = useState(initialRule?.options.replace || "");
-  const [isRegex, setIsRegex] = useState(initialRule?.options.isRegex || false);
-  const [caseSensitive, setCaseSensitive] = useState(initialRule?.options.caseSensitive || false);
+  const initialOptions = initialRule?.options || {};
+  const [find, setFind] = useState((initialOptions as ReplaceOptions).find || "");
+  const [replace, setReplace] = useState((initialOptions as ReplaceOptions).replace || "");
+  const [isRegex, setIsRegex] = useState((initialOptions as ReplaceOptions).isRegex || false);
+  const [caseSensitive, setCaseSensitive] = useState((initialOptions as ReplaceOptions).caseSensitive || false);
 
-  const [text, setText] = useState(initialRule?.options.text || "");
-  const [position, setPosition] = useState(initialRule?.options.position || "end");
+  const [text, setText] = useState((initialOptions as AddOptions).text || "");
+  const [position, setPosition] = useState((initialOptions as AddOptions).position || "end");
 
-  const [caseFormat, setCaseFormat] = useState(initialRule?.options.format || "lowercase");
+  const [caseFormat, setCaseFormat] = useState((initialOptions as CaseOptions).format || "lowercase");
 
-  const [start, setStart] = useState(initialRule?.options.start?.toString() || "1");
-  const [step, setStep] = useState(initialRule?.options.step?.toString() || "1");
-  const [padding, setPadding] = useState(initialRule?.options.padding?.toString() || "1");
-  const [separator, setSeparator] = useState(initialRule?.options.separator || "-");
+  const [start, setStart] = useState((initialOptions as NumberOptions).start?.toString() || "1");
+  const [step, setStep] = useState((initialOptions as NumberOptions).step?.toString() || "1");
+  const [padding, setPadding] = useState((initialOptions as NumberOptions).padding?.toString() || "1");
+  const [separator, setSeparator] = useState((initialOptions as NumberOptions).separator || "-");
 
-  const [extMode, setExtMode] = useState(initialRule?.options.mode || "lowercase");
-  const [newExt, setNewExt] = useState(initialRule?.options.newExt || "");
+  const [extMode, setExtMode] = useState((initialOptions as ExtensionOptions).mode || "lowercase");
+  const [newExt, setNewExt] = useState((initialOptions as ExtensionOptions).newExt || "");
 
-  const handleSubmit = () => {
-    let options = {};
+  const ruleDescription = useMemo(() => {
     switch (type) {
       case "replace":
-        options = { find, replace, isRegex, caseSensitive };
+        return "Find specific text or patterns (Regex) and replace them with something else.";
+      case "add":
+        return "Insert custom text at the beginning or end of the filename.";
+      case "number":
+        return "Add a sequential counter to files, useful for sorting or ordering.";
+      case "case":
+        return "Transform the filename to UPPERCASE, lowercase, or Title Case.";
+      case "extension":
+        return "Modify the file extension (e.g., .jpg). Change case, remove it, or replace it entirely.";
+      case "trim":
+        return "Remove whitespace characters from both ends of the filename.";
+      default:
+        return "";
+    }
+  }, [type]);
+
+  const handleSubmit = () => {
+    let options: object = {};
+    switch (type) {
+      case "replace":
+        options = { find, replace, isRegex, caseSensitive } as ReplaceOptions;
         break;
       case "add":
-        options = { text, position };
+        options = { text, position } as AddOptions;
         break;
       case "case":
-        options = { format: caseFormat };
+        options = { format: caseFormat } as CaseOptions;
         break;
       case "number":
-        options = { start: Number(start), step: Number(step), padding: Number(padding), separator, position };
+        options = {
+          start: Number(start),
+          step: Number(step),
+          padding: Number(padding),
+          separator,
+          position,
+        } as NumberOptions;
         break;
       case "extension":
-        options = { mode: extMode, newExt };
+        options = { mode: extMode, newExt } as ExtensionOptions;
         break;
       case "trim":
         options = {};
@@ -58,7 +92,7 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
       id: initialRule?.id || uuidv4(),
       type,
       options,
-    });
+    } as RenameRule);
     pop();
   };
 
@@ -79,6 +113,8 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
         <Form.Dropdown.Item value="trim" title="Trim Whitespace" icon={Icon.Eraser} />
       </Form.Dropdown>
 
+      <Form.Description text={ruleDescription} />
+
       {type === "replace" && (
         <>
           <Form.TextField id="find" title="Find" value={find} onChange={setFind} placeholder="Text to find" />
@@ -97,7 +133,12 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
       {type === "add" && (
         <>
           <Form.TextField id="text" title="Text" value={text} onChange={setText} placeholder="Text to add" />
-          <Form.Dropdown id="position" title="Position" value={position} onChange={setPosition}>
+          <Form.Dropdown
+            id="position"
+            title="Position"
+            value={position}
+            onChange={(v) => setPosition(v as AddOptions["position"])}
+          >
             <Form.Dropdown.Item value="start" title="At Beginning" />
             <Form.Dropdown.Item value="end" title="At End" />
           </Form.Dropdown>
@@ -105,7 +146,12 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
       )}
 
       {type === "case" && (
-        <Form.Dropdown id="format" title="Format" value={caseFormat} onChange={setCaseFormat}>
+        <Form.Dropdown
+          id="format"
+          title="Format"
+          value={caseFormat}
+          onChange={(v) => setCaseFormat(v as CaseOptions["format"])}
+        >
           <Form.Dropdown.Item value="lowercase" title="lowercase" />
           <Form.Dropdown.Item value="uppercase" title="UPPERCASE" />
           <Form.Dropdown.Item value="capitalize" title="Capitalize" />
@@ -115,7 +161,12 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
 
       {type === "number" && (
         <>
-          <Form.Dropdown id="position" title="Position" value={position} onChange={setPosition}>
+          <Form.Dropdown
+            id="position"
+            title="Position"
+            value={position}
+            onChange={(v) => setPosition(v as NumberOptions["position"])}
+          >
             <Form.Dropdown.Item value="end" title="At End (Suffix)" />
             <Form.Dropdown.Item value="start" title="At Start (Prefix)" />
           </Form.Dropdown>
@@ -128,11 +179,16 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
 
       {type === "extension" && (
         <>
-          <Form.Dropdown id="mode" title="Action" value={extMode} onChange={setExtMode}>
-            <Form.Dropdown.Item value="lowercase" title="Lowercase" />
-            <Form.Dropdown.Item value="uppercase" title="Uppercase" />
-            <Form.Dropdown.Item value="remove" title="Remove" />
-            <Form.Dropdown.Item value="replace" title="Replace" />
+          <Form.Dropdown
+            id="mode"
+            title="Action"
+            value={extMode}
+            onChange={(v) => setExtMode(v as ExtensionOptions["mode"])}
+          >
+            <Form.Dropdown.Item value="lowercase" title="Lowercase (.jpg)" />
+            <Form.Dropdown.Item value="uppercase" title="Uppercase (.JPG)" />
+            <Form.Dropdown.Item value="remove" title="Remove Extension" />
+            <Form.Dropdown.Item value="replace" title="Replace Extension" />
           </Form.Dropdown>
           {extMode === "replace" && (
             <Form.TextField
@@ -140,7 +196,7 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
               title="New Extension"
               value={newExt}
               onChange={setNewExt}
-              placeholder="e.g. jpg"
+              placeholder="e.g. png (without dot)"
             />
           )}
         </>

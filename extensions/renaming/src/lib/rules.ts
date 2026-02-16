@@ -1,10 +1,41 @@
-export interface RenameRule {
-  id: string;
-  type: RuleType;
-  options: any;
+export type RenameRule =
+  | { id: string; type: "replace"; options: ReplaceOptions }
+  | { id: string; type: "case"; options: CaseOptions }
+  | { id: string; type: "add"; options: AddOptions }
+  | { id: string; type: "number"; options: NumberOptions }
+  | { id: string; type: "extension"; options: ExtensionOptions }
+  | { id: string; type: "trim"; options: object };
+
+export interface ReplaceOptions {
+  find: string;
+  replace: string;
+  isRegex: boolean;
+  caseSensitive: boolean;
 }
 
-export type RuleType = "replace" | "case" | "add" | "number" | "trim" | "extension";
+export interface CaseOptions {
+  format: "lowercase" | "uppercase" | "capitalize" | "titlecase";
+}
+
+export interface AddOptions {
+  text: string;
+  position: "start" | "end";
+}
+
+export interface NumberOptions {
+  start: number;
+  step: number;
+  padding: number;
+  separator: string;
+  position: "start" | "end";
+}
+
+export interface ExtensionOptions {
+  mode: "lowercase" | "uppercase" | "remove" | "replace";
+  newExt?: string;
+}
+
+export type RuleType = RenameRule["type"];
 
 export interface FileItem {
   originalPath: string;
@@ -21,31 +52,31 @@ export const applyRules = (file: FileItem, rules: RenameRule[], index: number): 
   for (const rule of rules) {
     try {
       switch (rule.type) {
-        case "replace":
-          if (rule.options.find) {
-            const flags = rule.options.caseSensitive ? "g" : "gi";
-            const search = rule.options.isRegex
-              ? new RegExp(rule.options.find, flags)
-              : rule.options.find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // simple string literal replacement simulation if needed or just use replaceAll
+        case "replace": {
+          const options = rule.options;
+          if (options.find) {
+            const flags = options.caseSensitive ? "g" : "gi";
+            const search = options.isRegex
+              ? new RegExp(options.find, flags)
+              : options.find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-            // For simple string replace without regex, we can use replaceAll if not regex
-            if (!rule.options.isRegex) {
-              if (rule.options.caseSensitive) {
-                name = name.replaceAll(rule.options.find, rule.options.replace || "");
+            if (!options.isRegex) {
+              if (options.caseSensitive) {
+                name = name.replaceAll(options.find, options.replace || "");
               } else {
-                // Case insensitive string replace is tricky with replaceAll without regex
-                // Easiest is to convert to regex
-                const esc = rule.options.find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-                name = name.replace(new RegExp(esc, "gi"), rule.options.replace || "");
+                const esc = options.find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                name = name.replace(new RegExp(esc, "gi"), options.replace || "");
               }
             } else {
-              name = name.replace(search, rule.options.replace || "");
+              name = name.replace(search, options.replace || "");
             }
           }
           break;
+        }
 
-        case "case":
-          switch (rule.options.format) {
+        case "case": {
+          const options = rule.options;
+          switch (options.format) {
             case "lowercase":
               name = name.toLowerCase();
               break;
@@ -60,39 +91,36 @@ export const applyRules = (file: FileItem, rules: RenameRule[], index: number): 
               break;
           }
           break;
+        }
 
-        case "add":
-          if (rule.options.text) {
-            if (rule.options.position === "start") name = rule.options.text + name;
-            if (rule.options.position === "end") name = name + rule.options.text;
-            if (rule.options.position === "index" && typeof rule.options.index === "number") {
-              const idx = Math.min(Math.max(0, rule.options.index), name.length);
-              name = name.slice(0, idx) + rule.options.text + name.slice(idx);
-            }
+        case "add": {
+          const options = rule.options;
+          if (options.text) {
+            if (options.position === "start") name = options.text + name;
+            if (options.position === "end") name = name + options.text;
+            // Note: position 'index' removed to match UI for now
           }
           break;
+        }
 
-        case "number":
-          const start = Number(rule.options.start) || 1;
-          const step = Number(rule.options.step) || 1;
+        case "number": {
+          const options = rule.options;
+          const start = Number(options.start) || 1;
+          const step = Number(options.step) || 1;
           const currentNum = start + index * step;
-          const numStr = currentNum.toString().padStart(rule.options.padding || 1, "0");
-          const separator = rule.options.separator || "";
+          const numStr = currentNum.toString().padStart(options.padding || 1, "0");
+          const separator = options.separator || "";
 
-          if (rule.options.position === "start") name = `${numStr}${separator}${name}`;
-          if (rule.options.position === "end") name = `${name}${separator}${numStr}`;
+          if (options.position === "start") name = `${numStr}${separator}${name}`;
+          if (options.position === "end") name = `${name}${separator}${numStr}`;
           break;
+        }
 
         case "trim":
           name = name.trim();
           break;
 
         case "extension":
-          // This affects extension, returns immediately or we handle it specially outside?
-          // Ideally we return the FULL new filename. But our function inputs "name" (base name).
-          // Let's assume this function returns the new BASE name, and extension logic handles extension.
-          // BUT "extension" rule needs to modify the extension part.
-          // Refactor: applyRules should take { name, extension } and return { name, extension }
           break;
       }
     } catch (e) {
@@ -114,37 +142,40 @@ export const applyRulesToItem = (
   for (const rule of rules) {
     try {
       if (rule.type === "extension") {
-        if (rule.options.mode === "lowercase") currentExt = currentExt.toLowerCase();
-        if (rule.options.mode === "uppercase") currentExt = currentExt.toUpperCase();
-        if (rule.options.mode === "remove") currentExt = "";
-        if (rule.options.mode === "replace" && rule.options.newExt) {
-          currentExt = rule.options.newExt.startsWith(".") ? rule.options.newExt : `.${rule.options.newExt}`;
+        const options = rule.options;
+        if (options.mode === "lowercase") currentExt = currentExt.toLowerCase();
+        if (options.mode === "uppercase") currentExt = currentExt.toUpperCase();
+        if (options.mode === "remove") currentExt = "";
+        if (options.mode === "replace" && options.newExt) {
+          currentExt = options.newExt.startsWith(".") ? options.newExt : `.${options.newExt}`;
         }
         continue;
       }
 
       // Other rules apply to the name part
-      // Re-use logic above but adapted here inline for simplicity or call helper
       switch (rule.type) {
-        case "replace":
-          if (rule.options.find) {
-            if (!rule.options.isRegex) {
-              const esc = rule.options.find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-              const flags = rule.options.caseSensitive ? "g" : "gi";
-              currentName = currentName.replace(new RegExp(esc, flags), rule.options.replace || "");
+        case "replace": {
+          const options = rule.options;
+          if (options.find) {
+            if (!options.isRegex) {
+              const esc = options.find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+              const flags = options.caseSensitive ? "g" : "gi";
+              currentName = currentName.replace(new RegExp(esc, flags), options.replace || "");
             } else {
               try {
-                const flags = rule.options.caseSensitive ? "g" : "gi";
-                currentName = currentName.replace(new RegExp(rule.options.find, flags), rule.options.replace || "");
+                const flags = options.caseSensitive ? "g" : "gi";
+                currentName = currentName.replace(new RegExp(options.find, flags), options.replace || "");
               } catch {
                 /* ignore invalid regex */
               }
             }
           }
           break;
+        }
 
-        case "case":
-          switch (rule.options.format) {
+        case "case": {
+          const options = rule.options;
+          switch (options.format) {
             case "lowercase":
               currentName = currentName.toLowerCase();
               break;
@@ -162,24 +193,29 @@ export const applyRulesToItem = (
               break;
           }
           break;
+        }
 
-        case "add":
-          if (rule.options.text) {
-            if (rule.options.position === "start") currentName = rule.options.text + currentName;
-            if (rule.options.position === "end") currentName = currentName + rule.options.text;
+        case "add": {
+          const options = rule.options;
+          if (options.text) {
+            if (options.position === "start") currentName = options.text + currentName;
+            if (options.position === "end") currentName = currentName + options.text;
           }
           break;
+        }
 
-        case "number":
-          const start = Number(rule.options.start) || 1;
-          const step = Number(rule.options.step) || 1;
+        case "number": {
+          const options = rule.options;
+          const start = Number(options.start) || 1;
+          const step = Number(options.step) || 1;
           const currentNum = start + index * step;
-          const numStr = currentNum.toString().padStart(rule.options.padding || 1, "0");
-          const separator = rule.options.separator || "";
+          const numStr = currentNum.toString().padStart(options.padding || 1, "0");
+          const separator = options.separator || "";
 
-          if (rule.options.position === "start") currentName = `${numStr}${separator}${currentName}`;
-          if (rule.options.position === "end") currentName = `${currentName}${separator}${numStr}`;
+          if (options.position === "start") currentName = `${numStr}${separator}${currentName}`;
+          if (options.position === "end") currentName = `${currentName}${separator}${numStr}`;
           break;
+        }
 
         case "trim":
           currentName = currentName.trim();
