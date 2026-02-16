@@ -2,7 +2,6 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- View recent transcriptions with quick copy/paste
-- Search through entire transcription history
+- Browse and search through transcription history with multi-word matching
 - Support for both VoiceInk Official and VoiceInk CE
 - Configurable database source in preferences

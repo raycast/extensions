@@ -17,7 +17,6 @@ export function TranscriptionItem({ transcription }: Props) {
       subtitle={formatRelativeTime(transcription.timestamp)}
       icon={transcription.powerModeEmoji || Icon.Message}
       accessories={buildAccessories(transcription, hasEnhancement)}
-      keywords={buildKeywords(transcription)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -66,23 +65,4 @@ function buildAccessories(transcription: Transcription, hasEnhancement: boolean)
   }
 
   return accessories;
-}
-
-function buildKeywords(transcription: Transcription): string[] {
-  const keywords: string[] = [];
-
-  if (transcription.text) {
-    keywords.push(...transcription.text.split(/\s+/).slice(0, 10));
-  }
-  if (transcription.enhancedText) {
-    keywords.push(...transcription.enhancedText.split(/\s+/).slice(0, 10));
-  }
-  if (transcription.modelName) {
-    keywords.push(transcription.modelName);
-  }
-  if (transcription.powerModeName) {
-    keywords.push(transcription.powerModeName);
-  }
-
-  return keywords;
 }

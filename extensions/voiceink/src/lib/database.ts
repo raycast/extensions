@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 import { existsSync } from "fs";
-import type { Transcription, TranscriptionRow } from "./types";
+import type { Transcription } from "./types";
 
 // Known VoiceInk database locations
 const DB_PATHS = {
@@ -114,9 +114,17 @@ export function buildQuery(limit: number, searchTerm?: string): string {
     WHERE ZTRANSCRIPTIONSTATUS = 'completed'
   `;
 
-  const searchClause = searchTerm
-    ? ` AND (ZTEXT LIKE '%${escapeSqlString(searchTerm)}%' OR ZENHANCEDTEXT LIKE '%${escapeSqlString(searchTerm)}%')`
-    : "";
+  let searchClause = "";
+  if (searchTerm) {
+    const words = searchTerm.trim().split(/\s+/).filter(Boolean);
+    if (words.length > 0) {
+      const conditions = words.map((word) => {
+        const escaped = escapeSqlString(word);
+        return `(ZTEXT LIKE '%${escaped}%' OR ZENHANCEDTEXT LIKE '%${escaped}%')`;
+      });
+      searchClause = ` AND ${conditions.join(" AND ")}`;
+    }
+  }
 
   return `${baseQuery}${searchClause} ORDER BY ZTIMESTAMP DESC LIMIT ${limit}`;
 }
@@ -129,7 +137,7 @@ export function parseTranscriptions(stdout: string): Transcription[] {
   if (!stdout.trim()) return [];
 
   try {
-    const rows: TranscriptionRow[] = JSON.parse(stdout);
+    const rows: Transcription[] = JSON.parse(stdout);
     return rows.map((row) => ({
       id: row.id,
       text: row.text || "",

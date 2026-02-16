@@ -9,15 +9,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "recent-transcriptions",
-      "title": "Recent Transcriptions",
-      "description": "View and copy recent VoiceInk transcriptions",
-      "mode": "view"
-    },
-    {
       "name": "search-transcriptions",
       "title": "Search Transcriptions",
-      "description": "Search through your VoiceInk transcription history",
+      "description": "Browse and search through your VoiceInk transcriptions",
       "mode": "view"
     }
   ],

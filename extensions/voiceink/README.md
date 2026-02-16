@@ -4,8 +4,7 @@ Quick access to your [VoiceInk](https://tryvoiceink.com) transcriptions directly
 
 ## Features
 
-- **Recent Transcriptions**: View and filter your latest transcriptions
-- **Search Transcriptions**: Search through your entire transcription history
+- **Search Transcriptions**: Browse recent transcriptions or search through your entire history with multi-word matching
 - **Quick Actions**: Copy, paste, or view details with keyboard shortcuts
 
 ## Setup

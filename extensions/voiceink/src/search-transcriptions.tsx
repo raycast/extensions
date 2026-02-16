@@ -4,13 +4,13 @@ import { useExec } from "@raycast/utils";
 import { getDatabaseInfo, buildQuery, parseTranscriptions } from "./lib/database";
 import { TranscriptionItem } from "./components/TranscriptionItem";
 
-const LIMIT = 100;
+const DISPLAY_LIMIT = 100;
 
 export default function SearchTranscriptions() {
   const [searchText, setSearchText] = useState("");
   const dbInfo = getDatabaseInfo();
 
-  const query = buildQuery(LIMIT, searchText || undefined);
+  const query = buildQuery(DISPLAY_LIMIT, searchText || undefined);
 
   const { isLoading, data } = useExec("sqlite3", ["-json", "-readonly", dbInfo.path, query], {
     execute: dbInfo.available,
@@ -18,7 +18,7 @@ export default function SearchTranscriptions() {
     onError: (error) => {
       showToast({
         style: Toast.Style.Failure,
-        title: "Search failed",
+        title: "Failed to load transcriptions",
         message: error.message,
       });
     },
@@ -61,8 +61,10 @@ export default function SearchTranscriptions() {
         />
       ) : (
         <List.Section
-          title={searchText ? "Search Results" : "All Transcriptions"}
-          subtitle={transcriptions.length >= LIMIT ? `${LIMIT}+ found` : `${transcriptions.length} found`}
+          title={searchText ? "Search Results" : "Recent"}
+          subtitle={
+            transcriptions.length >= DISPLAY_LIMIT ? `${DISPLAY_LIMIT}+ found` : `${transcriptions.length} found`
+          }
         >
           {transcriptions.map((transcription) => (
             <TranscriptionItem key={transcription.id} transcription={transcription} />
