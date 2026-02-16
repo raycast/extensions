@@ -58,6 +58,7 @@ function formatDate(iso: string): string {
   if (isNaN(d.getTime())) return "";
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
+  if (diffMs < 0) return "Today";
   const diffDays = Math.floor(diffMs / 86400000);
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
