@@ -145,13 +145,13 @@ export const moveWorktree = async ({
   currentName: string;
   newName: string;
 }) => {
-  const moveWorktree = `git -C ${path} worktree move ${currentName} ${newName}`;
+  const moveWorktree = `git -C "${path}" worktree move "${currentName}" "${newName}"`;
 
   return executeCommand(moveWorktree);
 };
 
 export const renameBranch = async ({ path, newBranchName }: { path: string; newBranchName: string }) => {
-  const renameBranch = `git -C ${path} branch -m ${newBranchName}`;
+  const renameBranch = `git -C "${path}" branch -m "${newBranchName}"`;
 
   return executeCommand(renameBranch);
 };
@@ -357,7 +357,7 @@ export const addRemoteWorktree = async ({
   parentPath: string;
 }) => {
   try {
-    const worktreeAddCommand = `git -C ${parentPath} worktree add --track -B ${remoteBranch} ${newWorktreePath} origin/${remoteBranch}`;
+    const worktreeAddCommand = `git -C "${parentPath}" worktree add --track -B "${remoteBranch}" "${newWorktreePath}" "origin/${remoteBranch}"`;
     await executeCommand(worktreeAddCommand);
   } catch (e: unknown) {
     throw Error(e instanceof Error ? e.message : "Unknown error occurred");
@@ -376,7 +376,7 @@ export const addNewWorktree = async ({
   parentPath: string;
 }) => {
   try {
-    const addCommand = `git -C ${parentPath} worktree add --track -B ${newBranch} ${newWorktreePath} origin/${trackingBranch}`;
+    const addCommand = `git -C "${parentPath}" worktree add --track -B "${newBranch}" "${newWorktreePath}" "origin/${trackingBranch}"`;
 
     await executeCommand(addCommand);
   } catch (e: unknown) {
