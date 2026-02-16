@@ -4,7 +4,7 @@ const LAST_USED_STORAGE_KEY = "pet-snippets-last-used-v1";
 
 export type LastUsedMap = Record<string, number>;
 
-function parseLastUsedMap(raw: LocalStorage.Value): LastUsedMap {
+function parseLastUsedMap(raw: LocalStorage.Value | undefined): LastUsedMap {
   if (typeof raw !== "string" || raw.trim().length === 0) {
     return {};
   }

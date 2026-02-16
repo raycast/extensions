@@ -157,9 +157,9 @@ export default function Command() {
   const [snippets, setSnippets] = useState<PetSnippet[]>([]);
   const [lastUsedMap, setLastUsedMap] = useState<LastUsedMap>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const mtimeRef = useRef<number>();
-  const snapshotRef = useRef<string>();
+  const [error, setError] = useState<string | undefined>(undefined);
+  const mtimeRef = useRef<number | undefined>(undefined);
+  const snapshotRef = useRef<string | undefined>(undefined);
   const loadingRef = useRef(false);
 
   useEffect(() => {
