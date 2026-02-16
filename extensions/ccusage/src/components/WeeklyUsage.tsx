@@ -117,7 +117,7 @@ export function WeeklyUsage() {
       icon={{ source: Icon.Calendar, tintColor: Color.SecondaryText }}
       accessories={[
         { text: formatCost(currentWeek?.totalCost || 0), icon: Icon.Coins },
-        { text: formatNumber(currentWeek?.totalTokens || 0), icon: Icon.Terminal, tooltip: "Total Tokens" },
+        { text: formatNumber(currentWeek?.totalTokens || 0), tooltip: "Total Tokens" },
       ]}
       detail={<List.Item.Detail metadata={currentWeek ? renderDetailMetadata(currentWeek) : undefined} />}
       actions={
