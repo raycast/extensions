@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import RenameCommand from "./commands/rename";
 import ReplaceCommand from "./commands/replace";
@@ -13,7 +14,7 @@ interface MenuItem {
   subtitle: string;
   icon: Icon;
   color: Color;
-  component: React.ComponentType<{ mode?: SelectionMode }>;
+  component: ComponentType<{ mode?: SelectionMode }>;
   mode?: SelectionMode;
   section?: "main" | "advanced";
 }
