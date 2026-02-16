@@ -1,5 +1,11 @@
 # Obsidian Changelog
 
+## [AI Search Tool Content Search Parameter] - 2026-02-16
+
+- Add searchContent parameter to searchNote AI tool for controlling search mode
+- Enable content and tag search capabilities in AI tools
+- Default searchContent to true for comprehensive search including file content and tag filtering
+
 ## [Custom Append Actions] - 2026-02-02
 
 - Added "Run Custom Action" command to create reusable append templates

@@ -10,6 +10,7 @@ import type {
   Pagination,
   CreateEnvironment,
   Domain,
+  AIGatewayLogItem,
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
@@ -358,4 +359,75 @@ export async function checkDomainAvailability(domain: string) {
 
   const json = (await response.json()) as { available: boolean };
   return { available: json.available };
+}
+
+// AI Gateway Logs
+function formatDateTime(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
+}
+
+export async function fetchAIGatewayLogs(ownerId: string, limit = 100) {
+  try {
+    const endTime = new Date();
+    const startTime = new Date(endTime.getTime() - 12 * 60 * 60 * 1000);
+
+    const params = new URLSearchParams({
+      ownerId,
+      startTime: formatDateTime(startTime),
+      endTime: formatDateTime(endTime),
+      limit: limit.toString(),
+      offset: "0",
+      sortBy: "timestamp",
+      sortDir: "DESC",
+    });
+
+    const url = `https://vercel.com/api/ai/gateway-inference-requests?${params}`;
+    const response = await fetch(url, {
+      method: "get",
+      headers: headers,
+    });
+
+    if (!response.ok) {
+      console.error("AI Gateway Logs API error:", response.status, response.statusText);
+      const errorText = await response.text();
+      console.error("Error response:", errorText);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch AI Gateway logs",
+      });
+      return [];
+    }
+
+    const json = (await response.json()) as { data: AIGatewayLogItem[] };
+    return json.data || [];
+  } catch (err) {
+    console.error("Failed to fetch AI Gateway logs:", err);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to fetch AI Gateway logs",
+    });
+    return [];
+  }
+}
+
+export async function fetchAICreditsBalance(teamId: string) {
+  try {
+    const url = `https://vercel.com/api/ai/ai-credits-balance?teamId=${teamId}`;
+    const response = await fetch(url, {
+      method: "get",
+      headers: headers,
+    });
+
+    if (!response.ok) {
+      console.error("AI Credits Balance API error:", response.status, response.statusText);
+      return null;
+    }
+
+    const json = (await response.json()) as { cumulativeBalance: string };
+    return json;
+  } catch (err) {
+    console.error("Failed to fetch AI credits balance:", err);
+    return null;
+  }
 }

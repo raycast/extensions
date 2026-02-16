@@ -1,5 +1,14 @@
 # Bed Time Calculator Changelog
 
+## [Windows Support] - 2026-02-15
+
+### Added
+- **Windows platform support**: Added Windows to supported platforms alongside macOS
+- **Contributor credit**: Added nazzy_wazzy_lu to contributors list
+
+### Fixed
+- Corrected title case for "Wake Up At" command
+
 ## [Enhanced UI] - 2026-02-13
 
 ### New Features

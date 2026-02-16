@@ -777,24 +777,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.103.9",
+    "@raycast/api": "1.104.6",
     "@raycast/utils": "2.2.2",
     "date-fns": "4.1.0",
     "emoji-regex": "10.6.0",
     "node-fetch": "3.3.2",
-    "remove-markdown": "0.6.2"
+    "remove-markdown": "0.6.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
     "@eslint/js": "9.39.1",
     "@raycast/eslint-config": "2.1.1",
-    "@types/lodash": "4.17.21",
+    "@types/lodash": "4.17.23",
     "@types/node": "22.16.5",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.14",
     "eslint": "9.39.1",
     "husky": "9.1.7",
     "lint-staged": "16.2.7",
-    "prettier": "3.7.3",
+    "prettier": "3.8.1",
     "prettier-plugin-organize-imports": "4.3.0",
     "typescript": "5.9.3"
   },
@@ -803,11 +803,8 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
-    "format": "prettier --write",
+    "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "prepare": "husky",

@@ -20,7 +20,8 @@
     "sapoepsilon",
     "theherk",
     "chris_van_es",
-    "vicampuzano"
+    "vicampuzano",
+    "ErBlack"
   ],
   "license": "MIT",
   "preferences": [
@@ -642,8 +643,8 @@
     {
       "name": "searchNote",
       "title": "Search Note",
-      "description": "Search for notes in Obsidian vaults by name or content and return a list of matching notes with their locations",
-      "instructions": "Use this tool to find notes. Returns a list of matching notes with vault name and path. Does not open Obsidian. Always provide a vault name if the user specified or hinted at some vault name the note could be located in. Specifying a vault name is very important. Only keep it empty when the user did not mention anything in that direction."
+      "description": "Search for notes in Obsidian vaults by title, path, and optionally content.",
+      "instructions": "Use this tool to find notes. By default searches inside note content (searchContent=true) which enables tag filtering with 'tag:tagname' syntax. For faster title-only search, set searchContent=false. Returns a list of matching notes with vault name and path. Does not open Obsidian. Specifying a vault name is very important. Only keep it empty when the user did not mention anything in that direction."
     },
     {
       "name": "createNote",
