@@ -12,6 +12,7 @@ Toggle commands for quickly switching settings on or off:
 - Toggle Precise Scrolling
 - Toggle Reverse Scroll Direction
 - Toggle Trackpad Simulation
+- Toggle Pointer Acceleration (uses System Settings UI; may break with macOS updates)
 
 Selection commands for choosing specific settings:
 

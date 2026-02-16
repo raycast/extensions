@@ -20,7 +20,7 @@ export default function Command() {
           }}
           actions={
             <ActionPanel>
-              <Action title="Create a new profile" onAction={() => setSelectionMode("add_profile")}></Action>
+              <Action title="Create a New Profile" onAction={() => setSelectionMode("add_profile")}></Action>
             </ActionPanel>
           }
         />

@@ -19,7 +19,6 @@ export type {
   InstallableResults,
   OutdatedResults,
   InstalledMap,
-  Remote,
 } from "../types";
 
 // Paths
@@ -38,8 +37,6 @@ export {
   brewFetchInstalledFast,
   brewFetchOutdated,
   brewUpdate,
-  brewFetchFormulae,
-  brewFetchCasks,
   brewFetchFormulaInfo,
   brewFetchCaskInfo,
   hasSearchCache,
@@ -81,6 +78,3 @@ export {
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";
-
-// Internal API (experimental)
-export { getSystemTag, getInternalFormulaUrl, getInternalCaskUrl, logInternalApiConfig } from "./internal-api";

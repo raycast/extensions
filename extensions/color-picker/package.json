@@ -15,7 +15,8 @@
     "samuelkraft",
     "ridemountainpig",
     "xilopaint",
-    "anwarulislam"
+    "anwarulislam",
+    "yusifaliyevpro"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -45,7 +46,7 @@
     {
       "name": "extract-color",
       "title": "Extract Color from Selected Image",
-      "description": "Extract colors from the selected Finder image",
+      "description": "Extract colors from the selected File Manager image",
       "mode": "view"
     },
     {
@@ -209,26 +210,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.3",
-    "@raycast/utils": "^2.2.0",
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
     "color-namer": "^1.4.0",
-    "colorjs.io": "^0.5.2",
-    "lodash": "^4.17.21",
+    "colorjs.io": "^0.5.1",
+    "lodash": "^4.17.23",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/color-namer": "^1.3.3",
-    "@types/lodash": "^4.17.20",
+    "@types/lodash": "^4.17.23",
     "@types/node": "^24.2.1",
-    "@types/react": "^19.1.10",
-    "eslint": "^9.33.0",
-    "prettier": "^3.6.2",
-    "react": "^19.1.1",
+    "@types/react": "^19.2.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
     "typescript": "^5.9.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
@@ -236,6 +237,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

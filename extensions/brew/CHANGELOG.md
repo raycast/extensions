@@ -1,6 +1,10 @@
 # Brew Changelog
 
-## [New Feature] - 2026-01-27
+## [Improved Memory Usage] - 2026-02-16
+
+- Use chunking to significantly reduce working memory
+
+## [Metadata Detail Panel] - 2026-01-27
 
 - Added optional split-view metadata panel for search results
 - Enable "Show metadata panel in search results" in Search command preferences (default true)

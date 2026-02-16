@@ -1,6 +1,6 @@
 # MiniMax - Raycast Extension
 
-A "Bring Your Own Key" Raycast extension for AI chat. Currently supports **MiniMax M2.1** with streaming responses.
+A "Bring Your Own Key" Raycast extension for AI chat. Currently supports **MiniMax M2.5**, **M2.1**, and **M2** with streaming responses.
 
 ## Features
 
@@ -32,7 +32,7 @@ Open Raycast → Search for "AI Chat" → `Cmd + ,` to open preferences:
 | Preference           | Type     | Description                                                             |
 | -------------------- | -------- | ----------------------------------------------------------------------- |
 | **MiniMax API Key**  | password | Your MiniMax API key (required)                                         |
-| **Model**            | dropdown | MiniMax-M2.1 (recommended) or MiniMax-M2                                |
+| **Model**            | dropdown | MiniMax-M2.5 (recommended), MiniMax-M2.1, MiniMax-M2                    |
 | **System Prompt**    | text     | Custom system prompt (optional)                                         |
 | **Temperature**      | dropdown | 0.3 / 0.7 / 1.0 / 1.5                                                   |
 | **Max Tokens**       | dropdown | 1024 / 2048 / 4096 / 8192                                               |
@@ -82,7 +82,7 @@ raycast-minimax/
 │   ├── ai-chat.tsx           # Command: chat with history
 │   ├── providers/
 │   │   ├── base.ts           # Provider interface
-│   │   └── minimax.ts        # MiniMax M2.1 implementation
+│   │   └── minimax.ts        # MiniMax API implementation
 │   ├── hooks/
 │   │   ├── useChat.ts        # Main chat hook
 │   │   └── useChatStore.ts   # Chat state management
@@ -94,14 +94,15 @@ raycast-minimax/
 │       └── errors.ts         # Error handling
 ```
 
-## MiniMax M2.1 API
+## MiniMax API
 
 **Endpoint:** `https://api.minimax.io/v1/chat/completions`
 
 **Models:**
 
-- `MiniMax-M2.1`: Recommended model, optimized for chat
-- `MiniMax-M2`: 200k context window for longer conversations
+- `MiniMax-M2.5`: Recommended, latest model
+- `MiniMax-M2.1`: Previous generation
+- `MiniMax-M2`: 200k context window
 
 The provider automatically filters `<think>...</think>` content generated during the model's internal reasoning.
 

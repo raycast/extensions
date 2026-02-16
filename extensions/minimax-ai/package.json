@@ -52,10 +52,14 @@
       "required": false,
       "title": "Model",
       "description": "MiniMax model to use for AI responses",
-      "default": "MiniMax-M2.1",
+      "default": "MiniMax-M2.5",
       "data": [
         {
-          "title": "MiniMax M2.1 (Recommended)",
+          "title": "MiniMax M2.5 (Recommended)",
+          "value": "MiniMax-M2.5"
+        },
+        {
+          "title": "MiniMax M2.1",
           "value": "MiniMax-M2.1"
         },
         {

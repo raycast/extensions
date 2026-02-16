@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kaset-control",
+  "title": "Kaset Control",
+  "description": "Control Kaset - YouTube Music client for macOS",
+  "icon": "extension-icon.png",
+  "author": "endiruslan",
+  "categories": [
+    "Media",
+    "Applications"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "menuBarStyle",
+      "type": "dropdown",
+      "title": "Menu Bar Style",
+      "description": "How to display track info in menu bar",
+      "required": false,
+      "default": "short",
+      "data": [
+        {
+          "title": "Icon only",
+          "value": "icon"
+        },
+        {
+          "title": "Short (20 chars)",
+          "value": "short"
+        },
+        {
+          "title": "Medium (35 chars)",
+          "value": "medium"
+        },
+        {
+          "title": "Long (50 chars)",
+          "value": "long"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Show Menu Bar",
+      "description": "Show current track in menu bar with controls",
+      "mode": "menu-bar",
+      "interval": "5s"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "View the currently playing track",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-playback",
+      "title": "Toggle Play/Pause",
+      "description": "Toggle between play and pause",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "description": "Skip to the next track",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "description": "Go to the previous track",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume",
+      "title": "Set Volume",
+      "description": "Set the playback volume",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "description": "Toggle shuffle mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "cycle-repeat",
+      "title": "Cycle Repeat",
+      "description": "Cycle through repeat modes (off, all, one)",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "description": "Toggle mute state",
+      "mode": "no-view"
+    },
+    {
+      "name": "like-track",
+      "title": "Like Track",
+      "description": "Like or unlike the current track",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike-track",
+      "title": "Dislike Track",
+      "description": "Dislike or undislike the current track",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.2",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.1",
+    "@types/react": "19.0.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`ray publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

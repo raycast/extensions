@@ -17,8 +17,8 @@ export type { DatabaseProperty };
 export async function fetchDatabase(pageId: string, silent: boolean = true) {
   try {
     const notion = getNotionClient();
-    const page = await notion.databases.retrieve({
-      database_id: pageId,
+    const page = await notion.dataSources.retrieve({
+      data_source_id: pageId,
     });
 
     return pageMapper(page);
@@ -35,10 +35,10 @@ export async function fetchDatabases() {
         direction: "descending",
         timestamp: "last_edited_time",
       },
-      filter: { property: "object", value: "database" },
+      filter: { property: "object", value: "data_source" },
     });
     return databases.results
-      .map((x) => (x.object === "database" && "last_edited_time" in x ? x : undefined))
+      .map((x) => (x.object === "data_source" && "last_edited_time" in x ? x : undefined))
       .filter(isNotNullOrUndefined)
       .map(
         (x) =>
@@ -59,13 +59,16 @@ export async function fetchDatabases() {
 export async function fetchDatabaseProperties(databaseId: string) {
   try {
     const notion = getNotionClient();
-    const database = await notion.databases.retrieve({ database_id: databaseId });
-    const propertyNames = Object.keys(database.properties).reverse();
+    const dataSource = await notion.dataSources.retrieve({ data_source_id: databaseId });
+
+    if (!("properties" in dataSource)) return [];
+
+    const propertyNames = Object.keys(dataSource.properties).reverse();
 
     const databaseProperties: DatabaseProperty[] = [];
 
     propertyNames.forEach((name) => {
-      const property = database.properties[name];
+      const property = dataSource.properties[name];
       if (isReadableProperty(property)) {
         if (property.type == "select")
           property.select.options.unshift({
@@ -92,8 +95,8 @@ export async function queryDatabase(
 ) {
   try {
     const notion = getNotionClient();
-    const database = await notion.databases.query({
-      database_id: databaseId,
+    const database = await notion.dataSources.query({
+      data_source_id: databaseId,
       page_size: 20,
       sorts: [
         {
@@ -149,7 +152,7 @@ export async function createDatabasePage(values: Form.Values) {
       if (!propId || !value) return;
 
       const formatted = formValueToPropertyValue(type, value);
-      if (formatted) arg.properties[propId] = formatted;
+      if (formatted) arg.properties![propId] = formatted;
     });
 
     const page = await notion.pages.create(arg);
@@ -171,7 +174,7 @@ export async function deleteDatabase(databaseId: string) {
 
     await notion.databases.update({
       database_id: databaseId,
-      archived: true,
+      in_trash: true,
     });
 
     await showToast({

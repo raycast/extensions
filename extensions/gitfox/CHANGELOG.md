@@ -1,5 +1,9 @@
 # Gitfox Changelog
 
+## [Fix] - 2026-02-11
+
+- Fixed duplicate repositories in menu bar command
+
 ## [Gitfox v4] - 2026-02-09
 
 - Added support for Gitfox v4 plist format
