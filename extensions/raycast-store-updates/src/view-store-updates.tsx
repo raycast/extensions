@@ -125,8 +125,11 @@ export default function Command() {
   // Fetch updated items from PRs (async because we need to fetch package.json for each)
   useEffect(() => {
     if (!prsData) return;
-    const newSlugs = new Set(newItems.map((i) => i.extensionSlug).filter(Boolean));
-    convertPRsToStoreItems(prsData, newSlugs as Set<string>).then(setUpdatedItems);
+    const newItemDates = new Map<string, string>();
+    for (const item of newItems) {
+      if (item.extensionSlug) newItemDates.set(item.extensionSlug, item.date);
+    }
+    convertPRsToStoreItems(prsData, newItemDates).then(setUpdatedItems);
   }, [prsData, newItems]);
 
   const allItems = useMemo(() => {
