@@ -35,6 +35,7 @@ export default function SearchView() {
     loadingState,
     data: results,
     indexTotals,
+    downloadProgressRef,
   } = useBrewSearch({
     searchText,
     installed,
@@ -54,10 +55,7 @@ export default function SearchView() {
   const maxCasksPercentRef = useRef(0);
   const maxFormulaePercentRef = useRef(0);
 
-  // Extract primitives for stable dependencies
   const phase = loadingState.phase;
-  const casksPercent = loadingState.casksProgress.percent;
-  const formulaePercent = loadingState.formulaeProgress.percent;
 
   // Show initializing toast on cold start (no cache files)
   useEffect(() => {
@@ -76,34 +74,38 @@ export default function SearchView() {
       return;
     }
 
-    // Track max progress to avoid jumps backwards when values update independently
-    maxCasksPercentRef.current = Math.max(maxCasksPercentRef.current, Math.max(0, Math.min(100, casksPercent)));
-    maxFormulaePercentRef.current = Math.max(
-      maxFormulaePercentRef.current,
-      Math.max(0, Math.min(100, formulaePercent)),
-    );
-
-    // Calculate combined progress (both downloads happen concurrently)
-    const combinedPercent = Math.round((maxCasksPercentRef.current + maxFormulaePercentRef.current) / 2);
-
-    const message = combinedPercent > 0 ? `${combinedPercent}%` : undefined;
-
     if (!initToastRef.current && !isCreatingToastRef.current) {
       // Create the toast (prevent duplicate creation while promise is pending)
       isCreatingToastRef.current = true;
       showToast({
         style: Toast.Style.Animated,
         title: "Initializing...",
-        message,
       }).then((toast) => {
         initToastRef.current = toast;
         isCreatingToastRef.current = false;
       });
-    } else if (initToastRef.current) {
-      // Update existing toast
-      initToastRef.current.message = message;
     }
-  }, [hasCacheFiles, phase, casksPercent, formulaePercent]);
+
+    // Poll progress ref to update toast without triggering re-renders
+    const interval = setInterval(() => {
+      if (!initToastRef.current) return;
+
+      const progress = downloadProgressRef.current;
+      const casksPercent = progress.casksProgress?.percent ?? 0;
+      const formulaePercent = progress.formulaeProgress?.percent ?? 0;
+
+      maxCasksPercentRef.current = Math.max(maxCasksPercentRef.current, Math.max(0, Math.min(100, casksPercent)));
+      maxFormulaePercentRef.current = Math.max(
+        maxFormulaePercentRef.current,
+        Math.max(0, Math.min(100, formulaePercent)),
+      );
+
+      const combinedPercent = Math.round((maxCasksPercentRef.current + maxFormulaePercentRef.current) / 2);
+      initToastRef.current.message = combinedPercent > 0 ? `${combinedPercent}%` : undefined;
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, [hasCacheFiles, phase]);
 
   // Show completion toast only on cold start when fully complete
   useEffect(() => {
@@ -125,7 +127,7 @@ export default function SearchView() {
       casks={casks}
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
-      isLoading={isLoadingInstalled || isLoadingSearch}
+      isLoading={(isLoadingInstalled && !installed) || isLoadingSearch}
       onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
       filtering={false}
       isInstalled={isInstalledCallback}
