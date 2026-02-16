@@ -1,6 +1,6 @@
 # Letta Extension Changelog
 
-## [Initial Version] - 2026-02-04
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Chat with Letta stateful agents that remember and learn over time
 - Support for multiple Letta projects (cloud or self-hosted)
