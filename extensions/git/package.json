@@ -94,7 +94,7 @@
   "preferences": [
     {
     "name": "binaryPath",
-    "required": true,
+    "required": false,
     "type": "textfield",
     "title": "Binary Path",
     "default": "git",
@@ -153,7 +153,7 @@
       "required": true,
       "type": "dropdown",
       "title": "User Icon Provider",
-      "default": "none",
+      "default": "retro",
       "description": "The user icon provider to use for displaying user icon in the commits list.",
       "data": [
         {
