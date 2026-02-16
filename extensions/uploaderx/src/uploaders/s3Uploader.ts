@@ -4,6 +4,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import mime from "mime-types";
 import { CloudProviderAccount } from "../cloudProviders";
+import { encodeKey } from "../utils/fileUtils";
 
 export const MAX_PRESIGN_EXPIRY = 60 * 60 * 24 * 6; // 6 days
 
@@ -52,10 +53,11 @@ export async function uploadToS3(
     );
   } catch {
     // Fallback to a public-style URL if presigning fails
+    const encodedKey = encodeKey(key);
     if (endpoint) {
-      return `${endpoint.replace(/\/+$/, "")}/${bucket}/${key}`;
+      return `${endpoint.replace(/\/+$/, "")}/${bucket}/${encodedKey}`;
     }
-    return `https://${bucket}.s3.${region || "us-east-1"}.amazonaws.com/${key}`;
+    return `https://${bucket}.s3.${region || "us-east-1"}.amazonaws.com/${encodedKey}`;
   }
 }
 
@@ -63,11 +65,12 @@ export function getPublicS3Url(provider: CloudProviderAccount, filePath: string)
   const { bucket, endpoint, region, domain } = provider.credentials;
   const fileName = path.basename(filePath);
   const key = provider.defaultPath ? `${provider.defaultPath.replace(/\/+$/, "")}/${fileName}` : fileName;
+  const encodedKey = encodeKey(key);
   if (provider.accessLevel === "public" && domain) {
-    return `${domain.replace(/\/+$/, "")}/${key}`;
+    return `${domain.replace(/\/+$/, "")}/${encodedKey}`;
   } else if (endpoint) {
-    return `${endpoint.replace(/\/+$/, "")}/${bucket}/${key}`;
+    return `${endpoint.replace(/\/+$/, "")}/${bucket}/${encodedKey}`;
   } else {
-    return `https://${bucket}.s3.${region || "us-east-1"}.amazonaws.com/${key}`;
+    return `https://${bucket}.s3.${region || "us-east-1"}.amazonaws.com/${encodedKey}`;
   }
 }

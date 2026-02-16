@@ -1,3 +1,7 @@
+export function encodeKey(key: string): string {
+  return key.split("/").map(encodeURIComponent).join("/");
+}
+
 export function truncateFileName(fileName: string, maxLength = 24): string {
   if (fileName.length <= maxLength) return fileName;
   const ext = fileName.includes(".") ? "." + fileName.split(".").pop() : "";
