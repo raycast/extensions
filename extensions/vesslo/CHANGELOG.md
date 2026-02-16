@@ -1,6 +1,6 @@
 # Vesslo Changelog
 
-## [Improve Store Listing] - {PR_MERGE_DATE}
+## [Improve Store Listing] - 2026-02-16
 
 - Improved README presentation by removing duplicate icon header
 - Added demo GIF showing the extension in action
