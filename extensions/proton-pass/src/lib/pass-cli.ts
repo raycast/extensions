@@ -21,6 +21,8 @@ import { ensureCli } from "./cli";
 let mockCacheCleared = false;
 
 const USE_MOCK_DATA = false;
+const DEFAULT_CLI_COMMAND = "pass-cli";
+type CliPathPreferenceValues = { cliPath?: string };
 
 function useMockData(): boolean {
   return environment.isDevelopment && USE_MOCK_DATA;
@@ -89,9 +91,9 @@ function getEnhancedPath(): string {
 }
 
 function getConfiguredCliPath(): string | undefined {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<CliPathPreferenceValues>();
   const configured = trimOrUndefined(preferences.cliPath);
-  if (!configured || configured === "pass-cli") {
+  if (!configured || configured === DEFAULT_CLI_COMMAND) {
     return undefined;
   }
   return stripSurroundingQuotes(configured);
@@ -102,6 +104,12 @@ async function getCliPathAsync(): Promise<string> {
   const configured = getConfiguredCliPath();
   if (configured) {
     return configured;
+  }
+
+  // This extension is macOS-only, but keeping a non-throwing fallback here
+  // avoids hard failures when code paths are executed in non-darwin environments.
+  if (process.platform !== "darwin") {
+    return DEFAULT_CLI_COMMAND;
   }
 
   // Ensure CLI is installed (auto-download if needed)

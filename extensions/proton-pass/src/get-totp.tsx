@@ -10,6 +10,10 @@ interface TotpItem extends Item {
   currentTotp?: string;
 }
 
+function getTotpTimeStep(): number {
+  return Math.floor(Date.now() / 30_000);
+}
+
 export default function Command() {
   const [items, setItems] = useState<TotpItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,6 +22,8 @@ export default function Command() {
   const [error, setError] = useState<PassCliErrorType | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const itemsRef = useRef<TotpItem[]>([]);
+  const currentTimeStepRef = useRef<number>(getTotpTimeStep());
+  const isRefreshingRef = useRef(false);
 
   useEffect(() => {
     loadTotpItems();
@@ -26,7 +32,9 @@ export default function Command() {
       const newRemaining = getTotpRemainingSeconds();
       setRemainingSeconds(newRemaining);
 
-      if (newRemaining === 30) {
+      const nextTimeStep = getTotpTimeStep();
+      if (nextTimeStep !== currentTimeStepRef.current) {
+        currentTimeStepRef.current = nextTimeStep;
         refreshTotpCodes();
       }
     }, 1000);
@@ -105,6 +113,9 @@ export default function Command() {
   }
 
   async function refreshTotpCodes() {
+    if (isRefreshingRef.current) return;
+
+    isRefreshingRef.current = true;
     setIsRefreshing(true);
     try {
       const currentItems = itemsRef.current;
@@ -121,6 +132,7 @@ export default function Command() {
       setItems(updatedItems);
       itemsRef.current = updatedItems;
     } finally {
+      isRefreshingRef.current = false;
       setIsRefreshing(false);
     }
   }

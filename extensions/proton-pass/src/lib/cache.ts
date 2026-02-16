@@ -3,6 +3,7 @@ import { Item, Vault } from "./types";
 
 const ITEMS_CACHE_KEY = "proton_pass_items_cache";
 const VAULTS_CACHE_KEY = "proton_pass_vaults_cache";
+const VAULT_ITEMS_CACHE_PREFIX = `${ITEMS_CACHE_KEY}_`;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface CachedData<T> {
@@ -44,5 +45,10 @@ export const getCachedVaults = () => getCache<Vault[]>(VAULTS_CACHE_KEY);
 export const setCachedVaults = (vaults: Vault[]) => setCache(VAULTS_CACHE_KEY, vaults);
 
 export async function clearCache(): Promise<void> {
-  await Promise.all([LocalStorage.removeItem(ITEMS_CACHE_KEY), LocalStorage.removeItem(VAULTS_CACHE_KEY)]);
+  const allCacheEntries = await LocalStorage.allItems();
+  const keysToClear = Object.keys(allCacheEntries).filter(
+    (key) => key === ITEMS_CACHE_KEY || key === VAULTS_CACHE_KEY || key.startsWith(VAULT_ITEMS_CACHE_PREFIX),
+  );
+
+  await Promise.all(keysToClear.map((key) => LocalStorage.removeItem(key)));
 }
