@@ -30,6 +30,7 @@ Browse all your Supabase projects grouped by organization.
 ![Project List](metadata/supabase-1.png)
 ![Project Actions](metadata/supabase-2.png)
 ![Branch List](metadata/supabase-3.png)
+![Branch Actions](metadata/supabase-4.png)
 
 ## Credits
 
