@@ -117,13 +117,15 @@ export default async function ExecuteDueCommands() {
       if (isDue) {
         console.log(LOG_MESSAGES.EXECUTING(command.name));
 
+        let commandToExecute = command;
         if (command.schedule.type === "once") {
           console.log(LOG_MESSAGES.DISABLING_ONCE(command.name));
+          commandToExecute = { ...command, enabled: false, updatedAt: now.toISOString() };
           applyDisable(rawToUpdate, indexById, command);
           didMutateStorage = true;
         }
 
-        didMutateStorage = (await executeCommand(rawToUpdate, indexById, command, now)) || didMutateStorage;
+        didMutateStorage = (await executeCommand(rawToUpdate, indexById, commandToExecute, now)) || didMutateStorage;
         executedCount++;
       } else if (isMissed) {
         console.log(LOG_MESSAGES.EXECUTING_MISSED(command.name));
