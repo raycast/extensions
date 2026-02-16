@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## {PR_MERGE_DATE}
+## [New Feature] - {PR_MERGE_DATE}
 
 ### Added
 

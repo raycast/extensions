@@ -10,6 +10,7 @@ import {
   closeMainWindow,
   popToRoot,
 } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { useState } from "react";
 import { useFileSelection, usePreview } from "./lib/hooks";
 import { RenameRule } from "./lib/rules";
@@ -47,6 +48,8 @@ export default function AdvancedRenameCommand() {
     if (await confirmAlert({ title: `Rename ${previewFiles.length} files?`, primaryAction: { title: "Rename" } })) {
       try {
         let successCount = 0;
+        const errors: string[] = [];
+
         for (const file of previewFiles) {
           if (file.newName && file.newName !== path.basename(file.originalPath)) {
             const oldPath = file.originalPath;
@@ -54,18 +57,38 @@ export default function AdvancedRenameCommand() {
             const newPath = path.join(dir, file.newName);
 
             if (fs.existsSync(newPath)) {
-              // Conflict! Skip for now or handle
-              console.error(`Skipping ${file.name} -> ${file.newName} due to conflict`);
+              errors.push(`Conflict: ${file.newName} already exists.`);
               continue;
             }
 
-            fs.renameSync(oldPath, newPath);
-            successCount++;
+            const escapedFilePath = oldPath.replaceAll('"', '\\"');
+            const escapedNewName = file.newName.replaceAll('"', '\\"');
+
+            try {
+              await runAppleScript(`
+                tell application "Finder"
+                  set theItem to POSIX file "${escapedFilePath}" as alias
+                  set name of theItem to "${escapedNewName}"
+                end tell
+              `);
+              successCount++;
+            } catch (err) {
+              errors.push(`Error renaming ${file.name}: ${(err as Error).message}`);
+            }
           }
         }
-        await showToast({ style: Toast.Style.Success, title: `Renamed ${successCount} files` });
-        await closeMainWindow();
-        await popToRoot();
+
+        if (errors.length > 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `Completed with ${errors.length} errors`,
+            message: errors[0] + (errors.length > 1 ? ` (and ${errors.length - 1} more)` : ""),
+          });
+        } else {
+          await showToast({ style: Toast.Style.Success, title: `Successfully renamed ${successCount} files` });
+          await closeMainWindow();
+          await popToRoot();
+        }
       } catch (e) {
         await showToast({
           style: Toast.Style.Failure,
