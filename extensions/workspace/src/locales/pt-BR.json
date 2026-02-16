@@ -1,0 +1,105 @@
+{
+  "extension": {
+    "title": "Workspace",
+    "description": "Gerencie e acesse seus projetos de workspace diretamente do Raycast."
+  },
+  "settings": {
+    "title": "Configurações do Workspace",
+    "general": {
+      "title": "Geral",
+      "defaultApp": {
+        "title": "Aplicativo Padrão",
+        "label": "Abrir no aplicativo padrão",
+        "description": "O aplicativo utilizado para abrir os projetos"
+      },
+      "language": {
+        "title": "Idioma",
+        "description": "O idioma utilizado na extensão",
+        "select": "Selecionar Idioma"
+      }
+    },
+    "workspaces": {
+      "title": "Workspaces Gerenciados",
+      "addWorkspace": "Adicionar Workspace",
+      "removeWorkspace": "Remover Workspace",
+      "setWorkspaceApp": "Definir Aplicativo do Workspace",
+      "moveUp": "Mover para Cima",
+      "moveDown": "Mover para Baixo",
+      "removeApp": "Remover Aplicativo do Workspace",
+      "copyName": "Copiar Nome do Workspace",
+      "copyPath": "Copiar Caminho do Workspace",
+      "appSet": "Aplicativo personalizado"
+    },
+    "toasts": {
+      "appUpdated": "Aplicativo Atualizado",
+      "workspaceRemoved": "Workspace removido",
+      "workspaceMoved": "Workspace movido",
+      "appReset": "Aplicativo Redefinido"
+    }
+  },
+  "workspace": {
+    "search": "Procurar projetos...",
+    "empty": {
+      "title": "Sem Workspaces",
+      "description": "Adicione um workspace nas configurações para ver seus projetos.",
+      "action": "Abrir Configurações"
+    },
+    "actions": {
+      "openIn": "Abrir no {app}",
+      "openWith": "Abrir com…",
+      "pin": "Fixar Projeto",
+      "unpin": "Desafixar Projeto",
+      "showInFinder": "Mostrar no Finder",
+      "copyName": "Copiar Nome do Projeto",
+      "copyPath": "Copiar Caminho do Projeto"
+    },
+    "sections": {
+      "pinned": "Fixados",
+      "projects": "Projetos",
+      "copy": "Copiar"
+    }
+  },
+  "addWorkspace": {
+    "title": "Adicionar Workspace",
+    "description": {
+      "title": "Adicionar Workspace",
+      "text": "Selecione uma pasta pai que contenha seus projetos de workspace. Você pode gerenciar seus workspaces mais tarde nas configurações da extensão."
+    },
+    "form": {
+      "workspace": "Caminho do Workspace",
+      "submit": "Adicionar Workspace"
+    },
+    "success": "Workspace Adicionado",
+    "alreadyExists": "Workspace já adicionado"
+  },
+  "selectEditor": {
+    "title": "Selecionar Aplicativo",
+    "default": {
+      "title": "Usar Aplicativo Padrão",
+      "subtitle": "Remover substituição específica do workspace",
+      "action": "Selecionar Aplicativo Padrão"
+    },
+    "search": "Procurar aplicativo...",
+    "action": "Selecionar Aplicativo"
+  },
+  "walkthrough": {
+    "title": "Bem-vindo ao Workspace Projects 🚀",
+    "step1": {
+      "title": "1. Adicionar Workspace",
+      "subtitle": "Selecione uma pasta que contenha seus projetos"
+    },
+    "step2": {
+      "title": "2. Aplicativo Padrão",
+      "subtitle": "Escolha o aplicativo para abrir seus projetos"
+    },
+    "step3": {
+      "title": "3. Concluir Configuração",
+      "subtitle": "Você está pronto para começar!"
+    },
+    "actions": {
+      "addWorkspace": "Adicionar Workspace",
+      "selectEditor": "Selecionar Editor",
+      "finish": "Concluir Walkthrough"
+    }
+  }
+}
