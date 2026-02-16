@@ -128,13 +128,16 @@ export default function Command({ mode = SelectionMode.FILES }: { mode?: Selecti
   const replaceCharacters = async () => {
     if (files.length === 0 || !replacePattern) return;
 
-    if (useRegex && regexError) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid regex",
-        message: regexError,
-      });
-      return;
+    if (useRegex && replacePattern) {
+      const validationError = validateRegexPattern(replacePattern);
+      if (validationError) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid regex",
+          message: validationError,
+        });
+        return;
+      }
     }
 
     // Build operations list (only for files that will actually change)
