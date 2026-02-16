@@ -199,23 +199,43 @@ export function getExtensionIconUrl(slug: string, iconFilename: string): string 
 export async function convertPRsToStoreItems(prs: GitHubPR[], newItemDates: Map<string, string>): Promise<StoreItem[]> {
   const seen = new Set<string>();
   const candidates: { pr: GitHubPR; slug: string }[] = [];
+  const needsFileFallback: GitHubPR[] = [];
 
+  // First pass: parse slugs from titles, collect PRs needing file fallback
   for (const pr of prs) {
     if (!pr.merged_at) continue;
 
-    // Try fast title-based parsing first, fall back to PR files API
-    let slug = parseExtensionSlugFromPR(pr);
-    if (!slug) {
-      slug = await fetchExtensionSlugFromPRFiles(pr.number);
+    const slug = parseExtensionSlugFromPR(pr);
+    if (slug) {
+      // Skip if this extension is in the "new" list and the PR is not newer
+      const feedDate = newItemDates.get(slug);
+      if (feedDate && new Date(pr.merged_at).getTime() <= new Date(feedDate).getTime()) continue;
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+      candidates.push({ pr, slug });
+    } else {
+      needsFileFallback.push(pr);
     }
-    if (!slug || seen.has(slug)) continue;
+  }
 
-    // Skip if this extension is in the "new" list and the PR is not newer
-    const feedDate = newItemDates.get(slug);
-    if (feedDate && new Date(pr.merged_at).getTime() <= new Date(feedDate).getTime()) continue;
+  // Batch fetch file-based slugs in parallel (avoids sequential API calls)
+  if (needsFileFallback.length > 0) {
+    const slugResults = await Promise.all(
+      needsFileFallback.map(async (pr) => ({
+        pr,
+        slug: await fetchExtensionSlugFromPRFiles(pr.number),
+      })),
+    );
 
-    seen.add(slug);
-    candidates.push({ pr, slug });
+    for (const { pr, slug } of slugResults) {
+      if (!slug) continue;
+      // Skip if this extension is in the "new" list and the PR is not newer
+      const feedDate = newItemDates.get(slug);
+      if (feedDate && new Date(pr.merged_at!).getTime() <= new Date(feedDate).getTime()) continue;
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+      candidates.push({ pr, slug });
+    }
   }
 
   // Fetch package.json for all candidates in parallel
