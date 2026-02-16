@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Image } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import {
   appleMapsUrl,
@@ -186,6 +186,17 @@ const spottedByLabel = (
   return parts.length ? `${name} · ${parts.join(" · ")}` : name;
 };
 
+const spottedByIcon = (details: EventDetails | null): Image.ImageLike => {
+  const avatar = String(details?.spottedBy?.avatarUrl || "").trim();
+  if (avatar) {
+    return {
+      source: avatar,
+      mask: Image.Mask.Circle,
+    };
+  }
+  return Icon.PersonCircle;
+};
+
 const buildShareMessage = (
   title: string,
   timeRangeLabel: string,
@@ -216,9 +227,12 @@ const EventMetadata = ({
   const price = priceLabel(details);
   const categories = categoryList(details, event);
   const spottedBy = spottedByLabel(details, effectiveTimezone);
+  const spottedIcon = spottedByIcon(details);
 
   return (
     <Detail.Metadata>
+      <Detail.Metadata.Label title="Spotted by" text={spottedBy} icon={spottedIcon} />
+      <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="When" text={timeRangeLabel} />
       <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="Where" text={venueLabel} />
@@ -251,8 +265,6 @@ const EventMetadata = ({
           <Detail.Metadata.Separator />
         </>
       ) : null}
-      <Detail.Metadata.Label title="Spotted by" text={spottedBy} />
-      <Detail.Metadata.Separator />
       {details?.zoneName ? (
         <>
           <Detail.Metadata.Label title="Town" text={details.zoneName} />
