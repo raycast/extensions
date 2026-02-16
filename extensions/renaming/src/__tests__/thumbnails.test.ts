@@ -32,8 +32,7 @@ describe("thumbnails", () => {
     it.skipIf(process.env.CI)("should generate thumbnail for a real PDF file", async () => {
       const pdfPath = join(testDir, "test.pdf");
 
-      try {
-        const minimalPdf = `%PDF-1.4
+      const minimalPdf = `%PDF-1.4
 1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
 2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
 3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >> endobj
@@ -47,16 +46,14 @@ trailer << /Size 4 /Root 1 0 R >>
 startxref
 196
 %%EOF`;
-        await writeFile(pdfPath, minimalPdf);
+      await writeFile(pdfPath, minimalPdf);
 
-        const result = await generateThumbnail(pdfPath);
+      const result = await generateThumbnail(pdfPath);
 
-        if (result) {
-          expect(result).toContain(".png");
-          await access(result);
-        }
-      } catch {
-        // If we can't create a test PDF, skip this test
+      // qlmanage may return null on some platforms/CI
+      expect(result === null || result.includes(".png")).toBe(true);
+      if (result) {
+        await access(result);
       }
     });
 
@@ -68,9 +65,8 @@ startxref
 
         // Quick Look can actually thumbnail text files on macOS
         const result = await generateThumbnail(txtPath);
-        if (result) {
-          expect(result).toContain(".png");
-        }
+        // qlmanage may return null on some platforms/CI
+        expect(result === null || result.includes(".png")).toBe(true);
       },
       15000,
     );

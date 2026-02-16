@@ -5,6 +5,7 @@
  */
 
 import { List, Icon, Color } from "@raycast/api";
+import { extname } from "path";
 import type { FileInfo, NamingTemplate, RenameOperation, FileMetadataContext } from "../types";
 import { previewTemplate, FileWithMetadata } from "../lib/template";
 import { PREVIEW_LIMIT } from "../lib/constants";
@@ -62,7 +63,7 @@ interface TemplatePreviewItemProps {
  */
 function TemplatePreviewItem({ operation, index }: TemplatePreviewItemProps) {
   const originalName = operation.oldPath.split("/").pop() || "";
-  const extension = originalName.includes(".") ? originalName.split(".").pop() || "" : "";
+  const extension = extname(originalName);
 
   const hasChange = originalName !== operation.newName;
   const icon = getFileTypeIcon(extension);

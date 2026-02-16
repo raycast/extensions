@@ -35,7 +35,8 @@ const PREVIEWABLE_EXTENSIONS = new Set([
  * These are image formats that can be rendered inline in Raycast's webview.
  */
 export function isPreviewableImage(filePathOrExt: string): boolean {
-  const ext = filePathOrExt.includes("/") || filePathOrExt.includes("\\") ? extname(filePathOrExt) : filePathOrExt;
+  const extracted = extname(filePathOrExt);
+  const ext = extracted || filePathOrExt;
   const normalizedExt = ext.startsWith(".") ? ext.toLowerCase() : `.${ext.toLowerCase()}`;
   return PREVIEWABLE_EXTENSIONS.has(normalizedExt);
 }
