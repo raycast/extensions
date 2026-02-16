@@ -1,10 +1,10 @@
 # Scheduler Changelog
 
-## [Fix execution of view-based commands] - {PR_MERGE_DATE}
+## [Fix execution of view-based commands] - 2026-02-16
 
 - Fixed an error where commands with a UI (e.g. `brew > upgrade`) would fail with "Invalid launch: mode 'default' cannot launch mode 'view' with type 'background'" when scheduled to run in the background. These commands now automatically fall back to user-initiated launch mode so they still execute on schedule.
 
-## [Bug Fixes and UI Improvements] - {PR_MERGE_DATE}
+## [Bug Fixes and UI Improvements] - 2026-02-16
 
 - Fixed a critical race condition in the background task (`execute-due-commands.ts`) that could lead to lost updates for scheduled commands if multiple commands were executed simultaneously. All updates are now accumulated and saved in a single, atomic operation.
 - Fixed a race condition in the UI hook where React state batching could cause storage writes with stale data.
