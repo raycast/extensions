@@ -266,22 +266,6 @@ export default function McpServersCommand() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Add MCP Server"
-                  icon={Icon.Plus}
-                  target={
-                    <McpForm
-                      mode="create"
-                      existingNames={servers.map((item) => item.name)}
-                      onSaved={loadServers}
-                    />
-                  }
-                />
-                <Action.Push
-                  title="Import from JSON"
-                  icon={Icon.ArrowDownCircle}
-                  target={<McpImportForm onSaved={loadServers} />}
-                />
-                <Action.Push
                   title="View Details"
                   icon={Icon.Sidebar}
                   target={<McpDetail server={server} />}
@@ -302,6 +286,22 @@ export default function McpServersCommand() {
                       onSaved={loadServers}
                     />
                   }
+                />
+                <Action.Push
+                  title="Add MCP Server"
+                  icon={Icon.Plus}
+                  target={
+                    <McpForm
+                      mode="create"
+                      existingNames={servers.map((item) => item.name)}
+                      onSaved={loadServers}
+                    />
+                  }
+                />
+                <Action.Push
+                  title="Import from JSON"
+                  icon={Icon.ArrowDownCircle}
+                  target={<McpImportForm onSaved={loadServers} />}
                 />
                 <Action.Push
                   title="Duplicate"

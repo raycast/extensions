@@ -95,7 +95,6 @@ type SkillStats = {
 
 async function getSkillStats(skillPath: string): Promise<SkillStats> {
   let count = 0;
-  let latestMtime = 0;
 
   async function walk(currentPath: string) {
     const items = await fs.readdir(currentPath, { withFileTypes: true });
@@ -108,15 +107,6 @@ async function getSkillStats(skillPath: string): Promise<SkillStats> {
         await walk(nextPath);
       } else {
         count += 1;
-        try {
-          const stat = await fs.stat(nextPath);
-          const mtime = stat.mtimeMs;
-          if (mtime > latestMtime) {
-            latestMtime = mtime;
-          }
-        } catch {
-          // Ignore stat errors to avoid blocking listing.
-        }
       }
     }
   }
@@ -267,7 +257,7 @@ export async function importSkillFromZip(
         : tempDir;
     await fs.stat(sourceDir);
     if (options.overwrite) {
-      await fs.rm(targetDir, { recursive: true, force: true });
+      await trash(targetDir);
     }
     await copyDirectory(sourceDir, targetDir);
     return targetDir;
