@@ -94,7 +94,7 @@ describe("groupFilesByExtension", () => {
   });
 
   it("normalizes extensions to lowercase", () => {
-    const upperJpg: FileInfo = { ...MOCK_JPG, extension: ".JPG" };
+    const upperJpg: FileInfo = { ...MOCK_JPG, extension: ".JPG", name: "photo.JPG", path: "/tmp/test/photo.JPG" };
     const groups = groupFilesByExtension([upperJpg, MOCK_PNG]);
     expect(groups.has(".jpg")).toBe(true);
     expect(groups.has(".JPG")).toBe(false);

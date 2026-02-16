@@ -11,7 +11,7 @@ import {
   Alert,
   Icon,
 } from "@raycast/api";
-import { basename, dirname } from "path";
+import path, { basename, dirname } from "path";
 import { useSelectedFiles } from "../hooks/use-selected-files";
 import { checkConflicts } from "../lib/files";
 import { saveToHistory, undoLastRename } from "../lib/history";
@@ -144,7 +144,7 @@ export default function Command({ mode = SelectionMode.FILES }: { mode?: Selecti
         return {
           oldPath: file.path,
           newName: newFileName,
-          newPath: `${dirname(file.path)}/${newFileName}`,
+          newPath: path.join(dirname(file.path), newFileName),
         };
       })
       .filter((op) => op.oldPath !== op.newPath);
@@ -177,7 +177,7 @@ export default function Command({ mode = SelectionMode.FILES }: { mode?: Selecti
         .join("\n");
 
       const confirmed = await confirmAlert({
-        title: `Replace in ${operations.length} ${mode === "folders" ? "Folders" : "Files"}?`,
+        title: `Replace in ${operations.length} ${mode === SelectionMode.FOLDERS ? "Folders" : "Files"}?`,
         message: previewText,
         primaryAction: {
           title: "Replace All",
@@ -196,12 +196,12 @@ export default function Command({ mode = SelectionMode.FILES }: { mode?: Selecti
     setPendingOperations(operations);
 
     try {
-      const itemLabel = mode === "folders" ? "folder" : "file";
-      const description = `Replaced "${replacePattern}" in ${operations.length} ${itemLabel}s`;
+      const itemLabel = mode === SelectionMode.FOLDERS ? "folder" : "file";
+      const noun = operations.length === 1 ? itemLabel : `${itemLabel}s`;
+      const description = `Replaced "${replacePattern}" in ${operations.length} ${noun}`;
 
       const result = await withProgress(operations, {
         actionName: "Replacing",
-        historyDescription: description,
         itemLabel,
       });
 
@@ -227,7 +227,15 @@ export default function Command({ mode = SelectionMode.FILES }: { mode?: Selecti
   };
 
   const handleUndo = async () => {
-    await undoLastRename();
+    try {
+      await undoLastRename();
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Undo failed",
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
   };
 
   const handleRetryFailed = async () => {
@@ -243,15 +251,15 @@ export default function Command({ mode = SelectionMode.FILES }: { mode?: Selecti
     setIsProcessing(true);
 
     try {
-      const retryItemLabel = mode === "folders" ? "folder" : "file";
+      const retryItemLabel = mode === SelectionMode.FOLDERS ? "folder" : "file";
       const result = await withProgress(failedOperations, {
         actionName: "Retrying",
-        historyDescription: `Retried ${failedOperations.length} ${retryItemLabel}s`,
         itemLabel: retryItemLabel,
       });
 
       if (result.successfulOps.length > 0) {
-        await saveToHistory(`Retried ${result.successfulOps.length} ${retryItemLabel}s`, result.successfulOps);
+        const retryNoun = result.successfulOps.length === 1 ? retryItemLabel : `${retryItemLabel}s`;
+        await saveToHistory(`Retried ${result.successfulOps.length} ${retryNoun}`, result.successfulOps);
       }
 
       // Merge results: keep successful from before, replace failed with new results
@@ -305,7 +313,7 @@ export default function Command({ mode = SelectionMode.FILES }: { mode?: Selecti
       {files.length > 0 && (
         <>
           <Form.Description
-            title={mode === "folders" ? "Selected Folders" : "Selected Files"}
+            title={mode === SelectionMode.FOLDERS ? "Selected Folders" : "Selected Files"}
             text={buildAutoSummary(files)}
           />
 

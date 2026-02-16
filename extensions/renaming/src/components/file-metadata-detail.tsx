@@ -17,7 +17,7 @@ interface FileMetadataDetailProps {
 }
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString([], {
+  return date.toLocaleString([], {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -55,9 +55,9 @@ export function FileMetadataDetail({
   // Build markdown content — skip previews for directories
   let markdown = "";
   if (showImage) {
-    markdown = `![${basename(filePath)}](${filePath})`;
+    markdown = `![${basename(filePath)}](${encodeURI(filePath).replace(/\(/g, "%28").replace(/\)/g, "%29")})`;
   } else if (thumbnailPath) {
-    markdown = `![${basename(filePath)}](${thumbnailPath})`;
+    markdown = `![${basename(filePath)}](${encodeURI(thumbnailPath).replace(/\(/g, "%28").replace(/\)/g, "%29")})`;
   } else if (isThumbnailLoading) {
     markdown = "*Loading preview...*";
   }

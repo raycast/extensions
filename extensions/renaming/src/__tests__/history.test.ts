@@ -319,7 +319,7 @@ describe("undoLastRename", () => {
     );
   });
 
-  it("still removes the entry from history even when undo fails", async () => {
+  it("does not remove entry from history when all operations fail", async () => {
     const history = [
       {
         timestamp: 1000,
@@ -333,9 +333,8 @@ describe("undoLastRename", () => {
 
     await undoLastRename();
 
-    const storedHistory = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
-    expect(storedHistory).toHaveLength(1);
-    expect(storedHistory[0].description).toBe("Kept entry");
+    // When all operations fail, history should NOT be updated
+    expect(mockStorage.setItem).not.toHaveBeenCalled();
   });
 });
 
@@ -437,7 +436,7 @@ describe("undoToPoint", () => {
       expect.objectContaining({
         style: "success",
         title: "Undo Successful",
-        message: "Reverted 1 operation (1 files)",
+        message: "Reverted 1 operation (1 file)",
       }),
     );
   });
@@ -496,7 +495,7 @@ describe("undoToPoint", () => {
     );
   });
 
-  it("still updates history even when all operations fail", async () => {
+  it("does not update history when all operations fail", async () => {
     const history = [
       {
         timestamp: 2000,
@@ -510,8 +509,7 @@ describe("undoToPoint", () => {
 
     await undoToPoint(0);
 
-    const storedHistory = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
-    expect(storedHistory).toHaveLength(1);
-    expect(storedHistory[0].description).toBe("Survivor");
+    // When all operations fail, history should NOT be updated
+    expect(mockStorage.setItem).not.toHaveBeenCalled();
   });
 });

@@ -70,7 +70,8 @@ export function TemplateBuilder({ template, onChange, showSaveAction = false, on
   };
 
   const handleCounterStartChange = (value: string) => {
-    const start = parseInt(value, 10) || 1;
+    const parsed = parseInt(value, 10);
+    const start = Number.isNaN(parsed) ? 1 : parsed;
     onChange({
       ...template,
       counter: { ...template.counter, start },

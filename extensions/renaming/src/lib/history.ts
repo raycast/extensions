@@ -72,6 +72,7 @@ export async function undoLastRename(): Promise<boolean> {
 
   const lastEntry = history[0]!;
   const errors: string[] = [];
+  const failedOps: Array<{ oldPath: string; newPath: string }> = [];
   log.history.info("Undoing last rename", { description: lastEntry.description });
 
   // Reverse the operations (in reverse order)
@@ -79,12 +80,14 @@ export async function undoLastRename(): Promise<boolean> {
     // Check if renamed file exists
     if (!(await fileExists(op.newPath))) {
       errors.push(`${basename(op.newPath)} not found`);
+      failedOps.push(op);
       continue;
     }
 
     // Check if original path is free
     if (await fileExists(op.oldPath)) {
       errors.push(`${basename(op.oldPath)} already exists`);
+      failedOps.push(op);
       continue;
     }
 
@@ -93,12 +96,19 @@ export async function undoLastRename(): Promise<boolean> {
     } catch (error) {
       log.history.error("Undo failed for file", { newPath: op.newPath, oldPath: op.oldPath, error });
       errors.push(`Failed to restore ${basename(op.oldPath)}`);
+      failedOps.push(op);
     }
   }
 
-  // Remove this entry from history
-  const newHistory = history.slice(1);
-  await LocalStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(newHistory));
+  // Update history: remove entry if fully undone, replace with failed ops if partial
+  if (errors.length === 0) {
+    // All succeeded — remove entry
+    await LocalStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history.slice(1)));
+  } else if (errors.length < lastEntry.operations.length) {
+    // Partial success — retain only failed ops in the entry
+    const updatedHistory = [{ ...lastEntry, operations: failedOps.slice().reverse() }, ...history.slice(1)];
+    await LocalStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(updatedHistory));
+  }
 
   if (errors.length === 0) {
     await showToast({
@@ -130,44 +140,68 @@ export async function undoLastRename(): Promise<boolean> {
 export async function undoToPoint(index: number): Promise<boolean> {
   const history = await getHistory();
 
-  if (index >= history.length) {
+  if (index < 0 || index >= history.length) {
     return false;
   }
 
   const errors: string[] = [];
   let successCount = 0;
   let totalOperations = 0;
+  const fullyUndoneEntries = new Set<number>();
+  const partialEntryOps = new Map<number, Array<{ oldPath: string; newPath: string }>>();
 
   // Undo from newest to the target index (inclusive)
   for (let i = 0; i <= index; i++) {
     const entry = history[i]!;
+    let entrySuccesses = 0;
+    const entryFailedOps: Array<{ oldPath: string; newPath: string }> = [];
 
     for (const op of [...entry.operations].reverse()) {
       totalOperations++;
 
       if (!(await fileExists(op.newPath))) {
         errors.push(`${basename(op.newPath)} not found`);
+        entryFailedOps.push(op);
         continue;
       }
 
       if (await fileExists(op.oldPath)) {
         errors.push(`${basename(op.oldPath)} already exists`);
+        entryFailedOps.push(op);
         continue;
       }
 
       try {
         await rename(op.newPath, op.oldPath);
         successCount++;
+        entrySuccesses++;
       } catch (error) {
         log.history.error("Undo to point failed for file", { newPath: op.newPath, oldPath: op.oldPath, error });
         errors.push(`Failed to restore ${basename(op.oldPath)}: ${getUserFriendlyErrorMessage(error)}`);
+        entryFailedOps.push(op);
       }
+    }
+
+    if (entrySuccesses === entry.operations.length) {
+      fullyUndoneEntries.add(i);
+    } else if (entrySuccesses > 0) {
+      partialEntryOps.set(i, entryFailedOps.slice().reverse());
     }
   }
 
-  // Remove all undone entries from history
-  const newHistory = history.slice(index + 1);
-  await LocalStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(newHistory));
+  // Update history: remove fully-undone entries, update partial entries with failed ops only
+  if (fullyUndoneEntries.size > 0 || partialEntryOps.size > 0) {
+    const newHistory = history
+      .map((entry, i) => {
+        if (i > index) return entry;
+        if (fullyUndoneEntries.has(i)) return null;
+        const failedOps = partialEntryOps.get(i);
+        if (failedOps) return { ...entry, operations: failedOps };
+        return entry;
+      })
+      .filter((e): e is RenameHistoryEntry => e !== null);
+    await LocalStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(newHistory));
+  }
 
   const operationsText = `${index + 1} operation${index > 0 ? "s" : ""}`;
 
@@ -175,7 +209,7 @@ export async function undoToPoint(index: number): Promise<boolean> {
     await showToast({
       style: Toast.Style.Success,
       title: "Undo Successful",
-      message: `Reverted ${operationsText} (${successCount} files)`,
+      message: `Reverted ${operationsText} (${successCount} file${successCount !== 1 ? "s" : ""})`,
     });
     return true;
   } else if (successCount > 0) {

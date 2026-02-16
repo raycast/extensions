@@ -35,6 +35,12 @@ export default function Command() {
     try {
       const saved = await getPresets();
       setPresets(saved);
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Load Presets",
+        message: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setIsLoading(false);
     }
@@ -55,23 +61,41 @@ export default function Command() {
     });
 
     if (confirmed) {
-      await deletePreset(id);
-      await loadPresets();
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Preset Deleted",
-      });
+      try {
+        await deletePreset(id);
+        await loadPresets();
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Preset Deleted",
+        });
+      } catch (err) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Delete Failed",
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
   };
 
-  const handleAddDefault = async (preset: (typeof DEFAULT_PRESETS)[number]) => {
-    await savePreset(preset);
-    await loadPresets();
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Preset Added",
-      message: preset.name,
-    });
+  const handleAddDefault = async (
+    preset: (typeof DEFAULT_PRESETS)[number] | (typeof DEFAULT_TEMPLATE_PRESETS)[number],
+  ) => {
+    try {
+      await savePreset(preset);
+      await loadPresets();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Preset Added",
+        message: preset.name,
+      });
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Add Preset",
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
   };
 
   const getPresetIcon = (preset: RenamePreset): { source: Icon; tintColor: Color } => {
@@ -279,17 +303,26 @@ function CreatePresetForm({ onSave }: CreatePresetFormProps) {
       return;
     }
 
-    await savePreset({
-      name: values.name.trim(),
-      description: values.description.trim() || undefined,
-      config: {
-        prefix: values.prefix || undefined,
-        suffix: values.suffix || undefined,
-        separator: values.separator || "_",
-        caseStyle: values.caseStyle || "unchanged",
-        preserveName: true,
-      },
-    });
+    try {
+      await savePreset({
+        name: values.name.trim(),
+        description: values.description.trim() || undefined,
+        config: {
+          prefix: values.prefix || undefined,
+          suffix: values.suffix || undefined,
+          separator: values.separator || "_",
+          caseStyle: values.caseStyle || "unchanged",
+          preserveName: true,
+        },
+      });
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Save Failed",
+        message: err instanceof Error ? err.message : String(err),
+      });
+      return;
+    }
 
     await showToast({
       style: Toast.Style.Success,

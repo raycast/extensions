@@ -12,8 +12,8 @@ interface UseFileMetadataResult {
 }
 
 /**
- * Hook to fetch metadata for a file
- * Caches results to avoid re-fetching
+ * Hook to fetch metadata for a file.
+ * Fetches metadata on mount and whenever filePath changes.
  */
 export function useFileMetadata(filePath: string | null): UseFileMetadataResult {
   const [metadata, setMetadata] = useState<FileMetadata | null>(null);
@@ -22,6 +22,7 @@ export function useFileMetadata(filePath: string | null): UseFileMetadataResult 
   useEffect(() => {
     if (!filePath) {
       setMetadata(null);
+      setIsLoading(false);
       return;
     }
 

@@ -142,7 +142,8 @@ export function FileSelectionForm({ onFilesSelected, mode = SelectionMode.ALL }:
           ];
           setSelectedExtensions(exts);
         }
-      } catch {
+      } catch (err) {
+        console.error("Failed to resolve file paths:", err);
         if (!cancelled) {
           setResolvedFiles([]);
           setHasDirs(false);
@@ -265,8 +266,12 @@ export function FileSelectionForm({ onFilesSelected, mode = SelectionMode.ALL }:
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={() => setSelectedPaths([...selectedPaths])}
               />
-              {selectedPaths.map((p) => (
-                <Action.ShowInFinder key={p} path={p} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
+              {selectedPaths.map((p, idx) => (
+                <Action.ShowInFinder
+                  key={p}
+                  path={p}
+                  {...(idx === 0 ? { shortcut: { modifiers: ["cmd", "shift"], key: "o" } } : {})}
+                />
               ))}
               <Action
                 title="Clear Selection"

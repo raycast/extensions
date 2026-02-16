@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import { popToRoot, closeMainWindow, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
-import { basename, dirname } from "path";
+import { basename, dirname, join } from "path";
 import { checkConflicts } from "../lib/files";
 import { saveToHistory, undoLastRename } from "../lib/history";
 import { withProgress } from "../lib/progress";
@@ -59,7 +59,7 @@ export function useRenameOperations({
       operations.push({
         oldPath: file.path,
         newName: newFileName,
-        newPath: `${dirname(file.path)}/${newFileName}`,
+        newPath: join(dirname(file.path), newFileName),
       });
     }
 
@@ -100,7 +100,6 @@ export function useRenameOperations({
 
       const result = await withProgress(operations, {
         actionName: "Renaming",
-        historyDescription: description,
         itemLabel,
       });
 
@@ -128,7 +127,16 @@ export function useRenameOperations({
   };
 
   const handleUndo = async () => {
-    await undoLastRename();
+    try {
+      await undoLastRename();
+    } catch (err) {
+      log.rename.error("Undo failed", err);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Undo failed",
+        message: getUserFriendlyErrorMessage(err),
+      });
+    }
   };
 
   const handleRetryFailed = async () => {
@@ -145,12 +153,12 @@ export function useRenameOperations({
       const retryLabel = mode === "folders" ? "folder" : "file";
       const result = await withProgress(failedOperations, {
         actionName: "Retrying",
-        historyDescription: `Retried ${failedOperations.length} ${retryLabel}s`,
         itemLabel: retryLabel,
       });
 
       if (result.successfulOps.length > 0) {
-        await saveToHistory(`Retried ${result.successfulOps.length} ${retryLabel}s`, result.successfulOps);
+        const retryNoun = result.successfulOps.length === 1 ? retryLabel : `${retryLabel}s`;
+        await saveToHistory(`Retried ${result.successfulOps.length} ${retryNoun}`, result.successfulOps);
       }
 
       const newResults = operationResults.map((oldResult) => {

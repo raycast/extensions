@@ -19,7 +19,7 @@ import {
   Icon,
   Color,
 } from "@raycast/api";
-import { dirname, basename } from "path";
+import { dirname, basename, join } from "path";
 import { useSelectedFiles } from "../hooks/use-selected-files";
 import { useAISuggestions } from "../hooks/use-ai-suggestions";
 import { checkConflicts } from "../lib/files";
@@ -133,15 +133,17 @@ export default function AISuggestCommand({ mode = SelectionMode.FILES }: { mode?
     // Find original file info for extension
     const fileMap = new Map(files.map((f) => [f.path, f]));
 
-    const operations: RenameOperation[] = toRename.map((suggestion) => {
-      const file = fileMap.get(suggestion.filePath)!;
-      const newName = file.extension ? `${suggestion.suggestedName}${file.extension}` : suggestion.suggestedName;
-      return {
-        oldPath: suggestion.filePath,
-        newName,
-        newPath: `${dirname(suggestion.filePath)}/${newName}`,
-      };
-    });
+    const operations: RenameOperation[] = toRename
+      .filter((suggestion) => fileMap.has(suggestion.filePath))
+      .map((suggestion) => {
+        const file = fileMap.get(suggestion.filePath)!;
+        const newName = file.extension ? `${suggestion.suggestedName}${file.extension}` : suggestion.suggestedName;
+        return {
+          oldPath: suggestion.filePath,
+          newName,
+          newPath: join(dirname(suggestion.filePath), newName),
+        };
+      });
 
     // Check for conflicts
     const conflicts = await checkConflicts(operations);
@@ -187,7 +189,6 @@ export default function AISuggestCommand({ mode = SelectionMode.FILES }: { mode?
 
       const result = await withProgress(operations, {
         actionName: "Renaming",
-        historyDescription: description,
         itemLabel,
       });
 
@@ -213,7 +214,16 @@ export default function AISuggestCommand({ mode = SelectionMode.FILES }: { mode?
   };
 
   const handleUndo = async () => {
-    await undoLastRename();
+    try {
+      await undoLastRename();
+    } catch (err) {
+      log.metadata.error("Undo failed", err);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Undo failed",
+        message: getUserFriendlyErrorMessage(err),
+      });
+    }
   };
 
   // Show file picker when no files are selected

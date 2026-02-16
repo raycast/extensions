@@ -10,8 +10,6 @@ import type { RenameOperation, RenameResult } from "../types";
 export interface BatchOperationOptions {
   /** The action being performed (e.g., "Renaming", "Replacing") */
   actionName: string;
-  /** Description for history (e.g., "Renamed 5 files") */
-  historyDescription: string;
   /** Label for items being operated on (default: "file") */
   itemLabel?: string;
 }
@@ -54,7 +52,20 @@ export async function withProgress(
   };
 
   // Replace the animated toast with a completion toast
-  const pastTense = actionName.endsWith("ing") ? actionName.slice(0, -3) + "ed" : actionName;
+  const PAST_TENSE_MAP: Record<string, string> = {
+    Renaming: "Renamed",
+    Replacing: "Replaced",
+    Copying: "Copied",
+    Moving: "Moved",
+    Deleting: "Deleted",
+  };
+  const pastTense =
+    PAST_TENSE_MAP[actionName] ??
+    (actionName.endsWith("ying")
+      ? actionName.slice(0, -4) + "ied"
+      : actionName.endsWith("ing")
+        ? actionName.slice(0, -3) + "ed"
+        : actionName);
   await showResultToast(result, pastTense, options.itemLabel);
 
   return result;

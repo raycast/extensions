@@ -66,8 +66,15 @@ export function useNameGenerator({
         isSingleGroup = dirGroups.dirCount === 1;
       }
 
-      const totalDigits = paddingDigits === "0" ? String(groupSize).length : parseInt(paddingDigits, 10);
-      const startNum = parseInt(startNumber, 10) || 1;
+      const parsedPadding = parseInt(paddingDigits, 10);
+      const totalDigits =
+        paddingDigits === "0"
+          ? String(groupSize).length
+          : Number.isNaN(parsedPadding)
+            ? String(groupSize).length
+            : parsedPadding;
+      const parsedStart = parseInt(startNumber, 10);
+      const startNum = Number.isNaN(parsedStart) ? 1 : Math.max(0, parsedStart);
       const paddedIndex = String(startNum + groupIndex).padStart(totalDigits, "0");
 
       let newBaseName: string;
@@ -160,6 +167,9 @@ export function useNameGenerator({
             remaining--;
             previewedCount++;
           }
+          if (entries.length > count) {
+            previews.push(`  ...and ${entries.length - count} more`);
+          }
         }
       } else {
         const count = Math.min(files.length, PREVIEW_LIMIT);
@@ -185,7 +195,8 @@ export function useNameGenerator({
 
     if (extensionOverrides.size > 0) {
       for (const [ext, baseName] of extensionOverrides) {
-        const count = detectedExtensions.find((d) => d.ext === ext)?.count ?? 0;
+        const normalizedExt = ext.toLowerCase();
+        const count = detectedExtensions.find((d) => d.ext.toLowerCase() === normalizedExt)?.count ?? 0;
         if (count > 1 && !baseName.trim()) return false;
       }
       const defaultCount = files.filter((f) => !extensionOverrides.has(f.extension.toLowerCase())).length;

@@ -17,7 +17,9 @@ export function UndoAction({ onUndo }: UndoActionProps) {
   const [undoCount, setUndoCount] = useState(0);
 
   useEffect(() => {
-    getUndoCount().then(setUndoCount);
+    getUndoCount()
+      .then(setUndoCount)
+      .catch((err) => console.error("Failed to get undo count:", err));
   }, []);
 
   if (undoCount === 0) return null;
@@ -28,10 +30,14 @@ export function UndoAction({ onUndo }: UndoActionProps) {
       icon={Icon.Undo}
       shortcut={{ modifiers: ["cmd"], key: "z" }}
       onAction={async () => {
-        const success = await undoLastRename();
-        if (success) {
-          setUndoCount((prev) => Math.max(0, prev - 1));
-          onUndo?.();
+        try {
+          const success = await undoLastRename();
+          if (success) {
+            setUndoCount((prev) => Math.max(0, prev - 1));
+            onUndo?.();
+          }
+        } catch (err) {
+          console.error("Undo failed:", err);
         }
       }}
     />

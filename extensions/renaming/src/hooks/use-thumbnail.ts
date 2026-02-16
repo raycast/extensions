@@ -25,6 +25,7 @@ export function useThumbnail(filePath: string | null): UseThumbnailResult {
   useEffect(() => {
     if (!filePath) {
       setThumbnailPath(null);
+      setIsLoading(false);
       return;
     }
 

@@ -13,6 +13,9 @@ export default function Command() {
     try {
       const entries = await getHistory();
       setHistory(entries);
+    } catch (err) {
+      console.error("Failed to load history:", err);
+      setHistory([]);
     } finally {
       setIsLoading(false);
     }
@@ -35,8 +38,8 @@ export default function Command() {
       title: `Undo ${changesCount} Change${changesCount > 1 ? "s" : ""}?`,
       message:
         index === 0
-          ? `This will revert "${history[index]!.description}"`
-          : `This will revert all operations back to and including "${history[index]!.description}"`,
+          ? `This will revert "${history[index]?.description ?? "unknown operation"}"`
+          : `This will revert all operations back to and including "${history[index]?.description ?? "unknown operation"}"`,
       primaryAction: {
         title: "Undo",
         style: Alert.ActionStyle.Destructive,

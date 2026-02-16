@@ -3,7 +3,7 @@
  */
 
 import { useMemo } from "react";
-import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import { basename, dirname } from "path";
 import type { RenameResult } from "../types";
 
@@ -47,8 +47,20 @@ export function ResultsView({ results, onClose, onUndo, onRetryFailed, isLoading
           icon={Icon.Undo}
           shortcut={{ modifiers: ["cmd"], key: "z" }}
           onAction={async () => {
-            await onUndo();
-            onClose();
+            let didUndo = false;
+            try {
+              await onUndo();
+              didUndo = true;
+            } catch (err) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Undo failed",
+                message: err instanceof Error ? err.message : String(err),
+              });
+            }
+            if (didUndo) {
+              onClose();
+            }
           }}
         />
       )}
@@ -57,7 +69,17 @@ export function ResultsView({ results, onClose, onUndo, onRetryFailed, isLoading
           title="Retry Failed"
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
-          onAction={onRetryFailed}
+          onAction={async () => {
+            try {
+              await onRetryFailed();
+            } catch (err) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Retry failed",
+                message: err instanceof Error ? err.message : String(err),
+              });
+            }
+          }}
         />
       )}
     </ActionPanel>
@@ -74,8 +96,8 @@ export function ResultsView({ results, onClose, onUndo, onRetryFailed, isLoading
       title={basename(result.oldPath)}
       subtitle={result.success ? `→ ${basename(result.newPath)}` : undefined}
       accessories={
-        result.error
-          ? [{ text: result.error, tooltip: result.error }]
+        !result.success
+          ? [{ text: result.error ?? "Failed", tooltip: result.error ?? "Unknown error" }]
           : [{ icon: { source: Icon.Check, tintColor: Color.Green } }]
       }
       actions={actions}

@@ -34,7 +34,7 @@ export function useFileGrouping({ files }: { files: FileInfo[] }): UseFileGroupi
       const idx = counters.get(dir) || 0;
       counters.set(dir, idx + 1);
       fileIndices.push(idx);
-      fileSizes.push(groups.get(dir) || files.length);
+      fileSizes.push(groups.get(dir) || 1);
     }
 
     return { fileIndices, fileSizes, dirCount: groups.size };

@@ -73,7 +73,7 @@ export function templateToConfig(template: NamingTemplate): TemplateConfig {
 /**
  * Convert a TemplateConfig back to a NamingTemplate
  */
-export function configToTemplate(config: TemplateConfig, preset: RenamePreset): NamingTemplate {
+export function configToTemplate(config: TemplateConfig, preset: RenamePreset, isBuiltIn = false): NamingTemplate {
   return {
     id: preset.id,
     name: preset.name,
@@ -84,7 +84,7 @@ export function configToTemplate(config: TemplateConfig, preset: RenamePreset): 
     sort: config.sort,
     transliteration: config.transliteration,
     caseStyle: config.caseStyle,
-    isBuiltIn: false,
+    isBuiltIn,
   };
 }
 
@@ -100,7 +100,13 @@ export async function getPresets(): Promise<RenamePreset[]> {
   try {
     return JSON.parse(data) as RenamePreset[];
   } catch (error) {
-    log.presets.warn("Failed to parse stored presets, returning empty list", error);
+    log.presets.error("Stored presets data is corrupted, backing up and returning empty list", error);
+    // Preserve corrupted data so user can recover manually
+    try {
+      await LocalStorage.setItem(`${PRESETS_KEY}-corrupted-backup`, data);
+    } catch {
+      // Best-effort backup
+    }
     return [];
   }
 }
@@ -118,7 +124,12 @@ export async function savePreset(preset: Omit<RenamePreset, "id" | "createdAt">)
   };
 
   presets.push(newPreset);
-  await LocalStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+  try {
+    await LocalStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+  } catch (error) {
+    log.presets.warn("Failed to save preset", error);
+    throw error;
+  }
 
   return newPreset;
 }
@@ -136,7 +147,12 @@ export async function updatePreset(
   if (index === -1) return false;
 
   presets[index] = { ...presets[index]!, ...updates };
-  await LocalStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+  try {
+    await LocalStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+  } catch (error) {
+    log.presets.warn("Failed to update preset", error);
+    throw error;
+  }
 
   return true;
 }
@@ -150,7 +166,12 @@ export async function deletePreset(id: string): Promise<boolean> {
 
   if (filtered.length === presets.length) return false;
 
-  await LocalStorage.setItem(PRESETS_KEY, JSON.stringify(filtered));
+  try {
+    await LocalStorage.setItem(PRESETS_KEY, JSON.stringify(filtered));
+  } catch (error) {
+    log.presets.warn("Failed to delete preset", error);
+    throw error;
+  }
   return true;
 }
 

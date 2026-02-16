@@ -1,4 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+vi.mock("@raycast/api", () => ({
+  showToast: vi.fn(),
+  Toast: {
+    Style: {
+      Success: "success",
+      Failure: "failure",
+      Animated: "animated",
+    },
+  },
+}));
+
 import { showToast } from "@raycast/api";
 
 vi.mock("../lib/files", () => ({
@@ -89,7 +101,6 @@ describe("withProgress", () => {
 
     await withProgress(operations, {
       actionName: "Renaming",
-      historyDescription: "Renamed 1 file",
     });
 
     expect(mockBatchRename).toHaveBeenCalledOnce();
@@ -111,7 +122,6 @@ describe("withProgress", () => {
 
     const result = await withProgress(operations, {
       actionName: "Renaming",
-      historyDescription: "Renamed 3 files",
     });
 
     expect(result.successCount).toBe(2);
@@ -130,7 +140,6 @@ describe("withProgress", () => {
 
     await withProgress(operations, {
       actionName: "Renaming",
-      historyDescription: "Renamed 1 file",
     });
 
     // "Renaming" -> "Renam" + "ed" = "Renamed"
@@ -148,7 +157,6 @@ describe("withProgress", () => {
 
     await withProgress(operations, {
       actionName: "Convert",
-      historyDescription: "Converted 1 file",
     });
 
     // "Convert" does not end in "ing", so it stays as "Convert"
@@ -172,7 +180,6 @@ describe("withProgress", () => {
 
     await withProgress(operations, {
       actionName: "Replacing",
-      historyDescription: "Replaced 2 files",
     });
 
     expect(mockShowToast).toHaveBeenCalledWith(
@@ -197,7 +204,6 @@ describe("withProgress", () => {
 
     await withProgress(operations, {
       actionName: "Renaming",
-      historyDescription: "Renamed 2 files",
     });
 
     expect(mockShowToast).toHaveBeenCalledWith(
@@ -218,7 +224,6 @@ describe("withProgress", () => {
 
     await withProgress(operations, {
       actionName: "Renaming",
-      historyDescription: "Renamed 1 file",
     });
 
     expect(mockShowToast).toHaveBeenCalledWith(

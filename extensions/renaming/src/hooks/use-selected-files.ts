@@ -71,7 +71,7 @@ export function useSelectedFiles(mode: SelectionMode = SelectionMode.ALL): UseSe
       const fileInfos = await pathsToFileInfos(filePaths);
 
       let filtered: FileInfo[];
-      if (mode === "files") {
+      if (mode === SelectionMode.FILES) {
         // Scan any selected directories for files
         const dirs = fileInfos.filter((f) => f.isDirectory);
         const directFiles = fileInfos.filter((f) => !f.isDirectory);
@@ -89,7 +89,7 @@ export function useSelectedFiles(mode: SelectionMode = SelectionMode.ALL): UseSe
         } else {
           filtered = directFiles;
         }
-      } else if (mode === "folders") {
+      } else if (mode === SelectionMode.FOLDERS) {
         filtered = fileInfos.filter((f) => f.isDirectory);
       } else {
         filtered = fileInfos;
@@ -102,8 +102,10 @@ export function useSelectedFiles(mode: SelectionMode = SelectionMode.ALL): UseSe
       }
 
       setFiles(filtered);
-    } catch (error) {
-      log.files.warn("Failed to load selected Finder items, falling back to manual selection", error);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      log.files.warn("Failed to load selected Finder items, falling back to manual selection", err);
+      setError(message);
       setNoFilesSelected(true);
     } finally {
       setIsLoading(false);
