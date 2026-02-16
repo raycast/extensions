@@ -1,6 +1,6 @@
 # Transport NSW Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-16
 
 - Plan trips between stations with multiple journey options
 - View detailed stop-by-stop journey information with platforms and times
