@@ -285,6 +285,7 @@ async function readChromiumNamesByFolder(
         browser,
         "Local State file is too large; falling back to folder names to avoid high memory usage",
         localStatePath,
+        "LOCAL_STATE_TOO_LARGE",
       ),
     );
     return namesByFolder;

@@ -38,12 +38,12 @@ export function useBrowserProfiles(): UseBrowserProfilesResult {
       });
 
       setProfiles(mergedProfiles);
-      await maybeShowWarnings(
+      const warningToastShown = await maybeShowWarnings(
         scanResult.warnings,
         hasShownWarningToast.current,
       );
       hasShownWarningToast.current =
-        hasShownWarningToast.current || scanResult.warnings.length > 0;
+        hasShownWarningToast.current || warningToastShown;
     } catch (error) {
       setProfiles([]);
       await showToast({
@@ -66,12 +66,15 @@ export function useBrowserProfiles(): UseBrowserProfilesResult {
 async function maybeShowWarnings(
   warnings: ScanWarning[],
   alreadyShown: boolean,
-): Promise<void> {
-  if (alreadyShown || warnings.length === 0) {
-    return;
+): Promise<boolean> {
+  const warningsToShow = warnings.filter(
+    (warning) => warning.code !== "LOCAL_STATE_TOO_LARGE",
+  );
+  if (alreadyShown || warningsToShow.length === 0) {
+    return false;
   }
 
-  const sample = warnings[0];
+  const sample = warningsToShow[0];
   const baseMessage = sample.path
     ? `${sample.message}: ${sample.path}`
     : sample.message;
@@ -80,8 +83,10 @@ async function maybeShowWarnings(
     style: Toast.Style.Failure,
     title: "Some Profiles Were Ignored",
     message:
-      warnings.length === 1
+      warningsToShow.length === 1
         ? baseMessage
-        : `${baseMessage} (+${warnings.length - 1} more)`,
+        : `${baseMessage} (+${warningsToShow.length - 1} more)`,
   });
+
+  return true;
 }
