@@ -17,7 +17,6 @@
     {
       "name": "search-banks",
       "title": "Lookup Banks",
-      "icon": "extension-icon.png",
       "description": "View VietQR-supported banks in Vietnam",
       "mode": "view"
     }
