@@ -36,7 +36,7 @@ export default function Command() {
     if (hasError || !selectedBankBin) return;
 
     const memoEncoded = encodeURIComponent(values.memo || "");
-    const qrUrl = `https://img.vietqr.io/image/${selectedBankBin}-${values.account}-${values.template}.png?amount=${values.amount || 0}&addInfo=${memoEncoded}`;
+    const qrUrl = `https://img.vietqr.io/image/${selectedBankBin}-${values.account}-${values.template}.png?amount=${values.amount || 0}&addInfo=${memoEncoded}&raycast-height=350`;
 
     push(<QRResult url={qrUrl} />);
   };
