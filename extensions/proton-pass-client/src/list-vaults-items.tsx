@@ -16,7 +16,7 @@ export default function ListVaultsItems(props: { vaultName: string }) {
       return items?.filter((item) => item.state === filter);
     } else {
       // Filter vault
-      return items?.filter((item) => item.vaultId === filter);
+      return items?.filter((item) => item.vaultTitle === filter);
     }
   }, [items, filter]);
 
