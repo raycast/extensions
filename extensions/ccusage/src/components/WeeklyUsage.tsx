@@ -14,6 +14,8 @@ export function WeeklyUsage() {
   const renderDetailMetadata = (item: WeeklyUsageData): ReactNode => {
     return (
       <List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.Label title="Week" text={item.week} icon={Icon.Calendar} />
+        <List.Item.Detail.Metadata.Separator />
         <List.Item.Detail.Metadata.Label
           title="Total Cost"
           text={formatCost(item.totalCost)}
@@ -113,12 +115,8 @@ export function WeeklyUsage() {
   return (
     <List.Item
       title="Weekly Usage"
-      subtitle={currentWeek?.week || "Current Week"}
-      icon={{ source: Icon.Calendar, tintColor: Color.SecondaryText }}
-      accessories={[
-        { text: formatCost(currentWeek?.totalCost || 0), icon: Icon.Coins },
-        { text: formatNumber(currentWeek?.totalTokens || 0), tooltip: "Total Tokens" },
-      ]}
+      icon={Icon.Calendar}
+      accessories={[{ text: formatCost(currentWeek?.totalCost || 0), icon: Icon.Coins }]}
       detail={<List.Item.Detail metadata={currentWeek ? renderDetailMetadata(currentWeek) : undefined} />}
       actions={
         <ActionPanel>
