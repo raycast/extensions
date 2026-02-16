@@ -84,12 +84,10 @@ describe("parseClipboard", () => {
   });
 
   describe("auto-detection and tie-breaking", () => {
-    it("prefers newline when newline count >= tab and comma counts", () => {
-      // 3 items by newline, 3 items by comma (same count) -> newline wins
+    it("comma wins when it produces more items than newline", () => {
+      // 3 items by newline, 6 items by comma -> comma wins
       const result = parseClipboard("a,b\nc,d\ne,f");
       expect(result.format).toBe(ClipboardFormat.COMMA);
-      // comma splitting on "a,b\nc,d\ne,f" produces 6 items, newline produces 3
-      // so comma actually wins here
     });
 
     it("chooses format producing the most items", () => {
@@ -296,27 +294,28 @@ describe("validateClipboardNames", () => {
   });
 
   describe("invalid characters", () => {
-    it("warns about names with colons", () => {
+    it("errors on names with colons", () => {
       const result = validateClipboardNames(["file:name"]);
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]).toContain("invalid characters");
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContainEqual(expect.stringContaining("invalid characters"));
     });
 
-    it("warns about names with slashes", () => {
+    it("errors on names with slashes", () => {
       const result = validateClipboardNames(["path/name"]);
-      expect(result.warnings).toHaveLength(1);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContainEqual(expect.stringContaining("invalid characters"));
     });
 
-    it('warns about names with special characters (*, ?, <, >, |, ")', () => {
+    it('errors on names with special characters (*, ?, <, >, |, ")', () => {
       const names = ["star*", "question?", "less<", "greater>", "pipe|", 'quote"'];
       const result = validateClipboardNames(names);
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]).toContain("6 names contain");
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContainEqual(expect.stringContaining("6 names contain"));
     });
 
     it("uses singular form for a single invalid name", () => {
       const result = validateClipboardNames(["bad*name"]);
-      expect(result.warnings[0]).toContain("1 name contains");
+      expect(result.errors).toContainEqual(expect.stringContaining("1 name contains"));
     });
   });
 
@@ -345,11 +344,11 @@ describe("validateClipboardNames", () => {
   });
 
   describe("mixed issues", () => {
-    it("reports both errors and warnings together", () => {
+    it("reports multiple error types together", () => {
       const result = validateClipboardNames(["valid", "valid", "bad/char", ""]);
       expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.warnings.length).toBeGreaterThan(0);
+      // Should have errors for: duplicates, invalid chars, and empty names
+      expect(result.errors.length).toBeGreaterThanOrEqual(2);
     });
   });
 });

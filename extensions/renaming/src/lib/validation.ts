@@ -32,11 +32,12 @@ export function validateFilename(name: string): ValidationResult {
     return { valid: false, error: `"${name}" is a reserved filename` };
   }
 
-  // Check length (macOS HFS+ and APFS limit)
-  if (name.length > MAX_FILENAME_LENGTH) {
+  // Check length (macOS HFS+ and APFS limit — measured in UTF-8 bytes)
+  const byteLen = Buffer.byteLength(name, "utf8");
+  if (byteLen > MAX_FILENAME_LENGTH) {
     return {
       valid: false,
-      error: `Filename too long (${name.length} chars, max ${MAX_FILENAME_LENGTH})`,
+      error: `Filename too long (${byteLen} bytes, max ${MAX_FILENAME_LENGTH})`,
     };
   }
 

@@ -257,7 +257,7 @@ describe("sanitizeFilename", () => {
       expect(sanitizeFilename("caf\u00e9")).toBe("cafe");
     });
 
-    it("can skip transliteration", () => {
+    it("still removes accents when transliteration disabled but removeAccents defaults true", () => {
       expect(sanitizeFilename("caf\u00e9", { transliterate: false })).toBe("cafe");
     });
 

@@ -47,9 +47,9 @@ describe("buildSelectionSummary", () => {
     expect(result.byExtension[".png"]).toBe(1);
   });
 
-  it("skips directories in byExtension", () => {
+  it("skips directories in byExtension and totalCount", () => {
     const result = buildSelectionSummary([jpg1, dir1]);
-    expect(result.totalCount).toBe(2);
+    expect(result.totalCount).toBe(1);
     expect(result.byExtension[".jpg"]).toBe(1);
     expect(Object.keys(result.byExtension)).toHaveLength(1);
   });

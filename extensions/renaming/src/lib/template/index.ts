@@ -12,6 +12,7 @@ import type {
   FileMetadataContext,
   RenameOperation,
 } from "../../types";
+import { dirname, join } from "path";
 import { parseTemplate, validateTemplate, extractVariables } from "./parser";
 import { resolveVariable } from "./variables";
 import { transliterate, removeAccents, sanitizeFilename } from "./transliterate";
@@ -106,18 +107,28 @@ export function processFilesWithTemplate(template: NamingTemplate, files: FileWi
   // Sort files according to template configuration
   const sortedFiles = sortFiles(files, template.sort);
 
-  // Generate new names for each file
+  // Generate new names for each file, detecting same-directory collisions
+  const seen = new Map<string, number>(); // "dir|newName" → count
   const operations: RenameOperation[] = sortedFiles.map((item, index) => {
     const newBaseName = applyTemplate(template, item.file, index, sortedFiles.length, item.metadata);
 
-    const newName = item.file.extension ? `${newBaseName}${item.file.extension}` : newBaseName;
+    let newName = item.file.extension ? `${newBaseName}${item.file.extension}` : newBaseName;
+    const directory = dirname(item.file.path);
 
-    const directory = item.file.path.substring(0, item.file.path.lastIndexOf("/"));
+    // Deduplicate within same directory
+    const key = `${directory}|${newName.toLowerCase()}`;
+    const count = seen.get(key) ?? 0;
+    if (count > 0) {
+      const ext = item.file.extension || "";
+      const base = ext ? newName.slice(0, -ext.length) : newName;
+      newName = `${base}_${count}${ext}`;
+    }
+    seen.set(key, count + 1);
 
     return {
       oldPath: item.file.path,
       newName,
-      newPath: `${directory}/${newName}`,
+      newPath: join(directory, newName),
     };
   });
 

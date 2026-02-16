@@ -73,7 +73,7 @@ describe("validateFilename", () => {
       const result = validateFilename(longName);
       expect(result.valid).toBe(false);
       expect(result.error).toContain("Filename too long");
-      expect(result.error).toContain("256 chars");
+      expect(result.error).toContain("256 bytes");
       expect(result.error).toContain("max 255");
     });
   });

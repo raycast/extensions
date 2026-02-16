@@ -41,7 +41,8 @@ describe("applyTemplate", () => {
 
   it("applies case transformation when set", () => {
     const lowerTemplate = { ...testTemplate, caseStyle: CaseStyle.LOWERCASE };
-    const result = applyTemplate(lowerTemplate, MOCK_JPG, 0, 1);
+    const mixedCaseFile = { ...MOCK_JPG, baseName: "Photo" };
+    const result = applyTemplate(lowerTemplate, mixedCaseFile, 0, 1);
     expect(result).toBe("photo_001");
   });
 

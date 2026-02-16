@@ -5,7 +5,7 @@
 import { rename, stat, access, readdir } from "fs/promises";
 import { randomUUID } from "crypto";
 import { constants } from "fs";
-import { basename, dirname, extname, join, resolve } from "path";
+import path, { basename, dirname, extname, join, resolve } from "path";
 import type { FileInfo, RenameOperation, RenameResult } from "../types";
 import { validateFilename } from "./validation";
 import { MAX_UNIQUE_FILENAME_ATTEMPTS } from "./constants";
@@ -33,8 +33,11 @@ export async function getFileInfo(filePath: string): Promise<FileInfo> {
   const stats = await stat(filePath);
   const isDirectory = stats.isDirectory();
   const fullName = basename(filePath);
-  const extension = isDirectory ? "" : extname(filePath);
-  const baseName = isDirectory ? fullName : basename(filePath, extension);
+  const ext = isDirectory ? "" : extname(filePath);
+  // Dotfiles like .gitignore: extname returns ".gitignore" (the whole name), baseName would be ""
+  const isDotfile = !isDirectory && fullName.startsWith(".") && ext === fullName;
+  const extension = isDotfile ? "" : ext;
+  const baseName = isDirectory || isDotfile ? fullName : basename(filePath, extension);
 
   return {
     path: filePath,
@@ -61,7 +64,7 @@ export async function fileExists(filePath: string): Promise<boolean> {
  * Normalize a path for case-insensitive comparison (macOS uses case-insensitive FS by default)
  */
 function normalizePath(filePath: string): string {
-  return process.platform === "darwin" ? filePath.toLowerCase() : filePath;
+  return process.platform === "darwin" || process.platform === "win32" ? filePath.toLowerCase() : filePath;
 }
 
 /**
@@ -258,7 +261,9 @@ export async function batchRename(
   const indexed = adjustedOps
     .map((op, i) => ({ op, originalIndex: i }))
     .filter(({ originalIndex }) => !results[originalIndex]); // skip already-failed
-  indexed.sort((a, b) => b.op.oldPath.split("/").length - a.op.oldPath.split("/").length);
+  indexed.sort(
+    (a, b) => path.normalize(b.op.oldPath).split(path.sep).length - path.normalize(a.op.oldPath).split(path.sep).length,
+  );
 
   for (let i = 0; i < indexed.length; i++) {
     const { op, originalIndex } = indexed[i]!;
@@ -277,7 +282,7 @@ export async function batchRename(
     // After a successful directory rename, fix up the newPath of
     // already-processed child results so undo history stays correct
     if (result.success && op.oldPath !== result.newPath) {
-      const oldPrefix = op.oldPath + "/";
+      const oldPrefix = op.oldPath + path.sep;
       for (let j = 0; j < results.length; j++) {
         const r = results[j];
         if (r && r.success && r.newPath.startsWith(oldPrefix)) {

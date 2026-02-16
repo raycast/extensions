@@ -10,8 +10,6 @@ import { transliterate as tr } from "transliteration";
 export interface TransliterateOptions {
   /** Remove characters that can't be mapped to ASCII (default: false) */
   removeUnmapped?: boolean;
-  /** Preserve original case where possible (default: true) */
-  preserveCase?: boolean;
 }
 
 export interface SanitizeOptions {
@@ -124,10 +122,13 @@ export function sanitizeFilename(filename: string, options: SanitizeOptions = {}
   // Replace spaces if requested
   if (replaceSpaces) {
     result = result.replace(/\s+/g, spaceReplacement);
+    // Re-sanitize in case spaceReplacement introduced invalid characters
+    // eslint-disable-next-line no-control-regex
+    result = result.replace(/[\\/:*?"<>|\x00]/g, "");
   }
 
   // Remove leading/trailing spaces and dots
-  result = result.trim().replace(/^\.+|\.+$/g, "");
+  result = result.replace(/^[\s.]+|[\s.]+$/g, "");
 
   // Ensure we have something left
   if (result.length === 0) {
@@ -152,9 +153,10 @@ export function getTransliterationPreview(str: string): TransliterationPreview {
 
   if (changed) {
     // Walk through original string and find characters that changed
+    const seen = new Set<string>();
     for (const original of str) {
-      if (original.charCodeAt(0) >= 128) {
-        // Non-ASCII char — find its replacement in the transliterated output
+      if ((original.codePointAt(0) ?? 0) >= 128 && !seen.has(original)) {
+        seen.add(original);
         const replacement = tr(original);
         if (replacement !== original) {
           changedChars.push({ original, replacement });

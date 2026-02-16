@@ -81,11 +81,11 @@ function splitByTab(text: string): string[] {
   // This handles Excel columns pasted as tab-separated
   const lines = text.split("\n");
   if (lines.length > 1) {
-    // Check if we have tabs on multiple lines (grid data)
+    // Check if any line has tabs
     const tabsPerLine = lines.filter((l) => l.includes("\t")).length;
-    if (tabsPerLine > 1) {
-      // Return all tab-separated values from all lines
-      return lines.flatMap((line) => line.split("\t"));
+    if (tabsPerLine > 0) {
+      // Split each line by tabs individually and flatten
+      return lines.flatMap((line) => (line.includes("\t") ? line.split("\t") : [line]));
     }
   }
   return text.split("\t");
@@ -103,7 +103,13 @@ function splitByComma(text: string): string[] {
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
 
-    if (char === '"' && (i === 0 || text[i - 1] !== "\\")) {
+    if (char === '"') {
+      if (inQuotes && i + 1 < text.length && text[i + 1] === '"') {
+        // RFC 4180: doubled quote inside quoted field means literal quote
+        current += '"';
+        i++;
+        continue;
+      }
       inQuotes = !inQuotes;
     } else if (char === "," && !inQuotes) {
       result.push(current);
@@ -150,9 +156,14 @@ export function mapClipboardToFiles(
     let newName = hasMatch ? names[index]! : file.name;
 
     if (hasMatch && preserveExtension && file.extension) {
-      // Check if the new name already has an extension
-      const nameHasExt = newName.includes(".");
-      if (!nameHasExt) {
+      // Check if the new name already has a plausible file extension
+      const lastDot = newName.lastIndexOf(".");
+      const hasPlausibleExt =
+        lastDot > 0 &&
+        lastDot < newName.length - 1 &&
+        newName.length - lastDot - 1 <= 6 &&
+        /^[a-zA-Z0-9]+$/.test(newName.slice(lastDot + 1));
+      if (!hasPlausibleExt) {
         newName = `${newName}${file.extension}`;
       }
     }
@@ -231,10 +242,10 @@ export function validateClipboardNames(names: string[]): { valid: boolean; error
   }
 
   // Check for invalid characters
-  const invalidChars = /[/:*?"<>|]/;
+  const invalidChars = /[\\/:*?"<>|]/;
   const invalid = names.filter((name) => invalidChars.test(name));
   if (invalid.length > 0) {
-    warnings.push(`${invalid.length} name${invalid.length > 1 ? "s contain" : " contains"} invalid characters`);
+    errors.push(`${invalid.length} name${invalid.length > 1 ? "s contain" : " contains"} invalid characters`);
   }
 
   // Check for empty names

@@ -39,17 +39,25 @@ export function buildSelectionSummary(files: FileInfo[]): SelectionSummary {
     }
   }
 
-  const totalSize = files.reduce((sum, f) => sum + (f.size ?? 0), 0);
-  const allDirs = files.every((f) => f.isDirectory);
-  const noun = allDirs ? "folder" : "file";
+  const nonDirFiles = files.filter((f) => !f.isDirectory);
+  const dirCount = files.length - nonDirFiles.length;
+  const totalSize = nonDirFiles.reduce((sum, f) => sum + (f.size ?? 0), 0);
   const sizeLabel = totalSize > 0 ? ` (${formatFileSize(totalSize)})` : "";
-  const totalLabel = `${files.length} ${noun}${files.length !== 1 ? "s" : ""}${sizeLabel}`;
+
+  const parts: string[] = [];
+  if (nonDirFiles.length > 0) {
+    parts.push(`${nonDirFiles.length} file${nonDirFiles.length !== 1 ? "s" : ""}`);
+  }
+  if (dirCount > 0) {
+    parts.push(`${dirCount} folder${dirCount !== 1 ? "s" : ""}`);
+  }
+  const totalLabel = `${parts.join(", ")}${sizeLabel}`;
 
   const breakdown = extensionBreakdownText(byExtension);
   const summaryText = breakdown ? `${totalLabel} — ${breakdown}` : totalLabel;
 
   return {
-    totalCount: files.length,
+    totalCount: nonDirFiles.length,
     totalSize,
     byExtension,
     summaryText,
@@ -68,7 +76,10 @@ export function buildPerFolderSummary(folderFileMap: Map<string, FileInfo[]>): s
     const folderName = basename(folderPath);
     const byExtension: Record<string, number> = {};
 
+    let fileCount = 0;
     for (const file of files) {
+      if (file.isDirectory) continue;
+      fileCount++;
       if (file.extension) {
         const ext = file.extension.toLowerCase();
         byExtension[ext] = (byExtension[ext] || 0) + 1;
@@ -78,12 +89,15 @@ export function buildPerFolderSummary(folderFileMap: Map<string, FileInfo[]>): s
     }
 
     const breakdown = extensionBreakdownText(byExtension);
-    const count = `${files.length} file${files.length !== 1 ? "s" : ""}`;
+    const count = `${fileCount} file${fileCount !== 1 ? "s" : ""}`;
     lines.push(breakdown ? `${folderName}: ${count} — ${breakdown}` : `${folderName}: ${count}`);
-    grandTotal += files.length;
+    grandTotal += fileCount;
   }
 
-  const grandSize = [...folderFileMap.values()].flat().reduce((sum, f) => sum + (f.size ?? 0), 0);
+  const grandSize = [...folderFileMap.values()]
+    .flat()
+    .filter((f) => !f.isDirectory)
+    .reduce((sum, f) => sum + (f.size ?? 0), 0);
   const sizeLabel = grandSize > 0 ? ` (${formatFileSize(grandSize)})` : "";
   const totalLine = `${grandTotal} file${grandTotal !== 1 ? "s" : ""} total${sizeLabel}`;
   return [totalLine, ...lines].join("\n");
@@ -96,7 +110,7 @@ export function buildPerFolderSummary(folderFileMap: Map<string, FileInfo[]>): s
 export function groupFilesByExtension(files: FileInfo[]): Map<string, FileInfo[]> {
   const groups = new Map<string, FileInfo[]>();
   for (const file of files) {
-    const ext = file.extension.toLowerCase() || "(no ext)";
+    const ext = file.extension ? file.extension.toLowerCase() : "(no ext)";
     if (!groups.has(ext)) groups.set(ext, []);
     groups.get(ext)!.push(file);
   }

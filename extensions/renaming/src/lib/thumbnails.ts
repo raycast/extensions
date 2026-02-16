@@ -6,7 +6,7 @@
  * this automatically supports any Quick Look plugin the user has installed.
  */
 
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { access, mkdir, rename } from "fs/promises";
 import { constants } from "fs";
@@ -16,7 +16,7 @@ import { createHash } from "crypto";
 import { FILE_CONSTANTS } from "./constants";
 import { log } from "./logger";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 // Cache directory for generated thumbnails
 const THUMBNAIL_CACHE_DIR = join(tmpdir(), FILE_CONSTANTS.THUMBNAIL_CACHE_DIR);
@@ -81,12 +81,10 @@ export async function generateThumbnail(
     const cacheKey = getCacheKey(filePath);
     const outputPath = join(THUMBNAIL_CACHE_DIR, `${cacheKey}.png`);
 
-    // Escape the file path for shell
-    const escapedPath = filePath.replace(/'/g, "'\\''");
-
     // Use qlmanage to generate thumbnail
     // -t = generate thumbnail, -s = size, -o = output directory
-    await execAsync(`qlmanage -t -s ${size} -o '${THUMBNAIL_CACHE_DIR}' '${escapedPath}'`, {
+    const safeSize = Math.max(1, Math.min(Math.floor(Number(size)), 2048));
+    await execFileAsync("qlmanage", ["-t", "-s", String(safeSize), "-o", THUMBNAIL_CACHE_DIR, filePath], {
       timeout: FILE_CONSTANTS.THUMBNAIL_TIMEOUT,
     });
 

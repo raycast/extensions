@@ -139,7 +139,7 @@ describe("getVariableMarkdown", () => {
 
   it("has one line per variable", () => {
     const md = getVariableMarkdown();
-    const lines = md.split("\n");
+    const lines = md.trim().split("\n");
     expect(lines.length).toBe(TEMPLATE_VARIABLES.length);
   });
 });

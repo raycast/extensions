@@ -70,11 +70,6 @@ export function parseTemplate(template: string): ParsedTemplate {
     tokens.push(createLiteralToken(literalValue));
   }
 
-  // Handle empty template
-  if (tokens.length === 0 && template.length > 0) {
-    tokens.push(createLiteralToken(template));
-  }
-
   return {
     tokens,
     variables,
@@ -183,7 +178,8 @@ export function hasVariable(template: string, variableName: string): boolean {
  * Replace a variable in a template with a new pattern
  */
 export function replaceVariable(template: string, variableName: string, replacement: string): string {
-  // Match the variable with or without format
-  const pattern = new RegExp(`\\{${variableName.replace(".", "\\.")}(?::[^}]+)?\\}`, "g");
-  return template.replace(pattern, replacement);
+  // Escape all regex metacharacters in the variable name
+  const escaped = variableName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`\\{${escaped}(?::[^}]+)?\\}`, "g");
+  return template.replace(pattern, () => replacement);
 }
