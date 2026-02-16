@@ -388,22 +388,14 @@ export async function getComputeACLs(): Promise<ComputeACLListResponse> {
   return fastlyFetch<ComputeACLListResponse>("/resources/acls");
 }
 
-export async function getComputeACLEntries(
-  aclId: string,
-  cursor?: string,
-): Promise<ComputeACLEntriesResponse> {
+export async function getComputeACLEntries(aclId: string, cursor?: string): Promise<ComputeACLEntriesResponse> {
   const params = new URLSearchParams();
   if (cursor) params.set("cursor", cursor);
   const query = params.toString();
-  return fastlyFetch<ComputeACLEntriesResponse>(
-    `/resources/acls/${aclId}/entries${query ? `?${query}` : ""}`,
-  );
+  return fastlyFetch<ComputeACLEntriesResponse>(`/resources/acls/${aclId}/entries${query ? `?${query}` : ""}`);
 }
 
-export async function updateComputeACLEntries(
-  aclId: string,
-  entries: ComputeACLBulkEntry[],
-): Promise<void> {
+export async function updateComputeACLEntries(aclId: string, entries: ComputeACLBulkEntry[]): Promise<void> {
   await fastlyFetch(`/resources/acls/${aclId}/entries`, {
     method: "PATCH",
     body: JSON.stringify({ entries }),
@@ -427,10 +419,7 @@ export async function deleteSecretStore(storeId: string): Promise<void> {
   await fastlyFetch(`/resources/stores/secret/${storeId}`, { method: "DELETE" });
 }
 
-export async function getSecretStoreSecrets(
-  storeId: string,
-  cursor?: string,
-): Promise<SecretStoreSecretsResponse> {
+export async function getSecretStoreSecrets(storeId: string, cursor?: string): Promise<SecretStoreSecretsResponse> {
   const params = new URLSearchParams();
   if (cursor) params.set("cursor", cursor);
   const query = params.toString();
@@ -484,34 +473,21 @@ export async function getConfigStoreItems(storeId: string): Promise<ConfigStoreI
 }
 
 export async function getConfigStoreItem(storeId: string, key: string): Promise<ConfigStoreItem> {
-  return fastlyFetch<ConfigStoreItem>(
-    `/resources/stores/config/${storeId}/item/${encodeURIComponent(key)}`,
-  );
+  return fastlyFetch<ConfigStoreItem>(`/resources/stores/config/${storeId}/item/${encodeURIComponent(key)}`);
 }
 
-export async function createConfigStoreItem(
-  storeId: string,
-  key: string,
-  value: string,
-): Promise<ConfigStoreItem> {
+export async function createConfigStoreItem(storeId: string, key: string, value: string): Promise<ConfigStoreItem> {
   return fastlyFetch<ConfigStoreItem>(`/resources/stores/config/${storeId}/item`, {
     method: "POST",
     body: JSON.stringify({ item_key: key, item_value: value }),
   });
 }
 
-export async function updateConfigStoreItem(
-  storeId: string,
-  key: string,
-  value: string,
-): Promise<ConfigStoreItem> {
-  return fastlyFetch<ConfigStoreItem>(
-    `/resources/stores/config/${storeId}/item/${encodeURIComponent(key)}`,
-    {
-      method: "PUT",
-      body: JSON.stringify({ item_value: value }),
-    },
-  );
+export async function updateConfigStoreItem(storeId: string, key: string, value: string): Promise<ConfigStoreItem> {
+  return fastlyFetch<ConfigStoreItem>(`/resources/stores/config/${storeId}/item/${encodeURIComponent(key)}`, {
+    method: "PUT",
+    body: JSON.stringify({ item_value: value }),
+  });
 }
 
 export async function deleteConfigStoreItem(storeId: string, key: string): Promise<void> {

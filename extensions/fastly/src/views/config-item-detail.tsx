@@ -66,23 +66,15 @@ ${markdown}
             <Detail.Metadata.Label title="Format" text={isJson ? "JSON" : "Text"} />
             <Detail.Metadata.Label title="Size" text={`${new Blob([item.item_value]).size} bytes`} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label
-              title="Created"
-              text={new Date(item.created_at).toLocaleString()}
-            />
-            <Detail.Metadata.Label
-              title="Updated"
-              text={new Date(item.updated_at).toLocaleString()}
-            />
+            <Detail.Metadata.Label title="Created" text={new Date(item.created_at).toLocaleString()} />
+            <Detail.Metadata.Label title="Updated" text={new Date(item.updated_at).toLocaleString()} />
           </Detail.Metadata>
         ) : null
       }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {value !== undefined && (
-              <Action.CopyToClipboard title="Copy Value" content={value} icon={Icon.Clipboard} />
-            )}
+            {value !== undefined && <Action.CopyToClipboard title="Copy Value" content={value} icon={Icon.Clipboard} />}
             <Action.Push
               title="Edit Item"
               target={<ConfigItemForm store={store} itemKey={itemKey} onSaved={revalidate} />}

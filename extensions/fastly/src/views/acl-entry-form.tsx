@@ -24,8 +24,7 @@ function isValidIPv6(ip: string): boolean {
   if (ip.includes("::")) {
     const sides = ip.split("::");
     if (sides.length > 2) return false;
-    const totalGroups =
-      (sides[0] ? sides[0].split(":").length : 0) + (sides[1] ? sides[1].split(":").length : 0);
+    const totalGroups = (sides[0] ? sides[0].split(":").length : 0) + (sides[1] ? sides[1].split(":").length : 0);
     if (totalGroups > 7) return false;
   } else {
     if (ip.split(":").length !== 8) return false;

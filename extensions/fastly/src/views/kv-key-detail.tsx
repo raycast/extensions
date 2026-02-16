@@ -61,17 +61,13 @@ ${markdown}
           <Detail.Metadata.Label title="Key" text={keyName} icon={Icon.Key} />
           <Detail.Metadata.Label title="Store" text={store.name} />
           <Detail.Metadata.Label title="Format" text={isJson ? "JSON" : "Text"} />
-          {value !== undefined && (
-            <Detail.Metadata.Label title="Size" text={`${new Blob([value]).size} bytes`} />
-          )}
+          {value !== undefined && <Detail.Metadata.Label title="Size" text={`${new Blob([value]).size} bytes`} />}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {value !== undefined && (
-              <Action.CopyToClipboard title="Copy Value" content={value} icon={Icon.Clipboard} />
-            )}
+            {value !== undefined && <Action.CopyToClipboard title="Copy Value" content={value} icon={Icon.Clipboard} />}
             <Action.Push
               title="Edit Value"
               target={<KVKeyForm store={store} keyName={keyName} onSaved={revalidate} />}

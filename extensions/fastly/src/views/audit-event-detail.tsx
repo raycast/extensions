@@ -104,28 +104,12 @@ ${metadata}
           />
           <Detail.Metadata.Label title="Event ID" text={event.id} icon={Icon.Fingerprint} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Timestamp"
-            text={timestamp}
-            icon={Icon.Clock}
-          />
+          <Detail.Metadata.Label title="Timestamp" text={timestamp} icon={Icon.Clock} />
           <Detail.Metadata.Label title="Relative" text={relativeTime} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Actor"
-            text={event.attributes.user_id || "System"}
-            icon={Icon.Person}
-          />
-          <Detail.Metadata.Label
-            title="IP Address"
-            text={event.attributes.ip || "N/A"}
-            icon={Icon.Network}
-          />
-          <Detail.Metadata.Label
-            title="Token"
-            text={obfuscateToken(event.attributes.token_id)}
-            icon={Icon.Key}
-          />
+          <Detail.Metadata.Label title="Actor" text={event.attributes.user_id || "System"} icon={Icon.Person} />
+          <Detail.Metadata.Label title="IP Address" text={event.attributes.ip || "N/A"} icon={Icon.Network} />
+          <Detail.Metadata.Label title="Token" text={obfuscateToken(event.attributes.token_id)} icon={Icon.Key} />
           {event.attributes.admin && (
             <Detail.Metadata.TagList title="Flags">
               <Detail.Metadata.TagList.Item text="Admin" color={Color.Red} />
@@ -133,29 +117,17 @@ ${metadata}
           )}
           <Detail.Metadata.Separator />
           {event.attributes.service_id && (
-            <Detail.Metadata.Label
-              title="Service ID"
-              text={event.attributes.service_id}
-              icon={Icon.Globe}
-            />
+            <Detail.Metadata.Label title="Service ID" text={event.attributes.service_id} icon={Icon.Globe} />
           )}
           {event.attributes.customer_id && (
-            <Detail.Metadata.Label
-              title="Customer ID"
-              text={event.attributes.customer_id}
-              icon={Icon.Building}
-            />
+            <Detail.Metadata.Label title="Customer ID" text={event.attributes.customer_id} icon={Icon.Building} />
           )}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy Event ID"
-              content={event.id}
-              icon={Icon.Clipboard}
-            />
+            <Action.CopyToClipboard title="Copy Event ID" content={event.id} icon={Icon.Clipboard} />
             <Action.CopyToClipboard
               title="Copy as JSON"
               content={JSON.stringify(exportableEvent, null, 2)}
@@ -168,9 +140,7 @@ ${metadata}
               title="Copy Description"
               content={event.attributes.description || event.attributes.event_type}
             />
-            {event.attributes.ip && (
-              <Action.CopyToClipboard title="Copy IP Address" content={event.attributes.ip} />
-            )}
+            {event.attributes.ip && <Action.CopyToClipboard title="Copy IP Address" content={event.attributes.ip} />}
             {event.attributes.service_id && (
               <Action.CopyToClipboard title="Copy Service ID" content={event.attributes.service_id} />
             )}

@@ -62,7 +62,11 @@ export function KVStoreList() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search KV stores by name...">
       {stores.length === 0 && !isLoading ? (
-        <List.EmptyView title="No KV Stores Found" description="Your account doesn't have any KV stores yet." icon={Icon.Tray} />
+        <List.EmptyView
+          title="No KV Stores Found"
+          description="Your account doesn't have any KV stores yet."
+          icon={Icon.Tray}
+        />
       ) : (
         stores.map((store) => (
           <List.Item
@@ -73,11 +77,7 @@ export function KVStoreList() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.Push
-                    title="Browse Keys"
-                    target={<KVStoreKeys store={store} />}
-                    icon={Icon.List}
-                  />
+                  <Action.Push title="Browse Keys" target={<KVStoreKeys store={store} />} icon={Icon.List} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="Actions">

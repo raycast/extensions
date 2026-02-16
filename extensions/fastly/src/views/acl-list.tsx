@@ -70,11 +70,7 @@ export function ACLList() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.Push
-                    title="View Entries"
-                    target={<ACLEntries acl={acl} />}
-                    icon={Icon.List}
-                  />
+                  <Action.Push title="View Entries" target={<ACLEntries acl={acl} />} icon={Icon.List} />
                   <Action.Push
                     title="Quick Add IP"
                     target={<ACLEntryForm aclId={acl.id} aclName={acl.name} />}

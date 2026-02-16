@@ -77,11 +77,7 @@ export function SecretStoreList() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.Push
-                    title="View Secrets"
-                    target={<SecretStoreSecrets store={store} />}
-                    icon={Icon.List}
-                  />
+                  <Action.Push title="View Secrets" target={<SecretStoreSecrets store={store} />} icon={Icon.List} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="Copy">

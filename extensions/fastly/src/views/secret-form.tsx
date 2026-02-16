@@ -65,10 +65,7 @@ export function SecretForm({ store, secretName, onSaved }: SecretFormProps) {
       navigationTitle={isRotating ? `Rotate ${secretName}` : `New Secret in ${store.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={isRotating ? "Rotate Secret" : "Create Secret"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={isRotating ? "Rotate Secret" : "Create Secret"} onSubmit={handleSubmit} />
           <Action
             title="Generate Random Value"
             icon={Icon.Wand}
@@ -85,11 +82,7 @@ export function SecretForm({ store, secretName, onSaved }: SecretFormProps) {
       {isRotating ? (
         <Form.Description text={`Secret: ${secretName}`} />
       ) : (
-        <Form.TextField
-          title="Secret Name"
-          placeholder="e.g. DATABASE_URL, API_KEY"
-          {...itemProps.name}
-        />
+        <Form.TextField title="Secret Name" placeholder="e.g. DATABASE_URL, API_KEY" {...itemProps.name} />
       )}
       <Form.PasswordField
         title="Secret Value"

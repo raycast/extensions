@@ -130,11 +130,7 @@ export function ACLEntries({ acl }: ACLEntriesProps) {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={acl.name}
-      searchBarPlaceholder={`Search entries in ${acl.name}...`}
-    >
+    <List isLoading={isLoading} navigationTitle={acl.name} searchBarPlaceholder={`Search entries in ${acl.name}...`}>
       {entries.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Entries Found"
@@ -165,14 +161,7 @@ export function ACLEntries({ acl }: ACLEntriesProps) {
                   <ActionPanel.Section>
                     <Action.Push
                       title="Edit Entry"
-                      target={
-                        <ACLEntryForm
-                          aclId={acl.id}
-                          aclName={acl.name}
-                          entry={entry}
-                          onSaved={loadEntries}
-                        />
-                      }
+                      target={<ACLEntryForm aclId={acl.id} aclName={acl.name} entry={entry} onSaved={loadEntries} />}
                       icon={Icon.Pencil}
                       shortcut={{
                         macOS: { modifiers: ["cmd"], key: "e" },
@@ -181,17 +170,13 @@ export function ACLEntries({ acl }: ACLEntriesProps) {
                     />
                     <Action.Push
                       title="Add Entry"
-                      target={
-                        <ACLEntryForm aclId={acl.id} aclName={acl.name} onSaved={loadEntries} />
-                      }
+                      target={<ACLEntryForm aclId={acl.id} aclName={acl.name} onSaved={loadEntries} />}
                       icon={Icon.Plus}
                       shortcut={Keyboard.Shortcut.Common.New}
                     />
                     <Action.Push
                       title="Bulk Add IPs"
-                      target={
-                        <ACLBulkAddForm aclId={acl.id} aclName={acl.name} onSaved={loadEntries} />
-                      }
+                      target={<ACLBulkAddForm aclId={acl.id} aclName={acl.name} onSaved={loadEntries} />}
                       icon={Icon.PlusSquare}
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "n" },
@@ -209,11 +194,7 @@ export function ACLEntries({ acl }: ACLEntriesProps) {
                         Windows: { modifiers: ["ctrl", "shift"], key: "c" },
                       }}
                     />
-                    <Action
-                      title="Copy All Prefixes"
-                      icon={Icon.Clipboard}
-                      onAction={handleCopyAllPrefixes}
-                    />
+                    <Action title="Copy All Prefixes" icon={Icon.Clipboard} onAction={handleCopyAllPrefixes} />
                     <Action.CopyToClipboard
                       // eslint-disable-next-line @raycast/prefer-title-case
                       title="Copy as cURL Command"
@@ -235,11 +216,7 @@ export function ACLEntries({ acl }: ACLEntriesProps) {
                         Windows: { modifiers: ["ctrl", "shift"], key: "e" },
                       }}
                     />
-                    <Action
-                      title="Export as CSV"
-                      icon={Icon.Download}
-                      onAction={handleExportCSV}
-                    />
+                    <Action title="Export as CSV" icon={Icon.Download} onAction={handleExportCSV} />
                   </ActionPanel.Section>
 
                   <ActionPanel.Section title="Danger Zone">

@@ -107,11 +107,7 @@ export function ConfigStoreItems({ store }: ConfigStoreItemsProps) {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={store.name}
-      searchBarPlaceholder={`Search items in ${store.name}...`}
-    >
+    <List isLoading={isLoading} navigationTitle={store.name} searchBarPlaceholder={`Search items in ${store.name}...`}>
       {items.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Items Found"
@@ -144,9 +140,7 @@ export function ConfigStoreItems({ store }: ConfigStoreItemsProps) {
                     />
                     <Action.Push
                       title="Edit Item"
-                      target={
-                        <ConfigItemForm store={store} itemKey={item.item_key} onSaved={loadItems} />
-                      }
+                      target={<ConfigItemForm store={store} itemKey={item.item_key} onSaved={loadItems} />}
                       icon={Icon.Pencil}
                       shortcut={{
                         macOS: { modifiers: ["cmd"], key: "e" },

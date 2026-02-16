@@ -1,14 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Keyboard,
-  Color,
-  Clipboard,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Keyboard, Color, Clipboard } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { AuditEvent, AuditEventFilters } from "../types";
 import { getEvents } from "../api";
@@ -363,12 +353,8 @@ export function AuditEventList() {
                   event.id,
                 ]}
                 accessories={[
-                  ...(isSecurity
-                    ? [{ tag: { value: "Security", color: Color.Red } }]
-                    : []),
-                  ...(event.attributes.service_id
-                    ? [{ tag: { value: "Service", color: Color.Blue } }]
-                    : []),
+                  ...(isSecurity ? [{ tag: { value: "Security", color: Color.Red } }] : []),
+                  ...(event.attributes.service_id ? [{ tag: { value: "Service", color: Color.Blue } }] : []),
                   { text: relativeTime, tooltip: new Date(event.attributes.created_at).toLocaleString() },
                 ]}
                 actions={
@@ -460,11 +446,7 @@ export function AuditEventList() {
                           Windows: { modifiers: ["ctrl", "shift"], key: "e" },
                         }}
                       />
-                      <Action
-                        title="Export Page as CSV"
-                        icon={Icon.Download}
-                        onAction={handleExportCSV}
-                      />
+                      <Action title="Export Page as CSV" icon={Icon.Download} onAction={handleExportCSV} />
                     </ActionPanel.Section>
 
                     <ActionPanel.Section title="Navigate">

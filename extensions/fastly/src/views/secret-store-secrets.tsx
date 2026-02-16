@@ -124,9 +124,7 @@ export function SecretStoreSecrets({ store }: SecretStoreSecretsProps) {
                   <ActionPanel.Section>
                     <Action.Push
                       title="Rotate Secret"
-                      target={
-                        <SecretForm store={store} secretName={secret.name} onSaved={loadSecrets} />
-                      }
+                      target={<SecretForm store={store} secretName={secret.name} onSaved={loadSecrets} />}
                       icon={Icon.ArrowCounterClockwise}
                       shortcut={{
                         macOS: { modifiers: ["cmd"], key: "e" },

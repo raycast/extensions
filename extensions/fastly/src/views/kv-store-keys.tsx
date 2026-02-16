@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Keyboard, confirmAlert, Alert, Clipboard } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  Keyboard,
+  confirmAlert,
+  Alert,
+  Clipboard,
+} from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { KVStore } from "../types";
 import { getKVStoreKeys, deleteKVStoreKey, getKVStoreKeyValue } from "../api";
@@ -92,11 +103,7 @@ export function KVStoreKeys({ store }: KVStoreKeysProps) {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={store.name}
-      searchBarPlaceholder={`Search keys in ${store.name}...`}
-    >
+    <List isLoading={isLoading} navigationTitle={store.name} searchBarPlaceholder={`Search keys in ${store.name}...`}>
       {keys.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Keys Found"

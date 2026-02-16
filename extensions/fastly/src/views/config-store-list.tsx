@@ -65,17 +65,11 @@ export function ConfigStoreList() {
             title={store.name}
             subtitle={store.id}
             icon={Icon.Gear}
-            accessories={[
-              { text: new Date(store.updated_at).toLocaleDateString(), tooltip: "Last updated" },
-            ]}
+            accessories={[{ text: new Date(store.updated_at).toLocaleDateString(), tooltip: "Last updated" }]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.Push
-                    title="View Items"
-                    target={<ConfigStoreItems store={store} />}
-                    icon={Icon.List}
-                  />
+                  <Action.Push title="View Items" target={<ConfigStoreItems store={store} />} icon={Icon.List} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="Copy">

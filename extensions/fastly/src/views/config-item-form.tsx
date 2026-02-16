@@ -1,11 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ConfigStore } from "../types";
-import {
-  createConfigStoreItem,
-  updateConfigStoreItem,
-  getConfigStoreItem,
-} from "../api";
+import { createConfigStoreItem, updateConfigStoreItem, getConfigStoreItem } from "../api";
 import { FormValidation, useForm } from "@raycast/utils";
 
 interface ConfigItemFormProps {
@@ -84,10 +80,7 @@ export function ConfigItemForm({ store, itemKey, onSaved }: ConfigItemFormProps)
       navigationTitle={isEditing ? `Edit ${itemKey}` : `New Item in ${store.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={isEditing ? "Update Item" : "Create Item"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={isEditing ? "Update Item" : "Create Item"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -95,11 +88,7 @@ export function ConfigItemForm({ store, itemKey, onSaved }: ConfigItemFormProps)
       {isEditing ? (
         <Form.Description text={`Key: ${itemKey}`} />
       ) : (
-        <Form.TextField
-          title="Key"
-          placeholder="e.g. feature_flags, api_url, rate_limit"
-          {...itemProps.key}
-        />
+        <Form.TextField title="Key" placeholder="e.g. feature_flags, api_url, rate_limit" {...itemProps.key} />
       )}
       <Form.TextArea
         title="Value"
