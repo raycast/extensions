@@ -19,11 +19,6 @@ import { isValidIcaoCode } from "./utils";
 
 const FLYCHECK_MACOS_URL = "https://fractals.sg/flycheck/";
 
-interface Preferences {
-  apiKey: string;
-  tempUnit: "celsius" | "fahrenheit";
-}
-
 interface DecodedMetar {
   icao: string;
   station?: { name: string };
@@ -102,6 +97,11 @@ export default function Command() {
   const is401 = error && error.message.includes("401");
   const showDetail = isValidIcaoCode(searchText) && !is401;
 
+  // `environment.platform` isn't present on the declared `Environment` type
+  // so narrow it here for runtime checks.
+  const platform = (environment as unknown as { platform?: string }).platform;
+  const isMac = platform === "macOS";
+
   return (
     <List
       isLoading={isLoading}
@@ -151,7 +151,7 @@ export default function Command() {
                       setHistory(newHistory);
                     }}
                   />
-                  {environment.platform === "macOS" && (
+                  {isMac && (
                     <ActionPanel.Section>
                       <DownloadFlyCheckAction />
                     </ActionPanel.Section>
@@ -243,7 +243,7 @@ export default function Command() {
                       title="Barometer"
                       text={`${metar.barometer?.hg || 0} inHg (${metar.barometer?.hpa || 0} hPa)`}
                     />
-                    {environment.platform === "macOS" && (
+                    {isMac && (
                       <>
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Link
@@ -269,7 +269,7 @@ export default function Command() {
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                   />
                 </ActionPanel.Section>
-                {environment.platform === "macOS" && (
+                {isMac && (
                   <ActionPanel.Section>
                     <DownloadFlyCheckAction />
                   </ActionPanel.Section>

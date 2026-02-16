@@ -1,17 +1,17 @@
-import { isValidIcaoCode } from "../utils";
+import { parseMetar } from "./test-utils";
 
 describe("parseMetar", () => {
   test("parses variable wind (VRB)", () => {
     const metar = "EGLL 041350Z VRB03KT 9999 FEW020 15/08 Q1013";
     const parsed = parseMetar(metar);
-    expect(parsed.wind).toContain("VRB at 03");
+    expect(parsed.wind).toBe("VRB at 03");
     expect(parsed.flightCategory).toBe("VFR");
   });
 
   test("parses CAVOK and altimeter in inHg", () => {
     const metar = "KJFK 041350Z 00000KT CAVOK 20/10 A2992";
     const parsed = parseMetar(metar);
-    expect(parsed.visibility).toContain("CAVOK");
+    expect(parsed.visibility).toBe("CAVOK");
     expect(parsed.altimeter).toBe("29.92 inHg");
   });
 
