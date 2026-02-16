@@ -300,20 +300,19 @@ export default function SearchMemories() {
     });
   }
 
-  // --- Search results view ---
-  if (searchText && searchResults) {
-    return (
-      <List
-        isLoading={isLoading}
-        onSearchTextChange={setSearchText}
-        searchBarPlaceholder="Search your knowledge base..."
-        throttle
-      >
+  return (
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search your knowledge base..."
+      throttle
+    >
+      {searchText ? (
         <List.Section
           title="Results"
-          subtitle={`${searchResults.length} memories${highRelevanceResults?.length ? ` · ${highRelevanceResults.length} above 50%` : ""}`}
+          subtitle={`${searchResults?.length ?? 0} memories${highRelevanceResults?.length ? ` · ${highRelevanceResults.length} above 50%` : ""}`}
         >
-          {searchResults.map((result: SearchResult) => (
+          {(searchResults ?? []).map((result: SearchResult) => (
             <List.Item
               key={result.memory.id}
               icon={{
@@ -374,59 +373,49 @@ export default function SearchMemories() {
             />
           ))}
         </List.Section>
-      </List>
-    );
-  }
-
-  // --- Recent memories view ---
-  return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search your knowledge base..."
-      throttle
-    >
-      <List.Section
-        title="Recent Memories"
-        subtitle={`${recentMemories?.length ?? 0} memories`}
-      >
-        {(recentMemories ?? []).map((memory: ListMemory) => (
-          <List.Item
-            key={memory.id}
-            icon={Icon.Dot}
-            title={memory.title || "Untitled"}
-            subtitle={truncate(memory.content, 60)}
-            accessories={[
-              ...(memory.is_favorite ? [{ icon: Icon.Star }] : []),
-              { text: memory.time },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="View Memory"
-                  icon={Icon.Eye}
-                  target={<ListMemoryDetail memory={memory} />}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Content"
-                  content={memory.content}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Title"
-                  content={memory.title || ""}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                />
-                <Action.Open
-                  title="Open in Nowledge Mem"
-                  target={`nowledgemem://memory/${memory.id}`}
-                  icon={Icon.AppWindow}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      ) : (
+        <List.Section
+          title="Recent Memories"
+          subtitle={`${recentMemories?.length ?? 0} memories`}
+        >
+          {(recentMemories ?? []).map((memory: ListMemory) => (
+            <List.Item
+              key={memory.id}
+              icon={Icon.Dot}
+              title={memory.title || "Untitled"}
+              subtitle={truncate(memory.content, 60)}
+              accessories={[
+                ...(memory.is_favorite ? [{ icon: Icon.Star }] : []),
+                { text: memory.time },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Memory"
+                    icon={Icon.Eye}
+                    target={<ListMemoryDetail memory={memory} />}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Content"
+                    content={memory.content}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Title"
+                    content={memory.title || ""}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  />
+                  <Action.Open
+                    title="Open in Nowledge Mem"
+                    target={`nowledgemem://memory/${memory.id}`}
+                    icon={Icon.AppWindow}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
