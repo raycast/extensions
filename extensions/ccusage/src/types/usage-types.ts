@@ -61,6 +61,7 @@ export const WeeklyUsageResponseSchema = z.object({
           cacheCreationTokens: z.number(),
           cacheReadTokens: z.number(),
           cost: z.number(),
+          totalTokens: z.number().optional(),
         }),
       ),
     }),
