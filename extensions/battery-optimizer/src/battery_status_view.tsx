@@ -96,7 +96,8 @@ export default function Command() {
       // Try direct execution
       try {
         console.log("Trying direct execution...");
-        const output = execSync(`${toolCmd} ${command}`, {
+        const redirectStderr = currentTool === BatteryTool.BATT && command === "status" ? " 2>&1" : "";
+        const output = execSync(`${toolCmd} ${command}${redirectStderr}`, {
           encoding: "utf8",
           env: {
             ...process.env,
