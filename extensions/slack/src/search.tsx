@@ -61,7 +61,7 @@ function CopyIdAction({ id }: { id: string }) {
       content={id}
       shortcut={{
         macOS: { modifiers: ["cmd", "shift"], key: "c" },
-        windows: { modifiers: ["ctrl", "shift"], key: "c" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
       }}
     />
   );
@@ -79,11 +79,7 @@ function Search() {
   const filteredRecents = recents.filter((item) => matchesAllWords(item.name, searchText));
 
   return (
-    <List
-      isLoading={isLoading || isLoadingChannels}
-      filtering={false}
-      onSearchTextChange={setSearchText}
-    >
+    <List isLoading={isLoading || isLoadingChannels} filtering={false} onSearchTextChange={setSearchText}>
       {filteredRecents.map((item) => {
         const isUser = item.id.startsWith("U");
 

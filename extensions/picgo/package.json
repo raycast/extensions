@@ -21,6 +21,27 @@
             "description": "Upload your images through PicGo-Core.",
             "mode": "view",
             "icon": "extension-icon.png"
+        },
+        {
+            "name": "plugin-search",
+            "title": "Search Plugins",
+            "description": "Search PicGo plugins on NPM.",
+            "mode": "view",
+            "icon": "extension-icon.png"
+        },
+        {
+            "name": "plugin-management",
+            "title": "Manage Plugins",
+            "description": "Manage your local PicGo plugins.",
+            "mode": "view",
+            "icon": "extension-icon.png"
+        },
+        {
+            "name": "uploader-management",
+            "title": "Manage Uploader Configs",
+            "description": "Manage your PicGo uploader configurations.",
+            "mode": "view",
+            "icon": "extension-icon.png"
         }
     ],
     "preferences": [
@@ -30,22 +51,59 @@
             "required": false,
             "title": "Upload Timeout (ms)",
             "description": "Custom timeout for PicGo upload process",
+            "placeholder": "Custom timeout for PicGo upload process",
             "default": "30000"
+        },
+        {
+            "name": "proxy",
+            "type": "textfield",
+            "required": false,
+            "title": "Upload Proxy",
+            "description": "Custom proxy address to upload images",
+            "placeholder": "Ex. https://127.0.0.1:7890",
+            "default": ""
+        },
+        {
+            "name": "npmPath",
+            "type": "textfield",
+            "required": false,
+            "title": "NPM Path",
+            "description": "Custom path to NPM executable (exclude npm itself, e.g. '/usr/local/bin' instead of '/usr/local/bin/npm')",
+            "placeholder": "Exclude npm itself, e.g. '/usr/local/bin' instead of '/usr/local/bin/npm'",
+            "default": "/usr/local/bin"
+        },
+        {
+            "name": "npmProxy",
+            "type": "textfield",
+            "required": false,
+            "title": "NPM Proxy",
+            "description": "Custom proxy address to download plugins via NPM",
+            "placeholder": "Ex. https://127.0.0.1:7890",
+            "default": ""
+        },
+        {
+            "name": "npmMirror",
+            "type": "textfield",
+            "required": false,
+            "title": "NPM Mirror",
+            "description": "Custom mirror address to download plugins via NPM",
+            "placeholder": "Ex. https://registry.npmmirror.com",
+            "default": ""
         }
     ],
     "dependencies": {
-        "@raycast/api": "^1.104.5",
-        "@raycast/utils": "^2.2.2",
-        "open": "^11.0.0",
-        "picgo": "^2.0.0"
+        "@raycast/api": "^1.104.3",
+        "@raycast/utils": "^1.17.0",
+        "open": "^10.1.0",
+        "picgo": "^2.0.2"
     },
     "devDependencies": {
-        "@raycast/eslint-config": "^2.1.1",
-        "@types/node": "25.2.2",
-        "@types/react": "19.2.13",
-        "eslint": "^10.0.0",
-        "prettier": "^3.8.1",
-        "typescript": "^5.9.3"
+        "@raycast/eslint-config": "^2.0.4",
+        "@types/node": "22.13.10",
+        "@types/react": "19.0.10",
+        "eslint": "^9.22.0",
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.2"
     },
     "scripts": {
         "build": "ray build",

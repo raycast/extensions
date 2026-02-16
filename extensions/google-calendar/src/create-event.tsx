@@ -31,7 +31,7 @@ type FormValues = {
   sendInvitations: string;
 };
 
-const preferences: Preferences.CreateEvent = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 function parseDurationAsMinutesForPlainNumbers(value: string | undefined): number | null | undefined {
   if (value === undefined) {

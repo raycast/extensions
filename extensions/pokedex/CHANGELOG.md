@@ -1,5 +1,13 @@
 # Pokédex Changelog
 
+## [Type Mastery] - 2026-02-13
+
+- Added **Natures** command to explore stat changes and localized names for all Pokémon natures.
+- Added **Type Chart** command for a comprehensive overview of type effectiveness, strengths, and weaknesses.
+- Fixed **Weakness & Resistance** calculations using a reliable manual cross-reference to avoid missing GraphQL data.
+- Completed a global prefix refactor by removing legacy `pokemon_v2_` naming across UI, types, and API queries.
+- Fully migrated **Moves** and **Abilities** commands to use GraphQL API data as the single source of truth.
+
 ## [Move Stability] - 2026-01-04
 
 - Fixed extension crash occurring when Pokémon move names are missing in localized languages.

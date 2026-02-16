@@ -184,6 +184,30 @@ export class IAMService {
     return principalsArray;
   }
 
+  private async modifyPolicy(
+    resourceType: string | undefined,
+    resourceName: string | undefined,
+    modifier: (policy: IAMPolicy) => void,
+  ): Promise<void> {
+    try {
+      const policy = await this.getIAMPolicy(resourceType, resourceName);
+      modifier(policy);
+      const url = `${CRM_API}/projects/${this.projectId}:setIamPolicy`;
+      await gcpPost(this.gcloudPath, url, { policy });
+      const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
+      this.policyCache.delete(cacheKey);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const isPermissionDenied =
+        errorMessage.toLowerCase().includes("permission denied") || errorMessage.includes("403");
+      throw new Error(
+        isPermissionDenied
+          ? "Permission denied: Policy update access denied. You need 'resourcemanager.projects.setIamPolicy' permission (typically Project Owner role)."
+          : errorMessage,
+      );
+    }
+  }
+
   async addMember(
     role: string,
     memberType: string,
@@ -195,45 +219,17 @@ export class IAMService {
       throw new Error(`Invalid member ID format for ${memberType}`);
     }
 
-    try {
-      // Get current policy
-      const policy = await this.getIAMPolicy(resourceType, resourceName);
-
-      // Add member to binding
-      const member = `${memberType}:${memberId}`;
-      let bindingFound = false;
-
-      for (const binding of policy.bindings) {
-        if (binding.role === role) {
-          if (!binding.members.includes(member)) {
-            binding.members.push(member);
-          }
-          bindingFound = true;
-          break;
+    const member = `${memberType}:${memberId}`;
+    await this.modifyPolicy(resourceType, resourceName, (policy) => {
+      const existing = policy.bindings.find((b) => b.role === role);
+      if (existing) {
+        if (!existing.members.includes(member)) {
+          existing.members.push(member);
         }
-      }
-
-      if (!bindingFound) {
+      } else {
         policy.bindings.push({ role, members: [member] });
       }
-
-      // Set updated policy via REST API
-      const url = `${CRM_API}/projects/${this.projectId}:setIamPolicy`;
-      await gcpPost(this.gcloudPath, url, { policy });
-
-      const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
-      this.policyCache.delete(cacheKey);
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      const isPermissionDenied =
-        errorMessage.toLowerCase().includes("permission denied") || errorMessage.includes("403");
-
-      throw new Error(
-        isPermissionDenied
-          ? "Permission denied: Policy update access denied. You need 'resourcemanager.projects.setIamPolicy' permission (typically Project Owner role)."
-          : errorMessage,
-      );
-    }
+    });
   }
 
   async removeMember(
@@ -247,40 +243,16 @@ export class IAMService {
       throw new Error(`Invalid member ID format for ${memberType}`);
     }
 
-    try {
-      // Get current policy
-      const policy = await this.getIAMPolicy(resourceType, resourceName);
-
-      // Remove member from binding
-      const member = `${memberType}:${memberId}`;
-
+    const member = `${memberType}:${memberId}`;
+    await this.modifyPolicy(resourceType, resourceName, (policy) => {
       for (const binding of policy.bindings) {
         if (binding.role === role) {
           binding.members = binding.members.filter((m) => m !== member);
           break;
         }
       }
-
-      // Remove empty bindings
       policy.bindings = policy.bindings.filter((b) => b.members.length > 0);
-
-      // Set updated policy via REST API
-      const url = `${CRM_API}/projects/${this.projectId}:setIamPolicy`;
-      await gcpPost(this.gcloudPath, url, { policy });
-
-      const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
-      this.policyCache.delete(cacheKey);
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      const isPermissionDenied =
-        errorMessage.toLowerCase().includes("permission denied") || errorMessage.includes("403");
-
-      throw new Error(
-        isPermissionDenied
-          ? "Permission denied: Policy update access denied. You need 'resourcemanager.projects.setIamPolicy' permission (typically Project Owner role)."
-          : errorMessage,
-      );
-    }
+    });
   }
 
   async getServiceAccounts(): Promise<IAMServiceAccount[]> {

@@ -1,5 +1,12 @@
 # Notion Changelog
 
+## [Fix deep linking to Notion pages] - 2026-02-12
+
+- Fix pages not opening to the correct page when using the Notion desktop app ([#23492](https://github.com/raycast/extensions/issues/23492))
+- Use `notion://` deep link protocol with explicit app targeting for reliable page navigation on both macOS and Windows
+- Fix "Open in Browser" action incorrectly passing the Notion app instead of the default browser
+- Make Notion app detection case-insensitive and check macOS bundle identifier for robustness
+
 ## [Use Clipboard in Create + Update Shortcuts] - 2025-12-01
 
 - New `Preference` allowing to use Clipboard for auto-filling **Name (Title)** or **Content** (ref: [Issue #23086](https://github.com/raycast/extensions/issues/23086))

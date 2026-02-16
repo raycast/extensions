@@ -143,3 +143,71 @@ export interface DownloadProgress {
 }
 
 export type DownloadProgressCallback = (progress: DownloadProgress) => void;
+
+/// Chunked Cache Types
+
+/** Index entry for chunked cache - contains searchable fields and chunk reference */
+export interface IndexEntry {
+  /** Unique identifier: name for formulae, token for casks */
+  id: string;
+  /** Name/token lowercased for search */
+  n: string;
+  /** Description lowercased (truncated ~100 chars) */
+  d?: string;
+  /** Aliases lowercased (formula only) */
+  a?: string[];
+  /** Chunk number (0-indexed) */
+  c: number;
+  /** Index within chunk (0-indexed) */
+  i: number;
+}
+
+/** Metadata for chunked cache */
+export interface ChunkedCacheMeta {
+  /** Schema version for future migrations */
+  version: number;
+  /** Original source URL for staleness check */
+  sourceUrl: string;
+  /** Last-Modified header timestamp (ms) */
+  lastModified: number;
+  /** When cache was built */
+  createdAt: number;
+  /** Total number of items */
+  totalItems: number;
+  /** Items per chunk */
+  chunkSize: number;
+  /** Number of chunk files */
+  chunkCount: number;
+  /** Type of data */
+  type: "formula" | "cask";
+}
+
+/** Configuration for chunked cache paths */
+export interface ChunkedCacheConfig {
+  /** Base directory for chunks (e.g., supportPath/formula/) */
+  baseDir: string;
+  /** Path to index.json */
+  indexPath: string;
+  /** Path to meta.json */
+  metaPath: string;
+  /** Type of data */
+  type: "formula" | "cask";
+}
+
+/** In-memory index loaded from chunked cache */
+export interface CacheIndex {
+  /** Index entries for searching */
+  entries: IndexEntry[];
+  /** Cache metadata */
+  meta: ChunkedCacheMeta;
+}
+
+/** Extended Remote type with chunked cache support */
+export interface ChunkedRemote<T> extends Remote<T> {
+  /** Chunked cache configuration */
+  chunkedConfig: ChunkedCacheConfig;
+  /** Cached index (loaded once) */
+  index?: CacheIndex;
+  /** In-flight index fetch for deduplication */
+  indexFetch?: Promise<CacheIndex>;
+}
