@@ -1,5 +1,10 @@
 # Anytype Changelog
 
+## [Bug Fixes & Dependency Updates] - 2026-02-14
+
+- Fix object property dropdowns interfering with each other's search results in create and update forms
+- Update dependencies to latest versions
+
 ## [Terminology Updates & Enhancements] - 2025-12-15
 
 - Update to API version 2025-11-08

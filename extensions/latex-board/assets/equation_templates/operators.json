@@ -1,0 +1,37 @@
+{
+  "Arithmetic Operators": {
+    "Plus Sign / Addition": " + ",
+    "Minus Sign / Subtraction": " - ",
+    "Plus or Minus 1": " \\pm ",
+    "Plus or Minus 2": " \\mp ",
+    "Multiplication 1": " \\times ",
+    "Multiplication 2": " \\cdot ",
+    "Multiplication 3": " \\ast ",
+    "Division 1": " \\div ",
+    "Division 2": " / ",
+    "Factorial": " ! "
+  },
+  "Relational Operators": {
+    "Equal": " = ",
+    "Not Equal": " \\neq ",
+    "Approximately 1": " \\sim ",
+    "Approximately 2": " \\simeq ",
+    "Approximately 3": " \\approx",
+    "Approximately 4": " \\cong ",
+    "Less Than": " \\lt ",
+    "Less or Equal": " \\le ",
+    "Much Less Than": " \\ll ",
+    "Greater Than": " \\gt ",
+    "Greater or Equal": " \\ge ",
+    "Much Greater Than": " \\gg "
+  },
+  "Geometric Operators": {
+    "Congruent": " \\equiv ",
+    "Angle": " \\angle ",
+    "Degree": " \\circ ",
+    "Perpendicular": " \\perp ",
+    "Parallel 1": " /\\!/ ",
+    "Parallel 2": " \\parallel ",
+    "Arc": " \\frown "
+  }
+}
