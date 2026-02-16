@@ -1,19 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { Project, ProjectDetail, Task, Notification } from "../types";
 
-interface Preferences {
-  instanceUrl: string;
-  apiToken: string;
-  workspaceId: string;
-}
-
 export class KaneoAPI {
   private instanceUrl: string;
   private apiToken: string;
   private workspaceId: string;
 
   constructor() {
-    const prefs = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues();
     this.instanceUrl = prefs.instanceUrl;
     this.apiToken = prefs.apiToken;
     this.workspaceId = prefs.workspaceId;
