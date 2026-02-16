@@ -1,13 +1,5 @@
 # Color Palette Generator Changelog
 
-## [Unreleased]
-
-- ✨ Added **Collections** support for organizing palettes
-- ✨ Added **Gradient Creator** command
-- ✨ Added **Image Color Extraction** command
-- ✨ Added **Physical Color Matching** (RAL, Copic, Prismacolor)
-- 🎨 Improved UI with new icons and better layout
-
 ## [Initial Release] - {PR_MERGE_DATE}
 
 - 🚀 Initial release of Color Palette Generator
