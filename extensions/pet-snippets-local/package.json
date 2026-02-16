@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pet-snippets-local",
+  "title": "Pet Snippets",
+  "description": "Search and use local pet snippets in Raycast and Vicinae.",
+  "icon": "command-icon.png",
+  "author": "deyunluo",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools", "Productivity"],
+  "keywords": ["pet", "snippets", "command", "clipboard", "developer"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Pet Snippets",
+      "description": "Search, copy, and paste local pet snippets.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sourceMode",
+      "title": "Snippet Source",
+      "description": "Choose how snippets are loaded",
+      "type": "dropdown",
+      "required": false,
+      "default": "pet-cli",
+      "data": [
+        {
+          "title": "Pet CLI (config-aware, recommended)",
+          "value": "pet-cli"
+        },
+        {
+          "title": "Snippet File (legacy)",
+          "value": "snippet-file"
+        }
+      ]
+    },
+    {
+      "name": "petConfigPath",
+      "title": "Pet Config File Path",
+      "description": "Used only in Pet CLI mode",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "petBinaryPath",
+      "title": "Pet Binary Path",
+      "description": "Optional absolute path to pet binary (useful when GUI PATH is limited)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "snippetFilePath",
+      "title": "Pet Snippet File Path",
+      "description": "Used only in Snippet File mode",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultAction",
+      "title": "Default Action",
+      "description": "Set the first action shown for each snippet",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "commandDisplay",
+      "title": "Command Display",
+      "description": "Choose how command text is shown in list results",
+      "type": "dropdown",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Detail Pane (Recommended)",
+          "value": "detail"
+        },
+        {
+          "title": "Title Only (Clean)",
+          "value": "title-only"
+        },
+        {
+          "title": "Subtitle (Description + Command)",
+          "value": "subtitle"
+        }
+      ]
+    },
+    {
+      "name": "lastUsedDisplay",
+      "title": "Last Used Display",
+      "description": "Show or hide usage time in list accessories",
+      "type": "dropdown",
+      "required": false,
+      "default": "off",
+      "data": [
+        {
+          "title": "Off (Clean)",
+          "value": "off"
+        },
+        {
+          "title": "Relative (e.g. 20m ago)",
+          "value": "relative"
+        },
+        {
+          "title": "Absolute (date and time)",
+          "value": "absolute"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "@raycast/api": "^1.94.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "react": "^18.2.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt looks like you are trying to publish this extension to npm.\\nUse npm run publish to publish to Raycast Store.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
