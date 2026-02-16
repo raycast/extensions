@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Updated bundled `sql-wasm.wasm` to match upgraded `sql.js` v1.13.0, fixing `TypeError: a is not a function` crash in Firefox, LibreWolf, and Zen bookmark hooks
+
 ## [Bug Fixes] - 2026-02-12
 
 - Fixed permission errors (EPERM) when accessing Chrome and Arc browser Local State files ([#16481](https://github.com/raycast/extensions/issues/16481))
