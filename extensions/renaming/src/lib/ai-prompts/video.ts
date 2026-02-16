@@ -9,8 +9,9 @@ export function getVideoPrompt(file: FileInfo, metadata?: FileMetadataContext): 
   const contextParts: string[] = [];
 
   if (metadata?.spotlight?.duration) {
-    const mins = Math.floor(metadata.spotlight.duration / 60);
-    const secs = Math.round(metadata.spotlight.duration % 60);
+    const totalSeconds = Math.round(metadata.spotlight.duration);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
     contextParts.push(`Duration: ${mins}:${secs.toString().padStart(2, "0")}`);
   }
   if (metadata?.spotlight?.pixelWidth && metadata?.spotlight?.pixelHeight) {

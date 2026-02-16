@@ -94,14 +94,16 @@ export function formatNumber(num: number, format?: string): string {
   // Determine padding from format string
   // "001" = 3 digits, "0001" = 4 digits, etc.
   const padding = format.length;
-  return String(num).padStart(padding, "0");
+  const sign = num < 0 ? "-" : "";
+  const digits = String(Math.abs(num)).padStart(padding, "0");
+  return `${sign}${digits}`;
 }
 
 /**
- * Parse a counter format string to extract padding
+ * Parse a counter format string to extract padding width
  *
  * @param format - Format string like "001" or "0001"
- * @returns Padding value (number of digits)
+ * @returns Padding width (the total length of the format string, or 1 if not provided)
  */
 export function parseCounterFormat(format?: string): number {
   if (!format) {
@@ -119,10 +121,10 @@ export function parseCounterFormat(format?: string): number {
  * @returns Formatted size string (e.g., "1.5 MB")
  */
 export function formatSize(bytes: number, decimals: number = 1): string {
-  if (bytes === 0) return "0 B";
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
 
   const k = 1024;
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), FORMAT_CONSTANTS.SIZE_UNITS.length - 1);
   const size = bytes / Math.pow(k, i);
 
   return `${size.toFixed(decimals)} ${FORMAT_CONSTANTS.SIZE_UNITS[i]}`;
@@ -135,7 +137,7 @@ export function formatSize(bytes: number, decimals: number = 1): string {
  * @returns Formatted duration (e.g., "1h 30m 45s" or "5m 30s")
  */
 export function formatDuration(seconds: number): string {
-  if (seconds < 0) return "0s";
+  if (!Number.isFinite(seconds) || seconds < 0) return "0s";
 
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -183,15 +185,15 @@ export function generateUUID(): string {
  * @param format - Format string to analyze
  * @returns Type of format
  */
-export function detectFormatType(format: string): "date" | "time" | "number" | "size" | "unknown" {
-  // Date patterns
-  if (/^[YMD\-_./]+$/i.test(format)) {
-    return "date";
-  }
-
-  // Time patterns
+export function detectFormatType(format: string): "date" | "time" | "number" | "unknown" {
+  // Time patterns (check before date since 'mm' is ambiguous)
   if (/^[Hhms\-_.:AaPp]+$/.test(format)) {
     return "time";
+  }
+
+  // Date patterns (case-sensitive: only uppercase Y, M, D)
+  if (/^[YMD\-_./]+$/.test(format)) {
+    return "date";
   }
 
   // Number patterns (all zeros)

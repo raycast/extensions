@@ -88,7 +88,7 @@ describe("getAIPromptForFile", () => {
   });
 
   it("returns fileType 'code' for .js", () => {
-    const jsFile = { ...mockCode, path: "/tmp/index.js", name: "index.js", extension: "js" };
+    const jsFile = { ...mockCode, path: "/tmp/index.js", name: "index.js", extension: ".js" };
     const result = getAIPromptForFile(jsFile);
     expect(result.fileType).toBe("code");
   });

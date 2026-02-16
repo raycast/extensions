@@ -38,8 +38,8 @@ describe("transformCase", () => {
       expect(transformCase("the quick brown fox", CaseStyle.TITLE_CASE)).toBe("The Quick Brown Fox");
     });
 
-    it("should handle already capitalized words", () => {
-      expect(transformCase("HELLO WORLD", CaseStyle.TITLE_CASE)).toBe("HELLO WORLD");
+    it("should normalize already capitalized words", () => {
+      expect(transformCase("HELLO WORLD", CaseStyle.TITLE_CASE)).toBe("Hello World");
     });
   });
 

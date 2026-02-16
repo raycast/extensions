@@ -164,8 +164,9 @@ function resolveSecond(context: TemplateContext, format?: string): string {
 }
 
 function resolveRandom(format?: string): string {
-  // Format specifies length (e.g., "6" or just the count of chars in format)
-  const length = format ? parseInt(format, 10) || format.length : 6;
+  if (!format) return generateRandom(6);
+  const parsed = parseInt(format, 10);
+  const length = Number.isInteger(parsed) ? Math.max(1, parsed) : format.length;
   return generateRandom(length);
 }
 
@@ -245,19 +246,19 @@ function resolveSpotlightMetadata(property: string, context: TemplateContext): s
       return spotlight.title || "";
 
     case "pixelWidth":
-      return spotlight.pixelWidth ? String(spotlight.pixelWidth) : "";
+      return spotlight.pixelWidth !== undefined ? String(spotlight.pixelWidth) : "";
 
     case "pixelHeight":
-      return spotlight.pixelHeight ? String(spotlight.pixelHeight) : "";
+      return spotlight.pixelHeight !== undefined ? String(spotlight.pixelHeight) : "";
 
     case "pageCount":
-      return spotlight.pageCount ? String(spotlight.pageCount) : "";
+      return spotlight.pageCount !== undefined ? String(spotlight.pageCount) : "";
 
     case "audioChannelCount":
-      return spotlight.audioChannelCount ? String(spotlight.audioChannelCount) : "";
+      return spotlight.audioChannelCount !== undefined ? String(spotlight.audioChannelCount) : "";
 
     case "audioBitRate":
-      return spotlight.audioBitRate ? String(spotlight.audioBitRate) : "";
+      return spotlight.audioBitRate !== undefined ? String(spotlight.audioBitRate) : "";
 
     default:
       return "";
@@ -290,10 +291,10 @@ export function requiresSpotlight(variableName: string): boolean {
 
 /**
  * Get the date source required by a template
- * Returns 'exif' if any exif.dateTaken variables are present
+ * Returns EXIF date source if any exif-prefixed variables are present
  */
 export function getRequiredDateSource(variables: string[]): TemplateDateSource | null {
-  if (variables.some((v) => v === "exif.dateTaken" || v === "exif")) {
+  if (variables.some((v) => v.startsWith("exif"))) {
     return TemplateDateSource.EXIF;
   }
   return null;

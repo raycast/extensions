@@ -50,7 +50,7 @@ export function transformCase(str: string, style: CaseStyle): string {
  * Title Case: Each Word Is Capitalized
  */
 function toTitleCase(str: string): string {
-  return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  return str.replace(/\b\w+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
 }
 
 /**
@@ -83,6 +83,7 @@ function toCamelCase(str: string): string {
  */
 function toPascalCase(str: string): string {
   const words = splitIntoWords(str);
+  if (words.length === 0) return str;
   return words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join("");
 }
 
@@ -91,6 +92,7 @@ function toPascalCase(str: string): string {
  */
 function toSnakeCase(str: string): string {
   const words = splitIntoWords(str);
+  if (words.length === 0) return str;
   return words.map((word) => word.toLowerCase()).join("_");
 }
 
@@ -99,6 +101,7 @@ function toSnakeCase(str: string): string {
  */
 function toKebabCase(str: string): string {
   const words = splitIntoWords(str);
+  if (words.length === 0) return str;
   return words.map((word) => word.toLowerCase()).join("-");
 }
 

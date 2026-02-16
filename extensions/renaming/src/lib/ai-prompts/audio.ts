@@ -18,8 +18,9 @@ export function getAudioPrompt(file: FileInfo, metadata?: FileMetadataContext): 
     contextParts.push(`Title: ${metadata.spotlight.title}`);
   }
   if (metadata?.spotlight?.duration) {
-    const mins = Math.floor(metadata.spotlight.duration / 60);
-    const secs = Math.round(metadata.spotlight.duration % 60);
+    const totalSeconds = Math.round(metadata.spotlight.duration);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
     contextParts.push(`Duration: ${mins}:${secs.toString().padStart(2, "0")}`);
   }
 
