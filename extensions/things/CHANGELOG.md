@@ -1,5 +1,12 @@
 # Things Changelog
 
+## [Reduce JXA Latency for List Fetching] - 2026-02-09
+
+- Todo list views and the menu bar command now fetch tags and lists in a single JXA call instead of two
+- The menu bar command and `get-lists` tool no longer fetch tags unnecessarily
+- The "Add New Project" form fetches tags and areas in a single JXA call instead of two
+- Consolidated collection-fetching functions into a single `getCollections` API
+
 ## [JXA Performance Optimization] - 2026-01-12
 
 - Reduced JXA fetch times by ~75% using `properties()` batching to minimize Apple Event overhead

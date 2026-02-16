@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Security Updates] - {PR_MERGE_DATE}
+
+- Upgraded `tar` to `7.5.7` to address dependency security advisories.
+
 ## [Bug Fixes] - 2025-07-07
 
 - Added support for detecting file selection in ForkLift's List and Icon views

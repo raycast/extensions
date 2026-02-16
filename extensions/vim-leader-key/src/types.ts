@@ -6,6 +6,7 @@ export interface Action {
   type: ActionType;
   label?: string;
   value: string;
+  browser?: string;
 }
 
 export interface Group {
@@ -14,6 +15,7 @@ export interface Group {
   type: "group";
   label?: string;
   actions: ActionOrGroup[];
+  browser?: string;
 }
 
 export type ActionOrGroup = Action | Group;

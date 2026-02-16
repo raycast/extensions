@@ -20,7 +20,7 @@ const getDerps = (netcheck: NetcheckResponse, setPreferredDERP: (derp: Derp) => 
         },
         nodes: _derpMap[_key].Nodes,
       };
-      netcheck.PreferredDERP === _key && setPreferredDERP(derp);
+      if (netcheck.PreferredDERP === _key) setPreferredDERP(derp);
       return derp;
     })
     .sort((a, b) => {
@@ -46,7 +46,7 @@ export default function MyDeviceList() {
         setNetcheck(_netcheck);
         setPortMappings(
           ["UPnP", "PMP", "PCP"].reduce((acc, mapping) => {
-            _netcheck[mapping] && acc.push(mapping);
+            if (_netcheck[mapping]) acc.push(mapping);
             return acc;
           }, [] as string[]),
         );

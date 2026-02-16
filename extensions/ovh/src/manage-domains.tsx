@@ -159,14 +159,14 @@ function DNSRecords({ domain }: { domain: Domain }) {
     data: records,
     mutate,
   } = useCachedPromise(
-    async () => {
-      const list = await callOvh<string[]>(`v1/domain/zone/${domain.domain}/record`);
+    async (domain: string) => {
+      const list = await callOvh<string[]>(`v1/domain/zone/${domain}/record`);
       const records = await Promise.all(
-        list.map((record) => callOvh<DNSRecord>(`v1/domain/zone/${domain.domain}/record/${record}`)),
+        list.map((record) => callOvh<DNSRecord>(`v1/domain/zone/${domain}/record/${record}`)),
       );
       return records;
     },
-    [],
+    [domain.domain],
     {
       initialData: [],
     },

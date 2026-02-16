@@ -15,9 +15,9 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
 import { EditTitle } from "./components/EditTitle";
-import { useHistory } from "./history";
-import { HistoryItem } from "./types";
-import { getFormattedColor, getPreviewColor } from "./utils";
+import { useHistory } from "./lib/history";
+import { HistoryItem } from "./lib/types";
+import { getFormattedColor, getPreviewColor } from "./lib/utils";
 
 const preferences: Preferences.OrganizeColors = getPreferenceValues();
 
@@ -75,7 +75,13 @@ export default function Command() {
 
 function Actions({ historyItem }: { historyItem: HistoryItem }) {
   const { remove, clear, edit } = useHistory();
-  const { data: frontmostApp } = usePromise(getFrontmostApplication, []);
+  const { data: frontmostApp } = usePromise(async () => {
+    try {
+      return await getFrontmostApplication();
+    } catch {
+      return null;
+    }
+  }, []);
 
   const color = historyItem.color;
   const formattedColor = getFormattedColor(color);

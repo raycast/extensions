@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
-import { getFormattedColor } from "../utils";
-import { HistoryColor } from "../types";
+import { getFormattedColor } from "../lib/utils";
+import { HistoryColor } from "../lib/types";
 
 type CopyAsSubmenuProps = {
   color: HistoryColor;
@@ -9,7 +9,7 @@ type CopyAsSubmenuProps = {
 
 export default function CopyAsSubmenu({ color, onCopy }: CopyAsSubmenuProps) {
   return (
-    <ActionPanel.Submenu title="Copy As" icon={Icon.Clipboard} shortcut={Keyboard.Shortcut.Common.Copy}>
+    <ActionPanel.Submenu title="Copy as" icon={Icon.Clipboard} shortcut={Keyboard.Shortcut.Common.Copy}>
       <Action.CopyToClipboard title={`HEX`} content={getFormattedColor(color, "hex")} onCopy={onCopy} />
       <Action.CopyToClipboard
         title={`Lowercased HEX`}

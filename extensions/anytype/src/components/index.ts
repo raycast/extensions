@@ -20,6 +20,7 @@ export * from "./Lists/TemplateList";
 export * from "./ObjectDetail";
 export * from "./ObjectList";
 export * from "./ObjectListItem";
+export * from "./ObjectPropertyDropdown";
 export * from "./SpaceListItem";
 export * from "./UpdateForm/UpdateObjectForm";
 export * from "./UpdateForm/UpdatePropertyForm";

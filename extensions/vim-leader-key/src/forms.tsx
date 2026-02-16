@@ -65,6 +65,7 @@ export function AddItemForm({
     actionType?: string;
     value?: string;
     appValue?: string;
+    browser?: string;
   }) {
     setIsSubmitting(true);
 
@@ -102,6 +103,7 @@ export function AddItemForm({
         type: "group",
         label: values.label || undefined,
         actions: [],
+        browser: values.browser || undefined,
       } as Group;
     } else {
       const value =
@@ -122,6 +124,9 @@ export function AddItemForm({
         type: (values.actionType || "application") as ActionType,
         label: values.label || undefined,
         value,
+        ...(values.actionType === "url" && values.browser
+          ? { browser: values.browser }
+          : {}),
       } as ActionItem;
     }
 
@@ -160,6 +165,31 @@ export function AddItemForm({
         }
         info="Display name for this item"
       />
+
+      {itemType === "group" && (
+        <>
+          <Form.Separator />
+          <Form.Dropdown
+            id="browser"
+            title="Default Browser"
+            info="URLs in this group will open with this browser unless overridden by the individual action"
+          >
+            <Form.Dropdown.Item
+              value=""
+              title="System Default"
+              icon={Icon.Globe}
+            />
+            {applications.map((app) => (
+              <Form.Dropdown.Item
+                key={app.bundleId || app.path}
+                value={app.path}
+                title={app.name}
+                icon={{ fileIcon: app.path }}
+              />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
 
       {itemType === "action" && (
         <>
@@ -215,6 +245,28 @@ export function AddItemForm({
               info={targetConfig.info}
             />
           )}
+
+          {actionType === "url" && (
+            <Form.Dropdown
+              id="browser"
+              title="Open With"
+              info="Choose which browser to open this URL with. System Default inherits from the parent group or OS default."
+            >
+              <Form.Dropdown.Item
+                value=""
+                title="System Default"
+                icon={Icon.Globe}
+              />
+              {applications.map((app) => (
+                <Form.Dropdown.Item
+                  key={app.bundleId || app.path}
+                  value={app.path}
+                  title={app.name}
+                  icon={{ fileIcon: app.path }}
+                />
+              ))}
+            </Form.Dropdown>
+          )}
         </>
       )}
     </Form>
@@ -268,6 +320,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
     actionType?: string;
     value?: string;
     appValue?: string;
+    browser?: string;
   }) {
     setIsSubmitting(true);
 
@@ -302,6 +355,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
       updates = {
         key,
         label: values.label || undefined,
+        browser: values.browser || undefined,
       };
     } else {
       const value =
@@ -321,6 +375,8 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
         type: (values.actionType || "application") as ActionType,
         label: values.label || undefined,
         value,
+        browser:
+          values.actionType === "url" ? values.browser || undefined : undefined,
       };
     }
 
@@ -359,6 +415,32 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
         placeholder={isGroupItem ? "e.g., Applications" : "e.g., Terminal"}
         info="Display name for this item"
       />
+
+      {isGroupItem && (
+        <>
+          <Form.Separator />
+          <Form.Dropdown
+            id="browser"
+            title="Default Browser"
+            defaultValue={(item as Group).browser || ""}
+            info="URLs in this group will open with this browser unless overridden by the individual action"
+          >
+            <Form.Dropdown.Item
+              value=""
+              title="System Default"
+              icon={Icon.Globe}
+            />
+            {applications.map((app) => (
+              <Form.Dropdown.Item
+                key={app.bundleId || app.path}
+                value={app.path}
+                title={app.name}
+                icon={{ fileIcon: app.path }}
+              />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
 
       {!isGroupItem && (
         <>
@@ -416,6 +498,29 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
               info={targetConfig.info}
             />
           )}
+
+          {actionType === "url" && (
+            <Form.Dropdown
+              id="browser"
+              title="Open With"
+              defaultValue={(item as ActionItem).browser || ""}
+              info="Choose which browser to open this URL with. System Default inherits from the parent group or OS default."
+            >
+              <Form.Dropdown.Item
+                value=""
+                title="System Default"
+                icon={Icon.Globe}
+              />
+              {applications.map((app) => (
+                <Form.Dropdown.Item
+                  key={app.bundleId || app.path}
+                  value={app.path}
+                  title={app.name}
+                  icon={{ fileIcon: app.path }}
+                />
+              ))}
+            </Form.Dropdown>
+          )}
         </>
       )}
     </Form>
@@ -444,7 +549,7 @@ function getTargetConfig(actionType: ActionType): {
       return {
         title: "Folder Path",
         placeholder: "/path/to/folder or ~/Documents",
-        info: "The folder path to open in Finder",
+        info: "The folder path to open in file manager",
       };
     case "command":
       return {

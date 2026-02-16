@@ -7,7 +7,7 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import path from "path";
 import fs from "fs";
-import { rm } from "fs/promises";
+import { rm, mkdir, readFile, writeFile } from "fs/promises";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
 import { ReadableStream } from "stream/web";
@@ -16,11 +16,9 @@ import { parser } from "stream-json";
 import { filter } from "stream-json/filters/Filter";
 import { streamArray } from "stream-json/streamers/StreamArray";
 import { pipeline as streamPipeline } from "stream/promises";
-import { Remote, DownloadProgressCallback } from "./types";
+import { DownloadProgressCallback, ChunkedCacheConfig, ChunkedCacheMeta, CacheIndex, IndexEntry } from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
-import { NetworkError, ParseError, isNetworkError, isRecoverableError, ensureError } from "./errors";
-import { wait } from "./async";
-import { preferences } from "./preferences";
+import { NetworkError, ParseError, ensureError } from "./errors";
 
 /// Cache Paths
 
@@ -83,13 +81,17 @@ export async function clearCache(): Promise<void> {
       cacheLogger.log("No cache files to clear");
     }
 
-    await Promise.all(
-      CACHE_FILES.map((file) =>
+    await Promise.all([
+      // Clear legacy cache files
+      ...CACHE_FILES.map((file) =>
         rm(path.join(environment.supportPath, file), { force: true }).catch(() => {
           // Ignore errors for files that don't exist
         }),
       ),
-    );
+      // Clear chunked cache directories
+      rm(path.join(environment.supportPath, "formula"), { recursive: true, force: true }).catch(() => {}),
+      rm(path.join(environment.supportPath, "cask"), { recursive: true, force: true }).catch(() => {}),
+    ]);
 
     cacheLogger.log("Cache clear completed", {
       filesCleared: existingFiles,
@@ -131,335 +133,440 @@ const valid_keys = [
   "pinned",
 ];
 
-/** Maximum number of retry attempts for network requests */
-const MAX_FETCH_RETRIES = 2;
-/** Delay between retry attempts in milliseconds */
-const RETRY_DELAY_MS = 1000;
-
-export async function fetchRemote<T>(remote: Remote<T>, onProgress?: DownloadProgressCallback): Promise<T[]> {
-  if (remote.value) {
-    // Already cached in memory
-    onProgress?.({
-      url: remote.url,
-      bytesDownloaded: 0,
-      totalBytes: 0,
-      percent: 100,
-      complete: true,
-    });
-    return remote.value;
-  } else if (remote.fetch) {
-    return remote.fetch;
-  } else {
-    remote.fetch = _fetchRemoteWithRetry(remote, onProgress)
-      .then((value) => {
-        remote.value = value;
-        return value;
-      })
-      .finally(() => {
-        remote.fetch = undefined;
-      });
-    return remote.fetch;
-  }
-}
-
 /**
- * Fetch remote data with automatic retry for transient network errors.
+ * Download remote data to cache file WITHOUT parsing into memory.
+ * Use this when you only need the file on disk (e.g., for chunked cache building).
+ * Returns the last-modified timestamp from the remote.
  */
-async function _fetchRemoteWithRetry<T>(remote: Remote<T>, onProgress?: DownloadProgressCallback): Promise<T[]> {
-  let lastError: Error | undefined;
-
-  for (let attempt = 0; attempt <= MAX_FETCH_RETRIES; attempt++) {
-    try {
-      return await _fetchRemote(remote, attempt, onProgress);
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-
-      // Only retry for recoverable errors (network issues)
-      if (!isRecoverableError(error) || attempt >= MAX_FETCH_RETRIES) {
-        throw lastError;
-      }
-
-      fetchLogger.warn("Fetch failed, retrying", {
-        url: remote.url,
-        attempt: attempt + 1,
-        maxRetries: MAX_FETCH_RETRIES,
-        error: lastError.message,
-      });
-
-      // Wait before retrying
-      await wait(RETRY_DELAY_MS * (attempt + 1));
-    }
-  }
-
-  throw lastError;
-}
-
-async function _fetchRemote<T>(
-  remote: Remote<T>,
-  attempt: number,
+export async function downloadRemoteToCache(
+  url: string,
+  cachePath: string,
   onProgress?: DownloadProgressCallback,
-): Promise<T[]> {
-  const fetchStartTime = Date.now();
-  fetchLogger.log("Fetching remote", { url: remote.url, attempt });
-
-  async function fetchURL(): Promise<void> {
-    const downloadStartTime = Date.now();
-    fetchLogger.log("Starting download", { url: remote.url });
-
-    try {
-      // Request uncompressed data so Content-Length matches actual bytes for accurate progress
-      const response = await fetch(remote.url, {
-        headers: {
-          "Accept-Encoding": "identity",
-        },
-      });
-      if (!response.ok || !response.body) {
-        throw new NetworkError(`HTTP ${response.status}: ${response.statusText}`, {
-          statusCode: response.status,
-          url: remote.url,
-        });
-      }
-
-      // Track response size for progress reporting
-      // With Accept-Encoding: identity, Content-Length should match actual bytes
-      const contentLength = response.headers.get("content-length");
-      const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
-
-      // Track bytes for progress reporting
-      let bytesDownloaded = 0;
-
-      // Report initial progress
-      onProgress?.({
-        url: remote.url,
-        bytesDownloaded: 0,
-        totalBytes,
-        percent: 0,
-        complete: false,
-      });
-
-      // Create write stream with error handling
-      const writeStream = fs.createWriteStream(remote.cachePath);
-
-      try {
-        // If we have a progress callback, use a transform stream to track progress
-        // Otherwise, stream directly to avoid overhead
-        if (onProgress) {
-          // Throttle progress updates to avoid render loops (max once per 100ms)
-          let lastProgressUpdate = 0;
-          const PROGRESS_THROTTLE_MS = 100;
-
-          const progressStream = new TransformStream({
-            transform(chunk, controller) {
-              bytesDownloaded += chunk.length;
-              const now = Date.now();
-
-              // Only report progress if enough time has passed OR this is the final chunk
-              const isComplete = totalBytes > 0 && bytesDownloaded >= totalBytes;
-              if (isComplete || now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
-                const percent = totalBytes > 0 ? Math.round((bytesDownloaded / totalBytes) * 100) : -1;
-                lastProgressUpdate = now;
-
-                onProgress({
-                  url: remote.url,
-                  bytesDownloaded,
-                  totalBytes,
-                  percent: Math.min(percent, 100), // Cap at 100%
-                  complete: false,
-                });
-              }
-
-              controller.enqueue(chunk);
-            },
-          });
-
-          // Pipe through progress tracker
-          const progressBody = response.body.pipeThrough(progressStream);
-          await streamPipeline(Readable.fromWeb(progressBody as ReadableStream), writeStream);
-        } else {
-          // Direct stream without progress tracking
-          await streamPipeline(Readable.fromWeb(response.body as ReadableStream), writeStream);
-        }
-      } catch (streamError) {
-        // Clean up partial file on stream failure
-        writeStream.destroy();
-        try {
-          fs.unlinkSync(remote.cachePath);
-          fetchLogger.log("Cleaned up partial cache file", { path: remote.cachePath });
-        } catch {
-          // Ignore cleanup errors
-        }
-
-        // Report error state to progress callback
-        const errorMessage = streamError instanceof Error ? streamError.message : String(streamError);
-        onProgress?.({
-          url: remote.url,
-          bytesDownloaded,
-          totalBytes,
-          percent: -1,
-          complete: false,
-          error: true,
-          errorMessage,
-        });
-
-        throw streamError;
-      }
-
-      // Report completion
-      onProgress?.({
-        url: remote.url,
-        bytesDownloaded,
-        totalBytes,
-        percent: 100,
-        complete: true,
-      });
-
-      const downloadDurationMs = Date.now() - downloadStartTime;
-
-      // Log cache update with size metrics
-      const logData: Record<string, unknown> = {
-        path: remote.cachePath,
-        url: remote.url,
-        downloadDurationMs,
-      };
-
-      if (totalBytes > 0) {
-        const contentLengthKb = (totalBytes / 1024).toFixed(2);
-        logData.responseSizeBytes = totalBytes;
-        logData.responseSizeKb = `${contentLengthKb} KB`;
-      }
-
-      if (preferences.useInternalApi) {
-        logData.usingInternalApi = true;
-      }
-
-      cacheLogger.log("Cache updated from remote", logData);
-    } catch (error) {
-      const downloadDurationMs = Date.now() - downloadStartTime;
-      fetchLogger.error("Download failed", { url: remote.url, durationMs: downloadDurationMs, error });
-
-      // Report error state to progress callback
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      onProgress?.({
-        url: remote.url,
-        bytesDownloaded: 0,
-        totalBytes: 0,
-        percent: -1,
-        complete: false,
-        error: true,
-        errorMessage,
-      });
-
-      if (isNetworkError(error)) {
-        throw error;
-      }
-      // Wrap fetch errors as NetworkError for retry logic
-      throw new NetworkError(`Failed to fetch ${remote.url}`, {
-        cause: error instanceof Error ? error : undefined,
-        url: remote.url,
-      });
-    }
+): Promise<number> {
+  // Check if cache is already up to date
+  let cacheInfo: fs.Stats | undefined;
+  let lastModified = 0;
+  try {
+    cacheInfo = await stat(cachePath);
+    const response = await fetch(url, { method: "HEAD" });
+    lastModified = Date.parse(response.headers.get("last-modified") ?? "");
+  } catch {
+    cacheLogger.log("Cache miss for download", { path: cachePath });
   }
 
-  async function updateCache(): Promise<void> {
-    let cacheInfo: fs.Stats | undefined;
-    let lastModified = 0;
-    try {
-      cacheInfo = await stat(remote.cachePath);
-      const response = await fetch(remote.url, { method: "HEAD" });
-      lastModified = Date.parse(response.headers.get("last-modified") ?? "");
-    } catch {
-      cacheLogger.log("Cache miss", { path: remote.cachePath });
-    }
-    if (!cacheInfo || cacheInfo.size == 0 || lastModified > cacheInfo.mtimeMs) {
-      await fetchURL();
-    } else {
-      fetchLogger.log("Using cached data (up to date)", {
-        url: remote.url,
-        cacheAgeMs: Date.now() - cacheInfo.mtimeMs,
-      });
-    }
+  if (cacheInfo && cacheInfo.size > 0 && lastModified <= cacheInfo.mtimeMs) {
+    fetchLogger.log("Using cached file (up to date)", {
+      url,
+      cacheAgeMs: Date.now() - cacheInfo.mtimeMs,
+    });
+    return lastModified || cacheInfo.mtimeMs;
   }
 
-  async function readCache(): Promise<T[]> {
-    const parseStartTime = Date.now();
-    fetchLogger.log("Parsing cache", { path: remote.cachePath });
+  // Need to download
+  const downloadStartTime = Date.now();
+  fetchLogger.log("Starting download (no parse)", { url });
 
-    const keysRe = new RegExp(`\\b(${valid_keys.join("|")})\\b`);
+  const response = await fetch(url, {
+    headers: {
+      "Accept-Encoding": "identity",
+    },
+  });
 
-    return new Promise<T[]>((resolve, reject) => {
-      // Note: We accumulate all parsed objects in memory. For ~7000 formulae/casks,
-      // this is typically 5-15MB of heap usage. The streaming parser avoids loading
-      // the entire 30MB+ JSON file at once, but we still need to hold the parsed
-      // objects for the UI. A SQLite backend could reduce memory but adds complexity.
-      const value: T[] = [];
-      // Throttle processing progress updates (max once per 100ms)
+  if (!response.ok || !response.body) {
+    throw new NetworkError(`HTTP ${response.status}: ${response.statusText}`, {
+      statusCode: response.status,
+      url,
+    });
+  }
+
+  const contentLength = response.headers.get("content-length");
+  const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+  let bytesDownloaded = 0;
+
+  onProgress?.({
+    url,
+    bytesDownloaded: 0,
+    totalBytes,
+    percent: 0,
+    complete: false,
+  });
+
+  const writeStream = fs.createWriteStream(cachePath);
+
+  try {
+    if (onProgress) {
       let lastProgressUpdate = 0;
       const PROGRESS_THROTTLE_MS = 100;
 
-      /** Report processing progress to callback */
-      const reportProgress = (complete: boolean) => {
-        onProgress?.({
-          url: remote.url,
-          bytesDownloaded: 0,
-          totalBytes: 0,
-          percent: 100, // Download is complete
-          complete,
-          phase: "processing",
-          itemsProcessed: value.length,
-          totalItems: complete ? value.length : undefined,
-        });
-      };
-
-      // stream-json/chain is quite slow, so unfortunately not suitable for real-time queries.
-      // migrating to a sqlite backend _might_ help, although the bootstrap cost
-      // (each time json response changes) will probably be high.
-      const pipeline = chain([
-        fs.createReadStream(remote.cachePath),
-        parser(),
-        filter({ filter: keysRe }),
-        streamArray(),
-      ]);
-      pipeline.on("data", (data) => {
-        if (data && typeof data === "object" && "value" in data) {
-          value.push(data.value);
-
-          // Report processing progress (throttled)
+      const progressStream = new TransformStream({
+        transform(chunk, controller) {
+          bytesDownloaded += chunk.length;
           const now = Date.now();
-          if (onProgress && now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+
+          const isComplete = totalBytes > 0 && bytesDownloaded >= totalBytes;
+          if (isComplete || now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+            const percent = totalBytes > 0 ? Math.round((bytesDownloaded / totalBytes) * 100) : -1;
             lastProgressUpdate = now;
-            reportProgress(false);
+
+            onProgress({
+              url,
+              bytesDownloaded,
+              totalBytes,
+              percent: Math.min(percent, 100),
+              complete: false,
+            });
           }
-        }
+
+          controller.enqueue(chunk);
+        },
       });
-      pipeline.on("end", () => {
-        const parseDurationMs = Date.now() - parseStartTime;
-        const totalDurationMs = Date.now() - fetchStartTime;
-        fetchLogger.log("Fetch completed", {
-          url: remote.url,
-          itemCount: value.length,
-          parseDurationMs,
-          totalDurationMs,
-        });
-        reportProgress(true);
-        resolve(value);
-      });
-      pipeline.on("error", (err) => {
-        const parseDurationMs = Date.now() - parseStartTime;
-        // Cache parsing failed, remove corrupted cache and retry
-        cacheLogger.warn("Cache parse error, removing corrupted cache", {
-          path: remote.cachePath,
-          error: err.message,
-          parseDurationMs,
-        });
-        fs.rmSync(remote.cachePath);
-        reject(
-          new ParseError("Failed to parse cached data", {
-            cause: err,
-          }),
-        );
-      });
-    });
+
+      const progressBody = response.body.pipeThrough(progressStream);
+      await streamPipeline(Readable.fromWeb(progressBody as ReadableStream), writeStream);
+    } else {
+      await streamPipeline(Readable.fromWeb(response.body as ReadableStream), writeStream);
+    }
+  } catch (streamError) {
+    writeStream.destroy();
+    try {
+      fs.unlinkSync(cachePath);
+    } catch {
+      // Ignore cleanup errors
+    }
+    throw streamError;
   }
 
-  return updateCache().then(readCache);
+  onProgress?.({
+    url,
+    bytesDownloaded,
+    totalBytes,
+    percent: 100,
+    complete: true,
+  });
+
+  const downloadDurationMs = Date.now() - downloadStartTime;
+  cacheLogger.log("Downloaded to cache (no parse)", {
+    path: cachePath,
+    url,
+    downloadDurationMs,
+    sizeBytes: totalBytes,
+  });
+
+  // Return the last-modified time
+  lastModified = Date.parse(response.headers.get("last-modified") ?? "") || Date.now();
+  return lastModified;
+}
+
+/// Chunked Cache
+
+/** Number of items per chunk file */
+const CHUNK_SIZE = 500;
+
+/** Current schema version for chunked cache */
+const CHUNKED_CACHE_VERSION = 1;
+
+/**
+ * Get configuration for chunked cache paths.
+ */
+export function getChunkedCacheConfig(type: "formula" | "cask"): ChunkedCacheConfig {
+  const baseDir = path.join(supportPath, type);
+  return {
+    baseDir,
+    indexPath: path.join(baseDir, "index.json"),
+    metaPath: path.join(baseDir, "meta.json"),
+    type,
+  };
+}
+
+/**
+ * Get the path for a specific chunk file.
+ */
+function getChunkPath(config: ChunkedCacheConfig, chunkNumber: number): string {
+  const paddedNumber = String(chunkNumber).padStart(4, "0");
+  return path.join(config.baseDir, `chunk-${paddedNumber}.json`);
+}
+
+/**
+ * Check if chunked cache is valid (exists and not stale).
+ */
+export async function isChunkedCacheValid(config: ChunkedCacheConfig, remoteUrl: string): Promise<boolean> {
+  try {
+    const metaContent = await readFile(config.metaPath, "utf-8");
+    const meta = JSON.parse(metaContent) as ChunkedCacheMeta;
+
+    // Check version compatibility
+    if (meta.version !== CHUNKED_CACHE_VERSION) {
+      cacheLogger.log("Chunked cache version mismatch", {
+        type: config.type,
+        cacheVersion: meta.version,
+        currentVersion: CHUNKED_CACHE_VERSION,
+      });
+      return false;
+    }
+
+    // Check if remote has been updated
+    const response = await fetch(remoteUrl, { method: "HEAD" });
+    const lastModified = Date.parse(response.headers.get("last-modified") ?? "");
+
+    if (lastModified > meta.lastModified) {
+      cacheLogger.log("Chunked cache outdated", {
+        type: config.type,
+        cacheTime: meta.lastModified,
+        remoteTime: lastModified,
+      });
+      return false;
+    }
+
+    cacheLogger.log("Chunked cache valid", {
+      type: config.type,
+      cacheAgeMs: Date.now() - meta.createdAt,
+      itemCount: meta.totalItems,
+    });
+    return true;
+  } catch {
+    cacheLogger.log("Chunked cache not found or invalid", { type: config.type });
+    return false;
+  }
+}
+
+/** Type for index entry extractor function */
+export type IndexExtractor<T> = (item: T, chunkNumber: number, indexInChunk: number) => IndexEntry;
+
+/**
+ * Build chunked cache from source JSON file.
+ * Streams through the source, writing chunks and building an index.
+ */
+export async function buildChunkedCache<T>(
+  sourcePath: string,
+  sourceUrl: string,
+  config: ChunkedCacheConfig,
+  extractIndex: IndexExtractor<T>,
+  onProgress?: DownloadProgressCallback,
+): Promise<void> {
+  const buildStartTime = Date.now();
+  cacheLogger.log("Building chunked cache", { type: config.type, sourcePath });
+
+  // Reset and ensure directory exists
+  await rm(config.baseDir, { recursive: true, force: true }).catch(() => {});
+  await mkdir(config.baseDir, { recursive: true });
+
+  // Get last modified time from source file (will use this for cache validity)
+  let lastModified = Date.now();
+  try {
+    const response = await fetch(sourceUrl, { method: "HEAD" });
+    lastModified = Date.parse(response.headers.get("last-modified") ?? "") || lastModified;
+  } catch {
+    // Use current time if we can't get last modified
+  }
+
+  const keysRe = new RegExp(`\\b(${valid_keys.join("|")})\\b`);
+
+  return new Promise<void>((resolve, reject) => {
+    const index: IndexEntry[] = [];
+    let currentChunk: T[] = [];
+    let chunkNumber = 0;
+    let totalItems = 0;
+
+    // Track progress
+    let lastProgressUpdate = 0;
+    const PROGRESS_THROTTLE_MS = 100;
+
+    const reportProgress = (complete: boolean) => {
+      onProgress?.({
+        url: sourceUrl,
+        bytesDownloaded: 0,
+        totalBytes: 0,
+        percent: 100,
+        complete,
+        phase: "processing",
+        itemsProcessed: totalItems,
+        totalItems: complete ? totalItems : undefined,
+      });
+    };
+
+    // Pending write operations
+    const writePromises: Promise<void>[] = [];
+
+    const pipeline = chain([fs.createReadStream(sourcePath), parser(), filter({ filter: keysRe }), streamArray()]);
+
+    pipeline.on("data", (data) => {
+      if (data && typeof data === "object" && "value" in data) {
+        const item = data.value as T;
+        const indexInChunk = currentChunk.length;
+
+        // Build index entry
+        const entry = extractIndex(item, chunkNumber, indexInChunk);
+        index.push(entry);
+
+        // Add to current chunk
+        currentChunk.push(item);
+        totalItems++;
+
+        // Write chunk when full
+        if (currentChunk.length >= CHUNK_SIZE) {
+          // Capture current chunk for async write
+          const chunkToWrite = currentChunk;
+          const chunkNum = chunkNumber;
+          currentChunk = [];
+          chunkNumber++;
+
+          writePromises.push(
+            (async () => {
+              const chunkPath = getChunkPath(config, chunkNum);
+              await writeFile(chunkPath, JSON.stringify(chunkToWrite));
+            })(),
+          );
+        }
+
+        // Report progress (throttled)
+        const now = Date.now();
+        if (onProgress && now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+          lastProgressUpdate = now;
+          reportProgress(false);
+        }
+      }
+    });
+
+    pipeline.on("end", async () => {
+      try {
+        // Wait for any pending chunk writes
+        await Promise.all(writePromises);
+
+        // Write final partial chunk
+        if (currentChunk.length > 0) {
+          const chunkPath = getChunkPath(config, chunkNumber);
+          await writeFile(chunkPath, JSON.stringify(currentChunk));
+          chunkNumber++;
+        }
+
+        // Write index
+        await writeFile(config.indexPath, JSON.stringify(index));
+
+        // Write meta
+        const meta: ChunkedCacheMeta = {
+          version: CHUNKED_CACHE_VERSION,
+          sourceUrl,
+          lastModified,
+          createdAt: Date.now(),
+          totalItems,
+          chunkSize: CHUNK_SIZE,
+          chunkCount: chunkNumber,
+          type: config.type,
+        };
+        await writeFile(config.metaPath, JSON.stringify(meta));
+
+        const buildDurationMs = Date.now() - buildStartTime;
+        cacheLogger.log("Chunked cache built", {
+          type: config.type,
+          totalItems,
+          chunkCount: chunkNumber,
+          buildDurationMs,
+        });
+
+        reportProgress(true);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    });
+
+    pipeline.on("error", async (err) => {
+      cacheLogger.error("Failed to build chunked cache", {
+        type: config.type,
+        error: err.message,
+      });
+
+      // Clean up partial cache
+      try {
+        await rm(config.baseDir, { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors
+      }
+
+      reject(
+        new ParseError("Failed to build chunked cache", {
+          cause: err,
+        }),
+      );
+    });
+  });
+}
+
+/**
+ * Load the index from chunked cache.
+ */
+export async function loadIndex(config: ChunkedCacheConfig): Promise<CacheIndex> {
+  const [indexContent, metaContent] = await Promise.all([
+    readFile(config.indexPath, "utf-8"),
+    readFile(config.metaPath, "utf-8"),
+  ]);
+
+  const entries = JSON.parse(indexContent) as IndexEntry[];
+  const meta = JSON.parse(metaContent) as ChunkedCacheMeta;
+
+  cacheLogger.log("Loaded chunked index", {
+    type: config.type,
+    entryCount: entries.length,
+  });
+
+  return { entries, meta };
+}
+
+/**
+ * Load specific chunks from chunked cache.
+ * Returns a map of chunk number to items array.
+ */
+export async function loadChunks<T>(config: ChunkedCacheConfig, chunkNumbers: Set<number>): Promise<Map<number, T[]>> {
+  const chunks = new Map<number, T[]>();
+
+  if (chunkNumbers.size === 0) {
+    return chunks;
+  }
+
+  const loadPromises = Array.from(chunkNumbers).map(async (chunkNum) => {
+    const chunkPath = getChunkPath(config, chunkNum);
+    const content = await readFile(chunkPath, "utf-8");
+    const items = JSON.parse(content) as T[];
+    return { chunkNum, items };
+  });
+
+  const results = await Promise.all(loadPromises);
+  for (const { chunkNum, items } of results) {
+    chunks.set(chunkNum, items);
+  }
+
+  cacheLogger.log("Loaded chunks", {
+    type: config.type,
+    chunkCount: chunks.size,
+    totalItems: Array.from(chunks.values()).reduce((sum, items) => sum + items.length, 0),
+  });
+
+  return chunks;
+}
+
+/**
+ * Load specific items from chunked cache based on index entries.
+ * Groups entries by chunk to minimize file reads.
+ */
+export async function loadItemsFromChunks<T>(config: ChunkedCacheConfig, entries: IndexEntry[]): Promise<T[]> {
+  if (entries.length === 0) {
+    return [];
+  }
+
+  // Determine which chunks we need
+  const neededChunks = new Set(entries.map((e) => e.c));
+
+  // Load those chunks
+  const chunks = await loadChunks<T>(config, neededChunks);
+
+  // Extract items in entry order
+  const items: T[] = [];
+  for (const entry of entries) {
+    const chunk = chunks.get(entry.c);
+    if (chunk && entry.i < chunk.length) {
+      items.push(chunk[entry.i]);
+    }
+  }
+
+  return items;
 }

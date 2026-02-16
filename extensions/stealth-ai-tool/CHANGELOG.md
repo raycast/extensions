@@ -1,5 +1,13 @@
 # Stealth AI Changelog
 
+## [In-App AI Configuration] - 2026-02-09
+
+- Add in-app AI provider and model configuration (no more Raycast Settings)
+- Support for RaycastAI (default), OpenAI, Anthropic, Gemini, and OpenRouter model fetching via API
+- API keys stored locally per provider
+- Model error toast now links directly to Configure AI Model command
+- Remove hardcoded model lists, fetch live from provider APIs
+
 ## [Windows Support & Finder Focus Fix] - 2026-02-04
 
 - Add Windows platform support using Raycast's cross-platform APIs

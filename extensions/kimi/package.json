@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kimi",
+  "title": "Kimi",
+  "description": "Interact with Moonshot AI's Kimi LLM directly from Raycast",
+  "icon": "icon.png",
+  "author": "degouville",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "kimi",
+    "moonshot",
+    "chat",
+    "ai"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Question",
+      "subtitle": "Kimi",
+      "description": "Ask Kimi via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "saved",
+      "title": "Saved Answers",
+      "subtitle": "Kimi",
+      "description": "Collection of your saved answers",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Kimi",
+      "description": "Collection of your recent answers",
+      "mode": "view"
+    },
+    {
+      "name": "conversation",
+      "title": "Conversations",
+      "subtitle": "Kimi",
+      "description": "Collection of your recent conversations",
+      "mode": "view"
+    },
+    {
+      "name": "model",
+      "title": "Models",
+      "subtitle": "Kimi",
+      "description": "Collection of your custom and default models",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "label": "Kimi API Key",
+      "description": "Enter your personal Kimi API Key from Moonshot AI",
+      "type": "password",
+      "title": "API Key",
+      "required": true
+    },
+    {
+      "name": "useStream",
+      "label": "Enable streaming of responses",
+      "description": "Stream responses from Kimi in real-time",
+      "type": "checkbox",
+      "title": "Stream Responses",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "isAutoLoad",
+      "label": "Enable auto-load selected text",
+      "description": "Load selected text from your front most application to the question bar automatically",
+      "type": "checkbox",
+      "title": "Auto-load",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoFullInput",
+      "label": "Enable full text input initially",
+      "description": "Use full text input form when asking question for the first time",
+      "type": "checkbox",
+      "title": "Use Full Text Input",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.14.1",
+    "csv-parse": "^5.5.3",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.6",
+    "@types/react": "^19.2.8",
+    "@types/uuid": "^9.0.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
