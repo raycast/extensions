@@ -8,7 +8,7 @@ import { BASE_INSTRUCTIONS, MAX_SUGGESTED_NAME_LENGTH } from "./base";
 export function getGenericPrompt(file: FileInfo, metadata?: FileMetadataContext): AIPromptConfig {
   const contextParts: string[] = [];
 
-  if (metadata?.size) {
+  if (metadata?.size != null) {
     const sizeMB = (metadata.size / (1024 * 1024)).toFixed(1);
     contextParts.push(`Size: ${sizeMB} MB`);
   }

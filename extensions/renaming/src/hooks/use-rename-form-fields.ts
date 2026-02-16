@@ -28,7 +28,7 @@ export interface UseRenameFormFieldsResult {
   setCaseStyle: (c: CaseStyle) => void;
   independentNumbering: boolean;
   setIndependentNumbering: (v: boolean) => void;
-  handleSeparatorChange: (type: "separator" | "indexSeparator", value: string) => void;
+  handleSeparatorChange: (type: "separator" | "indexSeparator", value: string) => Promise<void>;
 }
 
 export function useRenameFormFields(): UseRenameFormFieldsResult {
