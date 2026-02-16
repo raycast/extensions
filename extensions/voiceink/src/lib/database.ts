@@ -120,7 +120,7 @@ export function buildQuery(limit: number, searchTerm?: string): string {
     if (words.length > 0) {
       const conditions = words.map((word) => {
         const escaped = escapeSqlString(word);
-        return `(ZTEXT LIKE '%${escaped}%' OR ZENHANCEDTEXT LIKE '%${escaped}%')`;
+        return `(ZTEXT LIKE '%${escaped}%' ESCAPE '\\' OR ZENHANCEDTEXT LIKE '%${escaped}%' ESCAPE '\\')`;
       });
       searchClause = ` AND ${conditions.join(" AND ")}`;
     }
@@ -130,7 +130,7 @@ export function buildQuery(limit: number, searchTerm?: string): string {
 }
 
 function escapeSqlString(str: string): string {
-  return str.replace(/'/g, "''");
+  return str.replace(/'/g, "''").replace(/%/g, "\\%").replace(/_/g, "\\_");
 }
 
 export function parseTranscriptions(stdout: string): Transcription[] {
