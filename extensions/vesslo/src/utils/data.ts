@@ -70,24 +70,3 @@ export function loadVessloData(): VessloData | null {
     return null;
   }
 }
-
-/**
- * Check if Vesslo data is fresh (within 24 hours)
- */
-export function isVessloDataFresh(): boolean {
-  try {
-    if (!existsSync(DATA_PATH)) {
-      return false;
-    }
-    const data = loadVessloData();
-    if (!data) return false;
-
-    const exportedAt = new Date(data.exportedAt);
-    const now = new Date();
-    const hoursDiff = (now.getTime() - exportedAt.getTime()) / (1000 * 60 * 60);
-
-    return hoursDiff < 24;
-  } catch {
-    return false;
-  }
-}

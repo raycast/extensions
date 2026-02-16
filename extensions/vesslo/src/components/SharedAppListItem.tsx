@@ -7,6 +7,7 @@ import {
   runBrewUpgradeInTerminal,
   runMasUpgradeInTerminal,
 } from "../utils/actions";
+import { getSourceColor } from "../constants";
 
 interface SharedAppListItemProps {
   app: VessloApp;
@@ -69,15 +70,7 @@ export function SharedAppListItem({
 
   // Source badges
   app.sources.forEach((source) => {
-    const color =
-      source === "Brew"
-        ? Color.Orange
-        : source === "App Store"
-          ? Color.Blue
-          : source === "Sparkle"
-            ? Color.Green
-            : Color.SecondaryText;
-    accessories.push({ tag: { value: source, color } });
+    accessories.push({ tag: { value: source, color: getSourceColor(source) } });
   });
 
   // Icon
@@ -99,11 +92,13 @@ export function SharedAppListItem({
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <Action
-              title="Open in Vesslo"
-              icon={Icon.Link}
-              onAction={() => app.bundleId && openInVesslo(app.bundleId)}
-            />
+            {app.bundleId && (
+              <Action
+                title="Open in Vesslo"
+                icon={Icon.Link}
+                onAction={() => openInVesslo(app.bundleId!)}
+              />
+            )}
             {app.bundleId && (
               <Action.CopyToClipboard
                 title="Copy Bundle ID"
@@ -139,7 +134,7 @@ export function SharedAppListItem({
                 <Action
                   title="Update Via Terminal (Mas)"
                   icon={Icon.Terminal}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                   onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
                 />
               )}

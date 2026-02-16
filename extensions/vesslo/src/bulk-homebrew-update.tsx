@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { loadVessloData } from "./utils/data";
+// loadVessloData is used for post-update refresh in updateAllDirect()
 import { exec } from "child_process";
 import { promisify } from "util";
 import { getBrewPath } from "./utils/brew";
@@ -31,6 +32,9 @@ export default function BulkHomebrewUpdate() {
       (app) =>
         app.sources.includes("Brew") &&
         app.targetVersion !== null &&
+        app.targetVersion !== undefined &&
+        app.targetVersion !== "undefined" &&
+        app.targetVersion.trim() !== "" &&
         app.homebrewCask,
     );
   }, [data]);
