@@ -1,4 +1,4 @@
-import { UNTRACKED_OR_MODIFIED_FILES_ERROR } from "#/config/constants";
+import { NOT_A_WORKING_TREE_ERROR, UNTRACKED_OR_MODIFIED_FILES_ERROR } from "#/config/constants";
 import { Worktree } from "#/config/types";
 import { removeWorktreeFromCache } from "#/helpers/cache";
 import { pruneWorktrees, removeBranch, removeWorktree } from "#/helpers/git";
@@ -31,21 +31,25 @@ export const RemoveWorktree = ({
 
         const errorMessage = e.message;
 
-        if (!errorMessage.includes(UNTRACKED_OR_MODIFIED_FILES_ERROR)) throw e;
+        if (errorMessage.includes(NOT_A_WORKING_TREE_ERROR)) {
+          // Worktree directory already gone — skip removal, proceed with cleanup
+        } else if (errorMessage.includes(UNTRACKED_OR_MODIFIED_FILES_ERROR)) {
+          const confirmed = await confirmAlert({
+            title: "Worktree has unsaved changes",
+            message: "This action cannot be undone, are you sure?",
+          });
 
-        const confirmed = await confirmAlert({
-          title: "Worktree has unsaved changes",
-          message: "This action cannot be undone, are you sure?",
-        });
+          if (!confirmed) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Aborted Removal";
+            toast.message = "The worktree was not removed";
+            return;
+          }
 
-        if (!confirmed) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Aborted Removal";
-          toast.message = "The worktree was not removed";
-          return;
+          await removeWorktree({ parentPath: projectPath, worktreeName, force: true });
+        } else {
+          throw e;
         }
-
-        await removeWorktree({ parentPath: projectPath, worktreeName, force: true });
       }
 
       toast.title = "Running Cleanup";
