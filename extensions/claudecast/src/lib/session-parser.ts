@@ -87,8 +87,13 @@ export async function resolveProjectPath(
       resolvedPathCache.set(encodedDirName, index.originalPath);
       return index.originalPath;
     }
-  } catch {
-    // sessions-index.json doesn't exist or is unreadable
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") {
+      console.warn(
+        `Failed to read sessions-index.json for ${encodedDirName}:`,
+        error,
+      );
+    }
   }
 
   // 2. Try filesystem-guided resolution
@@ -98,9 +103,14 @@ export async function resolveProjectPath(
     return fsResolved;
   }
 
-  // 3. Naive decode (last resort)
+  // 3. Naive decode (last resort — known-lossy, only cache if path exists)
   const decoded = decodeProjectPath(encodedDirName);
-  resolvedPathCache.set(encodedDirName, decoded);
+  try {
+    await fs.promises.access(decoded);
+    resolvedPathCache.set(encodedDirName, decoded);
+  } catch {
+    // Don't cache lossy results that don't exist on disk
+  }
   return decoded;
 }
 
@@ -183,8 +193,11 @@ async function walkPathSegments(
         const resolved = await walkPathSegments(candidatePath, remaining);
         if (resolved) return resolved;
       }
-    } catch {
-      // Doesn't exist on disk — try shorter component
+    } catch (error: unknown) {
+      const code = (error as NodeJS.ErrnoException)?.code;
+      if (code !== "ENOENT" && code !== "ENOTDIR") {
+        console.warn(`Unexpected error probing ${candidatePath}:`, error);
+      }
     }
   }
 
@@ -193,7 +206,9 @@ async function walkPathSegments(
 
 /**
  * Encode a project path to Claude's directory naming format.
- * Claude replaces both / and . with -.
+ * Claude Code (verified as of v1.x) replaces both / and . with -.
+ * Confirmed empirically by inspecting ~/.claude/projects/ directory names
+ * against their corresponding originalPath values in sessions-index.json.
  */
 export function encodeProjectPath(projectPath: string): string {
   return projectPath.replace(/[/.]/g, "-");
@@ -613,8 +628,11 @@ export async function searchSessionContent(
       try {
         const stat = await fs.promises.stat(filePath);
         fileInfos.push({ filePath, projectDir, mtime: stat.mtime });
-      } catch {
-        // Skip files we can't stat
+      } catch (error: unknown) {
+        const code = (error as NodeJS.ErrnoException)?.code;
+        if (code !== "ENOENT") {
+          console.warn(`Failed to stat session file ${filePath}:`, error);
+        }
       }
     }
   }
@@ -646,8 +664,9 @@ export async function searchSessionContent(
 
 /**
  * Search a single session file for a query match.
- * Reads the entire file (not just first 50 lines) but short-circuits
- * on first content match, continuing only to collect metadata.
+ * Reads the entire file to collect full metadata (turnCount, cost, model).
+ * Sets a match flag on first content hit, skipping redundant string
+ * comparisons for subsequent lines.
  */
 async function searchSingleSession(
   filePath: string,
@@ -768,41 +787,24 @@ async function searchSingleSession(
 
     rl.on("close", () => {
       signal?.removeEventListener("abort", onAbort);
-      if (found) {
-        if (!resolved) {
-          resolved = true;
-          resolve({
-            id,
-            summary,
-            firstMessage,
-            turnCount,
-            cost: totalCost,
-            model,
-          });
-        }
-      } else {
-        if (!resolved) {
-          resolved = true;
-          resolve(null);
-        }
-      }
+      safeResolve(
+        found
+          ? { id, summary, firstMessage, turnCount, cost: totalCost, model }
+          : null,
+      );
     });
 
-    rl.on("error", () => {
+    rl.on("error", (err) => {
+      console.warn(`Error reading session ${filePath}:`, err.message);
       cleanup();
       signal?.removeEventListener("abort", onAbort);
-      if (!resolved) {
-        resolved = true;
-        resolve(null);
-      }
+      safeResolve(null);
     });
-    stream.on("error", () => {
+    stream.on("error", (err) => {
+      console.warn(`Stream error for ${filePath}:`, err.message);
       cleanup();
       signal?.removeEventListener("abort", onAbort);
-      if (!resolved) {
-        resolved = true;
-        resolve(null);
-      }
+      safeResolve(null);
     });
   });
 }

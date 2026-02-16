@@ -26,12 +26,31 @@ import { ensureClaudeInstalled } from "./lib/claude-cli";
 const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_MS = 300;
 
+function getEmptyDescription(searchText: string, isSearching: boolean): string {
+  if (searchText.length === 0)
+    return "Type at least 3 characters to search session content";
+  if (searchText.length < MIN_QUERY_LENGTH) {
+    const remaining = MIN_QUERY_LENGTH - searchText.length;
+    return `Type ${remaining} more character${remaining === 1 ? "" : "s"} to start searching`;
+  }
+  if (isSearching) return "Searching session content...";
+  return `No sessions matched "${searchText}"`;
+}
+
 export default function DeepSearchSessions() {
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<SessionMetadata[]>([]);
   const [searchText, setSearchText] = useState("");
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup debounce timer and abort in-flight search on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const performSearch = useCallback(async (query: string) => {
     // Cancel any in-flight search
@@ -62,8 +81,17 @@ export default function DeepSearchSessions() {
         },
         controller.signal,
       );
-    } catch {
-      // Search was aborted or failed — ignore
+    } catch (error: unknown) {
+      if (controller.signal.aborted) return; // Expected cancellation
+      console.error("Deep search failed:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Search failed",
+        message:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      });
     }
 
     if (!controller.signal.aborted) {
@@ -80,14 +108,7 @@ export default function DeepSearchSessions() {
     [performSearch],
   );
 
-  const emptyDescription =
-    searchText.length === 0
-      ? "Type at least 3 characters to search session content"
-      : searchText.length < MIN_QUERY_LENGTH
-        ? `Type ${MIN_QUERY_LENGTH - searchText.length} more character${MIN_QUERY_LENGTH - searchText.length === 1 ? "" : "s"} to start searching`
-        : isSearching
-          ? "Searching session content..."
-          : `No sessions matched "${searchText}"`;
+  const emptyDescription = getEmptyDescription(searchText, isSearching);
 
   return (
     <List
@@ -295,9 +316,14 @@ function SessionDetailView({
 
   useEffect(() => {
     (async () => {
-      const detail = await getSessionDetail(sessionId);
-      setSession(detail);
-      setIsLoading(false);
+      try {
+        const detail = await getSessionDetail(sessionId);
+        setSession(detail);
+      } catch (err) {
+        console.error("Failed to load session detail:", err);
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, [sessionId]);
 
