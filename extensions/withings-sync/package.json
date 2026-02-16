@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "withings-sync",
+  "title": "Withings Sync",
+  "description": "Sync your Withings health data (weight, blood pressure, body composition) to Garmin Connect",
+  "icon": "command-icon.png",
+  "author": "thebruge",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "2.0.0",
+  "commands": [
+    {
+      "name": "view-measurements",
+      "title": "View Withings Measurements",
+      "subtitle": "Withings Sync",
+      "description": "View your recent Withings measurements",
+      "mode": "view"
+    },
+    {
+      "name": "sync-to-garmin",
+      "title": "Sync to Garmin",
+      "subtitle": "Withings Sync",
+      "description": "Sync your Withings data to Garmin Connect",
+      "mode": "view"
+    },
+    {
+      "name": "configure",
+      "title": "Configure Withings & Garmin",
+      "subtitle": "Withings Sync",
+      "description": "Set up your Withings and Garmin credentials",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "withingsClientId",
+      "type": "textfield",
+      "required": true,
+      "title": "Withings Client ID",
+      "description": "Your Withings OAuth Client ID from https://developer.withings.com/",
+      "placeholder": "c021a4a204f59c5723a19b261cc9afbde58b8bf5d080bdcfcdc336161842ed5d"
+    },
+    {
+      "name": "withingsClientSecret",
+      "type": "password",
+      "required": true,
+      "title": "Withings Client Secret",
+      "description": "Your Withings OAuth Client Secret"
+    },
+    {
+      "name": "garminUsername",
+      "type": "textfield",
+      "required": false,
+      "title": "Garmin Username",
+      "description": "Your Garmin Connect username/email",
+      "placeholder": "user@example.com"
+    },
+    {
+      "name": "garminPassword",
+      "type": "password",
+      "required": false,
+      "title": "Garmin Password",
+      "description": "Your Garmin Connect password"
+    },
+    {
+      "name": "weightUnit",
+      "type": "dropdown",
+      "required": false,
+      "default": "lbs",
+      "title": "Weight Unit",
+      "description": "Display weight in pounds or kilograms",
+      "data": [
+        {
+          "title": "Pounds (lb)",
+          "value": "lbs"
+        },
+        {
+          "title": "Kilograms (kg)",
+          "value": "kg"
+        }
+      ]
+    },
+    {
+      "name": "includeBloodPressure",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Include Blood Pressure",
+      "description": "Sync blood pressure measurements to Garmin",
+      "label": "Enable blood pressure sync"
+    },
+    {
+      "name": "lookbackDays",
+      "type": "textfield",
+      "required": false,
+      "default": "7",
+      "title": "Default Lookback Days",
+      "description": "Number of days to fetch measurements for (default: 7)",
+      "placeholder": "7"
+    }
+  ],
+  "dependencies": {
+    "@markw65/fit-file-writer": "^0.1.7",
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2",
+    "garmin-connect": "^1.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.2.0",
+    "@types/react": "^19.2.11",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

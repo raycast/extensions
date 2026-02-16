@@ -1,5 +1,29 @@
 # GitHub Copilot Changelog
 
+## [Fix search-repositories AI tool] - 2026-02-09
+
+- Fix search-repositories AI tool crash
+
+## [Premium requests on view tasks] - 2026-02-08
+
+- Add premium requests used to the "View Tasks" command
+
+## [Fix titles and URLs for tasks without a pull request] - 2026-02-06
+
+- Fix titles and URLs for tasks without a pull request in "View Tasks" command
+
+## [Additional instructions for issue assignment] - 2026-02-06
+
+- Add optional "Additional Instructions" field when assigning an issue to Copilot
+
+## [Switch extension to use new API] - 2026-02-06
+
+- Switch "Create Task", "View Tasks" and "Menu Bar Tasks" commands to use new API
+
+## [Open workflow run] - 2026-02-03
+
+- Add "Open workflow run" menu item to the "View Tasks" command
+
 ## [Assign Issue to Copilot] - 2026-02-03
 
 - Add "Assign Issue to Copilot" command

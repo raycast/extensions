@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [1.4.1] - 2026-02-13
+
+- Add new command: create-quick-event – create Google Calendar events using a rule-based natural language parser (no AI setup required)
+
 ## [1.4.0] - 2026-01-28
 
 - Added options to set default calendar, attendees, description, event duration, and send invitations

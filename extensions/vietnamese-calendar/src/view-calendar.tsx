@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   format,
   startOfMonth,
@@ -14,6 +14,7 @@ import {
   isSameMonth,
   isToday,
   getWeek,
+  getISODay,
 } from "date-fns";
 import { SolarDate } from "lunar-date-vn";
 import { getHoliday, isOfficialHoliday } from "./utils/holidays";
@@ -21,9 +22,17 @@ import DayDetailView from "./view-day-detail";
 
 export default function CalendarGrid() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedId, setSelectedId] = useState<string | undefined>(
-    format(new Date(), "yyyy-MM-dd"),
-  );
+  const [selectedId, setSelectedId] = useState<string | undefined>();
+  const delaySetSelectedId = useCallback((val: string | undefined) => {
+    // NOTE: some delay to prevent flash UI
+    setTimeout(() => {
+      setSelectedId(val);
+    }, 200);
+  }, []);
+
+  useEffect(() => {
+    delaySetSelectedId(format(new Date(), "yyyy-MM-dd"));
+  }, [delaySetSelectedId]);
 
   const { days, currentMonthName } = useMemo(() => {
     const monthStart = startOfMonth(currentDate);
@@ -52,7 +61,7 @@ export default function CalendarGrid() {
   const handleGoToToday = () => {
     const today = new Date();
     setCurrentDate(today);
-    setSelectedId(format(today, "yyyy-MM-dd"));
+    delaySetSelectedId(format(today, "yyyy-MM-dd"));
   };
 
   return (
@@ -61,7 +70,6 @@ export default function CalendarGrid() {
       inset={Grid.Inset.Small}
       navigationTitle={`Calendar - ${currentMonthName}`}
       searchBarPlaceholder={`Viewing ${currentMonthName}`}
-      onSearchTextChange={() => {}}
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id || undefined)}
     >
@@ -92,6 +100,7 @@ export default function CalendarGrid() {
           // Solar day
           const isWeekend = day.getDay() === 0 || day.getDay() === 6;
           const dayId = format(day, "yyyy-MM-dd");
+          const dayNum = format(day, "dd");
 
           return (
             <Grid.Item
@@ -107,7 +116,7 @@ export default function CalendarGrid() {
                 holiday,
                 isOfficial,
               )}
-              keywords={[dayId]}
+              keywords={[dayNum, lunarString]}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -188,17 +197,19 @@ function getIconForDay(
     lunarColor = "#FF6363";
   }
 
+  const vietnameseDay = getVietnameseDay(date);
+
   let svgContent = "";
   if (holiday) {
     svgContent = `
         <text x="256" y="80" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="256" fill="${solarColor}">${dayNumber}</text>
-        <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${lunarString}</text>
+        <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
         <text x="256" y="290" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="110" fill="#FFD700">${holiday}</text>
         `;
   } else {
     svgContent = `
         <text x="256" y="80" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="256" fill="${solarColor}">${dayNumber}</text>
-        <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${lunarString}</text>
+        <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
         `;
   }
 
@@ -210,4 +221,10 @@ function getIconForDay(
   `;
 
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
+const DAY_LABELS = ["", "T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+function getVietnameseDay(date: Date) {
+  return DAY_LABELS[getISODay(date)];
 }

@@ -1,9 +1,19 @@
 import { LocalStorage } from "@raycast/api";
 import type { AudioDevice } from "./audio-device";
 
-const DISABLED_DEVICES_KEY = "disabledDevices";
+type IOType = "input" | "output";
+
+const LEGACY_DISABLED_DEVICES_KEY = "disabledDevices";
 const LEGACY_HIDDEN_DEVICES_KEY = "hiddenDevices";
-const SHOW_HIDDEN_KEY = "showHiddenDevices";
+const LEGACY_SHOW_HIDDEN_KEY = "showHiddenDevices";
+const HIDDEN_DEVICES_KEYS = {
+  input: "hiddenDevicesInput",
+  output: "hiddenDevicesOutput",
+} as const;
+const SHOW_HIDDEN_KEYS = {
+  input: "showHiddenDevicesInput",
+  output: "showHiddenDevicesOutput",
+} as const;
 const INPUT_ORDER_KEY = "deviceOrderInput";
 const OUTPUT_ORDER_KEY = "deviceOrderOutput";
 
@@ -25,60 +35,54 @@ async function writeList(key: string, list: string[]) {
   await LocalStorage.setItem(key, JSON.stringify(list));
 }
 
-export async function getDisabledDevices(): Promise<string[]> {
-  const disabled = await readList(DISABLED_DEVICES_KEY);
-  if (disabled.length > 0) return disabled;
+function mergeUnique(...lists: string[][]): string[] {
+  return Array.from(new Set(lists.flat()));
+}
+
+async function migrateHiddenDevices(type: IOType): Promise<string[]> {
+  const storedRaw = await LocalStorage.getItem<string>(HIDDEN_DEVICES_KEYS[type]);
+  if (storedRaw != null) return parseStoredList(storedRaw);
 
   const legacyHidden = await readList(LEGACY_HIDDEN_DEVICES_KEY);
-  if (legacyHidden.length > 0) {
-    await writeList(DISABLED_DEVICES_KEY, legacyHidden);
-    return legacyHidden;
+  const legacyDisabled = await readList(LEGACY_DISABLED_DEVICES_KEY);
+  const merged = mergeUnique(legacyHidden, legacyDisabled);
+  if (merged.length > 0) {
+    await writeList(HIDDEN_DEVICES_KEYS[type], merged);
   }
-
-  return [];
+  return merged;
 }
 
-export async function setDisabledDevices(list: string[]) {
-  await writeList(DISABLED_DEVICES_KEY, list);
+export async function getHiddenDevices(type: IOType): Promise<string[]> {
+  return migrateHiddenDevices(type);
 }
 
-export async function disableDevice(deviceId: string) {
-  const disabled = await getDisabledDevices();
-  if (!disabled.includes(deviceId)) {
-    disabled.push(deviceId);
-    await setDisabledDevices(disabled);
-  }
+export async function setHiddenDevices(type: IOType, list: string[]) {
+  await writeList(HIDDEN_DEVICES_KEYS[type], list);
 }
 
-export async function enableDevice(deviceId: string) {
-  const disabled = await getDisabledDevices();
-  const next = disabled.filter((id) => id !== deviceId);
-  if (next.length !== disabled.length) {
-    await setDisabledDevices(next);
-  }
-}
-
-export async function toggleDeviceVisibility(deviceId: string) {
-  const disabled = await getDisabledDevices();
-  const index = disabled.indexOf(deviceId);
+export async function toggleDeviceVisibility(type: IOType, deviceId: string) {
+  const hidden = await getHiddenDevices(type);
+  const index = hidden.indexOf(deviceId);
   if (index === -1) {
-    disabled.push(deviceId);
+    hidden.push(deviceId);
   } else {
-    disabled.splice(index, 1);
+    hidden.splice(index, 1);
   }
-  await setDisabledDevices(disabled);
+  await setHiddenDevices(type, hidden);
 }
 
-export async function getHiddenDevices(): Promise<string[]> {
-  return getDisabledDevices();
+export async function isShowingHiddenDevices(type: IOType) {
+  const stored = await LocalStorage.getItem<string>(SHOW_HIDDEN_KEYS[type]);
+  if (stored != null) return stored === "true";
+  const legacy = await LocalStorage.getItem<string>(LEGACY_SHOW_HIDDEN_KEY);
+  if (legacy != null) {
+    await LocalStorage.setItem(SHOW_HIDDEN_KEYS[type], legacy);
+  }
+  return legacy === "true";
 }
 
-export async function isShowingHiddenDevices() {
-  return (await LocalStorage.getItem(SHOW_HIDDEN_KEY)) === "true";
-}
-
-export async function setShowHiddenDevices(show: boolean) {
-  await LocalStorage.setItem(SHOW_HIDDEN_KEY, show ? "true" : "false");
+export async function setShowHiddenDevices(type: IOType, show: boolean) {
+  await LocalStorage.setItem(SHOW_HIDDEN_KEYS[type], show ? "true" : "false");
 }
 
 export async function getDeviceOrder(type: "input" | "output"): Promise<string[]> {

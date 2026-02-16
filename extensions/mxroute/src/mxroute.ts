@@ -9,6 +9,7 @@ import {
   EmailForwarder,
   CreateEmailForwarderRequest,
   CatchAll,
+  DomainVerificationKey,
 } from "./types";
 
 const { api_key, server, username } = getPreferenceValues<Preferences>();
@@ -25,12 +26,13 @@ const makeRequest = async <T>(endpoint: string, options?: RequestInit) => {
     body: options?.body,
   });
   if (response.headers.get("Content-Length") === "0") return undefined as T;
-  const result = (await response.json()) as SuccessResponse<string[]> | ErrorResponse;
+  const result = (await response.json()) as SuccessResponse<unknown> | ErrorResponse;
   if (!result.success) throw new Error(result.error.message);
   return result.data as T;
 };
 
 export const mxroute = {
+  getDomainVerificationKey: () => makeRequest<DomainVerificationKey>("verification-key"),
   domains: {
     create: (domain: string) => makeRequest("domains", { method: "POST", body: JSON.stringify({ domain }) }),
     get: (domain: string) => makeRequest<Domain>(`domains/${domain}`),

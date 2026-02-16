@@ -28,7 +28,6 @@ export default function InstanceListItem({
 }: InstanceListItemProps) {
   const { isEnabled: isStreamerMode } = useStreamerMode();
 
-  // Get status icon and color
   const statusIcon = getStatusIcon(instance.status);
 
   // Format zone and machine type for display

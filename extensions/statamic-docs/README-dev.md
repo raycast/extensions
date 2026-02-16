@@ -20,7 +20,7 @@ function extractNavigation() {
             const sectionName = labelElement.textContent.trim().split('\n')[0].trim();
 
             // Find all nav links in this section's ul
-            const navLinks = section.querySelectorAll('ul a[wire\\:navigate]');
+            const navLinks = section.querySelectorAll('ul a');
 
             if (navLinks.length > 0) {
                 result[sectionName] = [];
@@ -56,7 +56,7 @@ function extractNavigation() {
 
 // Execute and log
 const data = extractNavigation();
-console.log(JSON.stringify(data, null, 2));
+console.log(JSON.stringify(data, null, 4));
 ```
 
 You should save the output to `assets/docs/6.x.json` (obviously replace `6.x` with the actual version number).

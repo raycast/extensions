@@ -1,5 +1,16 @@
 # Changelog
 
+## [Update] - 2026-02-06
+
+### Added
+- **GitHub Integration**: Add deployment and GitHub Pages links
+  - Add "Deployments" link with keyboard shortcut (Cmd+D) for GitHub repositories
+  - Add "GitHub Page" link for accessing GitHub Pages sites
+
+### Fixed
+- **Branch Actions**: Correct remote branch name for checkout
+  - Fix branch checkout logic to properly construct remote branch name
+
 ## [Update] - 2026-01-21
 
 ### Added

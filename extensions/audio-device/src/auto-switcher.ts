@@ -8,7 +8,7 @@ import {
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
 import { AUTO_SWITCH_KEYS } from "./auto-switch-keys";
-import { applyDeviceOrder, getDeviceOrder, getDisabledDevices } from "./device-preferences";
+import { applyDeviceOrder, getDeviceOrder, getHiddenDevices } from "./device-preferences";
 
 type IOType = "input" | "output";
 
@@ -40,11 +40,11 @@ async function setAutoSwitchEnabled(type: IOType, enabled: boolean) {
   await LocalStorage.setItem(AUTO_SWITCH_KEYS[type], enabled ? "true" : "false");
 }
 
-async function maybeSwitchInput(disabledDevices: string[]) {
+async function maybeSwitchInput(hiddenDevices: string[]) {
   const devices = await getInputDevices();
   const order = await getDeviceOrder("input");
-  const disabledSet = new Set(disabledDevices);
-  const ordered = applyDeviceOrder(order, devices).filter((device) => !disabledSet.has(device.uid));
+  const hiddenSet = new Set(hiddenDevices);
+  const ordered = applyDeviceOrder(order, devices).filter((device) => !hiddenSet.has(device.uid));
   const target = ordered[0];
   if (!target) return false;
 
@@ -55,11 +55,11 @@ async function maybeSwitchInput(disabledDevices: string[]) {
   return true;
 }
 
-async function maybeSwitchOutput(disabledDevices: string[]) {
+async function maybeSwitchOutput(hiddenDevices: string[]) {
   const devices = await getOutputDevices();
   const order = await getDeviceOrder("output");
-  const disabledSet = new Set(disabledDevices);
-  const ordered = applyDeviceOrder(order, devices).filter((device) => !disabledSet.has(device.uid));
+  const hiddenSet = new Set(hiddenDevices);
+  const ordered = applyDeviceOrder(order, devices).filter((device) => !hiddenSet.has(device.uid));
   const target = ordered[0];
   if (!target) return false;
 
@@ -71,8 +71,8 @@ async function maybeSwitchOutput(disabledDevices: string[]) {
 }
 
 async function runSwitch(type: IOType) {
-  const disabledDevices = await getDisabledDevices();
-  const changed = type === "input" ? await maybeSwitchInput(disabledDevices) : await maybeSwitchOutput(disabledDevices);
+  const hiddenDevices = await getHiddenDevices(type);
+  const changed = type === "input" ? await maybeSwitchInput(hiddenDevices) : await maybeSwitchOutput(hiddenDevices);
 
   return changed;
 }

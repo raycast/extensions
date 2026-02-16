@@ -1,5 +1,10 @@
 # Anki Changelog
 
+## [Security Maintenance] - {PR_MERGE_DATE}
+
+- Removed unused `npm-check-updates` dependency.
+- Reduced transitive dependency surface (including removal of transitive `tar` usage) to address security advisories.
+
 ## [Bug Fixes] - 2024-12-06
 
 - Fixed turndown to support markdown syntax when rendering card content

@@ -61,6 +61,7 @@ export type Comment = {
   id: number;
   body: string;
 };
+export type ResultV3 = (DirectoryV3 | FileV3) & { is_favorite: boolean };
 
 export type SingleResult<T> = {
   result: "success";

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List, showToast, Toast, Clipboard, showHUD, popToRoot, LocalStorage } from "@raycast/api";
-import { getFormattedColor } from "../utils";
-import { ColorFormatType } from "../types";
+import { getFormattedColor } from "../lib/utils";
+import { ColorFormatType } from "../lib/types";
 
 type ColorFormatProps = {
   text: string;

@@ -46,16 +46,16 @@
   ],
   "dependencies": {
     "@chrismessina/raycast-logger": "^1.0.0",
-    "@raycast/api": "^1.103.2",
-    "fathom-typescript": "^0.0.36"
+    "@raycast/api": "^1.104.5",
+    "fathom-typescript": "^0.0.37"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/utils": "^2.2.2",
     "@types/node": "^20.17.10",
     "@types/react": "19.1.13",
     "eslint": "^9.35.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.2"
   },
   "scripts": {
