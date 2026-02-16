@@ -1,6 +1,6 @@
 # Subnoto Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-16
 
 - Upload PDF and Word documents to Subnoto for electronic signature
 - Open envelope edit page in browser after upload
