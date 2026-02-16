@@ -203,13 +203,14 @@ export async function getSpotlightMetadata(filePath: string): Promise<SpotlightM
     if (Number.isFinite(parsed)) metadata.pageCount = parsed;
   }
 
-  const author = attrs.get("kMDItemAuthors");
+  const creator = attrs.get("kMDItemCreator");
+  if (creator) metadata.creator = creator;
+
+  // Use kMDItemCreator for document author (distinct from music artist which uses kMDItemAuthors above)
+  const author = creator || attrs.get("kMDItemAuthors");
   if (author) {
     metadata.author = author.replace(/[()"]/g, "").trim();
   }
-
-  const creator = attrs.get("kMDItemCreator");
-  if (creator) metadata.creator = creator;
 
   return Object.keys(metadata).length > 0 ? metadata : null;
 }
