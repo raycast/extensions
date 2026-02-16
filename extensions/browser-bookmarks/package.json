@@ -77,10 +77,12 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
+    "sync:sql-wasm": "node ./scripts/sync-sql-wasm.mjs",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "postinstall": "npm run sync:sql-wasm",
     "publish": "ray publish"
   },
   "platforms": [

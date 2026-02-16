@@ -205,18 +205,28 @@ export default function useLibreWolfBookmarks(enabled: boolean) {
         return null;
       }
 
-      const buffer = new Uint8Array(await read(dbPath));
-      const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
-      const wasmBinary =
-        wasmBinaryBuffer instanceof Uint8Array ? wasmBinaryBuffer.buffer : new Uint8Array(wasmBinaryBuffer).buffer;
-      const SQL = await initSqlJs({ wasmBinary });
-      const db = new SQL.Database(buffer);
+      try {
+        const buffer = new Uint8Array(await read(dbPath));
+        const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+        const wasmBinary =
+          wasmBinaryBuffer instanceof Uint8Array
+            ? wasmBinaryBuffer.buffer.slice(
+                wasmBinaryBuffer.byteOffset,
+                wasmBinaryBuffer.byteOffset + wasmBinaryBuffer.byteLength,
+              )
+            : new Uint8Array(wasmBinaryBuffer).buffer;
+        const SQL = await initSqlJs({ wasmBinary });
+        const db = new SQL.Database(buffer);
 
-      const rawFolders = getLibreWolfFolders(db);
-      const folders = processFolderHierarchy(rawFolders);
-      const bookmarks = getLibreWolfBookmarks(db);
+        const rawFolders = getLibreWolfFolders(db);
+        const folders = processFolderHierarchy(rawFolders);
+        const bookmarks = getLibreWolfBookmarks(db);
 
-      return { folders, bookmarks };
+        return { folders, bookmarks };
+      } catch (error) {
+        console.error("Failed to load LibreWolf bookmarks", error);
+        return { folders: [], bookmarks: [] };
+      }
     },
     [currentProfile, enabled],
   );

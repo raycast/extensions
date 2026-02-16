@@ -145,17 +145,27 @@ export default function useFirefoxBookmarks(enabled: boolean) {
         return;
       }
 
-      const buffer = new Uint8Array(await read(`${FIREFOX_FOLDER}/${profile}/places.sqlite`));
-      const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
-      const wasmBinary =
-        wasmBinaryBuffer instanceof Uint8Array ? wasmBinaryBuffer.buffer : new Uint8Array(wasmBinaryBuffer).buffer;
-      const SQL = await initSqlJs({ wasmBinary });
-      const db = new SQL.Database(buffer);
+      try {
+        const buffer = new Uint8Array(await read(`${FIREFOX_FOLDER}/${profile}/places.sqlite`));
+        const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+        const wasmBinary =
+          wasmBinaryBuffer instanceof Uint8Array
+            ? wasmBinaryBuffer.buffer.slice(
+                wasmBinaryBuffer.byteOffset,
+                wasmBinaryBuffer.byteOffset + wasmBinaryBuffer.byteLength,
+              )
+            : new Uint8Array(wasmBinaryBuffer).buffer;
+        const SQL = await initSqlJs({ wasmBinary });
+        const db = new SQL.Database(buffer);
 
-      const folders = getFirefoxFolders(db);
-      const bookmarks = getFirefoxBookmarks(db);
+        const folders = getFirefoxFolders(db);
+        const bookmarks = getFirefoxBookmarks(db);
 
-      return { folders, bookmarks };
+        return { folders, bookmarks };
+      } catch (error) {
+        console.error("Failed to load Firefox bookmarks", error);
+        return { folders: [], bookmarks: [] };
+      }
     },
     [currentProfile, enabled],
   );
