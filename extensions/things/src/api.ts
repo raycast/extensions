@@ -111,9 +111,8 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
 
     let areaTags = '';
     const areaRef = props.area;
-    if (areaRef) {
-      areaTags = areaRef.tagNames() || '';
-    }
+    let areaTags = '';
+    const areaRef = props.area;
 
     let project = null;
     const projectRef = props.project;
@@ -124,10 +123,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       if (projectAreaRef) {
         const areaProps = projectAreaRef.properties();
         projectArea = { id: areaProps.id, name: areaProps.name };
-        const projectAreaTags = projectAreaRef.tagNames() || '';
-        if (projectAreaTags) {
-          areaTags = areaTags ? areaTags + ', ' + projectAreaTags : projectAreaTags;
-        }
+        areaTags = projectAreaRef.tagNames() || '';
       }
       project = {
         id: projectProps.id,
