@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Add refresh action, improve platform icon colors, and enhance CHANGELOG navigation] - {PR_MERGE_DATE}
+## [Add refresh action, improve platform icon colors, and enhance CHANGELOG navigation] - 2026-02-16
 
 - Add CHANGELOG up/down reading navigation
 - Add refresh action (⌘R) to ExtensionActions that revalidates both feed and PR data
