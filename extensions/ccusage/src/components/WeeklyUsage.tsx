@@ -5,16 +5,27 @@ import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { StandardActions } from "./common/StandardActions";
 import { ReactNode } from "react";
+import { addDays, format } from "date-fns";
 
 import { WeeklyUsageData } from "../types/usage-types";
 
 export function WeeklyUsage() {
   const { data, isLoading, error, revalidate } = useWeeklyUsage();
 
+  const formatWeekRange = (startDateStr: string): string => {
+    try {
+      const startDate = new Date(startDateStr);
+      const endDate = addDays(startDate, 6);
+      return `${format(startDate, "yyyy-MM-dd")} - ${format(endDate, "yyyy-MM-dd")}`;
+    } catch {
+      return startDateStr;
+    }
+  };
+
   const renderDetailMetadata = (item: WeeklyUsageData): ReactNode => {
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label title="Week" text={item.week} icon={Icon.Calendar} />
+        <List.Item.Detail.Metadata.Label title="Week" text={formatWeekRange(item.week)} icon={Icon.Calendar} />
         <List.Item.Detail.Metadata.Separator />
         <List.Item.Detail.Metadata.Label
           title="Total Cost"
