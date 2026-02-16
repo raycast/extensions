@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SessionBlockData } from "../types/usage-types";
 import getBlocksUsage from "../tools/get-blocks-usage";
 import { showToast, Toast } from "@raycast/api";
@@ -39,9 +39,9 @@ export function useBlocksUsage() {
   useInterval(fetchData, 60000); // Refresh every minute for blocks
 
   // Initial fetch
-  useState(() => {
+  useEffect(() => {
     fetchData();
-  });
+  }, [fetchData]);
 
   return {
     data,

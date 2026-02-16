@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { WeeklyUsageData } from "../types/usage-types";
 import getWeeklyUsage from "../tools/get-weekly-usage";
 import { showToast, Toast } from "@raycast/api";
@@ -37,9 +37,9 @@ export function useWeeklyUsage() {
   useInterval(fetchData, 300000); // Refresh every 5 minutes
 
   // Initial fetch
-  useState(() => {
+  useEffect(() => {
     fetchData();
-  });
+  }, [fetchData]);
 
   return {
     data,
