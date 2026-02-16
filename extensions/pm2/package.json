@@ -99,5 +99,8 @@
     "pm2": "^6.0.14",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
