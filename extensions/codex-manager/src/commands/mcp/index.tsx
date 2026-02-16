@@ -216,7 +216,7 @@ export default function McpServersCommand() {
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add Mcp Server"
+                title="Add MCP Server"
                 icon={Icon.Plus}
                 target={
                   <McpForm
@@ -266,7 +266,7 @@ export default function McpServersCommand() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Add Mcp Server"
+                  title="Add MCP Server"
                   icon={Icon.Plus}
                   target={
                     <McpForm

@@ -4,32 +4,38 @@
   "description": "Manage Codex MCP servers and skills with safe local operations",
   "icon": "icon.png",
   "author": "jose_de_freitas",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "version": "0.0.1",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "mcp-servers",
-      "title": "Codex: MCP Servers",
+      "title": "Manage MCP Servers",
+      "subtitle": "Codex Manager",
       "description": "View and manage MCP servers",
       "mode": "view",
-      "path": "mcp-servers.tsx",
       "icon": "icon.png"
     },
     {
       "name": "skills",
-      "title": "Codex: Skills",
+      "title": "Manage Skills",
+      "subtitle": "Codex Manager",
       "description": "View and manage Codex skills",
       "mode": "view",
-      "path": "skills.tsx",
       "icon": "icon.png"
     },
     {
       "name": "doctor",
-      "title": "Codex: Doctor",
+      "title": "Check Configuration",
+      "subtitle": "Codex Manager",
       "description": "Diagnose common Codex configuration issues",
       "mode": "view",
-      "path": "doctor.tsx",
       "icon": "icon.png"
     }
   ],
@@ -96,10 +102,12 @@
     }
   ],
   "scripts": {
-    "dev": "npx ray develop",
-    "build": "npx ray build -e dist",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "lint": "npx ray lint",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -109,10 +117,12 @@
     "gray-matter": "4.0.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.11",
-    "@types/node": "20.19.28",
-    "eslint": "8.57.1",
-    "typescript": "5.9.3",
-    "vitest": "2.1.9"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.18"
   }
 }
