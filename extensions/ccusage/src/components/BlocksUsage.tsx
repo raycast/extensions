@@ -110,7 +110,11 @@ export function BlocksUsage() {
         title="Session Blocks"
         icon={{ source: Icon.Stopwatch, tintColor: Color.SecondaryText }}
         accessories={isLoading ? STANDARD_ACCESSORIES.LOADING : STANDARD_ACCESSORIES.NO_DATA}
-        detail={<List.Item.Detail markdown="No session block data available." />}
+        detail={
+          <List.Item.Detail
+            markdown={isLoading ? "Loading session block data..." : "No session block data available."}
+          />
+        }
         actions={
           <ActionPanel>
             <Action title="Refresh" onAction={revalidate} icon={Icon.ArrowClockwise} />

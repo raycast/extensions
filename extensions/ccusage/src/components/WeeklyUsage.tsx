@@ -99,7 +99,11 @@ export function WeeklyUsage() {
         title="Weekly Usage"
         icon={{ source: Icon.Calendar, tintColor: Color.SecondaryText }}
         accessories={isLoading ? STANDARD_ACCESSORIES.LOADING : STANDARD_ACCESSORIES.NO_DATA}
-        detail={<List.Item.Detail markdown="No weekly usage data available yet." />}
+        detail={
+          <List.Item.Detail
+            markdown={isLoading ? "Loading weekly usage data..." : "No weekly usage data available yet."}
+          />
+        }
         actions={
           <ActionPanel>
             <Action title="Refresh" onAction={revalidate} icon={Icon.ArrowClockwise} />
