@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browser-profile-manager",
+  "title": "Browser Profile Manager",
+  "description": "Scan, tag, rename, and launch browser profiles from Raycast.",
+  "categories": ["Productivity"],
+  "platforms": ["Windows"],
+  "icon": "icon.png",
+  "author": "rogerio_araujo_costa",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Perfis De Navegador",
+      "subtitle": "Escanear e Abrir Perfis",
+      "description": "Liste, personalize e abra perfis do Chrome, Edge, Firefox e Comet.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.2",
+    "ini": "^5.0.0",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/ini": "^4.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "dev": "ray develop",
+    "lint": "eslint src",
+    "fix-lint": "eslint src --fix",
+    "publish": "ray publish"
+  }
+}
