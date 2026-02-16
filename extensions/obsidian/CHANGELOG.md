@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [AI Search Tool Content Search Parameter] - {PR_MERGE_DATE}
+## [AI Search Tool Content Search Parameter] - 2026-02-16
 
 - Add searchContent parameter to searchNote AI tool for controlling search mode
 - Enable content and tag search capabilities in AI tools
