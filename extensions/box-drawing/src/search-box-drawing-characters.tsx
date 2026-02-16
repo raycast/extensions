@@ -18,6 +18,7 @@ function GridItem({ item }: { item: Character }) {
       title={item.name}
       actions={
         <ActionPanel>
+          <Action.Paste content={item.shape} />
           <Action.CopyToClipboard content={item.shape} />
           <Action.OpenInBrowser
             title="Box Drawing on Wikipedia"
