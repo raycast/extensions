@@ -165,10 +165,10 @@ describe("mapClipboardToFiles", () => {
     const result = mapClipboardToFiles(files, ["one", "two", "three"]);
     expect(result).toHaveLength(3);
     expect(result[0]!.file).toBe(MOCK_JPG);
-    expect(result[0]!.newName).toBe("one..jpg");
+    expect(result[0]!.newName).toBe("one.jpg");
     expect(result[0]!.hasMatch).toBe(true);
-    expect(result[1]!.newName).toBe("two..png");
-    expect(result[2]!.newName).toBe("three..pdf");
+    expect(result[1]!.newName).toBe("two.png");
+    expect(result[2]!.newName).toBe("three.pdf");
   });
 
   it("ignores extra names when more names than files", () => {
@@ -183,7 +183,7 @@ describe("mapClipboardToFiles", () => {
     const result = mapClipboardToFiles(files, ["renamed"]);
     expect(result).toHaveLength(3);
     expect(result[0]!.hasMatch).toBe(true);
-    expect(result[0]!.newName).toBe("renamed..jpg");
+    expect(result[0]!.newName).toBe("renamed.jpg");
     expect(result[1]!.hasMatch).toBe(false);
     expect(result[1]!.newName).toBe("screenshot.png");
     expect(result[2]!.hasMatch).toBe(false);
@@ -193,7 +193,7 @@ describe("mapClipboardToFiles", () => {
   describe("preserveExtension", () => {
     it("appends extension when preserveExtension=true and name has no extension", () => {
       const result = mapClipboardToFiles(files, ["newname"], true);
-      expect(result[0]!.newName).toBe("newname..jpg");
+      expect(result[0]!.newName).toBe("newname.jpg");
     });
 
     it("does not double-add extension when name already has one", () => {
@@ -210,7 +210,7 @@ describe("mapClipboardToFiles", () => {
     it("defaults preserveExtension to true", () => {
       const result = mapClipboardToFiles(files, ["test"]);
       // Default preserveExtension=true, extension ".jpg" is truthy -> appended
-      expect(result[0]!.newName).toBe("test..jpg");
+      expect(result[0]!.newName).toBe("test.jpg");
     });
   });
 });
