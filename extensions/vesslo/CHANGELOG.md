@@ -1,5 +1,11 @@
 # Vesslo Changelog
 
+## [Improve Store Listing] - {PR_MERGE_DATE}
+
+- Removed oversized icon/title HTML block from README
+- Added demo GIF showing the extension in action
+- Streamlined README with proper feature descriptions
+
 ## [Initial Release] - 2026-02-16
 - Added `Search Apps` command to find apps by name, developer, tag, or memo
 - Added `View Updates` command to check for pending updates with Vesslo integration
