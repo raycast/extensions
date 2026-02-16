@@ -399,7 +399,7 @@ describe("requiresSpotlight", () => {
 describe("getRequiredDateSource", () => {
   it("returns exif when exif variables are present", () => {
     expect(getRequiredDateSource(["exif.dateTaken", "original"])).toBe("exif");
-    expect(getRequiredDateSource(["exif"])).toBe("exif");
+    expect(getRequiredDateSource(["exif.dimensions"])).toBe("exif");
   });
 
   it("returns null when no special date source needed", () => {

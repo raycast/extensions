@@ -100,10 +100,9 @@ describe("groupFilesByExtension", () => {
     expect(groups.has(".JPG")).toBe(false);
   });
 
-  it("handles files with no extension", () => {
+  it("skips directories", () => {
     const groups = groupFilesByExtension([MOCK_DIR]);
-    expect(groups.has("(no ext)")).toBe(true);
-    expect(groups.get("(no ext)")).toEqual([MOCK_DIR]);
+    expect(groups.size).toBe(0);
   });
 
   it("returns empty map for empty input", () => {

@@ -129,6 +129,8 @@ export function useRenameOperations({
   const handleUndo = async () => {
     try {
       await undoLastRename();
+      setOperationResults(null);
+      setPendingOperations([]);
     } catch (err) {
       log.rename.error("Undo failed", err);
       await showToast({

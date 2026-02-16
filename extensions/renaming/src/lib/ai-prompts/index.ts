@@ -81,7 +81,7 @@ export function parseBatchAIResponse(response: string, expectedCount: number): s
   }
 
   while (names.length < expectedCount) {
-    names.push("");
+    names.push("unnamed");
   }
 
   return names;

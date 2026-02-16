@@ -8,7 +8,7 @@
 
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { access, mkdir, rename } from "fs/promises";
+import { access, mkdir, rename, stat } from "fs/promises";
 import { constants } from "fs";
 import { basename, join } from "path";
 import { tmpdir } from "os";
@@ -22,10 +22,18 @@ const execFileAsync = promisify(execFile);
 const THUMBNAIL_CACHE_DIR = join(tmpdir(), FILE_CONSTANTS.THUMBNAIL_CACHE_DIR);
 
 /**
- * Generate a cache key for a file based on path and modification time
+ * Generate a cache key for a file based on path and modification time.
+ * Including mtime ensures stale thumbnails are regenerated when the file changes.
  */
-function getCacheKey(filePath: string): string {
-  const hash = createHash("md5").update(filePath).digest("hex").slice(0, 12);
+async function getCacheKey(filePath: string): Promise<string> {
+  let mtimeMs = 0;
+  try {
+    const stats = await stat(filePath);
+    mtimeMs = stats.mtimeMs;
+  } catch {
+    // If stat fails, fall back to path-only hash
+  }
+  const hash = createHash("md5").update(`${filePath}:${mtimeMs}`).digest("hex").slice(0, 12);
   const name = basename(filePath)
     .replace(/[^a-zA-Z0-9]/g, "_")
     .slice(0, 20);
@@ -47,7 +55,7 @@ async function ensureCacheDir(): Promise<void> {
  * Check if a thumbnail already exists in cache
  */
 async function getThumbnailFromCache(filePath: string): Promise<string | null> {
-  const cacheKey = getCacheKey(filePath);
+  const cacheKey = await getCacheKey(filePath);
   const thumbnailPath = join(THUMBNAIL_CACHE_DIR, `${cacheKey}.png`);
 
   try {
@@ -78,12 +86,13 @@ export async function generateThumbnail(
   try {
     await ensureCacheDir();
 
-    const cacheKey = getCacheKey(filePath);
+    const cacheKey = await getCacheKey(filePath);
     const outputPath = join(THUMBNAIL_CACHE_DIR, `${cacheKey}.png`);
 
     // Use qlmanage to generate thumbnail
     // -t = generate thumbnail, -s = size, -o = output directory
-    const safeSize = Math.max(1, Math.min(Math.floor(Number(size)), 2048));
+    const parsed = Number(size);
+    const safeSize = Number.isFinite(parsed) ? Math.max(1, Math.min(Math.floor(parsed), 2048)) : 256;
     await execFileAsync("qlmanage", ["-t", "-s", String(safeSize), "-o", THUMBNAIL_CACHE_DIR, filePath], {
       timeout: FILE_CONSTANTS.THUMBNAIL_TIMEOUT,
     });

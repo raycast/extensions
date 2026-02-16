@@ -203,7 +203,7 @@ export interface AIPromptConfig {
 // Grouped Rename Types
 
 export interface ExtensionGroupConfig {
-  readonly extension: string;
+  extension: string;
   baseName: string;
   prefix?: string;
   suffix?: string;

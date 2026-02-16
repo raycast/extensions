@@ -294,7 +294,7 @@ export function requiresSpotlight(variableName: string): boolean {
  * Returns EXIF date source if any exif-prefixed variables are present
  */
 export function getRequiredDateSource(variables: string[]): TemplateDateSource | null {
-  if (variables.some((v) => v.startsWith("exif"))) {
+  if (variables.some((v) => v.startsWith("exif."))) {
     return TemplateDateSource.EXIF;
   }
   return null;

@@ -16,6 +16,11 @@ export default function Command() {
     } catch (err) {
       console.error("Failed to load history:", err);
       setHistory([]);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load history",
+        message: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setIsLoading(false);
     }
@@ -25,11 +30,11 @@ export default function Command() {
     loadHistory();
   }, [loadHistory]);
 
-  const handleUndoToPoint = async (index: number) => {
-    const success = await undoToPoint(index);
-    if (success) {
-      await loadHistory();
-    }
+  const handleUndoToPoint = async (index: number): Promise<void> => {
+    await undoToPoint(index);
+    // undoToPoint handles its own success/failure toasts;
+    // always reload history since partial undos may have modified entries
+    await loadHistory();
   };
 
   const handleUndoWithConfirm = async (index: number) => {
@@ -62,12 +67,20 @@ export default function Command() {
     });
 
     if (confirmed) {
-      await clearHistory();
-      setHistory([]);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "History Cleared",
-      });
+      try {
+        await clearHistory();
+        setHistory([]);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "History Cleared",
+        });
+      } catch (err) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to clear history",
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
   };
 

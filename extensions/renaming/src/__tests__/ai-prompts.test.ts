@@ -171,13 +171,13 @@ describe("parseBatchAIResponse", () => {
     expect(result[2]).toBe("mountain_view");
   });
 
-  it("pads with empty strings if fewer results than expected", () => {
+  it("pads with 'unnamed' if fewer results than expected", () => {
     const response = "1. sunset_beach";
     const result = parseBatchAIResponse(response, 3);
     expect(result).toHaveLength(3);
     expect(result[0]).toBe("sunset_beach");
-    expect(result[1]).toBe("");
-    expect(result[2]).toBe("");
+    expect(result[1]).toBe("unnamed");
+    expect(result[2]).toBe("unnamed");
   });
 
   it("stops at expectedCount", () => {

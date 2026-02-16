@@ -110,6 +110,7 @@ export function buildPerFolderSummary(folderFileMap: Map<string, FileInfo[]>): s
 export function groupFilesByExtension(files: FileInfo[]): Map<string, FileInfo[]> {
   const groups = new Map<string, FileInfo[]>();
   for (const file of files) {
+    if (file.isDirectory) continue;
     const ext = file.extension ? file.extension.toLowerCase() : "(no ext)";
     if (!groups.has(ext)) groups.set(ext, []);
     groups.get(ext)!.push(file);
@@ -122,6 +123,8 @@ export function groupFilesByExtension(files: FileInfo[]): Map<string, FileInfo[]
  * Falls back to flat summary for single-directory selections.
  */
 export function buildAutoSummary(files: FileInfo[]): string {
+  if (files.length === 0) return "No files selected";
+
   const dirMap = new Map<string, FileInfo[]>();
   for (const file of files) {
     const dir = dirname(file.path);

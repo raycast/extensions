@@ -245,7 +245,7 @@ export function TemplateBuilder({ template, onChange, showSaveAction = false, on
         id="sortDescending"
         title="Sort Options"
         label="Descending Order"
-        value={template.sort.direction === "desc"}
+        value={template.sort.direction === SortDirection.DESC}
         onChange={handleSortDirectionChange}
       />
 
