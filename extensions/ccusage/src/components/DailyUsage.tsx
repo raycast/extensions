@@ -70,7 +70,7 @@ export function DailyUsage() {
     <List.Item
       id="today"
       title="Today"
-      icon={{ source: Icon.Calendar, tintColor: Color.SecondaryText }}
+      icon={Icon.Calendar}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}

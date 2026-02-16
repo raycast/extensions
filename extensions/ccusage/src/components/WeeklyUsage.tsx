@@ -114,10 +114,10 @@ export function WeeklyUsage() {
     <List.Item
       title="Weekly Usage"
       subtitle={currentWeek?.week || "Current Week"}
-      icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
+      icon={{ source: Icon.Calendar, tintColor: Color.SecondaryText }}
       accessories={[
         { text: formatCost(currentWeek?.totalCost || 0), icon: Icon.Coins },
-        { text: formatNumber(currentWeek?.totalTokens || 0), icon: Icon.Text },
+        { text: formatNumber(currentWeek?.totalTokens || 0), icon: Icon.Terminal, tooltip: "Total Tokens" },
       ]}
       detail={<List.Item.Detail metadata={currentWeek ? renderDetailMetadata(currentWeek) : undefined} />}
       actions={

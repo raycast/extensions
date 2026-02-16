@@ -91,7 +91,7 @@ export function SessionUsage() {
     <List.Item
       id="sessions"
       title="Sessions"
-      icon={Icon.List}
+      icon={{ source: Icon.List, tintColor: Color.SecondaryText }}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions />}

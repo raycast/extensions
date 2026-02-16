@@ -140,7 +140,7 @@ export function CostAnalysis() {
     <List.Item
       id="cost-analysis"
       title="Costs"
-      icon={Icon.Coins}
+      icon={{ source: Icon.Coins, tintColor: Color.SecondaryText }}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}

@@ -124,10 +124,10 @@ export function BlocksUsage() {
     <List.Item
       title="Session Blocks"
       subtitle={activeBlock.isActive ? "Active Session" : "Recent Session"}
-      icon={{ source: Icon.Stopwatch, tintColor: activeBlock.isActive ? Color.Green : Color.Blue }}
+      icon={{ source: Icon.Stopwatch, tintColor: Color.SecondaryText }}
       accessories={[
         { text: formatCost(activeBlock.costUSD), icon: Icon.Coins },
-        { text: formatNumber(activeBlock.totalTokens), icon: Icon.Text },
+        { text: formatNumber(activeBlock.totalTokens), icon: Icon.Terminal, tooltip: "Total Tokens" },
         activeBlock.isActive ? { icon: { source: Icon.CircleFilled, tintColor: Color.Green }, tooltip: "Active" } : {},
       ]}
       detail={<List.Item.Detail metadata={renderDetailMetadata(activeBlock)} />}

@@ -130,7 +130,7 @@ export function ModelBreakdown() {
     <List.Item
       id="model-breakdown"
       title="Models"
-      icon={Icon.BarChart}
+      icon={{ source: Icon.BarChart, tintColor: Color.SecondaryText }}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}
