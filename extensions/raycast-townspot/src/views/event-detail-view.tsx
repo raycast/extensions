@@ -62,6 +62,16 @@ const formatDateTime = (value: Date | null, timezone: string): string => {
   return dayLabel || timeLabel || "TBC";
 };
 
+const formatSpottedByDate = (value: Date | null, timezone: string): string => {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: timezone || "Europe/London",
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  }).format(value);
+};
+
 const formatTimeRange = (
   startValue: string | undefined | null,
   endValue: string | undefined | null,
@@ -157,6 +167,25 @@ const priceLabel = (details: EventDetails | null): string | null => {
   return null;
 };
 
+const spottedByLabel = (
+  details: EventDetails | null,
+  timezone: string,
+): string => {
+  const spottedBy = details?.spottedBy;
+  const name = String(spottedBy?.name || "").trim() || "a local";
+  const org = String(spottedBy?.org || "").trim();
+  const spottedAt = parseDateValue(spottedBy?.spottedAt || details?.createdAt);
+  const parts: string[] = [];
+
+  if (org) parts.push(org);
+  if (spottedBy?.isAreaAdmin) parts.push("Area Admin");
+
+  const spottedDate = formatSpottedByDate(spottedAt, timezone);
+  if (spottedDate) parts.push(spottedDate);
+
+  return parts.length ? `${name} · ${parts.join(" · ")}` : name;
+};
+
 const buildShareMessage = (
   title: string,
   timeRangeLabel: string,
@@ -186,6 +215,7 @@ const EventMetadata = ({
   const recurring = recurringLabel(event);
   const price = priceLabel(details);
   const categories = categoryList(details, event);
+  const spottedBy = spottedByLabel(details, effectiveTimezone);
 
   return (
     <Detail.Metadata>
@@ -221,6 +251,8 @@ const EventMetadata = ({
           <Detail.Metadata.Separator />
         </>
       ) : null}
+      <Detail.Metadata.Label title="Spotted by" text={spottedBy} />
+      <Detail.Metadata.Separator />
       {details?.zoneName ? (
         <>
           <Detail.Metadata.Label title="Town" text={details.zoneName} />

@@ -3,6 +3,8 @@ import { normalizeApiBaseUrl } from "./townspot";
 export type EventDetails = {
   uuid: string;
   title: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   description?: string | null;
   venueDescription?: string | null;
   locationName?: string | null;
@@ -23,6 +25,15 @@ export type EventDetails = {
   lat?: number | null;
   lng?: number | null;
   zoneName?: string | null;
+  spottedBy?: {
+    name?: string | null;
+    org?: string | null;
+    displayPref?: string | null;
+    subscriberId?: number | null;
+    avatarUrl?: string | null;
+    spottedAt?: string | null;
+    isAreaAdmin?: boolean | null;
+  } | null;
 };
 
 const toNumber = (value: unknown): number | null => {
