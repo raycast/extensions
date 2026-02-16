@@ -10,11 +10,15 @@ import {
   Detail,
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listItems, listVaults, getItem, getItemRaw, getTotp, checkAuth } from "./lib/pass-cli";
+import { listItems, listVaults, getItem, getTotp, checkAuth } from "./lib/pass-cli";
 import { Item, ItemDetail as ItemDetailType, PassCliError, PassCliErrorType, Vault } from "./lib/types";
-import { getItemIcon, formatItemSubtitle, maskPassword, formatTotpCode } from "./lib/utils";
+import { getItemIcon, formatItemSubtitle, maskPassword } from "./lib/utils";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
+
+function escapeMarkdown(value: string): string {
+  return value.replace(/([\\`*_{}[\]()#+\-.!|>])/g, "\\$1");
+}
 
 function ItemDetail({ item }: { item: Item }) {
   const [detail, setDetail] = useState<ItemDetailType | null>(null);
@@ -51,38 +55,38 @@ function ItemDetail({ item }: { item: Item }) {
 
   const markdownParts: string[] = [];
 
-  markdownParts.push(`# ${detail.title}\n`);
-  markdownParts.push(`**Type:** ${detail.type}`);
-  markdownParts.push(`**Vault:** ${detail.vaultName}\n`);
+  markdownParts.push(`# ${escapeMarkdown(detail.title)}\n`);
+  markdownParts.push(`**Type:** ${escapeMarkdown(detail.type)}`);
+  markdownParts.push(`**Vault:** ${escapeMarkdown(detail.vaultName)}\n`);
 
   if (detail.username) {
-    markdownParts.push(`**Username:** ${detail.username}`);
+    markdownParts.push(`**Username:** ${escapeMarkdown(detail.username)}`);
   }
 
   if (detail.email) {
-    markdownParts.push(`**Email:** ${detail.email}`);
+    markdownParts.push(`**Email:** ${escapeMarkdown(detail.email)}`);
   }
 
   if (detail.password) {
-    markdownParts.push(`**Password:** ${maskPassword(detail.password)}`);
+    markdownParts.push(`**Password:** ${escapeMarkdown(maskPassword(detail.password))}`);
   }
 
   if (detail.urls && detail.urls.length > 0) {
     markdownParts.push(`\n**URLs:**`);
     detail.urls.forEach((url) => {
-      markdownParts.push(`- ${url}`);
+      markdownParts.push(`- ${escapeMarkdown(url)}`);
     });
   }
 
   if (detail.note) {
-    markdownParts.push(`\n**Note:**\n${detail.note}`);
+    markdownParts.push(`\n**Note:**\n${escapeMarkdown(detail.note)}`);
   }
 
   if (detail.customFields && detail.customFields.length > 0) {
     markdownParts.push(`\n**Custom Fields:**`);
     detail.customFields.forEach((field) => {
       const value = field.type === "hidden" ? maskPassword(field.value) : field.value;
-      markdownParts.push(`- **${field.name}:** ${value}`);
+      markdownParts.push(`- **${escapeMarkdown(field.name)}:** ${escapeMarkdown(value)}`);
     });
   }
 
@@ -147,8 +151,8 @@ function ItemDetail({ item }: { item: Item }) {
                 onAction={async () => {
                   try {
                     const totp = await getTotp(detail.shareId, detail.itemId);
-                    await Clipboard.copy(totp);
-                    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: formatTotpCode(totp) });
+                    await Clipboard.copy(totp, { transient: preferences.copyPasswordTransient ?? true });
+                    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: "Clipboard updated" });
                   } catch (error: unknown) {
                     const message = error instanceof Error ? error.message : "An unknown error occurred";
                     showToast({ style: Toast.Style.Failure, title: "Failed to get TOTP", message });
@@ -208,25 +212,6 @@ function ItemDetail({ item }: { item: Item }) {
                 2,
               )}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-            />
-            <Action
-              title="Copy Raw CLI Output"
-              icon={Icon.Terminal}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-              onAction={async () => {
-                try {
-                  const raw = await getItemRaw(detail.shareId, detail.itemId);
-                  await Clipboard.copy(raw);
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: "Raw JSON Copied",
-                    message: "Paste to see actual CLI output",
-                  });
-                } catch (error: unknown) {
-                  const message = error instanceof Error ? error.message : "An unknown error occurred";
-                  showToast({ style: Toast.Style.Failure, title: "Failed", message });
-                }
-              }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -387,11 +372,11 @@ export default function Command() {
                       onAction={async () => {
                         try {
                           const totp = await getTotp(item.shareId, item.itemId);
-                          await Clipboard.copy(totp);
+                          await Clipboard.copy(totp, { transient: preferences.copyPasswordTransient ?? true });
                           showToast({
                             style: Toast.Style.Success,
                             title: "TOTP Copied",
-                            message: formatTotpCode(totp),
+                            message: "Clipboard updated",
                           });
                         } catch (error: unknown) {
                           const message = error instanceof Error ? error.message : "An unknown error occurred";

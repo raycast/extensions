@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Clipboard, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Clipboard, Color, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { listItems, getTotp, checkAuth } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
@@ -15,6 +15,7 @@ function getTotpTimeStep(): number {
 }
 
 export default function Command() {
+  const preferences = getPreferenceValues();
   const [items, setItems] = useState<TotpItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -141,8 +142,8 @@ export default function Command() {
   if (errorView) return errorView;
 
   async function copyTotp(totp: string, title: string) {
-    await Clipboard.copy(totp);
-    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: `${title}: ${totp}` });
+    await Clipboard.copy(totp, { transient: preferences.copyPasswordTransient ?? true });
+    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: title });
   }
 
   function getTimerColor(): Color {

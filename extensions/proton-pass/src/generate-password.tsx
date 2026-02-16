@@ -7,6 +7,8 @@ import { renderErrorView } from "./lib/error-views";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const defaultPasswordType = (preferences.defaultPasswordType as "random" | "passphrase") || "random";
+  const defaultPasswordLength = preferences.defaultPasswordLength || "20";
   const [password, setPassword] = useState<string>("");
   const [score, setScore] = useState<PasswordScore | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,10 +19,10 @@ export default function Command() {
     async (type?: "random" | "passphrase") => {
       setIsLoading(true);
       try {
-        const passwordType = type || (preferences.defaultPasswordType as "random" | "passphrase") || "random";
+        const passwordType = type || defaultPasswordType;
         const options = {
           type: passwordType as "random" | "passphrase",
-          length: passwordType === "random" ? parseInt(preferences.defaultPasswordLength || "20") : undefined,
+          length: passwordType === "random" ? parseInt(defaultPasswordLength) : undefined,
           words: passwordType === "passphrase" ? 4 : undefined,
         };
 
@@ -40,7 +42,7 @@ export default function Command() {
         setIsLoading(false);
       }
     },
-    [preferences],
+    [defaultPasswordLength, defaultPasswordType],
   );
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export default function Command() {
                     title="Generate Passphrase"
                     icon={Icon.Text}
                     onAction={() => generate("passphrase")}
-                    shortcut={{ modifiers: ["cmd"], key: "p" }}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

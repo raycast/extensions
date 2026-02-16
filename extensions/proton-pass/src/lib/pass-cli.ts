@@ -486,7 +486,8 @@ export async function listItems(shareId?: string): Promise<Item[]> {
       const items = await listItemsFromVault(vault.shareId, vault.name);
       allItems.push(...items);
     } catch (error) {
-      console.error(`Failed to list items from vault ${vault.name}:`, error);
+      const errorType = error instanceof PassCliError ? error.type : "unknown";
+      console.error(`Failed to list items from vault ${vault.name} (${errorType}).`);
     }
   }
 
@@ -526,10 +527,6 @@ export async function getItem(shareId: string, itemId: string): Promise<ItemDeta
 
   const rawItem = unwrapItemResponse(data);
   return normalizeItemDetail(rawItem);
-}
-
-export async function getItemRaw(shareId: string, itemId: string): Promise<string> {
-  return runCli(["item", "view", "--share-id", shareId, "--item-id", itemId, "--output", "json"]);
 }
 
 export async function getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>> {
@@ -586,18 +583,41 @@ export async function generatePassword(options: PasswordOptions): Promise<string
 }
 
 export async function passwordScore(password: string): Promise<PasswordScore> {
-  const output = await runCli(["password", "score", password, "--output", "json"]);
-  const data = parseJson<Record<string, unknown>>(output, "password score");
+  // Avoid passing passwords to external process arguments.
+  const penalties: string[] = [];
 
-  const numericScoreValue = data.numericScore ?? data.numeric_score;
-  const numericScore = typeof numericScoreValue === "number" ? numericScoreValue : Number(numericScoreValue ?? 0);
+  if (password.length < 12) penalties.push("Use at least 12 characters");
+  if (!/[a-z]/.test(password)) penalties.push("Add lowercase letters");
+  if (!/[A-Z]/.test(password)) penalties.push("Add uppercase letters");
+  if (!/[0-9]/.test(password)) penalties.push("Add numbers");
+  if (!/[^a-zA-Z0-9]/.test(password)) penalties.push("Add symbols");
+  if (/(.)\1{2,}/.test(password)) penalties.push("Avoid repeated characters");
+  if (/(?:password|letmein|welcome|admin|qwerty|123456)/i.test(password)) penalties.push("Avoid common patterns");
+  if (/(?:0123|1234|2345|abcd|qwer|asdf|zxcv)/i.test(password)) penalties.push("Avoid sequences");
 
-  const passwordScore = trimOrUndefined(data.passwordScore ?? data.password_score) ?? "Unknown";
-  const penalties = Array.isArray(data.penalties) ? data.penalties.map((p) => String(p)) : undefined;
+  let characterPool = 0;
+  if (/[a-z]/.test(password)) characterPool += 26;
+  if (/[A-Z]/.test(password)) characterPool += 26;
+  if (/[0-9]/.test(password)) characterPool += 10;
+  if (/[^a-zA-Z0-9]/.test(password)) characterPool += 33;
+
+  const entropy = characterPool > 0 ? Math.log2(characterPool) * password.length : 0;
+  const penaltyWeight = 7;
+  const rawScore = Math.round(Math.min(100, entropy * 1.2)) - penalties.length * penaltyWeight;
+  const numericScore = Math.max(0, Math.min(100, rawScore));
+
+  let passwordScore = "Weak";
+  if (numericScore >= 80) {
+    passwordScore = "Strong";
+  } else if (numericScore >= 60) {
+    passwordScore = "Good";
+  } else if (numericScore >= 35) {
+    passwordScore = "Fair";
+  }
 
   return {
-    numericScore: Number.isFinite(numericScore) ? numericScore : 0,
+    numericScore,
     passwordScore,
-    penalties,
+    penalties: penalties.length > 0 ? penalties : undefined,
   };
 }

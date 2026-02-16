@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 import afs from "fs/promises";
@@ -49,6 +49,12 @@ export async function ensureCli(): Promise<string> {
     return cli;
   }
 
+  const installToast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Installing Proton Pass CLI",
+    message: "Downloading binary...",
+  });
+
   const platformKey = getPlatformKey();
   const platformInfo = CLI_PLATFORMS[platformKey];
 
@@ -74,7 +80,11 @@ export async function ensureCli(): Promise<string> {
     }
     const buffer = Buffer.from(await response.arrayBuffer());
     await afs.writeFile(downloadedFile, buffer);
+    installToast.message = "Download complete. Verifying binary...";
   } catch (error) {
+    installToast.style = Toast.Style.Failure;
+    installToast.title = "Failed to Install Proton Pass CLI";
+    installToast.message = error instanceof Error ? error.message : String(error);
     throw new Error(`Could not download pass-cli: ${error instanceof Error ? error.message : String(error)}`);
   }
 
@@ -93,9 +103,13 @@ export async function ensureCli(): Promise<string> {
       throw new Error(`SHA256 hash mismatch. Expected: ${platformInfo.sha256}, Got: ${fileHash}`);
     }
 
+    installToast.message = "Installing binary...";
     await afs.mkdir(dir, { recursive: true });
     await afs.copyFile(downloadedFile, cli);
   } catch (error) {
+    installToast.style = Toast.Style.Failure;
+    installToast.title = "Failed to Install Proton Pass CLI";
+    installToast.message = error instanceof Error ? error.message : String(error);
     throw new Error(`Could not verify pass-cli: ${error instanceof Error ? error.message : String(error)}`);
   } finally {
     try {
@@ -113,10 +127,16 @@ export async function ensureCli(): Promise<string> {
     } catch {
       // Ignore cleanup errors
     }
+    installToast.style = Toast.Style.Failure;
+    installToast.title = "Failed to Install Proton Pass CLI";
+    installToast.message = error instanceof Error ? error.message : String(error);
     throw new Error(`Could not set permissions on pass-cli: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   console.log("pass-cli installed successfully at:", cli);
+  installToast.style = Toast.Style.Success;
+  installToast.title = "Proton Pass CLI Ready";
+  installToast.message = "Download and installation complete.";
   return cli;
 }
 
