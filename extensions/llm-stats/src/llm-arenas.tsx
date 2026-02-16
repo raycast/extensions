@@ -1,5 +1,5 @@
-import { Icon, List, showToast, Toast, Color, ActionPanel } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Icon, List, Color, ActionPanel, Action } from "@raycast/api";
+import { useCachedPromise, useCachedState, showFailureToast } from "@raycast/utils";
 import { ZeroEvalAPI } from "./utils/zeroeval-api";
 import { ArenaModel } from "./types";
 import { getOrganizationLogo } from "./utils/organization-logos";
@@ -10,7 +10,7 @@ import {
   OpenPlaygroundAction,
   CompareWithSubmenu,
 } from "./components/actions/ModelActions";
-import { ARENAS_BY_SECTION } from "./utils/arenas";
+import { ARENAS_BY_SECTION, getArenaById } from "./utils/arenas";
 
 const api = new ZeroEvalAPI();
 
@@ -35,11 +35,7 @@ export default function Command() {
     [selectedArena],
     {
       onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load leaderboard",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Failed to load leaderboard" });
       },
     },
   );
@@ -63,6 +59,7 @@ export default function Command() {
 
   const models = leaderboardData?.leaderboard || [];
   const isLoading = isLoadingLeaderboard || isLoadingModels;
+  const arena = getArenaById(selectedArena);
 
   return (
     <List
@@ -80,41 +77,54 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {models.length === 0 && !isLoading ? (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="No models found"
-          description="Try selecting a different arena"
-        />
+      {isLoading ? (
+        <></>
+      ) : models.length === 0 ? (
+        <List.EmptyView title="No models available for this arena" />
       ) : (
-        models.map((model: ArenaModel, index) => {
-          const cachedModel = allModels?.find((m) => m.model_id === model.model_id);
-          return (
-            <List.Item
-              key={model.variant_id}
-              icon={getOrganizationLogo(cachedModel?.organization_id || model.organization.toLowerCase())}
-              title={cachedModel?.name || model.model_name}
-              subtitle={cachedModel?.organization || model.organization}
-              keywords={[cachedModel?.organization || model.organization]}
-              accessories={[
-                {
-                  text: `${model.wins}`,
-                  icon: Icon.ThumbsUp,
-                  tooltip: "Votes",
-                },
-                createScoreAccessory(model, index),
-              ]}
-              actions={
-                <ActionPanel>
-                  <ShowDetailsAction modelId={model.model_id} />
-                  <ModelDetailsLinkAction modelId={model.model_id} />
-                  <OpenPlaygroundAction modelId={model.model_id} />
-                  <CompareWithSubmenu modelId={model.model_id} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
+        <>
+          <List.Section>
+            {arena && (
+              <List.Item
+                key="open-arena"
+                title={`Open ${arena.name} Arena`}
+                icon={Icon.GameController}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser url={arena.link} />
+                  </ActionPanel>
+                }
+              />
+            )}
+          </List.Section>
+          <List.Section title="Leaderboard">
+            {models.map((model: ArenaModel, index) => {
+              const cachedModel = allModels?.find((m) => m.model_id === model.model_id);
+              return (
+                <List.Item
+                  key={model.model_id}
+                  icon={getOrganizationLogo(cachedModel?.organization_id || model.organization.toLowerCase())}
+                  title={cachedModel?.name || model.model_name}
+                  subtitle={cachedModel?.organization || model.organization}
+                  keywords={[cachedModel?.organization || model.organization]}
+                  accessories={
+                    [createVoteAccessory(model), createScoreAccessory(model, index)].filter(
+                      Boolean,
+                    ) as List.Item.Accessory[]
+                  }
+                  actions={
+                    <ActionPanel>
+                      <ShowDetailsAction modelId={model.model_id} />
+                      <ModelDetailsLinkAction modelId={model.model_id} />
+                      <OpenPlaygroundAction modelId={model.model_id} />
+                      <CompareWithSubmenu modelId={model.model_id} />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+          </List.Section>
+        </>
       )}
     </List>
   );
@@ -159,5 +169,17 @@ function createScoreAccessory(model: ArenaModel, index: number): List.Item.Acces
       color: Color.SecondaryText,
     },
     tooltip: "Score",
+  };
+}
+
+function createVoteAccessory(model: ArenaModel): List.Item.Accessory | undefined {
+  if (!model.wins) {
+    return undefined;
+  }
+
+  return {
+    text: `${model.wins}`,
+    icon: Icon.ThumbsUp,
+    tooltip: "Votes",
   };
 }

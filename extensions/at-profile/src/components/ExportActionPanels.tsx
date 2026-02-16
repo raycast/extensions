@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 
 interface ExportActionPanelsProps {
   state: "initial" | "success" | "error";
@@ -15,7 +15,7 @@ export function ExportActionPanels({ state, onExport, onShowInFinder, onTryAgain
           <Action
             title="Show in Finder"
             icon={Icon.Finder}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
             onAction={onShowInFinder}
           />
           <Action title="Export Again" icon={Icon.Download} onAction={onExport} />

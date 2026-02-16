@@ -1,4 +1,4 @@
-import { ActionPanel, Action, showToast, Toast, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, showToast, Toast, closeMainWindow, Icon } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { openActivityMonitorAppleScript } from "../utils";
 
@@ -22,7 +22,7 @@ export const Actions = ({ radioButtonNumber }: ActionsProps) => {
 
   return (
     <ActionPanel>
-      <Action title="Open Activity Monitor" onAction={handleRunAppleScript} />
+      <Action icon={Icon.Bolt} title="Open Activity Monitor" onAction={handleRunAppleScript} />
     </ActionPanel>
   );
 };

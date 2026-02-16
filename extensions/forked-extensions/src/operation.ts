@@ -152,6 +152,36 @@ class Operation {
     this.spawn(async () => git.sparseCheckoutRemove([extensionFolder]), "Removing extension", "Removed successfully");
 
   /**
+   * Adds a pattern to the sparse-checkout list.
+   * @param pattern The pattern of the sparse-checkout to add.
+   */
+  addSparseCheckoutPattern = async (pattern: string, onList?: () => Promise<void>) => {
+    this.spawn(
+      async () => {
+        await git.sparseCheckoutAdd([pattern]);
+        if (onList) await onList();
+      },
+      "Adding sparse-checkout pattern",
+      "Added successfully",
+    );
+  };
+
+  /**
+   * Removes a pattern from the sparse-checkout list.
+   * @param pattern The pattern of the sparse-checkout to remove.
+   */
+  removeSparseCheckoutPattern = async (pattern: string, onList?: () => Promise<void>) => {
+    this.spawn(
+      async () => {
+        await git.sparseCheckoutRemove([pattern]);
+        if (onList) await onList();
+      },
+      "Removing sparse-checkout pattern",
+      "Removed successfully",
+    );
+  };
+
+  /**
    * The singleton instance version of the the `showFailureToast` method.
    * @param error An unknown error to show in the failure toast.
    * @param options Optional toast options to customize the failure toast.

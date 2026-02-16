@@ -1,9 +1,9 @@
-import { LocalStorage, Toast, showToast } from '@raycast/api';
-import { RequestError } from 'got';
-import { getDefaultStore } from 'jotai';
-import { isAuthenticatedAtom } from '../hooks/atoms';
-import { TENANT_DOMAIN } from '../utils/config';
-import { client, cookieJar, isAbortError } from './shared';
+import { LocalStorage, Toast, showToast } from "@raycast/api";
+import { RequestError } from "got";
+import { getDefaultStore } from "jotai";
+import { isAuthenticatedAtom } from "../hooks/atoms";
+import { TENANT_DOMAIN } from "../utils/config";
+import { client, cookieJar, isAbortError } from "./shared";
 
 enum SpaceName {
   Home = 1,
@@ -53,10 +53,10 @@ const minutesClient = client.extend({
             LocalStorage.clear();
             getDefaultStore().set(isAuthenticatedAtom, false);
             setTimeout(() => {
-              showToast(Toast.Style.Failure, 'Session expired, please login again');
+              showToast(Toast.Style.Failure, "Session expired, please login again");
             });
           }
-          throw Error(String(data.msg || ''));
+          throw Error(String(data.msg || ""));
         }
         response.body = data.data;
         return response;
@@ -67,21 +67,21 @@ const minutesClient = client.extend({
 
 export async function fetchRecentMinutesList(size: number, signal?: AbortSignal): Promise<RecentMinutesListResponse> {
   try {
-    const { body } = await minutesClient.get<RecentMinutesListResponse>('space/list', {
+    const { body } = await minutesClient.get<RecentMinutesListResponse>("space/list", {
       searchParams: {
         space_name: SpaceName.Home,
         rank: 1,
         asc: false,
-        language: 'en_us',
+        language: "en_us",
         size,
       },
       signal,
     });
     return body;
   } catch (error) {
-    let errorMessage = 'Could not load recent minutes';
+    let errorMessage = "Could not load recent minutes";
     if (error instanceof Error) {
-      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ""}`;
     }
     if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
@@ -94,22 +94,22 @@ export async function fetchRecentMinutesList(size: number, signal?: AbortSignal)
 
 export async function searchMinutes(params: SearchMinutesParams, signal?: AbortSignal): Promise<SearchMinutesResponse> {
   try {
-    const { body } = await minutesClient.get<SearchMinutesResponse>('search', {
+    const { body } = await minutesClient.get<SearchMinutesResponse>("search", {
       searchParams: {
         suggestion_limit: 5,
         size: 15,
         offset: 0,
         total_limit: true,
-        language: 'en_us',
+        language: "en_us",
         ...params,
       },
       signal,
     });
     return body;
   } catch (error) {
-    let errorMessage = 'Could not search minutes';
+    let errorMessage = "Could not search minutes";
     if (error instanceof Error) {
-      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ""}`;
     }
     if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
@@ -124,19 +124,19 @@ let csrfTokenPromise: Promise<Record<string, string | undefined>> | null = null;
 async function getCsrfHeaders() {
   if (csrfTokenPromise) return await csrfTokenPromise;
   csrfTokenPromise = minutesClient
-    .get(`../me`, { responseType: 'text' })
+    .get(`../me`, { responseType: "text" })
     .then((response) => {
       // It will not archive here due to a CSRF abort.
-      throw new RequestError('', new Error(), response.request);
+      throw new RequestError("", new Error(), response.request);
     })
     .catch(async (error) => {
       if (error instanceof RequestError) {
         const requestURL = error.request?.requestUrl?.toString() || TENANT_DOMAIN;
         const cookies = await cookieJar.getCookies(requestURL);
-        const hashed = cookies.find((item) => item.key === 'm_e09b70')?.value;
+        const hashed = cookies.find((item) => item.key === "m_e09b70")?.value;
         await cookieJar.setCookie(`m_e09b70=${hashed}`, requestURL);
         return {
-          'Bv-Csrf-Token': cookies.find((item) => item.key === 'bv_csrf_token')?.value,
+          "Bv-Csrf-Token": cookies.find((item) => item.key === "bv_csrf_token")?.value,
         };
       }
       return {};
@@ -146,7 +146,7 @@ async function getCsrfHeaders() {
 
 export async function removeRecentMinute(objToken: string): Promise<boolean> {
   try {
-    await minutesClient.post('space/remove', {
+    await minutesClient.post("space/remove", {
       headers: await getCsrfHeaders(),
       form: {
         object_tokens: objToken,
@@ -156,9 +156,9 @@ export async function removeRecentMinute(objToken: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    let errorMessage = 'Could not remove the minute from recent list';
+    let errorMessage = "Could not remove the minute from recent list";
     if (error instanceof Error) {
-      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ""}`;
     }
 
     showToast(Toast.Style.Failure, errorMessage);

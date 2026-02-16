@@ -13,22 +13,27 @@
 
    ```shell
    sqlite3 --readonly "/Users/<username>/Library/Application Support/Zed/db/0-preview/db.sqlite" "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';"
-   28
+   34
    ```
 
-   Latest supported one - **28** (as of 2025-09-13)
+   Minimum supported version - **34** (as of 2025-01-17)
 
-4. Generate the test database file:
+4. Generate the test database files:
 
    ```shell
-   ./scripts/create-fixtures.sh "/Users/<username>/Library/Application Support/Zed/db/0-preview/db.sqlite" 28
+   ./scripts/create-fixtures.sh "/Users/<username>/Library/Application Support/Zed/db/0-preview/db.sqlite" 34
+   ./scripts/create-fixtures.sh "/Users/<username>/Library/Application Support/Zed/db/0-preview/db.sqlite" 30
    ```
+
+   Note: The v30 fixture is used to test unsupported version detection.
 
 5. Run the unit tests:
 
    ```shell
    npm run test
    ```
+
+   Note: Integration tests that require fixtures will be automatically skipped if the fixture files don't exist.
 
 ## If Zed Database Schema Update Is Needed
 

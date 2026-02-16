@@ -73,12 +73,12 @@ export default function MenuBarDeployments() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Settings"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={() => openCommandPreferences()}
         />
         <MenuBarExtra.Item
           title="Open in Raycast"
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } }}
           onAction={async () => {
             try {
               await launchCommand({ name: "search-deployments", type: LaunchType.UserInitiated });

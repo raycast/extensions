@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Fix] - 2026-02-01
+- Improved history chart contrast (axis labels and grid lines) for Raycast light/dark appearance
+
 ## [Update] - 2026-01-09
 - Added history chart to sensors inspired by the Home Assistant when viewing attributes of entity
 

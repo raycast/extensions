@@ -14,7 +14,8 @@
     "niklaswa",
     "teziovsky",
     "xmok",
-    "taken"
+    "taken",
+    "nbbaier"
   ],
   "commands": [
     {
@@ -36,6 +37,13 @@
       "title": "View Members",
       "subtitle": "Cloudflare",
       "description": "Lists your team members",
+      "mode": "view"
+    },
+    {
+      "name": "view-workers",
+      "title": "View Workers",
+      "subtitle": "Cloudflare",
+      "description": "Lists your workers",
       "mode": "view"
     }
   ],

@@ -1,0 +1,74 @@
+{
+  "name": "vim-leader-key",
+  "title": "Vim Leader Key",
+  "description": "Vim-style leader key for launching apps, running commands, and triggering actions with key sequences",
+  "icon": "icon.png",
+  "author": "akshay_k",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "leader-key",
+      "title": "Leader Key",
+      "description": "Activate leader key mode to trigger actions with key sequences",
+      "mode": "view"
+    },
+    {
+      "name": "import-config",
+      "title": "Import Config",
+      "description": "Import a Leader Key config.json file",
+      "mode": "view"
+    },
+    {
+      "name": "export-config",
+      "title": "Export Config",
+      "description": "Export your config as a Leader Key compatible JSON file",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableTimeout",
+      "type": "checkbox",
+      "default": false,
+      "title": "Auto-Reset Timeout",
+      "description": "Automatically reset to root menu after a period of inactivity",
+      "label": "Enable timeout",
+      "required": false
+    },
+    {
+      "name": "timeoutSeconds",
+      "type": "textfield",
+      "default": "2.5",
+      "title": "Timeout Duration",
+      "description": "Seconds of inactivity before resetting (2.5 - 6 seconds)",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

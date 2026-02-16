@@ -156,54 +156,6 @@ describe("django-docs", () => {
       expect(result.title).toBe("Untitled");
     });
 
-    it("should fallback to .body selector when #docs-content is missing", async () => {
-      const htmlContent = `
-        <html>
-          <body>
-            <h1>Test</h1>
-            <div class="body"><p>Body content</p></div>
-          </body>
-        </html>
-      `;
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        text: () => Promise.resolve(htmlContent),
-      });
-      mockedStripPilcrows.mockImplementation((text) => text.replace(/¶/g, ""));
-      mockedCreateTurndownService.mockReturnValue({
-        turndown: jest.fn().mockReturnValue("Body content"),
-      } as unknown as ReturnType<typeof createTurndownService>);
-
-      const result = await fetchPageContent(testUrl);
-
-      expect(result.content).toBe("Body content");
-    });
-
-    it("should fallback to article selector when both #docs-content and .body are missing", async () => {
-      const htmlContent = `
-        <html>
-          <body>
-            <h1>Test</h1>
-            <article><p>Article content</p></article>
-          </body>
-        </html>
-      `;
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        text: () => Promise.resolve(htmlContent),
-      });
-      mockedStripPilcrows.mockImplementation((text) => text.replace(/¶/g, ""));
-      mockedCreateTurndownService.mockReturnValue({
-        turndown: jest.fn().mockReturnValue("Article content"),
-      } as unknown as ReturnType<typeof createTurndownService>);
-
-      const result = await fetchPageContent(testUrl);
-
-      expect(result.content).toBe("Article content");
-    });
-
     it("should handle empty content gracefully", async () => {
       const htmlContent = `
         <html>

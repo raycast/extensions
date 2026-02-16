@@ -1750,6 +1750,13 @@ rm -f "${scriptPath}"
   }
 
   /**
+   * Initializes a repository.
+   */
+  async init(): Promise<void> {
+    await this.git.init();
+  }
+
+  /**
    * Initializes a repository and adds a remote.
    */
   async initRepository(url: string): Promise<void> {

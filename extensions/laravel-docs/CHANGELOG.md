@@ -1,5 +1,9 @@
 # Laravel Documentation Changelog
 
+## [Update] - 2026-02-05
+
+- Added support for Windows
+
 ## [Update] - 2025-02-26
 
 - Added laravel 12.x support.

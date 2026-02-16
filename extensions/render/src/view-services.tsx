@@ -7,6 +7,7 @@ import {
   showToast,
   Action,
   Toast,
+  getPreferenceValues,
 } from '@raycast/api';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import Service, {
@@ -33,6 +34,84 @@ import {
 import { useCachedPromise, useLocalStorage } from '@raycast/utils';
 
 const renderService = new Service(getKey());
+
+const { defaultAction } = getPreferenceValues();
+
+interface ServiceActionsProps {
+  service: ServiceResponse;
+  isPinned: boolean;
+  onPinAction: () => void;
+}
+
+function ServiceActions({
+  service,
+  isPinned,
+  onPinAction,
+}: ServiceActionsProps) {
+  const showDetailsAction = (
+    <Action.Push
+      key="details"
+      icon={Icon.BlankDocument}
+      title="Show Details"
+      target={<ServiceView service={service} />}
+      shortcut={{ modifiers: ['cmd'], key: 'i' }}
+    />
+  );
+
+  const showDeploysAction = (
+    <Action.Push
+      key="deploys"
+      icon={Icon.Hammer}
+      title="Show Deploys"
+      target={<DeployListView service={service} />}
+      shortcut={{ modifiers: ['cmd'], key: 'd' }}
+    />
+  );
+
+  const openInRenderAction = (
+    <Action.OpenInBrowser
+      key="render"
+      title="Open in Render"
+      url={getServiceUrl(service)}
+      shortcut={{ modifiers: ['cmd'], key: 'r' }}
+    />
+  );
+
+  const secondaryActions = [
+    showDetailsAction,
+    showDeploysAction,
+    openInRenderAction,
+  ];
+  const primaryAction =
+    secondaryActions.find(
+      (a) =>
+        (defaultAction === 'showDetails' && a.key === 'details') ||
+        (defaultAction === 'showDeploys' && a.key === 'deploys') ||
+        (defaultAction === 'openInRender' && a.key === 'render'),
+    ) || showDetailsAction;
+
+  const orderedActions = [
+    primaryAction,
+    ...secondaryActions.filter((a) => a.key !== primaryAction.key),
+  ];
+
+  return (
+    <ActionPanel>
+      {orderedActions}
+      <Action.OpenInBrowser
+        title="Open Repo"
+        url={service.repo}
+        shortcut={{ modifiers: ['cmd'], key: 'g' }}
+      />
+      <Action
+        icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+        title={isPinned ? 'Unpin Service' : 'Pin Service'}
+        shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
+        onAction={onPinAction}
+      />
+    </ActionPanel>
+  );
+}
 
 function getServiceStatusTag(
   service: ServiceResponse,
@@ -220,6 +299,7 @@ export default function Command() {
               title={service.name}
               subtitle={formatServiceType(service)}
               accessories={[
+                { icon: Icon.Pin },
                 ...(() => {
                   const tag = getServiceStatusTag(
                     service,
@@ -228,39 +308,14 @@ export default function Command() {
                   );
                   return tag ? [{ tag }] : [];
                 })(),
-                { icon: Icon.Pin },
                 { date: new Date(service.updatedAt) },
               ]}
               actions={
-                <ActionPanel>
-                  <Action.Push
-                    icon={Icon.BlankDocument}
-                    title="Show Details"
-                    target={<ServiceView service={service} />}
-                  />
-                  <Action.Push
-                    icon={Icon.Hammer}
-                    title="Show Deploys"
-                    target={<DeployListView service={service} />}
-                    shortcut={{ modifiers: ['cmd'], key: 'd' }}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open in Render"
-                    url={getServiceUrl(service)}
-                    shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open Repo"
-                    url={service.repo}
-                    shortcut={{ modifiers: ['cmd'], key: 'g' }}
-                  />
-                  <Action
-                    icon={Icon.PinDisabled}
-                    title="Unpin Service"
-                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
-                    onAction={() => unpinService(service.id)}
-                  />
-                </ActionPanel>
+                <ServiceActions
+                  service={service}
+                  isPinned={true}
+                  onPinAction={() => unpinService(service.id)}
+                />
               }
             />
           ))}
@@ -287,35 +342,11 @@ export default function Command() {
                   { date: new Date(service.updatedAt) },
                 ]}
                 actions={
-                  <ActionPanel>
-                    <Action.Push
-                      icon={Icon.BlankDocument}
-                      title="Show Details"
-                      target={<ServiceView service={service} />}
-                    />
-                    <Action.Push
-                      icon={Icon.Hammer}
-                      title="Show Deploys"
-                      target={<DeployListView service={service} />}
-                      shortcut={{ modifiers: ['cmd'], key: 'd' }}
-                    />
-                    <Action.OpenInBrowser
-                      title="Open in Render"
-                      url={getServiceUrl(service)}
-                      shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                    />
-                    <Action.OpenInBrowser
-                      title="Open Repo"
-                      url={service.repo}
-                      shortcut={{ modifiers: ['cmd'], key: 'g' }}
-                    />
-                    <Action
-                      icon={Icon.Pin}
-                      title="Pin Service"
-                      shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
-                      onAction={() => pinService(service.id)}
-                    />
-                  </ActionPanel>
+                  <ServiceActions
+                    service={service}
+                    isPinned={false}
+                    onPinAction={() => pinService(service.id)}
+                  />
                 }
               />
             ))}

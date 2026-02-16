@@ -12,7 +12,6 @@
   ],
   "author": "franzwilhelm",
   "contributors": [
-    "bkeys818",
     "michaelfaisst",
     "teziovsky",
     "lukebars",
@@ -22,6 +21,9 @@
     "pernielsentikaer",
     "AdrianKokot",
     "xmok"
+  ],
+  "pastContributors": [
+    "bkeys818"
   ],
   "license": "MIT",
   "commands": [

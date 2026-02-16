@@ -28,6 +28,18 @@
 - **Manager Classes Handle Errors**: Manager classes are responsible for catching errors and displaying failure toasts.
 - **Avoid Double Toasts**: `Action` components that call manager classes should not have their own `catch` blocks for showing error toasts, as this would result in duplicate notifications. A `try...catch` block can be used for cleanup or navigation on failure, but should not show a toast for errors already handled by the manager.
 - **Use Streaming Toasts for Long Operations**: For long-running commands, manager classes' `outputHandler` provides real-time feedback using an animated toast that updates with `stdout`.
+- **Use `showFailureToast` for Error Notifications**: Always use `showFailureToast` from `@raycast/utils` instead of `showToast` with `Toast.Style.Failure`. The `showFailureToast` function automatically handles error type casting and message extraction, eliminating the need for manual `error instanceof Error` checks.
+  ```ts
+  // Bad: Manual error handling with showToast
+  showToast({
+    style: Toast.Style.Failure,
+    title: "Failed to load data",
+    message: error instanceof Error ? error.message : "Unknown error",
+  });
+
+  // Good: Use showFailureToast which handles error casting automatically
+  showFailureToast(error, { title: "Failed to load data" });
+  ```
 
 ### Icons and UI
 - **Use Both Built-in and Custom Icons**: Use built-in icons from `@raycast/api`'s `Icon` where appropriate. For domain-specific concepts, use custom SVG icons from the `/assets` directory.

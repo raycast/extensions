@@ -2,9 +2,14 @@ import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 
-const DEFAULT_TRY_PATH = join(homedir(), "src", "tries");
+export function expandTildePath(inputPath: string): string {
+  if (inputPath.startsWith("~/") || inputPath === "~") {
+    return join(homedir(), inputPath.slice(1));
+  }
+  return inputPath;
+}
 
 export function getTryPath(): string {
   const { tryPath } = getPreferenceValues<Preferences>();
-  return tryPath || DEFAULT_TRY_PATH;
+  return expandTildePath(tryPath);
 }

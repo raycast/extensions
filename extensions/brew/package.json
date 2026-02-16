@@ -34,7 +34,18 @@
       "title": "Search",
       "subtitle": "Brew",
       "description": "Search brew formulae & casks",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showMetadataPanel",
+          "type": "checkbox",
+          "default": true,
+          "required": false,
+          "title": "Search View",
+          "label": "Show metadata panel in search results",
+          "description": "Display a metadata panel next to the search results list showing details for the selected package."
+        }
+      ]
     },
     {
       "name": "outdated",
@@ -155,8 +166,8 @@
     },
     {
       "default": false,
-      "description": "Use Homebrew's internal JSON API for faster search. Formula descriptions load on-demand when viewing details.",
-      "label": "Use internal API for faster search (experimental)",
+      "description": "Use Homebrew's internal JSON API.",
+      "label": "Use internal API (experimental)",
       "name": "useInternalApi",
       "required": false,
       "type": "checkbox"

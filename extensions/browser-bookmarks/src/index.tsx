@@ -190,7 +190,7 @@ export default function Command() {
         let domain;
         try {
           domain = new URL(item.url).hostname;
-        } catch (error) {
+        } catch {
           console.error(`Invalid URL: ${item.url}`);
           domain = "";
         }

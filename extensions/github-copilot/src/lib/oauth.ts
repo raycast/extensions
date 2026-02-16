@@ -1,7 +1,6 @@
 import { Octokit } from "@octokit/rest";
-import { OAuth } from "@raycast/api";
-import { OAuthService, useCachedState } from "@raycast/utils";
-import { Repository } from "../services/repositories";
+import { Cache, OAuth } from "@raycast/api";
+import { OAuthService } from "@raycast/utils";
 
 const CLIENT_ID = "Ov23ctJbHO0idEBx76J5";
 const SCOPES = "repo,workflow,read:org";
@@ -17,6 +16,7 @@ export const client = new OAuth.PKCEClient({
   description: "Log in with your GitHub account to track and start Copilot coding agent sessions.",
 });
 
+const cache = new Cache();
 let octokitInstance: Octokit | null = null;
 
 export const provider = new OAuthService({
@@ -26,8 +26,7 @@ export const provider = new OAuthService({
   tokenUrl: TOKEN_URL,
   scope: SCOPES,
   onAuthorize: ({ token }) => {
-    const [, setPreviousRepositories] = useCachedState<Repository[]>("previousRepositories", []);
-    setPreviousRepositories([]);
+    cache.remove("previousRepositories");
 
     octokitInstance = new Octokit({ auth: token });
   },

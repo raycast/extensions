@@ -83,19 +83,22 @@ interface LineFormat {
   origPath: string;
 }
 
-interface ChangedFile
-  extends Pick<LineFormat, "indicator" | "xy" | "submodule" | "mH" | "mI" | "mW" | "hH" | "hI" | "path"> {
+interface ChangedFile extends Pick<
+  LineFormat,
+  "indicator" | "xy" | "submodule" | "mH" | "mI" | "mW" | "hH" | "hI" | "path"
+> {
   indicator: "1";
 }
-interface RenamedFile
-  extends Pick<
-    LineFormat,
-    "indicator" | "xy" | "submodule" | "mH" | "mI" | "mW" | "hH" | "hI" | "rc" | "rcScore" | "path" | "origPath"
-  > {
+interface RenamedFile extends Pick<
+  LineFormat,
+  "indicator" | "xy" | "submodule" | "mH" | "mI" | "mW" | "hH" | "hI" | "rc" | "rcScore" | "path" | "origPath"
+> {
   indicator: "2";
 }
-interface UnmergedFile
-  extends Pick<LineFormat, "indicator" | "xy" | "submodule" | "m1" | "m2" | "m3" | "mW" | "h1" | "h2" | "h3" | "path"> {
+interface UnmergedFile extends Pick<
+  LineFormat,
+  "indicator" | "xy" | "submodule" | "m1" | "m2" | "m3" | "mW" | "h1" | "h2" | "h3" | "path"
+> {
   indicator: "u";
 }
 interface UntrackedFile extends Pick<LineFormat, "indicator" | "path"> {

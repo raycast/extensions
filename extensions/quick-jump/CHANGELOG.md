@@ -1,5 +1,11 @@
 # Quick Jump Changelog
 
+## [Enhancement] - 2026-01-24
+
+### Added
+- Nested placeholder expansion: placeholders can now reference other placeholders (e.g., `teamDir: "${baseDir}/team"`)
+- Circular dependency detection with detailed error UI showing cycle path and fix instructions
+
 ## [Enhancement] - 2026-01-15
 
 ### Added

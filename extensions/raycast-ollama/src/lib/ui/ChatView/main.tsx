@@ -16,9 +16,9 @@ import { RaycastImage } from "../../types";
 
 /**
  * Return JSX element for chat view.
- * @returns {JSX.Element} Raycast Chat View.
+ * @returns {React.JSX.Element} Raycast Chat View.
  */
-export function ChatView() {
+export function ChatView(): React.JSX.Element {
   const {
     data: ChatNames,
     revalidate: RevalidateChatNames,
@@ -49,11 +49,12 @@ export function ChatView() {
       if (Image) SetImage(undefined);
       if (Chat.messages.length === 1 && Chat.name === "New Chat")
         SetChat((prevValue) => {
-          if (prevValue) {
+          if (prevValue && prevValue.messages.length > 0) {
             const name = `${prevValue.messages[0].messages[0].content.substring(0, 25)}...`;
             if (ChatNames) ChatNames[ChatNameIndex] = name;
             return { ...prevValue, name: name };
           }
+          return prevValue;
         });
       SetSettingsCommandChatByIndex(ChatNameIndex, Chat);
     }
@@ -88,7 +89,7 @@ export function ChatView() {
    * @param props - Selected Chat Message
    * @returns Action Panel
    */
-  function ActionMessage(props: { message?: RaycastChatMessage }) {
+  function ActionMessage(props: { message?: RaycastChatMessage }): React.JSX.Element {
     return (
       <ActionPanel>
         {!IsLoading && Query && Chat && ChatModelsAvailable && (
@@ -215,7 +216,7 @@ export function ChatView() {
    * @param props - Chat Message
    * @returns JSX Element
    */
-  function DetailMetadataMessage(props: { message: RaycastChatMessage }) {
+  function DetailMetadataMessage(props: { message: RaycastChatMessage }): React.JSX.Element {
     return (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Model" text={props.message.model} />

@@ -1,5 +1,10 @@
 # Harvest Changelog
 
+## [Bug Fixes] - 2026-01-19
+
+- Fix: Clearing notes when editing a time entry now properly deletes the note
+- Fix: Duration parsing now runs on submit, not just on blur
+
 ## [Flexible Duration Input] - 2026-01-13
 
 - Added: Duration field now accepts flexible formats like `15m`, `1h30m`, `1.5h`, `.5+15m`

@@ -2,10 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vietnamese-calendar",
   "title": "Vietnamese Calendar",
-  "version": "1.3.0",
+  "version": "1.3.2",
   "description": "A comprehensive Vietnamese Lunar Calendar for Raycast. View Solar and Lunar dates, check holidays with anniversary counts, and navigate easily with shortcuts.",
   "icon": "command-icon.png",
   "author": "hoando",
+  "contributors": [
+    "dangkhoipro"
+  ],
   "categories": [
     "Productivity"
   ],

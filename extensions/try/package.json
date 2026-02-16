@@ -27,7 +27,7 @@
       "title": "Try Directory Path",
       "description": "Path to the try directories folder",
       "type": "directory",
-      "required": false,
+      "required": true,
       "default": "~/src/tries"
     }
   ],

@@ -1,5 +1,9 @@
 # Oracle Cloud Changelog
 
+## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - {PR_MERGE_DATE}
+
+- Refreshed `package-lock.json` to remove stale transitive entries (including `got`/`electron`) that were no longer part of the installed dependency graph.
+
 ## [Manage Vaults, Secrets, Versions and Bundle] - 2026-01-01
 
 - view vaults

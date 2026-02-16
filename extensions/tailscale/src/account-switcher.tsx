@@ -83,8 +83,8 @@ export default function AccountSwitchList() {
       {error ? (
         <List.EmptyView icon={Icon.Warning} title={error.title} description={error.description} />
       ) : (
-        users
-          ?.sort((a, b) => +a.active - +b.active)
+        [...(users ?? [])]
+          .sort((a, b) => Number(a.active) - Number(b.active))
           .map((user) => (
             <List.Item
               title={user.name}

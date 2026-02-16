@@ -4,7 +4,6 @@ import { setTimeout } from "node:timers/promises";
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Detail,
   Grid,
   Icon,
@@ -12,7 +11,6 @@ import {
   Toast,
   confirmAlert,
   open,
-  showHUD,
   showToast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -21,6 +19,7 @@ import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { CopyFontEntities, LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
 import {
   cacheAssetPack,
+  copyOrPaste,
   defaultDetailAction,
   displaySimpleIconsFontFeatures,
   enableAiSearch,
@@ -186,10 +185,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                               <Detail.Metadata.TagList title="Title">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.title}
-                                  onAction={async () => {
-                                    Clipboard.copy(icon.title);
-                                    await showHUD("Copied to Clipboard");
-                                  }}
+                                  onAction={() => copyOrPaste(icon.title)}
                                 />
                               </Detail.Metadata.TagList>
                               {aliases.length > 0 && (
@@ -198,10 +194,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                                     <Detail.Metadata.TagList.Item
                                       key={alias}
                                       text={alias}
-                                      onAction={async () => {
-                                        Clipboard.copy(alias);
-                                        await showHUD("Copied to Clipboard");
-                                      }}
+                                      onAction={() => copyOrPaste(alias)}
                                     />
                                   ))}
                                 </Detail.Metadata.TagList>
@@ -209,20 +202,14 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                               <Detail.Metadata.TagList title="Slug">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.slug}
-                                  onAction={async () => {
-                                    Clipboard.copy(icon.slug);
-                                    await showHUD("Copied to Clipboard");
-                                  }}
+                                  onAction={() => copyOrPaste(icon.slug)}
                                 />
                               </Detail.Metadata.TagList>
                               <Detail.Metadata.TagList title="Brand color">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.hex}
                                   color={`#${icon.hex}`}
-                                  onAction={async () => {
-                                    Clipboard.copy(icon.hex);
-                                    await showHUD("Copied to Clipboard");
-                                  }}
+                                  onAction={() => copyOrPaste(icon.hex)}
                                 />
                               </Detail.Metadata.TagList>
                               <Detail.Metadata.Separator />

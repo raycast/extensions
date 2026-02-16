@@ -1,0 +1,21 @@
+generatorName: typescript-fetch
+inputSpec: openapi.yaml
+outputDir: src/api/generated
+globalProperties:
+  skipFormModel: "true"
+  apis: ""
+  models: ""
+  supportingFiles: "runtime.ts"
+additionalProperties:
+  supportsES6: true
+  modelPropertyNaming: original
+  npmName: "@openhue/client"
+  npmVersion: "1.0.0"
+  withInterfaces: true
+  useSingleRequestParameter: false
+  typescriptThreePlus: true
+  enumPropertyNaming: original
+  generateApis: true
+  generateModels: true
+  generateModelTests: false
+  generateApiTests: false

@@ -1,6 +1,9 @@
 // src/fileProcessor.ts
 import fs from "fs/promises";
+import { createWriteStream, WriteStream, createReadStream } from "fs";
+import { Transform } from "stream";
 import path from "path";
+import os from "os";
 import ignore from "ignore";
 import mime from "mime-types";
 import {
@@ -14,9 +17,17 @@ import {
   bytesToMB,
   formatFileSizeKB,
   SAFETY_LIMITS,
+  LARGE_FILE_THRESHOLD_BYTES,
+  STREAMING_FILE_THRESHOLD_BYTES,
+  BUFFER_CHUNK_SIZE,
+  MAX_BUFFER_SIZE,
 } from "./constants";
 import type { ProjectEntry, ProcessDirectoryOptions, FileProcessorConfig } from "./types";
 import { Stats } from "fs";
+import { parseIgnorePatterns } from "./utils/ignorePatterns";
+import { isMemoryError, formatMemoryError } from "./utils/errorHandling";
+import { estimateTokens } from "./utils/tokens";
+import { checkSafetyLimits } from "./utils/safetyLimits";
 
 /**
  * Parses the .gitignore file from the project root and combines its rules
@@ -61,8 +72,42 @@ async function loadIgnoreFilter(
 }
 
 /**
+ * Reads a file using streaming for large files to reduce memory usage.
+ * @param filePath The path to the file.
+ * @param encoding The encoding to use (default: 'utf-8').
+ * @returns A promise that resolves to the file content as a string.
+ */
+function readFileStreaming(filePath: string, encoding: BufferEncoding = "utf-8"): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    // Read as Buffer (no encoding option), then convert to string with specified encoding
+    const stream = createReadStream(filePath);
+
+    stream.on("data", (chunk) => {
+      // chunk is Buffer when no encoding is specified
+      if (Buffer.isBuffer(chunk)) {
+        chunks.push(chunk);
+      } else {
+        // Fallback: convert string to Buffer (shouldn't happen without encoding)
+        chunks.push(Buffer.from(chunk as string, "utf-8"));
+      }
+    });
+
+    stream.on("end", () => {
+      const buffer = Buffer.concat(chunks);
+      resolve(buffer.toString(encoding));
+    });
+
+    stream.on("error", (error) => {
+      reject(error);
+    });
+  });
+}
+
+/**
  * Determines the programming language of a file based on its extension or name.
- * @param filePath The absolute path to the file.
+ *
+ * @param filePath - The absolute path to the file.
  * @returns A string representing the language, or an empty string if not determined.
  */
 function getFileLanguage(filePath: string): string {
@@ -91,7 +136,18 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
   const fileSizeKB = formatFileSizeKB(stats.size);
   const maxAllowedSizeMB = bytesToMB(maxFileSizeBytes).toFixed(2);
 
+  // Log large file reads for debugging
+  if (stats.size > LARGE_FILE_THRESHOLD_BYTES) {
+    // Files larger than threshold
+    console.log(
+      `[readFileContent] Reading large file: ${path.basename(filePath)} (${bytesToMB(stats.size).toFixed(2)} MB)`,
+    );
+  }
+
   if (stats.size > maxFileSizeBytes) {
+    console.log(
+      `[readFileContent] File too large, omitting: ${path.basename(filePath)} (${fileSizeKB} > ${maxAllowedSizeMB} MB)`,
+    );
     return `[File content omitted: Size (${fileSizeKB}) exceeds maximum allowed (${maxAllowedSizeMB} MB)]`;
   }
   if (stats.size === 0) {
@@ -120,7 +176,29 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
   }
 
   try {
-    let content = await fs.readFile(filePath, "utf-8");
+    const readStartTime = Date.now();
+    let content: string;
+
+    // For large files, use streaming to reduce memory pressure
+    // Note: This still loads file into memory, but in chunks. For true streaming, use formatFileContentStreaming with writeStream.
+    if (stats.size > LARGE_FILE_THRESHOLD_BYTES) {
+      console.log(
+        `[readFileContent] Using stream read for large file: ${path.basename(filePath)} (${bytesToMB(stats.size).toFixed(2)} MB)`,
+      );
+      content = await readFileStreaming(filePath, "utf-8");
+    } else {
+      content = await fs.readFile(filePath, "utf-8");
+    }
+
+    const readDuration = Date.now() - readStartTime;
+
+    // Log slow file reads (taking more than 1 second)
+    if (readDuration > 1000) {
+      console.log(
+        `[readFileContent] Slow read: ${path.basename(filePath)} took ${readDuration}ms (${bytesToMB(stats.size).toFixed(2)} MB)`,
+      );
+    }
+
     // Heuristic for binary files misidentified as UTF-8: check for excessive NULL bytes
     let nullBytes = 0;
     const sampleLength = Math.min(content.length, 1024);
@@ -131,6 +209,7 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
     }
     if (nullBytes > 10 && nullBytes / sampleLength > 0.05) {
       // Threshold: >10 NULLs and >5% of sample
+      console.log(`[readFileContent] Binary file detected: ${path.basename(filePath)}`);
       return `[File content omitted: Potentially binary (detected excessive NULL bytes). Size: ${fileSizeKB}]`;
     }
     // Normalize line endings to LF for consistency
@@ -139,7 +218,13 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
   } catch (eUtf8) {
     console.warn(`UTF-8 decoding failed for ${filePath}, trying Latin-1. Error: ${(eUtf8 as Error).message}`);
     try {
-      let content = await fs.readFile(filePath, "latin1");
+      let content: string;
+      // Use streaming for large files even when falling back to latin1
+      if (stats.size > LARGE_FILE_THRESHOLD_BYTES) {
+        content = await readFileStreaming(filePath, "latin1");
+      } else {
+        content = await fs.readFile(filePath, "latin1");
+      }
       content = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
       return content;
     } catch (eLatin1) {
@@ -155,20 +240,50 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
 
 /**
  * Formats a single file's content into the output format.
- * Used for streaming processing to format content immediately after reading.
+ * For large files (>20MB), writes directly to stream to avoid loading entire file into memory.
+ * For smaller files, reads content and returns formatted string.
  * @param entryPath The absolute path to the file.
  * @param relativePath The relative path from project root.
  * @param stats The file stats.
  * @param maxFileSizeBytes Maximum file size for content inclusion.
- * @returns Formatted file content string.
+ * @param writeStream Optional write stream for large files. If provided, writes directly to stream.
+ * @returns Formatted file content string (only for small files, empty string for large files written to stream).
  */
 async function formatFileContentStreaming(
   entryPath: string,
   relativePath: string,
   stats: Stats,
   maxFileSizeBytes: number,
+  writeStream?: WriteStream,
 ): Promise<string> {
   const fileLanguage = getFileLanguage(entryPath);
+  // Use streaming for large files if writeStream is available to avoid memory issues
+  const isLargeFile = stats.size > STREAMING_FILE_THRESHOLD_BYTES;
+
+  // For large files with writeStream, write directly to stream
+  if (isLargeFile && writeStream && stats.size <= maxFileSizeBytes) {
+    console.log(
+      `[formatFileContentStreaming] Writing large file directly to stream: ${path.basename(entryPath)} (${bytesToMB(stats.size).toFixed(2)} MB)`,
+    );
+
+    // Write file header
+    let header = `\n<file path="${relativePath}" size="${formatFileSizeKB(stats.size)}"`;
+    if (fileLanguage) {
+      header += ` language="${fileLanguage}"`;
+    }
+    header += ">\n";
+    await writeStreamChunk(writeStream, header);
+
+    // Stream file content directly to output
+    await streamFileToOutput(entryPath, writeStream);
+
+    // Write file footer
+    await writeStreamChunk(writeStream, "\n</file>\n");
+
+    return ""; // Return empty string as content was written to stream
+  }
+
+  // For smaller files, use existing approach
   const fileContent = await readFileContent(entryPath, stats, maxFileSizeBytes);
 
   const parts: string[] = [];
@@ -187,6 +302,119 @@ async function formatFileContentStreaming(
 }
 
 /**
+ * Creates a transform stream that normalizes line endings (CRLF/LF to LF).
+ * Processes data in chunks without accumulating entire content in memory.
+ */
+function createLineEndingNormalizer(): Transform {
+  let lastChar = "";
+
+  return new Transform({
+    encoding: "utf-8",
+    transform(chunk: Buffer, encoding: BufferEncoding, callback: (error?: Error | null, data?: string) => void) {
+      let data = chunk.toString("utf-8");
+
+      // Handle case where previous chunk ended with \r
+      if (lastChar === "\r") {
+        if (data[0] === "\n") {
+          // \r\n -> \n, skip the \r
+          data = data.substring(1);
+        } else {
+          // \r without \n -> \n
+          data = "\n" + data;
+        }
+        lastChar = "";
+      }
+
+      // Normalize \r\n to \n and standalone \r to \n
+      data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+      // Check if chunk ends with \r (might be followed by \n in next chunk)
+      if (data.length > 0 && data[data.length - 1] === "\r") {
+        lastChar = "\r";
+        data = data.slice(0, -1) + "\n";
+      }
+
+      callback(null, data);
+    },
+    flush(callback: (error?: Error | null, data?: string) => void) {
+      // Handle trailing \r
+      if (lastChar === "\r") {
+        callback(null, "\n");
+      } else {
+        callback();
+      }
+    },
+  });
+}
+
+/**
+ * Streams a file directly to output stream using pipe with transform for line ending normalization.
+ * This approach is more memory-efficient as it uses Node.js built-in backpressure handling.
+ * @param filePath The path to the file to stream.
+ * @param writeStream The output write stream.
+ */
+async function streamFileToOutput(filePath: string, writeStream: WriteStream): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const readStream = createReadStream(filePath, { encoding: "utf-8", highWaterMark: BUFFER_CHUNK_SIZE });
+    const normalizer = createLineEndingNormalizer();
+
+    let isResolved = false;
+    let hasError = false;
+
+    const cleanup = (error?: Error) => {
+      if (hasError) return;
+      hasError = true;
+
+      // Destroy streams on error
+      if (error) {
+        if (!readStream.destroyed) {
+          readStream.destroy();
+        }
+        if (!normalizer.destroyed) {
+          normalizer.destroy();
+        }
+      }
+
+      // Remove all listeners to prevent memory leaks
+      readStream.removeAllListeners();
+      normalizer.removeAllListeners();
+    };
+
+    const handleError = (error: Error) => {
+      cleanup(error);
+      if (!isResolved) {
+        isResolved = true;
+        reject(error);
+      }
+    };
+
+    const handleEnd = () => {
+      if (!isResolved && !hasError) {
+        isResolved = true;
+        cleanup();
+        resolve();
+      }
+    };
+
+    // Pipe: readStream -> normalizer -> writeStream
+    // Node.js handles backpressure automatically through pipe
+    readStream.pipe(normalizer).pipe(writeStream, { end: false }); // end: false to keep writeStream open for other files
+
+    readStream.on("error", handleError);
+    normalizer.on("error", handleError);
+    writeStream.on("error", handleError);
+
+    // Resolve when normalizer finishes (after all data is processed)
+    normalizer.on("end", handleEnd);
+
+    // Also handle read stream end as fallback
+    readStream.on("end", () => {
+      // Normalizer will emit 'end' after processing all data
+    });
+  });
+}
+
+/**
  * Recursively processes a directory with streaming output.
  * For each file, reads content, formats it immediately, and writes to output callback.
  * Returns only the directory structure (without file contents) to reduce memory usage.
@@ -198,7 +426,7 @@ async function processDirectoryRecursiveStreaming(
   options: ProcessDirectoryOptions,
   onFileContent: (formattedContent: string) => void,
 ): Promise<ProjectEntry[]> {
-  const { projectRoot, currentPath, ignoreFilter, maxFileSizeBytes, onProgress, safetyLimits } = options;
+  const { projectRoot, currentPath, ignoreFilter, maxFileSizeBytes, onProgress, safetyLimits, writeStream } = options;
   const entries: ProjectEntry[] = [];
   let filesCollectedInThisCall = 0;
 
@@ -246,6 +474,8 @@ async function processDirectoryRecursiveStreaming(
         continue;
       }
 
+      // Get stats only when needed (for file size or directory size)
+      // Type information is already available from dirent (withFileTypes: true)
       const stats = await fs.stat(entryPath);
       const relativePath = path.relative(projectRoot, entryPath);
 
@@ -268,6 +498,7 @@ async function processDirectoryRecursiveStreaming(
             maxFileSizeBytes,
             onProgress,
             safetyLimits,
+            writeStream,
           },
           onFileContent,
         );
@@ -283,29 +514,41 @@ async function processDirectoryRecursiveStreaming(
       } else if (dirent.isFile()) {
         // Check safety limits before processing file
         if (safetyLimits) {
-          // Check limits before incrementing to prevent exceeding
-          if (safetyLimits.filesProcessed >= safetyLimits.maxFiles) {
-            throw new Error(
-              `File count limit exceeded (${safetyLimits.maxFiles} files). Consider using .gitignore or selecting fewer files.`,
-            );
-          }
-          const projectedTotalSize = safetyLimits.totalSize + (stats.size || 0);
-          if (projectedTotalSize >= safetyLimits.maxTotalSizeBytes) {
-            throw new Error(
-              `Total size limit exceeded (${bytesToMB(safetyLimits.maxTotalSizeBytes)} MB). ` +
-                `Current: ${bytesToMB(safetyLimits.totalSize).toFixed(2)} MB, ` +
-                `File: ${bytesToMB(stats.size || 0).toFixed(2)} MB. ` +
-                `Consider using .gitignore to exclude large files or selecting fewer files.`,
-            );
-          }
+          checkSafetyLimits(safetyLimits, stats, relativePath);
 
-          safetyLimits.filesProcessed++;
-          safetyLimits.totalSize += stats.size || 0;
+          // Log progress every 100 files
+          if (safetyLimits.filesProcessed % 100 === 0) {
+            console.log("[processDirectoryRecursiveStreaming] Progress:", {
+              filesProcessed: safetyLimits.filesProcessed,
+              totalSize: bytesToMB(safetyLimits.totalSize),
+              currentFile: relativePath,
+            });
+          }
         }
 
         // Format and output file content immediately
-        const formattedContent = await formatFileContentStreaming(entryPath, relativePath, stats, maxFileSizeBytes);
-        onFileContent(formattedContent);
+        const formatStartTime = Date.now();
+        // Pass writeStream for large files to enable direct streaming
+        const formattedContent = await formatFileContentStreaming(
+          entryPath,
+          relativePath,
+          stats,
+          maxFileSizeBytes,
+          options.writeStream,
+        );
+        const formatDuration = Date.now() - formatStartTime;
+
+        // Log slow file formatting (taking more than 2 seconds)
+        if (formatDuration > 2000) {
+          console.log(
+            `[processDirectoryRecursiveStreaming] Slow format: ${relativePath} took ${formatDuration}ms (${bytesToMB(stats.size).toFixed(2)} MB)`,
+          );
+        }
+
+        // Only call onFileContent if content was returned (small files)
+        if (formattedContent) {
+          onFileContent(formattedContent);
+        }
 
         // Store only metadata, not content
         entries.push({
@@ -338,6 +581,7 @@ async function processMixedSelectionStreaming(
   config: FileProcessorConfig,
   onFileContent: (formattedContent: string) => void,
   onProgress?: (progress: { message: string; details?: string }) => void,
+  writeStream?: WriteStream,
 ): Promise<ProjectEntry[]> {
   const { projectDirectory, selectedFilePaths = [], maxFileSizeBytes } = config;
   const projectRoot = path.resolve(projectDirectory);
@@ -350,12 +594,7 @@ async function processMixedSelectionStreaming(
   // Load ignore filter once for the entire process
   progressCallback("Loading ignore rules...");
   const { additionalIgnorePatterns: configAdditionalPatterns } = config;
-  const additionalPatterns = configAdditionalPatterns
-    ? configAdditionalPatterns
-        .split(",")
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0)
-    : undefined;
+  const additionalPatterns = parseIgnorePatterns(configAdditionalPatterns);
   const { filter: ignoreFilter } = await loadIgnoreFilter(projectRoot, additionalPatterns);
 
   // Initialize safety limits for directory processing
@@ -381,26 +620,41 @@ async function processMixedSelectionStreaming(
       }
 
       if (stats.isFile()) {
-        // Check safety limits before processing with improved error messages
-        if (safetyLimits.filesProcessed >= safetyLimits.maxFiles) {
-          throw new Error(
-            `File count limit exceeded (${safetyLimits.maxFiles} files). ` +
-              `Consider using .gitignore to exclude files or selecting fewer files/directories.`,
-          );
-        }
-        const projectedTotalSize = safetyLimits.totalSize + (stats.size || 0);
-        if (projectedTotalSize >= safetyLimits.maxTotalSizeBytes) {
-          throw new Error(
-            `Total size limit exceeded (${bytesToMB(safetyLimits.maxTotalSizeBytes)} MB). ` +
-              `Current: ${bytesToMB(safetyLimits.totalSize).toFixed(2)} MB, ` +
-              `File: ${bytesToMB(stats.size || 0).toFixed(2)} MB. ` +
-              `Consider using .gitignore to exclude large files or selecting fewer files.`,
+        // Check safety limits before processing
+        checkSafetyLimits(safetyLimits, stats, relativePath);
+
+        // Format and output file content immediately
+        const formatStartTime = Date.now();
+        // Pass writeStream for large files to enable direct streaming
+        const formattedContent = await formatFileContentStreaming(
+          entryPath,
+          relativePath,
+          stats,
+          maxFileSizeBytes,
+          writeStream,
+        );
+        const formatDuration = Date.now() - formatStartTime;
+
+        // Log slow file formatting (taking more than 2 seconds)
+        if (formatDuration > 2000) {
+          console.log(
+            `[processMixedSelectionStreaming] Slow format: ${relativePath} took ${formatDuration}ms (${bytesToMB(stats.size).toFixed(2)} MB)`,
           );
         }
 
-        // Format and output file content immediately
-        const formattedContent = await formatFileContentStreaming(entryPath, relativePath, stats, maxFileSizeBytes);
-        onFileContent(formattedContent);
+        // Only call onFileContent if content was returned (small files)
+        if (formattedContent) {
+          onFileContent(formattedContent);
+        }
+
+        // Log progress every 50 files
+        if (safetyLimits.filesProcessed % 50 === 0) {
+          console.log("[processMixedSelectionStreaming] Progress:", {
+            filesProcessed: safetyLimits.filesProcessed,
+            totalSize: bytesToMB(safetyLimits.totalSize),
+            currentFile: relativePath,
+          });
+        }
 
         // Store only metadata, not content
         entries.push({
@@ -411,10 +665,6 @@ async function processMixedSelectionStreaming(
           language: getFileLanguage(entryPath),
           // content is not stored to reduce memory usage
         });
-
-        // Update safety counters
-        safetyLimits.filesProcessed++;
-        safetyLimits.totalSize += stats.size || 0;
       } else if (stats.isDirectory()) {
         progressCallback(`Scanning directory: ${basename}...`);
 
@@ -444,6 +694,7 @@ async function processMixedSelectionStreaming(
               }
             },
             safetyLimits,
+            writeStream,
           },
           onFileContent,
         );
@@ -481,27 +732,150 @@ async function processMixedSelectionStreaming(
 }
 
 /**
- * Estimates the number of tokens in a text string using a simple heuristic.
- * Uses the approximation: 1 token ≈ 4 characters for English code.
- * @param content The text content to estimate tokens for.
- * @returns The estimated number of tokens.
+ * Writes a chunk of data to a write stream, handling backpressure.
+ * Returns a promise that resolves when the data is written (or queued).
+ * @param stream The write stream to write to.
+ * @param data The data to write.
+ * @returns A promise that resolves when the write is complete.
  */
-function estimateTokens(content: string): number {
-  return Math.ceil(content.length / 4);
+async function writeStreamChunk(stream: WriteStream, data: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!stream.write(data)) {
+      stream.once("drain", resolve);
+      stream.once("error", reject);
+    } else {
+      process.nextTick(resolve);
+    }
+  });
 }
 
 /**
- * Generates a single string containing the project's code structure and file contents.
- * Uses streaming processing to reduce memory usage by formatting file contents immediately
- * as they are read, rather than storing all contents in memory.
- * @param config Configuration object for generation, including AI instruction preference.
- * @param onProgress Optional callback for reporting progress during processing.
- * @returns A promise that resolves to the complete project code string.
+ * Updates metadata placeholders in the generated file using streaming to avoid loading entire file into memory.
+ * Reads file in chunks, replaces placeholders, and writes to a temporary file, then replaces original.
+ * @param filePath Path to the file to update.
+ * @param gitignoreUsed Whether .gitignore was used.
+ * @param estimatedTokens Estimated token count.
  */
-export async function generateProjectCodeString(
+async function updateMetadataInFile(filePath: string, gitignoreUsed: boolean, estimatedTokens: number): Promise<void> {
+  const tempFilePath = `${filePath}.tmp`;
+  const readStream = createReadStream(filePath, { encoding: "utf-8", highWaterMark: BUFFER_CHUNK_SIZE });
+  const writeStream = createWriteStream(tempFilePath, { encoding: "utf-8" });
+
+  const gitignoreReplacement = `  .gitignore used: ${gitignoreUsed ? "Yes" : "No"}`;
+  const tokensReplacement = `  Estimated tokens: ~${estimatedTokens}`;
+
+  let buffer = "";
+  let gitignoreReplaced = false;
+  let tokensReplaced = false;
+  let isPaused = false;
+
+  const flushBuffer = (): void => {
+    if (buffer.length === 0) return;
+
+    // Always write in chunks to prevent buffer from growing too large
+    const chunkSize = Math.min(buffer.length, BUFFER_CHUNK_SIZE);
+    const toWrite = buffer.substring(0, chunkSize);
+    buffer = buffer.substring(chunkSize);
+
+    if (!writeStream.write(toWrite)) {
+      isPaused = true;
+      readStream.pause();
+      writeStream.once("drain", () => {
+        isPaused = false;
+        readStream.resume();
+        // Continue flushing if there's more data
+        if (buffer.length > 0) {
+          flushBuffer();
+        }
+      });
+    }
+  };
+
+  return new Promise((resolve, reject) => {
+    readStream.on("data", (chunk: string | Buffer) => {
+      const chunkStr = typeof chunk === "string" ? chunk : chunk.toString("utf-8");
+      buffer += chunkStr;
+
+      // Replace placeholders if found in buffer
+      if (!gitignoreReplaced && buffer.includes("  .gitignore used: TOKEN_PLACEHOLDER")) {
+        buffer = buffer.replace("  .gitignore used: TOKEN_PLACEHOLDER", gitignoreReplacement);
+        gitignoreReplaced = true;
+      }
+      if (!tokensReplaced && buffer.includes("  Estimated tokens: ~TOKEN_PLACEHOLDER")) {
+        buffer = buffer.replace("  Estimated tokens: ~TOKEN_PLACEHOLDER", tokensReplacement);
+        tokensReplaced = true;
+      }
+
+      // Flush buffer if it exceeds maximum size to prevent memory issues
+      if (buffer.length > MAX_BUFFER_SIZE) {
+        flushBuffer();
+      }
+    });
+
+    readStream.on("end", () => {
+      // Write remaining buffer
+      while (buffer.length > 0) {
+        flushBuffer();
+      }
+      if (!isPaused) {
+        writeStream.end();
+      } else {
+        writeStream.once("drain", () => {
+          writeStream.end();
+        });
+      }
+    });
+
+    readStream.on("error", (error: Error) => {
+      writeStream.destroy();
+      reject(error);
+    });
+
+    writeStream.on("error", (error: Error) => {
+      readStream.destroy();
+      reject(error);
+    });
+
+    writeStream.on("finish", async () => {
+      try {
+        // Replace original file with updated one
+        try {
+          await fs.unlink(filePath);
+        } catch (error) {
+          // Ignore ENOENT (file not found) errors
+          if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+            throw error;
+          }
+        }
+        await fs.rename(tempFilePath, filePath);
+        resolve();
+      } catch (error) {
+        // Clean up temp file on error
+        try {
+          await fs.unlink(tempFilePath);
+        } catch {
+          // Ignore cleanup errors
+        }
+        reject(error);
+      }
+    });
+  });
+}
+
+/**
+ * Generates project code and writes it directly to a file using chunk-based streaming.
+ * This approach significantly reduces memory usage by writing content to disk immediately
+ * as it's processed, rather than accumulating it in memory.
+ * @param config Configuration object for generation, including AI instruction preference.
+ * @param outputFilePath The absolute path where the output file should be written.
+ * @param onProgress Optional callback for reporting progress during processing.
+ * @returns A promise that resolves when the file has been written, containing file stats.
+ */
+export async function generateProjectCodeToFile(
   config: FileProcessorConfig,
+  outputFilePath: string,
   onProgress?: (progress: { message: string; details?: string }) => void,
-): Promise<string> {
+): Promise<{ fileSize: number; estimatedTokens: number }> {
   const {
     projectDirectory,
     maxFileSizeBytes,
@@ -512,183 +886,277 @@ export async function generateProjectCodeString(
   } = config;
   const projectRoot = path.resolve(projectDirectory);
 
+  console.log("[generateProjectCodeToFile] Starting generation", {
+    projectRoot,
+    maxFileSizeBytes: bytesToMB(maxFileSizeBytes),
+    processOnlySelectedFiles,
+    selectedFilePathsCount: selectedFilePaths?.length || 0,
+    outputFilePath,
+  });
+
   const progressCallback = (message: string, details?: string) => {
+    console.log(`[Progress] ${message}`, details || "");
     if (onProgress) onProgress({ message, details });
   };
 
-  // Use array-based string building for streaming output
-  const outputParts: string[] = [];
-  const fileContentsParts: string[] = [];
+  const writeStream = createWriteStream(outputFilePath, { encoding: "utf-8" });
+  // Increase max listeners to prevent warnings when streaming large files
+  writeStream.setMaxListeners(100);
 
-  // Start building output header
-  if (includeAiInstructions) {
-    outputParts.push("<ai_instruction>\n" + AI_INSTRUCTION_CONTENT + "</ai_instruction>\n\n");
-  }
+  try {
+    // Write header
+    if (includeAiInstructions) {
+      const headerContent = "<ai_instruction>\n" + AI_INSTRUCTION_CONTENT + "</ai_instruction>\n\n";
+      await writeStreamChunk(writeStream, headerContent);
+    }
 
-  // Build metadata section (token count will be added later)
-  const metadataLines: string[] = [];
-  metadataLines.push("  Date created: " + new Date().toISOString());
-  metadataLines.push("  Project root: " + projectRoot);
-  metadataLines.push("  Processing mode: " + (processOnlySelectedFiles ? "Selected files only" : "Entire directory"));
-  if (processOnlySelectedFiles && selectedFilePaths) {
-    metadataLines.push("  Selected files: " + selectedFilePaths.length);
-  }
-  metadataLines.push("  Max file size for content: " + bytesToMB(maxFileSizeBytes).toFixed(2) + " MB");
-  // gitignoreUsed and token count will be set later
-  metadataLines.push("  AI instructions included: " + (includeAiInstructions ? "Yes" : "No"));
+    // Build and write metadata section (token count will be added later)
+    const metadataLines: string[] = [];
+    metadataLines.push("  Date created: " + new Date().toISOString());
+    metadataLines.push("  Project root: " + projectRoot);
+    metadataLines.push("  Processing mode: " + (processOnlySelectedFiles ? "Selected files only" : "Entire directory"));
+    if (processOnlySelectedFiles && selectedFilePaths) {
+      metadataLines.push("  Selected files: " + selectedFilePaths.length);
+    }
+    metadataLines.push("  Max file size for content: " + bytesToMB(maxFileSizeBytes).toFixed(2) + " MB");
+    // gitignoreUsed and token count will be set later - use placeholder
+    metadataLines.push("  AI instructions included: " + (includeAiInstructions ? "Yes" : "No"));
+    metadataLines.push("  .gitignore used: TOKEN_PLACEHOLDER");
+    metadataLines.push("  Estimated tokens: ~TOKEN_PLACEHOLDER");
 
-  outputParts.push("<metadata>\n" + metadataLines.join("\n") + "\n");
+    const metadataContent = "<metadata>\n" + metadataLines.join("\n") + "\n";
+    await writeStreamChunk(writeStream, metadataContent);
 
-  let projectStructure: ProjectEntry[];
-  let gitignoreUsed = false;
+    let projectStructure: ProjectEntry[];
+    let gitignoreUsed = false;
 
-  // Callback to receive formatted file content as it's processed
-  const onFileContent = (formattedContent: string) => {
-    fileContentsParts.push(formattedContent);
-  };
+    // Callback to receive formatted file content as it's processed - write directly to stream
+    const onFileContent = async (formattedContent: string) => {
+      await writeStreamChunk(writeStream, formattedContent);
+    };
 
-  if (processOnlySelectedFiles && selectedFilePaths && selectedFilePaths.length > 0) {
-    progressCallback("Processing selected files and directories...");
-    try {
-      // Parse additional ignore patterns
-      const additionalPatterns = additionalIgnorePatterns
-        ? additionalIgnorePatterns
-            .split(",")
-            .map((p) => p.trim())
-            .filter((p) => p.length > 0)
-        : undefined;
+    if (processOnlySelectedFiles && selectedFilePaths && selectedFilePaths.length > 0) {
+      progressCallback("Processing selected files and directories...");
+      try {
+        // Parse additional ignore patterns
+        const additionalPatterns = parseIgnorePatterns(additionalIgnorePatterns);
+        const ignoreResult = await loadIgnoreFilter(projectRoot, additionalPatterns);
+        gitignoreUsed = ignoreResult.gitignoreUsed;
+
+        projectStructure = await processMixedSelectionStreaming(config, onFileContent, onProgress, writeStream);
+      } catch (error) {
+        writeStream.destroy();
+        const typedError = error as Error;
+        const errorMessage = typedError.message;
+
+        if (errorMessage.includes("limit exceeded")) {
+          throw new Error(
+            `Project too large: ${errorMessage}\n\n` +
+              `Recommendations:\n` +
+              `- Use .gitignore to exclude large directories (node_modules, dist, build, .next, .cache)\n` +
+              `- Select specific files or directories instead of processing entire project\n` +
+              `- Add ignore patterns in the "Additional Ignore Patterns" field (e.g., "*.log, vendor/, coverage/")`,
+          );
+        }
+        if (isMemoryError(typedError)) {
+          throw formatMemoryError(typedError);
+        }
+        throw error;
+      }
+    } else {
+      progressCallback("Loading ignore rules...");
+      const additionalPatterns = parseIgnorePatterns(additionalIgnorePatterns);
       const ignoreResult = await loadIgnoreFilter(projectRoot, additionalPatterns);
       gitignoreUsed = ignoreResult.gitignoreUsed;
 
-      projectStructure = await processMixedSelectionStreaming(config, onFileContent, onProgress);
-    } catch (error) {
-      const errorMessage = (error as Error).message;
-      if (errorMessage.includes("limit exceeded")) {
-        throw new Error(
-          `Project too large: ${errorMessage}. Consider selecting fewer files/directories or using .gitignore.`,
-        );
-      }
-      if (errorMessage.includes("heap") || errorMessage.includes("memory")) {
-        throw new Error(
-          `Memory limit exceeded. The selected files/directories are too large to process. Please select fewer items or use .gitignore.`,
-        );
-      }
-      throw error;
-    }
-  } else {
-    progressCallback("Loading ignore rules...");
-    const additionalPatterns = additionalIgnorePatterns
-      ? additionalIgnorePatterns
-          .split(",")
-          .map((p) => p.trim())
-          .filter((p) => p.length > 0)
-      : undefined;
-    const ignoreResult = await loadIgnoreFilter(projectRoot, additionalPatterns);
-    gitignoreUsed = ignoreResult.gitignoreUsed;
+      progressCallback("Scanning project files...");
 
-    progressCallback("Scanning project files...");
+      const safetyLimits = {
+        maxFiles: SAFETY_LIMITS.MAX_FILES,
+        maxScanTimeMs: SAFETY_LIMITS.MAX_SCAN_TIME_MS,
+        maxTotalSizeBytes: SAFETY_LIMITS.MAX_TOTAL_SIZE_BYTES,
+        startTime: Date.now(),
+        filesProcessed: 0,
+        totalSize: 0,
+      };
 
-    const safetyLimits = {
-      maxFiles: SAFETY_LIMITS.MAX_FILES,
-      maxScanTimeMs: SAFETY_LIMITS.MAX_SCAN_TIME_MS,
-      maxTotalSizeBytes: SAFETY_LIMITS.MAX_TOTAL_SIZE_BYTES,
-      startTime: Date.now(),
-      filesProcessed: 0,
-      totalSize: 0,
-    };
+      console.log("[generateProjectCodeToFile] Safety limits:", {
+        maxFiles: safetyLimits.maxFiles,
+        maxTotalSizeBytes: bytesToMB(safetyLimits.maxTotalSizeBytes),
+        maxScanTimeMs: safetyLimits.maxScanTimeMs / 1000,
+      });
 
-    try {
-      projectStructure = await processDirectoryRecursiveStreaming(
-        {
-          projectRoot,
-          currentPath: projectRoot,
-          ignoreFilter: ignoreResult.filter,
-          maxFileSizeBytes,
-          safetyLimits,
-          onProgress: (progressUpdate) => {
-            if (safetyLimits.filesProcessed >= SAFETY_LIMITS.FILES_WARNING_THRESHOLD) {
-              progressCallback(
-                "Scanning (large project)",
-                `${progressUpdate.scannedPath} (${safetyLimits.filesProcessed} files)`,
-              );
-            } else {
-              progressCallback("Scanning", progressUpdate.scannedPath);
-            }
+      try {
+        projectStructure = await processDirectoryRecursiveStreaming(
+          {
+            projectRoot,
+            currentPath: projectRoot,
+            ignoreFilter: ignoreResult.filter,
+            maxFileSizeBytes,
+            safetyLimits,
+            writeStream,
+            onProgress: (progressUpdate) => {
+              if (safetyLimits.filesProcessed >= SAFETY_LIMITS.FILES_WARNING_THRESHOLD) {
+                progressCallback(
+                  "Scanning (large project)",
+                  `${progressUpdate.scannedPath} (${safetyLimits.filesProcessed} files)`,
+                );
+              } else {
+                progressCallback("Scanning", progressUpdate.scannedPath);
+              }
+            },
           },
-        },
-        onFileContent,
-      );
-    } catch (error) {
-      const errorMessage = (error as Error).message;
-      if (errorMessage.includes("limit exceeded")) {
-        throw new Error(
-          `Project too large: ${errorMessage}. Consider using .gitignore, selecting specific files/directories, or processing a smaller directory.`,
+          onFileContent,
         );
+      } catch (error) {
+        writeStream.destroy();
+        const typedError = error as Error;
+        const errorMessage = typedError.message;
+
+        if (errorMessage.includes("limit exceeded")) {
+          throw new Error(
+            `Project too large: ${errorMessage}\n\n` +
+              `Recommendations:\n` +
+              `- Use .gitignore to exclude large directories (node_modules, dist, build, .next, .cache)\n` +
+              `- Select specific files or directories instead of processing entire project\n` +
+              `- Add ignore patterns in the "Additional Ignore Patterns" field (e.g., "*.log, vendor/, coverage/")`,
+          );
+        }
+        if (isMemoryError(typedError)) {
+          throw formatMemoryError(typedError, { safetyLimits });
+        }
+        throw error;
       }
-      if (errorMessage.includes("heap") || errorMessage.includes("memory")) {
-        throw new Error(
-          `Memory limit exceeded. The project is too large to process. Please select specific files/directories or use .gitignore to exclude large files.`,
-        );
-      }
-      throw error;
     }
-  }
 
-  // Update metadata with gitignore status before closing tag
-  const metadataPartIndex = outputParts.findIndex((part) => part.includes("<metadata>"));
-  if (metadataPartIndex !== -1) {
-    const metadataContent = outputParts[metadataPartIndex];
-    // Insert gitignore status before closing metadata tag
-    outputParts[metadataPartIndex] = metadataContent.replace(
-      "\n",
-      "\n  .gitignore used: " + (gitignoreUsed ? "Yes" : "No") + "\n",
-    );
-  }
+    // Close metadata tag (gitignore and tokens will be updated later)
+    await writeStreamChunk(writeStream, "</metadata>\n\n");
 
-  progressCallback("Formatting output...");
+    progressCallback("Formatting output...");
 
-  // Format project structure
-  outputParts.push("<project_structure>\n");
-  outputParts.push(formatProjectStructure(projectStructure));
-  outputParts.push("</project_structure>\n\n");
+    // Write project structure
+    const structureHeader = "<project_structure>\n";
+    await writeStreamChunk(writeStream, structureHeader);
 
-  // Add file contents that were collected during streaming processing
-  outputParts.push("<file_contents>");
-  outputParts.push(fileContentsParts.join(""));
-  if (fileContentsParts.length > 0) {
-    outputParts.push("\n");
-  }
-  outputParts.push("</file_contents>\n");
+    const structureContent = formatProjectStructure(projectStructure);
+    await writeStreamChunk(writeStream, structureContent);
 
-  if (includeAiInstructions) {
-    outputParts.push("\n<ai_analysis_guide>\n" + AI_ANALYSIS_GUIDE_CONTENT + "</ai_analysis_guide>\n");
-  }
+    const structureFooter = "</project_structure>\n\n";
+    await writeStreamChunk(writeStream, structureFooter);
 
-  // Join all parts
-  let output = outputParts.join("");
+    // Write file contents tag opener
+    const fileContentsOpen = "<file_contents>";
+    await writeStreamChunk(writeStream, fileContentsOpen);
 
-  // Clear arrays to help GC
-  outputParts.length = 0;
-  fileContentsParts.length = 0;
+    // File contents are already written via onFileContent callback during processing
 
-  // Calculate estimated tokens and add to metadata
-  const estimatedTokens = estimateTokens(output);
-  const metadataEndTagIndex = output.indexOf("</metadata>");
-  if (metadataEndTagIndex !== -1) {
-    const beforeMetadataEnd = output.substring(0, metadataEndTagIndex);
-    const afterMetadataEnd = output.substring(metadataEndTagIndex);
-    output = beforeMetadataEnd + "  Estimated tokens: ~" + estimatedTokens + "\n" + afterMetadataEnd;
-  }
+    // Write file contents tag closer
+    const fileContentsClose = "\n</file_contents>\n";
+    await writeStreamChunk(writeStream, fileContentsClose);
 
-  // Try to trigger garbage collection if available
-  if (global.gc && typeof global.gc === "function") {
+    // Write footer if needed
+    if (includeAiInstructions) {
+      const footerContent = "\n<ai_analysis_guide>\n" + AI_ANALYSIS_GUIDE_CONTENT + "</ai_analysis_guide>\n";
+      await writeStreamChunk(writeStream, footerContent);
+    }
+
+    // Close the stream and wait for it to finish
+    await new Promise<void>((resolve, reject) => {
+      writeStream.end((err: Error | null | undefined) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+
+    // Get actual file size from filesystem
+    const stats = await fs.stat(outputFilePath);
+    const fileSize = stats.size;
+
+    // Calculate estimated tokens based on actual file size
+    const estimatedTokens = estimateTokens("x".repeat(fileSize));
+
+    // Update metadata with actual values using streaming to avoid loading entire file into memory
+    await updateMetadataInFile(outputFilePath, gitignoreUsed, estimatedTokens);
+
+    // Try to trigger garbage collection if available
+    if (global.gc && typeof global.gc === "function") {
+      try {
+        global.gc();
+      } catch {
+        // GC not available or failed, ignore
+      }
+    }
+
+    progressCallback("Generation complete!");
+
+    console.log("[generateProjectCodeToFile] Generation completed", {
+      fileSize: bytesToMB(fileSize),
+      estimatedTokens,
+      outputFilePath,
+    });
+
+    return { fileSize, estimatedTokens };
+  } catch (error) {
+    writeStream.destroy();
+    // Try to delete partial file on error
     try {
-      global.gc();
+      await fs.unlink(outputFilePath);
     } catch {
-      // GC not available or failed, ignore
+      // Ignore deletion errors
     }
-  }
 
-  progressCallback("Generation complete!");
-  return output;
+    // Enhance error message for memory-related errors
+    const typedError = error as Error;
+    const errorMessage = typedError.message;
+
+    if (isMemoryError(typedError) && !errorMessage.includes("Recommendations:")) {
+      throw formatMemoryError(typedError);
+    }
+
+    throw error;
+  }
+}
+
+/**
+ * Legacy function for backward compatibility.
+ * Generates a single string containing the project's code structure and file contents.
+ * NOTE: This function loads the entire output into memory. For large projects, use generateProjectCodeToFile instead.
+ * @param config Configuration object for generation, including AI instruction preference.
+ * @param onProgress Optional callback for reporting progress during processing.
+ * @returns A promise that resolves to the complete project code string.
+ * @deprecated Use generateProjectCodeToFile for better memory efficiency.
+ */
+export async function generateProjectCodeString(
+  config: FileProcessorConfig,
+  onProgress?: (progress: { message: string; details?: string }) => void,
+): Promise<string> {
+  // Create a temporary file path
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "raycast-project-code-"));
+  const tempFilePath = path.join(tempDir, "temp_output.txt");
+
+  try {
+    // Generate to file
+    await generateProjectCodeToFile(config, tempFilePath, onProgress);
+
+    // Read the file back into memory
+    const content = await fs.readFile(tempFilePath, "utf-8");
+
+    // Clean up
+    await fs.unlink(tempFilePath);
+    await fs.rmdir(tempDir);
+
+    return content;
+  } catch (error) {
+    // Clean up on error
+    try {
+      await fs.unlink(tempFilePath).catch(() => {});
+      await fs.rmdir(tempDir).catch(() => {});
+    } catch {
+      // Ignore cleanup errors
+    }
+    throw error;
+  }
 }

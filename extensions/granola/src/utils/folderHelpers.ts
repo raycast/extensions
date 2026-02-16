@@ -69,6 +69,9 @@ export async function getFolderInfoForAI(): Promise<
     noteCount: number;
     createdAt: string;
     noteIds: string[];
+    isShared: boolean;
+    userRole: string;
+    memberCount: number;
   }>
 > {
   const folders = await getFoldersFromAPI({ includeDocumentIds: true });
@@ -80,5 +83,8 @@ export async function getFolderInfoForAI(): Promise<
     noteCount: folder.document_ids.length,
     createdAt: folder.created_at,
     noteIds: folder.document_ids,
+    isShared: folder.is_shared,
+    userRole: folder.user_role,
+    memberCount: folder.members?.length || 0,
   }));
 }

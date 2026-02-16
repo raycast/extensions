@@ -1,8 +1,8 @@
 import { useCachedPromise } from "@raycast/utils";
 import { infomaniak, TINT_COLOR } from "./infomaniak";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { AccountDrive } from "./types";
+import { AccountDrive, ResultV3 } from "./types";
 import { filesize } from "filesize";
 
 export default function Drives() {
@@ -31,6 +31,7 @@ export default function Drives() {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.MagnifyingGlass} title="Search" target={<Search drive={drive} />} />
+                <Action.Push icon={Icon.Star} title="Favorites" target={<Favorites drive={drive} />} />
               </ActionPanel>
             }
           />
@@ -40,6 +41,38 @@ export default function Drives() {
   );
 }
 
+function ResultItem({ driveId, result }: { driveId: number; result: ResultV3 }) {
+  return (
+    <List.Item
+      icon={result.type === "dir" ? Icon.Folder : Icon.Document}
+      title={result.name}
+      accessories={[
+        { icon: result.is_favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined },
+        { date: new Date(result.last_modified_at * 1000) },
+        { text: "size" in result ? filesize(result.size, { standard: "jedec" }) : "" },
+      ]}
+      actions={
+        <ActionPanel>
+          {result.type === "file" && (
+            <>
+              <Action.Push
+                icon={Icon.Clock}
+                title="Activity"
+                target={<Activity driveId={driveId} fileId={result.id} />}
+              />
+              <Action.Push
+                icon={Icon.SpeechBubbleActive}
+                title="Comments"
+                target={<Comments driveId={driveId} fileId={result.id} />}
+              />
+            </>
+          )}
+          <Action.OpenInBrowser url={`https://kdrive.infomaniak.com/app/drive/${driveId}/redirect/${result.id}`} />
+        </ActionPanel>
+      }
+    />
+  );
+}
 function Search({ drive }: { drive: AccountDrive }) {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data: results } = useCachedPromise(
@@ -59,36 +92,7 @@ function Search({ drive }: { drive: AccountDrive }) {
       <List.EmptyView icon={{ source: Icon.MagnifyingGlass, tintColor: TINT_COLOR }} title="No results in the kDrive" />
       <List.Section title={`${drive.name} > Search results`} subtitle={`${results.length}`}>
         {results.map((result) => (
-          <List.Item
-            key={result.id}
-            icon={result.type === "dir" ? Icon.Folder : Icon.Document}
-            title={result.name}
-            accessories={[
-              { date: new Date(result.last_modified_at * 1000) },
-              { text: "size" in result ? filesize(result.size, { standard: "jedec" }) : "" },
-            ]}
-            actions={
-              <ActionPanel>
-                {result.type === "file" && (
-                  <>
-                    <Action.Push
-                      icon={Icon.Clock}
-                      title="Activity"
-                      target={<Activity driveId={drive.id} fileId={result.id} />}
-                    />
-                    <Action.Push
-                      icon={Icon.SpeechBubbleActive}
-                      title="Comments"
-                      target={<Comments driveId={drive.id} fileId={result.id} />}
-                    />
-                  </>
-                )}
-                <Action.OpenInBrowser
-                  url={`https://kdrive.infomaniak.com/app/drive/${drive.id}/redirect/${result.id}`}
-                />
-              </ActionPanel>
-            }
-          />
+          <ResultItem key={result.id} result={result} driveId={drive.id} />
         ))}
       </List.Section>
     </List>
@@ -153,6 +157,33 @@ function Comments({ driveId, fileId }: { driveId: number; fileId: number }) {
             title=""
             detail={<List.Item.Detail markdown={comment.body} />}
           />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+
+function Favorites({ drive }: { drive: AccountDrive }) {
+  const { isLoading, data: favorites } = useCachedPromise(
+    (driveId: number) => async (options) => {
+      const { data, has_more, cursor } = await infomaniak.drives.files.favorites.list({
+        driveId,
+        cursor: options.cursor,
+      });
+      return { data, hasMore: has_more, cursor };
+    },
+    [drive.id],
+    {
+      initialData: [],
+    },
+  );
+
+  return (
+    <List isLoading={isLoading}>
+      <List.EmptyView icon={{ source: Icon.Star, tintColor: Color.Yellow }} title="No favorite at this time" />
+      <List.Section title={`${drive.name} > Favorites`} subtitle={`${favorites.length}`}>
+        {favorites.map((favorite) => (
+          <ResultItem key={favorite.id} result={favorite} driveId={drive.id} />
         ))}
       </List.Section>
     </List>

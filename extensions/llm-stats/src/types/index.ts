@@ -13,7 +13,7 @@ export interface ArenaModel {
   conservative_rating?: number;
   percent_gain?: number;
   matches_played: number;
-  wins: number;
+  wins: number | null;
   win_rate: number;
   created_at: string;
   updated_at: string;

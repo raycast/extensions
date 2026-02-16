@@ -1,22 +1,22 @@
 import { Color, MenuBarExtra, open } from "@raycast/api";
-import { usePullRequestsWithAgentSessions } from "./hooks/usePullRequestsWithAgentSessions";
+import { useTasks } from "./hooks/useTasks";
 import { useMemo } from "react";
 import { withAccessToken } from "@raycast/utils";
 import { provider } from "./lib/oauth";
-import { getIcon, getMenuBarShortcut, truncate } from "./utils";
+import { getTaskIcon, getMenuBarShortcut, truncate } from "./utils";
 
 function Command() {
-  const { isLoading, pullRequestsWithAgentSessions } = usePullRequestsWithAgentSessions();
+  const { isLoading, tasks } = useTasks();
 
-  const openPullRequests = useMemo(
+  const openTasks = useMemo(
     () =>
-      pullRequestsWithAgentSessions.filter(
-        (pullRequestWithAgentSessions) => pullRequestWithAgentSessions.pullRequest.state === "OPEN",
+      tasks.filter(
+        (taskWithPullRequest) => !taskWithPullRequest.pullRequest || taskWithPullRequest.pullRequest.state === "OPEN",
       ),
-    [pullRequestsWithAgentSessions],
+    [tasks],
   );
 
-  if (openPullRequests.length === 0) {
+  if (openTasks.length === 0) {
     return null;
   }
 
@@ -26,18 +26,32 @@ function Command() {
       tooltip="GitHub Copilot Tasks"
       isLoading={isLoading}
     >
-      {openPullRequests.map((pullRequestWithAgentSessions, index) => (
-        <MenuBarExtra.Item
-          key={pullRequestWithAgentSessions.key}
-          title={truncate(pullRequestWithAgentSessions.pullRequest.title, 35)}
-          subtitle={`${pullRequestWithAgentSessions.pullRequest.repository.owner.login}/${pullRequestWithAgentSessions.pullRequest.repository.name}`}
-          onAction={() => {
-            open(pullRequestWithAgentSessions.pullRequest.url);
-          }}
-          icon={getIcon(pullRequestWithAgentSessions)}
-          shortcut={getMenuBarShortcut(index)}
-        />
-      ))}
+      {openTasks.map((taskWithPullRequest, index) => {
+        const { pullRequest } = taskWithPullRequest;
+        const title = pullRequest?.title ?? `Task ${taskWithPullRequest.task.id}`;
+        const subtitle = pullRequest
+          ? `${pullRequest.repository.owner.login}/${pullRequest.repository.name}`
+          : undefined;
+        // URL format: https://github.com/{owner}/{repo}/tasks/{task_id}
+        const url = pullRequest
+          ? `https://github.com/${pullRequest.repository.owner.login}/${pullRequest.repository.name}/tasks/${taskWithPullRequest.task.id}`
+          : undefined;
+
+        return (
+          <MenuBarExtra.Item
+            key={taskWithPullRequest.key}
+            title={truncate(title, 35)}
+            subtitle={subtitle}
+            onAction={() => {
+              if (url) {
+                open(url);
+              }
+            }}
+            icon={getTaskIcon(taskWithPullRequest)}
+            shortcut={getMenuBarShortcut(index)}
+          />
+        );
+      })}
     </MenuBarExtra>
   );
 }

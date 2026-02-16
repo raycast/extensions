@@ -1,5 +1,5 @@
-import { Icon, List, showToast, Toast, ActionPanel } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Icon, List, ActionPanel } from "@raycast/api";
+import { useCachedState, showFailureToast } from "@raycast/utils";
 import { ModelListItem } from "./types";
 import { useModels } from "./utils/use-models";
 import { getOrganizationLogo } from "./utils/organization-logos";
@@ -18,11 +18,7 @@ export default function Command() {
   const { data: models, isLoading, error } = useModels(true, true);
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to load models",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    showFailureToast(error, { title: "Failed to load models" });
   }
 
   // Sort models based on selected criteria
@@ -65,7 +61,7 @@ export default function Command() {
       }
     >
       {sortedModels.length === 0 && !isLoading ? (
-        <List.EmptyView icon={Icon.MagnifyingGlass} title="No models found" description="Try adjusting your search" />
+        <List.EmptyView title="No models found" description="Try adjusting your search" />
       ) : (
         sortedModels.map((model: ModelListItem) => {
           const accessories: List.Item.Accessory[] = [];

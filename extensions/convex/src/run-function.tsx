@@ -48,13 +48,15 @@ export default function RunFunctionCommand() {
     selectedContext.projectId,
   );
 
-  const selectedTeam = teams?.find((t) => t.id === selectedContext.teamId);
-  const selectedProject = projects?.find(
-    (p) => p.id === selectedContext.projectId,
-  );
-  const selectedDeployment = deployments?.find(
-    (d) => d.name === deploymentName,
-  );
+  const selectedTeam = Array.isArray(teams)
+    ? teams.find((t) => t.id === selectedContext.teamId)
+    : undefined;
+  const selectedProject = Array.isArray(projects)
+    ? projects.find((p) => p.id === selectedContext.projectId)
+    : undefined;
+  const selectedDeployment = Array.isArray(deployments)
+    ? deployments.find((d) => d.name === deploymentName)
+    : undefined;
 
   // Fetch functions
   const { data: modules, isLoading: functionsLoading } = useFunctions(
@@ -74,7 +76,7 @@ export default function RunFunctionCommand() {
       <List>
         <List.EmptyView
           title="No Deployment Selected"
-          description="Use 'Switch Convex Project' to select a deployment first"
+          description="Use 'Manage Projects' to select a deployment first"
           icon={Icon.Cloud}
         />
       </List>
@@ -82,7 +84,9 @@ export default function RunFunctionCommand() {
   }
 
   // Flatten functions for search
-  const allFunctions: FunctionWithPath[] = (modules ?? []).flatMap((module) =>
+  const allFunctions: FunctionWithPath[] = (
+    Array.isArray(modules) ? modules : []
+  ).flatMap((module) =>
     module.functions
       .filter((fn) => fn.visibility?.kind === "public")
       .map((fn) => {

@@ -1,8 +1,9 @@
-import * as echarts from "echarts";
-import { State } from "@lib/haapi";
-import { Connection, getCollection } from "home-assistant-js-websocket";
 import { getHAWSConnection } from "@lib/common";
+import { State } from "@lib/haapi";
+import { environment } from "@raycast/api";
+import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
+import { Connection, getCollection } from "home-assistant-js-websocket";
 
 interface Statistic {
   start: number;
@@ -19,6 +20,13 @@ export async function getChartMarkdownAsync(state: State): Promise<string> {
   const conn = await getHAWSConnection();
   const key = "history_" + state.entity_id;
   const date = new Date();
+
+  // SSR SVG needs explicit styling; match Raycast appearance.
+  const isDark = environment.appearance === "dark";
+  const axisLabelColor = isDark ? "#e5e7eb" : "#374151";
+  const axisLineColor = isDark ? "rgba(255,255,255,0.35)" : "rgba(17,24,39,0.30)";
+  // Horizontal grid lines (y-axis splitLine). Needs more contrast, especially in light theme.
+  const gridLineColor = isDark ? "rgba(255,255,255,0.18)" : "rgba(17,24,39,0.16)";
 
   date.setDate(date.getDate() - 1);
 
@@ -66,16 +74,23 @@ export async function getChartMarkdownAsync(state: State): Promise<string> {
     },
     xAxis: {
       type: "time",
+      axisLine: { lineStyle: { color: axisLineColor } },
+      axisTick: { lineStyle: { color: axisLineColor } },
       axisLabel: {
         fontSize: 16,
+        color: axisLabelColor,
       },
       minInterval: 100,
     },
     yAxis: {
+      axisLine: { lineStyle: { color: axisLineColor } },
+      axisTick: { lineStyle: { color: axisLineColor } },
       axisLabel: {
         formatter: `{value} ${state.attributes["unit_of_measurement"]}`,
         fontSize: 16,
+        color: axisLabelColor,
       },
+      splitLine: { lineStyle: { color: gridLineColor } },
       min: min[0],
     },
     series: [

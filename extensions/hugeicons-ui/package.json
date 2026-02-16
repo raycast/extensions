@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hugeicons-ui",
+  "title": "Hugeicons UI",
+  "description": "Browse and copy Hugeicons icons quickly from Raycast",
+  "icon": "logos/icon.png",
+  "author": "adnan_tresnjo",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-hugeicons",
+      "title": "Browse Hugeicons",
+      "description": "Browse and copy Hugeicons icons",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "title": "Default Copy Action",
+      "description": "Choose what to copy when pressing Enter",
+      "type": "dropdown",
+      "required": false,
+      "default": "svg",
+      "data": [
+        {
+          "title": "SVG",
+          "value": "svg"
+        },
+        {
+          "title": "React Component",
+          "value": "react"
+        },
+        {
+          "title": "React Usage",
+          "value": "usage"
+        },
+        {
+          "title": "Icon Name",
+          "value": "name"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@hugeicons/core-free-icons": "^2.0.0",
+    "@hugeicons/react": "^1.1.2",
+    "@raycast/api": "^1.104.1",
+    "title-case": "^3.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "generate-icons": "bun scripts/generate-hugeicons-metadata.ts"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
