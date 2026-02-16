@@ -1,9 +1,11 @@
 import { ActionPanel, Action, Alert, List, Icon, showToast, Toast, Color, open, confirmAlert } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   getDetailedAudioDevices,
   getRunningAudioApps,
   getAppStatus,
+  getOutputDeviceIconSourceFromName,
+  getAppOutputDevices,
   resetControlAppVolumeSettings,
   AudioDevice,
   AudioApp,
@@ -12,61 +14,189 @@ import {
 import { AppVolumeControl } from "./components/AppVolumeControl";
 import { clearAllAppPreferredDevices } from "./utils/preferences";
 
+const APP_STATUS_TIMEOUT_MS = 1200;
+const APP_STATUS_ACTIVE_REFRESH_MS = 2500;
+const APP_STATUS_IDLE_REFRESH_MS = 9000;
+const APP_ROUTES_REFRESH_MS = 30000;
+const BACKGROUND_REFRESH_MS = 3000;
+
+function getAppsSignature(apps: AudioApp[]): string {
+  return apps
+    .map((app) => app.bundleId)
+    .sort((a, b) => a.localeCompare(b))
+    .join("|");
+}
+
 export default function Command() {
   const [runningApps, setRunningApps] = useState<AudioApp[]>([]);
   const [devices, setDevices] = useState<AudioDevice[]>([]);
   const [appStatuses, setAppStatuses] = useState<Record<string, AppStatus>>({});
+  const [appRoutes, setAppRoutes] = useState<Record<string, string | null>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const devicesRef = useRef<AudioDevice[]>([]);
+  const appStatusesRef = useRef<Record<string, AppStatus>>({});
+  const appRoutesRef = useRef<Record<string, string | null>>({});
+  const statusFetchedAtRef = useRef<Record<string, number>>({});
+  const routesFetchedAtRef = useRef(0);
+  const routesAppsSignatureRef = useRef("");
+  const refreshInProgressRef = useRef(false);
+  const statusRefreshInProgressRef = useRef(false);
+  const routeRefreshInProgressRef = useRef(false);
 
-  const loadAudioInfo = useCallback(async (silent = false) => {
+  const refreshAppStatuses = useCallback(async (apps: AudioApp[]) => {
+    if (statusRefreshInProgressRef.current) return;
+    statusRefreshInProgressRef.current = true;
+
     try {
-      if (!silent) setIsLoading(true);
-      const [audioDevices, apps] = await Promise.all([getDetailedAudioDevices(), getRunningAudioApps()]);
+      const activeBundleIds = new Set(apps.map((app) => app.bundleId));
+      const now = Date.now();
+      const appsToRefreshStatuses = apps.filter((app) => {
+        const previousStatus = appStatusesRef.current[app.bundleId];
+        if (!previousStatus) return true;
 
-      setDevices(audioDevices);
-      setRunningApps(apps);
-
-      // Fetch statuses asynchronously
-      const statuses: Record<string, AppStatus> = {};
-
-      const results = await Promise.allSettled(
-        apps.map(async (app) => {
-          const status = await getAppStatus(app.name);
-          return { bundleId: app.bundleId, status };
-        }),
-      );
-
-      results.forEach((result) => {
-        if (result.status === "fulfilled") {
-          statuses[result.value.bundleId] = result.value.status;
-        }
+        const lastFetchedAt = statusFetchedAtRef.current[app.bundleId] ?? 0;
+        const minRefreshMs = app.activeOutputDetected ? APP_STATUS_ACTIVE_REFRESH_MS : APP_STATUS_IDLE_REFRESH_MS;
+        return now - lastFetchedAt >= minRefreshMs;
       });
 
-      setAppStatuses(statuses);
-    } catch {
-      console.error("Failed to load audio info");
-      if (!silent) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load audio information",
-        });
+      if (appsToRefreshStatuses.length === 0) {
+        return;
       }
+
+      await Promise.allSettled(
+        appsToRefreshStatuses.map(async (app) => {
+          statusFetchedAtRef.current[app.bundleId] = Date.now();
+          const incoming = await Promise.race<AppStatus>([
+            getAppStatus(app.name, app.bundleId),
+            new Promise<AppStatus>((resolve) => {
+              setTimeout(() => resolve({ volume: null, state: "unknown" }), APP_STATUS_TIMEOUT_MS);
+            }),
+          ]);
+          setAppStatuses((prev) => {
+            const next: Record<string, AppStatus> = {};
+
+            for (const [bundleId, status] of Object.entries(prev)) {
+              if (activeBundleIds.has(bundleId)) {
+                next[bundleId] = status;
+              }
+            }
+
+            next[app.bundleId] = {
+              volume: incoming.volume !== null ? incoming.volume : null,
+              state: incoming.state,
+            };
+
+            appStatusesRef.current = next;
+            return next;
+          });
+        }),
+      );
     } finally {
-      if (!silent) setIsLoading(false);
+      statusRefreshInProgressRef.current = false;
     }
   }, []);
 
+  const refreshAppRoutes = useCallback(async (apps: AudioApp[], force = false) => {
+    const appsSignature = getAppsSignature(apps);
+    const now = Date.now();
+    const shouldRefreshRoutes =
+      force ||
+      routesAppsSignatureRef.current !== appsSignature ||
+      now - routesFetchedAtRef.current >= APP_ROUTES_REFRESH_MS;
+
+    if (!shouldRefreshRoutes) {
+      setAppRoutes((prev) => {
+        const next: Record<string, string | null> = {};
+        for (const app of apps) {
+          if (prev[app.bundleId] !== undefined) {
+            next[app.bundleId] = prev[app.bundleId];
+            continue;
+          }
+
+          if (appRoutesRef.current[app.bundleId] !== undefined) {
+            next[app.bundleId] = appRoutesRef.current[app.bundleId];
+          }
+        }
+
+        appRoutesRef.current = next;
+        return next;
+      });
+      return;
+    }
+
+    if (routeRefreshInProgressRef.current) return;
+    routeRefreshInProgressRef.current = true;
+
+    try {
+      const nextRoutes = await getAppOutputDevices(apps.map((app) => app.bundleId));
+      routesFetchedAtRef.current = Date.now();
+      routesAppsSignatureRef.current = appsSignature;
+      appRoutesRef.current = nextRoutes;
+      setAppRoutes(nextRoutes);
+    } finally {
+      routeRefreshInProgressRef.current = false;
+    }
+  }, []);
+
+  const loadAudioInfo = useCallback(
+    async (silent = false) => {
+      if (refreshInProgressRef.current) return;
+      refreshInProgressRef.current = true;
+
+      let loadingSettled = false;
+
+      try {
+        if (!silent) setIsLoading(true);
+        const shouldLoadDevices = !silent || devicesRef.current.length === 0;
+        const appsPromise = getRunningAudioApps();
+        const devicesPromise = shouldLoadDevices ? getDetailedAudioDevices() : Promise.resolve(devicesRef.current);
+        const apps = await appsPromise;
+        setRunningApps(apps);
+
+        if (!silent) {
+          setIsLoading(false);
+          loadingSettled = true;
+        }
+
+        void refreshAppStatuses(apps);
+        void refreshAppRoutes(apps, !silent);
+
+        if (shouldLoadDevices) {
+          const audioDevices = await devicesPromise;
+          devicesRef.current = audioDevices;
+          setDevices(audioDevices);
+        }
+      } catch {
+        console.error("Failed to load audio info");
+        if (!silent) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load audio information",
+          });
+        }
+      } finally {
+        if (!silent && !loadingSettled) setIsLoading(false);
+        refreshInProgressRef.current = false;
+      }
+    },
+    [refreshAppRoutes, refreshAppStatuses],
+  );
+
   useEffect(() => {
-    loadAudioInfo();
-    const interval = setInterval(() => loadAudioInfo(true), 2000);
+    void loadAudioInfo();
+    const interval = setInterval(() => void loadAudioInfo(true), BACKGROUND_REFRESH_MS);
     return () => clearInterval(interval);
   }, [loadAudioInfo]);
 
   const handleVolumeUpdate = (bundleId: string, volume: number) => {
-    setAppStatuses((prev) => ({
-      ...prev,
-      [bundleId]: { ...prev[bundleId], volume },
-    }));
+    setAppStatuses((prev) => {
+      const next = {
+        ...prev,
+        [bundleId]: { ...prev[bundleId], volume },
+      };
+      appStatusesRef.current = next;
+      return next;
+    });
   };
 
   const handleResetAllSettings = async () => {
@@ -94,6 +224,12 @@ export default function Command() {
       }
 
       setAppStatuses({});
+      appStatusesRef.current = {};
+      statusFetchedAtRef.current = {};
+      setAppRoutes({});
+      appRoutesRef.current = {};
+      routesFetchedAtRef.current = 0;
+      routesAppsSignatureRef.current = "";
       await loadAudioInfo(true);
       await showToast({
         style: Toast.Style.Success,
@@ -110,31 +246,96 @@ export default function Command() {
     }
   };
 
+  const getVolumeIcon = (volume: number): Icon => {
+    if (volume <= 0) return Icon.SpeakerOff;
+    if (volume <= 35) return Icon.SpeakerLow;
+    if (volume <= 85) return Icon.SpeakerOn;
+    return Icon.SpeakerHigh;
+  };
+
+  const systemOutputDevice = devices.find((device) => device.isDefault);
+  const systemOutputUid = systemOutputDevice?.uid;
+  const systemOutputName = systemOutputDevice?.name || "System Output";
+  const visibleApps = runningApps.filter((app) => {
+    const appName = app.name.toLowerCase();
+    if (appName.includes("safari graphics and media")) {
+      return false;
+    }
+
+    const status = appStatuses[app.bundleId];
+    const isPlaying = status?.state === "playing";
+    const isPaused = status?.state === "paused" || status?.state === "stopped";
+    const isActiveOutput = app.activeOutputDetected === true;
+    return isPlaying || isPaused || isActiveOutput;
+  });
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search running apps...">
       <List.Section title="Running Audio Apps">
-        {runningApps.map((app) => {
+        {visibleApps.map((app) => {
           const status = appStatuses[app.bundleId];
-
-          // Filter out Safari if no media found (explicit user request),
-          // but keep other apps (like Chrome) visible as they might play in background tabs.
-          if (app.name === "Safari" && status?.state === "stopped") {
-            return null;
-          }
+          const isPlaying = status?.state === "playing";
+          const isPaused = status?.state === "paused" || status?.state === "stopped";
+          const isActiveOutput = app.activeOutputDetected === true;
+          const routedDeviceUid = appRoutes[app.bundleId];
+          const routedDevice = routedDeviceUid ? devices.find((device) => device.uid === routedDeviceUid) : undefined;
+          const isRouted = Boolean(routedDeviceUid && routedDeviceUid !== systemOutputUid);
+          const routedDeviceName = routedDevice?.name ?? null;
+          const outputDeviceName = isRouted ? routedDeviceName || routedDeviceUid || "Routed Output" : systemOutputName;
+          const outputColor = isRouted ? Color.Yellow : Color.Blue;
+          const outputIconSource = isRouted
+            ? getOutputDeviceIconSourceFromName(routedDeviceName || routedDeviceUid)
+            : getOutputDeviceIconSourceFromName(systemOutputName);
+          const displayVolume = status?.volume ?? 100;
 
           const accessories: List.Item.Accessory[] = [];
 
           if (status) {
-            if (status.state === "playing") {
+            if (isPlaying) {
               accessories.push({ tag: { value: "Playing", color: Color.Green } });
-            } else if (status.state === "paused") {
+            } else if (isPaused) {
               accessories.push({ tag: { value: "Paused", color: Color.Yellow } });
+            } else if (isActiveOutput) {
+              accessories.push({ tag: { value: "Active", color: Color.Green } });
             }
-            // If stopped/unknown (e.g. background tab), we simply show no status tag, just volume.
 
-            if (status.volume !== null) {
-              accessories.push({ tag: { value: `${status.volume}%`, color: Color.Blue } });
-            }
+            accessories.push({
+              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.Orange },
+              tooltip: `Volume ${displayVolume}%`,
+            });
+            accessories.push({
+              tag: { value: `${displayVolume}%`, color: Color.Orange },
+            });
+          } else if (isActiveOutput) {
+            accessories.push({ tag: { value: "Active", color: Color.Green } });
+            accessories.push({
+              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.Orange },
+              tooltip: `Volume ${displayVolume}%`,
+            });
+            accessories.push({
+              tag: { value: `${displayVolume}%`, color: Color.Orange },
+            });
+          } else {
+            accessories.push({
+              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.Orange },
+              tooltip: `Volume ${displayVolume}%`,
+            });
+            accessories.push({
+              tag: { value: `${displayVolume}%`, color: Color.Orange },
+            });
+          }
+
+          accessories.push({
+            icon: { source: outputIconSource, tintColor: outputColor },
+            tooltip: isRouted ? "Routed Output Device" : "System Output Device",
+          });
+          accessories.push({ tag: { value: outputDeviceName, color: outputColor } });
+
+          if (isRouted) {
+            accessories.push({
+              icon: { source: Icon.ArrowRightCircle, tintColor: Color.Yellow },
+              tooltip: "Routed",
+            });
           }
 
           return (
@@ -153,6 +354,8 @@ export default function Command() {
                       <AppVolumeControl
                         app={app}
                         devices={devices}
+                        initialStatus={status}
+                        initialRoutedDeviceUid={routedDeviceUid}
                         onVolumeChange={(vol) => handleVolumeUpdate(app.bundleId, vol)}
                       />
                     }
@@ -178,11 +381,11 @@ export default function Command() {
         })}
       </List.Section>
 
-      {runningApps.length === 0 && !isLoading && (
+      {visibleApps.length === 0 && !isLoading && (
         <List.EmptyView
           icon={Icon.Music}
-          title="No Audio Apps Running"
-          description="Open Music, Spotify, or a browser playing media"
+          title="No Active Audio Apps"
+          description="Start media playback to see apps here"
           actions={
             <ActionPanel>
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={loadAudioInfo} />

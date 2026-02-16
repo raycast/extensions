@@ -1,11 +1,15 @@
-import { exec, spawn } from "child_process";
+import { exec, execFile, spawn } from "child_process";
 import { promisify } from "util";
-import { getApplications, Icon } from "@raycast/api";
+import { Icon, LocalStorage } from "@raycast/api";
 import { access, mkdir, readFile, rename, writeFile, unlink } from "fs/promises";
+import { constants as fsConstants } from "fs";
+import { createHash } from "crypto";
 import { dirname, join } from "path";
 import { homedir, tmpdir } from "os";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+const LSAPPINFO_PATH = "/usr/bin/lsappinfo";
 const FINETUNE_APP_PATH = "/Applications/FineTune.app";
 const FINETUNE_SETTINGS_PATH = join(
   homedir(),
@@ -19,6 +23,11 @@ interface FineTuneSettings {
   appEQSettings: Record<string, unknown>;
   appVolumes: Record<string, number>;
   version: number;
+}
+
+interface FineTuneSettingsBackupPayload {
+  savedAt: number;
+  settings: FineTuneSettings;
 }
 
 // Types
@@ -36,6 +45,14 @@ export interface AudioApp {
   bundleId: string;
   path: string;
   isRunning: boolean;
+  activeOutputDetected?: boolean;
+}
+
+interface RunningProcessApp {
+  name: string;
+  bundleId: string;
+  path: string;
+  background?: boolean;
 }
 
 export interface AppStatus {
@@ -47,6 +64,59 @@ export interface VolumeInfo {
   volume: number; // 0-100
   muted: boolean;
 }
+
+const HEADPHONE_DEVICE_KEYWORDS = [
+  "headphone",
+  "headset",
+  "airpod",
+  "earbud",
+  "earbuds",
+  "earphone",
+  "earphones",
+  "earpods",
+  "jabra",
+  "beats",
+  "bose qc",
+  "sony wh",
+  "plantronics",
+];
+
+function isHeadphoneOutputDeviceName(name: string): boolean {
+  const lowerName = name.toLowerCase();
+  return HEADPHONE_DEVICE_KEYWORDS.some((keyword) => lowerName.includes(keyword));
+}
+
+export function getOutputDeviceIconSourceFromName(name: string | null | undefined): Icon {
+  if (name && isHeadphoneOutputDeviceName(name)) {
+    return Icon.Headphones;
+  }
+
+  return Icon.Speaker;
+}
+
+export function getOutputDeviceIconSource(device: AudioDevice | null | undefined): Icon {
+  return getOutputDeviceIconSourceFromName(device?.name);
+}
+
+const ACTIVE_OUTPUT_CACHE_TTL_MS = 1200;
+const ACTIVE_OUTPUT_LOOKUP_TIMEOUT_MS = 600;
+const RUNNING_PROCESSES_CACHE_TTL_MS = 1200;
+const FINETUNE_INSTALL_CACHE_TTL_MS = 5000;
+const FINETUNE_SETTINGS_CACHE_TTL_MS = 1500;
+const FINETUNE_TOGGLE_STATE_KEY = "finetune_toggle_state_v1";
+const FINETUNE_TOGGLE_BACKUP_KEY = "finetune_toggle_backup_v1";
+
+let activeOutputBundleIdsCache: { value: string[]; expiresAt: number } | null = null;
+let activeOutputBundleIdsPromise: Promise<string[]> | null = null;
+
+let runningProcessesCache: { value: RunningProcessApp[]; expiresAt: number } | null = null;
+let runningProcessesPromise: Promise<RunningProcessApp[]> | null = null;
+
+let fineTuneInstalledCache: { value: boolean; expiresAt: number } | null = null;
+let fineTuneInstalledPromise: Promise<boolean> | null = null;
+
+let fineTuneSettingsCache: { value: FineTuneSettings; expiresAt: number } | null = null;
+let fineTuneSettingsPromise: Promise<FineTuneSettings> | null = null;
 
 // Swift Switcher Code (Native CoreAudio)
 const SWIFT_AUDIO_CONTROL_CODE = `
@@ -253,6 +323,77 @@ func getDefaultDeviceUID(selector: AudioObjectPropertySelector) -> String {
     return getDeviceUID(id: defaultDeviceID) ?? ""
 }
 
+func getProcessObjectIDs() -> [AudioObjectID] {
+    var propertyAddress = AudioObjectPropertyAddress(
+        mSelector: kAudioHardwarePropertyProcessObjectList,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMain
+    )
+
+    var dataSize: UInt32 = 0
+    guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &dataSize) == noErr else {
+        return []
+    }
+
+    let processCount = Int(dataSize) / MemoryLayout<AudioObjectID>.size
+    var processIDs = [AudioObjectID](repeating: 0, count: processCount)
+
+    guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &dataSize, &processIDs) == noErr else {
+        return []
+    }
+
+    return processIDs
+}
+
+func getProcessFlag(processID: AudioObjectID, selector: AudioObjectPropertySelector) -> Bool {
+    var propertyAddress = AudioObjectPropertyAddress(
+        mSelector: selector,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMain
+    )
+
+    var value: UInt32 = 0
+    var size = UInt32(MemoryLayout<UInt32>.size)
+    guard AudioObjectGetPropertyData(processID, &propertyAddress, 0, nil, &size, &value) == noErr else {
+        return false
+    }
+
+    return value != 0
+}
+
+func getProcessBundleID(processID: AudioObjectID) -> String? {
+    var propertyAddress = AudioObjectPropertyAddress(
+        mSelector: kAudioProcessPropertyBundleID,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMain
+    )
+
+    var size = UInt32(MemoryLayout<CFString>.size)
+    var bundleID: CFString = "" as CFString
+    guard AudioObjectGetPropertyData(processID, &propertyAddress, 0, nil, &size, &bundleID) == noErr else {
+        return nil
+    }
+
+    let value = (bundleID as String).trimmingCharacters(in: .whitespacesAndNewlines)
+    return value.isEmpty ? nil : value
+}
+
+func getActiveOutputBundleIDs() -> [String] {
+    var unique = Set<String>()
+
+    for processID in getProcessObjectIDs() {
+        guard getProcessFlag(processID: processID, selector: kAudioProcessPropertyIsRunningOutput) else {
+            continue
+        }
+
+        if let bundleID = getProcessBundleID(processID: processID) {
+            unique.insert(bundleID)
+        }
+    }
+
+    return Array(unique).sorted()
+}
+
 let args = CommandLine.arguments
 if args.count > 2 {
     let command = args[1]
@@ -277,7 +418,14 @@ if args.count > 2 {
     }
 } else if args.count > 1 {
     let command = args[1]
-    if command == "--get-default-input-uid" {
+    if command == "--active-output-bundle-ids" {
+        let encoder = JSONEncoder()
+        if let data = try? encoder.encode(getActiveOutputBundleIDs()), let json = String(data: data, encoding: .utf8) {
+            print(json)
+        } else {
+            print("[]")
+        }
+    } else if command == "--get-default-input-uid" {
         print(getDefaultDeviceUID(selector: kAudioHardwarePropertyDefaultInputDevice))
     } else if command == "--get-default-output-uid" {
         print(getDefaultDeviceUID(selector: kAudioHardwarePropertyDefaultOutputDevice))
@@ -300,19 +448,121 @@ if args.count > 2 {
 }
 `;
 
+const AUDIO_CONTROL_BINARY_PATH = join(tmpdir(), "finetune-audio-control");
+const AUDIO_CONTROL_VERSION_PATH = `${AUDIO_CONTROL_BINARY_PATH}.version`;
+const AUDIO_CONTROL_VERSION = createHash("sha256").update(SWIFT_AUDIO_CONTROL_CODE).digest("hex");
+let ensureAudioControlBinaryPromise: Promise<string> | null = null;
+
+async function ensureAudioControlBinary(): Promise<string> {
+  if (ensureAudioControlBinaryPromise) {
+    return ensureAudioControlBinaryPromise;
+  }
+
+  ensureAudioControlBinaryPromise = (async () => {
+    let binaryIsCurrent = false;
+    try {
+      const [currentVersion] = await Promise.all([
+        readFile(AUDIO_CONTROL_VERSION_PATH, "utf8"),
+        access(AUDIO_CONTROL_BINARY_PATH, fsConstants.X_OK),
+      ]);
+      binaryIsCurrent = currentVersion.trim() === AUDIO_CONTROL_VERSION;
+    } catch {
+      binaryIsCurrent = false;
+    }
+
+    if (!binaryIsCurrent) {
+      const sourcePath = `${AUDIO_CONTROL_BINARY_PATH}.swift`;
+      await writeFile(sourcePath, SWIFT_AUDIO_CONTROL_CODE);
+      try {
+        await execFileAsync("xcrun", ["swiftc", "-O", "-o", AUDIO_CONTROL_BINARY_PATH, sourcePath]);
+        await writeFile(AUDIO_CONTROL_VERSION_PATH, AUDIO_CONTROL_VERSION);
+      } finally {
+        try {
+          await unlink(sourcePath);
+        } catch {
+          // Ignore cleanup failures for temporary source files.
+        }
+      }
+    }
+
+    return AUDIO_CONTROL_BINARY_PATH;
+  })();
+
+  try {
+    return await ensureAudioControlBinaryPromise;
+  } catch (error) {
+    ensureAudioControlBinaryPromise = null;
+    throw error;
+  }
+}
+
 // Helper to run the swift script
 async function runNativeAudioControl(args: string[] = []): Promise<string> {
-  const scriptPath = join(tmpdir(), `AudioControl-${Date.now()}.swift`);
   try {
-    await writeFile(scriptPath, SWIFT_AUDIO_CONTROL_CODE);
-    const { stdout } = await execAsync(`swift "${scriptPath}" ${args.map((a) => `"${a}"`).join(" ")}`);
+    const binaryPath = await ensureAudioControlBinary();
+    const { stdout } = await execFileAsync(binaryPath, args);
     return stdout;
-  } finally {
+  } catch {
+    // Fallback interpreter path for environments where swiftc is unavailable.
+    const scriptPath = join(tmpdir(), `AudioControl-${Date.now()}-${Math.random().toString(36).slice(2)}.swift`);
     try {
-      await unlink(scriptPath);
+      await writeFile(scriptPath, SWIFT_AUDIO_CONTROL_CODE);
+      const { stdout } = await execFileAsync("swift", [scriptPath, ...args]);
+      return stdout;
     } catch {
-      // Ignore cleanup failures for temporary scripts.
+      throw new Error("Native audio control failed");
+    } finally {
+      try {
+        await unlink(scriptPath);
+      } catch {
+        // Ignore cleanup failures for temporary scripts.
+      }
     }
+  }
+}
+
+async function getActiveOutputBundleIds(): Promise<string[]> {
+  const now = Date.now();
+  if (activeOutputBundleIdsCache && activeOutputBundleIdsCache.expiresAt > now) {
+    return activeOutputBundleIdsCache.value;
+  }
+
+  if (activeOutputBundleIdsPromise) {
+    return activeOutputBundleIdsPromise;
+  }
+
+  activeOutputBundleIdsPromise = (async () => {
+    try {
+      const raw = await runNativeAudioControl(["--active-output-bundle-ids"]);
+      const parsed = JSON.parse(raw) as string[];
+      const unique = new Set(parsed.map((bundleId) => bundleId.trim()).filter((bundleId) => bundleId.length > 0));
+      const value = Array.from(unique);
+      activeOutputBundleIdsCache = {
+        value,
+        expiresAt: Date.now() + ACTIVE_OUTPUT_CACHE_TTL_MS,
+      };
+      return value;
+    } catch (error) {
+      console.error("Failed to read active output bundle IDs:", error);
+      return [];
+    } finally {
+      activeOutputBundleIdsPromise = null;
+    }
+  })();
+
+  return activeOutputBundleIdsPromise;
+}
+
+async function getActiveOutputBundleIdsFast(): Promise<string[]> {
+  try {
+    return await Promise.race<string[]>([
+      getActiveOutputBundleIds(),
+      new Promise<string[]>((resolve) => {
+        setTimeout(() => resolve([]), ACTIVE_OUTPUT_LOOKUP_TIMEOUT_MS);
+      }),
+    ]);
+  } catch {
+    return [];
   }
 }
 
@@ -348,13 +598,216 @@ async function runAppleScript(script: string): Promise<string> {
   });
 }
 
+async function runJXAScript(script: string, timeoutMs = 1800): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const osascript = spawn("osascript", ["-l", "JavaScript", "-"]);
+    let stdout = "";
+    let stderr = "";
+    let didTimeout = false;
+
+    const timeout = setTimeout(() => {
+      didTimeout = true;
+      osascript.kill("SIGTERM");
+      reject(new Error("JXA script timed out"));
+    }, timeoutMs);
+
+    osascript.stdin.write(script);
+    osascript.stdin.end();
+
+    osascript.stdout.on("data", (data) => {
+      stdout += data;
+    });
+
+    osascript.stderr.on("data", (data) => {
+      stderr += data;
+    });
+
+    osascript.on("close", (code) => {
+      clearTimeout(timeout);
+      if (didTimeout) return;
+      if (code === 0) {
+        resolve(stdout.trim());
+      } else {
+        reject(new Error(stderr || "JXA script failed"));
+      }
+    });
+
+    osascript.on("error", (err) => {
+      clearTimeout(timeout);
+      if (didTimeout) return;
+      reject(err);
+    });
+  });
+}
+
+async function getRunningProcessesFromLsappinfo(): Promise<RunningProcessApp[]> {
+  try {
+    const { stdout } = await execFileAsync(LSAPPINFO_PATH, ["list"], { maxBuffer: 20 * 1024 * 1024 });
+    const entries = stdout.split(/\n(?=\s*\d+\)\s+")/g);
+    const byBundleId = new Map<string, RunningProcessApp>();
+
+    for (const entry of entries) {
+      const nameMatch = entry.match(/^\s*\d+\)\s+"([^"]+)"/m);
+      const bundleIdMatch = entry.match(/bundleID="([^"]+)"/);
+      if (!bundleIdMatch) continue;
+
+      const bundleId = bundleIdMatch[1].trim();
+      if (!bundleId) continue;
+
+      const pathMatch = entry.match(/bundle path="([^"]+)"/);
+      const typeMatch = entry.match(/\btype="([^"]+)"/);
+      const type = typeMatch?.[1]?.trim().toLowerCase() ?? "";
+
+      const process: RunningProcessApp = {
+        name: nameMatch?.[1]?.trim() || bundleId,
+        bundleId,
+        path: pathMatch?.[1]?.trim() || "",
+        background: type === "backgroundonly",
+      };
+
+      const existing = byBundleId.get(bundleId);
+      if (!existing) {
+        byBundleId.set(bundleId, process);
+        continue;
+      }
+
+      const existingScore =
+        (existing.background === false ? 2 : 0) + (existing.path && existing.path.includes(".app") ? 1 : 0);
+      const nextScore =
+        (process.background === false ? 2 : 0) + (process.path && process.path.includes(".app") ? 1 : 0);
+      if (nextScore > existingScore) {
+        byBundleId.set(bundleId, process);
+      }
+    }
+
+    return Array.from(byBundleId.values());
+  } catch {
+    return [];
+  }
+}
+
+async function getRunningProcessesFromJxa(): Promise<RunningProcessApp[]> {
+  try {
+    const raw = await runJXAScript(
+      `
+      const se = Application("System Events");
+      const processes = se.processes();
+      const output = [];
+
+      for (const process of processes) {
+        try {
+          const bundleId = process.bundleIdentifier();
+          if (!bundleId) continue;
+
+          let background = false;
+          try {
+            background = process.backgroundOnly();
+          } catch {
+            background = false;
+          }
+
+          output.push({
+            name: process.name() || "",
+            bundleId: bundleId,
+            path: "",
+            background: background,
+          });
+        } catch {}
+      }
+
+      JSON.stringify(output);
+    `,
+      5000,
+    );
+
+    const parsed = JSON.parse(raw) as RunningProcessApp[];
+    const uniqueByBundle = new Map<string, RunningProcessApp>();
+    for (const process of parsed) {
+      if (!process.bundleId) continue;
+      if (!uniqueByBundle.has(process.bundleId)) {
+        uniqueByBundle.set(process.bundleId, process);
+      }
+    }
+    return Array.from(uniqueByBundle.values());
+  } catch {
+    return [];
+  }
+}
+
+async function getRunningProcesses(): Promise<RunningProcessApp[]> {
+  const now = Date.now();
+  if (runningProcessesCache && runningProcessesCache.expiresAt > now) {
+    return runningProcessesCache.value;
+  }
+
+  if (runningProcessesPromise) {
+    return runningProcessesPromise;
+  }
+
+  runningProcessesPromise = (async () => {
+    const fromLsappinfo = await getRunningProcessesFromLsappinfo();
+    const value = fromLsappinfo.length > 0 ? fromLsappinfo : await getRunningProcessesFromJxa();
+    runningProcessesCache = {
+      value,
+      expiresAt: Date.now() + RUNNING_PROCESSES_CACHE_TTL_MS,
+    };
+    return value;
+  })();
+
+  try {
+    return await runningProcessesPromise;
+  } finally {
+    runningProcessesPromise = null;
+  }
+}
+
+function getBundleRoot(bundleId: string): string {
+  const lower = bundleId.toLowerCase();
+  return lower.replace(/\.helper.*$/, "");
+}
+
+function isRelatedBundleId(targetBundleId: string, candidateBundleId: string): boolean {
+  const targetRoot = getBundleRoot(targetBundleId);
+  const candidateRoot = getBundleRoot(candidateBundleId);
+
+  return (
+    candidateBundleId === targetBundleId ||
+    candidateBundleId.startsWith(`${targetRoot}.`) ||
+    targetBundleId.startsWith(`${candidateRoot}.`) ||
+    candidateRoot === targetRoot
+  );
+}
+
+async function getRunningProcessBundleIds(): Promise<string[]> {
+  const runningProcesses = await getRunningProcesses();
+  return Array.from(new Set(runningProcesses.map((process) => process.bundleId).filter(Boolean)));
+}
+
+async function getRelatedRunningBundleIds(bundleId: string): Promise<string[]> {
+  const allBundleIds = await getRunningProcessBundleIds();
+  const related = allBundleIds.filter((candidate) => isRelatedBundleId(bundleId, candidate));
+  if (!related.includes(bundleId)) {
+    related.push(bundleId);
+  }
+  return Array.from(new Set(related));
+}
+
+function getRelatedSettingBundleIds(bundleId: string, ids: string[]): string[] {
+  const related = ids.filter((candidate) => isRelatedBundleId(bundleId, candidate));
+  if (!related.includes(bundleId)) {
+    related.push(bundleId);
+  }
+  return Array.from(new Set(related));
+}
+
 // Get current system volume
 export async function getSystemVolume(): Promise<VolumeInfo> {
   try {
-    const volumeScript = "output volume of (get volume settings)";
-    const mutedScript = "output muted of (get volume settings)";
-
-    const [volumeResult, mutedResult] = await Promise.all([runAppleScript(volumeScript), runAppleScript(mutedScript)]);
+    const result = await runAppleScript(`
+      set settings to get volume settings
+      return (output volume of settings as string) & "|" & (output muted of settings as string)
+    `);
+    const [volumeResult, mutedResult] = result.split("|");
 
     return {
       volume: parseInt(volumeResult) || 0,
@@ -449,38 +902,37 @@ export async function switchAudioDevice(deviceUid: string): Promise<boolean> {
 // Get currently running apps that might produce audio
 export async function getRunningAudioApps(): Promise<AudioApp[]> {
   try {
-    const allApps = await getApplications();
+    const [runningProcesses, activeOutputBundleIds] = await Promise.all([
+      getRunningProcesses(),
+      getActiveOutputBundleIdsFast(),
+    ]);
+    if (runningProcesses.length === 0) {
+      return [];
+    }
 
-    // Use System Events to get running Bundle IDs (Robust Method)
-    // This replaces the fragile 'ps' parsing which can fail on path mismatches
-    const runningBundleIdsString = await runAppleScript(
-      'tell application "System Events" to get bundle identifier of every process where background only is false',
-    );
+    const excludedBundleIds = new Set([
+      "com.apple.finder",
+      "com.raycast.macos",
+      "com.openai.codex",
+      "com.apple.dock",
+      "com.apple.systempreferences",
+      "com.finetuneapp.FineTune",
+      "com.apple.controlcenter",
+    ]);
+    const excludedProcessNames = new Set(["raycast graphics and media"]);
 
-    // Normalize IDs (handling potential "missing value" or empty strings)
-    const runningBundleIds = new Set(
-      runningBundleIdsString
-        .split(",")
-        .map((id) => id.trim())
-        .filter((id) => id && id !== "missing value"),
-    );
-
-    // Common audio-producing apps to highlight
-    const audioAppBundleIds = [
+    const knownAudioBundleIds = new Set([
       "com.spotify.client",
       "com.apple.Music",
       "com.apple.iTunes",
       "com.google.Chrome",
-      "org.mozilla.firefox",
       "com.apple.Safari",
       "com.microsoft.edgemac",
       "com.brave.Browser",
-      "us.zoom.xos",
-      "com.microsoft.teams",
-      "com.slack.Slack",
-      "com.hnc.Discord",
-      "com.valvesoftware.steam",
-      "com.apple.FaceTime",
+      "company.thebrowser.Browser",
+      "com.operasoftware.Opera",
+      "com.operasoftware.OperaGX",
+      "org.mozilla.firefox",
       "tv.plex.player",
       "com.colliderli.iina",
       "org.videolan.vlc",
@@ -492,37 +944,137 @@ export async function getRunningAudioApps(): Promise<AudioApp[]> {
       "com.disney.disneyplus",
       "com.hbo.hbonow",
       "com.plexamp.Plexamp",
+      "com.microsoft.teams",
+      "com.microsoft.teams2",
+      "us.zoom.xos",
+      "net.whatsapp.WhatsApp",
+      "ru.keepcoder.Telegram",
+      "com.slack.Slack",
+      "com.hnc.Discord",
+      "com.webex.meetingsapp",
+      "com.skype.skype",
+      "com.apple.FaceTime",
+    ]);
+
+    const audioKeywords = [
+      "music",
+      "audio",
+      "video",
+      "player",
+      "podcast",
+      "stream",
+      "spotify",
+      "youtube",
+      "netflix",
+      "chrome",
+      "safari",
+      "brave",
+      "edge",
+      "firefox",
+      "opera",
+      "teams",
+      "zoom",
+      "meet",
+      "discord",
+      "slack",
+      "whatsapp",
+      "telegram",
+      "webex",
+      "facetime",
+      "vlc",
+      "iina",
     ];
 
-    const audioApps: AudioApp[] = [];
+    const hasActiveOutput = (bundleId: string): boolean =>
+      activeOutputBundleIds.some((activeBundleId) => isRelatedBundleId(bundleId, activeBundleId));
 
-    for (const app of allApps) {
-      if (!app.bundleId) continue;
+    const isLikelyAudioProcess = (process: RunningProcessApp): boolean => {
+      const lowerName = process.name.toLowerCase();
+      const lowerBundleId = process.bundleId.toLowerCase();
 
-      // Check if running using the robust Bundle ID set
-      if (runningBundleIds.has(app.bundleId)) {
-        const isMedia =
-          audioAppBundleIds.includes(app.bundleId) ||
-          app.name.toLowerCase().includes("music") ||
-          app.name.toLowerCase().includes("spotify") ||
-          app.name.toLowerCase().includes("player") ||
-          app.bundleId.includes("browser") ||
-          app.bundleId.includes("chrome") ||
-          app.bundleId.includes("firefox") ||
-          app.bundleId.includes("safari");
+      return (
+        knownAudioBundleIds.has(process.bundleId) ||
+        audioKeywords.some((keyword) => lowerName.includes(keyword) || lowerBundleId.includes(keyword))
+      );
+    };
 
-        if (isMedia && !audioApps.find((a) => a.bundleId === app.bundleId)) {
-          audioApps.push({
-            name: app.name,
-            bundleId: app.bundleId,
-            path: app.path,
-            isRunning: true,
-          });
-        }
+    const activeCandidates = runningProcesses.filter((process) => {
+      if (!process.bundleId || excludedBundleIds.has(process.bundleId)) {
+        return false;
+      }
+      if (excludedProcessNames.has(process.name.toLowerCase())) {
+        return false;
+      }
+
+      return hasActiveOutput(process.bundleId);
+    });
+
+    const fallbackCandidates = runningProcesses.filter((process) => {
+      if (!process.bundleId || excludedBundleIds.has(process.bundleId)) {
+        return false;
+      }
+      if (excludedProcessNames.has(process.name.toLowerCase())) {
+        return false;
+      }
+      if (process.background) {
+        return false;
+      }
+      return isLikelyAudioProcess(process);
+    });
+
+    const pickScore = (process: RunningProcessApp): number => {
+      const lowerName = process.name.toLowerCase();
+      const lowerBundleId = process.bundleId.toLowerCase();
+      const technicalName =
+        /helper|renderer|gpu|notification|modulehost|app_mode_loader|crashpad|plugin|updater|service/.test(lowerName);
+      const technicalBundle =
+        /helper|renderer|gpu|notification|modulehost|app_mode_loader|crashpad|plugin|updater|service/.test(
+          lowerBundleId,
+        );
+
+      let score = 0;
+      if (hasActiveOutput(process.bundleId)) score += 10;
+      if (process.background === false) score += 4;
+      if (process.path && process.path.includes(".app")) score += 2;
+      if (!technicalName) score += 2;
+      if (!technicalBundle) score += 1;
+      return score;
+    };
+
+    const getNameFromPath = (path: string): string | null => {
+      const match = path.match(/\/([^/]+)\.app(?:\/|$)/);
+      if (!match) return null;
+      const name = match[1]?.trim();
+      return name && name.length > 0 ? name : null;
+    };
+
+    const selected: RunningProcessApp[] = [];
+    const mergedCandidates = [...activeCandidates, ...fallbackCandidates];
+    for (const process of mergedCandidates) {
+      const existingIndex = selected.findIndex((candidate) => isRelatedBundleId(candidate.bundleId, process.bundleId));
+      if (existingIndex === -1) {
+        selected.push(process);
+        continue;
+      }
+
+      if (pickScore(process) > pickScore(selected[existingIndex])) {
+        selected[existingIndex] = process;
       }
     }
 
-    return audioApps;
+    const audioApps: AudioApp[] = selected.map((process) => {
+      const fallbackName = process.name || process.bundleId;
+      const appName = getNameFromPath(process.path) ?? fallbackName;
+      return {
+        name: appName,
+        bundleId: process.bundleId,
+        path: process.path || `/Applications/${appName}.app`,
+        isRunning: true,
+        activeOutputDetected: hasActiveOutput(process.bundleId),
+      };
+    });
+
+    return audioApps.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error("Failed to get running audio apps:", error);
     return [];
@@ -532,6 +1084,19 @@ export async function getRunningAudioApps(): Promise<AudioApp[]> {
 // Constants for browser detection
 const CHROMIUM_BROWSERS = ["google chrome", "chrome", "brave", "arc", "microsoft edge", "edge", "opera", "vivaldi"];
 const FIREFOX_BROWSERS = ["firefox", "zen", "floorp", "librewolf"];
+const COMMUNICATION_BUNDLE_IDS = new Set([
+  "com.microsoft.teams",
+  "com.microsoft.teams2",
+  "us.zoom.xos",
+  "com.slack.Slack",
+  "com.hnc.Discord",
+  "net.whatsapp.WhatsApp",
+  "ru.keepcoder.Telegram",
+  "com.apple.FaceTime",
+  "com.webex.meetingsapp",
+  "com.skype.skype",
+]);
+const COMMUNICATION_NAME_KEYWORDS = ["teams", "zoom", "meet", "meeting", "call", "webex", "facetime", "discord"];
 
 function isChromium(name: string): boolean {
   const lower = name.toLowerCase();
@@ -543,68 +1108,196 @@ function isFirefox(name: string): boolean {
   return FIREFOX_BROWSERS.some((b) => lower.includes(b));
 }
 
+export function isCommunicationApp(appName: string, bundleId?: string): boolean {
+  const lowerName = appName.toLowerCase();
+  const lowerBundleId = bundleId?.toLowerCase() ?? "";
+
+  return (
+    (bundleId ? COMMUNICATION_BUNDLE_IDS.has(bundleId) : false) ||
+    COMMUNICATION_NAME_KEYWORDS.some((keyword) => lowerName.includes(keyword)) ||
+    COMMUNICATION_NAME_KEYWORDS.some((keyword) => lowerBundleId.includes(keyword))
+  );
+}
+
 // Get application status (volume + state)
-export async function getAppStatus(appName: string): Promise<AppStatus> {
+export async function getAppStatus(appName: string, bundleId?: string): Promise<AppStatus> {
   const lowerName = appName.toLowerCase();
   let script = "";
 
+  if (isCommunicationApp(appName, bundleId)) {
+    const stored = bundleId ? await getFineTuneStoredVolume(bundleId) : null;
+    return {
+      volume: stored !== null ? Math.round(stored * 100) : null,
+      // Do not force "playing" for communication apps.
+      // Teams/WhatsApp don't expose a reliable media-state API via AppleScript/JXA.
+      state: "unknown",
+    };
+  }
+
   if (isChromium(appName)) {
-    // Return "vol|state"
-    const js = `(function() { 
-      var media = document.querySelectorAll('video, audio'); 
-      if (media.length === 0) return "-1|stopped";
-      var el = media[0];
-      var vol = Math.round(el.volume * 100);
-      var state = el.paused ? "paused" : "playing";
-      return vol + "|" + state; 
+    // Return "vol|state" by scanning all tabs, not only the active one.
+    const js = `(function() {
+      try {
+        var playbackState = (navigator.mediaSession && navigator.mediaSession.playbackState) ? String(navigator.mediaSession.playbackState) : "";
+        var media = document.querySelectorAll("video, audio");
+        var anyMedia = media.length > 0;
+        var anyPlaying = false;
+        var vol = -1;
+
+        for (var i = 0; i < media.length; i++) {
+          var el = media[i];
+          var elVol = Math.round((typeof el.volume === "number" ? el.volume : 1) * 100);
+          if (elVol > vol) vol = elVol;
+          if (!el.paused && !el.ended) anyPlaying = true;
+        }
+
+        if (playbackState === "playing" || anyPlaying) {
+          if (vol < 0) vol = 100;
+          return vol + "|playing";
+        }
+
+        if (playbackState === "paused" || anyMedia) {
+          if (vol < 0) vol = 100;
+          return vol + "|paused";
+        }
+
+        return "-1|stopped";
+      } catch (e) {
+        return "-1|unknown";
+      }
     })();`;
     const jsEscaped = js.replace(/"/g, '\\"');
     script = `
       try
+        set fallbackResult to ""
         tell application "${appName}"
-          execute front window's active tab javascript "${jsEscaped}"
+          repeat with w in windows
+            repeat with t in tabs of w
+              try
+                set tabResult to execute t javascript "${jsEscaped}"
+                if tabResult contains "|playing" then
+                  return tabResult
+                end if
+
+                if tabResult is not "-1|stopped" and fallbackResult is "" then
+                  set fallbackResult to tabResult
+                end if
+              end try
+            end repeat
+          end repeat
         end tell
+        if fallbackResult is not "" then
+          return fallbackResult
+        end if
+        return "-1|stopped"
       on error
         return "-1|unknown"
       end try
     `;
   } else if (lowerName === "safari") {
-    const js = `(function() { 
-      var media = document.querySelectorAll('video, audio'); 
-      if (media.length === 0) return "-1|stopped";
-      var el = media[0];
-      var vol = Math.round(el.volume * 100);
-      var state = el.paused ? "paused" : "playing";
-      return vol + "|" + state; 
+    const js = `(function() {
+      try {
+        var playbackState = (navigator.mediaSession && navigator.mediaSession.playbackState) ? String(navigator.mediaSession.playbackState) : "";
+        var media = document.querySelectorAll("video, audio");
+        var anyMedia = media.length > 0;
+        var anyPlaying = false;
+        var vol = -1;
+
+        for (var i = 0; i < media.length; i++) {
+          var el = media[i];
+          var elVol = Math.round((typeof el.volume === "number" ? el.volume : 1) * 100);
+          if (elVol > vol) vol = elVol;
+          if (!el.paused && !el.ended) anyPlaying = true;
+        }
+
+        if (playbackState === "playing" || anyPlaying) {
+          if (vol < 0) vol = 100;
+          return vol + "|playing";
+        }
+
+        if (playbackState === "paused" || anyMedia) {
+          if (vol < 0) vol = 100;
+          return vol + "|paused";
+        }
+
+        return "-1|stopped";
+      } catch (e) {
+        return "-1|unknown";
+      }
     })();`;
     const jsEscaped = js.replace(/"/g, '\\"');
     script = `
       try
+        set fallbackResult to ""
         tell application "${appName}"
-          if (count of windows) > 0 then
-            set statusResult to do JavaScript "${jsEscaped}" in current tab of front window
-            return statusResult
-          else
-            return "-1|stopped"
-          end if
+          repeat with w in windows
+            repeat with t in tabs of w
+              try
+                set tabResult to do JavaScript "${jsEscaped}" in t
+                if tabResult contains "|playing" then
+                  return tabResult
+                end if
+
+                if tabResult is not "-1|stopped" and fallbackResult is "" then
+                  set fallbackResult to tabResult
+                end if
+              end try
+            end repeat
+          end repeat
         end tell
+        if fallbackResult is not "" then
+          return fallbackResult
+        end if
+        return "-1|stopped"
       on error
         return "-1|unknown"
       end try
     `;
   } else if (["music", "spotify", "tv", "apple music"].includes(lowerName)) {
-    // Music/Spotify usually have 'player state' (playing, paused, stopped)
-    script = `
-      try
-        tell application "${appName}"
-          set v to sound volume
-          set s to player state as string
-          return (v as string) & "|" & s
-        end tell
-      on error
-        return "-1|unknown"
-      end try
-    `;
+    // Prefer JXA for better compatibility with modern Spotify/Music builds.
+    try {
+      const jxaResult = await runJXAScript(`
+        try {
+          const app = Application(${JSON.stringify(appName)});
+          let v = -1;
+          let s = "unknown";
+          try { v = Number(app.soundVolume()); } catch (e) {}
+          try { s = String(app.playerState()).toLowerCase(); } catch (e) {}
+          if (!Number.isFinite(v)) v = -1;
+          console.log(Math.round(v) + "|" + s);
+        } catch (e) {
+          console.log("-1|unknown");
+        }
+      `);
+
+      const jxaParts = jxaResult.trim().split("|");
+      const jxaVol = parseFloat(jxaParts[0]);
+      const jxaState = jxaParts[1]?.toLowerCase();
+
+      return {
+        volume: !Number.isNaN(jxaVol) && jxaVol >= 0 ? Math.round(jxaVol) : null,
+        state:
+          jxaState === "playing"
+            ? "playing"
+            : jxaState === "paused"
+              ? "paused"
+              : jxaState === "stopped"
+                ? "stopped"
+                : "unknown",
+      };
+    } catch {
+      script = `
+        try
+          tell application "${appName}"
+            set v to sound volume
+            set s to player state as string
+            return (v as string) & "|" & s
+          end tell
+        on error
+          return "-1|unknown"
+        end try
+      `;
+    }
   } else if (lowerName === "vlc") {
     // VLC 'audio volume' and 'playing'
     script = `
@@ -673,16 +1366,31 @@ export async function getAppStatus(appName: string): Promise<AppStatus> {
 // Returns: "true" (success), or error string starting with "error:"
 export async function setAppVolume(appName: string, volume: number, bundleId?: string): Promise<string> {
   const clampedVolume = Math.max(0, Math.min(200, Math.round(volume)));
-  const volFraction = clampedVolume / 100;
+  const lowerName = appName.toLowerCase();
+  const communicationApp = isCommunicationApp(appName, bundleId);
+  const safeFineTuneVolume = (communicationApp ? Math.min(clampedVolume, 100) : clampedVolume) / 100;
+  const boostRequested = clampedVolume > 100;
+  let fineTuneBoostApplied = false;
 
-  if (bundleId && clampedVolume > 100) {
-    const boosted = await setFineTuneBoostVolume(bundleId, volFraction);
-    if (boosted) return "true";
+  // Communication apps are sensitive while in calls. Prefer FineTune hot update without restarting audio engine.
+  if (bundleId && communicationApp) {
+    const updated = await setFineTuneAppVolume(bundleId, safeFineTuneVolume);
+    if (updated) return "true";
   }
 
-  if (bundleId && clampedVolume <= 100) {
-    await clearFineTuneBoostVolume(bundleId);
+  // For >100 on non-communication apps, use FineTune's gain path when available.
+  // Keep app-level volume at 100 to avoid clamping/stacking inconsistencies.
+  if (bundleId && !communicationApp && boostRequested) {
+    fineTuneBoostApplied = await setFineTuneAppVolume(bundleId, safeFineTuneVolume, { restartFineTune: true });
+  } else if (bundleId && !communicationApp && clampedVolume <= 100) {
+    // Clear residual boost when user returns to <=100.
+    const currentStored = await getFineTuneStoredVolume(bundleId);
+    const restartToClearBoost = currentStored !== null && currentStored > 1.001;
+    await setFineTuneAppVolume(bundleId, clampedVolume / 100, { restartFineTune: restartToClearBoost });
   }
+
+  const scriptVolume = fineTuneBoostApplied && boostRequested ? 100 : clampedVolume;
+  const volFraction = scriptVolume / 100;
 
   // JavaScript to inject for browsers to control HTML5 media
   // Uses Web Audio API GainNode for boosting > 100%
@@ -695,29 +1403,14 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
             var e = elems[i];
             try {
                 if (!e._rb) {
-                    e._rb = { ctx: null, src: null, gain: null, boosting: false, prevMuted: null };
+                    e._rb = { ctx: null, src: null, gain: null };
                 }
                 var rb = e._rb;
-
-                // Normal volume path (always reliable)
-                if (t <= 1.0) {
-                    if (rb.gain) {
-                        try { rb.gain.gain.value = 0.0; } catch (err) {}
-                    }
-                    if (rb.boosting) {
-                        if (typeof rb.prevMuted === "boolean") {
-                            e.muted = rb.prevMuted;
-                        }
-                        rb.boosting = false;
-                    }
-                    e.volume = t;
-                    continue;
-                }
 
                 // Boost path (WebAudio required)
                 var AC = window.AudioContext || window.webkitAudioContext;
                 if (!AC) {
-                    e.volume = 1;
+                    e.volume = (t > 1) ? 1 : t;
                     continue;
                 }
                 if (!rb.ctx) {
@@ -735,37 +1428,16 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
                 }
 
                 if (rb.ctx.state === "running") {
-                    if (!rb.boosting) {
-                        rb.prevMuted = e.muted === true;
-                        rb.boosting = true;
-                    }
-                    // Keep native path audible and add extra gain on the WebAudio path.
+                    // Route through GainNode: 1.0 = 100%, >1.0 = boost.
                     e.volume = 1;
-                    rb.gain.gain.value = Math.max(0, t - 1);
+                    rb.gain.gain.value = Math.max(0, t);
                 } else {
-                    if (rb.gain) {
-                        try { rb.gain.gain.value = 0.0; } catch (err) {}
-                    }
-                    if (rb.boosting) {
-                        if (typeof rb.prevMuted === "boolean") {
-                            e.muted = rb.prevMuted;
-                        }
-                        rb.boosting = false;
-                    }
-                    e.volume = 1;
+                    // If WebAudio isn't running yet, fall back to native (max 100%).
+                    e.volume = (t > 1) ? 1 : t;
                 }
             } catch (err) {
                 console.error("Raycast Boost Error:", err);
-                if (e._rb && e._rb.gain) {
-                    try { e._rb.gain.gain.value = 0.0; } catch (err2) {}
-                }
                 e.volume = (t > 1) ? 1 : t;
-                if (e._rb && e._rb.boosting) {
-                    if (typeof e._rb.prevMuted === "boolean") {
-                        e.muted = e._rb.prevMuted;
-                    }
-                    e._rb.boosting = false;
-                }
             }
         }
     })();
@@ -776,7 +1448,6 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
   const jsEscaped = JSON.stringify(browserJs).slice(1, -1);
 
   let script = "";
-  const lowerName = appName.toLowerCase();
 
   // 1. Chromium Browsers
   if (isChromium(appName)) {
@@ -813,7 +1484,7 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
     script = `
       try
         tell application "${appName}"
-          set volume to ${clampedVolume}
+          set volume to ${scriptVolume}
         end tell
         return "true"
       on error errMsg
@@ -826,7 +1497,7 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
     script = `
       try
         tell application "${appName}"
-          set audio volume to ${clampedVolume * 4}
+          set audio volume to ${scriptVolume * 4}
         end tell
         return "true"
       on error errMsg
@@ -842,7 +1513,7 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
   else if (["music", "spotify", "tv", "apple music"].includes(lowerName)) {
     script = `
       try
-        run script "tell application \\"${appName}\\" to set sound volume to ${clampedVolume}"
+        run script "tell application \\"${appName}\\" to set sound volume to ${scriptVolume}"
         return "true"
       on error errMsg
         return "error: " & errMsg
@@ -855,14 +1526,14 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
       try
         tell application "${appName}"
           try
-            set sound volume to ${clampedVolume}
+            set sound volume to ${scriptVolume}
             return "true"
           on error
             try
               set audio volume to ${volFraction}
               return "true"
             on error
-              set volume to ${clampedVolume}
+              set volume to ${scriptVolume}
               return "true"
             end try
           end try
@@ -875,42 +1546,166 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
 
   try {
     const result = await runAppleScript(script);
+    if (result === "true") {
+      return "true";
+    }
+
+    // Fallback for non-scriptable apps: write FineTune per-app volume directly.
+    if (bundleId) {
+      const updated = await setFineTuneAppVolume(bundleId, safeFineTuneVolume, {
+        restartFineTune: boostRequested,
+      });
+      if (updated) {
+        return "true";
+      }
+    }
+
     return result;
   } catch (e: unknown) {
+    if (bundleId) {
+      const updated = await setFineTuneAppVolume(bundleId, safeFineTuneVolume, {
+        restartFineTune: boostRequested,
+      });
+      if (updated) {
+        return "true";
+      }
+    }
+
     const msg = e instanceof Error ? e.message : String(e);
     return "error: " + msg;
   }
 }
 
 async function isFineTuneInstalled(): Promise<boolean> {
+  const now = Date.now();
+  if (fineTuneInstalledCache && fineTuneInstalledCache.expiresAt > now) {
+    return fineTuneInstalledCache.value;
+  }
+
+  if (fineTuneInstalledPromise) {
+    return fineTuneInstalledPromise;
+  }
+
+  fineTuneInstalledPromise = (async () => {
+    try {
+      await access(FINETUNE_APP_PATH);
+      fineTuneInstalledCache = {
+        value: true,
+        expiresAt: Date.now() + FINETUNE_INSTALL_CACHE_TTL_MS,
+      };
+      return true;
+    } catch {
+      fineTuneInstalledCache = {
+        value: false,
+        expiresAt: Date.now() + FINETUNE_INSTALL_CACHE_TTL_MS,
+      };
+      return false;
+    } finally {
+      fineTuneInstalledPromise = null;
+    }
+  })();
+
+  return fineTuneInstalledPromise;
+}
+
+function createDefaultFineTuneSettings(): FineTuneSettings {
+  return {
+    appDeviceRouting: {},
+    appMutes: {},
+    appEQSettings: {},
+    appVolumes: {},
+    version: 4,
+  };
+}
+
+function normalizeFineTuneSettings(parsed: Partial<FineTuneSettings>): FineTuneSettings {
+  return {
+    appDeviceRouting: parsed.appDeviceRouting ?? {},
+    appMutes: parsed.appMutes ?? {},
+    appEQSettings: parsed.appEQSettings ?? {},
+    appVolumes: parsed.appVolumes ?? {},
+    version: parsed.version ?? 4,
+  };
+}
+
+function cloneFineTuneSettings(settings: FineTuneSettings): FineTuneSettings {
+  return {
+    appDeviceRouting: { ...settings.appDeviceRouting },
+    appMutes: { ...settings.appMutes },
+    appEQSettings: { ...settings.appEQSettings },
+    appVolumes: { ...settings.appVolumes },
+    version: settings.version,
+  };
+}
+
+async function isFineTuneToggleEnabledByUser(): Promise<boolean> {
+  const state = await LocalStorage.getItem<string>(FINETUNE_TOGGLE_STATE_KEY);
+  return state !== "off";
+}
+
+async function setFineTuneToggleState(enabled: boolean): Promise<void> {
+  await LocalStorage.setItem(FINETUNE_TOGGLE_STATE_KEY, enabled ? "on" : "off");
+}
+
+async function saveFineTuneSettingsBackup(settings: FineTuneSettings): Promise<void> {
+  const payload: FineTuneSettingsBackupPayload = {
+    savedAt: Date.now(),
+    settings: cloneFineTuneSettings(settings),
+  };
+  await LocalStorage.setItem(FINETUNE_TOGGLE_BACKUP_KEY, JSON.stringify(payload));
+}
+
+async function loadFineTuneSettingsBackup(): Promise<FineTuneSettings | null> {
   try {
-    await access(FINETUNE_APP_PATH);
-    return true;
+    const raw = await LocalStorage.getItem<string>(FINETUNE_TOGGLE_BACKUP_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<FineTuneSettingsBackupPayload>;
+    if (!parsed?.settings) return null;
+    return normalizeFineTuneSettings(parsed.settings);
   } catch {
-    return false;
+    return null;
   }
 }
 
-async function readFineTuneSettings(): Promise<FineTuneSettings> {
+async function readFineTuneSettings(options?: { forceFresh?: boolean }): Promise<FineTuneSettings> {
+  const forceFresh = options?.forceFresh === true;
+  const now = Date.now();
+
+  if (!forceFresh && fineTuneSettingsCache && fineTuneSettingsCache.expiresAt > now) {
+    return cloneFineTuneSettings(fineTuneSettingsCache.value);
+  }
+
+  if (!forceFresh && fineTuneSettingsPromise) {
+    const inFlight = await fineTuneSettingsPromise;
+    return cloneFineTuneSettings(inFlight);
+  }
+
+  const loadPromise = (async (): Promise<FineTuneSettings> => {
+    try {
+      const raw = await readFile(FINETUNE_SETTINGS_PATH, "utf8");
+      const parsed = JSON.parse(raw) as Partial<FineTuneSettings>;
+      return normalizeFineTuneSettings(parsed);
+    } catch {
+      await mkdir(FINETUNE_SETTINGS_DIR, { recursive: true });
+      return createDefaultFineTuneSettings();
+    }
+  })();
+
+  if (!forceFresh) {
+    fineTuneSettingsPromise = loadPromise;
+  }
+
   try {
-    const raw = await readFile(FINETUNE_SETTINGS_PATH, "utf8");
-    const parsed = JSON.parse(raw) as Partial<FineTuneSettings>;
-    return {
-      appDeviceRouting: parsed.appDeviceRouting ?? {},
-      appMutes: parsed.appMutes ?? {},
-      appEQSettings: parsed.appEQSettings ?? {},
-      appVolumes: parsed.appVolumes ?? {},
-      version: parsed.version ?? 4,
+    const settings = await loadPromise;
+    fineTuneSettingsCache = {
+      value: cloneFineTuneSettings(settings),
+      expiresAt: Date.now() + FINETUNE_SETTINGS_CACHE_TTL_MS,
     };
-  } catch {
-    await mkdir(FINETUNE_SETTINGS_DIR, { recursive: true });
-    return {
-      appDeviceRouting: {},
-      appMutes: {},
-      appEQSettings: {},
-      appVolumes: {},
-      version: 4,
-    };
+    return cloneFineTuneSettings(settings);
+  } finally {
+    if (!forceFresh) {
+      fineTuneSettingsPromise = null;
+    }
   }
 }
 
@@ -919,6 +1714,15 @@ async function writeFineTuneSettings(settings: FineTuneSettings): Promise<void> 
   const tempPath = `${FINETUNE_SETTINGS_PATH}.${Date.now()}.tmp`;
   await writeFile(tempPath, JSON.stringify(settings));
   await rename(tempPath, FINETUNE_SETTINGS_PATH);
+  fineTuneInstalledCache = {
+    value: true,
+    expiresAt: Date.now() + FINETUNE_INSTALL_CACHE_TTL_MS,
+  };
+  fineTuneSettingsCache = {
+    value: cloneFineTuneSettings(settings),
+    expiresAt: Date.now() + FINETUNE_SETTINGS_CACHE_TTL_MS,
+  };
+  fineTuneSettingsPromise = null;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -951,67 +1755,197 @@ async function startFineTune(): Promise<void> {
   await execAsync(`open -ga "${FINETUNE_APP_PATH}"`);
 }
 
-async function updateFineTuneSettings(mutator: (settings: FineTuneSettings) => void): Promise<boolean> {
+async function canUseFineTuneFeatures(): Promise<boolean> {
+  if (!(await isFineTuneToggleEnabledByUser())) return false;
+  return isFineTuneInstalled();
+}
+
+export async function isFineTuneAvailable(): Promise<boolean> {
+  return isFineTuneInstalled();
+}
+
+export async function isFineTuneEnabled(): Promise<boolean> {
+  return isFineTuneToggleEnabledByUser();
+}
+
+export async function setFineTuneEnabled(enabled: boolean): Promise<boolean> {
   try {
     if (!(await isFineTuneInstalled())) return false;
+
+    if (enabled) {
+      const backup = await loadFineTuneSettingsBackup();
+      await stopFineTune();
+
+      if (backup) {
+        await writeFineTuneSettings(backup);
+      }
+
+      await startFineTune();
+      await setFineTuneToggleState(true);
+      return true;
+    }
+
+    const current = await readFineTuneSettings({ forceFresh: true });
+    await saveFineTuneSettingsBackup(current);
+
+    const neutral = cloneFineTuneSettings(current);
+    neutral.appDeviceRouting = {};
+    neutral.appVolumes = {};
+    neutral.appMutes = {};
+
     await stopFineTune();
-    const settings = await readFineTuneSettings();
-    mutator(settings);
-    await writeFineTuneSettings(settings);
-    await startFineTune();
+    await writeFineTuneSettings(neutral);
+    await setFineTuneToggleState(false);
     return true;
   } catch {
     return false;
   }
 }
 
+export async function toggleFineTuneEnabled(): Promise<boolean | null> {
+  const currentlyEnabled = await isFineTuneToggleEnabledByUser();
+  const nextEnabled = !currentlyEnabled;
+  const success = await setFineTuneEnabled(nextEnabled);
+  if (!success) return null;
+  return nextEnabled;
+}
+
+async function updateFineTuneSettings(
+  mutator: (settings: FineTuneSettings) => void,
+  options?: { restartFineTune?: boolean },
+): Promise<boolean> {
+  const restartFineTune = options?.restartFineTune ?? true;
+
+  try {
+    if (!(await isFineTuneInstalled())) return false;
+    if (restartFineTune) {
+      await stopFineTune();
+    }
+
+    const settings = await readFineTuneSettings({ forceFresh: true });
+    mutator(settings);
+    await writeFineTuneSettings(settings);
+
+    if (restartFineTune) {
+      await startFineTune();
+    }
+
+    return true;
+  } catch {
+    if (restartFineTune) {
+      try {
+        await startFineTune();
+      } catch {
+        // Ignore recovery failures.
+      }
+    }
+
+    return false;
+  }
+}
+
 async function getFineTuneStoredVolume(bundleId: string): Promise<number | null> {
   try {
-    if (!(await isFineTuneInstalled())) return null;
+    if (!(await canUseFineTuneFeatures())) return null;
     const settings = await readFineTuneSettings();
-    const stored = settings.appVolumes[bundleId];
-    return typeof stored === "number" ? stored : null;
+    const direct = settings.appVolumes[bundleId];
+    if (typeof direct === "number") return direct;
+
+    for (const [candidateBundleId, value] of Object.entries(settings.appVolumes)) {
+      if (typeof value === "number" && isRelatedBundleId(bundleId, candidateBundleId)) {
+        return value;
+      }
+    }
+
+    return null;
   } catch {
     return null;
   }
 }
 
-async function setFineTuneBoostVolume(bundleId: string, normalizedVolume: number): Promise<boolean> {
+async function setFineTuneAppVolume(
+  bundleId: string,
+  normalizedVolume: number,
+  options?: { restartFineTune?: boolean },
+): Promise<boolean> {
+  if (!(await canUseFineTuneFeatures())) return false;
   const target = Math.max(0, Math.min(2, normalizedVolume));
+  const targetBundleIds = await getRelatedRunningBundleIds(bundleId);
+  const restartFineTune = options?.restartFineTune ?? false;
+
   const current = await getFineTuneStoredVolume(bundleId);
-  if (current !== null && Math.abs(current - target) < 0.001) {
+  if (current !== null && Math.abs(current - target) < 0.001 && targetBundleIds.length <= 1) {
     return true;
   }
 
-  return updateFineTuneSettings((settings) => {
-    settings.appVolumes[bundleId] = target;
-  });
-}
-
-async function clearFineTuneBoostVolume(bundleId: string): Promise<void> {
-  const current = await getFineTuneStoredVolume(bundleId);
-  if (current === null || current <= 1.001) return;
-
-  await updateFineTuneSettings((settings) => {
-    settings.appVolumes[bundleId] = 1;
-  });
+  return updateFineTuneSettings(
+    (settings) => {
+      for (const id of targetBundleIds) {
+        settings.appVolumes[id] = target;
+      }
+    },
+    { restartFineTune },
+  );
 }
 
 export async function getAppOutputDevice(bundleId: string): Promise<string | null> {
+  const routes = await getAppOutputDevices([bundleId]);
+  return routes[bundleId] ?? null;
+}
+
+export async function getAppOutputDevices(bundleIds: string[]): Promise<Record<string, string | null>> {
+  const uniqueBundleIds = Array.from(new Set(bundleIds.filter((bundleId) => bundleId.trim().length > 0)));
+  const output: Record<string, string | null> = {};
+
+  for (const bundleId of uniqueBundleIds) {
+    output[bundleId] = null;
+  }
+
+  if (uniqueBundleIds.length === 0) {
+    return output;
+  }
+
   try {
-    if (!(await isFineTuneInstalled())) return null;
+    if (!(await canUseFineTuneFeatures())) return output;
     const settings = await readFineTuneSettings();
-    return settings.appDeviceRouting[bundleId] ?? null;
+    const routingEntries = Object.entries(settings.appDeviceRouting);
+
+    for (const bundleId of uniqueBundleIds) {
+      const direct = settings.appDeviceRouting[bundleId];
+      if (direct) {
+        output[bundleId] = direct;
+        continue;
+      }
+
+      for (const [candidateBundleId, deviceUid] of routingEntries) {
+        if (isRelatedBundleId(bundleId, candidateBundleId)) {
+          output[bundleId] = deviceUid;
+          break;
+        }
+      }
+    }
+
+    return output;
   } catch {
-    return null;
+    return output;
   }
 }
 
 // Configure application output device through FineTune's routing settings.
 export async function setAppOutputDevice(bundleId: string, deviceUid: string): Promise<boolean> {
   try {
+    if (!(await canUseFineTuneFeatures())) return false;
+    const runningRelated = await getRelatedRunningBundleIds(bundleId);
     const success = await updateFineTuneSettings((settings) => {
-      settings.appDeviceRouting[bundleId] = deviceUid;
+      const related = getRelatedSettingBundleIds(bundleId, [
+        ...runningRelated,
+        ...Object.keys(settings.appDeviceRouting),
+        ...Object.keys(settings.appVolumes),
+      ]);
+
+      for (const id of related) {
+        settings.appDeviceRouting[id] = deviceUid;
+      }
     });
     if (!success) return false;
     await enforceBluetoothInputSafety(deviceUid);
@@ -1022,13 +1956,25 @@ export async function setAppOutputDevice(bundleId: string, deviceUid: string): P
 }
 
 export async function removeAppOutputDevice(bundleId: string): Promise<boolean> {
+  if (!(await canUseFineTuneFeatures())) return false;
   return updateFineTuneSettings((settings) => {
-    delete settings.appDeviceRouting[bundleId];
+    const related = getRelatedSettingBundleIds(bundleId, [
+      ...Object.keys(settings.appDeviceRouting),
+      ...Object.keys(settings.appVolumes),
+    ]);
+
+    for (const id of related) {
+      delete settings.appDeviceRouting[id];
+    }
   });
 }
 
 export async function resetControlAppVolumeSettings(): Promise<boolean> {
   if (!(await isFineTuneInstalled())) {
+    return true;
+  }
+
+  if (!(await canUseFineTuneFeatures())) {
     return true;
   }
 
