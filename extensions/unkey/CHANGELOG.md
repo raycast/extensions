@@ -1,6 +1,6 @@
 # Unkey Changelog
 
-## [Maintenance Release] - {PR_MERGE_DATE}
+## [Maintenance Release] - 2026-02-16
 
 - Show ErrorComponent when Verify Key has an error
 - Remove outdated pagination text in README
