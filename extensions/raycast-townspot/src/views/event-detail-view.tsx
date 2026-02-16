@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, Image } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import {
   appleMapsUrl,
@@ -130,10 +130,14 @@ const sanitizeDescription = (value: string | null): string | null => {
 const buildMarkdown = (
   title: string,
   description: string | null,
+  spottedBy: string | null,
 ): string => {
   const blocks = [`# ${escapeMarkdown(title)}`];
   if (description) {
     blocks.push("", description);
+  }
+  if (spottedBy) {
+    blocks.push("", `Spotted by ${escapeMarkdown(spottedBy)}`);
   }
   return blocks.join("\n");
 };
@@ -178,23 +182,12 @@ const spottedByLabel = (
   const parts: string[] = [];
 
   if (org) parts.push(org);
-  if (spottedBy?.isAreaAdmin) parts.push("Area Admin");
+  if (spottedBy?.isAreaAdmin) parts.push("Admin");
 
   const spottedDate = formatSpottedByDate(spottedAt, timezone);
   if (spottedDate) parts.push(spottedDate);
 
   return parts.length ? `${name} · ${parts.join(" · ")}` : name;
-};
-
-const spottedByIcon = (details: EventDetails | null): Image.ImageLike => {
-  const avatar = String(details?.spottedBy?.avatarUrl || "").trim();
-  if (avatar) {
-    return {
-      source: avatar,
-      mask: Image.Mask.Circle,
-    };
-  }
-  return Icon.PersonCircle;
 };
 
 const buildShareMessage = (
@@ -227,12 +220,9 @@ const EventMetadata = ({
   const price = priceLabel(details);
   const categories = categoryList(details, event);
   const spottedBy = spottedByLabel(details, effectiveTimezone);
-  const spottedIcon = spottedByIcon(details);
 
   return (
     <Detail.Metadata>
-      <Detail.Metadata.Label title="Spotted by" text={spottedBy} icon={spottedIcon} />
-      <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="When" text={timeRangeLabel} />
       <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="Where" text={venueLabel} />
@@ -336,8 +326,9 @@ export const EventDetailView = ({
 
   const detailMarkdown = useMemo(() => {
     const description = sanitizeDescription(details?.description || null);
-    return buildMarkdown(details?.title || event.title, description);
-  }, [details, event.title]);
+    const spottedBy = spottedByLabel(details, effectiveTimezone);
+    return buildMarkdown(details?.title || event.title, description, spottedBy);
+  }, [details, effectiveTimezone, event.title]);
 
   const legacyTimeLabel = formatEventTime(event.startTime, effectiveTimezone);
   const shareMessage = buildShareMessage(
