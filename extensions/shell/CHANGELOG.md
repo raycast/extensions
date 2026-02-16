@@ -1,6 +1,6 @@
 # shell Changelog
 
-## [Fix edit executed command] - {PR_MERGE_DATE}
+## [Fix edit executed command] - 2026-02-16
 
 Fix edit command that was not in recent section, but on shell history.
 Closes [#25458](https://github.com/raycast/extensions/issues/25458#issuecomment-3902823145).
