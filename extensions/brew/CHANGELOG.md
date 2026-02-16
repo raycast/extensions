@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Improved Memory Usage] - {PR_MERGE_DATE}
+## [Improved Memory Usage] - 2026-02-16
 
 - Use chunking to significantly reduce working memory
 
