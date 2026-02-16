@@ -1,6 +1,8 @@
 # UploaderX Changelog
 
-## [Fix URL encoding for filenames with spaces] - {PR_MERGE_DATE}
+## [Fix] - 2026-02-16
+
+- Fixed URL encoding for filenames with spaces and special characters
 
 - Fix generated URLs not encoding special characters in filenames
 
