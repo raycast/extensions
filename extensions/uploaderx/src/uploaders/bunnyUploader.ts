@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import mime from "mime-types";
 import { CloudProviderAccount } from "../cloudProviders";
+import { encodeKey } from "../utils/fileUtils";
 import https from "https";
 
 export async function uploadToBunny(
@@ -14,7 +15,7 @@ export async function uploadToBunny(
   const endpoint = storageEndpoint || "storage.bunnycdn.com";
   const fileName = path.basename(filePath);
   const key = defaultPath ? `${defaultPath.replace(/\/+$/, "")}/${fileName}` : fileName;
-  const url = `https://${endpoint}/${storageZone}/${key}`;
+  const url = `https://${endpoint}/${storageZone}/${encodeKey(key)}`;
   const fileBuffer = fs.readFileSync(filePath);
   const contentType = mime.lookup(fileName) || "application/octet-stream";
 
@@ -58,15 +59,16 @@ export function getPublicBunnyUrl(provider: CloudProviderAccount, filePath: stri
   const { storageZone, domain, pullZoneDomain } = provider.credentials;
   const fileName = path.basename(filePath);
   const key = provider.defaultPath ? `${provider.defaultPath.replace(/\/+$/, "")}/${fileName}` : fileName;
+  const encodedKey = encodeKey(key);
   if (provider.accessLevel === "public" && pullZoneDomain) {
     // Use pull zone name to construct the URL
-    return `https://${pullZoneDomain}.b-cdn.net/${key}`;
+    return `https://${pullZoneDomain}.b-cdn.net/${encodedKey}`;
   } else if (provider.accessLevel === "public" && domain) {
     const trimmedDomain = domain.replace(/\/+$/, "");
     const normalizedDomain = /^https?:\/\//.test(trimmedDomain) ? trimmedDomain : `https://${trimmedDomain}`;
-    return `${normalizedDomain}/${key}`;
+    return `${normalizedDomain}/${encodedKey}`;
   } else {
     // BunnyCDN default public URL (user must configure pull zone for this to work)
-    return `https://${storageZone}.b-cdn.net/${key}`;
+    return `https://${storageZone}.b-cdn.net/${encodedKey}`;
   }
 }
