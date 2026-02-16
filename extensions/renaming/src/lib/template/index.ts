@@ -110,7 +110,7 @@ export function processFilesWithTemplate(template: NamingTemplate, files: FileWi
   const operations: RenameOperation[] = sortedFiles.map((item, index) => {
     const newBaseName = applyTemplate(template, item.file, index, sortedFiles.length, item.metadata);
 
-    const newName = item.file.extension ? `${newBaseName}.${item.file.extension}` : newBaseName;
+    const newName = item.file.extension ? `${newBaseName}${item.file.extension}` : newBaseName;
 
     const directory = item.file.path.substring(0, item.file.path.lastIndexOf("/"));
 
@@ -236,7 +236,7 @@ export function generateSampleOutput(template: NamingTemplate): string {
     path: "/Users/example/Photos/IMG_1234.jpg",
     name: "IMG_1234.jpg",
     baseName: "IMG_1234",
-    extension: "jpg",
+    extension: ".jpg",
     isDirectory: false,
   };
 
@@ -260,5 +260,5 @@ export function generateSampleOutput(template: NamingTemplate): string {
   };
 
   const baseName = applyTemplate(template, sampleFile, 0, 1, sampleMetadata);
-  return `${baseName}.${sampleFile.extension}`;
+  return `${baseName}${sampleFile.extension}`;
 }

@@ -18,7 +18,7 @@ export type { FileMetadata, BasicFileMetadata, ImageExifMetadata, SpotlightMetad
 export async function getFileMetadata(filePath: string): Promise<FileMetadata> {
   const [basic, exif, spotlight] = await Promise.all([
     getBasicMetadata(filePath),
-    getExifMetadata(filePath),
+    isImage(filePath) ? getExifMetadata(filePath) : Promise.resolve(null),
     getSpotlightMetadata(filePath),
   ]);
 

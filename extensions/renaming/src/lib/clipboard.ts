@@ -153,7 +153,7 @@ export function mapClipboardToFiles(
       // Check if the new name already has an extension
       const nameHasExt = newName.includes(".");
       if (!nameHasExt) {
-        newName = `${newName}.${file.extension}`;
+        newName = `${newName}${file.extension}`;
       }
     }
 

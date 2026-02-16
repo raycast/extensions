@@ -135,7 +135,7 @@ export default function AISuggestCommand({ mode = SelectionMode.FILES }: { mode?
 
     const operations: RenameOperation[] = toRename.map((suggestion) => {
       const file = fileMap.get(suggestion.filePath)!;
-      const newName = file.extension ? `${suggestion.suggestedName}.${file.extension}` : suggestion.suggestedName;
+      const newName = file.extension ? `${suggestion.suggestedName}${file.extension}` : suggestion.suggestedName;
       return {
         oldPath: suggestion.filePath,
         newName,

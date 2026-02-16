@@ -8,7 +8,7 @@
 
 import { exec } from "child_process";
 import { promisify } from "util";
-import { access, mkdir } from "fs/promises";
+import { access, mkdir, rename } from "fs/promises";
 import { constants } from "fs";
 import { basename, join } from "path";
 import { tmpdir } from "os";
@@ -96,7 +96,7 @@ export async function generateThumbnail(
     try {
       await access(qlOutputPath, constants.F_OK);
       // Rename to our cache key
-      await execAsync(`mv '${qlOutputPath}' '${outputPath}'`);
+      await rename(qlOutputPath, outputPath);
       return outputPath;
     } catch {
       // qlmanage might output directly to the expected path in some cases
