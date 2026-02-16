@@ -72,6 +72,7 @@ export async function sendMessage(
     const decoder = new TextDecoder();
     let fullContent = "";
     let done = false;
+    let sseBuffer = "";
 
     while (!done) {
       const result = await reader.read();
@@ -79,7 +80,9 @@ export async function sendMessage(
 
       if (result.value) {
         const chunk = decoder.decode(result.value, { stream: true });
-        const lines = chunk.split("\n");
+        sseBuffer += chunk;
+        const lines = sseBuffer.split("\n");
+        sseBuffer = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
@@ -168,7 +171,7 @@ export async function pollAsyncResult(
   runId: string,
 ): Promise<AsyncResultResponse> {
   const prefs = getPreferences();
-  const url = `${prefs.endpoint}/api/runs/${runId}`;
+  const url = `${prefs.endpoint}/api/runs/${encodeURIComponent(runId)}`;
 
   const response = await fetch(url, {
     headers: {

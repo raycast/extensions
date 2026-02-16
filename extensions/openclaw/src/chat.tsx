@@ -40,6 +40,7 @@ interface PendingMessage {
 
 const STORAGE_KEY = "openclaw-conversations";
 const PENDING_KEY = "openclaw-pending-messages";
+const MAX_CONVERSATIONS = 50;
 
 async function loadConversations(): Promise<Conversation[]> {
   const data = await LocalStorage.getItem<string>(STORAGE_KEY);
@@ -101,22 +102,44 @@ function ConversationView({
   const lastUpdateRef = useRef(0);
   const streamingTimestamp = useRef(Date.now());
   const pollingRef = useRef(false);
+  const currentConvRef = useRef(currentConv);
+  const pollTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    currentConvRef.current = currentConv;
+  }, [currentConv]);
 
   useEffect(() => {
     setCurrentConv(conversation);
   }, [conversation]);
 
+  // Cleanup all poll timers on unmount
+  useEffect(() => {
+    return () => {
+      pollTimersRef.current.forEach(clearTimeout);
+      pollTimersRef.current = [];
+      pollingRef.current = false;
+    };
+  }, []);
+
   // Check for pending responses on mount and poll for completion
   useEffect(() => {
+    let cancelled = false;
+
     const checkPendingResponse = async () => {
       const pending = await loadPendingMessages();
-      const myPending = pending[currentConv.id];
+      const convId = currentConvRef.current.id;
+      const myPending = pending[convId];
+
+      if (cancelled) return;
 
       if (myPending) {
         setHasPending(true);
 
         // Poll for result
         const result = await pollAsyncResult(myPending.runId);
+
+        if (cancelled) return;
 
         if (result.status === "complete" && result.content) {
           const assistantMessage: Message = {
@@ -125,15 +148,17 @@ function ConversationView({
             timestamp: Date.now(),
           };
 
-          const updatedConv = {
-            ...currentConv,
-            messages: [...currentConv.messages, assistantMessage],
-            updatedAt: Date.now(),
-          };
+          setCurrentConv((prev) => {
+            const updatedConv = {
+              ...prev,
+              messages: [...prev.messages, assistantMessage],
+              updatedAt: Date.now(),
+            };
+            onUpdate(updatedConv);
+            return updatedConv;
+          });
 
-          setCurrentConv(updatedConv);
-          onUpdate(updatedConv);
-          await clearPendingMessage(currentConv.id);
+          await clearPendingMessage(convId);
           setHasPending(false);
 
           showToast({
@@ -142,7 +167,7 @@ function ConversationView({
             message: "OpenClaw's response has arrived",
           });
         } else if (result.status === "error") {
-          await clearPendingMessage(currentConv.id);
+          await clearPendingMessage(convId);
           setHasPending(false);
 
           showToast({
@@ -158,7 +183,11 @@ function ConversationView({
     };
 
     checkPendingResponse();
-  }, [currentConv.id]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentConv.id, onUpdate]);
 
   // Non-blocking poll with retry for background responses
   const pollForResponse = useCallback(
@@ -217,14 +246,17 @@ function ConversationView({
               message: result.error || "Failed to get response",
             });
           } else if (result.status === "pending") {
-            setTimeout(poll, 5000); // Retry in 5s
+            const tid = setTimeout(poll, 5000); // Retry in 5s
+            pollTimersRef.current.push(tid);
           }
         } catch {
-          setTimeout(poll, 5000); // Retry on network error
+          const tid = setTimeout(poll, 5000); // Retry on network error
+          pollTimersRef.current.push(tid);
         }
       };
 
-      setTimeout(poll, 2000); // First check after 2s
+      const tid = setTimeout(poll, 2000); // First check after 2s
+      pollTimersRef.current.push(tid);
     },
     [onUpdate],
   );
@@ -498,10 +530,16 @@ export default function Command() {
     setConversations((prev) => {
       const newList = prev.filter((c) => c.id !== updated.id);
       newList.unshift(updated);
-      saveConversations(newList);
-      return newList;
+      return newList.slice(0, MAX_CONVERSATIONS);
     });
   }, []);
+
+  // Persist conversations to storage whenever they change
+  useEffect(() => {
+    if (!isLoading) {
+      saveConversations(conversations);
+    }
+  }, [conversations, isLoading]);
 
   function createNewConversation() {
     const newConv: Conversation = {

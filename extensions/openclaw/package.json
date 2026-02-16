@@ -62,7 +62,7 @@
       "title": "API Endpoint",
       "description": "OpenClaw gateway URL. Use http://127.0.0.1:18789 for local, or your Tailscale serve URL (e.g., https://machine-name.tailnet.ts.net) for remote access.",
       "type": "textfield",
-      "default": "https://jeffs-macbook-air.tailca3a37.ts.net",
+      "default": "http://127.0.0.1:18789",
       "required": true
     },
     {
