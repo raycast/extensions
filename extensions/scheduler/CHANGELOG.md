@@ -1,5 +1,16 @@
 # Scheduler Changelog
 
+## [Bug Fixes and UI Improvements] - {PR_MERGE_DATE}
+
+- Fixed a critical race condition in the background task (`execute-due-commands.ts`) that could lead to lost updates for scheduled commands if multiple commands were executed simultaneously. All updates are now accumulated and saved in a single, atomic operation.
+- Fixed a race condition in the UI hook where React state batching could cause storage writes with stale data.
+- Added robust data normalization for stored commands — malformed or incomplete entries are now validated, migrated to the current schema, and invalid entries are automatically cleaned up.
+- Commands that fail with permanent errors (e.g. uninstalled extension, invalid deeplink) are now auto-disabled to prevent repeated failures.
+- Added deeplink validation before execution to surface clear errors for empty or malformed deeplinks.
+- Storage writes are now skipped when no mutations occurred, reducing unnecessary I/O during background execution.
+- Improved the user interface to automatically refresh the list of scheduled commands when the view becomes visible, ensuring that changes made by the background task are immediately reflected.
+
+
 ## [Background Refresh Alert] - 2025-11-18
 
 - Added warning banner to alert users when background refresh is not enabled for scheduled commands

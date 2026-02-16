@@ -5,6 +5,10 @@ import { ERROR_MESSAGES } from "./constants";
 
 export async function executeRaycastCommand(raycastCommand: RaycastCommand): Promise<void> {
   const { deeplink } = raycastCommand;
+  if (typeof deeplink !== "string" || deeplink.trim().length === 0) {
+    throw new Error(`${ERROR_MESSAGES.DEEPLINK_INVALID}: ${String(deeplink)}`);
+  }
+
   const parsed = parseRaycastDeeplink(deeplink);
 
   if (!parsed) {
@@ -20,11 +24,14 @@ export async function executeRaycastCommand(raycastCommand: RaycastCommand): Pro
     throw new Error(`${ERROR_MESSAGES.EXT_COMMAND_INCOMPLETE}: ${deeplink}`);
   }
 
+  const args = raycastCommand.arguments;
+  const hasArgs = Boolean(args && typeof args === "object");
+
   await launchCommand({
     ownerOrAuthorName: parsed.ownerOrAuthorName,
     extensionName: parsed.extensionName,
     name: parsed.name,
     type: raycastCommand.type === "user-initiated" ? LaunchType.UserInitiated : LaunchType.Background,
-    arguments: raycastCommand.arguments,
+    ...(hasArgs ? { arguments: args } : {}),
   });
 }
