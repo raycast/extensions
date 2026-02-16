@@ -8,7 +8,7 @@
 - ✨ Added **Physical Color Matching** (RAL, Copic, Prismacolor)
 - 🎨 Improved UI with new icons and better layout
 
-## [Initial Release] - 2026-02-16
+## [Initial Release] - {PR_MERGE_DATE}
 
 - 🚀 Initial release of Color Palette Generator
 - ✨ "Generate Palette" command with 5 color harmony algorithms
