@@ -1,12 +1,4 @@
-const js = require("@eslint/js");
-const { FlatCompat } = require("@eslint/eslintrc");
+import { defineConfig } from "eslint/config";
+import raycast from "@raycast/eslint-config";
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-module.exports = [
-  ...compat.extends("@raycast"),
-];
+export default defineConfig([...raycast]);
