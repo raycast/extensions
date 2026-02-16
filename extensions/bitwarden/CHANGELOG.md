@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix & Feature] - {PR_MERGE_DATE}
+## [Fix & Feature] - 2026-02-16
 
 - Fix unhandled error when unlocking vault
 - Fix mismatched Windows CLI binary hash
