@@ -1,5 +1,14 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [PR_MERGE_DATE]
+
+### Added
+
+- Weekly Usage report: View cost and token usage aggregated by week.
+- Session Blocks analysis: Track usage by Claude Code's 5-hour billing sessions.
+- Detailed progress indicators for data loading states.
+- Enhanced weekly view showing full date ranges.
+
 ## [v2.1.2] - 2026-02-02
 
 ### Fixed
