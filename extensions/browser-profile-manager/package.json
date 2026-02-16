@@ -11,9 +11,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Perfis De Navegador",
-      "subtitle": "Escanear e Abrir Perfis",
-      "description": "Liste, personalize e abra perfis do Chrome, Edge, Firefox e Comet.",
+      "title": "Browser Profiles",
+      "subtitle": "Scan and Open Profiles",
+      "description": "List, customize, and open Chrome, Edge, Firefox, and Comet profiles.",
       "mode": "view"
     }
   ],

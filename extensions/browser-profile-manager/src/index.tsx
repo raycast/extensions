@@ -74,24 +74,24 @@ export default function Command() {
   async function handleOpenProfile(profile: ResolvedBrowserProfile) {
     const openingToast = await showToast({
       style: Toast.Style.Animated,
-      title: "Abrindo Perfil",
+      title: "Opening Profile",
       message: `${profile.displayName} (${profile.browser})`,
     });
 
     try {
       await launchBrowserProfile(profile);
       openingToast.style = Toast.Style.Success;
-      openingToast.title = "Perfil Aberto";
+      openingToast.title = "Profile Opened";
       openingToast.message = `${profile.displayName} (${profile.browser})`;
     } catch (error) {
       openingToast.style = Toast.Style.Failure;
       openingToast.title =
         error instanceof BrowserLaunchError &&
         error.code === "BROWSER_NOT_FOUND"
-          ? "Navegador Nao Encontrado"
-          : "Nao Foi Possivel Abrir O Perfil";
+          ? "Browser Not Found"
+          : "Couldn't Open Profile";
       openingToast.message =
-        error instanceof Error ? error.message : "Erro desconhecido";
+        error instanceof Error ? error.message : "Unknown error";
     }
   }
 
@@ -101,13 +101,13 @@ export default function Command() {
       await refresh();
       await showToast({
         style: Toast.Style.Success,
-        title: "Apelido Removido",
+        title: "Alias Removed",
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Nao Foi Possivel Remover O Apelido",
-        message: error instanceof Error ? error.message : "Erro desconhecido",
+        title: "Couldn't Remove Alias",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -116,16 +116,16 @@ export default function Command() {
     <List
       filtering={false}
       isLoading={isLoading}
-      searchBarPlaceholder="Buscar Perfis Por Nome Ou Tag"
+      searchBarPlaceholder="Search profiles by name or tag"
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filtrar Por Tag"
+          tooltip="Filter by tag"
           storeValue
           onChange={setSelectedTag}
         >
-          <List.Dropdown.Item title="Todas" value={ALL_TAGS} />
+          <List.Dropdown.Item title="All" value={ALL_TAGS} />
           {allTags.map((tag) => (
             <List.Dropdown.Item key={tag} title={tag} value={tag} />
           ))}
@@ -149,12 +149,12 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Abrir Perfil"
+                title="Open Profile"
                 onAction={() => void handleOpenProfile(profile)}
               />
-              <ActionPanel.Section title="Gerenciar">
+              <ActionPanel.Section title="Manage">
                 <Action
-                  title="Renomear Perfil"
+                  title="Rename Profile"
                   onAction={() =>
                     push(
                       <RenameProfileForm
@@ -167,7 +167,7 @@ export default function Command() {
                   }
                 />
                 <Action
-                  title="Gerenciar Tags"
+                  title="Manage Tags"
                   onAction={() =>
                     push(
                       <ManageTagsForm
@@ -182,7 +182,7 @@ export default function Command() {
                 />
                 {profile.alias ? (
                   <Action
-                    title="Remover Apelido"
+                    title="Remove Alias"
                     style={Action.Style.Destructive}
                     onAction={() => void handleRemoveAlias(profile)}
                   />

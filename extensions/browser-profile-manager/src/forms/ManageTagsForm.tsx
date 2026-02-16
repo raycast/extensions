@@ -50,14 +50,14 @@ export function ManageTagsForm({
       await onSaved();
       await showToast({
         style: Toast.Style.Success,
-        title: "Tags Atualizadas",
+        title: "Tags Updated",
       });
       pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Nao Foi Possivel Atualizar As Tags",
-        message: error instanceof Error ? error.message : "Erro desconhecido",
+        title: "Couldn't Update Tags",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsSaving(false);
@@ -69,12 +69,12 @@ export function ManageTagsForm({
       isLoading={isSaving}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Salvar Tags" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Tags" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description
-        title="Perfil"
+        title="Profile"
         text={`${profile.originalName} (${profile.browser})`}
       />
       <Form.TagPicker id="tags" title="Tags" defaultValue={profile.tags}>
@@ -84,8 +84,8 @@ export function ManageTagsForm({
       </Form.TagPicker>
       <Form.TextField
         id="newTags"
-        title="Adicionar Novas Tags"
-        placeholder="Tags separadas por virgula"
+        title="Add New Tags"
+        placeholder="Comma-separated tags"
       />
     </Form>
   );

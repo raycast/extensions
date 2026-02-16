@@ -31,7 +31,7 @@ export function RenameProfileForm({
     if (!alias) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "O Apelido Nao Pode Estar Vazio",
+        title: "Alias Can't Be Empty",
       });
       return;
     }
@@ -43,14 +43,14 @@ export function RenameProfileForm({
       await onSaved();
       await showToast({
         style: Toast.Style.Success,
-        title: "Perfil Renomeado",
+        title: "Profile Renamed",
       });
       pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Nao Foi Possivel Renomear O Perfil",
-        message: error instanceof Error ? error.message : "Erro desconhecido",
+        title: "Couldn't Rename Profile",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsSaving(false);
@@ -62,18 +62,18 @@ export function RenameProfileForm({
       isLoading={isSaving}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Salvar Apelido" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Alias" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description
-        title="Perfil"
+        title="Profile"
         text={`${profile.originalName} (${profile.browser})`}
       />
       <Form.TextField
         id="alias"
-        title="Apelido"
-        placeholder="Digite um nome personalizado para o perfil"
+        title="Alias"
+        placeholder="Enter a custom name for the profile"
         defaultValue={profile.alias ?? ""}
       />
     </Form>

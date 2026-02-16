@@ -48,8 +48,8 @@ export function useBrowserProfiles(): UseBrowserProfilesResult {
       setProfiles([]);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Nao Foi Possivel Carregar Os Perfis",
-        message: error instanceof Error ? error.message : "Erro desconhecido",
+        title: "Couldn't Load Profiles",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -78,7 +78,7 @@ async function maybeShowWarnings(
 
   await showToast({
     style: Toast.Style.Failure,
-    title: "Alguns Perfis Foram Ignorados",
+    title: "Some Profiles Were Ignored",
     message:
       warnings.length === 1
         ? baseMessage

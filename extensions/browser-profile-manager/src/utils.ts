@@ -33,24 +33,23 @@ interface ChromiumProfileCacheEntry {
   ShortcutName?: string;
 }
 
-interface ChromiumLocalState {
-  profile?: {
-    info_cache?: Record<string, ChromiumProfileCacheEntry>;
-  };
-}
-
 interface FirefoxIniProfile {
   profilePath: string;
   profileName: string;
   isRelative: boolean;
 }
 
+type NodeSqlitePreparedStatement = {
+  all?: () => unknown[];
+  iterate?: () => Iterable<unknown>;
+};
+
 type NodeSqliteModule = {
   DatabaseSync: new (
     filename: string,
     options?: Record<string, unknown>,
   ) => {
-    prepare: (sql: string) => { all: () => unknown[] };
+    prepare: (sql: string) => NodeSqlitePreparedStatement;
     close: () => void;
   };
 };
@@ -125,6 +124,9 @@ const BROWSER_SORT_INDEX: Record<BrowserType, number> = {
   Comet: 3,
 };
 
+const MAX_CHROMIUM_LOCAL_STATE_BYTES = 8 * 1024 * 1024;
+const MAX_FIREFOX_PROFILE_GROUP_ROWS = 5_000;
+
 let sqliteModulePromise: Promise<NodeSqliteModule | undefined> | undefined;
 
 export class BrowserLaunchError extends Error {
@@ -172,7 +174,7 @@ export async function launchBrowserProfile(
   if (!executable) {
     throw new BrowserLaunchError(
       "BROWSER_NOT_FOUND",
-      `Executavel do ${profile.browser} nao foi encontrado`,
+      `${profile.browser} executable was not found`,
     );
   }
 
@@ -186,7 +188,7 @@ export async function launchBrowserProfile(
   } catch (error) {
     throw new BrowserLaunchError(
       "LAUNCH_FAILED",
-      `Nao foi possivel abrir o perfil do ${profile.browser}`,
+      `Could not open ${profile.browser} profile`,
       { cause: error as Error },
     );
   }
@@ -204,7 +206,7 @@ async function readChromiumProfiles(
       warnings: [
         createWarning(
           browser,
-          "A variavel de ambiente LOCALAPPDATA nao esta disponivel",
+          "LOCALAPPDATA environment variable is not available",
         ),
       ],
     };
@@ -235,40 +237,22 @@ async function readChromiumProfiles(
   }
 
   const localStatePath = path.join(dataDir, "Local State");
-  const localStateRaw = await readFileUtf8(localStatePath, browser, warnings);
-  if (!localStateRaw) {
-    return { profiles: [], warnings };
-  }
+  const [namesByFolder, detectedFolders] = await Promise.all([
+    readChromiumNamesByFolder(browser, localStatePath, warnings),
+    readChromiumProfileFolders(browser, dataDir, warnings),
+  ]);
 
-  let parsedState: ChromiumLocalState;
-  try {
-    parsedState = JSON.parse(localStateRaw) as ChromiumLocalState;
-  } catch {
-    warnings.push(
-      createWarning(
-        browser,
-        "Nao foi possivel interpretar o JSON do Local State",
-        localStatePath,
-      ),
-    );
-    return { profiles: [], warnings };
-  }
-
-  const infoCache = parsedState.profile?.info_cache;
-  if (!infoCache || typeof infoCache !== "object") {
-    return { profiles: [], warnings };
-  }
-
+  const folderNames = new Set<string>([
+    ...detectedFolders,
+    ...namesByFolder.keys(),
+  ]);
   const profiles: BrowserProfile[] = [];
-  for (const [folderName, cacheEntry] of Object.entries(infoCache)) {
+
+  for (const folderName of folderNames) {
     const originalName = firstNonEmpty(
-      cacheEntry.Name,
-      cacheEntry.name,
-      cacheEntry.shortcut_name,
-      cacheEntry.ShortcutName,
+      namesByFolder.get(folderName),
       folderName,
     );
-
     if (!folderName || !originalName) {
       continue;
     }
@@ -284,6 +268,209 @@ async function readChromiumProfiles(
   return { profiles, warnings };
 }
 
+async function readChromiumNamesByFolder(
+  browser: ChromiumBrowser,
+  localStatePath: string,
+  warnings: ScanWarning[],
+): Promise<Map<string, string>> {
+  const namesByFolder = new Map<string, string>();
+
+  const localStateSize = await readFileSize(localStatePath, browser, warnings);
+  if (
+    typeof localStateSize === "number" &&
+    localStateSize > MAX_CHROMIUM_LOCAL_STATE_BYTES
+  ) {
+    warnings.push(
+      createWarning(
+        browser,
+        "Local State file is too large; falling back to folder names to avoid high memory usage",
+        localStatePath,
+      ),
+    );
+    return namesByFolder;
+  }
+
+  const localStateRaw = await readFileUtf8(localStatePath, browser, warnings);
+  if (!localStateRaw) {
+    return namesByFolder;
+  }
+
+  const infoCache = parseChromiumInfoCache(localStateRaw);
+  if (!infoCache) {
+    warnings.push(
+      createWarning(
+        browser,
+        "Could not extract info_cache from Local State",
+        localStatePath,
+      ),
+    );
+    return namesByFolder;
+  }
+
+  for (const [folderName, cacheEntry] of Object.entries(infoCache)) {
+    const originalName = firstNonEmpty(
+      cacheEntry.Name,
+      cacheEntry.name,
+      cacheEntry.shortcut_name,
+      cacheEntry.ShortcutName,
+      folderName,
+    );
+
+    if (!folderName || !originalName) {
+      continue;
+    }
+
+    namesByFolder.set(folderName, originalName);
+  }
+
+  return namesByFolder;
+}
+
+async function readChromiumProfileFolders(
+  browser: ChromiumBrowser,
+  dataDir: string,
+  warnings: ScanWarning[],
+): Promise<string[]> {
+  try {
+    const entries = await fs.readdir(dataDir, { withFileTypes: true });
+    return entries
+      .filter(
+        (entry) =>
+          entry.isDirectory() && isLikelyChromiumProfileDir(entry.name),
+      )
+      .map((entry) => entry.name);
+  } catch (error) {
+    const typedError = asErrno(error);
+    warnings.push(
+      createWarning(
+        browser,
+        isPermissionError(error)
+          ? "Permission denied while listing browser profile directory"
+          : "Could not list browser profile directory",
+        dataDir,
+        typedError?.code,
+      ),
+    );
+    return [];
+  }
+}
+
+function isLikelyChromiumProfileDir(folderName: string): boolean {
+  const normalizedName = folderName.trim();
+  if (!normalizedName) {
+    return false;
+  }
+
+  return (
+    normalizedName === "Default" ||
+    normalizedName === "Guest Profile" ||
+    normalizedName === "System Profile" ||
+    /^Profile \d+$/i.test(normalizedName) ||
+    /^Person \d+$/i.test(normalizedName)
+  );
+}
+
+function parseChromiumInfoCache(
+  localStateRaw: string,
+): Record<string, ChromiumProfileCacheEntry> | undefined {
+  const infoCacheRaw = extractJsonObjectByKey(localStateRaw, "info_cache");
+  if (!infoCacheRaw) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(infoCacheRaw) as unknown;
+    if (parsed && typeof parsed === "object") {
+      return parsed as Record<string, ChromiumProfileCacheEntry>;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function extractJsonObjectByKey(
+  source: string,
+  keyName: string,
+): string | undefined {
+  const keyToken = `"${keyName}"`;
+  const keyIndex = source.indexOf(keyToken);
+  if (keyIndex === -1) {
+    return undefined;
+  }
+
+  let cursor = keyIndex + keyToken.length;
+  while (cursor < source.length && isJsonWhitespace(source[cursor])) {
+    cursor += 1;
+  }
+
+  if (source[cursor] !== ":") {
+    return undefined;
+  }
+  cursor += 1;
+
+  while (cursor < source.length && isJsonWhitespace(source[cursor])) {
+    cursor += 1;
+  }
+
+  if (source[cursor] !== "{") {
+    return undefined;
+  }
+
+  const objectEnd = findJsonObjectEnd(source, cursor);
+  if (objectEnd === -1) {
+    return undefined;
+  }
+
+  return source.slice(cursor, objectEnd + 1);
+}
+
+function findJsonObjectEnd(source: string, objectStart: number): number {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = objectStart; index < source.length; index += 1) {
+    const char = source[index];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === "{") {
+      depth += 1;
+      continue;
+    }
+
+    if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return index;
+      }
+    }
+  }
+
+  return -1;
+}
+
+function isJsonWhitespace(value: string | undefined): boolean {
+  return value === " " || value === "\n" || value === "\r" || value === "\t";
+}
+
 async function readFirefoxProfiles(): Promise<ScanResult> {
   const browser: BrowserType = "Firefox";
   const warnings: ScanWarning[] = [];
@@ -292,10 +479,7 @@ async function readFirefoxProfiles(): Promise<ScanResult> {
     return {
       profiles: [],
       warnings: [
-        createWarning(
-          browser,
-          "A variavel de ambiente APPDATA nao esta disponivel",
-        ),
+        createWarning(browser, "APPDATA environment variable is not available"),
       ],
     };
   }
@@ -426,11 +610,7 @@ async function readFirefoxIniProfiles(
     parsedIni = ini.parse(iniRaw) as Record<string, Record<string, string>>;
   } catch {
     warnings.push(
-      createWarning(
-        browser,
-        "Nao foi possivel interpretar o profiles.ini",
-        profilesIniPath,
-      ),
+      createWarning(browser, "Could not parse profiles.ini", profilesIniPath),
     );
     return [];
   }
@@ -499,8 +679,8 @@ async function readFirefoxGroupDisplayNames(
       createWarning(
         browser,
         isPermissionError(error)
-          ? "Permissao negada ao listar Profile Groups"
-          : "Nao foi possivel listar Profile Groups",
+          ? "Permission denied while listing Profile Groups"
+          : "Could not list Profile Groups",
         profileGroupsDir,
         typedError?.code,
       ),
@@ -515,7 +695,7 @@ async function readFirefoxGroupDisplayNames(
   for (const sqliteFilePath of sqliteFiles) {
     let database:
       | {
-          prepare: (sql: string) => { all: () => unknown[] };
+          prepare: (sql: string) => NodeSqlitePreparedStatement;
           close: () => void;
         }
       | undefined;
@@ -524,9 +704,26 @@ async function readFirefoxGroupDisplayNames(
       database = new sqliteModule.DatabaseSync(sqliteFilePath, {
         readOnly: true,
       });
-      const rows = database.prepare("SELECT path, name FROM Profiles").all();
+      const statement = database.prepare("SELECT path, name FROM Profiles");
+      const rows =
+        typeof statement.iterate === "function"
+          ? statement.iterate()
+          : (statement.all?.() ?? []);
 
+      let rowsRead = 0;
       for (const row of rows) {
+        rowsRead += 1;
+        if (rowsRead > MAX_FIREFOX_PROFILE_GROUP_ROWS) {
+          warnings.push(
+            createWarning(
+              browser,
+              "Profile Groups read was limited to avoid high memory usage",
+              sqliteFilePath,
+            ),
+          );
+          break;
+        }
+
         const typedRow = row as { path?: unknown; name?: unknown };
         const profilePath = normalizeFirefoxProfilePath(
           String(typedRow.path ?? ""),
@@ -543,7 +740,7 @@ async function readFirefoxGroupDisplayNames(
       warnings.push(
         createWarning(
           browser,
-          "Nao foi possivel ler nomes no banco Profile Groups",
+          "Could not read profile names from Profile Groups database",
           sqliteFilePath,
           typedError?.code,
         ),
@@ -595,8 +792,8 @@ async function readFirefoxProfileFolders(
       createWarning(
         browser,
         isPermissionError(error)
-          ? "Permissao negada ao listar Profiles do Firefox"
-          : "Nao foi possivel listar Profiles do Firefox",
+          ? "Permission denied while listing Firefox Profiles"
+          : "Could not list Firefox Profiles",
         profilesDir,
         typedError?.code,
       ),
@@ -612,6 +809,44 @@ function getFirefoxLaunchArgs(profile: BrowserProfile): string[] {
   }
 
   return ["-profile", launchPath];
+}
+
+async function readFileSize(
+  filePath: string,
+  browser: BrowserType,
+  warnings: ScanWarning[],
+): Promise<number | undefined> {
+  try {
+    const stats = await fs.stat(filePath);
+    return stats.isFile() ? stats.size : undefined;
+  } catch (error) {
+    const typedError = asErrno(error);
+    if (typedError?.code === "ENOENT") {
+      return undefined;
+    }
+
+    if (isPermissionError(error)) {
+      warnings.push(
+        createWarning(
+          browser,
+          "Permission denied while accessing file",
+          filePath,
+          typedError?.code,
+        ),
+      );
+      return undefined;
+    }
+
+    warnings.push(
+      createWarning(
+        browser,
+        "Could not get file size",
+        filePath,
+        typedError?.code,
+      ),
+    );
+    return undefined;
+  }
 }
 
 async function readFileUtf8(
@@ -631,7 +866,7 @@ async function readFileUtf8(
       warnings.push(
         createWarning(
           browser,
-          "Permissao negada ao ler o arquivo",
+          "Permission denied while reading file",
           filePath,
           typedError?.code,
         ),
@@ -642,7 +877,7 @@ async function readFileUtf8(
     warnings.push(
       createWarning(
         browser,
-        "Erro inesperado ao ler o arquivo",
+        "Unexpected error while reading file",
         filePath,
         typedError?.code,
       ),
@@ -662,20 +897,20 @@ async function canReadPath(
   } catch (error) {
     const typedError = asErrno(error);
     if (typedError?.code === "ENOENT") {
-      return { ok: false, notFound: true, message: "Caminho nao encontrado" };
+      return { ok: false, notFound: true, message: "Path not found" };
     }
 
     if (isPermissionError(error)) {
       return {
         ok: false,
-        message: "Permissao negada ao acessar o caminho",
+        message: "Permission denied while accessing path",
         code: typedError?.code,
       };
     }
 
     return {
       ok: false,
-      message: "Nao foi possivel acessar o caminho",
+      message: "Could not access path",
       code: typedError?.code,
     };
   }

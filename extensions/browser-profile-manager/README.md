@@ -1,23 +1,23 @@
-# Gerenciador de Perfis de Navegador (Extensao Raycast)
+# Browser Profile Manager (Raycast Extension)
 
-Extensao Raycast para escanear, etiquetar, renomear (apelido) e iniciar perfis de navegador no Windows.
+Raycast extension to scan, tag, rename (alias), and launch browser profiles on Windows.
 
-## Navegadores Suportados
+## Supported Browsers
 
 - Google Chrome
 - Microsoft Edge
 - Mozilla Firefox
 - Comet (Chromium-based)
 
-## Recursos
+## Features
 
-- Detecta perfis automaticamente a partir dos arquivos de configuracao.
-- Persiste apelidos e tags com `LocalStorage` do Raycast.
-- Filtra a lista por tag usando dropdown.
-- Busca por apelido, nome original e tags.
-- Abre perfis diretamente pelo Raycast.
+- Automatically detects profiles from browser configuration files.
+- Persists aliases and tags using Raycast `LocalStorage`.
+- Filters profile list by tag with a dropdown.
+- Searches by alias, original profile name, and tags.
+- Opens profiles directly from Raycast.
 
-## Desenvolvimento
+## Development
 
 ```bash
 npm install
@@ -25,7 +25,7 @@ npm run build
 npm run lint
 ```
 
-Para executar em modo de desenvolvimento do Raycast:
+To run in Raycast development mode:
 
 ```bash
 npm run dev
