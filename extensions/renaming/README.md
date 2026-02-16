@@ -80,6 +80,6 @@ All operations can be undone using ⌘Z or through the Rename History command.
 ### Convert to lowercase
 1. Select files
 2. Open "Rename File(s)"
-3. Check "Preserve original filename"
+3. Enable "Preserve Name Mode"
 4. Set Case Style: `lowercase`
 5. Result: All filenames converted to lowercase

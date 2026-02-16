@@ -20,6 +20,6 @@ Node.js `fs.rename()` does not support moving files across filesystem boundaries
 
 | Feature | Constraint | Workaround |
 |---------|-----------|------------|
-| Undo History | No cross-session persistence beyond LocalStorage | LocalStorage-based history with configurable max entries |
+| Undo History | Persisted in Raycast LocalStorage, cleared on extension reset | Configurable max entries; export not available |
 | Large Selections (1000+) | Preview and rename operations process sequentially | Preview is capped to avoid UI lag; rename uses batched progress |
-| Regex in Replace | No lookbehind support in all environments | ReDoS safety check rejects potentially dangerous patterns |
+| Regex in Replace | ReDoS safety check rejects certain complex patterns | Simplify regex or split into multiple replacements |
