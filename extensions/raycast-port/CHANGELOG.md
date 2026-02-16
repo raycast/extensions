@@ -1,6 +1,6 @@
 # Raycast Port Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2026-02-16
 
 - Bump all dependencies to the latest
 
