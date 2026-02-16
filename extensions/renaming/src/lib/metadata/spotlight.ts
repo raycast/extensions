@@ -8,12 +8,12 @@
  * To access a new kMDItem key, add it to getSpotlightMetadata() — no changes needed in the extraction layer.
  */
 
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import type { SpotlightMetadata } from "./types";
 import { log } from "../logger";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Format duration in seconds to human readable string
@@ -30,20 +30,47 @@ function formatDuration(seconds: number): string {
 }
 
 /**
- * Parse mdls output into key-value pairs
+ * Parse mdls output into key-value pairs.
+ * Handles both single-line values and multi-line parenthesized arrays.
  */
 function parseMdlsOutput(output: string): Map<string, string> {
   const result = new Map<string, string>();
+  const lines = output.split("\n");
 
-  for (const line of output.split("\n")) {
-    const match = line.match(/^(\w+)\s+=\s+(.+)$/);
+  let i = 0;
+  while (i < lines.length) {
+    const match = lines[i]!.match(/^(\w+)\s+=\s+(.+)$/);
     if (match) {
-      const [, key, value] = match!;
-      // Remove quotes and handle (null) values
+      const key = match[1]!;
+      let value = match[2]!;
+
+      // Handle multi-line parenthesized arrays: value starts with "("
+      if (value === "(" || (value.startsWith("(") && !value.endsWith(")"))) {
+        const arrayLines: string[] = [value];
+        i++;
+        while (i < lines.length) {
+          const line = lines[i]!;
+          arrayLines.push(line.trim());
+          if (line.trim() === ")" || line.trim().endsWith(")")) break;
+          i++;
+        }
+        value = arrayLines.join(" ");
+      }
+
       if (key && value && value !== "(null)") {
-        result.set(key, value.replace(/^"(.+)"$/, "$1"));
+        // Clean up parenthesized array values: ( "a", "b" ) → a, b
+        const cleaned = value
+          .replace(/^\(\s*/, "")
+          .replace(/\s*\)$/, "")
+          .replace(/"/g, "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .join(", ");
+        result.set(key, cleaned || value.replace(/^"(.+)"$/, "$1"));
       }
     }
+    i++;
   }
 
   return result;
@@ -55,8 +82,7 @@ function parseMdlsOutput(output: string): Map<string, string> {
  */
 export async function getRawSpotlightAttributes(filePath: string): Promise<Map<string, string> | null> {
   try {
-    const escapedPath = filePath.replace(/'/g, "'\\''");
-    const { stdout } = await execAsync(`mdls '${escapedPath}'`, { timeout: 5000 });
+    const { stdout } = await execFileAsync("mdls", [filePath], { timeout: 5000 });
     const attrs = parseMdlsOutput(stdout);
     return attrs.size > 0 ? attrs : null;
   } catch (error) {
@@ -85,43 +111,72 @@ export async function getSpotlightMetadata(filePath: string): Promise<SpotlightM
   // Duration (audio/video)
   const duration = attrs.get("kMDItemDurationSeconds");
   if (duration) {
-    metadata.duration = parseFloat(duration);
-    metadata.durationFormatted = formatDuration(metadata.duration);
+    const parsed = parseFloat(duration);
+    if (Number.isFinite(parsed)) {
+      metadata.duration = parsed;
+      metadata.durationFormatted = formatDuration(parsed);
+    }
   }
 
   // Image/video dimensions
   const pixelWidth = attrs.get("kMDItemPixelWidth");
+  if (pixelWidth) {
+    const parsed = parseInt(pixelWidth, 10);
+    if (Number.isFinite(parsed)) metadata.pixelWidth = parsed;
+  }
   const pixelHeight = attrs.get("kMDItemPixelHeight");
-  if (pixelWidth) metadata.pixelWidth = parseInt(pixelWidth, 10);
-  if (pixelHeight) metadata.pixelHeight = parseInt(pixelHeight, 10);
+  if (pixelHeight) {
+    const parsed = parseInt(pixelHeight, 10);
+    if (Number.isFinite(parsed)) metadata.pixelHeight = parsed;
+  }
 
   // Audio properties
   const audioChannels = attrs.get("kMDItemAudioChannelCount");
-  if (audioChannels) metadata.audioChannels = parseInt(audioChannels, 10);
+  if (audioChannels) {
+    const parsed = parseInt(audioChannels, 10);
+    if (Number.isFinite(parsed)) metadata.audioChannels = parsed;
+  }
 
   const audioBitRate = attrs.get("kMDItemAudioBitRate");
-  if (audioBitRate) metadata.audioBitRate = parseInt(audioBitRate, 10);
+  if (audioBitRate) {
+    const parsed = parseInt(audioBitRate, 10);
+    if (Number.isFinite(parsed)) metadata.audioBitRate = parsed;
+  }
 
   const audioSampleRate = attrs.get("kMDItemAudioSampleRate");
-  if (audioSampleRate) metadata.audioSampleRate = parseInt(audioSampleRate, 10);
+  if (audioSampleRate) {
+    const parsed = parseInt(audioSampleRate, 10);
+    if (Number.isFinite(parsed)) metadata.audioSampleRate = parsed;
+  }
 
   // Video properties
   const videoBitRate = attrs.get("kMDItemTotalBitRate");
-  if (videoBitRate) metadata.videoBitRate = parseInt(videoBitRate, 10);
+  if (videoBitRate) {
+    const parsed = parseInt(videoBitRate, 10);
+    if (Number.isFinite(parsed)) metadata.videoBitRate = parsed;
+  }
 
   const frameRate = attrs.get("kMDItemVideoFrameRate");
-  if (frameRate) metadata.frameRate = parseFloat(frameRate);
+  if (frameRate) {
+    const parsed = parseFloat(frameRate);
+    if (Number.isFinite(parsed)) metadata.frameRate = parsed;
+  }
 
   // Codec
   const codecs = attrs.get("kMDItemCodecs");
   if (codecs) {
     // Format: ("codec1", "codec2") -> clean it up
-    metadata.codec = codecs.replace(/[()"\s]/g, "").replace(/,/g, ", ");
+    metadata.codec = codecs
+      .replace(/[()"]/g, "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .join(", ");
   }
 
   // Audio metadata (music files)
   const artist = attrs.get("kMDItemAuthors");
-  if (artist) metadata.artist = artist.replace(/[()"\s]/g, "");
+  if (artist) metadata.artist = artist.replace(/[()"]/g, "").trim();
 
   const album = attrs.get("kMDItemAlbum");
   if (album) metadata.album = album;
@@ -136,15 +191,21 @@ export async function getSpotlightMetadata(filePath: string): Promise<SpotlightM
   if (genre) metadata.genre = genre;
 
   const year = attrs.get("kMDItemRecordingYear");
-  if (year) metadata.year = parseInt(year, 10);
+  if (year) {
+    const parsed = parseInt(year, 10);
+    if (Number.isFinite(parsed)) metadata.year = parsed;
+  }
 
   // Document metadata
   const pageCount = attrs.get("kMDItemNumberOfPages");
-  if (pageCount) metadata.pageCount = parseInt(pageCount, 10);
+  if (pageCount) {
+    const parsed = parseInt(pageCount, 10);
+    if (Number.isFinite(parsed)) metadata.pageCount = parsed;
+  }
 
   const author = attrs.get("kMDItemAuthors");
-  if (author && !metadata.artist) {
-    metadata.author = author.replace(/[()"\s]/g, "");
+  if (author) {
+    metadata.author = author.replace(/[()"]/g, "").trim();
   }
 
   const creator = attrs.get("kMDItemCreator");

@@ -11,6 +11,7 @@ import { log } from "../logger";
  * Format shutter speed from decimal to fraction
  */
 function formatShutterSpeed(value: number): string {
+  if (value <= 0) return "0s";
   if (value >= 1) {
     return `${value}s`;
   }
@@ -64,19 +65,19 @@ export async function getExifMetadata(filePath: string): Promise<ImageExifMetada
     if (iso) metadata.iso = Number(iso);
 
     const aperture = tags.exif?.FNumber?.value;
-    if (aperture && Array.isArray(aperture)) {
+    if (aperture && Array.isArray(aperture) && aperture.length >= 2 && aperture[1] !== 0) {
       const fNumber = aperture[0] / aperture[1];
       metadata.aperture = `f/${fNumber.toFixed(1)}`;
     }
 
     const exposureTime = tags.exif?.ExposureTime?.value;
-    if (exposureTime && Array.isArray(exposureTime)) {
+    if (exposureTime && Array.isArray(exposureTime) && exposureTime.length >= 2 && exposureTime[1] !== 0) {
       const seconds = exposureTime[0] / exposureTime[1];
       metadata.shutterSpeed = formatShutterSpeed(seconds);
     }
 
     const focalLength = tags.exif?.FocalLength?.value;
-    if (focalLength && Array.isArray(focalLength)) {
+    if (focalLength && Array.isArray(focalLength) && focalLength.length >= 2 && focalLength[1] !== 0) {
       const mm = focalLength[0] / focalLength[1];
       metadata.focalLength = `${mm.toFixed(0)}mm`;
     }
@@ -84,11 +85,14 @@ export async function getExifMetadata(filePath: string): Promise<ImageExifMetada
     // Date taken
     const dateTimeOriginal = tags.exif?.DateTimeOriginal?.description;
     if (dateTimeOriginal) {
-      // Format: "2024:01:15 14:30:00" -> parse to Date
-      const [datePart, timePart] = dateTimeOriginal.split(" ");
-      const [year, month, day] = datePart!.split(":");
-      const isoString = `${year}-${month}-${day}T${timePart}`;
-      metadata.dateTaken = new Date(isoString);
+      const match = dateTimeOriginal.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}:\d{2}:\d{2})$/);
+      if (match) {
+        const isoString = `${match[1]}-${match[2]}-${match[3]}T${match[4]}`;
+        const parsed = new Date(isoString);
+        if (!isNaN(parsed.getTime())) {
+          metadata.dateTaken = parsed;
+        }
+      }
     }
 
     // GPS

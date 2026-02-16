@@ -1,10 +1,22 @@
 import { describe, it, expect, vi } from "vitest";
+import type ExifReader from "exifreader";
+import type { stat } from "fs/promises";
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
-const { execMock, mockReadFile, mockStat, mockExifLoad } = vi.hoisted(() => ({
+const { execMock, execFileMock, mockReadFile, mockStat, mockExifLoad } = vi.hoisted(() => ({
   execMock: vi.fn(
     (_cmd: string, _opts: unknown, cb: (err: Error | null, result: { stdout: string; stderr: string }) => void) => {
+      cb(null, { stdout: "", stderr: "" });
+    },
+  ),
+  execFileMock: vi.fn(
+    (
+      _cmd: string,
+      _args: string[],
+      _opts: unknown,
+      cb: (err: Error | null, result: { stdout: string; stderr: string }) => void,
+    ) => {
       cb(null, { stdout: "", stderr: "" });
     },
   ),
@@ -15,7 +27,8 @@ const { execMock, mockReadFile, mockStat, mockExifLoad } = vi.hoisted(() => ({
 
 vi.mock("child_process", () => ({
   exec: execMock,
-  default: { exec: execMock },
+  execFile: execFileMock,
+  default: { exec: execMock, execFile: execFileMock },
 }));
 
 vi.mock("util", () => {
@@ -404,8 +417,13 @@ describe("metadata", () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe("getSpotlightMetadata", () => {
     function mockMdlsOutput(lines: string[]) {
-      execMock.mockImplementationOnce(
-        (_cmd: string, _opts: unknown, cb: (err: Error | null, result: { stdout: string; stderr: string }) => void) => {
+      execFileMock.mockImplementationOnce(
+        (
+          _cmd: string,
+          _args: string[],
+          _opts: unknown,
+          cb: (err: Error | null, result: { stdout: string; stderr: string }) => void,
+        ) => {
           cb(null, { stdout: lines.join("\n"), stderr: "" });
         },
       );
@@ -496,7 +514,7 @@ describe("metadata", () => {
 
       const result = await getSpotlightMetadata("/path/to/song.flac");
       expect(result).not.toBeNull();
-      expect(result!.artist).toBe("PinkFloyd");
+      expect(result!.artist).toBe("Pink Floyd");
       expect(result!.album).toBe("The Dark Side of the Moon");
       expect(result!.title).toBe("Time");
       expect(result!.composer).toBe("Roger Waters");
@@ -521,9 +539,9 @@ describe("metadata", () => {
 
       const result = await getSpotlightMetadata("/path/to/file.pdf");
       expect(result).not.toBeNull();
-      expect(result!.artist).toBe("JaneDoe");
-      // author should NOT be set because artist was already populated from the same key
-      expect(result!.author).toBeUndefined();
+      expect(result!.artist).toBe("Jane Doe");
+      // author is also set since our fix changed the guard to !metadata.author (not !metadata.artist)
+      expect(result!.author).toBe("Jane Doe");
     });
 
     it("should skip (null) values", async () => {
@@ -543,9 +561,10 @@ describe("metadata", () => {
     });
 
     it("should return null when exec fails", async () => {
-      execMock.mockImplementationOnce(
+      execFileMock.mockImplementationOnce(
         (
           _cmd: string,
+          _args: string[],
           _opts: unknown,
           cb: (err: Error | null, result: { stdout: string; stderr: string } | null) => void,
         ) => {
@@ -557,13 +576,14 @@ describe("metadata", () => {
       expect(result).toBeNull();
     });
 
-    it("should escape single quotes in file paths", async () => {
+    it("should pass file path as argument without shell escaping", async () => {
       mockMdlsOutput(['kMDItemKind = "JPEG Image"']);
 
       await getSpotlightMetadata("/path/to/it's a photo.jpg");
 
-      const calledCmd = execMock.mock.calls[execMock.mock.calls.length - 1]![0] as string;
-      expect(calledCmd).toContain("it'\\''s a photo.jpg");
+      const lastCall = execFileMock.mock.calls[execFileMock.mock.calls.length - 1]!;
+      const args = lastCall[1] as string[];
+      expect(args).toContain("/path/to/it's a photo.jpg");
     });
 
     it("should handle empty mdls output", async () => {
@@ -595,8 +615,13 @@ describe("metadata", () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe("getRawSpotlightAttributes", () => {
     function mockMdlsOutput(lines: string[]) {
-      execMock.mockImplementationOnce(
-        (_cmd: string, _opts: unknown, cb: (err: Error | null, result: { stdout: string; stderr: string }) => void) => {
+      execFileMock.mockImplementationOnce(
+        (
+          _cmd: string,
+          _args: string[],
+          _opts: unknown,
+          cb: (err: Error | null, result: { stdout: string; stderr: string }) => void,
+        ) => {
           cb(null, { stdout: lines.join("\n"), stderr: "" });
         },
       );
@@ -627,9 +652,10 @@ describe("metadata", () => {
     });
 
     it("should return null on exec failure", async () => {
-      execMock.mockImplementationOnce(
+      execFileMock.mockImplementationOnce(
         (
           _cmd: string,
+          _args: string[],
           _opts: unknown,
           cb: (err: Error | null, result: { stdout: string; stderr: string } | null) => void,
         ) => {
@@ -770,9 +796,14 @@ describe("metadata", () => {
         },
       } as unknown as ReturnType<typeof ExifReader.load>);
 
-      // Mock exec for spotlight metadata
-      execMock.mockImplementationOnce(
-        (_cmd: string, _opts: unknown, cb: (err: Error | null, result: { stdout: string; stderr: string }) => void) => {
+      // Mock execFile for spotlight metadata
+      execFileMock.mockImplementationOnce(
+        (
+          _cmd: string,
+          _args: string[],
+          _opts: unknown,
+          cb: (err: Error | null, result: { stdout: string; stderr: string }) => void,
+        ) => {
           cb(null, {
             stdout: 'kMDItemContentType = "public.jpeg"\nkMDItemKind        = "JPEG Image"',
             stderr: "",
@@ -800,8 +831,13 @@ describe("metadata", () => {
         isDirectory: () => false,
       } as unknown as Awaited<ReturnType<typeof stat>>);
 
-      execMock.mockImplementationOnce(
-        (_cmd: string, _opts: unknown, cb: (err: Error | null, result: { stdout: string; stderr: string }) => void) => {
+      execFileMock.mockImplementationOnce(
+        (
+          _cmd: string,
+          _args: string[],
+          _opts: unknown,
+          cb: (err: Error | null, result: { stdout: string; stderr: string }) => void,
+        ) => {
           cb(null, { stdout: 'kMDItemKind = "Plain Text"', stderr: "" });
         },
       );
@@ -815,9 +851,11 @@ describe("metadata", () => {
 
     it("should handle all metadata sources returning null", async () => {
       mockStat.mockRejectedValueOnce(new Error("ENOENT"));
-      execMock.mockImplementationOnce((_cmd: string, _opts: unknown, cb: (err: Error | null, result: null) => void) => {
-        cb(new Error("no such file"), null);
-      });
+      execFileMock.mockImplementationOnce(
+        (_cmd: string, _args: string[], _opts: unknown, cb: (err: Error | null, result: null) => void) => {
+          cb(new Error("no such file"), null);
+        },
+      );
 
       const result = await getFileMetadata("/nonexistent/file.txt");
 
