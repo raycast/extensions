@@ -2,9 +2,8 @@
 
 ## [Improve Store Listing] - {PR_MERGE_DATE}
 
-- Removed oversized icon/title HTML block from README
+- Improved README presentation by removing duplicate icon header
 - Added demo GIF showing the extension in action
-- Streamlined README with proper feature descriptions
 
 ## [Initial Release] - 2026-02-16
 - Added `Search Apps` command to find apps by name, developer, tag, or memo
