@@ -1,5 +1,11 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fixes] - {PR_MERGE_DATE}
+
+- Fixed a regression that could crash the extension with `TypeError: a is not a function` while loading Firefox-based bookmarks.
+- Updated the bundled `sql-wasm.wasm` asset to match the installed `sql.js` runtime version.
+- Added an automatic post-install sync step to keep `assets/sql-wasm.wasm` aligned with `sql.js` on future dependency updates.
+
 ## [Bug Fixes] - 2026-02-12
 
 - Fixed permission errors (EPERM) when accessing Chrome and Arc browser Local State files ([#16481](https://github.com/raycast/extensions/issues/16481))
