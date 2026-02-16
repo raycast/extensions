@@ -65,7 +65,7 @@ function downloadBinary(url, dest, redirectCount = 0) {
         });
         return;
       }
-      }
+      
 
       if (response.statusCode !== 200) {
         file.close();
