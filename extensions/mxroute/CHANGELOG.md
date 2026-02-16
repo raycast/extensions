@@ -1,6 +1,6 @@
 # MXroute Changelog
 
-## [Show Email Account Usage] - {PR_MERGE_DATE}
+## [Show Email Account Usage] - 2026-02-16
 
 - Show MB Usage in "Email Accounts"
 
