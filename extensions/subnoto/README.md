@@ -65,3 +65,9 @@ Maximum file size: **50 MB**.
 - [Subnoto Website](https://subnoto.com)
 - [Subnoto Documentation](https://subnoto.com/documentation)
 - [TypeScript SDK Documentation](https://subnoto.com/documentation/developers/sdks/typescript)
+
+## About embedded binary
+
+The extension uses a binary file to authenticate with the Subnoto API. The binary comes from the `@subnoto/api-client` package and is moved as it and is then located in the `assets/oak_session_wasm_nodejs_bg.wasm` file.
+
+To move the binary, run the following command: `npm run move-subnoto-wasm`, this is done automatically when you `npm install`.
