@@ -1,6 +1,6 @@
 # Retrace Quick Actions Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-16
 
 - Add `Go to Retrace Timestamp` command with natural language parsing
 - Add `Go to Last Retrace Timestamp` command
