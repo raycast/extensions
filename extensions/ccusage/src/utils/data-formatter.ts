@@ -1,6 +1,20 @@
 import { match } from "ts-pattern";
 import { Clipboard, showToast, Toast } from "@raycast/api";
 
+export const formatNumber = (num: number | undefined): string => {
+  if (num === undefined) return "0";
+  return new Intl.NumberFormat("en-US").format(num);
+};
+
+export const formatDateTime = (dateStr: string): string => {
+  return new Date(dateStr).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
+
 export const formatTokens = (tokens: number | undefined): string => {
   if (tokens === undefined) return "0";
 

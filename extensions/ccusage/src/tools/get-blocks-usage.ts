@@ -1,7 +1,7 @@
 import { BlocksUsageResponseSchema, SessionBlockData } from "../types/usage-types";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
-import { resolveNodePath } from "../utils/node-path-resolver";
+import { getCustomNpxPath } from "../preferences";
 import { handleToolError } from "../utils/tool-error-handler";
 
 type Input = {
@@ -21,8 +21,8 @@ type Input = {
  */
 export default async function getBlocksUsage(input?: Input): Promise<SessionBlockData[]> {
   try {
-    const nodePath = await resolveNodePath(input?.customNpxPath);
-    const command = input?.useDirectCcusageCommand ? "ccusage" : `${nodePath} ccusage@latest`;
+    const npxCommand = getCustomNpxPath() ?? "npx";
+    const command = input?.useDirectCcusageCommand ? "ccusage" : `${npxCommand} ccusage@latest`;
     const args = ["blocks", "--json"];
 
     if (input?.recent) {

@@ -1,7 +1,7 @@
 import { WeeklyUsageDataSchema, WeeklyUsageResponseSchema, WeeklyUsageData } from "../types/usage-types";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
-import { resolveNodePath } from "../utils/node-path-resolver";
+import { getCustomNpxPath } from "../preferences";
 import { handleToolError } from "../utils/tool-error-handler";
 
 type Input = {
@@ -19,8 +19,8 @@ type Input = {
  */
 export default async function getWeeklyUsage(input?: Input): Promise<WeeklyUsageData[]> {
   try {
-    const nodePath = await resolveNodePath(input?.customNpxPath);
-    const command = input?.useDirectCcusageCommand ? "ccusage" : `${nodePath} ccusage@latest`;
+    const npxCommand = getCustomNpxPath() ?? "npx";
+    const command = input?.useDirectCcusageCommand ? "ccusage" : `${npxCommand} ccusage@latest`;
 
     const { stdout } = await execAsync(`${command} weekly --json`, getExecOptions());
     const jsonData = JSON.parse(stdout);
