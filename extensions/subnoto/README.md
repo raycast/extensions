@@ -40,16 +40,16 @@ You need a Subnoto account with API access. Sign up at [subnoto.com](https://sub
 
 1. Open Raycast and run any Subnoto command (e.g. **Upload Document** or **List Workspaces**).
 2. When prompted, enter:
-   - **API Access Key**: your Subnoto API access key  
-   - **API Secret Key**: your Subnoto API secret key  
+   - **API Access Key**: your Subnoto API access key
+   - **API Secret Key**: your Subnoto API secret key
 
 ## Usage
 
-| Command            | What it does |
-|--------------------|---------------|
+| Command             | What it does                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | **Upload Document** | Choose a workspace, pick a file, optionally set a title, then upload. The envelope edit page opens in your browser. |
-| **List Workspaces** | View workspaces, open one in Subnoto, or copy its UUID. |
-| **List Envelopes**  | Browse envelopes (optionally by workspace), search, then open in Subnoto or copy UUID. |
+| **List Workspaces** | View workspaces, open one in Subnoto, or copy its UUID.                                                             |
+| **List Envelopes**  | Browse envelopes (optionally by workspace), search, then open in Subnoto or copy UUID.                              |
 
 ## Supported file types
 
