@@ -1,11 +1,17 @@
 import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { openRetraceDeeplink } from "./open-retrace-deeplink";
+import { checkRetraceInstallation } from "./utils/checkInstall";
 
 const LAST_TIMESTAMP_KEY = "lastRetraceTimestamp";
 
 export default async function Command() {
   try {
+    const installed = await checkRetraceInstallation();
+    if (!installed) {
+      return;
+    }
+
     const lastTimestamp = await LocalStorage.getItem<string>(LAST_TIMESTAMP_KEY);
 
     if (!lastTimestamp) {

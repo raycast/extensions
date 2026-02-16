@@ -1,5 +1,6 @@
 import { LocalStorage, Toast, open, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { checkRetraceInstallation } from "./utils/checkInstall";
 
 const LAST_DEEPLINK_ATTEMPT_KEY = "lastRetraceDeeplinkAttempt";
 
@@ -41,6 +42,11 @@ function delay(ms: number): Promise<void> {
 }
 
 export async function openRetraceDeeplink(options: OpenRetraceDeeplinkOptions) {
+  const installed = await checkRetraceInstallation();
+  if (!installed) {
+    return;
+  }
+
   const urls = normalizeUrls(options.urls);
   if (urls.length === 0) {
     await showFailureToast("No deeplink URL provided", { title: "Retrace Deeplink Error" });
