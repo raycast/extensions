@@ -1,4 +1,4 @@
-import { List, Icon } from "@raycast/api";
+import { List, Icon, Color } from "@raycast/api";
 import { ReactNode, useMemo } from "react";
 import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 import {

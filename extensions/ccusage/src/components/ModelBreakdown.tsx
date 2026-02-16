@@ -1,5 +1,5 @@
 import React, { ReactNode, useMemo } from "react";
-import { List, Icon } from "@raycast/api";
+import { List, Icon, Color } from "@raycast/api";
 import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 import {
   getTopModels,

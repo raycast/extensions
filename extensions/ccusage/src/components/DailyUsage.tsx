@@ -1,4 +1,4 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { formatTokens, formatCost, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
 import { getCurrentLocalDate } from "../utils/date-formatter";
 import { useDailyUsage } from "../hooks/useDailyUsage";
