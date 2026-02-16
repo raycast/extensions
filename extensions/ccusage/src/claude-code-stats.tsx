@@ -93,7 +93,7 @@ const fetchUsageLimit = async () => {
 };
 
 export default async function Command() {
-  const { subtitleTemplate } = getPreferenceValues<{ subtitleTemplate: string }>();
+  const { subtitleTemplate } = getPreferenceValues<Preferences.ClaudeCodeStats>();
   const template = subtitleTemplate || "Today: {dailyCost}";
 
   const needsDaily = DAILY_PLACEHOLDERS.some((p) => template.includes(p));
