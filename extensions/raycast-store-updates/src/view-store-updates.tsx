@@ -69,31 +69,13 @@ export default function Command() {
     setIsRefreshing(true);
     setLastRefreshTime(now);
 
-    try {
-      await Promise.all([revalidateFeed(), revalidatePRs()]);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Feed refreshed",
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-
-      if (errorMessage.toLowerCase().includes("rate limit")) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Rate limit exceeded",
-          message: "GitHub API rate limit reached. Please wait a few minutes.",
-        });
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to refresh",
-          message: errorMessage,
-        });
-      }
-    } finally {
-      setIsRefreshing(false);
-    }
+    revalidateFeed();
+    revalidatePRs();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Feed refreshed",
+    });
+    setIsRefreshing(false);
   };
 
   const isLoading = feedLoading || prsLoading;

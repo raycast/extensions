@@ -5,7 +5,6 @@
 - Add CHANGELOG up/down reading navigation
 - Add refresh action (⌘R) to ExtensionActions that revalidates both feed and PR data
 - Change macOS platform icon from blue (#0A64F0) to 80% black (#000000CC) for better contrast
-- Update Windows platform icon to use currentColor in SVG for consistent theming
 - Add ChangelogActions component to changelog detail view
 - Replace "Show My Updates Only" action with "My Updates" Dropdown Filter
 - Improve URL parsing
