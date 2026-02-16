@@ -1,6 +1,6 @@
 # Accordance Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-16
 
 - Fix AppleScript injection vulnerability in verse retrieval and module checking
 - Add verse range support (e.g. Deut 2:1-5) to Read Bible command
