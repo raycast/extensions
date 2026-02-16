@@ -1,3 +1,8 @@
 # Nepal's Gold Silver Price
 
-Stay updated on the daily price of gold (Fine gold, Hallmark & Tejabi) and silver stated with the daily fluctuation in price. These prices are updated daily & calculated in Nepali Rupees. Gold/Silver price for today is available for Gold Hallmark - tola, Gold Tajabi - tola, Silver - tola, Gold Hallmark - 10g, Gold Tajabi - 10g, Silver - 10g. Precisely, Hamro Patro brings the prices of Nepali gold and silver market in your phone under your fingertips. The sneak peak of Nepali jewel market in hereby presented.
+A Raycast extension to check today's gold and silver rates in Nepal (NPR).
+
+The command fetches live data from Hamro Patro and shows:
+- Gold Hallmark, Gold Tajabi, and Silver prices
+- Separate sections for tola and 10g units
+- Source "Last Updated" timestamp
