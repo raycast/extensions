@@ -1,5 +1,4 @@
 import { match } from "ts-pattern";
-import { Clipboard, showToast, Toast } from "@raycast/api";
 
 export const formatNumber = (num: number | undefined): string => {
   if (num === undefined) return "0";
@@ -58,21 +57,6 @@ export const getCostPerMTok = (totalCost: number, totalTokens: number): string =
   if (totalTokens === 0) return "$0.00/MTok";
   const costPerMTok = (totalCost / totalTokens) * 1000000;
   return `$${costPerMTok.toFixed(2)}/MTok`;
-};
-
-export const copyToClipboard = async (text: string, message: string): Promise<void> => {
-  try {
-    await Clipboard.copy(text);
-    await showToast({
-      style: Toast.Style.Success,
-      title: message,
-    });
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to copy to clipboard",
-    });
-  }
 };
 
 export const getCCUsageCommand = (): string => {

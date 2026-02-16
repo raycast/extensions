@@ -25,7 +25,7 @@ const sortPathsByVersion = (paths: Array<{ path: string; version: string }>): st
   return paths.sort((a, b) => parseVersion(b.version) - parseVersion(a.version)).map((item) => item.path);
 };
 
-export const resolveVersionManagerPaths = (): string[] => {
+const resolveVersionManagerPaths = (): string[] => {
   const versionedPaths: Array<{ path: string; version: string }> = [];
   const staticPaths: string[] = [];
   const home = process.env.HOME;
@@ -96,10 +96,4 @@ export const getEnhancedNodePaths = (): string => {
 
   cachedPaths = allPaths.filter((path) => path).join(":");
   return cachedPaths;
-};
-
-// Optional: Cache clearing function for testing
-export const clearPathCache = (): void => {
-  cachedPaths = null;
-  cachedIsAppleSilicon = null;
 };
