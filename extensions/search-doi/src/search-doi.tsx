@@ -37,7 +37,7 @@ function decodeHTMLEntities(text?: string) {
       apos: "'",
       lt: "<",
       gt: ">",
-      ndash: "/u2013",
+      ndash: "\u2013",
       mdash: "—",
       rsquo: "’",
       lsquo: "‘",
