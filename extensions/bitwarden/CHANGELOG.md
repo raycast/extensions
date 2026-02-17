@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix & Improvements] - {PR_MERGE_DATE}
+## [Fix & Improvements] - 2026-02-17
 
 - Fix potential stale session token issue
 - Small feedback improvements
