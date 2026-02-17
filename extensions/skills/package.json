@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "skills",
+  "title": "Skills",
+  "description": "Browse and search AI agent skills from Skills",
+  "icon": "icon.png",
+  "author": "keito4",
+  "contributors": [
+    "DaleSeo",
+    "dominik_lukes"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "description": "Search for agent skills",
+      "mode": "view"
+    },
+    {
+      "name": "trending-skills",
+      "title": "Trending Skills",
+      "description": "Browse trending skills",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.5",
+    "@raycast/utils": "2.2.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19.2.13",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

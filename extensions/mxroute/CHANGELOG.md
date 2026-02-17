@@ -1,5 +1,9 @@
 # MXroute Changelog
 
+## [Show Email Account Usage] - 2026-02-16
+
+- Show MB Usage in "Email Accounts"
+
 ## [Domain Verification Key in Add + Catch All UX] - 2026-02-05
 
 - _Domain Verification Key_ is shown in "Add New Domain"

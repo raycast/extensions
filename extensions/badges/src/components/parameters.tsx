@@ -4,7 +4,7 @@ import { Color as Colour, Detail, Icon, useNavigation } from "@raycast/api";
 import { badgeSizes, badgeStyles, dynamicBadgeTypes } from "../constants.js";
 import { Input } from "./input.js";
 import { Badge, FieldName, OnBadgeChange, ParameterProps } from "../types.js";
-import { ellipsis, getSvgFromFile, getTagColor, isWindows, pickColor, pickLogo } from "../utils.js";
+import { ellipsis, getSvgFromFile, getTagColor, pickColor, pickLogo } from "../utils.js";
 
 export const EditButton = ({
   fieldName,
@@ -115,16 +115,14 @@ export const Color = ({ badge, onChange }: ParameterProps) => {
           }}
         />
       )}
-      {isWindows ? null : (
-        <Detail.Metadata.TagList.Item
-          icon={Icon.EyeDropper}
-          text="pick"
-          color={Colour.SecondaryText}
-          onAction={async () => {
-            await pickColor({ field: "color" });
-          }}
-        />
-      )}
+      <Detail.Metadata.TagList.Item
+        icon={Icon.EyeDropper}
+        text="pick"
+        color={Colour.SecondaryText}
+        onAction={async () => {
+          await pickColor({ field: "color" });
+        }}
+      />
       <EditButton fieldName="color" badge={badge} onChange={onChange} />
     </Detail.Metadata.TagList>
   );
@@ -150,16 +148,14 @@ export const LabelColor = ({ badge, onChange }: ParameterProps) => {
             />
           )}
           <Detail.Metadata.TagList.Item text={badge.labelColor} color={badge.labelColor} />
-          {isWindows ? null : (
-            <Detail.Metadata.TagList.Item
-              icon={Icon.EyeDropper}
-              text="pick"
-              color={Colour.SecondaryText}
-              onAction={async () => {
-                await pickColor({ field: "labelColor" });
-              }}
-            />
-          )}
+          <Detail.Metadata.TagList.Item
+            icon={Icon.EyeDropper}
+            text="pick"
+            color={Colour.SecondaryText}
+            onAction={async () => {
+              await pickColor({ field: "labelColor" });
+            }}
+          />
           <EditButton fieldName="labelColor" badge={badge} onChange={onChange} />
         </Detail.Metadata.TagList>
       )}
@@ -229,16 +225,14 @@ export const Logo = ({ badge, onChange }: ParameterProps) => {
             {badge.logoColor !== undefined && logoColor !== $icon.hex && (
               <Detail.Metadata.TagList.Item text={ellipsis(logoColor)} color={logoColor} />
             )}
-            {isWindows ? null : (
-              <Detail.Metadata.TagList.Item
-                icon={Icon.EyeDropper}
-                text="pick"
-                color={Colour.SecondaryText}
-                onAction={async () => {
-                  await pickColor({ field: "logoColor" });
-                }}
-              />
-            )}
+            <Detail.Metadata.TagList.Item
+              icon={Icon.EyeDropper}
+              text="pick"
+              color={Colour.SecondaryText}
+              onAction={async () => {
+                await pickColor({ field: "logoColor" });
+              }}
+            />
             <EditButton fieldName="logoColor" badge={badge} onChange={onChange} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="logoSize">

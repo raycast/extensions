@@ -15,8 +15,15 @@ A Vim-style leader key extension for Raycast that enables quick navigation throu
 
 - **Applications**: Launch apps with file-based or name-based targeting
 - **URLs**: Open websites or Raycast deeplinks
-- **Folders**: Open directories in Finder
+- **Folders**: Open directories in file manager
 - **Commands**: Execute shell commands
+
+### 🌐 Browser Selection
+
+- **Group-level default**: Set a default browser for all URLs in a group
+- **Per-URL override**: Override the group default on individual URL actions
+- **System default fallback**: Uses your OS default browser when no preference is set
+- Resolution order: action browser > parent group browser > system default
 
 ### ⚙️ Configuration Management
 
@@ -41,21 +48,26 @@ A Vim-style leader key extension for Raycast that enables quick navigation throu
 
 ## Default Configuration
 
-The extension comes with a basic setup:
+The extension comes with a platform-aware starter config:
 
 ```
-c → Calculator
 a → Applications/
-  ├── f → Finder
-  └── t → Terminal
+  ├── b → Browser (Safari / Edge)
+  ├── t → Terminal (Terminal.app / Command Prompt)
+  ├── f → File Manager (Finder / Explorer)
+  ├── c → Calculator
+  └── n → Notes (Notes.app / Notepad)
+u → URLs/
+  ├── g → Google
+  └── h → GitHub
 ```
 
 ## Usage Examples
 
 ### Simple Actions
 
-- Press `c` to open Calculator
-- Press `a` then `f` to open Finder via Applications group
+- Press `a` then `b` to open your browser
+- Press `u` then `g` to open Google
 
 ### Creating Groups
 
@@ -74,6 +86,7 @@ a → Applications/
 
 - Websites: `https://github.com`
 - Raycast deeplinks: `raycast://extensions/raycast/system/quit-all-applications`
+- Optionally set a specific browser via the "Open With" dropdown
 
 **Commands:**
 
@@ -100,27 +113,37 @@ a → Applications/
   "type": "group",
   "actions": [
     {
+      "key": "u",
+      "type": "group",
+      "label": "URLs",
+      "browser": "/Applications/Google Chrome.app",
+      "actions": [
+        {
+          "key": "g",
+          "type": "url",
+          "label": "Google",
+          "value": "https://google.com"
+        },
+        {
+          "key": "h",
+          "type": "url",
+          "label": "GitHub",
+          "value": "https://github.com",
+          "browser": "/Applications/Firefox.app"
+        }
+      ]
+    },
+    {
       "key": "c",
       "type": "application",
       "label": "Calculator",
       "value": "/System/Applications/Calculator.app"
-    },
-    {
-      "key": "a",
-      "type": "group",
-      "label": "Applications",
-      "actions": [
-        {
-          "key": "f",
-          "type": "application",
-          "label": "Finder",
-          "value": "/System/Library/CoreServices/Finder.app"
-        }
-      ]
     }
   ]
 }
 ```
+
+In this example, Google opens in Chrome (group default), while GitHub opens in Firefox (per-action override).
 
 ## Keyboard Shortcuts
 

@@ -78,14 +78,14 @@ ${relevantStats.map(([key, value]) => `| ${formatStatName(key)} | ${value} |`).j
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/items/${item.id}`}
+            target={`https://metaforge.app/arc-raiders/database/item/${item.id}`}
             text="View on MetaForge"
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
           <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
         </ActionPanel>
       }
@@ -212,7 +212,7 @@ export default function SearchItems() {
                     onAction={() => handleToggleBlueprintObtained(item.id, item.name)}
                   />
                 )}
-                <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+                <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
                 <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
               </ActionPanel>
             }

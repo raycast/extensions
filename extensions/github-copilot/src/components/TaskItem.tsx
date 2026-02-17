@@ -1,14 +1,15 @@
 import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { TaskWithPullRequest } from "../services/copilot";
-import { getTaskIcon } from "../utils";
+import { getTaskIcon, formatRelativeDate } from "../utils";
 import { reauthorize } from "../lib/oauth";
+import { useMemo } from "react";
 
 export function TaskItem(
   props: Readonly<{
     taskWithPullRequest: TaskWithPullRequest;
   }>,
 ) {
-  const { task, pullRequest, repository } = props.taskWithPullRequest;
+  const { task, pullRequest, premiumRequests, repository } = props.taskWithPullRequest;
   const title = pullRequest?.title ?? task.name ?? `Task ${task.id}`;
   const subtitle = repository ? `${repository.owner.login}/${repository.name}` : undefined;
 
@@ -16,6 +17,10 @@ export function TaskItem(
   const taskUrl = repository
     ? `https://github.com/${repository.owner.login}/${repository.name}/tasks/${task.id}`
     : undefined;
+
+  const createdAt = useMemo(() => new Date(task.created_at), [task.created_at]);
+  const relativeDate = useMemo(() => formatRelativeDate(createdAt), [createdAt]);
+  const premiumRequestsConsumed = useMemo(() => premiumRequests > 0, [premiumRequests]);
 
   return (
     <List.Item
@@ -25,8 +30,11 @@ export function TaskItem(
       icon={getTaskIcon(props.taskWithPullRequest)}
       accessories={[
         {
-          date: new Date(task.created_at),
-          tooltip: `Started at ${new Date(task.created_at).toLocaleString()}`,
+          icon: premiumRequestsConsumed ? Icon.Bolt : undefined,
+          text: premiumRequestsConsumed ? `${premiumRequests} · ${relativeDate}` : relativeDate,
+          tooltip: premiumRequestsConsumed
+            ? `${premiumRequests} premium requests · Started at ${createdAt.toLocaleString()}`
+            : `Started at ${createdAt.toLocaleString()}`,
         },
       ]}
       actions={

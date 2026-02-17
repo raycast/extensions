@@ -10,7 +10,8 @@
     "Rob",
     "syh",
     "erayack",
-    "clins1994"
+    "clins1994",
+    "stephlv"
   ],
   "pastContributors": [
     "Elliot67",
@@ -101,6 +102,14 @@
       "required": false,
       "title": "Slack Access Token",
       "type": "password"
+    },
+    {
+      "description": "HTTP/HTTPS proxy URL for corporate networks (e.g. http://proxy.example.com:8080). Falls back to HTTPS_PROXY / HTTP_PROXY environment variables if not set.",
+      "name": "proxyUrl",
+      "placeholder": "http://proxy.example.com:8080",
+      "required": false,
+      "title": "Proxy URL",
+      "type": "textfield"
     },
     {
       "title": "Navigation",
@@ -199,23 +208,23 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^2.0.0",
-    "@slack/web-api": "^7.0.4",
-    "date-fns": "^3.6.0",
-    "date-fns-tz": "^3.1.3",
-    "lodash": "^4.17.21",
-    "node-emoji": "^2.1.3"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "@slack/web-api": "^7.14.1",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "lodash": "^4.17.23",
+    "https-proxy-agent": "^7.0.6",
+    "node-emoji": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.17.5",
-    "@types/node": "^22.13.10",
-    "@types/node-emoji": "^2.1.0",
-    "@types/react": "^19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.23",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -225,8 +234,8 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "volta": {
-    "node": "18.16.0",
-    "npm": "9.6.4"
+    "node": "20.15.1",
+    "npm": "10.7.0"
   },
   "platforms": [
     "macOS",

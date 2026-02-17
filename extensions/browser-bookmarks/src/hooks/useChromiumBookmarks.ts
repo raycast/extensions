@@ -78,7 +78,7 @@ async function getChromiumProfilesFallback(path: string) {
     profiles = readdirSync(path, { withFileTypes: true })
       .filter((d) => d.isDirectory() && existsSync(join(path, d.name, "Bookmarks")))
       .map((d) => ({ path: d.name, name: d.name }));
-  } catch (error) {
+  } catch {
     return { profiles: [], defaultProfile: "" };
   }
 
@@ -93,11 +93,18 @@ async function getChromiumProfiles(path: string) {
     return { profiles: [], defaultProfile: "" };
   }
 
-  const file = await read(`${path}/Local State`, "utf-8");
+  let file: string;
+  try {
+    file = await read(`${path}/Local State`, "utf-8");
+  } catch {
+    // Handle permission errors (EPERM) or other file access errors
+    return getChromiumProfilesFallback(path);
+  }
+
   let localState;
   try {
     localState = JSON.parse(file);
-  } catch (e) {
+  } catch {
     return getChromiumProfilesFallback(path);
   }
 
@@ -110,7 +117,7 @@ async function getChromiumProfiles(path: string) {
       try {
         const profileDirectory = readdirSync(`${path}/${profilePath}`);
         return profileDirectory.includes("Bookmarks");
-      } catch (error) {
+      } catch {
         return false;
       }
     })

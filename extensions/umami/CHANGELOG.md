@@ -1,5 +1,10 @@
 # Umami Changelog
 
+## [Security: Pin Transitive Next.js Version] - {PR_MERGE_DATE}
+
+- Added an `overrides.next` pin to `15.5.10` to address transitive Next.js advisories pulled via `@umami/api-client`/`next-basics`.
+- Refreshed `package-lock.json` accordingly.
+
 ## [Fix Website Stats Always Zero in Cloud] - 2026-01-25
 
 - Fix: Website Stats are now correctly displayed when using Cloud V3

@@ -47,3 +47,28 @@ export const truncate = (text: string, maxLength: number): string => {
   }
   return text;
 };
+
+const shortWeekday = (d: Date) => d.toLocaleDateString("en-US", { weekday: "short" });
+const shortMonth = (d: Date) => d.toLocaleDateString("en-US", { month: "short" });
+
+export function formatRelativeDate(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  const diffHr = Math.floor(diffMs / 3_600_000);
+  const diffDays = Math.floor(diffMs / 86_400_000);
+
+  if (diffMin < 60) {
+    return `${Math.max(diffMin, 1)}m`;
+  }
+  if (diffHr < 24) {
+    return `${diffHr}h`;
+  }
+  if (diffDays < 7) {
+    return `${shortWeekday(date)} ${date.getDate()}`;
+  }
+  if (date.getFullYear() === now.getFullYear()) {
+    return `${date.getDate()} ${shortMonth(date)}`;
+  }
+  return `${date.getDate()} ${shortMonth(date)} ${String(date.getFullYear()).slice(2)}`;
+}

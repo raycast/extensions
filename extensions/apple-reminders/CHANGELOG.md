@@ -1,5 +1,11 @@
 # Apple Reminders Changelog
 
+## [Fix Quick Add Reminder AI model selection] - 2026-02-10
+
+- Fix Quick Add Reminder to use user's selected AI model instead of hardcoded OpenAI GPT-4o
+- Fix date formatting bug in non-AI path when displaying success messages
+- Resolves: https://github.com/raycast/extensions/issues/23932
+
 ## [Improve search results ordering] - 2026-02-06
 
 - Keep incomplete reminders above completed ones when filtering in My Reminders

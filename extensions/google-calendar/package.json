@@ -10,6 +10,7 @@
     "markusjura",
     "fabitosh",
     "geekyed",
+    "dangkhoipro",
     "0xdhrv"
   ],
   "categories": [
@@ -35,6 +36,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "create-quick-event",
+      "title": "Create Quick Event",
+      "subtitle": "Google Calendar",
+      "description": "Creates a quick event in your Google Calendar",
+      "mode": "view"
     },
     {
       "name": "search-contacts",
@@ -179,6 +187,7 @@
     "@googleapis/people": "^3.0.9",
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.19.1",
+    "chrono-node": "^2.9.0",
     "date-fns": "^4.1.0",
     "humanize-duration": "^3.32.1",
     "nanoid": "^5.1.5",

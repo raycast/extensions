@@ -15,6 +15,7 @@ const execAsync = promisify(exec);
 export async function executeAction(
   action: Action,
   onComplete?: () => void,
+  browser?: string,
 ): Promise<void> {
   const { type, value, label } = action;
 
@@ -26,7 +27,7 @@ export async function executeAction(
         await openApp(value);
         break;
       case "url":
-        await openUrl(value);
+        await openUrl(value, browser);
         break;
       case "folder":
         await openFolder(value);
@@ -55,8 +56,12 @@ async function openApp(appPath: string): Promise<void> {
   await open(appPath);
 }
 
-async function openUrl(url: string): Promise<void> {
-  await open(url);
+async function openUrl(url: string, browser?: string): Promise<void> {
+  if (browser && !url.startsWith("raycast://")) {
+    await open(url, browser);
+  } else {
+    await open(url);
+  }
 }
 
 async function openFolder(folderPath: string): Promise<void> {

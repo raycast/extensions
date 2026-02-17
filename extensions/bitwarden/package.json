@@ -426,15 +426,18 @@
     "execa": "^7.0.0",
     "fast-fuzzy": "^1.12.0",
     "node-stream-zip": "^1.15.0",
-    "otpauth": "^9.4.0"
+    "otplib": "^13.2.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
     "@faker-js/faker": "^7.6.0",
     "@types/jest": "^29.5.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",
+    "babel-jest": "^29.7.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -450,7 +453,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "publish": "npx @raycast/api@latest publish",
+    "publish": "npm run test && npx @raycast/api@latest publish",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "jest --verbose",
