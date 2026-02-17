@@ -63,11 +63,9 @@ export const RemoveWorktree = ({
 
       removeWorktreeFromCache({ projectName, worktreeId: worktree.id, onSuccess: revalidateProjects });
     } catch (e) {
-      if (!(e instanceof Error)) throw e;
-
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to Remove";
-      toast.message = e.message;
+      toast.message = e instanceof Error ? e.message : "An unknown error occurred";
     }
   };
 
