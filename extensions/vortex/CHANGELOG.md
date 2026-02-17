@@ -1,6 +1,6 @@
 # Alby Changelog
 
-## [Fixes] - 2026-02-12
+## [Fixes] - {PR_MERGE_DATE}
 
 - Renamed "Recent Transactions" command to "Transactions".
 - Updated Transactions command icon to PNG format for CI icon validation.
