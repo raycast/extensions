@@ -105,10 +105,26 @@ function verifyChecksum(filePath: string, expectedChecksum: string): Promise<voi
   });
 }
 
+let hasVerifiedBinaryThisSession = false;
+
 async function ensureBinary() {
   if (fs.existsSync(binary)) {
-    await logBinaryInfo();
-    return;
+    // Verify checksum at least once per session to catch corrupt binaries
+    if (!hasVerifiedBinaryThisSession) {
+      try {
+        await verifyChecksum(binary, WINDOWS_BINARY_CHECKSUM);
+        hasVerifiedBinaryThisSession = true;
+      } catch (error) {
+        console.warn("Binary checksum verification failed, re-downloading...", error);
+        fs.unlinkSync(binary);
+        // Continue to download below
+      }
+    }
+
+    if (fs.existsSync(binary)) {
+      await logBinaryInfo();
+      return;
+    }
   }
 
   if (isDownloading && downloadPromise) {
@@ -125,6 +141,7 @@ async function ensureBinary() {
       console.log("Downloading Windows audio CLI binary...");
       await downloadBinary(WINDOWS_BINARY_URL, binary);
       await verifyChecksum(binary, WINDOWS_BINARY_CHECKSUM);
+      hasVerifiedBinaryThisSession = true;
       console.log("Windows audio CLI binary downloaded and verified successfully");
       await logBinaryInfo();
     } catch (error) {
