@@ -38,6 +38,14 @@ function downloadBinary(url: string, dest: string, redirectCount = 0): Promise<v
 
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(dest);
+
+    file.on("error", (error) => {
+      file.close();
+      fs.unlink(dest, () => {
+        reject(error);
+      });
+    });
+
     const request = https.get(url, (response) => {
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
         file.close();
