@@ -4,9 +4,9 @@ import {
   AI,
   Clipboard,
   Detail,
+  Form,
   getPreferenceValues,
   Icon,
-  LaunchProps,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -22,12 +22,12 @@ import { RaycastResponse } from "./types";
 const PROD_API_BASE_URL = "https://api.townspot.co/api";
 const DEFAULT_LOCALE = "en-GB";
 
-type CommandArguments = {
-  prompt?: string;
-};
-
 type Preferences = {
   locale?: string;
+};
+
+type AskTownspotAiFormValues = {
+  prompt: string;
 };
 
 const normalizeLocale = (locale: string | undefined): string => {
@@ -38,28 +38,12 @@ const normalizeLocale = (locale: string | undefined): string => {
 const normalizePrompt = (value: string | undefined): string =>
   String(value || "").trim();
 
-const formatFallbackMarkdown = (prompt: string): string =>
-  [
-    "# Ask TownSpot AI",
-    "",
-    "Launch this command with a prompt argument.",
-    "",
-    "Examples:",
-    "- `kids events this weekend`",
-    "- `live music tonight`",
-    "- `free events this week`",
-    "",
-    `Current prompt: ${prompt || "_empty_"}`,
-  ].join("\n");
-
 const buildResultMarkdown = (
   prompt: string,
   townName: string,
   aiAnswer: string,
   errorMessage: string,
 ): string => {
-  if (!prompt) return formatFallbackMarkdown(prompt);
-
   const sections: string[] = [
     `# TownSpot AI · ${townName || "your town"}`,
     "",
@@ -75,10 +59,11 @@ const buildResultMarkdown = (
   return sections.join("\n");
 };
 
-export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
+export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const locale = normalizeLocale(preferences.locale);
-  const prompt = useMemo(() => normalizePrompt(props.arguments.prompt), [props.arguments.prompt]);
+  const [draftPrompt, setDraftPrompt] = useState("");
+  const [submittedPrompt, setSubmittedPrompt] = useState("");
 
   const [townName, setTownName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -91,7 +76,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
     let cancelled = false;
 
     const run = async () => {
-      if (!prompt) {
+      if (!submittedPrompt) {
         setTownName("");
         setTownSource("home");
         setErrorMessage("");
@@ -107,14 +92,14 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       setResponse(null);
 
       try {
-        const resolvedTown = await resolveTownForPrompt(PROD_API_BASE_URL, prompt);
+        const resolvedTown = await resolveTownForPrompt(PROD_API_BASE_URL, submittedPrompt);
         const town = resolvedTown.town;
         if (cancelled) return;
         setTownName(town.name);
         setTownSource(resolvedTown.source);
 
         const groundedResponse = await askTownspot({
-          query: prompt,
+          query: submittedPrompt,
           townSlug: town.slug,
           locale,
           limit: 12,
@@ -125,7 +110,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
         setResponse(groundedResponse);
 
         const aiPrompt = buildTownspotAiPrompt({
-          query: prompt,
+          query: submittedPrompt,
           townName: town.name,
           apiAnswer: groundedResponse.answer,
           events: groundedResponse.events,
@@ -158,11 +143,11 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
     return () => {
       cancelled = true;
     };
-  }, [locale, prompt]);
+  }, [locale, submittedPrompt]);
 
   const markdown = useMemo(
-    () => buildResultMarkdown(prompt, townName, aiAnswer, errorMessage),
-    [aiAnswer, errorMessage, prompt, townName],
+    () => buildResultMarkdown(submittedPrompt, townName, aiAnswer, errorMessage),
+    [aiAnswer, errorMessage, submittedPrompt, townName],
   );
 
   const subtitle =
@@ -174,6 +159,42 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
 
   const firstEventUrl = response?.events?.[0]?.url;
 
+  if (!submittedPrompt) {
+    return (
+      <Form
+        navigationTitle="Ask TownSpot AI"
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Ask TownSpot AI"
+              onSubmit={async (values: AskTownspotAiFormValues) => {
+                const normalized = normalizePrompt(values.prompt);
+                if (!normalized) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Enter a question",
+                    message: "Try: kids events this weekend",
+                  });
+                  return;
+                }
+                setSubmittedPrompt(normalized);
+              }}
+            />
+          </ActionPanel>
+        }
+      >
+        <Form.Description text="Ask naturally. TownSpot AI will answer using TownSpot event listings." />
+        <Form.TextArea
+          id="prompt"
+          title="Question"
+          placeholder="kids events this weekend"
+          value={draftPrompt}
+          onChange={setDraftPrompt}
+        />
+      </Form>
+    );
+  }
+
   return (
     <Detail
       navigationTitle={subtitle}
@@ -181,6 +202,14 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       markdown={markdown}
       actions={
         <ActionPanel>
+          <Action
+            title="Ask Another Question"
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            onAction={() => {
+              setDraftPrompt(submittedPrompt);
+              setSubmittedPrompt("");
+            }}
+          />
           {firstEventUrl ? <Action.OpenInBrowser title="Open First Listing" url={firstEventUrl} /> : null}
           {aiAnswer ? <Action.CopyToClipboard title="Copy AI Answer" content={aiAnswer} /> : null}
           {response?.events?.length ? (
