@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-17
 - Improve binary download for windows (downloads and checks if binary exists at runtime)
 
 ## [Update] - 2026-02-16
