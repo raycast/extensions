@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Application,
+  Color,
   Icon,
   List,
   getPreferenceValues,
@@ -14,6 +15,7 @@ import { stat } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
+import { useState } from "react";
 
 const execFileAsync = promisify(execFile);
 
@@ -29,10 +31,13 @@ type InvalidRepo = {
   reason: string;
 };
 
+type WorktreeStatus = "synced" | "clean" | "dirty";
+
 type Worktree = {
   path: string;
   branch?: string;
   detached: boolean;
+  status: WorktreeStatus;
 };
 
 type RepoWorktrees = {
@@ -94,6 +99,7 @@ function parseWorktreeListOutput(stdout: string): Worktree[] {
           path: current.path,
           branch: current.branch,
           detached: current.detached ?? false,
+          status: "clean",
         });
       }
 
@@ -120,15 +126,49 @@ function parseWorktreeListOutput(stdout: string): Worktree[] {
       path: current.path,
       branch: current.branch,
       detached: current.detached ?? false,
+      status: "clean",
     });
   }
 
   return worktrees;
 }
 
+async function getWorktreeStatus(worktreePath: string): Promise<WorktreeStatus> {
+  const { stdout: porcelain } = await execFileAsync("git", ["-C", worktreePath, "status", "--porcelain"]);
+  if (porcelain.trim().length > 0) {
+    return "dirty";
+  }
+
+  try {
+    const { stdout: revList } = await execFileAsync("git", [
+      "-C",
+      worktreePath,
+      "rev-list",
+      "--left-right",
+      "--count",
+      "HEAD...@{upstream}",
+    ]);
+    const [ahead, behind] = revList.trim().split(/\s+/).map(Number);
+    if (ahead === 0 && behind === 0) {
+      return "synced";
+    }
+    return "clean";
+  } catch {
+    // No upstream configured — can't determine sync status
+    return "clean";
+  }
+}
+
 async function getRepoWorktrees(repoPath: string): Promise<Worktree[]> {
   const { stdout } = await execFileAsync("git", ["-C", repoPath, "worktree", "list", "--porcelain"]);
-  return parseWorktreeListOutput(stdout);
+  const worktrees = parseWorktreeListOutput(stdout);
+
+  return Promise.all(
+    worktrees.map(async (wt) => ({
+      ...wt,
+      status: await getWorktreeStatus(wt.path),
+    })),
+  );
 }
 
 async function scanWorktrees(rawRepos: string): Promise<WorktreeScanResult> {
@@ -180,12 +220,42 @@ async function scanWorktrees(rawRepos: string): Promise<WorktreeScanResult> {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { data, isLoading } = usePromise(scanWorktrees, [preferences.repositories]);
+  const [searchText, setSearchText] = useState("");
+
+  const filteredRepos =
+    data?.repos.flatMap((repo) => {
+      const repoMatches = repo.name.toLowerCase().includes(searchText.toLowerCase());
+      const worktreeMatches = repo.worktrees.filter(
+        (worktree) =>
+          worktree.path.toLowerCase().includes(searchText.toLowerCase()) ||
+          worktree.branch?.toLowerCase().includes(searchText.toLowerCase()) ||
+          worktree.status.toLowerCase().includes(searchText.toLowerCase()),
+      );
+
+      if (repoMatches) {
+        return repo;
+      }
+
+      if (worktreeMatches.length > 0) {
+        return {
+          ...repo,
+          worktrees: worktreeMatches,
+        };
+      }
+
+      return [];
+    }) ?? [];
 
   const ide = preferences.defaultIDE;
   const terminal = preferences.defaultTerminal;
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search worktrees from configured repositories">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search worktrees by repo, path, branch, status"
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
       {data?.invalidRepos.length ? (
         <List.Section title="Invalid repositories">
           {data.invalidRepos.map((invalidRepo) => (
@@ -204,16 +274,27 @@ export default function Command() {
           ))}
         </List.Section>
       ) : null}
-
-      {data?.repos.map((repo) => (
+      {filteredRepos.map((repo) => (
         <List.Section key={repo.path} title={repo.name} subtitle={`${repo.worktrees.length} worktrees · ${repo.path}`}>
           {repo.worktrees.map((worktree) => (
             <List.Item
               key={worktree.path}
               icon={Icon.Folder}
-              title={path.basename(worktree.path)}
+              title={worktree.detached ? "Detached" : (worktree.branch ?? "unknown")}
               subtitle={worktree.path}
-              accessories={[{ text: worktree.detached ? "detached" : (worktree.branch ?? "unknown") }]}
+              accessories={[
+                {
+                  tag: {
+                    value: capitalize(worktree.status),
+                    color:
+                      worktree.status === "synced"
+                        ? Color.Green
+                        : worktree.status === "clean"
+                          ? Color.Blue
+                          : Color.Orange,
+                  },
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action
@@ -244,3 +325,5 @@ export default function Command() {
     </List>
   );
 }
+
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
