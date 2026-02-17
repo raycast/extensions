@@ -6,12 +6,6 @@
  */
 import { getPreferenceValues } from "@raycast/api";
 
-interface FathomPreferences {
-  fathomApiKey: string;
-  exportDirectory?: string;
-  verboseLogging?: boolean;
-}
-
 // Validation state: avoids repeated API calls with a known-bad key
 let apiKeyValidationState: "unknown" | "valid" | "invalid" = "unknown";
 
@@ -24,7 +18,7 @@ let apiKeyValidationState: "unknown" | "valid" | "invalid" = "unknown";
  * @throws Error if the API key is missing (empty or not configured)
  */
 export function getFathomApiKey(): string {
-  const prefs = getPreferenceValues<FathomPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const key = prefs.fathomApiKey?.trim();
 
   if (!key) {
@@ -56,6 +50,6 @@ export function resetApiKeyValidation(): void {
 
 /** Check if an API key is configured (non-throwing, for component-level guards) */
 export function hasApiKey(): boolean {
-  const prefs = getPreferenceValues<FathomPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   return !!prefs.fathomApiKey?.trim();
 }
