@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Application,
   Color,
   Icon,
   List,
@@ -18,12 +17,6 @@ import { promisify } from "node:util";
 import { useState } from "react";
 
 const execFileAsync = promisify(execFile);
-
-type Preferences = {
-  repositories: string;
-  defaultIDE: Application;
-  defaultTerminal: Application;
-};
 
 type InvalidRepo = {
   input: string;
@@ -303,18 +296,22 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action
-                    title={`Open in ${ide.name}`}
-                    icon={{ fileIcon: ide.path }}
-                    onAction={() => open(worktree.path, ide)}
-                  />
+                  {ide ? (
+                    <Action
+                      title={`Open in ${ide.name}`}
+                      icon={{ fileIcon: ide.path }}
+                      onAction={() => open(worktree.path, ide)}
+                    />
+                  ) : null}
                   <Action.CopyToClipboard content={worktree.path} />
-                  <Action
-                    title={`Open in ${terminal.name}`}
-                    icon={{ fileIcon: terminal.path }}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
-                    onAction={() => open(worktree.path, terminal)}
-                  />
+                  {terminal ? (
+                    <Action
+                      title={`Open in ${terminal.name}`}
+                      icon={{ fileIcon: terminal.path }}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      onAction={() => open(worktree.path, terminal)}
+                    />
+                  ) : null}
                   <Action.ShowInFinder path={worktree.path} />
                   <Action.CopyToClipboard
                     title="Copy Repository Path"
