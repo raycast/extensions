@@ -193,7 +193,7 @@ export default function Command() {
       "",
       "## Connection",
       hasCredentials
-        ? `\`${maskConnectionString(selectedDb.connectionString)}\``
+        ? `\`${maskConnectionString(selectedDb.connectionString ?? "")}\``
         : "_No connection string set. Use **Edit Credentials** to add one._",
       "",
       "## Exclusion rules",

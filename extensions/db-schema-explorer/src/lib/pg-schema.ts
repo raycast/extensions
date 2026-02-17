@@ -104,25 +104,27 @@ const UNIQUES_QUERY = `
 
 const FOREIGN_KEYS_QUERY = `
   SELECT
-    fk.table_schema AS table_schema,
-    fk.table_name AS table_name,
-    fk.column_name AS column_name,
-    fk.ordinal_position AS ordinal_position,
-    rc.constraint_name AS constraint_name,
-    pk.table_schema AS ref_table_schema,
-    pk.table_name AS ref_table_name,
-    pk.column_name AS ref_column_name
-  FROM information_schema.referential_constraints rc
-  JOIN information_schema.key_column_usage fk
-    ON rc.constraint_catalog = fk.constraint_catalog
-   AND rc.constraint_schema = fk.constraint_schema
-   AND rc.constraint_name = fk.constraint_name
-  JOIN information_schema.constraint_column_usage pk
-    ON rc.unique_constraint_catalog = pk.constraint_catalog
-   AND rc.unique_constraint_schema = pk.constraint_schema
-   AND rc.unique_constraint_name = pk.constraint_name
-  WHERE fk.table_schema NOT IN ('pg_catalog', 'information_schema')
-  ORDER BY fk.table_schema, fk.table_name, rc.constraint_name, fk.ordinal_position
+    src_ns.nspname AS table_schema,
+    src_tbl.relname AS table_name,
+    src_att.attname AS column_name,
+    src_pos.ordinality AS ordinal_position,
+    con.conname AS constraint_name,
+    ref_ns.nspname AS ref_table_schema,
+    ref_tbl.relname AS ref_table_name,
+    ref_att.attname AS ref_column_name
+  FROM pg_constraint con
+  JOIN pg_class src_tbl ON src_tbl.oid = con.conrelid
+  JOIN pg_namespace src_ns ON src_ns.oid = src_tbl.relnamespace
+  JOIN pg_class ref_tbl ON ref_tbl.oid = con.confrelid
+  JOIN pg_namespace ref_ns ON ref_ns.oid = ref_tbl.relnamespace
+  JOIN LATERAL unnest(con.conkey) WITH ORDINALITY AS src_pos(attnum, ordinality) ON true
+  JOIN LATERAL unnest(con.confkey) WITH ORDINALITY AS ref_pos(attnum, ordinality)
+    ON ref_pos.ordinality = src_pos.ordinality
+  JOIN pg_attribute src_att ON src_att.attrelid = src_tbl.oid AND src_att.attnum = src_pos.attnum
+  JOIN pg_attribute ref_att ON ref_att.attrelid = ref_tbl.oid AND ref_att.attnum = ref_pos.attnum
+  WHERE con.contype = 'f'
+    AND src_ns.nspname NOT IN ('pg_catalog', 'information_schema')
+  ORDER BY src_ns.nspname, src_tbl.relname, con.conname, src_pos.ordinality
 `;
 
 const INDEXES_QUERY = `

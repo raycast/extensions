@@ -31,9 +31,9 @@ function formatType(col: ColumnRow, enumTypeByUdt: Map<string, { schema: string;
       return col.character_maximum_length != null ? `character(${col.character_maximum_length})` : "character(1)";
     case "numeric":
     case "decimal": {
-      const p = col.numeric_precision != null ? col.numeric_precision : 0;
-      const s = col.numeric_scale != null ? col.numeric_scale : 0;
-      return s > 0 ? `numeric(${p},${s})` : `numeric(${p})`;
+      if (col.numeric_precision == null) return "numeric";
+      if (col.numeric_scale == null || col.numeric_scale === 0) return `numeric(${col.numeric_precision})`;
+      return `numeric(${col.numeric_precision},${col.numeric_scale})`;
     }
     case "timestamp with time zone":
       return "timestamp with time zone";

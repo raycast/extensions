@@ -17,6 +17,7 @@ export function parseConnectionConfig(connectionString: string): ClientConfig {
   const database = url.pathname ? url.pathname.slice(1) : undefined;
   const port = url.port ? parseInt(url.port, 10) : 5432;
   const sslmode = url.searchParams.get("sslmode")?.toLowerCase();
+  const sslParam = url.searchParams.get("ssl")?.toLowerCase();
 
   let ssl: ClientConfig["ssl"];
   switch (sslmode) {
@@ -39,10 +40,15 @@ export function parseConnectionConfig(connectionString: string): ClientConfig {
       ssl = { rejectUnauthorized: true };
       break;
     default:
-      // Default: no SSL for maximum compatibility
-      // This works with localhost, local databases, and servers without SSL
-      // Users can add ?sslmode=require or ?sslmode=verify-ca to enable SSL
-      ssl = false;
+      // Support common URLs that specify "ssl=true" instead of sslmode.
+      if (sslParam === "true" || sslParam === "1" || sslParam === "yes" || sslParam === "require") {
+        ssl = { rejectUnauthorized: false };
+      } else if (sslParam === "false" || sslParam === "0" || sslParam === "no") {
+        ssl = false;
+      } else {
+        // Default: no SSL for maximum compatibility.
+        ssl = false;
+      }
       break;
   }
 

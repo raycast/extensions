@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List, launchCommand, LaunchType, type LaunchProps, Icon } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getDatabases, getDefaultDatabase, type StoredDatabase } from "./lib/databases";
 import { readSchemaCache, type SchemaCache, type TableCacheEntry } from "./lib/cache";
 import { filterTables, getExclusionRules, type ExclusionRule } from "./lib/exclusion";
@@ -33,9 +33,12 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
   const [cache, setCache] = useState<SchemaCache | null>(null);
   const [exclusionRules, setExclusionRules] = useState<ExclusionRule[]>([]);
   const [selectedTableKeys, setSelectedTableKeys] = useState<Set<string>>(new Set());
+  const loadSeqRef = useRef(0);
 
   const loadDataForDb = useCallback(async (dbId: string) => {
+    const seq = ++loadSeqRef.current;
     const [cacheData, rules] = await Promise.all([Promise.resolve(readSchemaCache(dbId)), getExclusionRules(dbId)]);
+    if (seq !== loadSeqRef.current) return;
     setCache(cacheData);
     setExclusionRules(rules);
   }, []);
@@ -92,10 +95,10 @@ export default function Command(props: LaunchProps<{ launchContext?: ExploreLaun
 
   const refresh = useCallback(() => {
     if (activeDbId) {
-      setCache(readSchemaCache(activeDbId));
-      getExclusionRules(activeDbId).then(setExclusionRules);
+      setSelectedTableKeys(new Set());
+      loadDataForDb(activeDbId);
     }
-  }, [activeDbId]);
+  }, [activeDbId, loadDataForDb]);
 
   const allItems = useMemo(() => (cache ? tableEntries(cache) : []), [cache]);
   const items = useMemo(() => filterTables(allItems, exclusionRules), [allItems, exclusionRules]);

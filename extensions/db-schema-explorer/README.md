@@ -28,7 +28,7 @@ Get database schema (tables, columns, relations) from PostgreSQL and MongoDB for
 
    ```bash
    git clone <repository-url>
-   cd "DB schema explorer"
+   cd "<repository-directory>/extensions/db-schema-explorer"
    npm install
    npm run build
    ```
@@ -174,19 +174,15 @@ Examples:
 
 ## Screenshots
 
-![Manage Databases](metadata/db-schema-explorer-1.png)
-
-_Manage your database connections, credentials, and exclusion rules_
-
-![Sync Schema](metadata/db-schema-explorer-2.png)
+![Sync Schema](metadata/db-schema-explorer-1.png)
 
 _Sync database schemas to cache them locally for fast access_
 
-![Explore Tables](metadata/db-schema-explorer-3.png)
+![Explore Tables](metadata/db-schema-explorer-2.png)
 
 _Browse tables, view DDL, and copy schema information_
 
-![Table Details](metadata/db-schema-explorer-4.png)
+![Table Details](metadata/db-schema-explorer-3.png)
 
 _View detailed table structure and copy DDL statements_
 
