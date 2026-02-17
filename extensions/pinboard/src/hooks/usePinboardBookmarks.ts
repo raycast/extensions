@@ -9,7 +9,8 @@ const CACHE_KEY_LAST_UPDATED = "pinboard_last_updated";
 const MAX_RESULTS = 100;
 
 interface UsePinboardBookmarksOptions {
-  constantTags?: string[];
+  /** Space-separated tag string (primitive = stable dependency) */
+  constantTags?: string;
   readLater?: boolean;
 }
 
@@ -42,24 +43,26 @@ function setCachedLastUpdated(timestamp: string) {
   cache.set(CACHE_KEY_LAST_UPDATED, timestamp);
 }
 
+function hasCachedBookmarks(): boolean {
+  return !!cache.get(CACHE_KEY_BOOKMARKS);
+}
+
 export function usePinboardBookmarks(options?: UsePinboardBookmarksOptions): UsePinboardBookmarksResult {
   const [allBookmarks, setAllBookmarks] = useState<Bookmark[]>(() => getCachedBookmarks());
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const fetchedRef = useRef(false);
-  const constantTagsKey = options?.constantTags?.join(",") ?? "";
 
   useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
 
-    const cachedCount = allBookmarks.length;
     (async () => {
       try {
         const lastUpdated = await fetchLastUpdated();
         const cachedLastUpdated = getCachedLastUpdated();
 
-        if (cachedLastUpdated === lastUpdated && cachedCount > 0) {
+        if (cachedLastUpdated === lastUpdated && hasCachedBookmarks()) {
           setIsLoading(false);
           return;
         }
@@ -75,27 +78,28 @@ export function usePinboardBookmarks(options?: UsePinboardBookmarksOptions): Use
         setIsLoading(false);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const constantTags = options?.constantTags;
+  const readLater = options?.readLater;
 
   const preFiltered = useMemo(() => {
     let result = allBookmarks;
 
-    if (options?.constantTags?.length) {
-      const tags = options.constantTags;
+    if (constantTags) {
+      const tagList = constantTags.split(" ").filter(Boolean);
       result = result.filter((b) => {
         const bookmarkTags = b.tags?.split(" ") ?? [];
-        return bookmarkTags.some((t) => tags.includes(t));
+        return bookmarkTags.some((t) => tagList.includes(t));
       });
     }
 
-    if (options?.readLater) {
+    if (readLater) {
       result = result.filter((b) => b.readLater);
     }
 
     return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allBookmarks, constantTagsKey, options?.readLater]);
+  }, [allBookmarks, constantTags, readLater]);
 
   const bookmarks = useMemo(() => {
     if (!searchText.trim()) {

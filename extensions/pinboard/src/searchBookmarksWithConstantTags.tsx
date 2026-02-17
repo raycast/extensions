@@ -13,13 +13,12 @@ import { BookmarkListItem, EmptyView } from "./components";
 
 export default function Command() {
   const { constantTags } = getPreferenceValues<Preferences>();
-  const tagList = constantTags?.split(" ").filter(Boolean) ?? [];
 
   const [readLater, setReadLater] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
 
   const { bookmarks, isLoading, setSearchText, removeBookmark } = usePinboardBookmarks({
-    constantTags: tagList.length > 0 ? tagList : undefined,
+    constantTags: constantTags || undefined,
     readLater: readLater || undefined,
   });
 
