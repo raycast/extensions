@@ -37,7 +37,7 @@ function decodeHTMLEntities(text?: string) {
       apos: "'",
       lt: "<",
       gt: ">",
-      ndash: "-",
+      ndash: "/u2013",
       mdash: "—",
       rsquo: "’",
       lsquo: "‘",
@@ -222,7 +222,7 @@ function CopyAsRichText({ work, shortcut }: { work: CrossrefResponse["message"];
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data } = useFetch<CrossrefResponse>(
+  const { isLoading, data, error } = useFetch<CrossrefResponse>(
     searchText ? `https://api.crossref.org/works/${searchText}` : "",
     { execute: !!searchText },
   );
@@ -248,8 +248,11 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Paste DOI (e.g., 10.1038/s41586-020-2649-2)..."
       throttle
-      isShowingDetail
+      isShowingDetail={!!work}
     >
+      {!work && !isLoading && error && (
+        <List.EmptyView icon={Icon.Warning} title="DOI Not Found" description="Please check the DOI and try again." />
+      )}
       {work && (
         <List.Item
           title={`${formatListAuthors(work.author)} (${pubYear})`}
