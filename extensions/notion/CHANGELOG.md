@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Fix "Create Database Page" fails due to missing Data Source handling] - {PR_MERGE_DATE}
+
+- Fix "Create Database Page" command failing after the latest upgrade of "@notionhq/client".
+
 ## [Fix deep linking to Notion pages] - 2026-02-12
 
 - Fix pages not opening to the correct page when using the Notion desktop app ([#23492](https://github.com/raycast/extensions/issues/23492))
