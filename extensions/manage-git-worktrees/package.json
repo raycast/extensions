@@ -41,7 +41,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "view-git-worktrees",
+      "name": "view-worktrees",
       "title": "View Git Worktrees",
       "description": "List all worktrees from configured repositories. Open worktrees in IDE or Terminal, or copy the path to clipboard.",
       "mode": "view"

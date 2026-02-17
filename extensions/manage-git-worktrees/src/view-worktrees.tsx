@@ -1,12 +1,12 @@
 import {
   Action,
   ActionPanel,
+  Application,
   Icon,
   List,
   getPreferenceValues,
   open,
   openExtensionPreferences,
-  showInFinder,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
@@ -19,8 +19,8 @@ const execFileAsync = promisify(execFile);
 
 type Preferences = {
   repositories: string;
-  defaultIDE: string;
-  defaultTerminal: string;
+  defaultIDE: Application;
+  defaultTerminal: Application;
 };
 
 type InvalidRepo = {
@@ -181,6 +181,9 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { data, isLoading } = usePromise(scanWorktrees, [preferences.repositories]);
 
+  const ide = preferences.defaultIDE;
+  const terminal = preferences.defaultTerminal;
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search worktrees from configured repositories">
       {data?.invalidRepos.length ? (
@@ -214,18 +217,18 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Open in IDE"
-                    icon={Icon.Code}
-                    onAction={() => open(worktree.path, preferences.defaultIDE)}
+                    title={`Open in ${ide.name}`}
+                    icon={{ fileIcon: ide.path }}
+                    onAction={() => open(worktree.path, ide)}
                   />
                   <Action.CopyToClipboard content={worktree.path} />
                   <Action
-                    title="Open in Terminal"
-                    icon={Icon.Terminal}
+                    title={`Open in ${terminal.name}`}
+                    icon={{ fileIcon: terminal.path }}
                     shortcut={{ modifiers: ["cmd"], key: "t" }}
-                    onAction={() => open(worktree.path, preferences.defaultTerminal)}
+                    onAction={() => open(worktree.path, terminal)}
                   />
-                  <Action title="Show in Finder" icon={Icon.Folder} onAction={() => showInFinder(worktree.path)} />
+                  <Action.ShowInFinder path={worktree.path} />
                   <Action.CopyToClipboard
                     title="Copy Repository Path"
                     content={repo.path}
