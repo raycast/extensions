@@ -9,6 +9,9 @@
 - `3월 12일 점심 12시 30분에 점심 약속`
 - `오늘 19:00에 운동`
 
+![raycast2x](https://github.com/user-attachments/assets/3dc03d0f-148a-487b-9e10-ad93c08cb901)
+
+
 ## 동작 규칙
 
 - 시간이 없으면 종일 일정으로 생성합니다.
