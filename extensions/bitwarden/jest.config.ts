@@ -3,6 +3,8 @@ import type { JestConfigWithTsJest } from "ts-jest";
 const config: JestConfigWithTsJest = {
   verbose: true,
   preset: "ts-jest",
+  // Network download tests leave HTTP sockets that prevent Jest from exiting cleanly
+  forceExit: true,
   testEnvironment: "node",
   moduleNameMapper: { "^~/(.*)$": "<rootDir>/src/$1" },
   moduleFileExtensions: ["ts", "tsx", "js"],

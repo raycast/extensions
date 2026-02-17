@@ -19,7 +19,7 @@ import {
   VaultIsLockedError,
 } from "~/utils/errors";
 import { join, dirname } from "path";
-import { chmod, rename, rm } from "fs/promises";
+import { chmod, rename, rm, unlink } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
@@ -53,6 +53,7 @@ type ExecProps = {
   resetVaultTimeout: boolean;
   abortController?: AbortController;
   input?: string;
+  env?: Record<string, string>;
 };
 
 type LockOptions = {
@@ -212,6 +213,10 @@ export class Bitwarden {
 
         Cache.set(CACHE_KEYS.CLI_VERSION, cliInfo.version);
         this.wasCliUpdated = true;
+
+        // clear the data.json file to avoid issues with the new binary
+        const dataJsonPath = join(supportPath, "data.json");
+        await tryExec(() => unlink(dataJsonPath));
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
         throw extractError;
@@ -310,13 +315,14 @@ export class Bitwarden {
   }
 
   private async exec(args: string[], options: ExecProps): Promise<ExecaChildProcess> {
-    const { abortController, input = "", resetVaultTimeout } = options ?? {};
+    const { abortController, input = "", resetVaultTimeout, env: envOverrides } = options ?? {};
 
     let env = this.env;
     if (this.tempSessionToken) {
       env = { ...env, BW_SESSION: this.tempSessionToken };
       this.tempSessionToken = undefined;
     }
+    if (envOverrides) env = { ...env, ...envOverrides };
 
     const result = await execa(this.cliPath, args, { input, env, signal: abortController?.signal });
 
@@ -388,6 +394,7 @@ export class Bitwarden {
       }
 
       await this.exec(["lock"], { resetVaultTimeout: false });
+      this.clearSessionToken();
       await this.saveLastVaultStatus("lock", "locked");
       if (!immediate) await this.callActionListeners("lock", reason);
       return { result: undefined };
@@ -401,7 +408,12 @@ export class Bitwarden {
 
   async unlock(password: string): Promise<MaybeError<string>> {
     try {
-      const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"], { resetVaultTimeout: true });
+      this.clearSessionToken();
+      const result = await this.exec(["unlock", "--passwordenv", "BW_PASSWORD", "--raw"], {
+        resetVaultTimeout: true,
+        env: { BW_PASSWORD: password },
+      });
+      const sessionToken = result.stdout;
       if (!sessionToken.trim()) throw new Error("Invalid session token");
       this.setSessionToken(sessionToken);
       await this.saveLastVaultStatus("unlock", "unlocked");
