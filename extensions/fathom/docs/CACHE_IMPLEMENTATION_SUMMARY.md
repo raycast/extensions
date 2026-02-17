@@ -172,7 +172,7 @@ When the user scrolls to the bottom, Raycast List pagination calls `onLoadMore`:
 
 ### Cache Lifecycle
 
-```
+```text
 1. User opens Search Meetings
    ↓
 2. Load cached meetings from LocalStorage (instant)
