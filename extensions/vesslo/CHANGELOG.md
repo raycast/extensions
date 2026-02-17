@@ -1,6 +1,6 @@
 # Vesslo Changelog
 
-## [Improve Safety and Data Accuracy] - {PR_MERGE_DATE}
+## [Improve Safety and Data Accuracy] - 2026-02-17
 
 - Added deleted/skipped/ignored app state to Raycast data export
 - Updates list now excludes deleted, skipped, and ignored apps (aligned with Vesslo app)
