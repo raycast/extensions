@@ -222,9 +222,11 @@ function CopyAsRichText({ work, shortcut }: { work: CrossrefResponse["message"];
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
+  const doi = searchText.replace(/^https?:\/\/doi\.org\//i, "");
+
   const { isLoading, data, error } = useFetch<CrossrefResponse>(
-    searchText ? `https://api.crossref.org/works/${searchText}` : "",
-    { execute: !!searchText },
+    doi ? `https://api.crossref.org/works/${doi}` : "",
+    { execute: !!doi },
   );
   const work = data?.message;
 
