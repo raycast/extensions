@@ -1,8 +1,9 @@
 import { exec } from "child_process";
-import { promisify } from "util";
-import path from "path";
 import { existsSync } from "fs";
-import { GitStatus } from "../types";
+import path from "path";
+import { promisify } from "util";
+
+import { GitStatus } from "@/types";
 
 const execAsync = promisify(exec);
 
@@ -17,7 +18,6 @@ export async function getGitStatus(repoPath: string): Promise<GitStatus | null> 
       cwd: repoPath,
       encoding: "utf8",
     });
-
     const branchName = branch.trim();
 
     try {
@@ -26,6 +26,7 @@ export async function getGitStatus(repoPath: string): Promise<GitStatus | null> 
         encoding: "utf8",
       });
       const [ahead, behind] = counts.trim().split(/\s+/).map(Number);
+
       return {
         branch: branchName,
         pull: behind || 0,

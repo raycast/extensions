@@ -1,39 +1,40 @@
-import { useCallback, useEffect, useState } from "react";
-import { useCachedState, useCachedPromise } from "@raycast/utils";
-import { getGitStatus } from "../utils/git";
-import {
-  getStoredWorkspaces,
-  getStoredApp,
-  getWorkspaceApps,
-  getStoredWalkthroughCompleted,
-  setStoredWalkthroughCompleted,
-  saveStoredApp,
-  saveStoredWorkspaces,
-  getStoredPinnedProjects,
-  saveStoredPinnedProjects,
-  getStoredTerminalApp,
-  saveStoredTerminalApp,
-} from "../utils/storage";
-import { Project, App } from "../types";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { readdirSync } from "fs";
 import path from "path";
+import { useCallback, useEffect, useState } from "react";
+
+import { App, Project } from "@/types";
+import { getGitStatus } from "@/utils/git";
+import {
+  getStoredApp,
+  getStoredOnboardingCompleted,
+  getStoredPinnedProjects,
+  getStoredTerminalApp,
+  getStoredWorkspaces,
+  getWorkspaceApps,
+  saveStoredApp,
+  saveStoredPinnedProjects,
+  saveStoredTerminalApp,
+  saveStoredWorkspaces,
+  setStoredOnboardingCompleted,
+} from "@/utils/storage";
 
 export interface UseWorkspaceReturn {
-  workspaces: string[];
-  projects: Project[] | undefined;
-  pinnedProjects: string[];
   defaultApp: App | null;
-  terminalApp: App | null;
-  workspaceApps: Record<string, App>;
+  getSubdirectories: (parentPath: string) => Project[];
   isLoading: boolean;
   loadData: () => Promise<void>;
-  getSubdirectories: (parentPath: string) => Project[];
-  walkthroughCompleted: boolean;
-  setWalkthroughCompleted: (completed: boolean) => Promise<void>;
+  onboardingCompleted: boolean;
+  pinnedProjects: string[];
+  projects: Project[] | undefined;
+  setOnboardingCompleted: (completed: boolean) => Promise<void>;
+  terminalApp: App | null;
   togglePinProject: (projectPath: string) => Promise<void>;
-  updateWorkspaces: (newWorkspaces: string[]) => Promise<void>;
   updateDefaultApp: (app: App | null) => Promise<void>;
   updateTerminalApp: (app: App | null) => Promise<void>;
+  updateWorkspaces: (newWorkspaces: string[]) => Promise<void>;
+  workspaceApps: Record<string, App>;
+  workspaces: string[];
 }
 
 export function useWorkspace(): UseWorkspaceReturn {
@@ -42,18 +43,19 @@ export function useWorkspace(): UseWorkspaceReturn {
   const [defaultApp, setDefaultApp] = useCachedState<App | null>("default-app", null);
   const [terminalApp, setTerminalApp] = useCachedState<App | null>("terminal-app", null);
   const [workspaceApps, setWorkspaceApps] = useCachedState<Record<string, App>>("workspace-apps", {});
-  const [walkthroughCompleted, setWalkthroughCompleted] = useCachedState<boolean>("walkthrough-completed", false);
+  const [onboardingCompleted, setOnboardingCompleted] = useCachedState<boolean>("onboarding-completed", false);
   const [isLoading, setIsLoading] = useState(true);
 
   const getSubdirectories = useCallback((parentPath: string): Project[] => {
     try {
       const entries = readdirSync(parentPath, { withFileTypes: true });
+
       return entries
         .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((entry) => ({
-          name: entry.name,
           fullPath: path.join(parentPath, entry.name),
+          name: entry.name,
           parentFolder: parentPath,
         }));
     } catch {
@@ -64,10 +66,10 @@ export function useWorkspace(): UseWorkspaceReturn {
   const { data: projects, isLoading: isProjectsLoading } = useCachedPromise(
     async (workspaces: string[]) => {
       const allProjects = workspaces.flatMap((workspace) => getSubdirectories(workspace));
-
       const projectsWithStatus = await Promise.all(
         allProjects.map(async (project) => {
           const status = await getGitStatus(project.fullPath);
+
           return { ...project, gitStatus: status };
         }),
       );
@@ -85,14 +87,14 @@ export function useWorkspace(): UseWorkspaceReturn {
       storedWorkspaces,
       storedApp,
       storedWorkspaceApps,
-      storedWalkthroughCompleted,
+      storedOnboardingCompleted,
       storedPinnedProjects,
       storedTerminalApp,
     ] = await Promise.all([
       getStoredWorkspaces(),
       getStoredApp(),
       getWorkspaceApps(),
-      getStoredWalkthroughCompleted(),
+      getStoredOnboardingCompleted(),
       getStoredPinnedProjects(),
       getStoredTerminalApp(),
     ]);
@@ -100,19 +102,20 @@ export function useWorkspace(): UseWorkspaceReturn {
     setWorkspaces(storedWorkspaces);
     setDefaultApp(storedApp);
     setWorkspaceApps(storedWorkspaceApps);
-    setWalkthroughCompleted(storedWalkthroughCompleted);
+    setOnboardingCompleted(storedOnboardingCompleted);
     setPinnedProjects(storedPinnedProjects);
     setTerminalApp(storedTerminalApp);
     setIsLoading(false);
-  }, [setWorkspaces, setDefaultApp, setWorkspaceApps, setWalkthroughCompleted, setPinnedProjects]);
+  }, [setWorkspaces, setDefaultApp, setWorkspaceApps, setOnboardingCompleted, setPinnedProjects]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  const setWalkthroughCompletedState = async (completed: boolean): Promise<void> => {
-    await setStoredWalkthroughCompleted(completed);
-    setWalkthroughCompleted(completed);
+  const setOnboardingCompletedState = async (completed: boolean): Promise<void> => {
+    await setStoredOnboardingCompleted(completed);
+
+    setOnboardingCompleted(completed);
   };
 
   const togglePinProject = async (projectPath: string): Promise<void> => {
@@ -121,11 +124,13 @@ export function useWorkspace(): UseWorkspaceReturn {
       : [...pinnedProjects, projectPath];
 
     await saveStoredPinnedProjects(newPinned);
+
     setPinnedProjects(newPinned);
   };
 
   const updateWorkspaces = async (newWorkspaces: string[]): Promise<void> => {
     await saveStoredWorkspaces(newWorkspaces);
+
     setWorkspaces(newWorkspaces);
   };
 
@@ -133,29 +138,31 @@ export function useWorkspace(): UseWorkspaceReturn {
     if (app) {
       await saveStoredApp(app);
     }
+
     setDefaultApp(app);
   };
 
   const updateTerminalApp = async (app: App | null): Promise<void> => {
     await saveStoredTerminalApp(app);
+
     setTerminalApp(app);
   };
 
   return {
-    workspaces,
-    projects,
-    pinnedProjects,
     defaultApp,
-    terminalApp,
-    workspaceApps,
+    getSubdirectories,
     isLoading: isLoading || isProjectsLoading,
     loadData,
-    getSubdirectories,
-    walkthroughCompleted,
-    setWalkthroughCompleted: setWalkthroughCompletedState,
+    onboardingCompleted,
+    pinnedProjects,
+    projects,
+    setOnboardingCompleted: setOnboardingCompletedState,
+    terminalApp,
     togglePinProject,
-    updateWorkspaces,
     updateDefaultApp,
     updateTerminalApp,
+    updateWorkspaces,
+    workspaceApps,
+    workspaces,
   };
 }

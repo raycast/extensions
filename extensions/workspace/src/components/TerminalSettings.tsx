@@ -1,55 +1,57 @@
-import { Action, ActionPanel, Icon, List, useNavigation, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { type Application, getApplications } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getApplications, type Application } from "@raycast/api";
 
-import { saveStoredTerminalApp } from "../utils/storage";
+import { saveStoredTerminalApp } from "@/utils/storage";
 
 export default function TerminalSettings() {
   const { pop } = useNavigation();
-  const { isLoading, data: apps } = usePromise(getApplications);
+  const { data: apps, isLoading } = usePromise(getApplications);
 
   const setTerminal = async (app: Application) => {
-    await saveStoredTerminalApp({ name: app.name, bundleId: app.bundleId || "" });
+    await saveStoredTerminalApp({ bundleId: app.bundleId || "", name: app.name });
     await showToast({
+      message: app.name,
       style: Toast.Style.Success,
       title: "App Updated",
-      message: app.name,
     });
+
     pop();
   };
 
   const resetTerminal = async () => {
     await saveStoredTerminalApp(null);
     await showToast({
+      message: "Default",
       style: Toast.Style.Success,
       title: "App Updated",
-      message: "Default",
     });
+
     pop();
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search for an app..." navigationTitle="Terminal">
+    <List isLoading={isLoading} navigationTitle="Terminal" searchBarPlaceholder="Search for an app...">
       <List.Item
-        title="Default"
-        subtitle="Use the default terminal from settings"
-        icon={Icon.ArrowCounterClockwise}
         actions={
           <ActionPanel>
-            <Action title="Reset to Default" onAction={resetTerminal} />
+            <Action onAction={resetTerminal} title="Reset to Default" />
           </ActionPanel>
         }
+        icon={Icon.ArrowCounterClockwise}
+        subtitle="Use the default terminal from settings"
+        title="Default"
       />
       {apps?.map((app) => (
         <List.Item
-          key={app.bundleId || app.path}
-          title={app.name}
-          icon={{ fileIcon: app.path }}
           actions={
             <ActionPanel>
-              <Action title="Select App" icon={Icon.Check} onAction={() => setTerminal(app)} />
+              <Action icon={Icon.Check} onAction={() => setTerminal(app)} title="Select App" />
             </ActionPanel>
           }
+          icon={{ fileIcon: app.path }}
+          key={app.bundleId || app.path}
+          title={app.name}
         />
       ))}
     </List>

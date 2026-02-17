@@ -1,60 +1,62 @@
-import { Action, ActionPanel, Icon, List, useNavigation, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { type Application, getApplications } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getApplications, type Application } from "@raycast/api";
 
-import { saveStoredApp } from "../utils/storage";
+import { saveStoredApp } from "@/utils/storage";
 
 interface SelectEditorProps {
-  onSelect?: (app: Application) => void;
   onReset?: () => void;
+  onSelect?: (app: Application) => void;
 }
 
-export default function SelectEditor({ onSelect, onReset }: SelectEditorProps) {
+export default function SelectEditor({ onReset, onSelect }: SelectEditorProps) {
   const { pop } = useNavigation();
-  const { isLoading, data: apps } = usePromise(getApplications);
+  const { data: apps, isLoading } = usePromise(getApplications);
 
   const setEditor = async (app: Application) => {
     if (onSelect) {
       onSelect(app);
       pop();
+
       return;
     }
 
-    await saveStoredApp({ name: app.name, bundleId: app.bundleId || "" });
-    await showToast({ style: Toast.Style.Success, title: "App Updated", message: app.name });
+    await saveStoredApp({ bundleId: app.bundleId || "", name: app.name });
+    await showToast({ message: app.name, style: Toast.Style.Success, title: "App Updated" });
+
     pop();
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search for an app..." navigationTitle="Select App">
+    <List isLoading={isLoading} navigationTitle="Select App" searchBarPlaceholder="Search for an app...">
       {onReset && (
         <List.Item
-          title="Default"
-          subtitle="Use the default application from settings"
-          icon={Icon.ArrowCounterClockwise}
           actions={
             <ActionPanel>
               <Action
-                title="Reset to Default"
                 onAction={() => {
                   onReset();
                   pop();
                 }}
+                title="Reset to Default"
               />
             </ActionPanel>
           }
+          icon={Icon.ArrowCounterClockwise}
+          subtitle="Use the default application from settings"
+          title="Default"
         />
       )}
       {apps?.map((app) => (
         <List.Item
-          key={app.path}
-          title={app.name}
-          icon={{ fileIcon: app.path }}
           actions={
             <ActionPanel>
-              <Action title="Select App" icon={Icon.Check} onAction={() => setEditor(app)} />
+              <Action icon={Icon.Check} onAction={() => setEditor(app)} title="Select App" />
             </ActionPanel>
           }
+          icon={{ fileIcon: app.path }}
+          key={app.path}
+          title={app.name}
         />
       ))}
     </List>

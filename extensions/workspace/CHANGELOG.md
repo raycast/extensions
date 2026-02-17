@@ -9,7 +9,7 @@
 - Project pinning for quick access to favorite projects.
 - Customizable application overrides per folder/project.
 - Dedicated copy actions for project names and paths.
-- Onboarding walkthrough for initial setup.
+- Initial onboarding experience for setup.
 - Advanced settings for default application and workspace management.
 
 ### Fixed

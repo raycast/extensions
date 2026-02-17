@@ -1,26 +1,26 @@
-import { ActionPanel, Action, List } from "@raycast/api";
-import { useState, useMemo } from "react";
-import Settings from "./components/Settings";
-import Walkthrough from "./components/Walkthrough";
-import ProjectItem from "./components/ProjectItem";
+import { Action, ActionPanel, List } from "@raycast/api";
 import path from "path";
+import { useMemo, useState } from "react";
 
-import { useWorkspace } from "./hooks/useWorkspace";
-import { Project } from "./types";
+import Onboarding from "@/components/Onboarding";
+import ProjectItem from "@/components/ProjectItem";
+import Settings from "@/components/Settings";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { Project } from "@/types";
 
 export default function Command() {
   const {
-    workspaces: parentWorkspaces,
-    projects,
-    pinnedProjects,
     defaultApp,
-    terminalApp,
-    workspaceApps,
     isLoading,
     loadData,
-    walkthroughCompleted,
-    setWalkthroughCompleted,
+    onboardingCompleted,
+    pinnedProjects,
+    projects,
+    setOnboardingCompleted,
+    terminalApp,
     togglePinProject,
+    workspaceApps,
+    workspaces: parentWorkspaces,
   } = useWorkspace();
 
   const [searchText, setSearchText] = useState("");
@@ -29,8 +29,10 @@ export default function Command() {
     if (!projects) {
       return [];
     }
+
     return projects.filter((project) => {
       const searchLower = searchText.toLowerCase();
+
       return (
         project.name.toLowerCase().includes(searchLower) ||
         project.fullPath.toLowerCase().includes(searchLower) ||
@@ -41,9 +43,11 @@ export default function Command() {
 
   const projectsByWorkspace = useMemo(() => {
     const map: Record<string, Project[]> = {};
+
     parentWorkspaces.forEach((ws: string) => {
       map[ws] = filteredProjects.filter((p: Project) => p.parentFolder === ws);
     });
+
     return map;
   }, [parentWorkspaces, filteredProjects]);
 
@@ -51,13 +55,13 @@ export default function Command() {
     return (projects || []).filter((project: Project) => pinnedProjects.includes(project.fullPath));
   }, [projects, pinnedProjects]);
 
-  if (!isLoading && !walkthroughCompleted) {
+  if (!isLoading && !onboardingCompleted) {
     return (
-      <Walkthrough
-        onComplete={() => setWalkthroughCompleted(true)}
-        workspaces={parentWorkspaces}
+      <Onboarding
         defaultApp={defaultApp}
         loadData={loadData}
+        onComplete={() => setOnboardingCompleted(true)}
+        workspaces={parentWorkspaces}
       />
     );
   }
@@ -65,24 +69,24 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search for projects..."
       onSearchTextChange={setSearchText}
       onSelectionChange={() => {}}
+      searchBarPlaceholder="Search for projects..."
       throttle
     >
       {pinnedList.length > 0 && (
         <List.Section title="Pinned">
           {pinnedList.map((project) => (
             <ProjectItem
-              key={`pinned-${project.fullPath}`}
-              project={project}
-              workspacePath={project.parentFolder}
-              isPinned={true}
               defaultApp={defaultApp}
+              isPinned={true}
+              key={`pinned-${project.fullPath}`}
+              onRefresh={loadData}
+              onTogglePin={togglePinProject}
+              project={project}
               terminalApp={terminalApp}
               workspaceApps={workspaceApps}
-              onTogglePin={togglePinProject}
-              onRefresh={loadData}
+              workspacePath={project.parentFolder}
             />
           ))}
         </List.Section>
@@ -90,23 +94,24 @@ export default function Command() {
 
       {parentWorkspaces.map((workspace) => {
         const workspaceProjects = projectsByWorkspace[workspace] || [];
+
         if (workspaceProjects.length === 0 && searchText) {
           return null;
         }
 
         return (
-          <List.Section key={workspace} title={path.basename(workspace)} subtitle={workspace}>
+          <List.Section key={workspace} subtitle={workspace} title={path.basename(workspace)}>
             {workspaceProjects.map((project: Project) => (
               <ProjectItem
-                key={project.fullPath}
-                project={project}
-                workspacePath={workspace}
-                isPinned={pinnedProjects.includes(project.fullPath)}
                 defaultApp={defaultApp}
+                isPinned={pinnedProjects.includes(project.fullPath)}
+                key={project.fullPath}
+                onRefresh={loadData}
+                onTogglePin={togglePinProject}
+                project={project}
                 terminalApp={terminalApp}
                 workspaceApps={workspaceApps}
-                onTogglePin={togglePinProject}
-                onRefresh={loadData}
+                workspacePath={workspace}
               />
             ))}
           </List.Section>
@@ -115,13 +120,13 @@ export default function Command() {
 
       {parentWorkspaces.length === 0 && !isLoading && (
         <List.EmptyView
-          title="No Workspaces"
-          description="Add a workspace in settings to see your projects."
           actions={
             <ActionPanel>
-              <Action.Push title="Open Settings" target={<Settings onWorkspacesChanged={loadData} />} />
+              <Action.Push target={<Settings onWorkspacesChanged={loadData} />} title="Open Settings" />
             </ActionPanel>
           }
+          description="Add a workspace in settings to see your projects."
+          title="No Workspaces"
         />
       )}
     </List>
