@@ -25,6 +25,7 @@ Get database schema (tables, columns, relations) from PostgreSQL and MongoDB for
    - Click "Install"
 
    Or install manually:
+
    ```bash
    git clone <repository-url>
    cd "DB schema explorer"
@@ -103,7 +104,7 @@ Browse and copy table DDL statements:
 
 3. **Copy DDL**
    - **Single Table**: Select a table and press Enter or click "Copy DDL"
-   - **Multiple Tables**: 
+   - **Multiple Tables**:
      - Select tables using "Add to Selection" (or ⌘+Click)
      - Press ⌘⇧Enter to copy combined DDL of selected tables
    - **Full Schema**: Use "Copy Full Schema" to copy DDL for all tables
@@ -147,22 +148,26 @@ Browse and copy table DDL statements:
 ## Connection String Formats
 
 ### PostgreSQL
+
 ```
 postgresql://[user[:password]@][host][:port][/database][?param1=value1&...]
 ```
 
 Examples:
+
 - `postgresql://user:password@localhost:5432/mydb`
 - `postgresql://user@localhost/mydb` (no password)
 - `postgresql://user:password@example.com:5432/mydb?sslmode=require`
 
 ### MongoDB
+
 ```
 mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[database][?options]]
 mongodb+srv://[username:password@]host[/[database][?options]]
 ```
 
 Examples:
+
 - `mongodb://localhost:27017/mydb`
 - `mongodb://user:password@localhost:27017/mydb`
 - `mongodb+srv://user:password@cluster.mongodb.net/mydb`
@@ -171,19 +176,19 @@ Examples:
 
 ![Manage Databases](metadata/db-schema-explorer-1.png)
 
-*Manage your database connections, credentials, and exclusion rules*
+_Manage your database connections, credentials, and exclusion rules_
 
 ![Sync Schema](metadata/db-schema-explorer-2.png)
 
-*Sync database schemas to cache them locally for fast access*
+_Sync database schemas to cache them locally for fast access_
 
 ![Explore Tables](metadata/db-schema-explorer-3.png)
 
-*Browse tables, view DDL, and copy schema information*
+_Browse tables, view DDL, and copy schema information_
 
 ![Table Details](metadata/db-schema-explorer-4.png)
 
-*View detailed table structure and copy DDL statements*
+_View detailed table structure and copy DDL statements_
 
 ## Requirements
 
