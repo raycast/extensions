@@ -20,7 +20,7 @@ export default function Command() {
   const { get } = usePaystack(account)
 
   const { data: balances, isLoading } = useCachedPromise(
-    async (accountId: string) => {
+    async (_accountId: string) => {
       const response = (await get('/balance')) as {
         status: boolean
         message: string
@@ -40,7 +40,7 @@ export default function Command() {
       }
       return response.data
     },
-    [account?.id ?? ''],
+    [account?.id ?? ''] as [string],
     { execute: !!account },
   )
 

@@ -44,7 +44,7 @@ export default function Command() {
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
   const { data: payouts, isLoading } = useCachedPromise(
-    async (accountId: string) => {
+    async (_accountId: string) => {
       const response = (await get('/settlement')) as PaystackResponse<Payout[]>
       if (response.status) {
         showToast({
@@ -54,7 +54,7 @@ export default function Command() {
       }
       return response.data
     },
-    [account?.id ?? ''],
+    [account?.id ?? ''] as [string],
     { execute: !!account },
   )
 

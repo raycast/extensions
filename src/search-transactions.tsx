@@ -30,7 +30,7 @@ export default function Command() {
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
   const { data: transactions, isLoading } = useCachedPromise(
-    async (accountId: string) => {
+    async (_accountId: string) => {
       const response = (await get('/transaction')) as PaystackResponse<
         Transaction[]
       >
@@ -42,7 +42,7 @@ export default function Command() {
       }
       return response.data
     },
-    [account?.id ?? ''],
+    [account?.id ?? ''] as [string],
     { execute: !!account },
   )
 

@@ -25,7 +25,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState<string>('')
 
   const { data: plans, isLoading } = useCachedPromise(
-    async (accountId: string) => {
+    async (_accountId: string) => {
       const response = (await get('/plan')) as PaystackResponse<Plan[]>
       if (response.status) {
         showToast({
@@ -35,7 +35,7 @@ export default function Command() {
       }
       return response.data
     },
-    [account?.id ?? ''],
+    [account?.id ?? ''] as [string],
     { execute: !!account },
   )
 

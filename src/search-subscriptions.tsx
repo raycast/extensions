@@ -26,7 +26,7 @@ export default function Command() {
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
   const { data: subscriptions, isLoading } = useCachedPromise(
-    async (accountId: string) => {
+    async (_accountId: string) => {
       const response = (await get('/subscription')) as PaystackResponse<
         Subscription[]
       >
@@ -38,7 +38,7 @@ export default function Command() {
       }
       return response.data
     },
-    [account?.id ?? ''],
+    [account?.id ?? ''] as [string],
     { execute: !!account },
   )
 
