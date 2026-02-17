@@ -18,10 +18,13 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { getBrewPath } from "./utils/brew";
 import { useVessloData } from "./utils/useVessloData";
-import { runBrewUpgrade, runBrewUpgradeInTerminal } from "./utils/actions";
+import {
+  BREW_MAX_BUFFER,
+  runBrewUpgrade,
+  runBrewUpgradeInTerminal,
+} from "./utils/actions";
 
 const execAsync = promisify(exec);
-const BREW_MAX_BUFFER = 10 * 1024 * 1024;
 
 export default function BulkHomebrewUpdate() {
   const { data, isLoading, setData } = useVessloData();

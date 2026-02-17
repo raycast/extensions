@@ -4,12 +4,15 @@ import { promisify } from "util";
 import { getBrewPath } from "./brew";
 
 const execAsync = promisify(exec);
-const BREW_MAX_BUFFER = 10 * 1024 * 1024;
+export const BREW_MAX_BUFFER = 10 * 1024 * 1024;
 
 export const VESSLO_URL_SCHEME = "vesslo://";
 
 function escapeForAppleScript(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "'\\'''");
 }
 
 function isValidCaskToken(token: string): boolean {
