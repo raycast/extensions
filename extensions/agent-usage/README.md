@@ -59,8 +59,4 @@ Optional fallback:
 
 ## Roadmap
 
-More agents coming soon: Claude Code, z.ai, and others.
-
-## Credits
-
-Extension icon from [AGENTS.md](https://agents.md/).
+More agents coming soon: Claude Code, and others.

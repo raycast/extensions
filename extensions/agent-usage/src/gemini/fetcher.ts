@@ -135,7 +135,6 @@ async function fetchTier(accessToken: string): Promise<{ tier: GeminiUsage["tier
     });
 
     if (!response.ok) {
-      console.log("fetchTier response not ok:", response.status, await response.text());
       return { tier: "Unknown" };
     }
 
@@ -155,8 +154,7 @@ async function fetchTier(accessToken: string): Promise<{ tier: GeminiUsage["tier
     }
 
     return { tier, projectId };
-  } catch (e) {
-    console.log("fetchTier error:", e);
+  } catch {
     return { tier: "Unknown" };
   }
 }
