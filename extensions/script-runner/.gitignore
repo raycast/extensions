@@ -6,12 +6,13 @@
 
 ## Dependencies
 node_modules/
-package-lock.json
 
 ## Build
 dist/
 
 ## Raycast
 raycast-env.d.ts
+assets/*.png
+!.gitignore
 
 

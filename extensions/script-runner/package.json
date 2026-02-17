@@ -11,6 +11,11 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/sarve-shreyas/Ray-runner",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sarve-shreyas/Ray-runner.git"
+  },
   "commands": [
     {
       "name": "script-runner",
