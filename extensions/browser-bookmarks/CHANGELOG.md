@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for Vivaldi Snapshot Browser] - {PR_MERGE_DATE}
+## [Support for Vivaldi Snapshot Browser] - 2026-02-17
 
 - Added support for `Vivaldi Snapshot` browser.
 
