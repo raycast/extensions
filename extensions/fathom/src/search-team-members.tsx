@@ -2,7 +2,7 @@ import { List, Icon, ActionPanel, Action, openExtensionPreferences } from "@rayc
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { listTeamMembers, listTeams } from "./fathom/api";
-import type { Paginated, Team, TeamMember } from "./types/Types";
+import type { Paginated, TeamMember } from "./types/Types";
 import { TeamMemberActions } from "./actions/TeamMemberActions";
 import { useDebouncedValue } from "./utils/debounce";
 import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
@@ -16,53 +16,33 @@ function Command() {
   // Early API key check — if missing, skip all API calls and show error view
   const apiKeyPresent = hasApiKey();
 
-  // Fetch teams list separately — wrapped so it never throws
-  const { data: teamsData } = useCachedPromise(
-    async () => {
-      try {
-        return await listTeams({});
-      } catch {
-        return { items: [] as Team[], nextCursor: undefined };
-      }
-    },
-    [],
-    {
-      keepPreviousData: true,
-      execute: apiKeyPresent,
-    },
-  );
+  // Fetch teams list separately — errors handled by useCachedPromise
+  const { data: teamsData, error: teamsError } = useCachedPromise(async () => listTeams({}), [], {
+    keepPreviousData: true,
+    execute: apiKeyPresent,
+  });
 
   const teams = useMemo(() => {
     return (teamsData?.items ?? []).sort((a, b) => a.name.localeCompare(b.name));
   }, [teamsData]);
 
-  // Fetch team members, optionally filtered by team — wrapped so it never throws
+  // Fetch team members, optionally filtered by team — errors handled by useCachedPromise
   const {
     data: membersData,
     isLoading,
     error: membersError,
     revalidate,
-  } = useCachedPromise(
-    async (teamName: string) => {
-      try {
-        return await listTeamMembers(teamName || undefined, {});
-      } catch {
-        return { items: [] as TeamMember[], nextCursor: undefined } as Paginated<TeamMember>;
-      }
-    },
-    [selectedTeam],
-    {
-      keepPreviousData: true,
-      execute: apiKeyPresent,
-    },
-  );
+  } = useCachedPromise(async (teamName: string) => listTeamMembers(teamName || undefined, {}), [selectedTeam], {
+    keepPreviousData: true,
+    execute: apiKeyPresent,
+  });
 
-  // Combine error sources: explicit missing key OR runtime API error
+  // Combine error sources: explicit missing key, teams error, or members error
   const error: Error | undefined = !apiKeyPresent
     ? new Error("API_KEY_MISSING: No API key configured. Please set your Fathom API Key in Extension Preferences.")
     : isApiKeyKnownInvalid()
       ? new Error("API_KEY_INVALID: Invalid API Key. Please check your Fathom API Key in Extension Preferences.")
-      : membersError;
+      : membersError || teamsError;
 
   const page: Paginated<TeamMember> | undefined = membersData;
 

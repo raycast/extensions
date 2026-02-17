@@ -1,6 +1,6 @@
 # Fathom for Raycast Changelog
 
-## Lazy Pagination & Smart Cache - {PR_MERGE_DATE}
+## [Lazy Pagination & Smart Cache] - {PR_MERGE_DATE}
 
 ### Added
 
