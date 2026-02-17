@@ -24,6 +24,9 @@ export default function Updates() {
     if (!data) return [];
     return data.apps.filter(
       (app) =>
+        !app.isDeleted &&
+        !app.isSkipped &&
+        !app.isIgnored &&
         app.targetVersion !== null &&
         app.targetVersion !== undefined &&
         app.targetVersion !== "undefined" &&
@@ -223,8 +226,12 @@ function UpdateListItem({ app }: { app: VessloApp }) {
 
           {/* General Actions */}
           <ActionPanel.Section>
-            <Action.Open title="Open App" target={app.path} />
-            <Action.ShowInFinder path={app.path} />
+            {!app.isDeleted && (
+              <>
+                <Action.Open title="Open App" target={app.path} />
+                <Action.ShowInFinder path={app.path} />
+              </>
+            )}
             {app.bundleId && (
               <Action
                 title="Open in Vesslo"

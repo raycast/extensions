@@ -21,6 +21,7 @@ import { useVessloData } from "./utils/useVessloData";
 import { runBrewUpgrade, runBrewUpgradeInTerminal } from "./utils/actions";
 
 const execAsync = promisify(exec);
+const BREW_MAX_BUFFER = 10 * 1024 * 1024;
 
 export default function BulkHomebrewUpdate() {
   const { data, isLoading, setData } = useVessloData();
@@ -30,6 +31,9 @@ export default function BulkHomebrewUpdate() {
     if (!data) return [];
     return data.apps.filter(
       (app) =>
+        !app.isDeleted &&
+        !app.isSkipped &&
+        !app.isIgnored &&
         app.sources.includes("Brew") &&
         app.targetVersion !== null &&
         app.targetVersion !== undefined &&
@@ -75,7 +79,9 @@ export default function BulkHomebrewUpdate() {
       });
 
       const brewPath = getBrewPath();
-      const { stdout } = await execAsync(`${brewPath} upgrade --cask`);
+      const { stdout } = await execAsync(`${brewPath} upgrade --cask`, {
+        maxBuffer: BREW_MAX_BUFFER,
+      });
 
       await showToast({
         style: Toast.Style.Success,

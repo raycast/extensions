@@ -13,6 +13,9 @@ export interface VessloApp {
   sources: string[];
   appStoreId: string | null;
   homebrewCask: string | null;
+  isDeleted: boolean;
+  isSkipped: boolean;
+  isIgnored: boolean;
 }
 
 export interface VessloData {
