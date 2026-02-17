@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Image } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import {
   appleMapsUrl,
@@ -130,14 +130,14 @@ const sanitizeDescription = (value: string | null): string | null => {
 const buildMarkdown = (
   title: string,
   description: string | null,
-  spottedBy: string | null,
+  spottedByMarkdown: string | null,
 ): string => {
   const blocks = [`# ${escapeMarkdown(title)}`];
   if (description) {
     blocks.push("", description);
   }
-  if (spottedBy) {
-    blocks.push("", `Spotted by ${escapeMarkdown(spottedBy)}`);
+  if (spottedByMarkdown) {
+    blocks.push("", spottedByMarkdown);
   }
   return blocks.join("\n");
 };
@@ -190,6 +190,41 @@ const spottedByLabel = (
   return parts.length ? `${name} · ${parts.join(" · ")}` : name;
 };
 
+const spottedByMarkdown = (
+  details: EventDetails | null,
+  timezone: string,
+): string | null => {
+  void details;
+  void timezone;
+  return null;
+};
+
+const renderableAvatarUrl = (avatarUrl: string): string => {
+  const trimmed = String(avatarUrl || "").trim();
+  if (!/^https?:\/\//i.test(trimmed)) return "";
+  const safeOriginal = trimmed.replace(/"/g, "%22");
+
+  // Use Supabase transform so markdown receives a square crop, avoiding squash.
+  const objectPublicPath = "/storage/v1/object/public/";
+  const renderPublicPath = "/storage/v1/render/image/public/";
+  if (!safeOriginal.includes(objectPublicPath)) return safeOriginal;
+
+  const transformed = safeOriginal.replace(objectPublicPath, renderPublicPath);
+  const joiner = transformed.includes("?") ? "&" : "?";
+  return `${transformed}${joiner}width=72&height=72&resize=cover`;
+};
+
+const spottedByAvatarIcon = (
+  details: EventDetails | null,
+): { source: string; mask: Image.Mask } | undefined => {
+  const avatarUrl = renderableAvatarUrl(String(details?.spottedBy?.avatarUrl || "").trim());
+  if (!avatarUrl) return undefined;
+  return {
+    source: avatarUrl,
+    mask: Image.Mask.Circle,
+  };
+};
+
 const buildShareMessage = (
   title: string,
   timeRangeLabel: string,
@@ -220,12 +255,15 @@ const EventMetadata = ({
   const price = priceLabel(details);
   const categories = categoryList(details, event);
   const spottedBy = spottedByLabel(details, effectiveTimezone);
+  const spottedByIcon = spottedByAvatarIcon(details);
 
   return (
     <Detail.Metadata>
       <Detail.Metadata.Label title="When" text={timeRangeLabel} />
       <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="Where" text={venueLabel} />
+      <Detail.Metadata.Separator />
+      <Detail.Metadata.Label title="Spotted by" text={spottedBy} icon={spottedByIcon} />
       <Detail.Metadata.Separator />
       {addressLabel ? (
         <>
@@ -326,7 +364,7 @@ export const EventDetailView = ({
 
   const detailMarkdown = useMemo(() => {
     const description = sanitizeDescription(details?.description || null);
-    const spottedBy = spottedByLabel(details, effectiveTimezone);
+    const spottedBy = spottedByMarkdown(details, effectiveTimezone);
     return buildMarkdown(details?.title || event.title, description, spottedBy);
   }, [details, effectiveTimezone, event.title]);
 
