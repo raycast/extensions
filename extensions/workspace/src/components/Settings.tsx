@@ -1,11 +1,9 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, confirmAlert, Alert, Color } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import path from "path";
 import AddWorkspaceForm from "./AddWorkspaceForm";
 import SelectEditor from "./SelectEditor";
-import LanguageSettings from "./LanguageSettings";
-import { useI18n } from "../hooks/useI18n";
-import { getLanguageName } from "../utils/i18n";
+import TerminalSettings from "./TerminalSettings";
 
 import { type Application } from "@raycast/api";
 
@@ -13,6 +11,7 @@ import {
   getStoredWorkspaces,
   saveStoredWorkspaces,
   getStoredApp,
+  getStoredTerminalApp,
   getWorkspaceApps,
   saveWorkspaceApps,
 } from "../utils/storage";
@@ -26,18 +25,20 @@ interface SettingsProps {
 export default function Settings({ onWorkspacesChanged, showGeneral = true }: SettingsProps) {
   const [workspaces, setWorkspaces] = useState<string[]>([]);
   const [defaultApp, setDefaultApp] = useState<App | null>(null);
+  const [terminalApp, setTerminalApp] = useState<App | null>(null);
   const [workspaceApps, setWorkspaceApps] = useState<Record<string, App>>({});
-  const { t, language } = useI18n();
 
   const loadSettings = useCallback(async () => {
-    const [storedWorkspaces, storedDefaultApp, storedWorkspaceApps] = await Promise.all([
+    const [storedWorkspaces, storedDefaultApp, storedWorkspaceApps, storedTerminalApp] = await Promise.all([
       getStoredWorkspaces(),
       getStoredApp(),
       getWorkspaceApps(),
+      getStoredTerminalApp(),
     ]);
     setWorkspaces(storedWorkspaces);
     setDefaultApp(storedDefaultApp);
     setWorkspaceApps(storedWorkspaceApps);
+    setTerminalApp(storedTerminalApp);
   }, []);
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
   async function removeWorkspace(workspacePath: string) {
     if (
       await confirmAlert({
-        title: t("settings.workspaces.removeWorkspace"),
+        title: "Remove Workspace",
         message: `Remove "${path.basename(workspacePath)}" from your workspace projects?`,
         primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
       })
@@ -64,7 +65,7 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
       if (onWorkspacesChanged) {
         await onWorkspacesChanged();
       }
-      await showToast({ style: Toast.Style.Success, title: t("settings.toasts.workspaceRemoved") });
+      await showToast({ style: Toast.Style.Success, title: "Workspace Removed" });
     }
   }
 
@@ -77,7 +78,7 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
     setWorkspaceApps(newWorkspaceApps);
     await showToast({
       style: Toast.Style.Success,
-      title: t("settings.toasts.appUpdated"),
+      title: "App Updated",
       message: `${path.basename(workspacePath)} -> ${app.name}`,
     });
   }
@@ -87,12 +88,14 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
     delete newWorkspaceApps[workspacePath];
     await saveWorkspaceApps(newWorkspaceApps);
     setWorkspaceApps(newWorkspaceApps);
-    await showToast({ style: Toast.Style.Success, title: t("settings.toasts.appReset") });
+    await showToast({ style: Toast.Style.Success, title: "Application Reset" });
   }
 
   async function moveWorkspace(index: number, direction: "up" | "down") {
     const newIndex = direction === "up" ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= workspaces.length) return;
+    if (newIndex < 0 || newIndex >= workspaces.length) {
+      return;
+    }
 
     const newWorkspaces = [...workspaces];
     const [moved] = newWorkspaces.splice(index, 1);
@@ -103,21 +106,21 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
     if (onWorkspacesChanged) {
       await onWorkspacesChanged();
     }
-    await showToast({ style: Toast.Style.Success, title: t("settings.toasts.workspaceMoved") });
+    await showToast({ style: Toast.Style.Success, title: "Workspace Moved" });
   }
 
   return (
-    <List navigationTitle={showGeneral ? t("settings.title") : t("settings.workspaces.title")}>
+    <List navigationTitle={showGeneral ? "Workspace Settings" : "Managed Workspaces"}>
       {showGeneral && (
-        <List.Section title={t("settings.general.title")}>
+        <List.Section title="General">
           <List.Item
-            title={t("settings.general.defaultApp.title")}
-            subtitle={defaultApp?.name || t("selectEditor.default.subtitle")}
+            title="Default App"
+            subtitle={defaultApp?.name || "Not selected"}
             icon={Icon.AppWindow}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title={t("selectEditor.default.action")}
+                  title="Change Application"
                   icon={Icon.Pencil}
                   target={<SelectEditor />}
                   onPop={loadSettings}
@@ -126,15 +129,16 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
             }
           />
           <List.Item
-            title={t("settings.general.language.title")}
-            subtitle={getLanguageName(language)}
-            icon={Icon.Globe}
+            title="Terminal App"
+            subtitle={terminalApp?.name || "System default"}
+            icon={Icon.Terminal}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title={t("settings.general.language.title")}
+                  title="Change Terminal"
                   icon={Icon.Pencil}
-                  target={<LanguageSettings />}
+                  target={<TerminalSettings />}
+                  onPop={loadSettings}
                 />
               </ActionPanel>
             }
@@ -142,7 +146,7 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
         </List.Section>
       )}
 
-      <List.Section title={t("settings.workspaces.title")}>
+      <List.Section title="Managed Workspaces">
         {workspaces.map((workspace, index) => {
           const workspaceApp = workspaceApps[workspace];
           return (
@@ -155,9 +159,9 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
                 workspaceApp
                   ? [
                       {
-                        tag: { value: workspaceApp.name, color: Icon.AppWindow },
+                        tag: { value: workspaceApp.name, color: Color.Blue },
                         icon: Icon.AppWindow,
-                        tooltip: t("settings.workspaces.appSet"),
+                        tooltip: "Custom App Set",
                       },
                     ]
                   : []
@@ -166,7 +170,7 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
                 <ActionPanel>
                   <ActionPanel.Section>
                     <Action.Push
-                      title={t("settings.workspaces.setWorkspaceApp")}
+                      title="Set Workspace App"
                       icon={Icon.Pencil}
                       target={
                         <SelectEditor
@@ -177,7 +181,7 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
                     />
                     {index > 0 && (
                       <Action
-                        title={t("settings.workspaces.moveUp")}
+                        title="Move up"
                         icon={Icon.ChevronUp}
                         shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                         onAction={() => moveWorkspace(index, "up")}
@@ -185,7 +189,7 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
                     )}
                     {index < workspaces.length - 1 && (
                       <Action
-                        title={t("settings.workspaces.moveDown")}
+                        title="Move Down"
                         icon={Icon.ChevronDown}
                         shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
                         onAction={() => moveWorkspace(index, "down")}
@@ -195,26 +199,23 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
                   <ActionPanel.Section>
                     {workspaceApp && (
                       <Action
-                        title={t("settings.workspaces.removeApp")}
+                        title="Remove Workspace Application"
                         icon={Icon.XMarkCircle}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
                         onAction={() => resetWorkspaceApp(workspace)}
                       />
                     )}
                     <Action
-                      title={t("settings.workspaces.removeWorkspace")}
+                      title="Remove Workspace"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       onAction={() => removeWorkspace(workspace)}
                     />
                   </ActionPanel.Section>
-                  <ActionPanel.Section title={t("workspace.sections.copy")}>
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard title="Copy Workspace Name" content={path.basename(workspace)} />
                     <Action.CopyToClipboard
-                      title={t("settings.workspaces.copyName")}
-                      content={path.basename(workspace)}
-                    />
-                    <Action.CopyToClipboard
-                      title={t("settings.workspaces.copyPath")}
+                      title="Copy Workspace Path"
                       content={workspace}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                     />
@@ -225,12 +226,12 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
           );
         })}
         <List.Item
-          title={t("settings.workspaces.addWorkspace")}
+          title="Add Workspace"
           icon={Icon.Plus}
           actions={
             <ActionPanel>
               <Action.Push
-                title={t("settings.workspaces.addWorkspace")}
+                title="Add Workspace"
                 target={<AddWorkspaceForm />}
                 onPop={() => {
                   loadSettings();

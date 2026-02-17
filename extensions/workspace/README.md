@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="./assets/extension-icon.png" width="200" height="200" />
+  <img src="./.github/assets/icon.png" width="200" height="200" />
 </p>
 
 # Workspace
 
 [![Raycast Store](https://img.shields.io/badge/Raycast-Store-blue?style=flat-square)](https://www.raycast.com/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-Manage and access all your development projects with ease.
+Manage and access all your projects with ease.
 
-Workspace is a Raycast extension that streamlines your workflow by providing a central hub for all your projects and folders across multiple parent directories.
+Workspace is a Raycast extension that streamlines your workflow by providing a central hub for all your projects and folders across multiple directories.
 
 > [!TIP]
-> **Not just for developers!** While it's perfect for code, Workspace can manage any project or folder structure. You can configure any application to open specific workspaces—use it for design assets, writing projects, or even administrative folders.
+> **Not just for developers!** While it's perfect for code, Workspace can manage any project or folder structure. You can configure any application to open specific workspaces, use it for design assets, writing projects, or even administrative folders.
 
 ## Installation
 
@@ -30,11 +30,11 @@ Workspace is a Raycast extension that streamlines your workflow by providing a c
 
 ## Screenshots
 
-![Main project list with pinned items and Git status](./metadata/workspace-2.png)
+![Main project list with pinned items and Git status](./.github/assets/screenshot-1.png)
 
 > _The main Workspace command showing pinned projects, Git status badges, and quick search._
 
-![Manage Workspaces view](./metadata/workspace-4.png)
+![Manage Workspaces view](./.github/assets/screenshot-2.png)
 
 > _Adding, removing, and reordering workspace folders._
 > _Example of per-workspace application override in action._

@@ -2,14 +2,9 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import { existsSync } from "fs";
+import { GitStatus } from "../types";
 
 const execAsync = promisify(exec);
-
-export interface GitStatus {
-  branch: string;
-  pull?: number;
-  push?: number;
-}
 
 export async function getGitStatus(repoPath: string): Promise<GitStatus | null> {
   const gitDir = path.join(repoPath, ".git");

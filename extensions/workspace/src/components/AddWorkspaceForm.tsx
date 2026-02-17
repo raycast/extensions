@@ -1,8 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import path from "path";
-import { useI18n } from "../hooks/useI18n";
-
 import { getStoredWorkspaces, saveStoredWorkspaces } from "../utils/storage";
 
 interface AddWorkspaceFormProps {
@@ -15,7 +13,6 @@ interface FormValues {
 
 export default function AddWorkspaceForm({ onDone }: AddWorkspaceFormProps) {
   const { pop } = useNavigation();
-  const { t } = useI18n();
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
@@ -25,7 +22,7 @@ export default function AddWorkspaceForm({ onDone }: AddWorkspaceFormProps) {
       if (workspaces.includes(workspacePath)) {
         await showToast({
           style: Toast.Style.Failure,
-          title: t("addWorkspace.alreadyExists"),
+          title: "Workspace already added",
           message: path.basename(workspacePath),
         });
 
@@ -37,7 +34,7 @@ export default function AddWorkspaceForm({ onDone }: AddWorkspaceFormProps) {
 
       await showToast({
         style: Toast.Style.Success,
-        title: t("addWorkspace.success"),
+        title: "Workspace Added",
         message: path.basename(workspacePath),
       });
 
@@ -58,16 +55,19 @@ export default function AddWorkspaceForm({ onDone }: AddWorkspaceFormProps) {
 
   return (
     <Form
-      navigationTitle={t("addWorkspace.title")}
+      navigationTitle="Add Workspace"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={t("addWorkspace.form.submit")} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Workspace" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description title={t("addWorkspace.description.title")} text={t("addWorkspace.description.text")} />
+      <Form.Description
+        title="Add Workspace"
+        text="Select a parent folder that contains your workspace projects. You can manage your workspaces later in the extension settings."
+      />
       <Form.FilePicker
-        title={t("addWorkspace.form.workspace")}
+        title="Workspace Path"
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}

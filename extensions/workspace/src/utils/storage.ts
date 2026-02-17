@@ -5,12 +5,22 @@ import {
   STORAGE_KEY_WORKSPACE_APPS,
   STORAGE_KEY_WALKTHROUGH_COMPLETED,
   STORAGE_KEY_PINNED_PROJECTS,
+  STORAGE_KEY_TERMINAL_APP,
 } from "./constants";
 import { App } from "../types";
 
+async function getStoredItem<T>(key: string, defaultValue: T): Promise<T> {
+  const raw = await LocalStorage.getItem<string>(key);
+  try {
+    return raw ? (JSON.parse(raw) as T) : defaultValue;
+  } catch (error) {
+    console.error(`Error parsing stored item for key "${key}":`, error);
+    return defaultValue;
+  }
+}
+
 export async function getStoredPinnedProjects(): Promise<string[]> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY_PINNED_PROJECTS);
-  return raw ? JSON.parse(raw) : [];
+  return getStoredItem<string[]>(STORAGE_KEY_PINNED_PROJECTS, []);
 }
 
 export async function saveStoredPinnedProjects(paths: string[]): Promise<void> {
@@ -18,8 +28,7 @@ export async function saveStoredPinnedProjects(paths: string[]): Promise<void> {
 }
 
 export async function getStoredWorkspaces(): Promise<string[]> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY_WORKSPACES);
-  return raw ? JSON.parse(raw) : [];
+  return getStoredItem<string[]>(STORAGE_KEY_WORKSPACES, []);
 }
 
 export async function saveStoredWorkspaces(workspaces: string[]): Promise<void> {
@@ -27,8 +36,7 @@ export async function saveStoredWorkspaces(workspaces: string[]): Promise<void> 
 }
 
 export async function getStoredApp(): Promise<App | null> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY_APP);
-  return raw ? JSON.parse(raw) : null;
+  return getStoredItem<App | null>(STORAGE_KEY_APP, null);
 }
 
 export async function saveStoredApp(app: App): Promise<void> {
@@ -36,8 +44,7 @@ export async function saveStoredApp(app: App): Promise<void> {
 }
 
 export async function getWorkspaceApps(): Promise<Record<string, App>> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY_WORKSPACE_APPS);
-  return raw ? JSON.parse(raw) : {};
+  return getStoredItem<Record<string, App>>(STORAGE_KEY_WORKSPACE_APPS, {});
 }
 
 export async function saveWorkspaceApps(workspaceApps: Record<string, App>): Promise<void> {
@@ -51,4 +58,16 @@ export async function getStoredWalkthroughCompleted(): Promise<boolean> {
 
 export async function setStoredWalkthroughCompleted(completed: boolean): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY_WALKTHROUGH_COMPLETED, completed);
+}
+
+export async function getStoredTerminalApp(): Promise<App | null> {
+  return getStoredItem<App | null>(STORAGE_KEY_TERMINAL_APP, null);
+}
+
+export async function saveStoredTerminalApp(app: App | null): Promise<void> {
+  if (app) {
+    await LocalStorage.setItem(STORAGE_KEY_TERMINAL_APP, JSON.stringify(app));
+  } else {
+    await LocalStorage.removeItem(STORAGE_KEY_TERMINAL_APP);
+  }
 }

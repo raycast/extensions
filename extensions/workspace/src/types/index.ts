@@ -1,4 +1,8 @@
-import { GitStatus } from "../utils/git";
+export interface GitStatus {
+  branch: string;
+  pull?: number;
+  push?: number;
+}
 
 export interface Project {
   name: string;
@@ -11,5 +15,3 @@ export interface App {
   name: string;
   bundleId: string;
 }
-
-export type { GitStatus };
