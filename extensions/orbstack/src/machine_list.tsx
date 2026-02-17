@@ -4,6 +4,7 @@ import { getStatusIcon } from "./utils";
 import CommandExecute from "./command_execute";
 import MachineCreate from "./machine_create";
 import MachineClone from "./machine_clone";
+import MachineRename from "./machine_rename";
 import { useMachineList, useMachineStateTransition, useMachineInfo, useMachineToggleAll } from "./hooks";
 
 export default function MachineList() {
@@ -133,6 +134,11 @@ export default function MachineList() {
                 title="Clone"
                 target={<MachineClone oldName={machine.name} refresh={revalidateMachineList} />}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+              <Action.Push
+                title="Rename"
+                target={<MachineRename oldName={machine.name} refresh={revalidateMachineList} />}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
               />
               <Action.Push
                 title="Delete"

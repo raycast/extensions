@@ -80,7 +80,7 @@ export default function MachineClone(props: MachineCloneProps) {
       isLoading={isLoading}
       actions={<ActionPanel>{<Action.SubmitForm title="Clone Machine" onSubmit={handleSubmit} />}</ActionPanel>}
     >
-      <Form.Dropdown title="Old Machine" {...itemProps.old_name} onChange={handleOldNameChange}>
+      <Form.Dropdown title="Old Name" {...itemProps.old_name} onChange={handleOldNameChange}>
         {machineOptions.map((m) => (
           <Form.Dropdown.Item key={m.value} value={m.value} title={m.title} />
         ))}

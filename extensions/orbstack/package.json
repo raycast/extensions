@@ -62,6 +62,11 @@
       "name": "machine_clone",
       "title": "Machine Clone",
       "description": "Clone a machine"
+    },
+    {
+      "name": "machine_rename",
+      "title": "Machine Rename",
+      "description": "Rename a machine"
     }
   ],
   "ai": {
