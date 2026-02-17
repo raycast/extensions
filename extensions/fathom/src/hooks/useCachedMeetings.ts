@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MeetingFilter, Meeting, ActionItem } from "../types/Types";
 import { searchCachedMeetings, type CachedMeetingData } from "../utils/cache";
 import { cacheManager } from "../utils/cacheManager";
+import { resetApiKeyValidation } from "../fathom/auth";
 import { logger } from "@chrismessina/raycast-logger";
 
 interface UseCachedMeetingsOptions {
@@ -15,6 +16,8 @@ interface UseCachedMeetingsResult {
   error: Error | undefined;
   searchMeetings: (query: string) => Meeting[];
   refreshCache: () => Promise<void>;
+  loadMore: () => Promise<void>;
+  hasMore: boolean;
 }
 
 /**
@@ -29,9 +32,17 @@ interface UseCachedMeetingsResult {
 export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCachedMeetingsResult {
   const { filter = {}, enableCache = true } = options;
 
+  // Stabilize filter reference to prevent useEffect re-runs on every render.
+  // Object literals like `{}` create a new reference each render, causing infinite loops.
+  const filterKey = JSON.stringify(filter);
+  const stableFilter = useMemo(() => filter, [filterKey]);
+  const filterRef = useRef(stableFilter);
+  filterRef.current = stableFilter;
+
   const [cachedMeetings, setCachedMeetings] = useState<CachedMeetingData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>();
+  const [hasMore, setHasMore] = useState(true);
 
   // Subscribe to cache manager updates
   useEffect(() => {
@@ -40,10 +51,18 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       return;
     }
 
+    let cancelled = false;
+
+    // Reset API key validation so a previously-invalid key doesn't block
+    // fresh attempts after the user updates their key in preferences
+    resetApiKeyValidation();
+    setError(undefined);
+
     logger.log("[useCachedMeetings] Subscribing to cache manager");
 
     // Subscribe to cache updates
     const unsubscribe = cacheManager.subscribe((meetings) => {
+      if (cancelled) return;
       logger.log(`[useCachedMeetings] Received cache update: ${meetings.length} meetings`);
       setCachedMeetings(meetings);
       setIsLoading(false);
@@ -54,26 +73,39 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       try {
         setIsLoading(true);
         const cached = await cacheManager.loadCache();
+        if (cancelled) return;
         setCachedMeetings(cached);
 
-        // Always check for new meetings on mount to ensure fresh data
-        // This ensures new meetings appear even if cache exists
-        logger.log(`[useCachedMeetings] Loaded ${cached.length} cached meetings, checking for updates`);
-        await cacheManager.fetchAndCache(filter);
+        // Only fetch fresh data if cache is stale (>5 min old)
+        // This avoids the "Loading..." toast on every launch
+        if (cacheManager.isCacheStale()) {
+          logger.log(
+            `[useCachedMeetings] Cache is stale (${cacheManager.getCacheAgeMinutes()} min old), fetching fresh data`,
+          );
+          await cacheManager.fetchAndCache(filterRef.current, { force: true });
+          setHasMore(cacheManager.hasMore());
+        } else {
+          logger.log(
+            `[useCachedMeetings] Using fresh cache (${cacheManager.getCacheAgeMinutes()} min old), skipping API fetch`,
+          );
+          setHasMore(cacheManager.hasMore());
+        }
       } catch (err) {
+        if (cancelled) return;
         logger.error("[useCachedMeetings] Error loading cache:", err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     })();
 
-    // Cleanup: unsubscribe on unmount
+    // Cleanup: unsubscribe on unmount and prevent stale state updates
     return () => {
+      cancelled = true;
       logger.log("[useCachedMeetings] Unsubscribing from cache manager");
       unsubscribe();
     };
-  }, [filter, enableCache]);
+  }, [filterKey, enableCache]);
 
   // Convert cached data to Meeting array
   const meetings: Meeting[] = cachedMeetings.map((cached) => {
@@ -114,12 +146,26 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
     if (!enableCache) return;
 
     try {
-      await cacheManager.refreshCache(filter);
+      await cacheManager.refreshCache(filterRef.current);
+      setHasMore(cacheManager.hasMore());
     } catch (error) {
       logger.error("[useCachedMeetings] Error refreshing cache:", error);
       setError(error instanceof Error ? error : new Error(String(error)));
     }
-  }, [enableCache, filter]);
+  }, [enableCache]);
+
+  // Load more meetings (incremental pagination)
+  const loadMore = useCallback(async () => {
+    if (!enableCache) return;
+
+    try {
+      await cacheManager.loadMoreMeetings(filterRef.current);
+      setHasMore(cacheManager.hasMore());
+    } catch (error) {
+      logger.error("[useCachedMeetings] Error loading more meetings:", error);
+      setError(error instanceof Error ? error : new Error(String(error)));
+    }
+  }, [enableCache]);
 
   return {
     meetings,
@@ -127,5 +173,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
     error,
     searchMeetings,
     refreshCache,
+    loadMore,
+    hasMore,
   };
 }
