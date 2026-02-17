@@ -1,0 +1,17 @@
+## IDE
+.vscode/*
+
+## System
+.DS_Store
+
+## Dependencies
+node_modules/
+package-lock.json
+
+## Build
+dist/
+
+## Raycast
+raycast-env.d.ts
+
+
