@@ -23,7 +23,7 @@ export default async function Command(props: { arguments: { preset: "smallest-si
       // This might be due to internal palette building algorithms of ffmpeg itself.
       // @TODO: we should look for a way to enable this optimization for gifs as well.
       if (selectedFiles.some((file) => file.extension() === ".gif")) {
-        throw new Error("Does not applicable to GIFs yet");
+        throw new Error("GIFs are not supported for this command yet");
       }
 
       for (const file of selectedFiles) {

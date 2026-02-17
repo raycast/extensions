@@ -105,6 +105,54 @@
       ]
     },
     {
+      "name": "crop",
+      "title": "Crop",
+      "description": "Crop video to a target aspect ratio without resizing. Choose a preset or provide custom width and height.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset",
+          "placeholder": "Preset",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "1:1",
+              "value": "1:1"
+            },
+            {
+              "title": "16:9",
+              "value": "16:9"
+            },
+            {
+              "title": "9:16",
+              "value": "9:16"
+            },
+            {
+              "title": "4:3",
+              "value": "4:3"
+            },
+            {
+              "title": "3:4",
+              "value": "3:4"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "width",
+          "placeholder": "Custom Width",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "Custom Height",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "stabilize",
       "title": "Stabilize",
       "description": "The command allows to stabilize video",

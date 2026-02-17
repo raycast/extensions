@@ -8,5 +8,7 @@ export type Video = {
 
   stabilize: () => Promise<void>;
 
+  crop: (options: { aspectRatioWidth: number; aspectRatioHeight: number }) => Promise<void>;
+
   trim: (options: { startTime: string; endTime?: string; duration?: string }) => Promise<void>;
 };

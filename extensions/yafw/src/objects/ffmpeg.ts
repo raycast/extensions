@@ -123,4 +123,21 @@ export class Ffmpeg {
       });
     });
   };
+
+  videoDimensions: (input: string) => Promise<{ width: number; height: number }> = async (input) => {
+    const dimensions = await this.ffprobe.exec({
+      input,
+      params: ["-v error", "-select_streams v:0", "-show_entries stream=width,height", "-of csv=s=x:p=0"],
+    });
+
+    const [widthRaw, heightRaw] = dimensions.trim().split("x");
+    const width = parseInt(widthRaw, 10);
+    const height = parseInt(heightRaw, 10);
+
+    if (Number.isNaN(width) || Number.isNaN(height) || width <= 0 || height <= 0) {
+      throw new Error("Cannot detect video dimensions");
+    }
+
+    return { width, height };
+  };
 }

@@ -22,7 +22,7 @@ export default async function Command() {
       // But it could easily be included if we decide to do so.
       // Beware that this feature has not been tested on GIFs, so please test it if you enable it.
       if (selectedFiles.some((file) => file.extension() === ".gif")) {
-        throw new Error("Does not applicable to GIFs yet");
+        throw new Error("GIFs are not supported for this command yet");
       }
 
       for (const file of selectedFiles) {

@@ -1,5 +1,11 @@
 # YAFW Changelog
 
+## [Add video crop command] - {PR_MERGE_DATE}
+
+- Add new "Crop" command to crop videos to a target aspect ratio without resizing
+- Add crop presets and custom width/height fields
+- Allow skipping preset when custom width and height are provided
+
 ## [Add video trim command] - 2026-01-28
 
 - Add new "Trim" command to trim videos by specifying start time and either end time or duration
