@@ -6,6 +6,8 @@ import {
   showToast,
   Toast,
   openExtensionPreferences,
+  launchCommand,
+  LaunchType,
 } from '@raycast/api'
 
 import { useState, useMemo } from 'react'
@@ -15,6 +17,7 @@ import { useDate } from './hooks/date'
 import { Currency, PaystackResponse } from './utils/types'
 import { paystackDashboardUrl } from './utils/urls'
 import { useCachedPromise } from '@raycast/utils'
+import { useActiveAccount } from './hooks/accounts'
 
 interface Payout {
   id: number
@@ -35,20 +38,25 @@ interface Payout {
 export default function Command() {
   const formatCurrency = useCurrencyFormatter()
   const { parseDate } = useDate()
-  const { get } = usePaystack()
+  const { account, isLoading: accountLoading } = useActiveAccount()
+  const { get } = usePaystack(account)
   const [searchText, setSearchText] = useState<string>('')
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
-  const { data: payouts, isLoading } = useCachedPromise(async () => {
-    const response = (await get('/settlement')) as PaystackResponse<Payout[]>
-    if (response.status) {
-      showToast({
-        style: Toast.Style.Success,
-        title: 'Payouts fetched successfully!',
-      })
-    }
-    return response.data
-  })
+  const { data: payouts, isLoading } = useCachedPromise(
+    async (_accountId: string) => {
+      const response = (await get('/settlement')) as PaystackResponse<Payout[]>
+      if (response.status) {
+        showToast({
+          style: Toast.Style.Success,
+          title: 'Payouts fetched successfully!',
+        })
+      }
+      return response.data
+    },
+    [account?.id ?? ''] as [string],
+    { execute: !!account },
+  )
 
   const filteredPayouts = useMemo(() => {
     if (!payouts) return []
@@ -74,7 +82,8 @@ export default function Command() {
       searchBarPlaceholder="Search payouts by ID, currency, or, status."
       onSearchTextChange={setSearchText}
       searchBarAccessory={StatusDropdown(onStatusChange)}
-      isLoading={isLoading}
+      isLoading={isLoading || accountLoading}
+      navigationTitle={account ? `Payouts — ${account.name}` : 'Payouts'}
     >
       {filteredPayouts.map((payout) => (
         <List.Item
@@ -123,6 +132,16 @@ export default function Command() {
               <Action.CopyToClipboard
                 title="Copy ID"
                 content={payout.id.toString()}
+              />
+              <Action
+                onAction={() =>
+                  launchCommand({
+                    name: 'manage-accounts',
+                    type: LaunchType.UserInitiated,
+                  })
+                }
+                title="Switch Account"
+                icon={Icon.Switch}
               />
               <Action
                 onAction={openExtensionPreferences}

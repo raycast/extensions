@@ -7,6 +7,9 @@ import {
   confirmAlert,
   Icon,
   Alert,
+  Detail,
+  launchCommand,
+  LaunchType,
 } from '@raycast/api'
 import { Currency, PaystackResponse } from './utils/types'
 import { SUPPORTED_CURRENCIES } from './data/supported-currencies'
@@ -14,6 +17,7 @@ import { useForm, FormValidation } from '@raycast/utils'
 import { usePaystack } from './hooks/paystack'
 import { useEffect } from 'react'
 import { paystackDocsUrl } from './utils/urls'
+import { useActiveAccount } from './hooks/accounts'
 
 interface RefundFormValues {
   transactionId: string
@@ -30,7 +34,8 @@ export default function Command({
   transactionId: string
   currency: Currency
 }) {
-  const { post, isLoading } = usePaystack()
+  const { account, isLoading: accountLoading } = useActiveAccount()
+  const { post, isLoading } = usePaystack(account)
   const { handleSubmit } = useForm<RefundFormValues>({
     async onSubmit(values) {
       if (
@@ -85,17 +90,35 @@ export default function Command({
       })
     }
   }, [isLoading])
+
+  if (accountLoading) {
+    return <Detail isLoading={true} />
+  }
+
   return (
     <Form
+      navigationTitle={
+        account ? `Issue Refund — ${account.name}` : 'Issue Refund'
+      }
       searchBarAccessory={
         <Form.LinkAccessory
-          target={`${paystackDocsUrl}/refund}`}
+          target={`${paystackDocsUrl}/refund`}
           text="Refunds Documentation"
         />
       }
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Issue Refund" />
+          <Action
+            onAction={() =>
+              launchCommand({
+                name: 'manage-accounts',
+                type: LaunchType.UserInitiated,
+              })
+            }
+            title="Switch Account"
+            icon={Icon.Switch}
+          />
         </ActionPanel>
       }
     >

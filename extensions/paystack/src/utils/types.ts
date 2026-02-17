@@ -1,3 +1,11 @@
+export interface PaystackAccount {
+  id: string
+  name: string
+  liveSecretKey: string
+  testSecretKey: string
+  isDefault?: boolean
+}
+
 export interface Customer {
   id: number
   email: string

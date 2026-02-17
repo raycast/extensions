@@ -1,4 +1,13 @@
-import { ActionPanel, List, Action, Icon, Toast, showToast } from '@raycast/api'
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  Toast,
+  showToast,
+  launchCommand,
+  LaunchType,
+} from '@raycast/api'
 import { paystackDashboardUrl } from './utils/urls'
 import { useState, useMemo } from 'react'
 import { usePaystack } from './hooks/paystack'
@@ -6,23 +15,29 @@ import { useDate } from './hooks/date'
 import { useCurrencyFormatter } from './hooks/currency'
 import { PaystackResponse, Plan } from './utils/types'
 import { useCachedPromise } from '@raycast/utils'
+import { useActiveAccount } from './hooks/accounts'
 
 export default function Command() {
   const { parseDate } = useDate()
   const formatCurrency = useCurrencyFormatter()
-  const { get } = usePaystack()
+  const { account, isLoading: accountLoading } = useActiveAccount()
+  const { get } = usePaystack(account)
   const [searchText, setSearchText] = useState<string>('')
 
-  const { data: plans, isLoading } = useCachedPromise(async () => {
-    const response = (await get('/plan')) as PaystackResponse<Plan[]>
-    if (response.status) {
-      showToast({
-        style: Toast.Style.Success,
-        title: 'Plans fetched successfully!',
-      })
-    }
-    return response.data
-  })
+  const { data: plans, isLoading } = useCachedPromise(
+    async (_accountId: string) => {
+      const response = (await get('/plan')) as PaystackResponse<Plan[]>
+      if (response.status) {
+        showToast({
+          style: Toast.Style.Success,
+          title: 'Plans fetched successfully!',
+        })
+      }
+      return response.data
+    },
+    [account?.id ?? ''] as [string],
+    { execute: !!account },
+  )
 
   const filteredPlans = useMemo(() => {
     if (!plans) return []
@@ -40,7 +55,8 @@ export default function Command() {
     <List
       searchBarPlaceholder="Search plans by name or plan code"
       onSearchTextChange={setSearchText}
-      isLoading={isLoading}
+      isLoading={isLoading || accountLoading}
+      navigationTitle={account ? `Plans — ${account.name}` : 'Plans'}
     >
       {filteredPlans.map((plan) => (
         <List.Item
@@ -61,6 +77,16 @@ export default function Command() {
               <Action.CopyToClipboard
                 content={plan.plan_code}
                 title="Copy Plan Code"
+              />
+              <Action
+                onAction={() =>
+                  launchCommand({
+                    name: 'manage-accounts',
+                    type: LaunchType.UserInitiated,
+                  })
+                }
+                title="Switch Account"
+                icon={Icon.Switch}
               />
             </ActionPanel>
           }

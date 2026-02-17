@@ -5,6 +5,10 @@ import {
   showToast,
   Toast,
   Clipboard,
+  Detail,
+  launchCommand,
+  LaunchType,
+  Icon,
 } from '@raycast/api'
 import { paystackDocsUrl } from './utils/urls'
 import { useForm, FormValidation } from '@raycast/utils'
@@ -12,6 +16,7 @@ import { usePaystack } from './hooks/paystack'
 import { SUPPORTED_CURRENCIES } from './data/supported-currencies'
 import { useEffect } from 'react'
 import { Currency, PaystackResponse } from './utils/types'
+import { useActiveAccount } from './hooks/accounts'
 
 interface InitializeTransactionFormValues {
   amount: string
@@ -22,7 +27,9 @@ interface InitializeTransactionFormValues {
   callbackUrl?: string
 }
 export default function Command() {
-  const { post, isLoading } = usePaystack()
+  const { account, isLoading: accountLoading } = useActiveAccount()
+  const { post, isLoading } = usePaystack(account)
+
   const { handleSubmit } = useForm<InitializeTransactionFormValues>({
     async onSubmit(values) {
       try {
@@ -84,8 +91,18 @@ export default function Command() {
       })
     }
   }, [isLoading])
+
+  if (accountLoading) {
+    return <Detail isLoading={true} />
+  }
+
   return (
     <Form
+      navigationTitle={
+        account
+          ? `Generate Payment Link — ${account.name}`
+          : 'Generate Payment Link'
+      }
       searchBarAccessory={
         <Form.LinkAccessory
           target={`${paystackDocsUrl}/transaction/#initialize`}
@@ -97,6 +114,16 @@ export default function Command() {
           <Action.SubmitForm
             onSubmit={handleSubmit}
             title="Generate Payment Link"
+          />
+          <Action
+            onAction={() =>
+              launchCommand({
+                name: 'manage-accounts',
+                type: LaunchType.UserInitiated,
+              })
+            }
+            title="Switch Account"
+            icon={Icon.Switch}
           />
         </ActionPanel>
       }

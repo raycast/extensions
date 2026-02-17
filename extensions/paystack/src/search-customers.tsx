@@ -1,10 +1,20 @@
-import { ActionPanel, List, Action, Icon, Toast, showToast } from '@raycast/api'
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  Toast,
+  showToast,
+  launchCommand,
+  LaunchType,
+} from '@raycast/api'
 import { paystackDashboardUrl } from './utils/urls'
 import { useState, useMemo } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useDate } from './hooks/date'
 import { PaystackResponse } from './utils/types'
 import { useCachedPromise } from '@raycast/utils'
+import { useActiveAccount } from './hooks/accounts'
 
 interface Customer {
   id: string
@@ -23,19 +33,24 @@ interface Customer {
 }
 export default function Command() {
   const { parseDate } = useDate()
-  const { get } = usePaystack()
+  const { account, isLoading: accountLoading } = useActiveAccount()
+  const { get } = usePaystack(account)
   const [searchText, setSearchText] = useState<string>('')
 
-  const { data: customers, isLoading } = useCachedPromise(async () => {
-    const response = (await get('/customer')) as PaystackResponse<Customer[]>
-    if (response.status) {
-      showToast({
-        style: Toast.Style.Success,
-        title: 'Customers fetched successfully!',
-      })
-    }
-    return response.data
-  })
+  const { data: customers, isLoading } = useCachedPromise(
+    async (_accountId: string) => {
+      const response = (await get('/customer')) as PaystackResponse<Customer[]>
+      if (response.status) {
+        showToast({
+          style: Toast.Style.Success,
+          title: 'Customers fetched successfully!',
+        })
+      }
+      return response.data
+    },
+    [account?.id ?? ''] as [string],
+    { execute: !!account },
+  )
 
   const filteredCustomers = useMemo(() => {
     if (!customers) return []
@@ -52,7 +67,11 @@ export default function Command() {
   }, [searchText, customers])
 
   return (
-    <List onSearchTextChange={setSearchText} isLoading={isLoading}>
+    <List
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading || accountLoading}
+      navigationTitle={account ? `Customers — ${account.name}` : 'Customers'}
+    >
       {filteredCustomers.map((customer) => (
         <List.Item
           key={customer.id}
@@ -80,6 +99,16 @@ export default function Command() {
               <Action.CopyToClipboard
                 content={customer.email}
                 title="Copy Customer Email"
+              />
+              <Action
+                onAction={() =>
+                  launchCommand({
+                    name: 'manage-accounts',
+                    type: LaunchType.UserInitiated,
+                  })
+                }
+                title="Switch Account"
+                icon={Icon.Switch}
               />
             </ActionPanel>
           }

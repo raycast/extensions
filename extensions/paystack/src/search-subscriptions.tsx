@@ -1,4 +1,13 @@
-import { ActionPanel, List, Action, Icon, Toast, showToast } from '@raycast/api'
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  Toast,
+  showToast,
+  launchCommand,
+  LaunchType,
+} from '@raycast/api'
 import { paystackDashboardUrl } from './utils/urls'
 import { useState, useMemo } from 'react'
 import { usePaystack } from './hooks/paystack'
@@ -6,26 +15,32 @@ import { useDate } from './hooks/date'
 import { useCurrencyFormatter } from './hooks/currency'
 import { PaystackResponse, Subscription } from './utils/types'
 import { useCachedPromise } from '@raycast/utils'
+import { useActiveAccount } from './hooks/accounts'
 
 export default function Command() {
   const { parseDate } = useDate()
   const formatCurrency = useCurrencyFormatter()
-  const { get } = usePaystack()
+  const { account, isLoading: accountLoading } = useActiveAccount()
+  const { get } = usePaystack(account)
   const [searchText, setSearchText] = useState<string>('')
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
-  const { data: subscriptions, isLoading } = useCachedPromise(async () => {
-    const response = (await get('/subscription')) as PaystackResponse<
-      Subscription[]
-    >
-    if (response.status) {
-      showToast({
-        style: Toast.Style.Success,
-        title: 'Subscriptions fetched successfully!',
-      })
-    }
-    return response.data
-  })
+  const { data: subscriptions, isLoading } = useCachedPromise(
+    async (_accountId: string) => {
+      const response = (await get('/subscription')) as PaystackResponse<
+        Subscription[]
+      >
+      if (response.status) {
+        showToast({
+          style: Toast.Style.Success,
+          title: 'Subscriptions fetched successfully!',
+        })
+      }
+      return response.data
+    },
+    [account?.id ?? ''] as [string],
+    { execute: !!account },
+  )
 
   const filteredSubscriptions = useMemo(() => {
     if (!subscriptions) return []
@@ -52,7 +67,10 @@ export default function Command() {
       searchBarPlaceholder="Search subscriptions by email, code or plan name"
       onSearchTextChange={setSearchText}
       searchBarAccessory={StatusDropdown(onStatusChange)}
-      isLoading={isLoading}
+      isLoading={isLoading || accountLoading}
+      navigationTitle={
+        account ? `Subscriptions — ${account.name}` : 'Subscriptions'
+      }
     >
       {filteredSubscriptions.map((subscription) => (
         <List.Item
@@ -69,6 +87,16 @@ export default function Command() {
               <Action.CopyToClipboard
                 title="Copy Subscription Code"
                 content={subscription.subscription_code}
+              />
+              <Action
+                onAction={() =>
+                  launchCommand({
+                    name: 'manage-accounts',
+                    type: LaunchType.UserInitiated,
+                  })
+                }
+                title="Switch Account"
+                icon={Icon.Switch}
               />
             </ActionPanel>
           }

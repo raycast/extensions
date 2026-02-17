@@ -6,6 +6,8 @@ import {
   showToast,
   Toast,
   openExtensionPreferences,
+  launchCommand,
+  LaunchType,
 } from '@raycast/api'
 
 import { useState, useMemo } from 'react'
@@ -15,28 +17,34 @@ import { useDate } from './hooks/date'
 import { Currency, PaystackResponse, Transaction } from './utils/types'
 import { paystackDashboardUrl } from './utils/urls'
 import { useCachedPromise } from '@raycast/utils'
+import { useActiveAccount } from './hooks/accounts'
 
 import IssueRefund from './issue-refund'
 
 export default function Command() {
   const formatCurrency = useCurrencyFormatter()
   const { parseDate } = useDate()
-  const { get } = usePaystack()
+  const { account, isLoading: accountLoading } = useActiveAccount()
+  const { get } = usePaystack(account)
   const [searchText, setSearchText] = useState<string>('')
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
-  const { data: transactions, isLoading } = useCachedPromise(async () => {
-    const response = (await get('/transaction')) as PaystackResponse<
-      Transaction[]
-    >
-    if (response.status) {
-      showToast({
-        style: Toast.Style.Success,
-        title: 'Transactions fetched successfully!',
-      })
-    }
-    return response.data
-  })
+  const { data: transactions, isLoading } = useCachedPromise(
+    async (_accountId: string) => {
+      const response = (await get('/transaction')) as PaystackResponse<
+        Transaction[]
+      >
+      if (response.status) {
+        showToast({
+          style: Toast.Style.Success,
+          title: 'Transactions fetched successfully!',
+        })
+      }
+      return response.data
+    },
+    [account?.id ?? ''] as [string],
+    { execute: !!account },
+  )
 
   const filteredTransactions = useMemo(() => {
     if (!transactions) return []
@@ -63,7 +71,10 @@ export default function Command() {
       searchBarPlaceholder="Search transactions by ID, reference, or email"
       onSearchTextChange={setSearchText}
       searchBarAccessory={StatusDropdown(onStatusChange)}
-      isLoading={isLoading}
+      isLoading={isLoading || accountLoading}
+      navigationTitle={
+        account ? `Transactions — ${account.name}` : 'Transactions'
+      }
     >
       {filteredTransactions.map((transaction) => (
         <List.Item
@@ -110,6 +121,16 @@ export default function Command() {
                 }
                 title="Issue Refund"
                 icon={Icon.Coin}
+              />
+              <Action
+                onAction={() =>
+                  launchCommand({
+                    name: 'manage-accounts',
+                    type: LaunchType.UserInitiated,
+                  })
+                }
+                title="Switch Account"
+                icon={Icon.Switch}
               />
               <Action
                 onAction={openExtensionPreferences}
