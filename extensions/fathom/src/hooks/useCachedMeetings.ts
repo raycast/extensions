@@ -42,12 +42,14 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
   const [cachedMeetings, setCachedMeetings] = useState<CachedMeetingData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>();
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(() => cacheManager.hasMore());
+  const isLoadingMoreRef = useRef(false);
 
   // Subscribe to cache manager updates
   useEffect(() => {
     if (!enableCache) {
       setIsLoading(false);
+      setHasMore(false);
       return;
     }
 
@@ -107,36 +109,24 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
     };
   }, [filterKey, enableCache]);
 
-  // Convert cached data to Meeting array
-  const meetings: Meeting[] = cachedMeetings.map((cached) => {
+  const toMeeting = (cached: CachedMeetingData): Meeting => {
     const meeting = cached.meeting as Meeting;
-    // Update with cached summary/transcript if not already present
     return {
       ...meeting,
       summaryText: meeting.summaryText || cached.summary,
       transcriptText: meeting.transcriptText || cached.transcript,
-      // Use cached action items if meeting data doesn't have them or if cache is more recent
       actionItems: meeting.actionItems || (cached.actionItems as ActionItem[] | undefined),
     };
-  });
+  };
+
+  // Convert cached data to Meeting array
+  const meetings: Meeting[] = cachedMeetings.map(toMeeting);
 
   // Full-text search over cached meetings
   const searchMeetings = useCallback(
     (query: string): Meeting[] => {
-      if (!query || query.trim() === "") {
-        return meetings;
-      }
-
-      const results = searchCachedMeetings(cachedMeetings, query);
-      return results.map((cached: CachedMeetingData) => {
-        const meeting = cached.meeting as Meeting;
-        return {
-          ...meeting,
-          summaryText: meeting.summaryText || cached.summary,
-          transcriptText: meeting.transcriptText || cached.transcript,
-          actionItems: meeting.actionItems || (cached.actionItems as ActionItem[] | undefined),
-        };
-      });
+      if (!query || query.trim() === "") return meetings;
+      return searchCachedMeetings(cachedMeetings, query).map(toMeeting);
     },
     [cachedMeetings, meetings],
   );
@@ -156,14 +146,17 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
   // Load more meetings (incremental pagination)
   const loadMore = useCallback(async () => {
-    if (!enableCache) return;
+    if (!enableCache || isLoadingMoreRef.current) return;
 
     try {
+      isLoadingMoreRef.current = true;
       await cacheManager.loadMoreMeetings(filterRef.current);
       setHasMore(cacheManager.hasMore());
     } catch (error) {
       logger.error("[useCachedMeetings] Error loading more meetings:", error);
       setError(error instanceof Error ? error : new Error(String(error)));
+    } finally {
+      isLoadingMoreRef.current = false;
     }
   }, [enableCache]);
 

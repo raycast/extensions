@@ -6,7 +6,7 @@
 
 - Created `src/utils/cache.ts` with comprehensive caching utilities
 - Created `src/utils/cacheManager.ts` with pagination and staleness logic
-- Lazy pagination: initially loads ~50 meetings, with ⌘-L to load more
+- Lazy pagination: initially loads ~50 meetings, with native List pagination to load more
 - Uses Raycast's encrypted LocalStorage for secure data storage
 - Content-addressed caching with SHA-256 hashes for validation
 
@@ -32,9 +32,10 @@
 ### 4. **Lazy Pagination** ✅
 
 - **Initial load**: Fetches ~50 meetings (5 pages) for fast startup
-- **Load more**: ⌘-L fetches next 50 meetings on demand
+- **Load more**: Scroll to the bottom — native Raycast List pagination triggers automatically
 - **Cursor tracking**: Maintains pagination position across sessions
-- **Has more detection**: UI shows/hides "Load Older Meetings" based on availability
+- **Correct `hasMore` initial state**: Initialized synchronously from `cacheManager.hasMore()` so pagination is offered from the first render, not after the async cache load resolves
+- **Correct `pageSize`**: Set to `20` (skeleton placeholder count per Raycast docs), not `50`
 - Expands searchable corpus incrementally as user loads more
 
 ### 5. **API Optimizations** ✅
@@ -46,7 +47,7 @@
 - Lazy pagination reduces initial payload vs fetching all meetings
 - Helps avoid rate limiting issues
 
-### 6. **Smart Cache Management** 
+### 6. **Smart Cache Management**
 
 - **Differential TTLs** for different data types:
   - Meetings/Summaries/Transcripts: 30 days (immutable after creation)
@@ -62,22 +63,23 @@
   - `meetings` - Array of cached meetings
   - `searchMeetings(query)` - Full-text search function
   - `refreshCache()` - Manual refresh trigger (⌘-R)
-  - `loadMore()` - Load next batch (⌘-L)
-  - `hasMore` - Whether more meetings available
+  - `loadMore()` - Load next batch (called via Raycast List `onLoadMore`)
+  - `hasMore` - Whether more meetings available (initialized synchronously from `cacheManager`)
   - `isLoading` - Loading state
   - `error` - Error state
+- Shared `toMeeting` helper eliminates duplicated `CachedMeetingData → Meeting` mapping
 
 ### 8. **Updated UI** ✅
 
 - Search placeholder: "Search meetings by title, summary, or transcript..."
 - Added "Refresh Cache" actions in empty/error states (⌘-R)
-- Added "Load Older Meetings" action with ⌘-L shortcut
+- Added native Raycast List pagination for loading older meetings on scroll
 - Disabled Raycast's built-in filtering (using custom search instead)
 - Controlled search text state for real-time updates
 
 ## Files Created
 
-```
+```text
 src/
 ├── utils/
 │   ├── cache.ts                    # 298 lines - Core caching logic
@@ -90,7 +92,7 @@ src/
 
 ## Files Modified
 
-```
+```text
 src/
 ├── fathom/
 │   └── api.ts                       # Added query params, listAllMeetings with pagination
@@ -129,21 +131,17 @@ const result = await listAllMeetings(filter, onProgress, 5);
 // result.nextCursor: string | undefined
 
 // Fetch next 50 meetings using cursor
-const moreResult = await listAllMeetings(
-  { ...filter, cursor: result.nextCursor },
-  onProgress,
-  5
-);
+const moreResult = await listAllMeetings({ ...filter, cursor: result.nextCursor }, onProgress, 5);
 ```
 
 ### Loading More Meetings
 
-When "Load Older Meetings" (⌘-L) is triggered:
+When the user scrolls to the bottom, Raycast List pagination calls `onLoadMore`:
 
 1. Fetches next 5 pages (~50 meetings) from API using stored cursor
 2. Merges new meetings with existing cache
 3. Updates cursor for next incremental load
-4. Updates `hasMore` state to show/hide the action
+4. Updates `hasMore` state; `pageSize: 20` controls skeleton placeholder count during load
 
 ### Cache Storage Structure
 
@@ -218,7 +216,7 @@ The HTTP mapper now extracts embedded data:
 - **Reopen <5 min**: Zero API calls (cache only, instant loading)
 - **Reopen >5 min**: Background refresh with minimal UI impact
 - **Manual refresh (⌘-R)**: Full fetch with progress toast
-- **Load more (⌘-L)**: Incremental fetch of next 50 meetings
+- **Load more (scroll to bottom)**: Incremental fetch of next 50 meetings
 - **Before**: Multiple API calls per meeting (1 for list + 1 for summary + 1 for transcript)
 - **After**: Single API call with embedded data + smart cache refresh
 
@@ -246,7 +244,7 @@ The HTTP mapper now extracts embedded data:
 4. **Instant Reopen**: Close and reopen within 5 minutes - should load instantly with no toast
 5. **Stale Refresh**: Wait 5+ minutes, reopen - should show cached data then silently refresh
 6. **Search Test**: Type keywords from summary/transcript content (not just titles)
-7. **Load More Test**: Press ⌘-L to fetch older meetings, verify "Fetching older meetings..." toast
+7. **Load More Test**: Scroll to the bottom of the list — 20 placeholder skeletons should appear, then older meetings load
 8. **Refresh Test**: Click "Refresh Cache" or press ⌘-R
 
 ### Verify Cache State
@@ -326,13 +324,13 @@ These are considered immutable once created:
 The implementation successfully adds:
 
 - ✅ Aggressive caching with summaries/transcripts
-- ✅ Lazy pagination (~50 meetings initial, ⌘-L for more)
+- ✅ Lazy pagination (~50 meetings initial, scroll-to-load-more via native List pagination)
 - ✅ Smart cache refresh (5-min staleness detection)
 - ✅ Full-text search across all meeting content
 - ✅ Smart TTL management (30 days immutable, 6 hours action items)
 - ✅ API optimization with embedded data
 - ✅ Reduced rate limiting risk
-- ✅ Manual refresh (⌘-R) and load more (⌘-L)
+- ✅ Manual refresh (⌘-R); load more via native List scroll pagination
 - ✅ Encrypted local storage via Raycast
 - ✅ Content hashing for validation
 - ✅ Instant loading when reopening within 5 minutes

@@ -8,6 +8,29 @@ import { useDebouncedValue } from "./utils/debounce";
 import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
 import { classifyError, ErrorType, getUserFriendlyError } from "./utils/errorHandling";
 
+function renderError(error: Error, onRefresh: () => void) {
+  const errorType = classifyError(error);
+  const isAuthError = errorType === ErrorType.API_KEY_MISSING || errorType === ErrorType.API_KEY_INVALID;
+
+  return (
+    <List.EmptyView
+      icon={isAuthError ? Icon.Key : Icon.ExclamationMark}
+      title={isAuthError ? "Invalid API Key" : "Failed to Load Team Members"}
+      description={
+        isAuthError ? "Please check your Fathom API Key in Extension Preferences." : getUserFriendlyError(error).message
+      }
+      actions={
+        <ActionPanel>
+          {isAuthError && (
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          )}
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 function Command() {
   const [query, setQuery] = useState<string>("");
   const [selectedTeam, setSelectedTeam] = useState<string>("");
@@ -89,30 +112,7 @@ function Command() {
       }
     >
       {error ? (
-        (() => {
-          const errorType = classifyError(error);
-          const isAuthError = errorType === ErrorType.API_KEY_MISSING || errorType === ErrorType.API_KEY_INVALID;
-
-          return (
-            <List.EmptyView
-              icon={isAuthError ? Icon.Key : Icon.ExclamationMark}
-              title={isAuthError ? "Invalid API Key" : "Failed to Load Team Members"}
-              description={
-                isAuthError
-                  ? "Please check your Fathom API Key in Extension Preferences."
-                  : getUserFriendlyError(error).message
-              }
-              actions={
-                <ActionPanel>
-                  {isAuthError && (
-                    <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-                  )}
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
-                </ActionPanel>
-              }
-            />
-          );
-        })()
+        renderError(error, revalidate)
       ) : items.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Person}

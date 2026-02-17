@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, Detail, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { Meeting, Team } from "./types/Types";
 import { getMeetingSummary, getMeetingTranscript, listTeams } from "./fathom/api";
 import { MeetingDetailActions } from "./actions/MeetingActions";
@@ -62,6 +62,11 @@ function Command() {
     filter: {},
     enableCache: apiKeyPresent,
   });
+
+  const loadMoreMeetings = useCallback(async () => {
+    if (!apiKeyPresent) return;
+    await loadMore();
+  }, [apiKeyPresent, loadMore]);
 
   // Combine error sources: explicit missing key OR runtime API error
   const error: Error | undefined = !apiKeyPresent
@@ -163,16 +168,9 @@ function Command() {
       actions={
         <ActionPanel>
           <RefreshCacheAction onRefresh={refreshCache} />
-          {hasMore && (
-            <Action
-              title="Load Older Meetings"
-              icon={Icon.Download}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
-              onAction={loadMore}
-            />
-          )}
         </ActionPanel>
       }
+      pagination={apiKeyPresent && !error ? { pageSize: 20, hasMore, onLoadMore: loadMoreMeetings } : undefined}
       searchBarAccessory={
         teams.length > 0 ? (
           <List.Dropdown tooltip="Filter by Team" value={filterType} onChange={setFilterType}>

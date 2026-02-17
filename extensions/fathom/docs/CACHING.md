@@ -29,9 +29,9 @@ The Fathom Raycast extension now implements aggressive caching for meetings, sum
 ### 4. **Lazy Pagination**
 
 - **Initial load**: Fetches ~50 meetings (5 pages) for fast startup
-- **Load more**: Press ⌘-L to fetch next 50 meetings on demand
+- **Load more**: Scroll to the bottom of the list to fetch next ~50 meetings on demand via native Raycast List pagination
 - **Incremental loading**: Cursor-based pagination tracks position across sessions
-- **Has more detection**: UI shows/hides "Load Older Meetings" action based on availability
+- **Has more detection**: `hasMore` initialized synchronously from `cacheManager` so pagination is offered from the first render
 
 ### 5. **Smart Cache Invalidation**
 
@@ -95,8 +95,8 @@ const {
   error,
   searchMeetings,
   refreshCache,
-  loadMore,      // NEW: Load next batch of meetings
-  hasMore,       // NEW: Whether more meetings are available
+  loadMore, // NEW: Load next batch of meetings
+  hasMore, // NEW: Whether more meetings are available
 } = useCachedMeetings({
   filter: {},
   enableCache: true,
@@ -117,23 +117,22 @@ await loadMore();
 1. **No query**: Shows all cached meetings grouped by date (This Week, Last Week, Previous Month, Older)
 2. **With query**: Searches titles, summaries, and transcripts across ALL cached meetings
 3. **Team filter**: Applies after search, filtering by team name
-4. **Load more**: Press ⌘-L to fetch older meetings and expand search corpus
+4. **Load more**: Scroll to the bottom of the list — Raycast List pagination triggers automatically
 
 ### Keyboard Shortcuts
 
 - **⌘-R**: Refresh cache (force fresh fetch from API)
-- **⌘-L**: Load older meetings (fetch next 50 meetings)
 
 ## Cache Management
 
 ### Automatic Behavior
 
-| Scenario | Behavior |
-|----------|----------|
-| First launch | Shows cached meetings instantly, fetches fresh data in background |
-| Reopen within 5 minutes | Shows cached meetings immediately, no API calls |
-| Reopen after 5 minutes | Shows cached meetings, silently refreshes in background |
-| Manual refresh (⌘-R) | Forces fresh fetch regardless of cache age |
+| Scenario                | Behavior                                                          |
+| ----------------------- | ----------------------------------------------------------------- |
+| First launch            | Shows cached meetings instantly, fetches fresh data in background |
+| Reopen within 5 minutes | Shows cached meetings immediately, no API calls                   |
+| Reopen after 5 minutes  | Shows cached meetings, silently refreshes in background           |
+| Manual refresh (⌘-R)    | Forces fresh fetch regardless of cache age                        |
 
 ### Cache Staleness Detection
 
@@ -152,12 +151,12 @@ isCacheStale(): boolean {
 
 ### Loading More Meetings
 
-When "Load Older Meetings" (⌘-L) is triggered:
+When the user scrolls to the bottom of the list, Raycast List pagination triggers `onLoadMore`:
 
 1. Fetches next 5 pages (~50 meetings) from API using stored cursor
 2. Merges new meetings with existing cache
 3. Updates cursor for next incremental load
-4. Updates `hasMore` state to show/hide the action
+4. Updates `hasMore` state; `pageSize: 20` controls how many skeleton placeholders display while loading
 
 ### Clearing Cache
 
@@ -189,11 +188,7 @@ const result = await listAllMeetings(filter, onProgress, 5);
 // result.nextCursor: string | undefined
 
 // Fetch next 50 meetings using cursor
-const moreResult = await listAllMeetings(
-  { ...filter, cursor: result.nextCursor },
-  onProgress,
-  5
-);
+const moreResult = await listAllMeetings({ ...filter, cursor: result.nextCursor }, onProgress, 5);
 ```
 
 The `Meeting` interface now includes optional embedded content:
@@ -264,7 +259,7 @@ Toast messages now clearly indicate the operation:
 ### Search Not Finding Results
 
 1. Ensure meetings are cached (check loading state)
-2. Load more meetings with ⌘-L to expand search corpus
+2. Scroll to the bottom to load more meetings and expand the search corpus
 3. Verify search terms are spelled correctly
 4. Try single-word searches to narrow down issues
 5. Check that summaries/transcripts are present in cached data

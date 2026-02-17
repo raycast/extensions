@@ -46,7 +46,7 @@
   ],
   "dependencies": {
     "@chrismessina/raycast-logger": "^1.2.2",
-    "@raycast/api": "^1.104.5",
+    "@raycast/api": "^1.104.6",
     "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {

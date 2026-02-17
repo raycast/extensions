@@ -33,6 +33,7 @@ class CacheManager {
   private FETCH_COOLDOWN = 5000; // 5 seconds minimum between fetches
   private nextCursor: string | undefined = undefined; // Pagination cursor for loading more
   private hasMoreMeetings = true; // Whether more meetings are available
+  private isLoadingMore = false;
 
   /**
    * Subscribe to cache updates
@@ -195,7 +196,7 @@ class CacheManager {
             progressToast.style = Toast.Style.Success;
             progressToast.title = `${result.meetings.length} meetings ready — cached locally`;
             if (this.hasMoreMeetings) {
-              progressToast.message = "Press ⌘-L to load older meetings";
+              progressToast.message = "Scroll to the bottom to load older meetings";
             }
           }
 
@@ -275,6 +276,11 @@ class CacheManager {
    * Load more meetings from the next page (incremental pagination)
    */
   async loadMoreMeetings(filter: MeetingFilter = {}): Promise<void> {
+    if (this.isLoadingMore) {
+      logger.log("[CacheManager] loadMoreMeetings already in progress");
+      return;
+    }
+
     if (!this.hasMoreMeetings || !this.nextCursor) {
       logger.log("[CacheManager] No more meetings to load");
       await showToast({
@@ -284,46 +290,54 @@ class CacheManager {
       return;
     }
 
-    try {
-      const progressToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Fetching older meetings from Fathom...",
-      });
+    const cursor = this.nextCursor;
+    const requestKey = `load-more-meetings:${cursor}:${JSON.stringify(filter)}`;
 
-      logger.log(`[CacheManager] Loading more meetings from cursor: ${this.nextCursor}`);
+    await globalQueue.enqueue(
+      requestKey,
+      async () => {
+        this.isLoadingMore = true;
+        try {
+          const progressToast = await showToast({
+            style: Toast.Style.Animated,
+            title: "Fetching older meetings from Fathom...",
+          });
 
-      const result = await listAllMeetings(
-        { ...filter, cursor: this.nextCursor },
-        (fetched) => {
-          progressToast.title = `Fetching older meetings from Fathom... (${fetched} downloaded)`;
-        },
-        5, // Fetch next 5 pages (~50 more meetings)
-      );
+          logger.log(`[CacheManager] Loading more meetings from cursor: ${cursor}`);
 
-      // Update cursor for next load
-      this.nextCursor = result.nextCursor;
-      this.hasMoreMeetings = !!result.nextCursor;
+          const result = await listAllMeetings(
+            { ...filter, cursor },
+            (fetched) => {
+              progressToast.title = `Fetching older meetings from Fathom... (${fetched} downloaded)`;
+            },
+            5, // Fetch next 5 pages (~50 more meetings)
+          );
 
-      progressToast.title = `Saving ${result.meetings.length} meetings to local cache...`;
+          // Update cursor for next load
+          this.nextCursor = result.nextCursor;
+          this.hasMoreMeetings = !!result.nextCursor;
 
-      // Cache the new results (will merge with existing)
-      await this.cacheApiResults(result.meetings);
-      this.lastCacheUpdateTime = Date.now();
+          progressToast.title = `Saving ${result.meetings.length} meetings to local cache...`;
 
-      progressToast.style = Toast.Style.Success;
-      progressToast.title = `${result.meetings.length} older meetings cached locally`;
-      if (this.hasMoreMeetings) {
-        progressToast.message = "Press ⌘-L to load more";
-      } else {
-        progressToast.message = "All meetings loaded";
-      }
-    } catch (error) {
-      await showContextualError(error, {
-        action: "load more meetings",
-        fallbackTitle: "Failed to Load More Meetings",
-      });
-      throw error;
-    }
+          // Cache the new results (will merge with existing)
+          await this.cacheApiResults(result.meetings);
+          this.lastCacheUpdateTime = Date.now();
+
+          progressToast.style = Toast.Style.Success;
+          progressToast.title = `${result.meetings.length} older meetings cached locally`;
+          progressToast.message = this.hasMoreMeetings ? "Scroll to the bottom to load more" : "All meetings loaded";
+        } catch (error) {
+          await showContextualError(error, {
+            action: "load more meetings",
+            fallbackTitle: "Failed to Load More Meetings",
+          });
+          throw error;
+        } finally {
+          this.isLoadingMore = false;
+        }
+      },
+      1,
+    );
   }
 
   /**
