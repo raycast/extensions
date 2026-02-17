@@ -1,5 +1,8 @@
 # Audio Device Changelog
 
+## [Update] - {PR_MERGE_DATE}
+- Improve binary download for windows (downloads and checks if binary exists at runtime)
+
 ## [Update] - 2026-02-16
 - Used https://github.com/Inovvia/go-win-audio-cli instead of cmdlet to prevent issues regarding powershell and administrator privileges
 - Listing audio devices on windows is now a lot faster!

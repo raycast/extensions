@@ -1,5 +1,7 @@
 import path from "path";
 import fs from "fs";
+import https from "https";
+import crypto from "crypto";
 import { execa } from "execa";
 import { environment } from "@raycast/api";
 import type { PlatformAudioAPI, AudioDevice } from "./index";
@@ -21,31 +23,114 @@ type WindowsAudioSwitchResult = {
   device: WindowsAudioDevice;
 };
 
-const binaryAsset = path.join(environment.assetsPath, "win-audio-cli.exe");
+const WINDOWS_BINARY_URL = "https://github.com/Inovvia/go-win-audio-cli/releases/download/1.1.0/win-audio-cli.exe";
+const WINDOWS_BINARY_CHECKSUM = "569fe05624f410b565b92fa0c729e29f170bb78907dcff7ef2cf66a01465e365";
+
 const binary = path.join(environment.supportPath, "win-audio-cli.exe");
 let hasLoggedBinaryInfo = false;
+let isDownloading = false;
+let downloadPromise: Promise<void> | null = null;
+
+function downloadBinary(url: string, dest: string, redirectCount = 0): Promise<void> {
+  if (redirectCount > 5) {
+    return Promise.reject(new Error("Too many redirects"));
+  }
+
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(dest);
+    const request = https.get(url, (response) => {
+      if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        file.close();
+        const location = response.headers.location;
+        fs.unlink(dest, (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (!location.startsWith("https://")) {
+            reject(new Error(`Redirect to non-HTTPS URL is not allowed: ${location}`));
+            return;
+          }
+          resolve(downloadBinary(location, dest, redirectCount + 1));
+        });
+        return;
+      }
+
+      if (response.statusCode !== 200) {
+        file.close();
+        fs.unlink(dest, () => {
+          reject(new Error(`Download failed with status ${response.statusCode}`));
+        });
+        return;
+      }
+
+      response.pipe(file);
+      file.on("finish", () => {
+        file.close(() => resolve());
+      });
+    });
+
+    request.on("error", (error) => {
+      file.close();
+      fs.unlink(dest, () => {
+        reject(error);
+      });
+    });
+  });
+}
+
+function verifyChecksum(filePath: string, expectedChecksum: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    const stream = fs.createReadStream(filePath);
+
+    stream.on("error", (error) => reject(error));
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => {
+      const actualChecksum = hash.digest("hex");
+      if (actualChecksum.toLowerCase() === expectedChecksum.toLowerCase()) {
+        resolve();
+      } else {
+        reject(new Error(`Checksum mismatch. Expected: ${expectedChecksum}, Got: ${actualChecksum}`));
+      }
+    });
+  });
+}
 
 async function ensureBinary() {
-  const shouldCopy = !fs.existsSync(binary);
-  if (shouldCopy) {
-    fs.copyFileSync(binaryAsset, binary);
+  if (fs.existsSync(binary)) {
     await logBinaryInfo();
     return;
   }
 
-  try {
-    const assetStat = fs.statSync(binaryAsset);
-    const binaryStat = fs.statSync(binary);
-    if (assetStat.mtimeMs > binaryStat.mtimeMs) {
-      fs.copyFileSync(binaryAsset, binary);
-      await logBinaryInfo();
-      return;
-    }
-  } catch (error) {
-    console.warn("Failed to sync Windows audio binary", error);
+  if (isDownloading && downloadPromise) {
+    return downloadPromise;
   }
 
-  await logBinaryInfo();
+  isDownloading = true;
+  downloadPromise = (async () => {
+    try {
+      if (!fs.existsSync(environment.supportPath)) {
+        fs.mkdirSync(environment.supportPath, { recursive: true });
+      }
+
+      console.log("Downloading Windows audio CLI binary...");
+      await downloadBinary(WINDOWS_BINARY_URL, binary);
+      await verifyChecksum(binary, WINDOWS_BINARY_CHECKSUM);
+      console.log("Windows audio CLI binary downloaded and verified successfully");
+      await logBinaryInfo();
+    } catch (error) {
+      if (fs.existsSync(binary)) {
+        fs.unlinkSync(binary);
+      }
+      throw error;
+    } finally {
+      isDownloading = false;
+      downloadPromise = null;
+    }
+  })();
+
+  return downloadPromise;
 }
 
 async function logBinaryInfo() {

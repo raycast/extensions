@@ -65,7 +65,6 @@ function downloadBinary(url, dest, redirectCount = 0) {
         });
         return;
       }
-      
 
       if (response.statusCode !== 200) {
         file.close();
@@ -95,19 +94,7 @@ if (process.platform === "darwin") {
   const dest = path.join(assetsDir, "audio-devices");
   copyBinary(source, dest);
 } else if (process.platform === "win32") {
-  const WINDOWS_BINARY_URL = "https://github.com/Inovvia/go-win-audio-cli/releases/download/1.1.0/win-audio-cli.exe";
-  const WINDOWS_BINARY_CHECKSUM = "569fe05624f410b565b92fa0c729e29f170bb78907dcff7ef2cf66a01465e365";
-  const dest = path.join(assetsDir, "win-audio-cli.exe");
-
-  downloadBinary(WINDOWS_BINARY_URL, dest)
-    .then(() => verifyChecksum(dest, WINDOWS_BINARY_CHECKSUM))
-    .then(() => {
-      console.log("Downloaded and verified win-audio-cli.exe to assets/.");
-    })
-    .catch((error) => {
-      console.error("Failed to download Windows audio binary:", error.message);
-      process.exit(1);
-    });
+  console.log("Skipping Windows binary download - will be downloaded at runtime");
 } else {
   console.log("Skipping binary copy (unsupported platform)");
 }
