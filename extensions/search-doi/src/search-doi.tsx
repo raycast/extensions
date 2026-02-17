@@ -223,10 +223,9 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
 
   const { isLoading, data } = useFetch<CrossrefResponse>(
-    searchText ? `https://api.crossref.org/works/${searchText}` : null,
+    searchText ? `https://api.crossref.org/works/${searchText}` : "",
     { execute: !!searchText },
   );
-
   const work = data?.message;
 
   const fullAuthorList = work?.author
@@ -286,7 +285,7 @@ export default function Command() {
 
               <ActionPanel.Submenu
                 title="Get Reference"
-                icon={Icon.Quote}
+                icon={Icon.SpeechBubble}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
               >
                 <CopyAsRichText work={work} shortcut={{ modifiers: ["cmd", "shift"], key: "a" }} />
@@ -308,8 +307,9 @@ export default function Command() {
               </ActionPanel.Submenu>
 
               <ActionPanel.Section title="Quick Actions">
-                <Action.CopyToClipboard content={work.URL} title="Copy URL" />
-                <Action.CopyToClipboard content={metaAuthorList} title="Copy Authors" />
+                <Action.CopyToClipboard content={work.URL} title="Copy URL" icon={Icon.Link} />
+
+                <Action.CopyToClipboard content={metaAuthorList} title="Copy Authors" icon={Icon.TwoPeople} />
               </ActionPanel.Section>
             </ActionPanel>
           }
