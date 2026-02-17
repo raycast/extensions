@@ -1,20 +1,23 @@
 import { useExec } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
-import { execSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
 import { AmpUsage, AmpError } from "./types";
 import { parseAmpUsage } from "./parser";
 
-function detectAmpPath(): string {
+const execFileAsync = promisify(execFile);
+
+async function detectAmpPath(): Promise<string> {
   // Try PATH first using 'which' (macOS/Linux) or 'where' (Windows)
   const isWindows = process.platform === "win32";
-  const whichCommand = isWindows ? "where amp" : "which amp";
+  const command = isWindows ? "where" : "which";
 
   try {
-    const result = execSync(whichCommand, { encoding: "utf-8", timeout: 5000 });
-    const detectedPath = result.trim().split("\n")[0]; // 'where' may return multiple lines
+    const { stdout } = await execFileAsync(command, ["amp"], { encoding: "utf-8", timeout: 5000 });
+    const detectedPath = stdout.trim().split("\n")[0]; // 'where' may return multiple lines
     if (detectedPath && fs.existsSync(detectedPath)) {
       return detectedPath;
     }
@@ -49,11 +52,21 @@ export function useAmpUsage() {
 
   // 检测 amp 路径
   useEffect(() => {
-    const detected = detectAmpPath();
-    setAmpPath(detected);
-    setPathDetected(true);
-    // 路径检测完成后，允许首次执行
-    setShouldExecute(true);
+    let cancelled = false;
+
+    void (async () => {
+      const detected = await detectAmpPath();
+      if (cancelled) return;
+
+      setAmpPath(detected);
+      setPathDetected(true);
+      // 路径检测完成后，允许首次执行
+      setShouldExecute(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const {

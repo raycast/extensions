@@ -2,9 +2,7 @@ import { List, getPreferenceValues } from "@raycast/api";
 import { AmpUsage, AmpError } from "./types";
 import { renderErrorDetail, renderNoDataDetail, getLoadingAccessory, getNoDataAccessory } from "../agents/ui";
 
-interface AmpPreferences {
-  ampDisplayMode?: "amount" | "percentage";
-}
+type Preferences = Preferences.AgentUsage;
 
 export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | null): string {
   if (error) {
@@ -122,7 +120,7 @@ export function getAmpAccessory(
     return getNoDataAccessory();
   }
 
-  const { ampDisplayMode = "amount" } = getPreferenceValues<AmpPreferences>();
+  const { ampDisplayMode = "amount" } = getPreferenceValues<Preferences>();
   const remaining = usage.ampFree.total - usage.ampFree.used;
   const percent = usage.ampFree.total > 0 ? (remaining / usage.ampFree.total) * 100 : 0;
 

@@ -13,6 +13,8 @@ import { useKimiUsage } from "./kimi/fetcher";
 import { renderKimiDetail, getKimiAccessory, formatKimiUsageText } from "./kimi/renderer";
 import { useAntigravityUsage } from "./antigravity/fetcher";
 import { renderAntigravityDetail, getAntigravityAccessory, formatAntigravityUsageText } from "./antigravity/renderer";
+import { useZaiUsage } from "./zai/fetcher";
+import { renderZaiDetail, getZaiAccessory, formatZaiUsageText } from "./zai/renderer";
 import { AgentDefinition, Accessory, UsageState } from "./agents/types";
 import { AmpError, AmpUsage } from "./amp/types";
 import { CodexError, CodexUsage } from "./codex/types";
@@ -20,6 +22,7 @@ import { DroidError, DroidUsage } from "./droid/types";
 import { GeminiError, GeminiUsage } from "./gemini/types";
 import { KimiError, KimiUsage } from "./kimi/types";
 import { AntigravityError, AntigravityUsage } from "./antigravity/types";
+import { ZaiError, ZaiUsage } from "./zai/types";
 
 const AGENT_ORDER_KEY = "agent-order";
 
@@ -73,6 +76,14 @@ const AGENTS: AgentDefinition[] = [
     description: "Google Antigravity",
     isSupported: true,
   },
+  {
+    id: "zai",
+    name: "z.ai",
+    icon: "zhipu-icon.svg",
+    description: "Z.AI / GLM Coding Assistant",
+    isSupported: true,
+    settingsUrl: "https://z.ai",
+  },
 ];
 
 function renderUnsupportedDetail(agent: AgentDefinition): React.ReactNode {
@@ -93,10 +104,11 @@ interface UsageStates {
   gemini: UsageState<GeminiUsage, GeminiError>;
   kimi: UsageState<KimiUsage, KimiError>;
   antigravity: UsageState<AntigravityUsage, AntigravityError>;
+  zai: UsageState<ZaiUsage, ZaiError>;
 }
 
 function getAgentAccessory(agent: AgentDefinition, states: UsageStates): Accessory {
-  const { amp, codex, droid, gemini, kimi, antigravity } = states;
+  const { amp, codex, droid, gemini, kimi, antigravity, zai } = states;
 
   if (agent.id === "amp") {
     return getAmpAccessory(amp.usage, amp.error, amp.isLoading);
@@ -122,11 +134,15 @@ function getAgentAccessory(agent: AgentDefinition, states: UsageStates): Accesso
     return getAntigravityAccessory(antigravity.usage, antigravity.error, antigravity.isLoading);
   }
 
+  if (agent.id === "zai") {
+    return getZaiAccessory(zai.usage, zai.error, zai.isLoading);
+  }
+
   return { text: "—", tooltip: "Not supported yet" };
 }
 
 function renderAgentDetail(agent: AgentDefinition, states: UsageStates): React.ReactNode {
-  const { amp, codex, droid, gemini, kimi, antigravity } = states;
+  const { amp, codex, droid, gemini, kimi, antigravity, zai } = states;
 
   if (agent.id === "amp" && agent.isSupported) {
     return renderAmpDetail(amp.usage, amp.error);
@@ -152,11 +168,15 @@ function renderAgentDetail(agent: AgentDefinition, states: UsageStates): React.R
     return renderAntigravityDetail(antigravity.usage, antigravity.error);
   }
 
+  if (agent.id === "zai" && agent.isSupported) {
+    return renderZaiDetail(zai.usage, zai.error);
+  }
+
   return renderUnsupportedDetail(agent);
 }
 
 function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
-  const { amp, codex, droid, gemini, kimi, antigravity } = states;
+  const { amp, codex, droid, gemini, kimi, antigravity, zai } = states;
 
   if (agent.id === "amp") {
     return formatAmpUsageText(amp.usage, amp.error);
@@ -176,6 +196,9 @@ function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
   if (agent.id === "antigravity") {
     return formatAntigravityUsageText(antigravity.usage, antigravity.error);
   }
+  if (agent.id === "zai") {
+    return formatZaiUsageText(zai.usage, zai.error);
+  }
   return `${agent.name}\nStatus: Not supported yet`;
 }
 
@@ -187,6 +210,7 @@ export default function Command() {
   const geminiState: UsageState<GeminiUsage, GeminiError> = useGeminiUsage();
   const kimiState: UsageState<KimiUsage, KimiError> = useKimiUsage();
   const antigravityState: UsageState<AntigravityUsage, AntigravityError> = useAntigravityUsage();
+  const zaiState: UsageState<ZaiUsage, ZaiError> = useZaiUsage();
 
   const [agentOrder, setAgentOrder] = useState<string[]>(AGENTS.map((a) => a.id));
 
@@ -217,6 +241,7 @@ export default function Command() {
     gemini: prefs.showGemini,
     kimi: prefs.showKimi,
     antigravity: prefs.showAntigravity,
+    zai: prefs.showZai,
   };
 
   const sortedAgents = agentOrder
@@ -230,7 +255,8 @@ export default function Command() {
     droidState.isLoading ||
     geminiState.isLoading ||
     kimiState.isLoading ||
-    antigravityState.isLoading;
+    antigravityState.isLoading ||
+    zaiState.isLoading;
 
   const hasPromptedGeminiReauth = useRef(false);
 
@@ -287,6 +313,7 @@ export default function Command() {
       geminiState.revalidate(),
       kimiState.revalidate(),
       antigravityState.revalidate(),
+      zaiState.revalidate(),
     ]);
     await showToast({
       title: "Refreshed",
@@ -319,6 +346,7 @@ export default function Command() {
           gemini: geminiState,
           kimi: kimiState,
           antigravity: antigravityState,
+          zai: zaiState,
         });
         const detail = renderAgentDetail(agent, {
           amp: ampState,
@@ -327,6 +355,7 @@ export default function Command() {
           gemini: geminiState,
           kimi: kimiState,
           antigravity: antigravityState,
+          zai: zaiState,
         });
 
         const canMoveUp = index > 0;
@@ -355,6 +384,7 @@ export default function Command() {
                         gemini: geminiState,
                         kimi: kimiState,
                         antigravity: antigravityState,
+                        zai: zaiState,
                       })}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
@@ -369,7 +399,7 @@ export default function Command() {
                 <ActionPanel.Section title="Reorder">
                   {canMoveUp && (
                     <Action
-                      title="Move up"
+                      title="Move Up"
                       icon={Icon.ArrowUp}
                       shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                       onAction={() => moveAgent(agent.id, "up")}

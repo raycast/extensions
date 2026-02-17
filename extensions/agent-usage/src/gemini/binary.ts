@@ -1,4 +1,3 @@
-import { execSync } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -25,18 +24,30 @@ function isExecutableFile(filePath: string): boolean {
   }
 }
 
-function resolveGeminiBinaryPathFromShell(): string | null {
-  try {
-    const result = execSync("command -v gemini || which gemini", { encoding: "utf-8", timeout: 5000 });
-    const candidate = cleanString(result.split("\n")[0]);
-    if (!candidate) {
-      return null;
-    }
-
-    return isExecutableFile(candidate) ? candidate : null;
-  } catch {
+function resolveGeminiBinaryPathFromPathEnv(): string | null {
+  const pathEnv = cleanString(process.env.PATH);
+  if (!pathEnv) {
     return null;
   }
+
+  const pathDirs = pathEnv.split(path.delimiter).filter((dir) => dir.length > 0);
+  const windowsExtensions =
+    process.platform === "win32"
+      ? (cleanString(process.env.PATHEXT)
+          ?.split(";")
+          .filter((ext) => ext.length > 0) ?? [".exe", ".cmd", ".bat", ".com"])
+      : [""];
+
+  for (const dir of pathDirs) {
+    for (const ext of windowsExtensions) {
+      const candidate = path.join(dir, `${GEMINI_BINARY_NAME}${ext}`);
+      if (isExecutableFile(candidate)) {
+        return candidate;
+      }
+    }
+  }
+
+  return null;
 }
 
 function compareVersionDesc(a: string, b: string): number {
@@ -90,9 +101,9 @@ export function resolveGeminiBinaryPath(): string | null {
     }
   }
 
-  const fromShell = resolveGeminiBinaryPathFromShell();
-  if (fromShell) {
-    return fromShell;
+  const fromPathEnv = resolveGeminiBinaryPathFromPathEnv();
+  if (fromPathEnv) {
+    return fromPathEnv;
   }
 
   const homeDir = os.homedir();
