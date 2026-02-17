@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Menu Bar Unloading Before API Fetch Completes] - {PR_MERGE_DATE}
+## [Fix Menu Bar Unloading Before API Fetch Completes] - 2026-02-17
 
 - Fixed the menu bar icon disappearing permanently when "Hide icon while idle" is enabled and Spotify is restarted
 - Replaced mutable ref-based execution control (`shouldExecute`) with computed reactive values (`isSpotifyActive`, `uriChanged`) so the hook re-evaluates when Spotify state changes
