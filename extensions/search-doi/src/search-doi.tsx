@@ -223,11 +223,9 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
 
   const doi = searchText.replace(/^https?:\/\/doi\.org\//i, "");
-
-  const { isLoading, data, error } = useFetch<CrossrefResponse>(
-    doi ? `https://api.crossref.org/works/${doi}` : "",
-    { execute: !!doi },
-  );
+  const { isLoading, data, error } = useFetch<CrossrefResponse>(doi ? `https://api.crossref.org/works/${doi}` : "", {
+    execute: !!doi,
+  });
   const work = data?.message;
 
   const fullAuthorList = work?.author
@@ -248,7 +246,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Paste DOI (e.g., 10.1038/s41586-020-2649-2)..."
+      searchBarPlaceholder="Enter DOI (e.g., 10.1038/s41586-020-2649-2)..."
       throttle
       isShowingDetail={!!work}
     >
