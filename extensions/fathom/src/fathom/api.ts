@@ -420,7 +420,6 @@ export async function listTeams(
   args: { pageSize?: number; cursor?: string; query?: string; maxPages?: number } = {},
 ): Promise<Paginated<Team>> {
   logger.log(`[API] 👥 listTeams called with args:`, args);
-
   const params: string[] = [];
   if (args.cursor) params.push(`cursor=${encodeURIComponent(args.cursor)}`);
 
