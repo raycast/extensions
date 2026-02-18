@@ -33,6 +33,30 @@ interface RawInventoryLine {
   displayName: string;
 }
 
+function parseInventoryLine(line: string): RawInventoryLine {
+  const match = line.match(/^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(.*))?$/);
+  if (!match) {
+    const lineSnippet = line.length > 200 ? `${line.slice(0, 200)}...` : line;
+    throw new Error(`Unable to parse objects.inv line: "${lineSnippet}"`);
+  }
+
+  const [, name, role, priorityToken, uri, displayNameToken] = match;
+  const priority = Number(priorityToken);
+  const displayName = displayNameToken?.trim() || name;
+
+  if (!Number.isFinite(priority)) {
+    throw new Error(`Invalid inventory priority for "${name}": "${priorityToken}"`);
+  }
+
+  return {
+    name,
+    role,
+    priority,
+    uri,
+    displayName,
+  };
+}
+
 export async function parseInventory(buffer: Buffer): Promise<RawInventoryLine[]> {
   let offset = 0;
 
@@ -60,17 +84,7 @@ export async function parseInventory(buffer: Buffer): Promise<RawInventoryLine[]
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => {
-      const [name, role, priority, uri, ...rest] = line.split(" ");
-      const displayName = rest.length > 0 ? rest.join(" ") : name;
-      return {
-        name,
-        role,
-        priority: Number(priority),
-        uri,
-        displayName,
-      };
-    });
+    .map(parseInventoryLine);
 }
 
 export function dedupeAndFilter(lines: RawInventoryLine[]): InventoryItem[] {

@@ -229,8 +229,8 @@ function normalizeWhitespace(value: string): string {
 function convertHtmlToMarkdown(element: cheerio.Cheerio<AnyNode>): string {
   const clone = element.clone();
 
-  clone.find("code").each((_: number, codeElement: Element) => {
-    const codeNode = clone.find(codeElement);
+  clone.find("code").each((index: number) => {
+    const codeNode = clone.find("code").eq(index);
     const codeText = codeNode.text();
     codeNode.replaceWith(`\`${codeText}\``);
   });

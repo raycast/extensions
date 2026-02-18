@@ -1,5 +1,10 @@
 # Polars Documentation Search Changelog
 
+## [1.0.3] - {PR_MERGE_DATE}
+
+- Fixed objects inventory parsing to handle arbitrary whitespace between fields and validate malformed lines.
+- Fixed inline code markdown conversion to replace exact `<code>` nodes reliably in Cheerio traversal.
+
 ## [1.0.2] - {PR_MERGE_DATE}
 
 - Fixed documentation error markdown to render real line breaks instead of literal `\n`.
