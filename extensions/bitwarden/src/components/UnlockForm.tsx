@@ -28,18 +28,20 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   async function onSubmit() {
     if (password.length === 0) return;
 
-    const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
     try {
       setLoading(true);
       setUnlockError(undefined);
 
       await pendingAction;
 
+      const toast = await showToast({ title: "Validating...", message: "Please wait", style: Toast.Style.Animated });
+
       const { error, result: vaultState } = await bitwarden.status();
       if (error) throw error;
 
       if (vaultState.status === "unauthenticated") {
         try {
+          toast.title = "Logging in...";
           const { error: loginError } = await bitwarden.login();
           if (loginError) throw loginError;
         } catch (error) {
@@ -50,6 +52,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         }
       }
 
+      toast.title = "Unlocking vault...";
       const { error: unlockError } = await bitwarden.unlock(password);
       if (unlockError) {
         return handleUnlockError(unlockError, {
@@ -58,8 +61,11 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         });
       }
 
+      toast.title = "Vault unlocked";
+      toast.style = Toast.Style.Success;
+      toast.message = undefined;
+
       await clearLockReason();
-      await toast.hide();
     } catch (error) {
       await handleUnlockError(error, {
         title: "Failed to unlock vault",
@@ -104,7 +110,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         <ActionPanel>
           {!isLoading && (
             <>
-              <Action.SubmitForm icon={Icon.LockUnlocked} title="Unlock" onSubmit={onSubmit} />
+              <Action.SubmitForm icon={Icon.LockUnlocked} title="Submit" onSubmit={onSubmit} />
               <Action
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}
@@ -113,7 +119,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
               />
             </>
           )}
-          {!!unlockError && (
+          {unlockError && (
             <Action
               onAction={copyUnlockError}
               title="Copy Last Error"

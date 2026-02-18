@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Vivaldi Snapshot Browser] - 2026-02-17
+
+- Added support for `Vivaldi Snapshot` browser.
+
 ## [Bug Fixes] - 2026-02-12
 
 - Fixed permission errors (EPERM) when accessing Chrome and Arc browser Local State files ([#16481](https://github.com/raycast/extensions/issues/16481))

@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Fix & Improvements] - 2026-02-17
+
+- Fix potential stale session token issue
+- Small feedback improvements
+
 ## [Fix & Feature] - 2026-02-16
 
 - Fix unhandled error when unlocking vault

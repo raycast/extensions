@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { Skill, buildInstallCommand, formatInstalls } from "../shared";
 import { SkillDetail } from "./SkillDetail";
+import { InstallSkillAction } from "./actions/InstallSkillAction";
 
 export function SkillListItem({ skill, rank }: { skill: Skill; rank?: number }) {
   const title = rank != null ? `#${rank} ${skill.name}` : skill.name;
@@ -20,6 +21,7 @@ export function SkillListItem({ skill, rank }: { skill: Skill; rank?: number }) 
       actions={
         <ActionPanel>
           <Action.Push title="View Details" icon={Icon.Eye} target={<SkillDetail skill={skill} />} />
+          <InstallSkillAction skill={skill} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}

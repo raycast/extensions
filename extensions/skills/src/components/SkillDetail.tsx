@@ -2,6 +2,7 @@ import { ActionPanel, Action, Icon, Detail, Keyboard } from "@raycast/api";
 
 import { useSkillContent } from "../hooks/useSkillContent";
 import { type Skill, formatInstalls, buildInstallCommand } from "../shared";
+import { InstallSkillAction } from "./actions/InstallSkillAction";
 
 export function SkillDetail({ skill }: { skill: Skill }) {
   const { content, isLoading } = useSkillContent(skill);
@@ -45,10 +46,12 @@ ${buildInstallCommand(skill)}
       }
       actions={
         <ActionPanel>
+          <InstallSkillAction skill={skill} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
             icon={Icon.Terminal}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.OpenInBrowser title="Open Repository" url={`https://github.com/${skill.source}`} icon={Icon.Globe} />
           <Action.OpenInBrowser
