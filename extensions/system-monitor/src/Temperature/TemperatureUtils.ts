@@ -54,13 +54,11 @@ export const getTemperatureData = async (): Promise<TemperatureData> => {
 
       try {
         const data = JSON.parse(stdout.trim());
-        const sensors: SensorReading[] = (data.sensors || []).map(
-          (s: { name: string; temperature: number }) => ({
-            name: s.name,
-            label: sensorLabel(s.name),
-            temperature: s.temperature,
-          }),
-        );
+        const sensors: SensorReading[] = (data.sensors || []).map((s: { name: string; temperature: number }) => ({
+          name: s.name,
+          label: sensorLabel(s.name),
+          temperature: s.temperature,
+        }));
 
         resolve({
           cpuAverage: data.cpuAverage ?? -1,

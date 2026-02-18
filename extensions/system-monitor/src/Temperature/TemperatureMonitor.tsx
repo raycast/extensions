@@ -24,7 +24,13 @@ export default function TemperatureMonitor() {
   );
 }
 
-function TemperatureDetail({ data, isLoading }: { data: Awaited<ReturnType<typeof getTemperatureData>> | undefined; isLoading: boolean }) {
+function TemperatureDetail({
+  data,
+  isLoading,
+}: {
+  data: Awaited<ReturnType<typeof getTemperatureData>> | undefined;
+  isLoading: boolean;
+}) {
   const severity = data ? getSeverity(data.cpuAverage) : "unavailable";
   const dieSensors = data?.sensors.filter((s) => s.name.toLowerCase().includes("tdie")) || [];
 
@@ -37,10 +43,7 @@ function TemperatureDetail({ data, isLoading }: { data: Awaited<ReturnType<typeo
             title="CPU Average"
             text={data ? formatTemperature(data.cpuAverage) : "--"}
           />
-          <List.Item.Detail.Metadata.Label
-            title="CPU Maximum"
-            text={data ? formatTemperature(data.cpuMax) : "--"}
-          />
+          <List.Item.Detail.Metadata.Label title="CPU Maximum" text={data ? formatTemperature(data.cpuMax) : "--"} />
           <List.Item.Detail.Metadata.TagList title="Status">
             <List.Item.Detail.Metadata.TagList.Item text={severityLabel(severity)} color={severityColor(severity)} />
           </List.Item.Detail.Metadata.TagList>
@@ -61,7 +64,10 @@ function TemperatureDetail({ data, isLoading }: { data: Awaited<ReturnType<typeo
               />
             ))
           ) : (
-            <List.Item.Detail.Metadata.Label title="Sensors" text={data?.sensorAvailable === false ? "Temperature sensors unavailable" : "No die sensor data"} />
+            <List.Item.Detail.Metadata.Label
+              title="Sensors"
+              text={data?.sensorAvailable === false ? "Temperature sensors unavailable" : "No die sensor data"}
+            />
           )}
           {data && data.gpuAverage > 0 && (
             <>

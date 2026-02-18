@@ -9,7 +9,7 @@ import { calculateDiskStorage, getOSInfo } from "./SystemInfo/SystemUtils";
 import { getMemoryUsage } from "./Memory/MemoryUtils";
 import { getNetworkData } from "./Network/NetworkUtils";
 import { getBatteryData } from "./Power/PowerUtils";
-import { getTemperatureData, formatTemperature, getSeverity, severityColor, severityLabel } from "./Temperature/TemperatureUtils";
+import { getTemperatureData, formatTemperature } from "./Temperature/TemperatureUtils";
 
 import { formatBytes, isObjectEmpty } from "./utils";
 
