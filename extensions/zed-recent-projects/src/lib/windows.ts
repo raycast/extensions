@@ -7,9 +7,12 @@ export function execWindowsZed(args: string[]) {
   const localAppData = process.env.LOCALAPPDATA;
   if (localAppData) {
     const windowsPath = join(localAppData, "Programs", zedBuild, "bin", "zed");
-    return execFilePromise(windowsPath, args);
+    // Pass an empty env to prevent Raycast's environment variables (e.g. NODE_ENV=production,
+    // NODE_PATH) from leaking into Zed and its child processes.
+    return execFilePromise(windowsPath, args, { env: {} });
   } else {
-    return execFilePromise("zed", args);
+    // Pass an empty env to prevent Raycast's environment variables from leaking into Zed.
+    return execFilePromise("zed", args, { env: {} });
   }
 }
 

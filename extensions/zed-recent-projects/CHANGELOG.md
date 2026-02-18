@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fix Environment Variable Leak] - {PR_MERGE_DATE}
+
+- Prevent Raycast environment variables (NODE_ENV, NODE_PATH) from leaking into Zed processes
+
 ## [Multi-folder Workspace Support] - 2026-01-21
 
 - Add support for multi-folder workspaces (requires Zed CLI to be installed)

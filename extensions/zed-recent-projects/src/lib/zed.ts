@@ -153,7 +153,9 @@ export async function openWithZedCli(cliPath: string, paths: string[], newWindow
   const args = newWindow ? ["-n", ...paths] : paths;
 
   try {
-    await execFileAsync(cliPath, args);
+    // Pass an empty env to prevent Raycast's environment variables (e.g. NODE_ENV=production,
+    // NODE_PATH) from leaking into Zed and its child processes (language servers, terminals, tasks).
+    await execFileAsync(cliPath, args, { env: {} });
   } catch (error) {
     console.error("Failed to open with Zed CLI:", error);
     throw error;
