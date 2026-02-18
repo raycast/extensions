@@ -14,9 +14,10 @@ import { usePromise } from "@raycast/utils";
 import { useState, ReactNode } from "react";
 import { FolderNode } from "./types";
 import { loadFolders, saveFolders, getAllFolders, updateNode, deleteNode, addChildNode } from "./storage";
+import { randomUUID } from "crypto";
 
 function generateId(): string {
-  return crypto.randomUUID();
+  return randomUUID();
 }
 
 // --- Folder Form (Add / Edit) ---
@@ -188,28 +189,36 @@ function ExportImportForm({ onDone }: { onDone: () => void }) {
       const parsed = JSON.parse(values.json) as FolderNode[];
       if (!Array.isArray(parsed)) throw new Error("Invalid format");
 
-      function isValidNode(node: unknown): node is FolderNode {
-        if (typeof node !== "object" || node === null) return false;
+      // Recursively validate and auto-assign missing ids
+      function sanitizeNode(node: unknown): FolderNode {
+        if (typeof node !== "object" || node === null) throw new Error("Expected an object");
         const n = node as Record<string, unknown>;
-        if (typeof n.id !== "string" || typeof n.name !== "string" || typeof n.url !== "string") return false;
-        if (n.children !== undefined && (!Array.isArray(n.children) || !n.children.every(isValidNode))) return false;
-        return true;
+        if (typeof n.name !== "string" || !n.name.trim()) throw new Error(`Missing name in node: ${JSON.stringify(n)}`);
+        // url is required but we accept any non-empty string including Windows paths
+        if (typeof n.url !== "string") throw new Error(`Missing url in "${n.name}"`);
+        return {
+          id: typeof n.id === "string" && n.id.trim() ? n.id : randomUUID(),
+          name: n.name.trim(),
+          url: n.url,
+          description: typeof n.description === "string" ? n.description : undefined,
+          showDescription: typeof n.showDescription === "boolean" ? n.showDescription : undefined,
+          children: Array.isArray(n.children) ? n.children.map(sanitizeNode) : undefined,
+        };
       }
 
-      if (!parsed.every(isValidNode)) throw new Error("Invalid folder structure");
-      await saveFolders(parsed);
+      const sanitized = parsed.map(sanitizeNode);
+      await saveFolders(sanitized);
       await showToast({ style: Toast.Style.Success, title: "Folders Imported" });
       onDone();
       pop();
-    } catch {
+    } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Invalid JSON",
-        message: "Check the format and try again.",
+        message: e instanceof Error ? e.message : "Check the format and try again.",
       });
     }
   }
-
   return (
     <Form
       navigationTitle="Export / Import"

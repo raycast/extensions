@@ -1,5 +1,13 @@
 # Portals Changelog
 
+## [1.2.0] - {PR_MERGE_DATE}
+
+### Added
+- Global search now searches entire folder tree including subfolders, parents, and siblings — not just the current level
+- Search works inside subfolder navigation views with full tree results
+- Import auto-assigns UUIDs to any folders missing an `id` field, so hand-crafted JSON works without IDs
+- Import now shows specific error messages indicating exactly which node failed validation
+
 ## [1.1.0] - {PR_MERGE_DATE}
 
 ### Fixed

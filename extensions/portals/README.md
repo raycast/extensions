@@ -27,7 +27,7 @@ Your main navigation view. Browse your portal hierarchy with a full detail panel
 | Action | Shortcut |
 |---|---|
 | Navigate into folder | `↵` |
-| Open in browser | `⌘ ↵` |
+| Open In Browser | `⌘ ↵` |
 | Copy URL | `⌘ ⇧ C` |
 | Pin / Unpin | `⌘ ⇧ P` |
 | Clear Recents | `⌘ ⇧ R` |

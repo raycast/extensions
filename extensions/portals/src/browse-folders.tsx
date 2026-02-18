@@ -79,6 +79,19 @@ function buildDetailMarkdown(folder: FolderNode): string {
   return lines.join("\n");
 }
 
+function flattenTree(nodes: FolderNode[], parentPath = ""): (FolderNode & { fullPath: string })[] {
+  const result: (FolderNode & { fullPath: string })[] = [];
+  for (const node of nodes) {
+    if (!node.id || !node.name || !node.url) continue;
+    const fullPath = parentPath ? `${parentPath} / ${node.name}` : node.name;
+    result.push({ ...node, fullPath });
+    if (node.children) {
+      result.push(...flattenTree(node.children, fullPath));
+    }
+  }
+  return result;
+}
+
 function FolderItem({
   folder,
   parentTitle,
@@ -95,6 +108,7 @@ function FolderItem({
   const isPinned = pins?.some((p) => p.id === folder.id) ?? false;
   const { push } = useNavigation();
   const hasChildren = folder.children && folder.children.length > 0;
+  const allFlatFolders = flattenTree(allFolders ?? []);
 
   const resolvedPath = parentTitle
     ? buildBreadcrumb(parentTitle, folder.name)
@@ -158,6 +172,7 @@ function FolderItem({
                       title={folder.name}
                       parentTitle={breadcrumb}
                       onRefresh={onRefresh}
+                      allFlatFolders={allFlatFolders}
                     />,
                   )
                 }
@@ -273,27 +288,64 @@ function FolderList({
   title,
   parentTitle,
   onRefresh,
+  allFlatFolders,
 }: {
   folders: FolderNode[];
   title?: string;
   parentTitle?: string;
   onRefresh?: () => void;
+  allFlatFolders: (FolderNode & { fullPath: string })[];
 }) {
-  const sectionTitle = parentTitle ?? title ?? "Browse Folders";
+  const [searchText, setSearchText] = useState("");
+  const isSearching = searchText.trim().length > 0;
+
+  const searchResults = allFlatFolders.filter(
+    (f) =>
+      f.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      f.url.toLowerCase().includes(searchText.toLowerCase()) ||
+      f.description?.toLowerCase().includes(searchText.toLowerCase()),
+  );
+
+  const sectionTitle = parentTitle ?? title ?? "Open Portals";
 
   return (
-    <List navigationTitle={title ?? "Browse Folders"} isShowingDetail>
-      <List.Section title={sectionTitle}>
-        {folders.map((folder) => (
-          <FolderItem key={folder.id} folder={folder} parentTitle={parentTitle} onRefresh={onRefresh} />
-        ))}
-      </List.Section>
+    <List
+      navigationTitle={title ?? "Open Portals"}
+      isShowingDetail
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
+      {isSearching ? (
+        <List.Section title={`Results for "${searchText}"`}>
+          {searchResults.length === 0 && <List.Item title="No results found" />}
+          {searchResults.map((folder, index) => (
+            <FolderItem
+              key={`search-${folder.id ?? index}`}
+              folder={folder}
+              parentTitle={
+                folder.fullPath.includes(" / ")
+                  ? folder.fullPath.substring(0, folder.fullPath.lastIndexOf(" / "))
+                  : undefined
+              }
+              onRefresh={onRefresh}
+              hideMeta
+            />
+          ))}
+        </List.Section>
+      ) : (
+        <List.Section title={sectionTitle}>
+          {folders.map((folder) => (
+            <FolderItem key={folder.id} folder={folder} parentTitle={parentTitle} onRefresh={onRefresh} />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
 
 export default function Command() {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [searchText, setSearchText] = useState("");
   const { data: folders, revalidate: revalidateFolders } = usePromise(loadFolders);
   const { data: recentFolders, revalidate: revalidateRecents } = usePromise(loadRecents);
   const { data: pinnedFolders, revalidate: revalidatePins } = usePromise(loadPins);
@@ -318,31 +370,62 @@ export default function Command() {
   }
 
   const isEmpty = !folders || folders.length === 0;
+  const isSearching = searchText.trim().length > 0;
+
+  // Flatten entire tree for search
+  const allFlatFolders = flattenTree(folders ?? []);
+  const searchResults = allFlatFolders.filter(
+    (f) =>
+      f.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      f.url.toLowerCase().includes(searchText.toLowerCase()) ||
+      f.description?.toLowerCase().includes(searchText.toLowerCase()),
+  );
 
   return (
-    <List navigationTitle="Open Portals" isShowingDetail>
-      {isEmpty && (
+    <List navigationTitle="Open Portals" isShowingDetail searchText={searchText} onSearchTextChange={setSearchText}>
+      {/* Search results mode — flat list of all matching folders */}
+      {isSearching && (
+        <List.Section title={`Results for "${searchText}"`}>
+          {searchResults.length === 0 && <List.Item title="No results found" />}
+          {searchResults.map((folder) => (
+            <FolderItem
+              key={`search-${folder.id}-${refreshKey}`}
+              folder={folder}
+              parentTitle={
+                folder.fullPath.includes(" / ")
+                  ? folder.fullPath.substring(0, folder.fullPath.lastIndexOf(" / "))
+                  : undefined
+              }
+              onRefresh={refreshAll}
+              hideMeta
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {/* Normal browsing mode */}
+      {!isSearching && isEmpty && (
         <List.EmptyView
           icon={Icon.Folder}
           title="No Portals Yet"
           description="Open 'Edit Portals' to add your first portal."
         />
       )}
-      {pinnedFolders && pinnedFolders.length > 0 && (
+      {!isSearching && pinnedFolders && pinnedFolders.length > 0 && (
         <List.Section title="Pinned">
           {resolveFolders(pinnedFolders).map((folder) => (
             <FolderItem key={`pinned-${folder.id}-${refreshKey}`} folder={folder} onRefresh={refreshAll} hideMeta />
           ))}
         </List.Section>
       )}
-      {recentFolders && recentFolders.length > 0 && (
+      {!isSearching && recentFolders && recentFolders.length > 0 && (
         <List.Section title="Recent">
           {resolveFolders(recentFolders).map((folder) => (
             <FolderItem key={`recent-${folder.id}-${refreshKey}`} folder={folder} onRefresh={refreshAll} hideMeta />
           ))}
         </List.Section>
       )}
-      {folders && folders.length > 0 && (
+      {!isSearching && folders && folders.length > 0 && (
         <List.Section title="All Folders">
           {folders.map((folder) => (
             <FolderItem key={`${folder.id}-${refreshKey}`} folder={folder} onRefresh={refreshAll} />
