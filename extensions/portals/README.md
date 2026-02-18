@@ -6,11 +6,11 @@ Portals works with **any destination**: websites, Dropbox folders, Google Drive,
 
 ## Screenshots
 
-![Open Portals](metadata/screenshot-1.png)
+![Open Portals](metadata/Screenshot-1.png)
 
-![Detail Panel](metadata/screenshot-2.png)
+![Detail Panel](metadata/Screenshot-2.png)
 
-![Edit Portals](metadata/screenshot-3.png)
+![Edit Portals](metadata/Screenshot-3.png)
 
 ---
 
