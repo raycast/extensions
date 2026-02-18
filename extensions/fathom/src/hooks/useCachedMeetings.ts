@@ -125,10 +125,10 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
   // Full-text search over cached meetings
   const searchMeetings = useCallback(
     (query: string): Meeting[] => {
-      if (!query || query.trim() === "") return meetings;
+      if (!query || query.trim() === "") return cachedMeetings.map(toMeeting);
       return searchCachedMeetings(cachedMeetings, query).map(toMeeting);
     },
-    [cachedMeetings, meetings],
+    [cachedMeetings],
   );
 
   // Refresh cache by fetching from API
