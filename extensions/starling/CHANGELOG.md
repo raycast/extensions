@@ -1,6 +1,6 @@
 # Starling Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-18
 
 - Added secure personal-token connection flow (user-owned token only).
 - Added Dashboard command for account holder and balances.
