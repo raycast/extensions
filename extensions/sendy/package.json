@@ -13,6 +13,20 @@
     "Communication"
   ],
   "license": "MIT",
+  "commands": [
+    {
+      "name": "search-brands",
+      "title": "Search Brands",
+      "description": "View Brands and their Lists",
+      "mode": "view"
+    },
+    {
+      "name": "check-subscriber-status",
+      "title": "Check Subscriber Status",
+      "description": "Check a Subscriber inside a List",
+      "mode": "view"
+    }
+  ],
   "preferences": [
     {
       "name": "sendy_url",
@@ -29,20 +43,6 @@
       "description": "Sendy API Key",
       "type": "password",
       "required": true
-    }
-  ],
-  "commands": [
-    {
-      "name": "search-brands",
-      "title": "Search Brands",
-      "description": "View Brands and their Lists",
-      "mode": "view"
-    },
-    {
-      "name": "check-subscriber-status",
-      "title": "Check Subscriber Status",
-      "description": "Check a Subscriber inside a List",
-      "mode": "view"
     }
   ],
   "dependencies": {
