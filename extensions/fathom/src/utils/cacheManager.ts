@@ -11,7 +11,14 @@
 import { showToast, Toast } from "@raycast/api";
 import { listAllMeetings } from "../fathom/api";
 import type { MeetingFilter, Meeting } from "../types/Types";
-import { cacheMeeting, getAllCachedMeetings, pruneCache, type CachedMeetingData } from "./cache";
+import {
+  cacheMeeting,
+  getAllCachedMeetings,
+  pruneCache,
+  updateCacheMetadata,
+  getCacheMetadata,
+  type CachedMeetingData,
+} from "./cache";
 import { globalQueue } from "./requestQueue";
 import { showContextualError } from "./errorHandling";
 import { logger } from "@chrismessina/raycast-logger";
@@ -109,6 +116,14 @@ class CacheManager {
       this.cachedMeetings = cached;
       this.isLoaded = true;
       logger.log(`[CacheManager] Loaded ${cached.length} cached meetings`);
+
+      // Restore last cache update time from metadata (persists across process restarts)
+      const metadata = await getCacheMetadata();
+      if (metadata) {
+        this.lastCacheUpdateTime = metadata.lastUpdated;
+        logger.log(`[CacheManager] Restored cache update time: ${new Date(this.lastCacheUpdateTime).toISOString()}`);
+      }
+
       this.notifyListeners();
       return cached;
     } catch (error) {
@@ -191,6 +206,9 @@ class CacheManager {
           // Cache the results
           await this.cacheApiResults(result.meetings);
           this.lastCacheUpdateTime = Date.now();
+
+          // Persist cache update time to survive process restarts
+          await updateCacheMetadata();
 
           if (progressToast) {
             progressToast.style = Toast.Style.Success;
@@ -322,6 +340,9 @@ class CacheManager {
           // Cache the new results (will merge with existing)
           await this.cacheApiResults(result.meetings);
           this.lastCacheUpdateTime = Date.now();
+
+          // Persist cache update time to survive process restarts
+          await updateCacheMetadata();
 
           progressToast.style = Toast.Style.Success;
           progressToast.title = `${result.meetings.length} older meetings cached locally`;

@@ -36,8 +36,7 @@ function getRetryDelay(attempt: number): number {
 async function authGet<T>(path: string, retryCount = 0): Promise<T> {
   const apiKey = getFathomApiKey();
 
-  const caller = new Error().stack?.split("\n")[2]?.trim() || "unknown";
-  logger.log(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) - Called from: ${caller}`);
+  logger.log(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
 
   const res = await fetch(`${BASE}${path}`, {
     method: "GET",
@@ -58,8 +57,7 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
       if (retryCount < MAX_RETRIES) {
         const retryDelay = getRetryDelay(retryCount);
         logger.warn(
-          `[API] ⚠️  RATE LIMITED on ${path} - Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})\n` +
-            `      Called from: ${caller}`,
+          `[API] ⚠️  RATE LIMITED on ${path} - Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`,
         );
         await sleep(retryDelay);
         return authGet<T>(path, retryCount + 1);
