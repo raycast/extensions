@@ -59,3 +59,13 @@ export interface DiskInterface {
   totalAvailableStorage: string;
   usedStorage: string;
 }
+
+export interface TemperatureMonitorState {
+  cpuAverage: number;
+  cpuMax: number;
+  gpuAverage: number;
+  chipModel: string;
+  coreCount: number;
+  dieSensorCount: number;
+  sensorAvailable: boolean;
+}
