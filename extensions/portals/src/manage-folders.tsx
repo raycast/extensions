@@ -16,7 +16,7 @@ import { FolderNode } from "./types";
 import { loadFolders, saveFolders, getAllFolders, updateNode, deleteNode, addChildNode } from "./storage";
 
 function generateId(): string {
-  return Math.random().toString(36).slice(2, 9);
+  return crypto.randomUUID();
 }
 
 // --- Folder Form (Add / Edit) ---
@@ -187,6 +187,16 @@ function ExportImportForm({ onDone }: { onDone: () => void }) {
     try {
       const parsed = JSON.parse(values.json) as FolderNode[];
       if (!Array.isArray(parsed)) throw new Error("Invalid format");
+
+      function isValidNode(node: unknown): node is FolderNode {
+        if (typeof node !== "object" || node === null) return false;
+        const n = node as Record<string, unknown>;
+        if (typeof n.id !== "string" || typeof n.name !== "string" || typeof n.url !== "string") return false;
+        if (n.children !== undefined && (!Array.isArray(n.children) || !n.children.every(isValidNode))) return false;
+        return true;
+      }
+
+      if (!parsed.every(isValidNode)) throw new Error("Invalid folder structure");
       await saveFolders(parsed);
       await showToast({ style: Toast.Style.Success, title: "Folders Imported" });
       onDone();

@@ -4,6 +4,5 @@ export interface FolderNode {
   url: string;
   description?: string;
   showDescription?: boolean;
-  pinned?: boolean;
   children?: FolderNode[];
 }

@@ -14,9 +14,6 @@
     "Web"
   ],
   "license": "MIT",
-  "permissions": [
-    "network"
-  ],
   "commands": [
     {
       "name": "browse-folders",

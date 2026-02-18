@@ -20,7 +20,7 @@ import {
   loadRecents,
   loadPins,
   addToRecents,
-  addTopins,
+  addToPins,
   removeFromPins,
   getAllFolders,
   findFolderPath,
@@ -45,8 +45,8 @@ function normalizeUrl(raw: string): { url: string; isWeb: boolean } {
     return { url, isWeb: false };
   }
 
-  // Add https:// if no protocol present
-  if (!/^https?:\/\//i.test(url)) {
+  // Add https:// only if no protocol present at all
+  if (!/^\w+:\/\//i.test(url)) {
     url = `https://${url}`;
   }
 
@@ -74,10 +74,6 @@ function buildDetailMarkdown(folder: FolderNode): string {
   if (hasChildren) {
     lines.push(`**Contains:**`);
     lines.push(folder.children!.map((c) => `- ${c.name}`).join("\n"));
-    /*
-            } else {
-                lines.push(`**No subfolders**`);
-            */
   }
 
   return lines.join("\n");
@@ -216,8 +212,8 @@ function FolderItem({
             }}
             onAction={async () => {
               await Clipboard.copy(folder.url);
-              await closeMainWindow();
               await showToast({ style: Toast.Style.Success, title: "URL Copied" });
+              await closeMainWindow();
             }}
           />
           <ActionPanel.Section>
@@ -245,7 +241,7 @@ function FolderItem({
                   Windows: { modifiers: ["ctrl", "shift"], key: "p" },
                 }}
                 onAction={async () => {
-                  await addTopins(folder);
+                  await addToPins(folder);
                   revalidatePins();
                   await showToast({ style: Toast.Style.Success, title: "Pinned" });
                   onRefresh?.();

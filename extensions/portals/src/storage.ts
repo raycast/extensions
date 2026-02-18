@@ -40,7 +40,7 @@ export async function loadPins(): Promise<FolderNode[]> {
   return JSON.parse(stored) as FolderNode[];
 }
 
-export async function addTopins(folder: FolderNode): Promise<void> {
+export async function addToPins(folder: FolderNode): Promise<void> {
   const existing = await loadPins();
   if (existing.find((f) => f.id === folder.id)) return;
   await LocalStorage.setItem(PINS_KEY, JSON.stringify([...existing, folder]));
@@ -92,26 +92,6 @@ export function addChildNode(nodes: FolderNode[], parentId: string, child: Folde
     if (n.children) return { ...n, children: addChildNode(n.children, parentId, child) };
     return n;
   });
-}
-
-// Extracts a node by id and returns it plus the tree without it
-export function extractNode(nodes: FolderNode[], id: string): { node: FolderNode | null; remaining: FolderNode[] } {
-  let found: FolderNode | null = null;
-
-  function walk(list: FolderNode[]): FolderNode[] {
-    const result: FolderNode[] = [];
-    for (const n of list) {
-      if (n.id === id) {
-        found = n;
-      } else {
-        result.push({ ...n, children: n.children ? walk(n.children) : undefined });
-      }
-    }
-    return result;
-  }
-
-  const remaining = walk(nodes);
-  return { node: found, remaining };
 }
 
 export function findFolderPath(nodes: FolderNode[], targetId: string, current = ""): string | null {
