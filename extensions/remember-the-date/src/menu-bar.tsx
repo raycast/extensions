@@ -26,9 +26,7 @@ export default function Command() {
     const map = new Map<string, string>();
     for (const item of upcomingDates) {
       const itemEffective = getEffectiveDate(item);
-      const until = showCountdownByDay
-        ? itemEffective.diff(today, "days") + " days"
-        : itemEffective.fromNow();
+      const until = showCountdownByDay ? itemEffective.diff(today, "days") + " days" : itemEffective.fromNow();
       map.set(item.id, until);
     }
     return { nextDate: next, untilNextDate: untilNext, itemUntilMap: map };
