@@ -13,6 +13,7 @@ extern int IOHIDEventSystemClientSetMatching(IOHIDEventSystemClientRef client, C
 extern IOHIDEventRef IOHIDServiceClientCopyEvent(IOHIDServiceClientRef, int64_t, int32_t, int64_t);
 extern CFStringRef IOHIDServiceClientCopyProperty(IOHIDServiceClientRef service, CFStringRef property);
 extern double IOHIDEventGetFloatValue(IOHIDEventRef event, int32_t field);
+extern CFArrayRef IOHIDEventSystemClientCopyServices(IOHIDEventSystemClientRef client);
 
 int main() {
     @autoreleasepool {

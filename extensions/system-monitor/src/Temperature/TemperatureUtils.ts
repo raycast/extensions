@@ -103,7 +103,7 @@ export const getSeverity = (tempCelsius: number): TempSeverity => {
   return "normal";
 };
 
-export const severityColor = (severity: TempSeverity): typeof Color.Green => {
+export const severityColor = (severity: TempSeverity): Color => {
   switch (severity) {
     case "normal":
       return Color.Green;
