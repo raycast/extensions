@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix Password Generation] - {PR_MERGE_DATE}
+## [Fix Password Generation] - 2026-02-18
 
 - Fix password generation failing due to false boolean options
 
