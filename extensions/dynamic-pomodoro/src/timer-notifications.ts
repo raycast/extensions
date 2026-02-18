@@ -49,7 +49,7 @@ type NotifyTimerFinishedDeps = {
   showHud: (title: string) => Promise<void>;
   showSuccessToast: (params: { title: string; message: string }) => Promise<void>;
   showFailureToast: (params: { title: string; message: string }) => Promise<void>;
-  recordNotifyAttempt: typeof recordNotifyAttempt;
+  recordNotifyAttempt: (params: { launchType: LaunchType | string | undefined; channel: string; error?: unknown }) => Promise<void>;
   deliverCompletionEvent: typeof deliverCompletionEventViaPipeline;
   markCompletionDecisionPending: () => Promise<void>;
   getCompletionEvent: typeof getCompletionEvent;
@@ -84,7 +84,13 @@ const defaultDeps: NotifyTimerFinishedDeps = {
       message,
     });
   },
-  recordNotifyAttempt,
+  recordNotifyAttempt: async ({ launchType, channel, error }) => {
+    await recordNotifyAttempt({
+      launchType: launchType as LaunchType | undefined,
+      channel,
+      error,
+    });
+  },
   deliverCompletionEvent: deliverCompletionEventViaPipeline,
   markCompletionDecisionPending,
   getCompletionEvent,

@@ -201,12 +201,12 @@ export function useTimerController() {
   const handleStart = () => {
     clearPendingDecision();
     setState((prev) => {
-      const withStyle =
+      const withStyle: TimerState =
         prev.styleChoiceSeen === true
           ? prev
           : {
               ...prev,
-              pomodoroStyle: "classic",
+              pomodoroStyle: "classic" as const,
               styleChoiceSeen: true,
             };
       return startTimer(withStyle, Date.now());
@@ -255,12 +255,12 @@ export function useTimerController() {
   const handleQuickStartPreset = (preset: number) => {
     clearPendingDecision();
     setState((prev) => {
-      const withStyle =
+      const withStyle: TimerState =
         prev.styleChoiceSeen === true
           ? prev
           : {
               ...prev,
-              pomodoroStyle: "classic",
+              pomodoroStyle: "classic" as const,
               styleChoiceSeen: true,
             };
       return quickStart(withStyle, preset, Date.now());
