@@ -20,26 +20,32 @@ function extractFirstHeading(content: string): string | undefined {
 }
 
 async function loadPlans(): Promise<PlanFile[]> {
-  const entries = await readdir(PLANS_DIR, { withFileTypes: true });
-  const plans = await Promise.all(
-    entries
-      .filter((e) => e.isFile() && e.name.endsWith(".md"))
-      .map(async (e) => {
-        const filePath = join(PLANS_DIR, e.name);
-        const [s, content] = await Promise.all([
-          stat(filePath),
-          readFile(filePath, "utf-8"),
-        ]);
-        return {
-          name: e.name.replace(/\.md$/, ""),
-          title: extractFirstHeading(content),
-          path: filePath,
-          content,
-          modifiedAt: s.mtime,
-        };
-      }),
-  );
-  return plans.sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime());
+  try {
+    const entries = await readdir(PLANS_DIR, { withFileTypes: true });
+    const plans = await Promise.all(
+      entries
+        .filter((e) => e.isFile() && e.name.endsWith(".md"))
+        .map(async (e) => {
+          const filePath = join(PLANS_DIR, e.name);
+          const [s, content] = await Promise.all([
+            stat(filePath),
+            readFile(filePath, "utf-8"),
+          ]);
+          return {
+            name: e.name.replace(/\.md$/, ""),
+            title: extractFirstHeading(content),
+            path: filePath,
+            content,
+            modifiedAt: s.mtime,
+          };
+        }),
+    );
+    return plans.sort(
+      (a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime(),
+    );
+  } catch {
+    return [];
+  }
 }
 
 export default function Command() {
