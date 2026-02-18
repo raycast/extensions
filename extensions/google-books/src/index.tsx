@@ -1,6 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useSearch } from "./hooks/useSearch";
 import { VolumeItem } from "./types/google-books.dt";
 import { bookCount } from "./utils/books";
@@ -11,10 +11,9 @@ import type { ViewMode } from "./views/BookGrid";
 export default function SearchGoogleBooks() {
   const [showDetail, setShowDetail] = useCachedState("show-detail", true);
   const [viewMode, setViewMode] = useCachedState<ViewMode>("view-mode", "list");
-  const [searchText, setSearchText] = useCachedState<string>("lastSearch", "");
-  const [activeFilter, setActiveFilter] = useCachedState<string>("lastFilter", "");
+  const [searchText, setSearchText] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
   const { items, loading, clearCache } = useSearch(searchText);
-  const isLoading = loading;
 
   const toggleDetail = useCallback(() => {
     setShowDetail((prev) => !prev);
@@ -34,18 +33,25 @@ export default function SearchGoogleBooks() {
     setViewMode("list");
   }, [setSearchText, setActiveFilter, clearCache, setViewMode]);
 
-  const categorizedItems =
-    items.reduce((acc: Record<string, VolumeItem[]>, item: VolumeItem) => {
-      const category = item.volumeInfo?.categories ? item.volumeInfo?.categories[0] : "Other";
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(item);
-      return acc;
-    }, {}) ?? {};
+  const categorizedItems = useMemo(
+    () =>
+      items.reduce((acc: Record<string, VolumeItem[]>, item: VolumeItem) => {
+        const category = item.volumeInfo?.categories ? item.volumeInfo?.categories[0] : "Other";
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(item);
+        return acc;
+      }, {}),
+    [items],
+  );
 
-  const filteredCategorizedItems = Object.fromEntries(
-    Object.entries(categorizedItems).filter(([category]) => !activeFilter || category === activeFilter),
+  const filteredCategorizedItems = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(categorizedItems).filter(([category]) => !activeFilter || category === activeFilter),
+      ),
+    [categorizedItems, activeFilter],
   );
 
   const totalCount = items.length;
@@ -58,7 +64,7 @@ export default function SearchGoogleBooks() {
         totalCount={totalCount}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
-        isLoading={isLoading}
+        isLoading={loading}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         onClearSearch={handleClearSearch}
@@ -73,7 +79,7 @@ export default function SearchGoogleBooks() {
       isShowingDetail={showDetail}
       searchBarPlaceholder="Search Google Books by keywords..."
       navigationTitle="Search Google Books"
-      isLoading={isLoading}
+      isLoading={loading}
       onSearchTextChange={handleSearchTextChange}
       searchText={searchText}
       searchBarAccessory={
