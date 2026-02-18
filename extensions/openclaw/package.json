@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openclaw",
+  "title": "OpenClaw",
+  "description": "Chat with your local OpenClaw AI assistant directly from Raycast",
+  "icon": "extension-icon.png",
+  "author": "scott_bronder",
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Chat with OpenClaw",
+      "subtitle": "OpenClaw",
+      "description": "Have a multi-turn conversation with your OpenClaw AI assistant",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gatewayUrl",
+      "title": "Gateway URL",
+      "description": "The URL of your OpenClaw Gateway (e.g., http://127.0.0.1:18789)",
+      "type": "textfield",
+      "default": "http://127.0.0.1:18789",
+      "required": true
+    },
+    {
+      "name": "authToken",
+      "title": "Auth Token",
+      "description": "Bearer token for Gateway authentication (leave empty if auth is disabled)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "agentId",
+      "title": "Agent ID",
+      "description": "OpenClaw agent to use (e.g., main, beta)",
+      "type": "textfield",
+      "default": "main",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model identifier to send in requests",
+      "type": "textfield",
+      "default": "openclaw",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.4",
+    "@types/react": "19.0.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
