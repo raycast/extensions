@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   Clipboard,
   Detail,
@@ -93,8 +92,7 @@ export default function Command() {
           if (stats.size > 100 * 1024 * 1024)
             throw new Error("File exceeds 100MB limit.");
 
-
-          let originalName = path.basename(filePath);
+          const originalName = path.basename(filePath);
           let finalName = originalName;
 
           // Read file buffer first to check magic bytes if needed
@@ -103,7 +101,8 @@ export default function Command() {
           // Check if it's a temp image from clipboard (often has no extension or looks like "Image (UxV)")
           const ext = path.extname(originalName);
           const isTempImage =
-            !ext || (originalName.startsWith("Image") && originalName.includes("("));
+            !ext ||
+            (originalName.startsWith("Image") && originalName.includes("("));
 
           if (isTempImage && fileBuffer.length > 4) {
             // Magic bytes check
@@ -113,7 +112,8 @@ export default function Command() {
               fileBuffer[2] === 0x4e &&
               fileBuffer[3] === 0x47
             ) {
-              if (!finalName.toLowerCase().endsWith(".png")) finalName += ".png";
+              if (!finalName.toLowerCase().endsWith(".png"))
+                finalName += ".png";
             } else if (
               fileBuffer[0] === 0xff &&
               fileBuffer[1] === 0xd8 &&
@@ -188,7 +188,10 @@ export default function Command() {
 
       // Generate QR Code locally
       try {
-        const qrDataUrl = await QRCode.toDataURL(finalLink, { width: 180, margin: 1 });
+        const qrDataUrl = await QRCode.toDataURL(finalLink, {
+          width: 180,
+          margin: 1,
+        });
         setQrCodeData(qrDataUrl);
       } catch (e) {
         console.error("QR Code generation failed:", e);
@@ -235,8 +238,6 @@ export default function Command() {
 
   // -- Markdown Generation --
   const getMarkdown = () => {
-    const timeDisplay = `${elapsedTime}s`;
-
     if (error) {
       return `
 # ❌ Upload Failed
@@ -256,7 +257,6 @@ Please check your network and try again.
 Please wait while we send your data to the cloud.
             `;
     }
-
 
     // Generate QR code locally
     const qrCodeState = downloadLink ? `![QR Code](${qrCodeData})\n` : "";
