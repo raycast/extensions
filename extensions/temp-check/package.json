@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "temp-check",
+  "title": "Temp Check",
+  "description": "Monitor your Mac's CPU temperature from the menu bar with real-time updates and thermal alerts",
+  "icon": "command-icon.png",
+  "author": "ADCAdams",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menubar-temperature",
+      "title": "Menu Bar Temperature",
+      "description": "Show CPU temperature in the macOS menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "temperature-monitor",
+      "title": "Temp Check",
+      "description": "View detailed CPU temperature readings with chip info and thermal sensor breakdown",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "temperatureUnit",
+      "title": "Temperature Unit",
+      "description": "Display temperatures in Celsius or Fahrenheit",
+      "type": "dropdown",
+      "required": false,
+      "default": "celsius",
+      "data": [
+        {
+          "title": "Celsius (°C)",
+          "value": "celsius"
+        },
+        {
+          "title": "Fahrenheit (°F)",
+          "value": "fahrenheit"
+        }
+      ]
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval (seconds)",
+      "description": "How often to poll temperature data in the list view",
+      "type": "dropdown",
+      "required": false,
+      "default": "3",
+      "data": [
+        {
+          "title": "1 second",
+          "value": "1"
+        },
+        {
+          "title": "3 seconds",
+          "value": "3"
+        },
+        {
+          "title": "5 seconds",
+          "value": "5"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        }
+      ]
+    },
+    {
+      "name": "warningThreshold",
+      "title": "Warning Threshold (°C)",
+      "description": "Temperature above which a warning color is shown (in Celsius)",
+      "type": "textfield",
+      "required": false,
+      "default": "80"
+    },
+    {
+      "name": "criticalThreshold",
+      "title": "Critical Threshold (°C)",
+      "description": "Temperature above which a critical alert is shown (in Celsius)",
+      "type": "textfield",
+      "required": false,
+      "default": "95"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2",
+    "usehooks-ts": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "~22.13.10",
+    "@types/react": "~19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "prebuild": "clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/temp-reader.m -framework IOKit -framework Foundation -o assets/temperature-reader",
+    "build": "npm run prebuild && ray build",
+    "dev": "npm run prebuild && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
