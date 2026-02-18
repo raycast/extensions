@@ -13,7 +13,8 @@
     "dmacdermott",
     "pernielsentikaer",
     "yansq",
-    "amureki"
+    "amureki",
+    "bengt"
   ],
   "license": "MIT",
   "commands": [
@@ -245,6 +246,24 @@
       "subtitle": "Spotify",
       "description": "Toggles Private Session in Spotify.",
       "mode": "no-view"
+    },
+    {
+      "name": "menuBarPlayer",
+      "title": "Menu Bar Player",
+      "subtitle": "Spotify",
+      "description": "Shows current track artwork in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "30s",
+      "preferences": [
+        {
+          "name": "showTextInMenuBar",
+          "type": "checkbox",
+          "label": "Show track text in menu bar",
+          "required": false,
+          "description": "Show the current track and artist next to the icon in the menu bar.",
+          "default": false
+        }
+      ]
     }
   ],
   "dependencies": {
