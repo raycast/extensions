@@ -41,19 +41,23 @@ export default function Command() {
     });
   }, [projects, searchText]);
 
+  const pinnedSet = useMemo(() => new Set(pinnedProjects), [pinnedProjects]);
+
   const projectsByWorkspace = useMemo(() => {
     const map: Record<string, Project[]> = {};
 
     parentWorkspaces.forEach((ws: string) => {
-      map[ws] = filteredProjects.filter((p: Project) => p.parentFolder === ws);
+      map[ws] = filteredProjects.filter(
+        (p: Project) => p.parentFolder === ws && (searchText || !pinnedSet.has(p.fullPath)),
+      );
     });
 
     return map;
-  }, [parentWorkspaces, filteredProjects]);
+  }, [parentWorkspaces, filteredProjects, pinnedSet, searchText]);
 
   const pinnedList = useMemo(() => {
-    return (projects || []).filter((project: Project) => pinnedProjects.includes(project.fullPath));
-  }, [projects, pinnedProjects]);
+    return (projects || []).filter((project: Project) => pinnedSet.has(project.fullPath));
+  }, [projects, pinnedSet]);
 
   if (!isLoading && !onboardingCompleted) {
     return (
@@ -70,11 +74,10 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      onSelectionChange={() => {}}
       searchBarPlaceholder="Search for projects..."
       throttle
     >
-      {pinnedList.length > 0 && (
+      {pinnedList.length > 0 && !searchText && (
         <List.Section title="Pinned">
           {pinnedList.map((project) => (
             <ProjectItem
@@ -95,7 +98,7 @@ export default function Command() {
       {parentWorkspaces.map((workspace) => {
         const workspaceProjects = projectsByWorkspace[workspace] || [];
 
-        if (workspaceProjects.length === 0 && searchText) {
+        if (workspaceProjects.length === 0) {
           return null;
         }
 
@@ -104,7 +107,7 @@ export default function Command() {
             {workspaceProjects.map((project: Project) => (
               <ProjectItem
                 defaultApp={defaultApp}
-                isPinned={pinnedProjects.includes(project.fullPath)}
+                isPinned={pinnedSet.has(project.fullPath)}
                 key={project.fullPath}
                 onRefresh={loadData}
                 onTogglePin={togglePinProject}

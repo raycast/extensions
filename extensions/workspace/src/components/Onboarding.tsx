@@ -17,10 +17,6 @@ export default function Onboarding({ defaultApp, loadData, onComplete, workspace
   const hasApp = !!defaultApp;
   const isReady = hasWorkspaces && hasApp;
 
-  const handleFinish = async () => {
-    onComplete();
-  };
-
   return (
     <List>
       <List.Section title="Workspace">
@@ -48,7 +44,7 @@ export default function Onboarding({ defaultApp, loadData, onComplete, workspace
           <List.Item
             actions={
               <ActionPanel>
-                <Action icon={Icon.Check} onAction={handleFinish} title="Finish Onboarding" />
+                <Action icon={Icon.Check} onAction={onComplete} title="Finish Onboarding" />
               </ActionPanel>
             }
             icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}

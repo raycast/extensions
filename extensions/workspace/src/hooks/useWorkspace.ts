@@ -1,9 +1,17 @@
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { readdirSync } from "fs";
+import { readdir } from "fs/promises";
 import path from "path";
 import { useCallback, useEffect, useState } from "react";
 
 import { App, Project } from "@/types";
+import {
+  STORAGE_KEY_APP,
+  STORAGE_KEY_ONBOARDING_COMPLETED,
+  STORAGE_KEY_PINNED_PROJECTS,
+  STORAGE_KEY_TERMINAL_APP,
+  STORAGE_KEY_WORKSPACE_APPS,
+  STORAGE_KEY_WORKSPACES,
+} from "@/utils/constants";
 import { getGitStatus } from "@/utils/git";
 import {
   getStoredApp,
@@ -21,7 +29,6 @@ import {
 
 export interface UseWorkspaceReturn {
   defaultApp: App | null;
-  getSubdirectories: (parentPath: string) => Project[];
   isLoading: boolean;
   loadData: () => Promise<void>;
   onboardingCompleted: boolean;
@@ -38,34 +45,20 @@ export interface UseWorkspaceReturn {
 }
 
 export function useWorkspace(): UseWorkspaceReturn {
-  const [workspaces, setWorkspaces] = useCachedState<string[]>("workspace-workspaces", []);
-  const [pinnedProjects, setPinnedProjects] = useCachedState<string[]>("workspace-pinned-projects", []);
-  const [defaultApp, setDefaultApp] = useCachedState<App | null>("default-app", null);
-  const [terminalApp, setTerminalApp] = useCachedState<App | null>("terminal-app", null);
-  const [workspaceApps, setWorkspaceApps] = useCachedState<Record<string, App>>("workspace-apps", {});
-  const [onboardingCompleted, setOnboardingCompleted] = useCachedState<boolean>("onboarding-completed", false);
+  const [workspaces, setWorkspaces] = useCachedState<string[]>(STORAGE_KEY_WORKSPACES, []);
+  const [pinnedProjects, setPinnedProjects] = useCachedState<string[]>(STORAGE_KEY_PINNED_PROJECTS, []);
+  const [defaultApp, setDefaultApp] = useCachedState<App | null>(STORAGE_KEY_APP, null);
+  const [terminalApp, setTerminalApp] = useCachedState<App | null>(STORAGE_KEY_TERMINAL_APP, null);
+  const [workspaceApps, setWorkspaceApps] = useCachedState<Record<string, App>>(STORAGE_KEY_WORKSPACE_APPS, {});
+  const [onboardingCompleted, setOnboardingCompleted] = useCachedState<boolean>(
+    STORAGE_KEY_ONBOARDING_COMPLETED,
+    false,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
-  const getSubdirectories = useCallback((parentPath: string): Project[] => {
-    try {
-      const entries = readdirSync(parentPath, { withFileTypes: true });
-
-      return entries
-        .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((entry) => ({
-          fullPath: path.join(parentPath, entry.name),
-          name: entry.name,
-          parentFolder: parentPath,
-        }));
-    } catch {
-      return [];
-    }
-  }, []);
-
   const { data: projects, isLoading: isProjectsLoading } = useCachedPromise(
-    async (workspaces: string[]) => {
-      const allProjects = workspaces.flatMap((workspace) => getSubdirectories(workspace));
+    async (ws: string[]) => {
+      const allProjects = (await Promise.all(ws.map(getSubdirectories))).flat();
       const projectsWithStatus = await Promise.all(
         allProjects.map(async (project) => {
           const status = await getGitStatus(project.fullPath);
@@ -106,7 +99,7 @@ export function useWorkspace(): UseWorkspaceReturn {
     setPinnedProjects(storedPinnedProjects);
     setTerminalApp(storedTerminalApp);
     setIsLoading(false);
-  }, [setWorkspaces, setDefaultApp, setWorkspaceApps, setOnboardingCompleted, setPinnedProjects]);
+  }, [setWorkspaces, setDefaultApp, setWorkspaceApps, setOnboardingCompleted, setPinnedProjects, setTerminalApp]);
 
   useEffect(() => {
     loadData();
@@ -120,7 +113,7 @@ export function useWorkspace(): UseWorkspaceReturn {
 
   const togglePinProject = async (projectPath: string): Promise<void> => {
     const newPinned = pinnedProjects.includes(projectPath)
-      ? pinnedProjects.filter((path: string) => path !== projectPath)
+      ? pinnedProjects.filter((p: string) => p !== projectPath)
       : [...pinnedProjects, projectPath];
 
     await saveStoredPinnedProjects(newPinned);
@@ -150,7 +143,6 @@ export function useWorkspace(): UseWorkspaceReturn {
 
   return {
     defaultApp,
-    getSubdirectories,
     isLoading: isLoading || isProjectsLoading,
     loadData,
     onboardingCompleted,
@@ -165,4 +157,21 @@ export function useWorkspace(): UseWorkspaceReturn {
     workspaceApps,
     workspaces,
   };
+}
+
+async function getSubdirectories(parentPath: string): Promise<Project[]> {
+  try {
+    const entries = await readdir(parentPath, { withFileTypes: true });
+
+    return entries
+      .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((entry) => ({
+        fullPath: path.join(parentPath, entry.name),
+        name: entry.name,
+        parentFolder: parentPath,
+      }));
+  } catch {
+    return [];
+  }
 }

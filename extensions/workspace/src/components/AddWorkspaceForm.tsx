@@ -17,7 +17,7 @@ export default function AddWorkspaceForm({ onDone }: AddWorkspaceFormProps) {
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
-      const workspacePath = values.workspace[0];
+      const workspacePath = path.resolve(values.workspace[0]);
       const workspaces = await getStoredWorkspaces();
 
       if (workspaces.includes(workspacePath)) {
@@ -30,9 +30,9 @@ export default function AddWorkspaceForm({ onDone }: AddWorkspaceFormProps) {
         return;
       }
 
-      workspaces.push(workspacePath);
+      const newWorkspaces = [...workspaces, workspacePath];
 
-      await saveStoredWorkspaces(workspaces);
+      await saveStoredWorkspaces(newWorkspaces);
       await showToast({
         message: path.basename(workspacePath),
         style: Toast.Style.Success,
@@ -64,14 +64,14 @@ export default function AddWorkspaceForm({ onDone }: AddWorkspaceFormProps) {
       navigationTitle="Add Workspace"
     >
       <Form.Description
-        text="Select a parent folder that contains your workspace projects. You can manage your workspaces later in the extension settings."
-        title="Add Workspace"
+        text="Select a parent folder (workspace) that contains your projects. You can manage your workspaces later in the extension settings."
+        title="How it works"
       />
       <Form.FilePicker
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
-        title="Workspace Path"
+        title="Workspace"
         {...itemProps.workspace}
       />
     </Form>

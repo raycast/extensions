@@ -15,9 +15,7 @@ export async function getStoredApp(): Promise<App | null> {
 }
 
 export async function getStoredOnboardingCompleted(): Promise<boolean> {
-  const raw = await LocalStorage.getItem<boolean>(STORAGE_KEY_ONBOARDING_COMPLETED);
-
-  return raw ?? false;
+  return getStoredItem<boolean>(STORAGE_KEY_ONBOARDING_COMPLETED, false);
 }
 
 export async function getStoredPinnedProjects(): Promise<string[]> {
@@ -61,7 +59,7 @@ export async function saveWorkspaceApps(workspaceApps: Record<string, App>): Pro
 }
 
 export async function setStoredOnboardingCompleted(completed: boolean): Promise<void> {
-  await LocalStorage.setItem(STORAGE_KEY_ONBOARDING_COMPLETED, completed);
+  await LocalStorage.setItem(STORAGE_KEY_ONBOARDING_COMPLETED, JSON.stringify(completed));
 }
 
 async function getStoredItem<T>(key: string, defaultValue: T): Promise<T> {

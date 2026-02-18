@@ -13,7 +13,7 @@ export default function SelectEditor({ onReset, onSelect }: SelectEditorProps) {
   const { pop } = useNavigation();
   const { data: apps, isLoading } = usePromise(getApplications);
 
-  const setEditor = async (app: Application) => {
+  const handleSelect = async (app: Application) => {
     if (onSelect) {
       onSelect(app);
       pop();
@@ -27,23 +27,25 @@ export default function SelectEditor({ onReset, onSelect }: SelectEditorProps) {
     pop();
   };
 
+  const handleReset = async () => {
+    if (onReset) {
+      onReset();
+    }
+
+    pop();
+  };
+
   return (
     <List isLoading={isLoading} navigationTitle="Select App" searchBarPlaceholder="Search for an app...">
       {onReset && (
         <List.Item
           actions={
             <ActionPanel>
-              <Action
-                onAction={() => {
-                  onReset();
-                  pop();
-                }}
-                title="Reset to Default"
-              />
+              <Action onAction={handleReset} title="Reset to Default" />
             </ActionPanel>
           }
           icon={Icon.ArrowCounterClockwise}
-          subtitle="Use the default application from settings"
+          subtitle="Use the default application"
           title="Default"
         />
       )}
@@ -51,11 +53,11 @@ export default function SelectEditor({ onReset, onSelect }: SelectEditorProps) {
         <List.Item
           actions={
             <ActionPanel>
-              <Action icon={Icon.Check} onAction={() => setEditor(app)} title="Select App" />
+              <Action icon={Icon.Check} onAction={() => handleSelect(app)} title="Select App" />
             </ActionPanel>
           }
           icon={{ fileIcon: app.path }}
-          key={app.path}
+          key={app.bundleId || app.path}
           title={app.name}
         />
       ))}

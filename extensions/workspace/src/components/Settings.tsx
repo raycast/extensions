@@ -5,13 +5,14 @@ import { useCallback, useEffect, useState } from "react";
 
 import AddWorkspaceForm from "@/components/AddWorkspaceForm";
 import SelectEditor from "@/components/SelectEditor";
-import TerminalSettings from "@/components/TerminalSettings";
 import { App } from "@/types";
+import { isGitAvailable } from "@/utils/git";
 import {
   getStoredApp,
   getStoredTerminalApp,
   getStoredWorkspaces,
   getWorkspaceApps,
+  saveStoredTerminalApp,
   saveStoredWorkspaces,
   saveWorkspaceApps,
 } from "@/utils/storage";
@@ -26,19 +27,23 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
   const [defaultApp, setDefaultApp] = useState<App | null>(null);
   const [terminalApp, setTerminalApp] = useState<App | null>(null);
   const [workspaceApps, setWorkspaceApps] = useState<Record<string, App>>({});
+  const [gitAvailable, setGitAvailable] = useState<boolean | null>(null);
 
   const loadSettings = useCallback(async () => {
-    const [storedWorkspaces, storedDefaultApp, storedWorkspaceApps, storedTerminalApp] = await Promise.all([
-      getStoredWorkspaces(),
-      getStoredApp(),
-      getWorkspaceApps(),
-      getStoredTerminalApp(),
-    ]);
+    const [storedWorkspaces, storedDefaultApp, storedWorkspaceApps, storedTerminalApp, gitInstalled] =
+      await Promise.all([
+        getStoredWorkspaces(),
+        getStoredApp(),
+        getWorkspaceApps(),
+        getStoredTerminalApp(),
+        isGitAvailable(),
+      ]);
 
     setWorkspaces(storedWorkspaces);
     setDefaultApp(storedDefaultApp);
     setWorkspaceApps(storedWorkspaceApps);
     setTerminalApp(storedTerminalApp);
+    setGitAvailable(gitInstalled);
   }, []);
 
   useEffect(() => {
@@ -53,52 +58,64 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
         title: "Remove Workspace",
       })
     ) {
-      const newWorkspaces = workspaces.filter((workspacePathItem) => workspacePathItem !== workspacePath);
+      try {
+        const newWorkspaces = workspaces.filter((item) => item !== workspacePath);
 
-      await saveStoredWorkspaces(newWorkspaces);
+        await saveStoredWorkspaces(newWorkspaces);
 
+        const newWorkspaceApps = { ...workspaceApps };
+        delete newWorkspaceApps[workspacePath];
+
+        await saveWorkspaceApps(newWorkspaceApps);
+
+        setWorkspaces(newWorkspaces);
+        setWorkspaceApps(newWorkspaceApps);
+
+        if (onWorkspacesChanged) {
+          await onWorkspacesChanged();
+        }
+
+        await showToast({ style: Toast.Style.Success, title: "Workspace Removed" });
+      } catch {
+        await showToast({ style: Toast.Style.Failure, title: "Failed to remove workspace" });
+      }
+    }
+  }
+
+  async function setWorkspaceApp(workspacePath: string, app: Application) {
+    try {
+      const newWorkspaceApps = {
+        ...workspaceApps,
+        [workspacePath]: { bundleId: app.bundleId || "", name: app.name },
+      };
+
+      await saveWorkspaceApps(newWorkspaceApps);
+
+      setWorkspaceApps(newWorkspaceApps);
+
+      await showToast({
+        message: `${path.basename(workspacePath)} → ${app.name}`,
+        style: Toast.Style.Success,
+        title: "App Updated",
+      });
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to update app" });
+    }
+  }
+
+  async function resetWorkspaceApp(workspacePath: string) {
+    try {
       const newWorkspaceApps = { ...workspaceApps };
       delete newWorkspaceApps[workspacePath];
 
       await saveWorkspaceApps(newWorkspaceApps);
 
-      setWorkspaces(newWorkspaces);
       setWorkspaceApps(newWorkspaceApps);
 
-      if (onWorkspacesChanged) {
-        await onWorkspacesChanged();
-      }
-
-      await showToast({ style: Toast.Style.Success, title: "Workspace Removed" });
+      await showToast({ style: Toast.Style.Success, title: "Application Reset" });
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to reset app" });
     }
-  }
-
-  async function setWorkspaceApp(workspacePath: string, app: Application) {
-    const newWorkspaceApps = {
-      ...workspaceApps,
-      [workspacePath]: { bundleId: app.bundleId || "", name: app.name },
-    };
-
-    await saveWorkspaceApps(newWorkspaceApps);
-
-    setWorkspaceApps(newWorkspaceApps);
-
-    await showToast({
-      message: `${path.basename(workspacePath)} -> ${app.name}`,
-      style: Toast.Style.Success,
-      title: "App Updated",
-    });
-  }
-
-  async function resetWorkspaceApp(workspacePath: string) {
-    const newWorkspaceApps = { ...workspaceApps };
-    delete newWorkspaceApps[workspacePath];
-
-    await saveWorkspaceApps(newWorkspaceApps);
-
-    setWorkspaceApps(newWorkspaceApps);
-
-    await showToast({ style: Toast.Style.Success, title: "Application Reset" });
   }
 
   async function moveWorkspace(index: number, direction: "down" | "up") {
@@ -107,27 +124,58 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
       return;
     }
 
-    const newWorkspaces = [...workspaces];
-    const [moved] = newWorkspaces.splice(index, 1);
+    try {
+      const newWorkspaces = [...workspaces];
+      const [moved] = newWorkspaces.splice(index, 1);
 
-    newWorkspaces.splice(newIndex, 0, moved);
+      newWorkspaces.splice(newIndex, 0, moved);
 
-    await saveStoredWorkspaces(newWorkspaces);
+      await saveStoredWorkspaces(newWorkspaces);
 
-    setWorkspaces(newWorkspaces);
+      setWorkspaces(newWorkspaces);
 
-    if (onWorkspacesChanged) {
-      await onWorkspacesChanged();
+      if (onWorkspacesChanged) {
+        await onWorkspacesChanged();
+      }
+
+      await showToast({ style: Toast.Style.Success, title: "Workspace Moved" });
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to move workspace" });
     }
-
-    await showToast({ style: Toast.Style.Success, title: "Workspace Moved" });
   }
 
+  const handleTerminalSelect = async (app: Application) => {
+    await saveStoredTerminalApp({ bundleId: app.bundleId || "", name: app.name });
+
+    setTerminalApp({ bundleId: app.bundleId || "", name: app.name });
+
+    await showToast({ message: app.name, style: Toast.Style.Success, title: "Terminal Updated" });
+  };
+
+  const handleTerminalReset = async () => {
+    await saveStoredTerminalApp(null);
+
+    setTerminalApp(null);
+
+    await showToast({ style: Toast.Style.Success, title: "Terminal Reset" });
+  };
+
   return (
-    <List navigationTitle={showGeneral ? "Workspace Settings" : "Managed Workspaces"}>
+    <List
+      navigationTitle={showGeneral ? "Workspace Settings" : "Manage Your Workspaces"}
+      searchBarPlaceholder={showGeneral ? "Search settings..." : "Search for workspaces..."}
+    >
       {showGeneral && (
         <List.Section title="General">
           <List.Item
+            accessories={[
+              {
+                tag: {
+                  color: defaultApp?.name ? Color.SecondaryText : Color.Red,
+                  value: defaultApp?.name || "Not selected",
+                },
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -139,23 +187,51 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
               </ActionPanel>
             }
             icon={Icon.AppWindow}
-            subtitle={defaultApp?.name || "Not selected"}
+            subtitle="Application where your projects are opened"
             title="Default App"
           />
           <List.Item
+            accessories={[
+              {
+                tag: {
+                  color: Color.SecondaryText,
+                  value: terminalApp?.name || "System default",
+                },
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.Push
                   icon={Icon.Pencil}
                   onPop={loadSettings}
-                  target={<TerminalSettings />}
+                  target={<SelectEditor onReset={handleTerminalReset} onSelect={handleTerminalSelect} />}
                   title="Change Terminal"
                 />
               </ActionPanel>
             }
             icon={Icon.Terminal}
-            subtitle={terminalApp?.name || "System default"}
+            subtitle="Open your projects in a terminal"
             title="Terminal App"
+          />
+          <List.Item
+            accessories={[
+              {
+                icon: gitAvailable ? Icon.Check : Icon.XMarkCircle,
+                tag: {
+                  color: gitAvailable ? Color.Green : Color.Red,
+                  value: gitAvailable ? "Available" : "Not installed",
+                },
+              },
+            ]}
+            icon={Icon.Code}
+            subtitle={
+              gitAvailable === null
+                ? "Checking..."
+                : gitAvailable
+                  ? "Branch and sync status shown per project"
+                  : "Install Git to see branch and sync status"
+            }
+            title="Git Integration"
           />
         </List.Section>
       )}
@@ -169,8 +245,7 @@ export default function Settings({ onWorkspacesChanged, showGeneral = true }: Se
                 workspaceApp
                   ? [
                       {
-                        icon: Icon.AppWindow,
-                        tag: { color: Color.Blue, value: workspaceApp.name },
+                        tag: { color: Color.SecondaryText, value: workspaceApp.name },
                         tooltip: "Custom App Set",
                       },
                     ]

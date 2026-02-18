@@ -5,8 +5,8 @@ export interface App {
 
 export interface GitStatus {
   branch: string;
-  pull?: number;
-  push?: number;
+  pull: number;
+  push: number;
 }
 
 export interface Project {

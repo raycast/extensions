@@ -3,7 +3,7 @@ import path from "path";
 import { useMemo } from "react";
 
 import Settings from "@/components/Settings";
-import { App, Project } from "@/types";
+import { App, GitStatus, Project } from "@/types";
 
 interface ProjectItemProps {
   defaultApp: App | null;
@@ -26,35 +26,22 @@ export default function ProjectItem({
   workspaceApps,
   workspacePath,
 }: ProjectItemProps) {
-  const gitStatus = project.gitStatus;
   const workspaceApp = workspaceApps[workspacePath];
   const appToUse = workspaceApp || defaultApp;
 
-  const gitColor = useMemo(() => {
-    if (!gitStatus) {
-      return undefined;
-    }
-
-    if (gitStatus.pull || gitStatus.push) {
-      return Color.Orange;
-    }
-
-    return Color.Green;
-  }, [gitStatus]);
+  const gitColor = useMemo(() => getGitColor(project.gitStatus), [project.gitStatus]);
 
   return (
     <List.Item
       accessories={[
-        ...(gitStatus
+        ...(project.gitStatus
           ? [
               {
                 tag: {
                   color: gitColor,
-                  value: `${gitStatus.pull ? `${gitStatus.pull}↓ ` : ""}${
-                    gitStatus.push ? `${gitStatus.push}↑ ` : ""
-                  }${gitStatus.branch}`,
+                  value: formatGitBadge(project.gitStatus),
                 },
-                tooltip: `Branch: ${gitStatus.branch}\nPull: ${gitStatus.pull || 0}\nPush: ${gitStatus.push || 0}`,
+                tooltip: `Branch: ${project.gitStatus.branch}\nPull: ${project.gitStatus.pull}\nPush: ${project.gitStatus.push}`,
               },
             ]
           : []),
@@ -66,7 +53,7 @@ export default function ProjectItem({
               application={appToUse?.bundleId}
               icon={Icon.AppWindow}
               target={project.fullPath}
-              title={`Open in ${appToUse?.name || "Open in default app"}`}
+              title={appToUse ? `Open in ${appToUse.name}` : "Open Project"}
             />
             <Action.Open
               application={terminalApp?.bundleId}
@@ -109,4 +96,28 @@ export default function ProjectItem({
       title={project.name}
     />
   );
+}
+
+function formatGitBadge(gitStatus: GitStatus): string {
+  const parts: string[] = [];
+
+  if (gitStatus.pull) {
+    parts.push(`${gitStatus.pull}↓`);
+  }
+
+  if (gitStatus.push) {
+    parts.push(`${gitStatus.push}↑`);
+  }
+
+  parts.push(gitStatus.branch);
+
+  return parts.join(" ");
+}
+
+function getGitColor(gitStatus: GitStatus | null | undefined): Color | undefined {
+  if (!gitStatus) {
+    return undefined;
+  }
+
+  return gitStatus.pull || gitStatus.push ? Color.Orange : Color.Green;
 }
