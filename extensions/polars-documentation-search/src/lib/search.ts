@@ -12,7 +12,7 @@ export function searchInventory(items: InventoryItem[], query: string, limit = 3
     return items.slice(0, limit);
   }
 
-  const candidates: ScoredItem[] = [];
+  const topCandidates: ScoredItem[] = [];
 
   for (const item of items) {
     const { score, matched } = scoreItem(item, normalized);
@@ -20,13 +20,37 @@ export function searchInventory(items: InventoryItem[], query: string, limit = 3
       continue;
     }
 
-    candidates.push({ item, score });
+    insertCandidate(topCandidates, { item, score }, limit);
   }
 
-  return candidates
-    .sort((a, b) => b.score - a.score || a.item.shortName.localeCompare(b.item.shortName))
-    .slice(0, limit)
-    .map((entry) => entry.item);
+  return topCandidates.map((entry) => entry.item);
+}
+
+function compareScoredItems(a: ScoredItem, b: ScoredItem): number {
+  return b.score - a.score || a.item.shortName.localeCompare(b.item.shortName);
+}
+
+function insertCandidate(topCandidates: ScoredItem[], candidate: ScoredItem, limit: number): void {
+  if (limit <= 0) {
+    return;
+  }
+
+  if (topCandidates.length === limit && compareScoredItems(candidate, topCandidates[topCandidates.length - 1]) >= 0) {
+    return;
+  }
+
+  let insertIndex = topCandidates.length;
+  for (let index = 0; index < topCandidates.length; index += 1) {
+    if (compareScoredItems(candidate, topCandidates[index]) < 0) {
+      insertIndex = index;
+      break;
+    }
+  }
+
+  topCandidates.splice(insertIndex, 0, candidate);
+  if (topCandidates.length > limit) {
+    topCandidates.pop();
+  }
 }
 
 function scoreItem(item: InventoryItem, query: string): { score: number; matched: boolean } {

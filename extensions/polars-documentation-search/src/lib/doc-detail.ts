@@ -230,8 +230,9 @@ function convertHtmlToMarkdown(element: cheerio.Cheerio<AnyNode>): string {
   const clone = element.clone();
 
   clone.find("code").each((_: number, codeElement: Element) => {
-    const codeText = clone.find(codeElement).text();
-    clone.find(codeElement).replaceWith(`\`${codeText}\``);
+    const codeNode = clone.find(codeElement);
+    const codeText = codeNode.text();
+    codeNode.replaceWith(`\`${codeText}\``);
   });
 
   return normalizeWhitespace(clone.text());

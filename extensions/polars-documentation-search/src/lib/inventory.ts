@@ -1,4 +1,5 @@
-import { inflateSync } from "zlib";
+import { promisify } from "util";
+import { inflate } from "zlib";
 
 export const INVENTORY_URL = "https://docs.pola.rs/api/python/stable/objects.inv";
 export const DOCUMENT_BASE_URL = "https://docs.pola.rs/api/python/stable/";
@@ -12,6 +13,7 @@ const ALLOWED_ROLES = new Set([
   "py:module",
   "py:exception",
 ]);
+const inflateAsync = promisify(inflate);
 
 export interface InventoryItem {
   id: string;
@@ -31,7 +33,7 @@ interface RawInventoryLine {
   displayName: string;
 }
 
-export function parseInventory(buffer: Buffer): RawInventoryLine[] {
+export async function parseInventory(buffer: Buffer): Promise<RawInventoryLine[]> {
   let offset = 0;
 
   function readLine() {
@@ -44,14 +46,15 @@ export function parseInventory(buffer: Buffer): RawInventoryLine[] {
 
   const header = readLine();
   if (!header.startsWith("# Sphinx inventory version")) {
-    throw new Error("Unexpected objects.inv header");
+    const headerSnippet = header.length > 100 ? `${header.slice(0, 100)}...` : header;
+    throw new Error(`Unexpected objects.inv header: "${headerSnippet}"`);
   }
   readLine();
   readLine();
   readLine();
 
   const compressed = buffer.subarray(offset);
-  const decompressed = inflateSync(compressed).toString("utf-8");
+  const decompressed = (await inflateAsync(compressed)).toString("utf-8");
 
   return decompressed
     .split(/\r?\n/)
@@ -83,8 +86,7 @@ export function dedupeAndFilter(lines: RawInventoryLine[]): InventoryItem[] {
     }
 
     const urlPath = resolveUri(line.uri, line.name);
-    const urlPathWithoutHash = urlPath.split("#")[0];
-    const url = new URL(urlPathWithoutHash, DOCUMENT_BASE_URL).toString();
+    const url = new URL(urlPath, DOCUMENT_BASE_URL).toString();
     const shortName = line.name.startsWith("polars.") ? line.name.slice("polars.".length) : line.name;
     const displayName = line.displayName === "-" ? line.name : line.displayName;
 
@@ -125,9 +127,9 @@ function resolveUri(uri: string, name: string): string {
   return resolved;
 }
 
-export function transformInventoryResponse(buffer: ArrayBuffer): InventoryItem[] {
+export async function transformInventoryResponse(buffer: ArrayBuffer): Promise<InventoryItem[]> {
   const raw = Buffer.from(buffer);
-  const lines = parseInventory(raw);
+  const lines = await parseInventory(raw);
   const filtered = dedupeAndFilter(lines);
   filtered.sort((a, b) => a.shortName.localeCompare(b.shortName));
   return filtered;
