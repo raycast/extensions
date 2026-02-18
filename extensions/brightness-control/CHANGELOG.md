@@ -1,6 +1,6 @@
 # Brightness Control Changelog
 
-## [Lunar-based Brightness Control] - {PR_MERGE_DATE}
+## [Lunar-based Brightness Control] - 2026-02-18
 
 - Added "Set Brightness" command: set exact brightness level (1-100) directly from the search bar using Lunar
 - Added "Max Brightness" command: instantly set brightness to 100% on the current display
