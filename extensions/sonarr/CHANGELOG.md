@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Removed the **Command Activity** command entirely
+- Removed an unused command entirely
 - Simplified **Search Series** rows to title/year with compact metadata
 - Added lightweight genre and status tags in **Search Series** while keeping library check indicators
 - Fixed the episode and season search action flow by handling Sonarr command responses more safely
