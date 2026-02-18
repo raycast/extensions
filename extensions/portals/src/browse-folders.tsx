@@ -377,7 +377,6 @@ export default function Command() {
   const searchResults = allFlatFolders.filter(
     (f) =>
       f.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      f.url.toLowerCase().includes(searchText.toLowerCase()) ||
       f.description?.toLowerCase().includes(searchText.toLowerCase()),
   );
 
