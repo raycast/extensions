@@ -1,25 +1,26 @@
 import { showToast, Toast } from "@raycast/api";
-import { getWatchTime } from "../utils/api";
+import { ShowWatchTime } from "../interface/show-watch-time";
 
-export function watchTimeHUD(props: { url: string }) {
-  const { url } = props;
+function getTimePart(value: number | null, unit: string): string | null {
+  if (value === null) {
+    return null;
+  }
 
-  getWatchTime(url)
-    .then((watchTime) => {
-      const { days, hours, minutes } = watchTime;
-      const daysText = days ? `${days} days` : "";
-      const hoursText = hours ? `${hours} hours` : "";
-      const minutesText = minutes ? `${minutes} minutes` : "";
+  return `${value} ${unit}`;
+}
 
-      const text = `${daysText} ${hoursText} ${minutesText}`;
-      if (daysText.length === 0 && hoursText.length === 0 && minutesText.length === 0) {
-        showToast({ style: Toast.Style.Failure, title: "Watch Time", message: "No watch time found" });
-        return;
-      }
-      showToast({ style: Toast.Style.Success, title: "Watch Time", message: text });
-    })
-    .catch((error) => {
-      console.error(error);
-      showToast({ style: Toast.Style.Failure, title: "Watch Time", message: "Error fetching watch time" });
-    });
+export function watchTimeHUD(props: { watchTime: ShowWatchTime; title: string }) {
+  const { watchTime, title } = props;
+  const timeParts = [
+    getTimePart(watchTime.days, "days"),
+    getTimePart(watchTime.hours, "hours"),
+    getTimePart(watchTime.minutes, "minutes"),
+  ].filter((part): part is string => part !== null);
+
+  if (timeParts.length === 0) {
+    showToast({ style: Toast.Style.Failure, title, message: "No watch time found" });
+    return;
+  }
+
+  showToast({ style: Toast.Style.Success, title, message: timeParts.join(" ") });
 }
