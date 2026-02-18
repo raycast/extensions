@@ -7,11 +7,6 @@ import { buildMarkdown, type DocDetail } from "./lib/doc-detail";
 import { searchInventory } from "./lib/search";
 import { applyPrefixPreference } from "./lib/prefix";
 
-interface Preferences {
-  useShortPrefix: boolean;
-  hideApiItems: boolean;
-}
-
 type DetailRenderState = {
   detail?: DocDetail;
   isLoading: boolean;
@@ -108,7 +103,7 @@ function getDetailMarkdown(item: InventoryItem, state: DetailRenderState, useSho
   }
 
   if (state.error) {
-    return `Failed to load documentation.\\n\\n${state.error.message}`;
+    return `Failed to load documentation.\n\n${state.error.message}`;
   }
 
   if (!state.detail) {
@@ -154,10 +149,24 @@ function FullScreenDocumentation({
   detail?: DocDetail;
   useShortPrefix: boolean;
 }) {
-  const markdown = detail ? buildMarkdown(item, detail, useShortPrefix) : "Loading documentation...";
+  const {
+    data: loadedDetail,
+    isLoading: isLoadingDetail,
+    error: loadedDetailError,
+  } = useDocDetail(detail ? undefined : item);
+  const effectiveDetail = detail ?? loadedDetail;
+  const markdown = loadedDetailError
+    ? `Failed to load documentation.\n\n${loadedDetailError.message}`
+    : effectiveDetail
+      ? buildMarkdown(item, effectiveDetail, useShortPrefix)
+      : isLoadingDetail
+        ? "Loading documentation..."
+        : "Documentation details are unavailable.";
   const displayName = applyPrefixPreference(item.name, useShortPrefix);
   const displayShortName = applyPrefixPreference(item.shortName, useShortPrefix);
-  const signature = detail?.signature ? applyPrefixPreference(detail.signature, useShortPrefix) : undefined;
+  const signature = effectiveDetail?.signature
+    ? applyPrefixPreference(effectiveDetail.signature, useShortPrefix)
+    : undefined;
 
   return (
     <Detail

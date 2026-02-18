@@ -234,8 +234,9 @@ function convertHtmlToMarkdown(element: cheerio.Cheerio<AnyNode>): string {
 
   // Convert <code> tags to markdown backticks
   clone.find("code").each((_: number, codeElement: Element) => {
-    const codeText = clone.find(codeElement).text();
-    clone.find(codeElement).replaceWith(`\`${codeText}\``);
+    const codeNode = $(codeElement);
+    const codeText = codeNode.text();
+    codeNode.replaceWith(`\`${codeText}\``);
   });
 
   // Get the text content and normalize whitespace
