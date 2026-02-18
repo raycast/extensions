@@ -1,5 +1,10 @@
 # Pandas Documentation Search Changelog
 
+## [1.0.6] - {PR_MERGE_DATE}
+
+- Fixed alias-based search lookups so inputs like `pd.array`, `df.*`, and `s.*` resolve to their corresponding Pandas symbols.
+- Fixed documentation detail parsing crash (`$ is not defined`) so API entries like `pd.array` load successfully.
+
 ## [1.0.5] - {PR_MERGE_DATE}
 
 - Fixed documentation error markdown to render real line breaks instead of literal `\n`.

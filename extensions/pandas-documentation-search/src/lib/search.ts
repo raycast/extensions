@@ -6,7 +6,7 @@ interface ScoredItem {
 }
 
 export function searchInventory(items: InventoryItem[], query: string, limit = 30): InventoryItem[] {
-  const normalized = query.trim().toLowerCase();
+  const normalized = normalizeQuery(query);
 
   if (!normalized) {
     return items.slice(0, limit);
@@ -24,6 +24,32 @@ export function searchInventory(items: InventoryItem[], query: string, limit = 3
   }
 
   return topCandidates.map((entry) => entry.item);
+}
+
+function normalizeQuery(query: string): string {
+  const normalized = query.trim().toLowerCase();
+
+  if (!normalized) {
+    return normalized;
+  }
+
+  if (normalized.startsWith("pandas.")) {
+    return normalized.slice("pandas.".length);
+  }
+
+  if (normalized.startsWith("pd.")) {
+    return normalized.slice("pd.".length);
+  }
+
+  if (normalized.startsWith("df.")) {
+    return `dataframe.${normalized.slice("df.".length)}`;
+  }
+
+  if (normalized.startsWith("s.")) {
+    return `series.${normalized.slice("s.".length)}`;
+  }
+
+  return normalized;
 }
 
 function compareScoredItems(a: ScoredItem, b: ScoredItem): number {

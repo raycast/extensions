@@ -187,11 +187,11 @@ function parseFieldDefinition($: cheerio.CheerioAPI, container: cheerio.Cheerio<
     const descriptionNode = term.next("dd");
     const paragraphs = descriptionNode
       .find("p")
-      .map((__, p) => convertHtmlToMarkdown($(p)))
+      .map((__, p) => convertHtmlToMarkdown($, $(p)))
       .get()
       .filter(Boolean);
 
-    const description = paragraphs.length > 0 ? paragraphs.join(" ") : convertHtmlToMarkdown(descriptionNode);
+    const description = paragraphs.length > 0 ? paragraphs.join(" ") : convertHtmlToMarkdown($, descriptionNode);
 
     items.push({
       name,
@@ -228,7 +228,7 @@ function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
-function convertHtmlToMarkdown(element: cheerio.Cheerio<AnyNode>): string {
+function convertHtmlToMarkdown($: cheerio.CheerioAPI, element: cheerio.Cheerio<AnyNode>): string {
   // Clone the element to avoid modifying the original
   const clone = element.clone();
 
