@@ -9,7 +9,7 @@ import {
   Toast,
   Clipboard,
 } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import {
   searchMemories,
@@ -258,7 +258,11 @@ function ListMemoryDetail({ memory }: { memory: ListMemory }) {
 export default function SearchMemories() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading: searchLoading, data: searchResults } = useCachedPromise(
+  const {
+    isLoading: searchLoading,
+    data: searchResults,
+    error: searchError,
+  } = useCachedPromise(
     async (query: string) => {
       if (!query) return null;
       return searchMemories(query, 15);
@@ -267,12 +271,24 @@ export default function SearchMemories() {
     { keepPreviousData: true },
   );
 
-  const { isLoading: recentLoading, data: recentMemories } = useCachedPromise(
-    async () => listMemories(15),
-    [],
-  );
+  const {
+    isLoading: recentLoading,
+    data: recentMemories,
+    error: recentError,
+  } = useCachedPromise(async () => listMemories(15), []);
 
   const isLoading = searchText ? searchLoading : recentLoading;
+
+  useEffect(() => {
+    const error = searchText ? searchError : recentError;
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Connection failed",
+        message: error.message,
+      });
+    }
+  }, [searchError, recentError, searchText]);
 
   const highRelevanceResults = searchResults?.filter(
     (r) => r.similarity_score >= 0.5,
