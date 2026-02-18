@@ -1,0 +1,15 @@
+node_modules
+.DS_Store
+.idea
+.vscode
+
+# Raycast build artifacts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

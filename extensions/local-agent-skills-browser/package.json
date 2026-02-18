@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "local-agent-skills-browser",
+  "title": "Local Agent Skills Browser",
+  "description": "Browse, search, and preview locally installed agent skills for Claude Code, Cursor, Codex, and 40+ AI coding agents",
+  "icon": "icon.png",
+  "author": "deprecated",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deprecated/raycast-local-agent-skills-browser.git"
+  },
+  "homepage": "https://github.com/deprecated/raycast-local-agent-skills-browser",
+  "bugs": {
+    "url": "https://github.com/deprecated/raycast-local-agent-skills-browser/issues"
+  },
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "subtitle": "Local Agent Skills",
+      "description": "Browse and search installed agent skills",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.4",
+    "@types/react": "19.0.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
