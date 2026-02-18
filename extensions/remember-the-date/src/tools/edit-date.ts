@@ -20,7 +20,9 @@ type EditDateInput = {
    */
   date?: string;
   /**
-   * The new repeat type: "none", "weekly", "monthly", or "yearly"
+   * The new repeat type: "none", "weekly", "monthly", or "yearly".
+   * To remove recurrence from a recurring date, pass repeat: "none" explicitly.
+   * Omitting this field preserves the existing repeat value.
    */
   repeat?: RepeatType;
 };

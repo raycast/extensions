@@ -38,19 +38,20 @@ export function getNextOccurrence(date: string, repeat?: RepeatType): moment.Mom
   const today = moment().startOf("day");
 
   if (!repeat || repeat === "none") {
-    return base;
+    return base.clone();
   }
 
   if (repeat === "yearly") {
     const baseMonth = base.month();
     const baseDay = base.date();
+    // Set day to 1 first to avoid month overflow when base day exceeds target month's days (e.g. Jan 31 -> Feb)
     let next = moment({ year: today.year(), month: baseMonth, day: 1 });
     next = next.date(Math.min(baseDay, next.daysInMonth()));
     if (next.isBefore(today)) {
       next = moment({ year: today.year() + 1, month: baseMonth, day: 1 });
       next = next.date(Math.min(baseDay, next.daysInMonth()));
     }
-    return next;
+    return next.clone();
   }
 
   if (repeat === "monthly") {
@@ -61,7 +62,7 @@ export function getNextOccurrence(date: string, repeat?: RepeatType): moment.Mom
       next = today.clone().startOf("month").add(1, "month");
       next = next.date(Math.min(baseDay, next.daysInMonth()));
     }
-    return next;
+    return next.clone();
   }
 
   if (repeat === "weekly") {
@@ -70,10 +71,10 @@ export function getNextOccurrence(date: string, repeat?: RepeatType): moment.Mom
     if (next.isBefore(today)) {
       next = next.add(1, "week");
     }
-    return next;
+    return next.clone();
   }
 
-  return base;
+  return base.clone();
 }
 
 export function getRepeatLabel(repeat?: RepeatType): string {

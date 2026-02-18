@@ -122,24 +122,30 @@ export async function getFormattedList() {
   const now = moment().startOf("day");
   const dates = [];
 
+  // Pre-compute effective date once per item to avoid redundant calls during filter/sort
+  const effectiveDateMap = new Map<string, moment.Moment>();
+  for (const item of items) {
+    effectiveDateMap.set(item.id, getEffectiveDate(item));
+  }
+
   const futureDates = items.filter((item) => {
-    const effective = getEffectiveDate(item);
+    const effective = effectiveDateMap.get(item.id)!;
     return effective.isSameOrAfter(now);
   });
-  futureDates.sort(function (a, b) {
-    const aDate = getEffectiveDate(a);
-    const bDate = getEffectiveDate(b);
+  futureDates.sort((a, b) => {
+    const aDate = effectiveDateMap.get(a.id)!;
+    const bDate = effectiveDateMap.get(b.id)!;
     return aDate.diff(bDate);
   });
   dates.push({ title: "Upcoming Dates", items: futureDates } as ListItems);
 
   const pastDates = items.filter((item) => {
-    const effective = getEffectiveDate(item);
+    const effective = effectiveDateMap.get(item.id)!;
     return effective.isBefore(now);
   });
-  pastDates.sort(function (a, b) {
-    const aDate = getEffectiveDate(a);
-    const bDate = getEffectiveDate(b);
+  pastDates.sort((a, b) => {
+    const aDate = effectiveDateMap.get(a.id)!;
+    const bDate = effectiveDateMap.get(b.id)!;
     return bDate.diff(aDate);
   });
 
