@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sendy",
   "title": "Sendy",
-  "description": "",
-  "icon": "extension-icon.png",
+  "description": "View Brands, Lists; Check Subscriber Status",
+  "icon": "sendy.co.png",
   "author": "xmok",
   "platforms": [
     "macOS",
@@ -35,7 +35,13 @@
     {
       "name": "search-brands",
       "title": "Search Brands",
-      "description": "",
+      "description": "View Brands and their Lists",
+      "mode": "view"
+    },
+    {
+      "name": "check-subscriber-status",
+      "title": "Check Subscriber Status",
+      "description": "Check a Subscriber inside a List",
       "mode": "view"
     }
   ],
