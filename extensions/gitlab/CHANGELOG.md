@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Bugfix merge requests] - {PR_MERGE_DATE}
+## [Bugfix merge requests] - 2026-02-18
 
 - Update merge request list to show approvals properly
 
