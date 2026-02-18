@@ -1,0 +1,321 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "local-ai",
+  "title": "Local AI",
+  "description": "Chat with local LLMs (Ollama, LM Studio, llama.cpp) directly from Raycast",
+  "icon": "extension-icon.png",
+  "author": "siraj",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Chat with AI",
+      "subtitle": "Local AI",
+      "description": "Start a chat conversation with your local AI model",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "quick-ask",
+      "title": "Quick Ask",
+      "subtitle": "Local AI",
+      "description": "Ask a quick one-off question to your local AI",
+      "mode": "view",
+      "popToRootType": "suspended",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "Ask anything..."
+        }
+      ]
+    },
+    {
+      "name": "models",
+      "title": "Browse Models",
+      "subtitle": "Local AI",
+      "description": "Browse and select available models from your local AI server",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "conversations",
+      "title": "Browse Previous Conversations",
+      "subtitle": "Local AI",
+      "description": "Browse and resume saved chat conversations",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "fix-grammar",
+      "title": "Selected Text: Fix Spelling & Grammar",
+      "subtitle": "Local AI",
+      "description": "Fix spelling and grammar errors in selected text",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "improve-writing",
+      "title": "Selected Text: Improve Writing",
+      "subtitle": "Local AI",
+      "description": "Improve the clarity and style of selected text",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "make-shorter",
+      "title": "Selected Text: Make Shorter",
+      "subtitle": "Local AI",
+      "description": "Condense selected text while preserving meaning",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "make-longer",
+      "title": "Selected Text: Make Longer",
+      "subtitle": "Local AI",
+      "description": "Expand selected text with more detail and examples",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "tone-professional",
+      "title": "Selected Text: Change Tone to Professional",
+      "subtitle": "Local AI",
+      "description": "Rewrite selected text in a professional tone",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "tone-casual",
+      "title": "Selected Text: Change Tone to Casual",
+      "subtitle": "Local AI",
+      "description": "Rewrite selected text in a casual conversational tone",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "tone-friendly",
+      "title": "Selected Text: Change Tone to Friendly",
+      "subtitle": "Local AI",
+      "description": "Rewrite selected text in a warm friendly tone",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "tone-confident",
+      "title": "Selected Text: Change Tone to Confident",
+      "subtitle": "Local AI",
+      "description": "Rewrite selected text in a confident assertive tone",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "explain-code",
+      "title": "Selected Text: Explain Code",
+      "subtitle": "Local AI",
+      "description": "Explain selected code step by step",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "explain-simply",
+      "title": "Selected Text: Explain Simply",
+      "subtitle": "Local AI",
+      "description": "Explain selected text in simple everyday terms",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "translate",
+      "title": "Selected Text: Translate",
+      "subtitle": "Local AI",
+      "description": "Translate selected text between languages",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "summarize",
+      "title": "Selected Text: Summarize",
+      "subtitle": "Local AI",
+      "description": "Summarize selected text into key points",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "rephrase-tweet",
+      "title": "Selected Text: Rephrase as Tweet",
+      "subtitle": "Local AI",
+      "description": "Rephrase selected text as a concise tweet",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "proofread",
+      "title": "Selected Text: Proofread",
+      "subtitle": "Local AI",
+      "description": "Check selected text for errors and suggest corrections",
+      "mode": "view",
+      "popToRootType": "suspended"
+    },
+    {
+      "name": "send-screen",
+      "title": "Send Screen to AI Chat",
+      "subtitle": "Local AI",
+      "description": "Capture your full screen and send it to AI chat for analysis",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-screen-area",
+      "title": "Send Screen Area to AI Chat",
+      "subtitle": "Local AI",
+      "description": "Select a screen area with crosshair and send it to AI chat",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-selected-text",
+      "title": "Send Selected Text to AI Chat",
+      "subtitle": "Local AI",
+      "description": "Send the currently selected text from any app to AI chat",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "Provider",
+      "description": "Local AI provider to connect to",
+      "type": "dropdown",
+      "required": true,
+      "default": "ollama",
+      "data": [
+        {
+          "title": "Ollama",
+          "value": "ollama"
+        },
+        {
+          "title": "LM Studio",
+          "value": "lmstudio"
+        },
+        {
+          "title": "llama.cpp",
+          "value": "llamacpp"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "Server base URL (leave empty to use provider default)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://localhost:11434"
+    },
+    {
+      "name": "defaultModel",
+      "title": "Default Model",
+      "description": "Preferred model name (auto-detected if empty)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. llama3.2"
+    },
+    {
+      "name": "temperature",
+      "title": "Temperature",
+      "description": "Response creativity (0.0-2.0)",
+      "type": "textfield",
+      "required": false,
+      "default": "0.7",
+      "placeholder": "0.7"
+    },
+    {
+      "name": "maxTokens",
+      "title": "Max Tokens",
+      "description": "Maximum response length in tokens",
+      "type": "textfield",
+      "required": false,
+      "default": "2048",
+      "placeholder": "2048"
+    },
+    {
+      "name": "systemPrompt",
+      "title": "System Prompt",
+      "description": "Default system prompt for all chats",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "You are a helpful assistant."
+    },
+    {
+      "name": "streamResponses",
+      "title": "Stream Responses",
+      "description": "Enable streaming for real-time token display",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable streaming responses"
+    },
+    {
+      "name": "autoPasteResult",
+      "title": "Auto-Paste Results",
+      "description": "Automatically paste AI results back and copy to clipboard as fallback (for text transform commands)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Auto-paste transformed text"
+    },
+    {
+      "name": "webSearchEnabled",
+      "title": "Web Search",
+      "description": "Allow AI to search the web for up-to-date information (requires Brave Search API key below)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable web search"
+    },
+    {
+      "name": "searchApiKey",
+      "title": "Brave Search API Key",
+      "description": "Brave Search API key (free: 2000 queries/month). Get one at https://brave.com/search/api/",
+      "type": "password",
+      "required": false,
+      "placeholder": "BSA..."
+    },
+    {
+      "name": "toolCallingEnabled",
+      "title": "Tool Calling Mode",
+      "description": "Use native OpenAI-compatible tool calling instead of prompt injection (requires llama3.1+, qwen2.5+, or mistral v0.3+)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable native tool calling"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint --fix && ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
