@@ -1,0 +1,134 @@
+{
+  "name": "dynamic-pomodoro",
+  "version": "0.1.0",
+  "title": "Dynamic Pomodoro",
+  "description": "Adaptive focus timer extension for Raycast",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "icon": "icon.png",
+  "author": "Nord",
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "dynamic-pomodoro",
+      "title": "Dynamic Pomodoro",
+      "description": "Start, pause, and reset an adaptive focus timer",
+      "mode": "view"
+    },
+    {
+      "name": "start-dynamic-pomodoro",
+      "title": "Start Dynamic Pomodoro",
+      "description": "Starts Dynamic Pomodoro from the current or selected duration",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-dynamic-pomodoro",
+      "title": "Stop Dynamic Pomodoro",
+      "description": "Stops Dynamic Pomodoro and resets remaining time",
+      "mode": "no-view"
+    },
+    {
+      "name": "dynamic-pomodoro-menu-bar",
+      "title": "Dynamic Pomodoro Menu Bar",
+      "description": "Track Dynamic Pomodoro from the menu bar in real time",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "dynamic-pomodoro-watchdog",
+      "title": "Dynamic Pomodoro Background Sync",
+      "description": "Internal background helper for Dynamic Pomodoro completion checks",
+      "mode": "no-view",
+      "interval": "10s",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "completionSoundId",
+      "type": "dropdown",
+      "title": "Completion Sound",
+      "description": "System sound played when the timer ends.",
+      "default": "system-beep",
+      "required": false,
+      "data": [
+        {
+          "title": "System Beep",
+          "value": "system-beep"
+        },
+        {
+          "title": "Раскрытие (Unfold)",
+          "value": "unfold-encore-infinitum"
+        },
+        {
+          "title": "Hero",
+          "value": "hero"
+        },
+        {
+          "title": "Ping",
+          "value": "ping"
+        },
+        {
+          "title": "Glass",
+          "value": "glass"
+        },
+        {
+          "title": "Pop",
+          "value": "pop"
+        },
+        {
+          "title": "Tink",
+          "value": "tink"
+        },
+        {
+          "title": "Basso",
+          "value": "basso"
+        },
+        {
+          "title": "Submarine",
+          "value": "submarine"
+        },
+        {
+          "title": "Frog",
+          "value": "frog"
+        },
+        {
+          "title": "Morse",
+          "value": "morse"
+        },
+        {
+          "title": "Sosumi",
+          "value": "sosumi"
+        }
+      ]
+    },
+    {
+      "name": "completionSoundMaxSeconds",
+      "type": "textfield",
+      "title": "Completion Sound Max Seconds",
+      "description": "Maximum duration of completion sound in seconds (1-15).",
+      "default": "5",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "node --experimental-strip-types --test src/*.test.ts"
+  }
+}
