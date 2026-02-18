@@ -16,7 +16,10 @@ interface ConversationEntry {
   content: string;
 }
 
-function formatConversation(conversation: ConversationEntry[], streamingText?: string): string {
+function formatConversation(
+  conversation: ConversationEntry[],
+  streamingText?: string,
+): string {
   if (conversation.length === 0 && !streamingText) {
     return "# 🦞 OpenClaw Chat\n\nPress **Enter** or use the **Send Message** action to start chatting.";
   }
@@ -58,7 +61,12 @@ function MessageInput({ onSend }: { onSend: (text: string) => void }) {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="message" title="Message" placeholder="Type your message..." autoFocus />
+      <Form.TextArea
+        id="message"
+        title="Message"
+        placeholder="Type your message..."
+        autoFocus
+      />
     </Form>
   );
 }
@@ -66,7 +74,9 @@ function MessageInput({ onSend }: { onSend: (text: string) => void }) {
 export default function ChatWithOpenClaw() {
   const [conversation, setConversation] = useState<ConversationEntry[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingText, setStreamingText] = useState<string | undefined>(undefined);
+  const [streamingText, setStreamingText] = useState<string | undefined>(
+    undefined,
+  );
   const abortRef = useRef<AbortController | null>(null);
   const { push } = useNavigation();
 
@@ -96,7 +106,10 @@ export default function ChatWithOpenClaw() {
       () => {
         setIsStreaming(false);
         setStreamingText(undefined);
-        setConversation([...updatedConversation, { role: "assistant", content: fullText }]);
+        setConversation([
+          ...updatedConversation,
+          { role: "assistant", content: fullText },
+        ]);
       },
       abortRef.current.signal,
     ).catch(async (error) => {
@@ -104,12 +117,16 @@ export default function ChatWithOpenClaw() {
       setIsStreaming(false);
       setStreamingText(undefined);
       if (fullText) {
-        setConversation([...updatedConversation, { role: "assistant", content: fullText }]);
+        setConversation([
+          ...updatedConversation,
+          { role: "assistant", content: fullText },
+        ]);
       }
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: error instanceof Error ? error.message : "Failed to get response",
+        message:
+          error instanceof Error ? error.message : "Failed to get response",
       });
     });
   }
@@ -143,7 +160,10 @@ export default function ChatWithOpenClaw() {
                 abortRef.current?.abort();
                 setIsStreaming(false);
                 if (streamingText) {
-                  setConversation([...conversation, { role: "assistant", content: streamingText }]);
+                  setConversation([
+                    ...conversation,
+                    { role: "assistant", content: streamingText },
+                  ]);
                 }
                 setStreamingText(undefined);
               }}
@@ -159,13 +179,21 @@ export default function ChatWithOpenClaw() {
               setConversation([]);
               setIsStreaming(false);
               setStreamingText(undefined);
-              showToast({ style: Toast.Style.Success, title: "Conversation cleared" });
+              showToast({
+                style: Toast.Style.Success,
+                title: "Conversation cleared",
+              });
             }}
           />
           {conversation.length > 0 && (
             <Action.CopyToClipboard
               title="Copy Conversation"
-              content={conversation.map((e) => `${e.role === "user" ? "You" : "OpenClaw"}: ${e.content}`).join("\n\n")}
+              content={conversation
+                .map(
+                  (e) =>
+                    `${e.role === "user" ? "You" : "OpenClaw"}: ${e.content}`,
+                )
+                .join("\n\n")}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           )}

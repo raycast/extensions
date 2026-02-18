@@ -106,11 +106,11 @@ export async function chatCompletion(messages: ChatMessage[]): Promise<string> {
       const { authToken } = getConfig();
       if (!authToken) {
         throw new Error(
-          "OpenClaw Gateway returned 405 (Method Not Allowed). This usually means authentication is required. Please set your Auth Token in the extension preferences."
+          "OpenClaw Gateway returned 405 (Method Not Allowed). This usually means authentication is required. Please set your Auth Token in the extension preferences.",
         );
       }
       throw new Error(
-        "OpenClaw Gateway returned 405 (Method Not Allowed). Your auth token may be invalid. Please check your Auth Token in the extension preferences."
+        "OpenClaw Gateway returned 405 (Method Not Allowed). Your auth token may be invalid. Please check your Auth Token in the extension preferences.",
       );
     }
     throw new Error(`OpenClaw Gateway error (${response.status}): ${text}`);
@@ -154,11 +154,11 @@ export async function chatCompletionStream(
       const { authToken } = getConfig();
       if (!authToken) {
         throw new Error(
-          "OpenClaw Gateway returned 405 (Method Not Allowed). This usually means authentication is required. Please set your Auth Token in the extension preferences."
+          "OpenClaw Gateway returned 405 (Method Not Allowed). This usually means authentication is required. Please set your Auth Token in the extension preferences.",
         );
       }
       throw new Error(
-        "OpenClaw Gateway returned 405 (Method Not Allowed). Your auth token may be invalid. Please check your Auth Token in the extension preferences."
+        "OpenClaw Gateway returned 405 (Method Not Allowed). Your auth token may be invalid. Please check your Auth Token in the extension preferences.",
       );
     }
     throw new Error(`OpenClaw Gateway error (${response.status}): ${text}`);
@@ -173,9 +173,12 @@ export async function chatCompletionStream(
   let buffer = "";
 
   try {
-    while (true) {
-      const { done, value } = await reader.read();
+    let done = false;
+    while (!done) {
+      const result = await reader.read();
+      done = result.done;
       if (done) break;
+      const value = result.value;
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
