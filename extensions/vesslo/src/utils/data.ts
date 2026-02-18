@@ -58,6 +58,9 @@ export function loadVessloData(): VessloData | null {
         sources: Array.isArray(app.sources) ? app.sources : [],
         appStoreId: app.appStoreId ?? null,
         homebrewCask: app.homebrewCask ?? null,
+        isDeleted: app.isDeleted ?? false,
+        isSkipped: app.isSkipped ?? false,
+        isIgnored: app.isIgnored ?? false,
       }));
 
     return {
@@ -68,26 +71,5 @@ export function loadVessloData(): VessloData | null {
   } catch (error) {
     console.error("Failed to load Vesslo data:", error);
     return null;
-  }
-}
-
-/**
- * Check if Vesslo data is fresh (within 24 hours)
- */
-export function isVessloDataFresh(): boolean {
-  try {
-    if (!existsSync(DATA_PATH)) {
-      return false;
-    }
-    const data = loadVessloData();
-    if (!data) return false;
-
-    const exportedAt = new Date(data.exportedAt);
-    const now = new Date();
-    const hoursDiff = (now.getTime() - exportedAt.getTime()) / (1000 * 60 * 60);
-
-    return hoursDiff < 24;
-  } catch {
-    return false;
   }
 }

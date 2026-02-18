@@ -229,10 +229,10 @@
 /extensions/brawlstars                                              @MaximeGuiliani
 /extensions/brew                                                    @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare @ashokbaruaakas @MillerApps @pernielsentikaer @jfkisafk @vpukhanov @j3lte @alexander-cato @ViGeng @ridemountainpig @chrismessina
 /extensions/brew-services                                           @erics118
-/extensions/brightness-control                                      @CaliCastle
+/extensions/brightness-control                                      @CaliCastle @pavzagor
 /extensions/bring                                                   @amuelli @maximilianzuern @xilopaint
 /extensions/browser-ai                                              @aeither
-/extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311 @daniel-nagy @gewoonseba @ridemountainpig @0xdhrv
+/extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311 @daniel-nagy @gewoonseba @ridemountainpig @sayuthisobri @0xdhrv @pernielsentikaer
 /extensions/browser-history                                         @crisboarna @TKDKid1000 @MikuGeek @ridemountainpig
 /extensions/browser-tabs                                            @koinzhang @ridemountainpig
 /extensions/browsers-profiles                                       @skydiver @kytta @emilshr @chingweih @nilleb
@@ -245,6 +245,7 @@
 /extensions/bunch                                                   @koinzhang
 /extensions/bundesliga                                              @anhthang
 /extensions/bundlephobia-search                                     @PeraSite @rushelex
+/extensions/bunq                                                    @TurboCoder13
 /extensions/cache-control-builder                                   @rkusa
 /extensions/cacher                                                  @jookyboi
 /extensions/cal-com-share-meeting-links                             @eluce2 @peduarte @pernielsentikaer @AlexIsMaking @jfkisafk @runofthemillgeek
@@ -490,6 +491,7 @@
 /extensions/dawa                                                    @SimonJ @pernielsentikaer
 /extensions/day-one                                                 @AntonNiklasson @bestemic
 /extensions/days-until-christmas                                    @MEGApixel23 @erics118 @jacpd @pernielsentikaer
+/extensions/db-schema-explorer                                      @SciSaif
 /extensions/dbt-documentation                                       @b-per
 /extensions/dbtCloud                                                @zsombor-flds
 /extensions/debank                                                  @Yukaii
@@ -554,6 +556,7 @@
 /extensions/django-docs                                             @JensAstrup
 /extensions/djangopackages                                          @saadmk11
 /extensions/dlmoji                                                  @Hydrapse
+/extensions/dns-lookup                                              @valent1d
 /extensions/do-not-disturb                                          @Yakitrak @quanru @mikikiv @LitoMore
 /extensions/doccheck                                                @justspacedog @h16nning
 /extensions/dock                                                    @pradeepb28 @xmok
@@ -703,7 +706,7 @@
 /extensions/figma-link-cleaner                                      @iamshubhransh
 /extensions/figma-variables                                         @Mart1M
 /extensions/filamentphp-doc-seach                                   @aurawindsurfing
-/extensions/file-info                                               @Envl
+/extensions/file-info                                               @Envl @SandeepBaskaran
 /extensions/file-manager                                            @erics118 @BalliAsghar @urwrstkn8mare @fengtianze @pernielsentikaer @ridemountainpig
 /extensions/file-organizer                                          @aaronlinv
 /extensions/file-tree-generator                                     @noidwasavailable
@@ -792,6 +795,7 @@
 /extensions/geohash-encode-decode                                   @alrico88
 /extensions/geoping                                                 @Chiroyce1
 /extensions/gerrit-code-review                                      @vkhitrin
+/extensions/get-app-icon                                            @chrismessina
 /extensions/get-cat-images                                          @luiggircardoso
 /extensions/get-direct-link                                         @trungnghiatn
 /extensions/get-favicon                                             @vimtor @robotdestroy @LeonChenWenJia @ViGeng @ridemountainpig
@@ -2180,6 +2184,7 @@
 /extensions/stagehand                                               @tamag0tcha
 /extensions/standing-desk-tracker                                   @pgyogesh
 /extensions/stardew-valley-wiki                                     @mistah-robot @mistah-robot
+/extensions/starling                                                @lemikeone
 /extensions/stashit                                                 @pmzi
 /extensions/stashpad-docs                                           @tsmarin
 /extensions/statamic-docs                                           @andrebreia @duncanmcclean
@@ -2204,11 +2209,13 @@
 /extensions/string-formatter                                        @fireice009
 /extensions/stripe                                                  @pradeepb28 @farisaziz12 @bradgarropy @remorses @pernielsentikaer
 /extensions/sublime                                                 @phgn0
+/extensions/subnoto                                                 @Mikescops
 /extensions/substack                                                @j3lte
 /extensions/subwatch                                                @nirgn975
 /extensions/summarize-youtube-video-with-ai                         @iKasch @bl1nk @mateusbadalotti
 /extensions/summation                                               @supermamon
 /extensions/sun-moon-times                                          @DannySeidel
+/extensions/supabase                                                @keito4
 /extensions/supabase-cron-monitor                                   @duhman
 /extensions/supabase-docs                                           @Isaiah-Hamilton @xmok
 /extensions/supahabits                                              @gon250

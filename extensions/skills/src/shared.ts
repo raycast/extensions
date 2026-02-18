@@ -13,8 +13,19 @@ export type SearchResponse = {
   count: number;
 };
 
+export type InstalledSkill = {
+  name: string;
+  path: string;
+  agents: string[];
+  agentCount: number;
+};
+
 export const API_BASE_URL = "https://skills.sh/api";
-export const REPO_URL = "https://github.com/raycast/extensions";
+const REPO_URL = "https://github.com/raycast/extensions";
+
+export function removeFrontmatter(content: string): string {
+  return content.replace(/^---\s*\n[\s\S]*?\n---\s*\n/, "");
+}
 
 export function formatInstalls(count: number): string {
   if (count >= 1_000_000_000) {

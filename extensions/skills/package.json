@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "skills",
   "title": "Skills",
-  "description": "Browse and search AI agent skills from Skills",
+  "description": "Browse, search, and manage AI agent skills from Skills",
   "icon": "icon.png",
   "author": "keito4",
   "contributors": [
@@ -24,6 +24,12 @@
       "name": "trending-skills",
       "title": "Trending Skills",
       "description": "Browse trending skills",
+      "mode": "view"
+    },
+    {
+      "name": "manage-skills",
+      "title": "Manage Skills",
+      "description": "View and remove installed skills",
       "mode": "view"
     }
   ],
