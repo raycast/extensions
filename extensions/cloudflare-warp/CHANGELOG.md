@@ -1,6 +1,6 @@
 # Cloudflare WARP Changelog
 
-## [Add Toggle Connection Command] - {PR_MERGE_DATE}
+## [Add Toggle Connection Command] - 2026-02-18
 
 - Add "Toggle Connection" command
 - Remove "Connect" & "Disconnect" commands
