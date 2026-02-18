@@ -199,7 +199,13 @@ function Command() {
             <List.EmptyView
               icon={isAuthError ? Icon.Key : Icon.ExclamationMark}
               title={
-                isAuthError ? "Invalid API Key" : isRateLimitError ? "Rate Limit Exceeded" : "Failed to Load Meetings"
+                errorType === ErrorType.API_KEY_MISSING
+                  ? "API Key Required"
+                  : errorType === ErrorType.API_KEY_INVALID
+                    ? "Invalid API Key"
+                    : isRateLimitError
+                      ? "Rate Limit Exceeded"
+                      : "Failed to Load Meetings"
               }
               description={
                 isAuthError

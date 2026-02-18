@@ -15,7 +15,13 @@ function renderError(error: Error, onRefresh: () => void) {
   return (
     <List.EmptyView
       icon={isAuthError ? Icon.Key : Icon.ExclamationMark}
-      title={isAuthError ? "Invalid API Key" : "Failed to Load Team Members"}
+      title={
+        errorType === ErrorType.API_KEY_MISSING
+          ? "API Key Required"
+          : errorType === ErrorType.API_KEY_INVALID
+            ? "Invalid API Key"
+            : "Failed to Load Team Members"
+      }
       description={
         isAuthError ? "Please check your Fathom API Key in Extension Preferences." : getUserFriendlyError(error).message
       }
