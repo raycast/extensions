@@ -17,7 +17,6 @@
     "recall"
   ],
   "license": "MIT",
-  "type": "module",
   "commands": [
     {
       "name": "search-memories",
