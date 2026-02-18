@@ -501,6 +501,12 @@ export function useFetchSite(url?: string) {
 
         const contentSignals = robotsTxtContent ? parseContentSignals(robotsTxtContent) : undefined;
         const paymentSignals = detectPaymentSignals(status, headers);
+        log.log("parse:payment-signals", {
+          detected: paymentSignals?.detected ?? false,
+          statusCode402: paymentSignals?.statusCode402 ?? false,
+          paymentRequired: paymentSignals?.paymentRequired ?? false,
+          paymentResponse: paymentSignals?.paymentResponse ?? false,
+        });
 
         const discoverability: DiscoverabilityData = {
           robots: $('meta[name="robots"]').attr("content"),
