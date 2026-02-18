@@ -32,12 +32,8 @@ export function parseDocDetail(html: string, item: InventoryItem): DocDetail {
   signature = signature.replace(/\[source\]\s*$/i, "").trim();
   signature = signature.replace(/\s*=\s*<ufunc\s+'[^']*'>\s*$/i, "").trim();
 
-  if (signature && !signature.includes(item.name)) {
-    if (signature.startsWith(item.shortName)) {
-      signature = `${item.name}${signature.slice(item.shortName.length)}`;
-    } else if (!signature.includes(item.shortName)) {
-      signature = `${item.name} ${signature}`.trim();
-    }
+  if (signature && !signature.includes(item.shortName)) {
+    signature = `${item.shortName} ${signature}`.trim();
   }
 
   let detailNode = target.next("dd");

@@ -29,9 +29,9 @@
       "name": "useShortPrefix",
       "type": "checkbox",
       "required": false,
-      "title": "Use Short Prefix",
-      "label": "Display 'pd.' instead of 'pandas.'",
-      "description": "Show Pandas symbols with 'pd.' prefix (e.g., 'pd.DataFrame') instead of 'pandas.' prefix (e.g., 'pandas.DataFrame').",
+      "title": "Use Common Aliases",
+      "label": "Use pd, df, s, and arr aliases",
+      "description": "Use common aliases in displayed symbols (for example, pandas->pd, DataFrame->df, Series->s, array(s)->arr).",
       "default": true
     },
     {
