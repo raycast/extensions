@@ -5,6 +5,13 @@
   "description": "Play simple and fun ASCII games in Raycast!",
   "icon": "raycast-arcade.png",
   "author": "EvanZhouDev",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "alexi.build"
+  ],
   "categories": [
     "Fun"
   ],
