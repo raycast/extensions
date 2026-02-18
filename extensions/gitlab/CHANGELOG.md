@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Bugfix merge requests] - {PR_MERGE_DATE}
+
+- Update merge request list to show approvals properly
+
 ## [Optimize Windows Experience] - 2025-12-05
 
 - Better milestones view
