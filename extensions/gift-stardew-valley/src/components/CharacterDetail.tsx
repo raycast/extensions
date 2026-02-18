@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { List, Color } from "@raycast/api";
 
 type CharacterProps = {
   character: Character;
@@ -11,17 +11,24 @@ export default function CharacterDetail({ character }: CharacterProps) {
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Name" text={character.name} />
           <List.Item.Detail.Metadata.Label title="Birthday" text={character.birthday} />
-          {character.loves.length && (
+
+          {character.loves.length > 0 && (
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Loves">
                 {character.loves.map((gift, index) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={index} icon={{ source: gift.image }} text={gift.name} />
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={index}
+                    icon={{ source: gift.image }}
+                    text={gift.name}
+                    color={Color.Orange}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             </>
           )}
-          {character.likes.length && (
+
+          {character.likes.length > 0 && (
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Likes">
@@ -31,7 +38,8 @@ export default function CharacterDetail({ character }: CharacterProps) {
               </List.Item.Detail.Metadata.TagList>
             </>
           )}
-          {character.dislikes.length && (
+
+          {character.dislikes.length > 0 && (
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Dislikes">
@@ -41,7 +49,8 @@ export default function CharacterDetail({ character }: CharacterProps) {
               </List.Item.Detail.Metadata.TagList>
             </>
           )}
-          {character.hates.length && (
+
+          {character.hates.length > 0 && (
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Hates">
@@ -53,6 +62,6 @@ export default function CharacterDetail({ character }: CharacterProps) {
           )}
         </List.Item.Detail.Metadata>
       }
-    ></List.Item.Detail>
+    />
   );
 }
