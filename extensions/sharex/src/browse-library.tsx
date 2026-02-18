@@ -193,7 +193,7 @@ export default function Command() {
                   ? { source: Icon.PlayFilled }
                   : /\.tiff?$/i.test(screenshot.path)
                     ? { source: Icon.Image }
-                    : { source: screenshot.path }
+                    : { source: `file://${screenshot.path}` }
               }
               title={screenshot.name}
               actions={
