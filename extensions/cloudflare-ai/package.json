@@ -12,6 +12,10 @@
     "macOS",
     "Windows"
   ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
