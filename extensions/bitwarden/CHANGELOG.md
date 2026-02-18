@@ -1,5 +1,11 @@
 # Bitwarden Changelog
 
+## [Fix & Improvements] - {PR_MERGE_DATE}
+
+- Refactor password and passphrase option types with passphrase discriminant
+- Add runtime option key validation for password generation arguments
+- Fix CLI extraction to check data.json exists before unlinking
+
 ## [Fix Password Generation] - 2026-02-18
 
 - Fix password generation failing due to false boolean options
