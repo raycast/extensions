@@ -454,10 +454,11 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "publish": "npm run test && npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "jest --verbose",
-    "test:watch": "jest --watch",
+    "test": "jest --verbose --detectOpenHandles",
+    "test:watch": "jest --watch --detectOpenHandles",
     "tsc:watch": "tsc --noEmit --watch"
   }
 }
