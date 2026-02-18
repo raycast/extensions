@@ -28,7 +28,7 @@ function parseJsonl<T>(content: string): T[] {
 
 export async function loadHistoryEntries(): Promise<HistoryEntry[]> {
   try {
-    const content = await readFile(HISTORY_PATH, "utf-8");
+    const content = await safeReadFile(HISTORY_PATH, MAX_READ_BYTES);
     return parseJsonl<HistoryEntry>(content);
   } catch {
     return [];
@@ -75,27 +75,38 @@ function getSessionPath(session: Session): string {
   return join(PROJECTS_DIR, encoded, `${session.id}.jsonl`);
 }
 
+async function readLineAligned(
+  fd: Awaited<ReturnType<typeof open>>,
+  offset: number,
+  bytes: number,
+  direction: "head" | "tail",
+): Promise<string> {
+  // Read extra 64 bytes to avoid splitting a multi-byte UTF-8 char mid-sequence
+  const extra = 64;
+  const buf = Buffer.alloc(bytes + extra);
+  const { bytesRead } = await fd.read(buf, 0, bytes + extra, offset);
+  const str = buf.subarray(0, bytesRead).toString("utf-8");
+
+  if (direction === "head") {
+    // Trim to last complete line
+    const end = str.lastIndexOf("\n");
+    return end > 0 ? str.slice(0, end) : str;
+  }
+  // Trim to first complete line (skip partial leading line)
+  const start = str.indexOf("\n");
+  return start >= 0 ? str.slice(start + 1) : str;
+}
+
 async function safeReadFile(path: string, maxBytes: number): Promise<string> {
   const s = await stat(path);
   if (s.size <= maxBytes) {
     return readFile(path, "utf-8");
   }
-  // Read head + tail to get first and last messages
   const half = Math.floor(maxBytes / 2);
   const fd = await open(path, "r");
   try {
-    const headBuf = Buffer.alloc(half);
-    const tailBuf = Buffer.alloc(half);
-    await fd.read(headBuf, 0, half, 0);
-    await fd.read(tailBuf, 0, half, s.size - half);
-
-    const headStr = headBuf.toString("utf-8");
-    const headEnd = headStr.lastIndexOf("\n");
-    const tailStr = tailBuf.toString("utf-8");
-    const tailStart = tailStr.indexOf("\n");
-
-    const head = headEnd > 0 ? headStr.slice(0, headEnd) : headStr;
-    const tail = tailStart >= 0 ? tailStr.slice(tailStart + 1) : tailStr;
+    const head = await readLineAligned(fd, 0, half, "head");
+    const tail = await readLineAligned(fd, s.size - half, half, "tail");
     return head + "\n" + tail;
   } finally {
     await fd.close();
