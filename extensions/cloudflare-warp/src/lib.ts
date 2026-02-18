@@ -5,7 +5,7 @@ import { ConnectionStatus, StatusResult, VirtualNetwork, VNetResult } from "./ty
 
 const execPromise = promisify(exec);
 
-const { wrapCliPath } = getPreferenceValues<{ wrapCliPath: string }>();
+const { wrapCliPath } = getPreferenceValues<Preferences>();
 const DEFAULT_WRAP_CLI_PATH = "/Applications/Cloudflare WARP.app/Contents/Resources/warp-cli";
 const wrapCliCmd = wrapCliPath ?? DEFAULT_WRAP_CLI_PATH;
 
@@ -60,12 +60,14 @@ export async function getMDMProfiles(): Promise<{ available: string[]; active: s
 
 async function runCommandWithReconnect(command: string, errorMessage: string): Promise<boolean> {
   try {
-    await toggleWarpConnection("disconnect");
+    const disconnected = await toggleWarpConnection("disconnect");
+    if (!disconnected) throw new Error("Failed to disconnect");
 
     const { status } = await execCommand<{ status: string }>(command);
     if (status !== "Success") throw new Error(errorMessage);
 
-    await toggleWarpConnection("connect");
+    const connected = await toggleWarpConnection("connect");
+    if (!connected) throw new Error("Failed to reconnect");
 
     return true;
   } catch (error) {
