@@ -1,5 +1,7 @@
 # Raycast Arcade Changelog
 
+## Add Windows Support - {PR_MERGE_DATE}
+
 ## [Snake and 2048 Update] - 2023-08-13
 
 ✨ It's update time! Get ready for new features, new games, fixes, and more...
