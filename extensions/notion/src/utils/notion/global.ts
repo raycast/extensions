@@ -34,8 +34,22 @@ export function pageMapper(notionPage: NotionObject): Page {
     created_by:
       "created_by" in notionPage && notionPage.created_by.object === "user" ? notionPage.created_by.id : undefined,
     parent_page_id: "parent" in notionPage && "page_id" in notionPage.parent ? notionPage.parent.page_id : undefined,
+    parent_data_source_id:
+      "parent" in notionPage && notionPage.parent
+        ? "data_source_id" in notionPage.parent && typeof notionPage.parent.data_source_id === "string"
+          ? notionPage.parent.data_source_id
+          : "database_id" in notionPage.parent && typeof notionPage.parent.database_id === "string"
+            ? notionPage.parent.database_id
+            : undefined
+        : undefined,
     parent_database_id:
-      "parent" in notionPage && "database_id" in notionPage.parent ? notionPage.parent.database_id : undefined,
+      "parent" in notionPage && notionPage.parent
+        ? "database_id" in notionPage.parent && typeof notionPage.parent.database_id === "string"
+          ? notionPage.parent.database_id
+          : "data_source_id" in notionPage.parent && typeof notionPage.parent.data_source_id === "string"
+            ? notionPage.parent.data_source_id
+            : undefined
+        : undefined,
     last_edited_time: "last_edited_time" in notionPage ? new Date(notionPage.last_edited_time).getTime() : undefined,
     last_edited_user:
       "last_edited_by" in notionPage && notionPage.last_edited_by.object === "user"

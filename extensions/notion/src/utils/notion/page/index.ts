@@ -180,6 +180,7 @@ export interface Page {
   object: "page" | "database";
   id: string;
   parent_page_id?: string;
+  parent_data_source_id?: string;
   parent_database_id?: string;
   created_by?: string;
   last_edited_time?: number;

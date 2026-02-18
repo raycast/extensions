@@ -3,7 +3,10 @@ import { withAccessToken } from "@raycast/utils";
 import { search, Page } from "../utils/notion";
 import { notionService } from "../utils/notion/oauth";
 
-type cleanedPage = Pick<Page, "id" | "title" | "url" | "parent_database_id" | "parent_page_id">;
+type cleanedPage = Pick<
+  Page,
+  "id" | "title" | "url" | "parent_data_source_id" | "parent_database_id" | "parent_page_id"
+>;
 
 type Input = {
   /** The title of the page to search for. Only use plain text: it doesn't support any operators */
@@ -23,7 +26,8 @@ export default withAccessToken(notionService)(async ({ searchText }: Input) => {
         id: page.id,
         title: page.title,
         url: page.url,
-        parent_database_id: page.parent_database_id,
+        parent_data_source_id: page.parent_data_source_id ?? page.parent_database_id,
+        parent_database_id: page.parent_database_id ?? page.parent_data_source_id,
         parent_page_id: page.parent_page_id,
       })),
     );

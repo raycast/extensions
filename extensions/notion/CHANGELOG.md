@@ -3,6 +3,7 @@
 ## [Fix "Create Database Page" fails due to missing Data Source handling] - {PR_MERGE_DATE}
 
 - Fix "Create Database Page" command failing after the latest upgrade of "@notionhq/client".
+- Fix page parent mapping compatibility when Notion returns `parent.data_source_id`, with fallback support for `parent.database_id`.
 
 ## [Fix deep linking to Notion pages] - 2026-02-12
 

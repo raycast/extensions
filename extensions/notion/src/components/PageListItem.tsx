@@ -98,6 +98,7 @@ export function PageListItem({
     databaseProperties?.filter((dp: DatabaseProperty) => databaseView?.properties?.[dp.id]).map((dp) => dp.id) || [];
 
   const title = page.title ? page.title : "Untitled";
+  const parentDataSourceId = page.parent_data_source_id ?? page.parent_database_id;
 
   const OpenInRaycastAction =
     page.object == "page" ? (
@@ -229,14 +230,14 @@ export function PageListItem({
 
           {databaseProperties && setDatabaseView ? (
             <ActionPanel.Section title="View options">
-              {page.parent_database_id ? (
+              {parentDataSourceId ? (
                 <Action.Push
                   title="Set View Type"
                   icon={databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png"}
                   shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "v" }}
                   target={
                     <DatabaseViewForm
-                      databaseId={page.parent_database_id}
+                      databaseId={parentDataSourceId}
                       databaseView={databaseView}
                       setDatabaseView={setDatabaseView}
                     />
