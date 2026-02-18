@@ -1,6 +1,6 @@
 # Speech to Text Changelog
 
-## [Add Ukrainian Language] - {PR_MERGE_DATE}
+## [Add Ukrainian Language] - 2026-02-18
 
 - Added Ukrainian language option to the language dropdown
 
