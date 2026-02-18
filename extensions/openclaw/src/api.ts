@@ -1,12 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  gatewayUrl: string;
-  authToken?: string;
-  agentId?: string;
-  model?: string;
-}
-
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
