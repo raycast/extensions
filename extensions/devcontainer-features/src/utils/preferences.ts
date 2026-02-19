@@ -2,15 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { setCacheTtl } from "../api/cache";
 
 /**
- * Extension preferences
- */
-export interface Preferences {
-  githubToken?: string;
-  cacheTtlHours: string;
-  concurrency: string;
-}
-
-/**
  * Get all preferences
  */
 export function getPreferences(): Preferences {

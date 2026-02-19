@@ -5,10 +5,6 @@ import {
   type AppError,
 } from "../utils/errors";
 
-interface Preferences {
-  githubToken?: string;
-}
-
 interface RateLimitInfo {
   remaining: number;
   limit: number;
