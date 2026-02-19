@@ -2,10 +2,8 @@
 
 ## [Added Temperature Monitoring] - {PR_MERGE_DATE}
 
-- Added CPU temperature monitoring via IOKit thermal sensors
-- Temperature section in list view with die sensor breakdown, chip info, and severity status
+- Added temperature view under CPU section
 - CPU temperature displayed in menu bar dropdown
-- Temperature option in Default Tab preference
 
 ## [New Additions & Chore] - 2026-02-02
 - Added customisable tags for menubar entries

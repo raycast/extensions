@@ -64,8 +64,8 @@
           "type": "textfield",
           "required": false,
           "title": "Network Formatting",
-          "placeholder": "\u2193 <DOWN>/s \u2191 <UP>/s",
-          "default": "\u2193 <DOWN>/s \u2191 <UP>/s"
+          "placeholder": "↓ <DOWN>/s ↑ <UP>/s",
+          "default": "↓ <DOWN>/s ↑ <UP>/s"
         },
         {
           "name": "diskMenubarFormat",
