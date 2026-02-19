@@ -117,11 +117,15 @@ export async function runWithTools(
       continue;
     }
 
-    // Model returned a final response (not tool calls)
+    // Model returned a final text response (not tool calls) — fall through
+    // to the streaming request below. This also handles the case where all
+    // maxRounds are exhausted: the accumulated tool results in `messages`
+    // are sent back to the model without the `tools` parameter, prompting
+    // it to produce a final text answer instead of requesting more tools.
     break;
   }
 
-  // Send final request as streaming (no tools — model has already decided)
+  // Stream the final response (without tools, so the model generates text)
   const stream = await sendChatStream(config, { ...request, messages });
   return { stream, toolMessages };
 }

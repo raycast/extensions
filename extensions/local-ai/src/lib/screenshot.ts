@@ -91,7 +91,7 @@ export async function readClipboardImage(): Promise<string | null> {
         "-e",
         "set imgData to the clipboard as \u00ABclass PNGf\u00BB",
         "-e",
-        `set filePath to POSIX file "${imagePath}"`,
+        `set filePath to POSIX file "${imagePath.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`,
         "-e",
         "set fileRef to open for access filePath with write permission",
         "-e",

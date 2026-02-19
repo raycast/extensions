@@ -325,6 +325,10 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
   // Web search state
   const [isSearching, setIsSearching] = useState(false);
 
+  // Ref to latest messages state — avoids stale closures in handleSendMessage
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
   // Auto-send image from launch context (screenshot commands)
   const autoSendImageRef = useRef<string | null>(null);
 
@@ -462,7 +466,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
         content: text || (hasImages ? "What's in this image?" : ""),
         images: hasImages ? images : undefined,
       };
-      const updatedMessages = [...messages, userMessage];
+      const updatedMessages = [...messagesRef.current, userMessage];
       setMessages(updatedMessages);
       setIsLoading(true);
       setCurrentResponse("");
@@ -631,7 +635,6 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
     },
     [
       config,
-      messages,
       currentModel,
       isLoading,
       conversationId,

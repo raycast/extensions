@@ -94,7 +94,7 @@ const SEARCH_TRIGGERS = [
   // Temporal / current events
   /\b(latest|current|recent|today|yesterday|this week|this month|this year|right now)\b/i,
   /\b(news|headline|update|announcement)\b/i,
-  /\b202[4-9]\b/, // Year references
+  /\b20[2-3]\d\b/, // Year references (2020s-2030s)
   // Factual lookups
   /\b(price of|cost of|weather in|weather for|stock price|exchange rate)\b/i,
   /\b(who is|who was|who are|what is|what are|what was|when did|when was|when is|where is|where was)\b/i,
