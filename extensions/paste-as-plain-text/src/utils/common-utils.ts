@@ -43,7 +43,7 @@ export const tryStrip = (str: string): string => {
   if (!cleanLineBreaks) {
     return str;
   }
-  return str.replace(/[\r\n]/gm, " ");
+  return str.replace(/[ \t]*[\r\n]+[ \t]*/gm, " ");
 };
 
 export const transform = (str: string | undefined | null): string => {
