@@ -1,5 +1,7 @@
 # Proton Pass Client Changelog
 
+## [Fix & Improvements] - {PR_MERGE_DATE}
+
 ## [Initial Version] - 2026-02-19
 
 - Browse Proton Pass vaults and items from Raycast
