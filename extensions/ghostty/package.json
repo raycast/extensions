@@ -42,7 +42,8 @@
       "description": "Open Ghostty with a specific configuration",
       "mode": "view"
     },
-    { "name": "open-with-ghostty",
+    {
+      "name": "open-with-ghostty",
       "title": "Open with Ghostty",
       "description": "Open the currently selected Finder item with Ghostty",
       "mode": "no-view"
