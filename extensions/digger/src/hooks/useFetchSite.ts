@@ -150,8 +150,9 @@ function parseContentSignals(robotsTxtContent: string): ContentSignalsData | und
     }
   }
 
+  const hasRecognized = result.search !== undefined || result.aiInput !== undefined || result.aiTrain !== undefined;
+  if (!hasRecognized) return undefined;
   result.raw = rawParts.length > 0 ? rawParts.join(", ") : undefined;
-  if (Object.keys(result).filter((k) => k !== "raw").length === 0 && !result.raw) return undefined;
   return result;
 }
 

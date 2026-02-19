@@ -1,6 +1,5 @@
 import { List, Icon, Color } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
-import { getFavicon } from "../utils/favicon";
+import { getFavicon, getProgressIcon } from "@raycast/utils";
 import { DiggerResult } from "../types";
 import { Actions } from "../actions";
 import { formatBytes, getStatusText } from "../utils/formatters";
