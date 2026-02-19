@@ -2,6 +2,8 @@
 
 ## [Fix & Improvements] - {PR_MERGE_DATE}
 
+- Fixed RangeError for large vaults by increasing buffer size to 50MB
+
 ## [Initial Version] - 2026-02-19
 
 - Browse Proton Pass vaults and items from Raycast
