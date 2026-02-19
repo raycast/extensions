@@ -1,0 +1,37 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "network-speed-monitor",
+  "title": "Network Speed Monitor",
+  "description": "Display real-time network speed in the menu bar",
+  "categories": ["System"],
+  "icon": "icon.png",
+  "author": "sahil_gulihar",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "network-speed",
+      "title": "Network Speed",
+      "description": "Show network speed in menu bar",
+      "mode": "menu-bar",
+      "interval": "1s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
