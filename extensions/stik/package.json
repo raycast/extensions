@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stik",
+  "title": "Stik",
+  "description": "Quick capture and browse your Stik notes. Create, search, organize, and manage markdown notes stored locally on your machine.",
+  "icon": "command-icon.png",
+  "author": "0xMassi",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "keywords": ["notes", "markdown", "capture", "stik", "quick notes", "knowledge base"],
+  "preferences": [
+    {
+      "name": "notesDirectory",
+      "title": "Notes Directory",
+      "description": "Path to your Stik notes folder",
+      "type": "textfield",
+      "default": "~/Documents/Stik/",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Create a new note and save it to a folder",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Full-text search across all your Stik notes",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "browse-notes",
+      "title": "Browse Notes",
+      "description": "Browse all notes organized by folder",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "open-recent",
+      "title": "Open Recent",
+      "description": "Quickly access your 10 most recently modified notes",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
