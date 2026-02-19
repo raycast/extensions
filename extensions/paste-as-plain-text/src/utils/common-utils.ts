@@ -37,7 +37,7 @@ export const tryTrim = (str: string | undefined): string => {
 };
 
 /**
- * strips all newline characters from the string and replaces them witha space.
+ * strips all newline characters from the string and replaces them with a space.
  */
 export const tryStrip = (str: string): string => {
   if (!cleanLineBreaks) {
