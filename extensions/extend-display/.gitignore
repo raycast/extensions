@@ -9,3 +9,4 @@ test-*.applescript
 debug-*.scpt
 test-*.ts
 AUDIO_*.md
+FINDINGS.md
