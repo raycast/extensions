@@ -16,16 +16,17 @@ Copy a file in Finder or an image from anywhere, run the command, get the hash. 
 filename.jpg 1920x1080 16:9 LKO2?U%2Tw=w]~RBVZRi...
 ```
 
-## Install
+## Features
+
+- Reads images and videos from clipboard, Finder copy, or Finder selection
+- Falls back to a native file picker or Clipboard History
+- Shows a decoded blurhash preview alongside file metadata
+- Supports JPEG, PNG, GIF, BMP, WebP, TIFF, HEIC, AVIF, MP4, MOV, MKV, and more
+
+## Requirements
+
+Requires [ffmpeg](https://formulae.brew.sh/formula/ffmpeg):
 
 ```
-git clone https://github.com/freaktion-craft/blurhash-raycast.git
-cd blurhash-raycast
-npm install && npm run dev
+brew install ffmpeg
 ```
-
-Requires [ffmpeg](https://formulae.brew.sh/formula/ffmpeg): `brew install ffmpeg`
-
-## License
-
-MIT
