@@ -5,7 +5,7 @@
 ### Merged Sound Control features
 - Volume control: see current volume level for each device in the list
 - Toggle Mute action (Cmd+M) directly from the device list
-- New standalone commands: Toggle Mute, Set Volume, Set Input Volume
+- New standalone commands: Set Output Volume, Set Input Volume
 - Full input volume and mute support via integrated sound-control binary
 
 ### Pinned Volume Levels
@@ -13,15 +13,16 @@
 - "Pinned: X%" tag shown on devices with pinned volumes
 - Background enforcer automatically resets volume if macOS changes it
 
-### Simplified auto-switch UX (Option B)
+### Default device and priority ordering
 - Default (sticky) device: star any device as your default (Cmd+Shift+D)
-- Priority ordering: reorder devices with Cmd+Arrow keys directly in the main list
-- Background enforcer always active -- no separate toggle commands
+- Default device is always pinned to the top of the list
+- Priority ordering: reorder devices with Ctrl+Opt+Arrow keys in the device list
+- Always-on background enforcement every 20s -- no manual toggle needed
 - If default device is connected, always use it; otherwise fall back to priority order
 - Removed separate "Toggle Auto Switch" and "Customize Order" commands
 
 ### New icons
-- All device icons replaced with clean 512x512 Lucide/Iconify monoline icons
+- All device icons replaced with clean 512x512 monoline icons
 - New headphones icon for wired headphones
 - Icons work properly with Raycast's tint system
 
