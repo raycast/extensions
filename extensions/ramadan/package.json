@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ramadan",
+  "title": "Ramadan",
+  "description": "Ramadan schedule, Suhoor & Iftar times based on your location",
+  "icon": "extension-icon.png",
+  "author": "iamrayyaann",
+  "categories": ["Productivity"],
+  "platforms": ["macOS", "Windows"],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "suhoor",
+      "title": "Suhoor Time",
+      "subtitle": "Ramadan",
+      "description": "Today's Suhoor time",
+      "mode": "view",
+      "icon": "suhoor-icon.png"
+    },
+    {
+      "name": "iftar",
+      "title": "Iftar Time",
+      "subtitle": "Ramadan",
+      "description": "Today's Iftar time",
+      "mode": "view",
+      "icon": "iftar-icon.png"
+    },
+    {
+      "name": "calendar",
+      "title": "Ramadan Schedule",
+      "subtitle": "Ramadan",
+      "description": "Full Ramadan schedule",
+      "mode": "view",
+      "icon": "schedule-icon.png"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Countdown",
+      "subtitle": "Ramadan",
+      "description": "Fasting countdown in menu bar",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "icon": "menubar-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "city",
+      "title": "City",
+      "description": "Your city name",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "e.g. London, Dubai, New York"
+    },
+    {
+      "name": "country",
+      "title": "Country",
+      "description": "Your country name",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "e.g. UK, UAE, US"
+    },
+    {
+      "name": "method",
+      "title": "Calculation Method",
+      "description": "Prayer time calculation method",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        { "title": "Islamic Society of North America (ISNA)", "value": "2" },
+        { "title": "Muslim World League (MWL)", "value": "3" },
+        { "title": "Egyptian General Authority", "value": "5" },
+        { "title": "Umm Al-Qura University, Makkah", "value": "4" },
+        { "title": "University of Islamic Sciences, Karachi", "value": "1" },
+        { "title": "Institute of Geophysics, University of Tehran", "value": "7" },
+        { "title": "Gulf Region", "value": "8" },
+        { "title": "Kuwait", "value": "9" },
+        { "title": "Qatar", "value": "10" },
+        { "title": "Singapore", "value": "11" },
+        { "title": "Turkey (Diyanet)", "value": "13" },
+        { "title": "Dubai", "value": "14" },
+        { "title": "Moonsighting Committee", "value": "15" }
+      ]
+    },
+    {
+      "name": "hijriDateOffset",
+      "title": "Hijri Date Offset (days)",
+      "description": "Adjust by +/- days to match local moon sighting",
+      "type": "textfield",
+      "required": false,
+      "default": "0",
+      "placeholder": "0"
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "description": "Time display format",
+      "type": "dropdown",
+      "required": false,
+      "default": "system",
+      "data": [
+        { "title": "System Default", "value": "system" },
+        { "title": "12-hour (AM/PM)", "value": "12hr" },
+        { "title": "24-hour", "value": "24hr" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.0",
+    "@types/node-fetch": "^2.6.13",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
