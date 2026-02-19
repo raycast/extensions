@@ -1,258 +1,214 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ticktick",
   "title": "TickTick",
-  "description": "Check and search tasks in TickTick via Raycast",
-  "icon": "tick-logo.png",
-  "author": "appest",
-  "contributors": [
-    "viduycheung",
-    "Alireza",
-    "yakitrak",
-    "ridemountainpig"
-  ],
-  "license": "MIT",
+  "description": "Manage your TickTick tasks, projects, and focus sessions from Raycast — fully cross-platform via the TickTick REST API",
+  "icon": "extension-icon.png",
+  "author": "daniel_lankry",
   "categories": [
     "Productivity"
   ],
+  "license": "MIT",
   "preferences": [
     {
-      "name": "defaultTitle",
-      "description": "Default title for new task.",
-      "defaultValue": "none",
-      "title": "Default Title",
-      "required": true,
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your TickTick API access token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultProject",
+      "title": "Default Project ID",
+      "description": "Default project for Quick Add Task. Use 'Copy Project ID' in the Projects command to find it. Leave empty for Inbox.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. 5f3a9c1b8e7d..."
+    },
+    {
+      "name": "pomodoroLength",
+      "title": "Focus Duration (min)",
+      "description": "Pomodoro focus session length",
       "type": "dropdown",
+      "required": false,
+      "default": "25",
       "data": [
         {
-          "title": "None",
-          "value": "none"
+          "title": "15 min",
+          "value": "15"
         },
         {
-          "title": "Clipboard",
-          "value": "clipboard"
+          "title": "25 min",
+          "value": "25"
         },
         {
-          "title": "Selection",
-          "value": "selection"
+          "title": "30 min",
+          "value": "30"
+        },
+        {
+          "title": "45 min",
+          "value": "45"
+        },
+        {
+          "title": "60 min",
+          "value": "60"
         }
       ]
     },
     {
-      "name": "defaultDate",
+      "name": "shortBreakLength",
+      "title": "Short Break (min)",
+      "description": "Short break duration between sessions",
       "type": "dropdown",
+      "required": false,
+      "default": "5",
       "data": [
         {
-          "title": "None",
-          "value": "none"
+          "title": "5 min",
+          "value": "5"
         },
         {
-          "title": "Today",
-          "value": "today"
-        },
-        {
-          "title": "Tomorrow",
-          "value": "tomorrow"
-        },
-        {
-          "title": "Day after Tomorrow",
-          "value": "dayAfterTomorrow"
-        },
-        {
-          "title": "Next Week",
-          "value": "nextWeek"
+          "title": "10 min",
+          "value": "10"
         }
-      ],
-      "default": "none",
+      ]
+    },
+    {
+      "name": "longBreakLength",
+      "title": "Long Break (min)",
+      "description": "Long break after 4 sessions",
+      "type": "dropdown",
       "required": false,
-      "title": "Default Date",
-      "description": "Default date for new task."
+      "default": "15",
+      "data": [
+        {
+          "title": "15 min",
+          "value": "15"
+        },
+        {
+          "title": "20 min",
+          "value": "20"
+        },
+        {
+          "title": "30 min",
+          "value": "30"
+        }
+      ]
     }
   ],
   "commands": [
     {
-      "name": "index",
-      "title": "Today",
+      "name": "today",
+      "title": "Today's Tasks",
       "subtitle": "TickTick",
-      "description": "Show today to-do tasks.",
-      "mode": "view"
+      "description": "View and manage today's tasks",
+      "mode": "view",
+      "icon": "command-today.png"
     },
     {
-      "name": "next7Days",
-      "title": "Next 7 Days",
+      "name": "search-tasks",
+      "title": "Search Tasks",
       "subtitle": "TickTick",
-      "description": "Show next 7 days to-do tasks.",
-      "mode": "view"
+      "description": "Search across all projects",
+      "mode": "view",
+      "icon": "command-search.png"
+    },
+    {
+      "name": "projects",
+      "title": "Projects",
+      "subtitle": "TickTick",
+      "description": "Browse all projects and their tasks",
+      "mode": "view",
+      "icon": "command-projects.png"
     },
     {
       "name": "inbox",
       "title": "Inbox",
       "subtitle": "TickTick",
-      "description": "Show Inbox to-do tasks.",
-      "mode": "view"
+      "description": "View tasks in your inbox",
+      "mode": "view",
+      "icon": "command-inbox.png"
     },
     {
-      "name": "search",
-      "title": "Search Tasks",
-      "subtitle": "TickTick",
-      "description": "Search tasks.",
-      "mode": "view"
-    },
-    {
-      "name": "create",
+      "name": "add-task",
       "title": "Add Task",
       "subtitle": "TickTick",
-      "description": "Add task in TickTick.",
+      "description": "Create a new task with full details",
       "mode": "view",
-      "preferences": [
+      "icon": "command-add.png"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "subtitle": "TickTick",
+      "description": "Quickly add a task from the command bar",
+      "mode": "no-view",
+      "icon": "command-quick-add.png",
+      "arguments": [
         {
-          "name": "autoFillEnabled",
-          "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
-          "type": "checkbox",
-          "defaultValue": false,
-          "label": "Auto Fill with AI",
+          "name": "title",
+          "placeholder": "Task title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "priority",
+          "placeholder": "Priority (none/low/med/high)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "project",
+          "placeholder": "Project name",
+          "type": "text",
           "required": false
         }
       ]
     },
     {
-      "name": "quickAdd",
-      "title": "Quick Add Task",
+      "name": "calendar",
+      "title": "Calendar",
       "subtitle": "TickTick",
-      "description": "Quick way to add task in TickTick.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "text",
-          "placeholder": "Title",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "description",
-          "placeholder": "Description",
-          "type": "text"
-        }
-      ]
-    }
-  ],
-  "tools": [
-    {
-      "name": "get-tasks",
-      "title": "Get Tasks",
-      "description": "Get tasks in smart list"
+      "description": "7-day agenda view with time slots and overdue tasks",
+      "mode": "view",
+      "icon": "command-calendar.png"
     },
     {
-      "name": "add-task",
-      "title": "Add Task",
-      "description": "Add task to TickTick"
+      "name": "focus-timer",
+      "title": "Focus Timer",
+      "subtitle": "TickTick",
+      "description": "Start a Pomodoro focus session",
+      "mode": "view",
+      "icon": "command-focus.png"
     },
     {
-      "name": "get-lists",
-      "title": "Get Lists",
-      "description": "Get Lists in TickTick"
+      "name": "menu-bar",
+      "title": "Menu Bar Tasks",
+      "subtitle": "TickTick",
+      "description": "Show today's tasks in the menu bar with quick complete",
+      "mode": "menu-bar",
+      "icon": "command-today.png",
+      "interval": "15m"
     }
   ],
-  "ai": {
-    "instructions": "",
-    "evals": [
-      {
-        "input": "@ticktick get tasks in today",
-        "mocks": {
-          "get-tasks": [
-            {
-              "id": "6821491f8e31d12726fb9992",
-              "title": "Buy oat milk",
-              "content": "",
-              "desc": "",
-              "priority": 3,
-              "projectId": "6821491f8e31d12726fb9993",
-              "kind": "TEXT",
-              "startDate": "2025-05-11T16:00:00+0000",
-              "dueDate": "",
-              "isAllDay": true,
-              "isFloating": false,
-              "timeZone": "Asia/Shanghai",
-              "items": [],
-              "tags": []
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-tasks",
-              "arguments": {
-                "smartProjectId": "today"
-              }
-            }
-          }
-        ]
-      },
-      {
-        "input": "@ticktick get tasks in next 7 days",
-        "mocks": {
-          "get-tasks": [
-            {
-              "id": "6821491f8e31d12726fb9992",
-              "title": "Buy oat milk",
-              "content": "",
-              "desc": "",
-              "priority": 3,
-              "projectId": "6821491f8e31d12726fb9993",
-              "kind": "TEXT",
-              "startDate": "2025-05-11T16:00:00+0000",
-              "dueDate": "",
-              "isAllDay": true,
-              "isFloating": false,
-              "timeZone": "Asia/Shanghai",
-              "items": [],
-              "tags": []
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-tasks",
-              "arguments": {
-                "smartProjectId": "next7Days"
-              }
-            }
-          }
-        ]
-      }
-    ]
-  },
   "dependencies": {
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.19.0",
-    "lodash": "^4.17.21",
-    "moment": "^2.29.1",
-    "moment-timezone": "^0.5.44",
-    "run-applescript": "^6.0.0",
-    "similarity": "^1.2.1"
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.14.194",
-    "@types/node": "~16.10.0",
-    "@types/react": "^18.2.46",
-    "@types/similarity": "^1.2.1",
-    "@types/sql.js": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-html": "^6.2.0",
-    "eslint-plugin-react-hooks": "^4.2.0",
-    "prettier": "^2.8.7",
-    "typescript": "^4.4.3"
+    "@types/node": "22.10.2",
+    "@types/react": "18.3.16",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

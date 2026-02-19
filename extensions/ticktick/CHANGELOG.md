@@ -1,73 +1,42 @@
 # TickTick Changelog
 
-## [Improve] - 2025-05-12
+## [1.1.0] - 2026-02-19
 
-- support AI Extension
+### Added
+- Task Detail view with full notes, checklist items, tags, and metadata
+- Move to Project action for quick task reassignment
+- Menu Bar Tasks command showing today's count with quick complete
+- Calendar 7-day agenda view with time slots and overdue section
+- Focus timer task linking — select a task to work on during a session
+- No Due Date section in Today's Tasks view
+- Relative date labels (Today, Tomorrow, in 3 days)
+- Smart date defaults when creating tasks from the calendar
+- Copy Project ID action in Projects command
+- All Day checkbox in task form for timed vs all-day tasks
+- Focus timer session progress tracking with recommended next session
+- Tag display in calendar agenda items
 
-## [Improve] - 2024-11-21
+### Fixed
+- Focus timer no longer auto-advances sessions without user confirmation
+- Stop Timer now requires confirmation to prevent accidental session loss
+- TaskForm no longer forces isAllDay — timed tasks now preserve their time
+- Project task counts refresh after completing tasks inside a project
+- Calendar command description updated to match actual functionality
 
-- `Add Task` command support selecting task priority.
+### Changed
+- Extension renamed from "TickTick for Windows" to "TickTick" — fully cross-platform
+- View Details is now the primary action (Enter) on task rows
+- Edit Task moved to Cmd+E shortcut
+- Default Project preference description improved with Copy Project ID reference
 
-## [Improve] - 2024-04-18
+## [1.0.0] - 2026-02-19
 
-- `Add Task` command support create all-day task
-
-## [Fixed] - 2024-01-22
-
-- Resolve the issue of the 'Auto Fill with AI' executing too frequently.
-
-## [Added] - 2024-01-09
-
-- Add `dueDate` and `startDate` to task detail view.
-
-## [Fixed spelling error] - 2023-11-27
-
-## [Added] - 2023-11-14
-
-- Add `Default Title` preference that allows you to set a default task title from your clipboard or selection when using the `Add Task` command.
-
-## [Added] - 2023-09-07
-
-- Add `Quick Add Task` command.
-- Add `Default Date` preference
-
-## [Added] - 2023-07-25
-
-- Support complete task.
-
-## [Added] - 2023-06-02
-
-- Add `Inbox` command.
-
-## [Improve] - 2023-05-31
-
-- The `Search Tasks` command will show all tasks related to a specific project if the search field is empty.
-
-## [Added] - 2023-05-26
-
-- When creating a new task, the extension will guess which project the task belongs to. For non-pro users it just acts as before.
-
-## [Added] - 2022-04-06
-
-- Add "Add Task" action.
-
-## [Added] - 2022-10-14
-
-- Add "Copy" action.
-
-## [Improve] - 2022-06-16
-
-- The Task detail view can show more information.
-
-## [Added] - 2022-03-31
-
-- Support List-detail view for better user experience.
-- Add `Search Tasks` command for quick search tasks.
-
-## [Fixed] - 2021-12-17
-
-- Fixed stability issue
-
-## [Added] - 2021-11-29
-
-- Add TickTick Extension
+### Added
+- View today's and upcoming tasks
+- Search across all projects with title and notes matching
+- Browse projects and inbox
+- Add tasks with full details or quick add from command bar
+- Complete, edit, delete tasks inline
+- Cycle task priority
+- Pomodoro focus timer with configurable durations
+- Tag and checklist support
