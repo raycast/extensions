@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - Unreleased
 
 - Suhoor Time command with countdown
 - Iftar Time command with countdown
