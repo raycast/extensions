@@ -45,7 +45,6 @@ function stateTransitionCommand(st: StateTransition | null): string[] {
 }
 
 function handleCommandError(error: Error, context: string) {
-  console.error(`Error in ${context}:`, error);
   showToast({
     title: `${context} Error`,
     message: error.message,
