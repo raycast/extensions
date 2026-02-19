@@ -45,13 +45,6 @@
       "mode": "view"
     },
     {
-      "name": "toggle-mute",
-      "title": "Toggle Mute",
-      "subtitle": "Audio Device",
-      "description": "Toggle mute on the current output device.",
-      "mode": "no-view"
-    },
-    {
       "name": "set-volume",
       "title": "Set Output Volume",
       "subtitle": "Audio Device",
@@ -68,16 +61,16 @@
     {
       "name": "auto-switch-input",
       "title": "Enforce Input Device",
-      "subtitle": "Active",
-      "description": "Background enforcer: keeps your default input device and pinned volumes in check.",
+      "subtitle": "Audio Device",
+      "description": "Automatically enforces your default input device, priority order, and pinned volumes every 20s.",
       "mode": "no-view",
       "interval": "20s"
     },
     {
       "name": "auto-switch-output",
       "title": "Enforce Output Device",
-      "subtitle": "Active",
-      "description": "Background enforcer: keeps your default output device and pinned volumes in check.",
+      "subtitle": "Audio Device",
+      "description": "Automatically enforces your default output device, priority order, and pinned volumes every 20s.",
       "mode": "no-view",
       "interval": "20s"
     },

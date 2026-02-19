@@ -1,4 +1,4 @@
-import { LaunchType, environment, showHUD, updateCommandMetadata } from "@raycast/api";
+import { updateCommandMetadata } from "@raycast/api";
 import {
   getDefaultInputDevice,
   getDefaultOutputDevice,
@@ -97,22 +97,14 @@ async function runEnforcement(type: IOType) {
 async function buildSubtitle(type: IOType): Promise<string> {
   const defaultName = await getDefaultDeviceName(type);
   const pinnedCount = (await getAllPinnedVolumes(type)).size;
-  const parts: string[] = [];
-  if (defaultName) parts.push(`Default: ${defaultName}`);
-  if (pinnedCount > 0) parts.push(`${pinnedCount} pinned`);
-  return parts.length > 0 ? parts.join(" | ") : "Active";
+  const details: string[] = [];
+  if (defaultName) details.push(`Default: ${defaultName}`);
+  if (pinnedCount > 0) details.push(`${pinnedCount} pinned`);
+  return details.length > 0 ? details.join(" | ") : "No rules set";
 }
 
 export async function runAutoSwitch(type: IOType) {
-  const isBackground = environment.launchType === LaunchType.Background;
-
-  const subtitle = await buildSubtitle(type);
-  await updateCommandMetadata({ subtitle });
-
-  if (!isBackground) {
-    await showHUD("Audio enforcer is always active");
-    return;
-  }
+  await updateCommandMetadata({ subtitle: await buildSubtitle(type) });
 
   try {
     await runEnforcement(type);

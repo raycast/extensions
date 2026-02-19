@@ -98,7 +98,15 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     })();
   }, [data?.devices, ioType]);
 
-  const orderedDevices = applyDeviceOrder(order, data?.devices ?? []);
+  const orderedDevices = (() => {
+    const sorted = applyDeviceOrder(order, data?.devices ?? []);
+    if (!defaultDeviceUid) return sorted;
+    const defaultIdx = sorted.findIndex((d) => d.uid === defaultDeviceUid);
+    if (defaultIdx <= 0) return sorted;
+    const [defaultDev] = sorted.splice(defaultIdx, 1);
+    sorted.unshift(defaultDev);
+    return sorted;
+  })();
 
   useEffect(() => {
     if ((!deviceId && !deviceName) || !data?.devices) return;
@@ -133,6 +141,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
 
   const moveDevice = useCallback(
     async (deviceUid: string, direction: "up" | "down" | "top" | "bottom") => {
+      if (deviceUid === defaultDeviceUid) return;
       const idx = order.indexOf(deviceUid);
       if (idx === -1) return;
       const next = [...order];
@@ -152,7 +161,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
       setOrderState(next);
       await setDeviceOrder(ioType, next);
     },
-    [order, ioType],
+    [order, ioType, defaultDeviceUid],
   );
 
   const hiddenSet = new Set(hiddenDevices ?? []);
@@ -163,7 +172,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
   const showEmptyView = !loading && visibleDevices.length === 0;
 
   return (
-    <List isLoading={loading}>
+    <List isLoading={loading} searchBarPlaceholder="Search devices...">
       {showEmptyView ? (
         <List.EmptyView
           title={shouldShowHidden ? "No devices found" : "No visible devices"}
@@ -262,32 +271,34 @@ function DeviceActions({
         onAction={onPinnedChange}
       />
       <SetDefaultDeviceAction device={device} ioType={ioType} isDefault={isDefault} onAction={onDefaultChange} />
-      <ActionPanel.Section title="Priority Order">
-        <Action
-          title="Move up"
-          icon={Icon.ArrowUp}
-          shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
-          onAction={() => onMoveDevice(device.uid, "up")}
-        />
-        <Action
-          title="Move Down"
-          icon={Icon.ArrowDown}
-          shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
-          onAction={() => onMoveDevice(device.uid, "down")}
-        />
-        <Action
-          title="Move to Top"
-          icon={Icon.ArrowUpCircle}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-          onAction={() => onMoveDevice(device.uid, "top")}
-        />
-        <Action
-          title="Move to Bottom"
-          icon={Icon.ArrowDownCircle}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-          onAction={() => onMoveDevice(device.uid, "bottom")}
-        />
-      </ActionPanel.Section>
+      {!isDefault && (
+        <ActionPanel.Section title="Priority Order">
+          <Action
+            title="Move up"
+            icon={Icon.ArrowUp}
+            shortcut={{ modifiers: ["ctrl", "opt"], key: "arrowUp" }}
+            onAction={() => onMoveDevice(device.uid, "up")}
+          />
+          <Action
+            title="Move Down"
+            icon={Icon.ArrowDown}
+            shortcut={{ modifiers: ["ctrl", "opt"], key: "arrowDown" }}
+            onAction={() => onMoveDevice(device.uid, "down")}
+          />
+          <Action
+            title="Move to Top"
+            icon={Icon.ArrowUpCircle}
+            shortcut={{ modifiers: ["ctrl", "opt", "shift"], key: "arrowUp" }}
+            onAction={() => onMoveDevice(device.uid, "top")}
+          />
+          <Action
+            title="Move to Bottom"
+            icon={Icon.ArrowDownCircle}
+            shortcut={{ modifiers: ["ctrl", "opt", "shift"], key: "arrowDown" }}
+            onAction={() => onMoveDevice(device.uid, "bottom")}
+          />
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section>
         <Action.CreateQuicklink
           quicklink={{
