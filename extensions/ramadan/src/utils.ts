@@ -1,23 +1,36 @@
 import { getPreferenceValues } from "@raycast/api";
-import { execSync } from "child_process";
 import { Preferences } from "./types";
 
 /**
- * Detect if macOS is set to 24-hour time
+ * Detect if the system is using 24-hour time.
+ * Uses Intl.DateTimeFormat to inspect how 13:00 is formatted, and caches the result.
  */
-function isSystem24Hour(): boolean {
+function detectSystem24Hour(): boolean {
   try {
-    const result = execSync(
-      "defaults read NSGlobalDomain AppleICUForce24HourTime",
-      { encoding: "utf-8" },
-    ).trim();
-    return result === "1";
+    const formatter = new Intl.DateTimeFormat(undefined, { hour: "numeric" });
+    const testDate = new Date(Date.UTC(2020, 0, 1, 13, 0, 0));
+    const parts = formatter.formatToParts(testDate);
+    const hourPart = parts.find((p) => p.type === "hour");
+    if (!hourPart) {
+      return false;
+    }
+    const hour = parseInt(hourPart.value, 10);
+    if (Number.isNaN(hour)) {
+      return false;
+    }
+    // In 24-hour formats, 13:00+ is shown as 13 or higher; in 12-hour formats it's 1.
+    return hour >= 13;
   } catch {
-    // If the key doesn't exist, macOS defaults to locale-based (typically 12hr in en_US)
+    // Fallback to 12-hour if detection fails for any reason.
     return false;
   }
 }
 
+const SYSTEM_24_HOUR = detectSystem24Hour();
+
+function isSystem24Hour(): boolean {
+  return SYSTEM_24_HOUR;
+}
 /**
  * Clean a time string from API (strip timezone like " (PKT)")
  */
