@@ -30,7 +30,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Preferred SQL Dialect",
-      "description": "Fallback dialect used before LocalStorage is loaded.",
+      "description": "Fallback dialect used when no previous dropdown selection is stored.",
       "data": [
         {
           "title": "PostgreSQL",

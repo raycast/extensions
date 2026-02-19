@@ -26,5 +26,3 @@ export const TYPE_PRIORITY: Record<SQLEntryType, number> = {
   operator: 24,
   datatype: 18,
 };
-
-export const DIALECT_STORAGE_KEY = "preferred-sql-dialect";

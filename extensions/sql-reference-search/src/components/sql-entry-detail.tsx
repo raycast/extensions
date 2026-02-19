@@ -67,6 +67,7 @@ export function buildEntryMarkdown(entry: SQLEntry, dialect: SQLDialect, compare
 export function SqlEntryDetail({ entry, initialDialect }: Props) {
   const [dialect, setDialect] = useState<SQLDialect>(initialDialect);
   const [compareDialects, setCompareDialects] = useState(false);
+  const supportedDialects = DIALECT_ORDER.filter((optionDialect) => entry.dialects.supported.includes(optionDialect));
 
   const markdown = useMemo(
     () => buildEntryMarkdown(entry, dialect, compareDialects),
@@ -90,7 +91,7 @@ export function SqlEntryDetail({ entry, initialDialect }: Props) {
             icon={Icon.Sidebar}
             onAction={() => setCompareDialects((value) => !value)}
           />
-          {DIALECT_ORDER.map((optionDialect) => (
+          {supportedDialects.map((optionDialect) => (
             <Action
               key={optionDialect}
               title={`View as ${DIALECT_LABELS[optionDialect]}`}
