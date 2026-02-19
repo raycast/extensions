@@ -16,6 +16,8 @@ interface BookGridProps {
   onViewModeChange: (mode: ViewMode) => void;
   onClearSearch: () => void;
   categorized: boolean;
+  searchText?: string;
+  onSearchTextChange?: (text: string) => void;
 }
 
 function BookGridItem({
@@ -48,18 +50,6 @@ function BookGridItem({
   );
 }
 
-export function BookGrid({
-  categorizedItems,
-  filteredCategorizedItems,
-  totalCount,
-  activeFilter,
-  onFilterChange,
-  isLoading,
-  viewMode,
-  onViewModeChange,
-  onClearSearch,
-  categorized,
-}: BookGridProps) {
 export function BookGrid({
   categorizedItems,
   filteredCategorizedItems,
