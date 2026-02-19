@@ -73,7 +73,13 @@ export function adjustHijriDate(
   year: number,
 ): { day: number; month: number; year: number; monthName: string } {
   const offset = getHijriDateOffset();
-  if (offset === 0) return { day, month, year };
+  if (offset === 0)
+    return {
+      day,
+      month,
+      year,
+      monthName: HIJRI_MONTHS[month] || `Month ${month}`,
+    };
 
   // Hijri months: odd months have 30 days, even months have 29 days (simplified)
   function daysInMonth(m: number): number {
