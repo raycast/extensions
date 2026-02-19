@@ -1,5 +1,12 @@
 # Notion Changelog
 
+## [Fix database ID resolution for create/delete actions] - 2026-02-19
+
+- Fix `Create Database Page` failing for some shared databases with "Failed to create page" / `object_not_found` style errors caused by mixed `database_id` and `data_source_id` usage ([#25393](https://github.com/raycast/extensions/issues/25393))
+- Normalize ID handling so commands resolve and use the correct Notion identifier (`data_source_id` vs `database_id`) before API calls
+- Fix `deleteDatabase` deleting the parent database by mistake; it now resolves and deletes the selected database/data source itself
+- Fix `Create Database Page` quicklinks emitting React "state update on an unmounted component" warnings by moving side effects out of render and narrowing relation prefetching to visible properties only
+
 ## [Fix deep linking to Notion pages] - 2026-02-12
 
 - Fix pages not opening to the correct page when using the Notion desktop app ([#23492](https://github.com/raycast/extensions/issues/23492))

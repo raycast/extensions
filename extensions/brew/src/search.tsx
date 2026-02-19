@@ -60,7 +60,8 @@ export default function SearchView() {
   // Show initializing toast on cold start (no cache files)
   useEffect(() => {
     // Only show on cold start when we're still loading
-    if (hasCacheFiles !== false || phase === "complete") {
+    // Once completion toast has been shown, never show init toast again
+    if (hasCacheFiles !== false || phase === "complete" || hasShownCompletionToast.current) {
       // Hide toast if it exists and we're done
       if (initToastRef.current) {
         initToastRef.current.hide();

@@ -11,6 +11,12 @@ import { formatTitle } from "./util/track";
 
 const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
+
+type FavoriteStatus = {
+  trackId: string;
+  isFavorited: boolean;
+};
+
 export default function CurrentlyPlayingMenuBarCommand() {
   const shouldExecute = useRef<boolean>(false);
 
@@ -46,10 +52,42 @@ export default function CurrentlyPlayingMenuBarCommand() {
     [],
     { execute: shouldExecute.current },
   );
+  const {
+    isLoading: isLoadingFavoriteStatus,
+    data: favoriteStatus,
+    mutate: mutateFavoriteStatus,
+  } = usePromise(
+    (trackId?: string) => {
+      if (!trackId) {
+        return Promise.resolve<FavoriteStatus | undefined>(undefined);
+      }
+
+      return pipe(
+        music.currentTrack.getFavoriteForCurrentTrackId(trackId),
+        TE.matchW(
+          () => undefined,
+          (favoriteStatus) => {
+            if (favoriteStatus === undefined) {
+              return undefined;
+            }
+
+            return {
+              trackId,
+              isFavorited: favoriteStatus.trim().toLowerCase() === "true",
+            };
+          },
+        ),
+      )();
+    },
+    [currentTrack?.id],
+    { execute: !!currentTrack },
+  );
 
   const isRunning = !isLoadingCurrentTrack && !!currentTrack;
   const isPlaying = playerState === PlayerState.PLAYING;
-  const isLoading = isLoadingCurrentTrack || isLoadingPlayerState;
+  const isFavoriteStatusForCurrentTrack = favoriteStatus?.trackId === currentTrack?.id;
+  const isFavorited = isFavoriteStatusForCurrentTrack && favoriteStatus?.isFavorited === true;
+  const isLoading = isLoadingCurrentTrack || isLoadingPlayerState || isLoadingFavoriteStatus;
 
   if (!isRunning) {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
@@ -120,6 +158,35 @@ export default function CurrentlyPlayingMenuBarCommand() {
         onAction={() =>
           pipe(music.player.previous, handleTaskEitherError("Failed to rewind track", "Track rewinded"))()
         }
+      />
+      <MenuBarExtra.Item
+        icon={isFavorited ? Icon.StarDisabled : Icon.Star}
+        title={isFavorited ? "Unfavorite Track" : "Favorite Track"}
+        onAction={() => {
+          const actionTrackId = currentTrack.id;
+          const nextFavoriteState = !isFavorited;
+          const toggleFavoriteAction = nextFavoriteState ? music.currentTrack.favorite : music.currentTrack.unfavorite;
+
+          return pipe(
+            toggleFavoriteAction,
+            handleTaskEitherError(
+              nextFavoriteState ? "Failed to favorite the track" : "Failed to unfavorite the track",
+              nextFavoriteState ? "Favorited" : "Unfavorited",
+            ),
+            TE.chainFirstTaskK(
+              () => () =>
+                mutateFavoriteStatus(undefined, {
+                  optimisticUpdate(data) {
+                    if (!data || data.trackId !== actionTrackId) {
+                      return data;
+                    }
+
+                    return { trackId: actionTrackId, isFavorited: nextFavoriteState };
+                  },
+                }),
+            ),
+          )();
+        }}
       />
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
