@@ -56,7 +56,7 @@
       "arguments": [
         {
           "name": "config",
-          "placeholder": "config name",
+          "placeholder": "Config Name",
           "type": "text",
           "required": true
         }
