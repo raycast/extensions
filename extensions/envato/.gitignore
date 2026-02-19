@@ -1,6 +1,0 @@
-node_modules
-.DS_Store
-.vscode
-.raycast-swift-build
-.swiftpm
-compiled_raycast_swift

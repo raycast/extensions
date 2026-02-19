@@ -1,3 +1,0 @@
-## Dutch Article
-
-- Initial release

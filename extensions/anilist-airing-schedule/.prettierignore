@@ -1,9 +1,0 @@
-.DS_Store
-.env*.local
-.prettierrc.json
-package.json
-pnpm-debug.log*
-pnpm-lock.yaml
-
-.vscode/*
-!.vscode/extensions.json
