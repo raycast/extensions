@@ -6,4 +6,3 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   config = config.toLowerCase().replace(/\s+/g, "-");
   await RunLaunchConfiguration({ name: config });
 }
-// Doesn't work consistently
