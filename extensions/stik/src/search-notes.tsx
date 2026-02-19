@@ -32,7 +32,7 @@ export default function SearchNotes() {
       onSearchTextChange={setSearchText}
       throttle
       searchBarAccessory={
-        <List.Dropdown title="Folder" onChange={setSelectedFolder}>
+        <List.Dropdown tooltip="Folder" onChange={setSelectedFolder}>
           <List.Dropdown.Item title="All Folders" value="__all__" />
           <List.Dropdown.Item title="Root" value="" />
           {folders.map((f) => (
