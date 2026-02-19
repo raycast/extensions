@@ -10,6 +10,12 @@
 ### Added
 - Support for Ghostty terminal emulator
 
+### Fixed
+- Load shell profiles in Ghostty and Alacritty adapters to ensure environment variables (e.g., ANTHROPIC_API_KEY) are available when launching Claude Code
+
+### Changed
+- Updated extension icon to match Claude Code branding
+
 ## [1.0.0] - 2025-09-30
 
 ### Features
