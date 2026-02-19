@@ -24,12 +24,6 @@
       "title": "Machine Create",
       "description": "Create a new machine",
       "mode": "view"
-    },
-    {
-      "name": "config_show",
-      "title": "Config Show",
-      "description": "Display OrbStack configuration",
-      "mode": "view"
     }
   ],
   "tools": [

@@ -121,6 +121,11 @@ export default function MachineList() {
                 shortcut={{ modifiers: ["cmd"], key: "i" }}
               />
               <Action.Push
+                title="OrbStack Config"
+                target={<CommandExecute name={`OrbStack`} title={"Config"} command={["config", "show"]} />}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+              />
+              <Action.Push
                 title="Logs"
                 target={<CommandExecute name={machine.name} title={"Logs"} command={["logs", machine.name]} />}
                 shortcut={{ modifiers: ["cmd"], key: "l" }}
