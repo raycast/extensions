@@ -27,6 +27,8 @@ import { basename } from "path";
 import { BranchAttachedLinksAction, BranchPushAction, BranchPushForceAction } from "../actions/BranchActions";
 import { RemoteFetchAction, RemotePullAction } from "../actions/RemoteActions";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { GitIgnoreAction } from "../actions/GitIgnoreAction";
+import { GitLFSAction } from "../actions/GitLFSAction";
 
 export function StatusView(context: RepositoryContext & NavigationContext) {
   const toggleController = useToggleDetail("Status Diff", "Changes", true);
@@ -80,6 +82,8 @@ export function StatusView(context: RepositoryContext & NavigationContext) {
               </ActionPanel.Section>
 
               <ToggleDetailAction controller={toggleController} />
+              <GitIgnoreAction {...context} />
+              <GitLFSAction {...context} />
               <WorkspaceNavigationActions {...context} />
             </ActionPanel>
           }
@@ -115,6 +119,8 @@ export function StatusView(context: RepositoryContext & NavigationContext) {
                 {context.branches.data.currentBranch && (
                   <BranchAttachedLinksAction {...context} branch={context.branches.data.currentBranch} />
                 )}
+                <GitIgnoreAction {...context} />
+                <GitLFSAction {...context} />
               </ActionPanel.Section>
 
               <WorkspaceNavigationActions {...context} />
@@ -278,6 +284,11 @@ function FileListItem(
               </>
             )}
             <FileHistoryAction filePath={context.file.absolutePath} {...context} />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Tracking">
+            <GitIgnoreAction filePath={context.file.relativePath} {...context} />
+            <GitLFSAction filePath={context.file.relativePath} {...context} />
           </ActionPanel.Section>
 
           <ActionPanel.Section>

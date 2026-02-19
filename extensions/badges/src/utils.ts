@@ -1,10 +1,7 @@
-import process from "node:process";
 import { readFile } from "node:fs/promises";
 import { Color, LaunchType, environment, open } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
 import { commandConfig } from "./constants.js";
-
-export const isWindows = process.platform === "win32";
 
 export const getCommandConfig = () => commandConfig[environment.commandName];
 

@@ -25,7 +25,7 @@ export class MiniMaxProvider implements AIProvider {
 
   constructor(config: ProviderConfig) {
     this.apiKey = config.apiKey;
-    this.model = config.model || "MiniMax-M2.1";
+    this.model = config.model || "MiniMax-M2.5";
     this.defaultTemperature = config.temperature ?? 0.7;
     this.defaultMaxTokens = config.maxTokens ?? 4096;
     this.systemPrompt = config.systemPrompt;

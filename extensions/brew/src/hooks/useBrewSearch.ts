@@ -73,6 +73,8 @@ interface UseBrewSearchResult {
   mutate: MutatePromise<InstallableResults | undefined>;
   /** Total counts of packages in the index (for status display) */
   indexTotals: IndexTotals | undefined;
+  /** Ref to current download progress (for polling without re-renders) */
+  downloadProgressRef: { current: SearchDownloadProgress };
 }
 
 /** Default progress state for a file */
@@ -136,9 +138,8 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     phase: "casks",
   });
 
-  // Throttle progress updates to avoid render loops (max once per 100ms)
-  const lastProgressUpdateRef = useRef(0);
-  const PROGRESS_THROTTLE_MS = 100;
+  // Ref for real-time progress tracking (doesn't trigger re-renders)
+  const downloadProgressRef = useRef<SearchDownloadProgress>({ phase: "casks" });
 
   const abortable = useRef<AbortController>(null);
   const {
@@ -151,30 +152,19 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
 
       // Reset progress at start of search
       setDownloadProgress({ phase: "casks" });
-      // Reset throttle timer so first progress update shows immediately
-      lastProgressUpdateRef.current = 0;
+      downloadProgressRef.current = { phase: "casks" };
 
       // Fetch search results with progress tracking
       // Always track progress - the UI decides whether to show it based on hasCacheFiles
       const result = await brewSearch(query, limit, abortable.current?.signal, (progress) => {
         try {
-          // AbortController signal will prevent further updates after abort
           if (abortable.current?.signal.aborted) return;
 
-          // Throttle UI updates to avoid excessive re-renders
-          // Always allow through: complete phase, download completion, or throttle interval
-          const now = Date.now();
-          const isComplete = progress.phase === "complete";
-          const isCasksComplete = progress.casksProgress?.complete === true;
-          const isFormulaeComplete = progress.formulaeProgress?.complete === true;
-          const shouldUpdate =
-            isComplete ||
-            isCasksComplete ||
-            isFormulaeComplete ||
-            now - lastProgressUpdateRef.current >= PROGRESS_THROTTLE_MS;
+          // Always update ref (no re-render cost)
+          downloadProgressRef.current = progress;
 
-          if (shouldUpdate) {
-            lastProgressUpdateRef.current = now;
+          // Only trigger re-render on completion (not during concurrent downloads)
+          if (progress.phase === "complete") {
             setDownloadProgress(progress);
           }
         } catch (error) {
@@ -349,6 +339,7 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     data,
     mutate,
     indexTotals,
+    downloadProgressRef,
   };
 }
 

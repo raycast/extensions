@@ -369,8 +369,9 @@ export interface Status {
 
 export interface MergeRequestApprovals {
   approved: boolean;
-  approvals_required: number;
-  approvals_left: number;
+  approvals_required?: number;
+  approvals_left?: number;
+  approved_by?: { user: User; approved_at: string }[];
 }
 
 export function isValidStatus(status: Status): boolean {

@@ -1,83 +1,85 @@
 # PicGo for Raycast
 
-[简体中文](./media/README-zh.md)
+<a href="https://www.raycast.com/rubisco0211/picgo" title="Install picgo Raycast Extension"><img src="https://www.raycast.com/rubisco0211/picgo/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt="" /></a>
 
-A [Raycast](https://www.raycast.com/) extension to upload images to image hosts using [PicGo-Core](https://github.com/PicGo/PicGo-Core) API.
+A [Raycast](https://www.raycast.com/) extension to upload images to image hosts using [PicGo-Core](https://github.com/PicGo/PicGo-Core).
+
+If you speak Chinese, check out [中文文档](https://github.com/RUBisco0211/raycast-extension-picgo/blob/master/media/README-zh.md).
 
 <p align="center">
-  <img src="./media/header.png" alt="">
+<img src="./media/header.png" alt="Header">
 </p>
 
-## How It Works
+## Features
 
-This extension integrates with `picgo` library to handle image uploads.
+- **Upload Images**: Seamlessly upload images from your clipboard or file selection.
+- **Multi-Format Export**: View upload results and copy links in various formats (URL, Markdown, HTML, UBB).
+- **Multi-Config Support**: Switch between different uploader configurations easily within Raycast.
+- **Plugin Management**: Search, install, update, and uninstall PicGo plugins directly from Raycast via NPM.
+- **Uploader Configuration**: Manage your uploader configurations (Url, Access Key, Secret Key, etc.).
 
-- **Configuration Management**: The extension reads your PicGo config file (`~/.picgo/config.json`) to detect installed uploaders and their configurations.You can choose which uploader and config to use from the dropdown menu. The extension persists your selection in **Raycast LocalStorage** and won't change your local config file.
 
-- **Select and Send Images**: Select images (allow multi selection) from file picker or paste from clipboard `Cmd+V`. .
+## Prerequisites
 
-- **Copy Result**: Choose your preferred format (URL, Markdown, HTML, or UBB) and copy to clipboard.
+- **NPM**: This extension requires Node.js. Ensure `npm` is accessible. You can configure the `NPM Path` in the extension preferences if it's not in the default location.
 
-## ScreenShots
+## Commands
 
-### Command `Upload Images` and Actions
+### Upload Images
+
+Select images from the file picker or paste from the clipboard (`Cmd+V`) to upload.
+
+- **Switch Config**: Use the dropdown menu to select the uploader configuration. The config will be remember (in **Raycast LocalStorage** without directly changing your local config file) once you upload some images with it.
+- **Upload from Files or Clipboard**: Supporting multi-image upload from files or clipboard (press `Cmd+V`).
 
 ![Command](./media/picgo-1.png)
 
-### Uploader Configs
+- **Copy Result**: Multi-formats copying supported.
 
-![Config](./media/picgo-2.png)
+![Command](./media/picgo-2.png)
 
-### Shortcuts
+### Manage Uploader Configs
 
-![Shortcuts](./media/picgo-3.png)
+View and manage all your uploader configurations.
 
-### Export Page
+- **Manage**:Add, duplicate, edit or delete a configuration. Press `enter` to set as default uploader config.
 
-![Export](./media/picgo-4.png)
+![Config](./media/picgo-3.png)
 
-## Prerequisites: PicGo Installation and Configuration
+![Config](./media/picgo-4.png)
 
-```shell
-# install picgo-cli
-npm install -g picgo
-# or
-yarn global add picgo
+### Search Plugins
 
+Search for PicGo plugins on NPM to extend uploader functionality.
 
-# install picgo plugins
-picgo install [name]
-# or use npm
-npm install picgo-plugin-[name]
+![Config](./media/picgo-6.png)
 
+### Manage Plugins
 
-# configuration of uploader
-picgo set uploader
-# and
-picgo use uploader
-```
+View installed plugins. You can update, uninstall, or configure them.
 
-For more, check out:
+![Config](./media/picgo-5.png)
 
-- [PicGo-Cli installation](https://docs.picgo.app/core/guide/getting-started#install-globally)
-- [PicGo plugin installation](https://docs.picgo.app/core/guide/commands#install-add)
-- [PicGO-Cli configuration](https://docs.picgo.app/core/guide/config)
+## Preferences
 
-## Keyboard Shortcuts
+| Preference | Description | Default |
+| ---------------- | -------------------------------------------------- | ------- |
+| Upload Timeout | Maximum time (in ms) to wait for upload completion. | 30000 |
+| Upload Proxy | Custom proxy address for uploading images (e.g., `http://127.0.0.1:7890`). | - |
+| NPM Path | Path to the NPM executable (e.g., `/usr/local/bin`). Do not include `/npm` in the path. | - |
+| NPM Proxy | Proxy address for installing plugins via NPM. | - |
+| NPM Mirror | Custom NPM registry mirror (e.g., `https://registry.npmmirror.com`). | - |
 
-| Action                      | Shortcut    |
-| --------------------------- | ----------- |
-| Quick upload from clipboard | `Cmd+V`     |
-| Submit and upload           | `Cmd+Enter` |
-| Copy current format         | `Cmd+C`     |
+## Troubleshooting
 
-## Extension Preferences
+- **"NPM not found"**: Check the `NPM Path` in extension preferences. Run `which npm` in your terminal to find the correct path.
+- **Plugin installation fails**: Try setting a valid `NPM Mirror` or `NPM Proxy` if you have network issues.
 
-| Setting        | Description                                        | Default |
-| -------------- | -------------------------------------------------- | ------- |
-| Upload Timeout | Maximum time (in ms) to wait for upload completion | 30000   |
+## For More
 
-## Limitations
+checkout:
+- [PicGo-Core Documentation](https://docs.picgo.app/core/)
 
-- It does **NOT** support PicGo plugin management - install/remove plugins via PicGo directly
-- It does **NOT** support configuring uploaders - configure them with `picgo set uploader`.
+## License
+
+MIT

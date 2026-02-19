@@ -1,5 +1,10 @@
 # System Monitor Changelog
 
+## [Added Temperature Monitoring] - 2026-02-19
+
+- Added temperature view under CPU section
+- CPU temperature displayed in menu bar dropdown
+
 ## [New Additions & Chore] - 2026-02-02
 - Added customisable tags for menubar entries
     - Universal tags

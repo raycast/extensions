@@ -101,3 +101,18 @@ export function RepositoryDirectoryActions({ repositoryPath, onOpen }: Repositor
     </ActionPanel.Section>
   );
 }
+
+/**
+ * Action for creating a quicklink for a repository.
+ */
+export function RepositoryQuickLinkAction({ repositoryPath }: RepositoryDirectoryActionsProps) {
+  return (
+    <Action.CreateQuicklink
+      title="Create Quicklink"
+      quicklink={{
+        link: `raycast://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(JSON.stringify({ path: repositoryPath }))}`,
+        name: `Show ${basename(repositoryPath)} in Git`,
+      }}
+    />
+  );
+}

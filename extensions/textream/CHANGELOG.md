@@ -1,5 +1,9 @@
 # Textream Changelog
 
+## [1.0.1] - 2026-02-10
+
+- Updated extension icon
+
 ## [1.0.0] - 2026-02-09
 
 ### Added
