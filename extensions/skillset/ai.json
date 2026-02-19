@@ -1,0 +1,145 @@
+{
+  "instructions": "You are an agent extended by a library of local 'skills'.\n\n### Core Philosophy\n- **Read-on-Demand**: You do not have skill instructions loaded. You must find and read them.\n- **Action-First**: You are an executor, not just an advisor. If a skill defines a command, YOU run it.\n\n### Workflow rules\n1. **Discovery**: Start with `list-all-skills` to locate capabilities.\n2. **Ingestion**: You MUST use `read-skill` to load the `SKILL.md` or instructions.\n3. **Execution**:\n   - **Personas**: If the skill is a guide, ADOPT the persona strictly.\n   - **Scripts/Code**: If the skill describes a command or code (bash, python), **DO NOT just explain it**. You MUST use the `@shell` extension or any other tool that is available to you to execute it. If `@shell` is not active, you need to explicitly ask the user to 'mention @shell' to allow you to execute the command.\n   - **Attachments**: If the skill mentions supporting files, use `read-skill-attachment` to read them.",
+  "evals": [
+    {
+      "input": "@skillset what skills do you have?",
+      "expected": [
+        {
+          "callsTool": "list-all-skills"
+        },
+        {
+          "includes": "git"
+        }
+      ],
+      "mocks": {
+        "list-all-skills": [
+          {
+            "name": "git-commit",
+            "dir": "/Users/user/.agents/skills/git-commit"
+          }
+        ]
+      }
+    },
+    {
+      "input": "@skillset help me write a better git commit message",
+      "expected": [
+        {
+          "callsTool": "list-all-skills"
+        },
+        {
+          "callsTool": {
+            "name": "read-skill",
+            "arguments": {
+              "name": "git-commit"
+            }
+          }
+        },
+        {
+          "includes": "emoji"
+        }
+      ],
+      "mocks": {
+        "list-all-skills": [
+          {
+            "name": "git-commit",
+            "dir": "/Users/user/.agents/skills/git-commit"
+          }
+        ],
+        "read-skill": {
+          "content": "ALWAYS start by adding a fitting emoji to the commit message."
+        }
+      }
+    },
+    {
+      "input": "@skillset improve the following text: 'Hello, world!'",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "read-skill",
+            "arguments": {
+              "name": "improve-writing"
+            }
+          }
+        },
+        {
+          "includes": "HELLO, WORLD!"
+        }
+      ],
+      "mocks": {
+        "read-skill": {
+          "content": "Convert the given text to UPPERCASE."
+        },
+        "list-all-skills": [
+          {
+            "name": "improve-writing",
+            "dir": "/Users/user/.agents/skills/improve-writing"
+          }
+        ]
+      }
+    },
+    {
+      "input": "@skillset generate a daily checklist",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "read-skill-attachment",
+            "arguments": {
+              "skillName": "checklist-maker",
+              "filePath": "templates/daily.md"
+            }
+          }
+        },
+        {
+          "includes": "- [ ] Drink water"
+        },
+        {
+          "includes": "- [ ] Check emails"
+        }
+      ],
+      "mocks": {
+        "list-all-skills": [
+          {
+            "name": "checklist-maker",
+            "dir": "/Users/user/.agents/skills/checklist-maker"
+          }
+        ],
+        "read-skill": {
+          "content": "To generate a checklist, you must first read the template file located at 'templates/daily.md' and then print it verbatim."
+        },
+        "read-skill-attachment": {
+          "content": "- [ ] Drink water\n- [ ] Check emails"
+        }
+      }
+    },
+    {
+      "input": "@skillset run the system cleanup skill",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "read-skill",
+            "arguments": {
+              "name": "system-cleanup"
+            }
+          }
+        },
+        {
+          "includes": "@shell"
+        }
+      ],
+      "mocks": {
+        "list-all-skills": [
+          {
+            "name": "system-cleanup",
+            "dir": "/Users/user/.agents/skills/system-cleanup"
+          }
+        ],
+        "read-skill": {
+          "content": "To clean up logs run scripts/cleanup.sh"
+        },
+        "read-skill-attachment": {
+          "content": "rm -rf /tmp/logs && rm -rf /tmp/cache"
+        }
+      }
+    }
+  ]
+}
