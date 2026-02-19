@@ -6,14 +6,14 @@ This folder contains screenshots and metadata for the Raycast Store.
 
 Before publishing to the Raycast Store, add:
 
-1. **network-speed-monitor-1.png** (1280x800px) - Menu bar showing network speed
-2. **network-speed-monitor-2.png** (1280x800px) - Dropdown menu with details
+1. **network-speed-monitor-1.png** (2000×1250px) - Menu bar showing network speed
+2. **network-speed-monitor-2.png** (2000×1250px) - Dropdown menu with details
 
 ## How to Create Screenshots
 
 1. Run the extension in Raycast
 2. Use `Cmd+Shift+4` to capture screenshots
-3. Resize to 1280x800px
+3. Resize to 2000×1250px
 4. Save in this directory with the naming convention above
 
 ## Example Content
