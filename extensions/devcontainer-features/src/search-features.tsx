@@ -48,13 +48,8 @@ export default function Command() {
     toggleFavorite,
     isLoading: favoritesLoading,
   } = useFavorites();
-  const {
-    filteredFeatures,
-    filters,
-    updateFilter,
-    hasActiveFilters,
-    resetFilters,
-  } = useFeatureFilters(features, favorites);
+  const { filteredFeatures, updateFilter, hasActiveFilters, resetFilters } =
+    useFeatureFilters(features, favorites);
 
   const loadingText = progress
     ? `Loading... ${progress.completed}/${progress.total} collections`

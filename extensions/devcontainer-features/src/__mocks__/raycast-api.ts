@@ -21,10 +21,11 @@ export class Cache {
 }
 
 export const LocalStorage = {
-  getItem: async <T>(key: string): Promise<T | undefined> => {
-    return undefined;
-  },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getItem: async <T>(key: string): Promise<T | undefined> => undefined,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setItem: async (key: string, value: string): Promise<void> => {},
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   removeItem: async (key: string): Promise<void> => {},
   clear: async (): Promise<void> => {},
   allItems: async (): Promise<Record<string, string>> => ({}),
