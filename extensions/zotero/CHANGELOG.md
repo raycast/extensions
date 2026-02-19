@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Fixes] - 2026-02-19
+## [Fixes] - {PR_MERGE_DATE}
 
 - Fix "No data found" error with Zotero 7+ when Better BibTeX is enabled: `better-bibtex.migrated` (renamed from `better-bibtex.sqlite` by Zotero 7's migration) is now recognised as a valid citation key source
 - Fix crash when `better-bibtex.sqlite` / `better-bibtex.migrated` are both absent (graceful fallback instead of unhandled ENOENT)
