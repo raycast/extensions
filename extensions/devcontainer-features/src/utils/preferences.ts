@@ -1,5 +1,5 @@
-import { getPreferenceValues } from '@raycast/api';
-import { setCacheTtl } from '../api/cache';
+import { getPreferenceValues } from "@raycast/api";
+import { setCacheTtl } from "../api/cache";
 
 /**
  * Extension preferences
@@ -38,7 +38,7 @@ export function getConcurrency(): number {
  */
 export function hasGitHubToken(): boolean {
   const { githubToken } = getPreferences();
-  return Boolean(githubToken && githubToken.trim() !== '');
+  return Boolean(githubToken && githubToken.trim() !== "");
 }
 
 /**

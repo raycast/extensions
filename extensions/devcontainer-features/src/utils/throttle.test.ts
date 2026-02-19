@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { debounce, throttle } from './throttle';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { debounce, throttle } from "./throttle";
 
-describe('throttle', () => {
+describe("throttle", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -10,7 +10,7 @@ describe('throttle', () => {
     vi.useRealTimers();
   });
 
-  it('calls function immediately on first call', () => {
+  it("calls function immediately on first call", () => {
     const fn = vi.fn();
     const throttled = throttle(fn, 100);
 
@@ -18,7 +18,7 @@ describe('throttle', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('ignores calls within throttle window', () => {
+  it("ignores calls within throttle window", () => {
     const fn = vi.fn();
     const throttled = throttle(fn, 100);
 
@@ -29,7 +29,7 @@ describe('throttle', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('allows call after throttle window', () => {
+  it("allows call after throttle window", () => {
     const fn = vi.fn();
     const throttled = throttle(fn, 100);
 
@@ -40,7 +40,7 @@ describe('throttle', () => {
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
-  it('calls with last args after throttle window', () => {
+  it("calls with last args after throttle window", () => {
     const fn = vi.fn();
     const throttled = throttle(fn, 100);
 
@@ -55,7 +55,7 @@ describe('throttle', () => {
   });
 });
 
-describe('debounce', () => {
+describe("debounce", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -64,7 +64,7 @@ describe('debounce', () => {
     vi.useRealTimers();
   });
 
-  it('delays function call', () => {
+  it("delays function call", () => {
     const fn = vi.fn();
     const debounced = debounce(fn, 100);
 
@@ -75,7 +75,7 @@ describe('debounce', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('resets delay on subsequent calls', () => {
+  it("resets delay on subsequent calls", () => {
     const fn = vi.fn();
     const debounced = debounce(fn, 100);
 
@@ -90,13 +90,13 @@ describe('debounce', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('passes correct arguments', () => {
+  it("passes correct arguments", () => {
     const fn = vi.fn();
     const debounced = debounce(fn, 100);
 
-    debounced('arg1', 'arg2');
+    debounced("arg1", "arg2");
     vi.advanceTimersByTime(100);
 
-    expect(fn).toHaveBeenCalledWith('arg1', 'arg2');
+    expect(fn).toHaveBeenCalledWith("arg1", "arg2");
   });
 });

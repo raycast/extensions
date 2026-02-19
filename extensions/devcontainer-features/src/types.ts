@@ -1,7 +1,7 @@
 /**
  * Feature option type (including enum)
  */
-export type FeatureOptionType = 'boolean' | 'string' | 'enum';
+export type FeatureOptionType = "boolean" | "string" | "enum";
 
 /**
  * A single devcontainer feature definition

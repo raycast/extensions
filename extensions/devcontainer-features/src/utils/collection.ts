@@ -1,15 +1,17 @@
-import type { CollectionInfo, Feature } from '../types';
+import type { CollectionInfo, Feature } from "../types";
 
 /**
  * Validate CollectionInfo has required fields
  */
-function isValidCollectionInfo(collection: unknown): collection is CollectionInfo {
-  if (collection === null || typeof collection !== 'object') return false;
+function isValidCollectionInfo(
+  collection: unknown,
+): collection is CollectionInfo {
+  if (collection === null || typeof collection !== "object") return false;
   const c = collection as Record<string, unknown>;
   return (
-    typeof c.sourceInformation === 'string' &&
+    typeof c.sourceInformation === "string" &&
     c.sourceInformation.length > 0 &&
-    typeof c.ociReference === 'string' &&
+    typeof c.ociReference === "string" &&
     c.ociReference.length > 0
   );
 }
@@ -18,13 +20,13 @@ function isValidCollectionInfo(collection: unknown): collection is CollectionInf
  * Validate Feature has required fields
  */
 function isValidFeature(feature: unknown): feature is Feature {
-  if (feature === null || typeof feature !== 'object') return false;
+  if (feature === null || typeof feature !== "object") return false;
   const f = feature as Record<string, unknown>;
   return (
-    typeof f.id === 'string' &&
+    typeof f.id === "string" &&
     f.id.length > 0 &&
-    typeof f.name === 'string' &&
-    typeof f.reference === 'string' &&
+    typeof f.name === "string" &&
+    typeof f.reference === "string" &&
     f.collection !== undefined &&
     isValidCollectionInfo(f.collection)
   );
@@ -36,7 +38,7 @@ function isValidFeature(feature: unknown): feature is Feature {
  */
 export function getCollectionName(collection: CollectionInfo): string {
   if (!isValidCollectionInfo(collection)) {
-    return '';
+    return "";
   }
   const ref = collection.ociReference;
   const match = ref.match(/ghcr\.io\/(.+)/);
@@ -48,7 +50,7 @@ export function getCollectionName(collection: CollectionInfo): string {
  */
 export function getFeatureCollectionName(feature: Feature): string {
   if (!isValidFeature(feature)) {
-    return '';
+    return "";
   }
   return getCollectionName(feature.collection);
 }
@@ -60,7 +62,7 @@ export function isOfficialCollection(collection: CollectionInfo): boolean {
   if (!isValidCollectionInfo(collection)) {
     return false;
   }
-  return collection.ociReference.includes('devcontainers/features');
+  return collection.ociReference.includes("devcontainers/features");
 }
 
 /**
@@ -99,8 +101,8 @@ export function sortFeatures(features: Feature[]): Feature[] {
  * Get GitHub repository URL from source information
  */
 export function getGitHubRepoUrl(sourceInfo: string): string {
-  if (typeof sourceInfo !== 'string' || sourceInfo.length === 0) {
-    return '';
+  if (typeof sourceInfo !== "string" || sourceInfo.length === 0) {
+    return "";
   }
   return `https://github.com/${sourceInfo}`;
 }
@@ -110,7 +112,7 @@ export function getGitHubRepoUrl(sourceInfo: string): string {
  */
 export function getFeatureGitHubUrl(feature: Feature): string {
   if (!isValidFeature(feature)) {
-    return '';
+    return "";
   }
   return getGitHubRepoUrl(feature.collection.sourceInformation);
 }
@@ -119,10 +121,10 @@ export function getFeatureGitHubUrl(feature: Feature): string {
  * Validate documentation URL format
  */
 export function isValidDocumentationUrl(url: string | undefined): boolean {
-  if (!url || typeof url !== 'string') return false;
+  if (!url || typeof url !== "string") return false;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
   } catch {
     return false;
   }

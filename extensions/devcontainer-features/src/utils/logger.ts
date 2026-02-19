@@ -1,4 +1,4 @@
-const DEBUG = process.env.NODE_ENV === 'development';
+const DEBUG = process.env.NODE_ENV === "development";
 
 interface TimingEntry {
   name: string;
@@ -39,7 +39,7 @@ export function endTiming(name: string): number | null {
  */
 export function logDebug(message: string, data?: unknown): void {
   if (DEBUG) {
-    console.log(`[DEBUG] ${message}`, data ?? '');
+    console.log(`[DEBUG] ${message}`, data ?? "");
   }
 }
 
@@ -47,27 +47,30 @@ export function logDebug(message: string, data?: unknown): void {
  * Log info message
  */
 export function logInfo(message: string, data?: unknown): void {
-  console.log(`[INFO] ${message}`, data ?? '');
+  console.log(`[INFO] ${message}`, data ?? "");
 }
 
 /**
  * Log warning message
  */
 export function logWarn(message: string, data?: unknown): void {
-  console.warn(`[WARN] ${message}`, data ?? '');
+  console.warn(`[WARN] ${message}`, data ?? "");
 }
 
 /**
  * Log error message
  */
 export function logError(message: string, error?: unknown): void {
-  console.error(`[ERROR] ${message}`, error ?? '');
+  console.error(`[ERROR] ${message}`, error ?? "");
 }
 
 /**
  * Time an async operation
  */
-export async function timeAsync<T>(name: string, fn: () => Promise<T>): Promise<T> {
+export async function timeAsync<T>(
+  name: string,
+  fn: () => Promise<T>,
+): Promise<T> {
   startTiming(name);
   try {
     return await fn();

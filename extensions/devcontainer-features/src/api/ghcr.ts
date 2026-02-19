@@ -6,12 +6,12 @@ import type {
   Feature,
   GhcrManifest,
   GhcrTokenResponse,
-} from '../types';
-import { createHttpError, getUserErrorMessage } from '../utils/errors';
-import { logDebug, logError } from '../utils/logger';
-import { getConcurrency } from '../utils/preferences';
+} from "../types";
+import { createHttpError, getUserErrorMessage } from "../utils/errors";
+import { logDebug, logError } from "../utils/logger";
+import { getConcurrency } from "../utils/preferences";
 
-const GHCR_REGISTRY = 'ghcr.io';
+const GHCR_REGISTRY = "ghcr.io";
 const TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 // Token cache
@@ -45,7 +45,10 @@ async function getGhcrToken(repository: string): Promise<string> {
 
   const response = await fetch(url);
   if (!response.ok) {
-    const error = createHttpError(response.status, `Failed to get GHCR token for ${repository}`);
+    const error = createHttpError(
+      response.status,
+      `Failed to get GHCR token for ${repository}`,
+    );
     throw error;
   }
 
@@ -65,18 +68,24 @@ async function getGhcrToken(repository: string): Promise<string> {
 /**
  * Fetch manifest for devcontainer-collection
  */
-async function fetchManifest(repository: string, token: string): Promise<GhcrManifest> {
+async function fetchManifest(
+  repository: string,
+  token: string,
+): Promise<GhcrManifest> {
   const url = `https://${GHCR_REGISTRY}/v2/${repository}/manifests/latest`;
 
   const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: 'application/vnd.oci.image.manifest.v1+json',
+      Accept: "application/vnd.oci.image.manifest.v1+json",
     },
   });
 
   if (!response.ok) {
-    const error = createHttpError(response.status, `Failed to fetch manifest for ${repository}`);
+    const error = createHttpError(
+      response.status,
+      `Failed to fetch manifest for ${repository}`,
+    );
     throw error;
   }
 
@@ -86,7 +95,11 @@ async function fetchManifest(repository: string, token: string): Promise<GhcrMan
 /**
  * Fetch and parse devcontainer-collection.json blob
  */
-async function fetchCollectionBlob(repository: string, digest: string, token: string): Promise<DevContainerCollection> {
+async function fetchCollectionBlob(
+  repository: string,
+  digest: string,
+  token: string,
+): Promise<DevContainerCollection> {
   const url = `https://${GHCR_REGISTRY}/v2/${repository}/blobs/${digest}`;
 
   const response = await fetch(url, {
@@ -96,7 +109,10 @@ async function fetchCollectionBlob(repository: string, digest: string, token: st
   });
 
   if (!response.ok) {
-    const error = createHttpError(response.status, `Failed to fetch blob for ${repository}`);
+    const error = createHttpError(
+      response.status,
+      `Failed to fetch blob for ${repository}`,
+    );
     throw error;
   }
 
@@ -110,22 +126,30 @@ async function fetchCollectionBlob(repository: string, digest: string, token: st
 function findCollectionLayer(manifest: GhcrManifest): string | null {
   // Strategy 1: Look for specific media type
   const byMediaType = manifest.layers.find(
-    (layer) => layer.mediaType === 'application/vnd.devcontainers.collection.layer.v1+json',
+    (layer) =>
+      layer.mediaType ===
+      "application/vnd.devcontainers.collection.layer.v1+json",
   );
   if (byMediaType) return byMediaType.digest;
 
   // Strategy 2: Look for annotation with title
   const byTitle = manifest.layers.find(
-    (layer) => layer.annotations?.['org.opencontainers.image.title'] === 'devcontainer-collection.json',
+    (layer) =>
+      layer.annotations?.["org.opencontainers.image.title"] ===
+      "devcontainer-collection.json",
   );
   if (byTitle) return byTitle.digest;
 
   // Strategy 3: Look for annotation with type
-  const byType = manifest.layers.find((layer) => layer.annotations?.['dev.containers.type'] === 'collection');
+  const byType = manifest.layers.find(
+    (layer) => layer.annotations?.["dev.containers.type"] === "collection",
+  );
   if (byType) return byType.digest;
 
   // Strategy 4: Look for any JSON layer
-  const jsonLayer = manifest.layers.find((layer) => layer.mediaType.includes('json'));
+  const jsonLayer = manifest.layers.find((layer) =>
+    layer.mediaType.includes("json"),
+  );
   if (jsonLayer) return jsonLayer.digest;
 
   // Fallback: use first layer
@@ -135,7 +159,9 @@ function findCollectionLayer(manifest: GhcrManifest): string | null {
 /**
  * Fetch features from a single collection
  */
-export async function fetchCollectionFeatures(collection: CollectionInfo): Promise<CollectionFetchResult> {
+export async function fetchCollectionFeatures(
+  collection: CollectionInfo,
+): Promise<CollectionFetchResult> {
   const repository = parseOciReference(collection.ociReference);
 
   try {
@@ -147,7 +173,7 @@ export async function fetchCollectionFeatures(collection: CollectionInfo): Promi
       return {
         collection,
         features: [],
-        error: 'No collection layer found in manifest',
+        error: "No collection layer found in manifest",
       };
     }
 
@@ -169,7 +195,10 @@ export async function fetchCollectionFeatures(collection: CollectionInfo): Promi
 /**
  * Convert raw collection data to Feature objects
  */
-function convertToFeatures(collectionData: DevContainerCollection, collection: CollectionInfo): Feature[] {
+function convertToFeatures(
+  collectionData: DevContainerCollection,
+  collection: CollectionInfo,
+): Feature[] {
   if (!collectionData.features || !Array.isArray(collectionData.features)) {
     return [];
   }
@@ -191,8 +220,15 @@ function convertToFeatures(collectionData: DevContainerCollection, collection: C
 export async function fetchAllFeatures(
   collections: CollectionInfo[],
   concurrency?: number,
-  onProgress?: (completed: number, total: number, failedCollections: string[]) => void,
-): Promise<{ features: Feature[]; failedCollections: CollectionFetchResult[] }> {
+  onProgress?: (
+    completed: number,
+    total: number,
+    failedCollections: string[],
+  ) => void,
+): Promise<{
+  features: Feature[];
+  failedCollections: CollectionFetchResult[];
+}> {
   const effectiveConcurrency = concurrency ?? getConcurrency();
   const allFeatures: Feature[] = [];
   const failedCollections: CollectionFetchResult[] = [];
@@ -201,10 +237,12 @@ export async function fetchAllFeatures(
   // Process in batches
   for (let i = 0; i < collections.length; i += effectiveConcurrency) {
     const batch = collections.slice(i, i + effectiveConcurrency);
-    const results = await Promise.allSettled(batch.map((c) => fetchCollectionFeatures(c)));
+    const results = await Promise.allSettled(
+      batch.map((c) => fetchCollectionFeatures(c)),
+    );
 
     for (const result of results) {
-      if (result.status === 'fulfilled') {
+      if (result.status === "fulfilled") {
         const fetchResult = result.value;
         if (fetchResult.error) {
           failedCollections.push(fetchResult);

@@ -1,5 +1,9 @@
-import { getPreferenceValues } from '@raycast/api';
-import { createAppError, createHttpError, type AppError } from '../utils/errors';
+import { getPreferenceValues } from "@raycast/api";
+import {
+  createAppError,
+  createHttpError,
+  type AppError,
+} from "../utils/errors";
 
 interface Preferences {
   githubToken?: string;
@@ -41,16 +45,18 @@ export function getTimeUntilReset(): number {
  */
 function getGitHubToken(): string | undefined {
   const { githubToken } = getPreferenceValues<Preferences>();
-  return githubToken && githubToken.trim() !== '' ? githubToken.trim() : undefined;
+  return githubToken && githubToken.trim() !== ""
+    ? githubToken.trim()
+    : undefined;
 }
 
 /**
  * Update rate limit info from response headers
  */
 function updateRateLimitFromHeaders(headers: Headers): void {
-  const remaining = headers.get('x-ratelimit-remaining');
-  const limit = headers.get('x-ratelimit-limit');
-  const reset = headers.get('x-ratelimit-reset');
+  const remaining = headers.get("x-ratelimit-remaining");
+  const limit = headers.get("x-ratelimit-limit");
+  const reset = headers.get("x-ratelimit-reset");
 
   if (remaining && limit && reset) {
     rateLimitInfo = {
@@ -66,24 +72,31 @@ function updateRateLimitFromHeaders(headers: Headers): void {
  */
 function createRateLimitError(): AppError {
   const resetTime = Math.ceil(getTimeUntilReset() / 1000 / 60);
-  return createAppError('RATE_LIMIT_EXCEEDED', `GitHub API rate limit exceeded. Resets in ${resetTime} minutes.`, {
-    resetTime,
-    rateLimitInfo,
-  });
+  return createAppError(
+    "RATE_LIMIT_EXCEEDED",
+    `GitHub API rate limit exceeded. Resets in ${resetTime} minutes.`,
+    {
+      resetTime,
+      rateLimitInfo,
+    },
+  );
 }
 
 /**
  * Fetch from GitHub API with authentication and rate limit tracking
  */
-export async function fetchGitHub(url: string, signal?: AbortSignal): Promise<Response> {
+export async function fetchGitHub(
+  url: string,
+  signal?: AbortSignal,
+): Promise<Response> {
   const token = getGitHubToken();
   const headers: Record<string, string> = {
-    Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'Raycast-DevContainer-Features',
+    Accept: "application/vnd.github.v3+json",
+    "User-Agent": "Raycast-DevContainer-Features",
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const response = await fetch(url, { headers, signal });
@@ -97,7 +110,10 @@ export async function fetchGitHub(url: string, signal?: AbortSignal): Promise<Re
  * Returns null on non-critical errors (404, etc.) to allow fallback
  * Throws AppError on critical errors (rate limit, network)
  */
-export async function fetchGitHubText(url: string, signal?: AbortSignal): Promise<string | null> {
+export async function fetchGitHubText(
+  url: string,
+  signal?: AbortSignal,
+): Promise<string | null> {
   if (isRateLimitExhausted()) {
     throw createRateLimitError();
   }
@@ -107,8 +123,8 @@ export async function fetchGitHubText(url: string, signal?: AbortSignal): Promis
 
     // Check for rate limit from response
     if (response.status === 403) {
-      const remaining = response.headers.get('x-ratelimit-remaining');
-      if (remaining === '0') {
+      const remaining = response.headers.get("x-ratelimit-remaining");
+      if (remaining === "0") {
         throw createRateLimitError();
       }
     }
@@ -120,21 +136,24 @@ export async function fetchGitHubText(url: string, signal?: AbortSignal): Promis
 
     // Throw for other HTTP errors
     if (!response.ok) {
-      throw createHttpError(response.status, `GitHub API error: ${response.status}`);
+      throw createHttpError(
+        response.status,
+        `GitHub API error: ${response.status}`,
+      );
     }
 
     return await response.text();
   } catch (err) {
     // Re-throw AbortError for cleanup handling
-    if (err instanceof Error && err.name === 'AbortError') {
+    if (err instanceof Error && err.name === "AbortError") {
       throw err;
     }
     // Re-throw AppError
-    if (err !== null && typeof err === 'object' && 'code' in err) {
+    if (err !== null && typeof err === "object" && "code" in err) {
       throw err;
     }
     // Return null for other errors to allow fallback
-    console.error('Failed to fetch from GitHub:', err);
+    console.error("Failed to fetch from GitHub:", err);
     return null;
   }
 }
@@ -144,7 +163,10 @@ export async function fetchGitHubText(url: string, signal?: AbortSignal): Promis
  * Returns null on non-critical errors to allow fallback
  * Throws AppError on critical errors
  */
-export async function fetchGitHubJson<T>(url: string, signal?: AbortSignal): Promise<T | null> {
+export async function fetchGitHubJson<T>(
+  url: string,
+  signal?: AbortSignal,
+): Promise<T | null> {
   if (isRateLimitExhausted()) {
     throw createRateLimitError();
   }
@@ -154,8 +176,8 @@ export async function fetchGitHubJson<T>(url: string, signal?: AbortSignal): Pro
 
     // Check for rate limit from response
     if (response.status === 403) {
-      const remaining = response.headers.get('x-ratelimit-remaining');
-      if (remaining === '0') {
+      const remaining = response.headers.get("x-ratelimit-remaining");
+      if (remaining === "0") {
         throw createRateLimitError();
       }
     }
@@ -167,21 +189,24 @@ export async function fetchGitHubJson<T>(url: string, signal?: AbortSignal): Pro
 
     // Throw for other HTTP errors
     if (!response.ok) {
-      throw createHttpError(response.status, `GitHub API error: ${response.status}`);
+      throw createHttpError(
+        response.status,
+        `GitHub API error: ${response.status}`,
+      );
     }
 
     return (await response.json()) as T;
   } catch (err) {
     // Re-throw AbortError for cleanup handling
-    if (err instanceof Error && err.name === 'AbortError') {
+    if (err instanceof Error && err.name === "AbortError") {
       throw err;
     }
     // Re-throw AppError
-    if (err !== null && typeof err === 'object' && 'code' in err) {
+    if (err !== null && typeof err === "object" && "code" in err) {
       throw err;
     }
     // Return null for other errors to allow fallback
-    console.error('Failed to fetch JSON from GitHub:', err);
+    console.error("Failed to fetch JSON from GitHub:", err);
     return null;
   }
 }

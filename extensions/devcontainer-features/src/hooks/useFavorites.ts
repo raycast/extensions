@@ -1,7 +1,7 @@
-import { LocalStorage } from '@raycast/api';
-import { useCallback, useEffect, useState } from 'react';
+import { LocalStorage } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
 
-const FAVORITES_KEY = 'devcontainer-favorites';
+const FAVORITES_KEY = "devcontainer-favorites";
 
 interface UseFavoritesResult {
   favorites: string[];
@@ -25,7 +25,7 @@ export function useFavorites(): UseFavoritesResult {
           setFavorites(JSON.parse(raw));
         }
       } catch (err) {
-        console.error('Failed to load favorites:', err);
+        console.error("Failed to load favorites:", err);
       } finally {
         setIsLoading(false);
       }

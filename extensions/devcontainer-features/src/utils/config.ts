@@ -1,4 +1,4 @@
-import type { Feature } from '../types';
+import type { Feature } from "../types";
 
 /**
  * Generate full configuration JSON with all options for a feature
@@ -12,10 +12,10 @@ export function generateFullConfiguration(feature: Feature): string {
         optionsObj[name] = option.default;
       } else if (option.enum && option.enum.length > 0) {
         optionsObj[name] = option.enum[0];
-      } else if (option.type === 'boolean') {
+      } else if (option.type === "boolean") {
         optionsObj[name] = true;
       } else {
-        optionsObj[name] = '';
+        optionsObj[name] = "";
       }
     }
   }

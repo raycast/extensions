@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
-import type { Feature } from '../types';
-import { isOfficialFeature } from '../utils/collection';
+import { useMemo, useState } from "react";
+import type { Feature } from "../types";
+import { isOfficialFeature } from "../utils/collection";
 
 export interface FeatureFilters {
   showFavoritesOnly: boolean;
@@ -19,17 +19,26 @@ const DEFAULT_FILTERS: FeatureFilters = {
 interface UseFeatureFiltersResult {
   filters: FeatureFilters;
   setFilters: (filters: FeatureFilters) => void;
-  updateFilter: <K extends keyof FeatureFilters>(key: K, value: FeatureFilters[K]) => void;
+  updateFilter: <K extends keyof FeatureFilters>(
+    key: K,
+    value: FeatureFilters[K],
+  ) => void;
   resetFilters: () => void;
   filteredFeatures: Feature[];
   filterFeatures: (features: Feature[], favorites?: string[]) => Feature[];
   hasActiveFilters: boolean;
 }
 
-export function useFeatureFilters(features: Feature[], favorites: string[] = []): UseFeatureFiltersResult {
+export function useFeatureFilters(
+  features: Feature[],
+  favorites: string[] = [],
+): UseFeatureFiltersResult {
   const [filters, setFilters] = useState<FeatureFilters>(DEFAULT_FILTERS);
 
-  const updateFilter = <K extends keyof FeatureFilters>(key: K, value: FeatureFilters[K]) => {
+  const updateFilter = <K extends keyof FeatureFilters>(
+    key: K,
+    value: FeatureFilters[K],
+  ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -52,14 +61,18 @@ export function useFeatureFilters(features: Feature[], favorites: string[] = [])
 
         // Filter by has options
         if (filters.hasOptions !== null) {
-          const hasOpts = feature.options && Object.keys(feature.options).length > 0;
+          const hasOpts =
+            feature.options && Object.keys(feature.options).length > 0;
           if (filters.hasOptions !== hasOpts) {
             return false;
           }
         }
 
         // Filter by collection
-        if (filters.collection && !feature.collection.ociReference.includes(filters.collection)) {
+        if (
+          filters.collection &&
+          !feature.collection.ociReference.includes(filters.collection)
+        ) {
           return false;
         }
 
@@ -98,7 +111,7 @@ export function useFeatureFilters(features: Feature[], favorites: string[] = [])
 export function getUniqueCollections(features: Feature[]): string[] {
   const collections = new Set<string>();
   for (const feature of features) {
-    const name = feature.collection.ociReference.replace('ghcr.io/', '');
+    const name = feature.collection.ociReference.replace("ghcr.io/", "");
     collections.add(name);
   }
   return Array.from(collections).sort();

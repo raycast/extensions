@@ -2,16 +2,16 @@
  * Error codes for the application
  */
 export type ErrorCode =
-  | 'NETWORK_ERROR'
-  | 'RATE_LIMIT_EXCEEDED'
-  | 'CACHE_CORRUPTION'
-  | 'INVALID_RESPONSE'
-  | 'NOT_FOUND'
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'TIMEOUT'
-  | 'SERVER_ERROR'
-  | 'UNKNOWN';
+  | "NETWORK_ERROR"
+  | "RATE_LIMIT_EXCEEDED"
+  | "CACHE_CORRUPTION"
+  | "INVALID_RESPONSE"
+  | "NOT_FOUND"
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "TIMEOUT"
+  | "SERVER_ERROR"
+  | "UNKNOWN";
 
 /**
  * Application error structure
@@ -28,45 +28,51 @@ export interface AppError {
 /**
  * Error message mappings
  */
-const ERROR_MESSAGES: Record<ErrorCode, { userMessage: string; retryable: boolean }> = {
+const ERROR_MESSAGES: Record<
+  ErrorCode,
+  { userMessage: string; retryable: boolean }
+> = {
   NETWORK_ERROR: {
-    userMessage: 'Unable to connect. Please check your internet connection.',
+    userMessage: "Unable to connect. Please check your internet connection.",
     retryable: true,
   },
   RATE_LIMIT_EXCEEDED: {
-    userMessage: 'API rate limit exceeded. Please try again later or add a GitHub token in preferences.',
+    userMessage:
+      "API rate limit exceeded. Please try again later or add a GitHub token in preferences.",
     retryable: false,
   },
   CACHE_CORRUPTION: {
-    userMessage: 'Cache data was corrupted and has been cleared. Please refresh.',
+    userMessage:
+      "Cache data was corrupted and has been cleared. Please refresh.",
     retryable: true,
   },
   INVALID_RESPONSE: {
-    userMessage: 'Received unexpected data from server.',
+    userMessage: "Received unexpected data from server.",
     retryable: true,
   },
   NOT_FOUND: {
-    userMessage: 'The requested resource was not found.',
+    userMessage: "The requested resource was not found.",
     retryable: false,
   },
   UNAUTHORIZED: {
-    userMessage: 'Authentication failed. Please check your credentials.',
+    userMessage: "Authentication failed. Please check your credentials.",
     retryable: false,
   },
   FORBIDDEN: {
-    userMessage: 'Access denied. You do not have permission to access this resource.',
+    userMessage:
+      "Access denied. You do not have permission to access this resource.",
     retryable: false,
   },
   TIMEOUT: {
-    userMessage: 'Request timed out. Please try again.',
+    userMessage: "Request timed out. Please try again.",
     retryable: true,
   },
   SERVER_ERROR: {
-    userMessage: 'Server error occurred. Please try again later.',
+    userMessage: "Server error occurred. Please try again later.",
     retryable: true,
   },
   UNKNOWN: {
-    userMessage: 'An unexpected error occurred.',
+    userMessage: "An unexpected error occurred.",
     retryable: true,
   },
 };
@@ -74,7 +80,12 @@ const ERROR_MESSAGES: Record<ErrorCode, { userMessage: string; retryable: boolea
 /**
  * Create an application error
  */
-export function createAppError(code: ErrorCode, message: string, details?: unknown, httpStatus?: number): AppError {
+export function createAppError(
+  code: ErrorCode,
+  message: string,
+  details?: unknown,
+  httpStatus?: number,
+): AppError {
   const { userMessage, retryable } = ERROR_MESSAGES[code];
   return { code, message, userMessage, retryable, details, httpStatus };
 }
@@ -83,19 +94,23 @@ export function createAppError(code: ErrorCode, message: string, details?: unkno
  * Map HTTP status code to ErrorCode
  */
 export function httpStatusToErrorCode(status: number): ErrorCode {
-  if (status === 401) return 'UNAUTHORIZED';
-  if (status === 403) return 'FORBIDDEN';
-  if (status === 404) return 'NOT_FOUND';
-  if (status === 408) return 'TIMEOUT';
-  if (status === 429) return 'RATE_LIMIT_EXCEEDED';
-  if (status >= 500 && status < 600) return 'SERVER_ERROR';
-  return 'UNKNOWN';
+  if (status === 401) return "UNAUTHORIZED";
+  if (status === 403) return "FORBIDDEN";
+  if (status === 404) return "NOT_FOUND";
+  if (status === 408) return "TIMEOUT";
+  if (status === 429) return "RATE_LIMIT_EXCEEDED";
+  if (status >= 500 && status < 600) return "SERVER_ERROR";
+  return "UNKNOWN";
 }
 
 /**
  * Create an AppError from HTTP response
  */
-export function createHttpError(status: number, message: string, details?: unknown): AppError {
+export function createHttpError(
+  status: number,
+  message: string,
+  details?: unknown,
+): AppError {
   const code = httpStatusToErrorCode(status);
   return createAppError(code, message, details, status);
 }
@@ -111,25 +126,29 @@ export function toAppError(err: unknown): AppError {
 
   if (err instanceof Error) {
     // Check for network errors
-    if (err.message.includes('fetch') || err.message.includes('network') || err.name === 'TypeError') {
-      return createAppError('NETWORK_ERROR', err.message, err);
+    if (
+      err.message.includes("fetch") ||
+      err.message.includes("network") ||
+      err.name === "TypeError"
+    ) {
+      return createAppError("NETWORK_ERROR", err.message, err);
     }
     // Check for timeout
-    if (err.message.includes('timeout') || err.name === 'TimeoutError') {
-      return createAppError('TIMEOUT', err.message, err);
+    if (err.message.includes("timeout") || err.name === "TimeoutError") {
+      return createAppError("TIMEOUT", err.message, err);
     }
     // Check for rate limit
-    if (err.message.includes('rate limit')) {
-      return createAppError('RATE_LIMIT_EXCEEDED', err.message, err);
+    if (err.message.includes("rate limit")) {
+      return createAppError("RATE_LIMIT_EXCEEDED", err.message, err);
     }
     // Check for abort
-    if (err.name === 'AbortError') {
-      return createAppError('TIMEOUT', 'Request was aborted', err);
+    if (err.name === "AbortError") {
+      return createAppError("TIMEOUT", "Request was aborted", err);
     }
-    return createAppError('UNKNOWN', err.message, err);
+    return createAppError("UNKNOWN", err.message, err);
   }
 
-  return createAppError('UNKNOWN', String(err), err);
+  return createAppError("UNKNOWN", String(err), err);
 }
 
 /**
@@ -138,11 +157,11 @@ export function toAppError(err: unknown): AppError {
 export function isAppError(err: unknown): err is AppError {
   return (
     err !== null &&
-    typeof err === 'object' &&
-    'code' in err &&
-    'message' in err &&
-    'userMessage' in err &&
-    'retryable' in err
+    typeof err === "object" &&
+    "code" in err &&
+    "message" in err &&
+    "userMessage" in err &&
+    "retryable" in err
   );
 }
 

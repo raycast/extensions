@@ -32,9 +32,9 @@ export const LocalStorage = {
 
 export function getPreferenceValues<T>(): T {
   return {
-    githubToken: '',
-    cacheTtlHours: '24',
-    concurrency: '10',
+    githubToken: "",
+    cacheTtlHours: "24",
+    concurrency: "10",
   } as T;
 }
 
@@ -42,19 +42,19 @@ export const showToast = async () => {};
 
 export const Toast = {
   Style: {
-    Animated: 'Animated',
-    Success: 'Success',
-    Failure: 'Failure',
+    Animated: "Animated",
+    Success: "Success",
+    Failure: "Failure",
   },
 };
 
 export const Icon = {
-  Eye: 'Eye',
-  ArrowClockwise: 'ArrowClockwise',
-  Warning: 'Warning',
-  ExclamationMark: 'ExclamationMark',
-  Download: 'Download',
-  List: 'List',
-  Star: 'Star',
-  StarDisabled: 'StarDisabled',
+  Eye: "Eye",
+  ArrowClockwise: "ArrowClockwise",
+  Warning: "Warning",
+  ExclamationMark: "ExclamationMark",
+  Download: "Download",
+  List: "List",
+  Star: "Star",
+  StarDisabled: "StarDisabled",
 };

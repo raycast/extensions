@@ -1,15 +1,20 @@
-import { Cache } from '@raycast/api';
-import type { CacheEntry, CollectionInfo, Feature, FeatureContent } from '../types';
+import { Cache } from "@raycast/api";
+import type {
+  CacheEntry,
+  CollectionInfo,
+  Feature,
+  FeatureContent,
+} from "../types";
 
 const cache = new Cache();
 
 const CACHE_KEYS = {
-  COLLECTIONS: 'devcontainer-collections',
-  FEATURES: 'devcontainer-features',
-  CONTENT_KEYS: 'devcontainer-content-keys',
+  COLLECTIONS: "devcontainer-collections",
+  FEATURES: "devcontainer-features",
+  CONTENT_KEYS: "devcontainer-content-keys",
 } as const;
 
-const FEATURE_CONTENT_PREFIX = 'feature-content-';
+const FEATURE_CONTENT_PREFIX = "feature-content-";
 
 // 24 hours in milliseconds (default, can be overridden by preferences)
 let cacheTtlMs = 24 * 60 * 60 * 1000;
@@ -18,8 +23,8 @@ let cacheTtlMs = 24 * 60 * 60 * 1000;
  * Set cache TTL (called from preferences)
  */
 export function setCacheTtl(hours: number): void {
-  if (typeof hours !== 'number' || hours <= 0 || !isFinite(hours)) {
-    console.warn('Invalid cache TTL, using default 24 hours');
+  if (typeof hours !== "number" || hours <= 0 || !isFinite(hours)) {
+    console.warn("Invalid cache TTL, using default 24 hours");
     cacheTtlMs = 24 * 60 * 60 * 1000;
     return;
   }
@@ -38,7 +43,7 @@ export function getCacheTtlMs(): number {
  */
 function isValid<T>(entry: CacheEntry<T> | null): entry is CacheEntry<T> {
   if (!entry) return false;
-  if (typeof entry.timestamp !== 'number') return false;
+  if (typeof entry.timestamp !== "number") return false;
   return Date.now() - entry.timestamp < cacheTtlMs;
 }
 
@@ -48,10 +53,10 @@ function isValid<T>(entry: CacheEntry<T> | null): entry is CacheEntry<T> {
 function isValidCacheEntry<T>(obj: unknown): obj is CacheEntry<T> {
   return (
     obj !== null &&
-    typeof obj === 'object' &&
-    'data' in obj &&
-    'timestamp' in obj &&
-    typeof (obj as CacheEntry<T>).timestamp === 'number'
+    typeof obj === "object" &&
+    "data" in obj &&
+    "timestamp" in obj &&
+    typeof (obj as CacheEntry<T>).timestamp === "number"
   );
 }
 
@@ -61,11 +66,11 @@ function isValidCacheEntry<T>(obj: unknown): obj is CacheEntry<T> {
 function isValidCollectionInfo(obj: unknown): obj is CollectionInfo {
   return (
     obj !== null &&
-    typeof obj === 'object' &&
-    'sourceInformation' in obj &&
-    'ociReference' in obj &&
-    typeof (obj as CollectionInfo).sourceInformation === 'string' &&
-    typeof (obj as CollectionInfo).ociReference === 'string'
+    typeof obj === "object" &&
+    "sourceInformation" in obj &&
+    "ociReference" in obj &&
+    typeof (obj as CollectionInfo).sourceInformation === "string" &&
+    typeof (obj as CollectionInfo).ociReference === "string"
   );
 }
 
@@ -73,12 +78,12 @@ function isValidCollectionInfo(obj: unknown): obj is CollectionInfo {
  * Validate Feature structure
  */
 function isValidFeature(obj: unknown): obj is Feature {
-  if (obj === null || typeof obj !== 'object') return false;
+  if (obj === null || typeof obj !== "object") return false;
   const f = obj as Record<string, unknown>;
   return (
-    typeof f.id === 'string' &&
-    typeof f.name === 'string' &&
-    typeof f.reference === 'string' &&
+    typeof f.id === "string" &&
+    typeof f.name === "string" &&
+    typeof f.reference === "string" &&
     f.collection !== undefined &&
     isValidCollectionInfo(f.collection)
   );
@@ -88,9 +93,12 @@ function isValidFeature(obj: unknown): obj is Feature {
  * Validate FeatureContent structure
  */
 function isValidFeatureContent(obj: unknown): obj is FeatureContent {
-  if (obj === null || typeof obj !== 'object') return false;
+  if (obj === null || typeof obj !== "object") return false;
   const c = obj as Record<string, unknown>;
-  return (c.readme === null || typeof c.readme === 'string') && Array.isArray(c.scripts);
+  return (
+    (c.readme === null || typeof c.readme === "string") &&
+    Array.isArray(c.scripts)
+  );
 }
 
 /**
@@ -102,13 +110,13 @@ function getCachedContentKeys(): string[] {
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
-      console.error('Invalid content keys format, clearing');
+      console.error("Invalid content keys format, clearing");
       cache.remove(CACHE_KEYS.CONTENT_KEYS);
       return [];
     }
-    return parsed.filter((k): k is string => typeof k === 'string');
+    return parsed.filter((k): k is string => typeof k === "string");
   } catch (err) {
-    console.error('Failed to parse content keys cache:', err);
+    console.error("Failed to parse content keys cache:", err);
     cache.remove(CACHE_KEYS.CONTENT_KEYS);
     return [];
   }
@@ -118,7 +126,7 @@ function getCachedContentKeys(): string[] {
  * Add a content key to the tracking list
  */
 function addContentKey(key: string): void {
-  if (typeof key !== 'string' || key.length === 0) return;
+  if (typeof key !== "string" || key.length === 0) return;
   const keys = getCachedContentKeys();
   if (!keys.includes(key)) {
     keys.push(key);
@@ -143,7 +151,7 @@ export function getCachedCollections(): CollectionInfo[] | null {
   try {
     const entry = JSON.parse(raw);
     if (!isValidCacheEntry<CollectionInfo[]>(entry)) {
-      console.error('Invalid cache entry structure for collections, clearing');
+      console.error("Invalid cache entry structure for collections, clearing");
       cache.remove(CACHE_KEYS.COLLECTIONS);
       return null;
     }
@@ -151,18 +159,18 @@ export function getCachedCollections(): CollectionInfo[] | null {
       return null;
     }
     if (!Array.isArray(entry.data)) {
-      console.error('Invalid collections data format, clearing');
+      console.error("Invalid collections data format, clearing");
       cache.remove(CACHE_KEYS.COLLECTIONS);
       return null;
     }
     // Validate each collection
     const validCollections = entry.data.filter(isValidCollectionInfo);
     if (validCollections.length !== entry.data.length) {
-      console.warn('Some collections failed validation, using valid ones only');
+      console.warn("Some collections failed validation, using valid ones only");
     }
     return validCollections.length > 0 ? validCollections : null;
   } catch (err) {
-    console.error('Cache corruption detected for collections, clearing:', err);
+    console.error("Cache corruption detected for collections, clearing:", err);
     cache.remove(CACHE_KEYS.COLLECTIONS);
     return null;
   }
@@ -173,7 +181,7 @@ export function getCachedCollections(): CollectionInfo[] | null {
  */
 export function setCachedCollections(collections: CollectionInfo[]): void {
   if (!Array.isArray(collections)) {
-    console.error('Invalid collections data, not caching');
+    console.error("Invalid collections data, not caching");
     return;
   }
   const entry: CacheEntry<CollectionInfo[]> = {
@@ -193,7 +201,7 @@ export function getCachedFeatures(): Feature[] | null {
   try {
     const entry = JSON.parse(raw);
     if (!isValidCacheEntry<Feature[]>(entry)) {
-      console.error('Invalid cache entry structure for features, clearing');
+      console.error("Invalid cache entry structure for features, clearing");
       cache.remove(CACHE_KEYS.FEATURES);
       return null;
     }
@@ -201,18 +209,18 @@ export function getCachedFeatures(): Feature[] | null {
       return null;
     }
     if (!Array.isArray(entry.data)) {
-      console.error('Invalid features data format, clearing');
+      console.error("Invalid features data format, clearing");
       cache.remove(CACHE_KEYS.FEATURES);
       return null;
     }
     // Validate each feature
     const validFeatures = entry.data.filter(isValidFeature);
     if (validFeatures.length !== entry.data.length) {
-      console.warn('Some features failed validation, using valid ones only');
+      console.warn("Some features failed validation, using valid ones only");
     }
     return validFeatures.length > 0 ? validFeatures : null;
   } catch (err) {
-    console.error('Cache corruption detected for features, clearing:', err);
+    console.error("Cache corruption detected for features, clearing:", err);
     cache.remove(CACHE_KEYS.FEATURES);
     return null;
   }
@@ -223,7 +231,7 @@ export function getCachedFeatures(): Feature[] | null {
  */
 export function setCachedFeatures(features: Feature[]): void {
   if (!Array.isArray(features)) {
-    console.error('Invalid features data, not caching');
+    console.error("Invalid features data, not caching");
     return;
   }
   const entry: CacheEntry<Feature[]> = {
@@ -237,7 +245,7 @@ export function setCachedFeatures(features: Feature[]): void {
  * Get cached feature content (README + scripts)
  */
 export function getCachedFeatureContent(key: string): FeatureContent | null {
-  if (typeof key !== 'string' || key.length === 0) return null;
+  if (typeof key !== "string" || key.length === 0) return null;
 
   const raw = cache.get(`${FEATURE_CONTENT_PREFIX}${key}`);
   if (!raw) return null;
@@ -245,7 +253,9 @@ export function getCachedFeatureContent(key: string): FeatureContent | null {
   try {
     const entry = JSON.parse(raw);
     if (!isValidCacheEntry<FeatureContent>(entry)) {
-      console.error(`Invalid cache entry structure for feature content ${key}, clearing`);
+      console.error(
+        `Invalid cache entry structure for feature content ${key}, clearing`,
+      );
       cache.remove(`${FEATURE_CONTENT_PREFIX}${key}`);
       return null;
     }
@@ -259,7 +269,10 @@ export function getCachedFeatureContent(key: string): FeatureContent | null {
     }
     return entry.data;
   } catch (err) {
-    console.error(`Cache corruption detected for feature content ${key}, clearing:`, err);
+    console.error(
+      `Cache corruption detected for feature content ${key}, clearing:`,
+      err,
+    );
     cache.remove(`${FEATURE_CONTENT_PREFIX}${key}`);
     return null;
   }
@@ -268,13 +281,16 @@ export function getCachedFeatureContent(key: string): FeatureContent | null {
 /**
  * Save feature content to cache
  */
-export function setCachedFeatureContent(key: string, content: FeatureContent): void {
-  if (typeof key !== 'string' || key.length === 0) {
-    console.error('Invalid cache key, not caching');
+export function setCachedFeatureContent(
+  key: string,
+  content: FeatureContent,
+): void {
+  if (typeof key !== "string" || key.length === 0) {
+    console.error("Invalid cache key, not caching");
     return;
   }
   if (!isValidFeatureContent(content)) {
-    console.error('Invalid feature content, not caching');
+    console.error("Invalid feature content, not caching");
     return;
   }
   const entry: CacheEntry<FeatureContent> = {
@@ -326,7 +342,7 @@ export function getCacheTimestamp(): Date | null {
     }
     return new Date(entry.timestamp);
   } catch (err) {
-    console.error('Failed to get cache timestamp:', err);
+    console.error("Failed to get cache timestamp:", err);
     return null;
   }
 }
@@ -334,7 +350,11 @@ export function getCacheTimestamp(): Date | null {
 /**
  * Get cache statistics
  */
-export function getCacheStats(): { featuresCount: number; contentKeysCount: number; timestamp: Date | null } {
+export function getCacheStats(): {
+  featuresCount: number;
+  contentKeysCount: number;
+  timestamp: Date | null;
+} {
   const features = getCachedFeatures();
   const contentKeys = getCachedContentKeys();
   const timestamp = getCacheTimestamp();
