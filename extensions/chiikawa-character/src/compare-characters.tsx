@@ -42,12 +42,16 @@ export default function CompareCharactersCommand() {
       navigationTitle="Compare Characters"
       actions={
         <ActionPanel>
-          <Action.Push
-            icon={Icon.Sidebar}
-            title="Compare Side by Side"
-            target={<CharacterComparisonDetail leftCharacter={leftCharacter} rightCharacter={rightCharacter} />}
-          />
-          <Action icon={Icon.ArrowClockwise} title="Swap Characters" onAction={swapCharacters} />
+          <ActionPanel.Section>
+            <Action.Push
+              icon={Icon.Sidebar}
+              title="Compare Side by Side"
+              target={<CharacterComparisonDetail leftCharacter={leftCharacter} rightCharacter={rightCharacter} />}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Selection">
+            <Action icon={Icon.ArrowClockwise} title="Swap Characters" onAction={swapCharacters} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >

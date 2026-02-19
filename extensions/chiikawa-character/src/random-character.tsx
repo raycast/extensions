@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CharacterDetail } from "./components/CharacterDetail";
 import { CATEGORY_LABELS, CHARACTERS } from "./data/characters";
 import { CharacterCategory, ChiikawaCharacter } from "./types/character";
@@ -35,6 +35,7 @@ export default function RandomCharacterCommand() {
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [excludeRecentlySeen, setExcludeRecentlySeen] = useState(true);
   const [rollSeed, setRollSeed] = useState(0);
+  const [didAutoOpenDetail, setDidAutoOpenDetail] = useState(false);
   const {
     value: recentlySeenIds = [],
     setValue: setRecentlySeenIds,
@@ -51,14 +52,23 @@ export default function RandomCharacterCommand() {
     [pool, excludeRecentlySeen, recentlySeenIds, rollSeed],
   );
 
-  const openCharacterDetail = async () => {
+  const openCharacterDetail = useCallback(async () => {
     if (!randomCharacter) {
       return;
     }
 
     await setRecentlySeenIds(getNextRecentlySeenIds(recentlySeenIds, randomCharacter.id));
     push(<CharacterDetail character={randomCharacter} />);
-  };
+  }, [push, randomCharacter, recentlySeenIds, setRecentlySeenIds]);
+
+  useEffect(() => {
+    if (isLoading || !randomCharacter || didAutoOpenDetail) {
+      return;
+    }
+
+    setDidAutoOpenDetail(true);
+    void openCharacterDetail();
+  }, [didAutoOpenDetail, isLoading, openCharacterDetail, randomCharacter]);
 
   return (
     <List
@@ -83,19 +93,23 @@ export default function RandomCharacterCommand() {
           ]}
           actions={
             <ActionPanel>
-              <Action icon={Icon.Eye} title="Open Character Detail" onAction={openCharacterDetail} />
-              <Action
-                icon={Icon.ArrowClockwise}
-                title="Pick Another Character"
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={() => setRollSeed((seed) => seed + 1)}
-              />
-              <Action
-                icon={excludeRecentlySeen ? Icon.MinusCircle : Icon.PlusCircle}
-                title={excludeRecentlySeen ? "Include Recently Seen" : "Exclude Recently Seen"}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-                onAction={() => setExcludeRecentlySeen((value) => !value)}
-              />
+              <ActionPanel.Section>
+                <Action icon={Icon.Eye} title="Open Character Detail" onAction={openCharacterDetail} />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Randomizer">
+                <Action
+                  icon={Icon.ArrowClockwise}
+                  title="Pick Another Character"
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={() => setRollSeed((seed) => seed + 1)}
+                />
+                <Action
+                  icon={excludeRecentlySeen ? Icon.MinusCircle : Icon.PlusCircle}
+                  title={excludeRecentlySeen ? "Include Recently Seen" : "Exclude Recently Seen"}
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  onAction={() => setExcludeRecentlySeen((value) => !value)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

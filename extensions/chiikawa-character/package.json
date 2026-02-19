@@ -17,13 +17,7 @@
     {
       "name": "search-characters",
       "title": "Search Chiikawa Characters",
-      "description": "Search by English, Japanese, romanized names, and keywords",
-      "mode": "view"
-    },
-    {
-      "name": "list-characters",
-      "title": "List Chiikawa Characters",
-      "description": "Browse all characters with category and sorting controls",
+      "description": "Search and browse with category, sorting, and list/grid views",
       "mode": "view"
     },
     {

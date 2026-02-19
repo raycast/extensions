@@ -88,20 +88,33 @@ export function CharacterComparisonDetail({ leftCharacter, rightCharacter }: Pro
       }
       actions={
         <ActionPanel>
-          <Action.Push
-            title={`Open ${leftCharacter.nameEn} Detail`}
-            target={<CharacterDetail character={leftCharacter} />}
-          />
-          <Action.Push
-            title={`Open ${rightCharacter.nameEn} Detail`}
-            target={<CharacterDetail character={rightCharacter} />}
-          />
-          <Action.OpenInBrowser title={`Open ${leftCharacter.nameEn} Official Page`} url={leftCharacter.officialUrl} />
-          <Action.OpenInBrowser
-            title={`Open ${rightCharacter.nameEn} Official Page`}
-            url={rightCharacter.officialUrl}
-          />
-          <Action.CopyToClipboard title="Copy Comparison as Markdown" content={markdown} />
+          <ActionPanel.Section title="Character Details">
+            <Action.Push
+              icon={Icon.Eye}
+              title={`Open ${leftCharacter.nameEn} Detail`}
+              target={<CharacterDetail character={leftCharacter} />}
+            />
+            <Action.Push
+              icon={Icon.Eye}
+              title={`Open ${rightCharacter.nameEn} Detail`}
+              target={<CharacterDetail character={rightCharacter} />}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Official Pages">
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title={`Open ${leftCharacter.nameEn} Official Page`}
+              url={leftCharacter.officialUrl}
+            />
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title={`Open ${rightCharacter.nameEn} Official Page`}
+              url={rightCharacter.officialUrl}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard icon={Icon.Document} title="Copy Comparison as Markdown" content={markdown} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

@@ -61,31 +61,40 @@ export function CharacterDetail({ character }: Props) {
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Japanese Name"
-            content={character.nameJp}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
-          <Action.CopyToClipboard
-            title="Copy Character Bio"
-            content={character.description}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
-          <Action.OpenInBrowser
-            title="Open Official Page"
-            url={character.officialUrl}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy as Markdown"
-            content={markdown}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
-          />
-          <Action.Push
-            title="View Random Character"
-            target={<CharacterDetail character={randomCharacter} />}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <ActionPanel.Section title="Open">
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title="Open Official Page"
+              url={character.officialUrl}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+            <Action.Push
+              icon={Icon.ArrowClockwise}
+              title="View Random Character"
+              target={<CharacterDetail character={randomCharacter} />}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard
+              icon={Icon.Clipboard}
+              title="Copy Japanese Name"
+              content={character.nameJp}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+            <Action.CopyToClipboard
+              icon={Icon.Text}
+              title="Copy Character Bio"
+              content={character.description}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+            <Action.CopyToClipboard
+              icon={Icon.Document}
+              title="Copy as Markdown"
+              content={markdown}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

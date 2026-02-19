@@ -1,17 +1,15 @@
 # Chiikawa Characters
 
-Raycast extension for searching and browsing Chiikawa character profiles offline.
+Raycast extension for searching and browsing [Chiikawa](https://www.chiikawaofficial.com/home/) character profiles offline. Character data and "open official page" actions use the [official character pages](https://www.chiikawaofficial.com/characters).
 
 ## Commands
 
 - `Search Chiikawa Characters`  
-  Fuzzy search by English name, Japanese name, romanized name, and lore keywords.
-- `List Chiikawa Characters`  
-  Browse all characters with category filter, sort toggles, and list/grid views.
+  Fuzzy search and browse by English name, Japanese name, romanized name, and lore keywords with category, sorting, and list/grid controls.
 - `Compare Chiikawa Characters`  
   Pick any two characters and compare traits, relationships, and fun facts side by side.
 - `Random Chiikawa Character`  
-  Smart randomizer with category filter and optional "exclude recently seen" behavior.
+  Smart randomizer with category filter and optional "exclude recently seen" behavior, opening directly in detail view on launch.
 
 ## Compare Characters
 
@@ -22,7 +20,7 @@ Raycast extension for searching and browsing Chiikawa character profiles offline
   - relationships and fun facts comparison
 - Quick actions to:
   - open each character's full profile
-  - open each official character page
+  - [open each official character page](https://www.chiikawaofficial.com/characters)
   - copy the full comparison as Markdown
 
 ## Smart Randomizer
@@ -58,6 +56,6 @@ Raycast extension for searching and browsing Chiikawa character profiles offline
 
 - Copy Japanese name (`Cmd + C`)
 - Copy bio (`Cmd + Shift + C`)
-- Open official page (`Cmd + O`)
+- [Open official page](https://www.chiikawaofficial.com/characters) (`Cmd + O`)
 - Copy profile as markdown (`Cmd + M`)
 - Jump to random character (`Cmd + R`)

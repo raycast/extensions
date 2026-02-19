@@ -18,10 +18,20 @@ export function CharacterListItem({ character }: Props) {
       accessories={[{ text: CATEGORY_LABELS[character.category], icon: Icon.Tag }]}
       actions={
         <ActionPanel>
-          <Action.Push title="Open Character Detail" target={<CharacterDetail character={character} />} />
-          <Action.CopyToClipboard title="Copy Japanese Name" content={character.nameJp} />
-          <Action.CopyToClipboard title="Copy Character Bio" content={character.description} />
-          <Action.OpenInBrowser title="Open Official Page" url={character.officialUrl} />
+          <ActionPanel.Section>
+            <Action.Push
+              title="Open Character Detail"
+              icon={Icon.Eye}
+              target={<CharacterDetail character={character} />}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy Japanese Name" icon={Icon.Clipboard} content={character.nameJp} />
+            <Action.CopyToClipboard title="Copy Character Bio" icon={Icon.Text} content={character.description} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Open">
+            <Action.OpenInBrowser title="Open Official Page" icon={Icon.Globe} url={character.officialUrl} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
