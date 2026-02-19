@@ -5,7 +5,6 @@ import {
   showToast,
   Toast,
   Clipboard,
-  useNavigation,
   List,
   Icon,
   open,
@@ -109,7 +108,7 @@ interface BlurHashResult {
   ratio: string;
   fileName: string;
   copyText: string;
-  previewPath: string;
+  previewDataUri: string;
 }
 
 function generatePreview(hash: string, width: number, height: number): string {
@@ -117,23 +116,25 @@ function generatePreview(hash: string, width: number, height: number): string {
   if (!ffmpeg)
     throw new Error("ffmpeg not found — install with: brew install ffmpeg");
 
-  // Generate large — Raycast's markdown renderer will scale it to fill the panel
-  const pw = 1200;
+  const pw = 400;
   const ph = Math.round((height / width) * pw);
   const pixels = decode(hash, pw, ph);
 
-  // Write raw RGBA to temp file, convert to PNG with ffmpeg
+  // Convert raw RGBA to PNG via ffmpeg, return as base64 data URI
   const rawPath = path.join(os.tmpdir(), `blurhash-raw-${Date.now()}.rgba`);
-  const pngPath = path.join(os.tmpdir(), `blurhash-preview-${Date.now()}.png`);
+  const pngPath = path.join(os.tmpdir(), `blurhash-png-${Date.now()}.png`);
 
   fs.writeFileSync(rawPath, Buffer.from(pixels.buffer));
   execSync(
     `"${ffmpeg}" -y -f rawvideo -pix_fmt rgba -s ${pw}x${ph} -i "${rawPath}" "${pngPath}"`,
     { stdio: "pipe" },
   );
-  fs.unlinkSync(rawPath);
 
-  return pngPath;
+  const pngBuffer = fs.readFileSync(pngPath);
+  fs.unlinkSync(rawPath);
+  fs.unlinkSync(pngPath);
+
+  return `data:image/png;base64,${pngBuffer.toString("base64")}`;
 }
 
 function generateBlurHash(filePath: string): BlurHashResult {
@@ -147,13 +148,13 @@ function generateBlurHash(filePath: string): BlurHashResult {
   const pixels = getPixelData(filePath, sw, sh);
   const hash = encode(pixels, sw, sh, 4, 3);
 
-  const previewPath = generatePreview(hash, width, height);
+  const previewDataUri = generatePreview(hash, width, height);
 
   const fileName = path.basename(filePath);
   const ratio = aspectRatio(width, height);
   const copyText = `${fileName} ${width}x${height} ${ratio} ${hash}`;
 
-  return { hash, width, height, ratio, fileName, copyText, previewPath };
+  return { hash, width, height, ratio, fileName, copyText, previewDataUri };
 }
 
 function isFile(p: string): boolean {
@@ -212,17 +213,7 @@ function resolveClipboardFile(clip: {
 }
 
 function ResultView({ result }: { result: BlurHashResult }) {
-  useEffect(() => {
-    return () => {
-      try {
-        fs.unlinkSync(result.previewPath);
-      } catch {
-        /* already gone */
-      }
-    };
-  }, []);
-
-  const markdown = `\n\n\n\n![preview](${result.previewPath})`;
+  const markdown = `\n\n\n\n![preview](${result.previewDataUri})`;
 
   return (
     <Detail
@@ -249,9 +240,11 @@ function ResultView({ result }: { result: BlurHashResult }) {
   );
 }
 
-function FallbackMenu() {
-  const { push } = useNavigation();
-
+function FallbackMenu({
+  onResult,
+}: {
+  onResult: (result: BlurHashResult) => void;
+}) {
   return (
     <List>
       <List.EmptyView
@@ -296,11 +289,22 @@ function FallbackMenu() {
                     title: "Generating BlurHash...",
                   });
                   const res = generateBlurHash(filePath);
+                  onResult(res);
                   await showToast({
                     style: Toast.Style.Success,
                     title: "Done!",
                   });
-                  push(<ResultView result={res} />);
+                  // Bring Raycast back to focus after native file dialog
+                  setTimeout(() => {
+                    try {
+                      execSync(
+                        `osascript -e 'tell application "System Events" to tell process "Raycast" to set frontmost to true'`,
+                        { stdio: "pipe", timeout: 3000 },
+                      );
+                    } catch {
+                      /* ignore */
+                    }
+                  }, 100);
                 } catch {
                   // User cancelled the dialog
                 }
@@ -317,7 +321,7 @@ function cleanupStaleTempFiles() {
   try {
     const tmpDir = os.tmpdir();
     for (const f of fs.readdirSync(tmpDir)) {
-      if (f.startsWith("blurhash-preview-") || f.startsWith("blurhash-raw-")) {
+      if (f.startsWith("blurhash-raw-") || f.startsWith("blurhash-png-")) {
         try {
           fs.unlinkSync(path.join(tmpDir, f));
         } catch {
@@ -405,12 +409,19 @@ export default function Command() {
     );
   }
 
-  if (showPicker) {
-    return <FallbackMenu />;
-  }
-
   if (result) {
     return <ResultView result={result} />;
+  }
+
+  if (showPicker) {
+    return (
+      <FallbackMenu
+        onResult={(res) => {
+          setShowPicker(false);
+          setResult(res);
+        }}
+      />
+    );
   }
 
   return <Detail isLoading={isLoading} markdown="" />;
