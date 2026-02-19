@@ -129,14 +129,16 @@ export default function MenuBarCommand() {
           {data.isRamadanNow ? (
             <>
               {/* Fasting status as a top-level title */}
-              {getFastingStatus(data.suhoor, data.iftar) === "fasting" ? (
-                <MenuBarExtra.Item title="Currently fasting" />
-              ) : getFastingStatus(data.suhoor, data.iftar) ===
-                "after-iftar" ? (
-                <MenuBarExtra.Item title="Fast complete" />
-              ) : (
-                <MenuBarExtra.Item title="Suhoor time" />
-              )}
+              {(() => {
+                const fastingStatus = getFastingStatus(data.suhoor, data.iftar);
+                if (fastingStatus === "fasting") {
+                  return <MenuBarExtra.Item title="Currently fasting" />;
+                } else if (fastingStatus === "after-iftar") {
+                  return <MenuBarExtra.Item title="Fast complete" />;
+                } else {
+                  return <MenuBarExtra.Item title="Suhoor time" />;
+                }
+              })()}
 
               <MenuBarExtra.Item
                 icon={Icon.Moon}
