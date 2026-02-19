@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon, open } from "@raycast/api";
 import type { RaycastCard } from "../lib/api";
 import { TEAK_APP_URL } from "../lib/constants";
 import { formatDateTime } from "../lib/dateFormat";
-import { SetRaycastKeyAction } from "./SetRaycastKeyAction";
+import { SetApiKeyAction } from "./SetApiKeyAction";
 
 export function CardDetail({ card }: { card: RaycastCard }) {
   const markdown = [
@@ -38,7 +38,7 @@ export function CardDetail({ card }: { card: RaycastCard }) {
             onAction={() => open(TEAK_APP_URL)}
             title="Open Teak App"
           />
-          <SetRaycastKeyAction />
+          <SetApiKeyAction />
         </ActionPanel>
       }
       markdown={markdown}

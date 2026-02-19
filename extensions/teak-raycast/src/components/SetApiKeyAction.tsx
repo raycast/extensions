@@ -1,6 +1,6 @@
 import { Action, Icon, openExtensionPreferences } from "@raycast/api";
 
-export function SetRaycastKeyAction() {
+export function SetApiKeyAction() {
   return (
     <Action
       icon={Icon.Gear}

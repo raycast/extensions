@@ -9,7 +9,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
-import { SetRaycastKeyAction } from "./components/SetRaycastKeyAction";
+import { SetApiKeyAction } from "./components/SetApiKeyAction";
 import {
   getRecoveryHint,
   getUserFacingErrorMessage,
@@ -83,7 +83,7 @@ export default function QuickSaveCommand() {
             onSubmit={handleSubmit}
             title={isSaving ? "Saving..." : "Save to Teak"}
           />
-          <SetRaycastKeyAction />
+          <SetApiKeyAction />
         </ActionPanel>
       }
     >

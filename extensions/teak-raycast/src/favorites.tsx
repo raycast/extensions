@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { CardDetail } from "./components/CardDetail";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
-import { SetRaycastKeyAction } from "./components/SetRaycastKeyAction";
+import { SetApiKeyAction } from "./components/SetApiKeyAction";
 import {
   getFavoriteCards,
   getUserFacingErrorMessage,
@@ -70,7 +70,7 @@ export default function FavoritesCommand() {
                 }}
                 title="Retry"
               />
-              <SetRaycastKeyAction />
+              <SetApiKeyAction />
             </ActionPanel>
           }
           description="Check your API key and network connection, then retry."
@@ -112,7 +112,7 @@ export default function FavoritesCommand() {
                   onAction={() => open(TEAK_APP_URL)}
                   title="Open Teak App"
                 />
-                <SetRaycastKeyAction />
+                <SetApiKeyAction />
               </ActionPanel>
             }
             icon={Icon.Star}

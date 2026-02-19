@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import { TEAK_SETTINGS_URL } from "../lib/constants";
-import { SetRaycastKeyAction } from "./SetRaycastKeyAction";
+import { SetApiKeyAction } from "./SetApiKeyAction";
 
 export function MissingApiKeyDetail() {
   return (
     <Detail
       actions={
         <ActionPanel>
-          <SetRaycastKeyAction />
+          <SetApiKeyAction />
           <Action.OpenInBrowser
             title="Open Teak Settings"
             url={TEAK_SETTINGS_URL}
