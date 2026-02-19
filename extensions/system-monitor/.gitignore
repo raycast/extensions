@@ -2,4 +2,3 @@ node_modules
 .DS_Store
 .vscode
 raycast-env.d.ts
-assets/temperature-reader

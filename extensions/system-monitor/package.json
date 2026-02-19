@@ -64,8 +64,8 @@
           "type": "textfield",
           "required": false,
           "title": "Network Formatting",
-          "placeholder": "↓ <DOWN>/s ↑ <UP>/s",
-          "default": "↓ <DOWN>/s ↑ <UP>/s"
+          "placeholder": "\u2193 <DOWN>/s \u2191 <UP>/s",
+          "default": "\u2193 <DOWN>/s \u2191 <UP>/s"
         },
         {
           "name": "diskMenubarFormat",
@@ -107,8 +107,8 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "npm run prebuild && ray build",
-    "dev": "npm run prebuild && ray develop",
+    "build": "ray build",
+    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
