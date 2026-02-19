@@ -31,7 +31,10 @@ async function getActiveInterface(): Promise<string> {
 async function getNetworkStats(): Promise<NetworkStats> {
   try {
     const iface = await getActiveInterface();
-    const command = `/usr/sbin/netstat -ib | /usr/bin/grep -E '${iface}.*Link' | /usr/bin/head -1 | /usr/bin/awk '{print $7, $10}'`;
+    // Sanitize interface name to prevent command injection (only allow valid interface name chars)
+    const safeIface = iface.replace(/[^a-zA-Z0-9._-]/g, "");
+    if (!safeIface) return { bytesReceived: 0, bytesSent: 0 };
+    const command = `/usr/sbin/netstat -ib | /usr/bin/grep -E '${safeIface}.*Link' | /usr/bin/head -1 | /usr/bin/awk '{print $7, $10}'`;
     const { stdout } = await execPromise(command);
     const trimmed = stdout.trim();
     if (!trimmed) return { bytesReceived: 0, bytesSent: 0 };
