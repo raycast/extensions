@@ -70,7 +70,7 @@ export default function CalendarCommand() {
         >();
         for (const day of calendar.data) {
           const g = day.date.gregorian;
-          const key = `${parseInt(g.day)}-${g.month.number}-${g.year}`;
+          const key = `${parseInt(g.day, 10)}-${g.month.number}-${g.year}`;
           timingsMap.set(key, day.timings);
         }
 
