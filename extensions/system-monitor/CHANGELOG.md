@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Added Temperature Monitoring] - {PR_MERGE_DATE}
+## [Added Temperature Monitoring] - 2026-02-19
 
 - Added temperature view under CPU section
 - CPU temperature displayed in menu bar dropdown
