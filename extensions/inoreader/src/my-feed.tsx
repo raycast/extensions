@@ -225,6 +225,25 @@ async function authorizeAndGetToken(preferences: Preferences.MyFeed): Promise<st
 async function getAccessToken(preferences: Preferences.MyFeed, interactive: boolean): Promise<string | undefined> {
   const tokens = await oauthClient.getTokens();
   if (tokens?.accessToken) {
+    if (tokens.refreshToken && tokens.isExpired()) {
+      try {
+        const params = new URLSearchParams();
+        params.set("client_id", preferences.clientId.trim());
+        params.set("refresh_token", tokens.refreshToken);
+        params.set("grant_type", "refresh_token");
+
+        const tokenResponse = await fetchTokens(params, preferences, tokens.refreshToken);
+        await oauthClient.setTokens(tokenResponse);
+        return tokenResponse.access_token;
+      } catch {
+        await oauthClient.removeTokens();
+        if (interactive) {
+          return authorizeAndGetToken(preferences);
+        }
+        return undefined;
+      }
+    }
+
     return tokens.accessToken;
   }
 
