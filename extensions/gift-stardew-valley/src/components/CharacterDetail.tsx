@@ -1,4 +1,4 @@
-import { List, Color } from "@raycast/api";
+import { List } from "@raycast/api";
 
 type CharacterProps = {
   character: Character;
@@ -17,12 +17,7 @@ export default function CharacterDetail({ character }: CharacterProps) {
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Loves">
                 {character.loves.map((gift, index) => (
-                  <List.Item.Detail.Metadata.TagList.Item
-                    key={index}
-                    icon={{ source: gift.image }}
-                    text={gift.name}
-                    color={Color.Orange}
-                  />
+                  <List.Item.Detail.Metadata.TagList.Item key={index} icon={{ source: gift.image }} text={gift.name} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             </>
