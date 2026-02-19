@@ -26,6 +26,19 @@
 - New headphones icon for wired headphones
 - Icons work properly with Raycast's tint system
 
+## [Update] - 2026-02-17
+- Improve binary download for windows (downloads and checks if binary exists at runtime)
+
+## [Update] - 2026-02-16
+- Used https://github.com/Inovvia/go-win-audio-cli instead of cmdlet to prevent issues regarding powershell and administrator privileges
+- Listing audio devices on windows is now a lot faster!
+
+## [Fix] - 2026-02-10
+- Improved windows requirement auto install logic
+- Suppressed PowerShell warnings — Set $WarningPreference = 'SilentlyContinue' and -WarningAction SilentlyContinue on Import-Module to prevent warnings from corrupting JSON output.
+- Stripped ANSI escape codes — PS7 outputs color codes in warnings; these are now stripped before JSON parsing.
+- Handled both PS5 and PS7
+
 ## Chore - 2026-02-07
 - Fix issues in lint due to newer ESlint package
 
