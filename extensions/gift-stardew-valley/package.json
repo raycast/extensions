@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gift-stardew-valley",
   "title": "Gift Stardew Valley",
   "description": "A database of gifts for Stardew Valley characters.",
