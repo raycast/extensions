@@ -1,6 +1,6 @@
 # Digger Changelog
 
-## [Add Content Signals and Payment Required (x402) detection] - {PR_MERGE_DATE}
+## [Add Content Signals and Payment Required (x402) detection] - 2026-02-19
 
 ### Added: Content Signals detection
 
