@@ -60,6 +60,20 @@ export function BookGrid({
   onClearSearch,
   categorized,
 }: BookGridProps) {
+export function BookGrid({
+  categorizedItems,
+  filteredCategorizedItems,
+  totalCount,
+  activeFilter,
+  onFilterChange,
+  isLoading,
+  viewMode,
+  onViewModeChange,
+  onClearSearch,
+  categorized,
+  searchText,
+  onSearchTextChange,
+}: BookGridProps) {
   return (
     <Grid
       columns={5}
@@ -67,6 +81,9 @@ export function BookGrid({
       fit={Grid.Fit.Fill}
       navigationTitle={categorized ? "Book Covers (Sorted)" : "Book Covers"}
       isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={onSearchTextChange}
+      searchBarPlaceholder="Search Google Books by keywords..."
       searchBarAccessory={
         <Grid.Dropdown tooltip="Category" value={activeFilter} onChange={onFilterChange}>
           <Grid.Dropdown.Item title={`All (${totalCount})`} value="" />
