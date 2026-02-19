@@ -35,7 +35,7 @@ function getApiConfig() {
   if (/^https?:\/\//i.test(rawHost)) {
     try {
       const parsed = new URL(rawHost);
-      protocol = parsed.protocol.replace(":", "");
+      protocol = parsed.protocol.replace(":", "") as "http" | "https";
       host = parsed.hostname;
       port = parsed.port || rawPort;
       baseFromHost = parsed.pathname === "/" ? "" : parsed.pathname;
