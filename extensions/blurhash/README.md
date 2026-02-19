@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="extension-icon.png" width="128" height="128" alt="BlurHash Generator" />
+  <img src="assets/extension-icon.png" width="128" height="128" alt="BlurHash Generator" />
 </p>
 
 <h1 align="center">BlurHash Generator</h1>
