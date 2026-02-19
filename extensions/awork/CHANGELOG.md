@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [Project and task keys] - {PR_MERGE_DATE}
+## [Project and task keys] - 2026-02-19
 
 - Added search support for project key and task key
 
