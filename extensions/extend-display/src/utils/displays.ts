@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, environment } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
 
@@ -86,7 +86,7 @@ tell application "System Events"
 end tell
 
 tell application "System Settings" to quit
-do shell script "open 'raycast://extensions/pavzagor/extend-display/connect-to-display'"
+do shell script "open '" & (system attribute "Raycast_Deeplink") & "'"
 
 set AppleScript's text item delimiters to "|||"
 return deviceNames as string
@@ -95,10 +95,12 @@ return deviceNames as string
 // Scan displays from System Settings dropdown
 export async function scanDisplaysFromSystem(): Promise<Display[]> {
   try {
+    const deeplink = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/connect-to-display`;
     const { stdout } = await execFileAsync("osascript", ["-e", scanScript], {
       env: {
         ...process.env,
         Mirror_Section_Name: MIRROR_SECTION_NAME,
+        Raycast_Deeplink: deeplink,
       },
     });
 
