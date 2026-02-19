@@ -1,6 +1,6 @@
 # Binge Clock Changelog
 
-## [Metadata, Filters, and Detail UI Improvements] - {PR_MERGE_DATE}
+## [Metadata, Filters, and Detail UI Improvements] - 2026-02-19
 
 - Added live detailed view while browsing search results (no separate calculate action required)
 - Added poster image in result detail view with a rectangular fallback image for missing posters
