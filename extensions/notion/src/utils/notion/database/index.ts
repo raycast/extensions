@@ -156,13 +156,37 @@ type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
 async function resolveParentDatabaseId(notion: Client, databaseOrDataSourceId: string): Promise<string> {
   try {
-    const dataSourceId = await resolveDataSourceId(notion, databaseOrDataSourceId);
     const dataSource = await notion.dataSources.retrieve({
-      data_source_id: dataSourceId,
+      data_source_id: databaseOrDataSourceId,
     });
 
     if ("parent" in dataSource && "database_id" in dataSource.parent) {
       return dataSource.parent.database_id;
+    }
+  } catch {
+    // Not a valid data source id, try resolving from database metadata.
+  }
+
+  try {
+    const database = await notion.databases.retrieve({
+      database_id: databaseOrDataSourceId,
+    });
+
+    if ("data_sources" in database && database.data_sources[0]?.id) {
+      try {
+        const dataSource = await notion.dataSources.retrieve({
+          data_source_id: database.data_sources[0].id,
+        });
+        if ("parent" in dataSource && "database_id" in dataSource.parent) {
+          return dataSource.parent.database_id;
+        }
+      } catch {
+        // Fall through and use database id as a safe fallback.
+      }
+    }
+
+    if ("id" in database && database.id) {
+      return database.id;
     }
   } catch {
     // Fall back to the provided id for workspaces still passing database ids.
