@@ -71,7 +71,7 @@ export const getProjects =
         filterBy = filterBy + `id eq guid'${encodeURIComponent(searchText)}'`;
       } else {
         const encodedSearchText = encodeURIComponent(searchText.replaceAll("'", ""));
-        filterBy = filterBy + `substringof('${encodedSearchText}',name) or projectKey eq '${encodedSearchText}'`;
+        filterBy = filterBy + `(substringof('${encodedSearchText}',name) or projectKey eq '${encodedSearchText}')`;
       }
     }
 

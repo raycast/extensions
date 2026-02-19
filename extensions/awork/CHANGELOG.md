@@ -2,7 +2,7 @@
 
 ## [Project and task keys] - {PR_MERGE_DATE}
 
-- Added search support for projekt key and task key
+- Added search support for project key and task key
 
 ## [Raycast AI & Windows support] - 2025-12-17
 
