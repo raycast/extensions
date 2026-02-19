@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-19
 
 ### Added
 - **GitIgnore**: Add "Add to .gitignore" action for files in status view
