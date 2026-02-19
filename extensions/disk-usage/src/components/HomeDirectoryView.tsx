@@ -24,7 +24,7 @@ export const HomeDirectoryComponent: FC<{
       <List.Section title="Welcome">
         <List.Item
           title="No disk index found"
-          subtitle="Click to start scanning your Home directory"
+          subtitle="Press Enter to start scanning your Home directory"
           icon={Icon.MagnifyingGlass}
           actions={
             <ActionPanel>

@@ -1,11 +1,49 @@
 import { readFile } from "fs/promises";
 import { LocalStorage } from "@raycast/api";
-import { ProtonExport, TOTPAccount } from "../types";
+import { ProtonExport, TOTPAccount, ImportMode } from "../types";
 import { parseOtpAuthUri } from "./parser";
 import { STORAGE_KEYS } from "./constants";
+import { loadAccountsFromDatabase } from "./database";
+import { validateAndParseKey } from "./crypto";
+
+export async function getImportMode(): Promise<ImportMode | null> {
+  const mode = await LocalStorage.getItem<string>(STORAGE_KEYS.IMPORT_MODE);
+  if (mode === "json" || mode === "sqlite") {
+    return mode;
+  }
+  return null;
+}
+
+export async function setImportMode(mode: ImportMode): Promise<void> {
+  await LocalStorage.setItem(STORAGE_KEYS.IMPORT_MODE, mode);
+}
+
+export async function getEncryptionKey(): Promise<string | null> {
+  const key = await LocalStorage.getItem<string>(STORAGE_KEYS.ENCRYPTION_KEY);
+  return key || null;
+}
+
+export async function setEncryptionKey(key: string): Promise<void> {
+  await LocalStorage.setItem(STORAGE_KEYS.ENCRYPTION_KEY, key);
+}
 
 export async function loadAccountsFromStorage(): Promise<TOTPAccount[]> {
   try {
+    const mode = await getImportMode();
+
+    if (mode === "sqlite") {
+      const keyString = await getEncryptionKey();
+      if (!keyString) {
+        return [];
+      }
+      const key = validateAndParseKey(keyString);
+      if (!key) {
+        return [];
+      }
+      return await loadAccountsFromDatabase(key);
+    }
+
+    // Default to JSON mode
     const storedData = await LocalStorage.getItem<string>(STORAGE_KEYS.PROTON_EXPORT);
     if (!storedData) {
       return [];
@@ -69,4 +107,6 @@ function parseProtonExport(exportData: ProtonExport): TOTPAccount[] {
 
 export async function clearStoredData(): Promise<void> {
   await LocalStorage.removeItem(STORAGE_KEYS.PROTON_EXPORT);
+  await LocalStorage.removeItem(STORAGE_KEYS.IMPORT_MODE);
+  await LocalStorage.removeItem(STORAGE_KEYS.ENCRYPTION_KEY);
 }

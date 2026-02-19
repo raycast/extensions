@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateSectionAccessories, calculateTotalEntries } from "../../utils/section-accessories";
-import { LogicalSection } from "../../lib/parse-zshrc";
+import type { LogicalSection } from "../../lib/parse-zshrc";
 import { Icon } from "@raycast/api";
 import { MODERN_COLORS } from "../../constants";
 
@@ -91,14 +91,12 @@ describe("section-accessories", () => {
       };
 
       const accessories = generateSectionAccessories(section);
-      expect(accessories).toHaveLength(2); // Icon + text
+      expect(accessories).toHaveLength(1);
       expect(accessories[0]).toMatchObject({
         icon: {
-          source: Icon.Box,
+          source: Icon.Upload,
           tintColor: MODERN_COLORS.primary,
         },
-      });
-      expect(accessories[1]).toMatchObject({
         text: "3",
       });
     });
@@ -127,14 +125,12 @@ describe("section-accessories", () => {
       };
 
       const accessories = generateSectionAccessories(section);
-      expect(accessories).toHaveLength(2); // Icon + text
+      expect(accessories).toHaveLength(1);
       expect(accessories[0]).toMatchObject({
         icon: {
           source: Icon.Code,
-          tintColor: MODERN_COLORS.primary,
+          tintColor: MODERN_COLORS.purple,
         },
-      });
-      expect(accessories[1]).toMatchObject({
         text: "2",
       });
     });
@@ -163,14 +159,12 @@ describe("section-accessories", () => {
       };
 
       const accessories = generateSectionAccessories(section);
-      expect(accessories).toHaveLength(2); // Icon + text
+      expect(accessories).toHaveLength(1);
       expect(accessories[0]).toMatchObject({
         icon: {
-          source: Icon.Box,
+          source: Icon.Plug,
           tintColor: MODERN_COLORS.warning,
         },
-      });
-      expect(accessories[1]).toMatchObject({
         text: "4",
       });
     });
@@ -199,8 +193,8 @@ describe("section-accessories", () => {
       };
 
       const accessories = generateSectionAccessories(section);
-      // Should have: alias (1), export icon + text (2), function icon + text (2) = 5
-      expect(accessories).toHaveLength(5);
+      // Should have: alias (1), export (1), function (1) = 3
+      expect(accessories).toHaveLength(3);
     });
 
     it("should handle all content types", () => {

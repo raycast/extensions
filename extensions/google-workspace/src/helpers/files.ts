@@ -34,7 +34,7 @@ export async function downloadFile(file: File): Promise<void> {
   try {
     await showToast({
       style: Toast.Style.Animated,
-      title: "Downloading...",
+      title: "Downloading…",
       message: file.name,
     });
 
@@ -68,7 +68,7 @@ export async function downloadFile(file: File): Promise<void> {
 
     await showToast({
       style: Toast.Style.Animated,
-      title: "Downloading...",
+      title: "Downloading…",
       message: totalBytes > 0 ? `0% - ${file.name}` : file.name,
     });
 
@@ -87,7 +87,7 @@ export async function downloadFile(file: File): Promise<void> {
           const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
           await showToast({
             style: Toast.Style.Animated,
-            title: "Downloading...",
+            title: "Downloading…",
             message: `${percentage}% - ${downloadedMB} MB / ${totalMB} MB`,
           });
           lastUpdateTime = now;

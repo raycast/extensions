@@ -1,19 +1,19 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import {
-  brewIsInstalled,
-  brewInstallPath,
   brewInstallCommand,
+  brewInstallPath,
+  brewIsInstalled,
   brewUninstallCommand,
   brewUpgradeCommand,
-  Cask,
-  Formula,
-  OutdatedCask,
-  OutdatedFormula,
+  type Cask,
+  type Formula,
+  type OutdatedCask,
+  type OutdatedFormula,
 } from "../utils";
-import { FormulaInfo } from "./formulaInfo";
-import { CaskInfo } from "./caskInfo";
-import * as Actions from "./actions";
 import { useTerminalApp } from "../utils/terminal";
+import * as Actions from "./actions";
+import { CaskInfo } from "./caskInfo";
+import { FormulaInfo } from "./formulaInfo";
 
 const DebugSection = (props: { obj: Cask | Formula }) => (
   <ActionPanel.Section>
@@ -169,6 +169,7 @@ export function FormulaActionPanel(props: {
           {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
+          <Actions.FormulaShowAllInstalled onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />

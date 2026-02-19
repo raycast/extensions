@@ -1,5 +1,11 @@
 # FreeAgent Changelog
 
+## [Fix time parsing in Create Timeslip] - 2026-01-08
+
+- Fixed bug where entering time in HH:MM format (e.g., `4:30`) would only record the hours portion
+- Now supports both HH:MM format (`4:30` = 4.5 hours) and decimal format (`4.5`)
+- Added validation for invalid time inputs with helpful error messages
+
 ## [Added new command to create tasks in projects] - 2025-11-12
 
 - New `Create a new task in FreeAgent` command

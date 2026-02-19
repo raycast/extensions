@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, open } from "@raycast/api";
 import { File } from "../api/getFiles";
 import { downloadFile, getFileIconLink, getMimeTypeLabel, humanFileSize } from "../helpers/files";
 import { formatDateTime, formatDuration } from "../helpers/formatters";
@@ -6,6 +6,7 @@ import { formatDateTime, formatDuration } from "../helpers/formatters";
 type FileListItemProps = {
   file: File;
   email?: string;
+  preferredBrowser?: string;
   onEnterDirectory?: (file: File) => void;
   goToParent?: () => void;
   currentParentId?: string | undefined;
@@ -14,6 +15,7 @@ type FileListItemProps = {
 export default function FileListItem({
   file,
   email,
+  preferredBrowser,
   onEnterDirectory,
   goToParent,
   currentParentId,
@@ -150,18 +152,26 @@ export default function FileListItem({
       detail={detail}
       actions={
         <ActionPanel title={file.name}>
-          <Action.OpenInBrowser
-            url={`${file.webViewLink}${
-              email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""
-            }`}
+          <Action
+            title="Open in Browser"
+            icon={Icon.Globe}
+            onAction={() =>
+              open(
+                `${file.webViewLink}${email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""}`,
+                preferredBrowser || undefined,
+              )
+            }
           />
           {file.parents && file.parents.length > 0 && (
-            <Action.OpenInBrowser
+            <Action
               title="Reveal in Google Drive"
+              icon={Icon.Globe}
               // As of September 2020, a file can have exactly one parent folder
               // It's safe to assume the corresponding folder will be the first one
               // https://developers.google.com/drive/api/guides/ref-single-parent
-              url={`https://drive.google.com/drive/folders/${file.parents[0]}`}
+              onAction={() =>
+                open(`https://drive.google.com/drive/folders/${file.parents![0]}`, preferredBrowser || undefined)
+              }
             />
           )}
           <Action.OpenWith

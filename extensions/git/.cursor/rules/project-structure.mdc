@@ -1,6 +1,4 @@
 ---
-description:
-globs:
 alwaysApply: true
 ---
 # Git Client for Raycast: Project Structure

@@ -1,6 +1,11 @@
 # Mail Changelog
 
-## [Add AI Tools] - {PR_MERGE_DATE}
+## [Improvement] - 2026-01-19
+
+- Add "Refresh" action to message actions
+- Add preference to auto-fill the reply subject when replying to an email
+
+## [Add AI Tools] - 2026-01-01
 
 - Add new AI tool `list-account-emails` to list all available email addresses from the user's mail accounts
 - Enhance `send-email` tool to allow changing the sender email address via the `from` parameter

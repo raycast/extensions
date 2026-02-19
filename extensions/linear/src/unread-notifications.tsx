@@ -8,6 +8,7 @@ import {
   Icon,
   openCommandPreferences,
   openExtensionPreferences,
+  Keyboard,
 } from "@raycast/api";
 
 import { NotificationResult } from "./api/getNotifications";
@@ -98,14 +99,17 @@ function UnreadNotifications() {
         <MenuBarExtra.Item
           title="Open Inbox"
           icon="linear-app-icon.png"
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={openInbox}
         />
         {unreadNotifications.length > 0 ? (
           <MenuBarExtra.Item
             title="Mark All as Read"
             icon={Icon.CheckCircle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "u" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+            }}
             onAction={markAllAsRead}
           />
         ) : null}
@@ -155,7 +159,7 @@ function UnreadNotifications() {
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={() => openCommandPreferences()}
           alternate={
             <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />

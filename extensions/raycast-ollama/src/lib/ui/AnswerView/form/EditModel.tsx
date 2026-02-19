@@ -26,7 +26,7 @@ interface FormData {
   keep_alive: string;
 }
 
-export function EditModel(props: props) {
+export function EditModel(props: props): React.JSX.Element {
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, [], {
     onData: (data) => {
       if (props.server === undefined || props.model === undefined) return;
@@ -126,6 +126,12 @@ export function EditModel(props: props) {
         onChange={SetCheckboxAdvanced}
       />
       {CheckboxAdvanced && <Form.TextField title="Keep Alive" info={InfoKeepAlive} {...itemProps.keep_alive} />}
+      {props.command === CommandAnswer.TRANSLATE && (
+        <React.Fragment>
+          <Form.Separator />
+          <Form.Description title="note" text="It is highly recommended to use the TranslateGemma model." />
+        </React.Fragment>
+      )}
     </Form>
   );
 }

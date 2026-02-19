@@ -15,7 +15,6 @@ import {
 import { SecretManagerService, Secret, SecretVersion } from "./SecretManagerService";
 import AddVersionForm from "./components/AddVersionForm";
 import SecretValueView from "./components/SecretValueView";
-import { showFailureToast } from "@raycast/utils";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
 
 interface SecretDetailViewProps {
@@ -61,9 +60,10 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
       } catch (error) {
         (await loadingToast).hide();
         console.error("Failed to load secret details:", error);
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to load secret details",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setIsLoading(false);
@@ -90,9 +90,10 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
         title: "Details refreshed",
       });
     } catch (error) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to refresh details",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -127,9 +128,10 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
         }
       } catch (error) {
         (await loadingToast).hide();
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to access secret",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
@@ -151,26 +153,31 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
     });
 
     if (confirmed) {
-      let success = false;
-      switch (action) {
-        case "enable":
-          success = await service.enableVersion(secretId, versionId);
-          break;
-        case "disable":
-          success = await service.disableVersion(secretId, versionId);
-          break;
-        case "destroy":
-          success = await service.destroyVersion(secretId, versionId);
-          break;
-      }
+      try {
+        switch (action) {
+          case "enable":
+            await service.enableVersion(secretId, versionId);
+            break;
+          case "disable":
+            await service.disableVersion(secretId, versionId);
+            break;
+          case "destroy":
+            await service.destroyVersion(secretId, versionId);
+            break;
+        }
 
-      if (success) {
         showToast({
           style: Toast.Style.Success,
           title: `Version ${action}d`,
           message: `Version ${versionId} has been ${action}d`,
         });
         await refreshData();
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: `Failed to ${action} version`,
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
   };

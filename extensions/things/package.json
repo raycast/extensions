@@ -8,7 +8,6 @@
   "contributors": [
     "andreaselia",
     "stelo",
-    "thomaslombart",
     "srikirank",
     "vimtor",
     "samuelkraft",
@@ -16,6 +15,9 @@
     "vmrjnvc",
     "dinocosta",
     "janosorcsik"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
   "platforms": [
@@ -429,7 +431,7 @@
     "@raycast/api": "^1.103.5",
     "@raycast/utils": "^2.2.1",
     "dayjs": "^1.11.18",
-    "qs": "^6.14.0"
+    "query-string": "^9.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

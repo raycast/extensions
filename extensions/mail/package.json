@@ -73,6 +73,15 @@
           "value": "20"
         }
       ]
+    },
+    {
+      "name": "autoFillReplySubject",
+      "label": "Auto-fill subject when replying",
+      "title": "Auto-fill Reply Subject",
+      "description": "Automatically fill the subject field with 'Re: ' followed by the original email's subject when using Reply or Reply All.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
     }
   ],
   "commands": [

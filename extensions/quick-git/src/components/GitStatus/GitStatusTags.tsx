@@ -39,20 +39,35 @@ export function GitStatusTags({ changes }: Props) {
     const tags = [];
 
     if (changes.hasStagedChanges) {
-      tags.push(["Staged", Color.PrimaryText]);
+      tags.push(<List.Item.Detail.Metadata.TagList.Item key={tags.length} text={"Staged"} color={Color.PrimaryText} />);
+
       const status = parseStatusValueName(changes.stagedChanges);
       if (status) {
-        tags.push([status, colorForStatus(changes.stagedChanges)]);
+        tags.push(
+          <List.Item.Detail.Metadata.TagList.Item
+            key={tags.length}
+            text={status}
+            color={colorForStatus(changes.stagedChanges)}
+          />,
+        );
       }
     }
 
     if (changes.hasUnstagedChanges) {
-      tags.push(["Unstaged", Color.SecondaryText]);
+      tags.push(
+        <List.Item.Detail.Metadata.TagList.Item key={tags.length} text={"Unstaged"} color={Color.SecondaryText} />,
+      );
 
       if (changes.unstagedChanges !== changes.stagedChanges) {
         const status = parseStatusValueName(changes.unstagedChanges);
         if (status) {
-          tags.push([status, colorForStatus(changes.unstagedChanges)]);
+          tags.push(
+            <List.Item.Detail.Metadata.TagList.Item
+              key={tags.length}
+              text={status}
+              color={colorForStatus(changes.stagedChanges)}
+            />,
+          );
         }
       }
     }
@@ -60,10 +75,5 @@ export function GitStatusTags({ changes }: Props) {
     return tags;
   }, [changes.hasStagedChanges, changes.stagedChanges, changes.hasUnstagedChanges, changes.unstagedChanges]);
 
-  const tagList = useMemo(
-    () => tags.map((tag, index) => <List.Item.Detail.Metadata.TagList.Item key={index} text={tag[0]} color={tag[1]} />),
-    [tags],
-  );
-
-  return <List.Item.Detail.Metadata.TagList title="Status">{tagList}</List.Item.Detail.Metadata.TagList>;
+  return <List.Item.Detail.Metadata.TagList title="Status">{tags}</List.Item.Detail.Metadata.TagList>;
 }

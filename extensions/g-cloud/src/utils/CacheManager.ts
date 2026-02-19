@@ -15,6 +15,7 @@ export const CACHE_KEYS = {
   RECENTLY_USED_PROJECTS: "recently-used-projects",
   RECENT_RESOURCES: "recent-resources",
   SERVICE_COUNTS: "service-counts",
+  SERVICE_USAGE: "service-usage",
 };
 
 export const CACHE_TTL = {
@@ -24,7 +25,15 @@ export const CACHE_TTL = {
   SERVICE_COUNTS: 5 * 60 * 1000, // 5 minutes
 };
 
-export type ResourceType = "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "logs";
+export type ResourceType =
+  | "compute"
+  | "storage"
+  | "iam"
+  | "network"
+  | "secrets"
+  | "cloudrun"
+  | "cloudfunctions"
+  | "logs";
 
 export interface RecentResource {
   id: string;
@@ -43,6 +52,8 @@ export interface ServiceCounts {
   network: number;
   secrets: number;
   cloudrun: number;
+  cloudfunctions: number;
+  cloudbuild: number;
   timestamp: number;
 }
 
@@ -510,5 +521,24 @@ export class CacheManager {
       cache.remove(`${CACHE_KEYS.SERVICE_COUNTS}-${projectId}`);
     }
     // Note: Can't clear all service counts without knowing all project IDs
+  }
+
+  // Service usage tracking for sorting services by frequency
+  static trackServiceUsage(serviceId: ResourceType): void {
+    const usage = CacheManager.getServiceUsage();
+    usage[serviceId] = (usage[serviceId] || 0) + 1;
+    cache.set(CACHE_KEYS.SERVICE_USAGE, JSON.stringify(usage));
+  }
+
+  static getServiceUsage(): Record<ResourceType, number> {
+    const usageStr = cache.get(CACHE_KEYS.SERVICE_USAGE);
+    if (!usageStr) {
+      return {} as Record<ResourceType, number>;
+    }
+    try {
+      return JSON.parse(usageStr);
+    } catch {
+      return {} as Record<ResourceType, number>;
+    }
   }
 }

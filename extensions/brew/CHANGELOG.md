@@ -1,5 +1,23 @@
 # Brew Changelog
 
+## [Improvements] - 2026-02-19
+
+- Improve handling of abort signal when loading search command
+
+## [Improved Memory Usage] - 2026-02-16
+
+- Use chunking to significantly reduce working memory
+
+## [Metadata Detail Panel] - 2026-01-27
+
+- Added optional split-view metadata panel for search results
+- Enable "Show metadata panel in search results" in Search command preferences (default true)
+- Displays package description and metadata alongside the search list
+
+## [Improvements] - 2026-01-05
+
+- Add a toggle to filter installed packages, allowing users to hide dependencies and show only those explicitly "installed on request".
+
 ## [Homebrew 5.0 Support] - 2025-12-16
 
 - Added compatibility with Homebrew 5.0

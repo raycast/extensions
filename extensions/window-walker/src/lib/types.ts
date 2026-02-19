@@ -57,3 +57,19 @@ export interface PinnedWindow {
   /** Optional title pattern for matching specific windows */
   titlePattern?: string;
 }
+
+/**
+ * Cached window info for perma-pinned windows (shown even when closed)
+ */
+export interface CachedWindowInfo {
+  /** Process name */
+  processName: string;
+  /** Window title */
+  title: string;
+  /** Full path to the executable */
+  processPath: string;
+  /** Path to extracted app icon (optional) */
+  iconPath?: string;
+  /** Timestamp when cached */
+  cachedAt: number;
+}

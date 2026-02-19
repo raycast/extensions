@@ -17,7 +17,8 @@
     "pernielsentikaer",
     "Zheckan",
     "Diwanshumidha",
-    "vmrjnvc"
+    "vmrjnvc",
+    "gareth_price"
   ],
   "categories": [
     "Applications",
@@ -105,6 +106,10 @@
         {
           "title": "Qwant",
           "value": "Qwant"
+        },
+        {
+          "title": "Kagi",
+          "value": "Kagi"
         }
       ]
     },

@@ -1,36 +1,38 @@
 import { useMemo } from "react";
-import { List } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 import { GitBranchItemActions } from "./GitBranchItemActions.js";
+import { BranchInfo } from "../../utils/git-branch/branch.js";
 
 interface Props {
-  branch: string;
+  branch: BranchInfo;
   checkBranches: () => void;
+  updateRepo: (value: string) => Promise<void>;
 }
 
-export function GitBranchItem({ branch, checkBranches }: Props) {
-  // Git indicates the current branch by start that row with with a `*`
-  const currentBranch = useMemo(() => branch.startsWith("*"), [branch]);
-
-  const title = useMemo(() => {
-    if (currentBranch) {
-      // Skip over the leading `*` and whitespace
-      return branch.slice(2);
-    }
-
-    return branch;
-  }, [branch, currentBranch]);
-
+export function GitBranchItem({ branch, checkBranches, updateRepo }: Props) {
   const accessories = useMemo(() => {
-    if (currentBranch) {
-      return [{ text: "Current branch" }];
+    if (branch.isCurrentBranch) {
+      return [{ tag: { value: "Current branch", color: Color.PrimaryText } }];
     }
-  }, [currentBranch]);
+
+    if (branch.isWorktree) {
+      return [{ tag: { value: "Worktree" } }];
+    }
+  }, [branch.isCurrentBranch, branch.isWorktree]);
 
   return (
     <List.Item
-      title={title}
+      title={branch.name}
       accessories={accessories}
-      actions={<GitBranchItemActions branch={title} isCurrentBranch={currentBranch} checkBranches={checkBranches} />}
+      actions={
+        <GitBranchItemActions
+          branch={branch.name}
+          isCurrentBranch={branch.isCurrentBranch}
+          isWorktree={branch.isWorktree}
+          checkBranches={checkBranches}
+          updateRepo={updateRepo}
+        />
+      }
     />
   );
 }

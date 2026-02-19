@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ReactElement } from "react";
 import { PackageDetail } from "./PackageDetail";
 import { Package } from "../types";
 
 interface PackageListItemProps {
   pkg: Package;
 }
-export const PackageListItem = ({ pkg }: PackageListItemProps): JSX.Element => {
+export const PackageListItem = ({ pkg }: PackageListItemProps): ReactElement => {
   const accessories: List.Item.Accessory[] = [
     {
       text: `v${pkg.version}`,

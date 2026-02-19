@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tella",
+  "title": "Tella",
+  "description": "Browse videos, view transcripts, and manage playlists with Tella",
+  "icon": "extension-icon.png",
+  "author": "jackmsvaughan",
+  "license": "MIT",
+  "version": "1.0.0",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "tella",
+    "video",
+    "screen recording",
+    "transcripts",
+    "loom alternative"
+  ],
+  "commands": [
+    {
+      "name": "overview",
+      "title": "Overview",
+      "description": "See your Tella stats at a glance",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "browse-videos",
+      "title": "Videos",
+      "description": "Browse and manage your Tella videos",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "browse-playlists",
+      "title": "Playlists",
+      "description": "Browse and manage your Tella playlists",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "search-transcripts",
+      "title": "Transcripts",
+      "description": "Search across all video transcripts",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-transcripts",
+      "title": "Search Video Transcripts",
+      "description": "Search across all Tella video transcripts to find relevant content. Returns matching excerpts with video names and timestamps. Use this when the user asks questions about their videos or wants to find something they said.",
+      "mode": "full-output",
+      "input": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query to find in video transcripts"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    }
+  ],
+  "preferences": [
+    {
+      "name": "tellaApiKey",
+      "title": "Tella API Key",
+      "type": "password",
+      "required": true,
+      "description": "API key from Tella account settings"
+    },
+    {
+      "name": "cacheDuration",
+      "type": "dropdown",
+      "title": "Cache Duration",
+      "description": "How long to cache video data before refreshing",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "1 hour",
+          "value": "60"
+        },
+        {
+          "title": "Manual refresh only",
+          "value": "0"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.2.8",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

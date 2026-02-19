@@ -107,7 +107,19 @@ export function useComposeWords(savedMdDefinitions: MdDefinition[], isLoadingSav
         });
 
         // Call CLI to compose sentence
-        const output = await executeWordCli(["compose", word1, word2]);
+        let output: string;
+        try {
+          output = await executeWordCli(["compose", word1, word2]);
+        } catch (cliError) {
+          const errorMessage = cliError instanceof Error ? cliError.message : "CLI execution failed";
+          setError(errorMessage);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to generate sentence",
+            message: errorMessage,
+          });
+          return;
+        }
 
         const parsed = parseComposedSentence(output, word1, word2);
 
@@ -118,7 +130,9 @@ export function useComposeWords(savedMdDefinitions: MdDefinition[], isLoadingSav
             title: "Sentence generated!",
           });
         } else {
-          setError("Failed to parse the generated sentence. Please try again.");
+          // Show the raw output so user can see what went wrong
+          const errorMessage = output.trim() || "Failed to parse the generated sentence. Please try again.";
+          setError(errorMessage);
           await showToast({
             style: Toast.Style.Failure,
             title: "Failed to parse sentence",

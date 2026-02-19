@@ -122,7 +122,7 @@ export default function Command() {
             title="Space"
             {...itemProps.spaceId}
             storeValue
-            onChange={() => setValue("spaceId", "")}
+            onChange={(value) => setValue("spaceId", value)}
             ref={spacesDropdown}
           >
             {store.spaces &&

@@ -1,5 +1,9 @@
 # Cursor Changelog
 
+## [Update] - 2026-01-14
+
+- Update description
+
 ## [Updated README] - 2025-02-26
 
 ## [Git Branch] - 2025-02-14

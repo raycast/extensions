@@ -141,3 +141,31 @@ export const getServerWithStatusQuery = {
   query:
     "query ServerWithStatus($serverID: ObjectID!) {\n  server(_id: $serverID) {\n    _id\n    status {\n      isOnline\n      totalCPU\n      totalMemory\n      usedCPU\n      usedMemory\n      warnings\n      vmStatus\n      __typename\n    }\n    __typename\n  }\n}",
 };
+
+export const getAIHubTenantQuery = {
+  operationName: "GetAIHubTenant",
+  variables: {},
+  query:
+    "query GetAIHubTenant {\n  aihubTenant {\n    balance\n    keys {\n      keyID\n      alias\n      cost\n      __typename\n    }\n    providerCustomerID\n    provider\n    autoRechargeThreshold\n    autoRechargeAmount\n    __typename\n  }\n}",
+};
+
+export const getAIHubMonthlyUsageQuery = {
+  operationName: "GetAIHubMonthlyUsage",
+  variables: {
+    month: "",
+  },
+  query:
+    "query GetAIHubMonthlyUsage($month: String) {\n  aihubMonthlyUsage(month: $month) {\n    totalSpend\n    dailyUsage {\n      date\n      spend\n      __typename\n    }\n    __typename\n  }\n}",
+};
+
+export const getAIHubSpendLogsQuery = {
+  operationName: "AihubSpendLogsPaginated",
+  variables: {
+    pageSize: 25,
+    page: 1,
+    startDate: "",
+    endDate: "",
+  },
+  query:
+    "query AihubSpendLogsPaginated($pageSize: Int!, $page: Int!, $startDate: Time, $endDate: Time) {\n  aihubSpendLogsPaginated(\n    pageSize: $pageSize\n    page: $page\n    startDate: $startDate\n    endDate: $endDate\n  ) {\n    data {\n      timestamp\n      cost\n      totalTokens\n      promptTokens\n      completionTokens\n      model\n      keyAlias\n      __typename\n    }\n    total\n    page\n    pageSize\n    totalPages\n    __typename\n  }\n}",
+};

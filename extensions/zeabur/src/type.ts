@@ -259,3 +259,72 @@ export interface ServerWithStatusInfo {
   };
   __typename: string;
 }
+
+// AI Hub Types
+export interface AIHubKey {
+  keyID: string;
+  alias: string;
+  cost: number;
+  __typename: string;
+}
+
+export interface AIHubTenantInfo {
+  balance: number;
+  keys: AIHubKey[];
+  providerCustomerID: string;
+  provider: string;
+  autoRechargeThreshold: number;
+  autoRechargeAmount: number;
+  __typename: string;
+}
+
+export interface AIHubTenant {
+  data: {
+    aihubTenant: AIHubTenantInfo;
+  };
+}
+
+export interface AIHubDailyUsage {
+  date: string;
+  spend: number;
+  __typename: string;
+}
+
+export interface AIHubMonthlyUsageInfo {
+  totalSpend: number;
+  dailyUsage: AIHubDailyUsage[];
+  __typename: string;
+}
+
+export interface AIHubMonthlyUsage {
+  data: {
+    aihubMonthlyUsage: AIHubMonthlyUsageInfo;
+  };
+}
+
+// AIHub Spend Logs Types
+export interface AIHubSpendLog {
+  timestamp: string;
+  cost: number;
+  totalTokens: number;
+  promptTokens: number;
+  completionTokens: number;
+  model: string;
+  keyAlias: string;
+  __typename: string;
+}
+
+export interface AIHubSpendLogsPaginatedInfo {
+  data: AIHubSpendLog[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  __typename: string;
+}
+
+export interface AIHubSpendLogsPaginated {
+  data: {
+    aihubSpendLogsPaginated: AIHubSpendLogsPaginatedInfo;
+  };
+}

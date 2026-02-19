@@ -3,12 +3,14 @@ import { Application } from "@raycast/api";
 // Export all types from modules
 export * from "./git-types";
 
-export type GitView = "branches" | "status" | "commits" | "files" | "stashes" | "remotes" | "tags";
+export type GitView = "branches" | "status" | "commits" | "files" | "stashes" | "remotes" | "submodules" | "tags";
 
 /**
  * User preferences for the Git Client extension.
  */
 export type Preferences = {
+  /** Path to the git binary to use for git commands. */
+  binaryPath: string;
   /** Default terminal for opening repository directory. */
   defaultTerminal: Application;
   /** External git client for git commands. */
@@ -21,6 +23,10 @@ export type Preferences = {
   maxTagsToLoad: string;
   /** Automatically generate a commit message using AI when opening the commit view. */
   autoGenerateCommitMessage: boolean;
+  /** User icon provider to use for displaying user icon in the commits list. */
+  userIconProvider: "none" | "initials" | "mp" | "identicon" | "retro" | "monsterid" | "robohash" | "wavatar";
+  /** Initial tab when opening a repository. "recent" remembers the last selected tab. */
+  initialTab: "recent" | "status" | "commits" | "branches" | "files";
 };
 
 /**

@@ -1,10 +1,6 @@
 import crypto from "crypto";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-}
-
 export interface AnalysisStats {
   malicious: number;
   suspicious: number;
@@ -39,6 +35,17 @@ interface FileReportData {
 
 export interface FileReport {
   data: FileReportData;
+}
+
+interface IpReportData {
+  id: string;
+  attributes: {
+    last_analysis_stats: AnalysisStats;
+  };
+}
+
+export interface IpReport {
+  data: IpReportData;
 }
 
 interface UrlReportData {
@@ -127,6 +134,21 @@ export async function uploadFile(fileBuffer: Buffer, fileName: string): Promise<
 
   const uploadData = (await uploadResponse.json()) as UploadData;
   return uploadData.data.id;
+}
+
+export async function getIPReport(ip: string): Promise<IpReport> {
+  const response = await fetch(`${BASE_URL}/ip_addresses/${ip}`, {
+    method: "GET",
+    headers: {
+      "x-apikey": API_KEY,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`VirusTotal API Error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json() as Promise<IpReport>;
 }
 
 export async function getURLReport(url: string): Promise<UrlReport> {

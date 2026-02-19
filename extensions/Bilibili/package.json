@@ -71,8 +71,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "crypto-js": "^4.2.0",
     "run-applescript": "^6.1.0"
   },
@@ -95,6 +95,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

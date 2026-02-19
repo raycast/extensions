@@ -1,8 +1,9 @@
-import { open } from "@raycast/api";
+import { open, getPreferenceValues } from "@raycast/api";
 import { getUserEmail } from "./api/googleAuth";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 
 async function Command() {
+  const { preferredBrowser } = getPreferenceValues<Preferences>();
   const email = await getUserEmail();
 
   const searchParams = new URLSearchParams();
@@ -10,7 +11,7 @@ async function Command() {
     searchParams.append("authuser", email);
   }
 
-  await open(`https://drive.google.com/drive/u/0/my-drive?${searchParams.toString()}`);
+  await open(`https://drive.google.com/drive/u/0/my-drive?${searchParams.toString()}`, preferredBrowser || undefined);
 }
 
 export default withGoogleAuth(Command);

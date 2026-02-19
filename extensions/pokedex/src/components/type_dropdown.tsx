@@ -1,25 +1,6 @@
 import { Grid, List } from "@raycast/api";
-
-const types = [
-  "Normal",
-  "Fire",
-  "Water",
-  "Grass",
-  "Electric",
-  "Ice",
-  "Fighting",
-  "Poison",
-  "Ground",
-  "Flying",
-  "Psychic",
-  "Bug",
-  "Rock",
-  "Ghost",
-  "Dragon",
-  "Dark",
-  "Steel",
-  "Fairy",
-];
+import { usePromise } from "@raycast/utils";
+import { fetchTypes } from "../api";
 
 export default function TypeDropdown(props: {
   type?: string;
@@ -29,10 +10,13 @@ export default function TypeDropdown(props: {
   const DropdownComponent =
     props.type === "grid" ? Grid.Dropdown : List.Dropdown;
 
+  const { data: types, isLoading } = usePromise(fetchTypes);
+
   return (
     <DropdownComponent
       tooltip={`${props.command} Type Filter`}
       onChange={props.onSelectType}
+      isLoading={isLoading}
     >
       <DropdownComponent.Item
         key="all"
@@ -41,13 +25,13 @@ export default function TypeDropdown(props: {
         icon="pokeball.svg"
       />
       <DropdownComponent.Section>
-        {types.map((type) => {
+        {types?.map((type) => {
           return (
             <DropdownComponent.Item
-              key={type}
-              value={type}
-              title={type}
-              icon={`types/${type.toLowerCase()}.svg`}
+              key={type.name}
+              value={type.name}
+              title={type.typenames[0]?.name || type.name}
+              icon={`types/${type.name.toLowerCase()}.svg`}
             />
           );
         })}

@@ -7,6 +7,8 @@ import { promisify } from "util";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { extractErrorMessage } from "./utils/errors";
 import { expandTilde, pathExists } from "./utils/fs";
+import { LOGOS_BUNDLE_ID } from "./logos/constants";
+import { encodeForRefLy } from "./utils/encodeForRefLy";
 
 const execFileAsync = promisify(execFile);
 
@@ -25,7 +27,6 @@ type WordSense = {
   description?: string | null;
 };
 
-const LOGOS_BUNDLE_ID = "com.logos.desktop.logos";
 const SQLITE_BIN = "/usr/bin/sqlite3";
 const SQLITE_JSON_BUFFER = 16 * 1024 * 1024;
 const MIN_QUERY_LENGTH = 2;
@@ -501,10 +502,6 @@ function buildWordKey(label: string) {
     return undefined;
   }
   return `Word|language=en|word=${trimmed}`;
-}
-
-function encodeForRefLy(value: string) {
-  return encodeURIComponent(value).replace(/%20/g, "+");
 }
 
 function escapeSql(input: string): string {

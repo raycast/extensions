@@ -8,7 +8,8 @@ import {
   upperCase,
   upperFirst,
   titleCase,
-  spongeCase,
+  alternatingCase,
+  randomCase,
   swapCase,
   sentenceCase,
 } from "./customCases";
@@ -31,9 +32,10 @@ export const functions: CaseFunctions = {
   "Pascal Case": changeCase.pascalCase,
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
-  "Random Case": spongeCase,
+  "Random Case": randomCase,
   "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
+  "Alternating Case": alternatingCase,
   "Swap Case": swapCase,
   "Title Case": titleCase,
   "Upper Case": upperCase,
@@ -47,10 +49,20 @@ export const aliases: Record<CaseType, string[]> = {
   "Header Case": ["train", "dash"],
   "No Case": ["none"],
   "Kebab Case": ["dash", "slug", "param"],
-  "Random Case": ["sponge"],
+  "Random Case": ["random"],
   "Swap Case": ["reverse"],
+  "Alternating Case": ["alternating", "sponge"],
   "Constant Case": ["macro"],
 };
+
+// cases that must not be pre-lowercased, as they depend on the original casing
+const CASES_SKIP_PRELOWERCASE: Set<string> = new Set([
+  "Swap Case", // pre-lowercasing would make output all-uppercase
+  "Alternating Case", // alternates per character from original positions
+  "Random Case", // no point in pre-lowercasing, as output is random anyway
+  "Lower First", // only first letter should be changed
+  "Upper First", // only first letter should be changed
+]);
 
 function preLowercaseText(input: string, preserveCase: boolean) {
   if (!preserveCase) {
@@ -61,8 +73,9 @@ function preLowercaseText(input: string, preserveCase: boolean) {
 
 export function convert(input: string, c: string) {
   const preferences = getPreferenceValues<Preferences>();
+  const preserveCase = preferences.preserveCase || CASES_SKIP_PRELOWERCASE.has(c);
 
-  const modified = functions[c](preLowercaseText(input, preferences.preserveCase), {
+  const modified = functions[c](preLowercaseText(input, preserveCase), {
     prefixCharacters: preferences.prefixCharacters,
     suffixCharacters: preferences.suffixCharacters,
   });

@@ -16,7 +16,6 @@
     "andreaselia",
     "stuart",
     "tonka3000",
-    "dancannon",
     "pernielsentikaer",
     "stevensd2m",
     "erics118",
@@ -27,7 +26,6 @@
     "rfaccio",
     "badta5te",
     "andyburris",
-    "thomaslombart",
     "rhesamu",
     "themitpatel",
     "litomore",
@@ -42,11 +40,14 @@
     "joshkat",
     "CaffeineCat",
     "AdrianKokot",
-    "xmok"
+    "validate",
+    "xmok",
+    "hugodemenez"
   ],
   "pastContributors": [
     "bkeys818",
-    "jonasengelmann"
+    "jonasengelmann",
+    "thomaslombart"
   ],
   "debug": {
     "reloadShortcut": {
@@ -492,7 +493,7 @@
           "name": "description",
           "placeholder": "Playlist description",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },

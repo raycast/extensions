@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { NetworkService, VPC } from "./NetworkService";
 import SubnetsView from "./SubnetsView";
 import FirewallRulesView from "./FirewallRulesView";
@@ -32,9 +31,13 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
         const fetchedVPCs = await networkService.getVPCs();
         setVPCs(fetchedVPCs);
 
-        networkService.getSubnets().catch((error) => {
+        networkService.getSubnets().catch(async (error) => {
           console.error("Background subnet fetch error:", error);
-          showFailureToast("Failed to prefetch subnets - subnet view may load slower");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to prefetch subnets",
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
         });
 
         loadingToast.hide();
@@ -280,19 +283,31 @@ function CreateVPCForm({ service, onVPCCreated }: CreateVPCFormProps) {
 
   async function handleSubmit(values: { name: string; description: string; subnetMode: string; mtu: string }) {
     if (!values.name) {
-      showFailureToast("Please enter a network name");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please enter a network name",
+      });
       return;
     }
 
     let mtuValue: number | undefined;
     if (values.mtu) {
       if (!/^\d+$/.test(values.mtu)) {
-        showFailureToast("MTU must be a valid number");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Validation Error",
+          message: "MTU must be a valid number",
+        });
         return;
       }
       mtuValue = parseInt(values.mtu);
       if (isNaN(mtuValue) || mtuValue < 1300 || mtuValue > 8896) {
-        showFailureToast("MTU must be between 1300 and 8896");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Validation Error",
+          message: "MTU must be between 1300 and 8896",
+        });
         return;
       }
     }
@@ -325,12 +340,20 @@ function CreateVPCForm({ service, onVPCCreated }: CreateVPCFormProps) {
         onVPCCreated();
         pop();
       } else {
-        showFailureToast("An error occurred while creating the VPC network");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to create VPC network",
+          message: "An error occurred while creating the VPC network",
+        });
       }
     } catch (error: unknown) {
       console.error("Error creating VPC:", error);
       loadingToast.hide();
-      showFailureToast(error instanceof Error ? error.message : "Failed to create VPC network");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create VPC network",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }

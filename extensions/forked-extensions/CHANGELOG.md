@@ -1,5 +1,11 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - 2026-01-19
+
+- Add support for managing sparse-checkout directories/patterns
+- Improve fetch performance
+- Bump all dependencies to the latest
+
 ## [Improvements] - 2025-12-17
 
 - Add support for opening an extension folder with a default application

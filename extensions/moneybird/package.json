@@ -23,6 +23,13 @@
       "subtitle": "Moneybird Time Tracking",
       "description": "Mark the current date and time as future start point for a new time entry",
       "mode": "no-view"
+    },
+    {
+      "name": "repeat-last-time-entry",
+      "title": "Repeat Last Time Entry",
+      "subtitle": "Moneybird Time Tracking",
+      "description": "Create a new time entry prefilled from the last submission but with today's date",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -44,5 +51,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

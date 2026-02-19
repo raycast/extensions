@@ -1,6 +1,6 @@
 # Surge Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2025-11-03
 
 - Mark this extension as macOS only
 - Remove the past author contact information from readme

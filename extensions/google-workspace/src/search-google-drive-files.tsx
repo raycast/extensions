@@ -1,11 +1,10 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, open, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { File, getFileParentsById, getFiles, QueryTypes, ScopeTypes } from "./api/getFiles";
-import FileListItem from "./components/FileListItem";
-
 import { getUserEmail } from "./api/googleAuth";
+import FileListItem from "./components/FileListItem";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 
 function getSectionTitle(queryType: QueryTypes): string {
@@ -15,13 +14,26 @@ function getSectionTitle(queryType: QueryTypes): string {
   return "Recently Used";
 }
 
-function SearchGoogleDriveFiles() {
+function SearchGoogleDrive() {
   const [query, setQuery] = useState("");
   const [queryType, setQueryType] = useCachedState<QueryTypes>("query type", QueryTypes.fileName);
   const [scopeType, setScopeType] = useCachedState<ScopeTypes>("scope type", ScopeTypes.allDrives);
   const [parentId, setParentId] = useState<string | undefined>(undefined);
 
-  const email = getUserEmail();
+  const { preferredBrowser } = getPreferenceValues<Preferences>();
+
+  const [email, setEmail] = useState<string>();
+  useEffect(() => {
+    async function fetchEmail() {
+      try {
+        const userEmail = await getUserEmail();
+        setEmail(userEmail);
+      } catch (error) {
+        console.error("Failed to fetch user email:", error);
+      }
+    }
+    fetchEmail();
+  }, []);
 
   const { data, isLoading } = useCachedPromise(
     async (queryType: QueryTypes, scopeType: ScopeTypes, query: string, parentId?: string) =>
@@ -45,7 +57,7 @@ function SearchGoogleDriveFiles() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || !email}
       isShowingDetail={true}
       searchBarPlaceholder="Search in Drive"
       searchBarAccessory={
@@ -75,7 +87,7 @@ function SearchGoogleDriveFiles() {
     >
       <List.EmptyView
         title={parentId ? "No files in this folder" : "No files found"}
-        description={parentId ? undefined : "Try adjusting your search or filter"}
+        description={parentId ? undefined : "Try another search or filter"}
         icon={{ source: "google-drive.svg", tintColor: Color.SecondaryText }}
         actions={
           <ActionPanel>
@@ -87,17 +99,23 @@ function SearchGoogleDriveFiles() {
                 shortcut={{ modifiers: ["shift"], key: "tab" }}
               />
             )}
+            <Action
+              title="Open Google Drive"
+              icon="google-drive.png"
+              onAction={() => open("https://drive.google.com", preferredBrowser || undefined)}
+            />
           </ActionPanel>
         }
       />
 
-      {data?.files && data.files.length > 0 && (
+      {data?.files && data.files.length > 0 && email && (
         <List.Section title={getSectionTitle(queryType)} subtitle={`${data.files.length}`}>
           {data.files.map((file) => (
             <FileListItem
               file={file}
               key={file.id}
               email={email}
+              preferredBrowser={preferredBrowser}
               onEnterDirectory={(file) => enterDirectory(file)}
               goToParent={goToParent}
               currentParentId={parentId}
@@ -109,4 +127,4 @@ function SearchGoogleDriveFiles() {
   );
 }
 
-export default withGoogleAuth(SearchGoogleDriveFiles);
+export default withGoogleAuth(SearchGoogleDrive);

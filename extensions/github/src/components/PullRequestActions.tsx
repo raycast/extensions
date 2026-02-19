@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, Preferences, showToast, Toast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 

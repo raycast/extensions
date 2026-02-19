@@ -11,38 +11,36 @@
     "pernielsentikaer",
     "rspeicher",
     "roele",
-    "AntonNiklasson"
+    "AntonNiklasson",
+    "xmok"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/VladCuciureanu/Toothpick.git"
   },
   "scripts": {
+    "build": "ray build",
     "dev": "ray develop",
-    "build": "ray build -e dist",
-    "publish": "ray publish",
-    "lint": "ray lint",
     "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
     "format": "prettier --write \"./src/**/*.{ts,tsx,js,jsx}\" --no-error-on-unmatched-pattern",
     "svg:optimize": "find assets -type f -name '*.svg' -print0 | xargs -0 -n 1 -P 6 svgo"
   },
   "dependencies": {
-    "@raycast/api": "^1.90.0",
+    "@raycast/api": "^1.104.1",
     "fuzzball": "^2.1.2",
     "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "@typescript-eslint/eslint-plugin": "^6.5.0",
-    "@typescript-eslint/parser": "^6.5.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
     "svgo": "^3.0.2",
-    "typescript": "^4.4.3"
+    "typescript": "^5.8.2"
   },
   "commands": [
     {
@@ -358,28 +356,32 @@
       "required": false,
       "title": "Device Name Fuzzy Ratio",
       "description": "Minimum difference ratio for matching a device name.",
-      "default": "98"
+      "default": "98",
+      "placeholder": "98"
     },
     {
       "name": "favoriteDevice1",
       "type": "textfield",
       "required": false,
       "title": "Favorite Device #1",
-      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #1' command"
+      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #1' command",
+      "placeholder": "Raycast Keyboard"
     },
     {
       "name": "favoriteDevice2",
       "type": "textfield",
       "required": false,
       "title": "Favorite Device #2",
-      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #2' command"
+      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #2' command",
+      "placeholder": "Raycast Mouse"
     },
     {
       "name": "favoriteDevice3",
       "type": "textfield",
       "required": false,
       "title": "Favorite Device #3",
-      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #3' command"
+      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #3' command",
+      "placeholder": "Raycast Headphones"
     },
     {
       "name": "closeOnSuccessfulConnection",
@@ -412,7 +414,8 @@
       "type": "textfield",
       "required": false,
       "title": "Override Blueutil Directory",
-      "description": "Set a custom 'blueutil' location for Toothpick to use."
+      "description": "Set a custom 'blueutil' location for Toothpick to use.",
+      "placeholder": "/opt/homebrew/bin/blueutil"
     }
   ],
   "categories": [
@@ -420,5 +423,8 @@
     "System"
   ],
   "license": "MIT",
-  "icon": "icon.png"
+  "icon": "icon.png",
+  "platforms": [
+    "macOS"
+  ]
 }

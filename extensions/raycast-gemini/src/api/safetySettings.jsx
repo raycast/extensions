@@ -19,8 +19,5 @@ export function getSafetySettings() {
 
     // Violent: Describes scenarios depicting violence against an individual or group
     { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: safetyThreshold },
-
-    // Dangerous: Promotes, facilitates, or encourages harmful acts
-    { category: "HARM_CATEGORY_DANGEROUS", threshold: safetyThreshold },
   ];
 }

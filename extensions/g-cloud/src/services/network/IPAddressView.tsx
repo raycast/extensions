@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { NetworkService, IPAddress, NetworkServiceError } from "./NetworkService";
+import { NetworkService, IPAddress } from "./NetworkService";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { maskIPIfEnabled } from "../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
@@ -48,7 +47,11 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
       } catch (error) {
         console.error("Error initializing:", error);
         loadingToast.hide();
-        showFailureToast(error instanceof NetworkServiceError ? error.message : "Failed to load IP addresses");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load IP addresses",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -91,7 +94,11 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
     } catch (error) {
       console.error("Error refreshing IPs:", error);
       loadingToast.hide();
-      showFailureToast(error instanceof NetworkServiceError ? error.message : "Failed to refresh IP addresses");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to refresh IP addresses",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -123,7 +130,11 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
         });
       } catch (error) {
         console.error("Error fetching IPs:", error);
-        showFailureToast(error instanceof NetworkServiceError ? error.message : "Failed to fetch IP addresses");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch IP addresses",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -451,17 +462,29 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     networkTier?: string;
   }) {
     if (!values.name) {
-      showFailureToast("Please enter an IP address name");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please enter an IP address name",
+      });
       return;
     }
 
     if (!values.region) {
-      showFailureToast("Please select a region for the IP address");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please select a region for the IP address",
+      });
       return;
     }
 
     if (values.addressType === "INTERNAL" && !values.subnet) {
-      showFailureToast("Please select a subnet for internal IP address");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please select a subnet for internal IP address",
+      });
       return;
     }
 
@@ -512,11 +535,11 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     } catch (error) {
       console.error("Error creating IP address:", error);
       loadingToast.hide();
-      showFailureToast(
-        error instanceof NetworkServiceError
-          ? error.message
-          : `Failed to create IP address: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create IP address",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }

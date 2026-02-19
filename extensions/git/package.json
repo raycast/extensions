@@ -8,14 +8,15 @@
   "keywords": [
     "repository",
     "project",
+    "workspace",
     "clone",
     "commit",
+    "branches",
+    "submodules",
     "worktree",
     "github",
     "gitlab",
-    "bitbucket",
-    "azure devops",
-    "gitea"
+    "bitbucket"
   ],
   "platforms": [
     "macOS"
@@ -61,6 +62,12 @@
       ]
     },
     {
+      "name": "open-last-visited-repository",
+      "title": "Open Last Visited Git Repository",
+      "description": "Open the most recently visited Git repository",
+      "mode": "view"
+    },
+    {
       "name": "configure-issue-trackers",
       "icon": "issue-trackers-icon.png",
       "title": "Configure Issue Trackers",
@@ -85,6 +92,14 @@
     }
   ],
   "preferences": [
+    {
+    "name": "binaryPath",
+    "required": false,
+    "type": "textfield",
+    "title": "Binary Path",
+    "default": "git",
+    "description": "The path to the git binary to use for git commands"
+    },
     {
       "name": "defaultTerminal",
       "required": true,
@@ -132,6 +147,78 @@
       "label": "Auto Generate Commit Message",
       "default": false,
       "description": "Automatically generate a commit message using AI when opening the commit message view."
+    },
+    {
+      "name": "userIconProvider",
+      "required": true,
+      "type": "dropdown",
+      "title": "User Icon Provider",
+      "default": "retro",
+      "description": "The user icon provider to use for displaying user icon in the commits list.",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Author's initials",
+          "value": "initials"
+        },
+        {
+          "title": "Gravatar: Retro (Recommended)",
+          "value": "retro"
+        },
+        {
+          "title": "Gravatar: Identicon (Classic)",
+          "value": "identicon"
+        },
+        {
+          "title": "Gravatar: Mystery Person",
+          "value": "mp"
+        },
+        {
+          "title": "Gravatar: Monsterid",
+          "value": "monsterid"
+        },
+        {
+          "title": "Gravatar: Robohash",
+          "value": "robohash"
+        },
+        {
+          "title": "Gravatar: Wavatar",
+          "value": "wavatar"
+        }
+      ]
+    },
+    {
+      "name": "initialTab",
+      "required": false,
+      "type": "dropdown",
+      "title": "Initial Tab",
+      "default": "recent",
+      "description": "The tab to show when opening a repository",
+      "data": [
+        {
+          "title": "Recently Opened",
+          "value": "recent"
+        },
+        {
+          "title": "Status",
+          "value": "status"
+        },
+        {
+          "title": "Commits",
+          "value": "commits"
+        },
+        {
+          "title": "Branches",
+          "value": "branches"
+        },
+        {
+          "title": "Files",
+          "value": "files"
+        }
+      ]
     }
   ],
   "dependencies": {

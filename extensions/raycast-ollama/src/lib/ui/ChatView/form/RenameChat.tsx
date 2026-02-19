@@ -16,7 +16,7 @@ interface FormData {
   name: string;
 }
 
-export function FormRenameChat(props: props) {
+export function FormRenameChat(props: props): React.JSX.Element {
   const { handleSubmit, itemProps } = useForm<FormData>({
     onSubmit(values) {
       Submit(values);

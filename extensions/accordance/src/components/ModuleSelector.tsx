@@ -9,7 +9,7 @@ interface ModuleSelectorProps {
 }
 
 export function ModuleSelector({ onModuleChange, initialModule, showAllModules = false }: ModuleSelectorProps) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [modules, setModules] = useState<string[]>([]);
   const [selectedModule, setSelectedModule] = useState(initialModule || "");
 

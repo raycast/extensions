@@ -2,8 +2,7 @@ import { Action, ActionPanel, Icon, List, Toast, open, showHUD, showToast } from
 import { useMemo } from "react";
 import { LOGOS_TOOL_GROUPS, type LogosTool } from "./data/logos-tools";
 import { extractErrorMessage } from "./utils/errors";
-
-const LOGOS_BUNDLE_ID = "com.logos.desktop.logos";
+import { LOGOS_BUNDLE_ID } from "./logos/constants";
 
 export default function Command() {
   return (

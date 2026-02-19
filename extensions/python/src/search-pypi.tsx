@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import fetch from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { PackageListItem } from "./components/PackageListItem";
@@ -14,7 +13,7 @@ interface DoltPackageRow {
 
 export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
 
   const { isLoading, data, revalidate } = usePromise(
     async (): Promise<Package[]> => {

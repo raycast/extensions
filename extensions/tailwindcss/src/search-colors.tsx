@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Grid, Keyboard, PreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Grid, Keyboard } from "@raycast/api";
 import { hex } from "color-convert";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -21,7 +21,7 @@ const hiddenColors = [
   "blueGray",
 ];
 
-const preferences = getPreferenceValues();
+const preferences = getPreferenceValues<Preferences.SearchColors>();
 
 export default function SearchColors() {
   const [searchText, setSearchText] = useState("");
@@ -40,8 +40,9 @@ export default function SearchColors() {
           const t = Object.entries(shades).filter(([shade]) => shade.includes(searchText));
           return [name, Object.fromEntries(t)];
         })
-        .filter(([name, shades]) => Object.keys(shades).length > 0);
+        .filter(([, shades]) => Object.keys(shades).length > 0);
       console.log(filteredShades);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filterColors(filteredShades as any);
       return;
     }
@@ -89,7 +90,7 @@ function Actions({
   shade,
   value,
 }: {
-  preferences: PreferenceValues;
+  preferences: Preferences.SearchColors;
   name: string;
   shade: string;
   value: string;
@@ -101,43 +102,64 @@ function Actions({
           id: "color-name",
           title: "Copy color name",
           content: `${name}-${shade}`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "n" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "n" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "n" },
+          } as Keyboard.Shortcut,
         },
         {
           id: "bg-class",
           title: "Copy Background Class",
           content: `bg-${name}-${shade}`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "b" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "b" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "b" },
+          } as Keyboard.Shortcut,
         },
         {
           id: "text-class",
           title: "Copy Text Class",
           content: `text-${name}-${shade}`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "t" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "t" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "t" },
+          } as Keyboard.Shortcut,
         },
         {
           id: "border-class",
           title: "Copy Border Class",
           content: `border-${name}-${shade}`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "o" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "o" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "o" },
+          } as Keyboard.Shortcut,
         },
         {
           id: "shadow-class",
           title: "Copy Shadow Class",
           content: `shadow-${name}-${shade}`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "a" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "a" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "a" },
+          } as Keyboard.Shortcut,
         },
         {
           id: "ring-class",
           title: "Copy Ring Class",
           content: `ring-${name}-${shade}`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "i" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "i" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "i" },
+          } as Keyboard.Shortcut,
         },
         {
           id: "outline-class",
           title: "Copy Outline Class",
           content: `outline-${name}-${shade}`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "u" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "u" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "u" },
+          } as Keyboard.Shortcut,
         },
       ],
     },
@@ -147,19 +169,28 @@ function Actions({
           id: "value-hex",
           title: "Copy Hex Value",
           content: value,
-          shortcut: { modifiers: ["cmd", "opt"], key: "h" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "h" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "h" },
+          } as Keyboard.Shortcut,
         },
         {
           id: "value-rgb",
           title: "Copy RGB Value",
           content: `rgb(${hex.rgb(value)})`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "r" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "r" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "r" },
+          } as Keyboard.Shortcut,
         },
         {
           id: "value-hsl",
           title: "Copy HSL Value",
           content: `hsl(${hex.hsl(value)})`,
-          shortcut: { modifiers: ["cmd", "opt"], key: "s" } as Keyboard.Shortcut,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "s" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "s" },
+          } as Keyboard.Shortcut,
         },
       ],
     },

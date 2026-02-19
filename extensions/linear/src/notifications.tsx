@@ -280,21 +280,30 @@ function Notifications() {
                           title="Mark as Unread"
                           icon={Icon.Dot}
                           onAction={() => markAsUnread(notification)}
-                          shortcut={{ modifiers: ["cmd"], key: "u" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd"], key: "u" },
+                            Windows: { modifiers: ["ctrl"], key: "u" },
+                          }}
                         />
                       ) : (
                         <Action
                           title="Mark as Read"
                           icon={Icon.Checkmark}
                           onAction={() => markAsRead(notification)}
-                          shortcut={{ modifiers: ["cmd"], key: "u" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd"], key: "u" },
+                            Windows: { modifiers: ["ctrl"], key: "u" },
+                          }}
                         />
                       )}
                       {unreadNotifications.length > 0 ? (
                         <Action
                           title="Mark All as Read"
                           icon={Icon.CheckCircle}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd", "shift"], key: "u" },
+                            Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+                          }}
                           onAction={markAllAsRead}
                         />
                       ) : null}
@@ -305,12 +314,12 @@ function Notifications() {
                             title="Open Issue in Raycast"
                             target={<IssueDetail issue={notification.issue} priorities={priorities} me={me} />}
                             icon={Icon.RaycastLogoNeg}
-                            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                            shortcut={Keyboard.Shortcut.Common.OpenWith}
                           />
                         ) : null}
 
                         {urlKey ? (
-                          <OpenInLinear title="Open Inbox" url={inboxUrl} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                          <OpenInLinear title="Open Inbox" url={inboxUrl} shortcut={Keyboard.Shortcut.Common.Open} />
                         ) : null}
 
                         <Action
@@ -328,7 +337,7 @@ function Notifications() {
                             icon={Icon.Clipboard}
                             content={url}
                             title="Copy URL"
-                            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                            shortcut={Keyboard.Shortcut.Common.CopyPath}
                           />
                         </ActionPanel.Section>
                       ) : null}
@@ -337,7 +346,7 @@ function Notifications() {
                         <Action
                           title="Refresh"
                           icon={Icon.ArrowClockwise}
-                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                          shortcut={Keyboard.Shortcut.Common.Refresh}
                           onAction={() => mutateNotifications()}
                         />
                       </ActionPanel.Section>

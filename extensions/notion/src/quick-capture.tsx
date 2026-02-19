@@ -51,7 +51,8 @@ const getPageDetail = async (url: string) => {
   try {
     const response = await fetch(url);
     const data = await response.text();
-    const { document } = parseHTML(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { document } = parseHTML(data) as any;
     const reader = new Readability(document);
     const parsedDocument = reader.parse();
     const content = parsedDocument?.textContent;
