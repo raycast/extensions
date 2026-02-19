@@ -1,6 +1,6 @@
 # base64 Changelog
 
-## [AI Tools] - {PR_MERGE_DATE}
+## [AI Tools] - 2026-02-19
 
 - Add encode/decode AI Tools.
 - Bump all dependencies to the latest.
