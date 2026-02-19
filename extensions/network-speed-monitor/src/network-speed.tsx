@@ -15,10 +15,23 @@ interface SpeedData {
   upload: string;
 }
 
+// Get the active network interface dynamically
+async function getActiveInterface(): Promise<string> {
+  try {
+    const { stdout } = await execPromise(
+      "/sbin/route get default | /usr/bin/grep interface | /usr/bin/awk '{print $2}'"
+    );
+    const iface = stdout.trim();
+    return iface || "en0"; // fallback to en0
+  } catch {
+    return "en0";
+  }
+}
+
 async function getNetworkStats(): Promise<NetworkStats> {
   try {
-    const command =
-      "/usr/sbin/netstat -ib | /usr/bin/grep -E 'en0.*Link' | /usr/bin/head -1 | /usr/bin/awk '{print $7, $10}'";
+    const iface = await getActiveInterface();
+    const command = `/usr/sbin/netstat -ib | /usr/bin/grep -E '${iface}.*Link' | /usr/bin/head -1 | /usr/bin/awk '{print $7, $10}'`;
     const { stdout } = await execPromise(command);
     const trimmed = stdout.trim();
     if (!trimmed) return { bytesReceived: 0, bytesSent: 0 };
@@ -62,6 +75,14 @@ export default function Command() {
       if (prevStats && prevStats.bytesReceived > 0) {
         const downloadSpeed = currentStats.bytesReceived - prevStats.bytesReceived;
         const uploadSpeed = currentStats.bytesSent - prevStats.bytesSent;
+
+        // Handle counter resets (wrap-around or interface reset)
+        if (downloadSpeed < 0 || uploadSpeed < 0) {
+          // Counter reset detected, skip this update
+          cache.set(CACHE_KEY_PREV_STATS, JSON.stringify(currentStats));
+          return;
+        }
+
         setSpeed({
           download: formatSpeed(downloadSpeed),
           upload: formatSpeed(uploadSpeed),
