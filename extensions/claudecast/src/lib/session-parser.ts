@@ -580,9 +580,40 @@ export async function listProjectSessions(
   projectPath: string,
 ): Promise<SessionMetadata[]> {
   const encodedPath = encodeProjectPath(projectPath);
-  const allSessions = await listAllSessions();
-  return allSessions.filter(
-    (s) => s.projectPath === projectPath || s.filePath.includes(encodedPath),
+  const projectDir = path.join(PROJECTS_DIR, encodedPath);
+
+  // Only parse sessions from the specific project directory instead of loading all
+  const sessions: SessionMetadata[] = [];
+  try {
+    const sessionFiles = await listSessionFiles(encodedPath);
+    for (const sessionFile of sessionFiles) {
+      const filePath = path.join(projectDir, sessionFile);
+      try {
+        const stat = await fs.promises.stat(filePath);
+        const metadata = await parseSessionMetadataFast(filePath);
+        const resolvedPath = await resolveProjectPath(encodedPath);
+        sessions.push({
+          id: metadata.id || path.basename(filePath, ".jsonl"),
+          filePath,
+          projectPath: resolvedPath,
+          projectName: getProjectName(resolvedPath),
+          summary: metadata.summary || "",
+          firstMessage: metadata.firstMessage || "",
+          lastModified: stat.mtime,
+          turnCount: metadata.turnCount || 0,
+          cost: metadata.cost || 0,
+          model: metadata.model,
+        });
+      } catch {
+        // Skip files we can't read
+      }
+    }
+  } catch {
+    // Project directory doesn't exist
+  }
+
+  return sessions.sort(
+    (a, b) => b.lastModified.getTime() - a.lastModified.getTime(),
   );
 }
 
