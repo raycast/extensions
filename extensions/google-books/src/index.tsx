@@ -69,6 +69,8 @@ export default function SearchGoogleBooks() {
         onViewModeChange={setViewMode}
         onClearSearch={handleClearSearch}
         categorized={viewMode === "categorized-grid"}
+        searchText={searchText}
+        onSearchTextChange={handleSearchTextChange}
       />
     );
   }
