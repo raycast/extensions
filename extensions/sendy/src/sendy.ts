@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { Item } from "./types";
 
 const { sendy_url, api_key } = getPreferenceValues<Preferences>();
-export const buildSendyUrl = (path: string) => new URL(path, sendy_url);
+export const buildSendyUrl = (path: string) => new URL(path, sendy_url.endsWith("/") ? sendy_url : `${sendy_url}/`);
 const request = async <T>(endpoint: string, payload?: Record<string, string>) => {
   const url = buildSendyUrl(`api/${endpoint}`);
   const response = await fetch(url, {
@@ -17,7 +17,7 @@ const request = async <T>(endpoint: string, payload?: Record<string, string>) =>
   const text = await response.text();
   let result;
   try {
-    result = await JSON.parse(text);
+    result = JSON.parse(text);
   } catch {
     result = text;
   }
