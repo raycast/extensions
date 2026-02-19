@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "node16",
+    "target": "ES2022",
+    "moduleResolution": "node16",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"]
+}
