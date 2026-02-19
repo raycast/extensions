@@ -93,7 +93,7 @@ export default function Command() {
   );
 }
 
-async function RunLaunchConfiguration({ name }: { name: string }) {
+export async function RunLaunchConfiguration({ name }: { name: string }) {
   const yamlContent = await LocalStorage.getItem<string>(name);
   if (!yamlContent) {
     return;

@@ -8,7 +8,8 @@
   "contributors": [
     "friendlyusername",
     "alexs",
-    "mathisfoxius"
+    "mathisfoxius",
+    "kelvin_jaison"
   ],
   "categories": [
     "Productivity",
@@ -41,11 +42,24 @@
       "description": "Open Ghostty with a specific configuration",
       "mode": "view"
     },
-    {
-      "name": "open-with-ghostty",
+    { "name": "open-with-ghostty",
       "title": "Open with Ghostty",
       "description": "Open the currently selected Finder item with Ghostty",
       "mode": "no-view"
+    },
+    {
+      "name": "run-ghostty-launch-configuration",
+      "title": "Run Ghostty Launch Configuration",
+      "description": "Run a launch configuration in Ghostty using an argument",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "config",
+          "placeholder": "config name",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {

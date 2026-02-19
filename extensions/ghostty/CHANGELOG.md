@@ -1,5 +1,9 @@
 # Ghostty Changelog
 
+## [Command] 2026-02-19
+
+- Add new command to run launch configuration using arguments.
+
 ## [Command] 2025-03-13
 
 - Add new command to open currently selected Finder directory in new Ghostty Window
