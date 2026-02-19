@@ -27,7 +27,6 @@ To use this extension, you must provide the IP address of your printer.
 1. Install the extension.
 2. Go to **Raycast Settings** → **Extensions** → **Printer Status**.
 3. Enter your printer's IP address in the **Printer IP Address** field (default: `192.168.1.10`).
-4. Choose your preferred **Language** (English or French) for the sensor names (default: `English`).
 
 
 
