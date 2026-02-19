@@ -11,14 +11,20 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useFrecencySorting, usePromise } from "@raycast/utils";
-import { useEffect } from "react";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useEffect, useState } from "react";
 import {
   type AudioDevice,
   getDefaultInputDevice,
   getDefaultOutputDevice,
   getInputDevices,
   getOutputDevices,
+  getOutputDeviceVolume,
+  getInputDeviceVolume,
+  getOutputDeviceMute,
+  getInputDeviceMute,
+  toggleOutputDeviceMute,
+  toggleInputDeviceMute,
   setDefaultInputDevice,
   TransportType,
   isWindows,
@@ -33,6 +39,13 @@ import {
   getDefaultDeviceUid,
   setDefaultDevicePreference,
   clearDefaultDevicePreference,
+  getPinnedVolume,
+  setPinnedVolume,
+  clearPinnedVolume,
+  getDeviceOrder,
+  setDeviceOrder,
+  normalizeDeviceOrder,
+  applyDeviceOrder,
 } from "./device-preferences";
 import { getTransportTypeLabel } from "./device-labels";
 import { createDeepLink } from "./utils";
@@ -46,7 +59,7 @@ type DeviceListProps = {
 };
 
 export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
-  const { isLoading, data } = useAudioDevices(ioType);
+  const { isLoading, data, revalidate: refetchDevices } = useAudioDevices(ioType);
   const {
     data: hiddenDevices,
     isLoading: isHiddenLoading,
@@ -58,15 +71,39 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     revalidate: refetchShowHiddenDevices,
   } = usePromise(isShowingHiddenDevices, [ioType]);
   const { data: defaultDeviceUid, revalidate: refetchDefaultDevice } = usePromise(getDefaultDeviceUid, [ioType]);
+  const pinnedVolumeCache = usePromise(
+    async (type: IOType, devices: AudioDevice[]) => {
+      const result: Record<string, number | undefined> = {};
+      await Promise.all(
+        devices.map(async (d) => {
+          result[d.uid] = await getPinnedVolume(type, d.uid);
+        }),
+      );
+      return result;
+    },
+    [ioType, data?.devices ?? []],
+  );
 
-  const { data: sortedDevices, visitItem: recordDeviceSelection } = useFrecencySorting(data?.devices || [], {
-    key: (device) => device.uid,
-  });
+  const [order, setOrderState] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!data?.devices) return;
+    (async () => {
+      const storedOrder = await getDeviceOrder(ioType);
+      const normalized = normalizeDeviceOrder(storedOrder, data.devices);
+      setOrderState(normalized);
+      if (normalized.join("|") !== storedOrder.join("|")) {
+        await setDeviceOrder(ioType, normalized);
+      }
+    })();
+  }, [data?.devices, ioType]);
+
+  const orderedDevices = applyDeviceOrder(order, data?.devices ?? []);
 
   useEffect(() => {
     if ((!deviceId && !deviceName) || !data?.devices) return;
 
-    let device = null;
+    let device: AudioDevice | undefined;
     if (deviceId) device = data.devices.find((d) => d.id === deviceId);
     if (!device && deviceName) device = data.devices.find((d) => d.name === deviceName);
 
@@ -76,27 +113,51 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
       return;
     }
 
+    const target = device;
     (async () => {
       try {
-        await (ioType === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
-        recordDeviceSelection(device);
+        await (ioType === "input" ? setDefaultInputDevice(target.id) : setOutputAndSystemDevice(target.id));
         closeMainWindow({ clearRootSearch: true });
         popToRoot({ clearSearchBar: true });
-        showHUD(`Active ${ioType} audio device set to ${device.name}`);
+        showHUD(`Active ${ioType} audio device set to ${target.name}`);
       } catch (e) {
         console.log(e);
         showToast(
           Toast.Style.Failure,
           `Error!`,
-          `There was an error setting the active ${ioType} audio device to ${device.name}`,
+          `There was an error setting the active ${ioType} audio device to ${target.name}`,
         );
       }
     })();
-  }, [deviceId, deviceName, data, ioType, recordDeviceSelection]);
+  }, [deviceId, deviceName, data, ioType]);
+
+  const moveDevice = useCallback(
+    async (deviceUid: string, direction: "up" | "down" | "top" | "bottom") => {
+      const idx = order.indexOf(deviceUid);
+      if (idx === -1) return;
+      const next = [...order];
+      if (direction === "top") {
+        next.splice(idx, 1);
+        next.unshift(deviceUid);
+      } else if (direction === "bottom") {
+        next.splice(idx, 1);
+        next.push(deviceUid);
+      } else {
+        const delta = direction === "up" ? -1 : 1;
+        const swapIdx = idx + delta;
+        if (swapIdx < 0 || swapIdx >= next.length) return;
+        next[idx] = next[swapIdx];
+        next[swapIdx] = deviceUid;
+      }
+      setOrderState(next);
+      await setDeviceOrder(ioType, next);
+    },
+    [order, ioType],
+  );
 
   const hiddenSet = new Set(hiddenDevices ?? []);
   const shouldShowHidden = showHiddenDevices ?? false;
-  const visibleDevices = (sortedDevices ?? []).filter((device) => shouldShowHidden || !hiddenSet.has(device.uid));
+  const visibleDevices = orderedDevices.filter((device) => shouldShowHidden || !hiddenSet.has(device.uid));
 
   const loading = isLoading || isHiddenLoading || isShowHiddenLoading;
   const showEmptyView = !loading && visibleDevices.length === 0;
@@ -123,6 +184,8 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
           const isCurrent = d.uid === data.current.uid;
           const isHidden = hiddenSet.has(d.uid);
           const isDefault = d.uid === defaultDeviceUid;
+          const volInfo = data.volumes[d.uid];
+          const pinnedLevel = pinnedVolumeCache.data?.[d.uid];
           return (
             <List.Item
               key={d.uid}
@@ -137,14 +200,18 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
                     isHidden={isHidden}
                     isDefault={isDefault}
                     isShowingHidden={shouldShowHidden}
-                    onSelection={() => recordDeviceSelection(d)}
+                    volumeInfo={volInfo}
+                    pinnedLevel={pinnedLevel}
+                    onSelection={() => void refetchDevices()}
                     onHiddenChange={() => void refetchHiddenDevices()}
                     onShowHiddenChange={() => void refetchShowHiddenDevices()}
                     onDefaultChange={() => void refetchDefaultDevice()}
+                    onPinnedChange={() => void pinnedVolumeCache.revalidate()}
+                    onMoveDevice={moveDevice}
                   />
                 </ActionPanel>
               }
-              accessories={getAccessories(isCurrent, isHidden, isDefault, shouldShowHidden, d)}
+              accessories={getAccessories(isCurrent, isHidden, isDefault, shouldShowHidden, d, volInfo, pinnedLevel)}
             />
           );
         })
@@ -159,41 +226,91 @@ function DeviceActions({
   isHidden,
   isDefault,
   isShowingHidden,
+  volumeInfo,
+  pinnedLevel,
   onSelection,
   onHiddenChange,
   onShowHiddenChange,
   onDefaultChange,
+  onPinnedChange,
+  onMoveDevice,
 }: {
   ioType: IOType;
   device: AudioDevice;
   isHidden: boolean;
   isDefault: boolean;
   isShowingHidden: boolean;
+  volumeInfo?: VolumeInfo;
+  pinnedLevel?: number;
   onSelection: () => void;
   onHiddenChange: () => void;
   onShowHiddenChange: () => void;
   onDefaultChange: () => void;
+  onPinnedChange: () => void;
+  onMoveDevice: (uid: string, dir: "up" | "down" | "top" | "bottom") => Promise<void>;
 }) {
   return (
     <>
       <SetAudioDeviceAction device={device} type={ioType} onSelection={onSelection} />
       {isWindows && <SetCommunicationDeviceAction device={device} type={ioType} onSelection={onSelection} />}
-      <SetDefaultDeviceAction device={device} ioType={ioType} isDefault={isDefault} onAction={onDefaultChange} />
-      <Action.CreateQuicklink
-        quicklink={{
-          name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
-          link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
-            deviceId: device.id,
-            deviceName: device.name,
-          }),
-        }}
+      <ToggleMuteAction device={device} ioType={ioType} volumeInfo={volumeInfo} />
+      <PinVolumeAction
+        device={device}
+        ioType={ioType}
+        volumeInfo={volumeInfo}
+        pinnedLevel={pinnedLevel}
+        onAction={onPinnedChange}
       />
-      <Action.CopyToClipboard title="Copy Device Name" content={device.name} shortcut={Keyboard.Shortcut.Common.Copy} />
-      <ToggleHiddenDeviceAction deviceId={device.uid} ioType={ioType} isHidden={isHidden} onAction={onHiddenChange} />
-      <ToggleShowHiddenDevicesAction ioType={ioType} isShowing={isShowingHidden} onToggle={onShowHiddenChange} />
+      <SetDefaultDeviceAction device={device} ioType={ioType} isDefault={isDefault} onAction={onDefaultChange} />
+      <ActionPanel.Section title="Priority Order">
+        <Action
+          title="Move up"
+          icon={Icon.ArrowUp}
+          shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
+          onAction={() => onMoveDevice(device.uid, "up")}
+        />
+        <Action
+          title="Move Down"
+          icon={Icon.ArrowDown}
+          shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
+          onAction={() => onMoveDevice(device.uid, "down")}
+        />
+        <Action
+          title="Move to Top"
+          icon={Icon.ArrowUpCircle}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+          onAction={() => onMoveDevice(device.uid, "top")}
+        />
+        <Action
+          title="Move to Bottom"
+          icon={Icon.ArrowDownCircle}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+          onAction={() => onMoveDevice(device.uid, "bottom")}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.CreateQuicklink
+          quicklink={{
+            name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
+            link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
+              deviceId: device.id,
+              deviceName: device.name,
+            }),
+          }}
+        />
+        <Action.CopyToClipboard
+          title="Copy Device Name"
+          content={device.name}
+          shortcut={Keyboard.Shortcut.Common.Copy}
+        />
+        <ToggleHiddenDeviceAction deviceId={device.uid} ioType={ioType} isHidden={isHidden} onAction={onHiddenChange} />
+        <ToggleShowHiddenDevicesAction ioType={ioType} isShowing={isShowingHidden} onToggle={onShowHiddenChange} />
+      </ActionPanel.Section>
     </>
   );
 }
+
+type VolumeInfo = { volume: number | undefined; muted: boolean | undefined };
 
 function useAudioDevices(type: IOType) {
   return usePromise(
@@ -201,10 +318,21 @@ function useAudioDevices(type: IOType) {
       const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
       const current = await (type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice());
 
-      return {
-        devices,
-        current,
-      };
+      const getVol = type === "input" ? getInputDeviceVolume : getOutputDeviceVolume;
+      const getMute = type === "input" ? getInputDeviceMute : getOutputDeviceMute;
+
+      const volumes: Record<string, VolumeInfo> = {};
+      await Promise.all(
+        devices.map(async (d) => {
+          const [volume, muted] = await Promise.all([
+            getVol(d.id).catch(() => undefined),
+            getMute(d.id).catch(() => undefined),
+          ]);
+          volumes[d.uid] = { volume, muted };
+        }),
+      );
+
+      return { devices, current, volumes };
     },
     [type],
   );
@@ -338,11 +466,8 @@ function getDeviceIcon(device: AudioDevice): string | null {
     return "bluetooth-speaker.png";
   }
 
-  // Windows-specific transport types
-  if (isWindows && device.transportType) {
-    if (device.transportType === TransportType.Headphones || device.transportType === "headphones") {
-      return "bluetooth-speaker.png";
-    }
+  if (device.transportType === TransportType.Headphones || device.transportType === "headphones") {
+    return "headphones.png";
   }
 
   // Not a special device with custom icon
@@ -373,8 +498,25 @@ function getAccessories(
   isDefault: boolean,
   shouldShowHidden: boolean,
   device?: AudioDevice,
+  volumeInfo?: VolumeInfo,
+  pinnedLevel?: number,
 ) {
   const accessories: List.Item.Accessory[] = [];
+
+  if (volumeInfo) {
+    if (volumeInfo.muted) {
+      accessories.push({ icon: Icon.SpeakerOff, tooltip: "Muted" });
+    } else if (volumeInfo.volume != null) {
+      accessories.push({ text: `${Math.round(volumeInfo.volume * 100)}%`, tooltip: "Volume" });
+    }
+  }
+
+  if (pinnedLevel != null) {
+    accessories.push({
+      tag: { value: `Pinned: ${pinnedLevel}%`, color: Color.Orange },
+      tooltip: "Volume pinned — enforced automatically",
+    });
+  }
 
   if (isDefault) {
     accessories.push({ tag: { value: "Default", color: Color.Blue }, tooltip: "Default device (auto-switch target)" });
@@ -437,6 +579,87 @@ function SetDefaultDeviceAction({
         await setDefaultDevicePreference(ioType, device.uid, device.name);
         onAction();
         await showToast(Toast.Style.Success, `Set "${device.name}" as default ${ioType} device`);
+      }}
+    />
+  );
+}
+
+function ToggleMuteAction({
+  device,
+  ioType,
+  volumeInfo,
+}: {
+  device: AudioDevice;
+  ioType: IOType;
+  volumeInfo?: VolumeInfo;
+}) {
+  const isMuted = volumeInfo?.muted === true;
+  const toggleFn = ioType === "input" ? toggleInputDeviceMute : toggleOutputDeviceMute;
+
+  return (
+    <Action
+      title={isMuted ? "Unmute" : "Mute"}
+      icon={isMuted ? Icon.SpeakerOn : Icon.SpeakerOff}
+      shortcut={{ modifiers: ["cmd"], key: "m" }}
+      onAction={async () => {
+        try {
+          const nowMuted = await toggleFn(device.id);
+          const vol = volumeInfo?.volume != null ? Math.round(volumeInfo.volume * 100) : "?";
+          if (nowMuted) {
+            await showHUD(`Muted ${device.name}`);
+          } else {
+            await showHUD(`Unmuted ${device.name} (${vol}%)`);
+          }
+        } catch {
+          await showToast(Toast.Style.Failure, `Failed to toggle mute for ${device.name}`);
+        }
+      }}
+    />
+  );
+}
+
+function PinVolumeAction({
+  device,
+  ioType,
+  volumeInfo,
+  pinnedLevel,
+  onAction,
+}: {
+  device: AudioDevice;
+  ioType: IOType;
+  volumeInfo?: VolumeInfo;
+  pinnedLevel?: number;
+  onAction: () => void;
+}) {
+  if (pinnedLevel != null) {
+    return (
+      <Action
+        title={`Unpin Volume (${pinnedLevel}%)`}
+        icon={Icon.PinDisabled}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+        onAction={async () => {
+          await clearPinnedVolume(ioType, device.uid);
+          onAction();
+          await showToast(Toast.Style.Success, `Unpinned volume for ${device.name}`);
+        }}
+      />
+    );
+  }
+
+  const currentPct = volumeInfo?.volume != null ? Math.round(volumeInfo.volume * 100) : undefined;
+  return (
+    <Action
+      title={currentPct != null ? `Pin Volume at ${currentPct}%` : "Pin Volume"}
+      icon={Icon.Pin}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      onAction={async () => {
+        if (currentPct == null) {
+          await showToast(Toast.Style.Failure, "Cannot read current volume");
+          return;
+        }
+        await setPinnedVolume(ioType, device.uid, currentPct);
+        onAction();
+        await showToast(Toast.Style.Success, `Pinned ${device.name} at ${currentPct}%`);
       }}
     />
   );

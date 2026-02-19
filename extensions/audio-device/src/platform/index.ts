@@ -53,6 +53,14 @@ export interface PlatformAudioAPI {
   setDefaultCommunicationInputDevice?(deviceId: string): Promise<void>;
   setOutputDeviceVolume?(deviceId: string, volume: number): Promise<void>;
   getOutputDeviceVolume?(deviceId: string): Promise<number | undefined>;
+  getOutputDeviceMute?(deviceId: string): Promise<boolean | undefined>;
+  setOutputDeviceMute?(deviceId: string, muted: boolean): Promise<void>;
+  toggleOutputDeviceMute?(deviceId: string): Promise<boolean>;
+  setInputDeviceVolume?(deviceId: string, volume: number): Promise<void>;
+  getInputDeviceVolume?(deviceId: string): Promise<number | undefined>;
+  getInputDeviceMute?(deviceId: string): Promise<boolean | undefined>;
+  setInputDeviceMute?(deviceId: string, muted: boolean): Promise<void>;
+  toggleInputDeviceMute?(deviceId: string): Promise<boolean>;
   createAggregateDevice?: (
     name: string,
     mainDeviceId: string,

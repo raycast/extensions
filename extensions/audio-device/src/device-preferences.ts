@@ -131,3 +131,40 @@ export async function clearDefaultDevicePreference(type: IOType) {
   await LocalStorage.removeItem(DEFAULT_DEVICE_UID_KEYS[type]);
   await LocalStorage.removeItem(DEFAULT_DEVICE_NAME_KEYS[type]);
 }
+
+// --- Pinned Volume ---
+
+function pinnedVolumeKey(type: IOType, deviceUid: string): string {
+  return `pinnedVolume_${type}_${deviceUid}`;
+}
+
+export async function getPinnedVolume(type: IOType, deviceUid: string): Promise<number | undefined> {
+  const raw = await LocalStorage.getItem<string>(pinnedVolumeKey(type, deviceUid));
+  if (raw == null) return undefined;
+  const val = Number(raw);
+  return Number.isFinite(val) ? val : undefined;
+}
+
+export async function setPinnedVolume(type: IOType, deviceUid: string, level: number) {
+  await LocalStorage.setItem(pinnedVolumeKey(type, deviceUid), String(Math.round(Math.max(0, Math.min(100, level)))));
+}
+
+export async function clearPinnedVolume(type: IOType, deviceUid: string) {
+  await LocalStorage.removeItem(pinnedVolumeKey(type, deviceUid));
+}
+
+export async function getAllPinnedVolumes(type: IOType): Promise<Map<string, number>> {
+  const allItems = await LocalStorage.allItems();
+  const prefix = `pinnedVolume_${type}_`;
+  const map = new Map<string, number>();
+  for (const [key, value] of Object.entries(allItems)) {
+    if (key.startsWith(prefix)) {
+      const uid = key.slice(prefix.length);
+      const val = Number(value);
+      if (Number.isFinite(val)) {
+        map.set(uid, val);
+      }
+    }
+  }
+  return map;
+}

@@ -23,7 +23,10 @@
   "keywords": [
     "sound",
     "manager",
-    "bluetooth"
+    "bluetooth",
+    "volume",
+    "mute",
+    "audio"
   ],
   "license": "MIT",
   "commands": [
@@ -42,27 +45,41 @@
       "mode": "view"
     },
     {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "subtitle": "Audio Device",
+      "description": "Toggle mute on the current output device.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Output Volume",
+      "subtitle": "Audio Device",
+      "description": "Set the volume of an output device.",
+      "mode": "view"
+    },
+    {
+      "name": "set-input-volume",
+      "title": "Set Input Volume",
+      "subtitle": "Audio Device",
+      "description": "Set the volume of an input device.",
+      "mode": "view"
+    },
+    {
       "name": "auto-switch-input",
-      "title": "Toggle Input Auto Switch",
-      "subtitle": "Disabled",
-      "description": "Enable or disable automatic switching for input devices.",
+      "title": "Enforce Input Device",
+      "subtitle": "Active",
+      "description": "Background enforcer: keeps your default input device and pinned volumes in check.",
       "mode": "no-view",
       "interval": "20s"
     },
     {
       "name": "auto-switch-output",
-      "title": "Toggle Output Auto Switch",
-      "subtitle": "Disabled",
-      "description": "Enable or disable automatic switching for output devices.",
+      "title": "Enforce Output Device",
+      "subtitle": "Active",
+      "description": "Background enforcer: keeps your default output device and pinned volumes in check.",
       "mode": "no-view",
       "interval": "20s"
-    },
-    {
-      "name": "customize-order",
-      "title": "Customize Auto Switch Device Order",
-      "subtitle": "Audio Device",
-      "description": "Set the priority order for input and output devices.",
-      "mode": "view"
     },
     {
       "name": "favourite",

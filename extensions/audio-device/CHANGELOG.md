@@ -1,14 +1,29 @@
 # Audio Device Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Major Update] - {PR_MERGE_DATE}
 
-### Added
-- Default (sticky) device feature: set any device as your default input or output from the device list
-- When the default device is connected, the extension automatically switches to it and stays on it
-- Default device takes priority over auto-switch priority order
-- "Default" tag shown on the designated device in the list
-- "Set as Default Device" / "Clear Default Device" actions with Cmd+Shift+D shortcut
-- Auto-switch subtitle shows the default device name
+### Merged Sound Control features
+- Volume control: see current volume level for each device in the list
+- Toggle Mute action (Cmd+M) directly from the device list
+- New standalone commands: Toggle Mute, Set Volume, Set Input Volume
+- Full input volume and mute support via integrated sound-control binary
+
+### Pinned Volume Levels
+- Pin any device's volume to prevent macOS from resetting it (Cmd+Shift+V)
+- "Pinned: X%" tag shown on devices with pinned volumes
+- Background enforcer automatically resets volume if macOS changes it
+
+### Simplified auto-switch UX (Option B)
+- Default (sticky) device: star any device as your default (Cmd+Shift+D)
+- Priority ordering: reorder devices with Cmd+Arrow keys directly in the main list
+- Background enforcer always active -- no separate toggle commands
+- If default device is connected, always use it; otherwise fall back to priority order
+- Removed separate "Toggle Auto Switch" and "Customize Order" commands
+
+### New icons
+- All device icons replaced with clean 512x512 Lucide/Iconify monoline icons
+- New headphones icon for wired headphones
+- Icons work properly with Raycast's tint system
 
 ## Chore - 2026-02-07
 - Fix issues in lint due to newer ESlint package

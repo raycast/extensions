@@ -79,6 +79,67 @@ export async function setOutputDeviceVolume(deviceId: string, volume: number) {
   }
 }
 
+export async function getOutputDeviceMute(deviceId: string) {
+  const api = await getAPI();
+  if (api.getOutputDeviceMute) {
+    return api.getOutputDeviceMute(deviceId);
+  }
+  return undefined;
+}
+
+export async function setOutputDeviceMute(deviceId: string, muted: boolean) {
+  const api = await getAPI();
+  if (api.setOutputDeviceMute) {
+    return api.setOutputDeviceMute(deviceId, muted);
+  }
+}
+
+export async function toggleOutputDeviceMute(deviceId: string) {
+  const api = await getAPI();
+  if (api.toggleOutputDeviceMute) {
+    return api.toggleOutputDeviceMute(deviceId);
+  }
+  return false;
+}
+
+export async function getInputDeviceVolume(deviceId: string) {
+  const api = await getAPI();
+  if (api.getInputDeviceVolume) {
+    return api.getInputDeviceVolume(deviceId);
+  }
+  return undefined;
+}
+
+export async function setInputDeviceVolume(deviceId: string, volume: number) {
+  const api = await getAPI();
+  if (api.setInputDeviceVolume) {
+    return api.setInputDeviceVolume(deviceId, volume);
+  }
+}
+
+export async function getInputDeviceMute(deviceId: string) {
+  const api = await getAPI();
+  if (api.getInputDeviceMute) {
+    return api.getInputDeviceMute(deviceId);
+  }
+  return undefined;
+}
+
+export async function setInputDeviceMute(deviceId: string, muted: boolean) {
+  const api = await getAPI();
+  if (api.setInputDeviceMute) {
+    return api.setInputDeviceMute(deviceId, muted);
+  }
+}
+
+export async function toggleInputDeviceMute(deviceId: string) {
+  const api = await getAPI();
+  if (api.toggleInputDeviceMute) {
+    return api.toggleInputDeviceMute(deviceId);
+  }
+  return false;
+}
+
 export async function createAggregateDevice(
   name: string,
   mainDeviceId: string,
