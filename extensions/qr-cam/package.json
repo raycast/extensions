@@ -3,7 +3,7 @@
   "name": "qr-cam",
   "title": "QR Cam",
   "description": "Scan a QR Code with your webcam",
-  "icon": "extension-icon2.png",
+  "icon": "extension-icon.png",
   "author": "lemikeone",
   "platforms": [
     "macOS"
@@ -21,8 +21,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
