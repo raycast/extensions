@@ -54,7 +54,11 @@ export const RemoveWorktree = ({
 
       toast.title = "Running Cleanup";
       toast.message = "Cleaning up worktrees and branches";
-      if (worktree.branch) await removeBranch({ path: projectPath, branch: worktree.branch });
+      try {
+        if (worktree.branch) await removeBranch({ path: projectPath, branch: worktree.branch });
+      } catch {
+        // Branch may already be deleted
+      }
       await pruneWorktrees({ path: projectPath });
 
       toast.style = Toast.Style.Success;

@@ -1,8 +1,7 @@
 # Git Worktree Changelog
 
-## [Unreleased]
+## [Fix Remove Worktree Infinite Loading] - {PR_MERGE_DATE}
 
-### Fixed
 - Fix remove worktree action showing infinite loading spinner on unexpected errors
 - Quote paths in git commands to handle paths with spaces
 
