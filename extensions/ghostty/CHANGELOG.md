@@ -1,6 +1,6 @@
 # Ghostty Changelog
 
-## [Command] 2026-02-19
+## [Command] {PR_MERGE_DATE}
 
 - Add new command to run launch configuration using arguments.
 
