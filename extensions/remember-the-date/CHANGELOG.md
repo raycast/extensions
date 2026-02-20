@@ -1,8 +1,6 @@
 # Remember the Date Changelog
 
-## [Added missing contributor] - 2026-02-21
-
-- Added atsushi_kawamura as contributor
+## [Added missing contributor] - {PR_MERGE_DATE}
 
 ## [Recurring Events Support] - 2026-02-20
 
