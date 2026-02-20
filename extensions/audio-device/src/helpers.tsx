@@ -5,6 +5,8 @@ import {
   closeMainWindow,
   Icon,
   Keyboard,
+  launchCommand,
+  LaunchType,
   List,
   popToRoot,
   showHUD,
@@ -270,7 +272,13 @@ function DeviceActions({
         pinnedLevel={pinnedLevel}
         onAction={onPinnedChange}
       />
-      <SetDefaultDeviceAction device={device} ioType={ioType} isDefault={isDefault} onAction={onDefaultChange} />
+      <SetDefaultDeviceAction
+        device={device}
+        ioType={ioType}
+        isDefault={isDefault}
+        onAction={onDefaultChange}
+        onEnforced={onSelection}
+      />
       {!isDefault && (
         <ActionPanel.Section title="Priority Order">
           <Action
@@ -560,11 +568,13 @@ function SetDefaultDeviceAction({
   ioType,
   isDefault,
   onAction,
+  onEnforced,
 }: {
   device: AudioDevice;
   ioType: IOType;
   isDefault: boolean;
   onAction: () => void;
+  onEnforced?: () => void;
 }) {
   if (isDefault) {
     return (
@@ -590,6 +600,18 @@ function SetDefaultDeviceAction({
         await setDefaultDevicePreference(ioType, device.uid, device.name);
         onAction();
         await showToast(Toast.Style.Success, `Set "${device.name}" as default ${ioType} device`);
+        const enforceCmd = ioType === "input" ? "auto-switch-input" : "auto-switch-output";
+        try {
+          await launchCommand({ name: enforceCmd, type: LaunchType.Background });
+          onEnforced?.();
+        } catch {
+          const label = ioType === "input" ? "Enforce Input Device" : "Enforce Output Device";
+          await showToast(
+            Toast.Style.Animated,
+            `Enable '${label}'`,
+            "The background command must be enabled in Raycast for the default device to be enforced automatically.",
+          );
+        }
       }}
     />
   );
@@ -671,6 +693,17 @@ function PinVolumeAction({
         await setPinnedVolume(ioType, device.uid, currentPct);
         onAction();
         await showToast(Toast.Style.Success, `Pinned ${device.name} at ${currentPct}%`);
+        const enforceCmd = ioType === "input" ? "auto-switch-input" : "auto-switch-output";
+        try {
+          await launchCommand({ name: enforceCmd, type: LaunchType.Background });
+        } catch {
+          const label = ioType === "input" ? "Enforce Input Device" : "Enforce Output Device";
+          await showToast(
+            Toast.Style.Animated,
+            `Enable '${label}'`,
+            "The background command must be enabled in Raycast for pinned volumes to be enforced automatically.",
+          );
+        }
       }}
     />
   );

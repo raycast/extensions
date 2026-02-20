@@ -1,4 +1,15 @@
-import { showToast, Toast, showHUD, Form, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  showHUD,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  useNavigation,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
   getInputDevices,
@@ -88,6 +99,19 @@ export default function Command() {
       const old = currentVolume != null ? `${currentVolume}%` : "?";
       const pinSuffix = values.pinVolume ? " (pinned)" : pinnedLevel != null ? " (unpinned)" : "";
       await showHUD(`${name}: ${old} -> ${clamped}%${pinSuffix}`);
+
+      if (values.pinVolume) {
+        try {
+          await launchCommand({ name: "auto-switch-input", type: LaunchType.Background });
+        } catch {
+          await showToast(
+            Toast.Style.Animated,
+            "Enable 'Enforce Input Device'",
+            "The background command must be enabled in Raycast for pinned volumes to be enforced automatically.",
+          );
+        }
+      }
+
       pop();
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to set input volume", String(error));

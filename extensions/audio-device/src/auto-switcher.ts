@@ -87,8 +87,10 @@ async function enforcePinnedVolumes(type: IOType) {
 }
 
 async function runEnforcement(type: IOType) {
-  const switchedToDefault = await maybeSwitchToDefault(type);
-  if (!switchedToDefault) {
+  const hasDefault = !!(await getDefaultDeviceUid(type));
+  if (hasDefault) {
+    await maybeSwitchToDefault(type);
+  } else {
     await maybeSwitchByPriority(type);
   }
   await enforcePinnedVolumes(type);
