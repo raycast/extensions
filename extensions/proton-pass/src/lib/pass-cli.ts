@@ -20,12 +20,13 @@ import { ensureCli } from "./cli";
 
 let mockCacheCleared = false;
 
-const USE_MOCK_DATA = false;
+// Seed the extension with local demo data while running `ray develop` / `npm run dev`.
+const USE_MOCK_DATA = environment.isDevelopment;
 const DEFAULT_CLI_COMMAND = "pass-cli";
 type CliPathPreferenceValues = { cliPath?: string };
 
 function useMockData(): boolean {
-  return environment.isDevelopment && USE_MOCK_DATA;
+  return USE_MOCK_DATA;
 }
 
 async function ensureMockCacheCleared(): Promise<void> {
@@ -78,14 +79,14 @@ function getEnhancedPath(): string {
   const home = homedir();
   const currentPath = process.env.PATH || "";
 
-  if (process.platform === "win32") {
-    return currentPath;
-  }
-
-  const additionalPaths =
-    process.platform === "darwin"
-      ? ["/opt/homebrew/bin", "/usr/local/bin", `${home}/.local/bin`, `${home}/bin`, "/usr/bin", "/bin"]
-      : ["/usr/local/bin", `${home}/.local/bin`, `${home}/bin`, "/usr/bin", "/bin"];
+  const additionalPaths = [
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+    `${home}/.local/bin`,
+    `${home}/bin`,
+    "/usr/bin",
+    "/bin",
+  ];
 
   return [...additionalPaths, currentPath].filter((p) => p.length > 0).join(delimiter);
 }
@@ -162,21 +163,10 @@ async function execPassCli(
     env,
     timeout: 60_000,
     maxBuffer: 20 * 1024 * 1024,
-    windowsHide: true,
   };
 
-  try {
-    const { stdout, stderr } = await execFileAsync(cliPath, args, baseOptions);
-    return { stdout: stdout ?? "", stderr: stderr ?? "" };
-  } catch (err: unknown) {
-    const execErr = err as NodeJS.ErrnoException;
-    const isEnoent = execErr?.code === "ENOENT" || execErr?.errno === -2;
-    if (process.platform === "win32" && isEnoent && !cliPath.toLowerCase().endsWith(".exe")) {
-      const { stdout, stderr } = await execFileAsync(`${cliPath}.exe`, args, baseOptions);
-      return { stdout: stdout ?? "", stderr: stderr ?? "" };
-    }
-    throw err;
-  }
+  const { stdout, stderr } = await execFileAsync(cliPath, args, baseOptions);
+  return { stdout: stdout ?? "", stderr: stderr ?? "" };
 }
 
 async function runCli(args: string[]): Promise<string> {

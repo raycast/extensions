@@ -30,8 +30,8 @@ export default function Command() {
     loadTotpItems();
 
     intervalRef.current = setInterval(() => {
-      const newRemaining = getTotpRemainingSeconds();
-      setRemainingSeconds(newRemaining);
+      const now = Math.floor(Date.now() / 1000);
+      setRemainingSeconds(30 - (now % 30));
 
       const nextTimeStep = getTotpTimeStep();
       if (nextTimeStep !== currentTimeStepRef.current) {
