@@ -1,0 +1,97 @@
+import { ActionPanel, Color, List, Action, Clipboard, Image, Icon } from "@raycast/api";
+import { format } from "timeago.js";
+import { RepositoryOwnProps } from "@/types";
+
+export default function Repository(props: RepositoryOwnProps) {
+  const {
+    id,
+    name,
+    nameWithOwner,
+    url,
+    description,
+    updatedAt,
+    isPrivate,
+    isFork,
+    isArchived,
+    primaryLanguage,
+    owner,
+  } = props;
+
+  const accessories: List.Item.Accessory[] = [];
+
+  if (primaryLanguage) {
+    accessories.push({
+      tag: { value: primaryLanguage.name, color: primaryLanguage.color || Color.SecondaryText },
+    });
+  }
+
+  if (isPrivate) {
+    accessories.push({
+      icon: { source: Icon.Lock, tintColor: Color.SecondaryText },
+      tooltip: "Private",
+    });
+  }
+
+  if (isArchived) {
+    accessories.push({
+      icon: { source: Icon.Box, tintColor: Color.SecondaryText },
+      tooltip: "Archived",
+    });
+  }
+
+  accessories.push({
+    text: format(updatedAt),
+    icon: {
+      source: owner.avatarUrl,
+      mask: Image.Mask.Circle,
+    },
+  });
+
+  return (
+    <List.Item
+      key={id}
+      title={name}
+      subtitle={description || undefined}
+      icon={{
+        source: isFork ? Icon.CodeBlock : Icon.Box,
+        tintColor: Color.PrimaryText,
+      }}
+      accessories={accessories}
+      actions={
+        <ActionPanel title={nameWithOwner}>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser url={url} />
+            <Action.OpenInBrowser
+              title="Open Issues"
+              url={`${url}/issues`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+            />
+            <Action.OpenInBrowser
+              title="Open Pull Requests"
+              url={`${url}/pulls`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Copy Repository Name"
+              icon={{
+                source: "doc-on-clipboard-16",
+                tintColor: Color.PrimaryText,
+              }}
+              onAction={() => Clipboard.copy(nameWithOwner)}
+            />
+            <Action
+              title="Copy Repository URL"
+              icon={{
+                source: "doc-on-clipboard-16",
+                tintColor: Color.PrimaryText,
+              }}
+              onAction={() => Clipboard.copy(url)}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}

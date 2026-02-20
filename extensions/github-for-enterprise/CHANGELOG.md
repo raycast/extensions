@@ -1,5 +1,10 @@
 # GitHub Enterprise Changelog
 
+## [Add Search Repositories Feature] - {PR_MERGE_DATE}
+
+- Added new "Search Repositories" command to search across public and private repositories
+- Updated repository action shortcuts to use Cmd+Shift+I and Cmd+Shift+P to avoid reserved shortcut conflicts
+
 ## [Fix notification URLs for GitHub Enterprise Cloud] - 2025-11-21
 
 - Fixed notification URLs for GitHub Enterprise Cloud instances
