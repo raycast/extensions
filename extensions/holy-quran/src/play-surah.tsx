@@ -22,7 +22,11 @@ import MemorizeSurah from "./memorize-surah";
 import { FAV_SURAH_KEY, FAV_RECITER_KEY, SURAH_VERSE_COUNTS } from "./lib/constants";
 
 export default function Command(props: LaunchProps<{ arguments: { surah?: string; start?: string; end?: string } }>) {
-  const { data: chapters, isLoading: isChaptersLoading } = useCachedPromise(fetchChapters);
+  const {
+    data: chapters,
+    isLoading: isChaptersLoading,
+  } = useCachedPromise(fetchChapters);
+
   const {
     data: favorites,
     isLoading: isFavsLoading,
@@ -122,6 +126,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
   useEffect(() => {
     async function handleArguments() {
       if (!isChaptersLoading && chapters && props.arguments.surah) {
+        if (props.arguments.surah === "") return;
         const query = props.arguments.surah.toLowerCase().trim();
         const chapter = chapters.find(
           (c) =>
@@ -168,7 +173,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
       }
     }
     handleArguments();
-  }, [isChaptersLoading, chapters, props.arguments, handlePlayAction]);
+  }, [isChaptersLoading, chapters, props.arguments.surah, props.arguments.start, props.arguments.end, handlePlayAction]);
 
   const isLoading = isChaptersLoading || isFavsLoading;
 
