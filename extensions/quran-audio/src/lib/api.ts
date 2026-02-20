@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "./constants";
-import { Chapter, Recitation, AudioFile } from "../types";
+import { Chapter, Recitation, AudioFile, Ayah, VerseRecitation } from "../types";
 
 async function callApi<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
@@ -36,4 +36,21 @@ export async function fetchAudioFile(
   const url = `${API_BASE_URL}/chapter_recitations/${reciterId}/${chapterId}${query ? `?${query}` : ""}`;
   const data = await callApi<{ audio_file: AudioFile }>(url);
   return data.audio_file;
+}
+
+export async function fetchVerses(chapterId: number): Promise<Ayah[]> {
+  const data = await callApi<{ verses: Ayah[] }>(
+    `${API_BASE_URL}/verses/by_chapter/${chapterId}?language=en&words=false`,
+  );
+  return data.verses;
+}
+
+export async function fetchVerseRecitations(reciterId: number, chapterId: number): Promise<VerseRecitation[]> {
+  const data = await callApi<{ audio_files: VerseRecitation[] }>(
+    `${API_BASE_URL}/recitations/${reciterId}/by_chapter/${chapterId}`,
+  );
+  return data.audio_files.map((file) => ({
+    ...file,
+    url: file.url.startsWith("http") ? file.url : `https://audio.qurancdn.com/${file.url}`,
+  }));
 }

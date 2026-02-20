@@ -4,6 +4,7 @@ import { fetchChapters, fetchAudioFile, fetchRecitations } from "./lib/api";
 import { playAudio } from "./lib/audio";
 import { Chapter, Recitation, Preferences } from "./types";
 import { useState, useEffect } from "react";
+import MemorizeSurah from "./memorize-surah";
 
 export default function Command() {
   const { data: chapters, isLoading } = useCachedPromise(fetchChapters);
@@ -76,6 +77,12 @@ export default function Command() {
                 title={`Play with ${defaultReciter.name}`}
                 icon={Icon.Play}
                 onAction={() => handlePlay(chapter)}
+              />
+              <Action.Push
+                title="Memorization Mode (Loop)"
+                icon={Icon.Repeat}
+                target={<MemorizeSurah chapter={chapter} />}
+                shortcut={{ modifiers: ["cmd"], key: "m" }}
               />
               <Action.Push
                 title="Choose Reciter"

@@ -32,6 +32,18 @@ export interface AudioFile {
   audio_url: string;
 }
 
+export interface VerseRecitation {
+  verse_key: string;
+  url: string;
+}
+
+export interface Ayah {
+  id: number;
+  verse_number: number;
+  verse_key: string;
+  text_uthmani: string;
+}
+
 export interface Preferences {
   defaultReciterId: string;
   defaultReciterName: string;
