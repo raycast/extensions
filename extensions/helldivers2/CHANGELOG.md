@@ -1,6 +1,6 @@
 # Helldivers 2 Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-02-20
 
 - Add support for Windows
 - Update extension name to Helldivers 2
