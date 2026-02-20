@@ -75,12 +75,19 @@ export async function fetchDownloadLinks(productId: string): Promise<FetchResult
 
   const response = await fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      Referer: "https://store.rg-adguard.net/",
+      Origin: "https://store.rg-adguard.net",
+    },
     body: formData.toString(),
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`);
+    const responseText = await response.text();
+    throw new Error(`API request failed: ${response.status} ${response.statusText} - ${responseText}`);
   }
 
   const html = await response.text();
