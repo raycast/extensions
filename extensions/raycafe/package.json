@@ -9,7 +9,7 @@
     "macOS",
     "Windows"
   ],
-  "categories": ["News"],
+  "categories": ["Productivity"],
   "keywords": ["raycast", "community", "meetup", "events", "raycafe"],
   "license": "MIT",
   "commands": [
