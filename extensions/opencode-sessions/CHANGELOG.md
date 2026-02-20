@@ -1,6 +1,6 @@
 # OpenCode Sessions Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-20
 
 - Browse sessions with time-grouped sections and project filtering
 - View full conversation transcripts with tool usage details
