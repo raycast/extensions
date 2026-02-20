@@ -1,4 +1,4 @@
-import { ActionPanel, Color, List, Action, Clipboard, Image, Icon } from "@raycast/api";
+import { ActionPanel, Color, List, Action, Image, Icon } from "@raycast/api";
 import { format } from "timeago.js";
 import { RepositoryOwnProps } from "@/types";
 
@@ -83,21 +83,15 @@ export default function Repository(props: RepositoryOwnProps) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action
+            <Action.CopyToClipboard
               title="Copy Repository Name"
-              icon={{
-                source: "doc-on-clipboard-16",
-                tintColor: Color.PrimaryText,
-              }}
-              onAction={() => Clipboard.copy(nameWithOwner)}
+              content={nameWithOwner}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
             />
-            <Action
+            <Action.CopyToClipboard
               title="Copy Repository URL"
-              icon={{
-                source: "doc-on-clipboard-16",
-                tintColor: Color.PrimaryText,
-              }}
-              onAction={() => Clipboard.copy(url)}
+              content={url}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
         </ActionPanel>
