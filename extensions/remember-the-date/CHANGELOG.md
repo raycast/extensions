@@ -1,6 +1,6 @@
 # Remember the Date Changelog
 
-## [Add Contributor] - 2026-02-21
+## [Added missing contributor] - 2026-02-21
 
 - Added atsushi_kawamura as contributor
 
