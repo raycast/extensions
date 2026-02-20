@@ -1,6 +1,6 @@
 # Google Books Changelog
 
-## [Detail Sidebar, Grid Views & Code Reorg] - {PR_MERGE_DATE}
+## [Detail Sidebar, Grid Views & Code Reorg] - 2026-02-20
 
 - feat: toggleable detail sidebar in List view showing book metadata
 - feat: switchable views — List & Grid
