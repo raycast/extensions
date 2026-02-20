@@ -3,3 +3,7 @@ export interface Space {
   name: string;
   icon?: string;
 }
+
+export interface ConfigureSpacesLaunchContext {
+  spaceIndex: number;
+}

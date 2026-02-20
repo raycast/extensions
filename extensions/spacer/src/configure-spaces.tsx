@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, List, popToRoot, useNavigation } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import { Space } from "./types";
+import { ConfigureSpacesLaunchContext, Space } from "./types";
 
-export default function ConfigureSpaces(props: LaunchProps) {
+type ConfigureSpacesProps = LaunchProps<{ launchContext: ConfigureSpacesLaunchContext }>;
+
+export default function ConfigureSpaces(props: ConfigureSpacesProps) {
   const { value: spaces, setValue: setSpaces, isLoading } = useLocalStorage<Space[]>("spaces", []);
 
   if (props.launchContext?.spaceIndex) {
