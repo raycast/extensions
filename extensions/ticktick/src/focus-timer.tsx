@@ -121,7 +121,7 @@ function TimerView({
             <Detail.Metadata.Label
               title="Focused Task"
               text={focusedTask.title}
-              icon={{ source: Icon.Target, tintColor: Color.Orange }}
+              icon={{ source: Icon.BullsEye, tintColor: Color.Orange }}
             />
           )}
           <Detail.Metadata.Label
@@ -340,7 +340,7 @@ export default function FocusTimerCommand() {
         <List.Section title="Focused Task">
           <List.Item
             title={focusedTask.title}
-            icon={{ source: Icon.Target, tintColor: Color.Orange }}
+            icon={{ source: Icon.BullsEye, tintColor: Color.Orange }}
             subtitle={
               projects.find((p) => p.id === focusedTask.projectId)?.name
             }
@@ -413,7 +413,7 @@ export default function FocusTimerCommand() {
                 <ActionPanel>
                   <Action
                     title="Set as Focused Task"
-                    icon={{ source: Icon.Target, tintColor: Color.Orange }}
+                    icon={{ source: Icon.BullsEye, tintColor: Color.Orange }}
                     onAction={() => setFocusedTaskId(task.id)}
                   />
                 </ActionPanel>
