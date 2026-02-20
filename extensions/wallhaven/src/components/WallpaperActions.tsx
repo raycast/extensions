@@ -11,7 +11,7 @@ import {
 import { join } from "path";
 import { homedir } from "os";
 import { mkdir } from "fs/promises";
-import { Preferences, Wallpaper } from "../types";
+import { Wallpaper } from "../types";
 import {
   downloadImage,
   getFileExtension,

@@ -2,7 +2,7 @@ import { getPreferenceValues, Grid } from "@raycast/api";
 import { useCallback, useRef, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { searchWallpapers } from "./api";
-import { Preferences, Wallpaper } from "./types";
+import { Wallpaper } from "./types";
 import { WallpaperGrid } from "./components/WallpaperGrid";
 
 export default function SearchWallpapers() {

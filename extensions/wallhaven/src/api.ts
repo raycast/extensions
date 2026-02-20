@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import {
-  Preferences,
   SearchParams,
   SearchResponse,
   WallpaperResponse,

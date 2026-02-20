@@ -8,7 +8,7 @@ import {
 import { useCallback, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getCollections, getCollectionWallpapers } from "./api";
-import { Collection, Preferences, Wallpaper } from "./types";
+import { Collection, Wallpaper } from "./types";
 import { WallpaperGrid } from "./components/WallpaperGrid";
 
 function CollectionWallpapers({

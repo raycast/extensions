@@ -1,6 +1,5 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { searchWallpapers } from "./api";
-import { Preferences } from "./types";
 import {
   downloadImage,
   getFileExtension,
