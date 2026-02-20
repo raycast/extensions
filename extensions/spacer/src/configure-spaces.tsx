@@ -69,7 +69,7 @@ function SpaceForm({
 }: {
   space?: Space;
   spaces: Space[];
-  setSpaces: (spaces: Space[]) => void;
+  setSpaces: (spaces: Space[]) => Promise<void>;
   isRoot?: boolean;
 }) {
   const { pop } = useNavigation();
