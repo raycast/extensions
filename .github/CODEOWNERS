@@ -155,7 +155,7 @@
 /extensions/bartender                                               @kmusick
 /extensions/basalt-wallpapers                                       @nurel07
 /extensions/base-stats                                              @0xOsprey
-/extensions/base64                                                  @DanielSinclair @jfkisafk @sammarks @ridemountainpig
+/extensions/base64                                                  @DanielSinclair @jfkisafk @sammarks @ridemountainpig @lafkpages
 /extensions/base64-to-file                                          @iamforrest
 /extensions/battery-health                                          @o1y @yz3440
 /extensions/battery-menubar                                         @panrafal @yarnaid @ViGeng @Sean-fn
@@ -166,13 +166,14 @@
 /extensions/bear                                                    @hmarr @lucaschultz @diokhan @ron-myers @juanbanchero @ramsaysewell @jfkisafk @xmok
 /extensions/beat-per-minute                                         @pernielsentikaer @mite404
 /extensions/bech32-converter                                        @Zygimantass
-/extensions/bed-time-calculator                                     @khlebobul
+/extensions/bed-time-calculator                                     @khlebobul @luinbytes
 /extensions/beehiiv                                                 @zachmian
 /extensions/beeminder                                               @vivgui @mybuddymichael
 /extensions/bento                                                   @ziptied
 /extensions/bento-me                                                @pabroux
 /extensions/berlin-public-transportation                            @arjanski
 /extensions/beszel-extension                                        @wyattjoh
+/extensions/betaseries                                              @lemikeone
 /extensions/better-aliases                                          @alexibuild
 /extensions/better-deal                                             @juxtdesigncc
 /extensions/better-uptime                                           @andreaselia @timoransky
@@ -228,10 +229,10 @@
 /extensions/brawlstars                                              @MaximeGuiliani
 /extensions/brew                                                    @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare @ashokbaruaakas @MillerApps @pernielsentikaer @jfkisafk @vpukhanov @j3lte @alexander-cato @ViGeng @ridemountainpig @chrismessina
 /extensions/brew-services                                           @erics118
-/extensions/brightness-control                                      @CaliCastle
+/extensions/brightness-control                                      @CaliCastle @pavzagor
 /extensions/bring                                                   @amuelli @maximilianzuern @xilopaint
 /extensions/browser-ai                                              @aeither
-/extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311 @daniel-nagy @gewoonseba @ridemountainpig @0xdhrv
+/extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311 @daniel-nagy @gewoonseba @ridemountainpig @sayuthisobri @0xdhrv @pernielsentikaer
 /extensions/browser-history                                         @crisboarna @TKDKid1000 @MikuGeek @ridemountainpig
 /extensions/browser-tabs                                            @koinzhang @ridemountainpig
 /extensions/browsers-profiles                                       @skydiver @kytta @emilshr @chingweih @nilleb
@@ -244,11 +245,13 @@
 /extensions/bunch                                                   @koinzhang
 /extensions/bundesliga                                              @anhthang
 /extensions/bundlephobia-search                                     @PeraSite @rushelex
+/extensions/bunq                                                    @TurboCoder13
 /extensions/cache-control-builder                                   @rkusa
 /extensions/cacher                                                  @jookyboi
 /extensions/cal-com-share-meeting-links                             @eluce2 @peduarte @pernielsentikaer @AlexIsMaking @jfkisafk @runofthemillgeek
 /extensions/calendar                                                @fuksman @pernielsentikaer @tonka3000
 /extensions/calendly                                                @eluce2
+/extensions/caltask                                                 @jujuyuzu
 /extensions/can-i-php                                               @mechelon @pernielsentikaer
 /extensions/can-i-use                                               @thomaslombart @j3lte @tofrankie @xmok
 /extensions/cangjie                                                 @jimmyclchu
@@ -266,7 +269,7 @@
 /extensions/cc0-lib                                                 @0xN1
 /extensions/ccf-what                                                @CrackedPoly
 /extensions/ccfddl                                                  @ViGeng
-/extensions/ccusage                                                 @nyatinte @zhuravel @nyatinte @GarrickZ2
+/extensions/ccusage                                                 @nyatinte @zhuravel @nyatinte @GarrickZ2 @pernielsentikaer
 /extensions/cdnjs                                                   @xmok
 /extensions/center                                                  @enesozturk
 /extensions/cerebras                                                @EvanZhouDev
@@ -296,6 +299,7 @@
 /extensions/cheetah                                                 @RongleCat
 /extensions/chess-com                                               @joshfarrant @tomassliz
 /extensions/chhoto                                                  @paranoidPhantom
+/extensions/chiikawa-character                                      @0xdhrv
 /extensions/china-ip-address                                        @ErlichLiu
 /extensions/chinese-character                                       @koinzhang
 /extensions/chinese-character-converter                             @f88083
@@ -318,7 +322,7 @@
 /extensions/claude-code-cheatsheet                                  @harumeri
 /extensions/claude-code-config-switcher                             @WangCheng0116
 /extensions/claude-code-launcher                                    @stephendolan @ridemountainpig
-/extensions/claudecast                                              @qazi0
+/extensions/claudecast                                              @qazi0 @RoderickJDunn
 /extensions/clean-keyboard                                          @ike-gg @owain-williams @xilopaint @ridemountainpig @LitoMore
 /extensions/clean-text                                              @MoisesCervera
 /extensions/cleanshotx                                              @Aayush9029 @lukaszmtw @erics118 @mlnchk @pernielsentikaer
@@ -343,7 +347,7 @@
 /extensions/cloud-cli-login-statuses                                @AdamVyborny
 /extensions/cloudflare                                              @Destiner @niklaswa @teziovsky @xmok @TakenMC @nbbaier
 /extensions/cloudflare-email-routing                                @erayack @xmok @parterburn
-/extensions/cloudflare-warp                                         @anandubajith
+/extensions/cloudflare-warp                                         @anandubajith @ezzylan
 /extensions/cloudinary                                              @colbyfayock @xmok
 /extensions/cnpj-lookup                                             @xilopaint
 /extensions/cobalt                                                  @aelew @aelew
@@ -357,6 +361,7 @@
 /extensions/code-saver                                              @Gnosnay
 /extensions/code-smells                                             @omorest
 /extensions/code-stash                                              @ben-greenwood
+/extensions/code-wiki                                               @alexibuild
 /extensions/codeforces-extension                                    @Iron0utlaw @m3hu1 @pernielsentikaer @YourMCGeek
 /extensions/codegeex                                                @MBearo
 /extensions/codegrepper                                             @emircanerkul @pernielsentikaer
@@ -470,6 +475,7 @@
 /extensions/cyberpanel                                              @xmok
 /extensions/cypress-docs                                            @robertguss
 /extensions/dad-jokes                                               @pernielsentikaer @xmok @xmok
+/extensions/dagster                                                 @b-per
 /extensions/daily-sites                                             @dubsdotla
 /extensions/daisyui                                                 @joeynotjoe
 /extensions/daminik                                                 @xmok
@@ -487,6 +493,7 @@
 /extensions/dawa                                                    @SimonJ @pernielsentikaer
 /extensions/day-one                                                 @AntonNiklasson @bestemic
 /extensions/days-until-christmas                                    @MEGApixel23 @erics118 @jacpd @pernielsentikaer
+/extensions/db-schema-explorer                                      @SciSaif
 /extensions/dbt-documentation                                       @b-per
 /extensions/dbtCloud                                                @zsombor-flds
 /extensions/debank                                                  @Yukaii
@@ -551,6 +558,7 @@
 /extensions/django-docs                                             @JensAstrup
 /extensions/djangopackages                                          @saadmk11
 /extensions/dlmoji                                                  @Hydrapse
+/extensions/dns-lookup                                              @valent1d
 /extensions/do-not-disturb                                          @Yakitrak @quanru @mikikiv @LitoMore
 /extensions/doccheck                                                @justspacedog @h16nning
 /extensions/dock                                                    @pradeepb28 @xmok
@@ -697,9 +705,10 @@
 /extensions/figlet                                                  @pernielsentikaer
 /extensions/figma-files                                             @michaelwschultz @pernielsentikaer @GLaDO8
 /extensions/figma-learn-companion                                   @MadMaxMcKinney
+/extensions/figma-link-cleaner                                      @iamshubhransh
 /extensions/figma-variables                                         @Mart1M
 /extensions/filamentphp-doc-seach                                   @aurawindsurfing
-/extensions/file-info                                               @Envl
+/extensions/file-info                                               @Envl @SandeepBaskaran
 /extensions/file-manager                                            @erics118 @BalliAsghar @urwrstkn8mare @fengtianze @pernielsentikaer @ridemountainpig
 /extensions/file-organizer                                          @aaronlinv
 /extensions/file-tree-generator                                     @noidwasavailable
@@ -737,6 +746,7 @@
 /extensions/flutter-pub-dev-search                                  @prasadsunny1 @K9i-0
 /extensions/flutter-utils                                           @ymunsch8
 /extensions/flux                                                    @allejo
+/extensions/flycheck-raycast                                        @flyingsotong
 /extensions/flypy-code-query                                        @absir1949
 /extensions/focus                                                   @namzo
 /extensions/focus-anchor                                            @ashleyhindle
@@ -787,6 +797,7 @@
 /extensions/geohash-encode-decode                                   @alrico88
 /extensions/geoping                                                 @Chiroyce1
 /extensions/gerrit-code-review                                      @vkhitrin
+/extensions/get-app-icon                                            @chrismessina
 /extensions/get-cat-images                                          @luiggircardoso
 /extensions/get-direct-link                                         @trungnghiatn
 /extensions/get-favicon                                             @vimtor @robotdestroy @LeonChenWenJia @ViGeng @ridemountainpig
@@ -829,7 +840,7 @@
 /extensions/github-trending                                         @mikqi
 /extensions/github-users                                            @luisFilipePT
 /extensions/gitignore                                               @daniel-stoneuk @pernielsentikaer @YourMCGeek
-/extensions/gitlab                                                  @tonka3000 @Loskir @immint023 @duboiss @metakirby5 @macbookandrew @shaoye @charl3j @emlez @HBunnick @jfkisafk @RomanSchmid @jessedobbelaere @Heavyrisem @constantins2001 @pernielsentikaer @tanevanwifferen @1weiho @pnowy @ridemountainpig
+/extensions/gitlab                                                  @tonka3000 @Loskir @immint023 @duboiss @metakirby5 @macbookandrew @shaoye @charl3j @emlez @HBunnick @jfkisafk @RomanSchmid @jessedobbelaere @Heavyrisem @constantins2001 @pernielsentikaer @tanevanwifferen @1weiho @pnowy @ridemountainpig @j3lte
 /extensions/gitlab-docs                                             @saschaeggi
 /extensions/gitmoji                                                 @ricoberger @joshmedeski @ridemountainpig
 /extensions/gitpod                                                  @henit-chobisa @Palanikannan1437 @henit-chobisa @pernielsentikaer @henit-chobisa
@@ -850,8 +861,8 @@
 /extensions/goodlinks                                               @nicolas-marien
 /extensions/goodreads                                               @shettypuneeth
 /extensions/google-advanced-search                                  @developerlover
-/extensions/google-books                                            @Ali-Parandeh @xmok
-/extensions/google-calendar                                         @thomaspaulmann @j3lte @markusjura @fabitosh @geekyed @0xdhrv
+/extensions/google-books                                            @Ali-Parandeh @xmok @chrismessina
+/extensions/google-calendar                                         @thomaspaulmann @j3lte @markusjura @fabitosh @geekyed @dangkhoipro @0xdhrv
 /extensions/google-calendar-quickadd                                @Baguirre03 @ridemountainpig
 /extensions/google-chrome                                           @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin @tleo19 @Tarocch1 @rsperezn @drewbabel @haydencbarnes @pernielsentikaer @j3lte @0xdhrv @xmok
 /extensions/google-chrome-profiles                                  @frouo @erics118 @jschmidtcordeiro
@@ -862,7 +873,7 @@
 /extensions/google-lens                                             @ridemountainpig
 /extensions/google-maps-search                                      @ratoru @aeither @chrismessina @klaussner @krsntn
 /extensions/google-maven-repository                                 @koinzhang
-/extensions/google-meet                                             @vitoorgomes @hughlaw @iwex
+/extensions/google-meet                                             @vitoorgomes @hughlaw @iwex @nexxai
 /extensions/google-scholar                                          @llfmaia
 /extensions/google-search                                           @mblode @VBenny42 @ridemountainpig @jlokos @YourMCGeek
 /extensions/google-tasks                                            @elliotdes @pernielsentikaer @erikvdp @ridemountainpig
@@ -913,13 +924,14 @@
 /extensions/hebrew-date-zmanim                                      @mendelg
 /extensions/height                                                  @teziovsky
 /extensions/helium                                                  @IslamTayeb
-/extensions/helldivers2                                             @AlexStrNik
+/extensions/helldivers2                                             @AlexStrNik @LitoMore
 /extensions/hellonext-changelogs                                    @heertheeswaran
 /extensions/hellonext-wallpapers                                    @imkarthikk
 /extensions/helm-chart                                              @eunchurn
 /extensions/helm-docs                                               @tiagomichaelsousa
 /extensions/hemolog                                                 @michaelwschultz
 /extensions/hephaestus                                              @AkaShark
+/extensions/heptabase                                               @ARui-tw
 /extensions/heroicons                                               @haackt @mil3na @j3lte @Cybrarist
 /extensions/heroku                                                  @Yukaii
 /extensions/hestiacp-admin                                          @xmok
@@ -1088,6 +1100,7 @@
 /extensions/kaomoji-search                                          @allexks @xmok @markwiseman-switch @pernielsentikaer
 /extensions/karabiner-profile-switcher                              @lucaschultz @erics118
 /extensions/karakeep                                                @foru17 @kdurek @foru17 @chrismessina
+/extensions/kaset-control                                           @Endiruslan
 /extensions/kde-connect                                             @StevenRCE0
 /extensions/keepassxc                                               @pabroux @zkytech @Osmagtor @Ygnas
 /extensions/keeper-security                                         @amuley-ks
@@ -1146,6 +1159,7 @@
 /extensions/lastpass                                                @alex-popov-tech
 /extensions/later                                                   @Ross249
 /extensions/latest-news                                             @FilipeCerejo
+/extensions/latex-board                                             @273Do
 /extensions/latex-math-symbols                                      @JeffersonDing
 /extensions/launch-agents                                           @stevensd2m
 /extensions/launchdarkly                                            @luarmr
@@ -1345,6 +1359,7 @@
 /extensions/mlb-scores                                              @jso8910 @RobErskine
 /extensions/mldocs                                                  @sadanand-singh
 /extensions/mnemosyne                                               @adityasarkar
+/extensions/mobile-provisions                                       @Ernest0-Production
 /extensions/mobius-materials                                        @tjwds
 /extensions/mochi                                                   @kawamataryo
 /extensions/moco                                                    @eviscares @el-schneider
@@ -1384,7 +1399,7 @@
 /extensions/multilinks                                              @abhisheksatre @lacherogwu
 /extensions/multipass                                               @davibe @pernielsentikaer
 /extensions/multiviewer                                             @secustor
-/extensions/music                                                   @Rawnly @peterdev22 @danpalmer @octoxan @Shpigford @urwrstkn8mare @michalzuch @validatedev @hrishabhn @bogdanrbucur @xmok
+/extensions/music                                                   @Rawnly @peterdev22 @danpalmer @octoxan @Shpigford @urwrstkn8mare @michalzuch @validatedev @hrishabhn @bogdanrbucur @xmok @byheaven
 /extensions/music-assistant-controls                                @YoeriVD
 /extensions/music-link-converter                                    @quentin23soleil @ridemountainpig @clins1994
 /extensions/music-timer                                             @JulienLacr0ix
@@ -1489,7 +1504,7 @@
 /extensions/oblique-strategies                                      @dnnsmnstrr
 /extensions/obs-clippings                                           @trevware
 /extensions/obs-control                                             @Yukaii @j3lte @RealCyGuy
-/extensions/obsidian                                                @marcjulianschwarz @KevinBatdorf @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort @MuuNU @marcjulianschwarz @theherk @marcjulianschwarz @vicampuzano
+/extensions/obsidian                                                @marcjulianschwarz @KevinBatdorf @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort @MuuNU @marcjulianschwarz @theherk @marcjulianschwarz @vicampuzano @ErBlack
 /extensions/obsidian-bookmarks                                      @Dru89 @moeyua @iwex @qfettes
 /extensions/obsidian-link-opener                                    @osteele
 /extensions/obsidian-smart-capture                                  @trillhause @Jimmy-b36
@@ -1507,6 +1522,7 @@
 /extensions/ohmyzsh-plugins                                         @k8scat
 /extensions/ok-json                                                 @francisfeng
 /extensions/oklch-color-converter                                   @strongeron
+/extensions/okta-app-manager                                        @Tigeredgar
 /extensions/oktasearch                                              @zachmian
 /extensions/olacv                                                   @xmok
 /extensions/ollama-mind-map-generator                               @vojay-dev
@@ -1545,6 +1561,7 @@
 /extensions/openai-gpt                                              @simicvm @DorukAkinci @EvilMouth
 /extensions/openai-speak                                            @jnchman
 /extensions/openai-translator                                       @douo @dekura @leeonfield @ridemountainpig
+/extensions/opencode-sessions                                       @mike182uk
 /extensions/openfortivpn                                            @rafalpetryka
 /extensions/openhue                                                 @thibauult
 /extensions/openrouter-model-search                                 @mutewinter @0xdhrv
@@ -1638,7 +1655,7 @@
 /extensions/pexels                                                  @koinzhang
 /extensions/phind-search                                            @aiyogg @pernielsentikaer
 /extensions/phonenumber-in-im                                       @TimonPeng
-/extensions/phosphor-icons                                          @marinsokol @xmok
+/extensions/phosphor-icons                                          @marinsokol @xmok @ridemountainpig
 /extensions/photoroom-image-editing                                 @ubuntudroid
 /extensions/php-docs                                                @comes @pernielsentikaer
 /extensions/php-toolbox                                             @inxilpro
@@ -1682,11 +1699,11 @@
 /extensions/plexus                                                  @RensHoogendam @diegosreis
 /extensions/ploi                                                    @ploi-deploy @xmok
 /extensions/pm2                                                     @LitoMore @pernielsentikaer
-/extensions/pocket                                                  @vimtor @hrishabhn @xmok
+/extensions/pocket                                                  @vimtor @hrishabhn @xmok @pernielsentikaer
 /extensions/pocketbase                                              @xmok
 /extensions/podcasts                                                @ron-myers
 /extensions/podcasts-now                                            @cloudy9101
-/extensions/pokedex                                                 @anhthang @miguel-felix1
+/extensions/pokedex                                                 @anhthang @miguel-felix1 @anhthang
 /extensions/pokemon-tcg-pocket-binder                               @Azyzraissi
 /extensions/polar                                                   @emilwidlund @xmok
 /extensions/polished                                                @LekoArts
@@ -1700,6 +1717,7 @@
 /extensions/port                                                    @etayalony
 /extensions/port-from-project-name                                  @Vethya
 /extensions/port-manager                                            @lucaschultz @Sheraff @ridemountainpig @pernielsentikaer
+/extensions/portal-wholesale                                        @nickdichev
 /extensions/ports                                                   @diegoleteliers10
 /extensions/portuguese-primeira-liga                                @danielsequeira
 /extensions/position-size-calculator                                @AkhileshDalvi
@@ -1732,9 +1750,11 @@
 /extensions/prompt-stash                                            @renzo4web @ridemountainpig
 /extensions/promptlab                                               @SKaplanOfficial @LitoMore
 /extensions/prompts-chat                                            @f
+/extensions/pronounce-the-word                                      @SandeepBaskaran
 /extensions/protobuf2typescript                                     @7gugu
 /extensions/proton-authenticator                                    @FareedFarag
 /extensions/proton-mail                                             @NormCopeland
+/extensions/proton-pass-client                                      @FeernandoOFF
 /extensions/proton-version                                          @flavienbonvin @pernielsentikaer
 /extensions/protondb                                                @LitoMore
 /extensions/prowlarr                                                @Elcaten
@@ -1925,6 +1945,7 @@
 /extensions/restore-photo                                           @peduarte
 /extensions/retool                                                  @andre347
 /extensions/retrac                                                  @Skarf4U
+/extensions/retrace                                                 @haseab @pernielsentikaer
 /extensions/reverso-context                                         @MrModest @MrModest
 /extensions/rewardful                                               @AlexIsMaking
 /extensions/rewiser                                                 @sertanhelvaci
@@ -2020,8 +2041,10 @@
 /extensions/send-ai                                                 @kanishq1
 /extensions/send-to-e-reader                                        @tangerine1202
 /extensions/send-to-flomo                                           @ahonn @fankaidev @pernielsentikaer @thishym @maidangzhu
+/extensions/send-to-kindle                                          @lemikeone
 /extensions/sendme                                                  @nazifishrak
 /extensions/sendportal                                              @xmok
+/extensions/sendy                                                   @xmok
 /extensions/sensible                                                @michaelwschultz
 /extensions/sentry                                                  @thomaspaulmann @mattisssa @NoorBayari @remorses
 /extensions/seo-lighthouse                                          @guelug
@@ -2093,7 +2116,7 @@
 /extensions/sketch                                                  @aesign
 /extensions/skills                                                  @keito4 @keito4 @keito4
 /extensions/skyscanner-flights                                      @ayushtom
-/extensions/slack                                                   @momme-rtf @jfkisafk @RobErskine @y0ngha @erayack @clins1994
+/extensions/slack                                                   @momme-rtf @jfkisafk @RobErskine @y0ngha @erayack @clins1994 @sleicht
 /extensions/slack-status                                            @PitNikola @johnhampton @thomaspaulmann @pernielsentikaer @ramsaysewell @henrik
 /extensions/slack-summarizer                                        @zahassanyum
 /extensions/slack-templated-message                                 @koh-sh
@@ -2167,6 +2190,7 @@
 /extensions/stagehand                                               @tamag0tcha
 /extensions/standing-desk-tracker                                   @pgyogesh
 /extensions/stardew-valley-wiki                                     @mistah-robot @mistah-robot
+/extensions/starling                                                @lemikeone
 /extensions/stashit                                                 @pmzi
 /extensions/stashpad-docs                                           @tsmarin
 /extensions/statamic-docs                                           @andrebreia @duncanmcclean
@@ -2191,11 +2215,13 @@
 /extensions/string-formatter                                        @fireice009
 /extensions/stripe                                                  @pradeepb28 @farisaziz12 @bradgarropy @remorses @pernielsentikaer
 /extensions/sublime                                                 @phgn0
+/extensions/subnoto                                                 @Mikescops
 /extensions/substack                                                @j3lte
 /extensions/subwatch                                                @nirgn975
 /extensions/summarize-youtube-video-with-ai                         @iKasch @bl1nk @mateusbadalotti
 /extensions/summation                                               @supermamon
 /extensions/sun-moon-times                                          @DannySeidel
+/extensions/supabase                                                @keito4
 /extensions/supabase-cron-monitor                                   @duhman
 /extensions/supabase-docs                                           @Isaiah-Hamilton @xmok
 /extensions/supahabits                                              @gon250
@@ -2231,7 +2257,7 @@
 /extensions/synonyms                                                @remorses @rom100main
 /extensions/syntax-fm                                               @msmps
 /extensions/system-information                                      @Visual-Studio-Coder @nagauta
-/extensions/system-monitor                                          @hossammourad @lucasmezencio @pernielsentikaer @lucasmezencio @ridemountainpig @xmok @JadenMajid
+/extensions/system-monitor                                          @hossammourad @lucasmezencio @pernielsentikaer @lucasmezencio @ridemountainpig @xmok @JadenMajid @ADCAdams
 /extensions/t3-chat                                                 @Lermatroid @Sclafus @effektsvk @wxiaoyun @lukrencijus
 /extensions/tabby                                                   @chupi33
 /extensions/table-converter                                         @naserowaimer
@@ -2257,6 +2283,7 @@
 /extensions/techcrunch                                              @khlebobul
 /extensions/telegram                                                @ikupenov
 /extensions/teleport                                                @lamberttraccard
+/extensions/tella                                                   @jackmsvaughan
 /extensions/tembo                                                   @vrmiguel
 /extensions/tempmail                                                @Joshlucpoll
 /extensions/tempo                                                   @gdarchen
@@ -2358,6 +2385,7 @@
 /extensions/translit                                                @tsibog
 /extensions/transmission                                            @FezVrasta @danpalmer @j3lte @zhangjiepro @mksong76
 /extensions/transmit                                                @kennonb @xmok
+/extensions/transport-nsw                                           @patbarlow
 /extensions/trek                                                    @opti21
 /extensions/trello                                                  @ChrisChinchilla @Jimmy-b36 @ChrisChinchilla @ajaypremshankar
 /extensions/trenit                                                  @gianpispi
@@ -2426,8 +2454,10 @@
 /extensions/upcoming-holidays                                       @rodrigouroz @0xdhrv
 /extensions/update-clash-subscription                               @JakeLaoyu
 /extensions/uplabs                                                  @gebeto
+/extensions/uploaderx                                               @SciSaif
 /extensions/uploadthing                                             @juliusmarminge @xmok @TakenMC
 /extensions/upnote                                                  @Ujjwal1998
+/extensions/upset-dev                                               @sereinne
 /extensions/upstash                                                 @xmok
 /extensions/uptime                                                  @yarnaid
 /extensions/uptime-kuma                                             @MarlBurroW @pernielsentikaer @xmok
@@ -2466,13 +2496,16 @@
 /extensions/veganify-application                                    @philipbrembeck @pernielsentikaer
 /extensions/vercast                                                 @MaxLeiter @gleich @dgrcode @samuelkraft @xmok @ridemountainpig @sebdanielsson @1weiho @thomas-forbes
 /extensions/verify-number                                           @xmok
+/extensions/vesslo                                                  @hjm79
 /extensions/viacep                                                  @xilopaint
 /extensions/video-call-reactions                                    @yazanzaid00
 /extensions/video-converter                                         @GR0SST
 /extensions/video-downloader                                        @vimtor @pernielsentikaer @darmiel @ridemountainpig @remorses @LitoMore @anwarulislam @yusifaliyevpro @xilopaint
 /extensions/vietnamese-calendar                                     @hoandesign @dangkhoipro
+/extensions/vietqr-transfer                                         @phucannguyen-dev
 /extensions/vim-bro                                                 @ajaypremshankar @pernielsentikaer @d3chapma @zayadur @xmok
 /extensions/vim-leader-key                                          @devaxai
+/extensions/virtfusion                                              @xmok
 /extensions/virtual-desktop-manager                                 @sameedmajgaonkar
 /extensions/virtual-pet                                             @timoransky
 /extensions/virtualbox-power-switch                                 @DiogoFerrer
@@ -2535,7 +2568,7 @@
 /extensions/whoop                                                   @Josha1len
 /extensions/whosampled                                              @ajtruex @pernielsentikaer @anisub710
 /extensions/wi-fi                                                   @koinzhang @louishuyng
-/extensions/wifi-password-reveal                                    @louishuyng
+/extensions/wifi-password-reveal                                    @louishuyng @xmok
 /extensions/wifi-share                                              @robinsrk
 /extensions/wiggle-text                                             @PineappleRind
 /extensions/wikipedia                                               @vimtor @shubzkothekar @NikosEfthias @menahishayan @pernielsentikaer @Ek2100 @sergiivelykodnyi @j3lte @peterbrinck @koinzhang
@@ -2581,6 +2614,7 @@
 /extensions/wppb                                                    @pernielsentikaer
 /extensions/wrike                                                   @suarez-agu
 /extensions/writersbrew                                             @pradeepb28
+/extensions/wsl-manager                                             @LukeKappa
 /extensions/wu-bi-bian-ma                                           @anyerqi
 /extensions/xcode                                                   @SvenTiigi @qeude @oliverepper @kiliankoe @3llomi @ridemountainpig
 /extensions/xcode-cloud                                             @yuta24

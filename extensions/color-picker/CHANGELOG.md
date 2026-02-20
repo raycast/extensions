@@ -1,5 +1,10 @@
 # Color Picker Changelog
 
+## [Windows: Enhancement] - 2026-02-13
+
+- Add ability to cancel color picker with Esc key
+- Fix typos
+
 ## [Windows Support] - 2026-02-12
 
 - Added Eyedropper and color extractor for Windows using Rust

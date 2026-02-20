@@ -1,5 +1,12 @@
 # Apple Music Changelog
 
+## [Favorite Flow Improvements] - 2026-02-19
+
+- Added a `Favorite Track` / `Unfavorite Track` action to the menu bar command with state-aware title and icon.
+- Updated favorite actions to wait for Apple Music to confirm the favorite state change before showing success HUD.
+- Added confirmation polling with timeout for favorite/unfavorite operations to avoid premature success messages.
+- Improved confirmation resilience by retrying status checks when temporary read errors occur.
+
 ## [New Menu Bar Command] - 2026-01-08
 
 - Added a new menu bar command to see currently playing track (inspired by **Spotify**) (ref: [Issue #24042](https://github.com/raycast/extensions/issues/24042))

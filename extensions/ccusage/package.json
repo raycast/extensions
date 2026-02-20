@@ -11,7 +11,8 @@
   "contributors": [
     "bohdan_zhuravel",
     "zzyfisher",
-    "garrick_zhang"
+    "garrick_zhang",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -28,6 +29,25 @@
       "subtitle": "ccusage",
       "description": "Show Claude Code usage in menu bar",
       "mode": "menu-bar"
+    },
+    {
+      "name": "claude-code-stats",
+      "title": "Claude Code Stats",
+      "subtitle": "ccusage",
+      "description": "Update command subtitle with Claude Code usage data",
+      "mode": "no-view",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "subtitleTemplate",
+          "type": "textfield",
+          "required": false,
+          "title": "Subtitle Template",
+          "description": "Template for the subtitle. Available placeholders: {dailyCost}, {dailyTokens}, {dailyInputTokens}, {dailyOutputTokens}, {dailyRatio}, {monthlyCost}, {monthlyTokens}, {monthlyRatio}, {usageLimit}",
+          "default": "Today: {dailyCost}",
+          "placeholder": "e.g. Today: {dailyCost} · Month: {monthlyCost}"
+        }
+      ]
     }
   ],
   "preferences": [

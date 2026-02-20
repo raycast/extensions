@@ -13,115 +13,99 @@ export interface Extensions {
   code: string;
 }
 
-export interface PokemonV2Pokemon {
+export interface Pokemon {
   base_experience: number;
   id: number;
   name: string;
   height: number;
   pokemon_species_id: number;
   weight: number;
-  pokemon_v2_encounters: PokemonV2Encounter[];
-  pokemon_v2_pokemonabilities: PokemonV2Pokemonability[];
-  pokemon_v2_pokemonforms: PokemonV2Pokemonform[];
-  pokemon_v2_pokemonmoves: PokemonV2Move[];
-  pokemon_v2_pokemonstats: PokemonV2Pokemonstat[];
-  pokemon_v2_pokemontypes: PokemonV2Pokemontype[];
-  pokemon_v2_pokemonspecy: PokemonV2Pokemonspecy;
+  encounters: PokemonEncounter[];
+  pokemonabilities: PokemonAbility[];
+  pokemonforms: PokemonFormType[];
+  pokemonmoves: PokemonMove[];
+  pokemonstats: PokemonStat[];
+  pokemontypes: PokemonType[];
+  pokemonspecy: PokemonSpecies;
 }
 
-export interface PokemonV2Encounter {
-  pokemon_v2_locationarea: PokemonV2Locationarea;
-  pokemon_v2_version: PokemonV2Version;
+export interface PokemonEncounter {
+  locationarea: LocationArea;
+  version: Version;
 }
 
-export interface PokemonV2Locationarea {
+export interface LocationArea {
   name: string;
-  pokemon_v2_locationareanames: PokemonV2Name[];
+  locationareanames: Name[];
 }
 
-export interface PokemonV2Pokemonability {
+export interface PokemonAbility {
   is_hidden: boolean;
-  pokemon_id: number;
-  pokemon_v2_ability: PokemonV2Ability;
+  ability: Ability;
 }
 
-export interface PokemonV2Move {
-  accuracy: number | null;
-  id: number;
+export interface PokemonMove {
   level: number;
-  move_effect_chance: number | null;
   move_id: number;
   move_learn_method_id: number;
-  name: string;
-  order: number | null;
+  order: number;
   pokemon_id: number;
-  power: number | null;
-  pp: number | null;
-  pokemon_v2_generation: PokemonV2Generation;
-  pokemon_v2_machines: PokemonV2Machine[];
-  pokemon_v2_move: PokemonV2Move;
-  pokemon_v2_movedamageclass: PokemonV2Movedamageclass;
-  pokemon_v2_moveeffect?: PokemonV2Moveeffect;
-  pokemon_v2_moveflavortexts: PokemonV2Flavortext[];
-  pokemon_v2_movelearnmethod: PokemonV2Movelearnmethod;
-  pokemon_v2_movenames: PokemonV2Name[];
-  pokemon_v2_pokemon: PokemonV2Pokemon;
-  pokemon_v2_pokemonmoves: PokemonV2Move[];
-  pokemon_v2_type: PokemonV2Type;
-  pokemon_v2_versiongroup: PokemonV2Versiongroup;
+  move: Move;
+  movelearnmethod: MoveLearnMethod;
+  versiongroup: VersionGroup;
+  pokemon: Pokemon;
 }
 
-export interface PokemonV2Machine {
+export interface Machine {
   machine_number: number;
   version_group_id: number;
 }
 
-export interface PokemonV2Movedamageclass {
-  pokemon_v2_movedamageclassnames: PokemonV2Name[];
-}
-
-export interface PokemonV2Moveeffect {
-  pokemon_v2_moveeffecteffecttexts: PokemonV2Effecttext[];
-}
-
-export interface PokemonV2Effecttext {
-  short_effect: string;
-  effect: string;
-}
-
-export interface PokemonV2Movelearnmethod {
+export interface MoveDamageClass {
   name: string;
-  pokemon_v2_movelearnmethodnames: PokemonV2Name[];
+  movedamageclassnames: Name[];
 }
 
-export interface PokemonV2Versiongroup {
+export interface MoveEffect {
+  moveeffecteffecttexts: Effect[];
+}
+
+export interface Effect {
+  short_effect: string;
+  effect?: string;
+}
+
+export interface MoveLearnMethod {
+  name: string;
+  movelearnmethodnames: Name[];
+}
+
+export interface VersionGroup {
   id: number;
   generation_id: number;
   name: string;
-  pokemon_v2_generation: PokemonV2Generation;
-  pokemon_v2_versions: PokemonV2Version[];
+  generation: Generation;
+  versions: Version[];
 }
 
-export interface PokemonV2Generation {
+export interface Generation {
   name: string;
-  pokemon_v2_generationnames: PokemonV2Name[];
+  generationnames: Name[];
 }
 
-export interface PokemonV2Ability {
+export interface Ability {
   id: number;
   name: string;
-  pokemon_v2_abilitynames: PokemonV2Name[];
-  pokemon_v2_abilityeffecttexts: PokemonV2Effecttext[];
-  pokemon_v2_abilityflavortexts: PokemonV2Flavortext[];
-  pokemon_v2_generation: PokemonV2Generation;
-  pokemon_v2_pokemonabilities: PokemonV2Pokemonability[];
+  abilitynames: Name[];
+  abilityeffecttexts: Effect[];
+  generation: Generation;
 }
 
-export interface PokemonV2Name {
+export interface Name {
   name: string;
 }
 
-export interface PokemonV2Pokemonspecy {
+export interface PokemonSpecies {
   id: number;
   base_happiness: number;
   capture_rate: number;
@@ -134,90 +118,164 @@ export interface PokemonV2Pokemonspecy {
   is_mythical: boolean;
   name: string;
   pokemon_shape_id: number;
-  pokemon_v2_pokemondexnumbers: PokemonV2Pokemondexnumber[];
-  pokemon_v2_evolutionchain: PokemonV2Evolutionchain;
-  pokemon_v2_pokemonegggroups: PokemonV2Pokemonegggroup[];
-  pokemon_v2_pokemons: PokemonV2Pokemon[];
-  pokemon_v2_pokemonspeciesflavortexts: PokemonV2Flavortext[];
-  pokemon_v2_pokemonspeciesnames: PokemonV2Pokemonspeciesname[];
+  pokemondexnumbers: PokemonDexNumber[];
+  evolutionchain: EvolutionChain;
+  pokemonegggroups: PokemonEggGroup[];
+  pokemons: PokemonForm[];
+  pokemonspeciesflavortexts: PokemonSpeciesFlavorText[];
+  pokemonspeciesnames: PokemonSpeciesName[];
 }
 
-export interface PokemonV2Pokemondexnumber {
+export interface PokemonDexNumber {
   pokedex_number: number;
-  pokemon_v2_pokedex: PokemonV2Pokedex;
+  pokedex: Pokedex;
 }
 
-export interface PokemonV2Pokedex {
-  pokemon_v2_pokedexversiongroups: PokemonV2Version[];
+export interface Pokedex {
+  pokedexversiongroups: PokedexVersionGroup[];
 }
 
-export interface PokemonV2Evolutionchain {
-  pokemon_v2_pokemonspecies: PokemonV2Pokemonspecy[];
+export interface PokedexVersionGroup {
+  version_group_id: number;
+  versiongroup: VersionGroup;
 }
 
-export interface PokemonV2Pokemonspeciesname extends PokemonV2Name {
+export interface EvolutionChain {
+  pokemonspecies: EvolutionSpecies[];
+}
+
+export interface EvolutionSpecies {
+  id: number;
+  name: string;
+  evolves_from_species_id: number | null;
+  pokemonspeciesnames: PokemonSpeciesName[];
+}
+
+export interface PokemonSpeciesName extends Name {
   genus: string;
   language_id: number;
 }
 
-export interface PokemonV2Pokemonegggroup {
-  pokemon_v2_egggroup: PokemonV2Egggroup;
+export interface PokemonEggGroup {
+  egggroup: EggGroup;
 }
 
-export interface PokemonV2Egggroup {
-  pokemon_v2_egggroupnames: PokemonV2Name[];
+export interface EggGroup {
   name: string;
+  egggroupnames: Name[];
 }
 
-export interface PokemonV2Pokemonform {
+export interface PokemonForm {
+  name: string;
+  height: number;
+  weight: number;
+  pokemonforms: PokemonFormType[];
+  pokemonabilities: PokemonAbility[];
+  pokemontypes: PokemonType[];
+}
+
+export interface PokemonFormType {
   form_name: string;
   pokemon_id: number;
-  pokemon_v2_pokemonformnames: PokemonV2Pokemonformname[];
+  pokemonformnames: PokemonFormName[];
 }
 
-export interface PokemonV2Pokemonformname {
+export interface PokemonFormName {
   name: string;
   pokemon_name: string;
 }
 
-export interface PokemonV2Flavortext {
+export interface FlavorText {
   flavor_text: string;
-  pokemon_v2_version: PokemonV2Version;
-  pokemon_v2_versiongroup: PokemonV2Versiongroup;
+  version: Version;
+  versiongroup: VersionGroup;
 }
 
-export interface PokemonV2Version {
+export interface PokemonSpeciesFlavorText {
+  flavor_text: string;
+  version: Version;
+  versiongroup: VersionGroup;
+}
+
+export interface Version {
   id: number;
   name: string;
   version_group_id: number;
-  pokemon_v2_versiongroup: PokemonV2Versiongroup;
-  pokemon_v2_versionnames: PokemonV2Name[];
+  versiongroup: VersionGroup;
+  versionnames: Name[];
 }
 
-export interface PokemonV2Pokemonstat {
+export interface PokemonStat {
   base_stat: number;
   effort: number;
-  pokemon_v2_stat: PokemonV2Stat;
+  stat: Stat;
 }
 
-export interface PokemonV2Stat {
+export interface Stat {
   name: string;
-  pokemon_v2_statnames: PokemonV2Name[];
+  statnames: Name[];
 }
 
-export interface PokemonV2Pokemontype {
-  pokemon_v2_type: PokemonV2Type;
+export interface PokemonType {
+  type: Type;
 }
 
-export interface PokemonV2Type {
+export interface Type {
+  id: number;
   name: string;
-  pokemon_v2_typenames: PokemonV2Name[];
-  pokemonV2TypeefficaciesByTargetTypeId: PokemonV2Typeefficacy[];
+  typenames: Name[];
+  typeefficacies: TypeEfficacy[];
 }
 
-export interface PokemonV2Typeefficacy {
+export interface TypeEfficacy {
   damage_factor: number;
   damage_type_id: number;
   target_type_id: number;
-  pokemon_v2_type: PokemonV2Type;
+  type: Type;
+}
+
+export interface Move {
+  id: number;
+  accuracy: number;
+  name: string;
+  move_effect_chance: number;
+  power: number;
+  pp: number;
+  machines: Machine[];
+  movedamageclass: MoveDamageClass;
+  moveeffect: MoveEffect;
+  movenames: Name[];
+  type: PokemonType["type"];
+  moveflavortexts: FlavorText[];
+  pokemonmoves: PokemonMove[];
+}
+
+export interface TypeChartType {
+  id: number;
+  name: string;
+  typenames: Name[];
+  typeefficacies: {
+    damage_factor: number;
+    target_type_id: number;
+    target_type: {
+      name: string;
+      typenames: Name[];
+    };
+  }[];
+}
+
+export interface Nature {
+  id: number;
+  name: string;
+  naturenames: Name[];
+  increased_stat_id: number | null;
+  decreased_stat_id: number | null;
+  increased_stat: {
+    name: string;
+    statnames: Name[];
+  } | null;
+  decreased_stat: {
+    name: string;
+    statnames: Name[];
+  } | null;
 }

@@ -66,14 +66,14 @@ ${quest.locations.map((loc) => `- ${loc.map}`).join("\n")}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/quests/${quest.id}`}
+            target={`https://metaforge.app/arc-raiders/database/quest/${quest.id}`}
             text="View on MetaForge"
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/quests/${quest.id}`} />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/quest/${quest.id}`} />
           <Action.CopyToClipboard title="Copy Quest Name" content={quest.name} />
         </ActionPanel>
       }
@@ -154,7 +154,7 @@ export default function SearchQuests() {
           actions={
             <ActionPanel>
               <Action.Push title="View Details" icon={Icon.Eye} target={<QuestDetail quest={quest} />} />
-              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/quests/${quest.id}`} />
+              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/quest/${quest.id}`} />
               <Action.CopyToClipboard title="Copy Quest Name" content={quest.name} />
             </ActionPanel>
           }

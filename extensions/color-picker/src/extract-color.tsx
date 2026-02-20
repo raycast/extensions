@@ -1,6 +1,7 @@
 import { Action, ActionPanel, getSelectedFinderItems, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isMac } from "./lib/utils";
+import { fileManagerName } from "./lib/constants";
 
 type FinalColor = {
   hex: string;
@@ -23,7 +24,7 @@ export default function Command() {
     description: string;
   }>({
     title: "No image found",
-    description: "Select an image from finder to extract colors",
+    description: `Select an image from ${fileManagerName} to extract colors`,
   });
 
   async function loadColors() {
@@ -73,11 +74,11 @@ export default function Command() {
       setIsLoading(false);
       setInfo({
         title: "No image selected",
-        description: "Please select an image from finder",
+        description: `Please select an image from ${fileManagerName} to extract colors`,
       });
       toast.style = Toast.Style.Failure;
       toast.title = "No image selected";
-      toast.message = "Please select an image from finder";
+      toast.message = `Please select an image from ${fileManagerName} to extract colors`;
     }
   }
 
