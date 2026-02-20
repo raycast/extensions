@@ -23,7 +23,7 @@ Switch to selected space
 - [Storage API](https://developers.raycast.com/api-reference/storage)
 - [AppleScript Util](https://developers.raycast.com/utilities/functions/runapplescript)
 - [UI - Forms](https://developers.raycast.com/api-reference/user-interface/form)
-- [UI - List](https://developers.raycast.com/utilities/functions/runapplescript)
+- [UI - List](https://developers.raycast.com/api-reference/user-interface/list)
 - [UI - Actions](https://developers.raycast.com/api-reference/user-interface/actions)
 - [UI - Action Panel](https://developers.raycast.com/api-reference/user-interface/action-panel)
 - [UI - Icons & Images](https://developers.raycast.com/api-reference/user-interface/icons-and-images)
