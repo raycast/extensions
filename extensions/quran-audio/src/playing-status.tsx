@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, LocalStorage, launchCommand, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, LocalStorage, launchCommand, LaunchType, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { stopAudio } from "./lib/audio";
 
@@ -23,7 +23,10 @@ export default function Command() {
     await mutate(undefined);
   }
 
-  const icon = playingInfo ? { source: "menu-icon.svg" } : { source: "menu-icon.svg" };
+  const icon = {
+    source: "menu-icon.svg",
+    tintColor: playingInfo ? Color.Green : undefined,
+  };
 
   return (
     <MenuBarExtra
