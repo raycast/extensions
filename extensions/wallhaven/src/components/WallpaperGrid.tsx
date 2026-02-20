@@ -1,4 +1,4 @@
-import { Grid, Color } from "@raycast/api";
+import { Grid, Color, Icon } from "@raycast/api";
 import { Wallpaper } from "../types";
 import { formatFileSize, purityColor } from "../utils";
 import { WallpaperActions } from "./WallpaperActions";
@@ -54,10 +54,11 @@ export function WallpaperGrid({
           title={wallpaper.resolution}
           subtitle={formatFileSize(wallpaper.file_size)}
           accessory={{
-            tag: {
-              value: wallpaper.purity.toUpperCase(),
-              color: purityColor(wallpaper.purity) as Color,
+            icon: {
+              source: Icon.Circle,
+              tintColor: purityColor(wallpaper.purity) as Color,
             },
+            tooltip: wallpaper.purity.toUpperCase(),
           }}
           actions={<WallpaperActions wallpaper={wallpaper} />}
         />
