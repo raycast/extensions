@@ -1,5 +1,12 @@
 # Linear Changelog
 
+## [Multi-Workspace Support] - 2026-02-20
+
+- Added "Add Workspace" command to connect additional Linear workspaces using Personal API Keys
+- Added "Switch Workspace" command to switch between connected workspaces
+- OAuth workspace remains the primary; additional workspaces use PATs
+- All existing commands now respect the active workspace
+
 ## [Update Shortcuts] - 2026-01-06
 
 - Updated shortcuts to make them cross-platform

@@ -16,4 +16,4 @@ The Linear extension brings the speed, quality and joy of the app to every corne
 
 **Q2. How do I switch workspaces?**
 
-**Ans.** You can't switch workspaces on the fly; however, you can go to `Preferences`, `click` "Logout" then run any `command` now selecting the appropriate workspace.
+**Ans.** Use the **Add Workspace** command to connect additional Linear workspaces via Personal API Keys (PATs). Then use the **Switch Workspace** command to switch between them. Your primary OAuth workspace is always available alongside any PAT workspaces you add.

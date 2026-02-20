@@ -16,7 +16,8 @@
     "fil",
     "joeb",
     "itsmingjie",
-    "xmok"
+    "xmok",
+    "eduwass"
   ],
   "pastContributors": [
     "mathieudutour",
@@ -234,6 +235,18 @@
       "name": "favorites",
       "title": "Favorites",
       "description": "Browse through your Linear favorites.",
+      "mode": "view"
+    },
+    {
+      "name": "add-workspace",
+      "title": "Add Workspace",
+      "description": "Add an additional Linear workspace using a Personal API Key.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-workspace",
+      "title": "Switch Workspace",
+      "description": "Switch between your connected Linear workspaces.",
       "mode": "view"
     }
   ],

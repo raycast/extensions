@@ -1,17 +1,7 @@
-import { LinearClient } from "@linear/sdk";
-import {
-  Clipboard,
-  closeMainWindow,
-  getPreferenceValues,
-  open,
-  Toast,
-  showToast,
-  showHUD,
-  Keyboard,
-} from "@raycast/api";
-import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, showHUD } from "@raycast/api";
 
-import { linear } from "./api/linearClient";
+import { getLinearClient } from "./api/linearClient";
+import { resolveActiveClient } from "./api/resolveActiveClient";
 
 const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) => {
   const { issueId, comment } = props.arguments;
@@ -24,8 +14,8 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
   const preferences = getPreferenceValues<Preferences.QuickAddCommentToIssue>();
 
   try {
-    const { token } = getAccessToken();
-    const linearClient = new LinearClient({ accessToken: token });
+    await resolveActiveClient();
+    const { linearClient } = getLinearClient();
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
@@ -52,7 +42,7 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
       if (newComment) {
         toast.primaryAction = {
           title: "Open Comment",
-          shortcut: Keyboard.Shortcut.Common.OpenWith,
+          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
           onAction: async () => {
             await open(newComment.url);
             await toast.hide();
@@ -70,11 +60,11 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
       toast.title = failureTitle;
       toast.primaryAction = {
         title: "Copy Error Log",
-        shortcut: Keyboard.Shortcut.Common.Copy,
+        shortcut: { modifiers: ["cmd", "shift"], key: "c" },
         onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
       };
     }
   }
 };
 
-export default withAccessToken(linear)(command);
+export default command;
