@@ -17,6 +17,7 @@ import { usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import {
   type AudioDevice,
+  type IOType,
   getDefaultInputDevice,
   getDefaultOutputDevice,
   getInputDevices,
@@ -28,7 +29,6 @@ import {
   toggleOutputDeviceMute,
   toggleInputDeviceMute,
   setDefaultInputDevice,
-  TransportType,
   isWindows,
   getAudioAPI,
 } from "./audio-device";
@@ -50,9 +50,9 @@ import {
   applyDeviceOrder,
 } from "./device-preferences";
 import { getTransportTypeLabel } from "./device-labels";
+import { getIcon } from "./device-icons";
+import { getAccessories, type VolumeInfo } from "./device-accessories";
 import { createDeepLink } from "./utils";
-
-type IOType = "input" | "output";
 
 type DeviceListProps = {
   ioType: IOType;
@@ -105,9 +105,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     if (!defaultDeviceUid) return sorted;
     const defaultIdx = sorted.findIndex((d) => d.uid === defaultDeviceUid);
     if (defaultIdx <= 0) return sorted;
-    const [defaultDev] = sorted.splice(defaultIdx, 1);
-    sorted.unshift(defaultDev);
-    return sorted;
+    return [sorted[defaultIdx], ...sorted.slice(0, defaultIdx), ...sorted.slice(defaultIdx + 1)];
   })();
 
   useEffect(() => {
@@ -131,7 +129,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
         popToRoot({ clearSearchBar: true });
         showHUD(`Active ${ioType} audio device set to ${target.name}`);
       } catch (e) {
-        console.log(e);
+        console.error(e);
         showToast(
           Toast.Style.Failure,
           `Error!`,
@@ -329,8 +327,6 @@ function DeviceActions({
   );
 }
 
-type VolumeInfo = { volume: number | undefined; muted: boolean | undefined };
-
 function useAudioDevices(type: IOType) {
   return usePromise(
     async (type) => {
@@ -379,7 +375,7 @@ function SetAudioDeviceAction({ device, type, onSelection }: SetAudioDeviceActio
           popToRoot({ clearSearchBar: true });
           showHUD(`Set "${device.name}" as ${type} device`);
         } catch (e) {
-          console.log(e);
+          console.error(e);
           showToast(Toast.Style.Failure, `Failed setting "${device.name}" as ${type} device`);
         }
       }}
@@ -408,7 +404,7 @@ function SetCommunicationDeviceAction({ device, type, onSelection }: SetAudioDev
             showHUD(`Set "${device.name}" as ${type} communication device`);
           }
         } catch (e) {
-          console.log(e);
+          console.error(e);
           showToast(Toast.Style.Failure, `Failed setting "${device.name}" as ${type} communication device`);
         }
       }}
@@ -462,105 +458,6 @@ function ToggleShowHiddenDevicesAction({
       }}
     />
   );
-}
-
-function getDeviceIcon(device: AudioDevice): string | null {
-  const name = device.name.toLowerCase();
-
-  // Check for AirPlay devices first
-  if (device.transportType === TransportType.Airplay) {
-    return "airplay.png";
-  }
-
-  // Check if it's a Bluetooth device
-  if (device.transportType === TransportType.Bluetooth || device.transportType === TransportType.BluetoothLowEnergy) {
-    if (name.includes("airpods max")) {
-      return "airpods-max.png";
-    } else if (name.includes("airpods pro")) {
-      return "airpods-pro.png";
-    } else if (name.includes("airpods")) {
-      return "airpods.png";
-    }
-    // If it's Bluetooth but not AirPods, use the bluetooth speaker icon
-    return "bluetooth-speaker.png";
-  }
-
-  if (device.transportType === TransportType.Headphones || device.transportType === "headphones") {
-    return "headphones.png";
-  }
-
-  // Not a special device with custom icon
-  return null;
-}
-
-export function getIcon(device: AudioDevice, isCurrent: boolean) {
-  const deviceIcon = getDeviceIcon(device);
-
-  // If it's a special device (AirPods/AirPlay/Bluetooth/Headphones), show its specific icon
-  if (deviceIcon) {
-    return {
-      source: deviceIcon,
-      tintColor: isCurrent ? Color.Green : Color.SecondaryText,
-    };
-  }
-
-  // For other devices, use the default mic/speaker icons
-  return {
-    source: device.isInput ? "mic.png" : "speaker.png",
-    tintColor: isCurrent ? Color.Green : Color.SecondaryText,
-  };
-}
-
-function getAccessories(
-  isCurrent: boolean,
-  isHidden: boolean,
-  isDefault: boolean,
-  shouldShowHidden: boolean,
-  device?: AudioDevice,
-  volumeInfo?: VolumeInfo,
-  pinnedLevel?: number,
-) {
-  const accessories: List.Item.Accessory[] = [];
-
-  if (volumeInfo) {
-    if (volumeInfo.muted) {
-      accessories.push({ icon: Icon.SpeakerOff, tooltip: "Muted" });
-    } else if (volumeInfo.volume != null) {
-      accessories.push({ text: `${Math.round(volumeInfo.volume * 100)}%`, tooltip: "Volume" });
-    }
-  }
-
-  if (pinnedLevel != null) {
-    accessories.push({
-      tag: { value: `Pinned: ${pinnedLevel}%`, color: Color.Orange },
-      tooltip: "Volume pinned — enforced automatically",
-    });
-  }
-
-  if (isDefault) {
-    accessories.push({ tag: { value: "Default", color: Color.Blue }, tooltip: "Default device (auto-switch target)" });
-  }
-
-  if (isCurrent) {
-    accessories.push({ icon: Icon.Checkmark });
-  }
-
-  if (shouldShowHidden && isHidden) {
-    accessories.push({ icon: Icon.EyeDisabled, tooltip: "Hidden" });
-  }
-
-  if (isWindows && device?.isCommunication && !isCurrent) {
-    accessories.push({ icon: Icon.Phone, tooltip: "Communication Device" });
-  }
-
-  if (isWindows && device && !isCurrent) {
-    const deviceType = getSubtitle(device);
-    if (deviceType) {
-      accessories.push({ text: deviceType });
-    }
-  }
-
-  return accessories;
 }
 
 function SetDefaultDeviceAction({
@@ -707,33 +604,4 @@ function PinVolumeAction({
       }}
     />
   );
-}
-
-function getSubtitle(device: AudioDevice) {
-  if (!device.transportType) {
-    return "";
-  }
-
-  if (isWindows) {
-    const typeLabels: Record<string, string> = {
-      hdmi: "HDMI Output",
-      displayport: "DisplayPort",
-      usb: "USB Audio",
-      bluetooth: "Bluetooth",
-      headphones: "Headphones",
-      headset: "Headset",
-      microphone: "Microphone",
-      mic: "Microphone",
-      speakers: "Speakers",
-      speaker: "Speakers",
-      spdif: "Digital (SPDIF/Optical)",
-      virtual: "Virtual Device",
-      builtin: "Built-in Audio",
-    };
-
-    const transportType = device.transportType.toLowerCase();
-    return typeLabels[transportType] || device.transportType.charAt(0).toUpperCase() + device.transportType.slice(1);
-  }
-
-  return Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0] || "";
 }

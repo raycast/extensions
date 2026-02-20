@@ -20,6 +20,8 @@ export enum TransportType {
   SPDIF = "spdif",
 }
 
+export type IOType = "input" | "output";
+
 export type Platform = "macOS" | "Windows";
 
 export const platform = (process.platform === "win32" ? "Windows" : "macOS") as Platform;

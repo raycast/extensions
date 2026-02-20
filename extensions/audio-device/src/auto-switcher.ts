@@ -1,5 +1,6 @@
 import { updateCommandMetadata } from "@raycast/api";
 import {
+  type IOType,
   getDefaultInputDevice,
   getDefaultOutputDevice,
   getInputDevices,
@@ -19,8 +20,6 @@ import {
   getDefaultDeviceName,
   getAllPinnedVolumes,
 } from "./device-preferences";
-
-type IOType = "input" | "output";
 
 async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
   const defaultUid = await getDefaultDeviceUid(type);

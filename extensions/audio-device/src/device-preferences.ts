@@ -1,7 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import type { AudioDevice } from "./audio-device";
-
-type IOType = "input" | "output";
+import type { AudioDevice, IOType } from "./audio-device";
 
 const LEGACY_DISABLED_DEVICES_KEY = "disabledDevices";
 const LEGACY_HIDDEN_DEVICES_KEY = "hiddenDevices";

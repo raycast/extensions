@@ -224,15 +224,14 @@
     "@raycast/api": "^1.104.4",
     "@raycast/utils": "^2.2.2",
     "@spotxyz/macos-audio-devices": "1.5.0",
-    "execa": "^9.6.1",
-    "prettier": "^3.8.1",
-    "run-applescript": "^7.1.0"
+    "execa": "^9.6.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^25.2.1",
     "@types/react": "^19.2.13",
     "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
     "react": "^19.2.4",
     "typescript": "^5.9.3"
   },
