@@ -52,8 +52,8 @@ export default async function Command() {
 
     // Step 3: No Figma URL in clipboard - try to get one from Figma app
     // This is the only path that requires AppleScript
-    const figmaIsActive = isFigmaFrontmost();
-    const figmaIsRunning = figmaIsActive || isFigmaRunning();
+    const figmaIsActive = await isFigmaFrontmost();
+    const figmaIsRunning = figmaIsActive || await isFigmaRunning();
 
     if (!figmaIsRunning) {
       // No Figma URL in clipboard and Figma isn't running
@@ -165,11 +165,11 @@ async function tryCopyFromFigma(
       // Send Cmd+L to Figma (focus first if needed)
       if (needsFocus && attempts === 0) {
         // Combined AppleScript: focus Figma → verify frontmost → send Cmd+L
-        focusFigmaAndCopyLink();
+        await focusFigmaAndCopyLink();
         // Extra wait since Figma was just brought to front
         await sleep(FOCUS_EXTRA_DELAY);
       } else {
-        sendCopyLinkKeystroke();
+        await sendCopyLinkKeystroke();
       }
 
       // Wait for clipboard to update
