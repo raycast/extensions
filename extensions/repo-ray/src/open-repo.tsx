@@ -14,15 +14,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
-interface Preferences {
-  projectDirectories: string;
-  editor1: Application;
-  editor2?: Application;
-  editor3?: Application;
-  editor4?: Application;
-  editor5?: Application;
-}
-
 interface Repo {
   name: string;
   fullPath: string;
@@ -79,7 +70,7 @@ function EditorList({ repo, editors }: { repo: Repo; editors: Application[] }) {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.OpenRepo>();
   const dirs = prefs.projectDirectories.split(",").filter(Boolean);
   const repos = scanRepos(dirs);
 

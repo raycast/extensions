@@ -13,12 +13,8 @@ import * as os from "os";
 import * as fs from "fs";
 import { execFile } from "child_process";
 
-interface Preferences {
-  projectDirectories: string;
-}
-
 export default function CloneRepo() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.CloneRepo>();
   const dirs = prefs.projectDirectories
     .split(",")
     .map((d) => d.trim().replace(/^~/, os.homedir()))
