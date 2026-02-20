@@ -1,4 +1,4 @@
-import { showToast, Toast, showHUD, Form, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { showToast, Toast, showHUD, Form, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
   getInputDevices,
@@ -8,32 +8,60 @@ import {
   setInputDeviceMute,
   type AudioDevice,
 } from "./audio-device";
-import { useState, useCallback } from "react";
+import { getPinnedVolume, setPinnedVolume, clearPinnedVolume } from "./device-preferences";
+import { useState, useRef } from "react";
+
+async function loadPinState(devices: AudioDevice[], deviceId: string) {
+  const device = devices.find((d) => d.id === deviceId);
+  if (!device) return undefined;
+  return getPinnedVolume("input", device.uid);
+}
+
+function sortCurrentFirst(devices: AudioDevice[], currentId: string): AudioDevice[] {
+  const current = devices.find((d) => d.id === currentId);
+  if (!current) return devices;
+  return [current, ...devices.filter((d) => d.id !== currentId)];
+}
 
 export default function Command() {
   const { pop } = useNavigation();
   const [selectedId, setSelectedId] = useState<string>("");
   const [currentVolume, setCurrentVolume] = useState<number | null>(null);
+  const [pinnedLevel, setPinnedLevel] = useState<number | undefined>(undefined);
+  const [pinVolume, setPinVolume] = useState(false);
+  const devicesRef = useRef<AudioDevice[]>([]);
 
   const { data, isLoading } = usePromise(async () => {
     const [devices, current] = await Promise.all([getInputDevices(), getDefaultInputDevice()]);
+    devicesRef.current = devices;
     setSelectedId(current.id);
+
     const vol = await getInputDeviceVolume(current.id);
     setCurrentVolume(vol != null ? Math.round(vol * 100) : null);
+
+    const pinned = await loadPinState(devices, current.id);
+    setPinnedLevel(pinned);
+    setPinVolume(pinned != null);
+
     return { devices, current };
   });
 
-  const handleDeviceChange = useCallback(async (deviceId: string) => {
+  async function handleDeviceChange(deviceId: string) {
     setSelectedId(deviceId);
+
     try {
       const vol = await getInputDeviceVolume(deviceId);
       setCurrentVolume(vol != null ? Math.round(vol * 100) : null);
     } catch {
       setCurrentVolume(null);
     }
-  }, []);
 
-  async function handleSubmit(values: { level: string; device?: string }) {
+    const pinned = await loadPinState(devicesRef.current, deviceId);
+    setPinnedLevel(pinned);
+    setPinVolume(pinned != null);
+  }
+
+  async function handleSubmit(values: { level: string; device?: string; pinVolume?: boolean }) {
     const level = parseInt(values.level, 10);
     if (isNaN(level)) {
       await showToast(Toast.Style.Failure, "Invalid input", "Enter a number 0-100");
@@ -41,7 +69,7 @@ export default function Command() {
     }
 
     const deviceId = values.device || selectedId;
-    const device = data?.devices.find((d: AudioDevice) => d.id === deviceId);
+    const device = devicesRef.current.find((d) => d.id === deviceId);
     const name = device?.name ?? "Input";
     const clamped = Math.max(0, Math.min(100, level));
 
@@ -49,15 +77,30 @@ export default function Command() {
       if (clamped > 0) await setInputDeviceMute(deviceId, false).catch(() => {});
       await setInputDeviceVolume(deviceId, clamped / 100);
 
+      if (device) {
+        if (values.pinVolume) {
+          await setPinnedVolume("input", device.uid, clamped);
+        } else if (pinnedLevel != null) {
+          await clearPinnedVolume("input", device.uid);
+        }
+      }
+
       const old = currentVolume != null ? `${currentVolume}%` : "?";
-      await showHUD(`${name}: ${old} -> ${clamped}%`);
+      const pinSuffix = values.pinVolume ? " (pinned)" : pinnedLevel != null ? " (unpinned)" : "";
+      await showHUD(`${name}: ${old} -> ${clamped}%${pinSuffix}`);
       pop();
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to set input volume", String(error));
     }
   }
 
-  const volText = isLoading ? "Loading..." : currentVolume != null ? `${currentVolume}%` : "Unknown";
+  const volText = isLoading
+    ? "Loading..."
+    : currentVolume != null
+      ? pinnedLevel != null
+        ? `${currentVolume}% (Pinned: ${pinnedLevel}%)`
+        : `${currentVolume}%`
+      : "Unknown";
 
   return (
     <Form
@@ -65,12 +108,18 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Set Input Volume" onSubmit={handleSubmit} />
+          <Action
+            title={pinVolume ? "Unpin Volume" : "Pin Volume"}
+            icon={pinVolume ? Icon.PinDisabled : Icon.Pin}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            onAction={() => setPinVolume(!pinVolume)}
+          />
         </ActionPanel>
       }
     >
       {data && data.devices.length > 0 && (
         <Form.Dropdown id="device" title="Input Device" value={selectedId} onChange={handleDeviceChange}>
-          {data.devices.map((d: AudioDevice) => (
+          {sortCurrentFirst(data.devices, data.current.id).map((d: AudioDevice) => (
             <Form.Dropdown.Item
               key={d.id}
               value={d.id}
@@ -88,6 +137,13 @@ export default function Command() {
         defaultValue={currentVolume != null ? String(currentVolume) : ""}
         info="Enter 0-100"
         autoFocus
+      />
+      <Form.Checkbox
+        id="pinVolume"
+        label="Pin Volume"
+        value={pinVolume}
+        onChange={setPinVolume}
+        info="Pinned volume is automatically enforced by the background auto-switcher"
       />
     </Form>
   );
