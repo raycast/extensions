@@ -16,7 +16,10 @@ export default async function RandomWallpaper() {
   });
 
   try {
-    const result = await searchWallpapers({ sorting: "random", purity: sfwOnly ? "100" : undefined });
+    const result = await searchWallpapers({
+      sorting: "random",
+      purity: sfwOnly ? "100" : undefined,
+    });
     if (!result.data.length) {
       toast.style = Toast.Style.Failure;
       toast.title = "No wallpapers found";
