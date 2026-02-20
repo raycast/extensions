@@ -9,25 +9,26 @@
     "macOS"
   ],
   "categories": [
-    "Applications"
+    "Applications",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "launch-group",
-      "title": "Launch",
+      "title": "Launch Group",
       "description": "Open all apps in a group with a single command",
       "mode": "view"
     },
     {
       "name": "quit-group",
-      "title": "Quit",
+      "title": "Quit Group",
       "description": "Gracefully quit all apps in a group",
       "mode": "view"
     },
     {
       "name": "manage-groups",
-      "title": "Manage",
+      "title": "Manage Groups",
       "description": "Create, edit, and delete your app groups",
       "mode": "view"
     }

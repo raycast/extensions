@@ -31,7 +31,7 @@ export default function QuitGroupCommand() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search groups...">
       {groups.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Groups Yet"
