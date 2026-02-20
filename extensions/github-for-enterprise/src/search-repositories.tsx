@@ -52,7 +52,14 @@ export default function Command() {
       searchBarPlaceholder="Globally search repositories"
       onSearchTextChange={searchRepositories}
     >
-      <List.Section title="Repositories" subtitle={plural(data?.user.repositories.nodes?.length, "repository")}>
+      <List.Section
+        title="Repositories"
+        subtitle={
+          data?.user.repositories.nodes?.length === 1
+            ? "1 repository"
+            : `${data?.user.repositories.nodes?.length || 0} repositories`
+        }
+      >
         {results
           ? results.map((item) => <Repository key={item.id} {...item} />)
           : data?.user.repositories.nodes?.map((item) => <Repository key={item.id} {...item} />)}
