@@ -1,5 +1,9 @@
 # HideMyEmail Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Updated response message upon failed login
+
 ## [Update] - 2025-02-28
 
 - Added option to configure what happens on copying email from address list
