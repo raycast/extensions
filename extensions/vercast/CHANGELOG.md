@@ -3,7 +3,6 @@
 ## [2.17] - {PR_MERGE_DATE}
 
 - Added `Cancel Deployment` action to deployments
-- 
 ## [2.16] - 2026-02-15
 
 - Added `Search AI Gateway Logs` command
