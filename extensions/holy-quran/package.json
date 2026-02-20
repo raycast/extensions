@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "holy-quran",
+  "title": "Holy Quran",
+  "description": "Experience the Holy Quran with beautiful recitations. Browse Surahs, select your favorite reciters, and listen to the divine verses in the background or with specialized memorization loops.",
+  "icon": "extension-icon.png",
+  "author": "abdullahnettoor",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play-surah",
+      "title": "Play Surah",
+      "description": "Browse and play Surahs",
+      "mode": "view"
+    },
+    {
+      "name": "stop-playback",
+      "title": "Stop Recitation",
+      "description": "Stop currently playing recitation",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-default-reciter",
+      "title": "Set Default Reciter",
+      "description": "Choose your preferred reciter for one-click playback",
+      "mode": "view"
+    },
+    {
+      "name": "list-reciters",
+      "title": "List Reciters",
+      "description": "Browse available reciters",
+      "mode": "view"
+    },
+    {
+      "name": "playing-status",
+      "title": "Playing Status",
+      "description": "Show currently playing recitation in Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultReciterId",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Reciter ID",
+      "description": "The ID of the default reciter (set via 'Set Default Reciter' command)",
+      "default": "7"
+    },
+    {
+      "name": "defaultReciterName",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Reciter Name",
+      "description": "The name of the default reciter",
+      "default": "Mishari Rashid al-`Afasy"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
