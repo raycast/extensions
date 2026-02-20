@@ -117,7 +117,7 @@ export default function ListOTPs() {
 
     setOTPs(allOTPs);
     setIsLoading(false);
-  }, [lookbackMinutes, prefs.enableGmail, prefs.gmailClientId]);
+  }, [lookbackMinutes, prefs.enableGmail, prefs.gmailClientId, prefs.enableOutlook, prefs.outlookClientId]);
 
   useEffect(() => {
     // Load from cache first for instant display
