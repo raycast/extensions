@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-20
 
 - Browse assets with materialization history, metadata charts, and one-click materialization (including upstream/downstream)
 - View recent runs with status, duration, error details, and materialized assets
