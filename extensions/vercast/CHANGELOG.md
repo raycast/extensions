@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.17] - {PR_MERGE_DATE}
+## [2.17] - 2026-02-20
 
 - Added `Cancel Deployment` action to deployments
 ## [2.16] - 2026-02-15
