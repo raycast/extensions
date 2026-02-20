@@ -18,7 +18,27 @@
       "name": "play-surah",
       "title": "Play Surah",
       "description": "Browse and play Surahs",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "surah",
+          "placeholder": "Surah (name or number)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "start",
+          "placeholder": "Start Ayah (optional)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "end",
+          "placeholder": "End Ayah (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "stop-playback",

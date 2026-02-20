@@ -10,16 +10,18 @@ import {
   Color,
   launchCommand,
   LaunchType,
+  LaunchProps,
+  popToRoot,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchChapters, fetchAudioFile, fetchRecitations } from "./lib/api";
-import { playAudio } from "./lib/audio";
+import { fetchChapters, fetchAudioFile, fetchRecitations, fetchVerseRecitations } from "./lib/api";
+import { playAudio, playVersePlaylist } from "./lib/audio";
 import { Chapter, Recitation, Preferences } from "./types";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import MemorizeSurah from "./memorize-surah";
 import { FAV_SURAH_KEY, FAV_RECITER_KEY } from "./lib/constants";
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: { surah?: string; start?: string; end?: string } }>) {
   const { data: chapters, isLoading: isChaptersLoading } = useCachedPromise(fetchChapters);
   const {
     data: favorites,
@@ -47,6 +49,104 @@ export default function Command() {
     loadDefaultReciter();
   }, []);
 
+  const handlePlayAction = useCallback(
+    async (chapter: Chapter, reciterId?: number, reciterName?: string, startAyah?: number, endAyah?: number) => {
+      const rid = reciterId || defaultReciter.id;
+      const rname = reciterName || defaultReciter.name;
+
+      const title = startAyah ? `Surah ${chapter.name_simple} • ${startAyah}${endAyah ? `-${endAyah}` : ""}` : `Surah ${chapter.name_simple}`;
+
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching audio...",
+        message: `${title} (${rname})`,
+      });
+
+      try {
+        let duration = 0;
+
+        if (startAyah) {
+          const allRecitations = await fetchVerseRecitations(rid, chapter.id);
+          const end = endAyah || startAyah;
+          const rangeRecitations = allRecitations.filter((r) => {
+            const vNum = parseInt(r.verse_key.split(":")[1]);
+            return vNum >= startAyah && vNum <= end;
+          });
+
+          const verseItems = rangeRecitations.map((r) => ({ url: r.url, verseKey: r.verse_key }));
+          if (verseItems.length === 0) throw new Error("No verses found for this range.");
+
+          duration = await playVersePlaylist(verseItems, rname, 1);
+
+          await LocalStorage.setItem(
+            "currently_playing",
+            JSON.stringify({
+              surah: title,
+              reciter: rname,
+              chapterId: chapter.id,
+              startTime: Date.now(),
+              duration,
+            }),
+          );
+        } else {
+          const audioFile = await fetchAudioFile(rid, chapter.id);
+          duration = await playAudio(audioFile.audio_url, rname, chapter.name_simple);
+
+          await LocalStorage.setItem(
+            "currently_playing",
+            JSON.stringify({
+              surah: chapter.name_simple,
+              reciter: rname,
+              chapterId: chapter.id,
+              reciterId: rid,
+              startTime: Date.now(),
+              duration,
+            }),
+          );
+        }
+
+        await launchCommand({ name: "status", type: LaunchType.UserInitiated });
+
+        toast.style = Toast.Style.Success;
+        toast.title = `Playing ${chapter.name_simple}`;
+        toast.message = `Reciter: ${rname}`;
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to play audio";
+        toast.message = error instanceof Error ? error.message : String(error);
+      }
+    },
+    [defaultReciter],
+  );
+
+  useEffect(() => {
+    async function handleArguments() {
+      if (!isChaptersLoading && chapters && props.arguments.surah) {
+        const query = props.arguments.surah.toLowerCase().trim();
+        const chapter = chapters.find(
+          (c) =>
+            c.id.toString() === query ||
+            c.name_simple.toLowerCase().includes(query) ||
+            c.name_complex.toLowerCase().includes(query),
+        );
+
+        if (chapter) {
+          const start = props.arguments.start ? parseInt(props.arguments.start) : undefined;
+          const end = props.arguments.end ? parseInt(props.arguments.end) : undefined;
+          await handlePlayAction(chapter, undefined, undefined, start, end);
+          await popToRoot();
+        } else {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Surah not found",
+            message: `Could not find "${props.arguments.surah}"`,
+          });
+        }
+      }
+    }
+    handleArguments();
+  }, [isChaptersLoading, chapters, props.arguments, handlePlayAction]);
+
   const isLoading = isChaptersLoading || isFavsLoading;
 
   const sortedChapters = useMemo(() => {
@@ -61,46 +161,6 @@ export default function Command() {
       return a.id - b.id;
     });
   }, [chapters, favorites]);
-
-  async function handlePlay(chapter: Chapter, reciterId?: number, reciterName?: string) {
-    const rid = reciterId || defaultReciter.id;
-    const rname = reciterName || defaultReciter.name;
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Fetching audio...",
-      message: `Surah ${chapter.name_simple} (${rname})`,
-    });
-
-    try {
-      const audioFile = await fetchAudioFile(rid, chapter.id);
-      const duration = await playAudio(audioFile.audio_url, rname, chapter.name_simple);
-
-      // Store currently playing info for the menu bar
-      await LocalStorage.setItem(
-        "currently_playing",
-        JSON.stringify({
-          surah: chapter.name_simple,
-          reciter: rname,
-          chapterId: chapter.id,
-          reciterId: rid,
-          startTime: Date.now(),
-          duration: duration,
-        }),
-      );
-
-      // Refresh Menu Bar status immediately
-      await launchCommand({ name: "status", type: LaunchType.UserInitiated });
-
-      toast.style = Toast.Style.Success;
-      toast.title = `Playing ${chapter.name_simple}`;
-      toast.message = `Reciter: ${rname}`;
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to play audio";
-      toast.message = error instanceof Error ? error.message : String(error);
-    }
-  }
 
   async function toggleFavorite(chapterId: number) {
     if (!favorites) return;
@@ -164,7 +224,7 @@ export default function Command() {
                 <Action
                   title={`Play with ${defaultReciter.name}`}
                   icon={Icon.Play}
-                  onAction={() => handlePlay(chapter)}
+                  onAction={() => handlePlayAction(chapter)}
                 />
                 <Action.Push
                   title="Memorization Mode (Loop)"
@@ -182,7 +242,7 @@ export default function Command() {
                   title="Choose Reciter"
                   icon={Icon.Person}
                   target={
-                    <ReciterPicker chapter={chapter} onSelect={(r) => handlePlay(chapter, r.id, r.reciter_name)} />
+                    <ReciterPicker chapter={chapter} onSelect={(r) => handlePlayAction(chapter, r.id, r.reciter_name)} />
                   }
                 />
               </ActionPanel>
