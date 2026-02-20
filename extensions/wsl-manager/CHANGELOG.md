@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-20
 
 - Initial release of the WSL Manager extension
 - Added ability to list installed distributions
