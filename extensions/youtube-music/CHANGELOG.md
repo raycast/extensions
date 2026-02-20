@@ -1,6 +1,6 @@
 # YouTube Music Changelog
 
-## [Refactor Commands and Improve Error Handling] - {PR_MERGE_DATE}
+## [Refactor Commands and Improve Error Handling] - 2026-02-20
 
 - Refactored: Extracted inline JavaScript from all commands into exported constants/functions for better testability and readability.
 - Refactored: Standardized all JS snippets to return descriptive string identifiers (e.g. `"like-clicked"`, `"dislike-not-found"`) instead of boolean values.
