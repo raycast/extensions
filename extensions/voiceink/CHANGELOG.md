@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-20
 
 - Browse and search through transcription history with multi-word matching
 - Support for both VoiceInk Official and VoiceInk CE
