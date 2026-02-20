@@ -62,7 +62,7 @@
     {
       "name": "list-meetings",
       "title": "List Meetings",
-      "description": "List meetings with basic metadata (title, date, folders) without content"
+      "description": "List meetings with basic metadata (title, date, folders) from your notes, shared notes, or both"
     },
     {
       "name": "get-note-content",
@@ -77,7 +77,7 @@
     {
       "name": "list-folders",
       "title": "List Folders",
-      "description": "List folders with metadata and note counts"
+      "description": "List folders with metadata, note counts, and sharing info"
     },
     {
       "name": "save-to-notion",

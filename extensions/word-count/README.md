@@ -2,6 +2,8 @@
 
 Count the number of characters, words, sentences, and paragraphs in some text.
 
+[![](https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square)](https://github.com/LitoMore/raycast-cross-extension-conventions)
+
 ## Tips
 
 - The command will automatically count any text in your clipboard. To clear, use `⌘ + E`.

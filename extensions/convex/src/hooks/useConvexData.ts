@@ -29,7 +29,8 @@ import { type DeployKeyConfig } from "../lib/deployKeyAuth";
 export function useTeams(accessToken: string | null) {
   return useCachedPromise(
     async (token: string) => {
-      return getTeams(token);
+      const teams = await getTeams(token);
+      return Array.isArray(teams) ? teams : [];
     },
     [accessToken ?? ""],
     {
@@ -42,7 +43,8 @@ export function useTeams(accessToken: string | null) {
 export function useProjects(accessToken: string | null, teamId: number | null) {
   return useCachedPromise(
     async (token: string, tId: number) => {
-      return getProjects(token, tId);
+      const projects = await getProjects(token, tId);
+      return Array.isArray(projects) ? projects : [];
     },
     [accessToken ?? "", teamId ?? -1],
     {
@@ -58,7 +60,8 @@ export function useDeployments(
 ) {
   return useCachedPromise(
     async (token: string, pId: number) => {
-      return getDeployments(token, pId);
+      const deployments = await getDeployments(token, pId);
+      return Array.isArray(deployments) ? deployments : [];
     },
     [accessToken ?? "", projectId ?? -1],
     {

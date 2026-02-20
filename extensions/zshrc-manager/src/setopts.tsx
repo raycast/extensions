@@ -23,7 +23,7 @@ export default function Setopts({ searchBarAccessory }: SetoptsProps) {
     <ListViewController<SetoptItem>
       commandName="Setopts"
       navigationTitle="Setopts"
-      searchPlaceholder="Search setopt options..."
+      searchPlaceholder="Search Setopt Options..."
       icon={Icon.Gear}
       tintColor={MODERN_COLORS.success}
       itemType="setopt"

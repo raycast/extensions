@@ -24,7 +24,7 @@ interface props {
  * Return JSX element with generated text and relative metadata.
  * @returns Raycast Answer View.
  */
-export function AnswerView(props: props) {
+export function AnswerView(props: props): React.JSX.Element {
   const {
     data: Model,
     revalidate: RevalidateModel,
@@ -94,7 +94,7 @@ export function AnswerView(props: props) {
   /**
    * Answer Action Menu.
    */
-  function AnswerAction() {
+  function AnswerAction(): React.JSX.Element {
     return (
       <ActionPanel title="Actions">
         <Action.CopyToClipboard content={answer} />
@@ -131,7 +131,10 @@ export function AnswerView(props: props) {
    * @param prop.answer - Ollama Generate Response.
    * @param prop.tag - Ollama Model Tag Response.
    */
-  function AnswerMetadata(prop: { answer: OllamaApiGenerateResponse; tag: OllamaApiTagsResponseModel }) {
+  function AnswerMetadata(prop: {
+    answer: OllamaApiGenerateResponse;
+    tag: OllamaApiTagsResponseModel;
+  }): React.JSX.Element {
     return (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Model" text={prop.tag.name} />

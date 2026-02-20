@@ -1,5 +1,13 @@
 # Asana Changelog
 
+## [Add subtasks support and tag management] - 2026-01-23
+
+- Added ability to view subtasks for a task in the detail view
+- Added action to create subtasks under a parent task
+- Added ability to convert tasks to subtasks and subtasks to tasks
+- Added actions to add and remove tags from existing tasks
+- Added ability to rename tasks and subtasks
+
 ## [Add support for Asana sections] - 2025-10-28
 
 - Added option for assigning a section when creating a task. User can select from a list of existing sections.

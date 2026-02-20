@@ -47,10 +47,12 @@ export default function SwitchDeploymentCommand() {
     selectedContext.projectId,
   );
 
-  const selectedTeam = teams?.find((t) => t.id === selectedContext.teamId);
-  const selectedProject = projects?.find(
-    (p) => p.id === selectedContext.projectId,
-  );
+  const selectedTeam = Array.isArray(teams)
+    ? teams.find((t) => t.id === selectedContext.teamId)
+    : undefined;
+  const selectedProject = Array.isArray(projects)
+    ? projects.find((p) => p.id === selectedContext.projectId)
+    : undefined;
 
   // Handle authentication
   const authGuard = useAuthenticatedListGuard(

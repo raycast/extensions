@@ -10,7 +10,9 @@
   "author": "nyatinte",
   "contributors": [
     "bohdan_zhuravel",
-    "zzyfisher"
+    "zzyfisher",
+    "garrick_zhang",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -27,6 +29,25 @@
       "subtitle": "ccusage",
       "description": "Show Claude Code usage in menu bar",
       "mode": "menu-bar"
+    },
+    {
+      "name": "claude-code-stats",
+      "title": "Claude Code Stats",
+      "subtitle": "ccusage",
+      "description": "Update command subtitle with Claude Code usage data",
+      "mode": "no-view",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "subtitleTemplate",
+          "type": "textfield",
+          "required": false,
+          "title": "Subtitle Template",
+          "description": "Template for the subtitle. Available placeholders: {dailyCost}, {dailyTokens}, {dailyInputTokens}, {dailyOutputTokens}, {dailyRatio}, {monthlyCost}, {monthlyTokens}, {monthlyRatio}, {usageLimit}",
+          "default": "Today: {dailyCost}",
+          "placeholder": "e.g. Today: {dailyCost} · Month: {monthlyCost}"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -53,6 +74,40 @@
         {
           "title": "Model Breakdown",
           "value": "model"
+        },
+        {
+          "title": "Usage Limits",
+          "value": "usage-limits"
+        }
+      ]
+    },
+    {
+      "name": "usageLimitsRefreshInterval",
+      "type": "dropdown",
+      "required": false,
+      "title": "Usage Limits Refresh Interval",
+      "description": "How often to refresh usage limits data",
+      "default": "60",
+      "data": [
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "1 minute (Recommended)",
+          "value": "60"
+        },
+        {
+          "title": "2 minutes",
+          "value": "120"
+        },
+        {
+          "title": "5 minutes",
+          "value": "300"
+        },
+        {
+          "title": "10 minutes",
+          "value": "600"
         }
       ]
     },
@@ -62,7 +117,7 @@
       "required": false,
       "title": "Custom npx Path",
       "description": "Override the default npx path if needed (optional)",
-      "placeholder": "e.g., /usr/local/bin/npx"
+      "placeholder": "e.g., /usr/local/bin/npx or ~/.local/bin/npx"
     },
     {
       "name": "useDirectCcusageCommand",
@@ -93,6 +148,11 @@
       "name": "get-session-usage",
       "title": "Get Session Usage",
       "description": "Get detailed session-by-session Claude Code usage statistics"
+    },
+    {
+      "name": "get-usage-limits",
+      "title": "Get Usage Limits",
+      "description": "Get Claude API usage limits showing 5-hour and 7-day utilization percentages and reset times"
     }
   ],
   "ai": {
@@ -115,7 +175,7 @@
                 "inputTokens": 10000,
                 "outputTokens": 6000,
                 "totalTokens": 16000,
-                "totalCost": 1.80
+                "totalCost": 1.8
               }
             ]
           }
@@ -160,7 +220,7 @@
                 "inputTokens": 35000,
                 "outputTokens": 25000,
                 "totalTokens": 60000,
-                "totalCost": 9.00
+                "totalCost": 9
               }
             ]
           }
@@ -214,7 +274,7 @@
                 "inputTokens": 10000,
                 "outputTokens": 6000,
                 "totalTokens": 16000,
-                "totalCost": 1.80
+                "totalCost": 1.8
               },
               {
                 "modelName": "claude-3-haiku-20240307",
@@ -256,7 +316,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^2.2.2",
     "ccusage": "^0.6.2",
     "date-fns": "^4.1.0",
     "es-toolkit": "^1.39.3",
@@ -265,13 +325,17 @@
     "zod": "^3.25.61"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@jest/globals": "^30.2.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/semver": "^7.5.8",
     "eslint": "^9.22.0",
+    "jest": "^30.2.0",
     "knip": "^5.61.2",
     "prettier": "^3.5.3",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -282,7 +346,8 @@
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest"
   },
   "platforms": [
     "macOS"

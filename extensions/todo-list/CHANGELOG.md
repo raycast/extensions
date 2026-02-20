@@ -1,5 +1,9 @@
 # Todo List Changelog
 
+## [Auto-assign active tag on create] - 2026-02-04
+
+- When creating a new todo while filtered by a tag, the todo inherits the active tag automatically (ref: [Issue #24930](https://github.com/raycast/extensions/issues/24930)).
+
 ## [Added Tooltip to Title] - 2025-09-29
 
 - Added `tooltip` to to-do list items so longer titles easier to read (ref: [Issue #21807](https://github.com/raycast/extensions/issues/21807)).

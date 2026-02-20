@@ -63,7 +63,7 @@ export default function SwitchProjectCommand() {
 
   // Restore selection from context
   useEffect(() => {
-    if (teams && selectedContext.teamId) {
+    if (Array.isArray(teams) && selectedContext.teamId) {
       const team = teams.find((t) => t.id === selectedContext.teamId);
       if (team) {
         setSelectedTeam(team);
@@ -73,7 +73,7 @@ export default function SwitchProjectCommand() {
   }, [teams, selectedContext.teamId]);
 
   useEffect(() => {
-    if (projects && selectedContext.projectId) {
+    if (Array.isArray(projects) && selectedContext.projectId) {
       const project = projects.find((p) => p.id === selectedContext.projectId);
       if (project) {
         setSelectedProject(project);
@@ -241,25 +241,31 @@ export default function SwitchProjectCommand() {
         : `${selectedProject?.name} - Deployments`;
 
   // Filter items based on search text
-  const filteredTeams = teams?.filter(
-    (team) =>
-      team.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      team.slug.toLowerCase().includes(searchText.toLowerCase()),
-  );
+  const filteredTeams = Array.isArray(teams)
+    ? teams.filter(
+        (team) =>
+          team.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          team.slug.toLowerCase().includes(searchText.toLowerCase()),
+      )
+    : [];
 
-  const filteredProjects = projects?.filter(
-    (project) =>
-      project.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      project.slug.toLowerCase().includes(searchText.toLowerCase()),
-  );
+  const filteredProjects = Array.isArray(projects)
+    ? projects.filter(
+        (project) =>
+          project.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          project.slug.toLowerCase().includes(searchText.toLowerCase()),
+      )
+    : [];
 
-  const filteredDeployments = deployments?.filter(
-    (deployment) =>
-      deployment.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      deployment.deploymentType
-        .toLowerCase()
-        .includes(searchText.toLowerCase()),
-  );
+  const filteredDeployments = Array.isArray(deployments)
+    ? deployments.filter(
+        (deployment) =>
+          deployment.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          deployment.deploymentType
+            .toLowerCase()
+            .includes(searchText.toLowerCase()),
+      )
+    : [];
 
   // Current selection subtitle
   const currentSelection = selectedContext.deploymentName

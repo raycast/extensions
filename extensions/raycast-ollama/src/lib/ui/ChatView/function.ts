@@ -236,11 +236,14 @@ async function Inference(
     .then(async (emiter) => {
       emiter.on("data", (data: string) => {
         setChat((prevState) => {
-          if (prevState) {
-            if (prevState.messages.length === ml) {
-              return {
-                ...prevState,
-                messages: prevState.messages.concat({
+          if (!prevState) return undefined;
+
+          if (prevState.messages.length === ml) {
+            return {
+              ...prevState,
+              messages: [
+                ...prevState.messages,
+                {
                   model: chat.models.main.tag,
                   created_at: "",
                   images: image,
@@ -249,33 +252,46 @@ async function Inference(
                     { role: OllamaApiChatMessageRole.ASSISTANT, content: data },
                   ],
                   done: false,
-                }),
-              };
-            } else {
-              const m: RaycastChat = JSON.parse(JSON.stringify(prevState));
-              m.messages[m.messages.length - 1].messages[1].content += data;
-              return {
-                ...prevState,
-                messages: m.messages,
-              };
-            }
+                },
+              ],
+            };
+          } else {
+            const newMessages = [...prevState.messages];
+            const lastMsgIndex = newMessages.length - 1;
+            const lastMsg = { ...newMessages[lastMsgIndex] };
+            const lastMsgMessages = [...lastMsg.messages];
+            const assistantMsg = { ...lastMsgMessages[1] };
+
+            assistantMsg.content += data;
+            lastMsgMessages[1] = assistantMsg;
+            lastMsg.messages = lastMsgMessages;
+            newMessages[lastMsgIndex] = lastMsg;
+
+            return {
+              ...prevState,
+              messages: newMessages,
+            };
           }
         });
       });
       emiter.on("done", async (data: OllamaApiChatResponse) => {
         await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
         setChat((prevState) => {
-          if (prevState) {
-            const m: RaycastChat = JSON.parse(JSON.stringify(prevState));
-            m.messages[m.messages.length - 1] = {
-              ...data,
-              images: image,
-              tools: context.tools && context.tools.meta,
-              messages: m.messages[m.messages.length - 1].messages,
-            };
-            setLoading(false);
-            return { ...m };
-          }
+          if (!prevState) return undefined;
+
+          const newMessages = [...prevState.messages];
+          const lastMsgIndex = newMessages.length - 1;
+          const lastMsg = newMessages[lastMsgIndex];
+
+          newMessages[lastMsgIndex] = {
+            ...data,
+            images: image,
+            tools: context.tools && context.tools.meta,
+            messages: lastMsg.messages,
+          };
+
+          setLoading(false);
+          return { ...prevState, messages: newMessages };
         });
       });
     })

@@ -63,7 +63,7 @@ export default async ({ github, context }: API) => {
   }
 
   // Previous expectations: Due to our current reduced availability, the initial review may take up to 10 business days.
-  const expectations = "Due to our current reduced availability, the initial review may take up to 10-15 business days.";
+  const expectations = "We're currently experiencing a high volume of incoming requests. As a result, the initial review may take up to 10-15 business days.";
 
   const codeowners = await getCodeOwners({ github, context });
 

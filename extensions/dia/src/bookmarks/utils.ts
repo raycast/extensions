@@ -86,6 +86,21 @@ export function toBookmarkItem(dir: BookmarkDirectory, path: string[], idPath: s
 }
 
 /**
+ * Recursively collect all bookmark URLs from a folder's children
+ */
+export function collectUrlsFromFolder(children: BookmarkDirectory[]): string[] {
+  const urls: string[] = [];
+  for (const child of children) {
+    if (child.type === "url" && child.url) {
+      urls.push(child.url);
+    } else if (child.type === "folder" && child.children) {
+      urls.push(...collectUrlsFromFolder(child.children));
+    }
+  }
+  return urls;
+}
+
+/**
  * Recursively search all bookmarks
  */
 export function searchAllBookmarks(

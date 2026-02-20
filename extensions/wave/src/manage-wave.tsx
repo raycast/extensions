@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useGetBusinesses, useGetBusinessInvoices } from "./lib/wave";
-import { Business, InvoiceStatus } from "./lib/types";
-import { calculateInvoiceItemAmount, getInvoiceStatusColor } from "./lib/utils";
+import { Business, InvoiceSendMethod, InvoiceStatus } from "./lib/types";
+import { calculateInvoiceItemAmount, formatInvoiceDate, getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState, withAccessToken } from "@raycast/utils";
 import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
 import { provider } from "./lib/oauth";
@@ -161,6 +161,14 @@ ${invoice.discounts.length ? `| | | ${invoice.discounts[0].name} | (${invoice.di
                         <List.Item.Detail.Metadata.Label
                           title="Modified At"
                           text={new Date(invoice.modifiedAt).toISOString()}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Last sent"
+                          text={`${invoice.lastSentVia === InvoiceSendMethod.NOT_SENT ? "" : `via ${invoice.lastSentVia} `}${invoice.lastSentAt ? formatInvoiceDate(invoice.lastSentAt) : "Never"}`}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Last viewed by customer"
+                          text={`${invoice.lastViewedAt ? formatInvoiceDate(invoice.lastViewedAt) : "Never"}`}
                         />
                         <List.Item.Detail.Metadata.Link
                           title="View PDF"

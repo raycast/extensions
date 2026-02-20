@@ -1,0 +1,12 @@
+{
+  "Multi-line Equations": {
+    "Line Break with \\\\": " \\begin{eqnarray} x_1 + 2x_2 & = 1 \\\\ 2x_1 + 3x_2 & = 3 \\end{eqnarray} ",
+    "Alignment with &": " \\begin{align} x_1 + 2x_2 + x_3 & = 3 \\\\ 2x_1 + 3x_2 + 4x_3 & = 2 \\\\ 3x_1 + 2x_2 + x_3 & = 0 \\end{align} ",
+    "No Numbering with *": " \\begin{align*} x^2 - (a + b)x + ab & = 0 \\\\ (x - a) (x - b) & = 0 \\\\ x & = a, b \\end{align*} ",
+    "Custom Numbering with \\tag{}": " \\begin{eqnarray} x_1 + 2x_2 & = & 1 \\tag{99} \\\\ 2x_1 + 3x_2 & = & 3 \\tag{100} \\end{eqnarray} "
+  },
+  "Piecewise Functions": {
+    "Piecewise Example 1": " \\begin{cases} x_1 + 2x_2 + x_3 = 3 \\\\ 2x_1 + 3x_2 + 4x_3 = 2 \\\\ 3x_1 + 2x_2 + x_3 = 0 \\end{cases} ",
+    "Piecewise Example 2": " \\|x|= \\begin{cases} x & ( x \\ge 0 ) \\\\ -x & ( x \\lt 0 ) \\end{cases} "
+  }
+}
