@@ -10,7 +10,7 @@ export default function Repository(props: RepositoryOwnProps) {
     url,
     description,
     updatedAt,
-    isPrivate,
+    visibility,
     isFork,
     isArchived,
     primaryLanguage,
@@ -25,10 +25,15 @@ export default function Repository(props: RepositoryOwnProps) {
     });
   }
 
-  if (isPrivate) {
+  if (visibility === "PRIVATE") {
     accessories.push({
       icon: { source: Icon.Lock, tintColor: Color.SecondaryText },
       tooltip: "Private",
+    });
+  } else if (visibility === "INTERNAL") {
+    accessories.push({
+      icon: { source: Icon.Lock, tintColor: Color.SecondaryText },
+      tooltip: "Internal",
     });
   }
 

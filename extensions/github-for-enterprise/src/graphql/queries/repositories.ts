@@ -10,7 +10,7 @@ const repositoryFragment = gql`
     stargazerCount
     forkCount
     updatedAt
-    isPrivate
+    visibility
     isFork
     isArchived
     primaryLanguage {

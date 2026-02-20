@@ -90,7 +90,7 @@ export type RepositoryOwnProps = {
   stargazerCount: number;
   forkCount: number;
   updatedAt: string;
-  isPrivate: boolean;
+  visibility: "PRIVATE" | "INTERNAL" | "PUBLIC";
   isFork: boolean;
   isArchived: boolean;
   primaryLanguage?: {
