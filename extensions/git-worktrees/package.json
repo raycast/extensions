@@ -166,7 +166,7 @@
       "type": "dropdown",
       "name": "shouldRunWorktreeSetupCommands",
       "title": "Run Worktree Setup Commands",
-      "description": "Run setup commands from .git-worktree-config.json after creating a new worktree",
+      "description": "Run setup commands from worktrees.json after creating a new worktree",
       "required": false,
       "default": "ask",
       "data": [
