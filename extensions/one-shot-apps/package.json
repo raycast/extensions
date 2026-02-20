@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "one-shot-apps",
+  "title": "One Shot Apps",
+  "description": "Create app groups and launch or quit them all at once",
+  "icon": "icon.png",
+  "author": "yasinkavakli",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "launch-group",
+      "title": "Launch",
+      "description": "Open all apps in a group with a single command",
+      "mode": "view"
+    },
+    {
+      "name": "quit-group",
+      "title": "Quit",
+      "description": "Gracefully quit all apps in a group",
+      "mode": "view"
+    },
+    {
+      "name": "manage-groups",
+      "title": "Manage",
+      "description": "Create, edit, and delete your app groups",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "launchDelay",
+      "title": "Launch Delay",
+      "description": "Delay between launching each app",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "data": [
+        { "title": "None", "value": "0" },
+        { "title": "500ms", "value": "500" },
+        { "title": "1 second", "value": "1000" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
