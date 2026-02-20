@@ -22,12 +22,6 @@ interface RunCutOutOptions {
   source: CommandSource;
 }
 
-interface Preferences {
-  exportMode: "new-file" | "overwrite";
-  revealInFinder: boolean | string;
-  openAfterExport: boolean | string;
-}
-
 interface ProcessResult {
   stdout: string;
   stderr: string;

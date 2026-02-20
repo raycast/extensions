@@ -24,7 +24,7 @@ Use the image currently stored in your clipboard, then copy the result back to c
 ## How to Use
 
 1. Run one of the two commands.
-2. In the Cut Out window, choose `Horizontal` (shortcut "h") or `Vertical` (shortcut "h").
+2. In the Cut Out window, choose `Horizontal` (shortcut "h") or `Vertical` (shortcut "v").
 3. Drag to select the strips you want to remove.
 4. Press `Enter` to apply, or `Esc` to cancel.
 
