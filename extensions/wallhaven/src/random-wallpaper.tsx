@@ -1,5 +1,6 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { searchWallpapers } from "./api";
+import { Preferences } from "./types";
 import {
   downloadImage,
   getFileExtension,
@@ -8,13 +9,14 @@ import {
 } from "./utils";
 
 export default async function RandomWallpaper() {
+  const { sfwOnly } = getPreferenceValues<Preferences>();
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Fetching random wallpaper...",
   });
 
   try {
-    const result = await searchWallpapers({ sorting: "random" });
+    const result = await searchWallpapers({ sorting: "random", purity: sfwOnly ? "100" : undefined });
     if (!result.data.length) {
       toast.style = Toast.Style.Failure;
       toast.title = "No wallpapers found";

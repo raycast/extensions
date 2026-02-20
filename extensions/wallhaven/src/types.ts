@@ -2,6 +2,7 @@ export interface Preferences {
   apiKey?: string;
   username?: string;
   downloadDir?: string;
+  sfwOnly: boolean;
 }
 
 export interface Thumbs {

@@ -63,6 +63,7 @@ By default, downloads are saved to `~/Downloads`. You can change this in extensi
 | API Key | No | Enables NSFW content and collections |
 | Username | No | Required for My Collections command |
 | Download Directory | No | Where to save downloaded wallpapers (default: `~/Downloads`) |
+| SFW Only | No | Always restrict results to SFW content, even when an API key is provided |
 
 ## Notes
 

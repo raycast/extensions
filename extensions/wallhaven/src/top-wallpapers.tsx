@@ -1,11 +1,12 @@
-import { Grid } from "@raycast/api";
+import { getPreferenceValues, Grid } from "@raycast/api";
 import { useCallback, useRef, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { searchWallpapers } from "./api";
-import { Wallpaper } from "./types";
+import { Preferences, Wallpaper } from "./types";
 import { WallpaperGrid } from "./components/WallpaperGrid";
 
 export default function TopWallpapers() {
+  const { sfwOnly } = getPreferenceValues<Preferences>();
   const [topRange, setTopRange] = useState("1M");
   const allWallpapers = useRef<Wallpaper[]>([]);
   const currentPage = useRef(1);
@@ -16,6 +17,7 @@ export default function TopWallpapers() {
       const result = await searchWallpapers({
         sorting: "toplist",
         topRange: range,
+        purity: sfwOnly ? "100" : undefined,
         page,
       });
       hasMore.current = result.meta.current_page < result.meta.last_page;

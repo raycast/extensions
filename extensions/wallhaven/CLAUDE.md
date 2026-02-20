@@ -81,6 +81,16 @@ WallpaperGrid          — shared Grid with pagination, renders items
 
 `WallpaperActions` imports both `WallpaperPreview` and `SimilarWallpapers` — avoid circular imports by never importing `WallpaperActions` from either of those two files.
 
+### SFW Only preference
+
+The `sfwOnly` boolean preference (`Safe Search` in the UI) forces purity to `"100"` in all API calls regardless of API key or user filter selection:
+
+- `search-wallpapers`: passes `purity: "100"` and hides the Purity section from the filter dropdown entirely
+- `top-wallpapers`: passes `purity: "100"` (overrides account-level default which may allow NSFW when an API key is set)
+- `random-wallpaper`: passes `purity: "100"` (same reason)
+
+When `sfwOnly` is false (default), purity is controlled by the in-UI filter in search, and left unset (account default) in top/random.
+
 ## API constraints
 
 - Base URL: `https://wallhaven.cc/api/v1/`

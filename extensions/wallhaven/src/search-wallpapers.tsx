@@ -6,7 +6,7 @@ import { Preferences, Wallpaper } from "./types";
 import { WallpaperGrid } from "./components/WallpaperGrid";
 
 export default function SearchWallpapers() {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey, sfwOnly } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const [categories, setCategories] = useState("111");
   const [purity, setPurity] = useState("100");
@@ -30,7 +30,7 @@ export default function SearchWallpapers() {
       const result = await searchWallpapers({
         q: query || undefined,
         categories: cats,
-        purity: pur,
+        purity: sfwOnly ? "100" : pur,
         sorting: sort,
         topRange: sort === "toplist" ? range : undefined,
         page,
@@ -90,13 +90,15 @@ export default function SearchWallpapers() {
         <Grid.Dropdown.Item title="General + People" value="cat:101" />
         <Grid.Dropdown.Item title="Anime + People" value="cat:011" />
       </Grid.Dropdown.Section>
-      <Grid.Dropdown.Section title="Purity">
-        <Grid.Dropdown.Item title="SFW" value="pur:100" />
-        <Grid.Dropdown.Item title="SFW + Sketchy" value="pur:110" />
-        {apiKey && (
-          <Grid.Dropdown.Item title="All (incl. NSFW)" value="pur:111" />
-        )}
-      </Grid.Dropdown.Section>
+      {!sfwOnly && (
+        <Grid.Dropdown.Section title="Purity">
+          <Grid.Dropdown.Item title="SFW" value="pur:100" />
+          <Grid.Dropdown.Item title="SFW + Sketchy" value="pur:110" />
+          {apiKey && (
+            <Grid.Dropdown.Item title="All (incl. NSFW)" value="pur:111" />
+          )}
+        </Grid.Dropdown.Section>
+      )}
       <Grid.Dropdown.Section title="Sorting">
         <Grid.Dropdown.Item title="Date Added" value="sort:date_added" />
         <Grid.Dropdown.Item title="Relevance" value="sort:relevance" />

@@ -88,6 +88,15 @@
       "title": "Download Directory",
       "description": "Folder where downloaded wallpapers are saved. Defaults to ~/Downloads.",
       "default": "~/Downloads"
+    },
+    {
+      "name": "sfwOnly",
+      "type": "checkbox",
+      "required": false,
+      "title": "Safe Search",
+      "label": "SFW content only",
+      "description": "Always restrict results to SFW content, even when an API key is provided. Disables the purity filter in Search Wallpapers.",
+      "default": false
     }
   ],
   "dependencies": {
