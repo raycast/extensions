@@ -40,14 +40,14 @@ export async function fetchAudioFile(
 
 export async function fetchVerses(chapterId: number): Promise<Ayah[]> {
   const data = await callApi<{ verses: Ayah[] }>(
-    `${API_BASE_URL}/verses/by_chapter/${chapterId}?language=en&words=false`,
+    `${API_BASE_URL}/verses/by_chapter/${chapterId}?language=en&words=false&per_page=300`,
   );
   return data.verses;
 }
 
 export async function fetchVerseRecitations(reciterId: number, chapterId: number): Promise<VerseRecitation[]> {
   const data = await callApi<{ audio_files: VerseRecitation[] }>(
-    `${API_BASE_URL}/recitations/${reciterId}/by_chapter/${chapterId}`,
+    `${API_BASE_URL}/recitations/${reciterId}/by_chapter/${chapterId}?per_page=300`,
   );
   return data.audio_files.map((file) => ({
     ...file,

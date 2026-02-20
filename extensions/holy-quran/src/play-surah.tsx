@@ -19,7 +19,7 @@ import { playAudio, playVersePlaylist } from "./lib/audio";
 import { Chapter, Recitation, Preferences } from "./types";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import MemorizeSurah from "./memorize-surah";
-import { FAV_SURAH_KEY, FAV_RECITER_KEY } from "./lib/constants";
+import { FAV_SURAH_KEY, FAV_RECITER_KEY, SURAH_VERSE_COUNTS } from "./lib/constants";
 
 export default function Command(props: LaunchProps<{ arguments: { surah?: string; start?: string; end?: string } }>) {
   const { data: chapters, isLoading: isChaptersLoading } = useCachedPromise(fetchChapters);
@@ -131,8 +131,31 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
         );
 
         if (chapter) {
+          const maxVerses = SURAH_VERSE_COUNTS[chapter.id] || 0;
           const start = props.arguments.start ? parseInt(props.arguments.start) : undefined;
           const end = props.arguments.end ? parseInt(props.arguments.end) : undefined;
+
+          // Validation
+          if (start !== undefined && (isNaN(start) || start < 1 || start > maxVerses)) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Invalid Start Ayah",
+              message: `Surah ${chapter.name_simple} only has ${maxVerses} verses.`,
+            });
+            return;
+          }
+
+          if (end !== undefined && (isNaN(end) || end < 1 || end > maxVerses || (start && end < start))) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Invalid End Ayah",
+              message: end < (start || 1)
+                ? "End Ayah cannot be before Start Ayah."
+                : `Surah ${chapter.name_simple} only has ${maxVerses} verses.`,
+            });
+            return;
+          }
+
           await handlePlayAction(chapter, undefined, undefined, start, end);
           await popToRoot();
         } else {

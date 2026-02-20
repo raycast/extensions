@@ -22,9 +22,467 @@
       "arguments": [
         {
           "name": "surah",
-          "placeholder": "Surah (name or number)",
-          "type": "text",
-          "required": false
+          "placeholder": "Select Surah",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "1. Al-Fatihah",
+              "value": "1"
+            },
+            {
+              "title": "2. Al-Baqarah",
+              "value": "2"
+            },
+            {
+              "title": "3. Ali 'Imran",
+              "value": "3"
+            },
+            {
+              "title": "4. An-Nisa",
+              "value": "4"
+            },
+            {
+              "title": "5. Al-Ma'idah",
+              "value": "5"
+            },
+            {
+              "title": "6. Al-An'am",
+              "value": "6"
+            },
+            {
+              "title": "7. Al-A'raf",
+              "value": "7"
+            },
+            {
+              "title": "8. Al-Anfal",
+              "value": "8"
+            },
+            {
+              "title": "9. At-Tawbah",
+              "value": "9"
+            },
+            {
+              "title": "10. Yunus",
+              "value": "10"
+            },
+            {
+              "title": "11. Hud",
+              "value": "11"
+            },
+            {
+              "title": "12. Yusuf",
+              "value": "12"
+            },
+            {
+              "title": "13. Ar-Ra'd",
+              "value": "13"
+            },
+            {
+              "title": "14. Ibrahim",
+              "value": "14"
+            },
+            {
+              "title": "15. Al-Hijr",
+              "value": "15"
+            },
+            {
+              "title": "16. An-Nahl",
+              "value": "16"
+            },
+            {
+              "title": "17. Al-Isra",
+              "value": "17"
+            },
+            {
+              "title": "18. Al-Kahf",
+              "value": "18"
+            },
+            {
+              "title": "19. Maryam",
+              "value": "19"
+            },
+            {
+              "title": "20. Taha",
+              "value": "20"
+            },
+            {
+              "title": "21. Al-Anbya",
+              "value": "21"
+            },
+            {
+              "title": "22. Al-Hajj",
+              "value": "22"
+            },
+            {
+              "title": "23. Al-Mu'minun",
+              "value": "23"
+            },
+            {
+              "title": "24. An-Nur",
+              "value": "24"
+            },
+            {
+              "title": "25. Al-Furqan",
+              "value": "25"
+            },
+            {
+              "title": "26. Ash-Shu'ara",
+              "value": "26"
+            },
+            {
+              "title": "27. An-Naml",
+              "value": "27"
+            },
+            {
+              "title": "28. Al-Qasas",
+              "value": "28"
+            },
+            {
+              "title": "29. Al-'Ankabut",
+              "value": "29"
+            },
+            {
+              "title": "30. Ar-Rum",
+              "value": "30"
+            },
+            {
+              "title": "31. Luqman",
+              "value": "31"
+            },
+            {
+              "title": "32. As-Sajdah",
+              "value": "32"
+            },
+            {
+              "title": "33. Al-Ahzab",
+              "value": "33"
+            },
+            {
+              "title": "34. Saba",
+              "value": "34"
+            },
+            {
+              "title": "35. Fatir",
+              "value": "35"
+            },
+            {
+              "title": "36. Ya-Sin",
+              "value": "36"
+            },
+            {
+              "title": "37. As-Saffat",
+              "value": "37"
+            },
+            {
+              "title": "38. Sad",
+              "value": "38"
+            },
+            {
+              "title": "39. Az-Zumar",
+              "value": "39"
+            },
+            {
+              "title": "40. Ghafir",
+              "value": "40"
+            },
+            {
+              "title": "41. Fussilat",
+              "value": "41"
+            },
+            {
+              "title": "42. Ash-Shuraa",
+              "value": "42"
+            },
+            {
+              "title": "43. Az-Zukhruf",
+              "value": "43"
+            },
+            {
+              "title": "44. Ad-Dukhan",
+              "value": "44"
+            },
+            {
+              "title": "45. Al-Jathiyah",
+              "value": "45"
+            },
+            {
+              "title": "46. Al-Ahqaf",
+              "value": "46"
+            },
+            {
+              "title": "47. Muhammad",
+              "value": "47"
+            },
+            {
+              "title": "48. Al-Fath",
+              "value": "48"
+            },
+            {
+              "title": "49. Al-Hujurat",
+              "value": "49"
+            },
+            {
+              "title": "50. Qaf",
+              "value": "50"
+            },
+            {
+              "title": "51. Adh-Dhariyat",
+              "value": "51"
+            },
+            {
+              "title": "52. At-Tur",
+              "value": "52"
+            },
+            {
+              "title": "53. An-Najm",
+              "value": "53"
+            },
+            {
+              "title": "54. Al-Qamar",
+              "value": "54"
+            },
+            {
+              "title": "55. Ar-Rahman",
+              "value": "55"
+            },
+            {
+              "title": "56. Al-Waqi'ah",
+              "value": "56"
+            },
+            {
+              "title": "57. Al-Hadid",
+              "value": "57"
+            },
+            {
+              "title": "58. Al-Mujadila",
+              "value": "58"
+            },
+            {
+              "title": "59. Al-Hashr",
+              "value": "59"
+            },
+            {
+              "title": "60. Al-Mumtahanah",
+              "value": "60"
+            },
+            {
+              "title": "61. As-Saf",
+              "value": "61"
+            },
+            {
+              "title": "62. Al-Jumu'ah",
+              "value": "62"
+            },
+            {
+              "title": "63. Al-Munafiqun",
+              "value": "63"
+            },
+            {
+              "title": "64. At-Taghabun",
+              "value": "64"
+            },
+            {
+              "title": "65. At-Talaq",
+              "value": "65"
+            },
+            {
+              "title": "66. At-Tahrim",
+              "value": "66"
+            },
+            {
+              "title": "67. Al-Mulk",
+              "value": "67"
+            },
+            {
+              "title": "68. Al-Qalam",
+              "value": "68"
+            },
+            {
+              "title": "69. Al-Haqqah",
+              "value": "69"
+            },
+            {
+              "title": "70. Al-Ma'arij",
+              "value": "70"
+            },
+            {
+              "title": "71. Nuh",
+              "value": "71"
+            },
+            {
+              "title": "72. Al-Jinn",
+              "value": "72"
+            },
+            {
+              "title": "73. Al-Muzzammil",
+              "value": "73"
+            },
+            {
+              "title": "74. Al-Muddaththir",
+              "value": "74"
+            },
+            {
+              "title": "75. Al-Qiyamah",
+              "value": "75"
+            },
+            {
+              "title": "76. Al-Insan",
+              "value": "76"
+            },
+            {
+              "title": "77. Al-Mursalat",
+              "value": "77"
+            },
+            {
+              "title": "78. An-Naba",
+              "value": "78"
+            },
+            {
+              "title": "79. An-Nazi'at",
+              "value": "79"
+            },
+            {
+              "title": "80. 'Abasa",
+              "value": "80"
+            },
+            {
+              "title": "81. At-Takwir",
+              "value": "81"
+            },
+            {
+              "title": "82. Al-Infitar",
+              "value": "82"
+            },
+            {
+              "title": "83. Al-Mutaffifin",
+              "value": "83"
+            },
+            {
+              "title": "84. Al-Inshiqaq",
+              "value": "84"
+            },
+            {
+              "title": "85. Al-Buruj",
+              "value": "85"
+            },
+            {
+              "title": "86. At-Tariq",
+              "value": "86"
+            },
+            {
+              "title": "87. Al-A'la",
+              "value": "87"
+            },
+            {
+              "title": "88. Al-Ghashiyah",
+              "value": "88"
+            },
+            {
+              "title": "89. Al-Fajr",
+              "value": "89"
+            },
+            {
+              "title": "90. Al-Balad",
+              "value": "90"
+            },
+            {
+              "title": "91. Ash-Shams",
+              "value": "91"
+            },
+            {
+              "title": "92. Al-Layl",
+              "value": "92"
+            },
+            {
+              "title": "93. Ad-Duhaa",
+              "value": "93"
+            },
+            {
+              "title": "94. Ash-Sharh",
+              "value": "94"
+            },
+            {
+              "title": "95. At-Tin",
+              "value": "95"
+            },
+            {
+              "title": "96. Al-'Alaq",
+              "value": "96"
+            },
+            {
+              "title": "97. Al-Qadr",
+              "value": "97"
+            },
+            {
+              "title": "98. Al-Bayyinah",
+              "value": "98"
+            },
+            {
+              "title": "99. Az-Zalzalah",
+              "value": "99"
+            },
+            {
+              "title": "100. Al-'Adiyat",
+              "value": "100"
+            },
+            {
+              "title": "101. Al-Qari'ah",
+              "value": "101"
+            },
+            {
+              "title": "102. At-Takathur",
+              "value": "102"
+            },
+            {
+              "title": "103. Al-'Asr",
+              "value": "103"
+            },
+            {
+              "title": "104. Al-Humazah",
+              "value": "104"
+            },
+            {
+              "title": "105. Al-Fil",
+              "value": "105"
+            },
+            {
+              "title": "106. Quraysh",
+              "value": "106"
+            },
+            {
+              "title": "107. Al-Ma'un",
+              "value": "107"
+            },
+            {
+              "title": "108. Al-Kawthar",
+              "value": "108"
+            },
+            {
+              "title": "109. Al-Kafirun",
+              "value": "109"
+            },
+            {
+              "title": "110. An-Nasr",
+              "value": "110"
+            },
+            {
+              "title": "111. Al-Masad",
+              "value": "111"
+            },
+            {
+              "title": "112. Al-Ikhlas",
+              "value": "112"
+            },
+            {
+              "title": "113. Al-Falaq",
+              "value": "113"
+            },
+            {
+              "title": "114. An-Nas",
+              "value": "114"
+            }
+          ]
         },
         {
           "name": "start",
