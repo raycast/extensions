@@ -1,0 +1,232 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "elgato-light",
+  "title": "Elgato Light",
+  "description": "Control Elgato lights with auto-discovery or by IP address.",
+  "icon": "extension-icon.png",
+  "author": "wassimk",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "preferences": [
+    {
+      "name": "ipAddresses",
+      "type": "textfield",
+      "required": false,
+      "key": "ip-addresses",
+      "title": "IP Addresses",
+      "description": "Comma-separated IP addresses. Leave empty to auto-discover via Bonjour.",
+      "placeholder": "Auto-discover or 192.168.0.25, ..."
+    },
+    {
+      "name": "brightnessChangeAmount",
+      "type": "textfield",
+      "required": false,
+      "key": "brightnessChangeAmount",
+      "title": "Brightness Increment Amount",
+      "description": "The amount to increment/decrement brightness by. Between 1 and 100",
+      "default": "5",
+      "placeholder": "1-100"
+    },
+    {
+      "name": "defaultBrightness",
+      "type": "textfield",
+      "required": false,
+      "key": "defaultBrightness",
+      "title": "Default Brightness",
+      "description": "The default brightness to set the light to. Between 1 and 100",
+      "default": "10",
+      "placeholder": "1-100"
+    },
+    {
+      "name": "defaultTemperature",
+      "type": "textfield",
+      "required": false,
+      "key": "defaultTemperature",
+      "title": "Default Temperature",
+      "description": "The default temperature to set the light to. Between 2900 and 7000",
+      "default": "5000",
+      "placeholder": "2900-7000"
+    },
+    {
+      "name": "nightLightBrightness",
+      "type": "textfield",
+      "required": false,
+      "key": "nightLightBrightness",
+      "title": "Night Light Brightness",
+      "description": "The default brightness to set the light to for night mode. Between 1 and 100",
+      "default": "20",
+      "placeholder": "1-100"
+    },
+    {
+      "name": "nightLightTemperature",
+      "type": "textfield",
+      "required": false,
+      "key": "nightLightTemperature",
+      "title": "Night Light Temperature",
+      "description": "The default temperature to set the light to for night mode. Between 2900 and 7000",
+      "default": "3000",
+      "placeholder": "2900-7000"
+    },
+    {
+      "name": "dayLightBrightness",
+      "type": "textfield",
+      "required": false,
+      "key": "dayLightBrightness",
+      "title": "Day Light Brightness",
+      "description": "The default brightness to set the light to for day mode. Between 1 and 100",
+      "default": "5",
+      "placeholder": "1-100"
+    },
+    {
+      "name": "dayLightTemperature",
+      "type": "textfield",
+      "required": false,
+      "key": "dayLightTemperature",
+      "title": "Day Light Temperature",
+      "description": "The default temperature to set the light to for day mode. Between 2900 and 7000",
+      "default": "5000",
+      "placeholder": "2900-7000"
+    }
+  ],
+  "commands": [
+    {
+      "name": "turn-on",
+      "title": "Turn on",
+      "subtitle": "Elgato Light",
+      "description": "Turn light(s) on to default settings",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-on-day-light",
+      "title": "Turn on Day Light",
+      "subtitle": "Elgato Light",
+      "description": "Turn light(s) on to day light settings",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-on-night-light",
+      "title": "Turn on Night Light",
+      "subtitle": "Elgato Light",
+      "description": "Turn light(s) on to night light settings",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn off",
+      "subtitle": "Elgato Light",
+      "description": "Turn light(s) off",
+      "mode": "no-view"
+    },
+    {
+      "name": "increase-brightness",
+      "title": "Increase Brightness",
+      "subtitle": "Elgato Light",
+      "description": "Increase the brightness of light(s)",
+      "mode": "no-view"
+    },
+    {
+      "name": "decrease-brightness",
+      "title": "Decrease Brightness",
+      "subtitle": "Elgato Light",
+      "description": "Decrease the brightness of light(s)",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-temperature",
+      "title": "Set Temperature",
+      "subtitle": "Elgato Light",
+      "description": "Set the temperature of light(s)",
+      "arguments": [
+        {
+          "name": "temperature",
+          "type": "text",
+          "required": true,
+          "title": "Temperature",
+          "placeholder": "2900-7000",
+          "description": "The temperature to set the light(s) to."
+        }
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "discover",
+      "title": "Discover Lights",
+      "subtitle": "Elgato Light",
+      "description": "Discover Elgato lights on the network and cache them",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Light Cache",
+      "subtitle": "Elgato Light",
+      "description": "Clear the cached light discovery data",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "turn-on",
+      "title": "Turn on",
+      "description": "Turn on Elgato light(s) with default brightness and temperature"
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn off",
+      "description": "Turn off Elgato light(s)"
+    },
+    {
+      "name": "turn-on-day-light",
+      "title": "Turn on Day Light",
+      "description": "Turn on Elgato light(s) with the day light brightness and temperature preset"
+    },
+    {
+      "name": "turn-on-night-light",
+      "title": "Turn on Night Light",
+      "description": "Turn on Elgato light(s) with the night light brightness and temperature preset"
+    },
+    {
+      "name": "set-temperature",
+      "title": "Set Temperature",
+      "description": "Set the color temperature of Elgato light(s) to a specific Kelvin value (2900-7000)"
+    },
+    {
+      "name": "increase-brightness",
+      "title": "Increase Brightness",
+      "description": "Increase the brightness of Elgato light(s)"
+    },
+    {
+      "name": "decrease-brightness",
+      "title": "Decrease Brightness",
+      "description": "Decrease the brightness of Elgato light(s)"
+    }
+  ],
+  "ai": {
+    "instructions": "This extension controls Elgato lights. The user can have day light and night light presets configured with different brightness and temperature values. When the user asks to change the light scene or mood, prefer using the day light or night light presets. When the user asks for a specific temperature, use the set-temperature tool with a Kelvin value between 2900 (warm) and 7000 (cool)."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "sha256-file": "^1.0.0",
+    "tar": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@types/sha256-file": "^1.0.3",
+    "@types/tar": "^6.1.13",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
