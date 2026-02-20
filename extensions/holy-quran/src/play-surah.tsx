@@ -8,6 +8,8 @@ import {
   getPreferenceValues,
   LocalStorage,
   Color,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchChapters, fetchAudioFile, fetchRecitations } from "./lib/api";
@@ -85,7 +87,10 @@ export default function Command() {
         }),
       );
 
-      await playAudio(audioFile.audio_url);
+      // Refresh Menu Bar status immediately
+      await launchCommand({ name: "status", type: LaunchType.UserInitiated });
+
+      await playAudio(audioFile.audio_url, rname, chapter.name_simple);
 
       toast.style = Toast.Style.Success;
       toast.title = `Playing ${chapter.name_simple}`;

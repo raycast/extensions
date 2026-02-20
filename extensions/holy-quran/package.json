@@ -39,9 +39,9 @@
       "mode": "view"
     },
     {
-      "name": "playing-status",
-      "title": "Playing Status",
-      "description": "Show currently playing recitation in Menu Bar",
+      "name": "status",
+      "title": "Show Extension Status",
+      "description": "Control and view current activity in the Menu Bar",
       "mode": "menu-bar",
       "interval": "1m"
     }

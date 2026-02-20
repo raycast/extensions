@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, getPreferenceValues, LocalStorage } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  LocalStorage,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { fetchVerses, fetchVerseRecitations } from "./lib/api";
@@ -50,9 +61,9 @@ export default function MemorizeSurah({ chapter }: { chapter: Chapter }) {
         return verseNum >= startAyah && verseNum <= endAyah;
       });
 
-      const urls = rangeRecitations.map((r) => r.url);
+      const verseItems = rangeRecitations.map((r) => ({ url: r.url, verseKey: r.verse_key }));
 
-      if (urls.length === 0) throw new Error("No audio files found for this range.");
+      if (verseItems.length === 0) throw new Error("No audio files found for this range.");
 
       // Store in LocalStorage for the Menu Bar
       await LocalStorage.setItem(
@@ -66,7 +77,10 @@ export default function MemorizeSurah({ chapter }: { chapter: Chapter }) {
         }),
       );
 
-      await playVersePlaylist(urls, repeatCount);
+      // Refresh Menu Bar status immediately
+      await launchCommand({ name: "status", type: LaunchType.UserInitiated });
+
+      await playVersePlaylist(verseItems, reciterName, repeatCount);
 
       toast.style = Toast.Style.Success;
       toast.title = "Loop started";
