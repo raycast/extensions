@@ -1,6 +1,6 @@
 # Remember the Date Changelog
 
-## [Recurring Events Support] - {PR_MERGE_DATE}
+## [Recurring Events Support] - 2026-02-20
 
 - Added support for recurring dates: weekly, monthly, and yearly repeat types
 - Recurring dates automatically show the next upcoming occurrence
