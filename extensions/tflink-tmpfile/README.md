@@ -9,6 +9,7 @@ Upload content from your clipboard to [tmpfile.link](https://tmpfile.link) anony
 -   **⚡️ Instant Sharing**: The download link is automatically copied to your clipboard upon success.
 -   **📱 QR Code Support**: Generates a QR code for the download link, allowing for quick transfer to mobile devices.
 -   **🔒 Privacy**: All uploads are anonymous and retained for **7 days**.
+-   **📦 Size Limit**: Files larger than **100MB** are rejected before upload.
 
 ## Usage
 
