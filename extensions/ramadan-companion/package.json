@@ -1,0 +1,260 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ramadan-companion",
+  "title": "Ramadan Companion",
+  "description": "Show Sehri and Iftar prayer times for Ramadan using the AlAdhan API",
+  "icon": "extension-icon.png",
+  "author": "saad",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "ramadan",
+    "iftar",
+    "sehri",
+    "prayer",
+    "times",
+    "ramzan",
+    "roza",
+    "sehoor",
+    "sahur",
+    "muslim",
+    "islam"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ramadan",
+      "title": "Ramadan Companion",
+      "subtitle": "Loading...",
+      "description": "Show both Sehri and Iftar times for today with countdown",
+      "mode": "view",
+      "interval": "1h",
+      "keywords": [
+        "ramadan",
+        "ramzan",
+        "roza",
+        "prayer",
+        "iftar",
+        "sehri",
+        "times"
+      ]
+    },
+    {
+      "name": "iftar",
+      "title": "Iftar Time",
+      "subtitle": "Loading...",
+      "description": "Show Iftar (Maghrib) time with countdown",
+      "mode": "view",
+      "interval": "1h",
+      "keywords": [
+        "iftar",
+        "maghrib",
+        "fast",
+        "break",
+        "time",
+        "the",
+        "what",
+        "what's",
+        "clock"
+      ]
+    },
+    {
+      "name": "sehri",
+      "title": "Sehri Time",
+      "subtitle": "Loading...",
+      "description": "Show Sehri (Fajr) time with countdown",
+      "mode": "view",
+      "interval": "1h",
+      "keywords": [
+        "sehri",
+        "sehoor",
+        "sahur",
+        "fajr",
+        "imsak",
+        "time",
+        "the",
+        "what",
+        "what's",
+        "clock"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "city",
+      "type": "textfield",
+      "required": true,
+      "title": "City",
+      "description": "Your city name (e.g., Lahore, London, New York)",
+      "default": "Lahore"
+    },
+    {
+      "name": "country",
+      "type": "textfield",
+      "required": true,
+      "title": "Country",
+      "description": "Your country name or code (e.g., Pakistan, PK, United States, US)",
+      "default": "Pakistan"
+    },
+    {
+      "name": "method",
+      "type": "dropdown",
+      "required": true,
+      "title": "Calculation Method",
+      "description": "Prayer time calculation method",
+      "default": "1",
+      "data": [
+        {
+          "title": "Karachi - University of Islamic Sciences",
+          "value": "1"
+        },
+        {
+          "title": "ISNA - Islamic Society of North America",
+          "value": "2"
+        },
+        {
+          "title": "MWL - Muslim World League",
+          "value": "3"
+        },
+        {
+          "title": "Umm Al-Qura, Makkah",
+          "value": "4"
+        },
+        {
+          "title": "Egyptian General Authority of Survey",
+          "value": "5"
+        },
+        {
+          "title": "Tehran - Institute of Geophysics",
+          "value": "7"
+        },
+        {
+          "title": "Gulf Region",
+          "value": "8"
+        },
+        {
+          "title": "Kuwait",
+          "value": "9"
+        },
+        {
+          "title": "Qatar",
+          "value": "10"
+        },
+        {
+          "title": "Singapore - MUIS",
+          "value": "11"
+        },
+        {
+          "title": "France - UOIF",
+          "value": "12"
+        },
+        {
+          "title": "Turkey - Diyanet",
+          "value": "13"
+        },
+        {
+          "title": "Russia",
+          "value": "14"
+        },
+        {
+          "title": "Moonsighting Committee",
+          "value": "15"
+        },
+        {
+          "title": "Dubai (experimental)",
+          "value": "16"
+        },
+        {
+          "title": "JAKIM - Malaysia",
+          "value": "17"
+        },
+        {
+          "title": "Kementerian Agama - Indonesia",
+          "value": "20"
+        },
+        {
+          "title": "Morocco",
+          "value": "21"
+        },
+        {
+          "title": "Jordan",
+          "value": "23"
+        }
+      ]
+    },
+    {
+      "name": "school",
+      "type": "dropdown",
+      "required": true,
+      "title": "Juristic School (Asr calculation)",
+      "description": "Shafi: shadow = object length. Hanafi: shadow = 2x object length.",
+      "default": "1",
+      "data": [
+        {
+          "title": "Shafi / Maliki / Hanbali",
+          "value": "0"
+        },
+        {
+          "title": "Hanafi",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "timeFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Time Format",
+      "description": "Display times in 12-hour or 24-hour format",
+      "default": "12h",
+      "data": [
+        {
+          "title": "12-hour (5:21 AM)",
+          "value": "12h"
+        },
+        {
+          "title": "24-hour (05:21)",
+          "value": "24h"
+        }
+      ]
+    },
+    {
+      "name": "sehriSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "Sehri Time Source",
+      "description": "Use Fajr time or Imsak (10 min before Fajr) for Sehri end",
+      "default": "fajr",
+      "data": [
+        {
+          "title": "Fajr (Azan time)",
+          "value": "fajr"
+        },
+        {
+          "title": "Imsak (precautionary, ~10 min before Fajr)",
+          "value": "imsak"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

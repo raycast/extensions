@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "ES2020"
+        ],
+        "module": "CommonJS",
+        "target": "ES2020",
+        "jsx": "react-jsx",
+        "strict": true,
+        "noUnusedLocals": false,
+        "isolatedModules": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    }
+}
