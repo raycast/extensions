@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchChapters, fetchAudioFile, fetchRecitations, fetchVerseRecitations } from "./lib/api";
-import { playAudio, playVersePlaylist } from "./lib/audio";
+import { playAudio, playVersePlaylist, isSurahCached, isVerseRangeCached } from "./lib/audio";
 import { Chapter, Recitation, Preferences } from "./types";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import MemorizeSurah from "./memorize-surah";
@@ -70,14 +70,23 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
         let duration = 0;
 
         if (startAyah) {
-          const allRecitations = await fetchVerseRecitations(rid, chapter.id);
           const end = endAyah || startAyah;
-          const rangeRecitations = allRecitations.filter((r) => {
-            const vNum = parseInt(r.verse_key.split(":")[1]);
-            return vNum >= startAyah && vNum <= end;
-          });
+          let verseItems;
 
-          const verseItems = rangeRecitations.map((r) => ({ url: r.url, verseKey: r.verse_key }));
+          if (isVerseRangeCached(rname, chapter.id, startAyah, end)) {
+            verseItems = [];
+            for (let i = startAyah; i <= end; i++) {
+              verseItems.push({ url: "", verseKey: `${chapter.id}:${i}` });
+            }
+          } else {
+            const allRecitations = await fetchVerseRecitations(rid, chapter.id);
+            const rangeRecitations = allRecitations.filter((r) => {
+              const vNum = parseInt(r.verse_key.split(":")[1]);
+              return vNum >= startAyah && vNum <= end;
+            });
+            verseItems = rangeRecitations.map((r) => ({ url: r.url, verseKey: r.verse_key }));
+          }
+
           if (verseItems.length === 0) throw new Error("No verses found for this range.");
 
           duration = await playVersePlaylist(verseItems, rname, 1);
@@ -93,8 +102,12 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
             }),
           );
         } else {
-          const audioFile = await fetchAudioFile(rid, chapter.id);
-          duration = await playAudio(audioFile.audio_url, rname, chapter.name_simple);
+          let audioUrl = "";
+          if (!isSurahCached(rname, chapter.name_simple)) {
+            const audioFile = await fetchAudioFile(rid, chapter.id);
+            audioUrl = audioFile.audio_url;
+          }
+          duration = await playAudio(audioUrl, rname, chapter.name_simple);
 
           await LocalStorage.setItem(
             "currently_playing",
@@ -147,6 +160,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
               title: "Invalid Start Ayah",
               message: `Surah ${chapter.name_simple} only has ${maxVerses} verses.`,
             });
+            await popToRoot();
             return;
           }
 
@@ -158,6 +172,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
                 ? "End Ayah cannot be before Start Ayah."
                 : `Surah ${chapter.name_simple} only has ${maxVerses} verses.`,
             });
+            await popToRoot();
             return;
           }
 
@@ -169,6 +184,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
             title: "Surah not found",
             message: `Could not find "${props.arguments.surah}"`,
           });
+          await popToRoot();
         }
       }
     }
@@ -202,6 +218,10 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
       title: favorites.includes(chapterId) ? "Removed from Favorites" : "Added to Favorites",
       style: Toast.Style.Success,
     });
+  }
+
+  if (props.arguments.surah) {
+    return null;
   }
 
   return (

@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "./constants";
 import { Chapter, Recitation, AudioFile, Ayah, VerseRecitation } from "../types";
+import { LocalStorage } from "@raycast/api";
 
 async function callApi<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
@@ -18,13 +19,34 @@ async function callApi<T>(url: string, options: RequestInit = {}): Promise<T> {
 }
 
 export async function fetchChapters(): Promise<Chapter[]> {
-  const data = await callApi<{ chapters: Chapter[] }>(`${API_BASE_URL}/chapters`);
-  return data.chapters;
+  const cached = await LocalStorage.getItem<string>("cached_chapters");
+  if (cached) {
+    // Surahs are constant, so if we have them, return them immediately.
+    return JSON.parse(cached);
+  }
+  try {
+    const data = await callApi<{ chapters: Chapter[] }>(`${API_BASE_URL}/chapters`);
+    await LocalStorage.setItem("cached_chapters", JSON.stringify(data.chapters));
+    return data.chapters;
+  } catch (error) {
+    if (cached) return JSON.parse(cached);
+    throw error;
+  }
 }
 
 export async function fetchRecitations(): Promise<Recitation[]> {
-  const data = await callApi<{ recitations: Recitation[] }>(`${API_BASE_URL}/resources/recitations`);
-  return data.recitations;
+  const cached = await LocalStorage.getItem<string>("cached_recitations");
+  if (cached) {
+    return JSON.parse(cached);
+  }
+  try {
+    const data = await callApi<{ recitations: Recitation[] }>(`${API_BASE_URL}/resources/recitations`);
+    await LocalStorage.setItem("cached_recitations", JSON.stringify(data.recitations));
+    return data.recitations;
+  } catch (error) {
+    if (cached) return JSON.parse(cached);
+    throw error;
+  }
 }
 
 export async function fetchAudioFile(
@@ -39,9 +61,15 @@ export async function fetchAudioFile(
 }
 
 export async function fetchVerses(chapterId: number): Promise<Ayah[]> {
+  const cacheKey = `cached_verses_${chapterId}`;
+  const cached = await LocalStorage.getItem<string>(cacheKey);
+  if (cached) {
+    return JSON.parse(cached);
+  }
   const data = await callApi<{ verses: Ayah[] }>(
     `${API_BASE_URL}/verses/by_chapter/${chapterId}?language=en&words=false&per_page=300`,
   );
+  await LocalStorage.setItem(cacheKey, JSON.stringify(data.verses));
   return data.verses;
 }
 

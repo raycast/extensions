@@ -10,6 +10,18 @@ const LIBRARY_PATH = path.join(os.homedir(), "Music", "HolyQuran");
 const VERSES_PATH = path.join(LIBRARY_PATH, ".verses"); // Hidden folder for verse caching
 const LOOP_SCRIPT = path.join(os.tmpdir(), "quran_audio_loop.sh");
 
+async function isOffline(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1000);
+    await fetch("https://www.google.com", { method: "HEAD", signal: controller.signal, mode: 'no-cors' });
+    clearTimeout(timeout);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 export async function stopAudio(): Promise<void> {
   try {
     await execAsync(`pkill -9 afplay; pkill -f "${LOOP_SCRIPT}"`);
@@ -60,18 +72,42 @@ async function getAudioDuration(filePath: string): Promise<number> {
   }
 }
 
+export function getSurahPath(reciterName: string, surahName: string): string {
+  const reciterSlug = sanitizePathSegment(reciterName);
+  const surahSlug = sanitizePathSegment(surahName);
+  return path.join(LIBRARY_PATH, reciterSlug, `${surahSlug}.mp3`);
+}
+
+export function getVersePath(reciterName: string, verseKey: string): string {
+  const reciterSlug = sanitizePathSegment(reciterName);
+  return path.join(VERSES_PATH, reciterSlug, `${verseKey.replace(":", "_")}.mp3`);
+}
+
+export function isSurahCached(reciterName: string, surahName: string): boolean {
+  return fs.existsSync(getSurahPath(reciterName, surahName));
+}
+
+export function isVerseRangeCached(reciterName: string, chapterId: number, start: number, end: number): boolean {
+  for (let i = start; i <= end; i++) {
+    const verseKey = `${chapterId}:${i}`;
+    if (!fs.existsSync(getVersePath(reciterName, verseKey))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export async function playAudio(url: string, reciterName: string, surahName: string): Promise<number> {
   await stopAudio();
 
-  const reciterSlug = sanitizePathSegment(reciterName);
-  const surahSlug = sanitizePathSegment(surahName);
-
-  const reciterDir = path.join(LIBRARY_PATH, reciterSlug);
+  const localFile = getSurahPath(reciterName, surahName);
+  const reciterDir = path.dirname(localFile);
   ensureDirSync(reciterDir);
 
-  const localFile = path.join(reciterDir, `${surahSlug}.mp3`);
-
   if (!fs.existsSync(localFile)) {
+    if (await isOffline()) {
+      throw new Error("You are offline. Please connect to the internet to download this Surah for the first time.");
+    }
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Failed to download audio: ${response.statusText}`);
@@ -108,11 +144,16 @@ export async function playVersePlaylist(
   const localPaths: string[] = [];
   let totalSingleDuration = 0;
 
+  const offline = await isOffline();
+
   for (const item of verseItems) {
     const fileName = `${item.verseKey.replace(":", "_")}.mp3`;
     const localPath = path.join(reciterVerseDir, fileName);
 
     if (!fs.existsSync(localPath)) {
+      if (offline || !item.url) {
+        continue; // Skip verses not in cache when offline or if no URL provided
+      }
       const resp = await fetch(item.url);
       if (resp.ok) {
         const buf = Buffer.from(await resp.arrayBuffer());
@@ -126,7 +167,12 @@ export async function playVersePlaylist(
     }
   }
 
-  if (localPaths.length === 0) throw new Error("Could not prepare any verses for playback.");
+  if (localPaths.length === 0) {
+    if (offline) {
+      throw new Error("You are offline and these verses are not in your library. Please connect to download them.");
+    }
+    throw new Error("Could not prepare any verses for playback.");
+  }
 
   const playSequence = localPaths.map((p) => `afplay "${p}"`).join("; ");
   const iterations = repeatCount === 0 ? 9999 : repeatCount;
