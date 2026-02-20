@@ -1,6 +1,6 @@
 # Mullvad Changelog
 
-## [Unreleased] - {PR_MERGE_DATE}
+## [Unreleased] - 2026-02-20
 
 - Updated dependencies and supported platforms in `package.json` (bumped dev deps and added Windows/macOS support).
 
