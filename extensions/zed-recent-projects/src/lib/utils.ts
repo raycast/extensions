@@ -1,7 +1,7 @@
 import util from "util";
 import { existsSync } from "fs";
 import { execFile, execFileSync } from "child_process";
-import { homedir } from "os";
+import { homedir, userInfo } from "os";
 
 export const execFilePromise = util.promisify(execFile);
 
@@ -19,7 +19,8 @@ export function shellEscape(arg: string): string {
  */
 function getUserShell(): string {
   try {
-    const result = execFileSync("dscl", [".", "-read", `/Users/${process.env.USER}`, "UserShell"], {
+    const username = process.env.USER || userInfo().username;
+    const result = execFileSync("dscl", [".", "-read", `/Users/${username}`, "UserShell"], {
       encoding: "utf8",
     });
     // Output format: "UserShell: /path/to/shell"
@@ -40,20 +41,28 @@ function getUserShell(): string {
  * The approach:
  * 1. `env -i` starts with an empty environment
  * 2. Only HOME is passed (required for login shell to find profile files)
- * 3. User's default shell runs as login shell, sourcing their profile
+ * 3. A POSIX-compatible login shell (zsh or bash) sources the user's profile,
+ *    then execs the target command directly — avoiding shell-escaping issues
+ *    with non-POSIX shells like fish.
  *
  * This gives the command the same environment as a fresh terminal window.
  */
 export async function execWithCleanEnv(command: string, args: string[]): Promise<void> {
+  const userShell = getUserShell();
+
+  // If the user's shell is fish (or any other non-POSIX shell), fall back to
+  // /bin/zsh for the -lc invocation. Fish does not support POSIX-style quoting
+  // or the `-c` flag in the same way, so we must use a POSIX shell to source
+  // the profile and then exec the real command.
+  const isFish = userShell.endsWith("fish");
+  const posixShell = isFish ? "/bin/zsh" : userShell;
+
   const escapedArgs = args.map(shellEscape).join(" ");
   const shellCommand = `${shellEscape(command)} ${escapedArgs}`;
 
-  const userShell = getUserShell();
-
   // Use env -i to start with empty environment, then login shell for user's profile
   // -l = login shell (sources profile), -c = execute command
-  // This works for bash, zsh, fish, and most POSIX shells
-  await execFilePromise("env", ["-i", `HOME=${process.env.HOME || homedir()}`, userShell, "-lc", shellCommand]);
+  await execFilePromise("env", ["-i", `HOME=${process.env.HOME || homedir()}`, posixShell, "-lc", shellCommand]);
 }
 
 export function exists(p: string) {
