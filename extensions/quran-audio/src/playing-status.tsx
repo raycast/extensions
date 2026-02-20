@@ -23,7 +23,7 @@ export default function Command() {
     await mutate(undefined);
   }
 
-  const icon = playingInfo ? Icon.PlayFilled : Icon.Music;
+  const icon = playingInfo ? { source: "menu-icon.svg" } : { source: "menu-icon.svg" };
 
   return (
     <MenuBarExtra
