@@ -76,6 +76,11 @@ export default function Repository(props: RepositoryOwnProps) {
               url={`${url}/pulls`}
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             />
+            <Action.OpenInBrowser
+              title="Open Actions"
+              url={`${url}/actions`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
