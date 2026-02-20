@@ -65,6 +65,8 @@ export default function MemorizeSurah({ chapter }: { chapter: Chapter }) {
 
       if (verseItems.length === 0) throw new Error("No audio files found for this range.");
 
+      const duration = await playVersePlaylist(verseItems, reciterName, repeatCount);
+
       // Store in LocalStorage for the Menu Bar
       await LocalStorage.setItem(
         "currently_playing",
@@ -74,13 +76,12 @@ export default function MemorizeSurah({ chapter }: { chapter: Chapter }) {
           chapterId: chapter.id,
           startTime: Date.now(),
           isMemorization: true,
+          duration: duration,
         }),
       );
 
       // Refresh Menu Bar status immediately
       await launchCommand({ name: "status", type: LaunchType.UserInitiated });
-
-      await playVersePlaylist(verseItems, reciterName, repeatCount);
 
       toast.style = Toast.Style.Success;
       toast.title = "Loop started";

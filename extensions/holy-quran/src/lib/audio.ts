@@ -49,7 +49,18 @@ function sanitizePathSegment(segment: string): string {
     .replace(/^_+|_+$/g, ""); // Trim underscores
 }
 
-export async function playAudio(url: string, reciterName: string, surahName: string): Promise<void> {
+async function getAudioDuration(filePath: string): Promise<number> {
+  try {
+    const { stdout } = await execAsync(`afinfo "${filePath}"`);
+    const match = stdout.match(/estimated duration: (\d+\.?\d*) sec/);
+    return match ? parseFloat(match[1]) : 0;
+  } catch (e) {
+    console.error("Failed to get audio duration:", e);
+    return 0;
+  }
+}
+
+export async function playAudio(url: string, reciterName: string, surahName: string): Promise<number> {
   await stopAudio();
 
   const reciterSlug = sanitizePathSegment(reciterName);
@@ -70,19 +81,24 @@ export async function playAudio(url: string, reciterName: string, surahName: str
     await fs.promises.writeFile(localFile, buffer);
   }
 
+  // Get duration before playing
+  const duration = await getAudioDuration(localFile);
+
   // Play from the local file and detach so it keeps running after Raycast exits
   const child = spawn("afplay", [localFile], {
     detached: true,
     stdio: "ignore",
   });
   child.unref();
+
+  return duration;
 }
 
 export async function playVersePlaylist(
   verseItems: { url: string; verseKey: string }[],
   reciterName: string,
   repeatCount: number = 1,
-): Promise<void> {
+): Promise<number> {
   await stopAudio();
 
   const reciterSlug = sanitizePathSegment(reciterName);
@@ -90,6 +106,7 @@ export async function playVersePlaylist(
   ensureDirSync(reciterVerseDir);
 
   const localPaths: string[] = [];
+  let totalSingleDuration = 0;
 
   for (const item of verseItems) {
     const fileName = `${item.verseKey.replace(":", "_")}.mp3`;
@@ -105,6 +122,7 @@ export async function playVersePlaylist(
 
     if (fs.existsSync(localPath)) {
       localPaths.push(localPath);
+      totalSingleDuration += await getAudioDuration(localPath);
     }
   }
 
@@ -112,6 +130,7 @@ export async function playVersePlaylist(
 
   const playSequence = localPaths.map((p) => `afplay "${p}"`).join("; ");
   const iterations = repeatCount === 0 ? 9999 : repeatCount;
+  const totalDuration = iterations === 9999 ? 0 : totalSingleDuration * iterations;
 
   const loopScript = `#!/bin/bash
 for i in {1..${iterations}}; do
@@ -127,5 +146,6 @@ done
     stdio: "ignore",
   });
   child.unref();
-}
 
+  return totalDuration;
+}

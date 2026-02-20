@@ -1,10 +1,13 @@
 import { MenuBarExtra, Icon, LocalStorage, launchCommand, LaunchType, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { stopAudio, pauseAudio, resumeAudio } from "./lib/audio";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export default function Command() {
   const isProcessing = useRef(false);
+  const [elapsed, setElapsed] = useState<number>(0);
+  const [remaining, setRemaining] = useState<number | null>(null);
+
   const {
     data: playingInfo,
     isLoading,
@@ -16,13 +19,52 @@ export default function Command() {
       surah: string;
       reciter: string;
       startTime: number;
+      duration?: number;
       isPaused?: boolean;
+      pausedTime?: number;
+      lastPausedAt?: number;
     };
   });
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    const updateTime = () => {
+      if (!playingInfo) return;
+
+      const now = playingInfo.isPaused && playingInfo.lastPausedAt ? playingInfo.lastPausedAt : Date.now();
+      const basePausedTime = playingInfo.pausedTime || 0;
+      const totalElapsedMs = now - playingInfo.startTime - basePausedTime;
+      const elapsedSeconds = Math.max(0, Math.floor(totalElapsedMs / 1000));
+
+      setElapsed(elapsedSeconds);
+
+      if (playingInfo.duration && playingInfo.duration > 0) {
+        setRemaining(Math.max(0, Math.round(playingInfo.duration - elapsedSeconds)));
+      } else {
+        setRemaining(null);
+      }
+    };
+
+    updateTime();
+
+    if (playingInfo && !playingInfo.isPaused) {
+      interval = setInterval(updateTime, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [playingInfo]);
+
+  function formatTime(seconds: number) {
+    const mins = Math.floor(Math.abs(seconds) / 60);
+    const secs = Math.abs(seconds) % 60;
+    return `${seconds < 0 ? "-" : ""}${mins}:${secs.toString().padStart(2, "0")}`;
+  }
 
   async function handleStop() {
     await stopAudio();
     await LocalStorage.removeItem("currently_playing");
+    setRemaining(null);
     await mutate(undefined);
   }
 
@@ -31,13 +73,27 @@ export default function Command() {
     isProcessing.current = true;
 
     try {
+      const now = Date.now();
+      let updatedInfo;
+
       if (playingInfo.isPaused) {
         await resumeAudio();
+        const pauseDuration = now - (playingInfo.lastPausedAt || now);
+        updatedInfo = {
+          ...playingInfo,
+          isPaused: false,
+          pausedTime: (playingInfo.pausedTime || 0) + pauseDuration,
+          lastPausedAt: undefined,
+        };
       } else {
         await pauseAudio();
+        updatedInfo = {
+          ...playingInfo,
+          isPaused: true,
+          lastPausedAt: now,
+        };
       }
 
-      const updatedInfo = { ...playingInfo, isPaused: !playingInfo.isPaused };
       await LocalStorage.setItem("currently_playing", JSON.stringify(updatedInfo));
       await mutate(Promise.resolve(updatedInfo));
     } finally {
@@ -51,11 +107,13 @@ export default function Command() {
   };
 
   const statusPrefix = playingInfo?.isPaused ? "[Paused] " : "Playing: ";
+  const timeDisplay = remaining !== null ? formatTime(remaining) : formatTime(elapsed);
+  const timeStr = playingInfo ? ` (${timeDisplay})` : "";
 
   return (
     <MenuBarExtra
       icon={icon}
-      title={playingInfo ? playingInfo.surah : undefined}
+      title={playingInfo ? `${playingInfo.surah}${timeStr}` : undefined}
       isLoading={isLoading}
       tooltip={playingInfo ? `${statusPrefix}${playingInfo.surah} (${playingInfo.reciter})` : "Holy Quran"}
     >
@@ -64,7 +122,7 @@ export default function Command() {
           <MenuBarExtra.Section title="Currently Playing">
             <MenuBarExtra.Item
               title={playingInfo.surah}
-              subtitle={playingInfo.reciter}
+              subtitle={`${playingInfo.reciter}${timeStr ? ` • ${timeStr} remaining` : ""}`}
               icon={playingInfo.isPaused ? Icon.Pause : Icon.Play}
             />
           </MenuBarExtra.Section>
@@ -86,7 +144,7 @@ export default function Command() {
       ) : (
         <MenuBarExtra.Item title="No Audio Playing" icon={Icon.Circle} />
       )}
-      <MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Explore">
         <MenuBarExtra.Item
           title="Browse Surahs"
           icon={Icon.Book}

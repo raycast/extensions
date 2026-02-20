@@ -74,6 +74,7 @@ export default function Command() {
 
     try {
       const audioFile = await fetchAudioFile(rid, chapter.id);
+      const duration = await playAudio(audioFile.audio_url, rname, chapter.name_simple);
 
       // Store currently playing info for the menu bar
       await LocalStorage.setItem(
@@ -84,13 +85,12 @@ export default function Command() {
           chapterId: chapter.id,
           reciterId: rid,
           startTime: Date.now(),
+          duration: duration,
         }),
       );
 
       // Refresh Menu Bar status immediately
       await launchCommand({ name: "status", type: LaunchType.UserInitiated });
-
-      await playAudio(audioFile.audio_url, rname, chapter.name_simple);
 
       toast.style = Toast.Style.Success;
       toast.title = `Playing ${chapter.name_simple}`;
