@@ -4,9 +4,9 @@ Name your spaces & more...
 
 ## Features
 
-🏷️ Name your spaces
-🚀 Switch between named spaces
-🎨 Set icon along with name
+- 🏷️ Name your spaces
+- 🚀 Switch between named spaces
+- 🎨 Set icon along with name
 
 ## Commands
 
