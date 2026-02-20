@@ -361,7 +361,6 @@ export async function checkDomainAvailability(domain: string) {
   return { available: json.available };
 }
 
-<<<<<<< ext/vercast
 /**
  * Cancel a deployment that is currently building or queued.
  * @see https://docs.vercel.com/docs/rest-api/reference/endpoints/deployments/cancel-a-deployment
@@ -392,7 +391,9 @@ export async function cancelDeployment(
       message,
     });
     throw err;
-=======
+  }
+}
+
 // AI Gateway Logs
 function formatDateTime(date: Date): string {
   const pad = (n: number) => n.toString().padStart(2, "0");
@@ -461,6 +462,5 @@ export async function fetchAICreditsBalance(teamId: string) {
   } catch (err) {
     console.error("Failed to fetch AI credits balance:", err);
     return null;
->>>>>>> main
   }
 }
