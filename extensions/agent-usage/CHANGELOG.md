@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-20
 
 - Track usage for Amp, Codex, Droid, Gemini CLI, Kimi, Antigravity, and z.ai
 - View remaining quotas and detailed usage breakdown
