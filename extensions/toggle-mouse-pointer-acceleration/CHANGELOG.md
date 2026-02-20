@@ -1,6 +1,6 @@
 # Toggle Mouse Pointer Acceleration Changelog
 
-## [1.0.0] - 2026-01-01
+## [1.0.0] - {PR_MERGE_DATE}
 
 - Initial release
 - Toggle Mouse Pointer Acceleration via System Settings → Mouse → Advanced
