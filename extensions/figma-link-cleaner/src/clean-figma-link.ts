@@ -53,7 +53,7 @@ export default async function Command() {
     // Step 3: No Figma URL in clipboard - try to get one from Figma app
     // This is the only path that requires AppleScript
     const figmaIsActive = await isFigmaFrontmost();
-    const figmaIsRunning = figmaIsActive || await isFigmaRunning();
+    const figmaIsRunning = figmaIsActive || (await isFigmaRunning());
 
     if (!figmaIsRunning) {
       // No Figma URL in clipboard and Figma isn't running
@@ -141,7 +141,9 @@ async function cleanAndCopyUrl(figmaUrl: string): Promise<void> {
     // Shortening disabled
     await showToast({
       style: Toast.Style.Success,
-      title: cleanResult.wasModified ? "Cleaned Figma link copied" : "Figma link copied",
+      title: cleanResult.wasModified
+        ? "Cleaned Figma link copied"
+        : "Figma link copied",
       message: cleanResult.summary,
     });
   }
