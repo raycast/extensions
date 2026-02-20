@@ -1,7 +1,9 @@
+import { Icon } from "@raycast/api";
+
 export interface Space {
   index: number;
   name: string;
-  icon?: string;
+  icon?: Icon;
 }
 
 export interface ConfigureSpacesLaunchContext {
