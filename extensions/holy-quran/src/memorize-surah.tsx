@@ -14,7 +14,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { fetchVerses, fetchVerseRecitations } from "./lib/api";
 import { playVersePlaylist } from "./lib/audio";
-import { Chapter, Preferences } from "./types";
+import { Chapter, Preferences, PlayingInfo } from "./types";
 
 export default function MemorizeSurah({ chapter }: { chapter: Chapter }) {
   const { data: verses, isLoading } = useCachedPromise(() => fetchVerses(chapter.id));

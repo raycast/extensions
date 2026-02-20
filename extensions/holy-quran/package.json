@@ -513,6 +513,12 @@
       "mode": "no-view"
     },
     {
+      "name": "toggle-pause",
+      "title": "Pause/Resume Recitation",
+      "description": "Pause or resume the current recitation",
+      "mode": "no-view"
+    },
+    {
       "name": "set-default-reciter",
       "title": "Set Default Reciter",
       "description": "Choose your preferred reciter for one-click playback",

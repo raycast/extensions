@@ -48,3 +48,16 @@ export interface Preferences {
   defaultReciterId: string;
   defaultReciterName: string;
 }
+
+export interface PlayingInfo {
+  surah: string;
+  reciter: string;
+  startTime: number;
+  duration?: number;
+  isPaused?: boolean;
+  pausedTime?: number;
+  lastPausedAt?: number;
+  chapterId?: number;
+  reciterId?: number;
+  isMemorization?: boolean;
+}

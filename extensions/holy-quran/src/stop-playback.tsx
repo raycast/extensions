@@ -1,10 +1,9 @@
-import { showToast, Toast, LocalStorage } from "@raycast/api";
-import { stopAudio } from "./lib/audio";
+import { showToast, Toast } from "@raycast/api";
+import { stopPlayback } from "./lib/control";
 
 export default async function Command() {
   try {
-    await stopAudio();
-    await LocalStorage.removeItem("currently_playing");
+    await stopPlayback();
     await showToast({
       style: Toast.Style.Success,
       title: "Playback stopped",

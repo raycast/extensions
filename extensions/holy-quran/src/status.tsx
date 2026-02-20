@@ -1,6 +1,7 @@
 import { MenuBarExtra, Icon, LocalStorage, launchCommand, LaunchType, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { stopAudio, pauseAudio, resumeAudio } from "./lib/audio";
+import { stopPlayback, togglePause } from "./lib/control";
+import { PlayingInfo } from "./types";
 import { useRef, useState, useEffect } from "react";
 
 export default function Command() {
@@ -15,15 +16,7 @@ export default function Command() {
   } = useCachedPromise(async () => {
     const item = await LocalStorage.getItem<string>("currently_playing");
     if (!item) return null;
-    return JSON.parse(item) as {
-      surah: string;
-      reciter: string;
-      startTime: number;
-      duration?: number;
-      isPaused?: boolean;
-      pausedTime?: number;
-      lastPausedAt?: number;
-    };
+    return JSON.parse(item) as PlayingInfo;
   });
 
   useEffect(() => {
@@ -62,8 +55,7 @@ export default function Command() {
   }
 
   async function handleStop() {
-    await stopAudio();
-    await LocalStorage.removeItem("currently_playing");
+    await stopPlayback();
     setRemaining(null);
     await mutate(undefined);
   }
@@ -73,29 +65,10 @@ export default function Command() {
     isProcessing.current = true;
 
     try {
-      const now = Date.now();
-      let updatedInfo;
-
-      if (playingInfo.isPaused) {
-        await resumeAudio();
-        const pauseDuration = now - (playingInfo.lastPausedAt || now);
-        updatedInfo = {
-          ...playingInfo,
-          isPaused: false,
-          pausedTime: (playingInfo.pausedTime || 0) + pauseDuration,
-          lastPausedAt: undefined,
-        };
-      } else {
-        await pauseAudio();
-        updatedInfo = {
-          ...playingInfo,
-          isPaused: true,
-          lastPausedAt: now,
-        };
+      const updated = await togglePause();
+      if (updated) {
+        await mutate(Promise.resolve(updated));
       }
-
-      await LocalStorage.setItem("currently_playing", JSON.stringify(updatedInfo));
-      await mutate(Promise.resolve(updatedInfo));
     } finally {
       isProcessing.current = false;
     }
@@ -148,7 +121,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Browse Surahs"
           icon={Icon.Book}
-          onAction={() => launchCommand({ name: "play-surah", type: LaunchType.UserInitiated })}
+          onAction={() => launchCommand({ name: "search-surah", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
           title="Change Reciter"
