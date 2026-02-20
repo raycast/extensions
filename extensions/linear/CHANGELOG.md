@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Multi-Workspace Support] - 2026-02-20
+## [Multi-Workspace Support] - {PR_MERGE_DATE}
 
 - Added "Add Workspace" command to connect additional Linear workspaces using Personal API Keys
 - Added "Switch Workspace" command to switch between connected workspaces
