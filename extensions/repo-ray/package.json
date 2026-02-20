@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "repo-ray",
+  "title": "RepoRay",
+  "description": "Quickly open or clone git repositories from Raycast",
+  "icon": "icon.png",
+  "author": "nikord",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "projectDirectories",
+      "title": "Project Directories",
+      "description": "Comma-separated list of directories to scan for git repositories (e.g. ~/Documents, ~/Work)",
+      "type": "textfield",
+      "required": true,
+      "default": "~/dev"
+    }
+  ],
+  "commands": [
+    {
+      "name": "open-repo",
+      "title": "Open Repo",
+      "description": "Search defined directories for git projects and open them in an editor of your choice",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "editor1",
+          "title": "Editor 1",
+          "description": "First editor shown in the selection list",
+          "type": "appPicker",
+          "required": true
+        },
+        {
+          "name": "editor2",
+          "title": "Editor 2",
+          "description": "Optional second editor",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "editor3",
+          "title": "Editor 3",
+          "description": "Optional third editor",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "editor4",
+          "title": "Editor 4",
+          "description": "Optional fourth editor",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "editor5",
+          "title": "Editor 5",
+          "description": "Optional fifth editor",
+          "type": "appPicker",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "clone-repo",
+      "title": "Clone Repository",
+      "description": "Clone a git repository into one of your project directories",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
