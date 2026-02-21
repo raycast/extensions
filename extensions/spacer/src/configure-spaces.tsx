@@ -76,7 +76,7 @@ function SpaceForm({
 }) {
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: { index: string; name: string; icon: string }) {
+  async function handleSubmit(values: { index: string; name: string; icon: Icon }) {
     const index = parseInt(values.index, 10);
     const newSpace: Space = { index, name: values.name, icon: values.icon };
 
