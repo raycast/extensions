@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "up",
-      "title": "Brightness up",
+      "title": "Brightness Up",
       "description": "Increases the brightness by 10% of your display",
       "mode": "no-view",
       "icon": "brightness-up.png"
@@ -51,7 +51,6 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.4",
     "@raycast/api": "^1.104.4",
     "run-applescript": "^6.0.0"
   },
