@@ -1,17 +1,8 @@
-# Dependencies
-node_modules/
+# dependencies
+/node_modules
 
-# Build output
-dist/
-
-# Environment variables
-.env
-
-# macOS
-.DS_Store
-
-# IDE
-.vscode/
-
-# Raycast
+# Raycast specific files
 raycast-env.d.ts
+
+# misc
+.DS_Store

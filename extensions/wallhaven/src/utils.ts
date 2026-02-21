@@ -19,18 +19,22 @@ export async function setDesktopWallpaper(
   imagePath: string,
   allDesktops: boolean = true,
 ): Promise<void> {
+  const escapedImagePath = imagePath
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"');
+
   if (allDesktops) {
     await runAppleScript(`
       tell application "System Events"
         tell every desktop
-          set picture to "${imagePath}"
+          set picture to "${escapedImagePath}"
         end tell
       end tell
     `);
   } else {
     await runAppleScript(`
       tell application "System Events"
-        set picture of current desktop to "${imagePath}"
+        set picture of current desktop to "${escapedImagePath}"
       end tell
     `);
   }
