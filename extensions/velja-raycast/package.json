@@ -1,0 +1,260 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "velja-raycast",
+  "title": "Velja",
+  "description": "Control Velja.app from Raycast",
+  "icon": "icon.png",
+  "author": "lmoloney",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "velja-status",
+      "source": "commands/velja-status.tsx",
+      "title": "Velja Status",
+      "description": "Check Velja installation and current configuration",
+      "mode": "view"
+    },
+    {
+      "name": "list-browsers",
+      "source": "commands/list-browsers.tsx",
+      "title": "List Browsers",
+      "description": "View browsers and profiles detected by Velja",
+      "mode": "view"
+    },
+    {
+      "name": "get-default-browser",
+      "source": "commands/get-default-browser.tsx",
+      "title": "Get Default Browser",
+      "description": "Show Velja's current default browser",
+      "mode": "view"
+    },
+    {
+      "name": "set-default-browser",
+      "source": "commands/set-default-browser.tsx",
+      "title": "Set Default Browser",
+      "description": "Set Velja's default browser",
+      "mode": "view"
+    },
+    {
+      "name": "get-alternative-browser",
+      "source": "commands/get-alternative-browser.tsx",
+      "title": "Get Alternative Browser",
+      "description": "Show Velja's current alternative browser",
+      "mode": "view"
+    },
+    {
+      "name": "set-alternative-browser",
+      "source": "commands/set-alternative-browser.tsx",
+      "title": "Set Alternative Browser",
+      "description": "Set Velja's alternative browser",
+      "mode": "view"
+    },
+    {
+      "name": "list-rules",
+      "source": "commands/list-rules.tsx",
+      "title": "List Rules",
+      "description": "Browse and manage Velja rules",
+      "mode": "view"
+    },
+    {
+      "name": "create-rule",
+      "source": "commands/create-rule.tsx",
+      "title": "Create Rule",
+      "description": "Create a new Velja URL routing rule with optional AI draft",
+      "mode": "view"
+    },
+    {
+      "name": "open-url-with-velja",
+      "source": "commands/open-url-with-velja.tsx",
+      "title": "Open URL with Velja",
+      "description": "Open a URL through Velja",
+      "mode": "view"
+    },
+    {
+      "name": "open-url-in-browser",
+      "source": "commands/open-url-in-browser.tsx",
+      "title": "Open URL in Browser",
+      "description": "Open a URL in a selected browser/profile",
+      "mode": "view"
+    },
+    {
+      "name": "remove-tracking-parameters",
+      "source": "commands/remove-tracking-parameters.tsx",
+      "title": "Remove Tracking Parameters",
+      "description": "Clean tracking parameters from a URL",
+      "mode": "view"
+    },
+    {
+      "name": "open-url-from-clipboard",
+      "source": "commands/open-url-from-clipboard.tsx",
+      "title": "Open URL from Clipboard",
+      "description": "Open the clipboard URL through Velja",
+      "mode": "view"
+    },
+    {
+      "name": "quick-switch-browser",
+      "source": "commands/quick-switch-browser.tsx",
+      "title": "Quick Switch Browser",
+      "description": "Swap Velja default and alternative browsers",
+      "mode": "view"
+    },
+    {
+      "name": "export-rules",
+      "source": "commands/export-rules.tsx",
+      "title": "Export Rules",
+      "description": "Export Velja rules as JSON",
+      "mode": "view"
+    },
+    {
+      "name": "import-rules",
+      "source": "commands/import-rules.tsx",
+      "title": "Import Rules",
+      "description": "Import Velja rules from JSON",
+      "mode": "view"
+    },
+    {
+      "name": "default-browser-menu-bar",
+      "source": "commands/default-browser-menu-bar.tsx",
+      "title": "Default Browser Menu Bar",
+      "description": "Show the current Velja default browser in the menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-preferred-browsers",
+      "title": "Get Preferred Browsers",
+      "description": "List available Velja browser/profile identifiers in shown-browser order, including Prompt."
+    },
+    {
+      "name": "list-velja-rules",
+      "title": "List Velja Rules",
+      "description": "List existing Velja rules with matcher and browser summaries."
+    },
+    {
+      "name": "find-velja-rules-by-domain",
+      "title": "Find Velja Rules by Domain",
+      "description": "Find existing Velja rules that can match a given domain or URL across host, hostSuffix, and urlPrefix matchers."
+    },
+    {
+      "name": "create-velja-rule",
+      "title": "Create Velja Rule",
+      "description": "Create a Velja rule with browser target, optional matcher, source apps, and behavior flags."
+    }
+  ],
+  "ai": {
+    "instructions": "For questions about existing Velja rules, call list-velja-rules for broad overviews and find-velja-rules-by-domain for domain or URL queries. Treat matcher kinds as: host = exact host, hostSuffix = domain/subdomain suffix, urlPrefix = URL prefix. Never call create-velja-rule unless the user explicitly asks to create or change a rule. When creating Velja rules, call get-preferred-browsers first and use an exact browser identifier from that tool. For domain-based matcher selection, default matcherKind to hostSuffix unless the user asks for exact host or URL prefix behavior. Ask follow-up questions when required creation details are missing.",
+    "evals": [
+      {
+        "input": "@velja-raycast What rules do I have for medium.com?",
+        "mocks": {
+          "find-velja-rules-by-domain": {
+            "query": "medium.com",
+            "totalMatches": 1,
+            "rules": [
+              {
+                "id": "RULE-1",
+                "title": "Medium to Safari",
+                "isEnabled": true,
+                "browser": "com.apple.Safari",
+                "browserTitle": "Safari",
+                "sourceApps": [],
+                "matchedMatchers": [
+                  {
+                    "matcherId": "M-1",
+                    "kind": "hostSuffix",
+                    "pattern": "medium.com",
+                    "fixture": "https://medium.com",
+                    "matchedValue": "medium.com"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-velja-rules-by-domain",
+              "arguments": {
+                "domainOrUrl": {
+                  "includes": "medium.com"
+                }
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "create-velja-rule"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@velja-raycast show me all my rules",
+        "mocks": {
+          "list-velja-rules": {
+            "totalRules": 1,
+            "rules": [
+              {
+                "id": "RULE-1",
+                "title": "Example Rule",
+                "isEnabled": true,
+                "browser": "com.apple.Safari",
+                "browserTitle": "Safari",
+                "matcherCount": 1,
+                "sourceAppCount": 0,
+                "matchers": [
+                  {
+                    "id": "M-1",
+                    "kind": "hostSuffix",
+                    "pattern": "example.com",
+                    "fixture": "https://example.com"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-velja-rules"
+          },
+          {
+            "not": {
+              "callsTool": "create-velja-rule"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.40.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "tsx": "^4.20.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "profile:check-upstream": "bash scripts/check-upstream-ready.sh",
+    "profile:dev": "bash scripts/set-extension-profile.sh dev",
+    "profile:prod": "bash scripts/set-extension-profile.sh prod",
+    "profile:status": "bash scripts/set-extension-profile.sh status",
+    "publish": "ray publish",
+    "test": "tsx --test tests/**/*.test.ts"
+  }
+}

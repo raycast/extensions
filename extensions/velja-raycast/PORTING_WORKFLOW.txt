@@ -1,0 +1,39 @@
+Manual Upstream Porting Workflow
+
+Repositories
+- Personal repo: this repository
+- Upstream work repo: /Users/luke/Developer/raycast-extensions-upstream
+- Upstream remote: upstream (https://github.com/raycast/extensions.git)
+- Fork remote: origin (https://github.com/lmoloney/extensions.git)
+
+Daily flow
+1) Build and validate in this personal repo.
+2) Save source commit SHA from this repo.
+3) Switch identity to upstream/store profile: `npm run profile:prod`.
+4) Verify guardrail: `npm run profile:check-upstream`.
+5) In /Users/luke/Developer/raycast-extensions-upstream, create a clean branch from upstream/main.
+6) Port only the needed file changes into the matching extension folder.
+7) Run lint/build in the upstream clone.
+8) Commit and push branch to origin.
+9) Open PR from lmoloney/extensions branch to raycast/extensions main.
+10) Record source SHA -> upstream SHA mapping in porting-ledger.tsv.
+11) Switch local repo back to dev identity: `npm run profile:dev`.
+
+Suggested commands
+- git -C /Users/luke/Developer/raycast-extensions-upstream fetch upstream
+- git -C /Users/luke/Developer/raycast-extensions-upstream checkout -B <branch> upstream/main
+- git -C /Users/luke/Developer/raycast-extensions-upstream push -u origin <branch>
+- gh pr create --repo raycast/extensions --head lmoloney:<branch> --base main
+
+Checklist before PR
+- [ ] Only target extension files changed
+- [ ] Lint/build pass
+- [ ] No personal-only identity values included in upstream branch
+- [ ] `npm run profile:check-upstream` passed before porting
+- [ ] Ledger updated with source and upstream SHAs
+
+Helper scripts
+- scripts/prepare-upstream-branch.sh <branch-name>
+- scripts/log-porting-entry.sh <source-sha> <upstream-branch> <upstream-sha> <pr-url> [notes]
+- scripts/set-extension-profile.sh <dev|prod|status>
+- scripts/check-upstream-ready.sh
