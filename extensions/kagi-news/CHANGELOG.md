@@ -1,6 +1,14 @@
 # Kagi News Changelog
 
-## [1.2] - {PENDING_APPROVAL}
+## [1.3] - {PR_MERGE_DATE}
+
+- Migrated to the new API, which Kagi News is now focusing on, so no more use of the static JSON files
+- New 'Time Travel' command to access Kagi News archives for a specific date
+- New favorite system for the 'Daily News' command to pin your categories of interest at the top of the Cmd+P menu
+- Added the missing Simplified Chinese language 
+- Renamed the "On this Day" section to "Today in History", as it appears on the official website 
+
+## [1.2] - 2025-12-05
 
 - Added over 15 new sections (now totaling more than 30) for display, which can be toggled in the settings
 - Reordered the available display sections in the settings alphabetically  

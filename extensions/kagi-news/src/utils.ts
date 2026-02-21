@@ -1,8 +1,107 @@
-import { Article, Cluster, Source } from "./interfaces";
+import { Article, Source } from "./interfaces";
 
-export const CATEGORIES_URL = "https://kite.kagi.com/kite.json";
-export const NEWS_BASE_URL = "https://news.kagi.com";
+const API_BASE_URL = "https://kite.kagi.com";
 
+// ============================================================================
+// API Response Types
+// ============================================================================
+
+interface BatchLatestResponse {
+  id: string;
+  totalClusters: number;
+  totalArticles: number;
+  totalReadCount: number;
+  language: string;
+  totalCategories: number;
+  createdAt: string;
+}
+
+interface StoryArticle {
+  date?: string;
+  image_caption?: string;
+  title: string;
+  domain?: string;
+  image?: string;
+  link: string;
+}
+
+interface StoryResponse {
+  id?: string;
+  cluster_number?: number;
+  title: string;
+  short_summary: string;
+  articles: StoryArticle[];
+  unique_domains?: number;
+  number_of_titles?: number;
+  category?: string;
+  emoji?: string;
+  talking_points?: string[];
+  quote?: string;
+  quote_author?: string;
+  quote_attribution?: string;
+  quote_source_url?: string;
+  primary_image?: { url: string; caption: string; credit: string };
+  secondary_image?: { url: string; caption: string; credit: string };
+  perspectives?: Array<{ text: string; sources?: Array<{ name: string; url: string }> }>;
+  business_angle_points?: string[];
+  business_angle_text?: string;
+  scientific_significance?: string[];
+  travel_advisory?: string[];
+  performance_statistics?: string[];
+  league_standings?: string;
+  design_principles?: string;
+  user_experience_impact?: string | string[];
+  gameplay_mechanics?: string[];
+  industry_impact?: string[];
+  technical_details?: string[];
+  technical_specifications?: string;
+  timeline?: Array<{ date: string; content: string }>;
+  international_reactions?: string[];
+  suggested_qna?: Array<{ question: string; answer: string }>;
+  user_action_items?: string[];
+  did_you_know?: string;
+  culinary_significance?: string;
+  destination_highlights?: string;
+  diy_tips?: string;
+  economic_implications?: string;
+  future_outlook?: string;
+  geopolitical_context?: string;
+  historical_background?: string;
+  humanitarian_impact?: string;
+  key_players?: string[];
+  location?: string;
+  sourceLanguage?: string;
+}
+
+// ============================================================================
+// API Functions
+// ============================================================================
+
+// Fetch the latest news batch for a given language
+export async function getLatestBatch(lang: string = "default"): Promise<BatchLatestResponse> {
+  const url = `${API_BASE_URL}/api/batches/latest?lang=${encodeURIComponent(lang)}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch latest batch: ${response.status}`);
+  }
+  return response.json();
+}
+
+// ============================================================================
+// String & URL Utilities
+// ============================================================================
+
+// Format Date to YYYY-MM-DD for API requests
+export function formatDateForAPI(date: Date | null | undefined): string {
+  if (!date) return "";
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// Extract clean domain name from URL (removes www prefix)
 export function getDomain(url: string): string {
   try {
     const domain = new URL(url).hostname;
@@ -12,66 +111,73 @@ export function getDomain(url: string): string {
   }
 }
 
+// Remove HTML tags from string
 export function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "");
 }
 
-export function clustersToArticles(clusters: Cluster[]): Article[] {
-  return clusters.map((cluster) => {
+// ============================================================================
+// Data Transformation
+// ============================================================================
+
+// Convert API story responses to Article model with deduped sources
+export function storiesToArticles(stories: StoryResponse[]): Article[] {
+  return stories.map((story) => {
     const sources: Source[] =
-      cluster.articles?.map((article) => ({
+      story.articles?.map((article) => ({
         name: article.title.length > 50 ? article.title.substring(0, 50) + "..." : article.title,
         url: article.link,
       })) || [];
 
     const uniqueSources = sources.filter(
-      (source, index, self) => index === self.findIndex((s) => s.url === source.url),
+      (source, index, self) => index === self.findIndex((s) => s.url === source.url)
     );
 
     return {
-      id: `cluster-${cluster.cluster_number}`,
-      title: cluster.title,
-      summary: cluster.short_summary,
+      id: story.id || `story-${story.cluster_number || 0}`,
+      title: story.title,
+      summary: story.short_summary,
       sources: uniqueSources,
-      uniqueDomains: cluster.unique_domains,
-      numberOfTitles: cluster.number_of_titles,
-      businessAnglePoints: cluster.business_angle_points || [],
-      businessAngleText: cluster.business_angle_text,
-      category: cluster.category,
-      culinarSignificance: cluster.culinary_significance,
-      designPrinciples: cluster.design_principles,
-      destinationHighlights: cluster.destination_highlights,
-      didYouKnow: cluster.did_you_know,
-      diyTips: cluster.diy_tips,
-      economicImplications: cluster.economic_implications,
-      emoji: cluster.emoji,
-      futureOutlook: cluster.future_outlook,
-      gameplayMechanics: cluster.gameplay_mechanics || [],
-      geopoliticalContext: cluster.geopolitical_context,
-      highlights: cluster.talking_points || [],
-      historicalBackground: cluster.historical_background,
-      humanitarianImpact: cluster.humanitarian_impact,
-      industryImpact: cluster.industry_impact || [],
-      internationalReactions: cluster.international_reactions || [],
-      keyPlayers: cluster.key_players || [],
-      leagueStandings: cluster.league_standings,
-      location: cluster.location,
-      performanceStatistics: cluster.performance_statistics || [],
-      perspectives: cluster.perspectives,
-      primary_image: cluster.primary_image,
-      quote: cluster.quote,
-      quoteAttribution: cluster.quote_attribution,
-      quoteAuthor: cluster.quote_author,
-      quoteSourceUrl: cluster.quote_source_url,
-      scientificSignificance: cluster.scientific_significance || [],
-      secondary_image: cluster.secondary_image,
-      suggestedQna: cluster.suggested_qna || [],
-      technicalDetails: cluster.technical_details || [],
-      technicalSpecifications: cluster.technical_specifications,
-      timeline: cluster.timeline,
-      travelAdvisory: cluster.travel_advisory || [],
-      userActionItems: cluster.user_action_items || [],
-      userExperienceImpact: cluster.user_experience_impact,
+      uniqueDomains: story.unique_domains,
+      numberOfTitles: story.number_of_titles,
+      businessAnglePoints: story.business_angle_points || [],
+      businessAngleText: story.business_angle_text,
+      category: story.category || "",
+      culinarSignificance: story.culinary_significance,
+      designPrinciples: story.design_principles,
+      destinationHighlights: story.destination_highlights,
+      didYouKnow: story.did_you_know,
+      diyTips: story.diy_tips,
+      economicImplications: story.economic_implications,
+      emoji: story.emoji,
+      futureOutlook: story.future_outlook,
+      gameplayMechanics: story.gameplay_mechanics || [],
+      geopoliticalContext: story.geopolitical_context,
+      highlights: story.talking_points || [],
+      historicalBackground: story.historical_background,
+      humanitarianImpact: story.humanitarian_impact,
+      industryImpact: story.industry_impact || [],
+      internationalReactions: story.international_reactions || [],
+      keyPlayers: story.key_players || [],
+      leagueStandings: story.league_standings,
+      location: story.location,
+      performanceStatistics: story.performance_statistics || [],
+      perspectives: story.perspectives,
+      primary_image: story.primary_image,
+      quote: story.quote,
+      quoteAttribution: story.quote_attribution,
+      quoteAuthor: story.quote_author,
+      quoteSourceUrl: story.quote_source_url,
+      scientificSignificance: story.scientific_significance || [],
+      secondary_image: story.secondary_image,
+      suggestedQna: story.suggested_qna || [],
+      technicalDetails: story.technical_details || [],
+      technicalSpecifications: story.technical_specifications,
+      timeline: story.timeline,
+      travelAdvisory: story.travel_advisory || [],
+      userActionItems: story.user_action_items || [],
+      userExperienceImpact:
+        typeof story.user_experience_impact === "string" ? story.user_experience_impact : undefined,
     };
   });
 }

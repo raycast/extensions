@@ -1,3 +1,5 @@
+// Display detailed article with configurable sections and source links
+
 import { Detail, getPreferenceValues } from "@raycast/api";
 import { Article, Source } from "../interfaces";
 import { getDomain } from "../utils";
@@ -193,7 +195,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     markdown += `\n\n## Technical Specifications\n${article.technicalSpecifications}`;
   }
 
-  // Timeline
+  // Timeline of Events
   if (preferences.showTimeline && article.timeline) {
     const timeline = article.timeline;
     if (Array.isArray(timeline) && timeline.length > 0) {
