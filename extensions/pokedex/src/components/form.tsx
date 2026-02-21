@@ -1,9 +1,10 @@
 import { List } from "@raycast/api";
 import json2md from "json2md";
 import { Pokemon } from "../types";
-import { filterPokemonForms, getOfficialArtworkImg } from "../utils";
 import PokemonMetadata from "./metadata/pokemon";
 import WeaknessMetadata from "./metadata/weakness";
+import { getMarkdownPokemonImage } from "../utils";
+import { filterPokemonForms } from "../utils/form";
 
 export default function PokemonForms(props: {
   id: number;
@@ -23,6 +24,13 @@ export default function PokemonForms(props: {
           form.pokemonforms[0].pokemonformnames[0]?.pokemon_name ||
           form.pokemonforms[0].pokemonformnames[0]?.name ||
           props.name;
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { pokemonformnames, pokemonformtypes, ...rest } =
+          form.pokemonforms[0];
+        const formTypes =
+          pokemonformtypes.length > 0 ? pokemonformtypes : form.pokemontypes;
+
         return (
           <List.Item
             key={idx}
@@ -31,22 +39,14 @@ export default function PokemonForms(props: {
               <List.Item.Detail
                 markdown={json2md([
                   {
-                    img: [
-                      {
-                        title:
-                          form.pokemonforms[0].pokemonformnames.find(
-                            (n) => n.pokemon_name === form.name,
-                          )?.name || form.pokemonforms[0].form_name,
-                        source: getOfficialArtworkImg(props.id, idx),
-                      },
-                    ],
+                    p: getMarkdownPokemonImage(props.id, { idx, ...rest }),
                   },
                 ])}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <PokemonMetadata pokemon={form} />
+                    <PokemonMetadata pokemon={form} formtypes={formTypes} />
                     <List.Item.Detail.Metadata.Separator />
-                    <WeaknessMetadata types={form.pokemontypes} />
+                    <WeaknessMetadata types={formTypes} />
                   </List.Item.Detail.Metadata>
                 }
               />

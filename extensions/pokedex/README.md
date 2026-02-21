@@ -15,6 +15,7 @@ Explore the world of Pokémon with stunning visuals and detailed information in 
 * **Natures:** Browse Pokémon natures and their effects on stat growth.
 * **Moves:** Access detailed move information including base power, accuracy, PP, type, category, priority, and more.
 * **Abilities:** Look up ability descriptions and effects.
+* **Items:** Browse and filter Pokémon items by pocket, view item effects, and item prices.
 * **Weaknesses:** Analyze type effectiveness for any Pokémon or type combination.
 
 ### Customization
@@ -28,7 +29,6 @@ Explore the world of Pokémon with stunning visuals and detailed information in 
 ## TODO
 
 * Integrate Pokémon sprites into Pokédex search results.
-* Items command with item effects and locations.
 
 ## Issues
 
@@ -40,8 +40,12 @@ Report bugs or suggest improvements by creating an issue [here](https://github.c
 
 * Data: [PokéAPI](https://pokeapi.co/)
 * Official Artwork & Sprites (Up to National Dex #649): © Nintendo/The Pokémon Company/GAME FREAK Inc.
-* Pixel Art Sprites (National Dex #650 and above): [Smogon community](https://www.smogon.com/forums/threads/smogon-sprite-project.3647722/) (special thanks for their contributions), [Smogon Sprite Project Spreadsheet](https://docs.google.com/spreadsheets/d/1acgzAjh0dnFRQnjZu8kSjS177rKCzpFfEHRLtwuuXRU/edit?gid=0#gid=0)
-* Generation 9 Sprites: [KingOfThe-X-Roads](https://www.deviantart.com/kingofthe-x-roads)
+* Black & White–Style Sprite Credits (National Dex #650+): Provided by the [Smogon Sprite Project](https://www.smogon.com/forums/threads/smogon-sprite-project.3647722/) huge thanks to their contributors for making these available.
+  * [Generation 6 Spreadsheet](https://docs.google.com/spreadsheets/d/1Gn0UORn-unvcbUeQhQdEBz0ADNcH49BZZqQ1dpXm9eo)
+  * [Generation 7 Spreadsheet](https://docs.google.com/spreadsheets/d/1FMcHbSKEWZc7v2Ur4cyJjT_NhO0gqXyU9kDhsOQhlBQ)
+  * [Generation 8 Spreadsheet](https://docs.google.com/spreadsheets/d/1acgzAjh0dnFRQnjZu8kSjS177rKCzpFfEHRLtwuuXRU)
+  * [Generation 9 Spreadsheet](https://docs.google.com/spreadsheets/d/1MCjDktTOOFjLKM5C-RW6SfBQGkjlxDSCZAZDma_ItuA)
+* Additional Generation 9 Sprites: Created by [KingOfThe-X-Roads on DeviantArt](https://www.deviantart.com/kingofthe-x-roads)
 
 **Icons:**
 

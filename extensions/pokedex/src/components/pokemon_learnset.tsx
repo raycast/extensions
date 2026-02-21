@@ -160,9 +160,9 @@ export default function PokemonLearnset(props: {
                     <ActionPanel>
                       <ActionPanel.Section title="Information">
                         <Action.Push
-                          title="View Details"
+                          title="View Move Details"
                           icon={Icon.Sidebar}
-                          target={<PokeMoves id={move.move.id} />}
+                          target={<PokeMoves id={move.move_id} />}
                         />
                       </ActionPanel.Section>
                     </ActionPanel>
