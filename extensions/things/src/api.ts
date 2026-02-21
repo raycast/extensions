@@ -111,8 +111,6 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
 
     let areaTags = '';
     const areaRef = props.area;
-    let areaTags = '';
-    const areaRef = props.area;
 
     let project = null;
     const projectRef = props.project;
