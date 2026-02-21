@@ -1,5 +1,9 @@
 # Brightness Control Changelog
 
+## [Update] {PR_MERGE_DATE}
+- Add windows support
+- Update packages
+
 ## [Lunar-based Brightness Control] - 2026-02-18
 
 - Added "Set Brightness" command: set exact brightness level (1-100) directly from the search bar using Lunar

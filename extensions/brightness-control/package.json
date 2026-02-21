@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "up",
-      "title": "Brightness Up",
+      "title": "Brightness up",
       "description": "Increases the brightness by 10% of your display",
       "mode": "no-view",
       "icon": "brightness-up.png"
@@ -51,13 +51,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.2",
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2",
+    "execa": "^9.6.1",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
@@ -70,6 +71,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
