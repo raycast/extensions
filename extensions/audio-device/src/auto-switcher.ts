@@ -12,14 +12,7 @@ import {
   setInputDeviceVolume,
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
-import {
-  applyDeviceOrder,
-  getDeviceOrder,
-  getHiddenDevices,
-  getDefaultDeviceUid,
-  getDefaultDeviceName,
-  getAllPinnedVolumes,
-} from "./device-preferences";
+import { getDefaultDeviceUid, getDefaultDeviceName, getAllPinnedVolumes } from "./device-preferences";
 
 async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
   const defaultUid = await getDefaultDeviceUid(type);
@@ -27,26 +20,6 @@ async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
 
   const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
   const target = devices.find((d) => d.uid === defaultUid);
-  if (!target) return false;
-
-  const current = type === "input" ? await getDefaultInputDevice() : await getDefaultOutputDevice();
-  if (current.uid === target.uid) return false;
-
-  if (type === "input") {
-    await setDefaultInputDevice(target.id);
-  } else {
-    await setOutputAndSystemDevice(target.id);
-  }
-  return true;
-}
-
-async function maybeSwitchByPriority(type: IOType) {
-  const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
-  const order = await getDeviceOrder(type);
-  const hiddenDevices = await getHiddenDevices(type);
-  const hiddenSet = new Set(hiddenDevices);
-  const ordered = applyDeviceOrder(order, devices).filter((d) => !hiddenSet.has(d.uid));
-  const target = ordered[0];
   if (!target) return false;
 
   const current = type === "input" ? await getDefaultInputDevice() : await getDefaultOutputDevice();
@@ -86,12 +59,7 @@ async function enforcePinnedVolumes(type: IOType) {
 }
 
 async function runEnforcement(type: IOType) {
-  const hasDefault = !!(await getDefaultDeviceUid(type));
-  if (hasDefault) {
-    await maybeSwitchToDefault(type);
-  } else {
-    await maybeSwitchByPriority(type);
-  }
+  await maybeSwitchToDefault(type);
   await enforcePinnedVolumes(type);
 }
 

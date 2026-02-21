@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import type { AudioDevice, IOType } from "./audio-device";
+import type { IOType } from "./audio-device";
 
 const LEGACY_DISABLED_DEVICES_KEY = "disabledDevices";
 const LEGACY_HIDDEN_DEVICES_KEY = "hiddenDevices";
@@ -12,8 +12,6 @@ const SHOW_HIDDEN_KEYS = {
   input: "showHiddenDevicesInput",
   output: "showHiddenDevicesOutput",
 } as const;
-const INPUT_ORDER_KEY = "deviceOrderInput";
-const OUTPUT_ORDER_KEY = "deviceOrderOutput";
 const DEFAULT_DEVICE_UID_KEYS = {
   input: "defaultDeviceUidInput",
   output: "defaultDeviceUidOutput",
@@ -89,27 +87,6 @@ export async function isShowingHiddenDevices(type: IOType) {
 
 export async function setShowHiddenDevices(type: IOType, show: boolean) {
   await LocalStorage.setItem(SHOW_HIDDEN_KEYS[type], show ? "true" : "false");
-}
-
-export async function getDeviceOrder(type: "input" | "output"): Promise<string[]> {
-  return readList(type === "input" ? INPUT_ORDER_KEY : OUTPUT_ORDER_KEY);
-}
-
-export async function setDeviceOrder(type: "input" | "output", order: string[]) {
-  await writeList(type === "input" ? INPUT_ORDER_KEY : OUTPUT_ORDER_KEY, order);
-}
-
-export function normalizeDeviceOrder(order: string[], devices: AudioDevice[]): string[] {
-  const deviceIds = devices.map((device) => device.uid);
-  const filtered = order.filter((id) => deviceIds.includes(id));
-  const missing = deviceIds.filter((id) => !filtered.includes(id));
-  return [...filtered, ...missing];
-}
-
-export function applyDeviceOrder(order: string[], devices: AudioDevice[]): AudioDevice[] {
-  const normalized = normalizeDeviceOrder(order, devices);
-  const deviceMap = new Map(devices.map((device) => [device.uid, device]));
-  return normalized.map((id) => deviceMap.get(id)).filter(Boolean) as AudioDevice[];
 }
 
 export async function getDefaultDeviceUid(type: IOType): Promise<string | undefined> {

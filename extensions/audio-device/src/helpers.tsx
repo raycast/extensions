@@ -14,7 +14,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   type AudioDevice,
   type IOType,
@@ -44,10 +44,6 @@ import {
   getPinnedVolume,
   setPinnedVolume,
   clearPinnedVolume,
-  getDeviceOrder,
-  setDeviceOrder,
-  normalizeDeviceOrder,
-  applyDeviceOrder,
 } from "./device-preferences";
 import { getTransportTypeLabel } from "./device-labels";
 import { getIcon } from "./device-icons";
@@ -86,26 +82,15 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     [ioType, data?.devices ?? []],
   );
 
-  const [order, setOrderState] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (!data?.devices) return;
-    (async () => {
-      const storedOrder = await getDeviceOrder(ioType);
-      const normalized = normalizeDeviceOrder(storedOrder, data.devices);
-      setOrderState(normalized);
-      if (normalized.join("|") !== storedOrder.join("|")) {
-        await setDeviceOrder(ioType, normalized);
-      }
-    })();
-  }, [data?.devices, ioType]);
-
-  const orderedDevices = (() => {
-    const sorted = applyDeviceOrder(order, data?.devices ?? []);
-    if (!defaultDeviceUid) return sorted;
-    const defaultIdx = sorted.findIndex((d) => d.uid === defaultDeviceUid);
-    if (defaultIdx <= 0) return sorted;
-    return [sorted[defaultIdx], ...sorted.slice(0, defaultIdx), ...sorted.slice(defaultIdx + 1)];
+  const sortedDevices = (() => {
+    const currentUid = data?.current?.uid;
+    const devices = [...(data?.devices ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+    const pinned = new Set<string>();
+    if (currentUid) pinned.add(currentUid);
+    if (defaultDeviceUid) pinned.add(defaultDeviceUid);
+    const top = devices.filter((d) => pinned.has(d.uid));
+    const rest = devices.filter((d) => !pinned.has(d.uid));
+    return [...top, ...rest];
   })();
 
   useEffect(() => {
@@ -139,34 +124,9 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     })();
   }, [deviceId, deviceName, data, ioType]);
 
-  const moveDevice = useCallback(
-    async (deviceUid: string, direction: "up" | "down" | "top" | "bottom") => {
-      if (deviceUid === defaultDeviceUid) return;
-      const idx = order.indexOf(deviceUid);
-      if (idx === -1) return;
-      const next = [...order];
-      if (direction === "top") {
-        next.splice(idx, 1);
-        next.unshift(deviceUid);
-      } else if (direction === "bottom") {
-        next.splice(idx, 1);
-        next.push(deviceUid);
-      } else {
-        const delta = direction === "up" ? -1 : 1;
-        const swapIdx = idx + delta;
-        if (swapIdx < 0 || swapIdx >= next.length) return;
-        next[idx] = next[swapIdx];
-        next[swapIdx] = deviceUid;
-      }
-      setOrderState(next);
-      await setDeviceOrder(ioType, next);
-    },
-    [order, ioType, defaultDeviceUid],
-  );
-
   const hiddenSet = new Set(hiddenDevices ?? []);
   const shouldShowHidden = showHiddenDevices ?? false;
-  const visibleDevices = orderedDevices.filter((device) => shouldShowHidden || !hiddenSet.has(device.uid));
+  const visibleDevices = sortedDevices.filter((device) => shouldShowHidden || !hiddenSet.has(device.uid));
 
   const loading = isLoading || isHiddenLoading || isShowHiddenLoading;
   const showEmptyView = !loading && visibleDevices.length === 0;
@@ -216,7 +176,6 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
                     onShowHiddenChange={() => void refetchShowHiddenDevices()}
                     onDefaultChange={() => void refetchDefaultDevice()}
                     onPinnedChange={() => void pinnedVolumeCache.revalidate()}
-                    onMoveDevice={moveDevice}
                   />
                 </ActionPanel>
               }
@@ -242,7 +201,6 @@ function DeviceActions({
   onShowHiddenChange,
   onDefaultChange,
   onPinnedChange,
-  onMoveDevice,
 }: {
   ioType: IOType;
   device: AudioDevice;
@@ -256,7 +214,6 @@ function DeviceActions({
   onShowHiddenChange: () => void;
   onDefaultChange: () => void;
   onPinnedChange: () => void;
-  onMoveDevice: (uid: string, dir: "up" | "down" | "top" | "bottom") => Promise<void>;
 }) {
   return (
     <>
@@ -277,34 +234,6 @@ function DeviceActions({
         onAction={onDefaultChange}
         onEnforced={onSelection}
       />
-      {!isDefault && (
-        <ActionPanel.Section title="Priority Order">
-          <Action
-            title="Move up"
-            icon={Icon.ArrowUp}
-            shortcut={{ modifiers: ["ctrl", "opt"], key: "arrowUp" }}
-            onAction={() => onMoveDevice(device.uid, "up")}
-          />
-          <Action
-            title="Move Down"
-            icon={Icon.ArrowDown}
-            shortcut={{ modifiers: ["ctrl", "opt"], key: "arrowDown" }}
-            onAction={() => onMoveDevice(device.uid, "down")}
-          />
-          <Action
-            title="Move to Top"
-            icon={Icon.ArrowUpCircle}
-            shortcut={{ modifiers: ["ctrl", "opt", "shift"], key: "arrowUp" }}
-            onAction={() => onMoveDevice(device.uid, "top")}
-          />
-          <Action
-            title="Move to Bottom"
-            icon={Icon.ArrowDownCircle}
-            shortcut={{ modifiers: ["ctrl", "opt", "shift"], key: "arrowDown" }}
-            onAction={() => onMoveDevice(device.uid, "bottom")}
-          />
-        </ActionPanel.Section>
-      )}
       <ActionPanel.Section>
         <Action.CreateQuicklink
           quicklink={{
