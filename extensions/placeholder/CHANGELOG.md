@@ -1,5 +1,9 @@
 # Placeholder Changelog
 
+## [Cross-Platform Keyboard Shortcuts] - {PR_MERGE_DATE}
+
+- Make `Keyboard` shortcuts cross-platform
+
 ## [Updates] - 2025-12-16
 
 - Add Windows support
