@@ -9,7 +9,7 @@ interface WallpaperGridProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   navigationTitle?: string;
-  searchBarAccessory?: React.ReactNode;
+  searchBarAccessory?: Grid.Props["searchBarAccessory"];
   searchBarPlaceholder?: string;
   onSearchTextChange?: (text: string) => void;
   throttle?: boolean;
