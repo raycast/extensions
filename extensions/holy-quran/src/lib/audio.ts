@@ -24,7 +24,7 @@ async function isOffline(): Promise<boolean> {
 
 export async function stopAudio(): Promise<void> {
   try {
-    await execAsync(`pkill -9 afplay; pkill -f "${LOOP_SCRIPT}"`);
+    await execAsync(`pkill -9 afplay || true; pkill -9 -f "${LOOP_SCRIPT}" || true`);
   } catch {
     // If no process is found, that's fine
   }
@@ -72,10 +72,11 @@ async function getAudioDuration(filePath: string): Promise<number> {
   }
 }
 
-export function getSurahPath(reciterName: string, surahName: string): string {
+export function getSurahPath(reciterName: string, surahName: string, chapterId: number): string {
   const reciterSlug = sanitizePathSegment(reciterName);
   const surahSlug = sanitizePathSegment(surahName);
-  return path.join(LIBRARY_PATH, reciterSlug, `${surahSlug}.mp3`);
+  const paddedId = chapterId.toString().padStart(3, "0");
+  return path.join(LIBRARY_PATH, reciterSlug, `${paddedId}_${surahSlug}.mp3`);
 }
 
 export function getVersePath(reciterName: string, verseKey: string): string {
@@ -83,8 +84,8 @@ export function getVersePath(reciterName: string, verseKey: string): string {
   return path.join(VERSES_PATH, reciterSlug, `${verseKey.replace(":", "_")}.mp3`);
 }
 
-export function isSurahCached(reciterName: string, surahName: string): boolean {
-  return fs.existsSync(getSurahPath(reciterName, surahName));
+export function isSurahCached(reciterName: string, surahName: string, chapterId: number): boolean {
+  return fs.existsSync(getSurahPath(reciterName, surahName, chapterId));
 }
 
 export function isVerseRangeCached(reciterName: string, chapterId: number, start: number, end: number): boolean {
@@ -97,10 +98,10 @@ export function isVerseRangeCached(reciterName: string, chapterId: number, start
   return true;
 }
 
-export async function playAudio(url: string, reciterName: string, surahName: string): Promise<number> {
+export async function playAudio(url: string, reciterName: string, surahName: string, chapterId: number): Promise<number> {
   await stopAudio();
 
-  const localFile = getSurahPath(reciterName, surahName);
+  const localFile = getSurahPath(reciterName, surahName, chapterId);
   const reciterDir = path.dirname(localFile);
   ensureDirSync(reciterDir);
 

@@ -4,6 +4,7 @@ import {
   Action,
   Icon,
   showToast,
+  showHUD,
   Toast,
   getPreferenceValues,
   LocalStorage,
@@ -103,11 +104,11 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
           );
         } else {
           let audioUrl = "";
-          if (!isSurahCached(rname, chapter.name_simple)) {
+          if (!isSurahCached(rname, chapter.name_simple, chapter.id)) {
             const audioFile = await fetchAudioFile(rid, chapter.id);
             audioUrl = audioFile.audio_url;
           }
-          duration = await playAudio(audioUrl, rname, chapter.name_simple);
+          duration = await playAudio(audioUrl, rname, chapter.name_simple, chapter.id);
 
           await LocalStorage.setItem(
             "currently_playing",
@@ -124,13 +125,21 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
 
         await launchCommand({ name: "status", type: LaunchType.UserInitiated });
 
-        toast.style = Toast.Style.Success;
-        toast.title = `Playing ${chapter.name_simple}`;
-        toast.message = `Reciter: ${rname}`;
+        if (props.arguments.surah) {
+          await showHUD(`Playing Surah ${chapter.name_simple} (${rname})`);
+        } else {
+          toast.style = Toast.Style.Success;
+          toast.title = `Playing ${chapter.name_simple}`;
+          toast.message = `Reciter: ${rname}`;
+        }
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed to play audio";
-        toast.message = error instanceof Error ? error.message : String(error);
+        if (props.arguments.surah) {
+          await showHUD("Failed to play audio");
+        } else {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to play audio";
+          toast.message = error instanceof Error ? error.message : String(error);
+        }
       }
     },
     [defaultReciter],
@@ -155,23 +164,13 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
 
           // Validation
           if (start !== undefined && (isNaN(start) || start < 1 || start > maxVerses)) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Invalid Start Ayah",
-              message: `Surah ${chapter.name_simple} only has ${maxVerses} verses.`,
-            });
+            await showHUD(`Surah ${chapter.name_simple} only has ${maxVerses} verses.`);
             await popToRoot();
             return;
           }
 
           if (end !== undefined && (isNaN(end) || end < 1 || end > maxVerses || (start && end < start))) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Invalid End Ayah",
-              message: end < (start || 1)
-                ? "End Ayah cannot be before Start Ayah."
-                : `Surah ${chapter.name_simple} only has ${maxVerses} verses.`,
-            });
+            await showHUD(end < (start || 1) ? "End Ayah cannot be before Start Ayah." : `Surah ${chapter.name_simple} only has ${maxVerses} verses.`);
             await popToRoot();
             return;
           }
@@ -179,11 +178,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
           await handlePlayAction(chapter, undefined, undefined, start, end);
           await popToRoot();
         } else {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Surah not found",
-            message: `Could not find "${props.arguments.surah}"`,
-          });
+          await showHUD(`Could not find "${props.arguments.surah}"`);
           await popToRoot();
         }
       }
