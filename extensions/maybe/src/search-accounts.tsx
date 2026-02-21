@@ -5,7 +5,7 @@ import { Account } from "./types";
 
 export default function SearchAccounts() {
   const {isLoading,data: accounts, pagination} = useCachedPromise(() =>async(options) => {
-    const data = await maybe.accounts.list({page: options.page+1});
+    const data = await maybe.accounts.list({page: options.page+1, per_page: 25});
     return {
       data: data.accounts,
       hasMore: data.pagination.page < data.pagination.total_pages

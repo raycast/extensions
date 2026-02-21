@@ -6,6 +6,13 @@ export type Account = {
     "classification": string
     "account_type": string
 }
+type Category = {
+  "id": string
+  "name": string
+  "classification": string
+  "color": string
+  "icon": string
+}
 export type Transaction = {
       "id": string
       "date": string
@@ -15,7 +22,7 @@ export type Transaction = {
       "notes": string
       "classification": string
       "account": Pick<Account, "id"|"name"|"account_type">
-    //   "category": null,
+      "category": Category | null,
     //   "merchant": null,
     //   "tags": [],
     //   "transfer": null,
@@ -30,3 +37,5 @@ export type PaginationInfo ={
         "total_pages": 1
   }
 }
+
+export type ErrorResult = {status:number; error:string}| {error:string; message:string, errors?: string[]}
