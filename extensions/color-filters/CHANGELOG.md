@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - 2026-01-29
+## [Initial Release] - {PR_MERGE_DATE}
 
 Initial release of Color Filters extension for Raycast.
 

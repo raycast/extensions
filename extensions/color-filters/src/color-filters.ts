@@ -38,7 +38,6 @@ const PREF_TYPE = "MADisplayFilterType";
 // 2. Run: osascript -e 'tell application "System Events" to tell process "System Settings" to get entire contents of window 1'
 // 3. Search the output for "Color Filters" checkbox and popup button
 // 4. Update the paths below with the new hierarchy
-// Also update: /Users/tj/.local/bin/color-filter (lines 8-9)
 const CHECKBOX_PATH =
   "checkbox 1 of group 5 of scroll area 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1";
 const POPUP_PATH =

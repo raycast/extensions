@@ -60,9 +60,7 @@ If this extension stops working after a macOS update, the UI element paths likel
 
 3. **Find the filter type popup button** and update `POPUP_PATH` in `src/color-filters.ts`
 
-4. **Update both files:**
-   - `/Users/tj/TJDevelopment/color-filters-raycast/src/color-filters.ts` (lines 35-36)
-   - `/Users/tj/.local/bin/color-filter` (lines 8-9)
+4. **Update the paths in:** `src/color-filters.ts` (lines 35-36)
 
 Current paths (macOS 26.x):
 ```
