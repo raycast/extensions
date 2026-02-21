@@ -1,6 +1,6 @@
 # Remember the Date Changelog
 
-## [Added missing contributor] - {PR_MERGE_DATE}
+## [Contributor Update] - {PR_MERGE_DATE}
 
 ## [Recurring Events Support] - 2026-02-20
 
