@@ -18,7 +18,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   // Handle deeplink context - render folder contents directly if opened via quicklink
   const context = props.launchContext as LaunchContext | undefined;
   if (context?.folderId) {
-    return <FolderContentsView folderId={context.folderId} folderName={context.folderName || "Folder"} />;
+    return <FolderContentsView folderId={context.folderId} folderName={context.folderName || "Bundle"} />;
   }
 
   const { showPreviewPane = false } = getPreferenceValues<Preferences>();
@@ -28,12 +28,13 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
     nestedFolders,
     isLoading: isLoadingFolders,
     handleSave,
-  } = useFoldersData({ enablePolling: true });
-  const { applications, isLoading: isLoadingApps } = useApplicationsData();
+    handleDelete,
+  } = useFoldersData();
+  const { appMap, isLoading: isLoadingApps } = useApplicationsData();
 
   const isLoading = isLoadingFolders || isLoadingApps;
 
-  const renderDetail = useFolderPreviewDetail(showPreviewPane, applications, folders);
+  const renderDetail = useFolderPreviewDetail(showPreviewPane, appMap, folders);
 
   const isEmpty = folders.length === 0 && !isLoading;
 
@@ -41,10 +42,11 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   const CreateFolderAction = useCallback(
     () => (
       <Action.Push
-        title="Create New Folder"
+        title="Create New Bundle"
         icon={Icon.Plus}
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         target={<FolderEditForm onSave={handleSave} navigateToFolderAfterSave={false} />}
+        onPop={handleSave}
       />
     ),
     [handleSave],
@@ -59,15 +61,15 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
         subtitle={showPreviewPane ? undefined : `${folder.items.length} ${pluralize(folder.items.length, "item")}`}
         icon={getFolderIcon(folder.icon, folder.color)}
         keywords={generateFolderKeywords(folder.name)}
-        actions={<FolderItemActions folder={folder} onFolderChange={handleSave} />}
+        actions={<FolderItemActions folder={folder} onFolderChange={handleSave} onDelete={handleDelete} />}
         detail={renderDetail(folder)}
       />
     ),
-    [showPreviewPane, renderDetail, handleSave],
+    [showPreviewPane, renderDetail, handleSave, handleDelete],
   );
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search folders..." filtering isShowingDetail={showPreviewPane}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search bundles..." filtering isShowingDetail={showPreviewPane}>
       {isEmpty ? (
         <List.EmptyView
           {...NO_FOLDERS_VIEW}
@@ -77,7 +79,12 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
                 <CreateFolderAction />
               </ActionPanel.Section>
               <ActionPanel.Section title="Backup">
-                <Action.Push title="Import Folders" icon={Icon.Download} target={<ImportFoldersForm />} />
+                <Action.Push
+                  title="Import Bundles"
+                  icon={Icon.Download}
+                  target={<ImportFoldersForm />}
+                  onPop={handleSave}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -85,12 +92,12 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       ) : (
         <>
           {topLevelFolders.length > 0 && (
-            <List.Section title="Folders" subtitle={`${topLevelFolders.length}`}>
+            <List.Section title="Bundles" subtitle={`${topLevelFolders.length}`}>
               {topLevelFolders.map(renderFolderItem)}
             </List.Section>
           )}
           {nestedFolders.length > 0 && (
-            <List.Section title="Nested Folders" subtitle={`${nestedFolders.length}`}>
+            <List.Section title="Nested Bundles" subtitle={`${nestedFolders.length}`}>
               {nestedFolders.map(renderFolderItem)}
             </List.Section>
           )}

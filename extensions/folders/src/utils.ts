@@ -42,9 +42,8 @@ export function parseSortPreference(value: string): SortConfig {
  * Get display name for a folder item
  * For nested folders, looks up the actual folder name from allFolders
  */
-export function getItemDisplayName(item: FolderItem, applications?: Application[], allFolders?: Folder[]): string {
+export function getItemDisplayName(item: FolderItem, appMap?: AppLookupMap, allFolders?: Folder[]): string {
   if (item.type === "folder") {
-    // Look up the actual folder name if allFolders is provided
     if (allFolders && item.folderId) {
       const folder = allFolders.find((f) => f.id === item.folderId);
       if (folder) return folder.name;
@@ -52,32 +51,41 @@ export function getItemDisplayName(item: FolderItem, applications?: Application[
     return item.name;
   }
   if (item.type === "website") return item.name;
-  if (!applications || !item.path) return item.name;
-  return findApplicationByItemPath(item.path, applications)?.name || item.name;
+  if (!appMap || !item.path) return item.name;
+  return findApplicationByItemPath(item.path, appMap)?.name || item.name;
 }
 
 /**
- * Find application by item path using multiple matching strategies
+ * Pre-built lookup map for O(1) application resolution.
+ * Keys: exact path, normalised path (no trailing slash), name, bundleId, lowercase path.
  */
-export function findApplicationByItemPath(itemPath: string, applications: Application[]): Application | undefined {
+export type AppLookupMap = Map<string, Application>;
+
+/**
+ * Build a lookup map from an applications array.
+ * Call once per data change, then pass the map everywhere.
+ */
+export function buildAppLookupMap(applications: Application[]): AppLookupMap {
+  const map: AppLookupMap = new Map();
+  for (const app of applications) {
+    if (app.path) {
+      map.set(app.path, app);
+      const normalised = app.path.replace(/\/$/, "");
+      if (normalised !== app.path) map.set(normalised, app);
+      map.set(app.path.toLowerCase(), app);
+    }
+    if (app.name) map.set(app.name, app);
+    if (app.bundleId) map.set(app.bundleId, app);
+  }
+  return map;
+}
+
+/**
+ * Find application by item path using pre-built lookup map (O(1)).
+ */
+export function findApplicationByItemPath(itemPath: string, appMap: AppLookupMap): Application | undefined {
   if (!itemPath) return undefined;
-
-  // Try exact match first (most common)
-  let app = applications.find((a) => a.path === itemPath);
-  if (app) return app;
-
-  // Normalized path (handle trailing slashes)
-  const normalizedPath = itemPath.replace(/\/$/, "");
-  app = applications.find((a) => a.path?.replace(/\/$/, "") === normalizedPath);
-  if (app) return app;
-
-  // Name or bundleId match
-  app = applications.find((a) => a.name === itemPath || a.bundleId === itemPath);
-  if (app) return app;
-
-  // Case-insensitive path match (last resort)
-  const lowerPath = itemPath.toLowerCase();
-  return applications.find((a) => a.path?.toLowerCase() === lowerPath);
+  return appMap.get(itemPath) ?? appMap.get(itemPath.replace(/\/$/, "")) ?? appMap.get(itemPath.toLowerCase());
 }
 
 // Icon type that includes tinted icons and source URLs
@@ -86,9 +94,8 @@ export type FolderIconType = Icon | { source: Icon; tintColor: string } | { file
 /**
  * Get icon for a folder item
  */
-export function getItemIcon(item: FolderItem, applications: Application[], folders?: Folder[]): FolderIconType {
+export function getItemIcon(item: FolderItem, appMap: AppLookupMap, folders?: Folder[]): FolderIconType {
   if (item.type === "folder") {
-    // Look up the actual folder to get its custom icon and color
     if (folders && item.folderId) {
       const folder = folders.find((f) => f.id === item.folderId);
       if (folder) {
@@ -104,7 +111,7 @@ export function getItemIcon(item: FolderItem, applications: Application[], folde
   }
 
   if (item.path) {
-    const app = findApplicationByItemPath(item.path, applications);
+    const app = findApplicationByItemPath(item.path, appMap);
     if (app?.path) return { fileIcon: app.path };
     return { fileIcon: item.path };
   }
@@ -210,20 +217,27 @@ export function sortFolders(folders: Folder[], primary: string, secondary: strin
 }
 
 /**
- * Multi-level sorting for folder items
+ * Multi-level sorting for folder items.
+ * Pre-computes display names into a Map for O(1) comparisons.
  */
 export function sortFolderItems(
   items: FolderItem[],
   primary: string,
   secondary: string,
   tertiary: string,
-  applications?: Application[],
+  appMap?: AppLookupMap,
 ): FolderItem[] {
   const configs = [primary, secondary, tertiary].map(parseSortPreference);
 
   if (configs.every((c) => c.method === "none")) return [...items];
 
-  const getName = (i: FolderItem) => (applications ? getItemDisplayName(i, applications) : i.name);
+  // Pre-compute names once (O(n)) instead of per-comparison (O(n² log n))
+  const nameCache = new Map<string, string>();
+  for (const item of items) {
+    nameCache.set(item.id, appMap ? getItemDisplayName(item, appMap) : item.name);
+  }
+
+  const getName = (i: FolderItem) => nameCache.get(i.id) || i.name;
   const getTime = (i: FolderItem) => i.lastUsed ?? 0;
 
   return [...items].sort((a, b) => {
@@ -242,7 +256,7 @@ export function generateFolderKeywords(folderName: string): string[] {
   const lower = folderName.toLowerCase();
   const words = lower.split(/\s+/).filter(Boolean);
   const prefixes = words.map((w) => w.slice(0, 3)).filter((w) => w.length >= 3);
-  return [lower, ...words, "folder", "folders", ...prefixes];
+  return [lower, ...words, "bundle", "bundles", ...prefixes];
 }
 
 // Lazy-loaded icon options cache
@@ -363,7 +377,7 @@ async function openItemsInBulk<T>(
 export async function openAllApplications(
   items: FolderItem[],
   folderName: string,
-  applications: Application[],
+  appMap: AppLookupMap,
 ): Promise<void> {
   const appItems = items.filter((item) => item.type === "application" && item.path);
 
@@ -371,7 +385,7 @@ export async function openAllApplications(
     appItems,
     (item) => {
       if (!item.path) return undefined;
-      const app = findApplicationByItemPath(item.path, applications);
+      const app = findApplicationByItemPath(item.path, appMap);
       return app?.path || item.path;
     },
     {

@@ -1,6 +1,6 @@
-import { Application, showToast, Toast, confirmAlert } from "@raycast/api";
+import { showToast, Toast, confirmAlert } from "@raycast/api";
 import { Folder, FolderItem } from "./types";
-import { createWebsiteItem } from "./utils";
+import { AppLookupMap, createWebsiteItem } from "./utils";
 import { normalizeUrl, isValidUrl, fetchWebsiteTitle, extractDomain } from "./favicon";
 
 // Shared content type for both forms
@@ -312,11 +312,12 @@ export function extractWebsiteUrls(items: FolderItem[]): string {
 }
 
 /**
- * Extract application paths from folder items
+ * Extract application paths from folder items.
+ * Uses AppLookupMap for O(1) resolution instead of O(n) find().
  */
-export function extractAppPaths(items: FolderItem[], applications: Application[]): string[] {
+export function extractAppPaths(items: FolderItem[], appMap: AppLookupMap): string[] {
   return filterApplications(items).map((i) => {
-    const app = applications.find((a) => a.path === i.path || a.name === i.path || a.bundleId === i.path);
+    const app = appMap.get(i.path);
     return app?.path || i.path;
   });
 }

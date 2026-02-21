@@ -11,11 +11,12 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import React, { useMemo, useCallback, memo } from "react";
 import { getFolderById, recordFolderAccess, recordItemAccess, invalidateFoldersCache, updateFolder } from "./storage";
 import { FolderItem, Folder } from "./types";
 import {
+  AppLookupMap,
   getItemDisplayName,
   sortFolderItems,
   getItemIcon,
@@ -32,7 +33,7 @@ import {
   useRunningApps,
   useCopyUrls,
 } from "./hooks";
-import { filterApplications, filterWebsites } from "./form-utils";
+
 import AddItemsForm from "./components/add-items-form";
 import WebsiteEditForm from "./components/website-edit-form";
 import MoveToFolderForm from "./components/move-to-folder-form";
@@ -43,7 +44,7 @@ import { EMPTY_FOLDER_VIEW, FOLDER_NOT_FOUND_VIEW } from "./constants";
 interface FolderContentsViewProps {
   folderId: string;
   folderName: string;
-  parentPath?: string; // Breadcrumb path for nested folders
+  parentPath?: string;
 }
 
 // Wrapper to avoid circular imports
@@ -51,7 +52,8 @@ function FolderContentsViewWrapper({ folderId, folderName, parentPath }: FolderC
   return <FolderContentsView folderId={folderId} folderName={folderName} parentPath={parentPath} />;
 }
 
-// Nested folder action with access tracking - memoized for performance
+// ===== Extracted Memoized Action Components =====
+
 const OpenNestedFolderAction = memo(function OpenNestedFolderAction({
   folderId,
   itemId,
@@ -76,10 +78,9 @@ const OpenNestedFolderAction = memo(function OpenNestedFolderAction({
     push(<FolderContentsViewWrapper folderId={itemFolderId} folderName={itemName} parentPath={newPath} />);
   }, [folderId, itemId, itemFolderId, itemName, currentPath, onAccessRecorded, push]);
 
-  return <Action title="Open Folder" icon={Icon.ArrowRight} onAction={handleOpen} />;
+  return <Action title="Open Bundle" icon={Icon.ArrowRight} onAction={handleOpen} />;
 });
 
-// Add Items action component - memoized for performance
 const AddItemsAction = memo(function AddItemsAction({ folder, onSave }: { folder: Folder; onSave: () => void }) {
   return (
     <Action.Push
@@ -87,18 +88,291 @@ const AddItemsAction = memo(function AddItemsAction({ folder, onSave }: { folder
       icon={Icon.Plus}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
       target={<AddItemsForm folder={folder} onSave={onSave} />}
+      onPop={onSave}
     />
   );
 });
 
+// Shared bulk actions (Open All, Copy URLs, Quit All)
+const BulkActionsSection = memo(function BulkActionsSection({
+  hasApps,
+  hasWebsites,
+  hasRunningApps,
+  hasUrls,
+  onOpenAllApps,
+  onOpenAllWeb,
+  onQuitAll,
+  onCopyMarkdown,
+  onCopyList,
+}: {
+  hasApps: boolean;
+  hasWebsites: boolean;
+  hasRunningApps: boolean;
+  hasUrls: boolean;
+  onOpenAllApps: () => void;
+  onOpenAllWeb: () => void;
+  onQuitAll: () => void;
+  onCopyMarkdown: () => Promise<void>;
+  onCopyList: () => Promise<void>;
+}) {
+  return (
+    <>
+      {(hasApps || hasWebsites || hasRunningApps) && (
+        <ActionPanel.Section title="Open All">
+          {hasApps && (
+            <Action
+              title="Open All Applications"
+              icon={Icon.AppWindow}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={onOpenAllApps}
+            />
+          )}
+          {hasWebsites && (
+            <Action
+              title="Open All Websites"
+              icon={Icon.Globe}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              onAction={onOpenAllWeb}
+            />
+          )}
+          {hasRunningApps && (
+            <Action
+              title="Quit All Running Applications"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+              style={Action.Style.Destructive}
+              onAction={onQuitAll}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
+      {hasUrls && (
+        <ActionPanel.Section title="Copy URLs">
+          <Action
+            title="Copy as Markdown"
+            icon={Icon.Document}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+            onAction={onCopyMarkdown}
+          />
+          <Action
+            title="Copy as List"
+            icon={Icon.List}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            onAction={onCopyList}
+          />
+        </ActionPanel.Section>
+      )}
+    </>
+  );
+});
+
+// Per-item action panel — receives only the props it needs
+const ItemActionPanel = memo(function ItemActionPanel({
+  item,
+  folder,
+  folderId,
+  displayPath,
+  allFolders,
+  bulkProps,
+  onOpenItem,
+  onSave,
+  onRemoveItem,
+  onDuplicateItem,
+  onRemoveDuplicates,
+  duplicateInfo,
+  revalidate,
+}: {
+  item: FolderItem;
+  folder: Folder;
+  folderId: string;
+  displayPath: string;
+  allFolders: Folder[];
+  bulkProps: {
+    hasApps: boolean;
+    hasWebsites: boolean;
+    hasRunningApps: boolean;
+    hasUrls: boolean;
+    onOpenAllApps: () => void;
+    onOpenAllWeb: () => void;
+    onQuitAll: () => void;
+    onCopyMarkdown: () => Promise<void>;
+    onCopyList: () => Promise<void>;
+  };
+  onOpenItem: (item: FolderItem) => void;
+  onSave: () => void;
+  onRemoveItem: (item: FolderItem) => void;
+  onDuplicateItem: (item: FolderItem) => void;
+  onRemoveDuplicates: () => void;
+  duplicateInfo: { hasDuplicates: boolean; duplicateCount: number };
+  revalidate: () => void;
+}) {
+  return (
+    <ActionPanel>
+      {/* Primary Action */}
+      <ActionPanel.Section>
+        {item.type === "application" ? (
+          <Action title="Open Application" icon={Icon.ArrowRight} onAction={() => onOpenItem(item)} />
+        ) : item.type === "website" ? (
+          <Action title="Open Website" icon={Icon.Globe} onAction={() => onOpenItem(item)} />
+        ) : item.folderId ? (
+          <OpenNestedFolderAction
+            folderId={folderId}
+            itemId={item.id}
+            itemFolderId={item.folderId}
+            itemName={item.name}
+            currentPath={displayPath}
+            onAccessRecorded={revalidate}
+          />
+        ) : (
+          <Action title="Open Bundle" icon={Icon.ArrowRight} onAction={() => onOpenItem(item)} />
+        )}
+      </ActionPanel.Section>
+
+      <BulkActionsSection {...bulkProps} />
+
+      {/* Organize */}
+      <ActionPanel.Section title="Organize">
+        <AddItemsAction folder={folder} onSave={onSave} />
+        {item.type === "website" && (
+          <Action.Push
+            title="Edit Website"
+            icon={Icon.Pencil}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            target={<WebsiteEditForm folder={folder} item={item} onSave={onSave} />}
+            onPop={onSave}
+          />
+        )}
+        {item.type === "folder" &&
+          item.folderId &&
+          (() => {
+            const nestedFolder = allFolders.find((f) => f.id === item.folderId);
+            return nestedFolder ? (
+              <Action.Push
+                title="Edit Bundle"
+                icon={Icon.Pencil}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                target={<FolderEditForm folder={nestedFolder} onSave={onSave} navigateToFolderAfterSave={false} />}
+                onPop={onSave}
+              />
+            ) : null;
+          })()}
+        <Action
+          title="Duplicate Item"
+          icon={Icon.CopyClipboard}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          onAction={() => onDuplicateItem(item)}
+        />
+        {allFolders.length > 1 && (
+          <Action.Push
+            title="Move to Bundle…"
+            icon={Icon.ArrowRightCircle}
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+            target={<MoveToFolderForm item={item} currentFolder={folder} onMove={onSave} />}
+            onPop={onSave}
+          />
+        )}
+      </ActionPanel.Section>
+
+      {/* Danger Zone */}
+      <ActionPanel.Section title="Danger Zone">
+        <Action
+          title="Remove from Bundle"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          onAction={() => onRemoveItem(item)}
+        />
+        {duplicateInfo.hasDuplicates && (
+          <Action
+            title={`Remove ${duplicateInfo.duplicateCount} Duplicate${duplicateInfo.duplicateCount > 1 ? "s" : ""}`}
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={onRemoveDuplicates}
+          />
+        )}
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+});
+
+// ===== Memoized Item Rendering Components =====
+
+const MemoizedListItem = memo(function MemoizedListItem({
+  item,
+  appMap,
+  allFolders,
+  showPreviewPane,
+  actionPanel,
+  detail,
+}: {
+  item: FolderItem;
+  appMap: AppLookupMap;
+  allFolders: Folder[];
+  showPreviewPane: boolean;
+  actionPanel: React.ReactNode;
+  detail?: React.ReactNode;
+}) {
+  return (
+    <List.Item
+      key={item.id}
+      id={item.id}
+      title={getItemDisplayName(item, appMap, allFolders)}
+      icon={getItemIcon(item, appMap, allFolders)}
+      actions={actionPanel}
+      detail={detail}
+      subtitle={
+        showPreviewPane
+          ? undefined
+          : item.type === "folder"
+            ? "Bundle"
+            : item.type === "website"
+              ? "Website"
+              : "Application"
+      }
+    />
+  );
+});
+
+const MemoizedGridItem = memo(function MemoizedGridItem({
+  item,
+  appMap,
+  allFolders,
+  showSubtitle,
+  actionPanel,
+}: {
+  item: FolderItem;
+  appMap: AppLookupMap;
+  allFolders: Folder[];
+  showSubtitle: boolean;
+  actionPanel: React.ReactNode;
+}) {
+  return (
+    <Grid.Item
+      key={item.id}
+      id={item.id}
+      title={getItemDisplayName(item, appMap, allFolders)}
+      subtitle={
+        showSubtitle
+          ? item.type === "folder"
+            ? "Bundle"
+            : item.type === "website"
+              ? "Website"
+              : "Application"
+          : undefined
+      }
+      content={getItemIcon(item, appMap, allFolders)}
+      actions={actionPanel}
+    />
+  );
+});
+
+// ===== Main Component =====
+
 export default function FolderContentsView({ folderId, folderName, parentPath }: FolderContentsViewProps) {
-  // Build the display path for navigation title
   const displayPath = parentPath || folderName;
 
-  // Poll preferences for dynamic updates
   const prefs = useFolderContentsPreferences();
-
-  const { applications, isLoading: isLoadingApps } = useApplicationsData();
+  const { appMap, isLoading: isLoadingApps } = useApplicationsData();
   const { folders: allFolders } = useFoldersData();
 
   const {
@@ -114,7 +388,7 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
     [folderId],
     {
       keepPreviousData: true,
-      failureToastOptions: { title: "Failed to load folder" },
+      failureToastOptions: { title: "Failed to load bundle" },
     },
   );
 
@@ -127,11 +401,11 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
       prefs.folderContentsSortPrimary || "alphabetical-asc",
       prefs.folderContentsSortSecondary || "none",
       prefs.folderContentsSortTertiary || "none",
-      applications,
+      appMap,
     );
   }, [
     folder,
-    applications,
+    appMap,
     prefs.folderContentsSortPrimary,
     prefs.folderContentsSortSecondary,
     prefs.folderContentsSortTertiary,
@@ -140,30 +414,44 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
   const viewType = prefs.folderContentsViewType || "list";
   const showPreviewPane = prefs.showPreviewPane ?? false;
 
+  // Consolidated item filtering — single pass, shared by bulk actions + section rendering (Task 3)
+  const { appItems, websiteItems, nestedFolderItems, hasApps, hasWebsites } = useMemo(() => {
+    const apps: FolderItem[] = [];
+    const websites: FolderItem[] = [];
+    const folders: FolderItem[] = [];
+    for (const item of sortedItems) {
+      if (item.type === "application") apps.push(item);
+      else if (item.type === "website") websites.push(item);
+      else if (item.type === "folder") folders.push(item);
+    }
+    return {
+      appItems: apps,
+      websiteItems: websites,
+      nestedFolderItems: folders,
+      hasApps: apps.length > 0,
+      hasWebsites: websites.length > 0,
+    };
+  }, [sortedItems]);
+
   // Render detail for items when preview pane is enabled
   const renderItemDetail = useCallback(
     (item: FolderItem) => {
       if (!showPreviewPane) return undefined;
 
-      // For nested folders, show their contents
       if (item.type === "folder" && item.folderId) {
         const nestedFolder = allFolders.find((f) => f.id === item.folderId);
         if (nestedFolder) {
-          return <FolderPreviewDetail folder={nestedFolder} applications={applications} allFolders={allFolders} />;
+          return <FolderPreviewDetail folder={nestedFolder} appMap={appMap} allFolders={allFolders} />;
         }
       }
 
-      // For applications, show basic info
       if (item.type === "application") {
         return (
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Type" text="Application" />
-                <List.Item.Detail.Metadata.Label
-                  title="Name"
-                  text={getItemDisplayName(item, applications, allFolders)}
-                />
+                <List.Item.Detail.Metadata.Label title="Name" text={getItemDisplayName(item, appMap, allFolders)} />
                 {item.path && <List.Item.Detail.Metadata.Label title="Path" text={item.path} />}
               </List.Item.Detail.Metadata>
             }
@@ -171,7 +459,6 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
         );
       }
 
-      // For websites, show URL and title
       if (item.type === "website") {
         return (
           <List.Item.Detail
@@ -188,7 +475,7 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
 
       return undefined;
     },
-    [showPreviewPane, allFolders, applications],
+    [showPreviewPane, allFolders, appMap],
   );
 
   const handleSave = useCallback(async () => {
@@ -200,34 +487,28 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
     async (item: FolderItem) => {
       if (!folder) return;
 
-      const itemName = getItemDisplayName(item, applications, allFolders);
+      const itemName = getItemDisplayName(item, appMap, allFolders);
 
       const confirmed = await confirmAlert({
         title: "Remove Item",
         message: `Remove "${itemName}" from ${folderName}?`,
-        primaryAction: {
-          title: "Remove",
-          style: Alert.ActionStyle.Destructive,
-        },
+        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
       });
 
       if (!confirmed) return;
 
       const updatedItems = folder.items.filter((i) => i.id !== item.id);
       await updateFolder(folderId, { items: updatedItems });
-
       await showToast({
         title: "Removed",
         message: `${itemName} removed from ${folderName}`,
         style: Toast.Style.Success,
       });
-
       await handleSave();
     },
-    [folder, folderId, folderName, applications, allFolders, handleSave],
+    [folder, folderId, folderName, appMap, allFolders, handleSave],
   );
 
-  // Find duplicate items in the folder (same URL for websites, same path for apps)
   const duplicateInfo = useMemo(
     () => (folder ? findDuplicateItems(folder.items) : { hasDuplicates: false, duplicateCount: 0, uniqueItems: [] }),
     [folder],
@@ -244,22 +525,17 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
     const confirmed = await confirmAlert({
       title: "Remove Duplicates",
       message: `Remove ${duplicateCount} duplicate ${pluralize(duplicateCount, "item")} from "${folderName}"? The first occurrence of each item will be kept.`,
-      primaryAction: {
-        title: "Remove Duplicates",
-        style: Alert.ActionStyle.Destructive,
-      },
+      primaryAction: { title: "Remove Duplicates", style: Alert.ActionStyle.Destructive },
     });
 
     if (!confirmed) return;
 
     await updateFolder(folderId, { items: uniqueItems });
-
     await showToast({
       title: "Duplicates removed",
       message: `Removed ${duplicateCount} ${pluralize(duplicateCount, "item")}`,
       style: Toast.Style.Success,
     });
-
     await handleSave();
   }, [folder, folderId, folderName, duplicateInfo, handleSave]);
 
@@ -267,27 +543,14 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
     async (item: FolderItem) => {
       if (!folder) return;
 
-      const itemName = getItemDisplayName(item, applications, allFolders);
+      const itemName = getItemDisplayName(item, appMap, allFolders);
+      const newItem: FolderItem = { ...item, id: generateId() };
 
-      // Create a copy of the item with a new ID
-      const newItem: FolderItem = {
-        ...item,
-        id: generateId(),
-      };
-
-      await updateFolder(folderId, {
-        items: [...folder.items, newItem],
-      });
-
-      await showToast({
-        title: "Item duplicated",
-        message: `"${itemName}" duplicated`,
-        style: Toast.Style.Success,
-      });
-
+      await updateFolder(folderId, { items: [...folder.items, newItem] });
+      await showToast({ title: "Item duplicated", message: `"${itemName}" duplicated`, style: Toast.Style.Success });
       await handleSave();
     },
-    [folder, folderId, applications, allFolders, handleSave],
+    [folder, folderId, appMap, allFolders, handleSave],
   );
 
   const handleOpenItem = useCallback(
@@ -300,197 +563,86 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
           await open(item.path);
           await showToast({
             title: "Opened",
-            message: getItemDisplayName(item, applications, allFolders),
+            message: getItemDisplayName(item, appMap, allFolders),
             style: Toast.Style.Success,
           });
         } else if (item.type === "website" && item.url) {
           await open(item.url);
           await showToast({
             title: "Opened",
-            message: getItemDisplayName(item, applications, allFolders),
+            message: getItemDisplayName(item, appMap, allFolders),
             style: Toast.Style.Success,
           });
         }
       } catch (error) {
-        await showToast({
-          title: "Failed to open",
-          message: error instanceof Error ? error.message : "Unknown error",
-          style: Toast.Style.Failure,
-        });
+        await showFailureToast(error, { title: "Failed to open" });
       }
     },
-    [folderId, applications, revalidate],
+    [folderId, appMap, allFolders, revalidate],
   );
-
-  // Get items by type once (memoized) - used for bulk actions and section rendering
-  const { appItemsList, websiteItemsList } = useMemo(
-    () => ({
-      appItemsList: folder ? filterApplications(folder.items) : [],
-      websiteItemsList: folder ? filterWebsites(folder.items) : [],
-    }),
-    [folder],
-  );
-
-  const hasApps = appItemsList.length > 0;
-  const hasWebsites = websiteItemsList.length > 0;
 
   const handleOpenAllApps = useCallback(
-    () => openAllApplications(appItemsList, folderName, applications),
-    [appItemsList, folderName, applications],
+    () => openAllApplications(appItems, folderName, appMap),
+    [appItems, folderName, appMap],
   );
 
-  const handleOpenAllWeb = useCallback(
-    () => openAllWebsites(websiteItemsList, folderName),
-    [websiteItemsList, folderName],
-  );
+  const handleOpenAllWeb = useCallback(() => openAllWebsites(websiteItems, folderName), [websiteItems, folderName]);
 
-  // URL copying functionality (reusable hook)
   const { hasUrls, copyAsMarkdown, copyAsList } = useCopyUrls(folder, allFolders);
-
-  // Track running applications
-  const { hasRunningApps, quitAllRunningApps } = useRunningApps(appItemsList, applications);
-
+  const { hasRunningApps, quitAllRunningApps } = useRunningApps(appItems, appMap);
   const handleQuitAllApplications = useCallback(() => quitAllRunningApps(folderName), [quitAllRunningApps, folderName]);
 
-  const renderActions = useCallback(
-    (item: FolderItem) => (
-      <ActionPanel>
-        {/* Primary Action */}
-        <ActionPanel.Section>
-          {item.type === "application" ? (
-            <Action title="Open Application" icon={Icon.ArrowRight} onAction={() => handleOpenItem(item)} />
-          ) : item.type === "website" ? (
-            <Action title="Open Website" icon={Icon.Globe} onAction={() => handleOpenItem(item)} />
-          ) : item.folderId ? (
-            <OpenNestedFolderAction
-              folderId={folderId}
-              itemId={item.id}
-              itemFolderId={item.folderId}
-              itemName={item.name}
-              currentPath={displayPath}
-              onAccessRecorded={revalidate}
-            />
-          ) : (
-            <Action title="Open Folder" icon={Icon.ArrowRight} onAction={() => handleOpenItem(item)} />
-          )}
-        </ActionPanel.Section>
-
-        {/* Open All */}
-        {(hasApps || hasWebsites || hasRunningApps) && (
-          <ActionPanel.Section title="Open All">
-            {hasApps && (
-              <Action
-                title="Open All Applications"
-                icon={Icon.AppWindow}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-                onAction={handleOpenAllApps}
-              />
-            )}
-            {hasWebsites && (
-              <Action
-                title="Open All Websites"
-                icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                onAction={handleOpenAllWeb}
-              />
-            )}
-            {hasRunningApps && (
-              <Action
-                title="Quit All Running Applications"
-                icon={Icon.XMarkCircle}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
-                style={Action.Style.Destructive}
-                onAction={handleQuitAllApplications}
-              />
-            )}
-          </ActionPanel.Section>
-        )}
-
-        {/* Copy URLs */}
-        {hasUrls && (
-          <ActionPanel.Section title="Copy URLs">
-            <Action
-              title="Copy as Markdown"
-              icon={Icon.Document}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-              onAction={copyAsMarkdown}
-            />
-            <Action
-              title="Copy as List"
-              icon={Icon.List}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-              onAction={copyAsList}
-            />
-          </ActionPanel.Section>
-        )}
-
-        {/* Organize */}
-        <ActionPanel.Section title="Organize">
-          {folder && <AddItemsAction folder={folder} onSave={handleSave} />}
-          {item.type === "website" && folder && (
-            <Action.Push
-              title="Edit Website"
-              icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
-              target={<WebsiteEditForm folder={folder} item={item} onSave={handleSave} />}
-            />
-          )}
-          {item.type === "folder" &&
-            item.folderId &&
-            (() => {
-              const nestedFolder = allFolders.find((f) => f.id === item.folderId);
-              return nestedFolder ? (
-                <Action.Push
-                  title="Edit Folder"
-                  icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  target={
-                    <FolderEditForm folder={nestedFolder} onSave={handleSave} navigateToFolderAfterSave={false} />
-                  }
-                />
-              ) : null;
-            })()}
-          <Action
-            title="Duplicate Item"
-            icon={Icon.CopyClipboard}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={() => handleDuplicateItem(item)}
-          />
-          {folder && allFolders.length > 1 && (
-            <Action.Push
-              title="Move to Folder…"
-              icon={Icon.ArrowRightCircle}
-              shortcut={{ modifiers: ["cmd"], key: "m" }}
-              target={<MoveToFolderForm item={item} currentFolder={folder} onMove={handleSave} />}
-            />
-          )}
-        </ActionPanel.Section>
-
-        {/* Danger Zone */}
-        <ActionPanel.Section title="Danger Zone">
-          <Action
-            title="Remove from Folder"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-            onAction={() => handleRemoveItem(item)}
-          />
-          {duplicateInfo.hasDuplicates && (
-            <Action
-              title={`Remove ${duplicateInfo.duplicateCount} Duplicate${duplicateInfo.duplicateCount > 1 ? "s" : ""}`}
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              onAction={handleRemoveDuplicates}
-            />
-          )}
-        </ActionPanel.Section>
-      </ActionPanel>
-    ),
+  // Stable bulk props object for ItemActionPanel
+  const bulkProps = useMemo(
+    () => ({
+      hasApps,
+      hasWebsites,
+      hasRunningApps,
+      hasUrls,
+      onOpenAllApps: handleOpenAllApps,
+      onOpenAllWeb: handleOpenAllWeb,
+      onQuitAll: handleQuitAllApplications,
+      onCopyMarkdown: copyAsMarkdown,
+      onCopyList: copyAsList,
+    }),
     [
-      folderId,
+      hasApps,
+      hasWebsites,
+      hasRunningApps,
+      hasUrls,
+      handleOpenAllApps,
+      handleOpenAllWeb,
+      handleQuitAllApplications,
+      copyAsMarkdown,
+      copyAsList,
+    ],
+  );
+
+  const renderActions = useCallback(
+    (item: FolderItem) =>
+      folder ? (
+        <ItemActionPanel
+          item={item}
+          folder={folder}
+          folderId={folderId}
+          displayPath={displayPath}
+          allFolders={allFolders}
+          bulkProps={bulkProps}
+          onOpenItem={handleOpenItem}
+          onSave={handleSave}
+          onRemoveItem={handleRemoveItem}
+          onDuplicateItem={handleDuplicateItem}
+          onRemoveDuplicates={handleRemoveDuplicates}
+          duplicateInfo={duplicateInfo}
+          revalidate={revalidate}
+        />
+      ) : null,
+    [
       folder,
-      allFolders,
+      folderId,
       displayPath,
+      allFolders,
+      bulkProps,
       handleOpenItem,
       handleSave,
       handleRemoveItem,
@@ -498,26 +650,7 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
       handleRemoveDuplicates,
       duplicateInfo,
       revalidate,
-      hasApps,
-      handleOpenAllApps,
-      hasWebsites,
-      handleOpenAllWeb,
-      hasUrls,
-      copyAsMarkdown,
-      copyAsList,
-      hasRunningApps,
-      handleQuitAllApplications,
     ],
-  );
-
-  // Separate sorted items by type (memoized for performance)
-  const { appItems, websiteItems, nestedFolderItems } = useMemo(
-    () => ({
-      appItems: sortedItems.filter((item) => item.type === "application"),
-      websiteItems: sortedItems.filter((item) => item.type === "website"),
-      nestedFolderItems: sortedItems.filter((item) => item.type === "folder"),
-    }),
-    [sortedItems],
   );
 
   const separateSections = prefs.gridSeparateSections ?? true;
@@ -555,12 +688,13 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
             {appItems.length > 0 && (
               <Grid.Section title="Applications" subtitle={`${appItems.length} ${pluralize(appItems.length, "app")}`}>
                 {appItems.map((item) => (
-                  <Grid.Item
+                  <MemoizedGridItem
                     key={item.id}
-                    id={item.id}
-                    title={getItemDisplayName(item, applications, allFolders)}
-                    content={getItemIcon(item, applications, allFolders)}
-                    actions={renderActions(item)}
+                    item={item}
+                    appMap={appMap}
+                    allFolders={allFolders}
+                    showSubtitle={false}
+                    actionPanel={renderActions(item)}
                   />
                 ))}
               </Grid.Section>
@@ -572,29 +706,31 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
                 inset={Grid.Inset.Large}
               >
                 {websiteItems.map((item) => (
-                  <Grid.Item
+                  <MemoizedGridItem
                     key={item.id}
-                    id={item.id}
-                    title={getItemDisplayName(item, applications, allFolders)}
-                    content={getItemIcon(item, applications, allFolders)}
-                    actions={renderActions(item)}
+                    item={item}
+                    appMap={appMap}
+                    allFolders={allFolders}
+                    showSubtitle={false}
+                    actionPanel={renderActions(item)}
                   />
                 ))}
               </Grid.Section>
             )}
             {nestedFolderItems.length > 0 && (
               <Grid.Section
-                title="Folders"
-                subtitle={`${nestedFolderItems.length} ${pluralize(nestedFolderItems.length, "folder")}`}
+                title="Bundles"
+                subtitle={`${nestedFolderItems.length} ${pluralize(nestedFolderItems.length, "bundle")}`}
                 inset={Grid.Inset.Large}
               >
                 {nestedFolderItems.map((item) => (
-                  <Grid.Item
+                  <MemoizedGridItem
                     key={item.id}
-                    id={item.id}
-                    title={getItemDisplayName(item, applications, allFolders)}
-                    content={getItemIcon(item, applications, allFolders)}
-                    actions={renderActions(item)}
+                    item={item}
+                    appMap={appMap}
+                    allFolders={allFolders}
+                    showSubtitle={false}
+                    actionPanel={renderActions(item)}
                   />
                 ))}
               </Grid.Section>
@@ -602,13 +738,13 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
           </>
         ) : (
           sortedItems.map((item) => (
-            <Grid.Item
+            <MemoizedGridItem
               key={item.id}
-              id={item.id}
-              title={getItemDisplayName(item, applications, allFolders)}
-              subtitle={item.type === "folder" ? "Folder" : item.type === "website" ? "Website" : "Application"}
-              content={getItemIcon(item, applications, allFolders)}
-              actions={renderActions(item)}
+              item={item}
+              appMap={appMap}
+              allFolders={allFolders}
+              showSubtitle={true}
+              actionPanel={renderActions(item)}
             />
           ))
         )}
@@ -634,12 +770,13 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
           {appItems.length > 0 && (
             <List.Section title="Applications" subtitle={`${appItems.length} ${pluralize(appItems.length, "app")}`}>
               {appItems.map((item) => (
-                <List.Item
+                <MemoizedListItem
                   key={item.id}
-                  id={item.id}
-                  title={getItemDisplayName(item, applications, allFolders)}
-                  icon={getItemIcon(item, applications, allFolders)}
-                  actions={renderActions(item)}
+                  item={item}
+                  appMap={appMap}
+                  allFolders={allFolders}
+                  showPreviewPane={showPreviewPane}
+                  actionPanel={renderActions(item)}
                   detail={renderItemDetail(item)}
                 />
               ))}
@@ -651,12 +788,13 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
               subtitle={`${websiteItems.length} ${pluralize(websiteItems.length, "website")}`}
             >
               {websiteItems.map((item) => (
-                <List.Item
+                <MemoizedListItem
                   key={item.id}
-                  id={item.id}
-                  title={getItemDisplayName(item, applications, allFolders)}
-                  icon={getItemIcon(item, applications, allFolders)}
-                  actions={renderActions(item)}
+                  item={item}
+                  appMap={appMap}
+                  allFolders={allFolders}
+                  showPreviewPane={showPreviewPane}
+                  actionPanel={renderActions(item)}
                   detail={renderItemDetail(item)}
                 />
               ))}
@@ -664,16 +802,17 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
           )}
           {nestedFolderItems.length > 0 && (
             <List.Section
-              title="Folders"
-              subtitle={`${nestedFolderItems.length} ${pluralize(nestedFolderItems.length, "folder")}`}
+              title="Bundles"
+              subtitle={`${nestedFolderItems.length} ${pluralize(nestedFolderItems.length, "bundle")}`}
             >
               {nestedFolderItems.map((item) => (
-                <List.Item
+                <MemoizedListItem
                   key={item.id}
-                  id={item.id}
-                  title={getItemDisplayName(item, applications, allFolders)}
-                  icon={getItemIcon(item, applications, allFolders)}
-                  actions={renderActions(item)}
+                  item={item}
+                  appMap={appMap}
+                  allFolders={allFolders}
+                  showPreviewPane={showPreviewPane}
+                  actionPanel={renderActions(item)}
                   detail={renderItemDetail(item)}
                 />
               ))}
@@ -682,21 +821,13 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
         </>
       ) : (
         sortedItems.map((item) => (
-          <List.Item
+          <MemoizedListItem
             key={item.id}
-            id={item.id}
-            title={getItemDisplayName(item, applications, allFolders)}
-            icon={getItemIcon(item, applications, allFolders)}
-            subtitle={
-              showPreviewPane
-                ? undefined
-                : item.type === "folder"
-                  ? "Folder"
-                  : item.type === "website"
-                    ? "Website"
-                    : "Application"
-            }
-            actions={renderActions(item)}
+            item={item}
+            appMap={appMap}
+            allFolders={allFolders}
+            showPreviewPane={showPreviewPane}
+            actionPanel={renderActions(item)}
             detail={renderItemDetail(item)}
           />
         ))

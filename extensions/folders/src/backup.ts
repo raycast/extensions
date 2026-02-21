@@ -1,4 +1,5 @@
 import { showHUD, showToast, Toast, Clipboard, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { writeFileSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
@@ -56,7 +57,7 @@ export async function exportFolder(folder: Folder): Promise<void> {
   try {
     await showToast({
       style: Toast.Style.Animated,
-      title: "Exporting folder...",
+      title: "Exporting bundle...",
     });
 
     const allFolders = await getFolders();
@@ -74,7 +75,7 @@ export async function exportFolder(folder: Folder): Promise<void> {
     // Save to Downloads folder
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
     const safeName = folder.name.replace(/[^a-zA-Z0-9-_]/g, "_");
-    const filename = `raycast-folder-${safeName}-${timestamp}.json`;
+    const filename = `raycast-bundle-${safeName}-${timestamp}.json`;
     const downloadsPath = join(homedir(), "Downloads", filename);
 
     writeFileSync(downloadsPath, jsonString, "utf-8");
@@ -85,16 +86,12 @@ export async function exportFolder(folder: Folder): Promise<void> {
     const nestedCount = foldersToExport.length - 1;
     const message =
       nestedCount > 0
-        ? `✅ Exported "${folder.name}" + ${nestedCount} nested folder(s)`
+        ? `✅ Exported "${folder.name}" + ${nestedCount} nested bundle(s)`
         : `✅ Exported "${folder.name}"`;
 
     await showHUD(message);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Export failed",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    await showFailureToast(error, { title: "Export failed" });
   }
 }
 
@@ -105,7 +102,7 @@ export async function exportAllFolders(): Promise<void> {
   try {
     await showToast({
       style: Toast.Style.Animated,
-      title: "Exporting all folders...",
+      title: "Exporting all bundles...",
     });
 
     const folders = await getFolders();
@@ -113,8 +110,8 @@ export async function exportAllFolders(): Promise<void> {
     if (folders.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "No folders to export",
-        message: "Create some folders first",
+        title: "No bundles to export",
+        message: "Create some bundles first",
       });
       return;
     }
@@ -130,7 +127,7 @@ export async function exportAllFolders(): Promise<void> {
 
     // Save to Downloads folder
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-    const filename = `raycast-folders-backup-${timestamp}.json`;
+    const filename = `raycast-bundles-backup-${timestamp}.json`;
     const downloadsPath = join(homedir(), "Downloads", filename);
 
     writeFileSync(downloadsPath, jsonString, "utf-8");
@@ -138,13 +135,9 @@ export async function exportAllFolders(): Promise<void> {
     // Also copy to clipboard for convenience
     await Clipboard.copy(jsonString);
 
-    await showHUD(`✅ Exported ${folders.length} folder(s) to Downloads & clipboard`);
+    await showHUD(`✅ Exported ${folders.length} bundle(s) to Downloads & clipboard`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Export failed",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    await showFailureToast(error, { title: "Export failed" });
   }
 }
 

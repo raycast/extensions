@@ -33,7 +33,7 @@ export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): U
 
   const copyAsMarkdown = useCallback(async () => {
     if (!hasUrls || !folder) {
-      await showToast({ title: "No URLs to copy", message: "This folder has no websites", style: Toast.Style.Failure });
+      await showToast({ title: "No URLs to copy", message: "This bundle has no websites", style: Toast.Style.Failure });
       return;
     }
 
@@ -50,7 +50,7 @@ export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): U
 
   const copyAsList = useCallback(async () => {
     if (!hasUrls) {
-      await showToast({ title: "No URLs to copy", message: "This folder has no websites", style: Toast.Style.Failure });
+      await showToast({ title: "No URLs to copy", message: "This bundle has no websites", style: Toast.Style.Failure });
       return;
     }
 

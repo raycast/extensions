@@ -10,6 +10,7 @@ import {
   Alert,
   LocalStorage,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React, { useState } from "react";
 import { Folder, STORAGE_KEY } from "../types";
 import { getFolders, invalidateFoldersCache } from "../storage";
@@ -55,8 +56,8 @@ export default function ImportFoldersForm() {
       if (importMode === "replace") {
         // Confirm before replacing
         const confirmed = await confirmAlert({
-          title: "Replace All Folders?",
-          message: `This will delete your ${existingFolders.length} existing folder(s) and replace them with ${data.folders.length} folder(s) from the backup.`,
+          title: "Replace All Bundles?",
+          message: `This will delete your ${existingFolders.length} existing bundle(s) and replace them with ${data.folders.length} bundle(s) from the backup.`,
           primaryAction: {
             title: "Replace All",
             style: Alert.ActionStyle.Destructive,
@@ -69,7 +70,7 @@ export default function ImportFoldersForm() {
         }
 
         finalFolders = data.folders;
-        message = `Replaced with ${data.folders.length} ${pluralize(data.folders.length, "folder")}`;
+        message = `Replaced with ${data.folders.length} ${pluralize(data.folders.length, "bundle")}`;
       } else {
         // Merge mode - add folders that don't exist by ID
         const existingIds = new Set(existingFolders.map((f) => f.id));
@@ -79,14 +80,14 @@ export default function ImportFoldersForm() {
           await showToast({
             style: Toast.Style.Success,
             title: "Nothing to import",
-            message: "All folders already exist",
+            message: "All bundles already exist",
           });
           setIsLoading(false);
           return;
         }
 
         finalFolders = [...existingFolders, ...newFolders];
-        message = `Added ${newFolders.length} new ${pluralize(newFolders.length, "folder")}`;
+        message = `Added ${newFolders.length} new ${pluralize(newFolders.length, "bundle")}`;
       }
 
       // Save to storage
@@ -102,17 +103,9 @@ export default function ImportFoldersForm() {
       popToRoot();
     } catch (error) {
       if (error instanceof SyntaxError) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid JSON",
-          message: "The pasted content is not valid JSON",
-        });
+        await showFailureToast(error, { title: "Invalid JSON" });
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Import failed",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        await showFailureToast(error, { title: "Import failed" });
       }
     } finally {
       setIsLoading(false);
@@ -122,11 +115,11 @@ export default function ImportFoldersForm() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Import Folders"
+      navigationTitle="Import Bundles"
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.SubmitForm icon={Icon.Download} title="Import Folders" onSubmit={handleImport} />
+            <Action.SubmitForm icon={Icon.Download} title="Import Bundles" onSubmit={handleImport} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -134,10 +127,10 @@ export default function ImportFoldersForm() {
       <Form.TextArea
         id="json"
         title="Backup JSON"
-        placeholder="Paste your exported folders JSON here..."
+        placeholder="Paste your exported bundles JSON here..."
         value={jsonInput}
         onChange={setJsonInput}
-        info="Paste the JSON from a previous export. Works with single folder or multi-folder backups."
+        info="Paste the JSON from a previous export. Works with single bundle or multi-bundle backups."
       />
 
       <Form.Dropdown id="mode" title="Import Mode" value={importMode} onChange={(v) => setImportMode(v as ImportMode)}>
@@ -149,8 +142,8 @@ export default function ImportFoldersForm() {
         title="Import Modes"
         text={
           importMode === "merge"
-            ? "Merge: Adds new folders from the backup. Existing folders (by ID) are kept unchanged."
-            : "Replace All: Deletes all existing folders and replaces them with the backup. Use with caution!"
+            ? "Merge: Adds new bundles from the backup. Existing bundles (by ID) are kept unchanged."
+            : "Replace All: Deletes all existing bundles and replaces them with the backup. Use with caution!"
         }
       />
     </Form>

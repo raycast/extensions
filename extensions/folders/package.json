@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "folders",
-  "title": "Folders",
-  "description": "Organize applications, websites, and folders in custom folders accessible from Raycast",
+  "name": "bundles",
+  "title": "Bundles",
+  "description": "Organize applications, websites, and nested collections in custom bundles",
   "icon": "icon.png",
   "author": "Jace",
   "categories": [
@@ -16,7 +16,7 @@
       "type": "dropdown",
       "required": true,
       "title": "🥇 Primary Sort",
-      "description": "Primary sort method for items inside folders",
+      "description": "Primary sort method for items inside bundles",
       "default": "alphabetical-asc",
       "data": [
         {
@@ -130,7 +130,7 @@
       "type": "dropdown",
       "required": true,
       "title": "📋 View Type",
-      "description": "How to display items when viewing folder contents",
+      "description": "How to display items when viewing bundle contents",
       "default": "list",
       "data": [
         {
@@ -148,7 +148,7 @@
       "type": "checkbox",
       "required": true,
       "title": "Preview Pane",
-      "description": "Show folder contents in a preview pane beside the folder list",
+      "description": "Show bundle contents in a preview pane beside the bundle list",
       "label": "Show Preview Pane",
       "default": false
     },
@@ -156,35 +156,35 @@
       "name": "gridSeparateSections",
       "type": "checkbox",
       "required": true,
-      "title": "Folder Contents",
-      "description": "Group apps, websites, and folders into separate sections",
-      "label": "Separate Apps, Websites & Folders",
+      "title": "Bundle Contents",
+      "description": "Group apps, websites, and bundles into separate sections",
+      "label": "Separate Apps, Websites & Bundles",
       "default": true
     },
     {
       "name": "defaultFolderColor",
       "type": "textfield",
       "required": false,
-      "title": "Default Folder Color",
-      "description": "CSS color name or hex code for new folders",
+      "title": "Default Bundle Color",
+      "description": "CSS color name or hex code for new bundles",
       "placeholder": "coral"
     }
   ],
   "commands": [
     {
       "name": "index",
-      "title": "Folders",
-      "description": "Search and open your custom folders",
+      "title": "Bundles",
+      "description": "Search and open your custom bundles",
       "mode": "view",
       "keywords": [
-        "folder",
-        "folders",
+        "bundle",
+        "bundles",
         "organize"
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^1.104.6",
     "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {

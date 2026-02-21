@@ -15,11 +15,19 @@ interface FolderItemActionsProps {
   folder: Folder;
   /** Optional callback to sync parent component after changes */
   onFolderChange?: () => void;
+  /** Optional delete handler from parent (uses parent's mutate for instant optimistic update) */
+  onDelete?: (folderId: string, folderName: string) => Promise<void>;
 }
 
-export const FolderItemActions = memo(function FolderItemActions({ folder, onFolderChange }: FolderItemActionsProps) {
-  const { applications } = useApplicationsData();
-  const { folders: allFolders, handleSave: defaultHandleSave, handleDelete } = useFoldersData();
+export const FolderItemActions = memo(function FolderItemActions({
+  folder,
+  onFolderChange,
+  onDelete,
+}: FolderItemActionsProps) {
+  const { appMap } = useApplicationsData();
+  const { folders: allFolders, handleSave: defaultHandleSave, handleDelete: defaultHandleDelete } = useFoldersData();
+
+  const handleDelete = onDelete || defaultHandleDelete;
 
   // Use provided callback or default handleSave
   const handleSave = onFolderChange || defaultHandleSave;
@@ -52,8 +60,8 @@ export const FolderItemActions = memo(function FolderItemActions({ folder, onFol
   }, [folder.items]);
 
   const handleOpenAllApps = useCallback(
-    () => openAllApplications(appItems, folder.name, applications),
-    [appItems, folder.name, applications],
+    () => openAllApplications(appItems, folder.name, appMap),
+    [appItems, folder.name, appMap],
   );
 
   const handleOpenAllWebsites = useCallback(
@@ -65,16 +73,16 @@ export const FolderItemActions = memo(function FolderItemActions({ folder, onFol
     if (folder.items.length === 0) {
       await showToast({
         style: Toast.Style.Success,
-        title: "Folder is already empty",
+        title: "Bundle is already empty",
       });
       return;
     }
 
     const confirmed = await confirmAlert({
-      title: "Empty Folder",
-      message: `Remove all ${folder.items.length} ${pluralize(folder.items.length, "item")} from "${folder.name}"? The folder itself will be kept.`,
+      title: "Empty Bundle",
+      message: `Remove all ${folder.items.length} ${pluralize(folder.items.length, "item")} from "${folder.name}"? The bundle itself will be kept.`,
       primaryAction: {
-        title: "Empty Folder",
+        title: "Empty Bundle",
         style: Alert.ActionStyle.Destructive,
       },
     });
@@ -86,7 +94,7 @@ export const FolderItemActions = memo(function FolderItemActions({ folder, onFol
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Folder emptied",
+      title: "Bundle emptied",
       message: `Removed ${folder.items.length} ${pluralize(folder.items.length, "item")}`,
     });
   }, [folder.id, folder.name, folder.items.length, handleSave]);
@@ -96,9 +104,10 @@ export const FolderItemActions = memo(function FolderItemActions({ folder, onFol
       {/* Primary Action */}
       <ActionPanel.Section>
         <Action.Push
-          title="Open Folder"
+          title="Open Bundle"
           icon={Icon.ArrowRight}
           target={<FolderContentsView folderId={folder.id} folderName={folder.name} />}
+          onPop={handleSave}
         />
       </ActionPanel.Section>
 
@@ -145,16 +154,18 @@ export const FolderItemActions = memo(function FolderItemActions({ folder, onFol
       {/* Organize */}
       <ActionPanel.Section title="Organize">
         <Action.Push
-          title="Edit Folder"
+          title="Edit Bundle"
           icon={Icon.Pencil}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
           target={<FolderEditForm folder={folder} onSave={handleSave} navigateToFolderAfterSave={false} />}
+          onPop={handleSave}
         />
         <Action.Push
-          title="Create New Folder"
+          title="Create New Bundle"
           icon={Icon.Plus}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
           target={<FolderEditForm onSave={handleSave} navigateToFolderAfterSave={false} />}
+          onPop={handleSave}
         />
       </ActionPanel.Section>
 
@@ -181,20 +192,20 @@ export const FolderItemActions = memo(function FolderItemActions({ folder, onFol
       {/* Backup */}
       <ActionPanel.Section title="Backup">
         <Action
-          title="Export This Folder"
+          title="Export This Bundle"
           icon={Icon.Upload}
           shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           onAction={() => exportFolder(folder)}
         />
-        <Action title="Export All Folders" icon={Icon.Upload} onAction={exportAllFolders} />
-        <Action.Push title="Import Folders" icon={Icon.Download} target={<ImportFoldersForm />} />
+        <Action title="Export All Bundles" icon={Icon.Upload} onAction={exportAllFolders} />
+        <Action.Push title="Import Bundles" icon={Icon.Download} target={<ImportFoldersForm />} onPop={handleSave} />
       </ActionPanel.Section>
 
       {/* Danger Zone */}
       <ActionPanel.Section title="Danger Zone">
         {folder.items.length > 0 && (
           <Action
-            title="Empty Folder"
+            title="Empty Bundle"
             icon={Icon.Eraser}
             style={Action.Style.Destructive}
             shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
@@ -202,7 +213,7 @@ export const FolderItemActions = memo(function FolderItemActions({ folder, onFol
           />
         )}
         <Action
-          title="Delete Folder"
+          title="Delete Bundle"
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}

@@ -1,24 +1,24 @@
-# Folders
+# Bundles
 
-> Organize applications, websites, and folders into custom collections accessible directly from Raycast.
+> Organize applications, websites, and bundles into custom collections accessible directly from Raycast.
 
 Think of it as Launchpad folders meets browser bookmarks, but faster, more powerful, and right in your command bar.
 
 ---
 
-## ❓ FAQ
+## FAQ
 
 <details>
 <summary><strong>Where is my data stored?</strong></summary>
 
-All data is stored locally using Raycast's LocalStorage. Nothing is sent to external servers. Favicons are cached locally in `~/Library/Application Support/com.raycast.macos/extensions/folders/`.
+All data is stored locally using Raycast's LocalStorage. Nothing is sent to external servers. Favicons are cached locally in `~/Library/Application Support/com.raycast.macos/extensions/bundles/`.
 
 </details>
 
 <details>
-<summary><strong>Can I sync folders across multiple Macs?</strong></summary>
+<summary><strong>Can I sync bundles across multiple Macs?</strong></summary>
 
-Not automatically, but you can use **Export All Folders** to create a backup JSON, then **Import Folders** on another Mac. The JSON is also copied to your clipboard for easy transfer.
+Not automatically, but you can use **Export All Bundles** to create a backup JSON, then **Import Bundles** on another Mac. The JSON is also copied to your clipboard for easy transfer.
 
 </details>
 
@@ -37,16 +37,16 @@ Use markdown link syntax: `[My Custom Name](https://example.com)`. Plain URLs wi
 </details>
 
 <details>
-<summary><strong>Can folders be nested multiple levels deep?</strong></summary>
+<summary><strong>Can bundles be nested multiple levels deep?</strong></summary>
 
-Yes! You can nest folders inside other nested folders. The breadcrumb path shows your location like `Work → Tools → Utilities`.
+Yes! You can nest bundles inside other nested bundles. The breadcrumb path shows your location like `Work → Tools → Utilities`.
 
 </details>
 
 <details>
-<summary><strong>How do I move an item to a different folder?</strong></summary>
+<summary><strong>How do I move an item to a different bundle?</strong></summary>
 
-Select any item inside a folder and press `⌘M` to open the move dialog. Choose a destination and the item is moved instantly.
+Select any item inside a bundle and press `⌘M` to open the move dialog. Choose a destination and the item is moved instantly.
 
 </details>
 
@@ -58,15 +58,15 @@ CSS color names (`coral`, `skyblue`), hex with hash (`#FF5733`), hex without has
 </details>
 
 <details>
-<summary><strong>How do I pin a folder to Raycast's root search?</strong></summary>
+<summary><strong>How do I pin a bundle to Raycast's root search?</strong></summary>
 
-Create a **Quicklink** for the folder:
+Create a **Quicklink** for the bundle:
 
-1. Select your folder in the list
+1. Select your bundle in the list
 2. Press `⌘⇧C` (Create Quicklink)
 3. Give it a name and save
 
-Now you can search for that folder directly from Raycast's root search without opening the Folders extension first. Your folder's custom icon is automatically applied to the quicklink.
+Now you can search for that bundle directly from Raycast's root search without opening the Bundles extension first. Your bundle's custom icon is automatically applied to the quicklink.
 
 </details>
 
@@ -77,7 +77,7 @@ Now you can search for that folder directly from Raycast's root search without o
 > **Note:** Links below work on GitHub but not on the Raycast Store website.
 
 - [Features](#features)
-  - [Folder Management](#-folder-management)
+  - [Bundle Management](#-bundle-management)
   - [Website Support](#-website-support)
   - [Smart Search & Navigation](#-smart-search--navigation)
   - [Display Options](#-display-options)
@@ -86,11 +86,11 @@ Now you can search for that folder directly from Raycast's root search without o
 - [Keyboard Shortcuts](#keyboard-shortcuts)
 - [Preferences](#preferences)
 - [Usage Guide](#usage-guide)
-  - [Creating Your First Folder](#creating-your-first-folder)
+  - [Creating Your First Bundle](#creating-your-first-bundle)
   - [Adding Websites](#adding-websites)
-  - [Organizing with Nested Folders](#organizing-with-nested-folders)
+  - [Organizing with Nested Bundles](#organizing-with-nested-bundles)
   - [Copying URLs](#copying-urls)
-  - [Moving Items Between Folders](#moving-items-between-folders)
+  - [Moving Items Between Bundles](#moving-items-between-bundles)
   - [Creating Quicklinks](#creating-quicklinks)
   - [Exporting & Importing](#exporting--importing)
 - [Development](#development)
@@ -101,19 +101,19 @@ Now you can search for that folder directly from Raycast's root search without o
 
 ## Features
 
-### 📁 Folder Management
+### Bundle Management
 
-| Feature            | Description                                                                |
-| ------------------ | -------------------------------------------------------------------------- |
-| **Custom Folders** | Group applications, websites, and other folders into organized collections |
-| **Nested Folders** | Create hierarchical folder structures for deeper organization              |
-| **Custom Icons**   | Choose from 100+ Raycast icons to personalize each folder                  |
-| **Custom Colors**  | Tint folder icons with CSS color names or hex codes                        |
-| **Default Color**  | Configure a default color for all newly created folders                    |
+| Feature             | Description                                                                |
+| ------------------- | -------------------------------------------------------------------------- |
+| **Custom Bundles**  | Group applications, websites, and other bundles into organized collections |
+| **Nested Bundles**  | Create hierarchical bundle structures for deeper organization              |
+| **Custom Icons**    | Choose from 100+ Raycast icons to personalize each bundle                  |
+| **Custom Colors**   | Tint bundle icons with CSS color names or hex codes                        |
+| **Default Color**   | Configure a default color for all newly created bundles                    |
 
 #### Supported Color Formats
 
-You can specify folder colors in multiple formats:
+You can specify bundle colors in multiple formats:
 
 | Format          | Example   | Result    |
 | --------------- | --------- | --------- |
@@ -123,17 +123,17 @@ You can specify folder colors in multiple formats:
 
 **Common CSS colors:** `red`, `orange`, `yellow`, `green`, `blue`, `purple`, `pink`, `coral`, `gold`, `crimson`, `indigo`, `teal`, `navy`, `skyblue`, `salmon`, `turquoise`, `violet`, and [80+ more](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color).
 
-### 🌐 Website Support
+### Website Support
 
 | Feature             | Description                                                                                         |
 | ------------------- | --------------------------------------------------------------------------------------------------- |
-| **Add URLs**        | Include website bookmarks in any folder                                                             |
+| **Add URLs**        | Include website bookmarks in any bundle                                                             |
 | **Auto Favicon**    | Favicons fetched from 6 sources in parallel (Google, DuckDuckGo, Icon Horse, Yandex, direct, Apple) |
 | **Refresh Favicon** | Manually re-fetch favicon with `⌘R` if it didn't load correctly                                     |
 | **Auto Titles**     | Page titles are fetched automatically from websites                                                 |
 | **Custom Titles**   | Use markdown syntax `[Title](URL)` for custom names                                                 |
 | **Edit Websites**   | Modify website names and URLs after adding                                                          |
-| **Open All**        | Launch all websites in a folder at once                                                             |
+| **Open All**        | Launch all websites in a bundle at once                                                             |
 
 #### Markdown Link Syntax
 
@@ -148,97 +148,97 @@ https://google.com
 
 - Plain URLs auto-fetch the page title
 - `[Title](URL)` uses your custom title instead
-- Custom titles are preserved when editing folders
+- Custom titles are preserved when editing bundles
 
-### 🔍 Smart Search & Navigation
+### Smart Search & Navigation
 
 | Feature              | Description                                               |
 | -------------------- | --------------------------------------------------------- |
-| **Instant Search**   | Find folders with Raycast's blazing-fast fuzzy search     |
+| **Instant Search**   | Find bundles with Raycast's blazing-fast fuzzy search     |
 | **Breadcrumb Paths** | See full navigation paths like `Work → Tools → Utilities` |
-| **Section Grouping** | Top-level and nested folders are displayed separately     |
+| **Section Grouping** | Top-level and nested bundles are displayed separately     |
 | **Recent Access**    | Items track when they were last accessed for sorting      |
 
-### 📋 Display Options
+### Display Options
 
-| Feature               | Description                                             |
-| --------------------- | ------------------------------------------------------- |
-| **List View**         | Classic list with icons, titles, and subtitles          |
-| **Grid View**         | Visual grid layout for browsing                         |
-| **Preview Pane**      | Side panel showing folder contents without opening      |
-| **Separate Sections** | Group apps, websites, and folders into labeled sections |
-| **Item Counts**       | See how many items are in each section                  |
+| Feature               | Description                                              |
+| --------------------- | -------------------------------------------------------- |
+| **List View**         | Classic list with icons, titles, and subtitles           |
+| **Grid View**         | Visual grid layout for browsing                          |
+| **Preview Pane**      | Side panel showing bundle contents without opening       |
+| **Separate Sections** | Group apps, websites, and bundles into labeled sections  |
+| **Item Counts**       | See how many items are in each section                   |
 
-### 📋 Copy & Share
+### Copy & Share
 
-| Feature                     | Description                                             |
-| --------------------------- | ------------------------------------------------------- |
-| **Copy as Markdown**        | Copy folder URLs as bullet points with nested structure |
-| **Copy as List**            | Copy all URLs as a plain list, sorted by length         |
-| **Includes Nested Folders** | Recursively includes URLs from all nested folders       |
+| Feature                     | Description                                              |
+| --------------------------- | -------------------------------------------------------- |
+| **Copy as Markdown**        | Copy bundle URLs as bullet points with nested structure  |
+| **Copy as List**            | Copy all URLs as a plain list, sorted by length          |
+| **Includes Nested Bundles** | Recursively includes URLs from all nested bundles        |
 
-### 💾 Backup & Restore
+### Backup & Restore
 
-| Feature                  | Description                                                      |
-| ------------------------ | ---------------------------------------------------------------- |
-| **Export Single Folder** | Export one folder (including nested folders) to JSON             |
-| **Export All Folders**   | Create a complete backup of all folders                          |
-| **Import Folders**       | Restore from backup with merge or replace options                |
-| **Clipboard Copy**       | Exports are also copied to clipboard for easy sharing            |
+| Feature                   | Description                                                      |
+| ------------------------- | ---------------------------------------------------------------- |
+| **Export Single Bundle**  | Export one bundle (including nested bundles) to JSON             |
+| **Export All Bundles**    | Create a complete backup of all bundles                          |
+| **Import Bundles**        | Restore from backup with merge or replace options                |
+| **Clipboard Copy**        | Exports are also copied to clipboard for easy sharing            |
 | **Preferences Included** | Exports include your sort order, view type, and display settings |
 
 ---
 
 ## Keyboard Shortcuts
 
-### From the Folder List
+### From the Bundle List
 
-| Shortcut | Action                             |
-| -------- | ---------------------------------- |
-| `↵`      | Open selected folder               |
-| `⌘N`     | Create new folder                  |
-| `⌘E`     | Edit selected folder               |
-| `⌘O`     | Open all applications in folder    |
-| `⌘⇧O`    | Open all websites in folder        |
-| `⌘⇧M`    | Copy all URLs as markdown          |
-| `⌘⇧L`    | Copy all URLs as list              |
-| `⌘⇧C`    | Create quicklink to folder         |
-| `⌘⌥C`    | Copy quicklink URL                 |
-| `⌘⇧E`    | Export selected folder             |
-| `⌃⇧X`    | Empty folder (remove all contents) |
-| `⌃X`     | Delete folder                      |
+| Shortcut | Action                              |
+| -------- | ----------------------------------- |
+| `↵`      | Open selected bundle                |
+| `⌘N`     | Create new bundle                   |
+| `⌘E`     | Edit selected bundle                |
+| `⌘O`     | Open all applications in bundle     |
+| `⌘⇧O`    | Open all websites in bundle         |
+| `⌘⇧M`    | Copy all URLs as markdown           |
+| `⌘⇧L`    | Copy all URLs as list               |
+| `⌘⇧C`    | Create quicklink to bundle          |
+| `⌘⌥C`    | Copy quicklink URL                  |
+| `⌘⇧E`    | Export selected bundle              |
+| `⌃⇧X`    | Empty bundle (remove all contents)  |
+| `⌃X`     | Delete bundle                       |
 
-### From Folder Contents
+### From Bundle Contents
 
-| Shortcut | Action                                        |
-| -------- | --------------------------------------------- |
-| `↵`      | Open selected item                            |
-| `⌘E`     | Edit selected item (website or nested folder) |
-| `⌘R`     | Refresh favicon (websites only)               |
-| `⌘M`     | Move item to another folder                   |
-| `⌘D`     | Duplicate item                                |
-| `⌘O`     | Open all applications                         |
-| `⌘⇧O`    | Open all websites                             |
-| `⌘⇧M`    | Copy all URLs as markdown                     |
-| `⌘⇧L`    | Copy all URLs as list                         |
-| `⌘⇧Q`    | Quit all running applications                 |
-| `⌘⌫`     | Remove item from folder                       |
+| Shortcut | Action                                         |
+| -------- | ---------------------------------------------- |
+| `↵`      | Open selected item                             |
+| `⌘E`     | Edit selected item (website or nested bundle)  |
+| `⌘R`     | Refresh favicon (websites only)                |
+| `⌘M`     | Move item to another bundle                    |
+| `⌘D`     | Duplicate item                                 |
+| `⌘O`     | Open all applications                          |
+| `⌘⇧O`    | Open all websites                              |
+| `⌘⇧M`    | Copy all URLs as markdown                      |
+| `⌘⇧L`    | Copy all URLs as list                          |
+| `⌘⇧Q`    | Quit all running applications                  |
+| `⌘⌫`     | Remove item from bundle                        |
 
 ---
 
 ## Preferences
 
-Access preferences via Raycast Settings → Extensions → Folders.
+Access preferences via Raycast Settings → Extensions → Bundles.
 
 ### Sorting
 
-Configure up to three levels of sorting priority for folder contents:
+Configure up to three levels of sorting priority for bundle contents:
 
 | Level                 | Purpose                         |
 | --------------------- | ------------------------------- |
-| **🥇 Primary Sort**   | Main sorting method             |
-| **🥈 Secondary Sort** | Tiebreaker when items are equal |
-| **🥉 Tertiary Sort**  | Final tiebreaker                |
+| **Primary Sort**      | Main sorting method             |
+| **Secondary Sort**    | Tiebreaker when items are equal |
+| **Tertiary Sort**     | Final tiebreaker                |
 
 **Available sort methods:**
 
@@ -251,26 +251,26 @@ Configure up to three levels of sorting priority for folder contents:
 
 ### Display
 
-| Preference            | Description                                  |
-| --------------------- | -------------------------------------------- |
-| **View Type**         | List or Grid view for folder contents        |
-| **Preview Pane**      | Show folder contents in a side panel         |
-| **Separate Sections** | Group apps, websites, and folders separately |
+| Preference            | Description                                   |
+| --------------------- | --------------------------------------------- |
+| **View Type**         | List or Grid view for bundle contents         |
+| **Preview Pane**      | Show bundle contents in a side panel          |
+| **Separate Sections** | Group apps, websites, and bundles separately  |
 
 ### Appearance
 
-| Preference               | Description                                     |
-| ------------------------ | ----------------------------------------------- |
-| **Default Folder Color** | Hex color to pre-fill when creating new folders |
+| Preference               | Description                                      |
+| ------------------------ | ------------------------------------------------ |
+| **Default Bundle Color** | Hex color to pre-fill when creating new bundles  |
 
 ---
 
 ## Usage Guide
 
-### Creating Your First Folder
+### Creating Your First Bundle
 
-1. Open Raycast and search for **"Folders"**
-2. Press `⌘N` to create a new folder
+1. Open Raycast and search for **"Bundles"**
+2. Press `⌘N` to create a new bundle
 3. Enter a name (e.g., "Work Apps")
 4. Choose an icon from the dropdown
 5. Optionally set a custom color (e.g., `coral`, `skyblue`, or `#3498db`)
@@ -300,24 +300,24 @@ https://google.com
 
 Mix and match as needed. Favicons are cached locally for fast loading.
 
-### Organizing with Nested Folders
+### Organizing with Nested Bundles
 
-1. Edit an existing folder (`⌘E`) or create a new one
-2. In the **"Nested Folders"** field, select existing folders to nest
-3. Or choose **"Create New Folder..."** to create and nest in one step
-4. The new folder is automatically added to the parent
+1. Edit an existing bundle (`⌘E`) or create a new one
+2. In the **"Nested Bundles"** field, select existing bundles to nest
+3. Or choose **"Create New Bundle..."** to create and nest in one step
+4. The new bundle is automatically added to the parent
 
-**Note:** Folders can only have one parent. A folder already nested elsewhere won't appear in the selection.
+**Note:** Bundles can only have one parent. A bundle already nested elsewhere won't appear in the selection.
 
 ### Copying URLs
 
-You can copy all URLs from a folder (including nested folders) in two formats:
+You can copy all URLs from a bundle (including nested bundles) in two formats:
 
 #### Copy as Markdown (`⌘⇧M`)
 
-Produces a hierarchical bullet list. If the folder contains nested folders, it includes the root folder name:
+Produces a hierarchical bullet list. If the bundle contains nested bundles, it includes the root bundle name:
 
-**Folder without nested folders:**
+**Bundle without nested bundles:**
 
 ```markdown
 - https://github.com
@@ -325,13 +325,13 @@ Produces a hierarchical bullet list. If the folder contains nested folders, it i
 - https://google.com
 ```
 
-**Folder with nested folders:**
+**Bundle with nested bundles:**
 
 ```markdown
-- **My Folder**
+- **My Bundle**
   - https://github.com
   - https://raycast.com
-  - **Subfolder**
+  - **Subbundle**
     - https://docs.github.com
     - https://api.github.com
 ```
@@ -347,21 +347,21 @@ https://raycast.com
 https://docs.github.com
 ```
 
-### Moving Items Between Folders
+### Moving Items Between Bundles
 
-1. Select any item inside a folder
+1. Select any item inside a bundle
 2. Press `⌘M` to open the move dialog
-3. Choose a destination folder (shows both top-level and nested folders)
+3. Choose a destination bundle (shows both top-level and nested bundles)
 4. The item is moved instantly
 
 ### Creating Quicklinks
 
-Quicklinks let you open specific folders directly from Raycast:
+Quicklinks let you open specific bundles directly from Raycast:
 
-1. Select a folder in the list
+1. Select a bundle in the list
 2. Press `⌘⇧C` to create a quicklink
-3. Your folder's custom icon is automatically applied
-4. Save and access the folder instantly from anywhere
+3. Your bundle's custom icon is automatically applied
+4. Save and access the bundle instantly from anywhere
 
 You can also copy the deeplink URL with `⌘⌥C` for sharing or scripting.
 
@@ -369,17 +369,17 @@ You can also copy the deeplink URL with `⌘⌥C` for sharing or scripting.
 
 #### Exporting
 
-1. Select a folder and press `⌘⇧E` to export it (includes nested folders)
-2. Or use **"Export All Folders"** from the action panel
+1. Select a bundle and press `⌘⇧E` to export it (includes nested bundles)
+2. Or use **"Export All Bundles"** from the action panel
 3. A JSON file is saved to Downloads and copied to clipboard
 
 #### Importing
 
-1. Select **"Import Folders"** from any folder's action panel
+1. Select **"Import Bundles"** from any bundle's action panel
 2. Paste your backup JSON
 3. Choose import mode:
-   - **Merge**: Add new folders, keep existing ones
-   - **Replace All**: Delete all existing folders first
+   - **Merge**: Add new bundles, keep existing ones
+   - **Replace All**: Delete all existing bundles first
 
 ---
 
@@ -413,8 +413,8 @@ npm run publish
 ```
 src/
 ├── index.tsx              # Main command entry point
-├── folder-contents.tsx    # Folder contents view
-├── folder-edit-form.tsx   # Create/edit folder form
+├── folder-contents.tsx    # Bundle contents view
+├── folder-edit-form.tsx   # Create/edit bundle form
 ├── storage.ts             # LocalStorage operations
 ├── types.ts               # TypeScript interfaces
 ├── utils.ts               # Utility functions
@@ -443,12 +443,12 @@ src/
 
 This extension:
 
-- ✅ Stores all data locally using Raycast's LocalStorage
-- ✅ Caches favicons locally for performance
-- ✅ Only accesses applications you explicitly add
-- ✅ Uses AppleScript solely for detecting running apps
-- ❌ Does **not** send any data to external servers
-- ❌ Does **not** track usage or analytics
+- Stores all data locally using Raycast's LocalStorage
+- Caches favicons locally for performance
+- Only accesses applications you explicitly add
+- Uses AppleScript solely for detecting running apps
+- Does **not** send any data to external servers
+- Does **not** track usage or analytics
 
 ---
 
@@ -458,18 +458,6 @@ MIT License — Free to use, modify, and distribute.
 
 ---
 
-## 🎉 Fun Extras
-
-A few hidden conveniences you might enjoy:
-
-| Feature           | What it does                                                                              |
-| ----------------- | ----------------------------------------------------------------------------------------- |
-| **"dot" → "."**   | Type `discorddotcom` and it becomes `discord.com`. Works for any TLD: `jadotmt` → `ja.mt` |
-| **Shorthand hex** | Type `F53` instead of `#FF5533` — it auto-expands                                         |
-| **CSS colors**    | Use `coral` or `skyblue` instead of memorizing hex codes                                  |
-
----
-
 <p align="center">
-  <strong>Made with ❤️ for Raycast</strong>
+  <strong>Made with love for Raycast</strong>
 </p>
