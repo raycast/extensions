@@ -2,7 +2,6 @@
 node_modules/
 
 # Build output
-.build/
 dist/
 
 # Environment variables
@@ -13,19 +12,6 @@ dist/
 
 # IDE
 .vscode/
-.idea/
 
 # Raycast
 raycast-env.d.ts
-.raycast-swift-build
-compiled_raycast_swift
-
-# Logs
-*.log
-
-# Coverage
-coverage/
-
-# Extension archives
-examples/**/*.zip
-extensions/**/*.zip
