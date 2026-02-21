@@ -23,53 +23,36 @@ export async function checkFFmpegVersion(ffmpegPath: string): Promise<number | n
 }
 
 export async function findFFmpegPath(minimumVersion = 6.0): Promise<{ path: string; version: number } | null> {
-  const preferences = getPreferenceValues();
-  const customPath: string = preferences.ffmpeg_path;
-
-  const storedPath = await LocalStorage.getItem<string>("ffmpeg-path");
-
-  // Check whether binary valid and can be executed
-  const canExecute = async (p: string | null | undefined): Promise<string | null> =>
-    p &&
+  const canExec = async (p?: string | null) =>
+    !!p &&
     (await access(p, constants.X_OK).then(
       () => true,
       () => false,
-    ))
-      ? p
-      : null;
+    ));
 
-  let validStoredPath: string | null = null;
+  const check = async (p?: string | null) => {
+    if (!(await canExec(p))) return null;
+    const v = await checkFFmpegVersion(p!);
+    return v && v >= minimumVersion ? { path: p!, version: v } : null;
+  };
 
-  if (storedPath && (await canExecute(storedPath))) {
-    const version = await checkFFmpegVersion(storedPath);
-
-    if (version !== null && version >= minimumVersion) {
-      validStoredPath = storedPath;
-    }
-  }
-
-  const customPathValidated =
-    customPath && (await canExecute(customPath))
-      ? await checkFFmpegVersion(customPath).then((v) => (v && v >= minimumVersion ? customPath : null))
-      : null;
+  const { ffmpeg_path: custom } = getPreferenceValues();
+  const stored = await LocalStorage.getItem<string>("ffmpeg-path");
   const whichPath = await which("ffmpeg").catch(() => null);
-  const whichPathValidated = whichPath
-    ? await checkFFmpegVersion(whichPath).then((v) => (v && v >= minimumVersion ? whichPath : null))
-    : null;
 
-  const path = validStoredPath ?? customPathValidated ?? whichPathValidated;
+  console.log(`custom: ${custom}`);
+  console.log(`stored: ${stored}`);
+  console.log(`which : ${whichPath}`);
 
-  if (!path) return null;
+  const [storedResult, customResult, whichResult] = await Promise.all([check(stored), check(custom), check(whichPath)]);
 
-  const version = await checkFFmpegVersion(path);
+  const result = storedResult ?? customResult ?? whichResult;
 
-  if (version === null || version < minimumVersion) {
-    return null;
-  }
+  if (!result) return null;
 
-  await LocalStorage.setItem("ffmpeg-path", path);
+  await LocalStorage.setItem("ffmpeg-path", result.path);
 
-  return { path, version };
+  return result;
 }
 
 export async function installFFmpegBinary(onProgress?: (progress: number) => void): Promise<void> {
