@@ -1,6 +1,6 @@
 # Brightness Control Changelog
 
-## [Update] {PR_MERGE_DATE}
+## [Update] - {PR_MERGE_DATE}
 - Add windows support
 - Update packages
 
