@@ -1,6 +1,6 @@
 # Sonarr Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-21
 
 - Removed an unused command entirely
 - Simplified **Search Series** rows to title/year with compact metadata
