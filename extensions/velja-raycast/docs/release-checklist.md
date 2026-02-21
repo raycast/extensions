@@ -35,6 +35,8 @@ Use this checklist before publishing a new version of the Velja Raycast extensio
 - [ ] README reflects current feature set
 - [ ] `docs/ai-extension-usage.md` examples are current
 - [ ] `docs/architecture.md` and `docs/velja-integration.md` still match implementation
+- [ ] `CHANGELOG.md` updated using `[Title] - {PR_MERGE_DATE}` format
+- [ ] `docs/store-submission.md` placeholders updated (screencast + screenshots + PR notes)
 
 ## 5. Publish
 
@@ -48,6 +50,7 @@ npm run publish
 ```
 
 - [ ] Verify Store metadata/screenshots and post-publish command behavior
+- [ ] Confirm screenshot assets match Raycast spec (PNG, 2000x1250, consistent background)
 
 ## 6. Rollback Plan
 

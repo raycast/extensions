@@ -8,6 +8,9 @@
   "categories": [
     "Productivity"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -234,7 +237,7 @@
   },
   "preferences": [],
   "dependencies": {
-    "@raycast/api": "^1.40.0"
+    "@raycast/api": "^1.104.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

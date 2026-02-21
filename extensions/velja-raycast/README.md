@@ -73,6 +73,7 @@ Upstream PR prep should always use the production profile (`velja-raycast` / `Ve
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development setup and guidelines.
 For release preparation, see [docs/release-checklist.md](docs/release-checklist.md).
+For Store submission placeholders and PR template, see [docs/store-submission.md](docs/store-submission.md).
 For AI usage details, see [docs/ai-extension-usage.md](docs/ai-extension-usage.md).
 
 ## Architecture
