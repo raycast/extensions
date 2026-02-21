@@ -7,6 +7,7 @@ This Raycast extension is the perfect companion for Slack users. It allows you t
 - See unread messages,
 - Snooze notifications
 - Set your presence status
+- Set your status
 
 ## How to get an access token?
 
