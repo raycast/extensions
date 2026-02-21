@@ -25,16 +25,8 @@ interface StreamDelta {
   }[];
 }
 
-export function getPreferences() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
-
-  if (!prefs.token) {
-    throw new Error(
-      "API token not configured. Please set your OpenClaw gateway token in the extension preferences.",
-    );
-  }
-
-  return prefs;
+export function getPreferences<T extends Preferences = Preferences>() {
+  return getPreferenceValues<T>();
 }
 
 export async function sendMessage(

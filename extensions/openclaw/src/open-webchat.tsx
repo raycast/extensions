@@ -3,7 +3,7 @@ import { getPreferences } from "./api";
 
 export default async function Command() {
   try {
-    const prefs = getPreferences();
+    const prefs = getPreferences<Preferences>();
     // The webchat is typically served from the gateway endpoint
     const webchatUrl = prefs.endpoint.replace(/\/+$/, "");
     await open(webchatUrl);

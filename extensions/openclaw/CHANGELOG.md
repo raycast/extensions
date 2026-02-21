@@ -1,4 +1,4 @@
-# Changelog
+# OpenClaw Changelog
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
