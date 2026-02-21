@@ -161,7 +161,8 @@ export function WallpaperActions({ wallpaper }: { wallpaper: Wallpaper }) {
           shortcut={{ modifiers: ["cmd"], key: "c" }}
         />
         <Action.CopyToClipboard
-          title="Copy Wallpaper Id"
+          // eslint-disable-next-line @raycast/prefer-title-case
+          title="Copy Wallpaper ID"
           content={wallpaper.id}
         />
         <Action.CopyToClipboard
