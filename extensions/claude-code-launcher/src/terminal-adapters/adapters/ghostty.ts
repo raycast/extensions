@@ -21,11 +21,12 @@ export class GhosttyAdapter implements TerminalAdapter {
     const userShell = process.env.SHELL || "/bin/zsh";
 
     // Build the command to execute in the terminal
-    // 1. cd to the target directory
-    // 2. clear the screen for a clean start
-    // 3. launch claude CLI
-    // 4. exec the shell to replace the process
-    const command = `cd ${this.shellEscape(directory)} && clear && claude ; exec ${userShell} -l`;
+    // 1. Source shell profiles to load environment variables (including API key)
+    // 2. cd to the target directory
+    // 3. clear the screen for a clean start
+    // 4. launch claude CLI
+    // 5. exec the shell to replace the process
+    const command = `source ~/.zprofile 2>/dev/null; source ~/.zshrc 2>/dev/null; source ~/.bash_profile 2>/dev/null; source ~/.bashrc 2>/dev/null; source ~/.profile 2>/dev/null; cd ${this.shellEscape(directory)} && clear && claude ; exec ${userShell} -l`;
 
     // Launch Ghostty using macOS 'open' command
     // -na: open a new instance of the application
