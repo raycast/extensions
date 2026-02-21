@@ -31,17 +31,18 @@ async function getActiveInterface(): Promise<string> {
 async function getNetworkStats(): Promise<NetworkStats> {
   try {
     const iface = await getActiveInterface();
-    // Sanitize interface name to prevent command injection (only allow valid interface name chars)
     const safeIface = iface.replace(/[^a-zA-Z0-9._-]/g, "");
     if (!safeIface) return { bytesReceived: 0, bytesSent: 0 };
-    const command = `/usr/sbin/netstat -ib | /usr/bin/grep -E '${safeIface}.*Link' | /usr/bin/head -1 | /usr/bin/awk '{print $7, $10}'`;
-    const { stdout } = await execPromise(command);
-    const trimmed = stdout.trim();
-    if (!trimmed) return { bytesReceived: 0, bytesSent: 0 };
 
-    const parts = trimmed.split(/\s+/);
-    const bytesReceived = parseInt(parts[0], 10) || 0;
-    const bytesSent = parseInt(parts[1], 10) || 0;
+    // Avoid interpolating interface name into shell command — parse output in JS instead
+    const { stdout } = await execPromise("/usr/sbin/netstat -ib");
+    const line = stdout.split("\n").find((l) => l.startsWith(safeIface) && l.includes("<Link#"));
+    if (!line) return { bytesReceived: 0, bytesSent: 0 };
+
+    // netstat -ib columns (0-indexed): Name Mtu Network Address Ipkts Ierrs Ibytes Opkts Oerrs Obytes Coll
+    const parts = line.trim().split(/\s+/);
+    const bytesReceived = parseInt(parts[6], 10) || 0;
+    const bytesSent = parseInt(parts[9], 10) || 0;
     return { bytesReceived, bytesSent };
   } catch {
     return { bytesReceived: 0, bytesSent: 0 };
