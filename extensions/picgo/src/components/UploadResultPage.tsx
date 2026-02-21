@@ -1,6 +1,6 @@
 import { type IImgInfo } from "picgo";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
 import { exportFormats } from "../util/format";
 import ImagesMetadataPanel from "./ImagesMetadataPanel";
 
@@ -9,17 +9,22 @@ interface Props {
 }
 
 export default function UploadResultPage({ result }: Props) {
-    result = result.filter((r) => r.imgUrl);
-    const urls = result.map((r) => r.imgUrl!);
-    if (result.length === 0)
+    const { autoCopyAfterUpload } = getPreferenceValues<Preferences>();
+    const imgs = result.filter((r) => r.imgUrl);
+    if (imgs.length === 0)
         return (
             <List>
                 <List.EmptyView icon={Icon.Warning} title="No Image URL Results." />
             </List>
         );
+    if (autoCopyAfterUpload) {
+        Clipboard.copy(exportFormats.url.generate(result));
+        showToast({ style: Toast.Style.Success, title: "URL Copied!" });
+    }
     return (
-        <List isShowingDetail navigationTitle={`${result.length} images uploaded`}>
-            {exportFormats.map((f) => {
+        <List isShowingDetail navigationTitle={`${imgs.length} images uploaded`}>
+            {Object.keys(exportFormats).map((k) => {
+                const f = exportFormats[k];
                 return (
                     <List.Item
                         id={f.name}
@@ -29,14 +34,14 @@ export default function UploadResultPage({ result }: Props) {
                             <ActionPanel>
                                 <Action.CopyToClipboard
                                     title={`Copy ${f.label} to Clipboard`}
-                                    content={f.generate(urls)}
+                                    content={f.generate(imgs)}
                                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                                 ></Action.CopyToClipboard>
                             </ActionPanel>
                         }
                         detail={
                             <List.Item.Detail
-                                markdown={`### ${f.label} Preview \n \`\`\`\n${f.generate(urls)}\n\`\`\``}
+                                markdown={`### ${f.label} Preview \n \`\`\`\n${f.generate(imgs)}\n\`\`\``}
                                 metadata={<ImagesMetadataPanel result={result}></ImagesMetadataPanel>}
                             ></List.Item.Detail>
                         }
