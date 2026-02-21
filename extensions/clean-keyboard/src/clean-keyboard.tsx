@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { handler, stopHandler } from "swift:../swift/MyExecutable";
+import { isMac } from "./lib/utils";
 
 interface Duration {
   display: string;
@@ -56,7 +56,15 @@ export default function Command() {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
 
-  const selectDuration = (duration: Duration) => {
+  const selectDuration = async (duration: Duration) => {
+    let handler: (duration: number) => void;
+    if (isMac) {
+      const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
+      handler = handlerSwift;
+    } else {
+      const { handler: handlerRust } = await import("rust:../rust/clean-keyboard");
+      handler = handlerRust;
+    }
     const lockToast = new Toast({ title: "Keyboard locked" });
     handler(duration.seconds);
     setTimeLeft(duration.seconds);
@@ -91,8 +99,16 @@ export default function Command() {
                 autoFocus={false}
                 title={"Unlock Keyboard"}
                 shortcut={{ modifiers: ["ctrl"], key: "u" }}
-                onAction={() => {
-                  stopHandler();
+                onAction={async () => {
+                  let stopHandler: () => Promise<void>;
+                  if (isMac) {
+                    const { stopHandler: stopHandlerSwift } = await import("swift:../swift/MyExecutable");
+                    stopHandler = stopHandlerSwift;
+                  } else {
+                    const { stop_handler: stopHandlerRust } = await import("rust:../rust/clean-keyboard");
+                    stopHandler = stopHandlerRust;
+                  }
+                  await stopHandler();
                   setIsRunning(false);
                 }}
               />
