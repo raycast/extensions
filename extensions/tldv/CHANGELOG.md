@@ -1,6 +1,6 @@
 # Changelog
 
-## [Code Quality & Features] - 2026-02-19
+## [Code Quality & Features] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -17,7 +17,7 @@
 
 - Use auto-generated Preferences type from raycast-env.d.ts
 
-## [Mock Data & Menu Bar] - 2026-02-19
+## [Mock Data & Menu Bar] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -29,7 +29,7 @@
 - AI Summary display improvements
 - "Transcript not available" message clarity
 
-## [Initial Version] - 2026-02-19
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 
