@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Menu Bar & Favorite Command Improvements] - {PR_MERGE_DATE}
+## [Menu Bar & Favorite Command Improvements] - 2026-02-21
 
 - `Favorite Track` and `Favorite and Add to Library` commands now close Raycast immediately, showing HUD only after Apple Music confirms the state change.
 - Menu bar favorite status is now fetched in the same AppleScript call as the track, eliminating flicker when opening the dropdown.
