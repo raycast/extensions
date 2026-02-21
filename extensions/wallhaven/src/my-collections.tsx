@@ -59,6 +59,15 @@ function CollectionWallpapers({
 export default function MyCollections() {
   const { apiKey, username } = getPreferenceValues<Preferences>();
 
+  const { data: collectionsData, isLoading } = useCachedPromise(
+    async () => {
+      const result = await getCollections();
+      return result.data;
+    },
+    [],
+    { execute: !!apiKey && !!username },
+  );
+
   if (!apiKey || !username) {
     return (
       <List>
@@ -70,11 +79,6 @@ export default function MyCollections() {
       </List>
     );
   }
-
-  const { data: collectionsData, isLoading } = useCachedPromise(async () => {
-    const result = await getCollections();
-    return result.data;
-  });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search collections...">
