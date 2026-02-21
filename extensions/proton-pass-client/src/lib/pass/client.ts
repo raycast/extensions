@@ -4,6 +4,8 @@ import { execFile } from "child_process";
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { useMemo } from "react";
 
+const MAX_BUFFER_SIZE = 50 * 1024 * 1024; // 50MB
+
 const execFileAsync = promisify(execFile);
 
 export type { Item, Vault };
@@ -46,7 +48,9 @@ export class Client {
 
   async getAllVaults(forceRefresh: boolean = false): Promise<Vault[]> {
     const fetchAndRefreshVaults = async () => {
-      const { stdout, stderr } = await execFileAsync(this.cliPath, ["vault", "list", "--output=json"]);
+      const { stdout, stderr } = await execFileAsync(this.cliPath, ["vault", "list", "--output=json"], {
+        maxBuffer: MAX_BUFFER_SIZE,
+      });
       if (stderr) throw new Error(`Error fetching vaults: ${stderr}`);
       this.setCachedVaults(stdout);
       return stdout;
@@ -64,7 +68,9 @@ export class Client {
 
   async getItems(vaultName: string | null, forceRefresh: boolean = false): Promise<Item[]> {
     const fetchAndRefreshItems = async (vaultName: string) => {
-      const { stdout, stderr } = await execFileAsync(this.cliPath, ["item", "list", vaultName, "--output=json"]);
+      const { stdout, stderr } = await execFileAsync(this.cliPath, ["item", "list", vaultName, "--output=json"], {
+        maxBuffer: MAX_BUFFER_SIZE,
+      });
       if (stderr) throw new Error(`Error fetching items: ${stderr}`);
       this.setCachedItems(stdout, vaultName);
       return stdout;

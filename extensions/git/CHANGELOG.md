@@ -1,5 +1,41 @@
 # Changelog
 
+## [Update] - 2026-02-19
+
+### Added
+- **GitIgnore**: Add "Add to .gitignore" action for files in status view
+  - Introduce `GitIgnoreAction` with form for adding patterns to `.gitignore`
+  - Add `checkIgnorePattern` and `addToGitignore` methods to `GitManager`
+  - Preview matched files before adding patterns
+- **Gravatar**: Add user icon display options in commits list
+  - Add `userIconProvider` preference (None, Author's initials, Gravatar variants)
+  - Implement `GravatarIcon` component for Gravatar and initials-based avatars
+  - Support Retro, Identicon, Mystery Person, Monsterid, Robohash, Wavatar styles
+- **Submodules**: Add "Show Repository" action for submodules
+  - Introduce `SubmoduleShowRepositoryAction` component
+  - Enable opening submodules in a new window
+  - Add "Update Submodule" action for updating submodules
+  - Add "Delete Submodule" action for deleting submodules
+  - Add "Add New Submodule" action for adding new submodules
+  - Add "Update All Submodules" action for updating all submodules
+- **Git Config**: Add "Git Config" view for managing local git config
+- **Git LFS**: Add "Git LFS" view for managing Git LFS filters
+- **Preferences**: Add new preferences:
+  - "Initial Tab" preference for opening repositories
+  - "Binary Path" preference for git binary path
+
+### Changed
+- **Interactive Rebase**: Improve UX and safety
+  - Add search bar placeholder ("Pick, reword, edit, drop, squash, fixup")
+  - Rename "Pick" action to "Apply Rebase" with Checkmark icon
+  - Add pre-rebase guard for uncommitted changes
+  - Use dynamic icons for squash and fixup actions (`arrow-down-left.svg`)
+- **Commit Details**: Improve performance by fetching commit details only when needed
+
+### Fixed
+- **Git Clone**: Refactor clone process for improved reliability
+- **Upstream Branch**: Enhance null safety in upstream branch handling
+
 ## [Update] - 2026-02-06
 
 ### Added

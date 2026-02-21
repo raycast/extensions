@@ -1,5 +1,9 @@
 # Proton Pass Client Changelog
 
+## [Fix & Improvements] - 2026-02-19
+
+- Fixed RangeError for large vaults by increasing buffer size to 50MB
+
 ## [Initial Version] - 2026-02-19
 
 - Browse Proton Pass vaults and items from Raycast

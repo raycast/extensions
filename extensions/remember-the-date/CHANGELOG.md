@@ -1,5 +1,12 @@
 # Remember the Date Changelog
 
+## [Recurring Events Support] - 2026-02-20
+
+- Added support for recurring dates: weekly, monthly, and yearly repeat types
+- Recurring dates automatically show the next upcoming occurrence
+- Repeat type badge displayed in the list view
+- AI tools updated to support repeat parameter
+
 ## [AI Tools Integration and Windows Support] - 2025-11-26
 
 - Added AI tools for seamless date management via Raycast AI

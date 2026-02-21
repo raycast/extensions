@@ -1,15 +1,15 @@
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import type {
-  Team,
-  Deployment,
-  Project,
-  Environment,
-  User,
-  CreateEnvironmentVariableResponse,
   Build,
-  Pagination,
   CreateEnvironment,
+  CreateEnvironmentVariableResponse,
+  Deployment,
   Domain,
+  Environment,
+  Pagination,
+  Project,
+  Team,
+  User,
   AIGatewayLogItem,
 } from "./types";
 
@@ -359,6 +359,39 @@ export async function checkDomainAvailability(domain: string) {
 
   const json = (await response.json()) as { available: boolean };
   return { available: json.available };
+}
+
+/**
+ * Cancel a deployment that is currently building or queued.
+ * @see https://docs.vercel.com/docs/rest-api/reference/endpoints/deployments/cancel-a-deployment
+ */
+export async function cancelDeployment(
+  deploymentId: Deployment["uid"] | string,
+  teamId?: Team["id"],
+): Promise<Deployment> {
+  try {
+    const id =
+      typeof deploymentId === "string" && deploymentId.startsWith("dpl_") ? deploymentId : `dpl_${deploymentId}`;
+    const query = teamId ? `?teamId=${encodeURIComponent(teamId)}` : "";
+    const response = await fetch(apiURL + `v12/deployments/${id}/cancel${query}`, {
+      method: "PATCH",
+      headers: headers,
+    });
+    if (!response.ok) {
+      const errorJson = (await response.json()) as { error?: { message?: string } };
+      throw new Error(errorJson.error?.message ?? `Cancel failed (${response.status})`);
+    }
+    const json = (await response.json()) as Deployment;
+    return json;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to cancel deployment";
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to cancel deployment",
+      message,
+    });
+    throw err;
+  }
 }
 
 // AI Gateway Logs
