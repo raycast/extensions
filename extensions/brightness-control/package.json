@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "up",
-      "title": "Brightness Up",
+      "title": "Brightness up",
       "description": "Increases the brightness by 10% of your display",
       "mode": "no-view",
       "icon": "brightness-up.png"

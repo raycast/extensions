@@ -45,7 +45,7 @@ async function isTwinkleTrayRunning(): Promise<boolean> {
  * Start Twinkle Tray in the background.
  */
 async function startTwinkleTray(exe: string): Promise<void> {
-    execAsync(`start "" ${exe}`, { timeout: 10000 }).catch(() => {});
+  execAsync(`start "" ${exe}`, { timeout: 10000 }).catch(() => {});
   // Wait for Twinkle Tray to initialize
   await new Promise((resolve) => setTimeout(resolve, 3000));
 }
