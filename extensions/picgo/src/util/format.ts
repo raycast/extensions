@@ -41,10 +41,9 @@ export const exportFormats: Record<string, ImgUrlExportFormat> = {
                         $extName: extName(img) ?? "",
                     };
                     let format = customFormat;
-                    Object.keys(items).forEach((key) => {
-                        if (!customFormat.includes(key)) return;
-                        const reg = new RegExp(`\\${key}`, "g");
-                        format = format.replace(reg, items[key] ?? "");
+                    Object.entries(items).forEach(([key, value]) => {
+                        if (!format.includes(key)) return;
+                        format = format.replaceAll(key, value);
                     });
                     return format;
                 })

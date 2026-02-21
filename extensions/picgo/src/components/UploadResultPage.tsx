@@ -18,7 +18,7 @@ export default function UploadResultPage({ result }: Props) {
             </List>
         );
     if (autoCopyAfterUpload) {
-        Clipboard.copy(exportFormats.url.generate(result));
+        Clipboard.copy(exportFormats.url.generate(imgs));
         showToast({ style: Toast.Style.Success, title: "URL Copied!" });
     }
     return (
@@ -42,7 +42,7 @@ export default function UploadResultPage({ result }: Props) {
                         detail={
                             <List.Item.Detail
                                 markdown={`### ${f.label} Preview \n \`\`\`\n${f.generate(imgs)}\n\`\`\``}
-                                metadata={<ImagesMetadataPanel result={result}></ImagesMetadataPanel>}
+                                metadata={<ImagesMetadataPanel result={imgs}></ImagesMetadataPanel>}
                             ></List.Item.Detail>
                         }
                     ></List.Item>
