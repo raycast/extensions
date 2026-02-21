@@ -22,8 +22,22 @@ export default function Command() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    const updateTime = () => {
+    const updateTime = async () => {
       if (!playingInfo) return;
+
+      // Check if background process is still alive (if not paused)
+      if (!playingInfo.isPaused) {
+        try {
+          const { execSync } = require("child_process");
+          const { LOOP_SCRIPT } = require("./lib/audio");
+          execSync(`pgrep -f "${LOOP_SCRIPT}"`);
+        } catch (e) {
+          // Process not found - recitation must have finished or was killed
+          await LocalStorage.removeItem("currently_playing");
+          await mutate(undefined);
+          return;
+        }
+      }
 
       const now = playingInfo.isPaused && playingInfo.lastPausedAt ? playingInfo.lastPausedAt : Date.now();
       const basePausedTime = playingInfo.pausedTime || 0;
@@ -32,7 +46,7 @@ export default function Command() {
 
       setElapsed(elapsedSeconds);
 
-      if (playingInfo.duration && playingInfo.duration > 0) {
+      if (playingInfo.duration && playingInfo.duration > 0 && !playingInfo.isMemorization) {
         setRemaining(Math.max(0, Math.round(playingInfo.duration - elapsedSeconds)));
       } else {
         setRemaining(null);
@@ -112,6 +126,14 @@ export default function Command() {
               onAction={handleStop}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
+            <MenuBarExtra.Item
+              title={playingInfo.isRepeating ? "Repeat: ON" : "Repeat: OFF"}
+              icon={playingInfo.isRepeating ? Icon.Repeat : Icon.Circle}
+              onAction={async () => {
+                const updated = await launchCommand({ name: "toggle-repeat", type: LaunchType.UserInitiated });
+                await mutate();
+              }}
+            />
           </MenuBarExtra.Section>
         </>
       ) : (
@@ -122,6 +144,11 @@ export default function Command() {
           title="Browse Surahs"
           icon={Icon.Book}
           onAction={() => launchCommand({ name: "search-surah", type: LaunchType.UserInitiated })}
+        />
+        <MenuBarExtra.Item
+          title="Memorize Surah"
+          icon={Icon.Repeat}
+          onAction={() => launchCommand({ name: "memorize-surah", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
           title="Change Reciter"

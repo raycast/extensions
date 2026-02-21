@@ -60,4 +60,5 @@ export interface PlayingInfo {
   chapterId?: number;
   reciterId?: number;
   isMemorization?: boolean;
+  isRepeating?: boolean;
 }

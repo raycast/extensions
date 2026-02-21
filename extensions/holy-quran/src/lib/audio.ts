@@ -8,7 +8,8 @@ const execAsync = promisify(exec);
 
 const LIBRARY_PATH = path.join(os.homedir(), "Music", "HolyQuran");
 const VERSES_PATH = path.join(LIBRARY_PATH, ".verses"); // Hidden folder for verse caching
-const LOOP_SCRIPT = path.join(os.tmpdir(), "quran_audio_loop.sh");
+export const LOOP_SCRIPT = path.join(os.tmpdir(), "quran_audio_loop.sh");
+export const REPEAT_FLAG_FILE = path.join(os.tmpdir(), "quran_repeat_flag");
 
 async function isOffline(): Promise<boolean> {
   try {
@@ -22,9 +23,18 @@ async function isOffline(): Promise<boolean> {
   }
 }
 
+export async function stopLoop(): Promise<void> {
+  try {
+    await execAsync(`pkill -9 -f "${LOOP_SCRIPT}" || true`);
+  } catch {
+    // ignore
+  }
+}
+
 export async function stopAudio(): Promise<void> {
   try {
     await execAsync(`pkill -9 afplay || true; pkill -9 -f "${LOOP_SCRIPT}" || true`);
+    if (fs.existsSync(REPEAT_FLAG_FILE)) fs.unlinkSync(REPEAT_FLAG_FILE);
   } catch {
     // If no process is found, that's fine
   }
@@ -98,7 +108,13 @@ export function isVerseRangeCached(reciterName: string, chapterId: number, start
   return true;
 }
 
-export async function playAudio(url: string, reciterName: string, surahName: string, chapterId: number): Promise<number> {
+export async function playAudio(
+  url: string,
+  reciterName: string,
+  surahName: string,
+  chapterId: number,
+  shouldLoop: boolean = false
+): Promise<number> {
   await stopAudio();
 
   const localFile = getSurahPath(reciterName, surahName, chapterId);
@@ -118,11 +134,24 @@ export async function playAudio(url: string, reciterName: string, surahName: str
     await fs.promises.writeFile(localFile, buffer);
   }
 
-  // Get duration before playing
   const duration = await getAudioDuration(localFile);
 
-  // Play from the local file and detach so it keeps running after Raycast exits
-  const child = spawn("afplay", [localFile], {
+  // Set the repeat flag
+  fs.writeFileSync(REPEAT_FLAG_FILE, shouldLoop ? "true" : "false");
+
+  // Create a loop script even for single playback to allow toggling repeat ON while playing
+  const loopScript = `#!/bin/bash
+while true; do
+  afplay "${localFile}"
+  if [ ! -f "${REPEAT_FLAG_FILE}" ] || [ "$(cat "${REPEAT_FLAG_FILE}")" != "true" ]; then
+    break
+  fi
+done
+`;
+
+  fs.writeFileSync(LOOP_SCRIPT, loopScript, { mode: 0o755 });
+
+  const child = spawn(LOOP_SCRIPT, [], {
     detached: true,
     stdio: "ignore",
   });
@@ -134,7 +163,7 @@ export async function playAudio(url: string, reciterName: string, surahName: str
 export async function playVersePlaylist(
   verseItems: { url: string; verseKey: string }[],
   reciterName: string,
-  repeatCount: number = 1,
+  repeatCount: number = 1, // 0 for infinite
 ): Promise<number> {
   await stopAudio();
 
@@ -152,9 +181,7 @@ export async function playVersePlaylist(
     const localPath = path.join(reciterVerseDir, fileName);
 
     if (!fs.existsSync(localPath)) {
-      if (offline || !item.url) {
-        continue; // Skip verses not in cache when offline or if no URL provided
-      }
+      if (offline || !item.url) continue;
       const resp = await fetch(item.url);
       if (resp.ok) {
         const buf = Buffer.from(await resp.arrayBuffer());
@@ -169,30 +196,40 @@ export async function playVersePlaylist(
   }
 
   if (localPaths.length === 0) {
-    if (offline) {
-      throw new Error("You are offline and these verses are not in your library. Please connect to download them.");
-    }
-    throw new Error("Could not prepare any verses for playback.");
+    if (offline) throw new Error("Offline and verses not cached.");
+    throw new Error("Could not prepare verses.");
   }
 
   const playSequence = localPaths.map((p) => `afplay "${p}"`).join("; ");
-  const iterations = repeatCount === 0 ? 9999 : repeatCount;
-  const totalDuration = iterations === 9999 ? 0 : totalSingleDuration * iterations;
+
+  // Set the repeat flag
+  const isInfinite = repeatCount === 0;
+  fs.writeFileSync(REPEAT_FLAG_FILE, isInfinite ? "true" : "false");
 
   const loopScript = `#!/bin/bash
-for i in {1..${iterations}}; do
+COUNT=0
+ITERATIONS=${isInfinite ? 999999 : (repeatCount || 1)}
+while [ $COUNT -lt $ITERATIONS ]; do
   ${playSequence}
+  COUNT=$((COUNT+1))
+  # Check if repeat was toggled OFF or if we finished our count
+  IF_FLAG=$(cat "${REPEAT_FLAG_FILE}" 2>/dev/null)
+  if [ "$IF_FLAG" == "true" ]; then
+    ITERATIONS=999999 # Make it infinite if flag is true
+  elif [ $COUNT -ge ${repeatCount || 1} ]; then
+    break # Stop if we hit our requested count and flag is NOT true
+  fi
 done
 `;
 
   fs.writeFileSync(LOOP_SCRIPT, loopScript, { mode: 0o755 });
 
-  // Execute the script in the background and detach
   const child = spawn(LOOP_SCRIPT, [], {
     detached: true,
     stdio: "ignore",
   });
   child.unref();
 
+  const totalDuration = isInfinite ? 0 : totalSingleDuration * (repeatCount || 1);
   return totalDuration;
 }

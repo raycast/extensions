@@ -23,6 +23,12 @@
       "mode": "view"
     },
     {
+      "name": "memorize-surah",
+      "title": "Memorize Surah",
+      "description": "Configure a memorization loop for a specific Surah range",
+      "mode": "view"
+    },
+    {
       "name": "play-surah",
       "title": "Play Surah",
       "description": "Browse and play Surahs",
@@ -516,6 +522,12 @@
       "name": "toggle-pause",
       "title": "Pause/Resume Recitation",
       "description": "Pause or resume the current recitation",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-repeat",
+      "title": "Toggle Repeat On/Off",
+      "description": "Enable or disable looping of the current session",
       "mode": "no-view"
     },
     {

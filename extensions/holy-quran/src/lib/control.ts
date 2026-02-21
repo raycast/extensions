@@ -2,6 +2,8 @@ import { LocalStorage, launchCommand, LaunchType } from "@raycast/api";
 import { stopAudio, pauseAudio, resumeAudio } from "./audio";
 import { PlayingInfo } from "../types";
 
+export const GLOBAL_REPEAT_KEY = "global_repeat_enabled";
+
 export async function stopPlayback() {
     await stopAudio();
     await LocalStorage.removeItem("currently_playing");
@@ -49,4 +51,39 @@ export async function togglePause() {
     }
 
     return updatedInfo;
+}
+export async function toggleRepeat() {
+    const item = await LocalStorage.getItem<string>("currently_playing");
+    const globalVal = await LocalStorage.getItem<boolean>(GLOBAL_REPEAT_KEY);
+
+    // Toggle based on current session if active, otherwise toggle the global setting
+    const isNowRepeating = item
+        ? !(JSON.parse(item) as PlayingInfo).isRepeating
+        : !globalVal;
+
+    // Write to the flag file for the background script to pick up
+    const fs = require("fs");
+    const { REPEAT_FLAG_FILE } = require("./audio");
+    fs.writeFileSync(REPEAT_FLAG_FILE, isNowRepeating ? "true" : "false");
+
+    // Save global setting
+    await LocalStorage.setItem(GLOBAL_REPEAT_KEY, isNowRepeating);
+
+    let updatedInfo: PlayingInfo | null = null;
+    if (item) {
+        const playingInfo = JSON.parse(item) as PlayingInfo;
+        updatedInfo = {
+            ...playingInfo,
+            isRepeating: isNowRepeating,
+        };
+        await LocalStorage.setItem("currently_playing", JSON.stringify(updatedInfo));
+    }
+
+    try {
+        await launchCommand({ name: "status", type: LaunchType.UserInitiated });
+    } catch (e) {
+        // ignore
+    }
+
+    return updatedInfo || { isRepeating: isNowRepeating } as PlayingInfo;
 }

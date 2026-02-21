@@ -21,6 +21,7 @@ import { Chapter, Recitation, Preferences } from "./types";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import MemorizeSurah from "./memorize-surah";
 import { FAV_SURAH_KEY, FAV_RECITER_KEY, SURAH_VERSE_COUNTS } from "./lib/constants";
+import { GLOBAL_REPEAT_KEY } from "./lib/control";
 
 export default function Command(props: LaunchProps<{ arguments: { surah?: string; start?: string; end?: string } }>) {
   const {
@@ -69,6 +70,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
 
       try {
         let duration = 0;
+        const globalRepeat = (await LocalStorage.getItem<boolean>(GLOBAL_REPEAT_KEY)) || false;
 
         if (startAyah) {
           const end = endAyah || startAyah;
@@ -90,7 +92,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
 
           if (verseItems.length === 0) throw new Error("No verses found for this range.");
 
-          duration = await playVersePlaylist(verseItems, rname, 1);
+          duration = await playVersePlaylist(verseItems, rname, globalRepeat ? 0 : 1);
 
           await LocalStorage.setItem(
             "currently_playing",
@@ -100,6 +102,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
               chapterId: chapter.id,
               startTime: Date.now(),
               duration,
+              isRepeating: globalRepeat,
             }),
           );
         } else {
@@ -108,7 +111,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
             const audioFile = await fetchAudioFile(rid, chapter.id);
             audioUrl = audioFile.audio_url;
           }
-          duration = await playAudio(audioUrl, rname, chapter.name_simple, chapter.id);
+          duration = await playAudio(audioUrl, rname, chapter.name_simple, chapter.id, globalRepeat);
 
           await LocalStorage.setItem(
             "currently_playing",
@@ -119,6 +122,7 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
               reciterId: rid,
               startTime: Date.now(),
               duration,
+              isRepeating: globalRepeat,
             }),
           );
         }
