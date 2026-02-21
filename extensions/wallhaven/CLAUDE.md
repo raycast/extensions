@@ -66,6 +66,8 @@ When `sorting=random`, the API returns a `seed` in `meta`. That seed must be pas
 
 `utils.ts:setDesktopWallpaper(path, allDesktops)` — `allDesktops=true` targets `every desktop`, `allDesktops=false` targets `current desktop` only. The image must be downloaded to a local path first (temp file via `getTempFilePath`, which uses `environment.supportPath`).
 
+`setDesktopWallpaper` must escape backslashes and double quotes in `imagePath` before interpolating into AppleScript strings. Do not pass raw paths directly into AppleScript interpolation.
+
 ### Collections require username
 
 The Wallhaven API endpoint for collection wallpapers is `/collections/<USERNAME>/<ID>`. The API has no endpoint that returns the authenticated user's username, so it is collected as a separate `username` preference. `My Collections` shows an empty-state gate if either `apiKey` or `username` is missing.

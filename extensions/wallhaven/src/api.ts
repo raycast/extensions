@@ -8,9 +8,9 @@ import {
 
 const BASE_URL = "https://wallhaven.cc/api/v1";
 
-function getHeaders(): HeadersInit {
+function getHeaders(): Record<string, string> {
   const { apiKey } = getPreferenceValues<Preferences>();
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {};
   if (apiKey) {
     headers["X-API-Key"] = apiKey;
   }
