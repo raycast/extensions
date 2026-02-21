@@ -4,7 +4,7 @@ import { withSlackClient } from "./shared/withSlackClient";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { SLACK_EMOJI_CODE_MAP } from "./constants/emoji.constants";
 import { useCallback, useMemo } from "react";
-import { type SlackStatusForm, StatusForm } from "./components/set-status/statuts-form.component";
+import { type SlackStatusForm, StatusForm } from "./components/set-status/status-form.component";
 import { EmojiPicker } from "./components/set-status/emoji-picker.component";
 import { getDurationOptionFromTimestamp, getTextForExpiration } from "./utils/set-status/expiration.util";
 import { showToastWithPromise } from "./utils/toast.util";

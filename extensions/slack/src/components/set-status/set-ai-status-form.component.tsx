@@ -1,6 +1,6 @@
 import { Action, ActionPanel, AI, clearSearchBar, Icon, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { SlackStatusForm } from "./statuts-form.component";
+import { SlackStatusForm } from "./status-form.component";
 
 type AIAnswerType = Pick<SlackStatusForm, "statusText" | "emoji" | "expiration">;
 
