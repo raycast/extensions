@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Favorite Flow Improvements] - 2026-02-19
+## [Favorite Flow Improvements] - 2026-02-10
 
 - Added a `Favorite Track` / `Unfavorite Track` action to the menu bar command with state-aware title and icon.
 - Updated favorite actions to wait for Apple Music to confirm the favorite state change before showing success HUD.
