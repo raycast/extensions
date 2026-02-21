@@ -305,7 +305,7 @@ export class SlackClient {
     });
 
     if (!result.profile) {
-      throw new Error(`${userId} is Not have profile.`);
+      throw new Error(`${userId} does not have a profile.`);
     }
 
     return result.profile;
