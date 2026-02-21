@@ -15,12 +15,43 @@ function getConfig(): Preferences {
   };
 }
 
-function getHeaders(): HeadersInit {
+function getHeaders() {
   const config = getConfig();
   return {
     Authorization: `Bearer ${config.apiKey}`,
     "Content-Type": "application/json",
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+async function getApiErrorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  try {
+    const data: unknown = await response.json();
+    if (isRecord(data) && typeof data.error === "string" && data.error) {
+      return data.error;
+    }
+  } catch {
+    // Ignore parse errors and use fallback.
+  }
+
+  return fallback;
+}
+
+async function parseApiResponse<T>(
+  response: Response,
+  fallbackError: string,
+): Promise<T> {
+  if (!response.ok) {
+    throw new Error(await getApiErrorMessage(response, fallbackError));
+  }
+
+  return (await response.json()) as T;
 }
 
 export type Model = {
@@ -71,6 +102,13 @@ export type ChatWithMessages = Chat & {
   messages: ChatMessage[];
 };
 
+type ChatsResponse = { chats: Chat[] };
+type ChatResponse = { chat: ChatWithMessages };
+type ModelsResponse = { models: Model[] };
+type ApplicationStagesResponse = { stages: ApplicationStage[] };
+type CreateApplicationResponse = { application: CreatedApplication };
+type ExtractJobResponse = { data: ExtractedJobData };
+
 export type RaycastCommand = "message" | "connection" | "webSearch";
 
 export async function fetchChats(): Promise<Chat[]> {
@@ -80,12 +118,10 @@ export async function fetchChats(): Promise<Chat[]> {
     headers: getHeaders(),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch chats");
-  }
-
-  const data = await response.json();
+  const data = await parseApiResponse<ChatsResponse>(
+    response,
+    "Failed to fetch chats",
+  );
   return data.chats;
 }
 
@@ -99,12 +135,10 @@ export async function fetchChat(chatId: string): Promise<ChatWithMessages> {
     },
   );
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch chat");
-  }
-
-  const data = await response.json();
+  const data = await parseApiResponse<ChatResponse>(
+    response,
+    "Failed to fetch chat",
+  );
   return data.chat;
 }
 
@@ -115,12 +149,10 @@ export async function fetchModels(): Promise<Model[]> {
     headers: getHeaders(),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch models");
-  }
-
-  const data = await response.json();
+  const data = await parseApiResponse<ModelsResponse>(
+    response,
+    "Failed to fetch models",
+  );
   return data.models;
 }
 
@@ -131,12 +163,7 @@ export async function fetchUserInfo(): Promise<UserInfo> {
     headers: getHeaders(),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch user info");
-  }
-
-  return response.json();
+  return parseApiResponse<UserInfo>(response, "Failed to fetch user info");
 }
 
 export async function* streamChat(
@@ -160,8 +187,9 @@ export async function* streamChat(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to send message");
+    throw new Error(
+      await getApiErrorMessage(response, "Failed to send message"),
+    );
   }
 
   const chatId = response.headers.get("X-Chat-Id") || undefined;
@@ -234,12 +262,10 @@ export async function fetchApplicationStages(): Promise<ApplicationStage[]> {
     },
   );
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch application stages");
-  }
-
-  const data = await response.json();
+  const data = await parseApiResponse<ApplicationStagesResponse>(
+    response,
+    "Failed to fetch application stages",
+  );
   return data.stages;
 }
 
@@ -256,12 +282,10 @@ export async function createApplication(
     },
   );
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to create application");
-  }
-
-  const data = await response.json();
+  const data = await parseApiResponse<CreateApplicationResponse>(
+    response,
+    "Failed to create application",
+  );
   return data.application;
 }
 
@@ -288,11 +312,9 @@ export async function extractJobFromUrl(
     },
   );
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to extract job details");
-  }
-
-  const data = await response.json();
+  const data = await parseApiResponse<ExtractJobResponse>(
+    response,
+    "Failed to extract job details",
+  );
   return data.data;
 }
