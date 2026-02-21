@@ -67,7 +67,7 @@ export default function FolderEditForm({
   navigateToFolderAfterSave = true,
 }: FolderEditFormProps) {
   const { push, pop } = useNavigation();
-  const { applications, isLoading: isLoadingApps } = useApplicationsData();
+  const { applications, appMap, isLoading: isLoadingApps } = useApplicationsData();
   const { folders: allFolders, isLoading: isLoadingFolders, revalidate } = useFoldersData();
   const { defaultFolderColor = "" } = getPreferenceValues<Preferences>();
 
@@ -78,33 +78,21 @@ export default function FolderEditForm({
     return allFolders.find((f) => f.id === folderProp.id) || folderProp;
   }, [folderProp, allFolders]);
 
-  // Find all ancestor folders (folders that contain the current folder, directly or indirectly)
-  // This prevents circular nesting (e.g., if A contains B, B cannot contain A)
+  // Find all ancestor folders using parent map traversal (O(D) where D = nesting depth).
+  // Walk up from the current folder via parent pointers to collect all ancestors.
+  // This prevents circular nesting (e.g., if A contains B, B cannot contain A).
   const ancestorIds = useMemo(() => {
     if (!folder) return new Set<string>();
 
+    const parentMap = getFolderParentMap(allFolders);
     const ancestors = new Set<string>();
 
-    // Helper to check if a folder contains the target folder (directly or indirectly)
-    const containsFolder = (checkFolder: Folder, targetId: string, visited: Set<string>): boolean => {
-      if (visited.has(checkFolder.id)) return false; // Prevent infinite loops
-      visited.add(checkFolder.id);
-
-      for (const item of checkFolder.items) {
-        if (item.type === "folder" && item.folderId) {
-          if (item.folderId === targetId) return true;
-          const nestedFolder = allFolders.find((f) => f.id === item.folderId);
-          if (nestedFolder && containsFolder(nestedFolder, targetId, visited)) return true;
-        }
-      }
-      return false;
-    };
-
-    // Check each folder to see if it's an ancestor of the current folder
-    for (const f of allFolders) {
-      if (f.id !== folder.id && containsFolder(f, folder.id, new Set())) {
-        ancestors.add(f.id);
-      }
+    let currentId: string | undefined = folder.id;
+    while (currentId) {
+      const parentId = parentMap.get(currentId);
+      if (!parentId || ancestors.has(parentId)) break; // stop at root or on cycle
+      ancestors.add(parentId);
+      currentId = parentId;
     }
 
     return ancestors;
@@ -163,11 +151,11 @@ export default function FolderEditForm({
     // Pre-populate with existing folder items
     return {
       ...baseValues,
-      applications: extractAppPaths(folder.items, applications),
+      applications: extractAppPaths(folder.items, appMap),
       folders: extractFolderIds(folder.items),
       websiteUrls: extractWebsiteUrls(folder.items),
     };
-  }, [folder, applications, initialColor]);
+  }, [folder, appMap, initialColor]);
 
   const { handleSubmit, itemProps, setValue, values } = useForm<FormValues>({
     initialValues: initialFormValues,
@@ -244,7 +232,7 @@ export default function FolderEditForm({
           icon: iconValue,
           color: colorValue,
         });
-        await showToast({ style: Toast.Style.Success, title: "Folder updated" });
+        await showToast({ style: Toast.Style.Success, title: "Bundle updated" });
       } else {
         newFolderId = generateId();
         await addFolder({
@@ -254,7 +242,7 @@ export default function FolderEditForm({
           icon: iconValue,
           color: colorValue,
         });
-        await showToast({ style: Toast.Style.Success, title: "Folder created" });
+        await showToast({ style: Toast.Style.Success, title: "Bundle created" });
       }
 
       await onSave();
@@ -298,13 +286,13 @@ export default function FolderEditForm({
     // Only update if the items have actually changed (not on first render)
     if (prevFolderItemsRef.current !== null && prevFolderItemsRef.current !== currentItemsKey) {
       // Update form values with fresh data
-      setValue("applications", extractAppPaths(folder.items, applications));
+      setValue("applications", extractAppPaths(folder.items, appMap));
       setValue("folders", extractFolderIds(folder.items));
       setValue("websiteUrls", extractWebsiteUrls(folder.items));
     }
 
     prevFolderItemsRef.current = currentItemsKey;
-  }, [folder, applications, setValue]);
+  }, [folder, appMap, setValue]);
 
   // Use shared hook for nested folder creation workflow
   const { handleFolderCreated } = useNestedFolderCreation({
@@ -326,15 +314,15 @@ export default function FolderEditForm({
           <ActionPanel.Section>
             <Action.SubmitForm
               icon={Icon.Check}
-              title={folder ? "Update Folder" : "Create Folder"}
+              title={folder ? "Update Bundle" : "Create Bundle"}
               onSubmit={handleSubmit}
             />
           </ActionPanel.Section>
           {!hideCreateOption && (
-            <ActionPanel.Section title="Nested Folders">
+            <ActionPanel.Section title="Nested Bundles">
               <Action.Push
                 icon={Icon.NewFolder}
-                title="Create New Folder to Nest"
+                title="Create New Bundle to Nest"
                 shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
                 target={<FolderEditForm onSave={onSave} onCreated={handleFolderCreated} hideCreateOption />}
               />
@@ -343,7 +331,7 @@ export default function FolderEditForm({
         </ActionPanel>
       }
     >
-      <Form.TextField title="Folder Name" placeholder="e.g., Browsers" {...itemProps.name} />
+      <Form.TextField title="Bundle Name" placeholder="e.g., Browsers" {...itemProps.name} />
       <Form.Dropdown title="Icon" {...itemProps.icon}>
         {ICON_OPTIONS.map((opt) => (
           <Form.Dropdown.Item
@@ -385,13 +373,13 @@ export default function FolderEditForm({
         {...itemProps.websiteUrls}
       />
 
-      <Form.TagPicker title="Nested Folders" placeholder="Select folders..." {...itemProps.folders}>
+      <Form.TagPicker title="Nested Bundles" placeholder="Select bundles..." {...itemProps.folders}>
         {/* Create New Folder option at the top (hidden when in nested creation to prevent recursion) */}
         {!hideCreateOption && (
           <Form.TagPicker.Item
             key={CREATE_NEW_FOLDER_VALUE}
             value={CREATE_NEW_FOLDER_VALUE}
-            title="​Create New Folder..."
+            title="​Create New Bundle..."
             icon={Icon.PlusCircle}
           />
         )}

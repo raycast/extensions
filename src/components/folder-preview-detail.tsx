@@ -1,11 +1,11 @@
-import { List, Icon, Application } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import React, { useMemo, memo } from "react";
 import { Folder } from "../types";
-import { getItemDisplayName, getItemIcon, pluralize, getFolderIcon } from "../utils";
+import { AppLookupMap, getItemDisplayName, getItemIcon, pluralize, getFolderIcon } from "../utils";
 
 interface FolderPreviewDetailProps {
   folder: Folder;
-  applications: Application[];
+  appMap: AppLookupMap;
   allFolders: Folder[];
 }
 
@@ -16,7 +16,7 @@ interface FolderPreviewDetailProps {
  */
 export const FolderPreviewDetail = memo(function FolderPreviewDetail({
   folder,
-  applications,
+  appMap,
   allFolders,
 }: FolderPreviewDetailProps) {
   const { applicationItems, websiteItems, folderItems, totalCount, parentFolders } = useMemo(() => {
@@ -24,8 +24,8 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
     const sortedApps = folder.items
       .filter((item) => item.type === "application")
       .sort((a, b) => {
-        const aName = getItemDisplayName(a, applications);
-        const bName = getItemDisplayName(b, applications);
+        const aName = getItemDisplayName(a, appMap);
+        const bName = getItemDisplayName(b, appMap);
         const alphaCompare = aName.localeCompare(bName);
         return alphaCompare !== 0 ? alphaCompare : aName.length - bName.length;
       });
@@ -56,7 +56,7 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
       totalCount: folder.items.length,
       parentFolders: parents,
     };
-  }, [folder.id, folder.items, applications, allFolders]);
+  }, [folder.id, folder.items, appMap, allFolders]);
 
   // Helper to get folder icon by folderId
   const getNestedFolderIcon = (folderId?: string) => {
@@ -76,7 +76,7 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
         <List.Item.Detail.Metadata>
           {parentFolders.length > 0 && (
             <>
-              <List.Item.Detail.Metadata.Label title={`Parent ${pluralize(parentFolders.length, "Folder")}`} />
+              <List.Item.Detail.Metadata.Label title={`Parent ${pluralize(parentFolders.length, "Bundle")}`} />
               {parentFolders.map((parent) => (
                 <List.Item.Detail.Metadata.Label
                   key={parent.id}
@@ -98,8 +98,8 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
               {applicationItems.map((item) => (
                 <List.Item.Detail.Metadata.Label
                   key={item.id}
-                  title={getItemDisplayName(item, applications, allFolders)}
-                  icon={getItemIcon(item, applications, allFolders)}
+                  title={getItemDisplayName(item, appMap, allFolders)}
+                  icon={getItemIcon(item, appMap, allFolders)}
                 />
               ))}
             </>
@@ -111,8 +111,8 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
               {websiteItems.map((item) => (
                 <List.Item.Detail.Metadata.Label
                   key={item.id}
-                  title={getItemDisplayName(item, applications, allFolders)}
-                  icon={getItemIcon(item, applications, allFolders)}
+                  title={getItemDisplayName(item, appMap, allFolders)}
+                  icon={getItemIcon(item, appMap, allFolders)}
                 />
               ))}
             </>
@@ -120,7 +120,7 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
           {folderItems.length > 0 && (
             <>
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title={`Nested Folders (${folderItems.length})`} />
+              <List.Item.Detail.Metadata.Label title={`Nested Bundles (${folderItems.length})`} />
               {folderItems.map((item) => (
                 <List.Item.Detail.Metadata.Label
                   key={item.id}
@@ -141,7 +141,7 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
  */
 export function useFolderPreviewDetail(
   showPreviewPane: boolean,
-  applications: Application[],
+  appMap: AppLookupMap,
   allFolders?: Folder[],
 ): (folder: Folder) => React.ReactNode | undefined {
   return useMemo(() => {
@@ -155,7 +155,7 @@ export function useFolderPreviewDetail(
         f.items.some((item) => item.type === "folder" && item.folderId === folder.id),
       );
       if (folder.items.length === 0 && !hasParents) return undefined;
-      return <FolderPreviewDetail folder={folder} applications={applications} allFolders={folders} />;
+      return <FolderPreviewDetail folder={folder} appMap={appMap} allFolders={folders} />;
     };
-  }, [showPreviewPane, applications, allFolders]);
+  }, [showPreviewPane, appMap, allFolders]);
 }

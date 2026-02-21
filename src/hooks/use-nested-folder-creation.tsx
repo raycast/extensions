@@ -58,7 +58,7 @@ export function useNestedFolderCreation({
         const newFolder = await getFolderById(newFolderId);
         const newNestedItem: FolderItem = {
           id: generateId(),
-          name: newFolder?.name || "New Folder",
+          name: newFolder?.name || "New Bundle",
           type: "folder",
           folderId: newFolderId,
         };

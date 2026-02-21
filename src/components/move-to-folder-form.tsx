@@ -3,6 +3,7 @@ import React, { useMemo, memo, useCallback } from "react";
 import { updateFolder } from "../storage";
 import { Folder, FolderItem } from "../types";
 import { getFolderIcon, getItemDisplayName, generateId, pluralize } from "../utils";
+import { showFailureToast } from "@raycast/utils";
 import { useFoldersData, useApplicationsData } from "../hooks";
 import { getNestedFolderIds } from "../form-utils";
 
@@ -21,9 +22,9 @@ interface MoveToFolderFormProps {
 function MoveToFolderForm({ item, currentFolder, onMove }: MoveToFolderFormProps) {
   const { pop } = useNavigation();
   const { folders: allFolders, isLoading } = useFoldersData();
-  const { applications } = useApplicationsData();
+  const { appMap } = useApplicationsData();
 
-  const itemName = useMemo(() => getItemDisplayName(item, applications, allFolders), [item, applications, allFolders]);
+  const itemName = useMemo(() => getItemDisplayName(item, appMap, allFolders), [item, appMap, allFolders]);
 
   // Get nested folder IDs for categorization
   const nestedFolderIds = useMemo(() => getNestedFolderIds(allFolders), [allFolders]);
@@ -68,11 +69,7 @@ function MoveToFolderForm({ item, currentFolder, onMove }: MoveToFolderFormProps
         await onMove();
         pop();
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to move item",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        await showFailureToast(error, { title: "Failed to move item" });
       }
     },
     [currentFolder, item, itemName, onMove],
@@ -96,22 +93,22 @@ function MoveToFolderForm({ item, currentFolder, onMove }: MoveToFolderFormProps
   );
 
   return (
-    <List isLoading={isLoading} navigationTitle={`Move "${itemName}" to...`} searchBarPlaceholder="Search folders...">
+    <List isLoading={isLoading} navigationTitle={`Move "${itemName}" to...`} searchBarPlaceholder="Search bundles...">
       {totalAvailable === 0 ? (
         <List.EmptyView
           icon={Icon.Folder}
-          title="No folders available"
-          description="Create another folder first to move items"
+          title="No bundles available"
+          description="Create another bundle first to move items"
         />
       ) : (
         <>
           {parentFolders.length > 0 && (
-            <List.Section title="Folders" subtitle={`${parentFolders.length}`}>
+            <List.Section title="Bundles" subtitle={`${parentFolders.length}`}>
               {parentFolders.map(renderFolderItem)}
             </List.Section>
           )}
           {nestedFolders.length > 0 && (
-            <List.Section title="Nested Folders" subtitle={`${nestedFolders.length}`}>
+            <List.Section title="Nested Bundles" subtitle={`${nestedFolders.length}`}>
               {nestedFolders.map(renderFolderItem)}
             </List.Section>
           )}

@@ -1,8 +1,8 @@
-import { Application, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { FolderItem } from "../types";
-import { findApplicationByItemPath, pluralize } from "../utils";
+import { AppLookupMap, findApplicationByItemPath, pluralize } from "../utils";
 import { RUNNING_APPS_POLL_INTERVAL } from "../constants";
 
 /**
@@ -11,7 +11,7 @@ import { RUNNING_APPS_POLL_INTERVAL } from "../constants";
  */
 export function useRunningApps(
   appItems: FolderItem[],
-  applications: Application[],
+  appMap: AppLookupMap,
 ): {
   runningAppPaths: Set<string>;
   hasRunningApps: boolean;
@@ -35,7 +35,7 @@ export function useRunningApps(
         const running = new Set<string>();
         for (const item of appItems) {
           if (!item.path) continue;
-          const app = findApplicationByItemPath(item.path, applications);
+          const app = findApplicationByItemPath(item.path, appMap);
           const appName = (app?.name || item.name).toLowerCase();
 
           if (runningProcesses.has(appName)) {
@@ -58,7 +58,7 @@ export function useRunningApps(
     checkRunningApps();
     const interval = setInterval(checkRunningApps, RUNNING_APPS_POLL_INTERVAL);
     return () => clearInterval(interval);
-  }, [appItems, applications, hasApps]);
+  }, [appItems, appMap, hasApps]);
 
   const quitAllRunningApps = useCallback(
     async (folderName: string) => {
@@ -80,7 +80,7 @@ export function useRunningApps(
       const count = runningAppPaths.size;
 
       for (const path of runningAppPaths) {
-        const app = findApplicationByItemPath(path, applications);
+        const app = findApplicationByItemPath(path, appMap);
         const appName = app?.name || path.split("/").pop()?.replace(".app", "") || "Unknown";
 
         try {
@@ -108,7 +108,7 @@ export function useRunningApps(
         });
       }
     },
-    [runningAppPaths, applications],
+    [runningAppPaths, appMap],
   );
 
   return useMemo(

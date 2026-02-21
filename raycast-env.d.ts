@@ -8,19 +8,19 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
-  /** 🥇 Primary Sort - Primary sort method for items inside folders */
+  /** 🥇 Primary Sort - Primary sort method for items inside bundles */
   "folderContentsSortPrimary": "alphabetical-asc" | "alphabetical-desc" | "length-asc" | "length-desc" | "recent-asc" | "recent-desc" | "none",
   /** 🥈 Secondary Sort - Used when items are equal by the first sort */
   "folderContentsSortSecondary": "alphabetical-asc" | "alphabetical-desc" | "length-asc" | "length-desc" | "recent-asc" | "recent-desc" | "none",
   /** 🥉 Tertiary Sort - Used when items are equal by the first two sorts */
   "folderContentsSortTertiary": "alphabetical-asc" | "alphabetical-desc" | "length-asc" | "length-desc" | "recent-asc" | "recent-desc" | "none",
-  /** 📋 View Type - How to display items when viewing folder contents */
+  /** 📋 View Type - How to display items when viewing bundle contents */
   "folderContentsViewType": "list" | "grid",
-  /** Preview Pane - Show folder contents in a preview pane beside the folder list */
+  /** Preview Pane - Show bundle contents in a preview pane beside the bundle list */
   "showPreviewPane": boolean,
-  /** Folder Contents - Group apps, websites, and folders into separate sections */
+  /** Bundle Contents - Group apps, websites, and bundles into separate sections */
   "gridSeparateSections": boolean,
-  /** Default Folder Color - CSS color name or hex code for new folders */
+  /** Default Bundle Color - CSS color name or hex code for new bundles */
   "defaultFolderColor"?: string
 }
 

@@ -156,10 +156,10 @@ function AddItemsForm({ folder, onSave }: AddItemsFormProps) {
           <ActionPanel.Section>
             <Action.SubmitForm icon={Icon.Plus} title="Add Items" onSubmit={handleSubmit} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Nested Folders">
+          <ActionPanel.Section title="Nested Bundles">
             <Action.Push
               icon={Icon.NewFolder}
-              title="Create New Folder to Nest"
+              title="Create New Bundle to Nest"
               shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
               target={<FolderEditForm onSave={onSave} onCreated={handleFolderCreated} hideCreateOption />}
             />
@@ -185,11 +185,11 @@ function AddItemsForm({ folder, onSave }: AddItemsFormProps) {
         {...itemProps.websiteUrls}
       />
 
-      <Form.TagPicker title="Nested Folders" placeholder="Select folders to nest..." {...itemProps.folders}>
+      <Form.TagPicker title="Nested Bundles" placeholder="Select bundles to nest..." {...itemProps.folders}>
         <Form.TagPicker.Item
           key={CREATE_NEW_FOLDER_VALUE}
           value={CREATE_NEW_FOLDER_VALUE}
-          title="​Create New Folder..."
+          title="​Create New Bundle..."
           icon={Icon.PlusCircle}
         />
         {availableFolders.map((f) => (
