@@ -1,4 +1,4 @@
-## [Initial Version] - 2026-02-22
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Cross-post from Bluesky to one or more Mastodon accounts
 - Compose Post command with 300-grapheme limit, link cards, and image attachments

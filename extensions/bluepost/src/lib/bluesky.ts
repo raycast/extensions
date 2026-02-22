@@ -2,12 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { AtpAgent, RichText } from "@atproto/api";
 import type { AppBskyEmbedExternal, AppBskyFeedPost } from "@atproto/api";
 
-interface Preferences {
-  blueskyHandle: string;
-  blueskyAppPassword: string;
-  automatedPostUrl?: string;
-}
-
 export async function login(): Promise<AtpAgent> {
   const { blueskyHandle, blueskyAppPassword } =
     getPreferenceValues<Preferences>();
