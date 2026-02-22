@@ -14,8 +14,8 @@ function Command() {
   const TOKEN_PARAM = `access_token=${token}`;
   const [pageUrl, setPageUrl] = useState<string>(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
   const [sales, setSales] = useState<Sale[] | undefined>(undefined);
-  const [productId, setProductId] = useState<string>("");
   const [priceFilter, setPriceFilter] = useState<"all" | "paid">("all");
+  const [filterValue, setFilterValue] = useState<string>("all_sales");
   const {
     data: salesData,
     isLoading: isLoadingSales,
@@ -38,16 +38,14 @@ function Command() {
   };
 
   const onFilterChange = (newValue: string) => {
+    setFilterValue(newValue);
     if (newValue === "all_sales" || newValue === "all_products") {
       setPriceFilter("all");
-      setProductId("");
       setPageUrl(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
     } else if (newValue === "hide_zero") {
       setPriceFilter("paid");
-      setProductId("");
       setPageUrl(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
     } else {
-      setProductId(newValue);
       setPriceFilter("all");
       setPageUrl(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}&product_id=${newValue}`);
     }
@@ -66,11 +64,7 @@ function Command() {
     <List
       isLoading={(isLoadingSales || sales === undefined) && !errorSales}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip={"Filter Sales"}
-          value={productId || (priceFilter === "paid" ? "hide_zero" : "all_sales")}
-          onChange={onFilterChange}
-        >
+        <List.Dropdown tooltip={"Filter Sales"} value={filterValue} onChange={onFilterChange}>
           <List.Dropdown.Section title="Price">
             <List.Dropdown.Item title="All Sales" value="all_sales" />
             <List.Dropdown.Item title="Hide $0 Sales" value="hide_zero" />
