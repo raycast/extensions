@@ -5,7 +5,10 @@
   "icon": "command-icon.png",
   "author": "jay",
   "license": "MIT",
-  "categories": ["Applications", "Productivity"],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "index",
@@ -22,7 +25,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.5.2",
-    "@types/react": "18.3.5",
+    "@types/react": "^19.2.14",
     "eslint": "^8.57.0",
     "typescript": "^5.5.4"
   },
