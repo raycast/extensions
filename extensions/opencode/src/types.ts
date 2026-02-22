@@ -86,14 +86,6 @@ export interface SessionWithProject {
   project: Project | undefined;
 }
 
-export interface SessionStats {
-  cost: number;
-  tokens: number;
-  context: number;
-  additions: number;
-  deletions: number;
-}
-
 export interface CustomCommand {
   name: string;
   description?: string;

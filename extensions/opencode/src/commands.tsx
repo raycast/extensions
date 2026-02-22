@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, Form, useNavigation, showToast, Toast } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Form,
+  useNavigation,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
@@ -99,6 +110,28 @@ export default function Command() {
     loadCustomCommands();
   }, []);
 
+  const handleDelete = async (cmd: CustomCommand) => {
+    const confirmed = await confirmAlert({
+      title: "Delete Command",
+      message: `Are you sure you want to delete /${cmd.name}?`,
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    });
+
+    if (confirmed) {
+      try {
+        const configPath = path.join(os.homedir(), ".config", "opencode", "commands");
+        const filePath = path.join(configPath, `${cmd.name}.md`);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          await showToast({ style: Toast.Style.Success, title: "Command deleted" });
+          loadCustomCommands();
+        }
+      } catch (e) {
+        await showToast({ style: Toast.Style.Failure, title: "Failed to delete command", message: String(e) });
+      }
+    }
+  };
+
   const allCommands = [...SYSTEM_COMMANDS, ...customCommands];
   const filteredCommands = allCommands.filter((cmd) => {
     if (filter === "system") return cmd.isSystem;
@@ -126,7 +159,7 @@ export default function Command() {
             <ActionPanel>
               <Action.Push
                 title="Create New Command"
-                target={<CreateCommandForm onCreated={loadCustomCommands} />}
+                target={<CommandForm onCreated={loadCustomCommands} />}
                 icon={Icon.Plus}
               />
             </ActionPanel>
@@ -155,9 +188,26 @@ export default function Command() {
                     <Action.Push
                       title="Create New Command"
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
-                      target={<CreateCommandForm onCreated={loadCustomCommands} />}
+                      target={<CommandForm onCreated={loadCustomCommands} />}
                       icon={Icon.Plus}
                     />
+                    {!cmd.isSystem && (
+                      <>
+                        <Action.Push
+                          title="Edit Command"
+                          icon={Icon.Pencil}
+                          shortcut={{ modifiers: ["cmd"], key: "e" }}
+                          target={<CommandForm initialValues={cmd} onCreated={loadCustomCommands} />}
+                        />
+                        <Action
+                          title="Delete Command"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          onAction={() => handleDelete(cmd)}
+                        />
+                      </>
+                    )}
                     {!cmd.isSystem && (
                       <Action title="Reload" onAction={loadCustomCommands} icon={Icon.ArrowClockwise} />
                     )}
@@ -172,7 +222,7 @@ export default function Command() {
   );
 }
 
-function CreateCommandForm({ onCreated }: { onCreated: () => void }) {
+function CommandForm({ onCreated, initialValues }: { onCreated: () => void; initialValues?: CustomCommand }) {
   const { pop } = useNavigation();
 
   const handleSubmit = async (values: {
@@ -193,6 +243,14 @@ function CreateCommandForm({ onCreated }: { onCreated: () => void }) {
         fs.mkdirSync(configPath, { recursive: true });
       }
 
+      // If editing and name changed, remove old file
+      if (initialValues && initialValues.name !== values.name) {
+        const oldFilePath = path.join(configPath, `${initialValues.name}.md`);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+
       const filePath = path.join(configPath, `${values.name}.md`);
       const content = `---
 description: ${values.description}
@@ -202,11 +260,15 @@ model: ${values.model}
 ${values.template}`;
 
       fs.writeFileSync(filePath, content, "utf-8");
-      await showToast({ style: Toast.Style.Success, title: "Command created", message: `/${values.name} is ready` });
+      await showToast({
+        style: Toast.Style.Success,
+        title: initialValues ? "Command updated" : "Command created",
+        message: `/${values.name} is ready`,
+      });
       onCreated();
       pop();
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to create command", message: String(e) });
+      await showToast({ style: Toast.Style.Failure, title: "Failed to save command", message: String(e) });
     }
   };
 
@@ -214,17 +276,33 @@ ${values.template}`;
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Command" onSubmit={handleSubmit} />
+          <Action.SubmitForm title={initialValues ? "Update Command" : "Create Command"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Command Name" placeholder="e.g. test" />
-      <Form.TextField id="description" title="Description" placeholder="What does this command do?" />
-      <Form.TextField id="agent" title="Agent" placeholder="e.g. build, plan (optional)" />
-      <Form.TextField id="model" title="Model" placeholder="e.g. anthropic/claude-3-5-sonnet (optional)" />
+      <Form.TextField id="name" title="Command Name" defaultValue={initialValues?.name} placeholder="e.g. test" />
+      <Form.TextField
+        id="description"
+        title="Description"
+        defaultValue={initialValues?.description}
+        placeholder="What does this command do?"
+      />
+      <Form.TextField
+        id="agent"
+        title="Agent"
+        defaultValue={initialValues?.agent}
+        placeholder="e.g. build, plan (optional)"
+      />
+      <Form.TextField
+        id="model"
+        title="Model"
+        defaultValue={initialValues?.model}
+        placeholder="e.g. anthropic/claude-3-5-sonnet (optional)"
+      />
       <Form.TextArea
         id="template"
         title="Prompt Template"
+        defaultValue={initialValues?.template}
         placeholder="The prompt to send to the LLM. Supports $ARGUMENTS, $1, !`command`, @file"
       />
     </Form>

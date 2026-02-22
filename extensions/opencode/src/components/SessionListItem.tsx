@@ -1,9 +1,7 @@
-import { List, Action, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { List } from "@raycast/api";
 
-import { Project, Session, SessionStats } from "../types";
-import { repoName, formatCost, formatTokens } from "../utils";
-import { loadSessionStats } from "../lib/storage";
+import { Project, Session } from "../types";
+import { formatAccessoryDate, repoName } from "../utils";
 import { SessionActions } from "./SessionActions";
 
 interface SessionListItemProps {
@@ -16,8 +14,15 @@ export function SessionListItem({ session, project, mutate }: SessionListItemPro
   const repo = project ? repoName(project.worktree) : undefined;
   const title = session.title || session.slug;
 
-  const { data: stats, isLoading } = usePromise((sid) => loadSessionStats(sid), [session.id], {
-    keepPreviousData: true,
+  const accessories: List.Item.Accessory[] = [];
+
+  if (repo && project?.worktree !== "/") {
+    accessories.push({ tag: repo });
+  }
+
+  accessories.push({
+    text: formatAccessoryDate(session.time.updated),
+    tooltip: `Last message: ${new Date(session.time.updated).toLocaleString()}`,
   });
 
   return (
@@ -25,56 +30,8 @@ export function SessionListItem({ session, project, mutate }: SessionListItemPro
       id={session.id}
       title={title}
       keywords={[session.slug, repo ?? "", session.directory, session.id]}
-      detail={<SessionItemDetail session={session} stats={stats} isLoading={isLoading} repo={repo} />}
-      actions={
-        <SessionActions session={session} project={project} mutate={mutate}>
-          <Action.CopyToClipboard title="Copy Session ID" content={session.id} icon={Icon.CopyClipboard} />
-        </SessionActions>
-      }
-    />
-  );
-}
-
-function SessionItemDetail({
-  session,
-  stats,
-  isLoading,
-  repo,
-}: {
-  session: Session;
-  stats?: SessionStats;
-  isLoading: boolean;
-  repo?: string;
-}) {
-  return (
-    <List.Item.Detail
-      isLoading={isLoading}
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Title" text={session.title || session.slug} />
-          <List.Item.Detail.Metadata.Label title="Directory" text={session.directory} />
-          {repo && <List.Item.Detail.Metadata.Label title="Project" text={repo} />}
-          <List.Item.Detail.Metadata.Label
-            title="Last Activity"
-            text={new Date(session.time.updated).toLocaleString()}
-          />
-
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Tokens Used"
-            text={stats ? formatTokens(stats.tokens) : "Loading..."}
-          />
-          <List.Item.Detail.Metadata.Label title="Amount Spent" text={stats ? formatCost(stats.cost) : "Loading..."} />
-
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Lines"
-            text={stats ? `+${stats.additions} -${stats.deletions}` : "Loading..."}
-          />
-        </List.Item.Detail.Metadata>
-      }
+      accessories={accessories}
+      actions={<SessionActions session={session} project={project} mutate={mutate} />}
     />
   );
 }

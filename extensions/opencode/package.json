@@ -25,7 +25,7 @@
     {
       "name": "commands",
       "title": "OpenCode Commands",
-      "description": "View and create custom OpenCode commands",
+      "description": "View, create, and manage custom OpenCode commands",
       "mode": "view"
     },
     {

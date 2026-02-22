@@ -5,7 +5,7 @@ import { existsSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
-import { Message, Part, Project, Session, SessionStats, TranscriptEntry } from "../types";
+import { Message, Part, Project, Session, TranscriptEntry } from "../types";
 
 function getDbPath(): string {
   const prefs = getPreferenceValues<ExtensionPreferences>();
@@ -191,9 +191,8 @@ export async function loadProjects(): Promise<Project[]> {
 }
 
 export async function loadSessions(): Promise<Session[]> {
-  const dbPath = getDbPath();
   const rows = await executeSQL<SessionRow>(
-    dbPath,
+    getDbPath(),
     `SELECT id, project_id, parent_id, slug, directory, title, version,
             share_url, summary_additions, summary_deletions, summary_files,
             time_created, time_updated, time_compacting, time_archived
@@ -203,65 +202,6 @@ export async function loadSessions(): Promise<Session[]> {
   );
 
   return rows.map(toSession);
-}
-
-export async function loadSessionStats(sessionID: string): Promise<SessionStats> {
-  const dbPath = getDbPath();
-  const sid = escapeSql(sessionID);
-
-  try {
-    // 1. Fetch all message data for the session
-    const messageRows = await executeSQL<MessageRow>(dbPath, `SELECT data FROM message WHERE session_id = '${sid}'`);
-
-    // 2. Fetch session summary (additions/deletions)
-    const sessionRows = await executeSQL<SessionRow>(
-      dbPath,
-      `SELECT summary_additions, summary_deletions FROM session WHERE id = '${sid}'`,
-    );
-
-    let totalCost = 0;
-    let totalTokens = 0;
-    let latestContext = 0;
-    let latestTime = 0;
-
-    for (const row of messageRows) {
-      try {
-        const data = JSON.parse(row.data) as {
-          cost?: number;
-          tokens?: { input: number; output: number };
-          time?: { created: number };
-        };
-        totalCost += Number(data.cost || 0);
-
-        if (data.tokens) {
-          totalTokens += Number(data.tokens.input || 0) + Number(data.tokens.output || 0);
-
-          const created = Number(data.time?.created || 0);
-          if (created >= latestTime) {
-            latestContext = Number(data.tokens.input || 0);
-            latestTime = created;
-          }
-        }
-      } catch {
-        // ignore malformed message data
-      }
-    }
-
-    const additions = Number(sessionRows[0]?.summary_additions || 0);
-    const deletions = Number(sessionRows[0]?.summary_deletions || 0);
-
-    return {
-      cost: totalCost,
-      tokens: totalTokens,
-      context: latestContext,
-      additions,
-      deletions,
-    };
-  } catch (error) {
-    console.error("Critical error in loadSessionStats:", error);
-    // Return zeros so UI doesn't hang in "Loading..."
-    return { cost: 0, tokens: 0, context: 0, additions: 0, deletions: 0 };
-  }
 }
 
 export async function loadMessages(sessionID: string): Promise<Message[]> {
