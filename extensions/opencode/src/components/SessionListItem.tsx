@@ -44,9 +44,24 @@ function SessionItemDetail({
   isLoading: boolean;
   repo?: string;
 }) {
+  const CONTEXT_LIMIT = 1000000;
+  const contextPercent = stats ? Math.round((stats.context / CONTEXT_LIMIT) * 100) : 0;
+
+  const markdown = stats
+    ? `
+# ${session.title || session.slug}
+
+**Context**
+${formatTokens(stats.tokens)} tokens
+${contextPercent}% used
+${formatCost(stats.cost)} spent
+  `
+    : "";
+
   return (
     <List.Item.Detail
       isLoading={isLoading}
+      markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Title" text={session.title || session.slug} />
@@ -56,18 +71,6 @@ function SessionItemDetail({
             title="Last Activity"
             text={new Date(session.time.updated).toLocaleString()}
           />
-
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Context"
-            text={stats ? `${formatTokens(stats.context)} tokens` : "Loading..."}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Tokens Used"
-            text={stats ? formatTokens(stats.tokens) : "Loading..."}
-          />
-          <List.Item.Detail.Metadata.Label title="Amount Spent" text={stats ? formatCost(stats.cost) : "Loading..."} />
 
           <List.Item.Detail.Metadata.Separator />
 
