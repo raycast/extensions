@@ -76,6 +76,7 @@ function Command() {
           actions={
             <ActionPanel>
               <Action.Push title="Show Details" target={<SaleDetails sale={sale} />} icon={Icon.Sidebar} />
+              <Action.CopyToClipboard title="Copy Customer Email" content={sale.email} />
             </ActionPanel>
           }
         />
