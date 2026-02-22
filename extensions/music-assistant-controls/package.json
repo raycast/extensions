@@ -51,14 +51,14 @@
       "name": "volume-up",
       "title": "Volume Up",
       "subtitle": "Increase volume on the active player.",
-      "description": "Increases the volume on the currently selected player by the configured step size.",
+      "description": "Increases the volume on the currently selected player.",
       "mode": "no-view"
     },
     {
       "name": "volume-down",
       "title": "Volume Down",
       "subtitle": "Decrease volume on the active player.",
-      "description": "Decreases the volume on the currently selected player by the configured step size.",
+      "description": "Decreases the volume on the currently selected player.",
       "mode": "no-view"
     }
   ],
