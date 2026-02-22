@@ -113,7 +113,7 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={icon ?? "🧼"}
-          description="Press ⌃ + U at any time to unlock the keyboard."
+          description={`Press ${isMac ? "⌃" : "Ctrl"} + U at any time to unlock the keyboard.`}
           title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`}
           actions={
             <ActionPanel>
