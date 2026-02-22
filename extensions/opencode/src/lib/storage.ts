@@ -191,8 +191,9 @@ export async function loadProjects(): Promise<Project[]> {
 }
 
 export async function loadSessions(): Promise<Session[]> {
+  const dbPath = getDbPath();
   const rows = await executeSQL<SessionRow>(
-    getDbPath(),
+    dbPath,
     `SELECT id, project_id, parent_id, slug, directory, title, version,
             share_url, summary_additions, summary_deletions, summary_files,
             time_created, time_updated, time_compacting, time_archived
@@ -201,7 +202,57 @@ export async function loadSessions(): Promise<Session[]> {
      ORDER BY time_updated DESC`,
   );
 
-  return rows.map(toSession);
+  const sessions = rows.map(toSession);
+
+  // Load stats for each session
+  // We do this by fetching all messages for these sessions and aggregating in JS
+  // to avoid issues with JSON functions in older SQLite versions
+  const sessionIds = sessions.map((s) => `'${escapeSql(s.id)}'`).join(",");
+  if (sessionIds.length > 0) {
+    const messageRows = await executeSQL<MessageRow>(
+      dbPath,
+      `SELECT id, session_id, data FROM message WHERE session_id IN (${sessionIds})`,
+    );
+
+    const statsMap = new Map<string, { cost: number; tokens: number; lastInputTokens: number; lastTime: number }>();
+
+    for (const row of messageRows) {
+      try {
+        const data = JSON.parse(row.data);
+        const cost = (data.cost as number) || 0;
+        const tokens = data.tokens ? (data.tokens.input || 0) + (data.tokens.output || 0) : 0;
+        const inputTokens = data.tokens?.input || 0;
+        const messageTime = data.time?.created || 0;
+
+        const current = statsMap.get(row.session_id) || { cost: 0, tokens: 0, lastInputTokens: 0, lastTime: 0 };
+
+        const isNewer = messageTime > current.lastTime;
+
+        statsMap.set(row.session_id, {
+          cost: current.cost + cost,
+          tokens: current.tokens + tokens,
+          lastInputTokens: isNewer ? inputTokens : current.lastInputTokens,
+          lastTime: Math.max(current.lastTime, messageTime),
+        });
+      } catch {
+        // ignore
+      }
+    }
+
+    for (const session of sessions) {
+      const stats = statsMap.get(session.id);
+      if (stats) {
+        session.stats = {
+          cost: stats.cost,
+          tokens: stats.tokens,
+          // Use input tokens as context value
+          contextPercent: stats.lastInputTokens,
+        };
+      }
+    }
+  }
+
+  return sessions;
 }
 
 export async function loadMessages(sessionID: string): Promise<Message[]> {
