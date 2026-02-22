@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-cli-file-picker",
+  "title": "AI CLI File Picker",
+  "description": "Pick files and copy them in AI CLI format",
+  "icon": "extension-icon.png",
+  "author": "lamb48",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pick-files-for-ai-cli",
+      "title": "Pick Files for AI CLI",
+      "description": "Pick files and copy as AI CLI format",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "additionalDirs",
+          "type": "textfield",
+          "title": "Additional Directories",
+          "description": "Additional directories to scan (colon-separated)",
+          "required": false,
+          "default": "",
+          "placeholder": "/path/to/dir1:/path/to/dir2"
+        },
+        {
+          "name": "maxRecentFiles",
+          "type": "textfield",
+          "title": "Max Recent Files",
+          "description": "Maximum number of recent files to display (default: 30)",
+          "required": false,
+          "default": "30",
+          "placeholder": "30"
+        },
+        {
+          "name": "includeDownloads",
+          "type": "checkbox",
+          "title": "Include Downloads",
+          "label": "Include ~/Downloads folder",
+          "description": "Include files from the Downloads folder in recent files",
+          "required": false,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
