@@ -128,8 +128,9 @@ export async function processStateChange(): Promise<void> {
 
   const currentLockState = detectResult.state;
 
-  // 防御：如果时间差异常（负值或超过 24 小时），记录异常日志并跳过本次处理
-  if (elapsed < 0 || elapsed > 24 * 60 * 60 * 1000) {
+  // 防御：如果时间差为负值（系统时钟回拨），记录异常日志并跳过本次处理
+  // 注意：elapsed > 24h 是合法场景（Mac 深度睡眠数天后唤醒），不应跳过，交给正常状态机处理
+  if (elapsed < 0) {
     const newState: StateData = {
       current: currentLockState,
       lastChangeAt: now,
@@ -143,7 +144,7 @@ export async function processStateChange(): Promise<void> {
       elapsed,
       method: detectResult.method,
       todayLockedMs: metrics.todayLockedMs,
-      detail: `Abnormal elapsed time: ${elapsed}ms (${elapsed / 1000 / 3600}h)`,
+      detail: `Negative elapsed time (clock skew): ${elapsed}ms`,
     });
 
     await saveState(newState);

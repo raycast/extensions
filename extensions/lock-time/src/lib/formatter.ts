@@ -14,21 +14,26 @@ export function formatDuration(ms: number): string {
   if (ms <= 0) return "0s";
 
   const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
+  if (days > 0) {
+    const parts = [`${days}d`];
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0 && days < 7) parts.push(`${minutes}m`);
+    return parts.join(" ");
+  }
+
   if (hours > 0) {
-    // 超过 1 小时：显示 "Xh Ym"
     return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
   }
 
   if (minutes > 0) {
-    // 超过 1 分钟：显示 "Xm Ys"
     return seconds > 0 ? `${minutes}m ${String(seconds).padStart(2, "0")}s` : `${minutes}m`;
   }
 
-  // 不足 1 分钟：显示 "Xs"
   return `${seconds}s`;
 }
 
@@ -48,13 +53,38 @@ export function formatTime(timestamp: number): string {
 /**
  * 将起止时间戳格式化为时间区间字符串
  *
+ * 同一天内显示 "12:57 → 13:48"，跨天时显示 "02/17 08:37 → 02/22 09:53"
+ *
  * @param startMs 开始时间戳（Unix ms）
  * @param endMs 结束时间戳（Unix ms）
- * @returns 格式化后的时间区间，如 "12:57 → 13:48"；若时间戳无效则返回空字符串
+ * @returns 格式化后的时间区间；若时间戳无效则返回空字符串
  */
 export function formatTimeRange(startMs: number, endMs: number): string {
   if (startMs <= 0 || endMs <= 0) return "";
-  return `${formatTime(startMs)} → ${formatTime(endMs)}`;
+
+  const startDate = new Date(startMs);
+  const endDate = new Date(endMs);
+
+  const sameDay =
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getDate() === endDate.getDate();
+
+  if (sameDay) {
+    return `${formatTime(startMs)} → ${formatTime(endMs)}`;
+  }
+
+  return `${formatDate(startMs)} ${formatTime(startMs)} → ${formatDate(endMs)} ${formatTime(endMs)}`;
+}
+
+/**
+ * 将时间戳格式化为 MM/DD 格式的日期字符串
+ */
+function formatDate(timestamp: number): string {
+  const date = new Date(timestamp);
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${m}/${d}`;
 }
 
 /**
