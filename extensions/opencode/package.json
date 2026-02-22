@@ -11,20 +11,35 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-projects",
-      "title": "Search Projects",
-      "description": "Find and open your projects",
+      "name": "sessions",
+      "title": "Sessions",
+      "description": "View and manage your OpenCode sessions",
+      "mode": "view"
+    },
+    {
+      "name": "commands",
+      "title": "Commands",
+      "description": "View and create custom OpenCode commands",
+      "mode": "view"
+    },
+    {
+      "name": "cheatsheet",
+      "title": "Usage Cheatsheet",
+      "description": "Cheatsheet for OpenCode TUI, CLI, and Web commands",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.84.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.13",
     "@types/react": "18.3.3",
+    "@types/uuid": "^10.0.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
