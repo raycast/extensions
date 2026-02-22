@@ -1,6 +1,6 @@
 # Simple Draw Changelog
 
-## [Initial Version] - 2025-02-21
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of Simple Draw extension
 - Open clipboard images in a drawing canvas for annotation
