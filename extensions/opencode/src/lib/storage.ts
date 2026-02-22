@@ -210,13 +210,10 @@ export async function loadSessionStats(sessionID: string): Promise<SessionStats>
   const sid = escapeSql(sessionID);
 
   try {
-    // We'll fetch all message data for the session and process it in JS.
-    // This is more reliable than complex SQL queries for real-time loading in Raycast.
-    const messageRows = await executeSQL<MessageRow>(
-      dbPath, 
-      `SELECT data FROM message WHERE session_id = '${sid}'`
-    );
+    // 1. Fetch all message data for the session
+    const messageRows = await executeSQL<MessageRow>(dbPath, `SELECT data FROM message WHERE session_id = '${sid}'`);
 
+    // 2. Fetch session summary (additions/deletions)
     const sessionRows = await executeSQL<SessionRow>(
       dbPath,
       `SELECT summary_additions, summary_deletions FROM session WHERE id = '${sid}'`,
@@ -229,25 +226,29 @@ export async function loadSessionStats(sessionID: string): Promise<SessionStats>
 
     for (const row of messageRows) {
       try {
-        const data = JSON.parse(row.data);
-        totalCost += Number(data.cost) || 0;
-        
+        const data = JSON.parse(row.data) as {
+          cost?: number;
+          tokens?: { input: number; output: number };
+          time?: { created: number };
+        };
+        totalCost += Number(data.cost || 0);
+
         if (data.tokens) {
-          totalTokens += (Number(data.tokens.input) || 0) + (Number(data.tokens.output) || 0);
-          
-          const created = data.time?.created || 0;
+          totalTokens += Number(data.tokens.input || 0) + Number(data.tokens.output || 0);
+
+          const created = Number(data.time?.created || 0);
           if (created >= latestTime) {
-            latestContext = Number(data.tokens.input) || 0;
+            latestContext = Number(data.tokens.input || 0);
             latestTime = created;
           }
         }
-      } catch (e) {
-        // ignore malformed data
+      } catch {
+        // ignore malformed message data
       }
     }
 
-    const additions = sessionRows[0]?.summary_additions || 0;
-    const deletions = sessionRows[0]?.summary_deletions || 0;
+    const additions = Number(sessionRows[0]?.summary_additions || 0);
+    const deletions = Number(sessionRows[0]?.summary_deletions || 0);
 
     return {
       cost: totalCost,
@@ -257,7 +258,8 @@ export async function loadSessionStats(sessionID: string): Promise<SessionStats>
       deletions,
     };
   } catch (error) {
-    console.error("Failed to load session stats:", error);
+    console.error("Critical error in loadSessionStats:", error);
+    // Return zeros so UI doesn't hang in "Loading..."
     return { cost: 0, tokens: 0, context: 0, additions: 0, deletions: 0 };
   }
 }

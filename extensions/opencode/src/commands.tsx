@@ -1,14 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Form,
-  useNavigation,
-  showToast,
-  Toast,
-  Color,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Form, useNavigation, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
@@ -16,53 +6,48 @@ import os from "os";
 import { CustomCommand } from "./types";
 
 const SYSTEM_COMMANDS: CustomCommand[] = [
-  { name: "connect", description: "Add a provider to OpenCode", template: "", isSystem: true, isInteractive: true },
-  { name: "compact", description: "Compact the current session", template: "", isSystem: true, isInteractive: false },
-  { name: "details", description: "Toggle tool execution details", template: "", isSystem: true, isInteractive: false },
+  { name: "connect", description: "Add a provider to OpenCode", template: "", isSystem: true },
+  { name: "compact", description: "Compact the current session", template: "", isSystem: true },
+  { name: "details", description: "Toggle tool execution details", template: "", isSystem: true },
   {
     name: "editor",
     description: "Open external editor for composing messages",
     template: "",
     isSystem: true,
-    isInteractive: true,
   },
-  { name: "exit", description: "Exit OpenCode", template: "", isSystem: true, isInteractive: false },
+  { name: "exit", description: "Exit OpenCode", template: "", isSystem: true },
   {
     name: "export",
     description: "Export current conversation to Markdown",
     template: "",
     isSystem: true,
-    isInteractive: false,
   },
-  { name: "help", description: "Show the help dialog", template: "", isSystem: true, isInteractive: true },
-  { name: "init", description: "Create or update AGENTS.md file", template: "", isSystem: true, isInteractive: true },
-  { name: "models", description: "List available models", template: "", isSystem: true, isInteractive: false },
-  { name: "new", description: "Start a new session", template: "", isSystem: true, isInteractive: false },
-  { name: "redo", description: "Redo a previously undone message", template: "", isSystem: true, isInteractive: false },
+  { name: "help", description: "Show the help dialog", template: "", isSystem: true },
+  { name: "init", description: "Create or update AGENTS.md file", template: "", isSystem: true },
+  { name: "models", description: "List available models", template: "", isSystem: true },
+  { name: "new", description: "Start a new session", template: "", isSystem: true },
+  { name: "redo", description: "Redo a previously undone message", template: "", isSystem: true },
   {
     name: "sessions",
     description: "List and switch between sessions",
     template: "",
     isSystem: true,
-    isInteractive: true,
   },
-  { name: "share", description: "Share current session", template: "", isSystem: true, isInteractive: false },
-  { name: "themes", description: "List available themes", template: "", isSystem: true, isInteractive: true },
+  { name: "share", description: "Share current session", template: "", isSystem: true },
+  { name: "themes", description: "List available themes", template: "", isSystem: true },
   {
     name: "thinking",
     description: "Toggle visibility of thinking/reasoning blocks",
     template: "",
     isSystem: true,
-    isInteractive: false,
   },
   {
     name: "undo",
     description: "Undo last message in the conversation",
     template: "",
     isSystem: true,
-    isInteractive: false,
   },
-  { name: "unshare", description: "Unshare current session", template: "", isSystem: true, isInteractive: false },
+  { name: "unshare", description: "Unshare current session", template: "", isSystem: true },
 ];
 
 export default function Command() {
@@ -99,7 +84,7 @@ export default function Command() {
             template = content.replace(frontmatterMatch[0], "").trim();
           }
 
-          return { name, description, agent, model, template, isSystem: false, isInteractive: false };
+          return { name, description, agent, model, template, isSystem: false };
         });
         setCustomCommands(commands);
       }
@@ -133,46 +118,56 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section
-        title={filter === "all" ? "All Commands" : filter === "system" ? "System Commands" : "Custom Commands"}
-      >
-        {filteredCommands.map((cmd) => (
-          <List.Item
-            key={cmd.name}
-            title={`/${cmd.name}`}
-            subtitle={cmd.description}
-            accessories={[
-              {
-                tag: {
-                  value: cmd.isInteractive ? "Interactive" : "Non-interactive",
-                  color: cmd.isInteractive ? Color.Green : Color.SecondaryText,
-                },
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action.CopyToClipboard title="Copy Command" content={`/${cmd.name}`} />
-                  <Action.Paste
-                    title="Paste in Active App"
-                    content={`/${cmd.name}`}
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action.Push
-                    title="Create New Command"
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    target={<CreateCommandForm onCreated={loadCustomCommands} />}
-                    icon={Icon.Plus}
-                  />
-                  {!cmd.isSystem && <Action title="Reload" onAction={loadCustomCommands} icon={Icon.ArrowClockwise} />}
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      {filteredCommands.length === 0 ? (
+        <List.EmptyView
+          title="No Commands Found"
+          description="Create a new custom command to get started."
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Create New Command"
+                target={<CreateCommandForm onCreated={loadCustomCommands} />}
+                icon={Icon.Plus}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section
+          title={filter === "all" ? "All Commands" : filter === "system" ? "System Commands" : "Custom Commands"}
+        >
+          {filteredCommands.map((cmd) => (
+            <List.Item
+              key={cmd.name}
+              title={`/${cmd.name}`}
+              subtitle={cmd.description}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.CopyToClipboard title="Copy Command" content={`/${cmd.name}`} />
+                    <Action.Paste
+                      title="Paste in Active App"
+                      content={`/${cmd.name}`}
+                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action.Push
+                      title="Create New Command"
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      target={<CreateCommandForm onCreated={loadCustomCommands} />}
+                      icon={Icon.Plus}
+                    />
+                    {!cmd.isSystem && (
+                      <Action title="Reload" onAction={loadCustomCommands} icon={Icon.ArrowClockwise} />
+                    )}
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

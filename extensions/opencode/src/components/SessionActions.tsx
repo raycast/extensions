@@ -111,8 +111,8 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
 
   return (
     <ActionPanel>
-      {children && <ActionPanel.Section>{children}</ActionPanel.Section>}
       <ActionPanel.Section>
+        <Action.CopyToClipboard title="Copy Session ID" content={session.id} icon={Icon.CopyClipboard} />
         {!isDetail && (
           <Action.Push
             title="View Transcript"
@@ -128,6 +128,7 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
             target={<SessionSummary session={session} project={project} mutate={mutate} />}
           />
         )}
+        {children}
       </ActionPanel.Section>
 
       <ActionPanel.Section>
@@ -141,11 +142,6 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
           title="Copy Resume Command"
           content={resumeCommand}
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-        />
-        <Action.CopyToClipboard
-          title="Copy Session ID"
-          content={session.id}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
         />
         <Action.CopyToClipboard title="Copy Slug" content={session.slug} />
         <Action.CopyToClipboard title="Copy Project Directory" content={session.directory} />

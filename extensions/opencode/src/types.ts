@@ -34,14 +34,6 @@ export interface Session {
   };
 }
 
-export interface SessionStats {
-  cost: number;
-  tokens: number;
-  context: number;
-  additions: number;
-  deletions: number;
-}
-
 export interface Message {
   id: string;
   sessionID: string;
@@ -94,6 +86,14 @@ export interface SessionWithProject {
   project: Project | undefined;
 }
 
+export interface SessionStats {
+  cost: number;
+  tokens: number;
+  context: number;
+  additions: number;
+  deletions: number;
+}
+
 export interface CustomCommand {
   name: string;
   description?: string;
@@ -101,7 +101,6 @@ export interface CustomCommand {
   model?: string;
   template: string;
   isSystem?: boolean;
-  isInteractive?: boolean;
 }
 
 export interface CheatsheetItem {

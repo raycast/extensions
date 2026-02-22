@@ -1,4 +1,4 @@
-import { List, Action, Icon, Color } from "@raycast/api";
+import { List, Action, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import { Project, Session, SessionStats } from "../types";
@@ -16,7 +16,9 @@ export function SessionListItem({ session, project, mutate }: SessionListItemPro
   const repo = project ? repoName(project.worktree) : undefined;
   const title = session.title || session.slug;
 
-  const { data: stats, isLoading } = usePromise((sid) => loadSessionStats(sid), [session.id]);
+  const { data: stats, isLoading } = usePromise((sid) => loadSessionStats(sid), [session.id], {
+    keepPreviousData: true,
+  });
 
   return (
     <List.Item
@@ -59,14 +61,17 @@ function SessionItemDetail({
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label title="Tokens Used" text={stats ? formatTokens(stats.tokens) : "Loading..."} />
+          <List.Item.Detail.Metadata.Label
+            title="Tokens Used"
+            text={stats ? formatTokens(stats.tokens) : "Loading..."}
+          />
           <List.Item.Detail.Metadata.Label title="Amount Spent" text={stats ? formatCost(stats.cost) : "Loading..."} />
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label 
-            title="Lines" 
-            text={stats ? `+${stats.additions} -${stats.deletions}` : "Loading..."} 
+          <List.Item.Detail.Metadata.Label
+            title="Lines"
+            text={stats ? `+${stats.additions} -${stats.deletions}` : "Loading..."}
           />
         </List.Item.Detail.Metadata>
       }
