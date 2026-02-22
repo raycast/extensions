@@ -1,7 +1,7 @@
 import { MenuBarExtra, launchCommand, LaunchType, open, Icon, Cache } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const execPromise = promisify(exec);
 
