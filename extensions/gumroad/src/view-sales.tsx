@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Keyboard } from "@raycast/api";
 import { getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { SalesResponse, ProductsResponse, Sale } from "./types";
@@ -60,6 +60,11 @@ function Command() {
     return true;
   });
 
+  const toggleShortcut: Keyboard.Shortcut = {
+    modifiers: process.platform === "darwin" ? ["cmd", "shift"] : ["ctrl", "shift"],
+    key: "h",
+  };
+
   return (
     <List
       isLoading={(isLoadingSales || sales === undefined) && !errorSales}
@@ -97,7 +102,7 @@ function Command() {
               <Action
                 title={priceFilter === "all" ? "Hide $0 Sales" : "Show All Sales"}
                 onAction={() => onFilterChange(priceFilter === "all" ? "hide_zero" : "all_sales")}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                shortcut={toggleShortcut}
                 icon={priceFilter === "all" ? Icon.EyeDisabled : Icon.Eye}
               />
             </ActionPanel>
