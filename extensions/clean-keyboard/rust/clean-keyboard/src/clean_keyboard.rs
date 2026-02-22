@@ -1,5 +1,6 @@
 use std::mem;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 
@@ -23,7 +24,10 @@ const VK_U: u32 = 0x55;
 
 static IS_LOCKED: AtomicBool = AtomicBool::new(false);
 static CTRL_DOWN: AtomicBool = AtomicBool::new(false);
-static mut KEYBOARD_HOOK: HHOOK = unsafe { mem::zeroed() };
+
+// Mutex-protected hook handle — prevents race conditions if handler() is
+// called concurrently (e.g. user triggers lock twice quickly)
+static KEYBOARD_HOOK: Mutex<isize> = Mutex::new(0);
 
 fn inject_ctrl_u() {
     unsafe {
@@ -86,6 +90,9 @@ unsafe extern "system" fn keyboard_hook(
     wparam: WPARAM,
     lparam: LPARAM,
 ) -> LRESULT {
+    // Read hook handle — use 0 (null) as fallback if lock is poisoned
+    let hook = HHOOK(*KEYBOARD_HOOK.lock().unwrap_or_else(|e| e.into_inner()) as *mut _);
+
     unsafe {
         if code >= 0 {
             let kbd = &*(lparam.0 as *const KBDLLHOOKSTRUCT);
@@ -95,51 +102,65 @@ unsafe extern "system" fn keyboard_hook(
             if kbd.vkCode == VK_LCONTROL || kbd.vkCode == VK_RCONTROL {
                 if is_down { CTRL_DOWN.store(true, Ordering::SeqCst); }
                 else if is_up { CTRL_DOWN.store(false, Ordering::SeqCst); }
-                return CallNextHookEx(KEYBOARD_HOOK, code, wparam, lparam);
+                return CallNextHookEx(hook, code, wparam, lparam);
             }
 
             if IS_LOCKED.load(Ordering::SeqCst) {
                 if is_down && kbd.vkCode == VK_U && CTRL_DOWN.load(Ordering::SeqCst) {
                     // Physical or synthetic Ctrl+U — unlock directly in this process
                     IS_LOCKED.store(false, Ordering::SeqCst);
-                    return CallNextHookEx(KEYBOARD_HOOK, code, wparam, lparam);
+                    return CallNextHookEx(hook, code, wparam, lparam);
                 }
                 return LRESULT(1);
             }
         }
-        CallNextHookEx(KEYBOARD_HOOK, code, wparam, lparam)
+        CallNextHookEx(hook, code, wparam, lparam)
     }
 }
 
 #[raycast]
 fn handler(duration: Option<i32>) -> Result<(), String> {
-    unsafe {
-        CTRL_DOWN.store(false, Ordering::SeqCst);
-        IS_LOCKED.store(true, Ordering::SeqCst);
+    // Acquire the lock first — if another handler() call is already running,
+    // this will block until it finishes rather than creating two concurrent hooks
+    let mut hook_guard = KEYBOARD_HOOK.lock().map_err(|e| e.to_string())?;
 
-        let hmod = GetModuleHandleW(None).map_err(|e| e.to_string())?;
-        let hinstance = HINSTANCE(hmod.0);
+    // Unhook any previously installed hook that wasn't cleaned up
+    if *hook_guard != 0 {
+        unsafe { let _ = UnhookWindowsHookEx(HHOOK(*hook_guard as *mut _)); }
+        *hook_guard = 0;
+    }
 
-        // If this fails, IS_LOCKED stays true but we return an Err —
-        // the caller gets the error and knows locking failed
-        KEYBOARD_HOOK = SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard_hook), hinstance, 0)
+    CTRL_DOWN.store(false, Ordering::SeqCst);
+    IS_LOCKED.store(true, Ordering::SeqCst);
+
+    let hmod = unsafe { GetModuleHandleW(None).map_err(|e| e.to_string())? };
+    let hinstance = HINSTANCE(hmod.0);
+
+    let hook = unsafe {
+        SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard_hook), hinstance, 0)
             .map_err(|e| {
                 IS_LOCKED.store(false, Ordering::SeqCst);
                 format!("Failed to install keyboard hook: {e}")
-            })?;
+            })?
+    };
 
-        if let Some(secs) = duration {
-            thread::spawn(move || {
-                thread::sleep(Duration::from_secs(secs as u64));
-                if IS_LOCKED.load(Ordering::SeqCst) {
-                    eprintln!("Timer expired ⏱️");
-                    IS_LOCKED.store(false, Ordering::SeqCst);
-                }
-            });
-        }
+    *hook_guard = hook.0 as isize;
+    // Release the mutex so the hook callback can acquire it during message pumping
+    drop(hook_guard);
 
-        let mut msg = MSG::default();
-        while IS_LOCKED.load(Ordering::SeqCst) {
+    if let Some(secs) = duration {
+        thread::spawn(move || {
+            thread::sleep(Duration::from_secs(secs as u64));
+            if IS_LOCKED.load(Ordering::SeqCst) {
+                eprintln!("Timer expired ⏱️");
+                IS_LOCKED.store(false, Ordering::SeqCst);
+            }
+        });
+    }
+
+    let mut msg = MSG::default();
+    while IS_LOCKED.load(Ordering::SeqCst) {
+        unsafe {
             if PeekMessageW(&mut msg, None, 0, 0, PM_REMOVE).as_bool() {
                 let _ = TranslateMessage(&msg);
                 DispatchMessageW(&msg);
@@ -147,12 +168,17 @@ fn handler(duration: Option<i32>) -> Result<(), String> {
                 thread::sleep(Duration::from_millis(5));
             }
         }
-
-        let _ = UnhookWindowsHookEx(KEYBOARD_HOOK);
-        KEYBOARD_HOOK = mem::zeroed();
-
-        Ok(())
     }
+
+    // Re-acquire to cleanly unhook
+    if let Ok(mut guard) = KEYBOARD_HOOK.lock() {
+        if *guard != 0 {
+            unsafe { let _ = UnhookWindowsHookEx(HHOOK(*guard as *mut _)); }
+            *guard = 0;
+        }
+    }
+
+    Ok(())
 }
 
 #[raycast]

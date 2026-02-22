@@ -65,16 +65,19 @@ export default function Command() {
       const { handler: handlerRust } = await import("rust:../rust/clean-keyboard");
       handler = handlerRust;
     }
-    try {
-      handler(duration.seconds);
-    } catch (err) {
-      await showToast({ title: "Failed to lock keyboard", message: String(err), style: Toast.Style.Failure });
-      return;
-    }
+
     setTimeLeft(duration.seconds);
     setIcon(duration.icon);
     setIsRunning(true);
     await showToast({ title: "Keyboard locked" });
+
+    Promise.resolve(handler(duration.seconds)).catch(async (err) => {
+      // Roll back UI if hook installation failed
+      setIsRunning(false);
+      setTimeLeft(null);
+      setIcon(null);
+      await showToast({ title: "Failed to lock keyboard", message: String(err), style: Toast.Style.Failure });
+    });
   };
 
   const unlockAction = async () => {
