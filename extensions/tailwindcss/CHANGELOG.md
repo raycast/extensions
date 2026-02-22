@@ -1,5 +1,10 @@
 # Tailwind CSS Changelog
 
+## [Add mauve, olive, mist, and taupe color palettes] - {PR_MERGE_DATE}
+
+- Add mauve, olive, mist, and taupe color palettes to the Search Colors command
+- Each palette includes shades 50–950 with oklch-derived hex values
+
 ## [Update keyboard shortcuts] - 2026-01-05
 
 - Update `Shortcut`s to be cross-platform

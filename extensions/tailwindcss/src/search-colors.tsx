@@ -2,11 +2,75 @@ import { Action, ActionPanel, getPreferenceValues, Grid, Keyboard } from "@rayca
 import { hex } from "color-convert";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import colors from "tailwindcss/colors";
+import tailwindColors from "tailwindcss/colors";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
 
 import { moveFirstMatchToFront } from "./utils/move-to-front-extension";
+
+const customColors = {
+  mauve: {
+    50: "#fafafa",
+    100: "#f3f1f3",
+    200: "#e7e4e7",
+    300: "#d7d0d7",
+    400: "#a89ea9",
+    500: "#79697b",
+    600: "#594c5b",
+    700: "#463947",
+    800: "#2a212c",
+    900: "#1d161e",
+    950: "#0c090c",
+  },
+  olive: {
+    50: "#fbfbf9",
+    100: "#f4f4f0",
+    200: "#e8e8e3",
+    300: "#d8d8d0",
+    400: "#abab9c",
+    500: "#7c7c67",
+    600: "#5b5b4b",
+    700: "#474739",
+    800: "#2b2b22",
+    900: "#1d1d16",
+    950: "#0c0c09",
+  },
+  mist: {
+    50: "#f9fbfb",
+    100: "#f1f3f3",
+    200: "#e3e7e8",
+    300: "#d0d6d8",
+    400: "#9ca8ab",
+    500: "#67787c",
+    600: "#4b585b",
+    700: "#394447",
+    800: "#22292b",
+    900: "#161b1d",
+    950: "#090b0c",
+  },
+  taupe: {
+    50: "#fbfaf9",
+    100: "#f3f1f1",
+    200: "#e8e4e3",
+    300: "#d8d2d0",
+    400: "#aba09c",
+    500: "#7c6d67",
+    600: "#5b4f4b",
+    700: "#473c39",
+    800: "#2b2422",
+    900: "#1d1816",
+    950: "#0c0a09",
+  },
+};
+
+const tailwindEntries = Object.entries(tailwindColors);
+const stoneIndex = tailwindEntries.findIndex(([name]) => name === "stone");
+const customEntries = Object.entries(customColors);
+const colors = Object.fromEntries([
+  ...tailwindEntries.slice(0, stoneIndex + 1),
+  ...customEntries,
+  ...tailwindEntries.slice(stoneIndex + 1),
+]);
 
 const hiddenColors = [
   "inherit",
