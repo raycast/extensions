@@ -38,7 +38,7 @@ function Command() {
   };
 
   const onFilterChange = (newValue: string) => {
-    if (newValue === "all_sales") {
+    if (newValue === "all_sales" || newValue === "all_products") {
       setPriceFilter("all");
       setProductId("");
       setPageUrl(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
@@ -76,7 +76,7 @@ function Command() {
             <List.Dropdown.Item title="Hide $0 Sales" value="hide_zero" />
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Products">
-            <List.Dropdown.Item title="All Products" value="all_sales" />
+            <List.Dropdown.Item title="All Products" value="all_products" />
             {productsData?.products.map((product) => (
               <List.Dropdown.Item key={product.id} title={product.name} value={product.id} />
             ))}
