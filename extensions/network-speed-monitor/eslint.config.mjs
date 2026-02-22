@@ -1,3 +1,4 @@
+import { defineConfig } from "eslint/config"
 import raycastConfig from "@raycast/eslint-config"
 
-export default raycastConfig.flat()
+export default defineConfig([...raycastConfig])
