@@ -1,76 +1,22 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Keyboard } from "@raycast/api";
 import { hex } from "color-convert";
+import { formatHex, parse } from "culori";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import tailwindColors from "tailwindcss/colors";
+// @ts-ignore - Tailwind v4.2 colors
+import colors from "tailwindcss/colors";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
 
 import { moveFirstMatchToFront } from "./utils/move-to-front-extension";
 
-const customColors = {
-  mauve: {
-    50: "#fafafa",
-    100: "#f3f1f3",
-    200: "#e7e4e7",
-    300: "#d7d0d7",
-    400: "#a89ea9",
-    500: "#79697b",
-    600: "#594c5b",
-    700: "#463947",
-    800: "#2a212c",
-    900: "#1d161e",
-    950: "#0c090c",
-  },
-  olive: {
-    50: "#fbfbf9",
-    100: "#f4f4f0",
-    200: "#e8e8e3",
-    300: "#d8d8d0",
-    400: "#abab9c",
-    500: "#7c7c67",
-    600: "#5b5b4b",
-    700: "#474739",
-    800: "#2b2b22",
-    900: "#1d1d16",
-    950: "#0c0c09",
-  },
-  mist: {
-    50: "#f9fbfb",
-    100: "#f1f3f3",
-    200: "#e3e7e8",
-    300: "#d0d6d8",
-    400: "#9ca8ab",
-    500: "#67787c",
-    600: "#4b585b",
-    700: "#394447",
-    800: "#22292b",
-    900: "#161b1d",
-    950: "#090b0c",
-  },
-  taupe: {
-    50: "#fbfaf9",
-    100: "#f3f1f1",
-    200: "#e8e4e3",
-    300: "#d8d2d0",
-    400: "#aba09c",
-    500: "#7c6d67",
-    600: "#5b4f4b",
-    700: "#473c39",
-    800: "#2b2422",
-    900: "#1d1816",
-    950: "#0c0a09",
-  },
-};
+type ColorPalette = Record<string, string>;
+const colorEntries = Object.entries(colors) as [string, ColorPalette][];
 
-const tailwindEntries = Object.entries(tailwindColors);
-const stoneIndex = tailwindEntries.findIndex(([name]) => name === "stone");
-const customEntries = Object.entries(customColors);
-const colors = Object.fromEntries([
-  ...tailwindEntries.slice(0, stoneIndex + 1),
-  ...customEntries,
-  ...tailwindEntries.slice(stoneIndex + 1),
-]);
+function toHex(value: string): string {
+  if (value.startsWith("#")) return value;
+  const parsed = parse(value);
+  return parsed ? formatHex(parsed) : value;
+}
 
 const hiddenColors = [
   "inherit",
@@ -78,40 +24,34 @@ const hiddenColors = [
   "transparent",
   "black",
   "white",
-  "lightBlue",
-  "coolGray",
-  "trueGray",
-  "warmGray",
-  "blueGray",
 ];
 
 const preferences = getPreferenceValues<Preferences.SearchColors>();
 
 export default function SearchColors() {
   const [searchText, setSearchText] = useState("");
-  const [filteredColors, filterColors] = useState(Object.entries(colors));
+  const [filteredColors, filterColors] = useState(colorEntries);
 
   useEffect(() => {
     // If there's no search text, show all colors
     if (!searchText) {
-      filterColors(Object.entries(colors));
+      filterColors(colorEntries);
       return;
     }
     // If the search text starts with a number, we assume it's a shade
     if (searchText.match(/^\d/)) {
-      const filteredShades = Object.entries(colors)
+      const filteredShades = colorEntries
         .map(([name, shades]) => {
           const t = Object.entries(shades).filter(([shade]) => shade.includes(searchText));
           return [name, Object.fromEntries(t)];
         })
         .filter(([, shades]) => Object.keys(shades).length > 0);
-      console.log(filteredShades);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filterColors(filteredShades as any);
       return;
     }
     // Otherwise, we assume it's a color name
-    filterColors(Object.entries(colors).filter(([name]) => name.includes(searchText)));
+    filterColors(colorEntries.filter(([name]) => name.includes(searchText)));
   }, [searchText]);
   return (
     <Grid searchBarPlaceholder="Search colors by name and shade..." columns={8} onSearchTextChange={setSearchText}>
@@ -138,8 +78,18 @@ export default function SearchColors() {
                   `${name}-${shade}`,
                   value as string,
                   (value as string).replace("#", ""),
+                  toHex(value as string),
+                  toHex(value as string).replace("#", ""),
                 ]}
-                actions={<Actions preferences={preferences} name={name} shade={shade} value={value as string} />}
+                actions={
+                  <Actions
+                    preferences={preferences}
+                    name={name}
+                    shade={shade}
+                    value={value as string}
+                    hexValue={toHex(value as string)}
+                  />
+                }
               />
             ))}
           </Grid.Section>
@@ -153,11 +103,13 @@ function Actions({
   name,
   shade,
   value,
+  hexValue,
 }: {
   preferences: Preferences.SearchColors;
   name: string;
   shade: string;
   value: string;
+  hexValue: string;
 }) {
   let sections = [
     {
@@ -232,7 +184,7 @@ function Actions({
         {
           id: "value-hex",
           title: "Copy Hex Value",
-          content: value,
+          content: hexValue,
           shortcut: {
             macOS: { modifiers: ["cmd", "opt"], key: "h" },
             Windows: { modifiers: ["ctrl", "alt"], key: "h" },
@@ -241,7 +193,7 @@ function Actions({
         {
           id: "value-rgb",
           title: "Copy RGB Value",
-          content: `rgb(${hex.rgb(value)})`,
+          content: `rgb(${hex.rgb(hexValue)})`,
           shortcut: {
             macOS: { modifiers: ["cmd", "opt"], key: "r" },
             Windows: { modifiers: ["ctrl", "alt"], key: "r" },
@@ -250,7 +202,7 @@ function Actions({
         {
           id: "value-hsl",
           title: "Copy HSL Value",
-          content: `hsl(${hex.hsl(value)})`,
+          content: `hsl(${hex.hsl(hexValue)})`,
           shortcut: {
             macOS: { modifiers: ["cmd", "opt"], key: "s" },
             Windows: { modifiers: ["ctrl", "alt"], key: "s" },

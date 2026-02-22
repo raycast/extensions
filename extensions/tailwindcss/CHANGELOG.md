@@ -1,9 +1,10 @@
 # Tailwind CSS Changelog
 
-## [Add mauve, olive, mist, and taupe color palettes] - {PR_MERGE_DATE}
+## [Upgrade to Tailwind v4.2 and add new color palettes] - {PR_MERGE_DATE}
 
-- Add mauve, olive, mist, and taupe color palettes to the Search Colors command
-- Each palette includes shades 50–950 with oklch-derived hex values
+- Upgrade to Tailwind CSS v4.2 for Search Colors (includes mauve, olive, mist, taupe in default theme)
+- Add culori for oklch-to-hex conversion (Tailwind v4 uses oklch)
+- Keep Tailwind v3 for class generator compatibility
 
 ## [Update keyboard shortcuts] - 2026-01-05
 
