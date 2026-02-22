@@ -18,13 +18,7 @@ function toHex(value: string): string {
   return parsed ? formatHex(parsed) : value;
 }
 
-const hiddenColors = [
-  "inherit",
-  "current",
-  "transparent",
-  "black",
-  "white",
-];
+const hiddenColors = ["inherit", "current", "transparent", "black", "white"];
 
 const preferences = getPreferenceValues<Preferences.SearchColors>();
 
@@ -102,7 +96,6 @@ function Actions({
   preferences,
   name,
   shade,
-  value,
   hexValue,
 }: {
   preferences: Preferences.SearchColors;
