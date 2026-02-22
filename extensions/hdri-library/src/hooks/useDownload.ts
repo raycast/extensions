@@ -3,7 +3,6 @@ import path from "path";
 import os from "os";
 import fs from "fs";
 import { pipeline } from "stream/promises";
-import fetch from "node-fetch";
 import { useSettings } from "./useSettings";
 
 export function useDownload() {

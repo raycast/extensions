@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 const API_BASE = "https://api.polyhaven.com";
 const USER_AGENT = "PolyHavenRaycastExtension/1.0";
 
