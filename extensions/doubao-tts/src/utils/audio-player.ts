@@ -88,7 +88,7 @@ export class AudioPlayer {
     }
     const fileName = `doubao-tts-${randomUUID()}.mp3`;
     const filePath = join(tmpdir(), fileName);
-    writeFileSync(filePath, buffer);
+    writeFileSync(filePath, new Uint8Array(buffer));
     this.tempFiles.push(filePath);
     return filePath;
   }
