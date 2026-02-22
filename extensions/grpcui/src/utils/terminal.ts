@@ -1,29 +1,27 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
-import { Terminal } from "../types";
+import { execFile } from "child_process";
 
-const escapeAppleScript = (s: string) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-const escapeShell = (s: string) => s.replace(/'/g, "'\\''");
+type Terminal = Preferences["terminal"];
 
-const commands: Record<Terminal, (service: string) => string> = {
-  Terminal: (service) => {
-    const escaped = escapeAppleScript(service);
-    return `osascript -e '
+const terminalScripts: Record<Terminal, string> = {
+  Terminal: `
+    on run argv
+      set service to item 1 of argv
       tell application "Terminal"
         activate
         if (count of windows) = 0 then
-          do script "grpcui ${escaped}"
+          do script "grpcui " & quoted form of service
         else
           tell application "System Events" to keystroke "t" using command down
           delay 0.3
-          do script "grpcui ${escaped}" in selected tab of front window
+          do script "grpcui " & quoted form of service in selected tab of front window
         end if
       end tell
-    '`;
-  },
-  iTerm: (service) => {
-    const escaped = escapeAppleScript(service);
-    return `osascript -e '
+    end run
+  `,
+  iTerm: `
+    on run argv
+      set service to item 1 of argv
       tell application "iTerm"
         activate
         if (count of windows) = 0 then
@@ -31,27 +29,29 @@ const commands: Record<Terminal, (service: string) => string> = {
         else
           tell current window to create tab with default profile
         end if
-        tell current session of current window to write text "grpcui ${escaped}"
+        tell current session of current window to write text "grpcui " & quoted form of service
       end tell
-    '`;
-  },
-  Ghostty: (service) => {
-    const escaped = escapeShell(service);
-    return `open -n -a Ghostty --args -e /bin/zsh -l -c 'grpcui ${escaped}'`;
-  },
+    end run
+  `,
+  Ghostty: `
+    on run argv
+      set service to item 1 of argv
+      do shell script "open -n -a Ghostty --args -e /bin/zsh -l -c 'grpcui " & quoted form of service & "'"
+    end run
+  `,
 };
 
 export const openInTerminal = async (service: string) => {
-  const { terminal } = getPreferenceValues<{ terminal: Terminal }>();
+  const { terminal } = getPreferenceValues<Preferences>();
 
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `Opening ${terminal}...`,
   });
 
-  const command = commands[terminal] ?? commands.Terminal;
+  const script = terminalScripts[terminal] ?? terminalScripts.Terminal;
 
-  exec(command(service), (error) => {
+  execFile("osascript", ["-e", script, "--", service], (error) => {
     if (error) {
       toast.style = Toast.Style.Failure;
       toast.title = `Error opening ${terminal}`;
