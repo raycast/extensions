@@ -171,7 +171,7 @@ export function buildOptionsFromPrefs(speakerOverride?: string): TTSOptions {
   const voiceConfig = getVoiceById(speaker);
   if (voiceConfig && voiceConfig.model !== baseModel) {
     throw new TTSApiError(
-      `音色「${voiceConfig.name}」需要 ${voiceConfig.model}，但当前模型为 ${currentModel}。请在偏好设置中更换默认音色或模型版本。`,
+      `Voice "${voiceConfig.name}" requires ${voiceConfig.model}, but the current model is ${currentModel}. Please change the default voice or model version in preferences.`,
       -1,
     );
   }
