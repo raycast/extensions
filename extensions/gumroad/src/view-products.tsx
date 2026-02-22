@@ -20,7 +20,9 @@ function Command() {
           title={product.name}
           subtitle={product.formatted_price}
           icon={
-            product.thumbnail_url ? { source: product.thumbnail_url } : { source: Icon.Image, tintColor: Color.Magenta }
+            product.thumbnail_url
+              ? { source: product.thumbnail_url }
+              : { source: Icon.Image, tintColor: Color.SecondaryText }
           }
           accessories={[
             {

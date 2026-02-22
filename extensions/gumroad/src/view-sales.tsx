@@ -89,7 +89,7 @@ function Command() {
           key={sale.id}
           title={sale.product_name}
           subtitle={formatDate(sale.created_at)}
-          icon={{ source: Icon.Coins, tintColor: Color.Magenta }}
+          icon={{ source: Icon.Coins, tintColor: Color.SecondaryText }}
           accessories={[
             {
               text: sale.formatted_total_price,
