@@ -104,8 +104,8 @@ jobs:
           webhook: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"
           text: |
-            :no_entry_sign: ${env.GITHUB_WORKFLOW} has failed
-            <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Action logs> | <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }|Commit: ${ env.GITHUB_SHA.substr(0,8) }>
+            :no_entry_sign: ${{ github.workflow }} has failed
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Action logs> | <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|Commit: ${{ github.sha }}>
       - name: Notify Success to Slack
         if: success() && github.event_name == 'workflow_dispatch'
         uses: raycast/github-actions/slack-send@master
@@ -113,5 +113,5 @@ jobs:
           webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "good"
           text: |
-            :white_check_mark: ${env.GITHUB_WORKFLOW} has succeeded
-            <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Action logs> | <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }|Commit: ${ env.GITHUB_SHA.substr(0,8) }>
+            :white_check_mark: ${{ github.workflow }} has succeeded
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Action logs> | <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|Commit: ${{ github.sha }}>
