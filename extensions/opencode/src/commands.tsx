@@ -9,6 +9,7 @@ import {
   Toast,
   confirmAlert,
   Alert,
+  trash,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fs from "fs";
@@ -87,10 +88,12 @@ export default function Command() {
             const lines = frontmatterMatch[1].split("\n");
             lines.forEach((line) => {
               const [key, ...value] = line.split(":");
-              const val = value.join(":").trim();
-              if (key.trim() === "description") description = val;
-              if (key.trim() === "agent") agent = val;
-              if (key.trim() === "model") model = val;
+              if (value.length > 0) {
+                const val = value.join(":").trim();
+                if (key.trim() === "description") description = val;
+                if (key.trim() === "agent") agent = val;
+                if (key.trim() === "model") model = val;
+              }
             });
             template = content.replace(frontmatterMatch[0], "").trim();
           }
@@ -122,7 +125,7 @@ export default function Command() {
         const configPath = path.join(os.homedir(), ".config", "opencode", "commands");
         const filePath = path.join(configPath, `${cmd.name}.md`);
         if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
+          await trash(filePath);
           await showToast({ style: Toast.Style.Success, title: "Command deleted" });
           loadCustomCommands();
         }
@@ -247,7 +250,7 @@ function CommandForm({ onCreated, initialValues }: { onCreated: () => void; init
       if (initialValues && initialValues.name !== values.name) {
         const oldFilePath = path.join(configPath, `${initialValues.name}.md`);
         if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
+          await trash(oldFilePath);
         }
       }
 
