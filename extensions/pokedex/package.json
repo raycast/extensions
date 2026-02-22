@@ -22,9 +22,9 @@
   "commands": [
     {
       "name": "pokemon",
-      "title": "Pokémon",
-      "subtitle": "Pokédex",
-      "description": "A digital encyclopedia that provides information about Pokémon.",
+      "title": "Pokédex",
+      "subtitle": "Pokémon",
+      "description": "Explore detailed Pokémon profiles with stats, abilities, moves, evolution chains, encounters, and Pokédex entries.",
       "mode": "view",
       "arguments": [
         {
@@ -36,54 +36,9 @@
       ]
     },
     {
-      "name": "ability",
-      "title": "Abilities",
-      "subtitle": "Pokédex",
-      "description": "An Ability is a unique, passive trait that provides a special effect for a Pokémon, influencing its battle performance or interactions with the environment.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Ability name",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "move",
-      "title": "Moves",
-      "subtitle": "Pokédex",
-      "description": "A move is a skill or attack that Pokémon use in battle, varying in type, power, accuracy, and additional effects.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Move name",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "weakness",
-      "title": "Weaknesses",
-      "subtitle": "Pokédex",
-      "description": "Discover the types of moves that are particularly effective against a specific Pokémon.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Pokémon name",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
       "name": "type_chart",
       "title": "Type Chart",
-      "subtitle": "Pokédex",
+      "subtitle": "Mechanics",
       "description": "View Pokémon type interactions, including strengths, weaknesses, and immunities.",
       "mode": "view",
       "arguments": [
@@ -96,15 +51,76 @@
       ]
     },
     {
+      "name": "weakness",
+      "title": "Weaknesses",
+      "subtitle": "Mechanics",
+      "description": "Discover the types of moves that are particularly effective against a specific Pokémon.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Pokémon name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ability",
+      "title": "Abilities",
+      "subtitle": "Mechanics",
+      "description": "An Ability is a unique, passive trait that provides a special effect for a Pokémon, influencing its battle performance or interactions with the environment.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ability name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "nature",
-      "title": "Natures",
-      "subtitle": "Pokédex",
+      "title": "Nature",
+      "subtitle": "Mechanics",
       "description": "Explore different Pokémon natures and their effects on stat growth.",
       "mode": "view",
       "arguments": [
         {
           "name": "search",
           "placeholder": "Nature name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "move",
+      "title": "Moves",
+      "subtitle": "Mechanics",
+      "description": "Discover Pokémon moves with detailed descriptions across game versions, power, accuracy, effect chances, and which Pokémon can learn them.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Move name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "item",
+      "title": "Items",
+      "subtitle": "Mechanics",
+      "description": "Browse Pokémon items with descriptions across game versions, effects, categories, and prices.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Item name",
           "type": "text",
           "required": false
         }
@@ -205,10 +221,19 @@
           "value": "official"
         },
         {
-          "title": "Pixel Art",
+          "title": "Black & White Sprites",
           "value": "pixel"
         }
       ]
+    },
+    {
+      "name": "shiny",
+      "title": "Appearance",
+      "description": "Display shiny versions of Pokémon images when available.",
+      "label": "Show Shiny Sprites",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {

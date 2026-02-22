@@ -58,7 +58,7 @@ export async function brewSearch(
         casksProgress: progress,
         formulaeProgress,
       });
-    }),
+    }, signal),
     fetchFormulaIndex((progress) => {
       formulaeProgress = progress;
       onProgress?.({
@@ -66,7 +66,7 @@ export async function brewSearch(
         casksProgress,
         formulaeProgress: progress,
       });
-    }),
+    }, signal),
   ]);
 
   if (signal?.aborted) {

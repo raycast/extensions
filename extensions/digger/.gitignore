@@ -12,8 +12,8 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
-./claude
-.windsurf/*
-/.windsurf
-./private
-private/*
+.claude
+.windsurf/
+.private
+.private/*
+CLAUDE.md

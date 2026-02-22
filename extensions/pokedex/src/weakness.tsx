@@ -16,7 +16,11 @@ import PokeProfile from "./components/profile";
 import TypeDropdown from "./components/type_dropdown";
 import pokedex from "./statics/pokedex.json";
 import { PokemonSpeciesName } from "./types";
-import { getOfficialArtworkImg, localeName, nationalDexNumber } from "./utils";
+import {
+  getMarkdownPokemonImage,
+  localeName,
+  nationalDexNumber,
+} from "./utils";
 import TypeMetadata from "./components/metadata/type";
 
 const { language } = getPreferenceValues();
@@ -89,12 +93,7 @@ export default function PokeWeaknesses(props: {
                   <List.Item.Detail
                     markdown={json2md([
                       {
-                        img: [
-                          {
-                            title: poke.name,
-                            source: getOfficialArtworkImg(poke.id),
-                          },
-                        ],
+                        p: getMarkdownPokemonImage(poke.id),
                       },
                     ])}
                     metadata={
