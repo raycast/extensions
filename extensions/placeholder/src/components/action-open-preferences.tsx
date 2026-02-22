@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, openCommandPreferences, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, openCommandPreferences, openExtensionPreferences } from "@raycast/api";
 
 export function ActionOpenPreferences() {
   return (
@@ -6,7 +6,10 @@ export function ActionOpenPreferences() {
       <Action
         icon={Icon.Gear}
         title="Configure Command"
-        shortcut={Keyboard.Shortcut.Common.CopyPath}
+        shortcut={{
+          macOS: { modifiers: ["shift", "cmd"], key: "," },
+          Windows: { modifiers: ["shift", "ctrl"], key: "," },
+        }}
         onAction={openCommandPreferences}
       />
       <Action
