@@ -37,15 +37,14 @@ export async function createPost(
   };
 
   if (params.url && (!params.images || params.images.length === 0)) {
-    const embed: AppBskyEmbedExternal.Main = {
-      $type: "app.bsky.embed.external",
+    record.embed = {
+      $type: "app.bsky.embed.external" as const,
       external: {
         uri: params.url,
         title: "",
         description: "",
       },
-    };
-    record.embed = embed;
+    } satisfies AppBskyEmbedExternal.Main & { $type: string };
   }
 
   if (params.images && params.images.length > 0) {
