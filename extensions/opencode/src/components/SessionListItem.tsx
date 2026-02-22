@@ -1,4 +1,4 @@
-import { List, Action, Icon } from "@raycast/api";
+import { List, Action, Icon, Color } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import { Project, Session, SessionStats } from "../types";
@@ -44,9 +44,6 @@ function SessionItemDetail({
   isLoading: boolean;
   repo?: string;
 }) {
-  const CONTEXT_LIMIT = 1000000;
-  const contextPercent = stats ? Math.round((stats.context / CONTEXT_LIMIT) * 100) : 0;
-
   return (
     <List.Item.Detail
       isLoading={isLoading}
@@ -63,10 +60,6 @@ function SessionItemDetail({
           <List.Item.Detail.Metadata.Separator />
 
           <List.Item.Detail.Metadata.Label
-            title="Context"
-            text={stats ? `${formatTokens(stats.context)} (${contextPercent}% used)` : "Loading..."}
-          />
-          <List.Item.Detail.Metadata.Label
             title="Tokens Used"
             text={stats ? formatTokens(stats.tokens) : "Loading..."}
           />
@@ -75,13 +68,16 @@ function SessionItemDetail({
           <List.Item.Detail.Metadata.Separator />
 
           <List.Item.Detail.Metadata.Label
-            title="Lines Added"
-            text={stats ? stats.additions.toString() : "Loading..."}
+            title="Lines"
+            text={stats ? `+${stats.additions}` : "Loading..."}
+            icon={stats ? { source: Icon.Plus, tintColor: Color.Green } : undefined}
           />
-          <List.Item.Detail.Metadata.Label
-            title="Lines Removed"
-            text={stats ? stats.deletions.toString() : "Loading..."}
-          />
+          {stats && (
+            <List.Item.Detail.Metadata.Label
+              text={`-${stats.deletions}`}
+              icon={{ source: Icon.Minus, tintColor: Color.Red }}
+            />
+          )}
         </List.Item.Detail.Metadata>
       }
     />

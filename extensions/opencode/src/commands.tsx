@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Form, useNavigation, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Form, useNavigation, showToast, Toast, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
@@ -6,23 +6,53 @@ import os from "os";
 import { CustomCommand } from "./types";
 
 const SYSTEM_COMMANDS: CustomCommand[] = [
-  { name: "connect", description: "Add a provider to OpenCode", template: "", isSystem: true },
-  { name: "compact", description: "Compact the current session", template: "", isSystem: true },
-  { name: "details", description: "Toggle tool execution details", template: "", isSystem: true },
-  { name: "editor", description: "Open external editor for composing messages", template: "", isSystem: true },
-  { name: "exit", description: "Exit OpenCode", template: "", isSystem: true },
-  { name: "export", description: "Export current conversation to Markdown", template: "", isSystem: true },
-  { name: "help", description: "Show the help dialog", template: "", isSystem: true },
-  { name: "init", description: "Create or update AGENTS.md file", template: "", isSystem: true },
-  { name: "models", description: "List available models", template: "", isSystem: true },
-  { name: "new", description: "Start a new session", template: "", isSystem: true },
-  { name: "redo", description: "Redo a previously undone message", template: "", isSystem: true },
-  { name: "sessions", description: "List and switch between sessions", template: "", isSystem: true },
-  { name: "share", description: "Share current session", template: "", isSystem: true },
-  { name: "themes", description: "List available themes", template: "", isSystem: true },
-  { name: "thinking", description: "Toggle visibility of thinking/reasoning blocks", template: "", isSystem: true },
-  { name: "undo", description: "Undo last message in the conversation", template: "", isSystem: true },
-  { name: "unshare", description: "Unshare current session", template: "", isSystem: true },
+  { name: "connect", description: "Add a provider to OpenCode", template: "", isSystem: true, isInteractive: true },
+  { name: "compact", description: "Compact the current session", template: "", isSystem: true, isInteractive: false },
+  { name: "details", description: "Toggle tool execution details", template: "", isSystem: true, isInteractive: false },
+  {
+    name: "editor",
+    description: "Open external editor for composing messages",
+    template: "",
+    isSystem: true,
+    isInteractive: true,
+  },
+  { name: "exit", description: "Exit OpenCode", template: "", isSystem: true, isInteractive: false },
+  {
+    name: "export",
+    description: "Export current conversation to Markdown",
+    template: "",
+    isSystem: true,
+    isInteractive: false,
+  },
+  { name: "help", description: "Show the help dialog", template: "", isSystem: true, isInteractive: true },
+  { name: "init", description: "Create or update AGENTS.md file", template: "", isSystem: true, isInteractive: true },
+  { name: "models", description: "List available models", template: "", isSystem: true, isInteractive: false },
+  { name: "new", description: "Start a new session", template: "", isSystem: true, isInteractive: false },
+  { name: "redo", description: "Redo a previously undone message", template: "", isSystem: true, isInteractive: false },
+  {
+    name: "sessions",
+    description: "List and switch between sessions",
+    template: "",
+    isSystem: true,
+    isInteractive: true,
+  },
+  { name: "share", description: "Share current session", template: "", isSystem: true, isInteractive: false },
+  { name: "themes", description: "List available themes", template: "", isSystem: true, isInteractive: true },
+  {
+    name: "thinking",
+    description: "Toggle visibility of thinking/reasoning blocks",
+    template: "",
+    isSystem: true,
+    isInteractive: false,
+  },
+  {
+    name: "undo",
+    description: "Undo last message in the conversation",
+    template: "",
+    isSystem: true,
+    isInteractive: false,
+  },
+  { name: "unshare", description: "Unshare current session", template: "", isSystem: true, isInteractive: false },
 ];
 
 export default function Command() {
@@ -59,7 +89,7 @@ export default function Command() {
             template = content.replace(frontmatterMatch[0], "").trim();
           }
 
-          return { name, description, agent, model, template, isSystem: false };
+          return { name, description, agent, model, template, isSystem: false, isInteractive: false };
         });
         setCustomCommands(commands);
       }
@@ -84,6 +114,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       searchBarPlaceholder="Search commands..."
       searchBarAccessory={
         <List.Dropdown tooltip="Filter Commands" storeValue={true} onChange={setFilter}>
@@ -101,7 +132,34 @@ export default function Command() {
             key={cmd.name}
             title={`/${cmd.name}`}
             subtitle={cmd.description}
-            accessories={cmd.agent ? [{ text: cmd.agent, icon: Icon.Person }] : []}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Command" text={`/${cmd.name}`} />
+                    <List.Item.Detail.Metadata.Label title="Description" text={cmd.description || "No description"} />
+                    <List.Item.Detail.Metadata.Label title="Type" text={cmd.isSystem ? "System" : "Custom"} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Interactivity"
+                      text={cmd.isInteractive ? "Interactive" : "Non-interactive"}
+                      icon={
+                        cmd.isInteractive
+                          ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                          : { source: Icon.XMarkCircle, tintColor: Color.SecondaryText }
+                      }
+                    />
+                    {cmd.agent && <List.Item.Detail.Metadata.Label title="Agent" text={cmd.agent} />}
+                    {cmd.model && <List.Item.Detail.Metadata.Label title="Model" text={cmd.model} />}
+                    {!cmd.isSystem && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Path"
+                        text={`~/.config/opencode/commands/${cmd.name}.md`}
+                      />
+                    )}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <ActionPanel.Section>

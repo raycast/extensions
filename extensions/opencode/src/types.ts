@@ -101,6 +101,7 @@ export interface CustomCommand {
   model?: string;
   template: string;
   isSystem?: boolean;
+  isInteractive?: boolean;
 }
 
 export interface CheatsheetItem {
