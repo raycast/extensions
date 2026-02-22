@@ -1,6 +1,6 @@
 # Chrome Profiles Changelog
 
-## [Initial Version] - 2026-02-22
+## [Initial Version] - {PR_MERGE_DATE}
 
 - List all Chrome profiles with custom names and Google account emails
 - Display Google avatar for each profile
