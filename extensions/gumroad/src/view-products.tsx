@@ -26,7 +26,7 @@ function Command() {
           }
           accessories={[
             {
-              text: `${formatNumber(product.sales_count)} Sales`,
+              text: `${String(formatNumber(product.sales_count))} Sales`,
               icon: { source: Icon.Cart, tintColor: Color.Green },
             },
           ]}

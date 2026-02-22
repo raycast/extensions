@@ -91,7 +91,7 @@ function Command() {
           icon={{ source: Icon.Coins, tintColor: Color.SecondaryText }}
           accessories={[
             {
-              text: sale.formatted_total_price,
+              text: String(sale.formatted_total_price),
               icon: { source: Icon.BankNote, tintColor: Color.Green },
             },
           ]}
