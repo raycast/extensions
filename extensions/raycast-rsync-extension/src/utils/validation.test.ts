@@ -122,6 +122,11 @@ describe("Validation Utilities", () => {
       // and are safely handled by our escaping
       expect(result.valid).toBe(true);
     });
+
+    it("should allow backslash in paths (valid in Unix filenames)", () => {
+      const result = validateRemotePath("/tmp/path\\with\\backslashes");
+      expect(result.valid).toBe(true);
+    });
   });
 
   describe("validatePort", () => {

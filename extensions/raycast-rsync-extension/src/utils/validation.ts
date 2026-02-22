@@ -54,15 +54,11 @@ export function validateRemotePath(path: string): ValidationResult {
   // - & (background execution)
   // - ` (command substitution)
   // - $ (variable expansion)
-  // - \ (escape character)
-  // We allow parentheses, brackets, and braces as they can legitimately appear in filenames
-  // and are safely handled by our escaping.
-  const dangerousMetacharacters = /[;&|`$\\]/;
+  const dangerousMetacharacters = /[;&|`$]/;
   if (dangerousMetacharacters.test(path)) {
     return {
       valid: false,
-      error:
-        "Invalid path format: contains dangerous shell metacharacters. Paths are now properly escaped, but this input may be unsafe.",
+      error: "Invalid path format: contains dangerous shell metacharacters.",
     };
   }
 
