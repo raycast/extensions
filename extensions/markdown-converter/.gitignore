@@ -8,6 +8,7 @@ dist/
 
 # Raycast auto-generated files
 raycast-env.d.ts
+raycast/
 
 # misc
 .DS_Store
