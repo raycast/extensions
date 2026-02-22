@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [1.1.0] - 2026-02-19
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
 - Task Detail view with full notes, checklist items, tags, and metadata
@@ -29,7 +29,7 @@
 - Edit Task moved to Cmd+E shortcut
 - Default Project preference description improved with Copy Project ID reference
 
-## [1.0.0] - 2026-02-19
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - View today's and upcoming tasks
