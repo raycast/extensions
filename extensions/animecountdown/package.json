@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "animecountdown",
+  "title": "Anime Countdown",
+  "description": "Track trending and upcoming anime with real-time countdown timers.",
+  "icon": "icon.png",
+  "author": "moksh",
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "commands": [
+    {
+      "name": "index",
+      "title": "Anime Countdown",
+      "description": "Browse trending and upcoming anime with countdown timers",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "layout",
+      "type": "dropdown",
+      "title": "Default Layout",
+      "description": "Choose the default layout for browsing anime",
+      "required": false,
+      "default": "list",
+      "data": [
+        {
+          "title": "Sleek List",
+          "value": "list"
+        },
+        {
+          "title": "Visual Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "viewType",
+      "type": "dropdown",
+      "title": "Default View",
+      "description": "Choose the default section to show on startup",
+      "required": false,
+      "default": "trending",
+      "data": [
+        {
+          "title": "Trending Anime",
+          "value": "trending"
+        },
+        {
+          "title": "Upcoming Anime",
+          "value": "upcoming"
+        }
+      ]
+    },
+    {
+      "name": "truncationLength",
+      "type": "textfield",
+      "title": "Title Truncation Length",
+      "description": "Max title length in List view (default: 50)",
+      "required": false,
+      "default": "50"
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "title": "Grid Columns",
+      "description": "Number of columns in Grid view",
+      "required": false,
+      "default": "4",
+      "data": [
+        {
+          "title": "2 Columns",
+          "value": "2"
+        },
+        {
+          "title": "3 Columns",
+          "value": "3"
+        },
+        {
+          "title": "4 Columns",
+          "value": "4"
+        },
+        {
+          "title": "5 Columns",
+          "value": "5"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.10.0",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "18.2.48",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "overrides": {
+    "@types/react": "18.2.48"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\""
+  }
+}
