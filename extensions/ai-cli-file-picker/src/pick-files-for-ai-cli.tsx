@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { getRecentFiles } from "./utils/files";
 import { formatPaths } from "./utils/formatter";
 import { getScreenshotDir } from "./utils/screenshot";
-import { FileItem, Preferences } from "./utils/types";
+import { FileItem } from "./utils/types";
 
 const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".heic", ".tiff"]);
 const TEXT_EXTENSIONS = new Set([
@@ -91,7 +91,7 @@ function getDetailContent(item: FileItem, focused: boolean): React.ReactNode {
 }
 
 export default function Command() {
-  const { additionalDirs, maxRecentFiles, includeDownloads } = getPreferenceValues<Preferences>();
+  const { additionalDirs, maxRecentFiles, includeDownloads } = getPreferenceValues<Preferences.PickFilesForAiCli>();
 
   const screenshotDir = useMemo(() => getScreenshotDir(), []);
   const recentFiles = useMemo(
