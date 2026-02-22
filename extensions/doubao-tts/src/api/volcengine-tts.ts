@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { randomUUID } from "crypto";
 import { getVoiceById } from "../constants/voices";
-import type { TTSV3Request, TTSV3ResponseChunk, TTSOptions, Preferences } from "./types";
+import type { TTSV3Request, TTSV3ResponseChunk, TTSOptions } from "./types";
 
 const API_URL = "https://openspeech.bytedance.com/api/v3/tts/unidirectional";
 const AUDIO_CHUNK_CODE = 0;

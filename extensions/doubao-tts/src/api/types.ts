@@ -34,14 +34,6 @@ export interface TTSOptions {
   sampleRate: number;
 }
 
-export interface Preferences {
-  appId: string;
-  accessKey: string;
-  resourceId: string;
-  defaultVoice: string;
-  speechRate: string;
-}
-
 export interface VoiceConfig {
   id: string;
   name: string;

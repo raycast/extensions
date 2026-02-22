@@ -14,7 +14,7 @@ import { VOICE_CATEGORIES, getVoicesByCategory } from "./constants/voices";
 import { synthesizeSpeech, buildOptionsFromPrefs, getBaseModel, TTSApiError } from "./api/volcengine-tts";
 import { chunkText } from "./utils/text-chunker";
 import { AudioPlayer } from "./utils/audio-player";
-import type { VoiceConfig, Preferences } from "./api/types";
+import type { VoiceConfig } from "./api/types";
 
 export default function ReadWithVoice() {
   const prefs = getPreferenceValues<Preferences>();

@@ -5,7 +5,7 @@
   "description": "Read selected text aloud using Volcengine Doubao TTS with 90+ Chinese and English voices",
   "icon": "icon.png",
   "author": "xianwei_zhang",
-  "categories": ["Productivity"],
+  "categories": ["Media"],
   "license": "MIT",
   "version": "1.0.0",
   "platforms": ["macOS"],
