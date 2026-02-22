@@ -29,15 +29,15 @@ function Command() {
             },
           ]}
           actions={
-              <ActionPanel>
-                <Action.Push title="Show Details" target={<ProductDetails product={product} />} icon={Icon.Sidebar} />
-                <Action.CopyToClipboard title="Copy Product URL" content={product.short_url} />
-                <Action.OpenInBrowser
-                  title="Open in Browser"
-                  icon={{ source: product.thumbnail_url, fallback: Icon.Globe }}
-                  url={product.short_url}
-                />
-              </ActionPanel>
+            <ActionPanel>
+              <Action.Push title="Show Details" target={<ProductDetails product={product} />} icon={Icon.Sidebar} />
+              <Action.CopyToClipboard title="Copy Product URL" content={product.short_url} />
+              <Action.OpenInBrowser
+                title="Open in Browser"
+                icon={{ source: product.thumbnail_url, fallback: Icon.Globe }}
+                url={product.short_url}
+              />
+            </ActionPanel>
           }
         />
       ))}

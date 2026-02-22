@@ -15,6 +15,7 @@ function Command() {
   const [pageUrl, setPageUrl] = useState<string>(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
   const [sales, setSales] = useState<Sale[] | undefined>(undefined);
   const [productId, setProductId] = useState<string>("");
+  const [priceFilter, setPriceFilter] = useState<"all" | "paid">("all");
   const {
     data: salesData,
     isLoading: isLoadingSales,
@@ -36,24 +37,46 @@ function Command() {
     }
   };
 
-  const onProductChange = (newValue: string) => {
-    setProductId(newValue);
-    if (newValue === "") {
+  const onFilterChange = (newValue: string) => {
+    if (newValue === "all_sales") {
+      setPriceFilter("all");
+      setProductId("");
+      setPageUrl(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
+    } else if (newValue === "hide_zero") {
+      setPriceFilter("paid");
+      setProductId("");
       setPageUrl(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
     } else {
+      setProductId(newValue);
+      setPriceFilter("all");
       setPageUrl(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}&product_id=${newValue}`);
     }
     setSales([]);
     revalidate();
   };
 
+  const filteredSales = sales?.filter((sale) => {
+    if (priceFilter === "paid") {
+      return sale.price > 0;
+    }
+    return true;
+  });
+
   return (
     <List
       isLoading={(isLoadingSales || sales === undefined) && !errorSales}
       searchBarAccessory={
-        <List.Dropdown tooltip={"Select Product"} value={productId} onChange={onProductChange}>
+        <List.Dropdown
+          tooltip={"Filter Sales"}
+          value={productId || (priceFilter === "paid" ? "hide_zero" : "all_sales")}
+          onChange={onFilterChange}
+        >
+          <List.Dropdown.Section title="Price">
+            <List.Dropdown.Item title="All Sales" value="all_sales" />
+            <List.Dropdown.Item title="Hide $0 Sales" value="hide_zero" />
+          </List.Dropdown.Section>
           <List.Dropdown.Section title="Products">
-            <List.Dropdown.Item title="All Products" value="" />
+            <List.Dropdown.Item title="All Products" value="all_sales" />
             {productsData?.products.map((product) => (
               <List.Dropdown.Item key={product.id} title={product.name} value={product.id} />
             ))}
@@ -61,7 +84,7 @@ function Command() {
         </List.Dropdown>
       }
     >
-      {sales?.map((sale) => (
+      {filteredSales?.map((sale) => (
         <List.Item
           key={sale.id}
           title={sale.product_name}
@@ -77,11 +100,17 @@ function Command() {
             <ActionPanel>
               <Action.Push title="Show Details" target={<SaleDetails sale={sale} />} icon={Icon.Sidebar} />
               <Action.CopyToClipboard title="Copy Customer Email" content={sale.email} />
+              <Action
+                title={priceFilter === "all" ? "Hide $0 Sales" : "Show All Sales"}
+                onAction={() => onFilterChange(priceFilter === "all" ? "hide_zero" : "all_sales")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                icon={priceFilter === "all" ? Icon.EyeDisabled : Icon.Eye}
+              />
             </ActionPanel>
           }
         />
       ))}
-      {sales && sales?.length > 0 && salesData?.next_page_url && (
+      {filteredSales && filteredSales?.length > 0 && salesData?.next_page_url && (
         <List.Item
           title="Load More"
           icon={{ source: Icon.Ellipsis, tintColor: Color.PrimaryText }}
