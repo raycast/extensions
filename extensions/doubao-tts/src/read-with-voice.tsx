@@ -47,8 +47,9 @@ export default function ReadWithVoice() {
         return;
       }
 
-      const player = playerRef.current;
-      player.stopPlayback();
+      playerRef.current.stopPlayback();
+      const player = new AudioPlayer();
+      playerRef.current = player;
 
       setIsLoading(true);
       setPlayingVoiceId(voice.id);
