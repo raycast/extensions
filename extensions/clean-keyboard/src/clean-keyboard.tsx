@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isMac } from "./lib/utils";
 
@@ -56,7 +56,7 @@ export default function Command() {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
 
-  const selectDuration = async (duration: Duration) => {
+  const lockAction = async (duration: Duration) => {
     let handler: (duration: number) => void;
     if (isMac) {
       const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
@@ -65,12 +65,25 @@ export default function Command() {
       const { handler: handlerRust } = await import("rust:../rust/clean-keyboard");
       handler = handlerRust;
     }
-    const lockToast = new Toast({ title: "Keyboard locked" });
     handler(duration.seconds);
     setTimeLeft(duration.seconds);
     setIcon(duration.icon);
     setIsRunning(true);
-    lockToast.show();
+    await showToast({ title: "Keyboard locked" });
+  };
+
+  const unlockAction = async () => {
+    let stopHandler: () => Promise<void>;
+    if (isMac) {
+      const { stopHandler: stopHandlerSwift } = await import("swift:../swift/MyExecutable");
+      stopHandler = stopHandlerSwift;
+    } else {
+      const { stop_handler: stopHandlerRust } = await import("rust:../rust/clean-keyboard");
+      stopHandler = stopHandlerRust;
+    }
+    await stopHandler();
+    setIsRunning(false);
+    await showToast({ title: "Keyboard unlocked" });
   };
 
   useEffect(() => {
@@ -99,18 +112,7 @@ export default function Command() {
                 autoFocus={false}
                 title={"Unlock Keyboard"}
                 shortcut={{ modifiers: ["ctrl"], key: "u" }}
-                onAction={async () => {
-                  let stopHandler: () => Promise<void>;
-                  if (isMac) {
-                    const { stopHandler: stopHandlerSwift } = await import("swift:../swift/MyExecutable");
-                    stopHandler = stopHandlerSwift;
-                  } else {
-                    const { stop_handler: stopHandlerRust } = await import("rust:../rust/clean-keyboard");
-                    stopHandler = stopHandlerRust;
-                  }
-                  await stopHandler();
-                  setIsRunning(false);
-                }}
+                onAction={unlockAction}
               />
             </ActionPanel>
           }
@@ -128,7 +130,7 @@ export default function Command() {
             icon={duration.icon}
             actions={
               <ActionPanel>
-                <Action title="Lock Keyboard" icon={Icon.Lock} onAction={() => selectDuration(duration)} />
+                <Action title="Lock Keyboard" icon={Icon.Lock} onAction={() => lockAction(duration)} />
               </ActionPanel>
             }
           />
