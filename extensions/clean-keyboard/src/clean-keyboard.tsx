@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isMac } from "./lib/utils";
 
@@ -65,7 +65,12 @@ export default function Command() {
       const { handler: handlerRust } = await import("rust:../rust/clean-keyboard");
       handler = handlerRust;
     }
-    handler(duration.seconds);
+    try {
+      handler(duration.seconds);
+    } catch (err) {
+      await showToast({ title: "Failed to lock keyboard", message: String(err), style: Toast.Style.Failure });
+      return;
+    }
     setTimeLeft(duration.seconds);
     setIcon(duration.icon);
     setIsRunning(true);
@@ -81,7 +86,12 @@ export default function Command() {
       const { stop_handler: stopHandlerRust } = await import("rust:../rust/clean-keyboard");
       stopHandler = stopHandlerRust;
     }
-    await stopHandler();
+    try {
+      await stopHandler();
+    } catch (err) {
+      await showToast({ title: "Failed to unlock keyboard", message: String(err), style: Toast.Style.Failure });
+      return;
+    }
     setIsRunning(false);
     await showToast({ title: "Keyboard unlocked" });
   };

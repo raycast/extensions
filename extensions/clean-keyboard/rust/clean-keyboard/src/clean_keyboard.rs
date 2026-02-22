@@ -100,7 +100,7 @@ unsafe extern "system" fn keyboard_hook(
 
             if IS_LOCKED.load(Ordering::SeqCst) {
                 if is_down && kbd.vkCode == VK_U && CTRL_DOWN.load(Ordering::SeqCst) {
-                    // Physical or synthetic Ctrl+U — unlock directly
+                    // Physical or synthetic Ctrl+U — unlock directly in this process
                     IS_LOCKED.store(false, Ordering::SeqCst);
                     return CallNextHookEx(KEYBOARD_HOOK, code, wparam, lparam);
                 }
@@ -120,8 +120,13 @@ fn handler(duration: Option<i32>) -> Result<(), String> {
         let hmod = GetModuleHandleW(None).map_err(|e| e.to_string())?;
         let hinstance = HINSTANCE(hmod.0);
 
+        // If this fails, IS_LOCKED stays true but we return an Err —
+        // the caller gets the error and knows locking failed
         KEYBOARD_HOOK = SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard_hook), hinstance, 0)
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| {
+                IS_LOCKED.store(false, Ordering::SeqCst);
+                format!("Failed to install keyboard hook: {e}")
+            })?;
 
         if let Some(secs) = duration {
             thread::spawn(move || {
@@ -152,8 +157,8 @@ fn handler(duration: Option<i32>) -> Result<(), String> {
 
 #[raycast]
 fn stop_handler() -> Result<(), String> {
-    // Injects synthetic Ctrl+U — the hook in handler()'s process catches it
-    // and sets IS_LOCKED to false, exiting the loop. Same approach as Swift.
+    // Injects a synthetic Ctrl+U — the hook in handler()'s process catches it
+    // and unlocks. Works for both mouse click and keyboard shortcut.
     inject_ctrl_u();
     Ok(())
 }
