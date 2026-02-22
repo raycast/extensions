@@ -209,71 +209,42 @@ export async function loadSessionStats(sessionID: string): Promise<SessionStats>
   const dbPath = getDbPath();
   const sid = escapeSql(sessionID);
 
-  try {
-    const results = await executeSQL<{
-      total_cost: number | null;
-      total_tokens: number | null;
-      context: number | null;
-      additions: number | null;
-      deletions: number | null;
-    }>(
-      dbPath,
-      `SELECT 
-        (SELECT SUM(json_extract(data, '$.cost')) FROM message WHERE session_id = '${sid}') as total_cost,
-        (SELECT SUM(json_extract(data, '$.tokens.input') + json_extract(data, '$.tokens.output')) FROM message WHERE session_id = '${sid}') as total_tokens,
-        (SELECT json_extract(data, '$.tokens.input') FROM message WHERE session_id = '${sid}' ORDER BY time_created DESC LIMIT 1) as context,
-        (SELECT summary_additions FROM session WHERE id = '${sid}') as additions,
-        (SELECT summary_deletions FROM session WHERE id = '${sid}') as deletions`,
-    );
+  const messageRows = await executeSQL<MessageRow>(dbPath, `SELECT data FROM message WHERE session_id = '${sid}'`);
 
-    if (results.length === 0) {
-      return { cost: 0, tokens: 0, context: 0, additions: 0, deletions: 0 };
-    }
+  const sessionRows = await executeSQL<SessionRow>(
+    dbPath,
+    `SELECT summary_additions, summary_deletions FROM session WHERE id = '${sid}'`,
+  );
 
-    const row = results[0];
-    return {
-      cost: row.total_cost ?? 0,
-      tokens: row.total_tokens ?? 0,
-      context: row.context ?? 0,
-      additions: row.additions ?? 0,
-      deletions: row.deletions ?? 0,
-    };
-  } catch (error) {
-    console.error("Failed to load session stats via SQL:", error);
-    // Fallback to manual parsing if SQL fails
-    const messageRows = await executeSQL<MessageRow>(dbPath, `SELECT data FROM message WHERE session_id = '${sid}'`);
-    const sessionRows = await executeSQL<SessionRow>(
-      dbPath,
-      `SELECT summary_additions, summary_deletions FROM session WHERE id = '${sid}'`,
-    );
+  let cost = 0;
+  let tokens = 0;
+  let context = 0;
+  let lastTime = 0;
 
-    let cost = 0;
-    let tokens = 0;
-    let context = 0;
-    let lastTime = 0;
+  for (const row of messageRows) {
+    try {
+      const data = JSON.parse(row.data) as {
+        cost?: number;
+        tokens?: { input: number; output: number };
+        time?: { created: number };
+      };
+      cost += data.cost || 0;
+      tokens += data.tokens ? (data.tokens.input || 0) + (data.tokens.output || 0) : 0;
 
-    for (const row of messageRows) {
-      try {
-        const data = JSON.parse(row.data);
-        cost += (data.cost as number) || 0;
-        tokens += data.tokens ? (data.tokens.input || 0) + (data.tokens.output || 0) : 0;
-        const messageTime = data.time?.created || 0;
-        if (messageTime > lastTime) {
-          context = (data.tokens?.input as number) || 0;
-          lastTime = messageTime;
-        }
-      } catch {
-        /* ignore */
+      const messageTime = data.time?.created || 0;
+      if (messageTime > lastTime) {
+        context = data.tokens?.input || 0;
+        lastTime = messageTime;
       }
+    } catch {
+      // ignore
     }
-    return {
-      cost,
-      tokens,
-      context,
-      additions: sessionRows[0]?.summary_additions || 0,
-      deletions: sessionRows[0]?.summary_deletions || 0,
-    };
   }
+
+  const additions = sessionRows[0]?.summary_additions || 0;
+  const deletions = sessionRows[0]?.summary_deletions || 0;
+
+  return { cost, tokens, context, additions, deletions };
 }
 
 export async function loadMessages(sessionID: string): Promise<Message[]> {

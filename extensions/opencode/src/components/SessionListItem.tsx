@@ -67,17 +67,24 @@ function SessionItemDetail({
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label
-            title="Lines"
-            text={stats ? `+${stats.additions}` : "Loading..."}
-            icon={stats ? { source: Icon.Plus, tintColor: Color.Green } : undefined}
-          />
-          {stats && (
-            <List.Item.Detail.Metadata.Label
-              text={`-${stats.deletions}`}
-              icon={{ source: Icon.Minus, tintColor: Color.Red }}
-            />
-          )}
+          <List.Item.Detail.Metadata.TagList title="Lines">
+            {stats ? (
+              <>
+                <List.Item.Detail.Metadata.TagList.Item
+                  text={`+${stats.additions}`}
+                  color={Color.Green}
+                  icon={Icon.Plus}
+                />
+                <List.Item.Detail.Metadata.TagList.Item
+                  text={`-${stats.deletions}`}
+                  color={Color.Red}
+                  icon={Icon.Minus}
+                />
+              </>
+            ) : (
+              <List.Item.Detail.Metadata.TagList.Item text="Loading..." />
+            )}
+          </List.Item.Detail.Metadata.TagList>
         </List.Item.Detail.Metadata>
       }
     />
