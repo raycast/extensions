@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "string-case-converter",
   "title": "String Case Converter",
-  "description": "Convert to String Convenstion.",
+  "description": "Convert to String Convention.",
   "icon": "string-extension-icon.png",
   "author": "dev_y0ngha",
   "platforms": [
