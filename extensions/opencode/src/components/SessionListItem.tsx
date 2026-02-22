@@ -59,32 +59,15 @@ function SessionItemDetail({
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label
-            title="Tokens Used"
-            text={stats ? formatTokens(stats.tokens) : "Loading..."}
-          />
+          <List.Item.Detail.Metadata.Label title="Tokens Used" text={stats ? formatTokens(stats.tokens) : "Loading..."} />
           <List.Item.Detail.Metadata.Label title="Amount Spent" text={stats ? formatCost(stats.cost) : "Loading..."} />
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.TagList title="Lines">
-            {stats ? (
-              <>
-                <List.Item.Detail.Metadata.TagList.Item
-                  text={`+${stats.additions}`}
-                  color={Color.Green}
-                  icon={Icon.Plus}
-                />
-                <List.Item.Detail.Metadata.TagList.Item
-                  text={`-${stats.deletions}`}
-                  color={Color.Red}
-                  icon={Icon.Minus}
-                />
-              </>
-            ) : (
-              <List.Item.Detail.Metadata.TagList.Item text="Loading..." />
-            )}
-          </List.Item.Detail.Metadata.TagList>
+          <List.Item.Detail.Metadata.Label 
+            title="Lines" 
+            text={stats ? `+${stats.additions} -${stats.deletions}` : "Loading..."} 
+          />
         </List.Item.Detail.Metadata>
       }
     />

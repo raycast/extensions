@@ -209,42 +209,57 @@ export async function loadSessionStats(sessionID: string): Promise<SessionStats>
   const dbPath = getDbPath();
   const sid = escapeSql(sessionID);
 
-  const messageRows = await executeSQL<MessageRow>(dbPath, `SELECT data FROM message WHERE session_id = '${sid}'`);
+  try {
+    // We'll fetch all message data for the session and process it in JS.
+    // This is more reliable than complex SQL queries for real-time loading in Raycast.
+    const messageRows = await executeSQL<MessageRow>(
+      dbPath, 
+      `SELECT data FROM message WHERE session_id = '${sid}'`
+    );
 
-  const sessionRows = await executeSQL<SessionRow>(
-    dbPath,
-    `SELECT summary_additions, summary_deletions FROM session WHERE id = '${sid}'`,
-  );
+    const sessionRows = await executeSQL<SessionRow>(
+      dbPath,
+      `SELECT summary_additions, summary_deletions FROM session WHERE id = '${sid}'`,
+    );
 
-  let cost = 0;
-  let tokens = 0;
-  let context = 0;
-  let lastTime = 0;
+    let totalCost = 0;
+    let totalTokens = 0;
+    let latestContext = 0;
+    let latestTime = 0;
 
-  for (const row of messageRows) {
-    try {
-      const data = JSON.parse(row.data) as {
-        cost?: number;
-        tokens?: { input: number; output: number };
-        time?: { created: number };
-      };
-      cost += data.cost || 0;
-      tokens += data.tokens ? (data.tokens.input || 0) + (data.tokens.output || 0) : 0;
-
-      const messageTime = data.time?.created || 0;
-      if (messageTime > lastTime) {
-        context = data.tokens?.input || 0;
-        lastTime = messageTime;
+    for (const row of messageRows) {
+      try {
+        const data = JSON.parse(row.data);
+        totalCost += Number(data.cost) || 0;
+        
+        if (data.tokens) {
+          totalTokens += (Number(data.tokens.input) || 0) + (Number(data.tokens.output) || 0);
+          
+          const created = data.time?.created || 0;
+          if (created >= latestTime) {
+            latestContext = Number(data.tokens.input) || 0;
+            latestTime = created;
+          }
+        }
+      } catch (e) {
+        // ignore malformed data
       }
-    } catch {
-      // ignore
     }
+
+    const additions = sessionRows[0]?.summary_additions || 0;
+    const deletions = sessionRows[0]?.summary_deletions || 0;
+
+    return {
+      cost: totalCost,
+      tokens: totalTokens,
+      context: latestContext,
+      additions,
+      deletions,
+    };
+  } catch (error) {
+    console.error("Failed to load session stats:", error);
+    return { cost: 0, tokens: 0, context: 0, additions: 0, deletions: 0 };
   }
-
-  const additions = sessionRows[0]?.summary_additions || 0;
-  const deletions = sessionRows[0]?.summary_deletions || 0;
-
-  return { cost, tokens, context, additions, deletions };
 }
 
 export async function loadMessages(sessionID: string): Promise<Message[]> {

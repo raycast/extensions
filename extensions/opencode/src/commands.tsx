@@ -1,4 +1,14 @@
-import { List, ActionPanel, Action, Icon, Form, useNavigation, showToast, Toast, Color } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Form,
+  useNavigation,
+  showToast,
+  Toast,
+  Color,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
@@ -114,7 +124,6 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail
       searchBarPlaceholder="Search commands..."
       searchBarAccessory={
         <List.Dropdown tooltip="Filter Commands" storeValue={true} onChange={setFilter}>
@@ -132,34 +141,14 @@ export default function Command() {
             key={cmd.name}
             title={`/${cmd.name}`}
             subtitle={cmd.description}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Command" text={`/${cmd.name}`} />
-                    <List.Item.Detail.Metadata.Label title="Description" text={cmd.description || "No description"} />
-                    <List.Item.Detail.Metadata.Label title="Type" text={cmd.isSystem ? "System" : "Custom"} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Interactivity"
-                      text={cmd.isInteractive ? "Interactive" : "Non-interactive"}
-                      icon={
-                        cmd.isInteractive
-                          ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                          : { source: Icon.XMarkCircle, tintColor: Color.SecondaryText }
-                      }
-                    />
-                    {cmd.agent && <List.Item.Detail.Metadata.Label title="Agent" text={cmd.agent} />}
-                    {cmd.model && <List.Item.Detail.Metadata.Label title="Model" text={cmd.model} />}
-                    {!cmd.isSystem && (
-                      <List.Item.Detail.Metadata.Label
-                        title="Path"
-                        text={`~/.config/opencode/commands/${cmd.name}.md`}
-                      />
-                    )}
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
+            accessories={[
+              {
+                tag: {
+                  value: cmd.isInteractive ? "Interactive" : "Non-interactive",
+                  color: cmd.isInteractive ? Color.Green : Color.SecondaryText,
+                },
+              },
+            ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
