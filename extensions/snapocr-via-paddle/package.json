@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snapocr-via-paddle",
+  "title": "SnapOCR Via Paddle",
+  "description": "Snap a screenshot and recognize text via Baidu AIStudio PaddleOCR API, optimized for Chinese handwritten and vertical layouts",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-ocr",
+      "title": "Quick OCR",
+      "description": "Take a screenshot and copy recognized text to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "preview-ocr",
+      "title": "Preview OCR",
+      "description": "Take a screenshot and preview recognized text in a detail view",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "AIStudio Access Token. Get it from https://aistudio.baidu.com/paddleocr → click API → copy TOKEN value",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "PaddleOCR API URL (without path). Get it from https://aistudio.baidu.com/paddleocr → click API → copy the base URL from API_URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://xxx.aistudio-app.com"
+    },
+    {
+      "name": "useDocOrientationClassify",
+      "title": "Document Orientation Classify",
+      "label": "Enable document orientation classification",
+      "description": "Automatically detect and correct document orientation",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "useDocUnwarping",
+      "title": "Document Unwarping",
+      "label": "Enable document unwarping",
+      "description": "Correct perspective distortion in document images",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "useChartRecognition",
+      "title": "Chart Recognition",
+      "label": "Enable chart recognition",
+      "description": "Recognize and extract text from charts and tables",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "eslint": "^9.39.3",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
