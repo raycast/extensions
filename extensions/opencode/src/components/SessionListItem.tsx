@@ -2,7 +2,7 @@ import { List, Action, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import { Project, Session, SessionStats } from "../types";
-import { formatAccessoryDate, repoName, formatCost, formatTokens } from "../utils";
+import { repoName, formatCost, formatTokens } from "../utils";
 import { loadSessionStats } from "../lib/storage";
 import { SessionActions } from "./SessionActions";
 
@@ -18,23 +18,11 @@ export function SessionListItem({ session, project, mutate }: SessionListItemPro
 
   const { data: stats, isLoading } = usePromise((sid) => loadSessionStats(sid), [session.id]);
 
-  const accessories: List.Item.Accessory[] = [];
-
-  if (repo && project?.worktree !== "/") {
-    accessories.push({ tag: repo });
-  }
-
-  accessories.push({
-    text: formatAccessoryDate(session.time.updated),
-    tooltip: `Last message: ${new Date(session.time.updated).toLocaleString()}`,
-  });
-
   return (
     <List.Item
       id={session.id}
       title={title}
       keywords={[session.slug, repo ?? "", session.directory, session.id]}
-      accessories={accessories}
       detail={<SessionItemDetail session={session} stats={stats} isLoading={isLoading} repo={repo} />}
       actions={
         <SessionActions session={session} project={project} mutate={mutate}>
@@ -64,20 +52,33 @@ function SessionItemDetail({
           <List.Item.Detail.Metadata.Label title="Title" text={session.title || session.slug} />
           <List.Item.Detail.Metadata.Label title="Directory" text={session.directory} />
           {repo && <List.Item.Detail.Metadata.Label title="Project" text={repo} />}
+          <List.Item.Detail.Metadata.Label
+            title="Last Activity"
+            text={new Date(session.time.updated).toLocaleString()}
+          />
 
           <List.Item.Detail.Metadata.Separator />
 
           <List.Item.Detail.Metadata.Label
             title="Context"
-            text={stats ? `${formatTokens(stats.context)} tokens` : "..."}
+            text={stats ? `${formatTokens(stats.context)} tokens` : "Loading..."}
           />
-          <List.Item.Detail.Metadata.Label title="Tokens Used" text={stats ? formatTokens(stats.tokens) : "..."} />
-          <List.Item.Detail.Metadata.Label title="Amount Spent" text={stats ? formatCost(stats.cost) : "..."} />
+          <List.Item.Detail.Metadata.Label
+            title="Tokens Used"
+            text={stats ? formatTokens(stats.tokens) : "Loading..."}
+          />
+          <List.Item.Detail.Metadata.Label title="Amount Spent" text={stats ? formatCost(stats.cost) : "Loading..."} />
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label title="Lines Added" text={stats ? stats.additions.toString() : "..."} />
-          <List.Item.Detail.Metadata.Label title="Lines Removed" text={stats ? stats.deletions.toString() : "..."} />
+          <List.Item.Detail.Metadata.Label
+            title="Lines Added"
+            text={stats ? stats.additions.toString() : "Loading..."}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Lines Removed"
+            text={stats ? stats.deletions.toString() : "Loading..."}
+          />
         </List.Item.Detail.Metadata>
       }
     />
