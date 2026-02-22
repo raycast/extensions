@@ -77,7 +77,14 @@ export default function Command() {
             accessories={[{ text: item.category, icon: getCategoryIcon(item.category) }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Command" content={item.command} />
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard title="Copy Command" content={item.command} />
+                  <Action.Paste
+                    title="Paste in Active App"
+                    content={item.command}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

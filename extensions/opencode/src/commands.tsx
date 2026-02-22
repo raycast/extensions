@@ -105,22 +105,23 @@ export default function Command() {
             accessories={cmd.agent ? [{ text: cmd.agent, icon: Icon.Person }] : []}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Create New Command"
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  target={<CreateCommandForm onCreated={loadCustomCommands} />}
-                  icon={Icon.Plus}
-                />
-                {!cmd.isSystem && (
-                  <Action
-                    title="Edit Command"
-                    onAction={() => {
-                      // Implement edit if needed
-                    }}
-                    icon={Icon.Pencil}
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard title="Copy Command" content={`/${cmd.name}`} />
+                  <Action.Paste
+                    title="Paste in Active App"
+                    content={`/${cmd.name}`}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
                   />
-                )}
-                <Action title="Reload" onAction={loadCustomCommands} icon={Icon.ArrowClockwise} />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Create New Command"
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    target={<CreateCommandForm onCreated={loadCustomCommands} />}
+                    icon={Icon.Plus}
+                  />
+                  {!cmd.isSystem && <Action title="Reload" onAction={loadCustomCommands} icon={Icon.ArrowClockwise} />}
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

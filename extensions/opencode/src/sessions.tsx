@@ -1,96 +1,70 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { Session } from "./types";
+import { Icon, List } from "@raycast/api";
+import { useCallback, useMemo, useState } from "react";
 
-export default function Command() {
-  const { isLoading, data, error, revalidate } = useExec("opencode", ["session", "list", "--format", "json"], {
-    parseOutput: (output) => {
-      try {
-        const parsed = JSON.parse(output.stdout);
-        // Assuming the response is an array of sessions or an object with a 'sessions' property
-        const sessions = Array.isArray(parsed) ? parsed : parsed.sessions || [];
-        return sessions as Session[];
-      } catch (e) {
-        console.error("Failed to parse sessions:", e);
-        return [];
-      }
-    },
-  });
+import { ProjectDropdown } from "./components/ProjectDropdown";
+import { SessionListItem } from "./components/SessionListItem";
+import { useSessions } from "./hooks/useSessions";
+import { groupSessionsByTime } from "./utils";
 
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to load sessions",
-      message: error.message,
-    });
-  }
+export default function ListSessions() {
+  const [selectedProject, setSelectedProject] = useState<string>("all");
+  const { sessions, projects, isLoading, storageError, mutate } = useSessions();
 
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter sessions...">
-      {data?.map((session) => (
-        <List.Item
-          key={session.id}
-          title={session.title || session.id}
-          subtitle={session.updatedAt ? new Date(session.updatedAt).toLocaleString() : ""}
-          icon={Icon.Message}
-          accessories={[
-            {
-              text: session.tokenCount ? `${session.tokenCount} tokens` : undefined,
-              icon: Icon.Hashtag,
-            },
-            {
-              text: session.cost !== undefined ? `$${session.cost.toFixed(4)}` : undefined,
-              icon: { source: Icon.Coins, tintColor: Color.Yellow },
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="View Details" target={<SessionDetail session={session} />} icon={Icon.Sidebar} />
-              <Action
-                title="Continue Session"
-                onAction={() => {
-                  // This would ideally open the TUI with this session
-                  // opencode --session session.id
-                  showToast({ title: "Opening TUI...", message: `Continuing session ${session.id}` });
-                }}
-                icon={Icon.Terminal}
-              />
-              <Action
-                title="Reload"
-                onAction={revalidate}
-                icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
+  // Only show projects that have at least one session
+  const projectsWithSessions = useMemo(() => {
+    const projectIDs = new Set(sessions.map((s) => s.session.projectID));
+
+    return projects.filter((p) => projectIDs.has(p.id));
+  }, [sessions, projects]);
+
+  // Fall back to "all" if the stored project ID no longer exists (e.g. after deletion)
+  const validProject = useMemo(() => {
+    if (selectedProject === "all") {
+      return "all";
+    }
+
+    return projectsWithSessions.some((p) => p.id === selectedProject) ? selectedProject : "all";
+  }, [selectedProject, projectsWithSessions]);
+
+  const handleProjectChange = useCallback((projectID: string) => {
+    setSelectedProject(projectID);
+  }, []);
+
+  const filtered = useMemo(
+    () => (validProject === "all" ? sessions : sessions.filter((s) => s.session.projectID === validProject)),
+    [sessions, validProject],
   );
-}
 
-function SessionDetail({ session }: { session: Session }) {
+  const grouped = useMemo(() => groupSessionsByTime(filtered), [filtered]);
+
   return (
-    <List.Item.Detail
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Session ID" text={session.id} />
-          <List.Item.Detail.Metadata.Label
-            title="Created"
-            text={session.createdAt ? new Date(session.createdAt).toLocaleString() : "Unknown"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Last Activity"
-            text={session.updatedAt ? new Date(session.updatedAt).toLocaleString() : "Unknown"}
-          />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Tokens" text={session.tokenCount?.toString() || "0"} />
-          <List.Item.Detail.Metadata.Label
-            title="Cost"
-            text={session.cost !== undefined ? `$${session.cost.toFixed(4)}` : "N/A"}
-          />
-        </List.Item.Detail.Metadata>
-      }
-    />
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search sessions..."
+      filtering
+      searchBarAccessory={<ProjectDropdown projects={projectsWithSessions} onProjectChange={handleProjectChange} />}
+    >
+      {storageError ? (
+        <List.EmptyView title="Storage Error" description={storageError} icon={Icon.ExclamationMark} />
+      ) : filtered.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Sessions Found"
+          description={
+            selectedProject === "all"
+              ? "No OpenCode sessions found. Start a session with opencode to see it here."
+              : "No sessions found for this project."
+          }
+          icon={Icon.Terminal}
+        />
+      ) : (
+        grouped.map(([section, items]) => (
+          <List.Section key={section} title={section}>
+            {items.map(({ session, project }) => (
+              <SessionListItem key={session.id} session={session} project={project} mutate={mutate} />
+            ))}
+          </List.Section>
+        ))
+      )}
+    </List>
   );
 }
