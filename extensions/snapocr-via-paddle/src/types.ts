@@ -1,15 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface PaddleOCRPreferences {
-  accessToken: string;
-  apiUrl: string;
-  useDocOrientationClassify: boolean;
-  useDocUnwarping: boolean;
-  useChartRecognition: boolean;
-}
-
-export function getPreferences(): PaddleOCRPreferences {
-  return getPreferenceValues<PaddleOCRPreferences>();
+export function getPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export interface PaddleOCRRequest {
