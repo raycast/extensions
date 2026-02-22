@@ -2,7 +2,6 @@ import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import MusicAssistantClient from "./music-assistant-client";
 import { getSelectedQueueID } from "./use-selected-player-id";
-import { PlayerState } from "./external-code/interfaces";
 
 export default async function main() {
   const selectedPlayerID = await getSelectedQueueID();
@@ -11,19 +10,21 @@ export default async function main() {
   try {
     const client = new MusicAssistantClient();
 
-    // Execute play/pause toggle and get updated state
-    await client.togglePlayPause(selectedPlayerID);
+    // Get current volume before
+    const playerBefore = await client.getPlayer(selectedPlayerID);
+    const volumeBefore = playerBefore.volume_level ?? 0;
 
-    // Get new state after
+    // Execute volume down
+    await client.volumeDown(selectedPlayerID);
+
+    // Get new volume after
     const playerAfter = await client.getPlayer(selectedPlayerID);
-    const stateAfter = playerAfter.state;
+    const volumeAfter = playerAfter.volume_level ?? 0;
 
-    // Show success toast with appropriate message
-    const emoji = stateAfter === PlayerState.PLAYING ? "▶️" : "⏸️";
-    const message = stateAfter === PlayerState.PLAYING ? "Playing" : "Paused";
+    // Show success toast with transition
     await showToast({
       style: Toast.Style.Success,
-      title: `${emoji} ${message}`,
+      title: `🔉 Volume ${volumeBefore}% → ${volumeAfter}%`,
     });
   } catch (error) {
     showFailureToast(error, {
