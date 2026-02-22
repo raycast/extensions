@@ -68,6 +68,12 @@
       "title": "Clone Repository",
       "description": "Clone a git repository into one of your project directories",
       "mode": "view"
+    },
+    {
+      "name": "remove-repo",
+      "title": "Remove Repository",
+      "description": "Permanently delete a git repository from your filesystem (blocked if there are uncommitted changes or unpushed commits)",
+      "mode": "view"
     }
   ],
   "dependencies": {
