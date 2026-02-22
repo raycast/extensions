@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bluepost",
+  "title": "Bluepost",
+  "description": "Cross-post from Bluesky to Mastodon",
+  "icon": "command-icon.png",
+  "author": "linus",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "blueskyHandle",
+      "type": "textfield",
+      "required": true,
+      "title": "Bluesky Handle",
+      "description": "Your Bluesky handle or DID",
+      "placeholder": "user.bsky.social"
+    },
+    {
+      "name": "blueskyAppPassword",
+      "type": "password",
+      "required": true,
+      "title": "Bluesky App Password",
+      "description": "Create one at Settings → Privacy and Security → App Passwords on bsky.app",
+      "placeholder": "xxxx-xxxx-xxxx-xxxx"
+    },
+    {
+      "name": "automatedPostUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Automated Post URL Filter",
+      "description": "Posts with link cards matching this URL prefix are tagged as automated (e.g. your blog URL)",
+      "placeholder": "https://example.com/blog/"
+    }
+  ],
+  "commands": [
+    {
+      "name": "manage-accounts",
+      "title": "Manage Mastodon Accounts",
+      "description": "Add or remove Mastodon accounts for cross-posting",
+      "mode": "view"
+    },
+    {
+      "name": "compose-post",
+      "title": "Compose Post",
+      "description": "Write and cross-post to Bluesky and Mastodon",
+      "mode": "view"
+    },
+    {
+      "name": "browse-posts",
+      "title": "Browse Posts",
+      "description": "Browse recent Bluesky posts and repost to Mastodon",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@atproto/api": "^0.18.16",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "masto": "^6.10.0",
+    "nanoid": "^5.1.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "~22.13.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
