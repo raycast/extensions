@@ -19,7 +19,7 @@ function StringCaseConverter() {
 
   if (!input) {
     return (
-      <List onSearchTextChange={setSearchText} throttle>
+      <List onSearchTextChange={setSearchText} throttle searchBarPlaceholder={"Enter the text you want to convert"}>
         <List.EmptyView title="Type something to convert" />
       </List>
     );
