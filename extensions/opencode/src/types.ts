@@ -32,11 +32,14 @@ export interface Session {
   share?: {
     url: string;
   };
-  stats?: {
-    cost: number;
-    tokens: number;
-    contextPercent?: number;
-  };
+}
+
+export interface SessionStats {
+  cost: number;
+  tokens: number;
+  context: number;
+  additions: number;
+  deletions: number;
 }
 
 export interface Message {

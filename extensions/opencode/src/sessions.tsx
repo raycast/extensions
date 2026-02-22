@@ -42,6 +42,7 @@ export default function ListSessions() {
       isLoading={isLoading}
       searchBarPlaceholder="Search sessions..."
       filtering
+      isShowingDetail
       searchBarAccessory={<ProjectDropdown projects={projectsWithSessions} onProjectChange={handleProjectChange} />}
     >
       {storageError ? (

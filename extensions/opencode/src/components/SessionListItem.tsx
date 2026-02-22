@@ -1,7 +1,9 @@
-import { Color, Icon, List } from "@raycast/api";
+import { List, Action, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
-import { Project, Session } from "../types";
-import { formatAccessoryDate, repoName } from "../utils";
+import { Project, Session, SessionStats } from "../types";
+import { formatAccessoryDate, repoName, formatCost, formatTokens } from "../utils";
+import { loadSessionStats } from "../lib/storage";
 import { SessionActions } from "./SessionActions";
 
 interface SessionListItemProps {
@@ -14,32 +16,9 @@ export function SessionListItem({ session, project, mutate }: SessionListItemPro
   const repo = project ? repoName(project.worktree) : undefined;
   const title = session.title || session.slug;
 
+  const { data: stats, isLoading } = usePromise((sid) => loadSessionStats(sid), [session.id]);
+
   const accessories: List.Item.Accessory[] = [];
-
-  if (session.stats) {
-    if (session.stats.cost > 0) {
-      accessories.push({
-        text: `$${session.stats.cost.toFixed(3)}`,
-        tooltip: `Cost: $${session.stats.cost.toFixed(6)}`,
-      });
-    }
-
-    if (session.stats.tokens > 0) {
-      accessories.push({
-        icon: { source: Icon.Coins, tintColor: Color.Yellow },
-        text: `${session.stats.tokens}`,
-        tooltip: `Tokens utilised: ${session.stats.tokens}`,
-      });
-    }
-
-    if (session.stats.contextPercent !== undefined && session.stats.contextPercent > 0) {
-      accessories.push({
-        icon: { source: Icon.Brain, tintColor: Color.Blue },
-        text: `${session.stats.contextPercent}`,
-        tooltip: `Context utilised: ${session.stats.contextPercent} tokens`,
-      });
-    }
-  }
 
   if (repo && project?.worktree !== "/") {
     accessories.push({ tag: repo });
@@ -56,7 +35,51 @@ export function SessionListItem({ session, project, mutate }: SessionListItemPro
       title={title}
       keywords={[session.slug, repo ?? "", session.directory, session.id]}
       accessories={accessories}
-      actions={<SessionActions session={session} project={project} mutate={mutate} />}
+      detail={<SessionItemDetail session={session} stats={stats} isLoading={isLoading} repo={repo} />}
+      actions={
+        <SessionActions session={session} project={project} mutate={mutate}>
+          <Action.CopyToClipboard title="Copy Session ID" content={session.id} icon={Icon.CopyClipboard} />
+        </SessionActions>
+      }
+    />
+  );
+}
+
+function SessionItemDetail({
+  session,
+  stats,
+  isLoading,
+  repo,
+}: {
+  session: Session;
+  stats?: SessionStats;
+  isLoading: boolean;
+  repo?: string;
+}) {
+  return (
+    <List.Item.Detail
+      isLoading={isLoading}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Title" text={session.title || session.slug} />
+          <List.Item.Detail.Metadata.Label title="Directory" text={session.directory} />
+          {repo && <List.Item.Detail.Metadata.Label title="Project" text={repo} />}
+
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label
+            title="Context"
+            text={stats ? `${formatTokens(stats.context)} tokens` : "..."}
+          />
+          <List.Item.Detail.Metadata.Label title="Tokens Used" text={stats ? formatTokens(stats.tokens) : "..."} />
+          <List.Item.Detail.Metadata.Label title="Amount Spent" text={stats ? formatCost(stats.cost) : "..."} />
+
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label title="Lines Added" text={stats ? stats.additions.toString() : "..."} />
+          <List.Item.Detail.Metadata.Label title="Lines Removed" text={stats ? stats.deletions.toString() : "..."} />
+        </List.Item.Detail.Metadata>
+      }
     />
   );
 }

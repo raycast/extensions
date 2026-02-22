@@ -111,6 +111,7 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
 
   return (
     <ActionPanel>
+      {children && <ActionPanel.Section>{children}</ActionPanel.Section>}
       <ActionPanel.Section>
         {!isDetail && (
           <Action.Push
@@ -127,7 +128,6 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
             target={<SessionSummary session={session} project={project} mutate={mutate} />}
           />
         )}
-        {children}
       </ActionPanel.Section>
 
       <ActionPanel.Section>

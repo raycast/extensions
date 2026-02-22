@@ -5,7 +5,7 @@ import { existsSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
-import { Message, Part, Project, Session, TranscriptEntry } from "../types";
+import { Message, Part, Project, Session, SessionStats, TranscriptEntry } from "../types";
 
 function getDbPath(): string {
   const prefs = getPreferenceValues<ExtensionPreferences>();
@@ -202,57 +202,45 @@ export async function loadSessions(): Promise<Session[]> {
      ORDER BY time_updated DESC`,
   );
 
-  const sessions = rows.map(toSession);
+  return rows.map(toSession);
+}
 
-  // Load stats for each session
-  // We do this by fetching all messages for these sessions and aggregating in JS
-  // to avoid issues with JSON functions in older SQLite versions
-  const sessionIds = sessions.map((s) => `'${escapeSql(s.id)}'`).join(",");
-  if (sessionIds.length > 0) {
-    const messageRows = await executeSQL<MessageRow>(
-      dbPath,
-      `SELECT id, session_id, data FROM message WHERE session_id IN (${sessionIds})`,
-    );
+export async function loadSessionStats(sessionID: string): Promise<SessionStats> {
+  const dbPath = getDbPath();
+  const sid = escapeSql(sessionID);
 
-    const statsMap = new Map<string, { cost: number; tokens: number; lastInputTokens: number; lastTime: number }>();
+  const messageRows = await executeSQL<MessageRow>(dbPath, `SELECT data FROM message WHERE session_id = '${sid}'`);
 
-    for (const row of messageRows) {
-      try {
-        const data = JSON.parse(row.data);
-        const cost = (data.cost as number) || 0;
-        const tokens = data.tokens ? (data.tokens.input || 0) + (data.tokens.output || 0) : 0;
-        const inputTokens = data.tokens?.input || 0;
-        const messageTime = data.time?.created || 0;
+  const sessionRows = await executeSQL<SessionRow>(
+    dbPath,
+    `SELECT summary_additions, summary_deletions FROM session WHERE id = '${sid}'`,
+  );
 
-        const current = statsMap.get(row.session_id) || { cost: 0, tokens: 0, lastInputTokens: 0, lastTime: 0 };
+  let cost = 0;
+  let tokens = 0;
+  let context = 0;
+  let lastTime = 0;
 
-        const isNewer = messageTime > current.lastTime;
+  for (const row of messageRows) {
+    try {
+      const data = JSON.parse(row.data);
+      cost += (data.cost as number) || 0;
+      tokens += data.tokens ? (data.tokens.input || 0) + (data.tokens.output || 0) : 0;
 
-        statsMap.set(row.session_id, {
-          cost: current.cost + cost,
-          tokens: current.tokens + tokens,
-          lastInputTokens: isNewer ? inputTokens : current.lastInputTokens,
-          lastTime: Math.max(current.lastTime, messageTime),
-        });
-      } catch {
-        // ignore
+      const messageTime = data.time?.created || 0;
+      if (messageTime > lastTime) {
+        context = data.tokens?.input || 0;
+        lastTime = messageTime;
       }
-    }
-
-    for (const session of sessions) {
-      const stats = statsMap.get(session.id);
-      if (stats) {
-        session.stats = {
-          cost: stats.cost,
-          tokens: stats.tokens,
-          // Use input tokens as context value
-          contextPercent: stats.lastInputTokens,
-        };
-      }
+    } catch {
+      // ignore
     }
   }
 
-  return sessions;
+  const additions = sessionRows[0]?.summary_additions || 0;
+  const deletions = sessionRows[0]?.summary_deletions || 0;
+
+  return { cost, tokens, context, additions, deletions };
 }
 
 export async function loadMessages(sessionID: string): Promise<Message[]> {

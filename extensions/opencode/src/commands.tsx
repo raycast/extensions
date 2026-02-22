@@ -101,7 +101,6 @@ export default function Command() {
             key={cmd.name}
             title={`/${cmd.name}`}
             subtitle={cmd.description}
-            icon={cmd.isSystem ? Icon.Gear : Icon.Person}
             accessories={cmd.agent ? [{ text: cmd.agent, icon: Icon.Person }] : []}
             actions={
               <ActionPanel>
