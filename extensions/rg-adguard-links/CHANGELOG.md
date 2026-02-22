@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Fix 403 Forbidden Error] - {PR_MERGE_DATE}
+
+- Added browser-like headers (User-Agent, Referer, Origin) to API requests to resolve 403 Forbidden errors
+- Improved error messages to include HTTP status code and response body for better diagnostics
+
 ## [1.1.0] - 2025-11-25
 
 - Added Windows as a supported platform in package.json
