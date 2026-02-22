@@ -48,7 +48,7 @@ export function ProductMetadata(props: { product: Product }) {
       <Detail.Metadata.Label title={"Number of Sales"} text={`${formatNumber(item.sales_count)}`} />
       <Detail.Metadata.Label title={"Status"} text={item.published ? "🟢 Published" : "⚪ Not Published"} />
       {item.variants.length > 0 && <Detail.Metadata.Separator />}
-      {item.variants.map((variant, variantIndex) => {
+      {item.variants.flatMap((variant, variantIndex) => {
         const title = variant.title || "Variant";
         return variant.options.map((option, optionIndex) => (
           <Detail.Metadata.Label key={`${variantIndex}-${optionIndex}`} title={title} text={option.name} />
