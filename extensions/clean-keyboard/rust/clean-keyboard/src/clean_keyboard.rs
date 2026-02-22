@@ -29,7 +29,7 @@ static CTRL_DOWN: AtomicBool = AtomicBool::new(false);
 // called concurrently (e.g. user triggers lock twice quickly)
 static KEYBOARD_HOOK: Mutex<isize> = Mutex::new(0);
 
-fn inject_ctrl_u() {
+fn inject_ctrl_u() -> Result<(), String> {
     unsafe {
         let inputs: [INPUT; 4] = [
             INPUT {
@@ -81,7 +81,11 @@ fn inject_ctrl_u() {
                 },
             },
         ];
-        SendInput(&inputs, mem::size_of::<INPUT>() as i32);
+        let sent = SendInput(&inputs, mem::size_of::<INPUT>() as i32);
+        if sent == 0 {
+            return Err("Failed to inject Ctrl+U: SendInput returned 0. The keyboard may still be locked.".to_string());
+        }
+        Ok(())
     }
 }
 
@@ -185,6 +189,6 @@ fn handler(duration: Option<i32>) -> Result<(), String> {
 fn stop_handler() -> Result<(), String> {
     // Injects a synthetic Ctrl+U — the hook in handler()'s process catches it
     // and unlocks. Works for both mouse click and keyboard shortcut.
-    inject_ctrl_u();
-    Ok(())
+    // Returns an error if SendInput fails so the UI can reflect the failure.
+    inject_ctrl_u()
 }
