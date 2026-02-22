@@ -77,8 +77,10 @@ export default function Command() {
   if (state === "PAUSED") {
     title = `⏸️ Paused: ${progress.toFixed(0)}%`;
   } else if (state === "PRINTING") {
-    const formattedTime = formatTime(timeRemaining);
-    title = formattedTime !== "Starting..." ? `${progress.toFixed(0)}% | ${formattedTime}` : `${progress.toFixed(0)}%`;
+    title =
+      Number.isFinite(timeRemaining) && timeRemaining >= 0
+        ? `${progress.toFixed(0)}% | ${formatTime(timeRemaining)}`
+        : `${progress.toFixed(0)}%`;
   } else {
     title = state.charAt(0) + state.slice(1).toLowerCase();
   }
