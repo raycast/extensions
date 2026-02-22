@@ -1,0 +1,36 @@
+{
+  "name": "chrome-profiles",
+  "title": "Chrome Profiles",
+  "description": "Quickly switch between Google Chrome profiles",
+  "icon": "command-icon.png",
+  "author": "jay",
+  "license": "MIT",
+  "categories": ["Applications", "Productivity"],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Chrome Profile",
+      "subtitle": "Chrome Profiles",
+      "description": "List and open Chrome profiles",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.2",
+    "@types/react": "18.3.5",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
