@@ -217,11 +217,11 @@ function SlackStatusList() {
         />
 
         <List.Item
-          title={"Set AI Prompt Status"}
+          title={"Set Status with AI"}
           icon={Icon.Stars}
           actions={
             <ActionPanel>
-              <Action.Push title={"Set AI Prompt Status"} target={<SetAiStatusForm onSubmit={handeStatusChange} />} />
+              <Action.Push title={"Set Status with AI"} target={<SetAiStatusForm onSubmit={handeStatusChange} />} />
             </ActionPanel>
           }
         />
