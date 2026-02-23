@@ -1,6 +1,6 @@
 # Paste as Plain text Changelog
 
-## [Enhance Clean Line Breaks] - 2026-02-19
+## [Enhance Clean Line Breaks] - {PR_MERGE_DATE}
 
 - Collapse whitespace surrounding line breaks to produce a single space instead of preserving trailing/leading spaces
 
