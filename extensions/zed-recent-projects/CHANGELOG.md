@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Fix Environment Inheritance] - {PR_MERGE_DATE}
+## [Fix Environment Inheritance] - 2026-02-23
 
 - Fix Zed inheriting Raycast environment variables when launched via extension
 
