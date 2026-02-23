@@ -143,6 +143,7 @@ export default function SearchTransactions() {
                         icon={Icon.Plus}
                         title="New Transaction"
                         target={<NewTransaction />}
+                        onPop={mutate}
                         shortcut={Keyboard.Shortcut.Common.New}
                       />
                     </ActionPanel.Section>
