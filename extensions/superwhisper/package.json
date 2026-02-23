@@ -31,6 +31,14 @@
       "icon": "superwhisper-light-icon.png"
     },
     {
+      "name": "copy-last-history",
+      "title": "Copy Last Hour History",
+      "subtitle": "superwhisper",
+      "description": "Copy Superwhisper history from the last hour to clipboard",
+      "mode": "no-view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
       "name": "select-mode",
       "title": "Select Mode",
       "subtitle": "superwhisper",
