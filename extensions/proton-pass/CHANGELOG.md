@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-23
 
 - Search all items across vaults
 - List and browse vaults
