@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timetrack",
+  "title": "Time Tracker",
+  "description": "Simple time tracking for clients and projects",
+  "icon": "icon.png",
+  "author": "aarona",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "time",
+    "tracking",
+    "timer",
+    "productivity",
+    "clients",
+    "billing",
+    "hours"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "commands": [
+    {
+      "name": "track",
+      "title": "Track Time",
+      "description": "Start or switch time tracking for a client/project",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "client",
+          "placeholder": "client 1",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "stop",
+      "title": "Stop Tracking",
+      "description": "Stop the current time tracking",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Time Tracking Status",
+      "description": "View current tracking status and today's summary",
+      "mode": "view"
+    },
+    {
+      "name": "report",
+      "title": "Time Report",
+      "description": "View time tracking report",
+      "mode": "view"
+    },
+    {
+      "name": "manage-entries",
+      "title": "Manage Time Entries",
+      "description": "View, add, edit, or delete time entries",
+      "mode": "view"
+    },
+    {
+      "name": "summary",
+      "title": "Time Summary",
+      "description": "Dashboard with weekly client hours and distribution chart",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
