@@ -552,4 +552,190 @@ describe("MusicAssistantClient", () => {
       });
     });
   });
+
+  describe("Player Grouping Methods", () => {
+    describe("setGroupMembers", () => {
+      it("should call playerCommandSetMembers with all parameters", async () => {
+        const mockApi = {
+          playerCommandSetMembers: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.setGroupMembers("leader-1", ["member-1"], ["member-2"]);
+
+        expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+        expect(mockApi.playerCommandSetMembers).toHaveBeenCalledWith("leader-1", ["member-1"], ["member-2"]);
+      });
+
+      it("should handle errors from API command", async () => {
+        const error = new Error("Incompatible players");
+        mockExecuteApiCommand.mockRejectedValue(error);
+
+        await expect(client.setGroupMembers("leader-1", ["member-1"])).rejects.toThrow("Incompatible players");
+      });
+    });
+
+    describe("groupPlayer", () => {
+      it("should call playerCommandGroup with correct parameters", async () => {
+        const mockApi = {
+          playerCommandGroup: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.groupPlayer("player-1", "leader-1");
+
+        expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+        expect(mockApi.playerCommandGroup).toHaveBeenCalledWith("player-1", "leader-1");
+      });
+
+      it("should handle errors from API command", async () => {
+        const error = new Error("Player already grouped");
+        mockExecuteApiCommand.mockRejectedValue(error);
+
+        await expect(client.groupPlayer("player-1", "leader-1")).rejects.toThrow("Player already grouped");
+      });
+    });
+
+    describe("ungroupPlayer", () => {
+      it("should call playerCommandUnGroup with correct player ID", async () => {
+        const mockApi = {
+          playerCommandUnGroup: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.ungroupPlayer("player-1");
+
+        expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+        expect(mockApi.playerCommandUnGroup).toHaveBeenCalledWith("player-1");
+      });
+
+      it("should handle errors from API command", async () => {
+        const error = new Error("Ungroup failed");
+        mockExecuteApiCommand.mockRejectedValue(error);
+
+        await expect(client.ungroupPlayer("player-1")).rejects.toThrow("Ungroup failed");
+      });
+    });
+
+    describe("canFormGroup", () => {
+      it("should return true when player has compatible players", () => {
+        const player = { player_id: "test", can_group_with: ["player-1", "player-2"] } as any;
+        expect(client.canFormGroup(player)).toBe(true);
+      });
+
+      it("should return false when can_group_with is empty", () => {
+        const player = { player_id: "test", can_group_with: [] } as any;
+        expect(client.canFormGroup(player)).toBe(false);
+      });
+
+      it("should return false when player is undefined", () => {
+        expect(client.canFormGroup(undefined)).toBe(false);
+      });
+    });
+
+    describe("isGroupLeader", () => {
+      it("should return true when player has group children", () => {
+        const player = { player_id: "test", group_childs: ["child-1", "child-2"] } as any;
+        expect(client.isGroupLeader(player)).toBe(true);
+      });
+
+      it("should return false when group_childs is empty", () => {
+        const player = { player_id: "test", group_childs: [] } as any;
+        expect(client.isGroupLeader(player)).toBe(false);
+      });
+
+      it("should return false when player is undefined", () => {
+        expect(client.isGroupLeader(undefined)).toBe(false);
+      });
+    });
+
+    describe("getGroupStatus", () => {
+      it("should return Leader when player has group children", () => {
+        const player = { player_id: "test", group_childs: ["child-1"], synced_to: undefined } as any;
+        expect(client.getGroupStatus(player)).toBe("Leader");
+      });
+
+      it("should return Member when player has synced_to", () => {
+        const player = { player_id: "test", group_childs: [], synced_to: "leader-1" } as any;
+        expect(client.getGroupStatus(player)).toBe("Member");
+      });
+
+      it("should return Member when player has active_group", () => {
+        const player = { player_id: "test", group_childs: [], active_group: "group-1" } as any;
+        expect(client.getGroupStatus(player)).toBe("Member");
+      });
+
+      it("should return Standalone when player is not grouped", () => {
+        const player = { player_id: "test", group_childs: [], synced_to: undefined, active_group: undefined } as any;
+        expect(client.getGroupStatus(player)).toBe("Standalone");
+      });
+
+      it("should return Standalone when player is undefined", () => {
+        expect(client.getGroupStatus(undefined)).toBe("Standalone");
+      });
+    });
+
+    describe("getCompatiblePlayers", () => {
+      it("should return only players with shared grouping providers", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          can_group_with: ["airplay", "sonos"],
+        } as any;
+
+        const allPlayers = [
+          { player_id: "player-1", can_group_with: ["airplay"], available: true, enabled: true },
+          { player_id: "player-2", can_group_with: ["sonos"], available: false, enabled: true },
+          { player_id: "player-3", can_group_with: ["airplay"], available: true, enabled: false },
+          { player_id: "player-4", can_group_with: ["chromecast"], available: true, enabled: true },
+          { player_id: "leader-1", can_group_with: ["airplay", "sonos"], available: true, enabled: true },
+        ] as any[];
+
+        const compatible = client.getCompatiblePlayers(targetPlayer, allPlayers);
+
+        expect(compatible).toHaveLength(1);
+        expect(compatible[0].player_id).toBe("player-1");
+      });
+
+      it("should exclude target player from compatible list", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          can_group_with: ["airplay"],
+        } as any;
+
+        const allPlayers = [
+          { player_id: "leader-1", can_group_with: ["airplay"], available: true, enabled: true },
+          { player_id: "player-1", can_group_with: ["airplay"], available: true, enabled: true },
+        ] as any[];
+
+        const compatible = client.getCompatiblePlayers(targetPlayer, allPlayers);
+
+        expect(compatible).toHaveLength(1);
+        expect(compatible[0].player_id).toBe("player-1");
+      });
+
+      it("should return empty array when no compatible players", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          can_group_with: ["airplay"],
+        } as any;
+
+        const allPlayers = [
+          { player_id: "player-1", can_group_with: ["chromecast"], available: true, enabled: true },
+        ] as any[];
+
+        const compatible = client.getCompatiblePlayers(targetPlayer, allPlayers);
+
+        expect(compatible).toHaveLength(0);
+      });
+    });
+  });
 });

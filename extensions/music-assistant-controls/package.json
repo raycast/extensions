@@ -60,6 +60,13 @@
       "subtitle": "Decrease volume on the active player.",
       "description": "Decreases the volume on the currently selected player.",
       "mode": "no-view"
+    },
+    {
+      "name": "manage-player-groups",
+      "title": "Manage Player Groups",
+      "subtitle": "Create, modify, and disband player sync groups",
+      "description": "Manage Music Assistant player groups for synchronized playback across multiple speakers.",
+      "mode": "view"
     }
   ],
   "preferences": [

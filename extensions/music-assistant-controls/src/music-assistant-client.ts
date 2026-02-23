@@ -385,4 +385,134 @@ export default class MusicAssistantClient {
       { level: 100, display: "100%" },
     ];
   }
+
+  // Player Grouping Methods
+  /**
+   * Set group members for a target player using the modern set_members API
+   *
+   * @param targetPlayer - The player ID of the group leader
+   * @param playerIdsToAdd - Optional array of player IDs to add to the group
+   * @param playerIdsToRemove - Optional array of player IDs to remove from the group
+   * @throws {Error} When the API command fails or players are incompatible
+   * @example
+   * ```typescript
+   * await client.setGroupMembers("leader-123", ["member-456", "member-789"]);
+   * ```
+   */
+  async setGroupMembers(targetPlayer: string, playerIdsToAdd?: string[], playerIdsToRemove?: string[]): Promise<void> {
+    await executeApiCommand(
+      async (api) => await api.playerCommandSetMembers(targetPlayer, playerIdsToAdd, playerIdsToRemove),
+    );
+  }
+
+  /**
+   * Group a single player to a target player
+   *
+   * @param playerId - The player ID to add to the group
+   * @param targetPlayerId - The player ID of the group leader
+   * @throws {Error} When the API command fails or players are incompatible
+   * @example
+   * ```typescript
+   * await client.groupPlayer("bedroom-speaker", "living-room-speaker");
+   * ```
+   */
+  async groupPlayer(playerId: string, targetPlayerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandGroup(playerId, targetPlayerId));
+  }
+
+  /**
+   * Remove a player from any group it's currently in
+   *
+   * @param playerId - The player ID to ungroup
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * await client.ungroupPlayer("bedroom-speaker");
+   * ```
+   */
+  async ungroupPlayer(playerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandUnGroup(playerId));
+  }
+
+  // Player Grouping Helper Methods
+  /**
+   * Checks if a player can form or join groups
+   *
+   * @param player - The player object to check
+   * @returns True if the player supports the SET_MEMBERS feature
+   * @example
+   * ```typescript
+   * if (client.canFormGroup(player)) {
+   *   // Show grouping controls
+   * }
+   * ```
+   */
+  canFormGroup(player?: Player): boolean {
+    if (!player) return false;
+    return player.can_group_with.length > 0;
+  }
+
+  /**
+   * Checks if a player is currently a group leader
+   *
+   * @param player - The player object to check
+   * @returns True if the player has group children
+   * @example
+   * ```typescript
+   * if (client.isGroupLeader(player)) {
+   *   // Show "Manage Group" option
+   * }
+   * ```
+   */
+  isGroupLeader(player?: Player): boolean {
+    if (!player) return false;
+    return player.group_childs.length > 0;
+  }
+
+  /**
+   * Gets the grouping status of a player
+   *
+   * @param player - The player object to check
+   * @returns "Leader", "Member", or "Standalone" based on the player's state
+   * @example
+   * ```typescript
+   * const status = client.getGroupStatus(player);
+   * // Returns: "Leader" if has group_childs, "Member" if synced_to, else "Standalone"
+   * ```
+   */
+  getGroupStatus(player?: Player): "Leader" | "Member" | "Standalone" {
+    if (!player) return "Standalone";
+
+    if (this.isGroupLeader(player)) {
+      return "Leader";
+    }
+
+    if (player.synced_to || player.active_group) {
+      return "Member";
+    }
+
+    return "Standalone";
+  }
+
+  /**
+   * Gets a list of players compatible for grouping with the target player
+   *
+   * @param targetPlayer - The player to find compatible players for
+   * @param allPlayers - Array of all available players
+   * @returns Array of players that can be grouped with the target
+   * @example
+   * ```typescript
+   * const compatible = client.getCompatiblePlayers(leader, allPlayers);
+   * // Returns only players that share grouping providers and are available
+   * ```
+   */
+  getCompatiblePlayers(targetPlayer: Player, allPlayers: Player[]): Player[] {
+    return allPlayers.filter(
+      (p) =>
+        p.player_id !== targetPlayer.player_id &&
+        p.available &&
+        p.enabled &&
+        targetPlayer.can_group_with.some((provider) => p.can_group_with.includes(provider)),
+    );
+  }
 }

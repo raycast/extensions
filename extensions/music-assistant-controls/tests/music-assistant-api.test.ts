@@ -185,6 +185,109 @@ describe("MusicAssistantApi REST API", () => {
     });
   });
 
+  describe("playerCommandSetMembers", () => {
+    it("should send set_members command with all three parameters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: null }),
+      } as Response);
+
+      api.initialize("http://localhost:8095", "test-token");
+      await api.playerCommandSetMembers("leader-1", ["member-1", "member-2"], ["member-3"]);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(callBody).toEqual({
+        command: "players/cmd/set_members",
+        args: {
+          target_player: "leader-1",
+          player_ids_to_add: ["member-1", "member-2"],
+          player_ids_to_remove: ["member-3"],
+        },
+      });
+    });
+
+    it("should send set_members with only add IDs", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: null }),
+      } as Response);
+
+      api.initialize("http://localhost:8095", "test-token");
+      await api.playerCommandSetMembers("leader-1", ["member-1"]);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(callBody).toEqual({
+        command: "players/cmd/set_members",
+        args: {
+          target_player: "leader-1",
+          player_ids_to_add: ["member-1"],
+          player_ids_to_remove: undefined,
+        },
+      });
+    });
+
+    it("should send set_members with only remove IDs", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: null }),
+      } as Response);
+
+      api.initialize("http://localhost:8095", "test-token");
+      await api.playerCommandSetMembers("leader-1", undefined, ["member-1"]);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(callBody).toEqual({
+        command: "players/cmd/set_members",
+        args: {
+          target_player: "leader-1",
+          player_ids_to_add: undefined,
+          player_ids_to_remove: ["member-1"],
+        },
+      });
+    });
+  });
+
+  describe("playerCommandGroup", () => {
+    it("should send group command with correct parameters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: null }),
+      } as Response);
+
+      api.initialize("http://localhost:8095", "test-token");
+      await api.playerCommandGroup("member-1", "leader-1");
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(callBody).toEqual({
+        command: "players/cmd/group",
+        args: {
+          player_id: "member-1",
+          target_player: "leader-1",
+        },
+      });
+    });
+  });
+
+  describe("playerCommandUnGroup", () => {
+    it("should send ungroup command with player_id", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: null }),
+      } as Response);
+
+      api.initialize("http://localhost:8095", "test-token");
+      await api.playerCommandUnGroup("player-1");
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(callBody).toEqual({
+        command: "players/cmd/ungroup",
+        args: {
+          player_id: "player-1",
+        },
+      });
+    });
+  });
+
   describe("error handling with details field", () => {
     it("should use details field when present in error response", async () => {
       mockFetch.mockResolvedValueOnce({
