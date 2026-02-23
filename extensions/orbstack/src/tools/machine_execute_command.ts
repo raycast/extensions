@@ -26,14 +26,17 @@ export const confirmation: Tool.Confirmation<CommandArgs> = async (args) => {
 export default async function tool(args: CommandArgs): Promise<string> {
   validateCommandArgs(args);
 
-  const { stdout, stderr } = await execAsync(`${ORB_CTL} run -m ${args.machine_name} ${args.command.join(" ")}`);
-
-  // We want to ignore this warning that shows in stderr because afaik, there isn't a way around it, and
-  // it's just annoying. related to: https://github.com/alacritty/alacritty/issues/7360
-  // So if stderr does NOT include this string, we will consider it a 'real' error.
-  if (!stderr.includes("-bash: warning: setlocale: LC_ALL: cannot change locale")) {
-    throw new Error(stderr);
+  try {
+    const { stdout } = await execAsync(`${ORB_CTL} run -m ${args.machine_name} ${args.command.join(" ")}`);
+    return stdout;
+  } catch (error) {
+    const { message, stderr, stdout } = error as Error & { stderr: string; stdout: string };
+    const hasLocaleWarning = stderr?.includes("-bash: warning: setlocale: LC_ALL: cannot change locale");
+    const stdoutSection = stdout || "";
+    // relevant info for the setlocale warning: https://github.com/alacritty/alacritty/issues/7360
+    const note = hasLocaleWarning
+      ? "\n\nNote: The locale warning in this error is a known issue with no fix and can be safely ignored."
+      : "";
+    throw new Error(`${stderr || message}${stdoutSection}${note}`);
   }
-
-  return stdout;
 }
