@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - 2025-02-23
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Track time for clients and projects with quick Raycast commands
 - Automatic timer switching when starting a new client
