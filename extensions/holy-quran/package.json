@@ -3,11 +3,10 @@
   "name": "holy-quran",
   "title": "Holy Quran",
   "description": "Experience the Holy Quran with beautiful recitations. Browse Surahs, select your favorite reciters, and listen to the divine verses in the background or with specialized memorization loops.",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "abdullahnettoor",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Media",

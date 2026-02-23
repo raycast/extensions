@@ -90,17 +90,17 @@ export default function Command() {
 
   const icon = {
     source: "icons/menu-icon.svg",
-    tintColor: playingInfo ? (playingInfo.isPaused ? Color.Yellow : Color.Green) : undefined,
+    tintColor: playingInfo ? (playingInfo.isPaused ? Color.Yellow : Color.Green) : Color.PrimaryText,
   };
 
   const statusPrefix = playingInfo?.isPaused ? "[Paused] " : "Playing: ";
-  const timeDisplay = remaining !== null ? formatTime(remaining) : formatTime(elapsed);
+  const timeDisplay = remaining !== null ? ("-" + formatTime(remaining)) : formatTime(elapsed);
   const timeStr = playingInfo ? ` (${timeDisplay})` : "";
 
   return (
     <MenuBarExtra
       icon={icon}
-      title={playingInfo ? `${playingInfo.surah}${timeStr}` : undefined}
+      title={playingInfo ? `${playingInfo.surah}${timeStr}` : ""}
       isLoading={isLoading}
       tooltip={playingInfo ? `${statusPrefix}${playingInfo.surah} (${playingInfo.reciter})` : "Holy Quran"}
     >
