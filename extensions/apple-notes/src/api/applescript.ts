@@ -49,12 +49,15 @@ export async function restoreNoteById(id: string) {
 }
 
 export async function getNoteBody(id: string) {
-  return runAppleScript(`
+  return runAppleScript(
+    `
     tell application "Notes"
       set theNote to note id "${escapeDoubleQuotes(id)}"
       return body of theNote
     end tell
-    `);
+    `,
+    { timeout: 30_000 },
+  );
 }
 
 export async function getNotePlainText(id: string) {
@@ -67,12 +70,15 @@ export async function getNotePlainText(id: string) {
 }
 
 export async function setNoteBody(id: string, body: string) {
-  return runAppleScript(`
+  return runAppleScript(
+    `
     tell application "Notes"
       set theNote to note id "${escapeDoubleQuotes(id)}"
       set body of theNote to "${escapeDoubleQuotes(body)}"
     end tell
-    `);
+    `,
+    { timeout: 30_000 },
+  );
 }
 
 export async function getSelectedNote() {
