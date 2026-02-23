@@ -45,7 +45,19 @@ type NoteItem = {
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
-export async function getNotes(maxQueryResults: number, filterByTags: string[] = []) {
+function escapeSQLString(value: string) {
+  return value.replace(/'/g, "''");
+}
+
+export async function getNotes(maxQueryResults: number, filterByTags: string[] = [], searchText?: string) {
+  const trimmedSearchText = searchText?.trim();
+  const searchFilter = trimmedSearchText
+    ? ` AND (
+        note.ztitle1 LIKE '%${escapeSQLString(trimmedSearchText)}%' OR
+        note.zsnippet LIKE '%${escapeSQLString(trimmedSearchText)}%'
+      )`
+    : "";
+
   const query = `
     SELECT
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS id,
@@ -73,6 +85,7 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
         note.z_pk IS NOT NULL AND
         note.zmarkedfordeletion != 1 AND
         folder.zmarkedfordeletion != 1
+        ${searchFilter}
     ORDER BY
         note.zmodificationdate1 DESC
     LIMIT ${maxQueryResults}
