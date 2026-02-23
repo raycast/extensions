@@ -3,6 +3,8 @@ import { useCachedPromise } from "@raycast/utils";
 import { stopPlayback, togglePause } from "./lib/control";
 import { PlayingInfo } from "./types";
 import { useRef, useState, useEffect } from "react";
+import { execSync } from "child_process";
+import { LOOP_SCRIPT } from "./lib/audio";
 
 export default function Command() {
   const isProcessing = useRef(false);
@@ -28,10 +30,8 @@ export default function Command() {
       // Check if background process is still alive (if not paused)
       if (!playingInfo.isPaused) {
         try {
-          const { execSync } = require("child_process");
-          const { LOOP_SCRIPT } = require("./lib/audio");
           execSync(`pgrep -f "${LOOP_SCRIPT}"`);
-        } catch (e) {
+        } catch {
           // Process not found - recitation must have finished or was killed
           await LocalStorage.removeItem("currently_playing");
           await mutate(undefined);
@@ -94,7 +94,7 @@ export default function Command() {
   };
 
   const statusPrefix = playingInfo?.isPaused ? "[Paused] " : "Playing: ";
-  const timeDisplay = remaining !== null ? ("-" + formatTime(remaining)) : formatTime(elapsed);
+  const timeDisplay = remaining !== null ? "-" + formatTime(remaining) : formatTime(elapsed);
   const timeStr = playingInfo ? ` (${timeDisplay})` : "";
 
   return (
@@ -130,7 +130,7 @@ export default function Command() {
               title={playingInfo.isRepeating ? "Repeat: ON" : "Repeat: OFF"}
               icon={playingInfo.isRepeating ? Icon.Repeat : Icon.Circle}
               onAction={async () => {
-                const updated = await launchCommand({ name: "toggle-repeat", type: LaunchType.UserInitiated });
+                await launchCommand({ name: "toggle-repeat", type: LaunchType.UserInitiated });
                 await mutate();
               }}
             />

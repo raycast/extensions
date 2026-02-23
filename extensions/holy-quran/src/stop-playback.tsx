@@ -5,7 +5,7 @@ export default async function Command() {
   try {
     await stopPlayback();
     await showHUD("Playback stopped");
-  } catch (error) {
+  } catch {
     await showHUD("Failed to stop playback");
   }
 }

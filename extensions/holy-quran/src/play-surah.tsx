@@ -24,10 +24,7 @@ import { FAV_SURAH_KEY, FAV_RECITER_KEY, SURAH_VERSE_COUNTS } from "./lib/consta
 import { GLOBAL_REPEAT_KEY } from "./lib/control";
 
 export default function Command(props: LaunchProps<{ arguments: { surah?: string; start?: string; end?: string } }>) {
-  const {
-    data: chapters,
-    isLoading: isChaptersLoading,
-  } = useCachedPromise(fetchChapters);
+  const { data: chapters, isLoading: isChaptersLoading } = useCachedPromise(fetchChapters);
 
   const {
     data: favorites,
@@ -60,7 +57,9 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
       const rid = reciterId || defaultReciter.id;
       const rname = reciterName || defaultReciter.name;
 
-      const title = startAyah ? `Surah ${chapter.name_simple} • ${startAyah}${endAyah ? `-${endAyah}` : ""}` : `Surah ${chapter.name_simple}`;
+      const title = startAyah
+        ? `Surah ${chapter.name_simple} • ${startAyah}${endAyah ? `-${endAyah}` : ""}`
+        : `Surah ${chapter.name_simple}`;
 
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -174,7 +173,11 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
           }
 
           if (end !== undefined && (isNaN(end) || end < 1 || end > maxVerses || (start && end < start))) {
-            await showHUD(end < (start || 1) ? "End Ayah cannot be before Start Ayah." : `Surah ${chapter.name_simple} only has ${maxVerses} verses.`);
+            await showHUD(
+              end < (start || 1)
+                ? "End Ayah cannot be before Start Ayah."
+                : `Surah ${chapter.name_simple} only has ${maxVerses} verses.`,
+            );
             await popToRoot();
             return;
           }
@@ -188,7 +191,14 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
       }
     }
     handleArguments();
-  }, [isChaptersLoading, chapters, props.arguments.surah, props.arguments.start, props.arguments.end, handlePlayAction]);
+  }, [
+    isChaptersLoading,
+    chapters,
+    props.arguments.surah,
+    props.arguments.start,
+    props.arguments.end,
+    handlePlayAction,
+  ]);
 
   const isLoading = isChaptersLoading || isFavsLoading;
 
@@ -289,7 +299,10 @@ export default function Command(props: LaunchProps<{ arguments: { surah?: string
                   title="Choose Reciter"
                   icon={Icon.Person}
                   target={
-                    <ReciterPicker chapter={chapter} onSelect={(r) => handlePlayAction(chapter, r.id, r.reciter_name)} />
+                    <ReciterPicker
+                      chapter={chapter}
+                      onSelect={(r) => handlePlayAction(chapter, r.id, r.reciter_name)}
+                    />
                   }
                 />
               </ActionPanel>

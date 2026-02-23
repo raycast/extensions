@@ -15,7 +15,7 @@ async function isOffline(): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 1000);
-    await fetch("https://www.google.com", { method: "HEAD", signal: controller.signal, mode: 'no-cors' });
+    await fetch("https://www.google.com", { method: "HEAD", signal: controller.signal, mode: "no-cors" });
     clearTimeout(timeout);
     return false;
   } catch {
@@ -113,7 +113,7 @@ export async function playAudio(
   reciterName: string,
   surahName: string,
   chapterId: number,
-  shouldLoop: boolean = false
+  shouldLoop: boolean = false,
 ): Promise<number> {
   await stopAudio();
 
@@ -208,7 +208,7 @@ export async function playVersePlaylist(
 
   const loopScript = `#!/bin/bash
 COUNT=0
-ITERATIONS=${isInfinite ? 999999 : (repeatCount || 1)}
+ITERATIONS=${isInfinite ? 999999 : repeatCount || 1}
 while [ $COUNT -lt $ITERATIONS ]; do
   ${playSequence}
   COUNT=$((COUNT+1))

@@ -78,13 +78,13 @@ export default function MemorizeSurah(props: { chapter?: Chapter }) {
             isMemorization: true,
             duration: finalDuration,
             isRepeating: values.isInfinite || parseInt(values.repeatCount) > 1,
-          })
+          }),
         );
 
         await launchCommand({ name: "status", type: LaunchType.UserInitiated });
         await showHUD(values.isInfinite ? "Infinite loop started" : "Recitation started");
         pop();
-      } catch (error) {
+      } catch {
         await showHUD("Failed to start playback");
       }
     },
@@ -135,21 +135,17 @@ export default function MemorizeSurah(props: { chapter?: Chapter }) {
         }}
       >
         {chapters?.map((c) => (
-          <Form.Dropdown.Item key={c.id} value={c.id.toString()} title={`${c.id}. ${c.name_simple} (${c.verses_count} Ayahs)`} />
+          <Form.Dropdown.Item
+            key={c.id}
+            value={c.id.toString()}
+            title={`${c.id}. ${c.name_simple} (${c.verses_count} Ayahs)`}
+          />
         ))}
       </Form.Dropdown>
 
-      <Form.TextField
-        {...itemProps.startAyah}
-        title="Start Ayah"
-        placeholder="1"
-      />
+      <Form.TextField {...itemProps.startAyah} title="Start Ayah" placeholder="1" />
 
-      <Form.TextField
-        {...itemProps.endAyah}
-        title="End Ayah"
-        placeholder="Same as start"
-      />
+      <Form.TextField {...itemProps.endAyah} title="End Ayah" placeholder="Same as start" />
 
       <Form.Dropdown {...itemProps.reciterId} title="Reciter">
         {recitations?.map((r) => (
