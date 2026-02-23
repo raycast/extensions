@@ -99,7 +99,11 @@ export function WordDetails({ wordData, onBack }: WordDetailsProps) {
             binary = "powershell";
             // Use Media.SoundPlayer for simplicity, though MediaPlayer is better for MP3.
             // Note: SoundPlayer is synchronous with .PlaySync() which suits our Promise wrapper.
-            args = ["-c", `(New-Object Media.SoundPlayer "${tempFilePath}").PlaySync()`];
+            args = [
+              "-Command",
+              "& { $player = New-Object Media.SoundPlayer $args[0]; $player.PlaySync() }",
+              tempFilePath,
+            ];
             break;
           case "darwin":
             binary = "afplay";
