@@ -58,7 +58,13 @@ export function useModes() {
 function parseRecordingMeta(path: string): RecordingMeta | undefined {
   try {
     const parsed = JSON.parse(readFileSync(path, "utf-8"));
-    return typeof parsed === "object" && parsed !== null ? (parsed as RecordingMeta) : undefined;
+    if (typeof parsed !== "object" || parsed === null) {
+      return undefined;
+    }
+
+    const rawResult = typeof parsed.rawResult === "string" ? parsed.rawResult : undefined;
+    const llmResult = typeof parsed.llmResult === "string" ? parsed.llmResult : undefined;
+    return { rawResult, llmResult };
   } catch {
     return undefined;
   }

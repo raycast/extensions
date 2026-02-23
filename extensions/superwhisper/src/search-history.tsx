@@ -61,9 +61,7 @@ ${rawResult || "_No result available._"}`;
                       shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
                     />
                   </>
-                ) : (
-                  <></>
-                )}
+                ) : null}
                 <Action.ShowInFinder
                   title="Show in Finder"
                   path={join(homedir(), "Documents", "superwhisper", "recordings", recording.directory)}
