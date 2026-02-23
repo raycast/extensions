@@ -597,8 +597,8 @@ async function installLunarCLI(): Promise<void> {
   }
 }
 
-function showSetupRequiredToast(status: InstallStatus): Promise<{ id: string }> {
-  return showToast({
+async function showSetupRequiredToast(status: InstallStatus): Promise<void> {
+  await showToast({
     style: Toast.Style.Failure,
     title: "Lunar Setup Required",
     message: buildLunarSetupMessage(status),
