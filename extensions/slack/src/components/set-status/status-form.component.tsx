@@ -21,7 +21,7 @@ interface StatusFormProps {
 const DURATION_OPTIONS = [
   { value: "0", title: "Don't clear" },
   { value: "30", title: "30 Minutes" },
-  { value: "60", title: "1 Hours" },
+  { value: "60", title: "1 Hour" },
   { value: "240", title: "4 Hours" },
   { value: "today", title: "Until Today" },
   { value: "week", title: "Until this week" },
