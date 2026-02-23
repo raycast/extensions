@@ -1,2 +1,1 @@
-/// <reference types="chrome" />
 export {};
