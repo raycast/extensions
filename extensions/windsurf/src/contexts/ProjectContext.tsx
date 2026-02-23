@@ -1,4 +1,5 @@
 import { createContext, useContext, ReactNode, useCallback } from "react";
+import { closeMainWindow } from "@raycast/api";
 import { openProjectInWindsurf, openNewWindsurfWindow } from "../windsurf";
 import { closeOtherWindows } from "../preferences";
 
@@ -25,12 +26,14 @@ export function ProjectProvider({
         ? decodeURIComponent(uri.slice(7))
         : uri;
       await openProjectInWindsurf(path, closeOthers ?? closeOtherWindows);
+      await closeMainWindow();
     },
     []
   );
 
   const openNewWindow = useCallback(async () => {
     await openNewWindsurfWindow();
+    await closeMainWindow();
   }, []);
 
   return (
