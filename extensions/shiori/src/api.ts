@@ -1,84 +1,73 @@
-import got from "got";
+import { getPreferenceValues } from "@raycast/api";
+import {
+  FetchLinksParams,
+  LinksResponse,
+  CreateLinkResponse,
+  UpdateLinksResponse,
+  DeleteLinkResponse,
+  ErrorResponse,
+} from "./types";
 
-// https://github.com/go-shiori/shiori/blob/master/docs/API.md#log-in
-export async function login(apiEndpoint: string, username: string, password: string): Promise<string> {
-  const apiUrl = `${apiEndpoint}/login`;
-  const { body } = (await got.post(apiUrl, {
-    json: {
-      username,
-      password,
-    },
-    responseType: "json",
-  })) as {
-    body: {
-      session: string;
-      account: {
-        id: number;
-        username: string;
-        owner: boolean;
-      };
-    };
-  };
+const BASE_URL = "https://www.shiori.sh";
 
-  return body.session;
+interface Preferences {
+  apiKey: string;
 }
 
-// https://github.com/go-shiori/shiori/blob/master/docs/API.md#add-bookmark
-//
-// sample request
-// {
-//   "url": "https://interesting_cool_article.com",
-//   "createArchive": true,
-//   "public": 1,
-//   "tags": [{"name": "Interesting"}, {"name": "Cool"}],
-//   "title": "Cool Interesting Article",
-//   "excerpt": "An interesting and cool article indeed!"
-// }
-//
-// sample response
-//   {
-//     "id": 827,
-//     "url": "https://interesting_cool_article.com",
-//     "title": "TITLE",
-//     "excerpt": "EXCERPT",
-//     "author": "AUTHOR",
-//     "public": 1,
-//     "modified": "DATE",
-//     "html": "HTML",
-//     "imageURL": "/bookmark/827/thumb",
-//     "hasContent": false,
-//     "hasArchive": true,
-//     "tags": [
-//         {
-//              "name": "Interesting"
-//         },
-//         {
-//              "name": "Cool"
-//         }
-//     ],
-//     "createArchive": true
-// }
-export async function addBookmark(
-  apiEndpoint: string,
-  session: string,
-  url: string,
-  // tags: string[]
-): Promise<number> {
-  const apiUrl = `${apiEndpoint}/bookmarks`;
-  console.log("addBookmark: " + apiUrl + " " + session + "; " + url);
-  const { body } = (await got.post(apiUrl, {
-    headers: {
-      "X-Session-Id": session,
-    },
-    json: {
-      url,
-      // tags: tags.map((tag) => ({ name: tag })),
-    },
-    responseType: "json",
-  })) as {
-    body: {
-      id: number;
-    };
+function headers(): Record<string, string> {
+  const { apiKey } = getPreferenceValues<Preferences>();
+  return {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
   };
-  return body.id;
+}
+
+async function request<T>(
+  path: string,
+  init?: { method?: string; body?: string; headers?: Record<string, string> },
+): Promise<T> {
+  const res = await globalThis.fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: { ...headers(), ...init?.headers },
+  });
+
+  const body = (await res.json()) as T | ErrorResponse;
+
+  if (!res.ok || !(body as { success: boolean }).success) {
+    const msg = (body as ErrorResponse).error ?? `Request failed (${res.status})`;
+    throw new Error(msg);
+  }
+
+  return body as T;
+}
+
+export async function fetchLinks(params: FetchLinksParams = {}): Promise<LinksResponse> {
+  const qs = new URLSearchParams();
+  if (params.limit !== undefined) qs.set("limit", String(params.limit));
+  if (params.offset !== undefined) qs.set("offset", String(params.offset));
+  if (params.read) qs.set("read", params.read);
+  if (params.sort) qs.set("sort", params.sort);
+
+  const query = qs.toString();
+  return request<LinksResponse>(`/api/links${query ? `?${query}` : ""}`);
+}
+
+export async function createLink(url: string, title?: string, read?: boolean): Promise<CreateLinkResponse> {
+  return request<CreateLinkResponse>("/api/links", {
+    method: "POST",
+    body: JSON.stringify({ url, ...(title && { title }), ...(read !== undefined && { read }) }),
+  });
+}
+
+export async function updateLinks(ids: string[], read: boolean): Promise<UpdateLinksResponse> {
+  return request<UpdateLinksResponse>("/api/links", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, read }),
+  });
+}
+
+export async function deleteLink(id: string): Promise<DeleteLinkResponse> {
+  return request<DeleteLinkResponse>(`/api/links/${id}`, {
+    method: "DELETE",
+  });
 }
