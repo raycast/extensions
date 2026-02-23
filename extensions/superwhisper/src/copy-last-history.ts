@@ -1,12 +1,10 @@
-import { Clipboard, Toast, closeMainWindow, showToast } from "@raycast/api";
-import { format } from "date-fns";
+import { Clipboard, Toast, closeMainWindow, getPreferenceValues, showToast } from "@raycast/api";
 
-import { getRecordingPrimaryText, getRecordings } from "./hooks";
+import { getLatestRecordingByVariant, TranscriptVariant } from "./hooks";
 import { checkSuperwhisperInstallation } from "./utils";
 
-const LAST_HOUR_IN_MS = 60 * 60 * 1000;
-
 export default async function main() {
+  const { transcriptVariant } = getPreferenceValues<Preferences.CopyLastHistory>();
   const isInstalled = await checkSuperwhisperInstallation();
   if (!isInstalled) {
     return;
@@ -15,35 +13,14 @@ export default async function main() {
   await closeMainWindow();
 
   try {
-    const recordings = await getRecordings();
-    const cutoff = Date.now() - LAST_HOUR_IN_MS;
-    const recentRecordings = recordings
-      .filter((recording) => recording.timestamp.getTime() >= cutoff)
-      .map((recording) => ({
-        timestamp: recording.timestamp,
-        text: getRecordingPrimaryText(recording.meta),
-      }))
-      .filter((recording) => recording.text.length > 0)
-      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const latestRecording = await getLatestRecordingByVariant(transcriptVariant as TranscriptVariant);
+    const variantTitle = transcriptVariant === "processed" ? "AI processed" : "unprocessed";
 
-    if (recentRecordings.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No recent recordings found",
-        message: "No Superwhisper history entries from the last hour.",
-      });
-      return;
-    }
-
-    const content = recentRecordings
-      .map((recording) => `[${format(recording.timestamp, "yyyy-MM-dd HH:mm:ss")}]\n${recording.text}`)
-      .join("\n\n---\n\n");
-
-    await Clipboard.copy(content);
+    await Clipboard.copy(latestRecording.text);
     await showToast({
       style: Toast.Style.Success,
-      title: "Copied last hour history",
-      message: `Copied ${recentRecordings.length} recording${recentRecordings.length === 1 ? "" : "s"} to clipboard.`,
+      title: "Copied last history",
+      message: `Copied the most recent ${variantTitle} transcript to the clipboard.`,
     });
   } catch (error) {
     await showToast({

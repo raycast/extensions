@@ -12,10 +12,17 @@ export type RecordingMeta = {
   llmResult?: string;
 };
 
+export type TranscriptVariant = "processed" | "unprocessed";
+
 export type Recording = {
   directory: string;
   meta: RecordingMeta;
   timestamp: Date;
+};
+
+export type LatestRecording = {
+  timestamp: Date;
+  text: string;
 };
 
 export function useModes() {
@@ -78,6 +85,14 @@ export function getRecordingPrimaryText(meta: RecordingMeta): string {
   return meta.rawResult?.trim() ?? "";
 }
 
+export function getRecordingTextByVariant(meta: RecordingMeta, variant: TranscriptVariant): string {
+  if (variant === "processed") {
+    return meta.llmResult?.trim() ?? "";
+  }
+
+  return meta.rawResult?.trim() ?? "";
+}
+
 export async function getRecordings(): Promise<Recording[]> {
   const isInstalled = await isSuperwhisperInstalled();
   if (!isInstalled) {
@@ -127,6 +142,40 @@ export async function getRecordings(): Promise<Recording[]> {
 
   recordingsList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   return recordingsList;
+}
+
+export function getLatestRecordingByVariantFromRecordings(
+  recordings: Recording[],
+  variant: TranscriptVariant,
+): LatestRecording | undefined {
+  const latestRecording = recordings[0];
+  if (!latestRecording) {
+    return undefined;
+  }
+
+  const text = getRecordingTextByVariant(latestRecording.meta, variant);
+  if (!text) {
+    return undefined;
+  }
+
+  return {
+    timestamp: latestRecording.timestamp,
+    text,
+  };
+}
+
+export async function getLatestRecordingByVariant(variant: TranscriptVariant): Promise<LatestRecording> {
+  const recordings = await getRecordings();
+  const latestRecording = getLatestRecordingByVariantFromRecordings(recordings, variant);
+  if (!latestRecording) {
+    if (variant === "processed") {
+      throw new Error("No AI processed transcript found. Switch Transcript Variant to Unprocessed.");
+    }
+
+    throw new Error("No unprocessed transcript found. Switch Transcript Variant to AI Processed.");
+  }
+
+  return latestRecording;
 }
 
 export function useRecordings() {

@@ -1,11 +1,22 @@
-import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 import { format } from "date-fns";
-import { getRecordingPrimaryText, useRecordings } from "./hooks";
+import {
+  getLatestRecordingByVariantFromRecordings,
+  getRecordingPrimaryText,
+  TranscriptVariant,
+  useRecordings,
+} from "./hooks";
 
 export default function Command() {
+  const { transcriptVariant } = getPreferenceValues<Preferences.SearchHistory>();
   const { recordings, isLoading, error } = useRecordings();
+  const latestHistoryText = recordings
+    ? getLatestRecordingByVariantFromRecordings(recordings, transcriptVariant as TranscriptVariant)?.text
+    : undefined;
+  const copyLastHistoryTitle =
+    transcriptVariant === "processed" ? "Copy Last History (AI Processed)" : "Copy Last History (Unprocessed)";
 
   if (error) {
     return (
@@ -42,6 +53,13 @@ ${rawResult || "_No result available._"}`;
             detail={<List.Item.Detail markdown={detailMarkdown} />}
             actions={
               <ActionPanel>
+                {latestHistoryText ? (
+                  <Action.CopyToClipboard
+                    title={copyLastHistoryTitle}
+                    content={latestHistoryText}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  />
+                ) : null}
                 {primaryResult ? (
                   <>
                     <Action.Paste title="Paste Result" content={primaryResult} />
