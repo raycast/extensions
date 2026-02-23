@@ -6,10 +6,6 @@ import type { ApiError } from "./types";
 const DEFAULT_PORT = 8978;
 const TIMEOUT_MS = 10000;
 
-interface Preferences {
-  port: string;
-}
-
 export class TypeWhisperError extends Error {
   constructor(
     message: string,
