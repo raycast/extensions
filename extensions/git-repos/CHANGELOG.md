@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## [Bug Fix] - 2026-02-23
+## [Bug Fix] - {PR_MERGE_DATE}
 
 - Prevent crashes when `Open with` app preferences are missing or invalid.
 - Guard quicklink and open actions against undefined application bundle IDs.
