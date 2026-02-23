@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Tag Filtering and Grouping] - {PR_MERGE_DATE}
+## [Tag Filtering and Grouping] - 2026-02-23
 
 - Added tag filter dropdown to list views (matches Things native behavior)
 - Tag filtering supports full inheritance: todo → project → area tags
