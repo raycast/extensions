@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lyrion-qobuz",
+  "title": "Lyrion Qobuz Search",
+  "description": "Search and play music from Qobuz via Lyrion Music Server",
+  "icon": "icon.png",
+  "author": "elliot_seeds",
+  "categories": [
+    "Media"
+  ],
+  "keywords": [
+    "qobuz",
+    "lyrion",
+    "lms",
+    "music",
+    "squeezebox",
+    "streaming"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-qobuz",
+      "title": "Search Qobuz",
+      "subtitle": "Lyrion Music Server",
+      "description": "Search for music on Qobuz and play it through your Lyrion Music Server",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lmsHost",
+      "title": "LMS Host",
+      "description": "Hostname or IP address of your Lyrion Music Server",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "192.168.0.21"
+    },
+    {
+      "name": "lmsPort",
+      "title": "LMS Port",
+      "description": "Port number for the Lyrion Music Server JSON-RPC API",
+      "type": "textfield",
+      "required": false,
+      "default": "9000",
+      "placeholder": "9000"
+    },
+    {
+      "name": "playerId",
+      "title": "Player ID",
+      "description": "MAC address of the player to control (e.g. 00:00:00:00:00:10)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "00:00:00:00:00:10"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~22.13.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
