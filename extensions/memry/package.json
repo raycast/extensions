@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "memry",
+  "title": "Memry",
+  "description": "Save links to Memry — your AI-powered link manager. Paste a URL or share from clipboard, and AI will analyze it automatically.",
+  "icon": "extension-icon.png",
+  "author": "memry",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "save-link",
+      "title": "Save Link to Memry",
+      "description": "Save a URL to your Memry account for AI analysis",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Memry API key (starts with memry_). Get one at savememry.com/integrations",
+      "type": "password",
+      "required": false,
+      "placeholder": "memry_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
