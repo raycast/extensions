@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "marcel-raycast",
+  "title": "Marcel",
+  "version": "1.0.0",
+  "description": "Manage your Marcel quests directly from Raycast. View your quest list and complete tasks without leaving your keyboard.",
+  "icon": "icon.png",
+  "author": "saravenpi",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quests",
+      "title": "View Quests",
+      "description": "View and complete your Marcel quests",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Marcel API Token",
+      "description": "Your Marcel API token (starts with 'marcel_'). Get it from Marcel settings.",
+      "placeholder": "marcel_..."
+    },
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API URL",
+      "description": "Marcel API base URL (leave empty for default production URL)",
+      "default": "https://api.marcel.my",
+      "placeholder": "https://api.marcel.my"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.0",
+    "@raycast/utils": "^1.5.0",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

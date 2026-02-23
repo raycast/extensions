@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.raycast/
+*.md
+!README.md
+!PUBLISHING.md
+!CHANGELOG.md
