@@ -6,12 +6,17 @@
 - Added keyboard shortcuts:
   - `Cmd + Right Arrow` to increase brightness by 10%
   - `Cmd + Left Arrow` to decrease brightness by 10%
+  - `Cmd + Shift + Right Arrow` to set brightness to `100%`
+  - `Cmd + Shift + Up Arrow` to set brightness to `50%`
+  - `Cmd + Shift + Left Arrow` to set brightness to `0%`
+  - `Cmd + R` to refresh displays
 - Added action menu support for:
   - Set Brightness
   - Increase Brightness
   - Decrease Brightness
-  - Reset to 100%
+  - Set to `100%`
+  - Set to `50%`
+  - Set to `0%`
+  - Refresh Displays
 - Added direct brightness input with integer validation in the range `0-100`
 - Added user-triggered automatic Lunar setup (Homebrew + install-cli) with retries and manual fallback actions
-- Added retry/backoff logic for transient Lunar socket and empty-display states
-- Updated extension icon and UI brightness meter to 10-segment filled/empty rectangles
