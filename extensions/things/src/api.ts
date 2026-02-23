@@ -138,6 +138,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     if (areaRef && !projectRef) {
       const areaProps = areaRef.properties();
       area = { id: areaProps.id, name: areaProps.name };
+      areaTags = areaRef.tagNames() || '';
     }
 
     return {

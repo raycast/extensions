@@ -20,7 +20,7 @@ type Section = { title?: string; todos: Todo[] };
 const ALL_TAGS = 'all';
 const NO_TAG = 'none';
 
-function parseTags(tagString: string | undefined): string[] {
+function parseTags(tagString: string | null | undefined): string[] {
   return tagString?.split(', ').filter(Boolean) ?? [];
 }
 
@@ -217,6 +217,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
                 todo={todo}
                 refreshTodos={mutate}
                 commandListName={commandListName}
+                displayActivationDates={displayActivationDates}
                 tags={tags}
                 lists={lists}
               />
