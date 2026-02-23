@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser";
 import type { AntigravityError, AntigravityUsage } from "./types";
-import {
-  AntigravityProbeError,
-  fetchAntigravityRawStatus,
-} from "./probe";
+import { AntigravityProbeError, fetchAntigravityRawStatus } from "./probe";
 import type { AntigravityProbeResult, AntigravityProbeSource } from "./probe";
 
 type ProbeFetcher = (preferredSource?: AntigravityProbeSource) => Promise<AntigravityProbeResult>;

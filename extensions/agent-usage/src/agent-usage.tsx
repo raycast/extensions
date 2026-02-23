@@ -401,7 +401,7 @@ export default function Command() {
                 <ActionPanel.Section title="Reorder">
                   {canMoveUp && (
                     <Action
-                      title="Move Up"
+                      title="Move up"
                       icon={Icon.ArrowUp}
                       shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                       onAction={() => moveAgent(agent.id, "up")}
