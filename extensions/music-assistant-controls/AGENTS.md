@@ -11,7 +11,7 @@ This is a Raycast extension for controlling Music Assistant, a home music server
 - **Always write unit tests** - Don't forget tests like a "junior developer"
 - **Proper test organization**: Put client tests in client test files, command-specific tests in command test files
 - **Clean test files**: Remove unused imports, variables, and mock configurations
-- **Focus on critical path**: Test business logic thoroughly (61% coverage target, not 100%)
+- **Focus on critical path**: Test business logic thoroughly (~69% coverage target, not 100%)
 - **REST API testing**: Test `sendCommand()` comprehensively; individual wrapper methods inherit coverage
 - **Regression tests**: Add tests for any bugs found to prevent recurrence
 - **Test error cases**: Always test both success and failure scenarios
@@ -144,7 +144,7 @@ Each command entry includes:
 
 ## Test Coverage Strategy
 
-### Current Coverage: 69.81% statements, 54.13% branches, 67% functions
+### Current Coverage: 69.15% statements, 53.73% branches, 67% functions
 
 **Why not 100% coverage?**
 
