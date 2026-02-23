@@ -18,10 +18,10 @@ Chat with your stateful AI agents that remember and learn over time — directly
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| **Chat with Agent** | Send messages to your active Letta agent |
-| **Manage Agents** | List, select, and manage your agents |
+| Command               | Description                               |
+| --------------------- | ----------------------------------------- |
+| **Chat with Agent**   | Send messages to your active Letta agent  |
+| **Manage Agents**     | List, select, and manage your agents      |
 | **View Agent Memory** | Inspect memory blocks of the active agent |
 
 ## Setup
@@ -34,11 +34,11 @@ Chat with your stateful AI agents that remember and learn over time — directly
 
 ## Configuration
 
-| Preference | Description | Required |
-|------------|-------------|----------|
-| **API Key** | Your Letta API key | Yes |
-| **Base URL** | Custom Letta API URL for self-hosted | No |
-| **Show Reasoning** | Display agent's internal thoughts | No |
+| Preference         | Description                          | Required |
+| ------------------ | ------------------------------------ | -------- |
+| **API Key**        | Your Letta API key                   | Yes      |
+| **Base URL**       | Custom Letta API URL for self-hosted | No       |
+| **Show Reasoning** | Display agent's internal thoughts    | No       |
 
 ## Development
 
