@@ -1006,6 +1006,132 @@ describe("MusicAssistantClient", () => {
     });
   });
 
+  describe("getPlayerAlbumArt", () => {
+    it("should return full URL when player has image_url", () => {
+      const player = {
+        current_media: {
+          image_url: "/imageproxy/abc123",
+        },
+      } as any;
+
+      const artUrl = client.getPlayerAlbumArt(player);
+
+      expect(artUrl).toBeDefined();
+      expect(artUrl).toContain("/imageproxy/abc123");
+    });
+
+    it("should handle absolute URLs from player", () => {
+      const player = {
+        current_media: {
+          image_url: "http://example.com/image.jpg",
+        },
+      } as any;
+
+      const artUrl = client.getPlayerAlbumArt(player);
+
+      expect(artUrl).toBe("http://example.com/image.jpg");
+    });
+
+    it("should return undefined when player has no current_media", () => {
+      const player = {
+        current_media: undefined,
+      } as any;
+
+      const artUrl = client.getPlayerAlbumArt(player);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should return undefined when current_media has no image_url", () => {
+      const player = {
+        current_media: {
+          title: "Song",
+        },
+      } as any;
+
+      const artUrl = client.getPlayerAlbumArt(player);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should handle undefined player", () => {
+      const artUrl = client.getPlayerAlbumArt(undefined);
+
+      expect(artUrl).toBeUndefined();
+    });
+  });
+
+  describe("getQueueAlbumArt", () => {
+    it("should return full URL when queue has image path", () => {
+      const queue = {
+        current_item: {
+          image: {
+            path: "/imageproxy/xyz789",
+          },
+        },
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBeDefined();
+      expect(artUrl).toContain("/imageproxy/xyz789");
+    });
+
+    it("should handle absolute URLs from queue", () => {
+      const queue = {
+        current_item: {
+          image: {
+            path: "https://cdn.example.com/cover.jpg",
+          },
+        },
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBe("https://cdn.example.com/cover.jpg");
+    });
+
+    it("should return undefined when queue has no current_item", () => {
+      const queue = {
+        current_item: undefined,
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should return undefined when current_item has no image", () => {
+      const queue = {
+        current_item: {
+          name: "Song",
+        },
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should return undefined when image has no path", () => {
+      const queue = {
+        current_item: {
+          image: {},
+        },
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should handle undefined queue", () => {
+      const artUrl = client.getQueueAlbumArt(undefined);
+
+      expect(artUrl).toBeUndefined();
+    });
+  });
+
   describe("getGroupMembers", () => {
     it("should return empty array for standalone players", () => {
       const player = {

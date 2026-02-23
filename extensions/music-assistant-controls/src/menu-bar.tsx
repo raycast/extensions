@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
+import { Icon, MenuBarExtra, openExtensionPreferences, Image } from "@raycast/api";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { Player, PlayerQueue } from "./external-code/interfaces";
 import MusicAssistantClient from "./music-assistant-client";
@@ -67,7 +67,11 @@ export default function Command() {
       {activeDisplayQueue && (
         <MenuBarExtra.Section title={activeDisplayQueue.display_name}>
           <MenuBarExtra.Item
-            icon={Icon.Eye}
+            icon={
+              client.getQueueAlbumArt(activeDisplayQueue)
+                ? { source: client.getQueueAlbumArt(activeDisplayQueue)!, mask: Image.Mask.RoundedRectangle }
+                : Icon.Music
+            }
             title={client.getQueueCurrentSong(activeDisplayQueue)}
             onAction={() => selectPlayerForMenuBar(activeDisplayQueue)}
           />
@@ -164,6 +168,11 @@ export default function Command() {
           {inactiveQueues.map((queue) => (
             <MenuBarExtra.Item
               key={queue.queue_id}
+              icon={
+                client.getQueueAlbumArt(queue)
+                  ? { source: client.getQueueAlbumArt(queue)!, mask: Image.Mask.RoundedRectangle }
+                  : Icon.Music
+              }
               title={queue.display_name}
               subtitle={client.getQueueCurrentSong(queue)}
               onAction={() => selectPlayerForMenuBar(queue)}

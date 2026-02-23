@@ -20,6 +20,7 @@
 
 ### 🎨 UI/UX Enhancements
 
+- **Album Art Display** - See album covers for all players in the menu bar with rounded icons next to song titles for quick visual identification
 - Smart player filtering - Only shows group leaders and standalone players, hiding group members that follow their leader's playback to reduce clutter
 - Build, modify, and manage groups directly from the menu bar without switching to the full command
 - Unified group management interface showing both current members and available players to recruit

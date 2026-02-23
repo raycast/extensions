@@ -1,7 +1,12 @@
 import executeApiCommand from "./api-command";
-import { showHUD } from "@raycast/api";
+import { showHUD, getPreferenceValues } from "@raycast/api";
 import { storeSelectedQueueID, StoredQueue } from "./use-selected-player-id";
 import { PlayerQueue, PlayerState, Player } from "./external-code/interfaces";
+
+interface Preferences {
+  host: string;
+  token: string;
+}
 
 /**
  * Client for interacting with Music Assistant API and handling UI logic
@@ -264,6 +269,69 @@ export default class MusicAssistantClient {
    */
   getQueueCurrentSong(queue?: PlayerQueue): string {
     return queue?.current_item?.name || "";
+  }
+
+  /**
+   * Gets the album art URL for a player's current media
+   *
+   * Retrieves the image URL from the player's current media if available.
+   * Returns undefined if no image is available.
+   *
+   * @param player - The player with current media information
+   * @returns Full URL to the album art image or undefined
+   * @example
+   * ```typescript
+   * const artUrl = client.getPlayerAlbumArt(player);
+   * // Returns: "http://192.168.1.100:8095/imageproxy/..." or undefined
+   * ```
+   */
+  getPlayerAlbumArt(player?: Player): string | undefined {
+    if (!player?.current_media?.image_url) return undefined;
+    return this.buildImageUrl(player.current_media.image_url);
+  }
+
+  /**
+   * Gets the album art URL for a queue's current item
+   *
+   * Retrieves the image path from the queue's current item if available.
+   * Returns undefined if no image is available.
+   *
+   * @param queue - The player queue with current item information
+   * @returns Full URL to the album art image or undefined
+   * @example
+   * ```typescript
+   * const artUrl = client.getQueueAlbumArt(queue);
+   * // Returns: "http://192.168.1.100:8095/imageproxy/..." or undefined
+   * ```
+   */
+  getQueueAlbumArt(queue?: PlayerQueue): string | undefined {
+    const imagePath = queue?.current_item?.image?.path;
+    if (!imagePath) return undefined;
+    return this.buildImageUrl(imagePath);
+  }
+
+  /**
+   * Builds the full image URL from a path or URL
+   *
+   * If the path is already a full URL (starts with http), returns it as-is.
+   * Otherwise, combines it with the Music Assistant server host.
+   *
+   * @param pathOrUrl - The image path or URL
+   * @returns Full URL to the image
+   * @example
+   * ```typescript
+   * const url = client.buildImageUrl("/imageproxy/abc123");
+   * // Returns: "http://192.168.1.100:8095/imageproxy/abc123"
+   * ```
+   */
+  private buildImageUrl(pathOrUrl: string): string {
+    if (pathOrUrl.startsWith("http")) {
+      return pathOrUrl;
+    }
+    const { host } = getPreferenceValues<Preferences>();
+    const baseUrl = host.endsWith("/") ? host.slice(0, -1) : host;
+    const path = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+    return `${baseUrl}${path}`;
   }
 
   /**

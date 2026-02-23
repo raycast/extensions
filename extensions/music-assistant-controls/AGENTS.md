@@ -144,7 +144,7 @@ Each command entry includes:
 
 ## Test Coverage Strategy
 
-### Current Coverage: 68.52% statements, 53.17% branches, 65.97% functions
+### Current Coverage: 69.81% statements, 54.13% branches, 67% functions
 
 **Why not 100% coverage?**
 
@@ -154,7 +154,7 @@ Each command entry includes:
 
 **Full Coverage (100%)**
 
-- api-command.ts, music-assistant-client.ts (99.04%), command implementations (next-song, play-pause)
+- api-command.ts, music-assistant-client.ts (99.15%), command implementations (next-song, play-pause)
 - use-selected-player-id.ts, play-pause.tsx
 
 **Strategic Coverage (20-80%)**
