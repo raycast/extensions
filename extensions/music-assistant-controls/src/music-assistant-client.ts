@@ -226,6 +226,47 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Gets the currently playing song from a player's media info
+   *
+   * Extracts song title and artist from player.current_media and formats them.
+   * Returns an empty string if no current media is available.
+   *
+   * @param player - The player with current media information
+   * @returns Formatted string like "Song Title - Artist" or empty string
+   * @example
+   * ```typescript
+   * const song = client.getCurrentlyPlayingSong(player);
+   * // Returns: "Bohemian Rhapsody - Queen" or ""
+   * ```
+   */
+  getCurrentlyPlayingSong(player?: Player): string {
+    if (!player?.current_media?.title) return "";
+    const parts = [player.current_media.title];
+    if (player.current_media.artist) {
+      parts.push(player.current_media.artist);
+    }
+    return parts.join(" - ");
+  }
+
+  /**
+   * Gets the currently playing song from a queue's current item
+   *
+   * Extracts and returns the name of the current queue item.
+   * Returns an empty string if no current item is available.
+   *
+   * @param queue - The player queue with current item information
+   * @returns The name of the current queue item or empty string
+   * @example
+   * ```typescript
+   * const song = client.getQueueCurrentSong(queue);
+   * // Returns: "Blinding Lights" or ""
+   * ```
+   */
+  getQueueCurrentSong(queue?: PlayerQueue): string {
+    return queue?.current_item?.name || "";
+  }
+
+  /**
    * Gets the appropriate play/pause button text based on player state
    *
    * @param state - The current state of the player

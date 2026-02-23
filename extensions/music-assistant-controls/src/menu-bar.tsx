@@ -68,7 +68,7 @@ export default function Command() {
         <MenuBarExtra.Section title={activeDisplayQueue.display_name}>
           <MenuBarExtra.Item
             icon={Icon.Eye}
-            title={activeDisplayQueue.current_item?.name || ""}
+            title={client.getQueueCurrentSong(activeDisplayQueue)}
             onAction={() => selectPlayerForMenuBar(activeDisplayQueue)}
           />
           <MenuBarExtra.Item
@@ -142,7 +142,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={queue.queue_id}
               title={queue.display_name}
-              subtitle={queue.current_item?.name || ""}
+              subtitle={client.getQueueCurrentSong(queue)}
               onAction={() => selectPlayerForMenuBar(queue)}
             />
           ))}

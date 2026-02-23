@@ -87,19 +87,6 @@ export default function ManagePlayerGroupsCommand() {
     }
   };
 
-  const getPlayerById = (playerId: string): Player | undefined => {
-    return players?.find((p) => p.player_id === playerId);
-  };
-
-  const getCurrentlyPlaying = (player: Player): string => {
-    if (!player.current_media?.title) return "";
-    const parts = [player.current_media.title];
-    if (player.current_media.artist) {
-      parts.push(player.current_media.artist);
-    }
-    return parts.join(" - ");
-  };
-
   const getIcon = (player: Player, isMember = false): Icon => {
     if (isMember) return Icon.Dot;
     const status = client.getGroupStatus(player);
@@ -119,7 +106,7 @@ export default function ManagePlayerGroupsCommand() {
     if (isMember) return "Group member";
 
     // Show currently playing info for standalone players and group leaders
-    const nowPlaying = getCurrentlyPlaying(player);
+    const nowPlaying = client.getCurrentlyPlayingSong(player);
     if (nowPlaying) return nowPlaying;
 
     const status = client.getGroupStatus(player);
@@ -276,9 +263,8 @@ export default function ManagePlayerGroupsCommand() {
       {groupLeaders.length > 0 && (
         <List.Section title="Groups" subtitle={`${groupLeaders.length} group(s)`}>
           {groupLeaders.map((leader) => {
-            const members = leader.group_childs
-              .map((childId) => getPlayerById(childId))
-              .filter((p): p is Player => p !== undefined && p.player_id !== leader.player_id);
+            const groupMembers = client.getGroupMembers(leader, players || []);
+            const members = groupMembers.filter((p) => p.player_id !== leader.player_id);
 
             return (
               <React.Fragment key={leader.player_id}>

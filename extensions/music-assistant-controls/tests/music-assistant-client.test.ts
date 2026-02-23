@@ -893,6 +893,119 @@ describe("MusicAssistantClient", () => {
     });
   });
 
+  describe("getCurrentlyPlayingSong", () => {
+    it("should return formatted song with title and artist", () => {
+      const player = {
+        current_media: {
+          title: "Bohemian Rhapsody",
+          artist: "Queen",
+        },
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("Bohemian Rhapsody - Queen");
+    });
+
+    it("should return only title when artist is missing", () => {
+      const player = {
+        current_media: {
+          title: "Song Title",
+        },
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("Song Title");
+    });
+
+    it("should return empty string when current_media is undefined", () => {
+      const player = {
+        current_media: undefined,
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("");
+    });
+
+    it("should return empty string when title is missing", () => {
+      const player = {
+        current_media: {
+          artist: "Artist Name",
+        },
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("");
+    });
+
+    it("should handle undefined player", () => {
+      const song = client.getCurrentlyPlayingSong(undefined);
+
+      expect(song).toBe("");
+    });
+
+    it("should handle null current_media", () => {
+      const player = {
+        current_media: null,
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("");
+    });
+  });
+
+  describe("getQueueCurrentSong", () => {
+    it("should return current item name from queue", () => {
+      const queue = {
+        current_item: {
+          name: "Blinding Lights",
+        },
+      } as any;
+
+      const song = client.getQueueCurrentSong(queue);
+
+      expect(song).toBe("Blinding Lights");
+    });
+
+    it("should return empty string when current_item is undefined", () => {
+      const queue = {
+        current_item: undefined,
+      } as any;
+
+      const song = client.getQueueCurrentSong(queue);
+
+      expect(song).toBe("");
+    });
+
+    it("should return empty string when queue is undefined", () => {
+      const song = client.getQueueCurrentSong(undefined);
+
+      expect(song).toBe("");
+    });
+
+    it("should return empty string when current_item is null", () => {
+      const queue = {
+        current_item: null,
+      } as any;
+
+      const song = client.getQueueCurrentSong(queue);
+
+      expect(song).toBe("");
+    });
+
+    it("should handle queue with no current_item property", () => {
+      const queue = {} as any;
+
+      const song = client.getQueueCurrentSong(queue);
+
+      expect(song).toBe("");
+    });
+  });
+
   describe("getGroupMembers", () => {
     it("should return empty array for standalone players", () => {
       const player = {
