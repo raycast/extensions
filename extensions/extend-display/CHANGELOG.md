@@ -1,6 +1,6 @@
 # Extend Display Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-23
 
 - Scan for available AirPlay/Sidecar displays from System Settings
 - One-click connect/disconnect with state detection
