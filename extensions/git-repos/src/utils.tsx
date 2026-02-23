@@ -21,8 +21,8 @@ export interface Preferences {
   repoScanDepth?: number;
   includeSubmodules?: boolean;
   searchKeys?: string;
-  openWith1: OpenWith;
-  openWith2: OpenWith;
+  openWith1?: OpenWith;
+  openWith2?: OpenWith;
   openWith3?: OpenWith;
   openWith4?: OpenWith;
   openWith5?: OpenWith;
