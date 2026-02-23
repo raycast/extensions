@@ -1,5 +1,5 @@
 # Rollcast Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-02-23
 
 ## [Initial Version] - 2023-05-17
