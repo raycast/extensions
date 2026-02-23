@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { Player } from "./external-code/interfaces";
 import MusicAssistantClient from "./music-assistant-client";
@@ -87,8 +87,17 @@ export default function ManagePlayerGroupsCommand() {
     }
   };
 
-  const getIcon = (player: Player, isMember = false): Icon => {
+  const getIcon = (player: Player, isMember = false): Icon | Image.ImageLike => {
+    // For members, always show the dot (indented)
     if (isMember) return Icon.Dot;
+
+    // Try to get album art for this player
+    const albumArt = client.getPlayerAlbumArt(player);
+    if (albumArt) {
+      return { source: albumArt, mask: Image.Mask.RoundedRectangle };
+    }
+
+    // Fallback to status icons
     const status = client.getGroupStatus(player);
     return status === "Standalone" ? Icon.Person : Icon.TwoPeople;
   };
