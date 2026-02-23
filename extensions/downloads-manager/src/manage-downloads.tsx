@@ -110,7 +110,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
           setDownloads(newDownloads);
           setSelectedItemId(newDownloads[0]?.path ?? null);
         } else {
-          setDownloads((prev) => [...prev, ...newDownloads]);
+          setDownloads((prev: Download[]) => [...prev, ...newDownloads]);
         }
         setHasMore(hasMoreItems);
         setNextOffset(offset + PAGE_SIZE);
@@ -136,8 +136,8 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
   }, [isLoading, hasMore, nextOffset, loadNextPage]);
 
   function handleTrash(paths: PathLike | PathLike[]) {
-    setDownloads((downloads) =>
-      downloads.filter((download) => (Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path)),
+    setDownloads((downloads: Download[]) =>
+      downloads.filter((download: Download) => (Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path)),
     );
   }
 
@@ -147,7 +147,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
   }, [loadNextPage, setNextOffset]);
 
   const toggleDetailView = useCallback(() => {
-    setIsShowingDetail((prev) => !prev);
+    setIsShowingDetail((prev: boolean) => !prev);
   }, []);
 
   const actions = (download: Download) => (
@@ -199,7 +199,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
         />
         <Action.Trash
           title="Delete All Downloads"
-          paths={downloads.map((d) => d.path)}
+          paths={downloads.map((d: Download) => d.path)}
           shortcut={Keyboard.Shortcut.Common.RemoveAll}
           onTrash={handleTrash}
         />
@@ -231,7 +231,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
         }}
       >
         {downloads.length === 0 && !isLoading && <Grid.EmptyView {...emptyViewProps} />}
-        {downloads.map((download) => (
+        {downloads.map((download: Download) => (
           <Grid.Item
             key={download.path}
             {...getItemProps(download)}
@@ -254,7 +254,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
       }}
     >
       {downloads.length === 0 && !isLoading && <List.EmptyView {...emptyViewProps} />}
-      {downloads.map((download) => (
+      {downloads.map((download: Download) => (
         <List.Item
           key={download.path}
           id={download.path}

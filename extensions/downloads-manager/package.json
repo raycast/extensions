@@ -345,16 +345,16 @@
   "dependencies": {
     "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.9.3",
     "untildify": "^6.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^24.10.2",
-    "@types/react": "^19.2.7",
     "eslint": "^9.39.2",
     "prettier": "^3.8.1",
-    "react": "^19.2.1",
-    "typescript": "^5.9.3"
+    "react": "^19.2.1"
   },
   "scripts": {
     "build": "ray build -e dist",
