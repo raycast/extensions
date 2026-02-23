@@ -270,7 +270,7 @@ function SubMenuView({
   const { push } = useNavigation();
 
   const { isLoading, data: items } = usePromise(
-    async (q: string, id: string) => client.getSubmenu(q, id, 30),
+    async (q: string, id: string) => client.getSubmenu(q, id),
     [query, goId],
     {
       onError: (error) => {

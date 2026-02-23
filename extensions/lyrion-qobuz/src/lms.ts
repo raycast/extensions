@@ -23,6 +23,9 @@ export interface SearchItem {
 
 const QUALITY_RE = /\s*\((?:Hi-Res|(?:\d+-Bit\/\d+kHz))[^)]*\)/i;
 
+/** Max items returned per submenu (artists, albums, etc.). Single request, keep balanced for speed. */
+export const SUBMENU_ITEM_LIMIT = 250;
+
 export class LyrionClient {
   private url: string;
   private baseUrl: string;
@@ -164,7 +167,7 @@ export class LyrionClient {
   async getSubmenu(
     query: string,
     goId: string,
-    limit = 20,
+    limit = SUBMENU_ITEM_LIMIT,
   ): Promise<SearchItem[]> {
     const raw = await this.globalsearchItems(query, goId, limit);
     return (raw as Record<string, unknown>[])

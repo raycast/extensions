@@ -38,7 +38,7 @@ async function drillDown(
 
   // No playId → container (artist, category). Drill using goId.
   spinner.start("Loading...");
-  const children = await client.getSubmenu(query, selected.goId, 30);
+  const children = await client.getSubmenu(query, selected.goId);
   spinner.stop();
 
   if (children.length > 0) {
@@ -96,7 +96,7 @@ async function main() {
       if (!catChoice) continue;
 
       spinner.start("Loading items...");
-      const items = await client.getSubmenu(query, catChoice.goId, 20);
+      const items = await client.getSubmenu(query, catChoice.goId);
       spinner.stop();
 
       if (!items.length) {
