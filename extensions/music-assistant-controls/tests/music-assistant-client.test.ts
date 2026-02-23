@@ -475,9 +475,31 @@ describe("MusicAssistantClient", () => {
     });
 
     describe("formatSelectionMessage", () => {
-      it("should format message correctly", () => {
+      const originalPlatform = process.platform;
+
+      afterEach(() => {
+        Object.defineProperty(process, "platform", {
+          value: originalPlatform,
+          writable: true,
+        });
+      });
+
+      it("should format message with menubar reference on macOS", () => {
+        Object.defineProperty(process, "platform", {
+          value: "darwin",
+          writable: true,
+        });
         const result = client.formatSelectionMessage("Bedroom");
         expect(result).toBe("Bedroom selected, allow 10 seconds for the menubar to update!");
+      });
+
+      it("should format message without menubar reference on Windows", () => {
+        Object.defineProperty(process, "platform", {
+          value: "win32",
+          writable: true,
+        });
+        const result = client.formatSelectionMessage("Kitchen");
+        expect(result).toBe("Kitchen selected!");
       });
     });
   });

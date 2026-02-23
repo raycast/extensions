@@ -1,5 +1,18 @@
 # Music Assistant Controls Changelog
 
+## [Windows Support Added (Beta)] - {PR_MERGE_DATE}
+
+### ✨ New Features
+
+- **Cross-Platform Availability (Beta)** - Extension is now available on both macOS and Windows Raycast. Windows support is currently in beta.
+
+### 📝 Platform Support Notes
+
+- All commands (Toggle, Next Song, Volume Up/Down, Set Volume, Set Active Player) are available on Windows
+- Menu bar command is macOS-only as the feature isn't supported on Windows Raycast
+- Windows support is in beta and may have stability or feature limitations
+
+
 ## [Volume Step Controls] - 2026-02-23
 
 ### ✨ New Features

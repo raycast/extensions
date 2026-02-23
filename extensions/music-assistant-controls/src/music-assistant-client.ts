@@ -321,11 +321,16 @@ export default class MusicAssistantClient {
    * @example
    * ```typescript
    * const message = client.formatSelectionMessage("Office Speakers");
-   * // Returns: "Office Speakers selected, allow 10 seconds for the menubar to update!"
+   * // Returns: "Office Speakers selected, allow 10 seconds for the menubar to update!" (macOS)
+   * // Returns: "Office Speakers selected!" (Windows)
    * ```
    */
   formatSelectionMessage(displayName: string): string {
-    return `${displayName} selected, allow 10 seconds for the menubar to update!`;
+    const isMacOS = process.platform === "darwin";
+    if (isMacOS) {
+      return `${displayName} selected, allow 10 seconds for the menubar to update!`;
+    }
+    return `${displayName} selected!`;
   }
 
   // Volume Control Helper Methods
