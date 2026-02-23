@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Add Direct command for setting slack ststus] - {PR_MERGE_DATE}
+## [Add Direct command for setting slack status] - {PR_MERGE_DATE}
 
 - Merged slack-status Extension into the main Slack extension, enabling users to view, set, update, AI-generate, and clear their status in one place.
 - Added full support for custom workspace emojis (beyond default emojis).
