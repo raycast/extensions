@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Prevent accidental recurring reminders from AI] - 2026-02-23
+## [Prevent accidental recurring reminders from AI] - {PR_MERGE_DATE}
 
 - Add tool confirmations for recurring reminder creation and recurrence updates so users can approve recurrence changes.
 - Tighten AI instructions to explicitly avoid recurrence unless the user asks for it.
