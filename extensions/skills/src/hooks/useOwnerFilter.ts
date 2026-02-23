@@ -7,8 +7,8 @@ export function useOwnerFilter(allSkills: Skill[]) {
 
   const ownerCounts = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const s of allSkills) {
-      const o = getOwner(s);
+    for (const skill of allSkills) {
+      const o = getOwner(skill);
       counts.set(o, (counts.get(o) ?? 0) + 1);
     }
     return new Map([...counts.entries()].sort(([a], [b]) => a.localeCompare(b)));
@@ -21,7 +21,7 @@ export function useOwnerFilter(allSkills: Skill[]) {
     }
   }, [owner, ownerCounts]);
 
-  const skills = owner === "all" ? allSkills : allSkills.filter((s) => getOwner(s) === owner);
+  const skills = owner === "all" ? allSkills : allSkills.filter((skill) => getOwner(skill) === owner);
 
   return { owner, setOwner, ownerCounts, skills };
 }

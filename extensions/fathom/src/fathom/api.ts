@@ -1,7 +1,6 @@
 import type { MeetingFilter, Paginated, Meeting, Summary, Transcript, Team, TeamMember } from "../types/Types";
-import { getFathomClient, getApiKey } from "./client";
+import { getFathomApiKey, markApiKeyValid, markApiKeyInvalid } from "./auth";
 import { isNumber, toStringOrUndefined } from "../utils/typeGuards";
-import { convertSDKMeeting, convertSDKTeam, convertSDKTeamMember } from "../utils/converters";
 import { formatTranscriptToMarkdown } from "../utils/formatting";
 import { parseTimestamp } from "../utils/dates";
 import { logger } from "@chrismessina/raycast-logger";
@@ -30,16 +29,14 @@ function getRetryDelay(attempt: number): number {
   return Math.floor(exponentialDelay + jitter);
 }
 
-// Fetch helpers
+/**
+ * Authenticated GET request using API key.
+ * Handles rate limiting with exponential backoff and retries.
+ */
 async function authGet<T>(path: string, retryCount = 0): Promise<T> {
-  const apiKey = getApiKey();
-  if (!apiKey || apiKey.trim() === "") {
-    throw new Error("API_KEY_MISSING: Fathom API Key is not set. Please configure it in Extension Preferences.");
-  }
+  const apiKey = getFathomApiKey();
 
-  // Log every API call with stack trace to identify caller
-  const caller = new Error().stack?.split("\n")[2]?.trim() || "unknown";
-  logger.log(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) - Called from: ${caller}`);
+  logger.log(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
 
   const res = await fetch(`${BASE}${path}`, {
     method: "GET",
@@ -51,6 +48,7 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
 
   if (!res.ok) {
     if (res.status === 401) {
+      markApiKeyInvalid();
       throw new Error("API_KEY_INVALID: Invalid API Key. Please check your Fathom API Key in Extension Preferences.");
     }
 
@@ -59,20 +57,17 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
       if (retryCount < MAX_RETRIES) {
         const retryDelay = getRetryDelay(retryCount);
         logger.warn(
-          `[API] ⚠️  RATE LIMITED on ${path} - Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})\n` +
-            `      Called from: ${caller}`,
+          `[API] ⚠️  RATE LIMITED on ${path} - Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`,
         );
         await sleep(retryDelay);
         return authGet<T>(path, retryCount + 1);
       }
-      // After max retries, throw a more informative error
       logger.error(`[API] ❌ RATE LIMIT EXCEEDED on ${path} after ${MAX_RETRIES} retries`);
       throw new Error(
         "RATE_LIMIT: Rate limit exceeded after multiple retries. The Fathom API is temporarily unavailable. Please try again in a few moments.",
       );
     }
 
-    // Handle other HTTP errors with user-friendly messages
     if (res.status === 404) {
       throw new Error(`NOT_FOUND: The requested resource was not found.`);
     }
@@ -86,50 +81,16 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
   }
 
   const data = (await res.json()) as unknown;
+  markApiKeyValid();
   logger.log(`[API] ✅ Success ${path}`);
   return data as T;
 }
 
-// API functions
+// ─── Meetings ────────────────────────────────────────────────────────────────
+
 export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Meeting>> {
   logger.log(`[API] 📋 listMeetings called with filter:`, filter);
-  logger.log(`[API] 🔵 Calling Fathom SDK client.listMeetings()...`);
-  try {
-    const client = getFathomClient();
 
-    const result = await client.listMeetings({
-      cursor: filter.cursor,
-      calendarInviteesDomains: filter.calendarInviteesDomains,
-      // Note: calendarInvitees (email-level filter) is not supported by the SDK;
-      // it is handled by the HTTP fallback in listMeetingsHTTP instead.
-      // Include summaries and transcripts for full-text search
-      includeSummary: true,
-      includeTranscript: true,
-      includeActionItems: true,
-    });
-
-    const items: Meeting[] = [];
-    let nextCursor: string | undefined = undefined;
-
-    for await (const response of result) {
-      if (!response) continue;
-      const meetingListResponse = response.result;
-      items.push(...meetingListResponse.items.map(convertSDKMeeting));
-      nextCursor = meetingListResponse.nextCursor || undefined;
-      break; // Only get first page
-    }
-
-    logger.log(`[API] ✅ SDK returned ${items.length} meetings`);
-    return { items, nextCursor };
-  } catch (error) {
-    // Fallback to direct HTTP for network/connection errors
-    logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
-    return await listMeetingsHTTP(filter);
-  }
-}
-
-// HTTP fallback for when SDK validation fails
-async function listMeetingsHTTP(filter: MeetingFilter): Promise<Paginated<Meeting>> {
   const params: string[] = [];
   if (filter.cursor) params.push(`cursor=${encodeURIComponent(filter.cursor)}`);
   if (filter.calendarInvitees?.length) {
@@ -147,10 +108,8 @@ async function listMeetingsHTTP(filter: MeetingFilter): Promise<Paginated<Meetin
     filter.recordedBy.forEach((email) => params.push(`recorded_by[]=${encodeURIComponent(email)}`));
   }
 
-  // Always include action items count in the response
+  // Always include full data for caching
   params.push("include_action_items=true");
-
-  // Include summaries and transcripts for caching
   params.push("include_summary=true");
   params.push("include_transcript=true");
 
@@ -167,6 +126,44 @@ async function listMeetingsHTTP(filter: MeetingFilter): Promise<Paginated<Meetin
   const nextCursor = toStringOrUndefined(r["next_cursor"]) || undefined;
 
   return { items, nextCursor };
+}
+
+/**
+ * Fetch meetings by auto-paginating through pages.
+ * Calls onProgress after each page so callers can update the UI.
+ *
+ * @param filter - Meeting filter options (including cursor to resume from)
+ * @param onProgress - Callback with (fetchedCount, nextCursor) after each page
+ * @param maxPages - Maximum number of pages to fetch (undefined = all pages)
+ * @returns Object with meetings array and nextCursor (if more pages exist)
+ */
+export async function listAllMeetings(
+  filter: MeetingFilter,
+  onProgress?: (fetched: number, nextCursor?: string) => void,
+  maxPages?: number,
+): Promise<{ meetings: Meeting[]; nextCursor?: string }> {
+  const allMeetings: Meeting[] = [];
+  let cursor: string | undefined = filter.cursor;
+  let pageNum = 0;
+
+  do {
+    pageNum++;
+    const page = await listMeetings({ ...filter, cursor });
+    allMeetings.push(...page.items);
+    cursor = page.nextCursor;
+
+    logger.log(`[API] 📄 Page ${pageNum}: got ${page.items.length} meetings (total so far: ${allMeetings.length})`);
+    onProgress?.(allMeetings.length, cursor);
+
+    // Stop if we've hit the page limit
+    if (maxPages && pageNum >= maxPages) {
+      logger.log(`[API] ⏸️  Reached maxPages limit (${maxPages}), stopping with cursor: ${cursor}`);
+      break;
+    }
+  } while (cursor);
+
+  logger.log(`[API] ✅ listAllMeetings complete: ${allMeetings.length} meetings across ${pageNum} pages`);
+  return { meetings: allMeetings, nextCursor: cursor };
 }
 
 // Map raw HTTP response to Meeting type
@@ -198,11 +195,13 @@ function mapMeetingFromHTTP(raw: unknown): Meeting | undefined {
     durationSeconds = Math.floor((end - start) / 1000);
   }
 
-  const calendarInviteesDomainType = toStringOrUndefined(r["calendar_invitees_domains_type"]) as
-    | "all"
-    | "only_internal"
-    | "one_or_more_external"
-    | undefined;
+  const calendarInviteesDomainTypeRaw = toStringOrUndefined(r["calendar_invitees_domains_type"]);
+  const validDomainTypes = ["all", "only_internal", "one_or_more_external"] as const;
+  const calendarInviteesDomainType = validDomainTypes.includes(
+    calendarInviteesDomainTypeRaw as (typeof validDomainTypes)[number],
+  )
+    ? (calendarInviteesDomainTypeRaw as "all" | "only_internal" | "one_or_more_external")
+    : undefined;
   const isExternal = calendarInviteesDomainType === "one_or_more_external";
   const transcriptLanguage = toStringOrUndefined(r["transcript_language"]);
 
@@ -339,6 +338,8 @@ function mapMeetingFromHTTP(raw: unknown): Meeting | undefined {
   };
 }
 
+// ─── Summaries & Transcripts ─────────────────────────────────────────────────
+
 export async function getMeetingSummary(recordingId: string): Promise<Summary> {
   logger.log(`[API] 📝 getMeetingSummary called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/summary`);
@@ -411,61 +412,12 @@ export async function getMeetingTranscript(recordingId: string): Promise<Transcr
   return { text: fullText, segments };
 }
 
+// ─── Teams ───────────────────────────────────────────────────────────────────
+
 export async function listTeams(
   args: { pageSize?: number; cursor?: string; query?: string; maxPages?: number } = {},
 ): Promise<Paginated<Team>> {
   logger.log(`[API] 👥 listTeams called with args:`, args);
-  logger.log(`[API] 🔵 Calling Fathom SDK client.listTeams()...`);
-  try {
-    const client = getFathomClient();
-    const maxPages = args.maxPages ?? 10; // Generous default: ~100-500 teams depending on page size
-
-    const result = await client.listTeams({
-      cursor: args.cursor,
-    });
-
-    const items: Team[] = [];
-    let nextCursor: string | undefined = undefined;
-    let pageCount = 0;
-
-    for await (const response of result) {
-      if (!response?.result) continue;
-
-      pageCount++;
-      if (pageCount > maxPages) {
-        logger.log(`[API] 👥 Reached maxPages limit (${maxPages}), stopping pagination`);
-        break;
-      }
-
-      const teamListResponse = response.result;
-      const pageItems = teamListResponse.items.map(convertSDKTeam);
-      items.push(...pageItems);
-      nextCursor = teamListResponse.nextCursor || undefined;
-
-      if (pageCount > 1) {
-        logger.log(`[API] 👥 Fetched page ${pageCount}: ${pageItems.length} teams (total: ${items.length})`);
-      }
-
-      // Continue fetching all pages automatically unless maxPages limit is reached
-      if (!nextCursor) {
-        logger.log(`[API] 👥 Pagination complete: ${pageCount} pages, ${items.length} total teams`);
-        break;
-      }
-    }
-
-    return { items, nextCursor };
-  } catch (error) {
-    // Fallback to direct HTTP for network/connection errors
-    logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
-    return await listTeamsHTTP(args);
-  }
-}
-
-// HTTP fallback for listTeams
-async function listTeamsHTTP(
-  args: { pageSize?: number; cursor?: string; query?: string } = {},
-): Promise<Paginated<Team>> {
-  logger.log(`[API] 👥 listTeamsHTTP called with args:`, args);
   const params: string[] = [];
   if (args.cursor) params.push(`cursor=${encodeURIComponent(args.cursor)}`);
 
@@ -484,7 +436,6 @@ async function listTeamsHTTP(
   return { items, nextCursor };
 }
 
-// Map raw HTTP response to Team type
 function mapTeamFromHTTP(raw: unknown): Team | undefined {
   if (typeof raw !== "object" || raw === null) return undefined;
   const r = raw as Record<string, unknown>;
@@ -495,56 +446,21 @@ function mapTeamFromHTTP(raw: unknown): Team | undefined {
   const createdAt = toStringOrUndefined(r["created_at"]);
 
   return {
-    id: name, // Use name as ID since API doesn't provide separate ID
+    id: name,
     name,
     createdAt,
     memberCount: undefined,
   };
 }
 
+// ─── Team Members ────────────────────────────────────────────────────────────
+
 export async function listTeamMembers(
   teamId?: string,
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<TeamMember>> {
   logger.log(`[API] 👤 listTeamMembers called for teamId: ${teamId} with args:`, args);
-  logger.log(`[API] 🔵 Calling Fathom SDK client.listTeamMembers()...`);
-  try {
-    const client = getFathomClient();
 
-    // Build request params, only include team if it's defined
-    const requestParams: { cursor?: string; team?: string } = {
-      cursor: args.cursor,
-    };
-    if (teamId) {
-      requestParams.team = teamId;
-    }
-
-    const result = await client.listTeamMembers(requestParams);
-
-    const items: TeamMember[] = [];
-    let nextCursor: string | undefined = undefined;
-
-    for await (const response of result) {
-      if (!response?.result) continue;
-      const teamMemberListResponse = response.result;
-      items.push(...teamMemberListResponse.items.map((tm) => convertSDKTeamMember(tm, teamId)));
-      nextCursor = teamMemberListResponse.nextCursor || undefined;
-      // Continue fetching all pages automatically
-    }
-
-    return { items, nextCursor };
-  } catch (error) {
-    // Fallback to direct HTTP for network/connection errors
-    logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
-    return await listTeamMembersHTTP(teamId, args);
-  }
-}
-
-// HTTP fallback for listTeamMembers
-async function listTeamMembersHTTP(
-  teamId?: string,
-  args: { pageSize?: number; cursor?: string; query?: string } = {},
-): Promise<Paginated<TeamMember>> {
   const params: string[] = [];
   if (args.cursor) params.push(`cursor=${encodeURIComponent(args.cursor)}`);
   if (teamId) params.push(`team=${encodeURIComponent(teamId)}`);
@@ -564,7 +480,6 @@ async function listTeamMembersHTTP(
   return { items, nextCursor };
 }
 
-// Map raw HTTP response to TeamMember type
 function mapTeamMemberFromHTTP(raw: unknown): TeamMember | undefined {
   if (typeof raw !== "object" || raw === null) return undefined;
   const r = raw as Record<string, unknown>;
@@ -579,7 +494,7 @@ function mapTeamMemberFromHTTP(raw: unknown): TeamMember | undefined {
   const team = toStringOrUndefined(r["team"]);
 
   return {
-    id: email, // Use email as ID
+    id: email,
     name,
     email,
     emailDomain,

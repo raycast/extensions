@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Improvements] - 2026-02-19
+
+- Improve handling of abort signal when loading search command
+
 ## [Improved Memory Usage] - 2026-02-16
 
 - Use chunking to significantly reduce working memory

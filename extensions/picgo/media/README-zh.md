@@ -62,11 +62,13 @@
 
 | 设置项 | 描述 | 默认值 |
 | ---------------- | -------------------------------------------------- | ------- |
-| Upload Timeout | 上传图片超时时间（毫秒）。 | 30000 |
-| Upload Proxy | 上传图片时使用的代理地址（例如 `http://127.0.0.1:7890`）。 | - |
-| NPM Path | NPM 可执行文件的所在目录（例如 `/usr/local/bin`）。**注意：路径中不要包含最后的 `/npm`**。 | - |
-| NPM Proxy | 通过 NPM 安装插件时使用的代理地址。 | - |
-| NPM Mirror | 自定义 NPM 镜像源（例如 `https://registry.npmmirror.com`）。 | - |
+| 上传超时时间 | 上传图片超时时间（毫秒）。 | 30000 |
+| 上传后自动复制URL | - | true |
+| 自定义URL格式 | 用 `$url` 代表URL的位置； <br>用`$fileName`代表文件名的位置； <br>用`$extName`代表文件拓展名的位置； <br>例如 `[$fileName]($url)` <br> => `[img.png](https://somepath/img.png)` | `$url` |
+| 上传代理 | 上传图片时使用的代理地址（例如 `http://127.0.0.1:7890`）。 | - |
+| NPM 路径 | NPM 可执行文件的所在目录（例如 `/usr/local/bin`）。**注意：路径中不要包含最后的 `/npm`**。 | - |
+| NPM 代理 | 通过 NPM 安装插件时使用的代理地址。 | - |
+| NPM 镜像 | 自定义 NPM 镜像源（例如 `https://registry.npm.taobao.org`）。 | - |
 
 ## 常见问题
 

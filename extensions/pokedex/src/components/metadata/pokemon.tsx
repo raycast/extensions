@@ -1,12 +1,13 @@
 import { Color, Detail, List } from "@raycast/api";
-import { Pokemon } from "../../types";
+import { Pokemon, PokemonType } from "../../types";
 import TypeMetadata from "./type";
 
 export default function PokemonMetadata(props: {
   type?: string;
   pokemon: Pokemon;
+  formtypes?: PokemonType[];
 }) {
-  const { pokemon } = props;
+  const { pokemon, formtypes } = props;
 
   const Metadata =
     props.type === "detail" ? Detail.Metadata : List.Item.Detail.Metadata;
@@ -14,12 +15,12 @@ export default function PokemonMetadata(props: {
   const meta = [
     <TypeMetadata
       key="types"
-      types={props.pokemon.pokemontypes}
+      types={formtypes || pokemon.pokemontypes}
       type="detail"
     />,
 
     <Detail.Metadata.TagList key="abilities" title="Abilities">
-      {props.pokemon.pokemonabilities.map((ability) => {
+      {pokemon.pokemonabilities.map((ability) => {
         return (
           <Detail.Metadata.TagList.Item
             key={ability.ability.abilitynames[0].name}

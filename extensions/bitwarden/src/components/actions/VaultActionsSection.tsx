@@ -8,19 +8,30 @@ export function VaultActionsSection() {
   const bitwarden = useBitwarden();
 
   const handleLockVault = async () => {
-    const toast = await showToast(Toast.Style.Animated, "Locking Vault...", "Please wait");
-    await bitwarden.lock({ reason: VAULT_LOCK_MESSAGES.MANUAL });
-    await toast.hide();
+    const toast = await showToast({ title: "Locking vault...", message: "Please wait", style: Toast.Style.Animated });
+    try {
+      await bitwarden.lock({ reason: VAULT_LOCK_MESSAGES.MANUAL });
+      toast.style = Toast.Style.Success;
+      toast.title = "Vault Locked";
+      toast.message = undefined;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to lock vault";
+      toast.message = undefined;
+    }
   };
 
   const handleLogoutVault = async () => {
-    const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
+    const toast = await showToast({ title: "Logging out...", message: "Please wait", style: Toast.Style.Animated });
     try {
       await bitwarden.logout();
-      await toast.hide();
+      toast.style = Toast.Style.Success;
+      toast.title = "Logged Out";
+      toast.message = undefined;
     } catch (error) {
-      toast.title = "Failed to logout";
       toast.style = Toast.Style.Failure;
+      toast.title = "Failed to logout";
+      toast.message = undefined;
     }
   };
 

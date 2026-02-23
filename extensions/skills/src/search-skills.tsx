@@ -40,8 +40,8 @@ export default function Command() {
         <List.Dropdown tooltip="Filter by Owner" value={owner} storeValue onChange={setOwner}>
           <List.Dropdown.Item title="All Owners" value="all" />
           <List.Dropdown.Section title="Owners">
-            {[...ownerCounts.entries()].map(([c, count]) => (
-              <List.Dropdown.Item key={c} title={`${c} (${count})`} value={c} />
+            {[...ownerCounts.entries()].map(([owner, count]) => (
+              <List.Dropdown.Item key={owner} title={`${owner} (${count})`} value={owner} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>

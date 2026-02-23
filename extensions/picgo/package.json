@@ -55,6 +55,23 @@
             "default": "30000"
         },
         {
+            "name": "autoCopyAfterUpload",
+            "type": "checkbox",
+            "required": false,
+            "label": "Automatically Copy URLs After Upload",
+            "description": "Automatically copy your image URLs right after finishing uploading",
+            "default": true
+        },
+        {
+            "name": "customFormat",
+            "type": "textfield",
+            "required": false,
+            "title": "Custom URL Format",
+            "description": "Use $url to represent the position of image URL\nUse $fileName to represent the position of file names\nUse $extName to represent the position of image extension name\n\nEx. [$fileName]($url) => [img.png](https://somepath/img.png)",
+            "placeholder": "Ex. [$fileName]($url)",
+            "default": "$url"
+        },
+        {
             "name": "proxy",
             "type": "textfield",
             "required": false,
@@ -70,7 +87,7 @@
             "title": "NPM Path",
             "description": "Custom path to NPM executable (exclude npm itself, e.g. '/usr/local/bin' instead of '/usr/local/bin/npm')",
             "placeholder": "Exclude npm itself, e.g. '/usr/local/bin' instead of '/usr/local/bin/npm'",
-            "default": "/usr/local/bin"
+            "default": ""
         },
         {
             "name": "npmProxy",

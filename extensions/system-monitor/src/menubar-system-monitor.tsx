@@ -9,6 +9,7 @@ import { calculateDiskStorage, getOSInfo } from "./SystemInfo/SystemUtils";
 import { getMemoryUsage } from "./Memory/MemoryUtils";
 import { getNetworkData } from "./Network/NetworkUtils";
 import { getBatteryData } from "./Power/PowerUtils";
+import { getTemperatureData, formatTemperature } from "./Temperature/TemperatureUtils";
 
 import { formatBytes, isObjectEmpty } from "./utils";
 
@@ -109,12 +110,15 @@ export default function Command() {
     };
   });
 
+  const { data: temperatureData, revalidate: revalidateTemperature } = usePromise(getTemperatureData);
+
   useInterval(() => {
     revalidateSystem();
     revalidateCpu();
     revalidateMemory();
     revalidateNetwork();
     revalidateBattery();
+    revalidateTemperature();
   }, 1000);
 
   return (
@@ -173,6 +177,15 @@ export default function Command() {
               : "Loading..."
           }
           icon={Icon.Monitor}
+          onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
+        />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section title="Temperature">
+        <MenuBarExtra.Item
+          title="CPU Temperature"
+          subtitle={temperatureData?.sensorAvailable ? formatTemperature(temperatureData.cpuAverage) : "N/A"}
+          icon={Icon.Temperature}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
         />
       </MenuBarExtra.Section>

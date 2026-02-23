@@ -16,7 +16,7 @@ export default function PokeMoves(props: {
 }) {
   const { search } = props.arguments || {};
 
-  const { data: moves } = usePromise(fetchMoves);
+  const { data: moves, isLoading } = usePromise(fetchMoves);
 
   const [type, setType] = useState<string>("all");
   const [selectedMoveId, setSelectedMoveId] = useState<number>(71);
@@ -27,7 +27,7 @@ export default function PokeMoves(props: {
     }
   }, [props.id]);
 
-  const { data: move, isLoading } = usePromise(fetchMove, [selectedMoveId]);
+  const { data: move } = usePromise(fetchMove, [selectedMoveId]);
 
   const debouncedSelectionChange = useCallback(
     debounce((index: string | null) => {
@@ -71,21 +71,23 @@ export default function PokeMoves(props: {
         return (
           <List.Section key={generation} title={generation}>
             {moves.map((m) => {
+              const moveName = m.movenames[0]?.name || m.name;
+
               return (
                 <List.Item
                   key={m.id}
                   id={m.id.toString()}
-                  title={m.movenames[0]?.name || m.name}
+                  title={moveName}
                   icon={`moves/${m.movedamageclass.name || "status"}.svg`}
-                  keywords={[m.name, m.movenames[0]?.name]}
+                  keywords={[m.name, moveName]}
                   detail={
-                    !isLoading && (
+                    move && (
                       <List.Item.Detail
                         markdown={
                           move && move.moveeffect?.moveeffecteffecttexts.length
                             ? json2md([
                                 {
-                                  h1: m.movenames[0]?.name || m.name,
+                                  h1: moveName,
                                 },
                                 {
                                   p: move.moveeffect.moveeffecteffecttexts[0].short_effect.replace(
@@ -109,7 +111,7 @@ export default function PokeMoves(props: {
                             icon={Icon.List}
                             target={
                               <Descriptions
-                                name={m.name}
+                                name={moveName}
                                 entries={move.moveflavortexts}
                               />
                             }
@@ -117,10 +119,10 @@ export default function PokeMoves(props: {
                           {move.movenames.length > 0 && (
                             <Action.Push
                               title="Learnset"
-                              icon={Icon.List}
+                              icon={Icon.LightBulb}
                               target={
                                 <MoveLearnset
-                                  name={move.movenames[0].name}
+                                  name={moveName}
                                   moves={move.pokemonmoves}
                                 />
                               }

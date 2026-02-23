@@ -1,5 +1,10 @@
 # Raycast Store Updates Changelog
 
+## [Improve robustness of update handling] - 2026-02-18
+
+- Add fallback to extract extension slugs from PR file paths when title parsing fails (e.g., PRs with titles starting with "Add", "Fix", etc.)
+- Fix date-aware filtering: PRs merged after the feed's publish date are now correctly shown as updates instead of being filtered out
+
 ## [Add refresh action, improve platform icon colors, and enhance CHANGELOG navigation] - 2026-02-16
 
 - Add CHANGELOG up/down reading navigation

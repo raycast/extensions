@@ -142,15 +142,18 @@ export async function downloadRemoteToCache(
   url: string,
   cachePath: string,
   onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
 ): Promise<number> {
   // Check if cache is already up to date
   let cacheInfo: fs.Stats | undefined;
   let lastModified = 0;
   try {
     cacheInfo = await stat(cachePath);
-    const response = await fetch(url, { method: "HEAD" });
+    const response = await fetch(url, { method: "HEAD", signal });
     lastModified = Date.parse(response.headers.get("last-modified") ?? "");
-  } catch {
+  } catch (err) {
+    // Re-throw abort errors, ignore others (cache miss is normal on first run)
+    if (err instanceof Error && err.name === "AbortError") throw err;
     cacheLogger.log("Cache miss for download", { path: cachePath });
   }
 
@@ -170,6 +173,7 @@ export async function downloadRemoteToCache(
     headers: {
       "Accept-Encoding": "identity",
     },
+    signal,
   });
 
   if (!response.ok || !response.body) {
@@ -289,7 +293,11 @@ function getChunkPath(config: ChunkedCacheConfig, chunkNumber: number): string {
 /**
  * Check if chunked cache is valid (exists and not stale).
  */
-export async function isChunkedCacheValid(config: ChunkedCacheConfig, remoteUrl: string): Promise<boolean> {
+export async function isChunkedCacheValid(
+  config: ChunkedCacheConfig,
+  remoteUrl: string,
+  signal?: AbortSignal,
+): Promise<boolean> {
   try {
     const metaContent = await readFile(config.metaPath, "utf-8");
     const meta = JSON.parse(metaContent) as ChunkedCacheMeta;
@@ -305,7 +313,7 @@ export async function isChunkedCacheValid(config: ChunkedCacheConfig, remoteUrl:
     }
 
     // Check if remote has been updated
-    const response = await fetch(remoteUrl, { method: "HEAD" });
+    const response = await fetch(remoteUrl, { method: "HEAD", signal });
     const lastModified = Date.parse(response.headers.get("last-modified") ?? "");
 
     if (lastModified > meta.lastModified) {
@@ -323,7 +331,9 @@ export async function isChunkedCacheValid(config: ChunkedCacheConfig, remoteUrl:
       itemCount: meta.totalItems,
     });
     return true;
-  } catch {
+  } catch (err) {
+    // Re-throw abort errors, ignore others (missing cache is normal on first run)
+    if (err instanceof Error && err.name === "AbortError") throw err;
     cacheLogger.log("Chunked cache not found or invalid", { type: config.type });
     return false;
   }
@@ -342,7 +352,15 @@ export async function buildChunkedCache<T>(
   config: ChunkedCacheConfig,
   extractIndex: IndexExtractor<T>,
   onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
 ): Promise<void> {
+  // Check for abort before starting
+  if (signal?.aborted) {
+    const error = new Error("Aborted");
+    error.name = "AbortError";
+    throw error;
+  }
+
   const buildStartTime = Date.now();
   cacheLogger.log("Building chunked cache", { type: config.type, sourcePath });
 
@@ -353,15 +371,17 @@ export async function buildChunkedCache<T>(
   // Get last modified time from source file (will use this for cache validity)
   let lastModified = Date.now();
   try {
-    const response = await fetch(sourceUrl, { method: "HEAD" });
+    const response = await fetch(sourceUrl, { method: "HEAD", signal });
     lastModified = Date.parse(response.headers.get("last-modified") ?? "") || lastModified;
-  } catch {
-    // Use current time if we can't get last modified
+  } catch (err) {
+    // Re-throw abort errors, ignore others (use current time)
+    if (err instanceof Error && err.name === "AbortError") throw err;
   }
 
   const keysRe = new RegExp(`\\b(${valid_keys.join("|")})\\b`);
 
   return new Promise<void>((resolve, reject) => {
+    let aborted = false;
     const index: IndexEntry[] = [];
     let currentChunk: T[] = [];
     let chunkNumber = 0;
@@ -372,6 +392,7 @@ export async function buildChunkedCache<T>(
     const PROGRESS_THROTTLE_MS = 100;
 
     const reportProgress = (complete: boolean) => {
+      if (aborted) return;
       onProgress?.({
         url: sourceUrl,
         bytesDownloaded: 0,
@@ -388,6 +409,13 @@ export async function buildChunkedCache<T>(
     const writePromises: Promise<void>[] = [];
 
     const pipeline = chain([fs.createReadStream(sourcePath), parser(), filter({ filter: keysRe }), streamArray()]);
+
+    // Abort handler: destroy the pipeline when signal fires
+    const onAbort = () => {
+      aborted = true;
+      pipeline.destroy();
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
 
     pipeline.on("data", (data) => {
       if (data && typeof data === "object" && "value" in data) {
@@ -428,6 +456,7 @@ export async function buildChunkedCache<T>(
     });
 
     pipeline.on("end", async () => {
+      signal?.removeEventListener("abort", onAbort);
       try {
         // Wait for any pending chunk writes
         await Promise.all(writePromises);
@@ -471,10 +500,7 @@ export async function buildChunkedCache<T>(
     });
 
     pipeline.on("error", async (err) => {
-      cacheLogger.error("Failed to build chunked cache", {
-        type: config.type,
-        error: err.message,
-      });
+      signal?.removeEventListener("abort", onAbort);
 
       // Clean up partial cache
       try {
@@ -482,6 +508,20 @@ export async function buildChunkedCache<T>(
       } catch {
         // Ignore cleanup errors
       }
+
+      // If aborted, reject with AbortError instead of ParseError
+      if (aborted) {
+        cacheLogger.log("Chunked cache build aborted", { type: config.type });
+        const abortError = new Error("Aborted");
+        abortError.name = "AbortError";
+        reject(abortError);
+        return;
+      }
+
+      cacheLogger.error("Failed to build chunked cache", {
+        type: config.type,
+        error: err.message,
+      });
 
       reject(
         new ParseError("Failed to build chunked cache", {

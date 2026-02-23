@@ -105,6 +105,60 @@ describe("MusicAssistantClient", () => {
     });
   });
 
+  describe("volumeUp", () => {
+    it("should call playerCommandVolumeUp API method", async () => {
+      const playerId = "test-player-vol";
+      const mockApi = {
+        playerCommandVolumeUp: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.volumeUp(playerId);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeUp).toHaveBeenCalledWith(playerId);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-vol";
+      const error = new Error("Volume up failed");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.volumeUp(playerId)).rejects.toThrow("Volume up failed");
+    });
+  });
+
+  describe("volumeDown", () => {
+    it("should call playerCommandVolumeDown API method", async () => {
+      const playerId = "test-player-vol";
+      const mockApi = {
+        playerCommandVolumeDown: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.volumeDown(playerId);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeDown).toHaveBeenCalledWith(playerId);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-vol";
+      const error = new Error("Volume down failed");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.volumeDown(playerId)).rejects.toThrow("Volume down failed");
+    });
+  });
+
   describe("getPlayer", () => {
     it("should call getPlayer with correct playerId", async () => {
       const playerId = "test-player-123";

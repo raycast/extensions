@@ -5,6 +5,9 @@
   "description": "Claude Code workflows at your fingertips - Quick prompts, session management, and agentic workflows",
   "icon": "command-icon.png",
   "author": "qazi0",
+  "contributors": [
+    "roderickjdunn"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -36,6 +39,21 @@
         "history",
         "resume",
         "conversations"
+      ]
+    },
+    {
+      "name": "deep-search-sessions",
+      "title": "Deep Search Sessions",
+      "description": "Search through full session content across all Claude Code conversations",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "search",
+        "find",
+        "content",
+        "deep",
+        "sessions",
+        "grep"
       ]
     },
     {

@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import PokeProfile from "./components/profile";
 import TypeDropdown from "./components/type_dropdown";
 import pokedexData from "./statics/pokedex.json";
-import { getContentImg, localeName, nationalDexNumber } from "./utils";
+import { getPokemonImage, localeName, nationalDexNumber } from "./utils";
 
 const { language } = getPreferenceValues();
 
@@ -92,7 +92,7 @@ export default function NationalPokedex(props: {
                 return (
                   <Grid.Item
                     key={pokemon.id}
-                    content={getContentImg(pokemon.id)}
+                    content={getPokemonImage(pokemon.id)}
                     title={localeName(pokemon, language)}
                     subtitle={`${nationalDexNumber(pokemon.id)} ${statsString}`}
                     keywords={[pokemon.id.toString(), pokemon.name]}

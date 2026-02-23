@@ -91,8 +91,8 @@ export function VaultProvider(props: VaultProviderProps) {
     const { isInitial = false } = props ?? {};
 
     const toast = await showToast({
-      title: "Syncing Vault...",
-      message: isInitial ? "Background Task" : undefined,
+      title: "Syncing vault...",
+      message: isInitial ? "Background task" : undefined,
       style: Toast.Style.Animated,
     });
     try {

@@ -284,7 +284,9 @@ function ProjectItem({
                 await popToRoot();
               }}
             />
-            <Action.ShowInFinder path={project.path} />
+            {existsSync(project.path) && (
+              <Action.ShowInFinder path={project.path} />
+            )}
             <Action
               title="Open in Terminal"
               icon={Icon.Terminal}
