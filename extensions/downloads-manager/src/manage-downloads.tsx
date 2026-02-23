@@ -21,7 +21,8 @@ function FilePreviewDetail({ download, isSelected }: { download: Download; isSel
   const isDarwin = process.platform === "darwin";
   const isHiddenFile = download.file.startsWith(".");
   const isText = !download.isDirectory && isTextFile(download.file);
-  const shouldShowImagePreview = isDarwin && showPreview && !download.isDirectory && isSelected && !isHiddenFile && !isText;
+  const shouldShowImagePreview =
+    isDarwin && showPreview && !download.isDirectory && isSelected && !isHiddenFile && !isText;
   const shouldShowTextPreview = showPreview && !download.isDirectory && isSelected && !isHiddenFile && isText;
 
   const { data, isLoading } = usePromise(
@@ -40,11 +41,7 @@ function FilePreviewDetail({ download, isSelected }: { download: Download; isSel
   if (shouldShowTextPreview) {
     markdown = getTextFilePreview(download.path);
   } else if (shouldShowImagePreview) {
-    markdown = isLoading
-      ? "*Loading preview...*"
-      : data
-        ? `![Preview](${data})`
-        : "*No preview available*";
+    markdown = isLoading ? "*Loading preview...*" : data ? `![Preview](${data})` : "*No preview available*";
   }
 
   return (
@@ -137,7 +134,9 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
 
   function handleTrash(paths: PathLike | PathLike[]) {
     setDownloads((downloads: Download[]) =>
-      downloads.filter((download: Download) => (Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path)),
+      downloads.filter((download: Download) =>
+        Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path,
+      ),
     );
   }
 
