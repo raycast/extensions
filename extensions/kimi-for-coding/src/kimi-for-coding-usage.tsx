@@ -3,7 +3,7 @@ import { useFetch } from "@raycast/utils";
 
 interface UsageDetail {
   limit: string;
-  used: string;
+  used?: string;
   remaining: string;
   resetTime: string;
 }
@@ -43,7 +43,18 @@ function formatMembership(level: string): string {
 }
 
 function formatTimeUnit(timeUnit: string): string {
-  return timeUnit.replace("TIME_UNIT_", "").toLowerCase();
+  switch (timeUnit) {
+    case "TIME_UNIT_SECOND":
+      return "seconds";
+    case "TIME_UNIT_MINUTE":
+      return "minutes";
+    case "TIME_UNIT_HOUR":
+      return "hours";
+    case "TIME_UNIT_DAY":
+      return "days";
+    default:
+      return timeUnit.replace("TIME_UNIT_", "").toLowerCase();
+  }
 }
 
 function getUsageColor(used: number, limit: number): Color {
@@ -54,7 +65,7 @@ function getUsageColor(used: number, limit: number): Color {
 }
 
 export default function Command() {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
 
   const { isLoading, data, error } = useFetch<UsageResponse>("https://api.kimi.com/coding/v1/usages", {
     headers: {
@@ -93,18 +104,18 @@ export default function Command() {
       )}
 
       {usage && (
-        <List.Section title="Overall Usage">
+        <List.Section title="Weekly Usage">
           <List.Item
             icon={Icon.BarChart}
             title="Usage"
             accessories={[
               {
                 tag: {
-                  value: `${usage.used}%`,
-                  color: getUsageColor(parseInt(usage.used), parseInt(usage.limit)),
+                  value: `${usage.used ?? "0"}%`,
+                  color: getUsageColor(parseInt(usage.used ?? "0"), parseInt(usage.limit)),
                 },
               },
-              { text: `${usage.remaining}% remaining` },
+              { text: `${usage.remaining ?? "0"}% remaining` },
             ]}
           />
           <List.Item icon={Icon.Clock} title="Resets At" accessories={[{ text: formatResetTime(usage.resetTime) }]} />
@@ -118,15 +129,15 @@ export default function Command() {
         >
           <List.Item
             icon={Icon.BarChart}
-            title="Usage"
+            title="Rate Limit Details"
             accessories={[
               {
                 tag: {
-                  value: `${limit.detail.used}%`,
-                  color: getUsageColor(parseInt(limit.detail.used), parseInt(limit.detail.limit)),
+                  value: `${limit.detail.used ?? "0"}%`,
+                  color: getUsageColor(parseInt(limit.detail.used ?? "0"), parseInt(limit.detail.limit)),
                 },
               },
-              { text: `${limit.detail.remaining}% remaining` },
+              { text: `${limit.detail.remaining ?? "0"}% remaining` },
             ]}
           />
           <List.Item
