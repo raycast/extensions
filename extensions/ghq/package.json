@@ -5,6 +5,9 @@
   "description": "Raycast Extension for ghq.",
   "icon": "ghq-raycast.png",
   "author": "konojunya",
+  "contributors": [
+    "alinnow"
+  ],
   "categories": [
     "Developer Tools"
   ],
