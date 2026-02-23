@@ -27,6 +27,7 @@ export interface SetBrightnessResult {
  * macOS: simulates brightness key press (offset sign determines direction).
  * Windows: uses Twinkle Tray --Offset for all monitors (auto-installs if needed).
  */
+export async function adjustBrightness(offset: number): Promise<boolean> {
   if (isWindows) {
     try {
       const exe = await ensureTwinkleTrayReady();
@@ -42,7 +43,6 @@ export interface SetBrightnessResult {
       return false;
     }
   }
-  }
 
   await runAppleScript(makeScript(offset > 0 ? BrightnessAction.Up : BrightnessAction.Down));
   return true;
@@ -53,6 +53,7 @@ export interface SetBrightnessResult {
  * macOS: uses Lunar CLI with cursor display detection.
  * Windows: uses Twinkle Tray --Set for all monitors (auto-installs if needed).
  */
+export async function setBrightness(level: number): Promise<SetBrightnessResult | null> {
   if (isWindows) {
     try {
       const exe = await ensureTwinkleTrayReady();

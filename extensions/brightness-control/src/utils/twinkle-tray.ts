@@ -49,6 +49,7 @@ async function isTwinkleTrayRunning(): Promise<boolean> {
 /**
  * Start Twinkle Tray in the background and poll until it's running.
  */
+async function startTwinkleTray(exe: string): Promise<void> {
   await execFileAsync(exe).catch(() => {});
 
   const maxAttempts = 15;
