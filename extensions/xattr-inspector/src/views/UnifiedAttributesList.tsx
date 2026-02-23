@@ -26,7 +26,7 @@ export default function UnifiedAttributesList({ files, isLoading, onRefresh }: U
       isShowingDetail
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
-      navigationTitle={selected ? selected.file.path : "Xattrs Inspector"}
+      navigationTitle={selected ? selected.file.displayName : undefined}
       searchBarPlaceholder="Filter Attributes..."
     >
       {allAttrs.length === 0 && !isLoading ? (

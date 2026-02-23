@@ -1,6 +1,6 @@
 # File Attributes Inspector Changelog
 
-## [Initial Version] - 2026-02-22
+## [Initial Version] - {PR_MERGE_DATE}
 
 - View extended attributes of selected Finder files
 - Rich formatting for dates, URLs, tags, quarantine data, and plists
