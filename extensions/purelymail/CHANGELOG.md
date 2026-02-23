@@ -1,6 +1,6 @@
 # Purelymail Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-02-23
 
 - Extension now works on Windows
 - Fix infinite loading in some Forms
