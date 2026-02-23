@@ -1,6 +1,7 @@
 import { Action, ActionPanel, AI, clearSearchBar, Icon, List, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { SlackStatusForm } from "./status-form.component";
+import { showToastWithPromise } from "../../utils/toast.util";
 
 type AIAnswerType = Pick<SlackStatusForm, "statusText" | "emoji" | "expiration">;
 
@@ -12,11 +13,9 @@ interface SetStatusWithAIActionProps {
 function SetStatusWithAIAction({ inputText, onSubmit }: SetStatusWithAIActionProps) {
   const { pop } = useNavigation();
 
-  return (
-    <Action
-      title="Set Status"
-      icon={Icon.Stars}
-      onAction={async () => {
+  const onAction = useCallback(async () => {
+    await showToastWithPromise(
+      async () => {
         const answer = await AI.ask(
           `You help a Slack user set their status.
 
@@ -58,9 +57,16 @@ function SetStatusWithAIAction({ inputText, onSubmit }: SetStatusWithAIActionPro
         await clearSearchBar();
         onSubmit(response);
         pop();
-      }}
-    />
-  );
+      },
+      {
+        success: "The status value has been created. Please wait a moment.",
+        error: "An error occurred while the AI was generating the status value.",
+        loading: "AI is generating status values...",
+      },
+    );
+  }, [onSubmit]);
+
+  return <Action title="Set Status" icon={Icon.Stars} onAction={onAction} />;
 }
 
 function SetAiStatusForm({ onSubmit }: Pick<SetStatusWithAIActionProps, "onSubmit">) {
