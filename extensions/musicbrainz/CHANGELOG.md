@@ -1,6 +1,6 @@
 # MusicBrainz Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-23
 
 - Search for artists, releases, recordings, release groups, labels, and works
 - View detailed entity information with metadata and relationships
