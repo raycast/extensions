@@ -27,12 +27,21 @@ export interface SetBrightnessResult {
  * macOS: simulates brightness key press (offset sign determines direction).
  * Windows: uses Twinkle Tray --Offset for all monitors (auto-installs if needed).
  */
-export async function adjustBrightness(offset: number): Promise<boolean> {
   if (isWindows) {
-    const exe = await ensureTwinkleTrayReady();
-    if (!exe) return false;
-    await ttAdjustBrightness(exe, offset);
-    return true;
+    try {
+      const exe = await ensureTwinkleTrayReady();
+      if (!exe) return false;
+      await ttAdjustBrightness(exe, offset);
+      return true;
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Adjust Brightness",
+        message: error instanceof Error ? error.message : "An error occurred",
+      });
+      return false;
+    }
+  }
   }
 
   await runAppleScript(makeScript(offset > 0 ? BrightnessAction.Up : BrightnessAction.Down));
@@ -44,12 +53,20 @@ export async function adjustBrightness(offset: number): Promise<boolean> {
  * macOS: uses Lunar CLI with cursor display detection.
  * Windows: uses Twinkle Tray --Set for all monitors (auto-installs if needed).
  */
-export async function setBrightness(level: number): Promise<SetBrightnessResult | null> {
   if (isWindows) {
-    const exe = await ensureTwinkleTrayReady();
-    if (!exe) return null;
-    await ttSetBrightness(exe, level);
-    return {};
+    try {
+      const exe = await ensureTwinkleTrayReady();
+      if (!exe) return null;
+      await ttSetBrightness(exe, level);
+      return {};
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Set Brightness",
+        message: error instanceof Error ? error.message : "An error occurred",
+      });
+      return null;
+    }
   }
 
   if (!(await ensureLunarReady())) {
