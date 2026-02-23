@@ -1,6 +1,6 @@
 # Git Worktree Changelog
 
-## [Add setup commands and refactor command/shell env execution] - {PR_MERGE_DATE}
+## [Add setup commands and refactor command/shell env execution] - 2026-02-23
 
 - Add setup commands configuration for worktrees
 - Refactor execute command and shell env
