@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-02-23
 
 - Reduced Menu Bar background refresh interval from 10 seconds to 3 minutes to prevent API rate limit exhaustion (240 calls/hour limit)
 - Changed default cache TTL from 0 to 30 seconds to reduce redundant API calls for project/client/tag data
