@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser";
-import { AntigravityError, AntigravityUsage } from "./types";
+import type { AntigravityError, AntigravityUsage } from "./types";
 import {
   AntigravityProbeError,
-  AntigravityProbeResult,
-  AntigravityProbeSource,
   fetchAntigravityRawStatus,
 } from "./probe";
+import type { AntigravityProbeResult, AntigravityProbeSource } from "./probe";
 
 type ProbeFetcher = (preferredSource?: AntigravityProbeSource) => Promise<AntigravityProbeResult>;
 
@@ -102,13 +101,19 @@ export function mapAntigravityError(error: unknown): AntigravityError {
   };
 }
 
-export function useAntigravityUsage() {
+export function useAntigravityUsage(enabled = true) {
   const [usage, setUsage] = useState<AntigravityUsage | null>(null);
   const [error, setError] = useState<AntigravityError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(enabled);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!enabled);
 
   const fetchData = useCallback(async () => {
+    if (!enabled) {
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -118,7 +123,7 @@ export function useAntigravityUsage() {
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     if (!hasInitialFetch) {
@@ -127,8 +132,12 @@ export function useAntigravityUsage() {
   }, [hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
-  }, [fetchData]);
+  }, [enabled, fetchData]);
 
   return {
     isLoading,

@@ -15,14 +15,14 @@ import { useAntigravityUsage } from "./antigravity/fetcher";
 import { renderAntigravityDetail, getAntigravityAccessory, formatAntigravityUsageText } from "./antigravity/renderer";
 import { useZaiUsage } from "./zai/fetcher";
 import { renderZaiDetail, getZaiAccessory, formatZaiUsageText } from "./zai/renderer";
-import { AgentDefinition, Accessory, UsageState } from "./agents/types";
-import { AmpError, AmpUsage } from "./amp/types";
-import { CodexError, CodexUsage } from "./codex/types";
-import { DroidError, DroidUsage } from "./droid/types";
-import { GeminiError, GeminiUsage } from "./gemini/types";
-import { KimiError, KimiUsage } from "./kimi/types";
-import { AntigravityError, AntigravityUsage } from "./antigravity/types";
-import { ZaiError, ZaiUsage } from "./zai/types";
+import type { AgentDefinition, Accessory, UsageState } from "./agents/types";
+import type { AmpError, AmpUsage } from "./amp/types";
+import type { CodexError, CodexUsage } from "./codex/types";
+import type { DroidError, DroidUsage } from "./droid/types";
+import type { GeminiError, GeminiUsage } from "./gemini/types";
+import type { KimiError, KimiUsage } from "./kimi/types";
+import type { AntigravityError, AntigravityUsage } from "./antigravity/types";
+import type { ZaiError, ZaiUsage } from "./zai/types";
 
 const AGENT_ORDER_KEY = "agent-order";
 
@@ -204,13 +204,13 @@ function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
-  const ampState: UsageState<AmpUsage, AmpError> = useAmpUsage();
-  const codexState: UsageState<CodexUsage, CodexError> = useCodexUsage();
-  const droidState: UsageState<DroidUsage, DroidError> = useDroidUsage();
-  const geminiState: UsageState<GeminiUsage, GeminiError> = useGeminiUsage();
-  const kimiState: UsageState<KimiUsage, KimiError> = useKimiUsage();
-  const antigravityState: UsageState<AntigravityUsage, AntigravityError> = useAntigravityUsage();
-  const zaiState: UsageState<ZaiUsage, ZaiError> = useZaiUsage();
+  const ampState: UsageState<AmpUsage, AmpError> = useAmpUsage(prefs.showAmp);
+  const codexState: UsageState<CodexUsage, CodexError> = useCodexUsage(prefs.showCodex);
+  const droidState: UsageState<DroidUsage, DroidError> = useDroidUsage(prefs.showDroid);
+  const geminiState: UsageState<GeminiUsage, GeminiError> = useGeminiUsage(prefs.showGemini);
+  const kimiState: UsageState<KimiUsage, KimiError> = useKimiUsage(prefs.showKimi);
+  const antigravityState: UsageState<AntigravityUsage, AntigravityError> = useAntigravityUsage(prefs.showAntigravity);
+  const zaiState: UsageState<ZaiUsage, ZaiError> = useZaiUsage(prefs.showZai);
 
   const [agentOrder, setAgentOrder] = useState<string[]>(AGENTS.map((a) => a.id));
 
@@ -250,13 +250,13 @@ export default function Command() {
   const visibleAgents = sortedAgents.filter((agent) => visibilityMap[agent.id]);
 
   const isLoading =
-    ampState.isLoading ||
-    codexState.isLoading ||
-    droidState.isLoading ||
-    geminiState.isLoading ||
-    kimiState.isLoading ||
-    antigravityState.isLoading ||
-    zaiState.isLoading;
+    (prefs.showAmp && ampState.isLoading) ||
+    (prefs.showCodex && codexState.isLoading) ||
+    (prefs.showDroid && droidState.isLoading) ||
+    (prefs.showGemini && geminiState.isLoading) ||
+    (prefs.showKimi && kimiState.isLoading) ||
+    (prefs.showAntigravity && antigravityState.isLoading) ||
+    (prefs.showZai && zaiState.isLoading);
 
   const hasPromptedGeminiReauth = useRef(false);
 
@@ -284,7 +284,7 @@ export default function Command() {
   useEffect(() => {
     const errorType = geminiState.error?.type;
 
-    if (shouldPromptGeminiReauth(errorType, hasPromptedGeminiReauth.current)) {
+    if (prefs.showGemini && shouldPromptGeminiReauth(errorType, hasPromptedGeminiReauth.current)) {
       hasPromptedGeminiReauth.current = true;
       void showToast({
         title: "Gemini Token Expired",
@@ -303,18 +303,20 @@ export default function Command() {
     if (errorType !== "unauthorized") {
       hasPromptedGeminiReauth.current = false;
     }
-  }, [geminiState.error?.type, handleGeminiReauth]);
+  }, [prefs.showGemini, geminiState.error?.type, handleGeminiReauth]);
 
   const handleRefresh = async () => {
-    await Promise.all([
-      ampState.revalidate(),
-      codexState.revalidate(),
-      droidState.revalidate(),
-      geminiState.revalidate(),
-      kimiState.revalidate(),
-      antigravityState.revalidate(),
-      zaiState.revalidate(),
-    ]);
+    const tasks: Array<Promise<void>> = [];
+
+    if (prefs.showAmp) tasks.push(ampState.revalidate());
+    if (prefs.showCodex) tasks.push(codexState.revalidate());
+    if (prefs.showDroid) tasks.push(droidState.revalidate());
+    if (prefs.showGemini) tasks.push(geminiState.revalidate());
+    if (prefs.showKimi) tasks.push(kimiState.revalidate());
+    if (prefs.showAntigravity) tasks.push(antigravityState.revalidate());
+    if (prefs.showZai) tasks.push(zaiState.revalidate());
+
+    await Promise.all(tasks);
     await showToast({
       title: "Refreshed",
       style: Toast.Style.Success,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getPreferenceValues } from "@raycast/api";
-import { ZaiUsage, ZaiError, ZaiLimitEntry, ZaiUsageDetail } from "./types";
+import type { ZaiUsage, ZaiError, ZaiLimitEntry, ZaiUsageDetail } from "./types";
 
 const ZAI_USAGE_API = "https://api.z.ai/api/monitor/usage/quota/limit";
 const REQUEST_TIMEOUT = 10000;
@@ -223,20 +223,34 @@ export function formatResetTime(isoTime: string): string {
   }
 }
 
-export function useZaiUsage() {
+export function useZaiUsage(enabled = true) {
   const [token, setToken] = useState<string>("");
   const [usage, setUsage] = useState<ZaiUsage | null>(null);
   const [error, setError] = useState<ZaiError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(enabled);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!enabled);
 
   useEffect(() => {
+    if (!enabled) {
+      setToken("");
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     const preferences = getPreferenceValues<Preferences>();
     const savedToken = preferences.zaiApiToken?.trim() || "";
     setToken(savedToken);
-  }, []);
+    setHasInitialFetch(false);
+  }, [enabled]);
 
   const fetchData = useCallback(async () => {
+    if (!enabled) {
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     if (!token) {
       setIsLoading(false);
       setHasInitialFetch(true);
@@ -252,7 +266,7 @@ export function useZaiUsage() {
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, [token]);
+  }, [enabled, token]);
 
   useEffect(() => {
     if (!hasInitialFetch && token) {
@@ -261,11 +275,15 @@ export function useZaiUsage() {
   }, [token, hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
-  }, [fetchData]);
+  }, [enabled, fetchData]);
 
   const finalError: ZaiError | null =
-    !token && hasInitialFetch
+    enabled && !token && hasInitialFetch
       ? {
           type: "not_configured",
           message: "z.ai token not configured. Please add it in extension settings (Cmd+,).",

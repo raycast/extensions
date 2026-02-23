@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { GeminiUsage, GeminiError, GeminiModelQuota } from "./types";
+import type { GeminiUsage, GeminiError, GeminiModelQuota } from "./types";
 import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth";
-import * as fs from "fs";
-import * as path from "path";
-import * as os from "os";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
 
 const SETTINGS_PATH = path.join(os.homedir(), ".gemini", "settings.json");
 const OAUTH_CREDS_PATH = path.join(os.homedir(), ".gemini", "oauth_creds.json");
@@ -217,7 +217,7 @@ async function fetchQuota(
     // Extract version number from model ID (e.g., "gemini-2.5-pro" -> 2.5, "gemini-3-flash-preview" -> 3)
     function getModelVersion(modelId: string): number {
       const match = modelId.match(/gemini-(\d+(?:\.\d+)?)/);
-      return match ? parseFloat(match[1]) : 0;
+      return match ? Number.parseFloat(match[1]) : 0;
     }
 
     // Find highest version Pro and Flash models
@@ -343,13 +343,19 @@ async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: G
   }
 }
 
-export function useGeminiUsage() {
+export function useGeminiUsage(enabled = true) {
   const [usage, setUsage] = useState<GeminiUsage | null>(null);
   const [error, setError] = useState<GeminiError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(enabled);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!enabled);
 
   const fetchData = useCallback(async () => {
+    if (!enabled) {
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -359,7 +365,7 @@ export function useGeminiUsage() {
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     if (!hasInitialFetch) {
@@ -368,8 +374,12 @@ export function useGeminiUsage() {
   }, [hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
-  }, [fetchData]);
+  }, [enabled, fetchData]);
 
   return {
     isLoading,

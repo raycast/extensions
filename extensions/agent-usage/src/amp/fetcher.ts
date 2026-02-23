@@ -1,11 +1,11 @@
 import { useExec } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
-import { execFile } from "child_process";
-import { promisify } from "util";
-import * as os from "os";
-import * as path from "path";
-import * as fs from "fs";
-import { AmpUsage, AmpError } from "./types";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import * as os from "node:os";
+import * as path from "node:path";
+import * as fs from "node:fs";
+import type { AmpUsage, AmpError } from "./types";
 import { parseAmpUsage } from "./parser";
 
 const execFileAsync = promisify(execFile);
@@ -44,7 +44,7 @@ async function detectAmpPath(): Promise<string> {
   return "amp";
 }
 
-export function useAmpUsage() {
+export function useAmpUsage(enabled = true) {
   const [ampPath, setAmpPath] = useState<string>("amp");
   const [pathDetected, setPathDetected] = useState(false);
   const [shouldExecute, setShouldExecute] = useState(false);
@@ -52,6 +52,13 @@ export function useAmpUsage() {
 
   // 检测 amp 路径
   useEffect(() => {
+    // 如果禁用了，不执行检测
+    if (!enabled) {
+      setPathDetected(true);
+      setHasInitialFetch(true);
+      return;
+    }
+
     let cancelled = false;
 
     void (async () => {
@@ -67,7 +74,7 @@ export function useAmpUsage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled]);
 
   const {
     isLoading: execLoading,
@@ -76,7 +83,7 @@ export function useAmpUsage() {
     revalidate: execRevalidate,
   } = useExec(ampPath, ["usage"], {
     timeout: 10000,
-    execute: shouldExecute,
+    execute: enabled && shouldExecute,
   });
 
   // 首次加载完成后，标记已完成
@@ -106,10 +113,14 @@ export function useAmpUsage() {
 
   // 重新验证（手动刷新）
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     setShouldExecute(true);
     await execRevalidate();
     setShouldExecute(false);
-  }, [execRevalidate]);
+  }, [enabled, execRevalidate]);
 
   return {
     isLoading,

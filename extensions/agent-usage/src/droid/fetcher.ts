@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getPreferenceValues } from "@raycast/api";
-import { DroidUsage, DroidUsageTier, DroidError } from "./types";
+import type { DroidUsage, DroidUsageTier, DroidError } from "./types";
 
 const DROID_USAGE_API = "https://api.factory.ai/api/organization/subscription/schedule";
 const REQUEST_TIMEOUT = 10000;
@@ -146,22 +146,36 @@ function parseDroidApiResponse(data: unknown): { usage: DroidUsage | null; error
   }
 }
 
-export function useDroidUsage() {
+export function useDroidUsage(enabled = true) {
   const [token, setToken] = useState<string>("");
   const [usage, setUsage] = useState<DroidUsage | null>(null);
   const [error, setError] = useState<DroidError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(enabled);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!enabled);
 
   // 从偏好设置读取 token
   useEffect(() => {
+    if (!enabled) {
+      setToken("");
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     const preferences = getPreferenceValues<Preferences>();
     const savedToken = preferences.droidAuthToken?.trim() || "";
     setToken(savedToken);
-  }, []);
+    setHasInitialFetch(false);
+  }, [enabled]);
 
   // 获取数据的函数
   const fetchData = useCallback(async () => {
+    if (!enabled) {
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     if (!token) {
       setIsLoading(false);
       setHasInitialFetch(true);
@@ -177,7 +191,7 @@ export function useDroidUsage() {
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, [token]);
+  }, [enabled, token]);
 
   // 首次加载时获取数据
   useEffect(() => {
@@ -188,12 +202,16 @@ export function useDroidUsage() {
 
   // 重新验证（手动刷新）
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
-  }, [fetchData]);
+  }, [enabled, fetchData]);
 
   // 如果没有配置 token，显示配置错误
   const finalError: DroidError | null =
-    !token && hasInitialFetch
+    enabled && !token && hasInitialFetch
       ? {
           type: "not_configured",
           message: "Droid token not configured. Please add it in extension settings (Cmd+,).",

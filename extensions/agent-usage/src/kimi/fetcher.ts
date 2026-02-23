@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getPreferenceValues } from "@raycast/api";
-import { KimiUsage, KimiError } from "./types";
+import type { KimiUsage, KimiError } from "./types";
 
 const KIMI_USAGE_API = "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages";
 const REQUEST_TIMEOUT = 10000;
@@ -140,16 +140,16 @@ function parseKimiApiResponse(data: unknown): { usage: KimiUsage | null; error: 
 
     const usage: KimiUsage = {
       weeklyUsage: {
-        limit: parseInt(weeklyDetail.limit, 10),
-        used: parseInt(weeklyDetail.used, 10),
-        remaining: parseInt(weeklyDetail.remaining, 10),
+        limit: Number.parseInt(weeklyDetail.limit, 10),
+        used: Number.parseInt(weeklyDetail.used, 10),
+        remaining: Number.parseInt(weeklyDetail.remaining, 10),
         resetTime: weeklyDetail.resetTime,
       },
       rateLimit: {
         windowMinutes: rateLimitData.window.duration,
-        limit: parseInt(rateLimitData.detail.limit, 10),
-        used: parseInt(rateLimitData.detail.used, 10),
-        remaining: parseInt(rateLimitData.detail.remaining, 10),
+        limit: Number.parseInt(rateLimitData.detail.limit, 10),
+        used: Number.parseInt(rateLimitData.detail.used, 10),
+        remaining: Number.parseInt(rateLimitData.detail.remaining, 10),
         resetTime: rateLimitData.detail.resetTime,
       },
     };
@@ -198,20 +198,34 @@ export function formatResetTime(isoTime: string): string {
   }
 }
 
-export function useKimiUsage() {
+export function useKimiUsage(enabled = true) {
   const [token, setToken] = useState<string>("");
   const [usage, setUsage] = useState<KimiUsage | null>(null);
   const [error, setError] = useState<KimiError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(enabled);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!enabled);
 
   useEffect(() => {
+    if (!enabled) {
+      setToken("");
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     const preferences = getPreferenceValues<Preferences>();
     const savedToken = preferences.kimiAuthToken?.trim() || "";
     setToken(savedToken);
-  }, []);
+    setHasInitialFetch(false);
+  }, [enabled]);
 
   const fetchData = useCallback(async () => {
+    if (!enabled) {
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     if (!token) {
       setIsLoading(false);
       setHasInitialFetch(true);
@@ -227,7 +241,7 @@ export function useKimiUsage() {
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, [token]);
+  }, [enabled, token]);
 
   useEffect(() => {
     if (!hasInitialFetch && token) {
@@ -236,11 +250,15 @@ export function useKimiUsage() {
   }, [token, hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
-  }, [fetchData]);
+  }, [enabled, fetchData]);
 
   const finalError: KimiError | null =
-    !token && hasInitialFetch
+    enabled && !token && hasInitialFetch
       ? {
           type: "not_configured",
           message: "Kimi token not configured. Please add it in extension settings (Cmd+,).",

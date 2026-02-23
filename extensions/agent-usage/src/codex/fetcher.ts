@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getPreferenceValues } from "@raycast/api";
-import { CodexUsage, CodexError } from "./types";
+import type { CodexUsage, CodexError } from "./types";
 import { normalizeCodexAuthorizationHeader, resolveCodexAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
@@ -183,13 +183,19 @@ function formatDuration(seconds: number): string {
 
 export { formatDuration };
 
-export function useCodexUsage() {
+export function useCodexUsage(enabled = true) {
   const [usage, setUsage] = useState<CodexUsage | null>(null);
   const [error, setError] = useState<CodexError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(enabled);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!enabled);
 
   const fetchData = useCallback(async () => {
+    if (!enabled) {
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -229,7 +235,7 @@ export function useCodexUsage() {
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     if (!hasInitialFetch) {
@@ -238,8 +244,12 @@ export function useCodexUsage() {
   }, [hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
-  }, [fetchData]);
+  }, [enabled, fetchData]);
 
   return {
     isLoading,
