@@ -99,7 +99,7 @@ export default function ManagePlayerGroupsCommand() {
 
     // Fallback to status icons
     const status = client.getGroupStatus(player);
-    return status === "Standalone" ? Icon.Person : Icon.TwoPeople;
+    return status === "Standalone" ? Icon.Cd : Icon.TwoPeople;
   };
 
   const getTitle = (player: Player, isMember = false): string => {
