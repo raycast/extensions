@@ -138,7 +138,7 @@
       "title": "Skip Git Hooks When Pushing",
       "description": "Skip git hooks when pushing new branches to remote",
       "required": false,
-      "default": false
+      "default": true
     },
     {
       "type": "dropdown",
@@ -161,6 +161,37 @@
           "value": "ask"
         }
       ]
+    },
+    {
+      "type": "dropdown",
+      "name": "shouldRunWorktreeSetupCommands",
+      "title": "Run Worktree Setup Commands",
+      "description": "Run setup commands from worktrees.json after creating a new worktree",
+      "required": false,
+      "default": "ask",
+      "data": [
+        {
+          "title": "Yes",
+          "value": "yes"
+        },
+        {
+          "title": "No",
+          "value": "no"
+        },
+        {
+          "title": "Ask",
+          "value": "ask"
+        }
+      ]
+    },
+    {
+      "type": "textfield",
+      "name": "commandTimeoutSeconds",
+      "title": "Command Timeout (seconds)",
+      "description": "Maximum time in seconds to wait for each setup command to complete",
+      "required": false,
+      "default": "30",
+      "placeholder": "30"
     },
     {
       "type": "checkbox",
@@ -243,19 +274,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.3",
+    "@raycast/api": "^1.104.6",
     "@raycast/utils": "^1.19.1",
+    "execa": "^9.6.1",
     "fast-glob": "^3.3.3",
-    "parse-url": "^9.2.0",
-    "zustand": "^5.0.3"
+    "parse-url": "^10.0.3",
+    "shell-env": "^4.0.3",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.24.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.11",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

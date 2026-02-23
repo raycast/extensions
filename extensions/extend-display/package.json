@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "extend-display",
+  "title": "Extend Display",
+  "description": "Connect to remote displays and preserve audio output",
+  "icon": "icon.png",
+  "author": "pavzagor",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "connect-to-display",
+      "title": "Connect to Display",
+      "description": "List and connect to available Sidecar/AirPlay displays",
+      "mode": "view"
+    },
+    {
+      "name": "quick-connect",
+      "title": "Quick Connect",
+      "description": "Instantly connect to your configured display",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "displayName",
+      "title": "Display Name",
+      "description": "Name of your target display (e.g. 'Pavzagor MacBook Pro 14')",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Your Mac or iPad name"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.10.0",
+    "execa": "^8.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "npx ray build -e dist",
+    "dev": "npx ray develop",
+    "fix-lint": "npx ray lint --fix",
+    "lint": "npx ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

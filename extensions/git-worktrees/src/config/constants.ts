@@ -12,3 +12,5 @@ export const CACHE_KEYS = {
 export const BARE_REPOSITORY = "bare";
 
 export const TEMP_DIR_PREFIX = "git-worktrees-";
+
+export const WORKTREE_CONFIG_FILE = "worktrees.json";

@@ -1,5 +1,12 @@
 # Git Worktree Changelog
 
+## [Add setup commands and refactor command/shell env execution] - 2026-02-23
+
+- Add setup commands configuration for worktrees
+- Refactor execute command and shell env
+- Simplify directory finding logic with fast glob
+- Update default to skip commit hooks on push
+
 ## [Fix Remove Worktree Infinite Loading] - 2026-02-20
 
 - Fix remove worktree action showing infinite loading spinner on unexpected errors

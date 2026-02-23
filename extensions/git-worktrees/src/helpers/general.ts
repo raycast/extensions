@@ -1,23 +1,11 @@
 import { getPreferences, resizeEditorWindow } from "#/helpers/raycast";
 import { confirmAlert, open } from "@raycast/api";
-import childProcess, { ExecOptions } from "node:child_process";
+import { execa, type Options as ExecaOptions } from "execa";
 import { dirname } from "node:path";
-import { promisify } from "node:util";
 import parseUrl from "parse-url";
 
-const exec = promisify(childProcess.exec);
-
-export const executeCommand = async (command: string, options?: ExecOptions) => {
-  const execOptions: ExecOptions = {
-    ...options,
-    cwd: options?.cwd,
-    // shell: "/opt/homebrew/bin/zsh",
-    // shell: "/bin/zsh",
-    // timeout: 5 * 1000
-  };
-
-  return exec(command, execOptions);
-  // return exec(`[ -f /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)" && ${command}`, execOptions);
+export const executeShellCommand = async (command: string, options?: ExecaOptions) => {
+  return execa({ shell: true, ...options })`${command}`;
 };
 
 export const batchPromises = async <T, R>(

@@ -1,5 +1,9 @@
 # Anytype Changelog
 
+## [Windows Support] - 2026-02-23
+
+- Add support for Windows platform
+
 ## [Bug Fixes & Dependency Updates] - 2026-02-14
 
 - Fix object property dropdowns interfering with each other's search results in create and update forms
