@@ -14,7 +14,7 @@ if (fs.existsSync(outdir)) {
 fs.mkdirSync(outdir, { recursive: true });
 
 // Commands to build
-const commands = ["track", "status", "report"];
+const commands = ["track", "stop", "status", "report", "manage-entries", "summary"];
 
 console.log("Building Raycast extension with esbuild 0.25.12...\n");
 console.log(`Using esbuild: ${esbuildBin}\n`);
