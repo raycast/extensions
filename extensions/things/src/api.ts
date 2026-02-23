@@ -201,10 +201,10 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       status: props.status,
       notes: props.notes,
       tags: todo.tagNames(),
-      areaTags: areaTags || null,
       dueDate: props.dueDate ? props.dueDate.toISOString() : null,
       activationDate: props.activationDate ? props.activationDate.toISOString() : null,
       isProject: props.pcls === "project",
+      areaTags: areaTags || null,
       project,
       area,
     };
@@ -417,7 +417,7 @@ const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
     'todos', COALESCE((
       SELECT json_group_array(json_object(
         'id', t.uuid, 'name', t.title,
-        'status', CASE t.status WHEN 0 THEN 'open' WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END,
+        'status', 'open',
         'projectName', p.title,
         'areaName', COALESCE(pa.title, da.title)
       ))
