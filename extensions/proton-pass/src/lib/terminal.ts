@@ -26,7 +26,6 @@ function buildTerminalLoginScript(cliPath: string): string {
   const escapedCliPath = escapeAppleScriptString(cliPath);
   return `tell application "Terminal" to do script "${escapedCliPath} login"`;
 }
-}
 
 export async function openTerminalForLogin(): Promise<void> {
   if (process.platform !== "darwin") {
