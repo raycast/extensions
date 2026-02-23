@@ -55,6 +55,7 @@ This extension uses the Music Assistant REST API (NOT WebSocket) for simpler, mo
 - **Client**: `src/external-code/music-assistant-api.ts` - Sends REST API calls
 - **Wrapper**: `src/api-command.ts` - Handles initialization and cleanup
 - **Interface**: `src/music-assistant-client.ts` - High-level business logic
+- **API Documentation**: `commands.json` - Complete Music Assistant API command reference with parameters, return types, and descriptions
 
 ### Key Implementation Details
 
@@ -64,6 +65,25 @@ This extension uses the Music Assistant REST API (NOT WebSocket) for simpler, mo
 - No local caching maintained (each call is independent)
 - Volume commands clamp values to 0-100 range
 - Use `player_id` parameter for player-specific commands
+
+### Available API Commands
+
+The `commands.json` file contains extracted API documentation with all available Music Assistant commands, organized by category:
+
+- **Auth**: Authentication, user management, token operations
+- **Config**: Core controllers, providers, players, DSP configuration
+- **Music**: Library items (albums, artists, tracks, playlists, podcasts, radio), favorites, playback tracking
+- **Player**: Player control, queue management, volume, playback state
+- **Metadata**: Enhanced metadata, lyrics, language preferences
+- **Logging**: Application logs (admin only)
+
+Each command entry includes:
+- Command path (e.g., `player/cmd/play`, `music/artists/library_items`)
+- Summary and detailed description
+- Parameters with types and descriptions
+- Return type
+- Authentication requirements
+- Required role (if admin-only)
 
 ## Development Workflow
 
