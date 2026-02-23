@@ -1,6 +1,6 @@
 # Karakeep Changelog
 
-## [2.1.1] - 2026-02-23
+## [2.1.1] - {PR_MERGE_DATE}
 
 ### Fixes
 
