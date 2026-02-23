@@ -432,7 +432,7 @@ function EditEntryForm({
         client: values.client,
         startTime,
         endTime,
-        durationMinutes: Math.ceil(actualMinutes / 15) * 15, // Round to 15-min increments
+        durationMinutes: tracker.roundDuration(actualMinutes),
       };
 
       tracker.updateEntry(entry, updatedEntry);
