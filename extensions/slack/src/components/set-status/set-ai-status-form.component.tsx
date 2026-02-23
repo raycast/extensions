@@ -18,28 +18,30 @@ function SetStatusWithAIAction({ inputText, onSubmit }: SetStatusWithAIActionPro
       async () => {
         const answer = await AI.ask(
           `You help a Slack user set their status.
+              
+              **Respond with a JSON object with the following attributes:**
+              - "text": a string value for status text, should be short and sweet, with no punctuation, e.g. "Working out", "Listening to Drake's new album", "Coffee break". It should not include the status duration for example "Working out" instead of "Working out for 2 hours" or "Working out until tomorrow".
+              - "emoji": a Slack-compatible string for single emoji matching the text of the status. Emojis should be in the form: :<emoji identifier>:
 
-                  **Respond with a minified JSON object with the following attributes:**
-                  - "text": a string value for status text. It should be short and sweet, with no punctuation, e.g., "Working out", "Listening to Drake's new album", "Coffee break". It MUST NOT include the status duration (e.g., output "Working out" instead of "Working out for 2 hours").
-                  - "emoji": a Slack-compatible string for a single emoji matching the text of the status. Emojis must be in the form: :<emoji identifier>:
-                  
-                  **If the user has specified a time or the end of their status in the description, add the following attribute:**
-                  - "duration": an integer representing the calculated duration of the status in seconds, starting from the Current Time provided below.
-                  
-                  Rules:
-                  - Output ONLY valid minified JSON. Do not use Markdown code blocks (\`\`\`json) or template quotes.
-                  - Do not include any explanations or conversational text.
-                  - All strings must use double quotation marks and must not have leading or trailing whitespace.
-                  - Remove all unnecessary carriage returns and whitespace outside of string values to keep the JSON minified.
-                  
-                  Current time of user's status: ${new Date().toLocaleTimeString()}
-                  User's description of their status: ${inputText}
-                  
-                  Your suggested Slack status (JSON only):`,
+              **If the user has specified a time or the end of status in their description then add the following attribute:**
+              - "duration": an integer representing the duration of the status in seconds
+
+              Rules:
+              - Response should be a string without any template quotes for formatting.
+              - all strings should use double quotation marks and should have .trim() applied
+              - all emojis should be in form :<emoji identifier>:
+              - all attributes should be wrapped with double quotation marks
+              - all spaces and carriage returns should be removed from the resulting string
+
+              Current time of user's status: ${new Date().toLocaleTimeString()}. User's description of their status: ${
+                inputText
+              }. 
+
+              Your suggested Slack status:`,
           { creativity: "low" },
         );
 
-        const parsedAnswer = JSON.parse(answer);
+        const parsedAnswer = JSON.parse(answer.replace(/```json\n?|```/g, "").trim());
 
         if (typeof parsedAnswer.emoji !== "string" || typeof parsedAnswer.text !== "string") {
           throw new Error("AI generated invalid status 🤷");
