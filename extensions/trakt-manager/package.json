@@ -89,5 +89,8 @@
   "contributors": [
     "vishalbalaji3"
   ],
-  "title": "Trakt Manager"
+  "title": "Trakt Manager",
+  "platforms": [
+    "macOS"
+  ]
 }
