@@ -1,6 +1,6 @@
 import { Icon, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
-import { PlayerQueue, Player } from "./external-code/interfaces";
+import { Player, PlayerQueue } from "./external-code/interfaces";
 import MusicAssistantClient from "./music-assistant-client";
 import { useEffect, useState, useMemo } from "react";
 import { selectedPlayerKey, StoredQueue } from "./use-selected-player-id";
@@ -31,12 +31,14 @@ export default function Command() {
 
   useEffect(() => {
     const activeQueue = client.findActiveQueue(queues, storedQueueId);
-    const newTitle = client.getDisplayTitle(activeQueue);
+    const displayQueue = client.getDisplayQueueForMenuBar(activeQueue, players, queues);
+
+    const newTitle = client.getDisplayTitle(displayQueue);
 
     if (client.shouldUpdateTitle(title, newTitle)) {
       setTitle(newTitle);
     }
-  }, [storedQueueId, queues]);
+  }, [storedQueueId, queues, players, client, title]);
 
   const selectPlayerForMenuBar = (queue: PlayerQueue) => {
     const selection = client.createQueueSelection(queue);
@@ -55,31 +57,37 @@ export default function Command() {
   };
 
   const activeQueue = client.findActiveQueue(queues, storedQueueId);
-  const inactiveQueues = (queues || []).filter((q) => q.queue_id !== activeQueue?.queue_id);
+  const displayableQueues = client.getDisplayableQueues(queues, players);
+  const activeDisplayQueue = client.getDisplayQueueForMenuBar(activeQueue, players, queues);
+  const inactiveQueues = displayableQueues.filter((q) => q.queue_id !== activeDisplayQueue?.queue_id);
 
   return (
     <MenuBarExtra icon="transparent-logo.png" isLoading={isLoading} title={title}>
       {/* Active Player Section - Always First */}
-      {activeQueue && (
-        <MenuBarExtra.Section title={activeQueue.display_name}>
+      {activeDisplayQueue && (
+        <MenuBarExtra.Section title={activeDisplayQueue.display_name}>
           <MenuBarExtra.Item
             icon={Icon.Eye}
-            title={activeQueue.current_item?.name || ""}
-            onAction={() => selectPlayerForMenuBar(activeQueue)}
+            title={activeDisplayQueue.current_item?.name || ""}
+            onAction={() => selectPlayerForMenuBar(activeDisplayQueue)}
           />
-          <MenuBarExtra.Item title="Next" icon={Icon.ArrowRight} onAction={() => client.next(activeQueue.queue_id)} />
           <MenuBarExtra.Item
-            title={client.getPlayPauseButtonText(activeQueue.state)}
-            icon={client.isPlaying(activeQueue.state) ? Icon.Pause : Icon.Play}
-            onAction={() => client.togglePlayPause(activeQueue.queue_id)}
+            title="Next"
+            icon={Icon.ArrowRight}
+            onAction={() => client.next(activeDisplayQueue.queue_id)}
+          />
+          <MenuBarExtra.Item
+            title={client.getPlayPauseButtonText(activeDisplayQueue.state)}
+            icon={client.isPlaying(activeDisplayQueue.state) ? Icon.Pause : Icon.Play}
+            onAction={() => client.togglePlayPause(activeDisplayQueue.queue_id)}
           />
 
           {/* Volume Controls */}
-          {client.supportsVolumeControl(getPlayerById(activeQueue.queue_id)) && (
+          {client.supportsVolumeControl(getPlayerById(activeDisplayQueue.queue_id)) && (
             <>
               <MenuBarExtra.Item
-                title={client.getVolumeDisplay(getPlayerById(activeQueue.queue_id))}
-                icon={getPlayerById(activeQueue.queue_id)?.volume_muted ? Icon.SpeakerOff : Icon.SpeakerOn}
+                title={client.getVolumeDisplay(getPlayerById(activeDisplayQueue.queue_id))}
+                icon={getPlayerById(activeDisplayQueue.queue_id)?.volume_muted ? Icon.SpeakerOff : Icon.SpeakerOn}
               />
               <MenuBarExtra.Submenu title="Set Volume" icon={Icon.SpeakerHigh}>
                 {client.getVolumeOptions().map((option) => (
@@ -87,10 +95,12 @@ export default function Command() {
                     key={option.level}
                     title={option.display}
                     icon={
-                      getPlayerById(activeQueue.queue_id)?.volume_level === option.level ? Icon.CheckCircle : undefined
+                      getPlayerById(activeDisplayQueue.queue_id)?.volume_level === option.level
+                        ? Icon.CheckCircle
+                        : undefined
                     }
                     onAction={async () => {
-                      await client.setVolume(activeQueue.queue_id, option.level);
+                      await client.setVolume(activeDisplayQueue.queue_id, option.level);
                       revalidatePlayerDetails();
                     }}
                   />

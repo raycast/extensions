@@ -275,6 +275,91 @@ export default class MusicAssistantClient {
     };
   }
 
+  /**
+   * Checks if a player should be displayed in the menu bar
+   *
+   * A player is displayable if it is either a group leader (has members)
+   * or a standalone player (not synced to another player).
+   * Group members are hidden as they follow their leader's playback.
+   *
+   * @param player - The player to check for displayability
+   * @returns True if the player should be shown in menu bar, false otherwise
+   * @example
+   * ```typescript
+   * if (client.isDisplayablePlayer(player)) {
+   *   // Show this player in the menu bar
+   * }
+   * ```
+   */
+  isDisplayablePlayer(player: Player): boolean {
+    const isGroupLeader = player.group_childs && player.group_childs.length > 0;
+    const isStandalone = !player.synced_to;
+
+    return isGroupLeader || isStandalone;
+  }
+
+  /**
+   * Filters queues to only include displayable players
+   *
+   * Returns only queues for players that are group leaders or standalone.
+   * Group members are excluded since they follow their leader's playback.
+   *
+   * @param queues - All available player queues
+   * @param players - All available players with their metadata
+   * @returns Filtered list containing only displayable player queues
+   * @example
+   * ```typescript
+   * const displayableQueues = client.getDisplayableQueues(allQueues, allPlayers);
+   * // Now only shows group leaders and standalone players
+   * ```
+   */
+  getDisplayableQueues(queues: PlayerQueue[], players: Player[]): PlayerQueue[] {
+    return queues.filter((queue) => {
+      const player = players.find((p) => p.player_id === queue.queue_id);
+      return player && this.isDisplayablePlayer(player);
+    });
+  }
+
+  /**
+   * Gets the queue to display in the menu bar for the active player
+   *
+   * If the active queue is a group member, this returns its group leader instead.
+   * This ensures the menu bar always shows a displayable player.
+   *
+   * @param activeQueue - The currently active queue (may be a group member)
+   * @param players - All available players with their metadata
+   * @param queues - All available player queues
+   * @returns The queue to display in menu bar (may differ from activeQueue if it's a group member)
+   * @example
+   * ```typescript
+   * const displayQueue = client.getDisplayQueueForMenuBar(activeQueue, allPlayers, allQueues);
+   * // If activeQueue is a group member, returns the group leader's queue instead
+   * ```
+   */
+  getDisplayQueueForMenuBar(
+    activeQueue: PlayerQueue | undefined,
+    players: Player[],
+    queues: PlayerQueue[],
+  ): PlayerQueue | undefined {
+    if (!activeQueue) return undefined;
+
+    const player = players.find((p) => p.player_id === activeQueue.queue_id);
+    if (!player) return activeQueue;
+
+    // If the player is already displayable, return it as-is
+    if (this.isDisplayablePlayer(player)) {
+      return activeQueue;
+    }
+
+    // If it's a group member, find and return the group leader queue
+    if (player.synced_to) {
+      const leaderQueue = queues.find((q) => q.queue_id === player.synced_to);
+      return leaderQueue || activeQueue;
+    }
+
+    return activeQueue;
+  }
+
   // Player Selection Logic
   /**
    * Selects a player queue and shows appropriate feedback

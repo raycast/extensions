@@ -738,4 +738,158 @@ describe("MusicAssistantClient", () => {
       });
     });
   });
+
+  // Menu Bar Display Logic Tests
+  describe("isDisplayablePlayer", () => {
+    it("should return true for group leaders with members", () => {
+      const groupLeader = {
+        player_id: "leader-1",
+        group_childs: ["member-1", "member-2"],
+        synced_to: undefined,
+      } as any;
+
+      expect(client.isDisplayablePlayer(groupLeader)).toBe(true);
+    });
+
+    it("should return true for standalone players without sync", () => {
+      const standalone = {
+        player_id: "player-1",
+        group_childs: [],
+        synced_to: undefined,
+      } as any;
+
+      expect(client.isDisplayablePlayer(standalone)).toBe(true);
+    });
+
+    it("should return false for group members that are synced", () => {
+      const groupMember = {
+        player_id: "member-1",
+        group_childs: [],
+        synced_to: "leader-1",
+      } as any;
+
+      expect(client.isDisplayablePlayer(groupMember)).toBe(false);
+    });
+
+    it("should return false for group members with empty group_childs", () => {
+      const groupMember = {
+        player_id: "member-1",
+        group_childs: [],
+        synced_to: "leader-1",
+      } as any;
+
+      expect(client.isDisplayablePlayer(groupMember)).toBe(false);
+    });
+  });
+
+  describe("getDisplayableQueues", () => {
+    it("should filter to only group leaders and standalone players", () => {
+      const queues: PlayerQueue[] = [
+        { queue_id: "leader-1", display_name: "Leader" } as any,
+        { queue_id: "member-1", display_name: "Member" } as any,
+        { queue_id: "standalone-1", display_name: "Standalone" } as any,
+      ];
+
+      const players = [
+        { player_id: "leader-1", group_childs: ["member-1"], synced_to: undefined },
+        { player_id: "member-1", group_childs: [], synced_to: "leader-1" },
+        { player_id: "standalone-1", group_childs: [], synced_to: undefined },
+      ] as any[];
+
+      const displayable = client.getDisplayableQueues(queues, players);
+
+      expect(displayable).toHaveLength(2);
+      expect(displayable.map((q) => q.queue_id)).toEqual(["leader-1", "standalone-1"]);
+    });
+
+    it("should return empty array when all are group members", () => {
+      const queues: PlayerQueue[] = [
+        { queue_id: "member-1", display_name: "Member 1" } as any,
+        { queue_id: "member-2", display_name: "Member 2" } as any,
+      ];
+
+      const players = [
+        { player_id: "member-1", group_childs: [], synced_to: "leader" },
+        { player_id: "member-2", group_childs: [], synced_to: "leader" },
+      ] as any[];
+
+      const displayable = client.getDisplayableQueues(queues, players);
+
+      expect(displayable).toHaveLength(0);
+    });
+
+    it("should handle queues with no matching player", () => {
+      const queues: PlayerQueue[] = [
+        { queue_id: "leader-1", display_name: "Leader" } as any,
+        { queue_id: "unknown-1", display_name: "Unknown" } as any,
+      ];
+
+      const players = [{ player_id: "leader-1", group_childs: [], synced_to: undefined }] as any[];
+
+      const displayable = client.getDisplayableQueues(queues, players);
+
+      expect(displayable).toHaveLength(1);
+      expect(displayable[0].queue_id).toBe("leader-1");
+    });
+  });
+
+  describe("getDisplayQueueForMenuBar", () => {
+    it("should return undefined when activeQueue is undefined", () => {
+      const result = client.getDisplayQueueForMenuBar(undefined, [], []);
+      expect(result).toBeUndefined();
+    });
+
+    it("should return displayable activeQueue as-is", () => {
+      const activeQueue: PlayerQueue = { queue_id: "leader-1", display_name: "Leader" } as any;
+      const players = [{ player_id: "leader-1", group_childs: ["member-1"], synced_to: undefined }] as any[];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, []);
+
+      expect(result).toBe(activeQueue);
+    });
+
+    it("should return the group leader queue when activeQueue is a group member", () => {
+      const activeQueue: PlayerQueue = { queue_id: "member-1", display_name: "Member" } as any;
+      const players = [
+        { player_id: "member-1", group_childs: [], synced_to: "leader-1" },
+        { player_id: "leader-1", group_childs: ["member-1"], synced_to: undefined },
+      ] as any[];
+
+      const queues: PlayerQueue[] = [
+        { queue_id: "member-1" } as any,
+        { queue_id: "leader-1", display_name: "Leader" } as any,
+      ];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, queues);
+
+      expect(result?.queue_id).toBe("leader-1");
+    });
+
+    it("should return activeQueue when player not found in players list", () => {
+      const activeQueue: PlayerQueue = { queue_id: "unknown-1", display_name: "Unknown" } as any;
+      const players: any[] = [];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, []);
+
+      expect(result).toBe(activeQueue);
+    });
+
+    it("should return activeQueue when member has no synced_to", () => {
+      const activeQueue: PlayerQueue = { queue_id: "player-1", display_name: "Player" } as any;
+      const players = [{ player_id: "player-1", group_childs: [], synced_to: undefined }] as any[];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, []);
+
+      expect(result).toBe(activeQueue);
+    });
+
+    it("should return activeQueue when synced group leader queue not found", () => {
+      const activeQueue: PlayerQueue = { queue_id: "member-1", display_name: "Member" } as any;
+      const players = [{ player_id: "member-1", group_childs: [], synced_to: "missing-leader" }] as any[];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, []);
+
+      expect(result).toBe(activeQueue);
+    });
+  });
 });
