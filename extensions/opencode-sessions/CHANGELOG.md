@@ -7,7 +7,7 @@
 - Added `OpenCode Usage Cheatsheet` for quick reference of TUI, CLI, and Web commands.
 - Enhanced existing session listing to `OpenCode Sessions`.
 
-## [Initial Version] - 2026-02-20
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Browse sessions with time-grouped sections and project filtering
 - View full conversation transcripts with tool usage details

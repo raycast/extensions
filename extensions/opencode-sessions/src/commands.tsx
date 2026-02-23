@@ -11,6 +11,7 @@ import {
   Alert,
   trash,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
@@ -67,7 +68,7 @@ export default function Command() {
   const [customCommands, setCustomCommands] = useState<CustomCommand[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadCustomCommands = async () => {
+  const loadCustomCommands = () => {
     setIsLoading(true);
     try {
       const configPath = path.join(os.homedir(), ".config", "opencode", "commands");
@@ -130,7 +131,7 @@ export default function Command() {
           loadCustomCommands();
         }
       } catch (e) {
-        await showToast({ style: Toast.Style.Failure, title: "Failed to delete command", message: String(e) });
+        await showFailureToast(e, { title: "Failed to delete command" });
       }
     }
   };
@@ -271,7 +272,7 @@ ${values.template}`;
       onCreated();
       pop();
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to save command", message: String(e) });
+      await showFailureToast(e, { title: "Failed to save command" });
     }
   };
 

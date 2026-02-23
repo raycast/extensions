@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "opencode",
+  "name": "opencode-sessions",
   "title": "OpenCode",
   "description": "Manage your OpenCode sessions, commands, and more",
   "icon": "extension-icon.png",
@@ -19,18 +19,21 @@
     {
       "name": "sessions",
       "title": "OpenCode Sessions",
+      "subtitle": "OpenCode",
       "description": "Browse and manage your OpenCode sessions",
       "mode": "view"
     },
     {
       "name": "commands",
       "title": "OpenCode Commands",
+      "subtitle": "OpenCode",
       "description": "View, create, and manage custom OpenCode commands",
       "mode": "view"
     },
     {
       "name": "cheatsheet",
       "title": "OpenCode Usage Cheatsheet",
+      "subtitle": "OpenCode",
       "description": "Quick reference for OpenCode TUI, CLI, and Web commands",
       "mode": "view"
     }
