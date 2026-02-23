@@ -892,4 +892,85 @@ describe("MusicAssistantClient", () => {
       expect(result).toBe(activeQueue);
     });
   });
+
+  describe("getGroupMembers", () => {
+    it("should return empty array for standalone players", () => {
+      const player = {
+        player_id: "standalone-1",
+        group_childs: [],
+      } as any;
+
+      const members = client.getGroupMembers(player, []);
+
+      expect(members).toHaveLength(0);
+    });
+
+    it("should return empty array when group_childs is undefined", () => {
+      const player = {
+        player_id: "player-1",
+        group_childs: undefined,
+      } as any;
+
+      const members = client.getGroupMembers(player, []);
+
+      expect(members).toHaveLength(0);
+    });
+
+    it("should return all group members for a group leader", () => {
+      const groupLeader = {
+        player_id: "leader-1",
+        group_childs: ["member-1", "member-2"],
+      } as any;
+
+      const allPlayers = [
+        { player_id: "leader-1", display_name: "Leader" },
+        { player_id: "member-1", display_name: "Member 1" },
+        { player_id: "member-2", display_name: "Member 2" },
+      ] as any[];
+
+      const members = client.getGroupMembers(groupLeader, allPlayers);
+
+      expect(members).toHaveLength(2);
+      expect(members[0].player_id).toBe("member-1");
+      expect(members[1].player_id).toBe("member-2");
+    });
+
+    it("should filter out members that are not found in allPlayers", () => {
+      const groupLeader = {
+        player_id: "leader-1",
+        group_childs: ["member-1", "missing-member"],
+      } as any;
+
+      const allPlayers = [
+        { player_id: "leader-1", display_name: "Leader" },
+        { player_id: "member-1", display_name: "Member 1" },
+      ] as any[];
+
+      const members = client.getGroupMembers(groupLeader, allPlayers);
+
+      expect(members).toHaveLength(1);
+      expect(members[0].player_id).toBe("member-1");
+    });
+
+    it("should preserve member order from group_childs", () => {
+      const groupLeader = {
+        player_id: "leader-1",
+        group_childs: ["member-3", "member-1", "member-2"],
+      } as any;
+
+      const allPlayers = [
+        { player_id: "leader-1", display_name: "Leader" },
+        { player_id: "member-1", display_name: "Member 1" },
+        { player_id: "member-2", display_name: "Member 2" },
+        { player_id: "member-3", display_name: "Member 3" },
+      ] as any[];
+
+      const members = client.getGroupMembers(groupLeader, allPlayers);
+
+      expect(members).toHaveLength(3);
+      expect(members[0].player_id).toBe("member-3");
+      expect(members[1].player_id).toBe("member-1");
+      expect(members[2].player_id).toBe("member-2");
+    });
+  });
 });

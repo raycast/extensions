@@ -360,6 +360,31 @@ export default class MusicAssistantClient {
     return activeQueue;
   }
 
+  /**
+   * Gets the group members for a group leader player
+   *
+   * Returns an array of Player objects that are members of this player's group.
+   * Returns an empty array if the player is not a group leader.
+   *
+   * @param player - The player that may be a group leader
+   * @param allPlayers - All available players to look up member details
+   * @returns Array of Player objects that are group members
+   * @example
+   * ```typescript
+   * const members = client.getGroupMembers(groupLeader, allPlayers);
+   * members.forEach(member => console.log(member.display_name));
+   * ```
+   */
+  getGroupMembers(player: Player, allPlayers: Player[]): Player[] {
+    if (!player.group_childs || player.group_childs.length === 0) {
+      return [];
+    }
+
+    return player.group_childs
+      .map((childId) => allPlayers.find((p) => p.player_id === childId))
+      .filter((p): p is Player => p !== undefined);
+  }
+
   // Player Selection Logic
   /**
    * Selects a player queue and shows appropriate feedback

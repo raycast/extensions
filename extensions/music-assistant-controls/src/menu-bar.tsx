@@ -108,6 +108,30 @@ export default function Command() {
               </MenuBarExtra.Submenu>
             </>
           )}
+
+          {/* Group Members */}
+          {(() => {
+            const activePlayer = getPlayerById(activeDisplayQueue.queue_id);
+            const members = activePlayer
+              ? client.getGroupMembers(activePlayer, players).filter((m) => m.player_id !== activePlayer.player_id)
+              : [];
+            return members.length > 0 ? (
+              <MenuBarExtra.Submenu title="Group Members" icon={Icon.TwoPeople}>
+                {members.map((member) => (
+                  <MenuBarExtra.Item
+                    key={member.player_id}
+                    title={member.display_name}
+                    subtitle={member.current_media?.title || ""}
+                    icon={Icon.Minus}
+                    onAction={async () => {
+                      await client.ungroupPlayer(member.player_id);
+                      revalidatePlayerDetails();
+                    }}
+                  />
+                ))}
+              </MenuBarExtra.Submenu>
+            ) : null;
+          })()}
         </MenuBarExtra.Section>
       )}
 
@@ -118,6 +142,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={queue.queue_id}
               title={queue.display_name}
+              subtitle={queue.current_item?.name || ""}
               onAction={() => selectPlayerForMenuBar(queue)}
             />
           ))}
