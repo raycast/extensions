@@ -78,6 +78,7 @@ The `commands.json` file contains extracted API documentation with all available
 - **Logging**: Application logs (admin only)
 
 Each command entry includes:
+
 - Command path (e.g., `player/cmd/play`, `music/artists/library_items`)
 - Summary and detailed description
 - Parameters with types and descriptions
