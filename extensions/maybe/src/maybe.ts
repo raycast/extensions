@@ -9,6 +9,7 @@ const request = async <T>(endpoint: string, options?: RequestInit) => {
     method: options?.method,
     headers: {
       Accept: "application/json",
+      "Content-Type": "application/json",
       "X-Api-Key": api_key,
     },
     body: options?.body,
@@ -23,13 +24,14 @@ const request = async <T>(endpoint: string, options?: RequestInit) => {
   }
   return result as T;
 };
+
 export const maybe = {
   accounts: {
     list: (props: { page: number; per_page: number }) =>
       request<{ accounts: Account[] } & PaginationInfo>(`accounts?page=${props.page}&per_page=${props.per_page}`),
   },
   transactions: {
-    create: (props: TransactionCreateRequest) =>
+    create: (props: { transaction: TransactionCreateRequest }) =>
       request<Transaction>("transactions", { method: "POST", body: JSON.stringify(props) }),
     delete: (props: { id: string }) => request<{ message: string }>(`transactions/${props.id}`, { method: "DELETE" }),
     list: (props: { page: number; per_page: number; params: string }) =>

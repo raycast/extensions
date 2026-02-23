@@ -61,7 +61,7 @@ export default function SearchTransactions() {
       searchBarPlaceholder="Search transactions"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
-          <Form.Dropdown.Item icon="maybe.png" title="All" value="" />
+          <List.Dropdown.Item icon="maybe.png" title="All" value="" />
           <List.Dropdown.Section title="Accounts">
             {accounts.map((account) => (
               <List.Dropdown.Item
@@ -172,7 +172,7 @@ function NewTransaction() {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating", values.description);
       try {
-        const result = await maybe.transactions.create(values);
+        const result = await maybe.transactions.create({ transaction: values });
         toast.style = Toast.Style.Success;
         toast.title = "Created";
         toast.message = result.name;

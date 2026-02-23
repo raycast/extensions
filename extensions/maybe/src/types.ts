@@ -28,10 +28,10 @@ export type Transaction = {
 };
 export type PaginationInfo = {
   pagination: {
-    page: 1;
-    per_page: 25;
-    total_count: 3;
-    total_pages: 1;
+    page: number;
+    per_page: number;
+    total_count: number;
+    total_pages: number;
   };
 };
 
