@@ -21,7 +21,7 @@ Works with:
 - A standalone Music Assistant server
 - The Home Assistant add-on
 
-ⓘ **Platform Notes:** The menu bar command is available on macOS only. On Windows (currently in beta), you can use all other commands (Toggle, Next Song, Volume Up/Down, Set Volume, Set Active Player) from Raycast's search interface.
+ⓘ **Platform Notes:** The menu bar command is available on macOS only. On Windows, you can use all other commands (Toggle, Next Song, Volume Up/Down, Set Volume, Set Active Player) from Raycast's search interface.
 
 ## Configuration
 
