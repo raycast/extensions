@@ -1,5 +1,18 @@
 # Music Assistant Controls Changelog
 
+## [Player Grouping and Ungrouping] - {PR_MERGE_DATE}
+
+### ✨ New Features
+
+- **Manage Player Groups Command** - Control player sync groups with an intuitive tree-view interface
+- **Create New Groups** - Combine standalone players into new groups for synchronized playback
+- **Join Existing Groups** - Add standalone players to existing groups with one click
+- **Disband Groups** - Remove all members from a group to return them to standalone mode
+- **Tree View UI** - Groups displayed as hierarchies with leaders and their nested members for clear relationships
+- **Playback State Indicators** - Play/pause icons showing player status at a glance
+- **Smart Formatting** - Group leaders show currently playing info; members show group status
+- **Context-aware Actions** - Action menus adapt based on player status (standalone, member, or leader)
+
 ## [Volume Step Controls] - 2026-02-23
 
 ### ✨ New Features
