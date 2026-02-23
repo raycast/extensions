@@ -32,22 +32,12 @@
       "icon": "superwhisper-light-icon.png",
       "preferences": [
         {
-          "name": "transcriptVariant",
-          "title": "Transcript Variant",
-          "description": "Variant used for Copy Last History action",
-          "type": "dropdown",
-          "required": true,
-          "default": "processed",
-          "data": [
-            {
-              "title": "AI Processed",
-              "value": "processed"
-            },
-            {
-              "title": "Unprocessed",
-              "value": "unprocessed"
-            }
-          ]
+          "name": "recordingDir",
+          "title": "Recording Directory",
+          "description": "Directory configured to store recording files",
+          "type": "directory",
+          "required": false,
+          "default": "~/Documents/superwhisper/recordings"
         }
       ]
     },

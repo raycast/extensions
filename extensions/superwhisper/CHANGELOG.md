@@ -1,10 +1,10 @@
 # superwhisper Changelog
 
-## [Copy/Paste Last History and fix missing meta files] - [PR_MERGE_DATE]
+## [Copy/Paste Last History and fix missing meta files] - {PR_MERGE_DATE}
 
 - Added no-view commands to copy or paste the most recent Superwhisper transcript.
 - Added command settings to choose AI Processed vs Unprocessed transcript variant for copy/paste behavior.
-- Added a "Copy Last History" action in Search History that uses the configured transcript variant.
+- Added a configurable recording directory picker to Search History and made its "Copy Last History" action use the latest available transcript (processed first, fallback unprocessed).
 - Fixed history loading to skip incomplete/corrupt recording folders instead of failing when `meta.json` is missing.
 - Improved search history rendering and copy actions when metadata fields are missing.
 

@@ -93,13 +93,13 @@ export function getRecordingTextByVariant(meta: RecordingMeta, variant: Transcri
   return meta.rawResult?.trim() ?? "";
 }
 
-export async function getRecordings(): Promise<Recording[]> {
+export async function getRecordings(customRecordingsPath?: string): Promise<Recording[]> {
   const isInstalled = await isSuperwhisperInstalled();
   if (!isInstalled) {
     throw new Error("Superwhisper is not installed");
   }
 
-  const recordingsPath = join(homedir(), "Documents", "superwhisper", "recordings");
+  const recordingsPath = customRecordingsPath ?? join(homedir(), "Documents", "superwhisper", "recordings");
   if (!existsSync(recordingsPath)) {
     throw new Error("Recording directory not found. Please make a recording first.");
   }
@@ -178,15 +178,15 @@ export async function getLatestRecordingByVariant(variant: TranscriptVariant): P
   return latestRecording;
 }
 
-export function useRecordings() {
+export function useRecordings(customRecordingsPath?: string) {
   const {
     data: recordings,
     isLoading,
     error,
-  } = useCachedPromise(getRecordings, [], {
+  } = useCachedPromise(getRecordings, [customRecordingsPath], {
     failureToastOptions: {
       title: `Failed to fetch recordings`,
-      message: "Check if Superwhisper is installed and recordings directory is correct.",
+      message: "Check if Superwhisper is installed and the recording directory is correct.",
       primaryAction: {
         title: "Install from superwhisper.com",
         onAction: async (toast) => {

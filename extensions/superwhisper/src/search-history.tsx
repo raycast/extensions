@@ -2,21 +2,13 @@ import { List, ActionPanel, Action, Icon, Color, getPreferenceValues } from "@ra
 import { homedir } from "os";
 import { join } from "path";
 import { format } from "date-fns";
-import {
-  getLatestRecordingByVariantFromRecordings,
-  getRecordingPrimaryText,
-  TranscriptVariant,
-  useRecordings,
-} from "./hooks";
+import { getRecordingPrimaryText, useRecordings } from "./hooks";
 
 export default function Command() {
-  const { transcriptVariant } = getPreferenceValues<Preferences.SearchHistory>();
-  const { recordings, isLoading, error } = useRecordings();
-  const latestHistoryText = recordings
-    ? getLatestRecordingByVariantFromRecordings(recordings, transcriptVariant as TranscriptVariant)?.text
-    : undefined;
-  const copyLastHistoryTitle =
-    transcriptVariant === "processed" ? "Copy Last History (AI Processed)" : "Copy Last History (Unprocessed)";
+  const { recordingDir } = getPreferenceValues<Preferences.SearchHistory>();
+  const recordingsPath = recordingDir || join(homedir(), "Documents", "superwhisper", "recordings");
+  const { recordings, isLoading, error } = useRecordings(recordingsPath);
+  const latestHistoryText = recordings?.[0] ? getRecordingPrimaryText(recordings[0].meta) : "";
 
   if (error) {
     return (
@@ -55,7 +47,7 @@ ${rawResult || "_No result available._"}`;
               <ActionPanel>
                 {latestHistoryText ? (
                   <Action.CopyToClipboard
-                    title={copyLastHistoryTitle}
+                    title="Copy Last History"
                     content={latestHistoryText}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
                   />
@@ -82,7 +74,7 @@ ${rawResult || "_No result available._"}`;
                 ) : null}
                 <Action.ShowInFinder
                   title="Show in Finder"
-                  path={join(homedir(), "Documents", "superwhisper", "recordings", recording.directory)}
+                  path={join(recordingsPath, recording.directory)}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                 />
               </ActionPanel>
