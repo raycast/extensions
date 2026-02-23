@@ -44,7 +44,3 @@ export interface PaneConfig {
   commands?: Array<{ exec: string }>;
 }
 
-/** Extension preferences */
-export interface Preferences {
-  socketPath: string;
-}
