@@ -289,17 +289,20 @@ export default function Command() {
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const webIntegrationEnabled = preferences.enableWebIntegration ?? true;
   const hasLoadedFromCache = useRef(false);
-  const { data: activeOrigin } = usePromise(async () => {
-    if (!webIntegrationEnabled) return undefined;
-    if (!environment.canAccess(BrowserExtension)) return undefined;
+  const { data: activeOrigin } = usePromise(
+    async (isWebIntegrationEnabled: boolean) => {
+      if (!isWebIntegrationEnabled) return undefined;
+      if (!environment.canAccess(BrowserExtension)) return undefined;
 
-    try {
-      const tabs = await BrowserExtension.getTabs();
-      return originOf(tabs.find((tab) => tab.active)?.url);
-    } catch {
-      return undefined;
-    }
-  }, [webIntegrationEnabled]);
+      try {
+        const tabs = await BrowserExtension.getTabs();
+        return originOf(tabs.find((tab) => tab.active)?.url);
+      } catch {
+        return undefined;
+      }
+    },
+    [webIntegrationEnabled],
+  );
 
   useEffect(() => {
     loadItems();
