@@ -1,6 +1,6 @@
 # OpenClaw Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-02-23
 
 - Added "Ask OpenClaw" command for quick Q&A
 - Added "Chat with OpenClaw" command with persistent conversations
