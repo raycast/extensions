@@ -51,7 +51,13 @@ export function usePinboardBookmarks(options?: UsePinboardBookmarksOptions): Use
   const [allBookmarks, setAllBookmarks] = useState<Bookmark[]>(() => getCachedBookmarks());
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const fetchedRef = useRef(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchText(searchText), 250);
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   useEffect(() => {
     if (fetchedRef.current) return;
@@ -102,11 +108,11 @@ export function usePinboardBookmarks(options?: UsePinboardBookmarksOptions): Use
   }, [allBookmarks, constantTags, readLater]);
 
   const bookmarks = useMemo(() => {
-    if (!searchText.trim()) {
+    if (!debouncedSearchText.trim()) {
       return preFiltered.slice(0, MAX_RESULTS);
     }
 
-    const terms = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = debouncedSearchText.toLowerCase().split(/\s+/).filter(Boolean);
     const tagTerms = terms.filter((t) => t.startsWith("#")).map((t) => t.slice(1));
     const textTerms = terms.filter((t) => !t.startsWith("#"));
 
@@ -125,7 +131,7 @@ export function usePinboardBookmarks(options?: UsePinboardBookmarksOptions): Use
     });
 
     return filtered.slice(0, MAX_RESULTS);
-  }, [preFiltered, searchText]);
+  }, [preFiltered, debouncedSearchText]);
 
   const removeBookmark = useCallback(
     async (bookmark: Bookmark) => {
