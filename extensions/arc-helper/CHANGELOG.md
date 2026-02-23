@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.1] - 2026-02-16
+
+### Fixed
+
+- Updated Open in Browser URLs to match MetaForge's new URL structure
+
 ## [1.5.0] - 2026-01-28
 
 ### Fixed

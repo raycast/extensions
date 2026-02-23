@@ -1,5 +1,17 @@
 # Music Assistant Controls Changelog
 
+## [Volume Step Controls] - 2026-02-23
+
+### ✨ New Features
+
+- **Volume Up/Down Commands** - Increase or decrease volume on the active player using Music Assistant's native step controls
+- **Toast Feedback** - All no-view commands now provide feedback including volume transitions and the current playing song
+
+### 🎯 Benefits
+
+- Quick volume adjustment without opening the menu bar
+- Bind to media control keys for optimal experience
+
 ## [REST API Migration] - 2026-01-30
 
 ### 🔧 Technical Improvements

@@ -1,5 +1,21 @@
 # ClaudeCast Changelog
 
+## [1.2.0] - 2026-02-20
+
+### Added
+
+- **Deep Search Sessions**: New command that searches through full session content across all Claude Code conversations
+  - Streams through JSONL files incrementally, showing results as they're found
+  - Debounced search with AbortSignal cancellation when query changes
+  - Searches all message content (user and assistant) case-insensitively
+
+### Fixed
+
+- **Project Path Resolution**: Fixed "Project path no longer exists" error when browsing sessions
+  - Claude Code encodes both `/` and `.` as `-` in directory names, making the previous naive decode incorrect for usernames with dots or project names with dashes
+  - Added three-tier resolution: sessions-index.json (authoritative), filesystem-guided walk, naive decode (fallback)
+  - Fixed `encodeProjectPath` to correctly encode both `/` and `.`
+
 ## [1.1.0] - 2026-01-27
 
 ### Added

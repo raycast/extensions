@@ -4,23 +4,7 @@ import path from "path";
 import { promisify } from "util";
 
 const fsAccess = promisify(fs.access);
-const fsMkdir = promisify(fs.mkdir);
 const fsStat = promisify(fs.stat);
-
-export async function ensureDirectoryExists(dirPath: string): Promise<void> {
-  try {
-    await fsAccess(dirPath, fs.constants.F_OK);
-  } catch (error) {
-    try {
-      await fsMkdir(dirPath, { recursive: true });
-    } catch (mkdirError: unknown) {
-      console.error(`Error creating directory: ${dirPath}`, mkdirError);
-      throw new Error(
-        `Failed to create directory: ${mkdirError instanceof Error ? mkdirError.message : String(mkdirError)}`,
-      );
-    }
-  }
-}
 
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes";

@@ -1,9 +1,10 @@
+import { IImgInfo } from "picgo";
 import usePicGoContext from "../util/context";
 
 export type ImgUrlExportFormat = {
     name: string;
     label: string;
-    generate: (urls: string[]) => string;
+    generate: (urls: IImgInfo[]) => string;
 };
 
 export type UploadFormData = {

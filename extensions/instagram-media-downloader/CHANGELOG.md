@@ -1,5 +1,9 @@
 # Instagram Media Downloader Changelog
 
+## [Update] - 2026-02-13
+
+- Add support for downloading Instagram Reels.
+
 ## [New Features] - 2026-02-04
 
 - Add multi-selection support for highlight stories with visual checkmark indicators.

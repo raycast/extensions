@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteTag } from "./apis";
 import { BookmarkList } from "./components/BookmarkList";
@@ -6,6 +6,7 @@ import { useConfig } from "./hooks/useConfig";
 import { useGetAllTags } from "./hooks/useGetAllTags";
 import { useGetTagsBookmarks } from "./hooks/useGetTagsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
+import { runWithToast } from "./utils/toast";
 
 export default function Tags() {
   const { push } = useNavigation();
@@ -33,9 +34,9 @@ export default function Tags() {
           isLoading={isLoadingBookmarks}
           onRefresh={revalidateBookmarks}
           pagination={pagination}
-          searchBarPlaceholder={`In ${tagName} tag search...`}
-          emptyViewTitle="No bookmarks found"
-          emptyViewDescription="No bookmarks in this tag yet"
+          searchBarPlaceholder={t("tags.bookmarks.searchInTag", { name: tagName })}
+          emptyViewTitle={t("tags.bookmarks.empty.title")}
+          emptyViewDescription={t("tags.bookmarks.empty.description")}
         />
       );
     };
@@ -44,22 +45,22 @@ export default function Tags() {
   };
 
   const handleDeleteTag = async (tagId: string) => {
-    const toast = await showToast({ title: "Delete tag", message: "Deleting tag...", style: Toast.Style.Animated });
     try {
-      await fetchDeleteTag(tagId);
-      toast.title = "Delete tag";
-      toast.message = "Tag deleted successfully";
-      toast.style = Toast.Style.Success;
-      await revalidate();
+      await runWithToast({
+        loading: { title: t("tags.actions.deleteTag"), message: t("tags.toast.delete.loading") },
+        success: { title: t("tags.actions.deleteTag"), message: t("tags.toast.delete.success") },
+        failure: { title: t("tags.actions.deleteTag"), message: t("tags.toast.delete.error") },
+        action: async () => {
+          await fetchDeleteTag(tagId);
+          await revalidate();
+        },
+      });
     } catch (error) {
       logger.error("Failed to delete tag", { tagId, error });
-      toast.title = "Delete tag";
-      toast.message = "Tag deletion failed";
-      toast.style = Toast.Style.Failure;
     }
   };
 
-  const sortedTags = tags.sort((a, b) => b.numBookmarks - a.numBookmarks);
+  const sortedTags = [...tags].sort((a, b) => b.numBookmarks - a.numBookmarks);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={t("tags.searchPlaceholder")}>

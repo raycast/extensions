@@ -1,5 +1,10 @@
 # Google Cloud CLI Changelog
 
+## [1.0.4] - 2026-02-10
+- Fixed JS heap out-of-memory crash in index command by limiting API response payloads
+- Deduplicated IAM policy modification logic into a single reusable method
+- Removed dead code, orphaned files, and unused `dotenv` dependency
+
 ## [1.0.3] - 2026-01-13
 - Added Cloud Shell SSH connection action across all views
 - Added keyboard shortcut (Cmd+Opt+S) to copy Cloud Shell connection command

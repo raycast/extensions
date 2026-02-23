@@ -1,0 +1,127 @@
+{
+  "name": "wordpress-manager",
+  "version": "1.0.0",
+  "title": "WordPress Manager",
+  "description": "Manage your WordPress site directly from Raycast. Create posts, moderate comments, manage plugins, and more.",
+  "icon": "extension-icon.png",
+  "author": "gaurav_tiwari",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "posts",
+      "title": "Manage Posts",
+      "subtitle": "WordPress",
+      "description": "View, create, edit and delete WordPress posts",
+      "mode": "view"
+    },
+    {
+      "name": "pages",
+      "title": "Manage Pages",
+      "subtitle": "WordPress",
+      "description": "View, create, edit and delete WordPress pages",
+      "mode": "view"
+    },
+    {
+      "name": "quick-post",
+      "title": "Quick Post",
+      "subtitle": "WordPress",
+      "description": "Quickly create a new WordPress post",
+      "mode": "view"
+    },
+    {
+      "name": "comments",
+      "title": "Moderate Comments",
+      "subtitle": "WordPress",
+      "description": "Approve, spam, or trash comments",
+      "mode": "view"
+    },
+    {
+      "name": "media",
+      "title": "Media Library",
+      "subtitle": "WordPress",
+      "description": "Browse and manage media files",
+      "mode": "view"
+    },
+    {
+      "name": "users",
+      "title": "Manage Users",
+      "subtitle": "WordPress",
+      "description": "View and manage WordPress users",
+      "mode": "view"
+    },
+    {
+      "name": "plugins",
+      "title": "Manage Plugins",
+      "subtitle": "WordPress",
+      "description": "Activate and deactivate plugins",
+      "mode": "view"
+    },
+    {
+      "name": "site-info",
+      "title": "Site Dashboard",
+      "subtitle": "WordPress",
+      "description": "View site information and quick stats",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Content",
+      "subtitle": "WordPress",
+      "description": "Search across all WordPress content",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "WordPress Site URL",
+      "description": "Your WordPress site URL (e.g., https://example.com)",
+      "placeholder": "https://yoursite.com"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "Your WordPress username",
+      "placeholder": "admin"
+    },
+    {
+      "name": "applicationPassword",
+      "type": "password",
+      "required": true,
+      "title": "Application Password",
+      "description": "Generate this from WordPress Dashboard > Users > Profile > Application Passwords"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "@raycast/utils": "^1.10.0",
+    "date-fns": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.10.4",
+    "@types/react": "18.2.45",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -7,6 +7,9 @@ export const translations = {
     pleaseWait: "Please wait...",
     refreshingBookmarks: "Refreshing bookmarks...",
     bookmarksRefreshed: "Bookmarks refreshed",
+    refreshingLists: "Refreshing list...",
+    listsRefreshed: "List refreshed",
+    refreshError: "Refresh error",
     searchBookmarks: "Search bookmarks...",
 
     // Common Actions & Messages
@@ -141,8 +144,8 @@ export const translations = {
       searchInArchived: "Search in Archived...",
       openList: "Open List",
       deleteList: "Delete List",
-      deleteConfirm: "Are you sure you want to delete list {name}?",
-      searchInList: "Search in {name}...",
+      deleteConfirm: "Are you sure you want to delete list {{name}}?",
+      searchInList: "Search in {{name}}...",
       noBookmarks: {
         title: "No bookmarks found",
         description: "No bookmarks in this list",
@@ -156,6 +159,13 @@ export const translations = {
     // Tags Related
     tags: {
       searchPlaceholder: "Search tags",
+      bookmarks: {
+        searchInTag: "Search in {{name}} tag...",
+        empty: {
+          title: "No bookmarks found",
+          description: "No bookmarks in this tag yet",
+        },
+      },
       detail: {
         name: "Tag name",
         id: "Tag ID",
@@ -235,6 +245,18 @@ export const translations = {
         },
       },
     },
+
+    quickBookmark: {
+      gettingBrowserUrl: "Getting browser URL...",
+      failedToGetBrowserUrl: {
+        title: "Failed to get browser URL",
+        message: "Make sure a browser is open with an active tab",
+      },
+      creatingBookmark: "Creating bookmark...",
+      failedToCreateBookmark: "Failed to create bookmark",
+      successHud: "✓ Bookmark created",
+      failureToastTitle: "Failed to create quick bookmark",
+    },
   },
 
   zh: {
@@ -243,6 +265,9 @@ export const translations = {
     pleaseWait: "请稍等...",
     refreshingBookmarks: "正在刷新书签...",
     bookmarksRefreshed: "书签已刷新",
+    refreshingLists: "正在刷新列表...",
+    listsRefreshed: "列表已刷新",
+    refreshError: "刷新失败",
     searchBookmarks: "搜索书签...",
 
     // 通用操作和消息
@@ -379,8 +404,8 @@ export const translations = {
       searchInArchived: "在已归档中搜索...",
       openList: "打开列表",
       deleteList: "删除列表",
-      deleteConfirm: "确定要删除列表 {name} 吗？",
-      searchInList: "在 {name} 中搜索...",
+      deleteConfirm: "确定要删除列表 {{name}} 吗？",
+      searchInList: "在 {{name}} 中搜索...",
       noBookmarks: {
         title: "暂无书签",
         description: "列表中暂无书签",
@@ -394,6 +419,13 @@ export const translations = {
     // 标签相关
     tags: {
       searchPlaceholder: "搜索标签",
+      bookmarks: {
+        searchInTag: "在标签 {{name}} 中搜索...",
+        empty: {
+          title: "暂无书签",
+          description: "该标签下暂无书签",
+        },
+      },
       detail: {
         name: "标签名称",
         id: "标签 ID",
@@ -472,6 +504,18 @@ export const translations = {
           error: "清除缓存失败",
         },
       },
+    },
+
+    quickBookmark: {
+      gettingBrowserUrl: "正在获取浏览器链接...",
+      failedToGetBrowserUrl: {
+        title: "获取浏览器链接失败",
+        message: "请确认浏览器已打开且有活动标签页",
+      },
+      creatingBookmark: "正在创建书签...",
+      failedToCreateBookmark: "创建书签失败",
+      successHud: "✓ 已创建书签",
+      failureToastTitle: "快速创建书签失败",
     },
   },
 };

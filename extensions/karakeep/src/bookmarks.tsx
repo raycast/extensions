@@ -1,28 +1,29 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useCallback } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { BookmarkList } from "./components/BookmarkList";
 import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
+import { runWithToast } from "./utils/toast";
 
 export default function BookmarksList() {
   const { t } = useTranslation();
   const { isLoading, bookmarks, revalidate, pagination } = useGetAllBookmarks();
 
   const handleRefresh = useCallback(async () => {
-    const toast = await showToast({
-      title: t("refreshingBookmarks"),
-      message: t("pleaseWait"),
+    await runWithToast({
+      loading: { title: t("refreshingBookmarks"), message: t("pleaseWait") },
+      success: { title: t("bookmarksRefreshed") },
+      failure: { title: t("refreshError") },
+      action: async () => {
+        try {
+          await revalidate();
+        } catch (error) {
+          logger.error("Failed to refresh bookmarks", { error });
+          throw error;
+        }
+      },
     });
-
-    try {
-      revalidate();
-      toast.title = t("bookmarksRefreshed");
-    } catch (error) {
-      logger.error("Failed to refresh bookmarks", error);
-      toast.style = Toast.Style.Failure;
-      toast.title = t("refreshError");
-    }
   }, [t, revalidate]);
 
   if (isLoading && bookmarks.length === 0) {

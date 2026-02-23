@@ -9,34 +9,32 @@ import {
     Toast,
     useNavigation,
     openExtensionPreferences,
-    getPreferenceValues,
 } from "@raycast/api";
 
 import ConfigDropdownList from "./components/ConfigDropdown";
 import type { UserUploaderConfig, UploadFormData } from "./types/type";
 import { isImgFile } from "./util/util";
-import { withTimeout } from "./util/util";
 import UploadResultPage from "./components/UploadResultPage";
 import ErrorView from "./components/ErrorView";
-import usePicGoContext from "./util/context";
+import getPicGoContext from "./util/context";
 import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
+import UploaderManagement from "./uploader-management";
 
 const UPLOADER_CONFIG_KEY = "picgo:user_uploader_config";
 
 export default function Command() {
     const {
-        ctx,
+        upload,
         getActiveUploaderType,
         getActiveConfig,
         isAvailableConfig,
-        syncConfig,
-        uploaderTypeList,
+        setActiveConfig,
+        getUploaderTypeList,
         getConfigList,
-    } = usePicGoContext();
+    } = getPicGoContext();
 
     const { push } = useNavigation();
-    const { uploadTimeout } = getPreferenceValues<Preferences>();
 
     const {
         value: localConfig,
@@ -58,7 +56,7 @@ export default function Command() {
         if (isLoading) return;
         if (localConfig && isAvailableConfig(localConfig)) setConfig(localConfig);
         else {
-            console.info(
+            console.warn(
                 `LocalStorage config '${JSON.stringify(localConfig)}' not available, config state fallback to default config '${JSON.stringify(initialConfig)}'`,
             );
             setConfig(initialConfig);
@@ -73,22 +71,21 @@ export default function Command() {
             }
         } catch (e) {
             const err = e as Error;
-            console.error(err);
+            console.warn(error?.message);
             setError(err);
             showToast(Toast.Style.Failure, err.message);
         }
     }, []);
 
     const dropdownItems = useMemo(() => {
-        return <ConfigDropdownList uploaderTypes={uploaderTypeList} getConfigList={getConfigList} />;
-    }, [uploaderTypeList]);
+        return <ConfigDropdownList uploaderTypes={getUploaderTypeList()} getConfigList={getConfigList} />;
+    }, []);
 
     async function uploadImgs(input?: string[]) {
         setUploading(true);
         const toast = await showToast(Toast.Style.Animated, "Uploading...");
         try {
-            const timeout = Number(uploadTimeout);
-            const res = await withTimeout(ctx.upload(input), timeout, `Upload timeout: ${timeout / 1000}s`);
+            const res = await upload(input);
 
             if (res instanceof Error) throw res;
             if (res.length === 0) throw new Error("No results returned");
@@ -124,7 +121,7 @@ export default function Command() {
         const config = JSON.parse(uploaderConfig) as UserUploaderConfig;
         // config is available
         await setLocalConfig(config);
-        syncConfig(config);
+        setActiveConfig(config);
         const imgs = files.filter((f) => isImgFile(f));
         if (imgs.length === 0) {
             showToast(Toast.Style.Failure, "Error", "Please pick image files.");
@@ -138,14 +135,29 @@ export default function Command() {
     }
 
     if (error) {
-        return <ErrorView msg={error.message} />;
+        return (
+            <ErrorView
+                error={error}
+                description="Make sure you setup uploader configs"
+                actions={
+                    <ActionPanel>
+                        <Action.Push
+                            title="Setup Uploader Configs"
+                            icon={Icon.Cog}
+                            target={<UploaderManagement />}
+                        ></Action.Push>
+                        <Action.OpenInBrowser url="https://docs.picgo.app/core/" title="View Installation Guide" />
+                    </ActionPanel>
+                }
+            />
+        );
     }
 
     if (isLoading || !config) {
         return <List isLoading />;
     }
 
-    if (isUploading) return <List isLoading />;
+    if (isUploading) return <Form isLoading />;
 
     return (
         <Form
@@ -185,7 +197,6 @@ export default function Command() {
             <Form.Description
                 title="Quick Tips"
                 text={`• ⌘ + V: Quick Upload from Clipboard\n• ⌘ + Enter: Submit and upload`}
-                // text={JSON.stringify(localConfig)}
             />
         </Form>
     );
