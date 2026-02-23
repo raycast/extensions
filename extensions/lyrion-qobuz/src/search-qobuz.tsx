@@ -20,11 +20,7 @@ const RECENT_SEARCHES_KEY = "recent-searches";
 const MAX_RECENT_SEARCHES = 8;
 
 function getClient(): LyrionClient {
-  const prefs = getPreferenceValues<{
-    lmsHost: string;
-    lmsPort?: string;
-    playerId: string;
-  }>();
+  const prefs = getPreferenceValues<Preferences>();
   return new LyrionClient(
     prefs.lmsHost,
     prefs.lmsPort ?? "9000",
