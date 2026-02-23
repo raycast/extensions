@@ -54,50 +54,67 @@ export default function Command() {
     return players.find((p) => p.player_id === playerId);
   };
 
+  const activeQueue = client.findActiveQueue(queues, storedQueueId);
+  const inactiveQueues = (queues || []).filter((q) => q.queue_id !== activeQueue?.queue_id);
+
   return (
     <MenuBarExtra icon="transparent-logo.png" isLoading={isLoading} title={title}>
-      {queues &&
-        queues.map((queue) => {
-          const player = getPlayerById(queue.queue_id);
-          return (
-            <MenuBarExtra.Section title={queue.display_name} key={queue.queue_id}>
-              <MenuBarExtra.Item
-                icon={Icon.Eye}
-                title={queue.current_item?.name || ""}
-                onAction={() => selectPlayerForMenuBar(queue)}
-              />
-              <MenuBarExtra.Item title="Next" icon={Icon.ArrowRight} onAction={() => client.next(queue.queue_id)} />
-              <MenuBarExtra.Item
-                title={client.getPlayPauseButtonText(queue.state)}
-                icon={client.isPlaying(queue.state) ? Icon.Pause : Icon.Play}
-                onAction={() => client.togglePlayPause(queue.queue_id)}
-              />
+      {/* Active Player Section - Always First */}
+      {activeQueue && (
+        <MenuBarExtra.Section title={activeQueue.display_name}>
+          <MenuBarExtra.Item
+            icon={Icon.Eye}
+            title={activeQueue.current_item?.name || ""}
+            onAction={() => selectPlayerForMenuBar(activeQueue)}
+          />
+          <MenuBarExtra.Item title="Next" icon={Icon.ArrowRight} onAction={() => client.next(activeQueue.queue_id)} />
+          <MenuBarExtra.Item
+            title={client.getPlayPauseButtonText(activeQueue.state)}
+            icon={client.isPlaying(activeQueue.state) ? Icon.Pause : Icon.Play}
+            onAction={() => client.togglePlayPause(activeQueue.queue_id)}
+          />
 
-              {/* Volume Controls */}
-              {client.supportsVolumeControl(player) && (
-                <>
+          {/* Volume Controls */}
+          {client.supportsVolumeControl(getPlayerById(activeQueue.queue_id)) && (
+            <>
+              <MenuBarExtra.Item
+                title={client.getVolumeDisplay(getPlayerById(activeQueue.queue_id))}
+                icon={getPlayerById(activeQueue.queue_id)?.volume_muted ? Icon.SpeakerOff : Icon.SpeakerOn}
+              />
+              <MenuBarExtra.Submenu title="Set Volume" icon={Icon.SpeakerHigh}>
+                {client.getVolumeOptions().map((option) => (
                   <MenuBarExtra.Item
-                    title={client.getVolumeDisplay(player)}
-                    icon={player?.volume_muted ? Icon.SpeakerOff : Icon.SpeakerOn}
+                    key={option.level}
+                    title={option.display}
+                    icon={
+                      getPlayerById(activeQueue.queue_id)?.volume_level === option.level ? Icon.CheckCircle : undefined
+                    }
+                    onAction={async () => {
+                      await client.setVolume(activeQueue.queue_id, option.level);
+                      revalidatePlayerDetails();
+                    }}
                   />
-                  <MenuBarExtra.Submenu title="Set Volume" icon={Icon.SpeakerHigh}>
-                    {client.getVolumeOptions().map((option) => (
-                      <MenuBarExtra.Item
-                        key={option.level}
-                        title={option.display}
-                        icon={player?.volume_level === option.level ? Icon.CheckCircle : undefined}
-                        onAction={async () => {
-                          await client.setVolume(queue.queue_id, option.level);
-                          revalidatePlayerDetails();
-                        }}
-                      />
-                    ))}
-                  </MenuBarExtra.Submenu>
-                </>
-              )}
-            </MenuBarExtra.Section>
-          );
-        })}
+                ))}
+              </MenuBarExtra.Submenu>
+            </>
+          )}
+        </MenuBarExtra.Section>
+      )}
+
+      {/* Other Players - Single Line Per Player */}
+      {inactiveQueues.length > 0 && (
+        <MenuBarExtra.Section>
+          {inactiveQueues.map((queue) => (
+            <MenuBarExtra.Item
+              key={queue.queue_id}
+              title={queue.display_name}
+              onAction={() => selectPlayerForMenuBar(queue)}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      )}
+
+      {/* Refresh */}
       {queues && queues.length > 0 ? (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
