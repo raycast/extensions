@@ -1,5 +1,22 @@
 # Music Assistant Controls Changelog
 
+## [Menu Bar Enhancements for Group Management] - {PR_MERGE_DATE}
+
+### ✨ New Features
+
+- **Group Members Submenu** - See all members of the currently playing group directly in the menu bar without opening the full group management command
+- **Quick Group Management** - Add or remove players from the group right in the menu bar:
+  - Click the **minus icon (−)** next to group members to remove them
+  - Click the **plus icon (+)** next to compatible players to add them to the group
+- **Current Song Display for All Players** - View what's currently playing on each inactive player with song titles displayed as subtitles
+- **Smart Player Filtering** - Menu bar now intelligently shows only group leaders and standalone players, hiding group members that follow their leader's playback to reduce clutter
+
+### 🎨 UI/UX Enhancements
+
+- Build, modify, and manage groups directly from the menu bar without switching to the full command
+- Unified group management interface showing both current members and available players to recruit
+- Faster group creation and modifications for power users
+
 ## [Player Grouping and Ungrouping] - {PR_MERGE_DATE}
 
 ### ✨ New Features

@@ -109,22 +109,45 @@ export default function Command() {
             </>
           )}
 
-          {/* Group Members */}
+          {/* Group Members & Potential Members */}
           {(() => {
             const activePlayer = getPlayerById(activeDisplayQueue.queue_id);
-            const members = activePlayer
-              ? client.getGroupMembers(activePlayer, players).filter((m) => m.player_id !== activePlayer.player_id)
-              : [];
-            return members.length > 0 ? (
+            if (!activePlayer || !client.canFormGroup(activePlayer)) return null;
+
+            const currentMembers = client
+              .getGroupMembers(activePlayer, players)
+              .filter((m) => m.player_id !== activePlayer.player_id);
+
+            const compatiblePlayers = client.getCompatiblePlayers(activePlayer, players);
+            const potentialMembers = compatiblePlayers.filter(
+              (p) => p.player_id !== activePlayer.player_id && !currentMembers.find((m) => m.player_id === p.player_id),
+            );
+
+            const hasContent = currentMembers.length > 0 || potentialMembers.length > 0;
+
+            return hasContent ? (
               <MenuBarExtra.Submenu title="Group Members" icon={Icon.TwoPeople}>
-                {members.map((member) => (
+                {/* Current Members */}
+                {currentMembers.map((member) => (
                   <MenuBarExtra.Item
                     key={member.player_id}
                     title={member.display_name}
-                    subtitle={member.current_media?.title || ""}
                     icon={Icon.Minus}
                     onAction={async () => {
                       await client.ungroupPlayer(member.player_id);
+                      revalidatePlayerDetails();
+                    }}
+                  />
+                ))}
+
+                {/* Potential Members */}
+                {potentialMembers.map((player) => (
+                  <MenuBarExtra.Item
+                    key={player.player_id}
+                    title={player.display_name}
+                    icon={Icon.Plus}
+                    onAction={async () => {
+                      await client.groupPlayer(player.player_id, activePlayer.player_id);
                       revalidatePlayerDetails();
                     }}
                   />

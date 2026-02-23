@@ -144,7 +144,7 @@ Each command entry includes:
 
 ## Test Coverage Strategy
 
-### Current Coverage: 61% statements, 55% branches, 28% functions
+### Current Coverage: 68.52% statements, 53.17% branches, 65.97% functions
 
 **Why not 100% coverage?**
 
@@ -154,16 +154,17 @@ Each command entry includes:
 
 **Full Coverage (100%)**
 
-- api-command.ts, music-assistant-client.ts, command implementations (next-song, play-pause)
+- api-command.ts, music-assistant-client.ts (99.04%), command implementations (next-song, play-pause)
+- use-selected-player-id.ts, play-pause.tsx
 
 **Strategic Coverage (20-80%)**
 
 - music-assistant-api.ts: Only `sendCommand()` and error handling tested (20%)
-- use-selected-player-id.ts: Core logic tested, some edge cases untested (80%)
+- next-song.tsx, volume-up.tsx, volume-down.tsx: Core logic tested, some branches untested (57-60%)
 
 **No Coverage (0%) - By Design**
 
-- UI components (menu-bar.tsx, set-active-player.tsx, set-volume.tsx)
+- UI components (manage-player-groups.tsx - 5%, menu-bar.tsx - 0%)
 
 See TESTING.md for detailed coverage breakdown and rationale.
 
