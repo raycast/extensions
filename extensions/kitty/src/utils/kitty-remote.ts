@@ -1,7 +1,11 @@
 import { execSync } from "child_process";
 import { existsSync, readdirSync, statSync } from "fs";
 import { getPreferenceValues } from "@raycast/api";
-import type { KittyOSWindow, Preferences } from "./types";
+import type { KittyOSWindow } from "./types";
+
+interface Preferences {
+  socketPath: string;
+}
 
 const KITTEN_PATH = "/Applications/kitty.app/Contents/MacOS/kitten";
 const TIMEOUT = 5000;
