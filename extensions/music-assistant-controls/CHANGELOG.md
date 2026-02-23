@@ -1,6 +1,6 @@
 # Music Assistant Controls Changelog
 
-## [Volume Step Controls] - {PR_MERGE_DATE}
+## [Volume Step Controls] - 2026-02-23
 
 ### ✨ New Features
 
