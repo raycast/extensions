@@ -207,7 +207,7 @@ export class TimeTracker {
   }
 
   // Round duration to 15-minute billing increments
-  private roundDuration(minutes: number): number {
+  roundDuration(minutes: number): number {
     // If 5 minutes or less, keep as is (no minimum billing)
     if (minutes <= 5) {
       return minutes;
