@@ -42,6 +42,8 @@ pass-cli vault list
 - **Default Password Length**: Length for generated passwords (default: 20)
 - **Default Password Type**: Random characters or memorable passphrase
 - **Transient Clipboard**: Clear password from clipboard after pasting
+- **Background Refresh**: Automatically refresh cached vault and item data
+- **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
 
 ## Troubleshooting
 

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { listVaults, listItems, checkAuth } from "./lib/pass-cli";
 import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
@@ -6,7 +6,7 @@ import { getItemIcon } from "./lib/utils";
 import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
 import { openTerminalForLogin } from "./lib/terminal";
 
-function VaultItems({ vault }: { vault: Vault }) {
+function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const hasLoadedFromCache = useRef(false);
@@ -21,6 +21,10 @@ function VaultItems({ vault }: { vault: Vault }) {
       setItems(cachedItems);
       setIsLoading(false);
       hasLoadedFromCache.current = true;
+
+      if (!backgroundRefreshEnabled) {
+        return;
+      }
     }
 
     try {
@@ -93,6 +97,8 @@ export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<PassCliError | null>(null);
+  const preferences = getPreferenceValues<Preferences>();
+  const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
 
   useEffect(() => {
@@ -107,6 +113,10 @@ export default function Command() {
       setVaults(cachedVaults);
       setIsLoading(false);
       hasLoadedFromCache.current = true;
+
+      if (!backgroundRefreshEnabled) {
+        return;
+      }
     }
 
     try {
@@ -301,7 +311,11 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.Push title="View Items" icon={Icon.List} target={<VaultItems vault={vault} />} />
+                <Action.Push
+                  title="View Items"
+                  icon={Icon.List}
+                  target={<VaultItems vault={vault} backgroundRefreshEnabled={backgroundRefreshEnabled} />}
+                />
                 <Action.CopyToClipboard
                   title="Copy Vault Name"
                   content={vault.name}

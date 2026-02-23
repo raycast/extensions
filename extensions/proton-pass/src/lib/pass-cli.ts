@@ -303,6 +303,7 @@ function normalizeItem(raw: unknown, vaultNameOverride?: string): Item {
 
   const username = loginData ? trimOrUndefined(loginData.username) : trimOrUndefined(raw.username);
   const email = loginData ? trimOrUndefined(loginData.email) : trimOrUndefined(raw.email);
+  const urls = loginData ? normalizeUrls(loginData.urls) : undefined;
 
   const totpUri = loginData ? trimOrUndefined(loginData.totp_uri ?? loginData.totpUri) : undefined;
   const hasTotp = totpUri !== undefined && totpUri.length > 0;
@@ -319,6 +320,7 @@ function normalizeItem(raw: unknown, vaultNameOverride?: string): Item {
     title,
     type,
     vaultName,
+    urls,
     username,
     email,
     hasTotp,
@@ -346,9 +348,17 @@ function normalizeCustomFields(raw: unknown): ItemDetail["customFields"] {
   return mapped.length > 0 ? mapped : undefined;
 }
 
-function normalizeStringArray(raw: unknown): string[] | undefined {
+function normalizeUrls(raw: unknown): string[] | undefined {
   if (!Array.isArray(raw)) return undefined;
-  const values = raw.map((v) => trimOrUndefined(v)).filter((v): v is string => Boolean(v));
+
+  const values = raw
+    .map((entry) => {
+      if (typeof entry === "string") return trimOrUndefined(entry);
+      if (!isRecord(entry)) return undefined;
+      return trimOrUndefined(entry.url ?? entry.href ?? entry.value ?? entry.link);
+    })
+    .filter((value): value is string => Boolean(value));
+
   return values.length > 0 ? values : undefined;
 }
 
@@ -380,7 +390,7 @@ function normalizeItemDetail(raw: unknown): ItemDetail {
 
   const password = typeData ? trimOrUndefined(typeData.password) : undefined;
 
-  const urls = typeData ? normalizeStringArray(typeData.urls) : undefined;
+  const urls = typeData ? normalizeUrls(typeData.urls) : undefined;
 
   const note = trimOrUndefined(outerContent.note ?? raw.note);
 
