@@ -142,7 +142,7 @@ export async function playAudio(
   // Create a loop script even for single playback to allow toggling repeat ON while playing
   const loopScript = `#!/bin/bash
 while true; do
-  afplay "${localFile}"
+  afplay "$(printf '%q' "${localFile}")"
   if [ ! -f "${REPEAT_FLAG_FILE}" ] || [ "$(cat "${REPEAT_FLAG_FILE}")" != "true" ]; then
     break
   fi
@@ -200,8 +200,6 @@ export async function playVersePlaylist(
     throw new Error("Could not prepare verses.");
   }
 
-  const playSequence = localPaths.map((p) => `afplay "${p}"`).join("; ");
-
   // Set the repeat flag
   const isInfinite = repeatCount === 0;
   fs.writeFileSync(REPEAT_FLAG_FILE, isInfinite ? "true" : "false");
@@ -210,14 +208,13 @@ export async function playVersePlaylist(
 COUNT=0
 ITERATIONS=${isInfinite ? 999999 : repeatCount || 1}
 while [ $COUNT -lt $ITERATIONS ]; do
-  ${playSequence}
+  ${localPaths.map((p) => `afplay "$(printf '%q' '${p}')"`).join("; ")}
   COUNT=$((COUNT+1))
-  # Check if repeat was toggled OFF or if we finished our count
-  IF_FLAG=$(cat "${REPEAT_FLAG_FILE}" 2>/dev/null)
+  IF_FLAG=$(cat "$(printf '%q' '${REPEAT_FLAG_FILE}')" 2>/dev/null)
   if [ "$IF_FLAG" == "true" ]; then
-    ITERATIONS=999999 # Make it infinite if flag is true
+    ITERATIONS=999999
   elif [ $COUNT -ge ${repeatCount || 1} ]; then
-    break # Stop if we hit our requested count and flag is NOT true
+    break
   fi
 done
 `;
