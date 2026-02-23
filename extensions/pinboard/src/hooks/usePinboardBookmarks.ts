@@ -93,10 +93,10 @@ export function usePinboardBookmarks(options?: UsePinboardBookmarksOptions): Use
     let result = allBookmarks;
 
     if (constantTags) {
-      const tagList = constantTags.split(" ").filter(Boolean);
+      const tagSet = new Set(constantTags.split(" ").filter(Boolean));
       result = result.filter((b) => {
         const bookmarkTags = b.tags?.split(" ") ?? [];
-        return bookmarkTags.some((t) => tagList.includes(t));
+        return bookmarkTags.some((t) => tagSet.has(t));
       });
     }
 
@@ -133,28 +133,27 @@ export function usePinboardBookmarks(options?: UsePinboardBookmarksOptions): Use
     return filtered.slice(0, MAX_RESULTS);
   }, [preFiltered, debouncedSearchText]);
 
-  const removeBookmark = useCallback(
-    async (bookmark: Bookmark) => {
-      const toast = await showToast({ title: "Deleting bookmark...", style: Toast.Style.Animated });
+  const removeBookmark = useCallback(async (bookmark: Bookmark) => {
+    const toast = await showToast({ title: "Deleting bookmark...", style: Toast.Style.Animated });
 
-      try {
-        await apiDeleteBookmark(bookmark);
+    try {
+      await apiDeleteBookmark(bookmark);
 
-        const updated = allBookmarks.filter((b) => b.id !== bookmark.id);
-        setAllBookmarks(updated);
+      setAllBookmarks((prev) => {
+        const updated = prev.filter((b) => b.id !== bookmark.id);
         setCachedBookmarks(updated);
+        return updated;
+      });
 
-        toast.style = Toast.Style.Success;
-        toast.title = "Successfully deleted bookmark";
-      } catch (error) {
-        console.error("deleteBookmark error", error);
-        toast.title = "Could not delete bookmark";
-        toast.message = String(error);
-        toast.style = Toast.Style.Failure;
-      }
-    },
-    [allBookmarks],
-  );
+      toast.style = Toast.Style.Success;
+      toast.title = "Successfully deleted bookmark";
+    } catch (error) {
+      console.error("deleteBookmark error", error);
+      toast.title = "Could not delete bookmark";
+      toast.message = String(error);
+      toast.style = Toast.Style.Failure;
+    }
+  }, []);
 
   return { bookmarks, isLoading, setSearchText, removeBookmark };
 }
