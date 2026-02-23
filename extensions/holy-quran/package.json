@@ -1,0 +1,590 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "holy-quran",
+  "title": "Holy Quran",
+  "description": "Experience the Holy Quran with beautiful recitations. Browse Surahs, select your favorite reciters, and listen to the divine verses in the background or with specialized memorization loops.",
+  "icon": "extension_icon.png",
+  "author": "abdullahnettoor",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-surah",
+      "title": "Search Surahs",
+      "description": "Browse and search for Surahs to play",
+      "mode": "view"
+    },
+    {
+      "name": "memorize-surah",
+      "title": "Memorize Surah",
+      "description": "Configure a memorization loop for a specific Surah range",
+      "mode": "view"
+    },
+    {
+      "name": "play-surah",
+      "title": "Play Surah",
+      "description": "Browse and play Surahs",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "surah",
+          "placeholder": "Select Surah",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "1. Al-Fatihah (AlFatihah)",
+              "value": "1"
+            },
+            {
+              "title": "2. Al-Baqarah (AlBaqarah)",
+              "value": "2"
+            },
+            {
+              "title": "3. Ali 'Imran (AliImran)",
+              "value": "3"
+            },
+            {
+              "title": "4. An-Nisa (AnNisa)",
+              "value": "4"
+            },
+            {
+              "title": "5. Al-Ma'idah (AlMaidah)",
+              "value": "5"
+            },
+            {
+              "title": "6. Al-An'am (AlAnam)",
+              "value": "6"
+            },
+            {
+              "title": "7. Al-A'raf (AlAraf)",
+              "value": "7"
+            },
+            {
+              "title": "8. Al-Anfal (AlAnfal)",
+              "value": "8"
+            },
+            {
+              "title": "9. At-Tawbah (AtTawbah)",
+              "value": "9"
+            },
+            {
+              "title": "10. Yunus",
+              "value": "10"
+            },
+            {
+              "title": "11. Hud",
+              "value": "11"
+            },
+            {
+              "title": "12. Yusuf",
+              "value": "12"
+            },
+            {
+              "title": "13. Ar-Ra'd (ArRad)",
+              "value": "13"
+            },
+            {
+              "title": "14. Ibrahim",
+              "value": "14"
+            },
+            {
+              "title": "15. Al-Hijr (AlHijr)",
+              "value": "15"
+            },
+            {
+              "title": "16. An-Nahl (AnNahl)",
+              "value": "16"
+            },
+            {
+              "title": "17. Al-Isra (AlIsra)",
+              "value": "17"
+            },
+            {
+              "title": "18. Al-Kahf (AlKahf)",
+              "value": "18"
+            },
+            {
+              "title": "19. Maryam",
+              "value": "19"
+            },
+            {
+              "title": "20. Taha",
+              "value": "20"
+            },
+            {
+              "title": "21. Al-Anbya (AlAnbya)",
+              "value": "21"
+            },
+            {
+              "title": "22. Al-Hajj (AlHajj)",
+              "value": "22"
+            },
+            {
+              "title": "23. Al-Mu'minun (AlMuminun)",
+              "value": "23"
+            },
+            {
+              "title": "24. An-Nur (AnNur)",
+              "value": "24"
+            },
+            {
+              "title": "25. Al-Furqan (AlFurqan)",
+              "value": "25"
+            },
+            {
+              "title": "26. Ash-Shu'ara (AshShuara)",
+              "value": "26"
+            },
+            {
+              "title": "27. An-Naml (AnNaml)",
+              "value": "27"
+            },
+            {
+              "title": "28. Al-Qasas (AlQasas)",
+              "value": "28"
+            },
+            {
+              "title": "29. Al-'Ankabut (AlAnkabut)",
+              "value": "29"
+            },
+            {
+              "title": "30. Ar-Rum (ArRum)",
+              "value": "30"
+            },
+            {
+              "title": "31. Luqman",
+              "value": "31"
+            },
+            {
+              "title": "32. As-Sajdah (AsSajdah)",
+              "value": "32"
+            },
+            {
+              "title": "33. Al-Ahzab (AlAhzab)",
+              "value": "33"
+            },
+            {
+              "title": "34. Saba",
+              "value": "34"
+            },
+            {
+              "title": "35. Fatir",
+              "value": "35"
+            },
+            {
+              "title": "36. Ya-Sin (YaSin yasin)",
+              "value": "36"
+            },
+            {
+              "title": "37. As-Saffat (AsSaffat)",
+              "value": "37"
+            },
+            {
+              "title": "38. Sad",
+              "value": "38"
+            },
+            {
+              "title": "39. Az-Zumar (AzZumar)",
+              "value": "39"
+            },
+            {
+              "title": "40. Ghafir",
+              "value": "40"
+            },
+            {
+              "title": "41. Fussilat",
+              "value": "41"
+            },
+            {
+              "title": "42. Ash-Shuraa (AshShuraa)",
+              "value": "42"
+            },
+            {
+              "title": "43. Az-Zukhruf (AzZukhruf)",
+              "value": "43"
+            },
+            {
+              "title": "44. Ad-Dukhan (AdDukhan)",
+              "value": "44"
+            },
+            {
+              "title": "45. Al-Jathiyah (AlJathiyah)",
+              "value": "45"
+            },
+            {
+              "title": "46. Al-Ahqaf (AlAhqaf)",
+              "value": "46"
+            },
+            {
+              "title": "47. Muhammad",
+              "value": "47"
+            },
+            {
+              "title": "48. Al-Fath (AlFath)",
+              "value": "48"
+            },
+            {
+              "title": "49. Al-Hujurat (AlHujurat)",
+              "value": "49"
+            },
+            {
+              "title": "50. Qaf",
+              "value": "50"
+            },
+            {
+              "title": "51. Adh-Dhariyat (AdhDhariyat)",
+              "value": "51"
+            },
+            {
+              "title": "52. At-Tur (AtTur)",
+              "value": "52"
+            },
+            {
+              "title": "53. An-Najm (AnNajm)",
+              "value": "53"
+            },
+            {
+              "title": "54. Al-Qamar (AlQamar)",
+              "value": "54"
+            },
+            {
+              "title": "55. Ar-Rahman (ArRahman)",
+              "value": "55"
+            },
+            {
+              "title": "56. Al-Waqi'ah (AlWaqiah)",
+              "value": "56"
+            },
+            {
+              "title": "57. Al-Hadid (AlHadid)",
+              "value": "57"
+            },
+            {
+              "title": "58. Al-Mujadila (AlMujadila)",
+              "value": "58"
+            },
+            {
+              "title": "59. Al-Hashr (AlHashr)",
+              "value": "59"
+            },
+            {
+              "title": "60. Al-Mumtahanah (AlMumtahanah)",
+              "value": "60"
+            },
+            {
+              "title": "61. As-Saf (AsSaf)",
+              "value": "61"
+            },
+            {
+              "title": "62. Al-Jumu'ah (AlJumuah)",
+              "value": "62"
+            },
+            {
+              "title": "63. Al-Munafiqun (AlMunafiqun)",
+              "value": "63"
+            },
+            {
+              "title": "64. At-Taghabun (AtTaghabun)",
+              "value": "64"
+            },
+            {
+              "title": "65. At-Talaq (AtTalaq)",
+              "value": "65"
+            },
+            {
+              "title": "66. At-Tahrim (AtTahrim)",
+              "value": "66"
+            },
+            {
+              "title": "67. Al-Mulk (AlMulk)",
+              "value": "67"
+            },
+            {
+              "title": "68. Al-Qalam (AlQalam)",
+              "value": "68"
+            },
+            {
+              "title": "69. Al-Haqqah (AlHaqqah)",
+              "value": "69"
+            },
+            {
+              "title": "70. Al-Ma'arij (AlMaarij)",
+              "value": "70"
+            },
+            {
+              "title": "71. Nuh",
+              "value": "71"
+            },
+            {
+              "title": "72. Al-Jinn (AlJinn)",
+              "value": "72"
+            },
+            {
+              "title": "73. Al-Muzzammil (AlMuzzammil)",
+              "value": "73"
+            },
+            {
+              "title": "74. Al-Muddaththir (AlMuddaththir)",
+              "value": "74"
+            },
+            {
+              "title": "75. Al-Qiyamah (AlQiyamah)",
+              "value": "75"
+            },
+            {
+              "title": "76. Al-Insan (AlInsan)",
+              "value": "76"
+            },
+            {
+              "title": "77. Al-Mursalat (AlMursalat)",
+              "value": "77"
+            },
+            {
+              "title": "78. An-Naba (AnNaba)",
+              "value": "78"
+            },
+            {
+              "title": "79. An-Nazi'at (AnNaziat)",
+              "value": "79"
+            },
+            {
+              "title": "80. 'Abasa (Abasa)",
+              "value": "80"
+            },
+            {
+              "title": "81. At-Takwir (AtTakwir)",
+              "value": "81"
+            },
+            {
+              "title": "82. Al-Infitar (AlInfitar)",
+              "value": "82"
+            },
+            {
+              "title": "83. Al-Mutaffifin (AlMutaffifin)",
+              "value": "83"
+            },
+            {
+              "title": "84. Al-Inshiqaq (AlInshiqaq)",
+              "value": "84"
+            },
+            {
+              "title": "85. Al-Buruj (AlBuruj)",
+              "value": "85"
+            },
+            {
+              "title": "86. At-Tariq (AtTariq)",
+              "value": "86"
+            },
+            {
+              "title": "87. Al-A'la (AlAla)",
+              "value": "87"
+            },
+            {
+              "title": "88. Al-Ghashiyah (AlGhashiyah)",
+              "value": "88"
+            },
+            {
+              "title": "89. Al-Fajr (AlFajr)",
+              "value": "89"
+            },
+            {
+              "title": "90. Al-Balad (AlBalad)",
+              "value": "90"
+            },
+            {
+              "title": "91. Ash-Shams (AshShams)",
+              "value": "91"
+            },
+            {
+              "title": "92. Al-Layl (AlLayl)",
+              "value": "92"
+            },
+            {
+              "title": "93. Ad-Duhaa (AdDuhaa)",
+              "value": "93"
+            },
+            {
+              "title": "94. Ash-Sharh (AshSharh)",
+              "value": "94"
+            },
+            {
+              "title": "95. At-Tin (AtTin)",
+              "value": "95"
+            },
+            {
+              "title": "96. Al-'Alaq (AlAlaq)",
+              "value": "96"
+            },
+            {
+              "title": "97. Al-Qadr (AlQadr)",
+              "value": "97"
+            },
+            {
+              "title": "98. Al-Bayyinah (AlBayyinah)",
+              "value": "98"
+            },
+            {
+              "title": "99. Az-Zalzalah (AzZalzalah)",
+              "value": "99"
+            },
+            {
+              "title": "100. Al-'Adiyat (AlAdiyat)",
+              "value": "100"
+            },
+            {
+              "title": "101. Al-Qari'ah (AlQariah)",
+              "value": "101"
+            },
+            {
+              "title": "102. At-Takathur (AtTakathur)",
+              "value": "102"
+            },
+            {
+              "title": "103. Al-'Asr (AlAsr)",
+              "value": "103"
+            },
+            {
+              "title": "104. Al-Humazah (AlHumazah)",
+              "value": "104"
+            },
+            {
+              "title": "105. Al-Fil (AlFil)",
+              "value": "105"
+            },
+            {
+              "title": "106. Quraysh",
+              "value": "106"
+            },
+            {
+              "title": "107. Al-Ma'un (AlMaun)",
+              "value": "107"
+            },
+            {
+              "title": "108. Al-Kawthar (AlKawthar)",
+              "value": "108"
+            },
+            {
+              "title": "109. Al-Kafirun (AlKafirun)",
+              "value": "109"
+            },
+            {
+              "title": "110. An-Nasr (AnNasr)",
+              "value": "110"
+            },
+            {
+              "title": "111. Al-Masad (AlMasad)",
+              "value": "111"
+            },
+            {
+              "title": "112. Al-Ikhlas (AlIkhlas)",
+              "value": "112"
+            },
+            {
+              "title": "113. Al-Falaq (AlFalaq)",
+              "value": "113"
+            },
+            {
+              "title": "114. An-Nas (AnNas)",
+              "value": "114"
+            }
+          ]
+        },
+        {
+          "name": "start",
+          "placeholder": "Start Ayah (optional)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "end",
+          "placeholder": "End Ayah (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "stop-playback",
+      "title": "Stop Recitation",
+      "description": "Stop currently playing recitation",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-pause",
+      "title": "Pause/Resume Recitation",
+      "description": "Pause or resume the current recitation",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-repeat",
+      "title": "Toggle Repeat On/Off",
+      "description": "Enable or disable looping of the current session",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-default-reciter",
+      "title": "Set Default Reciter",
+      "description": "Choose your preferred reciter for one-click playback",
+      "mode": "view"
+    },
+    {
+      "name": "list-reciters",
+      "title": "List Reciters",
+      "description": "Browse available reciters",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Show Extension Status",
+      "description": "Control and view current activity in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultReciterId",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Reciter ID",
+      "description": "The ID of the default reciter (set via 'Set Default Reciter' command)",
+      "default": "7"
+    },
+    {
+      "name": "defaultReciterName",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Reciter Name",
+      "description": "The name of the default reciter",
+      "default": "Mishari Rashid al-`Afasy"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
