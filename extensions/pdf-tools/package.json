@@ -200,7 +200,7 @@
     }
   ],
   "dependencies": {
-    "@libpdf/core": "^0.2.7",
+    "@libpdf/core": "^0.2.9",
     "@raycast/api": "^1.104.6",
     "universal-selection": "^0.1.10"
   },
@@ -208,7 +208,7 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
     "@types/react": "^19.2.8",
-    "eslint": "^9.39.2",
+    "eslint": "^9.39.3",
     "prettier": "^3.8.1",
     "typescript": "^5.8.2"
   },

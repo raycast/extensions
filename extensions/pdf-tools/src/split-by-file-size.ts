@@ -8,9 +8,8 @@ import {
 } from "@raycast/api";
 import fs from "fs/promises";
 import path from "path";
-import { PDF } from "@libpdf/core";
 import { getSelectedItems } from "universal-selection";
-import { isMac, isWindows, splitBySizeWindows } from "./lib/utils";
+import { isMac, isWindows } from "./lib/constants";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.SplitByFileSize }>) {
   try {
@@ -63,6 +62,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
     // Windows implementation using @libpdf/core
     if (isWindows) {
+      const { PDF } = await import("@libpdf/core");
+      const { splitBySizeWindows } = await import("./lib/windows");
       await closeMainWindow();
 
       const preferences = getPreferenceValues<Preferences.SplitByFileSize>();

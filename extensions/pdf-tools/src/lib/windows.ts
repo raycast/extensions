@@ -2,9 +2,6 @@ import fs from "fs/promises";
 import path from "path";
 import { PDF } from "@libpdf/core";
 
-export const isMac = process.platform === "darwin";
-export const isWindows = process.platform === "win32";
-
 /**
  * For Windows, MacOS uses native Swift implementation.
  * Splits a PDF document into multiple smaller PDF documents, with each chunk containing a specified number of pages.

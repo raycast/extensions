@@ -8,9 +8,8 @@ import {
 } from "@raycast/api";
 import fs from "fs/promises";
 import path from "path";
-import { isMac, isWindows } from "./lib/utils";
+import { isMac, isWindows } from "./lib/constants";
 import { getSelectedItems } from "universal-selection";
-import { PDF, rgb, Standard14Font, StandardFonts } from "@libpdf/core";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.Watermark }>) {
   try {
@@ -52,6 +51,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
     // Windows implementation using @libpdf/core
     if (isWindows) {
+      const { PDF, rgb, Standard14Font, StandardFonts } = await import("@libpdf/core");
+
       for (const item of selectedItems) {
         if (path.extname(item.path).toLowerCase() !== ".pdf") {
           throw new Error("Only PDF files should be selected");

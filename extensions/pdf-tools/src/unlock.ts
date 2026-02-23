@@ -1,9 +1,8 @@
 import { closeMainWindow, getSelectedFinderItems, LaunchProps, showToast, Toast } from "@raycast/api";
 import fs from "fs/promises";
 import path from "path";
-import { PDF } from "@libpdf/core";
 import { getSelectedItems } from "universal-selection";
-import { isMac, isWindows } from "./lib/utils";
+import { isMac, isWindows } from "./lib/constants";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.Unlock }>) {
   try {
@@ -45,6 +44,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
     // Windows implementation using @libpdf/core
     if (isWindows) {
+      const { PDF } = await import("@libpdf/core");
+
       await closeMainWindow();
 
       for (const item of selectedItems) {
