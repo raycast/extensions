@@ -1,6 +1,6 @@
 # Anytype Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-02-23
 
 - Add support for Windows platform
 
