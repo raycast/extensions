@@ -255,6 +255,89 @@ export const withAccessToDownloadsFolder = <P extends object>(Component: Compone
   };
 };
 
+const textExtensions = new Set([
+  ".txt", ".md", ".markdown",
+  ".json", ".jsonc",
+  ".js", ".jsx", ".mjs", ".cjs",
+  ".ts", ".tsx",
+  ".css", ".scss", ".sass", ".less",
+  ".html", ".htm", ".xml",
+  ".csv", ".tsv",
+  ".yaml", ".yml", ".toml", ".ini", ".env", ".cfg", ".conf",
+  ".sh", ".bash", ".zsh", ".fish",
+  ".py", ".rb", ".go", ".rs",
+  ".c", ".cpp", ".h", ".hpp",
+  ".java", ".kt", ".swift", ".php", ".cs",
+  ".sql", ".graphql", ".gql",
+  ".log",
+]);
+
+const extToLanguage: Record<string, string> = {
+  json: "json",
+  jsonc: "json",
+  js: "javascript",
+  jsx: "javascript",
+  mjs: "javascript",
+  cjs: "javascript",
+  ts: "typescript",
+  tsx: "typescript",
+  md: "markdown",
+  markdown: "markdown",
+  css: "css",
+  scss: "css",
+  sass: "css",
+  less: "css",
+  html: "html",
+  htm: "html",
+  xml: "xml",
+  yaml: "yaml",
+  yml: "yaml",
+  toml: "toml",
+  sh: "bash",
+  bash: "bash",
+  zsh: "bash",
+  fish: "bash",
+  py: "python",
+  rb: "ruby",
+  go: "go",
+  rs: "rust",
+  c: "c",
+  h: "c",
+  cpp: "cpp",
+  hpp: "cpp",
+  java: "java",
+  kt: "kotlin",
+  swift: "swift",
+  php: "php",
+  cs: "csharp",
+  sql: "sql",
+  graphql: "graphql",
+  gql: "graphql",
+};
+
+const TEXT_PREVIEW_MAX_BYTES = 10_000;
+
+export function isTextFile(filename: string): boolean {
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex === -1) return false;
+  const ext = filename.toLowerCase().slice(dotIndex);
+  return textExtensions.has(ext);
+}
+
+export function getTextFilePreview(filePath: string): string {
+  try {
+    const buffer = readFileSync(filePath);
+    const truncated = buffer.length > TEXT_PREVIEW_MAX_BYTES;
+    const text = buffer.slice(0, TEXT_PREVIEW_MAX_BYTES).toString("utf-8");
+    const dotIndex = filePath.lastIndexOf(".");
+    const ext = dotIndex !== -1 ? filePath.slice(dotIndex + 1).toLowerCase() : "";
+    const lang = extToLanguage[ext] ?? "";
+    return `\`\`\`${lang}\n${text}${truncated ? "\n\u2026" : ""}\n\`\`\``;
+  } catch {
+    return "*Cannot read file content*";
+  }
+}
+
 const PREVIEW_THUMBNAIL_SIZE = 512;
 
 export function getQuickLookPreviewDataUrl(filePath: string): Promise<string | null> {

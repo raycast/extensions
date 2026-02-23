@@ -7,7 +7,9 @@ import {
   downloadsFolder,
   getDownloads,
   getQuickLookPreviewDataUrl,
+  getTextFilePreview,
   isImageFile,
+  isTextFile,
   showPreview,
   withAccessToDownloadsFolder,
   Download,
@@ -18,31 +20,36 @@ import {
 function FilePreviewDetail({ download, isSelected }: { download: Download; isSelected: boolean }) {
   const isDarwin = process.platform === "darwin";
   const isHiddenFile = download.file.startsWith(".");
-  const shouldShowPreview = isDarwin && showPreview && !download.isDirectory && isSelected && !isHiddenFile;
+  const isText = !download.isDirectory && isTextFile(download.file);
+  const shouldShowImagePreview = isDarwin && showPreview && !download.isDirectory && isSelected && !isHiddenFile && !isText;
+  const shouldShowTextPreview = showPreview && !download.isDirectory && isSelected && !isHiddenFile && isText;
 
   const { data, isLoading } = usePromise(
     async (path: string) => {
       return await getQuickLookPreviewDataUrl(path);
     },
     [download.path],
-    { execute: shouldShowPreview },
+    { execute: shouldShowImagePreview },
   );
 
   if (!isSelected) {
     return null;
   }
 
-  const markdown = shouldShowPreview
-    ? isLoading
+  let markdown: string | null = null;
+  if (shouldShowTextPreview) {
+    markdown = getTextFilePreview(download.path);
+  } else if (shouldShowImagePreview) {
+    markdown = isLoading
       ? "*Loading preview...*"
       : data
         ? `![Preview](${data})`
-        : "*No preview available*"
-    : null;
+        : "*No preview available*";
+  }
 
   return (
     <List.Item.Detail
-      isLoading={shouldShowPreview && isLoading}
+      isLoading={shouldShowImagePreview && isLoading}
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
