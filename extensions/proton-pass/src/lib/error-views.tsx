@@ -52,7 +52,7 @@ function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string): Err
       return {
         icon: Icon.Lock,
         title: "Not Logged In",
-        description: "Run 'pass-cli login' in terminal to authenticate",
+        description: "Run 'pass-cli login' (web login) to authenticate",
         showDocsLink: true,
         showRetry: false,
       };

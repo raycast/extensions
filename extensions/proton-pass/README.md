@@ -26,7 +26,13 @@ Run the login command in your terminal:
 pass-cli login
 ```
 
-Follow the prompts to authenticate with your Proton account.
+This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
+
+Optional: use terminal prompts with interactive login:
+
+```bash
+pass-cli login --interactive user@proton.me
+```
 
 ### 3. Verify
 
