@@ -43,4 +43,3 @@ export interface PaneConfig {
   panes?: PaneConfig[];
   commands?: Array<{ exec: string }>;
 }
-
