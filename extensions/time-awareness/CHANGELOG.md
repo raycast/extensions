@@ -1,5 +1,9 @@
 # Time Awareness Changelog
 
+## Add Custom Confetti Emojis - {PR_MERGE_DATE}
+
+- Add a new preference to the extension to allow users to customize the confetti emojis.
+
 ## [Initial Version] - 2026-02-02
 
 ### Added

@@ -5,6 +5,9 @@
 	"description": "Track your activity sessions and intervals",
 	"icon": "extension-icon.png",
 	"author": "alexi.build",
+	"categories": [
+		"Fun"
+	],
 	"platforms": [
 		"macOS"
 	],
@@ -36,6 +39,15 @@
 			"description": "Reset active counter after being idle for this long",
 			"type": "textfield",
 			"default": "180",
+			"required": false
+		},
+		{
+			"name": "confettiEmojis",
+			"title": "Confetti Emojis",
+			"label": "Confetti Emojis",
+			"description": "Emojis to use for confetti celebration (default: 🩷)",
+			"type": "textfield",
+			"default": "🩷",
 			"required": false
 		}
 	],
