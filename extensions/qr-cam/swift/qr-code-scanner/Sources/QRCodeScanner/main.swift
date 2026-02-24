@@ -3,6 +3,34 @@ import AVFoundation
 import Foundation
 import Vision
 
+final class TitlebarHoverView: NSView {
+  var onHoverChange: ((Bool) -> Void)?
+
+  private var trackingAreaRef: NSTrackingArea?
+
+  override func updateTrackingAreas() {
+    if let trackingAreaRef {
+      removeTrackingArea(trackingAreaRef)
+    }
+
+    let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
+    let trackingArea = NSTrackingArea(rect: .zero, options: options, owner: self, userInfo: nil)
+    addTrackingArea(trackingArea)
+    trackingAreaRef = trackingArea
+    super.updateTrackingAreas()
+  }
+
+  override func mouseEntered(with event: NSEvent) {
+    onHoverChange?(true)
+    super.mouseEntered(with: event)
+  }
+
+  override func mouseExited(with event: NSEvent) {
+    onHoverChange?(false)
+    super.mouseExited(with: event)
+  }
+}
+
 enum ScannerError: LocalizedError {
   case missingCommand
   case unknownCommand(String)
@@ -37,7 +65,9 @@ final class ScannerDelegate: NSObject, NSApplicationDelegate, AVCaptureVideoData
   private let captureSession = AVCaptureSession()
   private var hasFinished = false
   private var isProcessingFrame = false
+  private let sessionQueue = DispatchQueue(label: "raycast.qr.session")
   private let videoQueue = DispatchQueue(label: "raycast.qr.video")
+  private var trafficLightControls: [NSButton] = []
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     do {
@@ -56,6 +86,14 @@ final class ScannerDelegate: NSObject, NSApplicationDelegate, AVCaptureVideoData
 
   func windowWillClose(_ notification: Notification) {
     finish(with: nil)
+  }
+
+  func windowDidBecomeKey(_ notification: Notification) {
+    setTitlebarControlsVisible(false)
+  }
+
+  func windowDidResignKey(_ notification: Notification) {
+    setTitlebarControlsVisible(true)
   }
 
   func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -121,6 +159,11 @@ final class ScannerDelegate: NSObject, NSApplicationDelegate, AVCaptureVideoData
     }
 
     captureSession.beginConfiguration()
+    if captureSession.canSetSessionPreset(.hd1280x720) {
+      captureSession.sessionPreset = .hd1280x720
+    } else if captureSession.canSetSessionPreset(.high) {
+      captureSession.sessionPreset = .high
+    }
 
     guard captureSession.canAddInput(input) else {
       captureSession.commitConfiguration()
@@ -142,13 +185,18 @@ final class ScannerDelegate: NSObject, NSApplicationDelegate, AVCaptureVideoData
 
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 920, height: 620),
-      styleMask: [.titled, .closable, .miniaturizable, .resizable],
+      styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
       backing: .buffered,
       defer: false
     )
     window.title = "Raycast QR Scanner"
+    window.titleVisibility = .hidden
+    window.titlebarAppearsTransparent = true
+    window.isMovableByWindowBackground = true
+    window.backgroundColor = .black
     window.center()
     window.delegate = self
+    self.window = window
 
     let contentView = NSView(frame: window.contentView?.bounds ?? .zero)
     contentView.wantsLayer = true
@@ -160,8 +208,34 @@ final class ScannerDelegate: NSObject, NSApplicationDelegate, AVCaptureVideoData
     previewLayer.frame = contentView.bounds
     contentView.layer?.addSublayer(previewLayer)
 
+    let hoverView = TitlebarHoverView(frame: NSRect(x: 0, y: contentView.bounds.height - 72, width: contentView.bounds.width, height: 72))
+    hoverView.autoresizingMask = [.width, .minYMargin]
+    hoverView.onHoverChange = { [weak self] isHovered in
+      self?.setTitlebarControlsVisible(isHovered)
+    }
+    contentView.addSubview(hoverView)
+
+    trafficLightControls = [
+      window.standardWindowButton(.closeButton),
+      window.standardWindowButton(.miniaturizeButton),
+      window.standardWindowButton(.zoomButton),
+    ].compactMap { $0 }
+    setTitlebarControlsVisible(false)
+
     window.makeKeyAndOrderFront(nil)
-    captureSession.startRunning()
+    sessionQueue.async { [weak self] in
+      guard let self, !self.hasFinished else {
+        return
+      }
+      self.captureSession.startRunning()
+    }
+  }
+
+  private func setTitlebarControlsVisible(_ visible: Bool) {
+    for button in trafficLightControls {
+      button.isHidden = !visible
+      button.alphaValue = visible ? 1 : 0
+    }
   }
 
   private func finish(with value: String?) {
@@ -171,8 +245,11 @@ final class ScannerDelegate: NSObject, NSApplicationDelegate, AVCaptureVideoData
     hasFinished = true
 
     result = value
-    captureSession.stopRunning()
-    window?.orderOut(nil)
+    sessionQueue.async { [captureSession] in
+      if captureSession.isRunning {
+        captureSession.stopRunning()
+      }
+    }
     activateRaycast()
 
     NSApp.stop(nil)

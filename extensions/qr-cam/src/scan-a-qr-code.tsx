@@ -20,6 +20,7 @@ type WifiNetwork = {
 };
 
 const execFileAsync = promisify(execFile);
+let didPrepareNativeScannerExecutable = false;
 
 export default function Command(props: LaunchProps<{ launchContext?: CommandLaunchContext }>) {
   const initialValue = props.launchContext?.value?.trim() || null;
@@ -435,7 +436,10 @@ async function runNativeSwiftScanner(): Promise<string | null> {
   }
 
   const swiftPath = join(environment.assetsPath, "compiled_raycast_swift", "qr-code-scanner");
-  await chmod(swiftPath, "755");
+  if (!didPrepareNativeScannerExecutable) {
+    await chmod(swiftPath, "755");
+    didPrepareNativeScannerExecutable = true;
+  }
 
   return new Promise((resolve, reject) => {
     const child = spawn(swiftPath, ["scanQRCode"]);
