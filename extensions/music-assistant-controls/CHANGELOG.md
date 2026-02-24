@@ -1,6 +1,6 @@
 # Music Assistant Controls Changelog
 
-## [Player Grouping and Menu Bar Management] - {PR_MERGE_DATE}
+## [Player Grouping and Menu Bar Management] - 2026-02-24
 
 ### ✨ New Features
 
