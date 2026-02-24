@@ -1,5 +1,9 @@
 # Raycast Fork Extensions Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Update extension instruction
+
 ## [Maintenance] - 2026-02-23
 
 - Bump nano-spawn@2.0.0
