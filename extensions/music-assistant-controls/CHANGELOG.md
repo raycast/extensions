@@ -1,6 +1,6 @@
 # Music Assistant Controls Changelog
 
-## [Windows Support Added] - {PR_MERGE_DATE}
+## [Windows Support Added] - 2026-02-24
 
 ### ✨ New Features
 
