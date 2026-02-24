@@ -1,11 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-type Preferences = {
-  apiKey: string;
-  apiBaseUrl: string;
-  modelId?: string;
-};
-
 function getConfig(): Preferences {
   const prefs = getPreferenceValues<Preferences>();
   return {

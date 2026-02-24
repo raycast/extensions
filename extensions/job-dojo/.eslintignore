@@ -1,3 +1,0 @@
-# Keep lint scope explicit for Raycast publish/lint commands.
-dist/
-node_modules/

@@ -353,7 +353,7 @@ function ChatView({
         setIsLoading(false);
       }
     },
-    [chatId, currentModelId],
+    [chatId, currentModelId, model],
   );
 
   // Send initial question on mount (for new chats)
@@ -426,7 +426,7 @@ function ChatView({
         <ActionPanel>
           {!isLoading && (
             <Action
-              title="Follow Up"
+              title="Follow up"
               icon={Icon.Message}
               onAction={handleFollowUp}
             />
