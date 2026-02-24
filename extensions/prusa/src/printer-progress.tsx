@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, LaunchType, launchCommand } from "@raycast/api";
+import { MenuBarExtra, Icon, LaunchType, launchCommand, getPreferenceValues, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { createPrusaClientFromPreferences } from "./api/prusaClient";
@@ -18,6 +18,8 @@ function formatTime(seconds: number): string {
 }
 
 export default function Command() {
+  const { prusaConnectUUID: rawPrusaConnectUUID } = getPreferenceValues<Preferences>();
+  const prusaConnectUUID = rawPrusaConnectUUID?.trim();
   const {
     data: status,
     error,
@@ -123,6 +125,15 @@ export default function Command() {
             }
           }}
         />
+        {prusaConnectUUID && (
+          <MenuBarExtra.Item
+            title="Open in Prusa Connect"
+            icon={Icon.Globe}
+            onAction={() => {
+              void open(`https://connect.prusa3d.com/printer/${prusaConnectUUID}/dashboard`);
+            }}
+          />
+        )}
         <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

@@ -1,8 +1,9 @@
 # Prusa Printer Control Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Improvements] - {PR_MERGE_DATE}
 
-- Change icon when status is `Attention`
+- Added Prusa Connect dashboard integration: configure your printer UUID in preferences to open the dashboard from the status view, menu bar, or as a standalone command
+- Changed icon when status is `ATTENTION`
 
 ## [Bug Fix] - 2026-02-23
 
