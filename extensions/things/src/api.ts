@@ -1,4 +1,4 @@
-import { exec, spawn } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { existsSync, readdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
@@ -49,27 +49,11 @@ function getThingsDBPath(): string {
   return _thingsDBPath;
 }
 
-// Pipe SQL to sqlite3 via stdin to avoid shell/argument parsing issues
-function runSqlite(dbPath: string, sql: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('/usr/bin/sqlite3', ['-readonly', dbPath], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    let stdout = '';
-    let stderr = '';
-    proc.stdout.on('data', (chunk: Buffer) => {
-      stdout += chunk;
-    });
-    proc.stderr.on('data', (chunk: Buffer) => {
-      stderr += chunk;
-    });
-    proc.on('error', reject);
-    proc.on('close', (code) => {
-      if (code !== 0) reject(new Error(`sqlite3 exited ${code}: ${stderr.trim()}`));
-      else resolve(stdout.trim());
-    });
-    proc.stdin.end(sql);
-  });
+const execFileAsync = promisify(execFile);
+
+async function runSqlite(dbPath: string, sql: string): Promise<string> {
+  const { stdout } = await execFileAsync('/usr/bin/sqlite3', ['-readonly', dbPath, sql]);
+  return stdout.trim();
 }
 
 export class ThingsError extends Error {
