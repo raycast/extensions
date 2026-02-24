@@ -2,6 +2,10 @@
 
 ## [Menu Bar Performance & Stability] - {PR_MERGE_DATE}
 
+### ✨ New Features
+
+- **Previous Song command** - Navigate backward through the queue with a dedicated "Previous Song" command that mirrors the existing "Next Song" functionality
+
 ### ⚡ Performance & Reliability
 
 - Menu bar is now instant and flicker-free — appears immediately even with slow Music Assistant servers, with responsive controls and smooth background updates

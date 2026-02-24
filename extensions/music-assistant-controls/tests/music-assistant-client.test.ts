@@ -49,6 +49,33 @@ describe("MusicAssistantClient", () => {
     });
   });
 
+  describe("previous", () => {
+    it("should call playerCommandPrevious with correct playerId", async () => {
+      const playerId = "test-player-123";
+      const mockApi = {
+        playerCommandPrevious: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.previous(playerId);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandPrevious).toHaveBeenCalledWith(playerId);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-123";
+      const error = new Error("API Error");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.previous(playerId)).rejects.toThrow("API Error");
+    });
+  });
+
   describe("togglePlayPause", () => {
     it("should call playerCommandPlayPause with correct playerId", async () => {
       const playerId = "test-player-456";

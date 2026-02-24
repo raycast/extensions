@@ -50,6 +50,20 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Go back to the previous track on the specified player
+   *
+   * @param playerId - The unique identifier of the player to control
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.previous("living-room-player");
+   * ```
+   */
+  async previous(playerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandPrevious(playerId));
+  }
+
+  /**
    * Toggle play/pause state on the specified player
    *
    * @param playerId - The unique identifier of the player to control

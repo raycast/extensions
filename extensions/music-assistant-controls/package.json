@@ -26,6 +26,13 @@
       "mode": "no-view"
     },
     {
+      "name": "previous-song",
+      "title": "Previous Song",
+      "subtitle": "Previous song in queue on the active player.",
+      "description": "Goes back to the previous song on the currently selected menu bar player.",
+      "mode": "no-view"
+    },
+    {
       "name": "play-pause",
       "title": "Toggle",
       "subtitle": "Toggle play/pause on the active player.",
