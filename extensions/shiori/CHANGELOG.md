@@ -1,3 +1,3 @@
-# Shiori Changelog
+# shiori Changelog
 
-## [Initial Version] - 2024-01-21
+## [Initial Version] - {PR_MERGE_DATE}

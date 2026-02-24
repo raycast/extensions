@@ -2,67 +2,43 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shiori",
   "title": "Shiori",
-  "description": "Interact with Shiori the bookmark manager",
-  "version": "0.1.0",
-  "icon": "shiori-icon-512.png",
-  "author": "namiwang",
+  "description": "Shiori is a tool for searching and managing your links.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
-    "Productivity"
+    "Applications"
   ],
   "license": "MIT",
-  "type": "module",
+  "commands": [
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "description": "Search for links in your Shiori database.",
+      "mode": "no-view"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.65.1",
-    "@raycast/utils": "^1.12.4",
-    "got": "^14.0.0"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "preferences": [
-    {
-      "name": "hostUrl",
-      "title": "Shiori Instance URL",
-      "description": "URL for your Shiori instance",
-      "placeholder": "URL for your Shiori instance",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "username",
-      "title": "Username",
-      "description": "Enter your Shiori username",
-      "placeholder": "Your Shiori username",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "password",
-      "title": "Password",
-      "description": "Enter your Shiori password",
-      "placeholder": "Your Shiori password",
-      "type": "password",
-      "required": true
-    }
-  ],
-  "commands": [
-    {
-      "name": "addBookmark",
-      "title": "Add Bookmark to Shiori",
-      "description": "Add a bookmark to Shiori",
-      "mode": "view"
-    }
-  ]
+  }
 }
