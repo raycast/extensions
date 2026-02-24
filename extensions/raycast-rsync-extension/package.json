@@ -88,5 +88,8 @@
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest --run",
     "test:watch": "vitest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
