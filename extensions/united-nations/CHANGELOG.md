@@ -1,5 +1,10 @@
 # United Nations Extension
 
+## [Maintenance] - 2026-02-01
+
+- Resolve CVE-2026-25128
+- Bump all dependencies to the latest
+
 ## [Maintenance] - 2025-11-19
 
 - Fix issue when access values from undefined

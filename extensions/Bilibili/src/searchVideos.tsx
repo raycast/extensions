@@ -30,6 +30,7 @@ export default function Command() {
         {videoResults?.map((item) => {
           return (
             <Video
+              key={item.bvid}
               title={removeEmHTMLTag(item.title)}
               cover={item.pic}
               url={item.arcurl}

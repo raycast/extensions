@@ -219,7 +219,10 @@ export default function Command() {
                 icon={Icon.Download}
                 // eslint-disable-next-line @raycast/prefer-title-case
                 title="Export Timers as CSV"
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "s" },
+                  Windows: { modifiers: ["ctrl"], key: "s" },
+                }}
                 onAction={exportTimers}
               />
             </ActionPanel>

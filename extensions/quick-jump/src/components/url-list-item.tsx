@@ -2,6 +2,7 @@ import { Action, ActionPanel, Application, List, Detail, Icon } from "@raycast/a
 import { DisplayUrl } from "../types";
 import { OpenConfigFileAction } from "./open-config-action";
 import { getTagAccessories, getFallbackIcon, getAppIcon } from "../utils";
+import { SHORTCUTS } from "../constants";
 
 interface URLListItemProps {
   item: DisplayUrl;
@@ -58,7 +59,7 @@ function URLDetailView({ item, applications }: { item: DisplayUrl; applications:
           )}
           <Action.CopyToClipboard content={item.url} title="Copy URL" />
           <ActionPanel.Section>
-            <OpenConfigFileAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+            <OpenConfigFileAction shortcut={SHORTCUTS.OPEN_CONFIG} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -92,7 +93,7 @@ export function URLListItem({ item, applications }: URLListItemProps) {
           ) : (
             <Action.OpenInBrowser url={item.url} />
           )}
-          <Action.CopyToClipboard content={item.url} />
+          <Action.CopyToClipboard content={item.url} title="Copy URL" />
           <Action.Push
             title="Show Details"
             icon={Icon.Eye}
@@ -100,7 +101,7 @@ export function URLListItem({ item, applications }: URLListItemProps) {
             target={<URLDetailView item={item} applications={applications} />}
           />
           <ActionPanel.Section>
-            <OpenConfigFileAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+            <OpenConfigFileAction shortcut={SHORTCUTS.OPEN_CONFIG} />
           </ActionPanel.Section>
         </ActionPanel>
       }

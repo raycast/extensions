@@ -8,29 +8,27 @@ Explore the world of Pokémon with stunning visuals and detailed information in 
 
 ## Features
 
-### Core Functionality
+### Commands
 
-* **Comprehensive Pokémon Database:** Access information on all 1025 Pokémon species, including regional variants, Mega Evolutions, and Gigantamax forms.
-* **Detailed Pokédex Entries:** Explore in-depth details about Pokédex data, stats, types, training, breeding, evolutions, learnsets, and locations.
-* **Enhanced Move Information**: Access detailed information about Pokémon moves, including base power, accuracy, PP, type, category, priority, target, and more.
-* **Quick Links:** Easily access Pokémon on the Official Pokémon Website or Bulbapedia with direct links.
+* **Pokédex:** Search and explore all 1025 Pokémon species with comprehensive data including stats, types, abilities, evolutions, learnsets, and encounter locations.
+* **Type Chart:** View type matchups and interactions to understand strengths, weaknesses, and resistances.
+* **Natures:** Browse Pokémon natures and their effects on stat growth.
+* **Moves:** Access detailed move information including base power, accuracy, PP, type, category, priority, and more.
+* **Abilities:** Look up ability descriptions and effects.
+* **Items:** Browse and filter Pokémon items by pocket, view item effects, and item prices.
+* **Weaknesses:** Analyze type effectiveness for any Pokémon or type combination.
 
-### Customization Options
+### Customization
 
-* **Language Preferences:** Choose your preferred language for Pokémon details (English, French, German, Italian, Japanese, Korean, Spanish, Simplified & Traditional Chinese).
-* **Type Filtering**: Narrow down your search by selecting specific Pokémon types.
-* **Sorting Flexibility:** Sort the Pokédex by Pokémon name or National Pokédex number to suit your preferences.
-* **Artwork Selection:** Customize the Pokémon artwork to match your style:
-  * **Official Artwork:** View the classic, official Pokémon designs.
-  * **Pixel Art:** Experience a nostalgic touch with pixelated Pokémon sprites.
-
-### Performance Optimization
-
-* **Efficient Caching:** Benefit from a caching system that stores frequently accessed Pokémon data, improving load times and reducing API usage.
+* **Language Support:** English, French, German, Italian, Japanese, Korean, Spanish, Simplified & Traditional Chinese.
+* **Type Filtering:** Narrow results by Pokémon type in the Pokédex.
+* **Sorting Options:** Sort by Pokémon name or National Pokédex number.
+* **Artwork Styles:** Choose between official artwork or pixel art sprites.
+* **Quick Links:** Direct access to official Pokémon website and Bulbapedia.
 
 ## TODO
 
-* Integrate Pokémon sprites.
+* Integrate Pokémon sprites into Pokédex search results.
 
 ## Issues
 
@@ -42,8 +40,12 @@ Report bugs or suggest improvements by creating an issue [here](https://github.c
 
 * Data: [PokéAPI](https://pokeapi.co/)
 * Official Artwork & Sprites (Up to National Dex #649): © Nintendo/The Pokémon Company/GAME FREAK Inc.
-* Pixel Art Sprites (National Dex #650 and above): [Smogon community](https://www.smogon.com/forums/threads/smogon-sprite-project.3647722/) (special thanks for their contributions), [Smogon Sprite Project Spreadsheet](https://docs.google.com/spreadsheets/d/1acgzAjh0dnFRQnjZu8kSjS177rKCzpFfEHRLtwuuXRU/edit?gid=0#gid=0)
-* Generation 9 Sprites: [KingOfThe-X-Roads](https://www.deviantart.com/kingofthe-x-roads)
+* Black & White–Style Sprite Credits (National Dex #650+): Provided by the [Smogon Sprite Project](https://www.smogon.com/forums/threads/smogon-sprite-project.3647722/) huge thanks to their contributors for making these available.
+  * [Generation 6 Spreadsheet](https://docs.google.com/spreadsheets/d/1Gn0UORn-unvcbUeQhQdEBz0ADNcH49BZZqQ1dpXm9eo)
+  * [Generation 7 Spreadsheet](https://docs.google.com/spreadsheets/d/1FMcHbSKEWZc7v2Ur4cyJjT_NhO0gqXyU9kDhsOQhlBQ)
+  * [Generation 8 Spreadsheet](https://docs.google.com/spreadsheets/d/1acgzAjh0dnFRQnjZu8kSjS177rKCzpFfEHRLtwuuXRU)
+  * [Generation 9 Spreadsheet](https://docs.google.com/spreadsheets/d/1MCjDktTOOFjLKM5C-RW6SfBQGkjlxDSCZAZDma_ItuA)
+* Additional Generation 9 Sprites: Created by [KingOfThe-X-Roads on DeviantArt](https://www.deviantart.com/kingofthe-x-roads)
 
 **Icons:**
 

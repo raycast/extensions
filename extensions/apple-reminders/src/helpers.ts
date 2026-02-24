@@ -100,5 +100,8 @@ export function getIntervalValidationError(interval?: string): string | undefine
 }
 
 export function getAttachedUrls(reminder: Reminder): string[] {
-  return (reminder.attachedUrls || []).filter(Boolean);
+  if (!reminder.attachedUrls || !Array.isArray(reminder.attachedUrls)) {
+    return [];
+  }
+  return reminder.attachedUrls.filter(Boolean);
 }

@@ -29,7 +29,7 @@ function CopyUsernameAction() {
       title="Copy Username"
       icon={Icon.Person}
       onAction={handleCopyUsername}
-      shortcut={{ macOS: { key: "u", modifiers: ["opt"] }, windows: { key: "u", modifiers: ["alt"] } }}
+      shortcut={{ macOS: { key: "u", modifiers: ["opt"] }, Windows: { key: "u", modifiers: ["alt"] } }}
     />
   );
 }

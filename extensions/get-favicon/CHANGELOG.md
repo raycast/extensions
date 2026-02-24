@@ -1,5 +1,10 @@
 # Get Favicon Changelog
 
+## [Maintenance] - 2026-01-24
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Add support for specifying icon size] - 2025-03-03
 
 - Added support for specifying icon size, you can set the size of the icon in the settings.

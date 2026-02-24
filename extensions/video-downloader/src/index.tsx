@@ -33,6 +33,7 @@ import {
   sanitizeVideoTitle,
 } from "./utils.js";
 import { Video } from "./types.js";
+import { MP3_FORMAT_ID } from "./utils.js";
 import Installer from "./views/installer.js";
 import Updater from "./views/updater.js";
 
@@ -62,8 +63,15 @@ export default function DownloadVideo() {
       const [downloadFormat, recodeFormat] = values.format.split("#");
 
       options.push("--ffmpeg-location", ffmpegPath);
-      options.push("--format", downloadFormat);
-      options.push("--recode-video", recodeFormat);
+
+      if (values.format === MP3_FORMAT_ID) {
+        options.push("--extract-audio");
+        options.push("--audio-format", "mp3");
+        options.push("--audio-quality", "0");
+      } else {
+        options.push("--format", downloadFormat);
+        options.push("--recode-video", recodeFormat);
+      }
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -74,11 +82,13 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const process = spawn(ytdlPath, [...options, values.url]);
+      const downloadProcess = spawn(ytdlPath, [...options, values.url], {
+        env: { ...globalThis.process.env, PYTHONUNBUFFERED: "1" },
+      });
 
       let filePath = "";
 
-      process.stdout.on("data", (data) => {
+      downloadProcess.stdout.on("data", (data) => {
         const line = data.toString() as string;
 
         const progress = Number(/\[download\]\s+(\d+(\.\d+)?)%.*/.exec(line)?.[1]);
@@ -96,7 +106,7 @@ export default function DownloadVideo() {
         }
       });
 
-      process.stderr.on("data", (data) => {
+      downloadProcess.stderr.on("data", (data) => {
         const line = data.toString();
 
         if (line.startsWith("WARNING:")) {
@@ -110,7 +120,7 @@ export default function DownloadVideo() {
         toast.message = line;
       });
 
-      process.on("close", () => {
+      downloadProcess.on("close", () => {
         if (toast.style === Toast.Style.Failure) {
           return;
         }
@@ -174,9 +184,19 @@ export default function DownloadVideo() {
 
       const result = await execa(
         ytdlPath,
-        [forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter((x) =>
-          Boolean(x),
-        ),
+        [
+          forceIpv4 ? "--force-ipv4" : "",
+          "--no-playlist",
+          "--dump-json",
+          "--format-sort=resolution,ext,tbr",
+          url,
+        ].filter(Boolean),
+        {
+          env: {
+            ...process.env,
+            PYTHONUNBUFFERED: "1",
+          },
+        },
       );
       const data = JSON.parse(result.stdout) as Video;
 

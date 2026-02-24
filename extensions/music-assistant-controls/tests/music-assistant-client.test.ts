@@ -105,6 +105,60 @@ describe("MusicAssistantClient", () => {
     });
   });
 
+  describe("volumeUp", () => {
+    it("should call playerCommandVolumeUp API method", async () => {
+      const playerId = "test-player-vol";
+      const mockApi = {
+        playerCommandVolumeUp: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.volumeUp(playerId);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeUp).toHaveBeenCalledWith(playerId);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-vol";
+      const error = new Error("Volume up failed");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.volumeUp(playerId)).rejects.toThrow("Volume up failed");
+    });
+  });
+
+  describe("volumeDown", () => {
+    it("should call playerCommandVolumeDown API method", async () => {
+      const playerId = "test-player-vol";
+      const mockApi = {
+        playerCommandVolumeDown: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.volumeDown(playerId);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeDown).toHaveBeenCalledWith(playerId);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-vol";
+      const error = new Error("Volume down failed");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.volumeDown(playerId)).rejects.toThrow("Volume down failed");
+    });
+  });
+
   describe("getPlayer", () => {
     it("should call getPlayer with correct playerId", async () => {
       const playerId = "test-player-123";
@@ -421,9 +475,31 @@ describe("MusicAssistantClient", () => {
     });
 
     describe("formatSelectionMessage", () => {
-      it("should format message correctly", () => {
+      const originalPlatform = process.platform;
+
+      afterEach(() => {
+        Object.defineProperty(process, "platform", {
+          value: originalPlatform,
+          writable: true,
+        });
+      });
+
+      it("should format message with menubar reference on macOS", () => {
+        Object.defineProperty(process, "platform", {
+          value: "darwin",
+          writable: true,
+        });
         const result = client.formatSelectionMessage("Bedroom");
         expect(result).toBe("Bedroom selected, allow 10 seconds for the menubar to update!");
+      });
+
+      it("should format message without menubar reference on Windows", () => {
+        Object.defineProperty(process, "platform", {
+          value: "win32",
+          writable: true,
+        });
+        const result = client.formatSelectionMessage("Kitchen");
+        expect(result).toBe("Kitchen selected!");
       });
     });
   });
@@ -496,6 +572,666 @@ describe("MusicAssistantClient", () => {
           { level: 100, display: "100%" },
         ]);
       });
+    });
+  });
+
+  describe("Player Grouping Methods", () => {
+    describe("setGroupMembers", () => {
+      it("should call playerCommandSetMembers with all parameters", async () => {
+        const mockApi = {
+          playerCommandSetMembers: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.setGroupMembers("leader-1", ["member-1"], ["member-2"]);
+
+        expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+        expect(mockApi.playerCommandSetMembers).toHaveBeenCalledWith("leader-1", ["member-1"], ["member-2"]);
+      });
+
+      it("should handle errors from API command", async () => {
+        const error = new Error("Incompatible players");
+        mockExecuteApiCommand.mockRejectedValue(error);
+
+        await expect(client.setGroupMembers("leader-1", ["member-1"])).rejects.toThrow("Incompatible players");
+      });
+    });
+
+    describe("groupPlayer", () => {
+      it("should call playerCommandGroup with correct parameters", async () => {
+        const mockApi = {
+          playerCommandGroup: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.groupPlayer("player-1", "leader-1");
+
+        expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+        expect(mockApi.playerCommandGroup).toHaveBeenCalledWith("player-1", "leader-1");
+      });
+
+      it("should handle errors from API command", async () => {
+        const error = new Error("Player already grouped");
+        mockExecuteApiCommand.mockRejectedValue(error);
+
+        await expect(client.groupPlayer("player-1", "leader-1")).rejects.toThrow("Player already grouped");
+      });
+    });
+
+    describe("ungroupPlayer", () => {
+      it("should call playerCommandUnGroup with correct player ID", async () => {
+        const mockApi = {
+          playerCommandUnGroup: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.ungroupPlayer("player-1");
+
+        expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+        expect(mockApi.playerCommandUnGroup).toHaveBeenCalledWith("player-1");
+      });
+
+      it("should handle errors from API command", async () => {
+        const error = new Error("Ungroup failed");
+        mockExecuteApiCommand.mockRejectedValue(error);
+
+        await expect(client.ungroupPlayer("player-1")).rejects.toThrow("Ungroup failed");
+      });
+    });
+
+    describe("canFormGroup", () => {
+      it("should return true when player has compatible players", () => {
+        const player = { player_id: "test", can_group_with: ["player-1", "player-2"] } as any;
+        expect(client.canFormGroup(player)).toBe(true);
+      });
+
+      it("should return false when can_group_with is empty", () => {
+        const player = { player_id: "test", can_group_with: [] } as any;
+        expect(client.canFormGroup(player)).toBe(false);
+      });
+
+      it("should return false when player is undefined", () => {
+        expect(client.canFormGroup(undefined)).toBe(false);
+      });
+    });
+
+    describe("isGroupLeader", () => {
+      it("should return true when player has group children", () => {
+        const player = { player_id: "test", group_childs: ["child-1", "child-2"] } as any;
+        expect(client.isGroupLeader(player)).toBe(true);
+      });
+
+      it("should return false when group_childs is empty", () => {
+        const player = { player_id: "test", group_childs: [] } as any;
+        expect(client.isGroupLeader(player)).toBe(false);
+      });
+
+      it("should return false when player is undefined", () => {
+        expect(client.isGroupLeader(undefined)).toBe(false);
+      });
+    });
+
+    describe("getGroupStatus", () => {
+      it("should return Leader when player has group children", () => {
+        const player = { player_id: "test", group_childs: ["child-1"], synced_to: undefined } as any;
+        expect(client.getGroupStatus(player)).toBe("Leader");
+      });
+
+      it("should return Member when player has synced_to", () => {
+        const player = { player_id: "test", group_childs: [], synced_to: "leader-1" } as any;
+        expect(client.getGroupStatus(player)).toBe("Member");
+      });
+
+      it("should return Member when player has active_group", () => {
+        const player = { player_id: "test", group_childs: [], active_group: "group-1" } as any;
+        expect(client.getGroupStatus(player)).toBe("Member");
+      });
+
+      it("should return Standalone when player is not grouped", () => {
+        const player = { player_id: "test", group_childs: [], synced_to: undefined, active_group: undefined } as any;
+        expect(client.getGroupStatus(player)).toBe("Standalone");
+      });
+
+      it("should return Standalone when player is undefined", () => {
+        expect(client.getGroupStatus(undefined)).toBe("Standalone");
+      });
+    });
+
+    describe("getCompatiblePlayers", () => {
+      it("should return only players with shared grouping providers", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          can_group_with: ["airplay", "sonos"],
+        } as any;
+
+        const allPlayers = [
+          { player_id: "player-1", can_group_with: ["airplay"], available: true, enabled: true },
+          { player_id: "player-2", can_group_with: ["sonos"], available: false, enabled: true },
+          { player_id: "player-3", can_group_with: ["airplay"], available: true, enabled: false },
+          { player_id: "player-4", can_group_with: ["chromecast"], available: true, enabled: true },
+          { player_id: "leader-1", can_group_with: ["airplay", "sonos"], available: true, enabled: true },
+        ] as any[];
+
+        const compatible = client.getCompatiblePlayers(targetPlayer, allPlayers);
+
+        expect(compatible).toHaveLength(1);
+        expect(compatible[0].player_id).toBe("player-1");
+      });
+
+      it("should exclude target player from compatible list", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          can_group_with: ["airplay"],
+        } as any;
+
+        const allPlayers = [
+          { player_id: "leader-1", can_group_with: ["airplay"], available: true, enabled: true },
+          { player_id: "player-1", can_group_with: ["airplay"], available: true, enabled: true },
+        ] as any[];
+
+        const compatible = client.getCompatiblePlayers(targetPlayer, allPlayers);
+
+        expect(compatible).toHaveLength(1);
+        expect(compatible[0].player_id).toBe("player-1");
+      });
+
+      it("should return empty array when no compatible players", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          can_group_with: ["airplay"],
+        } as any;
+
+        const allPlayers = [
+          { player_id: "player-1", can_group_with: ["chromecast"], available: true, enabled: true },
+        ] as any[];
+
+        const compatible = client.getCompatiblePlayers(targetPlayer, allPlayers);
+
+        expect(compatible).toHaveLength(0);
+      });
+    });
+  });
+
+  // Menu Bar Display Logic Tests
+  describe("isDisplayablePlayer", () => {
+    it("should return true for group leaders with members", () => {
+      const groupLeader = {
+        player_id: "leader-1",
+        group_childs: ["member-1", "member-2"],
+        synced_to: undefined,
+      } as any;
+
+      expect(client.isDisplayablePlayer(groupLeader)).toBe(true);
+    });
+
+    it("should return true for standalone players without sync", () => {
+      const standalone = {
+        player_id: "player-1",
+        group_childs: [],
+        synced_to: undefined,
+      } as any;
+
+      expect(client.isDisplayablePlayer(standalone)).toBe(true);
+    });
+
+    it("should return false for group members that are synced", () => {
+      const groupMember = {
+        player_id: "member-1",
+        group_childs: [],
+        synced_to: "leader-1",
+      } as any;
+
+      expect(client.isDisplayablePlayer(groupMember)).toBe(false);
+    });
+
+    it("should return false for group members with empty group_childs", () => {
+      const groupMember = {
+        player_id: "member-1",
+        group_childs: [],
+        synced_to: "leader-1",
+      } as any;
+
+      expect(client.isDisplayablePlayer(groupMember)).toBe(false);
+    });
+  });
+
+  describe("getDisplayableQueues", () => {
+    it("should filter to only group leaders and standalone players", () => {
+      const queues: PlayerQueue[] = [
+        { queue_id: "leader-1", display_name: "Leader" } as any,
+        { queue_id: "member-1", display_name: "Member" } as any,
+        { queue_id: "standalone-1", display_name: "Standalone" } as any,
+      ];
+
+      const players = [
+        { player_id: "leader-1", group_childs: ["member-1"], synced_to: undefined },
+        { player_id: "member-1", group_childs: [], synced_to: "leader-1" },
+        { player_id: "standalone-1", group_childs: [], synced_to: undefined },
+      ] as any[];
+
+      const displayable = client.getDisplayableQueues(queues, players);
+
+      expect(displayable).toHaveLength(2);
+      expect(displayable.map((q) => q.queue_id)).toEqual(["leader-1", "standalone-1"]);
+    });
+
+    it("should return empty array when all are group members", () => {
+      const queues: PlayerQueue[] = [
+        { queue_id: "member-1", display_name: "Member 1" } as any,
+        { queue_id: "member-2", display_name: "Member 2" } as any,
+      ];
+
+      const players = [
+        { player_id: "member-1", group_childs: [], synced_to: "leader" },
+        { player_id: "member-2", group_childs: [], synced_to: "leader" },
+      ] as any[];
+
+      const displayable = client.getDisplayableQueues(queues, players);
+
+      expect(displayable).toHaveLength(0);
+    });
+
+    it("should handle queues with no matching player", () => {
+      const queues: PlayerQueue[] = [
+        { queue_id: "leader-1", display_name: "Leader" } as any,
+        { queue_id: "unknown-1", display_name: "Unknown" } as any,
+      ];
+
+      const players = [{ player_id: "leader-1", group_childs: [], synced_to: undefined }] as any[];
+
+      const displayable = client.getDisplayableQueues(queues, players);
+
+      expect(displayable).toHaveLength(1);
+      expect(displayable[0].queue_id).toBe("leader-1");
+    });
+  });
+
+  describe("getDisplayQueueForMenuBar", () => {
+    it("should return undefined when activeQueue is undefined", () => {
+      const result = client.getDisplayQueueForMenuBar(undefined, [], []);
+      expect(result).toBeUndefined();
+    });
+
+    it("should return displayable activeQueue as-is", () => {
+      const activeQueue: PlayerQueue = { queue_id: "leader-1", display_name: "Leader" } as any;
+      const players = [{ player_id: "leader-1", group_childs: ["member-1"], synced_to: undefined }] as any[];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, []);
+
+      expect(result).toBe(activeQueue);
+    });
+
+    it("should return the group leader queue when activeQueue is a group member", () => {
+      const activeQueue: PlayerQueue = { queue_id: "member-1", display_name: "Member" } as any;
+      const players = [
+        { player_id: "member-1", group_childs: [], synced_to: "leader-1" },
+        { player_id: "leader-1", group_childs: ["member-1"], synced_to: undefined },
+      ] as any[];
+
+      const queues: PlayerQueue[] = [
+        { queue_id: "member-1" } as any,
+        { queue_id: "leader-1", display_name: "Leader" } as any,
+      ];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, queues);
+
+      expect(result?.queue_id).toBe("leader-1");
+    });
+
+    it("should return activeQueue when player not found in players list", () => {
+      const activeQueue: PlayerQueue = { queue_id: "unknown-1", display_name: "Unknown" } as any;
+      const players: any[] = [];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, []);
+
+      expect(result).toBe(activeQueue);
+    });
+
+    it("should return activeQueue when member has no synced_to", () => {
+      const activeQueue: PlayerQueue = { queue_id: "player-1", display_name: "Player" } as any;
+      const players = [{ player_id: "player-1", group_childs: [], synced_to: undefined }] as any[];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, []);
+
+      expect(result).toBe(activeQueue);
+    });
+
+    it("should return activeQueue when synced group leader queue not found", () => {
+      const activeQueue: PlayerQueue = { queue_id: "member-1", display_name: "Member" } as any;
+      const players = [{ player_id: "member-1", group_childs: [], synced_to: "missing-leader" }] as any[];
+
+      const result = client.getDisplayQueueForMenuBar(activeQueue, players, []);
+
+      expect(result).toBe(activeQueue);
+    });
+  });
+
+  describe("getCurrentlyPlayingSong", () => {
+    it("should return formatted song with title and artist", () => {
+      const player = {
+        current_media: {
+          title: "Bohemian Rhapsody",
+          artist: "Queen",
+        },
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("Bohemian Rhapsody - Queen");
+    });
+
+    it("should return only title when artist is missing", () => {
+      const player = {
+        current_media: {
+          title: "Song Title",
+        },
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("Song Title");
+    });
+
+    it("should return empty string when current_media is undefined", () => {
+      const player = {
+        current_media: undefined,
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("");
+    });
+
+    it("should return empty string when title is missing", () => {
+      const player = {
+        current_media: {
+          artist: "Artist Name",
+        },
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("");
+    });
+
+    it("should handle undefined player", () => {
+      const song = client.getCurrentlyPlayingSong(undefined);
+
+      expect(song).toBe("");
+    });
+
+    it("should handle null current_media", () => {
+      const player = {
+        current_media: null,
+      } as any;
+
+      const song = client.getCurrentlyPlayingSong(player);
+
+      expect(song).toBe("");
+    });
+  });
+
+  describe("getQueueCurrentSong", () => {
+    it("should return current item name from queue", () => {
+      const queue = {
+        current_item: {
+          name: "Blinding Lights",
+        },
+      } as any;
+
+      const song = client.getQueueCurrentSong(queue);
+
+      expect(song).toBe("Blinding Lights");
+    });
+
+    it("should return empty string when current_item is undefined", () => {
+      const queue = {
+        current_item: undefined,
+      } as any;
+
+      const song = client.getQueueCurrentSong(queue);
+
+      expect(song).toBe("");
+    });
+
+    it("should return empty string when queue is undefined", () => {
+      const song = client.getQueueCurrentSong(undefined);
+
+      expect(song).toBe("");
+    });
+
+    it("should return empty string when current_item is null", () => {
+      const queue = {
+        current_item: null,
+      } as any;
+
+      const song = client.getQueueCurrentSong(queue);
+
+      expect(song).toBe("");
+    });
+
+    it("should handle queue with no current_item property", () => {
+      const queue = {} as any;
+
+      const song = client.getQueueCurrentSong(queue);
+
+      expect(song).toBe("");
+    });
+  });
+
+  describe("getPlayerAlbumArt", () => {
+    it("should return full URL when player has image_url", () => {
+      const player = {
+        current_media: {
+          image_url: "/imageproxy/abc123",
+        },
+      } as any;
+
+      const artUrl = client.getPlayerAlbumArt(player);
+
+      expect(artUrl).toBeDefined();
+      expect(artUrl).toContain("/imageproxy/abc123");
+    });
+
+    it("should handle absolute URLs from player", () => {
+      const player = {
+        current_media: {
+          image_url: "http://example.com/image.jpg",
+        },
+      } as any;
+
+      const artUrl = client.getPlayerAlbumArt(player);
+
+      expect(artUrl).toBe("http://example.com/image.jpg");
+    });
+
+    it("should return undefined when player has no current_media", () => {
+      const player = {
+        current_media: undefined,
+      } as any;
+
+      const artUrl = client.getPlayerAlbumArt(player);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should return undefined when current_media has no image_url", () => {
+      const player = {
+        current_media: {
+          title: "Song",
+        },
+      } as any;
+
+      const artUrl = client.getPlayerAlbumArt(player);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should handle undefined player", () => {
+      const artUrl = client.getPlayerAlbumArt(undefined);
+
+      expect(artUrl).toBeUndefined();
+    });
+  });
+
+  describe("getQueueAlbumArt", () => {
+    it("should return full URL when queue has image path", () => {
+      const queue = {
+        current_item: {
+          image: {
+            path: "/imageproxy/xyz789",
+          },
+        },
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBeDefined();
+      expect(artUrl).toContain("/imageproxy/xyz789");
+    });
+
+    it("should handle absolute URLs from queue", () => {
+      const queue = {
+        current_item: {
+          image: {
+            path: "https://cdn.example.com/cover.jpg",
+          },
+        },
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBe("https://cdn.example.com/cover.jpg");
+    });
+
+    it("should return undefined when queue has no current_item", () => {
+      const queue = {
+        current_item: undefined,
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should return undefined when current_item has no image", () => {
+      const queue = {
+        current_item: {
+          name: "Song",
+        },
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should return undefined when image has no path", () => {
+      const queue = {
+        current_item: {
+          image: {},
+        },
+      } as any;
+
+      const artUrl = client.getQueueAlbumArt(queue);
+
+      expect(artUrl).toBeUndefined();
+    });
+
+    it("should handle undefined queue", () => {
+      const artUrl = client.getQueueAlbumArt(undefined);
+
+      expect(artUrl).toBeUndefined();
+    });
+  });
+
+  describe("getGroupMembers", () => {
+    it("should return empty array for standalone players", () => {
+      const player = {
+        player_id: "standalone-1",
+        group_childs: [],
+      } as any;
+
+      const members = client.getGroupMembers(player, []);
+
+      expect(members).toHaveLength(0);
+    });
+
+    it("should return empty array when group_childs is undefined", () => {
+      const player = {
+        player_id: "player-1",
+        group_childs: undefined,
+      } as any;
+
+      const members = client.getGroupMembers(player, []);
+
+      expect(members).toHaveLength(0);
+    });
+
+    it("should return all group members for a group leader", () => {
+      const groupLeader = {
+        player_id: "leader-1",
+        group_childs: ["member-1", "member-2"],
+      } as any;
+
+      const allPlayers = [
+        { player_id: "leader-1", display_name: "Leader" },
+        { player_id: "member-1", display_name: "Member 1" },
+        { player_id: "member-2", display_name: "Member 2" },
+      ] as any[];
+
+      const members = client.getGroupMembers(groupLeader, allPlayers);
+
+      expect(members).toHaveLength(2);
+      expect(members[0].player_id).toBe("member-1");
+      expect(members[1].player_id).toBe("member-2");
+    });
+
+    it("should filter out members that are not found in allPlayers", () => {
+      const groupLeader = {
+        player_id: "leader-1",
+        group_childs: ["member-1", "missing-member"],
+      } as any;
+
+      const allPlayers = [
+        { player_id: "leader-1", display_name: "Leader" },
+        { player_id: "member-1", display_name: "Member 1" },
+      ] as any[];
+
+      const members = client.getGroupMembers(groupLeader, allPlayers);
+
+      expect(members).toHaveLength(1);
+      expect(members[0].player_id).toBe("member-1");
+    });
+
+    it("should preserve member order from group_childs", () => {
+      const groupLeader = {
+        player_id: "leader-1",
+        group_childs: ["member-3", "member-1", "member-2"],
+      } as any;
+
+      const allPlayers = [
+        { player_id: "leader-1", display_name: "Leader" },
+        { player_id: "member-1", display_name: "Member 1" },
+        { player_id: "member-2", display_name: "Member 2" },
+        { player_id: "member-3", display_name: "Member 3" },
+      ] as any[];
+
+      const members = client.getGroupMembers(groupLeader, allPlayers);
+
+      expect(members).toHaveLength(3);
+      expect(members[0].player_id).toBe("member-3");
+      expect(members[1].player_id).toBe("member-1");
+      expect(members[2].player_id).toBe("member-2");
     });
   });
 });

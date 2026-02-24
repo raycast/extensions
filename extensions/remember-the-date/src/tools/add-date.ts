@@ -1,7 +1,7 @@
 import { Icon, Color } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getItems, saveItems } from "../storage";
-import { Item } from "../types";
+import { Item, RepeatType } from "../types";
 import { refreshCommands } from "../utils";
 
 type AddDateInput = {
@@ -17,6 +17,10 @@ type AddDateInput = {
    * The date in YYYY-MM-DD format
    */
   date: string;
+  /**
+   * Optional repeat type: "none" (default), "weekly", "monthly", or "yearly"
+   */
+  repeat?: RepeatType;
 };
 
 /**
@@ -32,6 +36,7 @@ export default async function addDate(input: AddDateInput) {
     date: input.date,
     icon: Icon.Calendar,
     color: Color.Blue,
+    repeat: input.repeat || "none",
   };
 
   items.push(newItem);

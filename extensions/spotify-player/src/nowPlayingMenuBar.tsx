@@ -43,12 +43,15 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     getPreferenceValues<Preferences.NowPlayingMenuBar>();
 
   const [uriFromSpotify, setUriFromSpotify] = useCachedState<string | undefined>("currentlyPlayingUri", undefined);
-  const shouldExecute = React.useRef<boolean>(false);
 
   const { spotifyAppData, spotifyAppDataIsLoading, spotifyAppDataRevalidate } = useSpotifyAppData();
 
+  // Determine if we should fetch from API based on spotify app state
+  const isSpotifyActive = spotifyAppData?.state !== "NOT_RUNNING" && spotifyAppData?.state !== "NOT_PLAYING";
+  const uriChanged = isSpotifyActive && uriFromSpotify !== spotifyAppData?.uri;
+
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying({
-    options: { execute: shouldExecute.current },
+    options: { execute: isSpotifyActive && (uriChanged || !!uriFromSpotify) },
   });
 
   // The hooks below will only execute when the Menu Bar is opened
@@ -60,18 +63,29 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     options: { execute: launchType === LaunchType.UserInitiated },
   });
 
+  // Sync URI from Spotify app data
   React.useEffect(() => {
-    if (spotifyAppData?.state === "NOT_RUNNING" || spotifyAppData?.state === "NOT_PLAYING") {
-      setUriFromSpotify(undefined);
-      shouldExecute.current = false;
+    if (!isSpotifyActive) {
+      if (uriFromSpotify !== undefined) {
+        setUriFromSpotify(undefined);
+      }
       return;
     }
 
     if (uriFromSpotify !== spotifyAppData?.uri) {
       setUriFromSpotify(spotifyAppData?.uri);
-      shouldExecute.current = true;
     }
-  }, [uriFromSpotify, shouldExecute, spotifyAppData]);
+  }, [isSpotifyActive, spotifyAppData?.uri, uriFromSpotify, setUriFromSpotify]);
+
+  // We have to ensure that the Spotify App Data is loaded before we can display the correct UI
+  if (spotifyAppDataIsLoading || currentlyPlayingIsLoading) {
+    // putting is Loading to true ensure we don't unload the menu bar when the data is loading (null unloads the menu bar)
+    return <MenuBarExtra isLoading={true} />;
+  }
+
+  if (!isSpotifyActive) {
+    return <OpenSpotify isLoading={false} />;
+  }
 
   const isPlaying = spotifyAppData?.state === "PLAYING";
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
@@ -81,12 +95,6 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const twoHoursInMilliseconds = 2 * 60 * 60 * 1000;
   const dataIsOld =
     currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > twoHoursInMilliseconds;
-
-  if (spotifyAppData?.state === "NOT_RUNNING") {
-    return (
-      <OpenSpotify isLoading={spotifyAppDataIsLoading || currentlyPlayingIsLoading || currentlyPlayingIsLoading} />
-    );
-  }
 
   if ((dataIsOld && !isPlaying) || !currentlyPlayingData?.item) {
     return (

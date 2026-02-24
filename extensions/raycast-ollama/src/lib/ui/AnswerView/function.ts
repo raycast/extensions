@@ -84,7 +84,13 @@ export async function convertAnswerToChat(
     ],
   };
   await AddSettingsCommandChat(chat);
-  openCommand && (await launchCommand({ name: "ollama-chat", type: LaunchType.UserInitiated }));
+  if (openCommand) {
+    try {
+      await launchCommand({ name: "ollama-chat", type: LaunchType.UserInitiated });
+    } catch (e) {
+      await showToast({ style: Toast.Style.Failure, title: "Error", message: String(e) });
+    }
+  }
 }
 
 /**

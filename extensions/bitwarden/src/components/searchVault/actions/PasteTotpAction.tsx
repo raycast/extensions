@@ -37,7 +37,7 @@ function PasteTotpAction() {
       onAction={pasteTotp}
       shortcut={{
         macOS: { key: "t", modifiers: ["opt", "shift"] },
-        windows: { key: "t", modifiers: ["alt", "shift"] },
+        Windows: { key: "t", modifiers: ["alt", "shift"] },
       }}
       repromptDescription={`Pasting the TOTP of <${selectedItem.name}>`}
     />

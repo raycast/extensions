@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import type { ReactElement } from "react";
 import { parseExports } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
 import EditExport, { exportConfig } from "./edit-export";
 import { MODERN_COLORS } from "./constants";
-import { getZshrcPath } from "./lib/zsh";
-import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
+import { ListViewController, type FilterableItem, type ItemWarning } from "./lib/list-view-controller";
 import { deleteItem } from "./lib/delete-item";
+import { SharedActionsSection } from "./lib/shared-actions";
 
 /**
  * Export item interface
@@ -21,6 +21,29 @@ interface ExportsProps {
 }
 
 /**
+ * Warning generator for exports
+ * Detects duplicate exports
+ */
+function generateExportWarning(exportItem: ExportItem, allExports: ExportItem[]): ItemWarning | null {
+  // Check for duplicates
+  const duplicates = allExports.filter((e) => e.variable === exportItem.variable);
+  if (duplicates.length > 1) {
+    const otherSections = duplicates
+      .filter((d) => d !== exportItem)
+      .map((d) => d.section)
+      .join(", ");
+    return {
+      type: "duplicate",
+      message: `Duplicate export: also defined in ${otherSections}`,
+      icon: Icon.ExclamationMark,
+      color: Color.Yellow,
+    };
+  }
+
+  return null;
+}
+
+/**
  * Exports management command for zshrc content
  */
 export default function Exports({ searchBarAccessory }: ExportsProps) {
@@ -28,14 +51,16 @@ export default function Exports({ searchBarAccessory }: ExportsProps) {
     <ListViewController<ExportItem>
       commandName="Exports"
       navigationTitle="Exports"
-      searchPlaceholder="Search exports..."
-      icon={Icon.Box}
+      searchPlaceholder="Search Exports..."
+      icon={Icon.Upload}
       tintColor={MODERN_COLORS.primary}
       itemType="export"
       itemTypePlural="exports"
       parser={parseExports}
       searchFields={["variable", "value", "section"]}
       searchBarAccessory={searchBarAccessory}
+      warningGenerator={generateExportWarning}
+      showWarningFilter={!searchBarAccessory}
       generateTitle={(exportItem) => exportItem.variable}
       generateOverviewMarkdown={(_, allExports, grouped) => `
 # Export Summary
@@ -86,7 +111,7 @@ echo $${exportItem.variable}
             title="Variable Name"
             text={exportItem.variable}
             icon={{
-              source: Icon.Box,
+              source: Icon.Upload,
               tintColor: MODERN_COLORS.primary,
             }}
           />
@@ -124,13 +149,7 @@ echo $${exportItem.variable}
             shortcut={Keyboard.Shortcut.Common.New}
             icon={Icon.Plus}
           />
-          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={refresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <SharedActionsSection onRefresh={refresh} />
         </ActionPanel>
       )}
       generateItemActions={(exportItem, refresh) => (
@@ -168,13 +187,7 @@ echo $${exportItem.variable}
             shortcut={Keyboard.Shortcut.Common.New}
             icon={Icon.Plus}
           />
-          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={refresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <SharedActionsSection onRefresh={refresh} />
         </ActionPanel>
       )}
     />

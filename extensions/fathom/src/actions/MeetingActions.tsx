@@ -20,7 +20,7 @@ export function MeetingCopyActions(props: {
           title={additionalContent.title}
           content={additionalContent.content}
           icon={Icon.Clipboard}
-          shortcut={additionalContent.shortcut || { modifiers: ["cmd"], key: "c" }}
+          shortcut={additionalContent.shortcut || Keyboard.Shortcut.Common.Copy}
         />
       )}
       {shareUrl && (
@@ -28,7 +28,7 @@ export function MeetingCopyActions(props: {
           title="Copy Share Link"
           content={shareUrl}
           icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
         />
       )}
       {meeting.calendarInvitees && meeting.calendarInvitees.length > 0 && (
@@ -51,14 +51,10 @@ export function MeetingOpenActions(props: { meeting: Meeting }) {
   return (
     <ActionPanel.Section title="Open">
       {meeting.url && (
-        <Action.OpenInBrowser url={meeting.url} title="Open in Fathom" shortcut={{ modifiers: ["cmd"], key: "o" }} />
+        <Action.OpenInBrowser url={meeting.url} title="Open in Fathom" shortcut={Keyboard.Shortcut.Common.Open} />
       )}
       {shareUrl && shareUrl !== meeting.url && (
-        <Action.OpenInBrowser
-          url={shareUrl}
-          title="Open Share Link"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-        />
+        <Action.OpenInBrowser url={shareUrl} title="Open Share Link" shortcut={Keyboard.Shortcut.Common.OpenWith} />
       )}
     </ActionPanel.Section>
   );

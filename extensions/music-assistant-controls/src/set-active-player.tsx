@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import MusicAssistantClient from "./music-assistant-client";
 import { useCachedPromise } from "@raycast/utils";
 
@@ -19,15 +19,19 @@ export default function SetActivePlayerCommand() {
 
   return (
     <List isLoading={isLoading} navigationTitle="Set Active Player" searchBarPlaceholder="Search your active players">
-      {queues?.map(({ queue_id, display_name, current_item }) => (
+      {queues?.map((queue) => (
         <List.Item
-          title={display_name}
-          subtitle={current_item?.name}
-          icon={Icon.Play}
-          key={queue_id}
+          title={queue.display_name}
+          subtitle={queue.current_item?.name}
+          icon={
+            client.getQueueAlbumArt(queue)
+              ? { source: client.getQueueAlbumArt(queue)!, mask: Image.Mask.RoundedRectangle }
+              : Icon.Play
+          }
+          key={queue.queue_id}
           actions={
             <ActionPanel>
-              <Action title="Select" onAction={() => select(queue_id, display_name)} />
+              <Action title="Select" onAction={() => select(queue.queue_id, queue.display_name)} />
               <Action title="Reload" onAction={() => revalidatePlayers()} />
             </ActionPanel>
           }

@@ -15,6 +15,7 @@ Quick Jump is a Raycast extension designed to give you and your team quick, orga
 -   **Centralized Configuration:** Define all your links from GitLab repositories to Grafana dashboards in a single, easy-to-manage JSON file.
 -   **Powerful Templating:** Create dynamic URLs for common patterns (e.g., Kibana logs, Project dashboard, Git Urls) using placeholders.
 -   **Global Placeholders:** Define common placeholder values once and use them across all templates. Local placeholders can override global ones.
+-   **Nested Placeholder Expansion:** Placeholders can reference other placeholders, enabling powerful variable composition.
 -   **Template Groups:** Reduce configuration duplication by grouping common templates and applying them with a single line.
 -   **Smart Search:** Instantly find what you need by searching across group names, group titles, URL titles, tags (including tags on group-specific URLs), and even URL domains.
 -   **Detail Views:** Press `Cmd+D` on any item to see comprehensive details including URLs, tags, placeholders, templates, and search keywords.
@@ -42,6 +43,7 @@ The JSON file has five main sections: `groups`, `urls`, `templates`, `templateGr
 {
   "globalPlaceholders": {
     "company-domain": "company.net",
+    "base-url": "https://grafana.${company-domain}",
     "region": "us-east-1"
   },
   "groups": {
@@ -52,7 +54,7 @@ The JSON file has five main sections: `groups`, `urls`, `templates`, `templateGr
       "otherUrls": {
         "staging-env": {
           "title": "Staging Environment",
-          "url": "https://staging.my-project.com",
+          "url": "https://staging.my-project.${company-domain}",
           "icon": "dashboard.png",
           "tags": ["staging"],
           "openIn": "Google Chrome"
@@ -61,6 +63,17 @@ The JSON file has five main sections: `groups`, `urls`, `templates`, `templateGr
       "templatePlaceholders": {
         "project-id": "my-project-123",
         "path": "/path/to/project"
+      },
+      "appliedTemplateGroups": ["dev-tools"],
+      "tags": ["project"]
+    },
+    "eu-project": {
+      "title": "EU Project",
+      "icon": "project.png",
+      "templatePlaceholders": {
+        "project-id": "eu-project-456",
+        "region": "eu-west-1",
+        "path": "/path/to/eu-project"
       },
       "appliedTemplateGroups": ["dev-tools"],
       "tags": ["project"]
@@ -81,7 +94,7 @@ The JSON file has five main sections: `groups`, `urls`, `templates`, `templateGr
   "templates": {
     "monitoring": {
       "title": "Monitoring Dashboard",
-      "templateUrl": "https://grafana.${company-domain}/d/${project-id}?region=${region}",
+      "templateUrl": "${base-url}/d/${project-id}?region=${region}",
       "icon": "grafana.png",
       "tags": ["monitoring"]
     },
@@ -185,6 +198,40 @@ In this example:
 - `project-id` is defined at the group level
 - The monitoring template uses both global (`company-domain`, `region`) and local (`project-id`) placeholders
 - Local placeholders always override global ones if they have the same name
+
+### Nested Placeholder Expansion
+
+Placeholders can reference other placeholders:
+
+```json
+{
+  "globalPlaceholders": {
+    "workDir": "/Users/me/Projects",
+    "teamDir": "${workDir}/my-team",
+    "projectDir": "${teamDir}/my-project"
+  }
+}
+```
+
+Here `projectDir` expands to `/Users/me/Projects/my-team/my-project`. Local placeholders can also reference global ones.
+
+### Circular Dependency Detection
+
+The extension automatically detects circular references in placeholders and displays a helpful error message:
+
+```json
+{
+  "globalPlaceholders": {
+    "foo": "${bar}",
+    "bar": "${foo}"
+  }
+}
+```
+
+This configuration will show a blocking error with:
+- The exact cycle path (e.g., `foo -> bar -> foo`)
+- Step-by-step fix instructions
+- Example solutions
 
 ## Using Templates and the `openIn` Field
 

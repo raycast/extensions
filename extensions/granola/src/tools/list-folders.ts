@@ -11,6 +11,9 @@ type Output = Array<{
   noteCount: number;
   createdAt: string;
   noteIds: string[];
+  isShared: boolean;
+  userRole: string;
+  memberCount: number;
 }>;
 
 /**

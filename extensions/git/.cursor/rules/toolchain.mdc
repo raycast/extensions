@@ -1,6 +1,4 @@
 ---
-description:
-globs:
 alwaysApply: true
 ---
 To debug if package compiled use command:

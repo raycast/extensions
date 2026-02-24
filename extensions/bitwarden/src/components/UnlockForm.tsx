@@ -20,7 +20,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
 
   const [isLoading, setLoading] = useState(false);
-  const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
+  const [unlockError, setUnlockError] = useState<string>();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
@@ -28,43 +28,67 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   async function onSubmit() {
     if (password.length === 0) return;
 
-    const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
     try {
       setLoading(true);
       setUnlockError(undefined);
 
       await pendingAction;
 
+      const toast = await showToast({ title: "Validating...", message: "Please wait", style: Toast.Style.Animated });
+
       const { error, result: vaultState } = await bitwarden.status();
       if (error) throw error;
 
       if (vaultState.status === "unauthenticated") {
         try {
-          const { error } = await bitwarden.login();
-          if (error) throw error;
+          toast.title = "Logging in...";
+          const { error: loginError } = await bitwarden.login();
+          if (loginError) throw loginError;
         } catch (error) {
-          const {
-            displayableError = `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`,
-            treatedError,
-          } = getUsefulError(error, password);
-          await showToast(Toast.Style.Failure, "Failed to log in", displayableError);
-          setUnlockError(treatedError);
-          captureException("Failed to log in", error);
-          return;
+          return handleUnlockError(error, {
+            title: "Failed to log in",
+            fallbackMessage: `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`,
+          });
         }
       }
 
-      await bitwarden.unlock(password);
+      toast.title = "Unlocking vault...";
+      const { error: unlockError } = await bitwarden.unlock(password);
+      if (unlockError) {
+        return handleUnlockError(unlockError, {
+          title: "Failed to unlock vault",
+          fallbackMessage: "Please check your credentials",
+        });
+      }
+
+      toast.title = "Vault unlocked";
+      toast.style = Toast.Style.Success;
+      toast.message = undefined;
+
       await clearLockReason();
-      await toast.hide();
     } catch (error) {
-      const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);
-      await showToast(Toast.Style.Failure, "Failed to unlock vault", displayableError);
-      setUnlockError(treatedError);
-      captureException("Failed to unlock vault", error);
+      await handleUnlockError(error, {
+        title: "Failed to unlock vault",
+        fallbackMessage: "Please check your credentials",
+      });
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleUnlockError(error: unknown, toastOptions: { title: string; fallbackMessage: string }) {
+    const { title, fallbackMessage } = toastOptions;
+
+    const { displayableError = fallbackMessage, treatedError } = getUsefulError(error, password);
+    setUnlockError(treatedError);
+
+    await showToast({
+      title,
+      message: displayableError,
+      style: Toast.Style.Failure,
+      primaryAction: { title: "Copy Error", onAction: copyUnlockError },
+    });
+    captureException("Failed to unlock vault", error);
   }
 
   const copyUnlockError = async () => {
@@ -86,16 +110,16 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         <ActionPanel>
           {!isLoading && (
             <>
-              <Action.SubmitForm icon={Icon.LockUnlocked} title="Unlock" onSubmit={onSubmit} />
+              <Action.SubmitForm icon={Icon.LockUnlocked} title="Submit" onSubmit={onSubmit} />
               <Action
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}
                 onAction={() => setShowPassword((prev) => !prev)}
-                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, windows: { key: "e", modifiers: ["alt"] } }}
+                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, Windows: { key: "e", modifiers: ["alt"] } }}
               />
             </>
           )}
-          {!!unlockError && (
+          {unlockError && (
             <Action
               onAction={copyUnlockError}
               title="Copy Last Error"

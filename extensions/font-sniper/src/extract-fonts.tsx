@@ -428,7 +428,10 @@ export default function ExtractFonts() {
                       ? Icon.Circle
                       : Icon.CheckCircle
                   }
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "a" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+                  }}
                   onAction={
                     selectedCount === accessibleCount ? deselectAll : selectAll
                   }

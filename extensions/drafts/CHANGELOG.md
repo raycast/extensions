@@ -1,5 +1,10 @@
 # Drafts Changelog
 
+## [Security Maintenance] - {PR_MERGE_DATE}
+
+- Added a dependency override to resolve transitive `tar` usage to `7.5.7`.
+- Updated dependencies to address reported `tar` security advisories in nested install paths.
+
 ## [Add Find Features and AI Extension Support] - 2025-04-10
 
 New Commands to search through Drafts database

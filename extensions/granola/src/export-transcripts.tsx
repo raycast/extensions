@@ -16,10 +16,12 @@ import { ExportService } from "./utils/exportService";
 
 import { Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
-import { sortNotesByDate } from "./components/NoteComponents";
+import { sortNotesByDate, FolderFilterDropdown } from "./components/NoteComponents";
 import { toErrorMessage } from "./utils/errorUtils";
 import { getNotionBatchSize } from "./utils/notionBatching";
 import { getFolderNoteResults } from "./utils/searchUtils";
+
+const untitledNoteTitle = "New note";
 
 interface BulkNotionResult {
   noteId: string;
@@ -48,8 +50,6 @@ export default function Command() {
   if (hasError) {
     return <Unresponsive />;
   }
-
-  const untitledNoteTitle = "Untitled Note";
 
   if (noteData?.data) {
     return (
@@ -141,7 +141,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
 
   // Combine all folder-related computations into a single useMemo (like search-notes.tsx)
   // This reduces memory overhead by computing only what's needed and reusing data structures
-  const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
+  const { filteredNotes, notesNotInFolders, sharedNotes, folderNoteCounts } = useMemo(() => {
     const foldersToProcess = activeFolders.length > 0 ? activeFolders : folders;
     return getFolderNoteResults(notes, foldersToProcess, selectedFolder);
   }, [notes, folders, activeFolders, selectedFolder]);
@@ -396,7 +396,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
           const source = note.creation_source || "Unknown";
 
           // Format transcript content
-          const transcriptContent = `# ${note.title || "Untitled"}
+          const transcriptContent = `# ${note.title || untitledNoteTitle}
 
 ## Transcript
 
@@ -404,11 +404,11 @@ ${transcript}
 
 ---
 
-*Exported from Granola on ${new Date().toLocaleString()}*  
+*Exported from Granola on ${new Date().toLocaleString()}*
 **Created:** ${createdDate} | **Source:** ${source}
 `;
 
-          const safeTitle = sanitizeFileName(note.title || "Untitled");
+          const safeTitle = sanitizeFileName(note.title || untitledNoteTitle);
           const fileName = `${safeTitle}_${note.id.substring(0, 8)}.md`;
 
           return {
@@ -487,36 +487,15 @@ ${transcript}
       navigationTitle={navigationTitle}
       searchBarPlaceholder={searchPlaceholder}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={setSelectedFolder}>
-          <List.Dropdown.Section title="All Notes">
-            <List.Dropdown.Item title="All Folders" value="all" icon={Icon.Folder} />
-            {notesNotInFolders.length > 0 && (
-              <List.Dropdown.Item
-                title={`Notes Not in Folders (${notesNotInFolders.length})`}
-                value="orphans"
-                icon={{ source: Icon.Document, tintColor: Color.SecondaryText }}
-              />
-            )}
-          </List.Dropdown.Section>
-
-          {!foldersLoading && folders.length > 0 && (
-            <List.Dropdown.Section title="Folders">
-              {folders
-                .sort((a, b) => a.title.localeCompare(b.title))
-                .map((folder) => (
-                  <List.Dropdown.Item
-                    key={folder.id}
-                    title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
-                    value={folder.id}
-                    icon={{
-                      source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                      tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
-                    }}
-                  />
-                ))}
-            </List.Dropdown.Section>
-          )}
-        </List.Dropdown>
+        <FolderFilterDropdown
+          folders={folders}
+          foldersLoading={foldersLoading}
+          folderNoteCounts={folderNoteCounts}
+          onChange={setSelectedFolder}
+          sharedNotesCount={sharedNotes.length}
+          orphanNotesCount={notesNotInFolders.length}
+          variant="export"
+        />
       }
       actions={
         <ActionPanel>
@@ -589,7 +568,7 @@ ${transcript}
             accessories.push({
               icon: {
                 source: noteFolder.icon ? mapIconToHeroicon(noteFolder.icon.value) : getDefaultIconUrl(),
-                tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : Color.Blue,
+                tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : mapColorToHex("default"),
               },
               tooltip:
                 folderNames.length > 1 ? `In folders: ${folderNames.join(", ")}` : `In folder: ${firstFolderName}`,
@@ -604,7 +583,7 @@ ${transcript}
         } else {
           // Show "No folder" indicator for orphaned notes (matching search-notes.tsx)
           accessories.push({
-            icon: { source: Icon.Document, tintColor: Color.SecondaryText },
+            icon: { source: Icon.Document, tintColor: mapColorToHex("default") },
             tooltip: "Not in any folder",
           });
         }
@@ -620,7 +599,7 @@ ${transcript}
             title={note.title ?? untitledNoteTitle}
             icon={{
               source: selectedNoteIds.has(note.id) ? Icon.CheckCircle : Icon.Circle,
-              tintColor: selectedNoteIds.has(note.id) ? Color.Green : Color.SecondaryText,
+              tintColor: selectedNoteIds.has(note.id) ? mapColorToHex("lime") : Color.SecondaryText,
             }}
             accessories={accessories}
             actions={
@@ -749,7 +728,7 @@ function BulkNotionResults({
             <List.Item
               key={result.noteId}
               title={result.title}
-              icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
+              icon={{ source: Icon.Clock, tintColor: mapColorToHex("amber") }}
               accessories={[{ text: "Saving..." }]}
             />
           ))}
@@ -762,7 +741,7 @@ function BulkNotionResults({
             <List.Item
               key={result.noteId}
               title={result.title}
-              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+              icon={{ source: Icon.CheckCircle, tintColor: mapColorToHex("lime") }}
               accessories={[{ text: "Saved to Notion" }]}
               actions={
                 <ActionPanel>
@@ -794,7 +773,7 @@ function BulkNotionResults({
               key={result.noteId}
               title={result.title}
               subtitle={result.error || "Unknown error"}
-              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+              icon={{ source: Icon.XMarkCircle, tintColor: mapColorToHex("red") }}
               accessories={[{ text: "Failed" }]}
               actions={
                 <ActionPanel>

@@ -1,5 +1,5 @@
 import executeApiCommand from "./api-command";
-import { showHUD } from "@raycast/api";
+import { showHUD, getPreferenceValues } from "@raycast/api";
 import { storeSelectedQueueID, StoredQueue } from "./use-selected-player-id";
 import { PlayerQueue, PlayerState, Player } from "./external-code/interfaces";
 
@@ -101,6 +101,34 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Increase the volume on the specified player
+   *
+   * @param playerId - The unique identifier of the player to control
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.volumeUp("living-room-player");
+   * ```
+   */
+  async volumeUp(playerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandVolumeUp(playerId));
+  }
+
+  /**
+   * Decrease the volume on the specified player
+   *
+   * @param playerId - The unique identifier of the player to control
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.volumeDown("living-room-player");
+   * ```
+   */
+  async volumeDown(playerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandVolumeDown(playerId));
+  }
+
+  /**
    * Get detailed player information including volume levels
    *
    * @param playerId - The unique identifier of the player
@@ -198,6 +226,110 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Gets the currently playing song from a player's media info
+   *
+   * Extracts song title and artist from player.current_media and formats them.
+   * Returns an empty string if no current media is available.
+   *
+   * @param player - The player with current media information
+   * @returns Formatted string like "Song Title - Artist" or empty string
+   * @example
+   * ```typescript
+   * const song = client.getCurrentlyPlayingSong(player);
+   * // Returns: "Bohemian Rhapsody - Queen" or ""
+   * ```
+   */
+  getCurrentlyPlayingSong(player?: Player): string {
+    if (!player?.current_media?.title) return "";
+    const parts = [player.current_media.title];
+    if (player.current_media.artist) {
+      parts.push(player.current_media.artist);
+    }
+    return parts.join(" - ");
+  }
+
+  /**
+   * Gets the currently playing song from a queue's current item
+   *
+   * Extracts and returns the name of the current queue item.
+   * Returns an empty string if no current item is available.
+   *
+   * @param queue - The player queue with current item information
+   * @returns The name of the current queue item or empty string
+   * @example
+   * ```typescript
+   * const song = client.getQueueCurrentSong(queue);
+   * // Returns: "Blinding Lights" or ""
+   * ```
+   */
+  getQueueCurrentSong(queue?: PlayerQueue): string {
+    return queue?.current_item?.name || "";
+  }
+
+  /**
+   * Gets the album art URL for a player's current media
+   *
+   * Retrieves the image URL from the player's current media if available.
+   * Returns undefined if no image is available.
+   *
+   * @param player - The player with current media information
+   * @returns Full URL to the album art image or undefined
+   * @example
+   * ```typescript
+   * const artUrl = client.getPlayerAlbumArt(player);
+   * // Returns: "http://192.168.1.100:8095/imageproxy/..." or undefined
+   * ```
+   */
+  getPlayerAlbumArt(player?: Player): string | undefined {
+    if (!player?.current_media?.image_url) return undefined;
+    return this.buildImageUrl(player.current_media.image_url);
+  }
+
+  /**
+   * Gets the album art URL for a queue's current item
+   *
+   * Retrieves the image path from the queue's current item if available.
+   * Returns undefined if no image is available.
+   *
+   * @param queue - The player queue with current item information
+   * @returns Full URL to the album art image or undefined
+   * @example
+   * ```typescript
+   * const artUrl = client.getQueueAlbumArt(queue);
+   * // Returns: "http://192.168.1.100:8095/imageproxy/..." or undefined
+   * ```
+   */
+  getQueueAlbumArt(queue?: PlayerQueue): string | undefined {
+    const imagePath = queue?.current_item?.image?.path;
+    if (!imagePath) return undefined;
+    return this.buildImageUrl(imagePath);
+  }
+
+  /**
+   * Builds the full image URL from a path or URL
+   *
+   * If the path is already a full URL (starts with http), returns it as-is.
+   * Otherwise, combines it with the Music Assistant server host.
+   *
+   * @param pathOrUrl - The image path or URL
+   * @returns Full URL to the image
+   * @example
+   * ```typescript
+   * const url = client.buildImageUrl("/imageproxy/abc123");
+   * // Returns: "http://192.168.1.100:8095/imageproxy/abc123"
+   * ```
+   */
+  private buildImageUrl(pathOrUrl: string): string {
+    if (pathOrUrl.startsWith("http")) {
+      return pathOrUrl;
+    }
+    const { host } = getPreferenceValues<Preferences>();
+    const baseUrl = host.endsWith("/") ? host.slice(0, -1) : host;
+    const path = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+    return `${baseUrl}${path}`;
+  }
+
+  /**
    * Gets the appropriate play/pause button text based on player state
    *
    * @param state - The current state of the player
@@ -247,6 +379,116 @@ export default class MusicAssistantClient {
     };
   }
 
+  /**
+   * Checks if a player should be displayed in the menu bar
+   *
+   * A player is displayable if it is either a group leader (has members)
+   * or a standalone player (not synced to another player).
+   * Group members are hidden as they follow their leader's playback.
+   *
+   * @param player - The player to check for displayability
+   * @returns True if the player should be shown in menu bar, false otherwise
+   * @example
+   * ```typescript
+   * if (client.isDisplayablePlayer(player)) {
+   *   // Show this player in the menu bar
+   * }
+   * ```
+   */
+  isDisplayablePlayer(player: Player): boolean {
+    const isGroupLeader = player.group_childs && player.group_childs.length > 0;
+    const isStandalone = !player.synced_to;
+
+    return isGroupLeader || isStandalone;
+  }
+
+  /**
+   * Filters queues to only include displayable players
+   *
+   * Returns only queues for players that are group leaders or standalone.
+   * Group members are excluded since they follow their leader's playback.
+   *
+   * @param queues - All available player queues
+   * @param players - All available players with their metadata
+   * @returns Filtered list containing only displayable player queues
+   * @example
+   * ```typescript
+   * const displayableQueues = client.getDisplayableQueues(allQueues, allPlayers);
+   * // Now only shows group leaders and standalone players
+   * ```
+   */
+  getDisplayableQueues(queues: PlayerQueue[], players: Player[]): PlayerQueue[] {
+    return queues.filter((queue) => {
+      const player = players.find((p) => p.player_id === queue.queue_id);
+      return player && this.isDisplayablePlayer(player);
+    });
+  }
+
+  /**
+   * Gets the queue to display in the menu bar for the active player
+   *
+   * If the active queue is a group member, this returns its group leader instead.
+   * This ensures the menu bar always shows a displayable player.
+   *
+   * @param activeQueue - The currently active queue (may be a group member)
+   * @param players - All available players with their metadata
+   * @param queues - All available player queues
+   * @returns The queue to display in menu bar (may differ from activeQueue if it's a group member)
+   * @example
+   * ```typescript
+   * const displayQueue = client.getDisplayQueueForMenuBar(activeQueue, allPlayers, allQueues);
+   * // If activeQueue is a group member, returns the group leader's queue instead
+   * ```
+   */
+  getDisplayQueueForMenuBar(
+    activeQueue: PlayerQueue | undefined,
+    players: Player[],
+    queues: PlayerQueue[],
+  ): PlayerQueue | undefined {
+    if (!activeQueue) return undefined;
+
+    const player = players.find((p) => p.player_id === activeQueue.queue_id);
+    if (!player) return activeQueue;
+
+    // If the player is already displayable, return it as-is
+    if (this.isDisplayablePlayer(player)) {
+      return activeQueue;
+    }
+
+    // If it's a group member, find and return the group leader queue
+    if (player.synced_to) {
+      const leaderQueue = queues.find((q) => q.queue_id === player.synced_to);
+      return leaderQueue || activeQueue;
+    }
+
+    return activeQueue;
+  }
+
+  /**
+   * Gets the group members for a group leader player
+   *
+   * Returns an array of Player objects that are members of this player's group.
+   * Returns an empty array if the player is not a group leader.
+   *
+   * @param player - The player that may be a group leader
+   * @param allPlayers - All available players to look up member details
+   * @returns Array of Player objects that are group members
+   * @example
+   * ```typescript
+   * const members = client.getGroupMembers(groupLeader, allPlayers);
+   * members.forEach(member => console.log(member.display_name));
+   * ```
+   */
+  getGroupMembers(player: Player, allPlayers: Player[]): Player[] {
+    if (!player.group_childs || player.group_childs.length === 0) {
+      return [];
+    }
+
+    return player.group_childs
+      .map((childId) => allPlayers.find((p) => p.player_id === childId))
+      .filter((p): p is Player => p !== undefined);
+  }
+
   // Player Selection Logic
   /**
    * Selects a player queue and shows appropriate feedback
@@ -293,11 +535,16 @@ export default class MusicAssistantClient {
    * @example
    * ```typescript
    * const message = client.formatSelectionMessage("Office Speakers");
-   * // Returns: "Office Speakers selected, allow 10 seconds for the menubar to update!"
+   * // Returns: "Office Speakers selected, allow 10 seconds for the menubar to update!" (macOS)
+   * // Returns: "Office Speakers selected!" (Windows)
    * ```
    */
   formatSelectionMessage(displayName: string): string {
-    return `${displayName} selected, allow 10 seconds for the menubar to update!`;
+    const isMacOS = process.platform === "darwin";
+    if (isMacOS) {
+      return `${displayName} selected, allow 10 seconds for the menubar to update!`;
+    }
+    return `${displayName} selected!`;
   }
 
   // Volume Control Helper Methods
@@ -356,5 +603,135 @@ export default class MusicAssistantClient {
       { level: 75, display: "75%" },
       { level: 100, display: "100%" },
     ];
+  }
+
+  // Player Grouping Methods
+  /**
+   * Set group members for a target player using the modern set_members API
+   *
+   * @param targetPlayer - The player ID of the group leader
+   * @param playerIdsToAdd - Optional array of player IDs to add to the group
+   * @param playerIdsToRemove - Optional array of player IDs to remove from the group
+   * @throws {Error} When the API command fails or players are incompatible
+   * @example
+   * ```typescript
+   * await client.setGroupMembers("leader-123", ["member-456", "member-789"]);
+   * ```
+   */
+  async setGroupMembers(targetPlayer: string, playerIdsToAdd?: string[], playerIdsToRemove?: string[]): Promise<void> {
+    await executeApiCommand(
+      async (api) => await api.playerCommandSetMembers(targetPlayer, playerIdsToAdd, playerIdsToRemove),
+    );
+  }
+
+  /**
+   * Group a single player to a target player
+   *
+   * @param playerId - The player ID to add to the group
+   * @param targetPlayerId - The player ID of the group leader
+   * @throws {Error} When the API command fails or players are incompatible
+   * @example
+   * ```typescript
+   * await client.groupPlayer("bedroom-speaker", "living-room-speaker");
+   * ```
+   */
+  async groupPlayer(playerId: string, targetPlayerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandGroup(playerId, targetPlayerId));
+  }
+
+  /**
+   * Remove a player from any group it's currently in
+   *
+   * @param playerId - The player ID to ungroup
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * await client.ungroupPlayer("bedroom-speaker");
+   * ```
+   */
+  async ungroupPlayer(playerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandUnGroup(playerId));
+  }
+
+  // Player Grouping Helper Methods
+  /**
+   * Checks if a player can form or join groups
+   *
+   * @param player - The player object to check
+   * @returns True if the player supports the SET_MEMBERS feature
+   * @example
+   * ```typescript
+   * if (client.canFormGroup(player)) {
+   *   // Show grouping controls
+   * }
+   * ```
+   */
+  canFormGroup(player?: Player): boolean {
+    if (!player) return false;
+    return player.can_group_with.length > 0;
+  }
+
+  /**
+   * Checks if a player is currently a group leader
+   *
+   * @param player - The player object to check
+   * @returns True if the player has group children
+   * @example
+   * ```typescript
+   * if (client.isGroupLeader(player)) {
+   *   // Show "Manage Group" option
+   * }
+   * ```
+   */
+  isGroupLeader(player?: Player): boolean {
+    if (!player) return false;
+    return player.group_childs.length > 0;
+  }
+
+  /**
+   * Gets the grouping status of a player
+   *
+   * @param player - The player object to check
+   * @returns "Leader", "Member", or "Standalone" based on the player's state
+   * @example
+   * ```typescript
+   * const status = client.getGroupStatus(player);
+   * // Returns: "Leader" if has group_childs, "Member" if synced_to, else "Standalone"
+   * ```
+   */
+  getGroupStatus(player?: Player): "Leader" | "Member" | "Standalone" {
+    if (!player) return "Standalone";
+
+    if (this.isGroupLeader(player)) {
+      return "Leader";
+    }
+
+    if (player.synced_to || player.active_group) {
+      return "Member";
+    }
+
+    return "Standalone";
+  }
+
+  /**
+   * Gets a list of players compatible for grouping with the target player
+   *
+   * @param targetPlayer - The player to find compatible players for
+   * @param allPlayers - Array of all available players
+   * @returns Array of players that can be grouped with the target
+   * @example
+   * ```typescript
+   * const compatible = client.getCompatiblePlayers(leader, allPlayers);
+   * // Returns only players that share grouping providers and are available
+   * ```
+   */
+  getCompatiblePlayers(targetPlayer: Player, allPlayers: Player[]): Player[] {
+    return allPlayers.filter(
+      (p) =>
+        p.player_id !== targetPlayer.player_id &&
+        p.available &&
+        p.enabled &&
+        targetPlayer.can_group_with.some((provider) => p.can_group_with.includes(provider)),
+    );
   }
 }
