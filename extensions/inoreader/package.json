@@ -34,6 +34,13 @@
       "subtitle": "Inoreader RSS Feed",
       "description": "View followed sources with VIP management and folder filters",
       "mode": "view"
+    },
+    {
+      "name": "executive-summary",
+      "title": "Executive Summary",
+      "subtitle": "AI recap of unread articles",
+      "description": "Generate an AI executive brief from your unread Inoreader feed items",
+      "mode": "view"
     }
   ],
   "preferences": [

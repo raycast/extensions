@@ -77,7 +77,7 @@ type FeedViewProps = {
   enableStreamSelection?: boolean;
 };
 
-type InoreaderArticle = {
+export type InoreaderArticle = {
   id: string;
   title?: string;
   canonical?: Array<{ href?: string }>;
@@ -94,7 +94,7 @@ type InoreaderArticle = {
   updated?: number;
 };
 
-type StreamContentsResponse = {
+export type StreamContentsResponse = {
   items?: InoreaderArticle[];
   continuation?: string;
 };
@@ -104,7 +104,7 @@ type OAuthTokenResponse = OAuth.TokenResponse & {
   refresh_token?: string;
 };
 
-class InoreaderApiError extends Error {
+export class InoreaderApiError extends Error {
   constructor(
     readonly status: number,
     readonly body: string,
@@ -118,11 +118,11 @@ function getScope(preferences: Preferences.MyFeed): string {
   return preferences.scope?.trim() ? preferences.scope.trim() : "read write";
 }
 
-function isUnauthorized(error: unknown): error is InoreaderApiError {
+export function isUnauthorized(error: unknown): error is InoreaderApiError {
   return error instanceof InoreaderApiError && error.status === 401;
 }
 
-function normalizeErrorMessage(error: unknown): string {
+export function normalizeErrorMessage(error: unknown): string {
   if (error instanceof InoreaderApiError) {
     const message = error.body.match(/^Error=(.+)$/m)?.[1]?.trim();
     if (message) {
@@ -222,7 +222,10 @@ async function authorizeAndGetToken(preferences: Preferences.MyFeed): Promise<st
   return tokenResponse.access_token;
 }
 
-async function getAccessToken(preferences: Preferences.MyFeed, interactive: boolean): Promise<string | undefined> {
+export async function getAccessToken(
+  preferences: Preferences.MyFeed,
+  interactive: boolean,
+): Promise<string | undefined> {
   const tokens = await oauthClient.getTokens();
   if (tokens?.accessToken) {
     if (tokens.refreshToken && tokens.isExpired()) {
@@ -254,7 +257,7 @@ async function getAccessToken(preferences: Preferences.MyFeed, interactive: bool
   return authorizeAndGetToken(preferences);
 }
 
-async function requestJson<T>(token: string, path: string, params?: URLSearchParams): Promise<T> {
+export async function requestJson<T>(token: string, path: string, params?: URLSearchParams): Promise<T> {
   const url = new URL(`${API_BASE_URL}${path}`);
   if (params) {
     url.search = params.toString();
@@ -289,7 +292,7 @@ async function postForm(token: string, path: string, body: URLSearchParams): Pro
   return text;
 }
 
-function getArticleUrl(article: InoreaderArticle): string | undefined {
+export function getArticleUrl(article: InoreaderArticle): string | undefined {
   return article.canonical?.[0]?.href || article.alternate?.[0]?.href || article.origin?.htmlUrl;
 }
 
@@ -297,7 +300,7 @@ async function openUrlInBackground(url: string): Promise<void> {
   await execFileAsync("open", ["-g", url]);
 }
 
-function getArticleDate(article: InoreaderArticle): Date | undefined {
+export function getArticleDate(article: InoreaderArticle): Date | undefined {
   const value = article.published ?? article.updated;
   if (!value || Number.isNaN(value)) {
     return undefined;
@@ -420,7 +423,7 @@ const NAMED_HTML_ENTITY_MAP: Record<string, string> = {
   Yacute: "Ý",
 };
 
-function decodeHtmlEntities(input?: string): string {
+export function decodeHtmlEntities(input?: string): string {
   if (!input) {
     return "";
   }
@@ -431,7 +434,7 @@ function decodeHtmlEntities(input?: string): string {
     .replace(/&([a-zA-Z][a-zA-Z0-9]+);/g, (entity, name) => NAMED_HTML_ENTITY_MAP[name] ?? entity);
 }
 
-function htmlToPlainText(input?: string | null): string {
+export function htmlToPlainText(input?: string | null): string {
   if (!input) {
     return "";
   }
@@ -531,7 +534,7 @@ async function extractReadableContent(url: string): Promise<ReadableContent> {
   };
 }
 
-function getSummaryLanguage(value: string | undefined): string {
+export function getSummaryLanguage(value: string | undefined): string {
   const language = value?.trim();
   return language ? language : "English";
 }
