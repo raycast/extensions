@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build
+.build/
+dist/
+
+# Raycast
+.raycast/
+
+# Swift compiled binaries
+swift-helper/window-helper
+swift-helper/space-switcher
+assets/window-helper
+assets/space-switcher
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
