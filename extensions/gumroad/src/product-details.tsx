@@ -21,6 +21,7 @@ ${NodeHtmlMarkdown.translate(item.description)}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={item.short_url} />
+          <Action.CopyToClipboard title="Copy Product URL" content={item.short_url} />
         </ActionPanel>
       }
     />

@@ -1,4 +1,4 @@
-import { Detail, Color } from "@raycast/api";
+import { Detail, Color, ActionPanel, Action } from "@raycast/api";
 import { Sale } from "./types";
 import { formatDate, removeParentheses } from "./utils";
 
@@ -16,7 +16,18 @@ You made a sale!
 ${item.product_name}
   `;
 
-  return <Detail markdown={markdown} navigationTitle={item.product_name} metadata={<SaleMetadata sale={item} />} />;
+  return (
+    <Detail
+      markdown={markdown}
+      navigationTitle={item.product_name}
+      metadata={<SaleMetadata sale={item} />}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Customer Email" content={item.email} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 function SaleMetadata(props: { sale: Sale }) {
