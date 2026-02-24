@@ -1,6 +1,7 @@
 import {
   ActionPanel,
   Action,
+  Color,
   List,
   showToast,
   Toast,
@@ -17,6 +18,9 @@ import {
   removeDisplay,
   markDisplayConnected,
   scanDisplaysFromSystem,
+  getQuickConnectDisplay,
+  setQuickConnectDisplay,
+  clearQuickConnectDisplay,
   Display,
 } from "./utils/displays";
 import { connectToDisplay } from "./utils/connect";
@@ -89,6 +93,13 @@ export default function Command() {
   const [hasDeps, setHasDeps] = useState<boolean | null>(null);
   const [displays, setDisplays] = useState<Display[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [quickConnectName, setQuickConnectName] = useState<
+    string | undefined
+  >();
+
+  const loadQuickConnect = useCallback(async () => {
+    setQuickConnectName(await getQuickConnectDisplay());
+  }, []);
 
   const loadDisplays = useCallback(async () => {
     setIsLoading(true);
@@ -113,12 +124,13 @@ export default function Command() {
       setHasDeps(deps);
       if (deps) {
         loadDisplays();
+        loadQuickConnect();
       } else {
         setIsLoading(false);
       }
     }
     init();
-  }, [loadDisplays]);
+  }, [loadDisplays, loadQuickConnect]);
 
   async function handleRemove(name: string) {
     await removeDisplay(name);
@@ -243,16 +255,19 @@ export default function Command() {
               "ipad",
               "mac",
             ]}
-            accessories={
-              display.lastConnected
+            accessories={[
+              ...(quickConnectName === display.name
+                ? [{ tag: { value: "Quick Connect", color: Color.Blue } }]
+                : []),
+              ...(display.lastConnected
                 ? [
                     {
                       date: new Date(display.lastConnected),
                       tooltip: "Last connected",
                     },
                   ]
-                : []
-            }
+                : []),
+            ]}
             actions={
               <ActionPanel>
                 <Action
@@ -260,6 +275,36 @@ export default function Command() {
                   icon={Icon.Link}
                   onAction={() => handleConnect(display)}
                 />
+                {quickConnectName === display.name ? (
+                  <Action
+                    title="Clear Quick Connect"
+                    icon={Icon.StarDisabled}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    onAction={async () => {
+                      await clearQuickConnectDisplay();
+                      setQuickConnectName(undefined);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Quick Connect cleared",
+                      });
+                    }}
+                  />
+                ) : (
+                  <Action
+                    title="Set as Quick Connect"
+                    icon={Icon.Star}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    onAction={async () => {
+                      await setQuickConnectDisplay(display.name);
+                      setQuickConnectName(display.name);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Quick Connect set",
+                        message: display.name,
+                      });
+                    }}
+                  />
+                )}
                 <Action
                   title="Scan for Displays"
                   icon={Icon.MagnifyingGlass}
