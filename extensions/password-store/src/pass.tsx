@@ -1,12 +1,112 @@
-import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { List, Action, ActionPanel, Icon, getPreferenceValues, confirmAlert, Form, useNavigation } from "@raycast/api";
+import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { glob } from "glob";
 import { getOptionIcon, getPasswordIcon } from "./utils/icons.util";
 import { getLastUsedPassword } from "./utils/password.util";
 import { runCmd } from "./utils/cmd.util";
 import { performAction } from "./utils/action.util";
-import { Option, Password } from "./interfaces";
+import { Option, Password, PasswordMakerProps, InsertPasswordForm, RenamePasswordProps } from "./interfaces";
 import url from "url";
+import os from "os";
+
+export function RenamePasswordPrompt({ onPasswordRename, oldName }: RenamePasswordProps) {
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{ renamed: string }>({
+    onSubmit: function (toBeSubmitted) {
+      const cmd = `pass mv ${oldName} ${toBeSubmitted.renamed}`;
+      onPasswordRename(runCmd(cmd), {
+        optimisticUpdate(data) {
+          return data ? data.filter((pass) => pass.value != oldName) : [];
+        },
+      });
+      pop();
+    },
+    validation: {
+      renamed: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Rename Password" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Rename To" {...itemProps.renamed} />
+    </Form>
+  );
+}
+
+/** A component to prompt the user to insert a new password with additional metadata */
+export function InsertPasswordPrompt({ onPasswordCreate }: PasswordMakerProps) {
+  // used for popping back to the list view after submitting
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<InsertPasswordForm>({
+    onSubmit: function (toBeSubmitted) {
+      const isWindows = os.platform() === "win32";
+      // pass `toBeSubmitted.password` and `toBeSubmitted.metadata` to `pass insert -m` command uninteractively to each supported platform.
+      const windowsCmd = `'{0}\n{1}\n' -f "${toBeSubmitted.password}", "${toBeSubmitted.metadata}" | pass insert -m ${toBeSubmitted.passwordPath}`;
+      const unixCmd = `printf "%s\n%s\n" "${toBeSubmitted.password}" "${toBeSubmitted.metadata ? toBeSubmitted.metadata : ""}" | pass insert -m ${toBeSubmitted.passwordPath}`;
+      // if its not windows, it is assumed to be a unix-like system. So far raycast is available on MacOS, Linux and Windows.
+      const cmd = isWindows ? windowsCmd : unixCmd;
+      // run `cmd` via `runCmd` helper function and wrap that inside `onPasswordCreate` in order to perform Optimistic Update.
+      // By default it will call the hook (`UsePromise`) again after an update
+      onPasswordCreate(runCmd(cmd));
+      pop();
+    },
+    validation: {
+      passwordPath: FormValidation.Required,
+      password: FormValidation.Required,
+    },
+  });
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Insert New Password" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="path" {...itemProps.passwordPath} />
+      <Form.TextField title="password" {...itemProps.password} />
+      <Form.TextArea title="metadata" {...itemProps.metadata} />
+    </Form>
+  );
+}
+
+/** A component to prompt the user to generate a new password */
+export function GeneratePasswordPrompt({ onPasswordCreate }: PasswordMakerProps) {
+  // used for popping back to the list view after submitting
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{ passwordPath: string }>({
+    onSubmit: function (toBeSubmitted) {
+      // prepare the command to generate a pseudo-random password
+      const cmd = `pass generate ${toBeSubmitted.passwordPath}`;
+      // run `cmd` via `runCmd` helper function and wrap that inside `onPasswordCreate` in order to perform Optimistic Update.
+      // By default it will call the hook (`UsePromise`) again after an update
+      onPasswordCreate(runCmd(cmd));
+      // pop back to list view
+      pop();
+    },
+    validation: {
+      passwordPath: FormValidation.Required,
+    },
+  });
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Generate Password" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="password path" {...itemProps.passwordPath} />
+    </Form>
+  );
+}
 
 /**
  * Command component that displays a list of passwords, with the last used password at the top if available.
@@ -14,7 +114,9 @@ import url from "url";
  * @returns {JSX.Element} The rendered component.
  */
 export default function Command(): JSX.Element {
-  const { isLoading, data } = usePromise(async () => {
+  // move `preferences` here in order to access user preferences values
+  const preferences = getPreferenceValues();
+  const { isLoading, data, mutate } = usePromise(async () => {
     // Info about the last used password
     const lastUsedPassword = await getLastUsedPassword();
 
@@ -28,7 +130,6 @@ export default function Command(): JSX.Element {
         showOtpFirst: lastUsedPassword.option === "Password",
       });
 
-    const preferences = getPreferenceValues();
     const passPath = preferences.PASSWORDS_PATH;
 
     // Get all password files
@@ -49,6 +150,20 @@ export default function Command(): JSX.Element {
         <List.EmptyView
           title="No password files found"
           description="Please check that you have the correct folder selected in your extension preferences. "
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Generate"
+                icon={Icon.Key}
+                target={<GeneratePasswordPrompt onPasswordCreate={mutate} />}
+              />
+              <Action.Push
+                title="Insert"
+                icon={Icon.Plus}
+                target={<InsertPasswordPrompt onPasswordCreate={mutate} />}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         data?.map((password: Password) => (
@@ -60,7 +175,43 @@ export default function Command(): JSX.Element {
               <ActionPanel>
                 <Action.Push
                   title="Decrypt"
+                  icon={Icon.Hashtag}
                   target={<PasswordOptions selectedPassword={password.value} showOtpFirst={password.showOtpFirst} />}
+                />
+                <Action
+                  title="Delete"
+                  icon={Icon.DeleteDocument}
+                  onAction={async () => {
+                    // confirmation prompt before continue to delete password file
+                    const isConfirmed = await confirmAlert({
+                      title: "Are you sure you want to delete this password file with its metadata?",
+                    });
+                    const cmd = `echo 'y' | pass rm ${password.value}`;
+                    if (isConfirmed) {
+                      // deleting password entries must be through `pass` with `pass remove`
+                      // the mutate function is a function that gets called when an update occurs and how should the UI behave when it occurs
+                      mutate(runCmd(cmd), {
+                        optimisticUpdate(data) {
+                          return data ? data.filter((pass) => pass.value != password.value) : [];
+                        },
+                      });
+                    }
+                  }}
+                />
+                <Action.Push
+                  title="Generate"
+                  icon={Icon.Key}
+                  target={<GeneratePasswordPrompt onPasswordCreate={mutate} />}
+                />
+                <Action.Push
+                  title="Insert"
+                  icon={Icon.Plus}
+                  target={<InsertPasswordPrompt onPasswordCreate={mutate} />}
+                />
+                <Action.Push
+                  title="Rename"
+                  icon={Icon.Pencil}
+                  target={<RenamePasswordPrompt onPasswordRename={mutate} oldName={password.value} />}
                 />
               </ActionPanel>
             }
