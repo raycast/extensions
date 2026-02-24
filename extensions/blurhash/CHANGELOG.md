@@ -1,6 +1,6 @@
 # BlurHash Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-24
 
 - Generate blurhash from clipboard images and videos
 - Auto-detect files from clipboard, Finder copy, and Finder selection
