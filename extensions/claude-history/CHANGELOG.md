@@ -1,6 +1,6 @@
 # Claude History Changelog
 
-## [Initial Version] - 2026-02-24
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Browse all Claude Code sessions grouped by project
 - Conversation preview in detail panel
