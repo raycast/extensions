@@ -27,7 +27,11 @@ function isValidUrl(text: string): boolean {
   }
 }
 
-function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }) {
+function SetupForm({
+  onKeySubmitted,
+}: {
+  onKeySubmitted: (key: string) => void;
+}) {
   const [apiKey, setApiKey] = useState("");
   const [isValidating, setIsValidating] = useState(false);
 
@@ -42,7 +46,10 @@ function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }
     const trimmedKey = apiKey.trim();
 
     if (!trimmedKey) {
-      showToast({ style: Toast.Style.Failure, title: "Please enter your API key" });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please enter your API key",
+      });
       return;
     }
 
@@ -98,8 +105,15 @@ function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }
       isLoading={isValidating}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Connect" onSubmit={handleSubmit} />
-          <Action title="Paste from Clipboard" onAction={handlePasteKey} shortcut={{ modifiers: ["cmd"], key: "v" }} />
+          <Action.SubmitForm
+            title="Connect"
+            onSubmit={handleSubmit}
+          />
+          <Action
+            title="Paste from Clipboard"
+            onAction={handlePasteKey}
+            shortcut={{ modifiers: ["cmd"], key: "v" }}
+          />
           <Action.OpenInBrowser
             title="Get API Key at savememry.com"
             url="https://savememry.com/integrations"
@@ -108,7 +122,10 @@ function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }
         </ActionPanel>
       }
     >
-      <Form.Description title="Welcome to Memry" text="Connect your account to start saving links with AI analysis." />
+      <Form.Description
+        title="Welcome to Memry"
+        text="Connect your account to start saving links with AI analysis."
+      />
       <Form.Separator />
       <Form.PasswordField
         id="apiKey"
@@ -116,7 +133,7 @@ function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }
         placeholder="memry_..."
         value={apiKey}
         onChange={setApiKey}
-        info="Go to savememry.com/integrations → API Keys tab → Create a key and paste it here."
+        info="Go to savememry.com/integrations to create a key and paste it here."
         autoFocus
       />
       <Form.Separator />
@@ -125,7 +142,13 @@ function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }
   );
 }
 
-function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: () => void }) {
+function SaveLinkForm({
+  apiKey,
+  onDisconnect,
+}: {
+  apiKey: string;
+  onDisconnect: () => void;
+}) {
   const [url, setUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -141,7 +164,10 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
   async function handleSubmit() {
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      showToast({ style: Toast.Style.Failure, title: "Please enter a URL" });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please enter a URL",
+      });
       return;
     }
 
@@ -168,7 +194,11 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
       });
 
       if (!response.ok) {
-        const data = (await response.json().catch(() => ({ message: "Request failed" }))) as { message?: string };
+        const data = (await response
+          .json()
+          .catch(() => ({ message: "Request failed" }))) as {
+          message?: string;
+        };
         if (response.status === 401) {
           showToast({
             style: Toast.Style.Failure,
@@ -179,7 +209,9 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
           onDisconnect();
           return;
         }
-        throw new Error(data.message || `Error ${response.status}`);
+        throw new Error(
+          data.message || `Error ${response.status}`,
+        );
       }
 
       showToast({
@@ -189,8 +221,15 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
       });
       popToRoot();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Check your API key and try again";
-      showToast({ style: Toast.Style.Failure, title: "Failed to save", message });
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Check your API key and try again";
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to save",
+        message,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -205,7 +244,10 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
 
   async function handleDisconnect() {
     await LocalStorage.removeItem(STORAGE_KEY);
-    showToast({ style: Toast.Style.Success, title: "Disconnected" });
+    showToast({
+      style: Toast.Style.Success,
+      title: "Disconnected",
+    });
     onDisconnect();
   }
 
@@ -214,36 +256,62 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
       isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Link" onSubmit={handleSubmit} />
-          <Action title="Paste from Clipboard" onAction={handlePaste} shortcut={{ modifiers: ["cmd"], key: "v" }} />
+          <Action.SubmitForm
+            title="Save Link"
+            onSubmit={handleSubmit}
+          />
+          <Action
+            title="Paste from Clipboard"
+            onAction={handlePaste}
+            shortcut={{ modifiers: ["cmd"], key: "v" }}
+          />
           <Action
             title="Disconnect Account"
             onAction={handleDisconnect}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            shortcut={{
+              modifiers: ["cmd", "shift"],
+              key: "d",
+            }}
           />
         </ActionPanel>
       }
     >
-      <Form.Description title="Memry" text="Save a link and AI will analyze it automatically." />
+      <Form.Description
+        title="Memry"
+        text="Save a link and AI will analyze it automatically."
+      />
       <Form.Separator />
-      <Form.TextField id="url" title="URL" placeholder="https://..." value={url} onChange={setUrl} autoFocus />
+      <Form.TextField
+        id="url"
+        title="URL"
+        placeholder="https://..."
+        value={url}
+        onChange={setUrl}
+        autoFocus
+      />
       <Form.Separator />
-      <Form.Description text="Paste any URL — AI extracts key takeaways, topics, and a summary." />
+      <Form.Description text="Paste any URL. AI extracts key takeaways, topics, and a summary." />
     </Form>
   );
 }
 
 export default function SaveLink() {
   const prefs = getPreferenceValues<Preferences>();
-  const [storedKey, setStoredKey] = useState<string | null>(null);
+  const [storedKey, setStoredKey] = useState<string | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      if (prefs.apiKey && prefs.apiKey.startsWith("memry_")) {
+      if (
+        prefs.apiKey &&
+        prefs.apiKey.startsWith("memry_")
+      ) {
         setStoredKey(prefs.apiKey);
       } else {
-        const saved = await LocalStorage.getItem<string>(STORAGE_KEY);
+        const saved =
+          await LocalStorage.getItem<string>(STORAGE_KEY);
         if (saved && saved.startsWith("memry_")) {
           setStoredKey(saved);
         }
@@ -257,8 +325,17 @@ export default function SaveLink() {
   }
 
   if (!storedKey) {
-    return <SetupForm onKeySubmitted={(key) => setStoredKey(key)} />;
+    return (
+      <SetupForm
+        onKeySubmitted={(key) => setStoredKey(key)}
+      />
+    );
   }
 
-  return <SaveLinkForm apiKey={storedKey} onDisconnect={() => setStoredKey(null)} />;
+  return (
+    <SaveLinkForm
+      apiKey={storedKey}
+      onDisconnect={() => setStoredKey(null)}
+    />
+  );
 }
