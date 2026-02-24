@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Menu Bar is Coming and Fix some bugs] - {PR_MERGE_DATE}
+## [Menu Bar is Coming and Fix some bugs] - 2026-02-24
 
 ### New Features
 
