@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-24
 
 - **Search Memories**: semantic search with relevance scoring, recent memories fallback
 - **Add Memory**: save with title, content, and importance from Raycast
