@@ -250,7 +250,7 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
               set _title to my escape_value(get name of _tab)
               set _url to ""
               try
-                set _url to get URL of _tab
+                set _url to my escape_value(get URL of _tab)
                 if _url is missing value then set _url to ""
               end try
               set _id to get id of _tab
