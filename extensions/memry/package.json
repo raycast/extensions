@@ -4,8 +4,11 @@
   "title": "Memry",
   "description": "Save links to Memry — your AI-powered link manager. Paste a URL or share from clipboard, and AI will analyze it automatically.",
   "icon": "extension-icon.png",
-  "author": "memry",
-  "categories": ["Productivity", "Web"],
+  "author": "daxeel_soni",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
