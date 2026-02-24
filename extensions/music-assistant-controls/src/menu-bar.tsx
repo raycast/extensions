@@ -2,26 +2,25 @@ import { Icon, MenuBarExtra, openExtensionPreferences, Image } from "@raycast/ap
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { Player, PlayerQueue } from "./external-code/interfaces";
 import MusicAssistantClient from "./music-assistant-client";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { selectedPlayerKey, StoredQueue } from "./use-selected-player-id";
 
 export default function Command() {
-  const client = useMemo(() => new MusicAssistantClient(), []);
-  const {
-    isLoading,
-    data: queues,
-    revalidate: revalidatePlayers,
-  } = useCachedPromise(async () => await client.getActiveQueues(), [], {
-    keepPreviousData: true,
-    initialData: [],
-  });
+  const client = new MusicAssistantClient();
 
-  const { data: players, revalidate: revalidatePlayerDetails } = useCachedPromise(
-    async () => await client.getPlayers(),
+  // Fetch both in parallel with automatic caching
+  const {
+    data: { queuesData = [], playersData = [] } = {},
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async () => {
+      const [queuesData, playersData] = await Promise.all([client.getActiveQueues(), client.getPlayers()]);
+      return { queuesData, playersData };
+    },
     [],
     {
       keepPreviousData: true,
-      initialData: [],
     },
   );
 
@@ -30,15 +29,15 @@ export default function Command() {
   const [title, setTitle] = useState<string>();
 
   useEffect(() => {
-    const activeQueue = client.findActiveQueue(queues, storedQueueId);
-    const displayQueue = client.getDisplayQueueForMenuBar(activeQueue, players, queues);
+    const activeQueue = client.findActiveQueue(queuesData, storedQueueId);
+    const displayQueue = client.getDisplayQueueForMenuBar(activeQueue, playersData, queuesData);
 
     const newTitle = client.getDisplayTitle(displayQueue);
 
     if (client.shouldUpdateTitle(title, newTitle)) {
       setTitle(newTitle);
     }
-  }, [storedQueueId, queues, players, client, title]);
+  }, [storedQueueId, queuesData, playersData, client, title]);
 
   const selectPlayerForMenuBar = (queue: PlayerQueue) => {
     const selection = client.createQueueSelection(queue);
@@ -53,12 +52,12 @@ export default function Command() {
   };
 
   const getPlayerById = (playerId: string): Player | undefined => {
-    return players.find((p) => p.player_id === playerId);
+    return playersData.find((p) => p.player_id === playerId);
   };
 
-  const activeQueue = client.findActiveQueue(queues, storedQueueId);
-  const displayableQueues = client.getDisplayableQueues(queues, players);
-  const activeDisplayQueue = client.getDisplayQueueForMenuBar(activeQueue, players, queues);
+  const activeQueue = client.findActiveQueue(queuesData, storedQueueId);
+  const displayableQueues = client.getDisplayableQueues(queuesData, playersData);
+  const activeDisplayQueue = client.getDisplayQueueForMenuBar(activeQueue, playersData, queuesData);
   const inactiveQueues = displayableQueues.filter((q) => q.queue_id !== activeDisplayQueue?.queue_id);
 
   return (
@@ -105,7 +104,7 @@ export default function Command() {
                     }
                     onAction={async () => {
                       await client.setVolume(activeDisplayQueue.queue_id, option.level);
-                      revalidatePlayerDetails();
+                      revalidate();
                     }}
                   />
                 ))}
@@ -119,10 +118,10 @@ export default function Command() {
             if (!activePlayer || !client.canFormGroup(activePlayer)) return null;
 
             const currentMembers = client
-              .getGroupMembers(activePlayer, players)
+              .getGroupMembers(activePlayer, playersData)
               .filter((m) => m.player_id !== activePlayer.player_id);
 
-            const compatiblePlayers = client.getCompatiblePlayers(activePlayer, players);
+            const compatiblePlayers = client.getCompatiblePlayers(activePlayer, playersData);
             const potentialMembers = compatiblePlayers.filter(
               (p) => p.player_id !== activePlayer.player_id && !currentMembers.find((m) => m.player_id === p.player_id),
             );
@@ -139,7 +138,7 @@ export default function Command() {
                     icon={Icon.Minus}
                     onAction={async () => {
                       await client.ungroupPlayer(member.player_id);
-                      revalidatePlayerDetails();
+                      revalidate();
                     }}
                   />
                 ))}
@@ -152,7 +151,7 @@ export default function Command() {
                     icon={Icon.Plus}
                     onAction={async () => {
                       await client.groupPlayer(player.player_id, activePlayer.player_id);
-                      revalidatePlayerDetails();
+                      revalidate();
                     }}
                   />
                 ))}
@@ -182,14 +181,13 @@ export default function Command() {
       )}
 
       {/* Refresh */}
-      {queues && queues.length > 0 ? (
+      {queuesData && queuesData.length > 0 ? (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
             title="Refresh"
             icon={Icon.RotateAntiClockwise}
             onAction={() => {
-              revalidatePlayers();
-              revalidatePlayerDetails();
+              revalidate();
             }}
           />
         </MenuBarExtra.Section>

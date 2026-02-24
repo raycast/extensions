@@ -167,6 +167,199 @@ Each command entry includes:
 
 See TESTING.md for detailed coverage breakdown and rationale.
 
+## React Hooks & State Management
+
+### Supported Hooks
+
+- ✅ `useCachedPromise` - Caches API call results between command runs
+- ✅ `useCachedState` - Persists state across command invocations (JSON serializable only)
+- ✅ `useLocalStorage` - Stores user preferences and selections
+- ✅ `usePromise` - For one-off async operations
+- ✅ Standard React hooks: `useState`, `useEffect`
+
+### Unsupported Hooks (Do NOT Use)
+
+- ❌ `useMemo` - Not available in Raycast
+- ❌ `useCallback` - Not available in Raycast
+- ➡️ Use `useCachedPromise` with `execute` parameter instead to control when fetches happen
+
+### useCachedState Best Practice
+
+```typescript
+// Persist data between command invocations
+const [cachedQueues, setCachedQueues] = useCachedState<PlayerQueue[]>("menu-bar-queues", []);
+
+// Update cache when fresh data arrives
+const { isLoading, revalidate } = useCachedPromise(
+  async () => {
+    const data = await fetchQueues();
+    setCachedQueues(data); // Update cache
+    return data;
+  },
+  [],
+  { execute: isBackgroundRefresh },
+);
+
+// Always use cached data for display
+const displayQueues = cachedQueues || [];
+```
+
+## Menu Bar Command Architecture
+
+Menu bar commands have a **different lifecycle** than regular commands and must be optimized to prevent timeouts.
+
+### Configuration (package.json)
+
+```json
+{
+  "name": "menu-bar",
+  "mode": "menu-bar",
+  "interval": "10s" // Background refresh interval - fetch happens every 10 seconds
+}
+```
+
+### Launch Types & Lifecycle
+
+Menu bar commands execute in three distinct scenarios:
+
+1. **Background Refresh** (`environment.launchType === "background"`)
+   - Raycast runs the command at specified interval (every 10s)
+   - Time budget: ~8-10 seconds per cycle
+   - Use this to fetch fresh API data and update cache
+   - Set `isLoading = true` while fetching
+
+2. **User Opens Menu** (`environment.launchType === "userInitiated"`)
+   - User clicks the menu bar icon to open the menu
+   - Display cached data immediately - NO NEW API CALLS
+   - Menu must appear instantly, no loading state shown
+   - Set `isLoading = false` (or don't check it during user interaction)
+
+3. **Raycast Restart/Resume**
+   - Raycast restores menu bar item from database (no code execution)
+   - Previous state persists from last background refresh cycle
+
+### Critical Menu Bar Pattern
+
+```typescript
+import { environment } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+
+export default function MenuBar() {
+  const client = new MusicAssistantClient();
+  const isBackgroundRefresh = environment.launchType === "background";
+
+  // Persist data using useCachedState
+  const [cachedData, setCachedData] = useCachedState("key", []);
+
+  // Only fetch during background refresh
+  const { isLoading, revalidate } = useCachedPromise(
+    async () => {
+      const data = await client.fetchData();
+      setCachedData(data);  // Update cache for next user interaction
+      return data;
+    },
+    [],
+    {
+      execute: isBackgroundRefresh,  // ⭐ CRITICAL: Only fetch in background
+      keepPreviousData: true
+    }
+  );
+
+  // Show loading ONLY during background refresh
+  const showLoading = isBackgroundRefresh && isLoading;
+
+  // Always use cached data for rendering
+  const displayData = cachedData || [];
+
+  return (
+    <MenuBarExtra isLoading={showLoading} title={displayData?.title}>
+      {/* Render displayData immediately */}
+    </MenuBarExtra>
+  );
+}
+```
+
+### Why Menu Bar Timeouts Happened
+
+**Problem**: Menu bar was fetching fresh API data **every time the command ran**, including when user clicked the menu icon.
+
+- User opens menu → API call starts → API timeout (slow server) → Menu appears blank
+
+**Solution**: Only fetch during 10-second background intervals
+
+- Every 10s: Background refresh fetches data, updates cache, unloads command
+- User opens menu: Display cached data instantly (no API call = no timeout) ⚡
+- User clicks action: Manually call `revalidate()` to refresh
+
+### Menu Bar Best Practices
+
+1. **Use `execute: isBackgroundRefresh`** - Controls when `useCachedPromise` fetches
+   - Prevents API calls during user menu interactions
+   - Menu always responsive with cached data
+
+2. **Always set `isLoading` correctly**
+   - Use `showLoading = isBackgroundRefresh && isLoading`
+   - Never show loading spinner when user opens menu
+
+3. **Use `useCachedState` for persistence**
+   - Survives between menu opens/closes
+   - Menu always has data to display
+   - JSON serializable values only
+
+4. **Keep `revalidate()` for manual refresh**
+   - Call in action handlers (next, play/pause, volume)
+   - Let user trigger fresh data when they interact
+
+5. **Set reasonable API timeout**
+   - 8-10 seconds max per API call
+   - Menu bar has limited time budget (interval is 10s)
+   - Gracefully use cached data if timeout occurs
+
+## Performance Optimization Patterns
+
+### Menu Bar Timeout Resolution
+
+The key insight: **Separate background data fetching from user-triggered displays**
+
+**Before (Timeout)**:
+
+- Command runs → Fetch new API data → Wait for response → Display menu
+- If API slow: Menu blank for 5-10+ seconds or times out
+
+**After (Instant)**:
+
+- Background: Fetch data every 10s → Update cache → Unload
+- User opens: Display cached data instantly ⚡ No API call
+
+**Data Flow**:
+
+```
+Background Refresh (10s interval)
+├─ Fetch fresh API data
+├─ Update useCachedState cache
+├─ Raycast waits max 8-10s, then unloads
+└─ Menu shows new data on next user interaction
+
+User Opens Menu
+├─ Raycast loads command
+├─ Display cached data immediately (< 100ms)
+└─ Menu responsive & interactive
+
+User Clicks Action
+├─ Execute action
+├─ Call revalidate() to update cache
+└─ Menu refreshes with new data
+```
+
+### Performance Mistakes to Avoid
+
+- ❌ Fetch fresh data every time menu bar renders (causes timeouts)
+- ❌ Using `useMemo`/`useCallback` (unsupported, not needed with above pattern)
+- ❌ Making sequential API calls instead of parallel
+- ❌ Showing loading spinner when displaying cached data to user
+- ❌ Very long titles in menu bar items
+- ❌ Identical `MenuBarExtra.Item`s with same action at same level
+
 ## Anti-patterns to Avoid
 
 - ❌ Modifying README.md (it's published on store)
@@ -179,3 +372,11 @@ See TESTING.md for detailed coverage breakdown and rationale.
 - ❌ Showing UI controls for unsupported features
 - ❌ Hard-coding values that should be dynamic
 - ❌ Removing error handling for null/undefined responses
+- ❌ Using `useMemo` or `useCallback` (not supported by Raycast) - use `useCachedPromise` instead
+- ❌ Fetching fresh API data every time menu bar renders (causes timeouts)
+- ❌ Setting `execute: true` on all `useCachedPromise` calls in menu bar
+- ❌ Setting `isLoading=true` when displaying cached data to user
+- ❌ Making sequential API calls when parallel is possible
+- ❌ Very long titles in menu bar items
+- ❌ Identical `MenuBarExtra.Item`s with same action handler at same level
+- ❌ Ignoring `environment.launchType` in menu bar commands
