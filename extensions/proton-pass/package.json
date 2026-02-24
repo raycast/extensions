@@ -93,6 +93,24 @@
       "description": "When enabled, passwords will be cleared from clipboard after pasting",
       "default": true,
       "required": false
+    },
+    {
+      "name": "enableBackgroundRefresh",
+      "type": "checkbox",
+      "title": "Background Refresh",
+      "label": "Automatically refresh cached vault and item data",
+      "description": "When enabled, cached results will refresh in the background",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableWebIntegration",
+      "type": "checkbox",
+      "title": "Web Integration",
+      "label": "Match active browser tab URL in Search Items",
+      "description": "When enabled, Search Items auto-selects logins matching the active tab URL (Raycast web extension required)",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {

@@ -810,7 +810,7 @@
 /extensions/gh-pic                                                  @xiangsanliu
 /extensions/ghost-docs                                              @royalfig
 /extensions/ghostty                                                 @JarryChung @FriendlyUsername @AlexIsMaking @mathisfoxius
-/extensions/ghq                                                     @konojunya
+/extensions/ghq                                                     @konojunya @alinnow
 /extensions/gif-search                                              @josephschmitt @tmwrnr @j3lte @samuelkraft @ridemountainpig @Spookywy @seanparkross @YourMCGeek @thomaspaulmann @artisticmedic
 /extensions/gift-stardew-valley                                     @NaoRojas
 /extensions/gistly                                                  @rafalzawadzki
@@ -1026,6 +1026,7 @@
 /extensions/initium                                                 @toto-minai
 /extensions/inkdrop                                                 @yaeda
 /extensions/inkeep                                                  @marcklingen
+/extensions/inoreader                                               @lemikeone
 /extensions/inpost-parcel-lockers                                   @timrogers
 /extensions/input-source-switcher                                   @danulqua
 /extensions/inspire-search                                          @errepuntopenco
@@ -1121,6 +1122,7 @@
 /extensions/kill-process                                            @rolandleth @crazyones110 @zhenpewu @Saafo @erics118 @xilopaint @validatedev @nmder @mateusbadalotti
 /extensions/kimai                                                   @marinsokol @codiini
 /extensions/kimi                                                    @degouville
+/extensions/kimi-for-coding                                         @geekdada
 /extensions/kinopio-inbox                                           @pketh
 /extensions/kinopoisk                                               @mattisssa
 /extensions/kiro                                                    @jyothish-ram
@@ -1303,6 +1305,7 @@
 /extensions/maven-central-repository                                @koinzhang
 /extensions/maxly-chat                                              @max-lee-dev
 /extensions/mayar                                                   @moerdowo
+/extensions/maybe                                                   @xmok
 /extensions/mbta-tracker                                            @djpowers
 /extensions/mcp                                                     @EvanZhouDev @shemhamforash23 @radzio
 /extensions/md-to-excel                                             @victor-defi
@@ -1970,7 +1973,7 @@
 /extensions/roblox-games                                            @TayIorRobinson
 /extensions/rocket-chat                                             @alex-w0
 /extensions/roll-d20                                                @kaylasween
-/extensions/rollcast                                                @TroAlexis @pernielsentikaer
+/extensions/rollcast                                                @TroAlexis @pernielsentikaer @alexibuild
 /extensions/rollup-wtf                                              @0xOsprey
 /extensions/rounding-number                                         @HackettLai
 /extensions/rss-reader                                              @fuksman @pernielsentikaer @pomdtr @xmok
@@ -2565,6 +2568,7 @@
 /extensions/wechat-devtool                                          @tofrankie
 /extensions/week-number                                             @koinzhang
 /extensions/weread-sync                                             @changbinwang
+/extensions/wezterm-navigator                                       @louishuyng
 /extensions/what-happened-today                                     @nikhiltiwari0
 /extensions/whatsapp                                                @vimtor @xmok @p-gurbani
 /extensions/whentomeet                                              @aaronlinv

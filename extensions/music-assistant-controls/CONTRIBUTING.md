@@ -6,9 +6,9 @@ Thank you for your interest in contributing! This guide will help you set up you
 
 ### Prerequisites
 
-- Node.js 16+
+- Node.js 22+ (as specified in [.nvmrc](.nvmrc))
 - npm or yarn
-- macOS (for testing the extension)
+- macOS or Windows (for testing the extension; menu bar command requires macOS)
 
 ### Setup
 

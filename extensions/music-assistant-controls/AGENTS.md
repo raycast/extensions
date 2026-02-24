@@ -1,5 +1,3 @@
-# GitHub Copilot Custom Instructions
-
 ## Project Context
 
 This is a Raycast extension for controlling Music Assistant, a home music server system. The extension provides menu bar controls and commands for music playback, player selection, and volume control.

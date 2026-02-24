@@ -1,23 +1,9 @@
 import { Detail, ActionPanel, Action, Icon, showToast, Toast, environment } from "@raycast/api";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { WordData } from "./api";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { execFile, ChildProcess } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
-
-const execAsync = promisify(exec);
-
-function getPlayCommand(filePath: string): string {
-  switch (process.platform) {
-    case "win32":
-      return `powershell -c (New-Object Media.SoundPlayer "${filePath}").PlaySync()`;
-    case "darwin":
-      return `afplay "${filePath}"`;
-    default:
-      return `ffplay -nodisp -autoexit "${filePath}" 2>/dev/null || mpv --no-video "${filePath}" 2>/dev/null`;
-  }
-}
 
 const modKey = process.platform === "win32" ? "Ctrl" : "⌘";
 const shortcutModifier = process.platform === "win32" ? "ctrl" : "cmd";
@@ -34,6 +20,29 @@ interface WordDetailsProps {
 
 export function WordDetails({ wordData, onBack }: WordDetailsProps) {
   const [audioLoading, setAudioLoading] = useState<string | null>(null);
+  const audioProcessRef = useRef<ChildProcess | null>(null);
+  const downloadAbortControllerRef = useRef<AbortController | null>(null);
+  const tempFilesRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup on unmount
+      downloadAbortControllerRef.current?.abort();
+      if (audioProcessRef.current) {
+        audioProcessRef.current.kill();
+      }
+      // Clean up all temporary files
+      tempFilesRef.current.forEach((file) => {
+        if (fs.existsSync(file)) {
+          try {
+            fs.unlinkSync(file);
+          } catch (e) {
+            console.error("Cleanup error:", e);
+          }
+        }
+      });
+    };
+  }, []);
 
   const playAudio = async (audioUrl: string, label: string) => {
     if (!audioUrl) {
@@ -45,6 +54,15 @@ export function WordDetails({ wordData, onBack }: WordDetailsProps) {
       return;
     }
 
+    // Stop any current playback or download
+    downloadAbortControllerRef.current?.abort();
+    if (audioProcessRef.current) {
+      audioProcessRef.current.kill();
+    }
+
+    downloadAbortControllerRef.current = new AbortController();
+    const signal = downloadAbortControllerRef.current.signal;
+
     setAudioLoading(audioUrl);
 
     const toast = await showToast({
@@ -52,37 +70,83 @@ export function WordDetails({ wordData, onBack }: WordDetailsProps) {
       title: "Playing pronunciation...",
     });
 
+    let tempFilePath = "";
+
     try {
       // Download the audio file
-      const response = await fetch(audioUrl);
+      const response = await fetch(audioUrl, { signal });
       if (!response.ok) {
         throw new Error(`Failed to download audio: ${response.statusText}`);
       }
 
       const arrayBuffer = await response.arrayBuffer();
+      if (signal.aborted) return;
       const buffer = Buffer.from(arrayBuffer);
 
       // Save to temporary file
       const tempDir = environment.supportPath;
-      const tempFilePath = path.join(tempDir, `pronunciation_${Date.now()}.mp3`);
+      tempFilePath = path.join(tempDir, `pronunciation_${Date.now()}.mp3`);
+      tempFilesRef.current.push(tempFilePath);
       fs.writeFileSync(tempFilePath, buffer);
 
       // Play audio using platform-specific command
-      const playCommand = getPlayCommand(tempFilePath);
-      await execAsync(playCommand);
+      await new Promise<void>((resolve, reject) => {
+        let binary = "";
+        let args: string[] = [];
+
+        switch (process.platform) {
+          case "win32":
+            binary = "powershell";
+            // Use Media.SoundPlayer for simplicity, though MediaPlayer is better for MP3.
+            // Note: SoundPlayer is synchronous with .PlaySync() which suits our Promise wrapper.
+            args = [
+              "-Command",
+              "& { $player = New-Object Media.SoundPlayer $args[0]; $player.PlaySync() }",
+              tempFilePath,
+            ];
+            break;
+          case "darwin":
+            binary = "afplay";
+            args = [tempFilePath];
+            break;
+          default:
+            binary = "ffplay";
+            args = ["-nodisp", "-autoexit", tempFilePath];
+            break;
+        }
+
+        const proc = execFile(binary, args, (error) => {
+          if (error && !proc.killed) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+        audioProcessRef.current = proc;
+      });
+
+      if (signal.aborted) return;
 
       // Clean up
-      fs.unlinkSync(tempFilePath);
+      if (fs.existsSync(tempFilePath)) {
+        fs.unlinkSync(tempFilePath);
+        tempFilesRef.current = tempFilesRef.current.filter((f) => f !== tempFilePath);
+      }
 
       toast.style = Toast.Style.Success;
       toast.title = "Played pronunciation";
       setAudioLoading(null);
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
       console.error("Audio error:", error);
-      toast.style = Toast.Style.Failure;
-      toast.title = "Audio error";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
-      setAudioLoading(null);
+      if (!signal.aborted) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Audio error";
+        toast.message = error instanceof Error ? error.message : "Unknown error";
+        setAudioLoading(null);
+      }
     }
   };
 

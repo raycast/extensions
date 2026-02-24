@@ -1,5 +1,4 @@
 # Music Assistant Controls Changelog
-
 ## [Player Grouping and Menu Bar Management] - {PR_MERGE_DATE}
 
 ### ✨ New Features
@@ -28,6 +27,18 @@
 - Build, modify, and manage groups directly from the menu bar without switching to the full command
 - Unified group management interface showing both current members and available players to recruit
 - Faster group creation and modifications for power users
+
+## [Windows Support Added] - 2026-02-24
+
+### ✨ New Features
+
+- **Cross-Platform Availability** - Extension is now available on both macOS and Windows Raycast.
+
+### 📝 Platform Support Notes
+
+- All commands (Toggle, Next Song, Volume Up/Down, Set Volume, Set Active Player) are available on Windows
+- Menu bar command is macOS-only as the feature isn't supported on Windows Raycast
+
 
 ## [Volume Step Controls] - 2026-02-23
 
