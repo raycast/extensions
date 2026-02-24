@@ -1,6 +1,6 @@
 # WezTerm Navigator Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-24
 
 - Navigate WezTerm tabs with workspace grouping and detail panels
 - Create new tabs with directory picker and workspace selection
