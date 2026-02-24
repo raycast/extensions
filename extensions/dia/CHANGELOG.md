@@ -1,5 +1,20 @@
 # Dia Changelog
 
+## [Performance and Features] - 2026-02-24
+
+### Performance
+
+- Replace nested AppleScript repeat loops with JXA (JavaScript for Automation) with bulk AppleScript fallback using `properties of every tab` for 10-14x faster tab fetching
+- Switch `useTabs()` from `usePromise` to `useCachedPromise` for instant subsequent launches
+- Add `throttle={true}` to Search and Search History views to reduce SQL queries during typing
+- Progressive UI loading: tabs render immediately, history/bookmarks/suggestions stream in independently
+
+### Added
+
+- **Open URL in Dia**: New no-view command to open a URL in Dia with argument, clipboard fallback, and Google search for non-URLs
+- **URL detection in Search**: Typing a URL shows "Open [url]" as the first result with default action to open in Dia
+- **Better default tab action**: Enter opens a new tab (faster), Cmd+Enter focuses the existing tab
+
 ## [Search Bookmarks: Open all in folder] - 2026-02-02
 
 - Added "Open All # in Dia" action on bookmark folders to open all bookmarks in that folder (and subfolders) as tabs in Dia for quick access to a bookmarked set of tabs; Raycast window closes after opening to keep user in flow.
