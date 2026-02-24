@@ -251,7 +251,7 @@
       "name": "menuBarPlayer",
       "title": "Menu Bar Player",
       "subtitle": "Spotify",
-      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more. Refreshes every 10 seconds.",
+      "description": "See what's currently playing in your Menu Bar. Click for actions such as Play/Pause and Skip. Refreshes every 10 seconds.",
       "mode": "menu-bar",
       "interval": "10s",
       "preferences": [
