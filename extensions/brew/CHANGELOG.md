@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-02-24
 
 - Remove updating homebrew index toast from outdated command
 
