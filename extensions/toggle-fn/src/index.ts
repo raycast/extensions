@@ -40,7 +40,7 @@ export default async function () {
           -- Uses UI Scripting to click through System Settings
           else if osver >= "13.0" then
               open location "x-apple.systempreferences:com.apple.Keyboard-Settings.extension"
-			  delay 1 -- Wait for the settings to open
+              delay 1 -- Wait for the settings to open
               
               if osver >= "14.0" then
                   tell application "System Settings"
