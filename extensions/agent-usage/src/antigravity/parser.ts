@@ -1,4 +1,5 @@
 import { AntigravityError, AntigravityModelQuota, AntigravityUsage } from "./types";
+import { formatResetTime, parseDate } from "../agents/format";
 
 interface ParseResult {
   usage: AntigravityUsage | null;
@@ -99,22 +100,7 @@ export function selectDisplayModels(models: AntigravityModelQuota[]): Antigravit
   return [...models].sort((a, b) => a.percentLeft - b.percentLeft);
 }
 
-export function formatResetTime(value: string | null): string {
-  if (!value) return "unknown";
-
-  const date = parseDate(value);
-  if (!date) return "unknown";
-
-  const diffMs = date.getTime() - Date.now();
-  if (diffMs <= 0) return "now";
-
-  const diffMinutes = Math.floor(diffMs / 60000);
-  if (diffMinutes < 60) return `${diffMinutes}m`;
-
-  const hours = Math.floor(diffMinutes / 60);
-  const minutes = diffMinutes % 60;
-  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
-}
+export { formatResetTime } from "../agents/format";
 
 function quotaFromConfig(rawConfig: unknown): AntigravityModelQuota | null {
   const config = asRecord(rawConfig);
@@ -184,24 +170,6 @@ function isGeminiProHigh(label: string): boolean {
 function isGeminiFlash(label: string): boolean {
   const lower = label.toLowerCase();
   return lower.includes("gemini") && lower.includes("flash");
-}
-
-function parseDate(value: string): Date | null {
-  if (!value) return null;
-
-  const isoDate = new Date(value);
-  if (!Number.isNaN(isoDate.getTime())) {
-    return isoDate;
-  }
-
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) {
-    return null;
-  }
-
-  const asMs = numeric > 1_000_000_000_000 ? numeric : numeric * 1000;
-  const date = new Date(asMs);
-  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function codeToError(code: unknown): string | null {

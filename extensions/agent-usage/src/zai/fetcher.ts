@@ -1,72 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
-import { getPreferenceValues } from "@raycast/api";
 import { ZaiUsage, ZaiError, ZaiLimitEntry, ZaiUsageDetail } from "./types";
+import { httpFetch } from "../agents/http";
+import { createTokenBasedHook } from "../agents/hooks";
 
 const ZAI_USAGE_API = "https://api.z.ai/api/monitor/usage/quota/limit";
-const REQUEST_TIMEOUT = 10000;
-
-type Preferences = Preferences.AgentUsage;
 
 async function fetchZaiUsage(token: string): Promise<{ usage: ZaiUsage | null; error: ZaiError | null }> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-
-    const authHeader = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-
-    const response = await fetch(ZAI_USAGE_API, {
-      method: "GET",
-      headers: {
-        Authorization: authHeader,
-        Accept: "application/json",
-      },
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (response.status === 401) {
-      return {
-        usage: null,
-        error: {
-          type: "unauthorized",
-          message: "Authorization token expired or invalid. Please update it in extension settings.",
-        },
-      };
-    }
-
-    if (!response.ok) {
-      return {
-        usage: null,
-        error: {
-          type: "unknown",
-          message: `HTTP ${response.status}: ${response.statusText}`,
-        },
-      };
-    }
-
-    const data = await response.json();
-
-    return parseZaiApiResponse(data);
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return {
-        usage: null,
-        error: {
-          type: "network_error",
-          message: "Request timeout. Please check your network connection.",
-        },
-      };
-    }
-
-    return {
-      usage: null,
-      error: {
-        type: "network_error",
-        message: error instanceof Error ? error.message : "Network request failed",
-      },
-    };
-  }
+  const { data, error } = await httpFetch({ url: ZAI_USAGE_API, token, headers: { Accept: "application/json" } });
+  if (error) return { usage: null, error };
+  return parseZaiApiResponse(data);
 }
 
 interface ZaiApiLimitEntry {
@@ -134,37 +75,19 @@ function parseLimitEntry(entry: ZaiApiLimitEntry): ZaiLimitEntry {
 function parseZaiApiResponse(data: unknown): { usage: ZaiUsage | null; error: ZaiError | null } {
   try {
     if (!data || typeof data !== "object") {
-      return {
-        usage: null,
-        error: {
-          type: "parse_error",
-          message: "Invalid API response format",
-        },
-      };
+      return { usage: null, error: { type: "parse_error", message: "Invalid API response format" } };
     }
 
     const response = data as ZaiApiResponse;
 
     if (response.success !== true || response.code !== 200) {
-      return {
-        usage: null,
-        error: {
-          type: "api_error",
-          message: response.msg || "API returned an error",
-        },
-      };
+      return { usage: null, error: { type: "api_error", message: response.msg || "API returned an error" } };
     }
 
     const limits = response.data?.limits;
 
     if (!limits || !Array.isArray(limits)) {
-      return {
-        usage: null,
-        error: {
-          type: "parse_error",
-          message: "No limits data found in API response",
-        },
-      };
+      return { usage: null, error: { type: "parse_error", message: "No limits data found in API response" } };
     }
 
     const tokenEntry = limits.find((l) => l.type === "TOKENS_LIMIT");
@@ -183,99 +106,13 @@ function parseZaiApiResponse(data: unknown): { usage: ZaiUsage | null; error: Za
   } catch (error) {
     return {
       usage: null,
-      error: {
-        type: "parse_error",
-        message: error instanceof Error ? error.message : "Failed to parse API response",
-      },
+      error: { type: "parse_error", message: error instanceof Error ? error.message : "Failed to parse API response" },
     };
   }
 }
 
-export function formatResetTime(isoTime: string): string {
-  try {
-    const resetDate = new Date(isoTime);
-    const now = new Date();
-    const diffMs = resetDate.getTime() - now.getTime();
-
-    if (diffMs <= 0) {
-      return "now";
-    }
-
-    const diffSeconds = Math.floor(diffMs / 1000);
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffDays > 0) {
-      const remainingHours = diffHours % 24;
-      return remainingHours > 0 ? `${diffDays}d ${remainingHours}h` : `${diffDays}d`;
-    }
-    if (diffHours > 0) {
-      const remainingMinutes = diffMinutes % 60;
-      return remainingMinutes > 0 ? `${diffHours}h ${remainingMinutes}m` : `${diffHours}h`;
-    }
-    if (diffMinutes > 0) {
-      return `${diffMinutes}m`;
-    }
-    return `${diffSeconds}s`;
-  } catch {
-    return "unknown";
-  }
-}
-
-export function useZaiUsage() {
-  const [token, setToken] = useState<string>("");
-  const [usage, setUsage] = useState<ZaiUsage | null>(null);
-  const [error, setError] = useState<ZaiError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-
-  useEffect(() => {
-    const preferences = getPreferenceValues<Preferences>();
-    const savedToken = preferences.zaiApiToken?.trim() || "";
-    setToken(savedToken);
-  }, []);
-
-  const fetchData = useCallback(async () => {
-    if (!token) {
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    const result = await fetchZaiUsage(token);
-
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, [token]);
-
-  useEffect(() => {
-    if (!hasInitialFetch && token) {
-      fetchData();
-    }
-  }, [token, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    await fetchData();
-  }, [fetchData]);
-
-  const finalError: ZaiError | null =
-    !token && hasInitialFetch
-      ? {
-          type: "not_configured",
-          message: "z.ai token not configured. Please add it in extension settings (Cmd+,).",
-        }
-      : error;
-
-  return {
-    isLoading,
-    usage,
-    error: finalError,
-    revalidate,
-  };
-}
+export const useZaiUsage = createTokenBasedHook<ZaiUsage, ZaiError>({
+  preferenceKey: "zaiApiToken",
+  agentName: "z.ai",
+  fetcher: fetchZaiUsage,
+});
