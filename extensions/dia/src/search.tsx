@@ -15,7 +15,7 @@ type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "bookmarks" | "history" | 
 
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     timer.current = setTimeout(() => setDebounced(value), delayMs);
