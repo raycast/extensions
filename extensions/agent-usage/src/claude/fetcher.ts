@@ -136,6 +136,8 @@ function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error
         scopes?: string[];
         rateLimitTier?: string;
         rate_limit_tier?: string;
+        subscriptionType?: string;
+        subscription_type?: string;
       };
     };
 
