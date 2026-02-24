@@ -3,11 +3,6 @@ import { showHUD, getPreferenceValues } from "@raycast/api";
 import { storeSelectedQueueID, StoredQueue } from "./use-selected-player-id";
 import { PlayerQueue, PlayerState, Player } from "./external-code/interfaces";
 
-interface Preferences {
-  host: string;
-  token: string;
-}
-
 /**
  * Client for interacting with Music Assistant API and handling UI logic
  *

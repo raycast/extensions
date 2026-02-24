@@ -20,6 +20,7 @@ This is a Raycast extension for controlling Music Assistant, a home music server
 - **Clean imports**: Group and organize import statements properly
 - **No scattered imports**: Consolidate related imports together
 - **Remove unused code**: Clean up unused variables, imports, and dependencies
+- **Auto-generated Preferences**: Do NOT manually define a `Preferences` interface - Raycast auto-generates `Preferences` type in `raycast-env.d.ts` from `package.json`. Manual definitions can become out of sync. Use `getPreferenceValues<Preferences>()` directly; the type is auto-imported from the generated file.
 
 ### API Integration Patterns
 
