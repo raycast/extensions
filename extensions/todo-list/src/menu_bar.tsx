@@ -1,5 +1,5 @@
 import { TodoItem, TodoSections, todoAtom } from "./atoms";
-import { launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
+import { Keyboard, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
 import MenuBarTodoItem from "./menu_bar_todo_item";
 import { SECTIONS_DATA, preferences } from "./config";
 import { useAtom } from "jotai";
@@ -26,6 +26,7 @@ export default function MenuBar() {
     >
       <MenuBarExtra.Item
         title="Add Todo"
+        shortcut={Keyboard.Shortcut.Common.New}
         onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
       />
       {todoLength > 0 ? (
