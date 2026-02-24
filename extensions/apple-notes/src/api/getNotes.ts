@@ -1,9 +1,6 @@
-import { homedir } from "os";
-import { resolve } from "path";
-
 import { executeSQL } from "@raycast/utils";
 
-import { getOpenNoteURL } from "../helpers";
+import { escapeSQLString, getOpenNoteURL, NOTES_DB } from "../helpers";
 
 type Link = {
   id: string;
@@ -42,12 +39,6 @@ type NoteItem = {
   checklist: boolean;
   checklistInProgress: boolean;
 };
-
-const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
-
-function escapeSQLString(value: string) {
-  return value.replace(/'/g, "''");
-}
 
 export async function getNotes(maxQueryResults: number, filterByTags: string[] = [], searchText?: string) {
   const trimmedSearchText = searchText?.trim();

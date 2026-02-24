@@ -1,11 +1,10 @@
 import os from "os";
-import { homedir } from "os";
 import { resolve } from "path";
 
 import { executeSQL } from "@raycast/utils";
 
 export const fileIcon = "/System/Applications/Notes.app";
-const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
+export const NOTES_DB = resolve(os.homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
 type ResolvedNoteId = {
   id: string;
@@ -13,6 +12,10 @@ type ResolvedNoteId = {
 
 export function escapeDoubleQuotes(value: string) {
   return value.replace(/"/g, '\\"');
+}
+
+export function escapeSQLString(value: string) {
+  return value.replace(/'/g, "''");
 }
 
 export function truncate(str: string, maxLength = 30): string {
@@ -33,7 +36,7 @@ export async function resolveAppleNoteId(noteId: string): Promise<string> {
     return noteId;
   }
 
-  const escapedNoteId = noteId.replace(/'/g, "''");
+  const escapedNoteId = escapeSQLString(noteId);
   const rows = await executeSQL<ResolvedNoteId>(
     NOTES_DB,
     `
