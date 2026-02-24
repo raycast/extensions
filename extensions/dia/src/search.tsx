@@ -5,10 +5,11 @@ import { BookmarkListItem } from "./components/BookmarkListItem";
 import { HistoryListItem } from "./components/HistoryListItem";
 import { SuggestionListItem } from "./components/SuggestionListItem";
 import { TabListItem } from "./components/TabListItem";
+import { URLListItem } from "./components/URLListItem";
 import withVersionCheck from "./components/VersionCheck";
 import { useSearchHistory, useTabs, useBookmarks } from "./dia";
 import { useGoogleSuggestions } from "./google";
-import { filterHistory, filterTabs } from "./utils";
+import { filterHistory, filterTabs, isLikelyURL } from "./utils";
 
 type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "bookmarks" | "history" | "suggestions";
 
@@ -17,9 +18,9 @@ function Command() {
   const [viewMode, setViewMode] = useCachedState<ViewMode>("view-mode", "all");
 
   const { isLoading: isLoadingTabs, data: tabs, revalidate: revalidateTabs } = useTabs();
-  const { isLoading: isLoadingHistory, data: history, permissionView } = useSearchHistory(searchText);
-  const { isLoading: isLoadingBookmarks, data: bookmarks } = useBookmarks(searchText);
-  const { isLoading: isLoadingGoogleSuggestions, data: googleSuggestions } = useGoogleSuggestions(searchText);
+  const { data: history, permissionView } = useSearchHistory(searchText);
+  const { data: bookmarks } = useBookmarks(searchText);
+  const { data: googleSuggestions } = useGoogleSuggestions(searchText);
 
   if (permissionView) {
     return permissionView;
@@ -29,13 +30,15 @@ function Command() {
   const filteredHistory = useMemo(() => filterHistory(history, tabs), [history, tabs]);
 
   const shouldShow = (section: ViewMode) => viewMode === "all" || viewMode === section;
+  const detectedURL = searchText && isLikelyURL(searchText) ? searchText.trim() : null;
 
   return (
     <List
-      isLoading={isLoadingTabs || isLoadingHistory || isLoadingBookmarks || isLoadingGoogleSuggestions}
+      isLoading={isLoadingTabs}
       searchBarPlaceholder="Search tabs, bookmarks and browsing history..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      throttle={true}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter View"
@@ -55,6 +58,12 @@ function Command() {
         </List.Dropdown>
       }
     >
+      {detectedURL && (
+        <List.Section title="Open URL">
+          <URLListItem url={detectedURL} searchText={searchText} />
+        </List.Section>
+      )}
+
       {shouldShow("pinned-tabs") && (
         <List.Section title="Pinned Tabs">
           {filteredTabs
@@ -85,7 +94,7 @@ function Command() {
         </List.Section>
       )}
 
-      {shouldShow("bookmarks") && !isLoadingTabs && searchText && (
+      {shouldShow("bookmarks") && searchText && (
         <List.Section title="Bookmarks">
           {bookmarks?.map((bookmark) => (
             <BookmarkListItem
@@ -103,7 +112,7 @@ function Command() {
         </List.Section>
       )}
 
-      {shouldShow("history") && !isLoadingTabs && (
+      {shouldShow("history") && (
         <List.Section title="History">
           {filteredHistory?.map((item) => (
             <HistoryListItem
@@ -116,7 +125,7 @@ function Command() {
         </List.Section>
       )}
 
-      {shouldShow("suggestions") && !isLoadingTabs && searchText && (
+      {shouldShow("suggestions") && searchText && (
         <List.Section title="Google Suggestions">
           {googleSuggestions?.map((suggestion) => (
             <SuggestionListItem key={suggestion.id} suggestion={suggestion} onSuggestionAction={revalidateTabs} />

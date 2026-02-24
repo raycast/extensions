@@ -18,9 +18,21 @@ export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) 
       accessories={getAccessories(tab)}
       actions={
         <ActionPanel>
+          {tab.url && (
+            <Action.Open
+              icon={Icon.Globe}
+              title="Open in New Tab"
+              target={tab.url}
+              application="company.thebrowser.dia"
+              onOpen={() => {
+                onTabAction?.();
+              }}
+            />
+          )}
           <Action
             icon={Icon.ArrowRight}
-            title="Focus Tab"
+            title="Focus Existing Tab"
+            shortcut={tab.url ? { modifiers: ["cmd"], key: "return" } : undefined}
             onAction={async () => {
               try {
                 await focusTab(tab);
@@ -33,15 +45,6 @@ export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) 
               }
             }}
           />
-          {tab.url && (
-            <Action.OpenInBrowser
-              title="Open URL in New Tab"
-              url={tab.url}
-              onOpen={() => {
-                onTabAction?.();
-              }}
-            />
-          )}
           {searchText && (
             <Action.OpenInBrowser
               title="Search Google"

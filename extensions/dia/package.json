@@ -72,6 +72,21 @@
       "subtitle": "Dia",
       "description": "Create a new incognito window.",
       "mode": "no-view"
+    },
+    {
+      "name": "open-url",
+      "title": "Open URL in Dia",
+      "subtitle": "Dia",
+      "description": "Open a URL in a new Dia tab. Falls back to clipboard or Google search.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL or search query",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
