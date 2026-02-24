@@ -9,9 +9,7 @@ export function getEffectiveStatus(monitor: Monitor): string {
 }
 
 export function getStatusColor(status: string): string {
-  return (
-    STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.paused
-  );
+  return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.paused;
 }
 
 export function groupMonitorsByStatus(monitors: Monitor[]): {
@@ -60,9 +58,7 @@ export function groupMonitorsByStatus(monitors: Monitor[]): {
 }
 
 export function formatSuccessAssertions(assertions: Assertion[]): string {
-  return assertions
-    .map((a: Assertion) => `${a.type} ${a.operator} ${a.value}`)
-    .join(", ");
+  return assertions.map((a: Assertion) => `${a.type} ${a.operator} ${a.value}`).join(", ");
 }
 
 // Form data transformation

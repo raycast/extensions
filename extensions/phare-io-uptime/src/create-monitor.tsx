@@ -1,5 +1,4 @@
 import { Form, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
 import { useCreateMonitor } from "./hooks/useCreateMonitor";
 import { CreateMonitorForm } from "./components/CreateMonitorForm";
 

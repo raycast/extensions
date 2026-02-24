@@ -22,55 +22,25 @@ interface CreateMonitorFormProps {
 export function CreateMonitorForm({ itemProps }: CreateMonitorFormProps) {
   return (
     <>
-      <Form.TextField
-        id="name"
-        title="Monitor Name"
-        placeholder="My Website Monitor"
-        {...itemProps.name}
-      />
+      <Form.TextField id="name" title="Monitor Name" placeholder="My Website Monitor" {...itemProps.name} />
 
-      <Form.TextField
-        id="url"
-        title="URL"
-        placeholder="https://example.com"
-        {...itemProps.url}
-      />
+      <Form.TextField id="url" title="URL" placeholder="https://example.com" {...itemProps.url} />
 
       <Form.Dropdown id="method" title="HTTP Method" {...itemProps.method}>
         {FORM_OPTIONS.methods.map((method) => (
-          <Form.Dropdown.Item
-            key={method.value}
-            value={method.value}
-            title={method.title}
-          />
+          <Form.Dropdown.Item key={method.value} value={method.value} title={method.title} />
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="interval"
-        title="Check Interval"
-        {...itemProps.interval}
-      >
+      <Form.Dropdown id="interval" title="Check Interval" {...itemProps.interval}>
         {FORM_OPTIONS.intervals.map((interval) => (
-          <Form.Dropdown.Item
-            key={interval.value}
-            value={interval.value}
-            title={interval.title}
-          />
+          <Form.Dropdown.Item key={interval.value} value={interval.value} title={interval.title} />
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="timeout"
-        title="Timeout (seconds)"
-        {...itemProps.timeout}
-      >
+      <Form.Dropdown id="timeout" title="Timeout (seconds)" {...itemProps.timeout}>
         {FORM_OPTIONS.timeouts.map((timeout) => (
-          <Form.Dropdown.Item
-            key={timeout.value}
-            value={timeout.value}
-            title={timeout.title}
-          />
+          <Form.Dropdown.Item key={timeout.value} value={timeout.value} title={timeout.title} />
         ))}
       </Form.Dropdown>
 
@@ -81,39 +51,19 @@ export function CreateMonitorForm({ itemProps }: CreateMonitorFormProps) {
         {...itemProps.regions}
       >
         {FORM_OPTIONS.regions.map((region) => (
-          <Form.TagPicker.Item
-            key={region.value}
-            value={region.value}
-            title={region.title}
-          />
+          <Form.TagPicker.Item key={region.value} value={region.value} title={region.title} />
         ))}
       </Form.TagPicker>
 
-      <Form.Dropdown
-        id="incidentConfirmations"
-        title="Incident Confirmations"
-        {...itemProps.incidentConfirmations}
-      >
+      <Form.Dropdown id="incidentConfirmations" title="Incident Confirmations" {...itemProps.incidentConfirmations}>
         {FORM_OPTIONS.confirmations.map((confirmation) => (
-          <Form.Dropdown.Item
-            key={confirmation.value}
-            value={confirmation.value}
-            title={confirmation.title}
-          />
+          <Form.Dropdown.Item key={confirmation.value} value={confirmation.value} title={confirmation.title} />
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="recoveryConfirmations"
-        title="Recovery Confirmations"
-        {...itemProps.recoveryConfirmations}
-      >
+      <Form.Dropdown id="recoveryConfirmations" title="Recovery Confirmations" {...itemProps.recoveryConfirmations}>
         {FORM_OPTIONS.confirmations.map((confirmation) => (
-          <Form.Dropdown.Item
-            key={confirmation.value}
-            value={confirmation.value}
-            title={confirmation.title}
-          />
+          <Form.Dropdown.Item key={confirmation.value} value={confirmation.value} title={confirmation.title} />
         ))}
       </Form.Dropdown>
 

@@ -27,10 +27,6 @@ export interface Monitor {
   created_at: string;
 }
 
-export interface Preferences {
-  phareApiKey: string;
-}
-
 export interface ApiResponse<T> {
   data: T;
 }
