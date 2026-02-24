@@ -105,8 +105,6 @@ export default function Command() {
     setIsLoading(true);
     try {
       const list = await getAvailableDisplays();
-      // Sort by last connected (most recent first)
-      list.sort((a, b) => (b.lastConnected || 0) - (a.lastConnected || 0));
       setDisplays(list);
     } catch (error) {
       showToast({
@@ -131,6 +129,16 @@ export default function Command() {
     }
     init();
   }, [loadDisplays, loadQuickConnect]);
+
+  const sortedDisplays = [...displays].sort((a, b) => {
+    if (a.name === quickConnectName) return -1;
+    if (b.name === quickConnectName) return 1;
+    if (a.lastConnected && b.lastConnected)
+      return b.lastConnected - a.lastConnected;
+    if (a.lastConnected) return -1;
+    if (b.lastConnected) return 1;
+    return a.name.localeCompare(b.name);
+  });
 
   async function handleRemove(name: string) {
     await removeDisplay(name);
@@ -240,7 +248,7 @@ export default function Command() {
       searchBarPlaceholder="Search monitors and displays..."
     >
       <List.Section title="Your Displays">
-        {displays.map((display) => (
+        {sortedDisplays.map((display) => (
           <List.Item
             key={display.name}
             title={display.name}
