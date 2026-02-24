@@ -5,7 +5,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { brewFetchOutdated, brewUpdate, OutdatedResults, isBrewLockError, getErrorMessage, brewLogger } from "../utils";
+import {
+  brewFetchOutdated,
+  brewUpdate,
+  OutdatedResults,
+  isBrewLockError,
+  getErrorMessage,
+  brewLogger,
+} from "../utils";
 import { preferences } from "../utils";
 
 /**
@@ -66,19 +73,9 @@ export function useBrewOutdated() {
 
     brewLogger.log("Starting background refresh for outdated packages");
 
-    let toast: Toast | undefined;
     try {
-      // Show toast for brew update
-      toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Updating Homebrew Index…",
-      });
-
-      // Run brew update
+      // Run brew update (loading indicator is shown via isRefreshing)
       await brewUpdate();
-
-      // Update toast for fetching outdated
-      toast.title = "Checking for Outdated Packages…";
 
       // Then fetch fresh outdated data (skipUpdate since we just did it)
       const freshData = await brewFetchOutdated(preferences.greedyUpgrades, undefined, true);
@@ -99,13 +96,8 @@ export function useBrewOutdated() {
       } else {
         brewLogger.log("Background refresh complete, no changes");
       }
-
-      // Hide toast on success
-      toast?.hide();
     } catch (error) {
       brewLogger.warn("Background refresh failed", { error });
-      // Hide toast on failure too
-      toast?.hide();
     } finally {
       setIsRefreshing(false);
     }
