@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2026-02-24
 
 - Update extension instruction
 
