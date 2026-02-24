@@ -105,10 +105,7 @@ function SetupForm({
       isLoading={isValidating}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Connect"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Connect" onSubmit={handleSubmit} />
           <Action
             title="Paste from Clipboard"
             onAction={handlePasteKey}
@@ -209,9 +206,7 @@ function SaveLinkForm({
           onDisconnect();
           return;
         }
-        throw new Error(
-          data.message || `Error ${response.status}`,
-        );
+        throw new Error(data.message || `Error ${response.status}`);
       }
 
       showToast({
@@ -256,10 +251,7 @@ function SaveLinkForm({
       isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Link"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Save Link" onSubmit={handleSubmit} />
           <Action
             title="Paste from Clipboard"
             onAction={handlePaste}
@@ -297,21 +289,15 @@ function SaveLinkForm({
 
 export default function SaveLink() {
   const prefs = getPreferenceValues<Preferences>();
-  const [storedKey, setStoredKey] = useState<string | null>(
-    null,
-  );
+  const [storedKey, setStoredKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      if (
-        prefs.apiKey &&
-        prefs.apiKey.startsWith("memry_")
-      ) {
+      if (prefs.apiKey && prefs.apiKey.startsWith("memry_")) {
         setStoredKey(prefs.apiKey);
       } else {
-        const saved =
-          await LocalStorage.getItem<string>(STORAGE_KEY);
+        const saved = await LocalStorage.getItem<string>(STORAGE_KEY);
         if (saved && saved.startsWith("memry_")) {
           setStoredKey(saved);
         }
@@ -325,17 +311,10 @@ export default function SaveLink() {
   }
 
   if (!storedKey) {
-    return (
-      <SetupForm
-        onKeySubmitted={(key) => setStoredKey(key)}
-      />
-    );
+    return <SetupForm onKeySubmitted={(key) => setStoredKey(key)} />;
   }
 
   return (
-    <SaveLinkForm
-      apiKey={storedKey}
-      onDisconnect={() => setStoredKey(null)}
-    />
+    <SaveLinkForm apiKey={storedKey} onDisconnect={() => setStoredKey(null)} />
   );
 }
