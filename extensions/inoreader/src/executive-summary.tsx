@@ -10,7 +10,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   decodeHtmlEntities,
   getAccessToken,
@@ -181,12 +181,19 @@ export default function Command() {
   ] as const;
   const [isLoading, setIsLoading] = useState(false);
   const [markdown, setMarkdown] = useState<string>("Preparing executive summary...");
+  const hasAutoRunRef = useRef(false);
+  const requestIdRef = useRef(0);
 
   const runExecutiveSummary = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    const isStale = () => requestId !== requestIdRef.current;
+
     if (!environment.canAccess(AI)) {
-      setMarkdown(
-        "# Executive Summary\n\nYou don't have access to Raycast AI. Enable Raycast Pro to use this command.",
-      );
+      if (!isStale()) {
+        setMarkdown(
+          "# Executive Summary\n\nYou don't have access to Raycast AI. Enable Raycast Pro to use this command.",
+        );
+      }
       return;
     }
 
@@ -195,6 +202,9 @@ export default function Command() {
 
     try {
       const token = await getAccessToken(preferences, true);
+      if (isStale()) {
+        return;
+      }
       if (!token) {
         setMarkdown("# Executive Summary\n\nUnable to connect to Inoreader.");
         return;
@@ -214,6 +224,9 @@ export default function Command() {
 
       const encodedStreamId = encodeURIComponent(ALL_FOLLOWED_STREAM_ID);
       const response = await requestJson<StreamContentsResponse>(token, `/stream/contents/${encodedStreamId}`, params);
+      if (isStale()) {
+        return;
+      }
       const items = response.items ?? [];
 
       if (items.length === 0) {
@@ -231,8 +244,14 @@ export default function Command() {
 
       const prompt = buildExecutiveSummaryPrompt(feedContent, summaryLanguage);
       const summary = await AI.ask(prompt, { creativity: "low" });
+      if (isStale()) {
+        return;
+      }
       setMarkdown(getExecutiveSummaryMarkdown(summary, analyzedCount, items.length, summaryLanguage));
     } catch (error) {
+      if (isStale()) {
+        return;
+      }
       if (isUnauthorized(error)) {
         await showToast({
           style: Toast.Style.Failure,
@@ -251,11 +270,17 @@ export default function Command() {
         ].join("\n"),
       );
     } finally {
-      setIsLoading(false);
+      if (!isStale()) {
+        setIsLoading(false);
+      }
     }
   }, [...preferenceDeps, summaryLanguage]);
 
   useEffect(() => {
+    if (hasAutoRunRef.current) {
+      return;
+    }
+    hasAutoRunRef.current = true;
     void runExecutiveSummary();
   }, [runExecutiveSummary]);
 
