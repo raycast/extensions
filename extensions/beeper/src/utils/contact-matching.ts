@@ -39,7 +39,7 @@ function levenshteinDistance(a: string, b: string): number {
         matrix[i][j] = Math.min(
           matrix[i - 1][j - 1] + 1, // substitution
           matrix[i][j - 1] + 1, // insertion
-          matrix[i - 1][j] + 1 // deletion
+          matrix[i - 1][j] + 1, // deletion
         );
       }
     }
@@ -54,7 +54,7 @@ function levenshteinDistance(a: string, b: string): number {
  */
 export function calculateSimilarity(
   query: string,
-  target: string
+  target: string,
 ): { score: number; matchType: MatchResult["matchType"] } {
   const q = query.toLowerCase().trim();
   const t = target.toLowerCase().trim();
@@ -112,7 +112,7 @@ export function rankChatMatches(
     service?: string;
     minScore?: number;
     maxResults?: number;
-  }
+  },
 ): MatchResult[] {
   const { service, minScore = 0.4, maxResults = 5 } = options || {};
 

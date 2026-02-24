@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, Color } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, Color, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { getBeeperClient, checkBeeperConnection, createBeeperOAuth } from "./services/beeper-client";
+import { MOCK_ACCOUNTS } from "./utils/mock-data";
 import { getServiceIcon, getServiceDisplayName } from "./utils/service-icons";
 import { parseService, BeeperAccount } from "./utils/types";
 
@@ -12,6 +13,11 @@ function ListAccountsCommand() {
     revalidate,
   } = useCachedPromise(
     async () => {
+      const { useMockData } = getPreferenceValues<Preferences>();
+      if (useMockData) {
+        return MOCK_ACCOUNTS;
+      }
+
       const connectionStatus = await checkBeeperConnection();
       if (!connectionStatus.connected) {
         throw new Error(connectionStatus.error || "Cannot connect to Beeper Desktop");
@@ -31,7 +37,7 @@ function ListAccountsCommand() {
 
       // Sort by service name
       return transformedAccounts.sort((a, b) =>
-        getServiceDisplayName(a.service).localeCompare(getServiceDisplayName(b.service))
+        getServiceDisplayName(a.service).localeCompare(getServiceDisplayName(b.service)),
       );
     },
     [],
@@ -44,7 +50,7 @@ function ListAccountsCommand() {
           message: err.message,
         });
       },
-    }
+    },
   );
 
   const connectedCount = accounts?.filter((a) => a.isConnected).length || 0;
@@ -124,7 +130,7 @@ function AccountListItem({ account, onRefresh }: AccountListItemProps) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard content={account.displayName} title="Copy Account Name" />
-            <Action.CopyToClipboard content={account.id} title="Copy Account Id" />
+            <Action.CopyToClipboard content={account.id} title="Copy Account ID" />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action

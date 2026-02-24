@@ -184,13 +184,13 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
     if (recentMessages.length > 0) {
       // Find the most recent message's date
       const sortedRecent = recentMessages.sort(
-        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       );
       const mostRecentDate = new Date(sortedRecent[0].timestamp);
       const mostRecentDayStart = new Date(
         mostRecentDate.getFullYear(),
         mostRecentDate.getMonth(),
-        mostRecentDate.getDate()
+        mostRecentDate.getDate(),
       );
 
       // Filter to just messages from that day

@@ -710,22 +710,30 @@
       "title": "Access Token",
       "description": "Beeper Desktop API Access Token. If not provided, the extension will try to connect without it (or use a dummy token).",
       "placeholder": "Enter your access token if required"
+    },
+    {
+      "name": "useMockData",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use Mock Data",
+      "label": "Yes, Show mock data",
+      "description": "Show sample data instead of connecting to Beeper. Useful for taking screenshots or demos.",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
-    "@raycast/utils": "^1.19.0",
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2",
     "@beeper/desktop-api": "^0.1.4",
     "fromnow": "^3.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { getBeeperClient, checkBeeperConnection, createBeeperOAuth } from "./services/beeper-client";
+import { MOCK_CHATS } from "./utils/mock-data";
 import { openChat } from "./services/openChat";
 import { getServiceIcon, getServiceDisplayName } from "./utils/service-icons";
 import { parseService, BeeperService } from "./utils/types";
@@ -58,6 +59,11 @@ function OpenChatCommand() {
     revalidate,
   } = useCachedPromise(
     async () => {
+      const { useMockData } = getPreferenceValues<Preferences>();
+      if (useMockData) {
+        return MOCK_CHATS;
+      }
+
       // First check connection
       const connectionStatus = await checkBeeperConnection();
       if (!connectionStatus.connected) {
@@ -119,7 +125,7 @@ function OpenChatCommand() {
           message: err.message,
         });
       },
-    }
+    },
   );
 
   // Filter chats by selected network
@@ -162,7 +168,7 @@ function OpenChatCommand() {
               <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               {error.message.includes("Authentication failed") && (
                 <Action
-                  title="Re-authenticate (reset)"
+                  title="Re-Authenticate (Reset)"
                   icon={Icon.Logout}
                   onAction={async () => {
                     await resetAuth();
@@ -248,7 +254,7 @@ function ChatListItem({ chat, onOpen }: ChatListItemProps) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard content={chat.name} title="Copy Name" />
-            <Action.CopyToClipboard content={chat.id} title="Copy Chat Id" />
+            <Action.CopyToClipboard content={chat.id} title="Copy Chat ID" />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action

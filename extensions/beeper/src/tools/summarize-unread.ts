@@ -175,7 +175,7 @@ export default async function (input: Input): Promise<SummarizeResult> {
  */
 async function getAllUnreadChatsSummary(
   client: Awaited<ReturnType<typeof getBeeperClient>>,
-  serviceFilter?: string
+  serviceFilter?: string,
 ): Promise<SummarizeResult> {
   // Fetch recent chats (get a good sample to find unread ones)
   const searchCursor = await client.chats.search({

@@ -53,21 +53,16 @@ export async function getBeeperClient(): Promise<BeeperDesktop> {
       // Token is undefined/null, force fallback to LocalStorage
       throw new Error("OAuth token is empty");
     }
-  } catch (e) {
+  } catch {
     // If getAccessToken fails (AI tools), try LocalStorage
     try {
       const storedToken = await LocalStorage.getItem<string>(TOKEN_STORAGE_KEY);
-      if (storedToken) {
-        accessToken = storedToken;
-      } else {
-        // LocalStorage empty, try preferences as last resort
-        const preferences = getPreferenceValues<{ accessToken?: string }>();
-        accessToken = preferences.accessToken;
-      }
-    } catch (storageError) {
-      // LocalStorage also failed, try preferences
+      accessToken = storedToken ?? undefined;
+    } catch {
       console.warn("Could not retrieve token from storage, falling back to preferences");
-      const preferences = getPreferenceValues<{ accessToken?: string }>();
+    }
+    if (!accessToken) {
+      const preferences = getPreferenceValues<Preferences>();
       accessToken = preferences.accessToken;
     }
   }

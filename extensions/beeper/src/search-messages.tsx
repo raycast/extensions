@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getBeeperClient, checkBeeperConnection, createBeeperOAuth } from "./services/beeper-client";
+import { MOCK_MESSAGES } from "./utils/mock-data";
 import { openChat } from "./services/openChat";
 import { getServiceIcon, getServiceDisplayName } from "./utils/service-icons";
 import { parseService, BeeperService } from "./utils/types";
@@ -79,6 +80,21 @@ function SearchMessagesCommand() {
     setError(null);
 
     try {
+      const { useMockData } = getPreferenceValues<Preferences>();
+      if (useMockData) {
+        // Filter mock messages by search query for screenshot consistency
+        const query = debouncedSearch.trim().toLowerCase();
+        const filtered = query
+          ? MOCK_MESSAGES.filter(
+              (m) => m.text.toLowerCase().includes(query) || m.senderName.toLowerCase().includes(query),
+            )
+          : MOCK_MESSAGES;
+        if (isMountedRef.current) {
+          setMessages(filtered);
+        }
+        return;
+      }
+
       const connectionStatus = await checkBeeperConnection();
       if (!connectionStatus.connected) {
         throw new Error(connectionStatus.error || "Cannot connect to Beeper Desktop");
@@ -124,7 +140,7 @@ function SearchMessagesCommand() {
       const transformedMessages: MessageSearchResult[] = messagesFromApi.map((msg) => ({
         id: msg.id,
         text: cleanMessageText(msg.text),
-        senderName: msg.senderName || msg.senderID.split(":")[0].replace("@", "") || "Unknown",
+        senderName: msg.senderName || msg.senderID?.split(":")[0]?.replace("@", "") || "Unknown",
         chatId: msg.chatID,
         accountId: msg.accountID,
         timestamp: msg.timestamp,
@@ -271,7 +287,7 @@ function MessageListItem({ message, onRefresh }: MessageListItemProps) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard content={message.text} title="Copy Message Text" />
-            <Action.CopyToClipboard content={message.chatId} title="Copy Chat Id" />
+            <Action.CopyToClipboard content={message.chatId} title="Copy Chat ID" />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
