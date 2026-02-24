@@ -1,6 +1,9 @@
-import { Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
+
 import { runAppleScript } from "run-applescript";
+
+import { getPreferenceValues, Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+
 import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "./utils";
 
 type NowPlayingInfo = {
@@ -12,6 +15,11 @@ type NowPlayingInfo = {
 
 type Preferences = {
   showTextInMenuBar?: boolean;
+  hideIconWhenIdle?: boolean;
+  hideArtistName?: boolean;
+  cleanupSongTitle?: boolean;
+  nowPlayingTextLength?: string;
+  menuBarIcon?: "spotify" | "artwork" | "music";
 };
 
 function parseNowPlayingInfo(raw: string): NowPlayingInfo {
@@ -58,24 +66,82 @@ function isHttpUrl(value?: string) {
   return !!value && (value.startsWith("https://") || value.startsWith("http://"));
 }
 
-function infoText(info: NowPlayingInfo) {
-  if (!info.artist && !info.track) {
+function cleanTrackTitle(track?: string) {
+  if (!track) {
     return undefined;
   }
 
-  if (!info.artist) {
-    return info.track;
+  return track
+    .replace(/\s*[-–—]\s*remaster(?:ed)?(?:\s*\d{4})?$/i, "")
+    .replace(/\s*\((?:[^)]*version|[^)]*remaster(?:ed)?[^)]*)\)$/i, "")
+    .replace(/\s*\[(?:[^\]]*version|[^\]]*remaster(?:ed)?[^\]]*)\]$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function truncate(text: string, maxLength: number) {
+  if (text.length <= maxLength) {
+    return text;
   }
 
-  if (!info.track) {
+  if (maxLength <= 1) {
+    return "…";
+  }
+
+  return `${text.slice(0, maxLength - 1)}…`;
+}
+
+function infoText(
+  info: NowPlayingInfo,
+  options: {
+    hideArtistName?: boolean;
+    cleanupSongTitle?: boolean;
+    nowPlayingTextLength: number;
+  },
+) {
+  const track = options.cleanupSongTitle ? cleanTrackTitle(info.track) : info.track;
+
+  if (!info.artist && !track) {
+    return undefined;
+  }
+
+  if (!info.artist || options.hideArtistName) {
+    return track ? truncate(track, options.nowPlayingTextLength) : undefined;
+  }
+
+  if (!track) {
     return `Song by ${info.artist}`;
   }
 
-  return `${info.track} by ${info.artist}`;
+  return truncate(`${track} by ${info.artist}`, options.nowPlayingTextLength);
+}
+
+function getIcon(
+  info: NowPlayingInfo,
+  options: {
+    menuBarIcon: "spotify" | "artwork" | "music";
+    hideIconWhenIdle?: boolean;
+  },
+) {
+  const isIdle = info.state !== "playing";
+  if (options.hideIconWhenIdle && isIdle) {
+    return undefined;
+  }
+
+  if (options.menuBarIcon === "music") {
+    return Icon.Music;
+  }
+
+  if (options.menuBarIcon === "artwork") {
+    return isHttpUrl(info.artworkUrl) ? info.artworkUrl : "icon.png";
+  }
+
+  return "icon.png";
 }
 
 export default function Command() {
-  const { showTextInMenuBar } = getPreferenceValues<Preferences>();
+  const { showTextInMenuBar, hideArtistName, cleanupSongTitle, hideIconWhenIdle, nowPlayingTextLength, menuBarIcon } =
+    getPreferenceValues<Preferences>();
 
   const [isLoading, setIsLoading] = useState(true);
   const [info, setInfo] = useState<NowPlayingInfo>({ state: "unknown" });
@@ -98,9 +164,18 @@ export default function Command() {
     };
   }, []);
 
-  const icon = isHttpUrl(info.artworkUrl) ? info.artworkUrl : Icon.Music;
+  const parsedTextLength = Number.parseInt(nowPlayingTextLength ?? "30", 10);
+  const maxTextLength = Number.isFinite(parsedTextLength) && parsedTextLength > 0 ? parsedTextLength : 30;
+  const icon = getIcon(info, {
+    menuBarIcon: menuBarIcon ?? "spotify",
+    hideIconWhenIdle,
+  });
 
-  const trackInfo = infoText(info);
+  const trackInfo = infoText(info, {
+    hideArtistName,
+    cleanupSongTitle,
+    nowPlayingTextLength: maxTextLength,
+  });
   return (
     <MenuBarExtra icon={icon} isLoading={isLoading} title={showTextInMenuBar ? trackInfo : undefined}>
       <MenuBarExtra.Section>

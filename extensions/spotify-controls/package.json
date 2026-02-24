@@ -251,10 +251,64 @@
       "name": "menuBarPlayer",
       "title": "Menu Bar Player",
       "subtitle": "Spotify",
-      "description": "Shows current track artwork in the menu bar.",
+      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more. Refreshes every 10 seconds.",
       "mode": "menu-bar",
-      "interval": "30s",
+      "interval": "10s",
       "preferences": [
+        {
+          "name": "hideIconWhenIdle",
+          "type": "checkbox",
+          "label": "Hide icon when idle",
+          "required": false,
+          "description": "Hide the menu bar icon while Spotify is idle.",
+          "default": false
+        },
+        {
+          "name": "hideArtistName",
+          "type": "checkbox",
+          "label": "Hide artist's name",
+          "required": false,
+          "description": "Only show the song title in the menu bar text.",
+          "default": false
+        },
+        {
+          "name": "cleanupSongTitle",
+          "type": "checkbox",
+          "label": "Cleanup song title",
+          "required": false,
+          "description": "Remove common suffixes like Remastered and bracketed metadata.",
+          "default": false
+        },
+        {
+          "name": "nowPlayingTextLength",
+          "type": "textfield",
+          "title": "Now Playing Text Length",
+          "required": false,
+          "description": "Maximum number of characters shown in menu bar text.",
+          "default": "30"
+        },
+        {
+          "name": "menuBarIcon",
+          "type": "dropdown",
+          "title": "Menu Bar Icon",
+          "required": false,
+          "description": "Choose which icon is shown in the menu bar.",
+          "default": "spotify",
+          "data": [
+            {
+              "title": "Spotify Icon",
+              "value": "spotify"
+            },
+            {
+              "title": "Track Icon",
+              "value": "artwork"
+            },
+            {
+              "title": "Music Icon",
+              "value": "music"
+            }
+          ]
+        },
         {
           "name": "showTextInMenuBar",
           "type": "checkbox",
