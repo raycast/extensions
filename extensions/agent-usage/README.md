@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for Amp Code, Codex (OpenAI), Droid (Factory AI), Gemini CLI, and Kimi
+- **Multi-Agent Support** - View usage for Amp Code, Claude Code, Codex (OpenAI), Droid (Factory AI), Gemini CLI, and Kimi
 - **Quick Overview** - See remaining quotas and usage at a glance
 - **Detailed Breakdown** - Expand each agent for full usage details
 - **Refresh & Copy** - Quickly refresh data or copy usage details to clipboard
@@ -18,6 +18,7 @@ Track usage across your AI coding agents in one place.
 | Agent | Data Source | Setup Required |
 |-------|-------------|----------------|
 | **Amp** | Local SQLite database | None (auto-detected) |
+| **Claude** | Anthropic OAuth Usage API | None (auto-detected after `claude` login) |
 | **Codex** | OpenAI API | None (auto-detected after `codex login`) |
 | **Droid** | Factory AI API | Authorization token |
 | **Gemini** | Local state file | None (auto-detected) |
@@ -59,4 +60,4 @@ Optional fallback:
 
 ## Roadmap
 
-More agents coming soon: Claude Code, and others.
+More agents coming soon.

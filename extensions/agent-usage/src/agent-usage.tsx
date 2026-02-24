@@ -1,14 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  LaunchProps,
-  List,
-  LocalStorage,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import type { LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Accessory, AgentDefinition, AgentId, UsageState } from "./agents/types";
 import { useAmpUsage } from "./amp/fetcher";
@@ -17,6 +8,9 @@ import type { AmpError, AmpUsage } from "./amp/types";
 import { useAntigravityUsage } from "./antigravity/fetcher";
 import { formatAntigravityUsageText, getAntigravityAccessory, renderAntigravityDetail } from "./antigravity/renderer";
 import type { AntigravityError, AntigravityUsage } from "./antigravity/types";
+import { useClaudeUsage } from "./claude/fetcher";
+import { formatClaudeUsageText, getClaudeAccessory, renderClaudeDetail } from "./claude/renderer";
+import type { ClaudeError, ClaudeUsage } from "./claude/types";
 import { useCodexUsage } from "./codex/fetcher";
 import { formatCodexUsageText, getCodexAccessory, renderCodexDetail } from "./codex/renderer";
 import type { CodexError, CodexUsage } from "./codex/types";
@@ -49,6 +43,7 @@ interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefi
 
 interface AgentUsageById {
   amp: AmpUsage;
+  claude: ClaudeUsage;
   codex: CodexUsage;
   droid: DroidUsage;
   gemini: GeminiUsage;
@@ -59,6 +54,7 @@ interface AgentUsageById {
 
 interface AgentErrorById {
   amp: AmpError;
+  claude: ClaudeError;
   codex: CodexError;
   droid: DroidError;
   gemini: GeminiError;
@@ -92,6 +88,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderAmpDetail,
     getAccessory: getAmpAccessory,
     formatUsageText: formatAmpUsageText,
+  },
+  claude: {
+    id: "claude",
+    name: "Claude",
+    icon: "claude-icon.svg",
+    description: "Anthropic Claude Code",
+    isSupported: true,
+    settingsUrl: "https://claude.ai/settings/billing",
+    useUsage: useClaudeUsage,
+    renderDetail: renderClaudeDetail,
+    getAccessory: getClaudeAccessory,
+    formatUsageText: formatClaudeUsageText,
   },
   codex: {
     id: "codex",
@@ -208,6 +216,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   // Hooks must be called unconditionally at top level (React rules)
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
+  const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
   const codexState = AGENT_REGISTRY.codex.useUsage(Boolean(prefs.showCodex));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
@@ -217,6 +226,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const agentViews: Record<AgentId, AgentView> = {
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
+    claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     codex: createAgentView(AGENT_REGISTRY.codex, codexState, Boolean(prefs.showCodex)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
@@ -278,14 +288,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     setSelectedItemId(visibleAgentViews[0].id);
   }, [selectedItemId, visibleAgentViews]);
 
-  const isLoading =
-    ampState.isLoading ||
-    codexState.isLoading ||
-    droidState.isLoading ||
-    geminiState.isLoading ||
-    kimiState.isLoading ||
-    antigravityState.isLoading ||
-    zaiState.isLoading;
+  const isLoading = visibleAgentViews.some((agent) => agent.isLoading);
 
   const hasPromptedGeminiReauth = useRef(false);
 
@@ -313,7 +316,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   useEffect(() => {
     const errorType = geminiState.error?.type;
 
-    if (shouldPromptGeminiReauth(errorType, hasPromptedGeminiReauth.current)) {
+    if (Boolean(prefs.showGemini) && shouldPromptGeminiReauth(errorType, hasPromptedGeminiReauth.current)) {
       hasPromptedGeminiReauth.current = true;
       void showToast({
         title: "Gemini Token Expired",
@@ -332,18 +335,10 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     if (errorType !== "unauthorized") {
       hasPromptedGeminiReauth.current = false;
     }
-  }, [geminiState.error?.type, handleGeminiReauth]);
+  }, [prefs.showGemini, geminiState.error?.type, handleGeminiReauth]);
 
   const handleRefresh = async () => {
-    await Promise.all([
-      ampState.revalidate(),
-      codexState.revalidate(),
-      droidState.revalidate(),
-      geminiState.revalidate(),
-      kimiState.revalidate(),
-      antigravityState.revalidate(),
-      zaiState.revalidate(),
-    ]);
+    await Promise.all(visibleAgentViews.map((agent) => agent.revalidate()));
     await showToast({
       title: "Refreshed",
       style: Toast.Style.Success,
@@ -409,7 +404,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                 <ActionPanel.Section title="Reorder">
                   {canMoveUp && (
                     <Action
-                      title="Move Up"
+                      title="Move up"
                       icon={Icon.ArrowUp}
                       shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                       onAction={() => moveAgent(agent.id, "up")}
