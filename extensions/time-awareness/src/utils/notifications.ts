@@ -12,7 +12,7 @@ export async function triggerIntervalCompleteNotification(minutes: number): Prom
   const enableConfetti = await getConfettiEnabled();
   const { confettiEmojis } = getParsedPreferences();
   try {
-    await showHUD(`${confettiEmojis} You have been active for ${minutes} minutes`);
+    await showHUD(`🩷 You have been active for ${minutes} minutes`);
     if (enableConfetti) {
       await open(`raycast://extensions/raycast/raycast/confetti?emojis=${encodeURIComponent(confettiEmojis)}`);
     }
