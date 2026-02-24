@@ -230,7 +230,7 @@ export default function Command() {
       isLoadingThumbnails,
       downloadPathError,
     });
-    const status = getStatusInfo({ isPrefillingUrl, normalizedUrl, videoId });
+    const placeholder = getPlaceholderEmptyState({ isPrefillingUrl, normalizedUrl, videoId });
 
     return (
       <List
@@ -240,21 +240,38 @@ export default function Command() {
         onSearchTextChange={setSearchText}
         searchBarPlaceholder="Paste a YouTube URL..."
       >
-        <List.Item
-          title={status.title}
-          icon={status.showInvalidIcon ? getInvalidStatusIcon() : undefined}
-          detail={<List.Item.Detail markdown={statusMarkdown} />}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Paste URL from Clipboard"
-                onAction={pasteUrlFromClipboard}
-                icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "v" }}
-              />
-            </ActionPanel>
-          }
-        />
+        {placeholder ? (
+          <List.EmptyView
+            title={placeholder.title}
+            description={placeholder.description}
+            icon={getInvalidStatusIcon()}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Paste URL from Clipboard"
+                  onAction={pasteUrlFromClipboard}
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "v" }}
+                />
+              </ActionPanel>
+            }
+          />
+        ) : (
+          <List.Item
+            title="YouTube Thumbnail"
+            detail={<List.Item.Detail markdown={statusMarkdown} />}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Paste URL from Clipboard"
+                  onAction={pasteUrlFromClipboard}
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "v" }}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
       </List>
     );
   }
@@ -393,25 +410,26 @@ This video may not have a public thumbnail image available.`;
   return "Enter a YouTube URL.";
 }
 
-function getStatusInfo(params: { isPrefillingUrl: boolean; normalizedUrl: string | null; videoId: string | null }): {
-  title: string;
-  showInvalidIcon: boolean;
-} {
+function getPlaceholderEmptyState(params: {
+  isPrefillingUrl: boolean;
+  normalizedUrl: string | null;
+  videoId: string | null;
+}): { title: string; description: string } | null {
   const { isPrefillingUrl, normalizedUrl, videoId } = params;
 
   if (isPrefillingUrl) {
-    return { title: "YouTube Thumbnail", showInvalidIcon: false };
+    return null;
   }
 
   if (!normalizedUrl) {
-    return { title: "No URL found", showInvalidIcon: true };
+    return { title: "No URL found", description: "Paste a valid YouTube URL above." };
   }
 
   if (!videoId) {
-    return { title: "Invalid YouTube URL", showInvalidIcon: true };
+    return { title: "Invalid YouTube URL", description: "Paste a valid YouTube URL above." };
   }
 
-  return { title: "YouTube Thumbnail", showInvalidIcon: false };
+  return null;
 }
 
 function getInvalidStatusIcon() {

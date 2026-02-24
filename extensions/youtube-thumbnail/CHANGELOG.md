@@ -13,6 +13,7 @@
 - Migrated network requests from Axios to native `fetch`.
 - Changed to a list UI that auto-fills from the clipboard when possible, and surfaces invalid YouTube links in the detail view.
 - Downloaded image filenames are now `[videoId]-[size].jpg`.
+- Replaced custom placeholder row with native empty states for **No URL found** and **Invalid YouTube URL**.
 
 ### Fixed
 
