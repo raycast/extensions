@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [Added: Add Todo button in menubar] - {PR_MERGE_DATE}
+## [Added: Add Todo button in menubar] - 2026-02-24
 
 - Add Todo in the menu bar now launches the main todo command for quick access to add new todos.
 
