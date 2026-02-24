@@ -13,6 +13,6 @@ Tested with:
 
 # Credits
 * Original code base provided by [@MrSimonC](https://github.com/MrSimonC/Toggle-Mac-Function-Keys).
-* Code optimization by [@pernielsentikaer)](https://github.com/pernielsentikaer).
+* Code optimization by [@pernielsentikaer](https://github.com/pernielsentikaer).
 * Special thanks to [@jcelaya775](https://github.com/jcelaya775) for the fix on macOS Tahoe.
 * Thanks to [@shivraj-roy](https://github.com/shivraj-roy) for the performance boost tip on macOS Tahoe.
