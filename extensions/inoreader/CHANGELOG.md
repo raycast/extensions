@@ -1,6 +1,6 @@
 # Inoreader Changelog
 
-## [Executive Summary Command] - {PR_MERGE_DATE}
+## [Executive Summary Command] - 2026-02-24
 
 - Added an `Executive Summary` command to generate an AI recap of unread articles.
 - Reuses the user's configured AI summary language preference for the executive brief output.
