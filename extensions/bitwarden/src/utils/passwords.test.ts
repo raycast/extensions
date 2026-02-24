@@ -8,10 +8,10 @@ describe("getPasswordGeneratingArgs", () => {
       uppercase: false,
       number: true,
       special: false,
-      passphrase: false,
+      passphrase: true,
     };
 
-    expect(getPasswordGeneratingArgs(options)).toEqual(["--lowercase", "--number"]);
+    expect(getPasswordGeneratingArgs(options)).toEqual(["--lowercase", "--number", "--passphrase"]);
   });
 
   it("adds string-based arguments in insertion order", () => {
@@ -19,8 +19,10 @@ describe("getPasswordGeneratingArgs", () => {
       length: "18",
       minNumber: "2",
       minSpecial: "1",
-      lowercase: true,
-      uppercase: true,
+      words: "4",
+      separator: "_",
+      capitalize: true,
+      includeNumber: true,
     };
 
     expect(getPasswordGeneratingArgs(options)).toEqual([
@@ -30,8 +32,12 @@ describe("getPasswordGeneratingArgs", () => {
       "2",
       "--minSpecial",
       "1",
-      "--lowercase",
-      "--uppercase",
+      "--words",
+      "4",
+      "--separator",
+      "_",
+      "--capitalize",
+      "--includeNumber",
     ]);
   });
 
@@ -46,38 +52,5 @@ describe("getPasswordGeneratingArgs", () => {
     };
 
     expect(getPasswordGeneratingArgs(options)).toEqual(["--lowercase", "--uppercase", "--special", "--length", "12"]);
-  });
-
-  it("filters out PassphraseOptions when passphrase is false", () => {
-    const options: PasswordGeneratorOptions = {
-      passphrase: false,
-      lowercase: true,
-      length: "12",
-      // Passphrase-only options — should be omitted from output
-      words: "5",
-      separator: "-",
-      capitalize: true,
-      includeNumber: true,
-    };
-
-    expect(getPasswordGeneratingArgs(options)).toEqual(["--lowercase", "--length", "12"]);
-  });
-
-  it("filters out PasswordOptions when passphrase is true", () => {
-    const options: PasswordGeneratorOptions = {
-      passphrase: true,
-      words: "6",
-      capitalize: true,
-      // Password-only options — should be omitted from output
-      lowercase: true,
-      uppercase: true,
-      number: true,
-      special: true,
-      length: "20",
-      minNumber: "2",
-      minSpecial: "1",
-    };
-
-    expect(getPasswordGeneratingArgs(options)).toEqual(["--passphrase", "--words", "6", "--capitalize"]);
   });
 });

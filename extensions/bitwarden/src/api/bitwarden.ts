@@ -216,9 +216,7 @@ export class Bitwarden {
 
         // clear the data.json file to avoid issues with the new binary
         const dataJsonPath = join(supportPath, "data.json");
-        if (existsSync(dataJsonPath)) {
-          await tryExec(() => unlink(dataJsonPath));
-        }
+        await tryExec(() => unlink(dataJsonPath));
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
         throw extractError;

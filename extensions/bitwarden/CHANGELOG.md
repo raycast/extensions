@@ -1,10 +1,11 @@
 # Bitwarden Changelog
 
-## [Fix & Improvements] - {PR_MERGE_DATE}
+## [Unified Item Detail View] - {PR_MERGE_DATE}
 
-- Refactor password and passphrase option types with passphrase discriminant
-- Add runtime option key validation for password generation arguments
-- Fix CLI extraction to check data.json exists before unlinking
+- Add unified detail screen for all vault item types (login, card, identity, note, SSH key)
+- Add field-type components with copy, paste, reveal/hide, and open-in-browser actions
+- Add keyboard shortcuts for copy/paste password and TOTP actions
+- Remove separate card and identity detail screens in favor of the unified view
 
 ## [Fix Password Generation] - 2026-02-18
 

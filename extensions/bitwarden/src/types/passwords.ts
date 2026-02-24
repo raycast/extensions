@@ -1,10 +1,6 @@
-import { asOptionKeys } from "~/utils/types";
-
 export type PasswordType = "password" | "passphrase";
 
-export type PasswordOptions = {
-  /** Do not generate a passphrase */
-  passphrase?: false;
+export interface PasswordOptions {
   /** Include uppercase characters */
   lowercase?: boolean;
   /** Include lowercase characters */
@@ -19,23 +15,9 @@ export type PasswordOptions = {
   minNumber?: string;
   /** Minimum number of special characters */
   minSpecial?: string;
-};
+}
 
-/** Keys for the password options to be used at runtime */
-export const PASSWORD_OPTION_KEYS: readonly string[] = asOptionKeys<PasswordOptions>()([
-  "passphrase",
-  "lowercase",
-  "uppercase",
-  "number",
-  "special",
-  "length",
-  "minNumber",
-  "minSpecial",
-]);
-
-export type PassphraseOptions = {
-  /** Generate a passphrase */
-  passphrase?: true;
+export interface PassphraseOptions {
   /** Number of words */
   words?: string;
   /** Word separator */
@@ -44,19 +26,9 @@ export type PassphraseOptions = {
   capitalize?: boolean;
   /** Passphrase includes number */
   includeNumber?: boolean;
-};
-
-/** Keys for the passphrase options to be used at runtime */
-export const PASSPHRASE_OPTION_KEYS: readonly string[] = asOptionKeys<PassphraseOptions>()([
-  "passphrase",
-  "words",
-  "separator",
-  "capitalize",
-  "includeNumber",
-]);
-
+}
 export type PasswordGeneratorOptions = {
   /** Generate a passphrase */
   passphrase?: boolean;
-} & Omit<PasswordOptions, "passphrase"> &
-  Omit<PassphraseOptions, "passphrase">;
+} & PasswordOptions &
+  PassphraseOptions;

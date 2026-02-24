@@ -7,6 +7,14 @@ import { Folder, Item, ItemType, Reprompt } from "~/types/vault";
 import { captureException } from "~/utils/development";
 
 type ListItemAccessory = NonNullable<List.Item.Props["accessories"]>[number];
+export const ITEM_TYPE_TO_COLOR_MAP: Record<ItemType, Color> = {
+  [ItemType.LOGIN]: Color.Blue,
+  [ItemType.CARD]: Color.Green,
+  [ItemType.IDENTITY]: Color.Orange,
+  [ItemType.NOTE]: Color.PrimaryText,
+  [ItemType.SSH_KEY]: Color.SecondaryText,
+};
+
 export const ITEM_TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
   [ItemType.LOGIN]: {
     icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.LOGIN], tintColor: Color.Blue },
