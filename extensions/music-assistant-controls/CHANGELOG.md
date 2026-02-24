@@ -2,21 +2,9 @@
 
 ## [Menu Bar Performance & Stability] - {PR_MERGE_DATE}
 
-### 🔧 Technical Improvements
+### ⚡ Performance & Reliability
 
-- **Parallel API Calls** - Combined queue and player fetches into a single parallel request using `Promise.all()`, reducing API call wait time
-- **Eliminated Flashing** - Fixed data inconsistency issues by ensuring queue and player data always stay synchronized
-- **Optimized Caching** - Leveraged `useCachedPromise`'s built-in caching with `keepPreviousData` to display instant results with smooth background updates
-- **Code Clarity** - Simplified data destructuring and removed unnecessary state management layers for better maintainability
-
-### 🎯 Benefits
-
-- **No More Timeouts** - Menu bar displays instantly with cached data, even with slow Music Assistant servers
-- **Smooth Interactions** - No visual flashing or album art glitches when switching players
-- **Responsive Controls** - User actions (next, play/pause, volume) update quickly without blocking the UI
-
-### Fixes
-- Closes #5 - Menu Bar Timeout Issues - Performance Optimization Needed
+- Menu bar is now instant and flicker-free — appears immediately even with slow Music Assistant servers, with responsive controls and smooth background updates
 
 ## [Player Grouping and Menu Bar Management] - 2026-02-24
 
