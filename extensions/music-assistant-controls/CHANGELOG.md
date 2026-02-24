@@ -1,32 +1,21 @@
 # Music Assistant Controls Changelog
+
 ## [Player Grouping and Menu Bar Management] - {PR_MERGE_DATE}
 
 ### ✨ New Features
 
-- **Manage Player Groups Command** - Control player sync groups with an intuitive tree-view interface
-- **Create New Groups** - Combine standalone players into new groups for synchronized playback
-- **Join Existing Groups** - Add standalone players to existing groups with one click
-- **Disband Groups** - Remove all members from a group to return them to standalone mode
-- **Tree View UI** - Groups displayed as hierarchies with leaders and their nested members for clear relationships
-- **Group Members Submenu in Menu Bar** - See all members of the currently playing group directly in the menu bar without opening the full group management command
-- **Quick Group Management from Menu Bar** - Add or remove players from the group right in the menu bar:
-  - Click the **minus icon (−)** next to group members to remove them
-  - Click the **plus icon (+)** next to compatible players to add them to the group
-- **Current Song Display for Inactive Players** - View what's currently playing on each inactive player with song titles displayed as subtitles for quick browsing
-- **Playback State Indicators** - Play/pause icons showing player status at a glance
-- **Smart Formatting** - Group leaders show currently playing info; members show group status
-- **Context-aware Actions** - Action menus adapt based on player status (standalone, member, or leader)
+- **Manage player groups command** - Tree-view interface to create, modify, and disband player sync groups
+- **Group members in menu bar** - See and manage group members directly from the menu bar with add (+) and remove (−) actions
+- **Playback state indicators** - Visual play/pause icons showing player status
+- **Context-aware actions** - Action menus adapt based on player status (standalone, member, or leader)
 
 ### 🎨 UI/UX Enhancements
 
-- **Album Art Display** - See album covers across all commands with rounded icons next to player names and song titles:
+- **Album art display** - See album covers across all commands with rounded icons next to player names and song titles:
   - Menu bar shows album art for active and inactive players
   - Set Active Player command displays album art for each available player
   - Manage Player Groups command shows album art for group leaders and standalone players
-- Smart player filtering - Only shows group leaders and standalone players, hiding group members that follow their leader's playback to reduce clutter
-- Build, modify, and manage groups directly from the menu bar without switching to the full command
-- Unified group management interface showing both current members and available players to recruit
-- Faster group creation and modifications for power users
+- **Streamlined menu bar layout** - Active player section at top with other players listed below for quick switching
 
 ## [Windows Support Added] - 2026-02-24
 
@@ -38,7 +27,6 @@
 
 - All commands (Toggle, Next Song, Volume Up/Down, Set Volume, Set Active Player) are available on Windows
 - Menu bar command is macOS-only as the feature isn't supported on Windows Raycast
-
 
 ## [Volume Step Controls] - 2026-02-23
 
