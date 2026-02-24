@@ -6,6 +6,9 @@ import { PrusaApiError } from "./api/errors";
 import { logger } from "./utils/logger";
 
 function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "Starting...";
+  }
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   if (hours > 0) {
@@ -43,7 +46,7 @@ export default function Command() {
     const errorMessage = error instanceof PrusaApiError ? error.message : "Connection failed";
 
     return (
-      <MenuBarExtra icon={Icon.Warning} title="⚠️ Error" tooltip={errorMessage}>
+      <MenuBarExtra icon={Icon.Warning} title="Error" tooltip={errorMessage}>
         <MenuBarExtra.Section title="Error">
           <MenuBarExtra.Item title={errorMessage} />
         </MenuBarExtra.Section>
@@ -74,7 +77,10 @@ export default function Command() {
   if (state === "PAUSED") {
     title = `⏸️ Paused: ${progress.toFixed(0)}%`;
   } else if (state === "PRINTING") {
-    title = `${progress.toFixed(0)}% | ${formatTime(timeRemaining)}`;
+    title =
+      Number.isFinite(timeRemaining) && timeRemaining >= 0
+        ? `${progress.toFixed(0)}% | ${formatTime(timeRemaining)}`
+        : `${progress.toFixed(0)}%`;
   } else {
     title = state.charAt(0) + state.slice(1).toLowerCase();
   }

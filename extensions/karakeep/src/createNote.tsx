@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation, closeMainWindow, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, closeMainWindow } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
@@ -6,7 +6,7 @@ import { fetchAddBookmarkToList, fetchCreateBookmark } from "./apis";
 import { BookmarkDetail } from "./components/BookmarkDetail";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
-import { Bookmark } from "./types";
+import { runWithToast } from "./utils/toast";
 
 interface FormValues {
   content: string;
@@ -45,40 +45,34 @@ export default function CreateNoteView() {
       return;
     }
 
-    const toast = await showToast({
-      title: t("bookmark.creating"),
-      style: Toast.Style.Animated,
-    });
-
     try {
-      const payload = {
-        type: "text",
-        text: values.content,
-        createdAt: new Date().toISOString(),
-      };
-      const bookmark = (await fetchCreateBookmark(payload)) as Bookmark;
+      const bookmark = await runWithToast({
+        loading: { title: t("bookmark.creating") },
+        success: { title: t("bookmark.createSuccess") },
+        failure: { title: t("bookmark.createFailed") },
+        action: async () => {
+          const payload = {
+            type: "text",
+            text: values.content,
+            createdAt: new Date().toISOString(),
+          };
+          const created = await fetchCreateBookmark(payload);
 
-      if (values.list) {
-        if (bookmark) {
-          await fetchAddBookmarkToList(values.list, bookmark?.id);
-        }
-      }
+          if (values.list) {
+            await fetchAddBookmarkToList(values.list, created.id);
+          }
 
-      // Clear the draft after successful creation
+          return created;
+        },
+      });
+
+      if (!bookmark) return;
+
       setContent("");
-
-      push(<BookmarkDetail bookmark={bookmark as Bookmark} />);
-
-      toast.style = Toast.Style.Success;
-      toast.title = t("bookmark.createSuccess");
-
-      showHUD(t("bookmark.createSuccess"));
+      push(<BookmarkDetail bookmark={bookmark} />);
       await closeMainWindow({ clearRootSearch: true });
     } catch (error) {
       logger.error("Failed to create note", { contentLength: values.content.length, error });
-      toast.style = Toast.Style.Failure;
-      toast.title = t("bookmark.createFailed");
-      toast.message = String(error);
     }
   };
 

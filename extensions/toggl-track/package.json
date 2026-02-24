@@ -63,7 +63,7 @@
       "title": "Toggl Menu Bar",
       "description": "View, start, or stop existing time entries from the Menu Bar.",
       "mode": "menu-bar",
-      "interval": "10s",
+      "interval": "3m",
       "preferences": [
         {
           "name": "showTitleInMenuBar",
@@ -167,11 +167,11 @@
     {
       "description": "The API responses cache time-to-live in seconds.",
       "name": "cacheTtl",
-      "placeholder": "Enter cache TTL in seconds (default: 0)",
+      "placeholder": "Enter cache TTL in seconds (default: 30)",
       "required": false,
       "title": "Cache TTL",
       "type": "textfield",
-      "default": "0"
+      "default": "30"
     }
   ],
   "dependencies": {

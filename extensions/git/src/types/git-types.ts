@@ -242,6 +242,18 @@ export type Remote = {
 };
 
 /**
+ * Represents a Git submodule.
+ */
+export interface Submodule {
+  /** Submodule path/name (e.g. "libs/foo"). */
+  name: string;
+  /** Relative path from repo root. */
+  relativePath: string;
+  /** Absolute path to the submodule. */
+  fullPath: string;
+}
+
+/**
  * Represents a Git tag.
  */
 export interface Tag {
@@ -348,3 +360,14 @@ export interface ConflictSegment {
   /** The resolution choice: "current", "incoming", or null if not resolved. */
   resolution: "current" | "incoming" | null;
 }
+
+/**
+ * Local git config as a map of string key to string value.
+ * Git stores all config values as strings (e.g. "true"/"false" for booleans).
+ */
+export type GitLocalConfig = {
+  local: Record<string, string | undefined>;
+  global: Record<string, string | undefined>;
+};
+
+export type GitLocalConfigUpdates = Record<string, string | undefined>;

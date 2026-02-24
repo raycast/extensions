@@ -6,15 +6,18 @@ import * as TE from "fp-ts/TaskEither";
 import { handleTaskEitherError } from "./util/utils";
 import { PlayerState } from "./util/models";
 import { getPlayerState } from "./util/scripts/player-controls";
-import { useRef } from "react";
+import { useEffect, useState } from "react";
 import { formatTitle } from "./util/track";
 
 const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
-export default function CurrentlyPlayingMenuBarCommand() {
-  const shouldExecute = useRef<boolean>(false);
 
-  const { isLoading: isLoadingCurrentTrack, data: currentTrack } = usePromise(
+export default function CurrentlyPlayingMenuBarCommand() {
+  const {
+    isLoading: isLoadingCurrentTrack,
+    data: currentTrack,
+    mutate: mutateCurrentTrack,
+  } = usePromise(
     () =>
       pipe(
         music.currentTrack.getCurrentTrack(),
@@ -24,11 +27,6 @@ export default function CurrentlyPlayingMenuBarCommand() {
         ),
       )(),
     [],
-    {
-      onData() {
-        shouldExecute.current = true;
-      },
-    },
   );
   const {
     isLoading: isLoadingPlayerState,
@@ -44,12 +42,56 @@ export default function CurrentlyPlayingMenuBarCommand() {
         ),
       )(),
     [],
-    { execute: shouldExecute.current },
   );
 
   const isRunning = !isLoadingCurrentTrack && !!currentTrack;
-  const isPlaying = playerState === PlayerState.PLAYING;
   const isLoading = isLoadingCurrentTrack || isLoadingPlayerState;
+
+  // Default to playing/not-favorited while data loads to avoid flicker on open
+  const isPlaying = playerState !== undefined ? playerState === PlayerState.PLAYING : true;
+  const isFavorited = currentTrack?.favorited === "true";
+
+  const title = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName,
+        maxTextLength,
+        cleanupTitle,
+      })
+    : "";
+
+  const DROPDOWN_MAX = 40;
+  const fullTitle = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName,
+        maxTextLength: "999",
+        cleanupTitle,
+      })
+    : "";
+  const needsScroll = fullTitle.length > DROPDOWN_MAX;
+  const SEPARATOR = "   ·   ";
+  const paddedTitle = needsScroll ? fullTitle + SEPARATOR : fullTitle;
+
+  const [scrollOffset, setScrollOffset] = useState(0);
+
+  useEffect(() => {
+    setScrollOffset(0);
+  }, [currentTrack?.id]);
+
+  useEffect(() => {
+    if (!needsScroll) return;
+    const interval = setInterval(() => {
+      setScrollOffset((prev) => (prev + 1) % paddedTitle.length);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [needsScroll, paddedTitle.length]);
+
+  const dropdownTitle = needsScroll
+    ? (paddedTitle + paddedTitle).substring(scrollOffset, scrollOffset + DROPDOWN_MAX)
+    : fullTitle;
 
   if (!isRunning) {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
@@ -59,16 +101,16 @@ export default function CurrentlyPlayingMenuBarCommand() {
     return <NothingPlaying isLoading={isLoading} />;
   }
 
-  const title = formatTitle({
-    name: currentTrack.name,
-    artistName: currentTrack.artist,
-    hideArtistName,
-    maxTextLength,
-    cleanupTitle,
-  });
-
   return (
-    <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title} tooltip={title}>
+    <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title}>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          icon="icon.png"
+          title={dropdownTitle}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          onAction={() => open("music://")}
+        />
+      </MenuBarExtra.Section>
       {isPlaying && (
         <MenuBarExtra.Item
           icon={Icon.Pause}
@@ -121,14 +163,31 @@ export default function CurrentlyPlayingMenuBarCommand() {
           pipe(music.player.previous, handleTaskEitherError("Failed to rewind track", "Track rewinded"))()
         }
       />
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          icon="icon.png"
-          title="Open Music"
-          shortcut={Keyboard.Shortcut.Common.Open}
-          onAction={() => open("music://")}
-        />
-      </MenuBarExtra.Section>
+      <MenuBarExtra.Item
+        icon={isFavorited ? Icon.StarDisabled : Icon.Star}
+        title={isFavorited ? "Unfavorite Track" : "Favorite Track"}
+        onAction={() => {
+          const nextFavoriteState = !isFavorited;
+          const toggleFavoriteAction = nextFavoriteState ? music.currentTrack.favorite : music.currentTrack.unfavorite;
+
+          return pipe(
+            toggleFavoriteAction,
+            handleTaskEitherError(
+              nextFavoriteState ? "Failed to favorite the track" : "Failed to unfavorite the track",
+              nextFavoriteState ? "Favorited" : "Unfavorited",
+            ),
+            TE.chainFirstTaskK(
+              () => () =>
+                mutateCurrentTrack(undefined, {
+                  optimisticUpdate(data) {
+                    if (!data) return data;
+                    return { ...data, favorited: nextFavoriteState ? "true" : "false" };
+                  },
+                }),
+            ),
+          )();
+        }}
+      />
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"

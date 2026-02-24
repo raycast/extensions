@@ -5,6 +5,7 @@ import { NavigationContext, RepositoryContext } from "../../open-repository";
 import { Commit, Remote } from "../../types";
 import { useState } from "react";
 import { basename } from "path";
+import { validateGitUrl } from "../../utils/url-utils";
 
 /**
  * Global fetch action that can be reused across different views.
@@ -116,22 +117,6 @@ function RemoteEditorForm(context: RepositoryContext & { initialRemote?: Remote 
   const [fetchUrl, setFetchUrl] = useState(context.initialRemote?.fetchUrl ?? "");
   const [pushUrl, setPushUrl] = useState(context.initialRemote?.pushUrl ?? "");
 
-  const validateGitUrl = (url: string): string | undefined => {
-    if (!url.trim()) return undefined;
-
-    // Check SSH format (git@github.com:username/repo.git)
-    const sshPattern = /^(?:ssh:\/\/)?(?:[^@]+@)?[^:]+:[^/]+\/.*\.git$/;
-
-    // Check HTTP/HTTPS format (https://github.com/username/repo.git)
-    const httpPattern = /^https?:\/\/(?:.*@)?[^/]+\/.*(?:\.git)?$/;
-
-    if (sshPattern.test(url) || httpPattern.test(url)) {
-      return undefined;
-    }
-
-    return "Incorrect SSH or HTTP format";
-  };
-
   const handleSubmit = async (_values: { name: string; fetchUrl: string; pushUrl: string }) => {
     try {
       if (context.initialRemote) {
@@ -169,7 +154,7 @@ function RemoteEditorForm(context: RepositoryContext & { initialRemote?: Remote 
         placeholder="git@github.com:org/repo.git or https://github.com/org/repo.git"
         value={fetchUrl}
         onChange={setFetchUrl}
-        error={fetchUrl.trim().length === 0 ? "Required" : validateGitUrl(fetchUrl)}
+        error={validateGitUrl(fetchUrl)}
       />
 
       <Form.TextField
@@ -177,7 +162,7 @@ function RemoteEditorForm(context: RepositoryContext & { initialRemote?: Remote 
         title="Push URL"
         placeholder="git@github.com:org/repo.git or https://github.com/org/repo.git"
         value={pushUrl}
-        error={pushUrl.trim().length === 0 ? undefined : validateGitUrl(pushUrl)}
+        error={validateGitUrl(pushUrl)}
         info={"Optional"}
         onChange={setPushUrl}
       />
@@ -202,6 +187,10 @@ export function RemoteDeleteAction(context: RepositoryContext & { remote: Remote
       await context.gitManager.removeRemote(context.remote.name);
       await showToast({ style: Toast.Style.Success, title: `Remote '${context.remote.name}' removed` });
       await context.remotes.revalidate();
+      await context.branches.revalidate();
+      await context.commits.revalidate();
+      await context.tags.revalidate();
+      await context.status.revalidate();
     } catch {
       // error toast shown by manager
     }

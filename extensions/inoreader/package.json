@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "inoreader",
+  "title": "Inoreader",
+  "description": "Browse your Inoreader RSS feed",
+  "icon": "extension-icon.png",
+  "author": "lemikeone",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-feed",
+      "title": "My Feed",
+      "subtitle": "Inoreader RSS Feed",
+      "description": "View followed Inoreader feeds and mark items as read",
+      "mode": "view"
+    },
+    {
+      "name": "saved-articles",
+      "title": "Saved Articles",
+      "subtitle": "Inoreader RSS Feed",
+      "description": "View saved Inoreader articles",
+      "mode": "view"
+    },
+    {
+      "name": "sources",
+      "title": "Sources",
+      "subtitle": "Inoreader RSS Feed",
+      "description": "View followed sources with VIP management and folder filters",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "Inoreader OAuth app client ID",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "clientSecret",
+      "title": "Client Secret",
+      "description": "Inoreader OAuth app client secret",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "scope",
+      "title": "OAuth Scope",
+      "description": "OAuth scope to request from Inoreader",
+      "type": "textfield",
+      "placeholder": "read write",
+      "default": "read write",
+      "required": false
+    },
+    {
+      "name": "unreadOnly",
+      "title": "Unread Filter",
+      "description": "By default, exclude items already marked as read",
+      "type": "checkbox",
+      "label": "Show unread articles only",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "itemsPerPage",
+      "title": "Items Per Page",
+      "description": "Number of items requested per API call",
+      "type": "dropdown",
+      "default": "50",
+      "required": false,
+      "data": [
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        }
+      ]
+    },
+    {
+      "name": "showSiteName",
+      "title": "Show Site Name",
+      "description": "Show the source site name on each row",
+      "type": "checkbox",
+      "label": "Show site name",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "aiSummaryLanguage",
+      "title": "AI Summary Language",
+      "description": "Default language used for AI summaries",
+      "type": "textfield",
+      "placeholder": "English",
+      "default": "English",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0",
+    "linkedom": "^0.18.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

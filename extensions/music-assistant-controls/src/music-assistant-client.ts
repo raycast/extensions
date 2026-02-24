@@ -101,6 +101,34 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Increase the volume on the specified player
+   *
+   * @param playerId - The unique identifier of the player to control
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.volumeUp("living-room-player");
+   * ```
+   */
+  async volumeUp(playerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandVolumeUp(playerId));
+  }
+
+  /**
+   * Decrease the volume on the specified player
+   *
+   * @param playerId - The unique identifier of the player to control
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.volumeDown("living-room-player");
+   * ```
+   */
+  async volumeDown(playerId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandVolumeDown(playerId));
+  }
+
+  /**
    * Get detailed player information including volume levels
    *
    * @param playerId - The unique identifier of the player
@@ -293,11 +321,16 @@ export default class MusicAssistantClient {
    * @example
    * ```typescript
    * const message = client.formatSelectionMessage("Office Speakers");
-   * // Returns: "Office Speakers selected, allow 10 seconds for the menubar to update!"
+   * // Returns: "Office Speakers selected, allow 10 seconds for the menubar to update!" (macOS)
+   * // Returns: "Office Speakers selected!" (Windows)
    * ```
    */
   formatSelectionMessage(displayName: string): string {
-    return `${displayName} selected, allow 10 seconds for the menubar to update!`;
+    const isMacOS = process.platform === "darwin";
+    if (isMacOS) {
+      return `${displayName} selected, allow 10 seconds for the menubar to update!`;
+    }
+    return `${displayName} selected!`;
   }
 
   // Volume Control Helper Methods

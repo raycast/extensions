@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Add Direct command for setting slack status] - 2026-02-23
+
+- Merged slack-status Extension into the main Slack extension, enabling users to view, set, update, AI-generate, and clear their status in one place.
+- Added full support for custom workspace emojis (beyond default emojis).
+ 
 ## [Add proxy support for corporate networks] - 2026-02-13
 
 - Add optional "Proxy URL" preference for routing Slack API requests through a corporate proxy

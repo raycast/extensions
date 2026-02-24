@@ -1,7 +1,7 @@
 import { shouldOpenWorktree } from "#/helpers/general";
 import { withToast } from "#/helpers/toast";
 import { useProjects } from "#/hooks/use-projects";
-import { Action, ActionPanel, Form, open, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
 import path from "node:path";
 import { useMemo, useRef, useState } from "react";
@@ -20,6 +20,7 @@ import {
   shouldPushWorktree,
 } from "./helpers/git";
 import { getPreferences, resizeEditorWindow } from "./helpers/raycast";
+import { buildWorktreeEnvVars, runSetupCommands, shouldRunSetupCommands } from "./helpers/worktree-config";
 
 enum WorktreeFlowType {
   CREATE_NEW = "create_new",
@@ -124,6 +125,46 @@ export default function Command({ directory: initialDirectory }: { directory?: s
             path: newWorktreePath,
             branch,
           });
+
+        // Run setup commands if configured
+        const { shouldRun, commands } = await shouldRunSetupCommands({
+          bareRepoPath: directory,
+        });
+
+        if (shouldRun && commands.length > 0) {
+          const envVars = await buildWorktreeEnvVars(directory, newWorktreePath);
+
+          await runSetupCommands({
+            commands,
+            worktreePath: newWorktreePath,
+            envVars,
+            onCommandStart: (command, index, total) => {
+              toast.style = Toast.Style.Animated;
+              toast.title = "Running Setup Commands";
+              toast.message = `(${index + 1}/${total}) ${command}`;
+            },
+            onCommandComplete: (command, index, total) => {
+              toast.message = `(${index + 1}/${total}) Completed: ${command}`;
+            },
+            onCommandError: async (command, error, index, total) => {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Setup Command Failed";
+              toast.message = `(${index + 1}/${total}) ${command}: ${error}`;
+
+              const shouldContinue = await confirmAlert({
+                title: "Setup Command Failed",
+                message: `Command "${command}" failed. Continue with remaining commands?`,
+              });
+
+              if (shouldContinue) {
+                toast.style = Toast.Style.Animated;
+                toast.title = "Running Setup Commands";
+              }
+
+              return shouldContinue;
+            },
+          });
+        }
 
         // Update the worktree cache if enabled
         if (preferences.enableWorktreeCaching) {

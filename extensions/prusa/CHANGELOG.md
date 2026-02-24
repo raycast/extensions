@@ -1,5 +1,10 @@
 # Prusa Printer Control Changelog
 
+## [Bug Fix] - 2026-02-23
+
+- Fixed NaN appearing in time displays when printer doesn't have time estimates; time displays now show "Starting..." at the beginning of a print instead of invalid values
+- Fixed double error icons when there's an error
+
 ## [Bug Fix] - 2026-01-31
 
 Fixed error when accessing job progress while printer is idle

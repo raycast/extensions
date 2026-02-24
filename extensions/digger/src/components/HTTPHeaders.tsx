@@ -21,6 +21,11 @@ const SECURITY_HEADERS = [
   { key: "permissions-policy", label: "Permissions-Policy" },
 ];
 
+const X402_HEADERS = [
+  { key: "payment-required", label: "PAYMENT-REQUIRED" },
+  { key: "payment-response", label: "PAYMENT-RESPONSE" },
+];
+
 export function HTTPHeaders({ data, onRefresh, progress }: HTTPHeadersProps) {
   if (!data) {
     return (
@@ -69,7 +74,7 @@ interface HTTPHeadersDetailProps {
 
 function HTTPHeadersDetail({ headers }: HTTPHeadersDetailProps) {
   const getHeaderValue = (key: string): string | undefined => {
-    return headers[key] || headers[key.toLowerCase()];
+    return headers[key] ?? headers[key.toLowerCase()];
   };
 
   return (
@@ -101,6 +106,24 @@ function HTTPHeadersDetail({ headers }: HTTPHeadersDetailProps) {
                 text={value ? truncateText(value, 40) : "Missing"}
                 icon={
                   value ? { source: Icon.Check, tintColor: Color.Green } : { source: Icon.Xmark, tintColor: Color.Red }
+                }
+              />
+            );
+          })}
+
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Payment Required" />
+          {X402_HEADERS.map(({ key, label }) => {
+            const value = getHeaderValue(key);
+            return (
+              <List.Item.Detail.Metadata.Label
+                key={key}
+                title={label}
+                text={value ? truncateText(value, 40) : "Not present"}
+                icon={
+                  value
+                    ? { source: Icon.CreditCard, tintColor: Color.Yellow }
+                    : { source: Icon.Minus, tintColor: Color.SecondaryText }
                 }
               />
             );

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
@@ -7,8 +7,8 @@ import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
 import { useConfig } from "./hooks/useConfig";
 import { getBrowserLink } from "./hooks/useBrowserLink";
-import { Bookmark } from "./types";
 import { validUrl } from "./utils/url";
+import { runWithToast } from "./utils/toast";
 
 interface FormValues {
   url: string;
@@ -34,34 +34,32 @@ export default function CreateBookmarkView() {
       },
     },
     async onSubmit(values) {
-      const toast = await showToast({
-        title: t("bookmark.creating"),
-        style: Toast.Style.Animated,
-      });
-
       try {
-        const payload = {
-          type: "link",
-          url: values.url,
-          createdAt: new Date().toISOString(),
-        };
-        const bookmark = (await fetchCreateBookmark(payload)) as Bookmark;
+        const bookmark = await runWithToast({
+          loading: { title: t("bookmark.creating") },
+          success: { title: t("bookmark.createSuccess") },
+          failure: { title: t("bookmark.createFailed") },
+          action: async () => {
+            const payload = {
+              type: "link",
+              url: values.url,
+              createdAt: new Date().toISOString(),
+            };
+            const created = await fetchCreateBookmark(payload);
 
-        if (values.list) {
-          if (bookmark) {
-            await fetchAddBookmarkToList(values.list, bookmark?.id);
-          }
+            if (values.list) {
+              await fetchAddBookmarkToList(values.list, created.id);
+            }
+
+            return created;
+          },
+        });
+
+        if (bookmark) {
+          pop();
         }
-
-        pop();
-
-        toast.style = Toast.Style.Success;
-        toast.title = t("bookmark.createSuccess");
       } catch (error) {
         logger.error("Failed to create bookmark", { url: values.url, error });
-        toast.style = Toast.Style.Failure;
-        toast.title = t("bookmark.createFailed");
-        toast.message = String(error);
       }
     },
   });

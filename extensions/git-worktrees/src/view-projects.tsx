@@ -2,6 +2,7 @@ import ClearCache from "#/components/actions/clear-cache";
 import { OpenTerminal } from "#/components/actions/open-terminal";
 import { RemoveProject } from "#/components/actions/remove-project";
 import { ResetRanking } from "#/components/actions/reset-item-ranking";
+import { SetupActions } from "#/components/actions/setup-actions";
 import { ViewProjectWorktrees } from "#/components/actions/view-project-worktrees";
 import { getPreferences } from "#/helpers/raycast";
 import { useProjects } from "#/hooks/use-projects";
@@ -50,6 +51,8 @@ export default function Command() {
                   />
 
                   <OpenTerminal path={project.fullPath} />
+
+                  <SetupActions projectPath={project.fullPath} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="Extra Actions">
