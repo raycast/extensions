@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Remove updating homebrew index toast from outdated command
+
 ## [Improvements] - 2026-02-19
 
 - Improve handling of abort signal when loading search command
