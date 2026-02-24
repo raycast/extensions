@@ -6,9 +6,9 @@ Thank you for your interest in contributing! This guide will help you set up you
 
 ### Prerequisites
 
-- Node.js 16+
+- Node.js 22+ (as specified in [.nvmrc](.nvmrc))
 - npm or yarn
-- macOS (for testing the extension)
+- macOS or Windows (for testing the extension; menu bar command requires macOS)
 
 ### Setup
 
@@ -136,6 +136,7 @@ Key files:
 - **src/external-code/music-assistant-api.ts** - REST API client
 - **src/api-command.ts** - Command execution wrapper
 - **src/music-assistant-client.ts** - High-level client interface
+- **commands.json** - Complete API reference with all available commands, parameters, and return types
 
 Example of adding a new command:
 
@@ -260,6 +261,7 @@ npm run publish       # Publish to Raycast Store
 
 - Check existing issues and discussions
 - Review the Music Assistant API docs: http://192.168.0.166:8095/api-docs
+- Refer to [commands.json](./commands.json) for AI-assisted development and code generation
 - Look at similar functionality in the codebase
 
 ## License

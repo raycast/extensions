@@ -862,6 +862,28 @@ export class MusicAssistantApi {
     });
   }
 
+  public playerCommandSetMembers(
+    targetPlayer: string,
+    playerIdsToAdd?: string[],
+    playerIdsToRemove?: string[],
+  ): Promise<void> {
+    /*
+      Join/unjoin given player(s) to/from target player.
+
+      Will add the given player(s) to the target player (sync leader or group player).
+      This is the modern API for managing group membership.
+
+      - targetPlayer: player_id of the syncgroup leader or group player.
+      - playerIdsToAdd: List of player_id's to add to the target player.
+      - playerIdsToRemove: List of player_id's to remove from the target player.
+    */
+    return this.sendCommand("players/cmd/set_members", {
+      target_player: targetPlayer,
+      player_ids_to_add: playerIdsToAdd,
+      player_ids_to_remove: playerIdsToRemove,
+    });
+  }
+
   public playerCommand(player_id: string, command: string, args?: Record<string, any>): Promise<void> {
     /*
       Handle command to player

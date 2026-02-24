@@ -1,89 +1,73 @@
 import { List } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
+import type { Accessory } from "../agents/types";
 import { formatDuration } from "./fetcher";
-import { renderErrorDetail, renderNoDataDetail, getLoadingAccessory, getNoDataAccessory } from "../agents/ui";
+import {
+  renderErrorOrNoData,
+  formatErrorOrNoData,
+  getLoadingAccessory,
+  getNoDataAccessory,
+  generatePieIcon,
+} from "../agents/ui";
 
 export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError | null): string {
-  if (error) {
-    return `Codex Usage\nStatus: Error\nType: ${error.type}\nMessage: ${error.message}`;
-  }
-  if (!usage) {
-    return "Codex Usage\nStatus: No data available";
-  }
+  const fallback = formatErrorOrNoData("Codex", usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as CodexUsage;
 
-  let text = `Codex Usage\nAccount: ${usage.account}`;
-  text += `\n\n5h Limit: ${usage.fiveHourLimit.percentageRemaining}% remaining`;
-  text += `\nResets In: ${formatDuration(usage.fiveHourLimit.resetsInSeconds)}`;
-  text += `\n\nWeekly Limit: ${usage.weeklyLimit.percentageRemaining}% remaining`;
-  text += `\nResets In: ${formatDuration(usage.weeklyLimit.resetsInSeconds)}`;
+  let text = `Codex Usage\nAccount: ${u.account}`;
+  text += `\n\n5h Limit: ${u.fiveHourLimit.percentageRemaining}% remaining`;
+  text += `\nResets In: ${formatDuration(u.fiveHourLimit.resetsInSeconds)}`;
+  text += `\n\nWeekly Limit: ${u.weeklyLimit.percentageRemaining}% remaining`;
+  text += `\nResets In: ${formatDuration(u.weeklyLimit.resetsInSeconds)}`;
 
-  if (usage.codeReviewLimit) {
-    text += `\n\nCode Review Limit: ${usage.codeReviewLimit.percentageRemaining}% remaining`;
-    text += `\nResets In: ${formatDuration(usage.codeReviewLimit.resetsInSeconds)}`;
+  if (u.codeReviewLimit) {
+    text += `\n\nCode Review Limit: ${u.codeReviewLimit.percentageRemaining}% remaining`;
+    text += `\nResets In: ${formatDuration(u.codeReviewLimit.resetsInSeconds)}`;
   }
 
-  text += `\n\nCredits: ${usage.credits.unlimited ? "Unlimited" : usage.credits.balance}`;
+  text += `\n\nCredits: ${u.credits.unlimited ? "Unlimited" : u.credits.balance}`;
 
   return text;
 }
 
 export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | null): React.ReactNode {
-  if (error) {
-    return renderErrorDetail(error);
-  }
-
-  if (!usage) {
-    return renderNoDataDetail();
-  }
+  const fallback = renderErrorOrNoData(usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as CodexUsage;
 
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Account" text={usage.account} />
+      <List.Item.Detail.Metadata.Label title="Account" text={u.account} />
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label
-        title="5h Limit"
-        text={`${usage.fiveHourLimit.percentageRemaining}% remaining`}
-      />
-      <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(usage.fiveHourLimit.resetsInSeconds)} />
+      <List.Item.Detail.Metadata.Label title="5h Limit" text={`${u.fiveHourLimit.percentageRemaining}% remaining`} />
+      <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.fiveHourLimit.resetsInSeconds)} />
 
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label
-        title="Weekly Limit"
-        text={`${usage.weeklyLimit.percentageRemaining}% remaining`}
-      />
-      <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(usage.weeklyLimit.resetsInSeconds)} />
+      <List.Item.Detail.Metadata.Label title="Weekly Limit" text={`${u.weeklyLimit.percentageRemaining}% remaining`} />
+      <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.weeklyLimit.resetsInSeconds)} />
 
-      {usage.codeReviewLimit && (
+      {u.codeReviewLimit && (
         <>
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Code Review Limit"
-            text={`${usage.codeReviewLimit.percentageRemaining}% remaining`}
+            text={`${u.codeReviewLimit.percentageRemaining}% remaining`}
           />
-          <List.Item.Detail.Metadata.Label
-            title="Resets In"
-            text={formatDuration(usage.codeReviewLimit.resetsInSeconds)}
-          />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.codeReviewLimit.resetsInSeconds)} />
         </>
       )}
 
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label
-        title="Credits"
-        text={usage.credits.unlimited ? "Unlimited" : usage.credits.balance}
-      />
+      <List.Item.Detail.Metadata.Label title="Credits" text={u.credits.unlimited ? "Unlimited" : u.credits.balance} />
     </List.Item.Detail.Metadata>
   );
 }
 
-export function getCodexAccessory(
-  usage: CodexUsage | null,
-  error: CodexError | null,
-  isLoading: boolean,
-): { text: string; tooltip?: string } {
+export function getCodexAccessory(usage: CodexUsage | null, error: CodexError | null, isLoading: boolean): Accessory {
   if (isLoading) {
     return getLoadingAccessory("Codex");
   }
@@ -105,8 +89,8 @@ export function getCodexAccessory(
     return getNoDataAccessory();
   }
 
-  // 显示 5h Limit 百分比
   return {
+    icon: generatePieIcon(usage.fiveHourLimit.percentageRemaining),
     text: `${usage.fiveHourLimit.percentageRemaining}%`,
     tooltip: `5h: ${usage.fiveHourLimit.percentageRemaining}% | Weekly: ${usage.weeklyLimit.percentageRemaining}%`,
   };

@@ -1,3 +1,5 @@
+import type { Image } from "@raycast/api";
+
 export type AgentId = "amp" | "codex" | "droid" | "gemini" | "kimi" | "antigravity" | "zai";
 
 export interface AgentDefinition {
@@ -19,4 +21,5 @@ export interface UsageState<TUsage, TError> {
 export interface Accessory {
   text: string;
   tooltip?: string;
+  icon?: Image.ImageLike;
 }

@@ -4,6 +4,10 @@ import fs from "fs";
 import afs from "fs/promises";
 import { createHash } from "crypto";
 import { createReadStream } from "fs";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 
 const CLI_VERSION = "1.4.1";
 
@@ -131,6 +135,14 @@ export async function ensureCli(): Promise<string> {
     installToast.title = "Failed to Install Proton Pass CLI";
     installToast.message = error instanceof Error ? error.message : String(error);
     throw new Error(`Could not set permissions on pass-cli: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  // Remove macOS quarantine attribute — downloaded binaries are quarantined by
+  // Gatekeeper and will fail to execute without this step.
+  try {
+    await execFileAsync("/usr/bin/xattr", ["-d", "com.apple.quarantine", cli]);
+  } catch {
+    // Attribute may not be present; ignore.
   }
 
   console.log("pass-cli installed successfully at:", cli);

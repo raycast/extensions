@@ -1,18 +1,22 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { AmpUsage, AmpError } from "./types";
-import { renderErrorDetail, renderNoDataDetail, getLoadingAccessory, getNoDataAccessory } from "../agents/ui";
+import type { Accessory } from "../agents/types";
+import {
+  renderErrorOrNoData,
+  formatErrorOrNoData,
+  getLoadingAccessory,
+  getNoDataAccessory,
+  generatePieIcon,
+} from "../agents/ui";
 
 type Preferences = Preferences.AgentUsage;
 
 export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | null): string {
-  if (error) {
-    return `Amp Usage\nStatus: Error\nType: ${error.type}\nMessage: ${error.message}`;
-  }
-  if (!usage) {
-    return "Amp Usage\nStatus: No data available";
-  }
+  const fallback = formatErrorOrNoData("Amp", usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as AmpUsage;
 
-  const { email, nickname, ampFree, individualCredits } = usage;
+  const { email, nickname, ampFree, individualCredits } = u;
   const ampFreeRemaining = ampFree.total - ampFree.used;
   const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
 
@@ -43,15 +47,11 @@ export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | nul
 }
 
 export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null): React.ReactNode {
-  if (error) {
-    return renderErrorDetail(error);
-  }
+  const fallback = renderErrorOrNoData(usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as AmpUsage;
 
-  if (!usage) {
-    return renderNoDataDetail();
-  }
-
-  const { email, nickname, ampFree, individualCredits } = usage;
+  const { email, nickname, ampFree, individualCredits } = u;
   const ampFreeRemaining = ampFree.total - ampFree.used;
   const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
 
@@ -97,11 +97,7 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
   );
 }
 
-export function getAmpAccessory(
-  usage: AmpUsage | null,
-  error: AmpError | null,
-  isLoading: boolean,
-): { text: string; tooltip?: string } {
+export function getAmpAccessory(usage: AmpUsage | null, error: AmpError | null, isLoading: boolean): Accessory {
   if (isLoading) {
     return getLoadingAccessory("Amp");
   }
@@ -124,14 +120,18 @@ export function getAmpAccessory(
   const remaining = usage.ampFree.total - usage.ampFree.used;
   const percent = usage.ampFree.total > 0 ? (remaining / usage.ampFree.total) * 100 : 0;
 
+  const icon = generatePieIcon(percent);
+
   if (ampDisplayMode === "percentage") {
     return {
+      icon,
       text: `${percent.toFixed(1)}%`,
       tooltip: `${usage.ampFree.unit}${remaining.toFixed(2)} remaining (${percent.toFixed(1)}%)`,
     };
   }
 
   return {
+    icon,
     text: `${usage.ampFree.unit}${remaining.toFixed(2)}`,
     tooltip: `${usage.ampFree.unit}${remaining.toFixed(2)} remaining (${percent.toFixed(1)}%)`,
   };

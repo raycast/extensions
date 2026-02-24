@@ -1,5 +1,9 @@
 # GitHub Copilot Changelog
 
+## [Fix copilot quota 100% cap] - 2026-02-24
+
+- Fix Copilot quota cap at 100% when user has used all of their quota and have the "Allow usage beyond quota" setting enabled
+
 ## [Fix search-repositories AI tool] - 2026-02-09
 
 - Fix search-repositories AI tool crash

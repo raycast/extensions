@@ -1,90 +1,196 @@
-import { List, Action, ActionPanel, Icon, showToast, Toast, getPreferenceValues, LocalStorage } from "@raycast/api";
-import { useEffect, useState, useCallback, useRef } from "react";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  LaunchProps,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { Accessory, AgentDefinition, AgentId, UsageState } from "./agents/types";
 import { useAmpUsage } from "./amp/fetcher";
-import { renderAmpDetail, getAmpAccessory, formatAmpUsageText } from "./amp/renderer";
-import { useCodexUsage } from "./codex/fetcher";
-import { renderCodexDetail, getCodexAccessory, formatCodexUsageText } from "./codex/renderer";
-import { useDroidUsage } from "./droid/fetcher";
-import { renderDroidDetail, getDroidAccessory, formatDroidUsageText } from "./droid/renderer";
-import { useGeminiUsage } from "./gemini/fetcher";
-import { renderGeminiDetail, getGeminiAccessory, formatGeminiUsageText } from "./gemini/renderer";
-import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth";
-import { useKimiUsage } from "./kimi/fetcher";
-import { renderKimiDetail, getKimiAccessory, formatKimiUsageText } from "./kimi/renderer";
+import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer";
+import type { AmpError, AmpUsage } from "./amp/types";
 import { useAntigravityUsage } from "./antigravity/fetcher";
-import { renderAntigravityDetail, getAntigravityAccessory, formatAntigravityUsageText } from "./antigravity/renderer";
+import { formatAntigravityUsageText, getAntigravityAccessory, renderAntigravityDetail } from "./antigravity/renderer";
+import type { AntigravityError, AntigravityUsage } from "./antigravity/types";
+import { useCodexUsage } from "./codex/fetcher";
+import { formatCodexUsageText, getCodexAccessory, renderCodexDetail } from "./codex/renderer";
+import type { CodexError, CodexUsage } from "./codex/types";
+import { useDroidUsage } from "./droid/fetcher";
+import { formatDroidUsageText, getDroidAccessory, renderDroidDetail } from "./droid/renderer";
+import type { DroidError, DroidUsage } from "./droid/types";
+import { useGeminiUsage } from "./gemini/fetcher";
+import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth";
+import { formatGeminiUsageText, getGeminiAccessory, renderGeminiDetail } from "./gemini/renderer";
+import type { GeminiError, GeminiUsage } from "./gemini/types";
+import { useKimiUsage } from "./kimi/fetcher";
+import { formatKimiUsageText, getKimiAccessory, renderKimiDetail } from "./kimi/renderer";
+import type { KimiError, KimiUsage } from "./kimi/types";
 import { useZaiUsage } from "./zai/fetcher";
-import { renderZaiDetail, getZaiAccessory, formatZaiUsageText } from "./zai/renderer";
-import { AgentDefinition, Accessory, UsageState } from "./agents/types";
-import { AmpError, AmpUsage } from "./amp/types";
-import { CodexError, CodexUsage } from "./codex/types";
-import { DroidError, DroidUsage } from "./droid/types";
-import { GeminiError, GeminiUsage } from "./gemini/types";
-import { KimiError, KimiUsage } from "./kimi/types";
-import { AntigravityError, AntigravityUsage } from "./antigravity/types";
-import { ZaiError, ZaiUsage } from "./zai/types";
+import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer";
+import type { ZaiError, ZaiUsage } from "./zai/types";
 
 const AGENT_ORDER_KEY = "agent-order";
 
 type Preferences = Preferences.AgentUsage;
+type ErrorLike = { type: string; message: string };
+type CommandLaunchContext = { selectedAgentId?: string };
 
-// Agent 配置定义
-const AGENTS: AgentDefinition[] = [
-  {
+interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefinition {
+  useUsage: (enabled?: boolean) => UsageState<TUsage, TError>;
+  renderDetail: (usage: TUsage | null, error: TError | null) => React.ReactNode;
+  getAccessory: (usage: TUsage | null, error: TError | null, isLoading: boolean) => Accessory;
+  formatUsageText: (usage: TUsage | null, error: TError | null) => string;
+}
+
+interface AgentUsageById {
+  amp: AmpUsage;
+  codex: CodexUsage;
+  droid: DroidUsage;
+  gemini: GeminiUsage;
+  kimi: KimiUsage;
+  antigravity: AntigravityUsage;
+  zai: ZaiUsage;
+}
+
+interface AgentErrorById {
+  amp: AmpError;
+  codex: CodexError;
+  droid: DroidError;
+  gemini: GeminiError;
+  kimi: KimiError;
+  antigravity: AntigravityError;
+  zai: ZaiError;
+}
+
+type AgentRegistry = {
+  [K in AgentId]: AgentRegistryEntry<AgentUsageById[K], AgentErrorById[K]>;
+};
+
+interface AgentView extends AgentDefinition {
+  isVisible: boolean;
+  isLoading: boolean;
+  revalidate: () => Promise<void>;
+  getAccessory: () => Accessory;
+  renderDetail: () => React.ReactNode;
+  formatUsageText: () => string;
+}
+
+const AGENT_REGISTRY: AgentRegistry = {
+  amp: {
     id: "amp",
     name: "Amp",
     icon: "amp-icon.svg",
     description: "Amp Code AI Assistant",
     isSupported: true,
     settingsUrl: "https://ampcode.com/settings",
+    useUsage: useAmpUsage,
+    renderDetail: renderAmpDetail,
+    getAccessory: getAmpAccessory,
+    formatUsageText: formatAmpUsageText,
   },
-  {
+  codex: {
     id: "codex",
     name: "Codex",
     icon: "codex-icon.svg",
     description: "OpenAI Codex CLI",
     isSupported: true,
-    settingsUrl: "https://chatgpt.com/codex/settings",
+    settingsUrl: "https://chatgpt.com/codex/settings/usage",
+    useUsage: useCodexUsage,
+    renderDetail: renderCodexDetail,
+    getAccessory: getCodexAccessory,
+    formatUsageText: formatCodexUsageText,
   },
-  {
+  droid: {
     id: "droid",
     name: "Droid",
     icon: "droid-icon.svg",
     description: "Factory AI Droid",
     isSupported: true,
-    settingsUrl: "https://api.factory.ai",
+    settingsUrl: "https://app.factory.ai/settings/billing",
+    useUsage: useDroidUsage,
+    renderDetail: renderDroidDetail,
+    getAccessory: getDroidAccessory,
+    formatUsageText: formatDroidUsageText,
   },
-  {
+  gemini: {
     id: "gemini",
     name: "Gemini",
     icon: "gemini-icon.png",
     description: "Google Gemini CLI",
     isSupported: true,
+    useUsage: useGeminiUsage,
+    renderDetail: renderGeminiDetail,
+    getAccessory: getGeminiAccessory,
+    formatUsageText: formatGeminiUsageText,
   },
-  {
+  kimi: {
     id: "kimi",
     name: "Kimi",
     icon: "kimi-icon.ico",
     description: "Moonshot Kimi Code",
     isSupported: true,
     settingsUrl: "https://www.kimi.com/code/console?from=membership",
+    useUsage: useKimiUsage,
+    renderDetail: renderKimiDetail,
+    getAccessory: getKimiAccessory,
+    formatUsageText: formatKimiUsageText,
   },
-  {
+  antigravity: {
     id: "antigravity",
     name: "Antigravity",
     icon: "antigravity-icon.png",
     description: "Google Antigravity",
     isSupported: true,
+    useUsage: useAntigravityUsage,
+    renderDetail: renderAntigravityDetail,
+    getAccessory: getAntigravityAccessory,
+    formatUsageText: formatAntigravityUsageText,
   },
-  {
+  zai: {
     id: "zai",
     name: "z.ai",
     icon: "zhipu-icon.svg",
     description: "Z.AI / GLM Coding Assistant",
     isSupported: true,
     settingsUrl: "https://z.ai",
+    useUsage: useZaiUsage,
+    renderDetail: renderZaiDetail,
+    getAccessory: getZaiAccessory,
+    formatUsageText: formatZaiUsageText,
   },
-];
+};
+
+const AGENT_IDS = Object.keys(AGENT_REGISTRY) as AgentId[];
+
+function isAgentId(value: string): value is AgentId {
+  return value in AGENT_REGISTRY;
+}
+
+function createAgentView<TUsage, TError extends ErrorLike>(
+  config: AgentRegistryEntry<TUsage, TError>,
+  state: UsageState<TUsage, TError>,
+  isVisible: boolean,
+): AgentView {
+  return {
+    id: config.id,
+    name: config.name,
+    icon: config.icon,
+    description: config.description,
+    isSupported: config.isSupported,
+    settingsUrl: config.settingsUrl,
+    isVisible,
+    isLoading: state.isLoading,
+    revalidate: state.revalidate,
+    getAccessory: () => config.getAccessory(state.usage, state.error, state.isLoading),
+    renderDetail: () => config.renderDetail(state.usage, state.error),
+    formatUsageText: () => config.formatUsageText(state.usage, state.error),
+  };
+}
 
 function renderUnsupportedDetail(agent: AgentDefinition): React.ReactNode {
   return (
@@ -97,157 +203,80 @@ function renderUnsupportedDetail(agent: AgentDefinition): React.ReactNode {
   );
 }
 
-interface UsageStates {
-  amp: UsageState<AmpUsage, AmpError>;
-  codex: UsageState<CodexUsage, CodexError>;
-  droid: UsageState<DroidUsage, DroidError>;
-  gemini: UsageState<GeminiUsage, GeminiError>;
-  kimi: UsageState<KimiUsage, KimiError>;
-  antigravity: UsageState<AntigravityUsage, AntigravityError>;
-  zai: UsageState<ZaiUsage, ZaiError>;
-}
-
-function getAgentAccessory(agent: AgentDefinition, states: UsageStates): Accessory {
-  const { amp, codex, droid, gemini, kimi, antigravity, zai } = states;
-
-  if (agent.id === "amp") {
-    return getAmpAccessory(amp.usage, amp.error, amp.isLoading);
-  }
-
-  if (agent.id === "codex") {
-    return getCodexAccessory(codex.usage, codex.error, codex.isLoading);
-  }
-
-  if (agent.id === "droid") {
-    return getDroidAccessory(droid.usage, droid.error, droid.isLoading);
-  }
-
-  if (agent.id === "gemini") {
-    return getGeminiAccessory(gemini.usage, gemini.error, gemini.isLoading);
-  }
-
-  if (agent.id === "kimi") {
-    return getKimiAccessory(kimi.usage, kimi.error, kimi.isLoading);
-  }
-
-  if (agent.id === "antigravity") {
-    return getAntigravityAccessory(antigravity.usage, antigravity.error, antigravity.isLoading);
-  }
-
-  if (agent.id === "zai") {
-    return getZaiAccessory(zai.usage, zai.error, zai.isLoading);
-  }
-
-  return { text: "—", tooltip: "Not supported yet" };
-}
-
-function renderAgentDetail(agent: AgentDefinition, states: UsageStates): React.ReactNode {
-  const { amp, codex, droid, gemini, kimi, antigravity, zai } = states;
-
-  if (agent.id === "amp" && agent.isSupported) {
-    return renderAmpDetail(amp.usage, amp.error);
-  }
-
-  if (agent.id === "codex" && agent.isSupported) {
-    return renderCodexDetail(codex.usage, codex.error);
-  }
-
-  if (agent.id === "droid" && agent.isSupported) {
-    return renderDroidDetail(droid.usage, droid.error);
-  }
-
-  if (agent.id === "gemini" && agent.isSupported) {
-    return renderGeminiDetail(gemini.usage, gemini.error);
-  }
-
-  if (agent.id === "kimi" && agent.isSupported) {
-    return renderKimiDetail(kimi.usage, kimi.error);
-  }
-
-  if (agent.id === "antigravity" && agent.isSupported) {
-    return renderAntigravityDetail(antigravity.usage, antigravity.error);
-  }
-
-  if (agent.id === "zai" && agent.isSupported) {
-    return renderZaiDetail(zai.usage, zai.error);
-  }
-
-  return renderUnsupportedDetail(agent);
-}
-
-function getAgentCopyText(agent: AgentDefinition, states: UsageStates): string {
-  const { amp, codex, droid, gemini, kimi, antigravity, zai } = states;
-
-  if (agent.id === "amp") {
-    return formatAmpUsageText(amp.usage, amp.error);
-  }
-  if (agent.id === "codex") {
-    return formatCodexUsageText(codex.usage, codex.error);
-  }
-  if (agent.id === "droid") {
-    return formatDroidUsageText(droid.usage, droid.error);
-  }
-  if (agent.id === "gemini") {
-    return formatGeminiUsageText(gemini.usage, gemini.error);
-  }
-  if (agent.id === "kimi") {
-    return formatKimiUsageText(kimi.usage, kimi.error);
-  }
-  if (agent.id === "antigravity") {
-    return formatAntigravityUsageText(antigravity.usage, antigravity.error);
-  }
-  if (agent.id === "zai") {
-    return formatZaiUsageText(zai.usage, zai.error);
-  }
-  return `${agent.name}\nStatus: Not supported yet`;
-}
-
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext: CommandLaunchContext }>) {
   const prefs = getPreferenceValues<Preferences>();
-  const ampState: UsageState<AmpUsage, AmpError> = useAmpUsage();
-  const codexState: UsageState<CodexUsage, CodexError> = useCodexUsage();
-  const droidState: UsageState<DroidUsage, DroidError> = useDroidUsage();
-  const geminiState: UsageState<GeminiUsage, GeminiError> = useGeminiUsage();
-  const kimiState: UsageState<KimiUsage, KimiError> = useKimiUsage();
-  const antigravityState: UsageState<AntigravityUsage, AntigravityError> = useAntigravityUsage();
-  const zaiState: UsageState<ZaiUsage, ZaiError> = useZaiUsage();
 
-  const [agentOrder, setAgentOrder] = useState<string[]>(AGENTS.map((a) => a.id));
+  // Hooks must be called unconditionally at top level (React rules)
+  const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
+  const codexState = AGENT_REGISTRY.codex.useUsage(Boolean(prefs.showCodex));
+  const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
+  const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
+  const kimiState = AGENT_REGISTRY.kimi.useUsage(Boolean(prefs.showKimi));
+  const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
+  const zaiState = AGENT_REGISTRY.zai.useUsage(Boolean(prefs.showZai));
+
+  const agentViews: Record<AgentId, AgentView> = {
+    amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
+    codex: createAgentView(AGENT_REGISTRY.codex, codexState, Boolean(prefs.showCodex)),
+    droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
+    gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
+    kimi: createAgentView(AGENT_REGISTRY.kimi, kimiState, Boolean(prefs.showKimi)),
+    antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
+    zai: createAgentView(AGENT_REGISTRY.zai, zaiState, Boolean(prefs.showZai)),
+  };
+
+  const [agentOrder, setAgentOrder] = useState<AgentId[]>(AGENT_IDS);
 
   useEffect(() => {
     LocalStorage.getItem<string>(AGENT_ORDER_KEY).then((stored) => {
-      if (stored) {
-        try {
-          const order = JSON.parse(stored) as string[];
-          const validOrder = order.filter((id) => AGENTS.some((a) => a.id === id));
-          const missingIds = AGENTS.map((a) => a.id).filter((id) => !validOrder.includes(id));
-          setAgentOrder([...validOrder, ...missingIds]);
-        } catch {
-          setAgentOrder(AGENTS.map((a) => a.id));
+      if (!stored) {
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(stored);
+        if (!Array.isArray(parsed)) {
+          setAgentOrder(AGENT_IDS);
+          return;
         }
+
+        const validOrder = parsed.filter((id): id is AgentId => typeof id === "string" && isAgentId(id));
+        const missingIds = AGENT_IDS.filter((id) => !validOrder.includes(id));
+        setAgentOrder([...validOrder, ...missingIds]);
+      } catch {
+        setAgentOrder(AGENT_IDS);
       }
     });
   }, []);
 
-  const saveOrder = useCallback(async (newOrder: string[]) => {
+  const saveOrder = useCallback(async (newOrder: AgentId[]) => {
     setAgentOrder(newOrder);
     await LocalStorage.setItem(AGENT_ORDER_KEY, JSON.stringify(newOrder));
   }, []);
 
-  const visibilityMap: Record<string, boolean> = {
-    amp: prefs.showAmp,
-    codex: prefs.showCodex,
-    droid: prefs.showDroid,
-    gemini: prefs.showGemini,
-    kimi: prefs.showKimi,
-    antigravity: prefs.showAntigravity,
-    zai: prefs.showZai,
-  };
+  const orderedAgentViews = agentOrder.map((agentId) => agentViews[agentId]);
+  const visibleAgentViews = orderedAgentViews.filter((agent) => agent.isVisible);
+  const requestedSelectedAgentId = props.launchContext?.selectedAgentId;
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(() =>
+    typeof requestedSelectedAgentId === "string" && isAgentId(requestedSelectedAgentId)
+      ? requestedSelectedAgentId
+      : undefined,
+  );
 
-  const sortedAgents = agentOrder
-    .map((id) => AGENTS.find((a) => a.id === id))
-    .filter((a): a is AgentDefinition => a !== undefined);
-  const visibleAgents = sortedAgents.filter((agent) => visibilityMap[agent.id]);
+  useEffect(() => {
+    if (visibleAgentViews.length === 0) {
+      if (selectedItemId !== undefined) {
+        setSelectedItemId(undefined);
+      }
+      return;
+    }
+
+    if (selectedItemId && visibleAgentViews.some((agent) => agent.id === selectedItemId)) {
+      return;
+    }
+
+    setSelectedItemId(visibleAgentViews[0].id);
+  }, [selectedItemId, visibleAgentViews]);
 
   const isLoading =
     ampState.isLoading ||
@@ -322,7 +351,7 @@ export default function Command() {
   };
 
   const moveAgent = useCallback(
-    async (agentId: string, direction: "up" | "down") => {
+    async (agentId: AgentId, direction: "up" | "down") => {
       const currentIndex = agentOrder.indexOf(agentId);
       if (currentIndex === -1) return;
 
@@ -337,29 +366,18 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
-      {visibleAgents.map((agent, index) => {
-        const accessory = getAgentAccessory(agent, {
-          amp: ampState,
-          codex: codexState,
-          droid: droidState,
-          gemini: geminiState,
-          kimi: kimiState,
-          antigravity: antigravityState,
-          zai: zaiState,
-        });
-        const detail = renderAgentDetail(agent, {
-          amp: ampState,
-          codex: codexState,
-          droid: droidState,
-          gemini: geminiState,
-          kimi: kimiState,
-          antigravity: antigravityState,
-          zai: zaiState,
-        });
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
+    >
+      {visibleAgentViews.map((agent, index) => {
+        const accessory = agent.getAccessory();
+        const detail = agent.isSupported ? agent.renderDetail() : renderUnsupportedDetail(agent);
 
         const canMoveUp = index > 0;
-        const canMoveDown = index < visibleAgents.length - 1;
+        const canMoveDown = index < visibleAgentViews.length - 1;
 
         return (
           <List.Item
@@ -368,7 +386,7 @@ export default function Command() {
             icon={agent.icon}
             title={agent.name}
             subtitle={agent.isSupported ? undefined : "(Coming Soon)"}
-            accessories={[{ text: accessory.text, tooltip: accessory.tooltip }]}
+            accessories={[{ icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip }]}
             detail={<List.Item.Detail metadata={detail} />}
             actions={
               <ActionPanel>
@@ -377,15 +395,7 @@ export default function Command() {
                     <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={handleRefresh} />
                     <Action.CopyToClipboard
                       title="Copy Usage Details"
-                      content={getAgentCopyText(agent, {
-                        amp: ampState,
-                        codex: codexState,
-                        droid: droidState,
-                        gemini: geminiState,
-                        kimi: kimiState,
-                        antigravity: antigravityState,
-                        zai: zaiState,
-                      })}
+                      content={agent.formatUsageText()}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                     {agent.id === "gemini" && geminiState.error?.type === "unauthorized" && (

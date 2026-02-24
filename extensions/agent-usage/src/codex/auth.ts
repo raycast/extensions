@@ -70,6 +70,4 @@ export function shouldFallbackToPreferenceToken(options: ShouldFallbackToPrefere
   );
 }
 
-export function normalizeCodexAuthorizationHeader(token: string): string {
-  return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-}
+export { normalizeBearerToken as normalizeCodexAuthorizationHeader } from "../agents/http";

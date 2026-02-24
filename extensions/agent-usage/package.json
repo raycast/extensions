@@ -12,112 +12,120 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "showAmp",
+      "type": "checkbox",
+      "title": "Visible Agents",
+      "label": "Show Amp",
+      "description": "Show Amp usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showCodex",
+      "type": "checkbox",
+      "label": "Show Codex",
+      "description": "Show Codex usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showDroid",
+      "type": "checkbox",
+      "label": "Show Droid",
+      "description": "Show Droid usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showGemini",
+      "type": "checkbox",
+      "label": "Show Gemini",
+      "description": "Show Gemini usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showKimi",
+      "type": "checkbox",
+      "label": "Show Kimi",
+      "description": "Show Kimi usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showAntigravity",
+      "type": "checkbox",
+      "label": "Show Antigravity",
+      "description": "Show Antigravity usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showZai",
+      "type": "checkbox",
+      "label": "Show z.ai(GLM)",
+      "description": "Show z.ai (GLM) usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "ampDisplayMode",
+      "type": "dropdown",
+      "title": "Amp Display Mode",
+      "description": "Display Amp remaining as amount or percentage",
+      "default": "amount",
+      "required": false,
+      "data": [
+        { "value": "amount", "title": "Amount" },
+        { "value": "percentage", "title": "Percentage" }
+      ]
+    },
+    {
+      "name": "codexAuthToken",
+      "type": "password",
+      "title": "Codex Authorization Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from ~/.codex/auth.json after 'codex login'. You can still paste Authorization header value ('Bearer eyJ...' or just 'eyJ...').",
+      "required": false
+    },
+    {
+      "name": "droidAuthToken",
+      "type": "password",
+      "title": "Droid Authorization Token",
+      "description": "From browser DevTools: Authorization header when accessing https://app.factory.ai/settings/billing. Format: 'Bearer eyJ...' or just 'eyJ...'",
+      "required": false
+    },
+    {
+      "name": "kimiAuthToken",
+      "type": "password",
+      "title": "Kimi Authorization Token",
+      "description": "From browser DevTools: Authorization header when accessing https://www.kimi.com/code/console. Format: 'Bearer eyJ...' or just 'eyJ...'",
+      "required": false
+    },
+    {
+      "name": "zaiApiToken",
+      "type": "password",
+      "title": "z.ai API Token",
+      "description": "API token from z.ai(GLM) platform. Set via extension preferences or Z_AI_API_KEY environment variable.",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "agent-usage",
       "title": "Agent Usage",
       "subtitle": "Show Agents Usage",
       "description": "Show agents usage",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "showAmp",
-          "type": "checkbox",
-          "title": "Visible Agents",
-          "label": "Show Amp",
-          "description": "Show Amp usage in the list",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "showCodex",
-          "type": "checkbox",
-          "label": "Show Codex",
-          "description": "Show Codex usage in the list",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "showDroid",
-          "type": "checkbox",
-          "label": "Show Droid",
-          "description": "Show Droid usage in the list",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "showGemini",
-          "type": "checkbox",
-          "label": "Show Gemini",
-          "description": "Show Gemini usage in the list",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "showKimi",
-          "type": "checkbox",
-          "label": "Show Kimi",
-          "description": "Show Kimi usage in the list",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "showAntigravity",
-          "type": "checkbox",
-          "label": "Show Antigravity",
-          "description": "Show Antigravity usage in the list",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "showZai",
-          "type": "checkbox",
-          "label": "Show z.ai",
-          "description": "Show z.ai (GLM) usage in the list",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "ampDisplayMode",
-          "type": "dropdown",
-          "title": "Amp Display Mode",
-          "description": "Display Amp remaining as amount or percentage",
-          "default": "amount",
-          "required": false,
-          "data": [
-            { "value": "amount", "title": "Amount" },
-            { "value": "percentage", "title": "Percentage" }
-          ]
-        },
-        {
-          "name": "codexAuthToken",
-          "type": "password",
-          "title": "Codex Authorization Token (Optional)",
-          "description": "Optional fallback token. Usually auto-detected from ~/.codex/auth.json after 'codex login'. You can still paste Authorization header value ('Bearer eyJ...' or just 'eyJ...').",
-          "required": false
-        },
-        {
-          "name": "droidAuthToken",
-          "type": "password",
-          "title": "Droid Authorization Token",
-          "description": "From browser DevTools: Authorization header when accessing https://app.factory.ai/settings/billing. Format: 'Bearer eyJ...' or just 'eyJ...'",
-          "required": false
-        },
-        {
-          "name": "kimiAuthToken",
-          "type": "password",
-          "title": "Kimi Authorization Token",
-          "description": "From browser DevTools: Authorization header when accessing https://www.kimi.com/code/console. Format: 'Bearer eyJ...' or just 'eyJ...'",
-          "required": false
-        },
-        {
-          "name": "zaiApiToken",
-          "type": "password",
-          "title": "z.ai API Token",
-          "description": "API token from z.ai platform. Set via extension preferences or Z_AI_API_KEY environment variable.",
-          "required": false
-        }
-      ]
+      "mode": "view"
+    },
+    {
+      "name": "agent-usage-menubar",
+      "title": "Agent Usage Menu Bar",
+      "subtitle": "Agent Usage",
+      "description": "Show agent usage in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h"
     }
   ],
   "dependencies": {
