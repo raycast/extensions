@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Form, showToast, Toast, getPreferenceValues, Clipboard, popToRoot, LocalStorage } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Clipboard,
+  popToRoot,
+  LocalStorage,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 
 const API_URL = "https://savememry.com";
@@ -37,7 +47,11 @@ function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }
     }
 
     if (!trimmedKey.startsWith("memry_")) {
-      showToast({ style: Toast.Style.Failure, title: "Invalid key format", message: "API keys start with memry_" });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid key format",
+        message: "API keys start with memry_",
+      });
       return;
     }
 
@@ -53,15 +67,27 @@ function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }
       });
 
       if (response.status === 401) {
-        showToast({ style: Toast.Style.Failure, title: "Invalid API key", message: "Check your key and try again" });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid API key",
+          message: "Check your key and try again",
+        });
         return;
       }
 
       await LocalStorage.setItem(STORAGE_KEY, trimmedKey);
-      showToast({ style: Toast.Style.Success, title: "Connected to Memry", message: "You're all set to save links" });
+      showToast({
+        style: Toast.Style.Success,
+        title: "Connected to Memry",
+        message: "You're all set to save links",
+      });
       onKeySubmitted(trimmedKey);
     } catch {
-      showToast({ style: Toast.Style.Failure, title: "Connection failed", message: "Could not reach Memry. Try again." });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Connection failed",
+        message: "Could not reach Memry. Try again.",
+      });
     } finally {
       setIsValidating(false);
     }
@@ -74,7 +100,11 @@ function SetupForm({ onKeySubmitted }: { onKeySubmitted: (key: string) => void }
         <ActionPanel>
           <Action.SubmitForm title="Connect" onSubmit={handleSubmit} />
           <Action title="Paste from Clipboard" onAction={handlePasteKey} shortcut={{ modifiers: ["cmd"], key: "v" }} />
-          <Action.OpenInBrowser title="Get API Key at savememry.com" url="https://savememry.com/integrations" shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          <Action.OpenInBrowser
+            title="Get API Key at savememry.com"
+            url="https://savememry.com/integrations"
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+          />
         </ActionPanel>
       }
     >
@@ -116,7 +146,11 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
     }
 
     if (!isValidUrl(trimmedUrl)) {
-      showToast({ style: Toast.Style.Failure, title: "Invalid URL", message: "Please enter a valid http or https URL" });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid URL",
+        message: "Please enter a valid http or https URL",
+      });
       return;
     }
 
@@ -136,7 +170,11 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
       if (!response.ok) {
         const data = (await response.json().catch(() => ({ message: "Request failed" }))) as { message?: string };
         if (response.status === 401) {
-          showToast({ style: Toast.Style.Failure, title: "API key expired", message: "Please reconnect your account." });
+          showToast({
+            style: Toast.Style.Failure,
+            title: "API key expired",
+            message: "Please reconnect your account.",
+          });
           await LocalStorage.removeItem(STORAGE_KEY);
           onDisconnect();
           return;
@@ -144,7 +182,11 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
         throw new Error(data.message || `Error ${response.status}`);
       }
 
-      showToast({ style: Toast.Style.Success, title: "Saved to Memry", message: "AI is analyzing your link" });
+      showToast({
+        style: Toast.Style.Success,
+        title: "Saved to Memry",
+        message: "AI is analyzing your link",
+      });
       popToRoot();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Check your API key and try again";
@@ -174,20 +216,17 @@ function SaveLinkForm({ apiKey, onDisconnect }: { apiKey: string; onDisconnect: 
         <ActionPanel>
           <Action.SubmitForm title="Save Link" onSubmit={handleSubmit} />
           <Action title="Paste from Clipboard" onAction={handlePaste} shortcut={{ modifiers: ["cmd"], key: "v" }} />
-          <Action title="Disconnect Account" onAction={handleDisconnect} shortcut={{ modifiers: ["cmd", "shift"], key: "d" }} />
+          <Action
+            title="Disconnect Account"
+            onAction={handleDisconnect}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          />
         </ActionPanel>
       }
     >
       <Form.Description title="Memry" text="Save a link and AI will analyze it automatically." />
       <Form.Separator />
-      <Form.TextField
-        id="url"
-        title="URL"
-        placeholder="https://..."
-        value={url}
-        onChange={setUrl}
-        autoFocus
-      />
+      <Form.TextField id="url" title="URL" placeholder="https://..." value={url} onChange={setUrl} autoFocus />
       <Form.Separator />
       <Form.Description text="Paste any URL — AI extracts key takeaways, topics, and a summary." />
     </Form>
