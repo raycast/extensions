@@ -112,7 +112,7 @@ function SetupForm({
             shortcut={{ modifiers: ["cmd"], key: "v" }}
           />
           <Action.OpenInBrowser
-            title="Get API Key at savememry.com"
+            title="Get Api Key at Savememry.com"
             url="https://savememry.com/integrations"
             shortcut={{ modifiers: ["cmd"], key: "o" }}
           />
