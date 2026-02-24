@@ -1,6 +1,6 @@
 # Inoreader Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-24
 
 - Added OAuth connection flow for Inoreader.
 - Added a feed reader command for followed feeds.
