@@ -15,9 +15,9 @@ export default function UnreadLinks() {
         <MenuBarExtra.Item title="No unread links" />
       ) : (
         <MenuBarExtra.Section title={`${total} Unread`}>
-          {links.map((link: Link, index: number) => (
+          {links.map((link: Link) => (
             <MenuBarExtra.Item
-              key={`link-${index}`}
+              key={link.id}
               icon={getFavicon(link.url, { size: 16, fallback: Icon.Link })}
               title={link.title || link.url}
               subtitle={link.domain}

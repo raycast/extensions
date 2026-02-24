@@ -10,10 +10,6 @@ import {
 
 const BASE_URL = "https://www.shiori.sh";
 
-interface Preferences {
-  apiKey: string;
-}
-
 function headers(): Record<string, string> {
   const { apiKey } = getPreferenceValues<Preferences>();
   return {
