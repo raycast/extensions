@@ -5,14 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import {
-  brewFetchOutdated,
-  brewUpdate,
-  OutdatedResults,
-  isBrewLockError,
-  getErrorMessage,
-  brewLogger,
-} from "../utils";
+import { brewFetchOutdated, brewUpdate, OutdatedResults, isBrewLockError, getErrorMessage, brewLogger } from "../utils";
 import { preferences } from "../utils";
 
 /**
