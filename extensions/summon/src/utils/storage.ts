@@ -14,18 +14,31 @@ function ensureDirectory(): void {
 }
 
 function defaultData(): StorageData {
-  return { version: 5, groups: [] };
+  return { version: 6, groups: [] };
 }
 
 /** Migrate data to current format. */
 function migrate(raw: Record<string, unknown>): StorageData {
   const version = raw.version as number | undefined;
-  if (version === 5) {
+  if (version === 6) {
     return raw as unknown as StorageData;
   }
 
+  if (version === 5) {
+    // v5 -> v6: drop slot field, new fields (frame, displayId, restoreLayout) are optional
+    const data = raw as unknown as {
+      version: number;
+      groups: Array<Group & { slot?: number }>;
+    };
+    return {
+      version: 6,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      groups: data.groups.map(({ slot, ...rest }) => rest),
+    };
+  }
+
   if (version === 4) {
-    // v4 -> v5: Convert space-based ProjectMapping[] to window-based GroupWindow[]
+    // v4 -> v6: Convert space-based ProjectMapping[] to window-based GroupWindow[]
     const oldGroups =
       (raw.groups as Array<{
         id: string;
@@ -50,18 +63,18 @@ function migrate(raw: Record<string, unknown>): StorageData {
         })),
     }));
 
-    return { version: 5, groups };
+    return { version: 6, groups };
   }
 
   if (version === 2 || version === 3) {
-    // v2/v3 -> v5: no focusWindow data to migrate, start with empty windows
+    // v2/v3 -> v6: no focusWindow data to migrate, start with empty windows
     const oldGroups = (raw.groups as Array<{ id: string; name: string }>) ?? [];
     const groups: Group[] = oldGroups.map((p) => ({
       id: p.id,
       name: p.name,
       windows: [],
     }));
-    return { version: 5, groups };
+    return { version: 6, groups };
   }
 
   // v1 or unknown: start fresh
@@ -80,7 +93,7 @@ export function readStorage(): StorageData {
     const parsed = JSON.parse(raw) as Record<string, unknown>;
     const data = migrate(parsed);
     // Write back if migrated
-    if ((parsed.version as number) !== 5) {
+    if ((parsed.version as number) !== 6) {
       writeStorage(data);
     }
     return data;
@@ -133,6 +146,16 @@ export function deleteGroup(id: string): void {
   writeStorage(data);
 }
 
-export function getGroupBySlot(slot: number): Group | undefined {
-  return readStorage().groups.find((p) => p.slot === slot);
+export function reorderGroup(id: string, direction: "up" | "down"): void {
+  const data = readStorage();
+  const idx = data.groups.findIndex((p) => p.id === id);
+  if (idx < 0) return;
+  const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (targetIdx < 0 || targetIdx >= data.groups.length) return;
+  // Swap
+  [data.groups[idx], data.groups[targetIdx]] = [
+    data.groups[targetIdx],
+    data.groups[idx],
+  ];
+  writeStorage(data);
 }

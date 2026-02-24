@@ -8,9 +8,9 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useMemo } from "react";
-import { saveGroup, getGroups, generateId } from "./utils/storage";
-import { getAllWindows } from "./utils/native";
-import { Group, GroupWindow } from "./utils/types";
+import { saveGroup, generateId } from "./utils/storage";
+import { getAllWindows, getDisplays, windowToDisplayId } from "./utils/native";
+import { Group, GroupWindow, WindowFrame } from "./utils/types";
 
 /**
  * Extract the stable part of a window title that identifies the *window*
@@ -32,11 +32,45 @@ function extractStableTitle(windowTitle: string): string {
   return "";
 }
 
+/** Tag value is JSON-encoded for robustness with growing field count */
+interface TagData {
+  bundleId: string;
+  titleMatch: string;
+  appName: string;
+  windowId: number;
+  frame?: WindowFrame;
+  displayId?: string;
+}
+
+function encodeTag(data: TagData): string {
+  return JSON.stringify(data);
+}
+
+function decodeTag(tag: string): TagData | null {
+  // Support legacy "::" format for backwards compatibility
+  if (!tag.startsWith("{")) {
+    const [bundleId, titleMatch, appName, winId] = tag.split("::");
+    return {
+      bundleId: bundleId ?? "",
+      titleMatch: titleMatch ?? "",
+      appName: appName ?? "",
+      windowId: parseInt(winId, 10) || 0,
+    };
+  }
+  try {
+    return JSON.parse(tag) as TagData;
+  } catch {
+    return null;
+  }
+}
+
 interface PickerWindow {
   bundleId: string;
   stableTitle: string;
   appName: string;
   windowId: number;
+  frame: WindowFrame;
+  displayId: string;
 }
 
 export interface GroupFormProps {
@@ -54,9 +88,10 @@ export function GroupForm({ editGroup, onSaved }: GroupFormProps) {
   // When multiple windows share the same key (e.g. browser windows with no
   // em-dash project suffix), fall back to the full window title so each
   // window appears as a separate picker item.
-  const allWindows = useMemo<PickerWindow[]>(() => {
+  const { allWindows } = useMemo(() => {
     try {
       const raw = getAllWindows();
+      const displayList = getDisplays();
 
       // First pass: compute stable titles and count per key
       const entries = raw.map((w) => ({
@@ -65,6 +100,15 @@ export function GroupForm({ editGroup, onSaved }: GroupFormProps) {
         fullTitle: w.windowTitle,
         stableTitle: extractStableTitle(w.windowTitle),
         windowId: w.windowId,
+        frame: { x: w.x, y: w.y, width: w.width, height: w.height },
+        displayId: windowToDisplayId(
+          w.x,
+          w.y,
+          w.width,
+          w.height,
+          raw,
+          displayList,
+        ),
       }));
 
       const keyCount = new Map<string, number>();
@@ -88,42 +132,31 @@ export function GroupForm({ editGroup, onSaved }: GroupFormProps) {
           stableTitle: title,
           appName: e.appName,
           windowId: e.windowId,
+          frame: e.frame,
+          displayId: e.displayId,
         });
       }
 
       setIsLoading(false);
-      return result;
+      return { allWindows: result };
     } catch {
       setIsLoading(false);
-      return [];
+      return { allWindows: [] as PickerWindow[] };
     }
   }, []);
 
-  // Build slot dropdown options showing which slots are taken
-  const slotOptions = useMemo(() => {
-    const allGroups = getGroups();
-    const taken = new Map<number, string>();
-    for (const g of allGroups) {
-      if (g.slot && g.id !== editGroup?.id) {
-        taken.set(g.slot, g.name);
-      }
-    }
-    const options = [{ value: "", title: "None" }];
-    for (let i = 1; i <= 5; i++) {
-      const owner = taken.get(i);
-      options.push({
-        value: String(i),
-        title: owner ? `Slot ${i} (used by "${owner}")` : `Slot ${i}`,
-      });
-    }
-    return options;
-  }, [editGroup]);
-
-  // Build default tag values from existing group windows (edit mode)
+  // Build default tag values from existing group windows (edit mode) — JSON encoded
   const defaultWindows = useMemo<string[]>(() => {
     if (!editGroup) return [];
-    return editGroup.windows.map(
-      (w) => `${w.bundleId}::${w.titleMatch}::${w.appName}::${w.windowId ?? 0}`,
+    return editGroup.windows.map((w) =>
+      encodeTag({
+        bundleId: w.bundleId,
+        titleMatch: w.titleMatch,
+        appName: w.appName,
+        windowId: w.windowId ?? 0,
+        frame: w.frame,
+        displayId: w.displayId,
+      }),
     );
   }, [editGroup]);
 
@@ -137,18 +170,34 @@ export function GroupForm({ editGroup, onSaved }: GroupFormProps) {
       .filter((w) => !liveKeys.has(`${w.bundleId}::${w.titleMatch}`))
       .map((w) => ({
         key: `${w.bundleId}::${w.titleMatch}`,
-        value: `${w.bundleId}::${w.titleMatch}::${w.appName}::${w.windowId ?? 0}`,
+        value: encodeTag({
+          bundleId: w.bundleId,
+          titleMatch: w.titleMatch,
+          appName: w.appName,
+          windowId: w.windowId ?? 0,
+          frame: w.frame,
+          displayId: w.displayId,
+        }),
         title: `${w.appName}${w.titleMatch ? `: ${w.titleMatch}` : ""} (saved)`,
       }));
     const liveItems = allWindows.map((w) => ({
       key: `${w.bundleId}::${w.stableTitle}`,
-      value: `${w.bundleId}::${w.stableTitle}::${w.appName}::${w.windowId}`,
+      value: encodeTag({
+        bundleId: w.bundleId,
+        titleMatch: w.stableTitle,
+        appName: w.appName,
+        windowId: w.windowId,
+        frame: w.frame,
+        displayId: w.displayId,
+      }),
       title: w.stableTitle ? `${w.appName}: ${w.stableTitle}` : w.appName,
     }));
     return [...savedItems, ...liveItems];
   }, [allWindows, editGroup]);
 
-  async function handleSubmit(values: Record<string, string | string[]>) {
+  async function handleSubmit(
+    values: Record<string, string | string[] | boolean>,
+  ) {
     const name = (values.groupName as string)?.trim();
     if (!name) {
       await showToast({
@@ -159,30 +208,33 @@ export function GroupForm({ editGroup, onSaved }: GroupFormProps) {
     }
 
     const windowTags = (values.windows as string[]) ?? [];
-    const windows: GroupWindow[] = windowTags.map((tag) => {
-      const [bundleId, titleMatch, appName, winId] = tag.split("::");
-      const windowId = parseInt(winId, 10) || undefined;
-      return { bundleId, titleMatch, appName, windowId };
-    });
+    const restoreLayout = (values.restoreLayout as boolean) ?? false;
+    const relaunchApps = (values.relaunchApps as boolean) ?? false;
 
-    const slotValue = values.slot as string;
-    const slot = slotValue ? parseInt(slotValue, 10) : undefined;
-
-    // Clear slot from any other group that currently holds it
-    if (slot) {
-      const allGroups = getGroups();
-      for (const g of allGroups) {
-        if (g.slot === slot && g.id !== (editGroup?.id ?? "")) {
-          saveGroup({ ...g, slot: undefined });
+    const windows: GroupWindow[] = windowTags
+      .map((tag) => {
+        const data = decodeTag(tag);
+        if (!data) return { bundleId: "", titleMatch: "", appName: "" };
+        const result: GroupWindow = {
+          bundleId: data.bundleId,
+          titleMatch: data.titleMatch,
+          appName: data.appName,
+          windowId: data.windowId || undefined,
+        };
+        if (restoreLayout && data.frame) {
+          result.frame = data.frame;
+          result.displayId = data.displayId;
         }
-      }
-    }
+        return result;
+      })
+      .filter((w) => w.bundleId);
 
     saveGroup({
       id: editGroup?.id ?? generateId(),
       name,
       windows,
-      slot,
+      restoreLayout: restoreLayout || undefined,
+      relaunchApps: relaunchApps || undefined,
     });
 
     await showToast({
@@ -212,19 +264,18 @@ export function GroupForm({ editGroup, onSaved }: GroupFormProps) {
         placeholder="e.g., Web Development"
         defaultValue={editGroup?.name ?? ""}
       />
-      <Form.Dropdown
-        id="slot"
-        title="Hotkey Slot"
-        defaultValue={editGroup?.slot ? String(editGroup.slot) : ""}
-      >
-        {slotOptions.map((opt) => (
-          <Form.Dropdown.Item
-            key={opt.value}
-            value={opt.value}
-            title={opt.title}
-          />
-        ))}
-      </Form.Dropdown>
+      <Form.Checkbox
+        id="restoreLayout"
+        label="Restore window positions and sizes when summoning"
+        title="Restore Layout"
+        defaultValue={editGroup?.restoreLayout ?? false}
+      />
+      <Form.Checkbox
+        id="relaunchApps"
+        label="Offer to relaunch closed apps when summoning"
+        title="Relaunch Apps"
+        defaultValue={editGroup?.relaunchApps ?? false}
+      />
       <Form.Separator />
       <Form.TagPicker
         id="windows"

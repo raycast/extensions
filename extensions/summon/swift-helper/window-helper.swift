@@ -68,6 +68,7 @@ struct WindowInfo: Codable {
     let height: Double
     let spaceIds: [Int]
     let ownerPid: Int
+    let isRegularApp: Bool  // true = foreground app, false = background/agent/accessory
 }
 
 // MARK: - Core functions
@@ -146,8 +147,8 @@ func getDisplaySpaces() -> [DisplayInfo] {
 func getAllWindows() -> [WindowInfo] {
     let conn = _CGSDefaultConnection()
 
-    // Get all on-screen windows
-    guard let windowList = CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID) as? [[String: Any]] else {
+    // Get on-screen windows only (excludes off-screen/hidden windows)
+    guard let windowList = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else {
         return []
     }
 
@@ -170,10 +171,12 @@ func getAllWindows() -> [WindowInfo] {
         let appName = windowDict[kCGWindowOwnerName as String] as? String ?? ""
         let title = windowDict[kCGWindowName as String] as? String ?? ""
 
-        // Get bundle ID from PID
+        // Get bundle ID and activation policy from PID
         var bundleId = ""
+        var isRegularApp = false
         if pid > 0, let app = NSRunningApplication(processIdentifier: pid_t(pid)) {
             bundleId = app.bundleIdentifier ?? ""
+            isRegularApp = app.activationPolicy == .regular
         }
 
         // Skip windows without a bundle ID (system processes, etc.)
@@ -189,7 +192,8 @@ func getAllWindows() -> [WindowInfo] {
             width: w,
             height: h,
             spaceIds: [],
-            ownerPid: pid
+            ownerPid: pid,
+            isRegularApp: isRegularApp
         ))
     }
 
@@ -208,7 +212,8 @@ func getAllWindows() -> [WindowInfo] {
                 width: windows[i].width,
                 height: windows[i].height,
                 spaceIds: spaceIds,
-                ownerPid: windows[i].ownerPid
+                ownerPid: windows[i].ownerPid,
+                isRegularApp: windows[i].isRegularApp
             )
         }
     }
@@ -216,18 +221,19 @@ func getAllWindows() -> [WindowInfo] {
     return windows
 }
 
-func raiseWindow(bundleId: String, titleMatch: String, windowId: Int?) -> Bool {
+/// Find a specific AXUIElement window using 3-tier strategy: windowId → title → bundleId fallback.
+/// Returns (window, app) on success, nil if nothing matched.
+func findWindow(bundleId: String, titleMatch: String, windowId: Int?) -> (AXUIElement, NSRunningApplication)? {
     // Check accessibility permission
     let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
     guard AXIsProcessTrustedWithOptions(options) else {
         fputs("Error: Accessibility permission not granted\n", stderr)
-        return false
+        return nil
     }
 
-    // Find running app by bundle ID
     guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).first else {
         fputs("Error: No running app with bundle ID '\(bundleId)'\n", stderr)
-        return false
+        return nil
     }
 
     let appElement = AXUIElementCreateApplication(app.processIdentifier)
@@ -236,17 +242,15 @@ func raiseWindow(bundleId: String, titleMatch: String, windowId: Int?) -> Bool {
     let windowsResult = AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &windowsRef)
     guard windowsResult == .success, let windows = windowsRef as? [AXUIElement] else {
         fputs("Error: Could not get windows for '\(bundleId)'\n", stderr)
-        return false
+        return nil
     }
 
-    // Strategy 1: Match by window ID (works within same session)
+    // Strategy 1: Match by window ID
     if let targetId = windowId, targetId > 0 {
         for window in windows {
             var wid: CGWindowID = 0
             if _AXUIElementGetWindow(window, &wid) == 0 && Int(wid) == targetId {
-                AXUIElementPerformAction(window, kAXRaiseAction as CFString)
-                app.activate()
-                return true
+                return (window, app)
             }
         }
     }
@@ -258,24 +262,85 @@ func raiseWindow(bundleId: String, titleMatch: String, windowId: Int?) -> Bool {
             AXUIElementCopyAttributeValue(window, kAXTitleAttribute as CFString, &titleRef)
             let title = titleRef as? String ?? ""
             if title.contains(titleMatch) {
-                AXUIElementPerformAction(window, kAXRaiseAction as CFString)
-                app.activate()
-                return true
+                return (window, app)
             }
         }
     }
 
-    // Strategy 3: Raise all windows of this app (bundle ID fallback)
-    if !windows.isEmpty {
-        for window in windows {
-            AXUIElementPerformAction(window, kAXRaiseAction as CFString)
-        }
-        app.activate()
-        return true
+    // Strategy 3: First window of this app (bundle ID fallback)
+    if let first = windows.first {
+        return (first, app)
     }
 
     fputs("Error: No windows found for '\(bundleId)'\n", stderr)
-    return false
+    return nil
+}
+
+func raiseWindow(bundleId: String, titleMatch: String, windowId: Int?) -> Bool {
+    guard let (window, app) = findWindow(bundleId: bundleId, titleMatch: titleMatch, windowId: windowId) else {
+        return false
+    }
+    AXUIElementPerformAction(window, kAXRaiseAction as CFString)
+    app.activate()
+    return true
+}
+
+func setWindowFrame(bundleId: String, titleMatch: String, windowId: Int?, x: Double, y: Double, width: Double, height: Double) -> Bool {
+    guard let (window, app) = findWindow(bundleId: bundleId, titleMatch: titleMatch, windowId: windowId) else {
+        return false
+    }
+
+    // Set position
+    var point = CGPoint(x: x, y: y)
+    if let posValue = AXValueCreate(.cgPoint, &point) {
+        AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, posValue)
+    }
+
+    // Set size
+    var size = CGSize(width: width, height: height)
+    if let sizeValue = AXValueCreate(.cgSize, &size) {
+        AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, sizeValue)
+    }
+
+    // Raise window after positioning
+    AXUIElementPerformAction(window, kAXRaiseAction as CFString)
+    app.activate()
+    return true
+}
+
+func launchApp(bundleId: String) -> (ok: Bool, alreadyRunning: Bool, pid: Int?) {
+    // Check if already running
+    if let running = NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).first {
+        return (ok: true, alreadyRunning: true, pid: Int(running.processIdentifier))
+    }
+
+    // Resolve app URL
+    guard let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) else {
+        fputs("Error: No app found with bundle ID '\(bundleId)'\n", stderr)
+        return (ok: false, alreadyRunning: false, pid: nil)
+    }
+
+    // Launch
+    let config = NSWorkspace.OpenConfiguration()
+    let semaphore = DispatchSemaphore(value: 0)
+    var launchedPid: Int?
+    var launchError: Error?
+
+    NSWorkspace.shared.openApplication(at: appURL, configuration: config) { app, error in
+        if let app = app {
+            launchedPid = Int(app.processIdentifier)
+        }
+        launchError = error
+        semaphore.signal()
+    }
+    semaphore.wait()
+
+    if let error = launchError {
+        fputs("Error: Failed to launch '\(bundleId)': \(error.localizedDescription)\n", stderr)
+        return (ok: false, alreadyRunning: false, pid: nil)
+    }
+
+    return (ok: true, alreadyRunning: false, pid: launchedPid)
 }
 
 // MARK: - CLI
@@ -295,7 +360,9 @@ guard args.count >= 2 else {
     fputs("Usage: window-helper <command> [options]\n", stderr)
     fputs("  list                                    List all displays and their spaces\n", stderr)
     fputs("  windows                                 List all windows with space mapping\n", stderr)
-    fputs("  raise-window --bundle-id <id> --title-match <substring>  Raise a window to front\n", stderr)
+    fputs("  raise-window --bundle-id <id> --title-match <substring> [--window-id <id>]  Raise a window to front\n", stderr)
+    fputs("  set-window-frame --bundle-id <id> --title-match <str> [--window-id <id>] --x <n> --y <n> --width <n> --height <n>  Position and raise a window\n", stderr)
+    fputs("  launch-app --bundle-id <id>             Launch an app by bundle ID\n", stderr)
     exit(1)
 }
 
@@ -339,6 +406,90 @@ case "raise-window":
     let success = raiseWindow(bundleId: bundleId, titleMatch: titleMatch, windowId: windowIdArg)
     if success {
         print("{\"ok\":true}")
+    } else {
+        exit(1)
+    }
+
+case "set-window-frame":
+    var bundleIdArg: String?
+    var titleMatchArg: String?
+    var windowIdArg: Int?
+    var xArg: Double?
+    var yArg: Double?
+    var widthArg: Double?
+    var heightArg: Double?
+
+    var i = 2
+    while i < args.count {
+        switch args[i] {
+        case "--bundle-id":
+            i += 1
+            if i < args.count { bundleIdArg = args[i] }
+        case "--title-match":
+            i += 1
+            if i < args.count { titleMatchArg = args[i] }
+        case "--window-id":
+            i += 1
+            if i < args.count { windowIdArg = Int(args[i]) }
+        case "--x":
+            i += 1
+            if i < args.count { xArg = Double(args[i]) }
+        case "--y":
+            i += 1
+            if i < args.count { yArg = Double(args[i]) }
+        case "--width":
+            i += 1
+            if i < args.count { widthArg = Double(args[i]) }
+        case "--height":
+            i += 1
+            if i < args.count { heightArg = Double(args[i]) }
+        default:
+            break
+        }
+        i += 1
+    }
+
+    guard let bundleId = bundleIdArg, let titleMatch = titleMatchArg,
+          let x = xArg, let y = yArg, let w = widthArg, let h = heightArg else {
+        fputs("Usage: window-helper set-window-frame --bundle-id <id> --title-match <str> [--window-id <id>] --x <n> --y <n> --width <n> --height <n>\n", stderr)
+        exit(1)
+    }
+
+    let frameSuccess = setWindowFrame(bundleId: bundleId, titleMatch: titleMatch, windowId: windowIdArg, x: x, y: y, width: w, height: h)
+    if frameSuccess {
+        print("{\"ok\":true}")
+    } else {
+        exit(1)
+    }
+
+case "launch-app":
+    var bundleIdArg: String?
+
+    var i = 2
+    while i < args.count {
+        switch args[i] {
+        case "--bundle-id":
+            i += 1
+            if i < args.count { bundleIdArg = args[i] }
+        default:
+            break
+        }
+        i += 1
+    }
+
+    guard let bundleId = bundleIdArg else {
+        fputs("Usage: window-helper launch-app --bundle-id <id>\n", stderr)
+        exit(1)
+    }
+
+    let result = launchApp(bundleId: bundleId)
+    if result.ok {
+        if result.alreadyRunning {
+            print("{\"ok\":true,\"alreadyRunning\":true}")
+        } else {
+            let pidStr = result.pid != nil ? String(result.pid!) : "null"
+            print("{\"ok\":true,\"alreadyRunning\":false,\"pid\":\(pidStr)}")
+        }
     } else {
         exit(1)
     }
