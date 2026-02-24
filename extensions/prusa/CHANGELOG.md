@@ -1,5 +1,9 @@
 # Prusa Printer Control Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Change icon when status is `Attention`
+
 ## [Bug Fix] - 2026-02-23
 
 - Fixed NaN appearing in time displays when printer doesn't have time estimates; time displays now show "Starting..." at the beginning of a print instead of invalid values

@@ -72,9 +72,13 @@ export default function Command() {
   const timeRemaining = status.job.time_remaining;
   const timePrinting = status.job.time_printing;
 
-  // Build menu bar title based on state
   let title = "";
-  if (state === "PAUSED") {
+  let icon: Icon | string = "command-icon.png";
+
+  if (state === "ATTENTION") {
+    icon = Icon.AlarmRinging;
+    title = "Attention";
+  } else if (state === "PAUSED") {
     title = `⏸️ Paused: ${progress.toFixed(0)}%`;
   } else if (state === "PRINTING") {
     title =
@@ -86,7 +90,7 @@ export default function Command() {
   }
 
   return (
-    <MenuBarExtra icon="command-icon.png" title={title} tooltip="Prusa Printer Status" isLoading={isLoading}>
+    <MenuBarExtra icon={icon} title={title} tooltip="Prusa Printer Status" isLoading={isLoading}>
       <MenuBarExtra.Section title="Print Job">
         <MenuBarExtra.Item title="Progress" subtitle={`${progress.toFixed(1)}%`} icon={Icon.CircleProgress} />
         <MenuBarExtra.Item title="Time Remaining" subtitle={formatTime(timeRemaining)} icon={Icon.Clock} />
