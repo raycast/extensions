@@ -11,12 +11,12 @@ The extension connects to the Nowledge Mem server running locally on your machin
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| **Search Memories** | Search your knowledge base with natural language. Shows results ranked by relevance. When empty, shows recent memories. |
-| **Add Memory** | Save a quick memory with title, content, and importance level. |
-| **Working Memory** | View today's daily briefing — active topics, flags, and recent changes. |
-| **Edit Working Memory** | Open `~/ai-now/memory.md` in your default editor for quick edits. |
+| Command                 | Description                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Search Memories**     | Search your knowledge base with natural language. Shows results ranked by relevance. When empty, shows recent memories. |
+| **Add Memory**          | Save a quick memory with title, content, and importance level.                                                          |
+| **Working Memory**      | View today's daily briefing — active topics, flags, and recent changes.                                                 |
+| **Edit Working Memory** | Open `~/ai-now/memory.md` in your default editor for quick edits.                                                       |
 
 ### Actions
 
@@ -38,6 +38,6 @@ Each morning, Nowledge Mem generates a briefing at `~/ai-now/memory.md` summariz
 
 ## Configuration
 
-| Preference | Default | Description |
-|---|---|---|
+| Preference | Default                  | Description                 |
+| ---------- | ------------------------ | --------------------------- |
 | Server URL | `http://127.0.0.1:14242` | Nowledge Mem server address |
