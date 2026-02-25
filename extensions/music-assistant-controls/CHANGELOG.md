@@ -4,6 +4,7 @@
 
 ### ✨ New Features
 
+- **Mute Toggle Command** - Dedicated command to toggle mute state on the active player with visual feedback showing state changes (MUTED/UNMUTED)
 - **Music Library Hub Command** - Comprehensive library exploration with unified search, browse, and queue management
   - **Search Tab** - Full-text search across entire library (artists, albums, tracks, playlists) with 50-item limit
   - **Browse Tab** - Drill-down navigation through Artists, Albums, and Playlists with pagination
@@ -11,6 +12,7 @@
   - **Queue Manager Tab** - View, reorder, remove, or clear items from active queue
 - **Queue Controls** - Manage shuffle and repeat modes directly from queue manager
 - **Add to Queue** - All items can be added to active player's queue to play next
+- **Previous Song command** - Navigate backward through the queue with a dedicated "Previous Song" command that mirrors the existing "Next Song" functionality
 
 ### 🎨 UI/UX Enhancements
 
@@ -19,10 +21,6 @@
 - Pagination support for large result sets (20 items per page in browse)
 - Visual feedback with toasts for all operations (add to queue, remove, clear, etc.)
 - Color-coded icons for different media types (artists, albums, tracks, playlists)
-
-### ✨ New Features
-
-- **Previous Song command** - Navigate backward through the queue with a dedicated "Previous Song" command that mirrors the existing "Next Song" functionality
 
 ### ⚡ Performance & Reliability
 

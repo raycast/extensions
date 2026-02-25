@@ -186,6 +186,51 @@ describe("MusicAssistantClient", () => {
     });
   });
 
+  describe("volumeMute", () => {
+    it("should call playerCommandVolumeMute API method with correct parameters", async () => {
+      const playerId = "test-player-mute";
+      const muted = true;
+      const mockApi = {
+        playerCommandVolumeMute: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.volumeMute(playerId, muted);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeMute).toHaveBeenCalledWith(playerId, muted);
+    });
+
+    it("should handle unmute (muted=false) correctly", async () => {
+      const playerId = "test-player-mute";
+      const muted = false;
+      const mockApi = {
+        playerCommandVolumeMute: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.volumeMute(playerId, muted);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeMute).toHaveBeenCalledWith(playerId, false);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-mute";
+      const error = new Error("Volume mute failed");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.volumeMute(playerId, true)).rejects.toThrow("Volume mute failed");
+    });
+  });
+
   describe("getPlayer", () => {
     it("should call getPlayer with correct playerId", async () => {
       const playerId = "test-player-123";
@@ -553,6 +598,31 @@ describe("MusicAssistantClient", () => {
       it("should return false when volume_control is undefined", () => {
         const player = { player_id: "test" } as any;
         const result = client.supportsVolumeControl(player);
+        expect(result).toBe(false);
+      });
+    });
+
+    describe("supportsMuteControl", () => {
+      it("should return true when player has absolute mute control", () => {
+        const player = { player_id: "test", mute_control: "absolute" } as any;
+        const result = client.supportsMuteControl(player);
+        expect(result).toBe(true);
+      });
+
+      it("should return false when player has no mute control", () => {
+        const player = { player_id: "test", mute_control: "none" } as any;
+        const result = client.supportsMuteControl(player);
+        expect(result).toBe(false);
+      });
+
+      it("should return false when player is undefined", () => {
+        const result = client.supportsMuteControl(undefined);
+        expect(result).toBe(false);
+      });
+
+      it("should return false when mute_control is undefined", () => {
+        const player = { player_id: "test" } as any;
+        const result = client.supportsMuteControl(player);
         expect(result).toBe(false);
       });
     });

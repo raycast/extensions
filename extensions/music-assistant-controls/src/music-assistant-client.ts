@@ -157,6 +157,21 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Set the mute state on the specified player
+   *
+   * @param playerId - The unique identifier of the player to control
+   * @param muted - Whether the player should be muted (true) or unmuted (false)
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.volumeMute("living-room-player", true);
+   * ```
+   */
+  async volumeMute(playerId: string, muted: boolean): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandVolumeMute(playerId, muted));
+  }
+
+  /**
    * Get detailed player information including volume levels
    *
    * @param playerId - The unique identifier of the player
@@ -590,6 +605,22 @@ export default class MusicAssistantClient {
    */
   supportsVolumeControl(player?: Player): boolean {
     return player?.volume_control !== "none" && player?.volume_control !== undefined;
+  }
+
+  /**
+   * Checks if a player supports mute control
+   *
+   * @param player - The player object to check
+   * @returns True if the player supports mute control, false otherwise
+   * @example
+   * ```typescript
+   * if (client.supportsMuteControl(player)) {
+   *   // Show mute controls
+   * }
+   * ```
+   */
+  supportsMuteControl(player?: Player): boolean {
+    return player?.mute_control !== "none" && player?.mute_control !== undefined;
   }
 
   /**
