@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Improvements] - 2026-02-25
+## [Improvements] - {PR_MERGE_DATE}
 
 - Add optional background refresh preference to control cache refresh behavior
 - Add optional web integration to preselect items matching the active browser tab URL
