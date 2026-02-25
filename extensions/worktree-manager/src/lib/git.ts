@@ -1,0 +1,269 @@
+import * as fs from "fs";
+import * as path from "path";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
+
+const DEBUG_GIT = false;
+function logGitError(message: string, ...args: unknown[]): void {
+  if (DEBUG_GIT) console.error(message, ...args);
+}
+
+export interface WorktreeItem {
+  path: string;
+  branch: string;
+  repoName: string;
+  isMain: boolean;
+  repoRoot: string;
+}
+
+interface RepoInfo {
+  path: string;
+}
+
+function isGitRepo(dirPath: string): boolean {
+  const gitPath = path.join(dirPath, ".git");
+  if (!fs.existsSync(gitPath)) return false;
+  const stat = fs.statSync(gitPath);
+  if (stat.isDirectory()) return true;
+  if (stat.isFile()) {
+    try {
+      const content = fs.readFileSync(gitPath, "utf-8");
+      return content.startsWith("gitdir:");
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+function getMainRepoPath(worktreePath: string): string | null {
+  const gitFile = path.join(worktreePath, ".git");
+  if (!fs.existsSync(gitFile) || !fs.statSync(gitFile).isFile()) return null;
+  try {
+    const content = fs.readFileSync(gitFile, "utf-8").trim();
+    const match = content.match(/^gitdir:\s*(.+)$/m);
+    if (!match) return null;
+    let gitDir = match[1].trim();
+    if (!path.isAbsolute(gitDir)) {
+      gitDir = path.resolve(path.dirname(gitFile), gitDir);
+    }
+    const commondirPath = path.join(gitDir, "commondir");
+    if (fs.existsSync(commondirPath)) {
+      const common = fs.readFileSync(commondirPath, "utf-8").trim();
+      const mainGitDir = path.isAbsolute(common)
+        ? common
+        : path.resolve(path.dirname(commondirPath), common);
+      return path.dirname(mainGitDir);
+    }
+    return path.dirname(gitDir);
+  } catch {
+    return null;
+  }
+}
+
+export function getReposForRoot(rootPath: string): RepoInfo[] {
+  if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {
+    return [];
+  }
+  const results: RepoInfo[] = [];
+  const seenMainPaths = new Set<string>();
+  try {
+    if (isGitRepo(rootPath)) {
+      const stat = fs.statSync(path.join(rootPath, ".git"));
+      if (stat.isFile()) {
+        const mainPath = getMainRepoPath(rootPath);
+        if (mainPath && !seenMainPaths.has(mainPath)) {
+          seenMainPaths.add(mainPath);
+          results.push({ path: mainPath });
+        }
+      } else {
+        seenMainPaths.add(rootPath);
+        results.push({ path: path.resolve(rootPath) });
+      }
+    }
+    const entries = fs.readdirSync(rootPath, { withFileTypes: true });
+    for (const ent of entries) {
+      if (!ent.isDirectory()) continue;
+      const fullPath = path.join(rootPath, ent.name);
+      if (!isGitRepo(fullPath)) continue;
+      const stat = fs.statSync(path.join(fullPath, ".git"));
+      if (stat.isFile()) {
+        const mainPath = getMainRepoPath(fullPath);
+        if (mainPath && !seenMainPaths.has(mainPath)) {
+          seenMainPaths.add(mainPath);
+          results.push({ path: mainPath });
+        }
+        continue;
+      }
+      const resolved = path.resolve(fullPath);
+      if (!seenMainPaths.has(resolved)) {
+        seenMainPaths.add(resolved);
+        results.push({ path: resolved });
+      }
+    }
+  } catch (err) {
+    logGitError("getReposForRoot error", rootPath, err);
+  }
+  return results;
+}
+
+interface WorktreeLine {
+  path: string;
+  branch?: string;
+  bare?: boolean;
+}
+
+async function getWorktreesForRepo(repoPath: string): Promise<WorktreeLine[]> {
+  if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) return [];
+  const absPath = path.resolve(repoPath);
+  try {
+    const { stdout } = await execFileAsync("git", ["worktree", "list", "--porcelain"], {
+      cwd: absPath,
+      maxBuffer: 1024 * 1024,
+    });
+    const lines: WorktreeLine[] = [];
+    let current: Partial<WorktreeLine> = {};
+    for (const line of stdout.split("\n")) {
+      if (line.startsWith("worktree ")) {
+        if (current.path) lines.push(current as WorktreeLine);
+        current = { path: line.slice(9).trim() };
+      } else if (line.startsWith("branch ")) {
+        current.branch = line
+          .slice(7)
+          .trim()
+          .replace(/^refs\/heads\//, "");
+      } else if (line.startsWith("bare")) {
+        current.bare = true;
+      } else if (line === "" && current.path) {
+        lines.push(current as WorktreeLine);
+        current = {};
+      }
+    }
+    if (current.path) lines.push(current as WorktreeLine);
+    return lines;
+  } catch (err) {
+    logGitError("getWorktreesForRepo error", repoPath, err);
+    return [];
+  }
+}
+
+export async function getAllWorktrees(roots: string[]): Promise<WorktreeItem[]> {
+  const items: WorktreeItem[] = [];
+  const seenPaths = new Set<string>();
+
+  for (const root of roots) {
+    const repos = getReposForRoot(root);
+    for (const repo of repos) {
+      const worktrees = await getWorktreesForRepo(repo.path);
+      const repoName = path.basename(repo.path);
+      const mainPath = worktrees[0]?.path || repo.path;
+      for (let i = 0; i < worktrees.length; i++) {
+        const wt = worktrees[i];
+        const absPath = path.isAbsolute(wt.path) ? wt.path : path.resolve(repo.path, wt.path);
+        if (seenPaths.has(absPath)) continue;
+        seenPaths.add(absPath);
+        items.push({
+          path: absPath,
+          branch: wt.branch ?? "(detached)",
+          repoName,
+          isMain: absPath === mainPath,
+          repoRoot: repo.path,
+        });
+      }
+    }
+  }
+
+  return items.sort((a, b) => a.path.localeCompare(b.path));
+}
+
+export async function getBranches(repoPath: string): Promise<string[]> {
+  if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) return [];
+  const absPath = path.resolve(repoPath);
+  try {
+    const { stdout } = await execFileAsync("git", ["branch", "-a", "--format=%(refname:short)"], {
+      cwd: absPath,
+      maxBuffer: 512 * 1024,
+    });
+    const branches = new Set<string>();
+    for (const line of stdout.split("\n")) {
+      const b = line.trim();
+      if (!b || b === "HEAD") continue;
+      const name = b.replace(/^remotes\/[^/]+\//, "").replace(/^(origin|upstream)\//, "");
+      if (name) branches.add(name);
+    }
+    return Array.from(branches).sort();
+  } catch (err) {
+    logGitError("getBranches error", repoPath, err);
+    return [];
+  }
+}
+
+async function hasLocalBranch(repoPath: string, branch: string): Promise<boolean> {
+  if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) return false;
+  try {
+    await execFileAsync("git", ["rev-parse", "--verify", `refs/heads/${branch}`], {
+      cwd: path.resolve(repoPath),
+      maxBuffer: 1024 * 1024,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function getDefaultRemote(repoPath: string): Promise<string | null> {
+  if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) return null;
+  try {
+    const { stdout } = await execFileAsync("git", ["remote"], {
+      cwd: path.resolve(repoPath),
+      maxBuffer: 1024 * 1024,
+    });
+    const remotes = stdout
+      .split("\n")
+      .map((r) => r.trim())
+      .filter(Boolean);
+    return remotes.includes("origin") ? "origin" : (remotes[0] ?? null);
+  } catch {
+    return null;
+  }
+}
+
+export async function createWorktree(
+  repoPath: string,
+  branch: string,
+  worktreePath: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) {
+    return { success: false, error: "Repository not found" };
+  }
+  const absRepo = path.resolve(repoPath);
+  const absWorktree = path.isAbsolute(worktreePath)
+    ? worktreePath
+    : path.resolve(path.dirname(absRepo), worktreePath);
+  if (branch.trim() === "") {
+    return { success: false, error: "Branch is required" };
+  }
+  const branchName = branch.trim();
+  try {
+    const localExists = await hasLocalBranch(absRepo, branchName);
+    if (localExists) {
+      await execFileAsync("git", ["worktree", "add", absWorktree, branchName], {
+        cwd: absRepo,
+        maxBuffer: 1024 * 1024,
+      });
+    } else {
+      const remote = await getDefaultRemote(absRepo);
+      const startPoint = remote ? `${remote}/${branchName}` : branchName;
+      await execFileAsync("git", ["worktree", "add", "-b", branchName, absWorktree, startPoint], {
+        cwd: absRepo,
+        maxBuffer: 1024 * 1024,
+      });
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { success: false, error: message };
+  }
+}

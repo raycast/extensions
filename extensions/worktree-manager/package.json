@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "worktree-manager",
+  "title": "Worktree Manager",
+  "description": "Search Git worktrees across multiple repo roots and open them in your editor",
+  "icon": "icon.png",
+  "author": "rodrigo_antinarelli",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-worktrees",
+      "title": "Search Worktrees",
+      "subtitle": "Worktree Manager",
+      "description": "List and search Git worktrees, open in editor",
+      "mode": "view"
+    },
+    {
+      "name": "create-worktree",
+      "title": "Create Worktree",
+      "subtitle": "Worktree Manager",
+      "description": "Create a new Git worktree from a repo and branch",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "roots",
+      "type": "directory",
+      "required": true,
+      "title": "Root path",
+      "description": "Folder to scan for Git repos and worktrees"
+    },
+    {
+      "name": "openWith",
+      "type": "appPicker",
+      "required": true,
+      "title": "Open with",
+      "description": "App to open worktree (e.g. Cursor, VS Code)",
+      "default": "Cursor"
+    },
+    {
+      "name": "defaultWorktreePath",
+      "type": "directory",
+      "required": true,
+      "title": "Default worktree path",
+      "description": "Folder where new worktrees will be created (e.g. reponame-branch)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.0.0",
+    "react": "19.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\n\nTo publish to the Raycast Store, use: npm run publish\n\" && exit 1"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

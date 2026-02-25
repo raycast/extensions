@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# macOS
+.DS_Store
+
+# Logs / debug
+*.log
+npm-debug.log*
+
+# Env (if you add env vars later)
+.env
+.env.local
+
+# IDE
+.idea/
+*.swp
+*.swo
