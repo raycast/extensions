@@ -26,6 +26,7 @@
   - Filters to show only controllable players (standalone players and group leaders)
   - Group leaders display member count in subtitle
   - Shows currently playing track or player status
+- **Unused section** - Removed the refresh button from the menu bar as it refreshes every 10 seconds.
 
 ## [Player Grouping and Menu Bar Management] - 2026-02-24
 
