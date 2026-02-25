@@ -7,7 +7,12 @@
 # @raycast.inputType text
 # @raycast.icon 🔤
 
+first=true
 while IFS= read -r line || [ -n "$line" ]; do
-    printf '"%s",
-' "$line"
+    if [ "$first" = false ]; then
+        echo ","
+    fi
+    printf '"%s"' "$line"
+    first=false
 done
+[ "$first" = false ] && echo

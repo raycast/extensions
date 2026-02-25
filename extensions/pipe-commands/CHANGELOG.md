@@ -1,6 +1,6 @@
 # Pipe Commands Changelog
 
-## [Added new commands] - 2026-02-25
+## [Added new commands] - {PR_MERGE_DATE}
 
 - Added Format as String Literal command
 - Added TSV to CSV command
