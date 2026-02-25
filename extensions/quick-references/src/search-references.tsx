@@ -26,7 +26,9 @@ const ALL_CATEGORIES = "all";
 function isDatasetStale(generatedAt: string): boolean {
   const generated = new Date(generatedAt).getTime();
   if (isNaN(generated)) return false;
-  return Date.now() - generated > AUTO_UPDATE_INTERVAL_DAYS * 24 * 60 * 60 * 1000;
+  return (
+    Date.now() - generated > AUTO_UPDATE_INTERVAL_DAYS * 24 * 60 * 60 * 1000
+  );
 }
 
 function formatUpdateAge(generatedAt: string): string {
@@ -323,9 +325,7 @@ export default function Command() {
 
       {recentItems.length > 0 && (
         <List.Section title="Recent">
-          {recentItems.map((item) =>
-            renderItem(item, favorites.has(item.id)),
-          )}
+          {recentItems.map((item) => renderItem(item, favorites.has(item.id)))}
         </List.Section>
       )}
 
