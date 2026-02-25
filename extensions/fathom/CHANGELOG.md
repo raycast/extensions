@@ -1,6 +1,6 @@
 # Fathom for Raycast Changelog
 
-## [Instant Display, Stop Fetching & Cache Performance] - {PR_MERGE_DATE}
+## [Instant Display, Stop Fetching & Cache Performance] - 2026-02-25
 
 ### Added
 
