@@ -46,6 +46,14 @@ function getTodayPortionMs(lastChangeAt: number, now: number): number {
  * 追加今日会话，并限制列表长度，避免 LocalStorage 无限增长。
  */
 function appendTodaySession(metrics: MetricsData, lockAt: number, unlockAt: number, durationMs: number): void {
+  const existingIdx = metrics.todaySessions.findIndex((s) => s.lockAt === lockAt);
+  if (existingIdx >= 0) {
+    if (unlockAt >= metrics.todaySessions[existingIdx].unlockAt) {
+      metrics.todaySessions[existingIdx] = { lockAt, unlockAt, durationMs };
+    }
+    return;
+  }
+
   metrics.todaySessions.push({ lockAt, unlockAt, durationMs });
   if (metrics.todaySessions.length > MAX_TODAY_SESSIONS) {
     metrics.todaySessions = metrics.todaySessions.slice(-MAX_TODAY_SESSIONS);
@@ -164,12 +172,8 @@ export async function processStateChange(): Promise<void> {
         const todayPortion = getTodayPortionMs(prevState.lastChangeAt, now);
         metrics.todayLockedMs += todayPortion;
         metrics.lastLockDurationMs = elapsed;
-        metrics.lastUnlockIntervalMs = 0; // 间隙期间推断为锁屏，解锁间隔视为 0
-        metrics.lastLockStartAt = prevState.lastChangeAt; // 推断锁屏开始于间隙起点
-        // 记录推断的锁屏会话到今日列表
-        const todayStartMs = new Date(now).setHours(0, 0, 0, 0);
-        const sessionLockAt = Math.max(prevState.lastChangeAt, todayStartMs);
-        appendTodaySession(metrics, sessionLockAt, now, todayPortion);
+        metrics.lastUnlockIntervalMs = 0;
+        metrics.lastLockStartAt = prevState.lastChangeAt;
         metricsChanged = true;
 
         logEvent({
@@ -259,6 +263,8 @@ export async function processStateChange(): Promise<void> {
     // 推断该间隙为锁屏/休眠，显式建模为 locked 区间：保存 current=locked、lastChangeAt=间隙起点。
     // 不在本 tick 累加 todayLockedMs，由下一 tick 的 LOCKED→UNLOCKED 一次性计入完整 elapsed，
     // 避免「本次累加 + 后续 locked 累积/解锁转换」重复计入重叠时间。
+    metrics.lastLockStartAt = prevState.lastChangeAt;
+
     const gapState: StateData = {
       current: "locked",
       lastChangeAt: prevState.lastChangeAt,
@@ -275,7 +281,7 @@ export async function processStateChange(): Promise<void> {
       detail: `Gap inferred as locked, will add on next LOCKED→UNLOCKED (elapsed: ${elapsed}ms)`,
     });
 
-    await saveState(gapState);
+    await Promise.all([saveState(gapState), saveMetrics(metrics)]);
     return;
   }
 
