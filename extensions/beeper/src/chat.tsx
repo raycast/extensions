@@ -1085,11 +1085,11 @@ function MessageActions({
         )}
       </ActionPanel.Section>
       <ActionPanel.Section title="Message">
-          <Action.Push
-            title="Reply to Message"
-            icon={Icon.ArrowDown}
-            target={<ComposeMessageForm chat={chat} replyToMessageID={messageID} />}
-          />
+        <Action.Push
+          title="Reply to Message"
+          icon={Icon.ArrowDown}
+          target={<ComposeMessageForm chat={chat} replyToMessageID={messageID} />}
+        />
         <Action.Push title="New Message" icon={Icon.Pencil} target={<ComposeMessageForm chat={chat} />} />
         {message.isSender && message.text && (
           <Action.Push
