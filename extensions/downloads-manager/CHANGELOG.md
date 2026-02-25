@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Add file preview] - {PR_MERGE_DATE}
+## [Add file preview] - 2026-02-25
 
 - Added file preview in Manage Downloads: image previews (macOS only) and metadata for downloaded files.
 - Added utility functions for Quick Look previews on macOS (using ql-manage).
