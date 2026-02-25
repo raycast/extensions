@@ -69,6 +69,12 @@ export interface DSPConfig {
   output_gain: number;
 }
 
+export interface DSPConfigPreset {
+  id?: string;
+  name: string;
+  config: DSPConfig;
+}
+
 // DSPDetails used in StreamDetails
 export enum DSPState {
   ENABLED = "enabled",
@@ -101,6 +107,7 @@ export enum MediaType {
   AUDIOBOOK = "audiobook",
   PODCAST = "podcast",
   PODCAST_EPISODE = "podcast_episode",
+  GENRE = "genre",
   FOLDER = "folder",
   UNKNOWN = "unknown",
 }
@@ -444,6 +451,27 @@ export type MessageType = CommandMessage | EventMessage | SuccessResultMessage |
 
 export type ConfigValueType = number | string | boolean | number[] | string[] | boolean[] | null;
 
+export type UserRole = "admin" | "user";
+
+export interface User {
+  user_id: string;
+  username: string;
+  role: UserRole;
+  display_name?: string;
+  avatar_url?: string;
+  preferences?: Record<string, any>;
+  player_filter?: string[];
+  provider_filter?: string[];
+}
+
+export interface AuthToken {
+  token_id: string;
+  name: string;
+  created_at?: number;
+  last_used?: number;
+  expires_at?: number;
+}
+
 export interface ConfigValueOption {
   // Model for a value with separated name/value.
   title: string;
@@ -631,6 +659,8 @@ export interface Playlist extends MediaItem {
 
 export interface Radio extends MediaItem {}
 
+export interface Genre extends MediaItem {}
+
 export interface Audiobook extends MediaItem {
   publisher: string;
   authors: string[];
@@ -668,6 +698,7 @@ export type MediaItemType =
   | Track
   | Radio
   | Playlist
+  | Genre
   | Audiobook
   | Podcast
   | PodcastEpisode
@@ -682,6 +713,7 @@ export interface SearchResults {
   tracks: Track[];
   playlists: Playlist[];
   radio: Radio[];
+  genres?: Genre[];
   podcasts: Podcast[];
   audiobooks: Audiobook[];
 }
@@ -793,6 +825,12 @@ export interface PlayerSource {
   can_next_previous: boolean;
 }
 
+export interface PlayerControl {
+  control_id: string;
+  name?: string;
+  [key: string]: any;
+}
+
 export interface Player {
   player_id: string;
   provider: string;
@@ -885,6 +923,34 @@ export interface ProviderInstance {
   supported_features: ProviderFeature[];
   available: boolean;
   is_streaming_provider?: boolean;
+}
+
+export interface MetadataProvider extends ProviderInstance {
+  type: ProviderType.METADATA;
+}
+
+export interface MusicProvider extends ProviderInstance {
+  type: ProviderType.MUSIC;
+}
+
+export interface PlayerProvider extends ProviderInstance {
+  type: ProviderType.PLAYER;
+}
+
+export interface PluginProvider extends ProviderInstance {
+  type: ProviderType.PLUGIN;
+}
+
+export interface PluginSource {
+  source_id: string;
+  name: string;
+  [key: string]: any;
+}
+
+export interface RemoteAccessInfo {
+  enabled: boolean;
+  url?: string;
+  [key: string]: any;
 }
 
 export interface SyncTask {
