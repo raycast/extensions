@@ -8,6 +8,20 @@ export const showToast = jest.fn();
 export const showHUD = jest.fn();
 export const launchCommand = jest.fn();
 
+export const Color = {
+  Blue: "blue",
+  Green: "green",
+  Purple: "purple",
+  Orange: "orange",
+};
+
+export const Icon = {
+  Person: "person",
+  Music: "music",
+  Layers: "layers",
+  Terminal: "terminal",
+};
+
 export const Toast = {
   Style: {
     Success: "success",
