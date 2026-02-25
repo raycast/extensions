@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, environment, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, environment, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import path from "node:path";
 import {
@@ -314,15 +314,10 @@ export default function IdentifySongCommand() {
             <Action.CopyToClipboard title="Copy Song Info" content={copySongLine(state.result)} />
           ) : null}
           {state.phase === "success" ? (
-            <Action
-              title="Copy Raw JSON (Clipboard)"
+            <Action.CopyToClipboard
+              title="Copy Raw JSON"
               icon={Icon.Clipboard}
-              onAction={async () => {
-                const text = await Clipboard.readText();
-                if (text) {
-                  await Clipboard.copy(text);
-                }
-              }}
+              content={JSON.stringify(state.result, null, 2)}
             />
           ) : null}
         </ActionPanel>
