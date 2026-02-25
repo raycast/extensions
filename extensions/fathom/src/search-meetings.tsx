@@ -12,6 +12,59 @@ import { MeetingListItem } from "./components/MeetingListItem";
 import { RefreshCacheAction } from "./actions/RefreshCacheAction";
 import { getDateRanges } from "./utils/dates";
 
+function getErrorDisplay(error: Error): { icon: Icon; title: string; description: string; isAuth: boolean } {
+  const errorType = classifyError(error);
+
+  switch (errorType) {
+    case ErrorType.API_KEY_MISSING:
+      return {
+        icon: Icon.Key,
+        title: "API Key Required",
+        description: "Please check your Fathom API Key in Extension Preferences.",
+        isAuth: true,
+      };
+    case ErrorType.API_KEY_INVALID:
+      return {
+        icon: Icon.Key,
+        title: "Invalid API Key",
+        description: "Please check your Fathom API Key in Extension Preferences.",
+        isAuth: true,
+      };
+    case ErrorType.RATE_LIMIT:
+      return {
+        icon: Icon.ExclamationMark,
+        title: "Rate Limit Exceeded",
+        description: "You've made too many requests. Please wait a moment and try again.",
+        isAuth: false,
+      };
+    default:
+      return {
+        icon: Icon.ExclamationMark,
+        title: "Failed to Load Meetings",
+        description: getUserFriendlyError(error).message,
+        isAuth: false,
+      };
+  }
+}
+
+function ErrorEmptyView(props: { error: Error; onRefresh: () => Promise<void> }) {
+  const { icon, title, description, isAuth } = getErrorDisplay(props.error);
+
+  return (
+    <List.EmptyView
+      icon={icon}
+      title={title}
+      description={description}
+      actions={
+        <ActionPanel>
+          {isAuth && <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />}
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={props.onRefresh} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 function Command() {
   const [filterType, setFilterType] = useState<string>("all");
   const [searchText, setSearchText] = useState<string>("");
@@ -53,9 +106,11 @@ function Command() {
   const {
     meetings: cachedMeetings,
     isLoading,
+    isFetchingBackground,
     error: meetingsError,
     searchMeetings,
     refreshCache,
+    stopFetch,
     loadMore,
     hasMore,
   } = useCachedMeetings({
@@ -167,7 +222,7 @@ function Command() {
       navigationTitle={filterDisplayName ? `Meetings: ${filterDisplayName}` : "Search Meetings"}
       actions={
         <ActionPanel>
-          <RefreshCacheAction onRefresh={refreshCache} />
+          <RefreshCacheAction onRefresh={refreshCache} onStop={stopFetch} isFetchingBackground={isFetchingBackground} />
         </ActionPanel>
       }
       pagination={apiKeyPresent && !error ? { pageSize: 20, hasMore, onLoadMore: loadMoreMeetings } : undefined}
@@ -190,41 +245,7 @@ function Command() {
       }
     >
       {error ? (
-        (() => {
-          const errorType = classifyError(error);
-          const isAuthError = errorType === ErrorType.API_KEY_MISSING || errorType === ErrorType.API_KEY_INVALID;
-          const isRateLimitError = errorType === ErrorType.RATE_LIMIT;
-
-          return (
-            <List.EmptyView
-              icon={isAuthError ? Icon.Key : Icon.ExclamationMark}
-              title={
-                errorType === ErrorType.API_KEY_MISSING
-                  ? "API Key Required"
-                  : errorType === ErrorType.API_KEY_INVALID
-                    ? "Invalid API Key"
-                    : isRateLimitError
-                      ? "Rate Limit Exceeded"
-                      : "Failed to Load Meetings"
-              }
-              description={
-                isAuthError
-                  ? "Please check your Fathom API Key in Extension Preferences."
-                  : isRateLimitError
-                    ? "You've made too many requests. Please wait a moment and try again."
-                    : getUserFriendlyError(error).message
-              }
-              actions={
-                <ActionPanel>
-                  {isAuthError && (
-                    <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-                  )}
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshCache} />
-                </ActionPanel>
-              }
-            />
-          );
-        })()
+        <ErrorEmptyView error={error} onRefresh={refreshCache} />
       ) : totalMeetings === 0 ? (
         <List.EmptyView
           icon={Icon.Calendar}
@@ -304,7 +325,7 @@ export function MeetingSummaryDetail({ meeting, recordingId }: { meeting: Meetin
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Load Summary",
-        message: message,
+        message,
       });
     },
   });
@@ -372,7 +393,7 @@ export function MeetingTranscriptDetail({ meeting, recordingId }: { meeting: Mee
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Load Transcript",
-        message: message,
+        message,
       });
     },
   });

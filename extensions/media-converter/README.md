@@ -29,6 +29,17 @@
 3. Choose your desired output format and quality settings (defaults are fine)
 4. Press &#8984;↵ to start conversion
 
+### Preferences
+
+You can also set defaults in extension preferences:
+
+- **Default Image Output Format**: default output format for image conversions.
+- **Default Image Quality**: detailed image quality default used when loading the form (`Lossless (when supported)`, `100` to `0`, plus `PNG-24`, `PNG-8`, `TIFF Deflate`, `TIFF LZW`).
+- **Default Video Output Format**: default output format for video conversions.
+- **Default Video Quality Preset**: preset used in simple mode (`lowest`, `low`, `medium`, `high`, `highest`).
+
+You can still override all values in the Convert Media form every time you run a conversion.
+
 ### ✨ Ask Media Converter
 
 1. Get started by typing @ in Raycast AI
