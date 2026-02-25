@@ -1313,7 +1313,7 @@
 /extensions/mbta-tracker                                            @djpowers
 /extensions/mcp                                                     @EvanZhouDev @shemhamforash23 @radzio
 /extensions/md-to-excel                                             @victor-defi
-/extensions/media-converter                                         @llfmaia @wattmalsh @samuelkraft @Glypse
+/extensions/media-converter                                         @llfmaia @wattmalsh @samuelkraft @Glypse @chihkang
 /extensions/medialister-marketplace-helper                          @td-sedov
 /extensions/meduza                                                  @castletaste
 /extensions/mem                                                     @brianfakhoury
@@ -2700,6 +2700,7 @@
 /extensions/zipper-run                                              @arielconti10 @pernielsentikaer
 /extensions/znotch                                                  @zkondor
 /extensions/zod-documentation                                       @danieldeichfuss
+/extensions/zodme                                                   @camib0b
 /extensions/zoo                                                     @ViGeng
 /extensions/zoom                                                    @thomaslombart @Visual-Studio-Coder @samuelkraft @jacpd
 /extensions/zoom-control                                            @prashantv @pernielsentikaer @JackCasica
