@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { execFile } from "child_process";
+import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
@@ -230,6 +230,22 @@ async function getDefaultRemote(repoPath: string): Promise<string | null> {
   }
 }
 
+/** If the local branch has an upstream (e.g. origin/master), return it; otherwise null. */
+async function getUpstreamRef(repoPath: string, localBranch: string): Promise<string | null> {
+  if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) return null;
+  try {
+    const { stdout } = await execFileAsync(
+      "git",
+      ["rev-parse", "--abbrev-ref", `${localBranch}@{upstream}`],
+      { cwd: path.resolve(repoPath), maxBuffer: 1024 * 1024 }
+    );
+    const ref = stdout.trim();
+    return ref && !ref.includes("@") ? ref : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createWorktree(
   repoPath: string,
   branch: string,
@@ -270,12 +286,69 @@ export async function createWorktree(
   }
 }
 
+const CANCELLED_ERROR = "Cancelled";
+
+function runGitWorktreeAdd(
+  cwd: string,
+  args: string[],
+  opts?: { onLog?: (text: string) => void; signal?: AbortSignal }
+): Promise<{ success: boolean; error?: string }> {
+  const { onLog, signal } = opts ?? {};
+  return new Promise((resolve) => {
+    if (signal?.aborted) {
+      resolve({ success: false, error: CANCELLED_ERROR });
+      return;
+    }
+    const stderrChunks: string[] = [];
+    const proc = spawn("git", ["worktree", "add", ...args], { cwd });
+    const onAbort = () => {
+      try {
+        proc.kill("SIGTERM");
+      } catch {
+        // already exited
+      }
+      resolve({ success: false, error: CANCELLED_ERROR });
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+    const push = (data: Buffer | string) => {
+      const text = data.toString();
+      stderrChunks.push(text);
+      onLog?.(text);
+    };
+    if (proc.stdout) proc.stdout.on("data", push);
+    if (proc.stderr) proc.stderr.on("data", push);
+    proc.on("close", (code: number | null) => {
+      signal?.removeEventListener("abort", onAbort);
+      if (signal?.aborted) {
+        resolve({ success: false, error: CANCELLED_ERROR });
+        return;
+      }
+      if (code === 0) {
+        resolve({ success: true });
+      } else {
+        resolve({
+          success: false,
+          error: stderrChunks.join("").trim() || `git worktree add exited with ${code}`,
+        });
+      }
+    });
+    proc.on("error", (err: Error) => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve({ success: false, error: err.message });
+    });
+  });
+}
+
+export const createWorktreeCancelledError = CANCELLED_ERROR;
+
 export async function createWorktreeFromBase(
   repoPath: string,
   newBranchName: string,
   worktreePath: string,
-  baseBranch: string
+  baseBranch: string,
+  opts?: { onLog?: (text: string) => void; signal?: AbortSignal }
 ): Promise<{ success: boolean; error?: string }> {
+  const { onLog, signal } = opts ?? {};
   if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) {
     return { success: false, error: "Repository not found" };
   }
@@ -288,19 +361,21 @@ export async function createWorktreeFromBase(
     ? worktreePath
     : path.resolve(path.dirname(absRepo), worktreePath);
   try {
+    if (signal?.aborted) return { success: false, error: CANCELLED_ERROR };
+    onLog?.("Checking if branch exists…\n");
     const branchExists = await hasLocalBranch(absRepo, branch);
+    if (signal?.aborted) return { success: false, error: CANCELLED_ERROR };
     if (branchExists) {
-      await execFileAsync("git", ["worktree", "add", absWorktree, branch], {
-        cwd: absRepo,
-        maxBuffer: 1024 * 1024,
-      });
-    } else {
-      await execFileAsync("git", ["worktree", "add", "-b", branch, absWorktree, base], {
-        cwd: absRepo,
-        maxBuffer: 1024 * 1024,
-      });
+      onLog?.(`Adding worktree at ${absWorktree} (existing branch ${branch})…\n`);
+      return runGitWorktreeAdd(absRepo, [absWorktree, branch], { onLog, signal });
     }
-    return { success: true };
+    const startPoint = (await getUpstreamRef(absRepo, base)) || base;
+    if (startPoint !== base) {
+      onLog?.(`Creating branch "${branch}" from ${startPoint} at ${absWorktree}…\n`);
+    } else {
+      onLog?.(`Creating branch "${branch}" and worktree at ${absWorktree}…\n`);
+    }
+    return runGitWorktreeAdd(absRepo, ["-b", branch, absWorktree, startPoint], { onLog, signal });
   } catch (err: unknown) {
     const e = err as { message?: string; stderr?: string; stdout?: string };
     const parts = [e.message, e.stderr, e.stdout].filter(Boolean) as string[];

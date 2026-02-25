@@ -7,13 +7,28 @@ import {
   getPreferenceValues,
   Icon,
   open,
+  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import * as path from "path";
-import { getAllWorktrees, createWorktreeFromBase, type WorktreeItem } from "./lib/git";
+import {
+  createWorktreeCancelledError,
+  getAllWorktrees,
+  createWorktreeFromBase,
+  type WorktreeItem,
+} from "./lib/git";
 import { expandRoots, type Preferences } from "./lib/preferences";
+
+/** ~100px height: show last N lines (API has no height/rows; approximate by line count) */
+const LOG_TAIL_LINES = 6;
+
+function lastLines(text: string, n: number): string {
+  const lines = text.split("\n");
+  if (lines.length <= n) return text;
+  return lines.slice(-n).join("\n");
+}
 
 async function fetchWorktrees(): Promise<WorktreeItem[]> {
   const prefs = getPreferenceValues<Preferences>();
@@ -52,6 +67,9 @@ export default function Command() {
   const roots = expandRoots(prefs.roots ?? "");
   const hasRoots = roots.length > 0;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [log, setLog] = React.useState("");
+  const [createSuccess, setCreateSuccess] = React.useState(false);
+  const abortControllerRef = React.useRef<AbortController | null>(null);
   const {
     data: worktrees = [],
     isLoading: worktreesLoading,
@@ -89,20 +107,32 @@ export default function Command() {
       title: "Creating worktree…",
     });
     setIsSubmitting(true);
+    setLog("");
+    setCreateSuccess(false);
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
     try {
       const result = await createWorktreeFromBase(
         baseWorktree.repoRoot,
         worktreeName,
         pathToUse,
-        baseWorktree.branch
+        baseWorktree.branch,
+        { onLog: (text) => setLog((prev) => prev + text), signal }
       );
       if (result.success) {
+        setCreateSuccess(true);
         toast.style = Toast.Style.Success;
         toast.title = "Worktree created";
         toast.primaryAction = {
           title: "Open in Editor",
           onAction: () => open(pathToUse, prefs.openWith),
         };
+        await new Promise((r) => setTimeout(r, 600));
+        await showHUD("Worktree created");
+      } else if (result.error === createWorktreeCancelledError) {
+        setLog((prev) => prev + "\nCancelled by user.\n");
+        toast.style = Toast.Style.Failure;
+        toast.title = "Cancelled";
       } else {
         const fullError = result.error ?? "Unknown error";
         const { title, message } = formatWorktreeError(fullError);
@@ -116,12 +146,14 @@ export default function Command() {
       }
     } finally {
       setIsSubmitting(false);
+      abortControllerRef.current = null;
     }
   }
 
   const baseItems = worktrees.map((w) => ({
     value: w.path,
     title: `${w.repoName} · ${w.branch}`,
+    keywords: [w.repoName, w.branch, `${w.repoName} ${w.branch}`, `${w.repoName} · ${w.branch}`],
   }));
 
   if (hasRoots && worktreesError) {
@@ -150,19 +182,42 @@ export default function Command() {
 
   return (
     <Form
-      isLoading={worktreesLoading || isSubmitting}
+      isLoading={worktreesLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Worktree" onSubmit={handleSubmit} />
+          {isSubmitting ? (
+            <Action
+              title="Cancel"
+              icon={Icon.XMarkCircle}
+              onAction={() => abortControllerRef.current?.abort()}
+            />
+          ) : (
+            <Action.SubmitForm title="Create Worktree" onSubmit={handleSubmit} icon={Icon.Plus} />
+          )}
         </ActionPanel>
       }
     >
       <Form.Dropdown id="base" title="Base" storeValue>
         {baseItems.map((item) => (
-          <Form.Dropdown.Item key={item.value} value={item.value} title={item.title} />
+          <Form.Dropdown.Item
+            key={item.value}
+            value={item.value}
+            title={item.title}
+            keywords={item.keywords}
+          />
         ))}
       </Form.Dropdown>
       <Form.TextField id="worktreeName" title="Worktree Name" placeholder="e.g. my-new-worktree" />
+      {createSuccess && <Form.Description title="" text="✓ Worktree created" />}
+      {!createSuccess && (isSubmitting || log) && (
+        <Form.TextArea
+          id="log"
+          title="Output"
+          value={lastLines(log || "Preparing…", LOG_TAIL_LINES)}
+          onChange={() => {}}
+          placeholder=""
+        />
+      )}
     </Form>
   );
 }

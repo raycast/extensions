@@ -1,7 +1,9 @@
+import React from "react";
 import {
   Action,
   ActionPanel,
   Alert,
+  confirmAlert,
   getPreferenceValues,
   Icon,
   List,
@@ -20,18 +22,43 @@ async function fetchWorktrees(): Promise<WorktreeItem[]> {
   return getAllWorktrees(roots);
 }
 
+function matchSearch(wt: WorktreeItem, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const words = q.split(/\s+/).filter(Boolean);
+  // Search by repo, branch, path, and "repo · branch" (display) or "repo branch" (typed)
+  const searchable = [
+    wt.repoName,
+    wt.branch,
+    wt.path,
+    path.basename(wt.path),
+    path.dirname(wt.path),
+    `${wt.repoName} ${wt.branch}`,
+    `${wt.repoName} · ${wt.branch}`.replace(/·/g, " ").replace(/\s+/g, " ").trim(),
+  ]
+    .join(" ")
+    .toLowerCase();
+  return words.every((word) => searchable.includes(word));
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const { data: worktrees, isLoading, error, revalidate } = useCachedPromise(fetchWorktrees);
+  const { data: worktrees = [], isLoading, error, revalidate } = useCachedPromise(fetchWorktrees);
+  const [searchText, setSearchText] = React.useState("");
 
   const roots = expandRoots(preferences.roots);
   const hasRoots = roots.length > 0;
+  const filtered = React.useMemo(
+    () => (searchText.trim() ? worktrees.filter((wt) => matchSearch(wt, searchText)) : worktrees),
+    [worktrees, searchText]
+  );
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search worktrees by path, branch, repo…"
-      filtering
+      filtering={false}
+      onSearchTextChange={setSearchText}
     >
       {!hasRoots && (
         <List.EmptyView
@@ -51,21 +78,26 @@ export default function Command() {
           }
         />
       )}
-      {hasRoots && !error && worktrees?.length === 0 && !isLoading && (
+      {hasRoots && !error && worktrees.length === 0 && !isLoading && (
         <List.EmptyView
           title="No worktrees found"
           description="Add Git repo root paths in preferences. Each path can contain multiple repos."
         />
       )}
+      {hasRoots && !error && worktrees.length > 0 && filtered.length === 0 && searchText.trim() && (
+        <List.EmptyView
+          title="No results"
+          description={`No worktrees match "${searchText.trim()}"`}
+        />
+      )}
       {hasRoots &&
         !error &&
-        worktrees?.map((wt) => (
+        filtered.map((wt) => (
           <List.Item
             key={wt.path}
             title={path.basename(wt.path)}
             subtitle={`${wt.repoName} · ${wt.branch}${wt.isMain ? " · main" : ""}`}
             accessories={[{ text: path.dirname(wt.path) }]}
-            keywords={[wt.path, wt.branch, wt.repoName]}
             actions={
               <ActionPanel>
                 <Action.Open
@@ -81,32 +113,34 @@ export default function Command() {
                     title="Remove Worktree"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    onAction={() =>
-                      Alert.alert({
-                        title: "Remove worktree?",
-                        message: `This will remove the worktree and delete the folder:\n${wt.path}`,
-                        primaryAction: {
-                          title: "Remove",
-                          style: Alert.ActionStyle.Destructive,
-                          onAction: async () => {
-                            const toast = await showToast({
-                              style: Toast.Style.Animated,
-                              title: "Removing worktree…",
-                            });
-                            const result = await removeWorktree(wt.repoRoot, wt.path);
-                            if (result.success) {
-                              toast.style = Toast.Style.Success;
-                              toast.title = "Worktree removed";
-                              revalidate();
-                            } else {
-                              toast.style = Toast.Style.Failure;
-                              toast.title = "Failed to remove";
-                              toast.message = result.error;
-                            }
+                    onAction={async () => {
+                      if (
+                        !(await confirmAlert({
+                          title: "Remove worktree?",
+                          message: `This will remove the worktree and delete the folder:\n${wt.path}`,
+                          primaryAction: {
+                            title: "Remove",
+                            style: Alert.ActionStyle.Destructive,
                           },
-                        },
-                      })
-                    }
+                        }))
+                      ) {
+                        return;
+                      }
+                      const toast = await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Removing worktree…",
+                      });
+                      const result = await removeWorktree(wt.repoRoot, wt.path);
+                      if (result.success) {
+                        toast.style = Toast.Style.Success;
+                        toast.title = "Worktree removed";
+                        revalidate();
+                      } else {
+                        toast.style = Toast.Style.Failure;
+                        toast.title = "Failed to remove";
+                        toast.message = result.error;
+                      }
+                    }}
                   />
                 )}
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
