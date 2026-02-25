@@ -559,7 +559,6 @@ REPO_NAME="${repoName}"
 
 git remote add $REPO_NAME $FORK_URL 2>/dev/null || git remote set-url $REPO_NAME $FORK_URL
 git fetch --filter=tree:0 --no-tags $REPO_NAME $BRANCH
-git sparse-checkout add "extensions/$EXTENSION_NAME"
 git checkout $REPO_NAME/$BRANCH -- "extensions/$EXTENSION_NAME"
 cd "extensions/$EXTENSION_NAME"
 npm install && npm run dev
