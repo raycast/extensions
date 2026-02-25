@@ -44,14 +44,29 @@ async function detectAmpPath(): Promise<string> {
   return "amp";
 }
 
-export function useAmpUsage() {
+export function useAmpUsage(enabled = true) {
   const [ampPath, setAmpPath] = useState<string>("amp");
   const [pathDetected, setPathDetected] = useState(false);
   const [shouldExecute, setShouldExecute] = useState(false);
   const [hasInitialFetch, setHasInitialFetch] = useState(false);
 
+  useEffect(() => {
+    if (enabled) {
+      return;
+    }
+
+    // Reset execution state when Amp is disabled.
+    setShouldExecute(false);
+    setPathDetected(false);
+    setHasInitialFetch(false);
+  }, [enabled]);
+
   // 检测 amp 路径
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     let cancelled = false;
 
     void (async () => {
@@ -67,7 +82,7 @@ export function useAmpUsage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled]);
 
   const {
     isLoading: execLoading,
@@ -76,17 +91,21 @@ export function useAmpUsage() {
     revalidate: execRevalidate,
   } = useExec(ampPath, ["usage"], {
     timeout: 10000,
-    execute: shouldExecute,
+    execute: enabled && shouldExecute,
   });
 
   // 首次加载完成后，标记已完成
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     if (shouldExecute && !execLoading && hasInitialFetch === false) {
       setHasInitialFetch(true);
       // 首次加载完成后，停止自动执行
       setShouldExecute(false);
     }
-  }, [shouldExecute, execLoading, hasInitialFetch]);
+  }, [enabled, shouldExecute, execLoading, hasInitialFetch]);
 
   const parsedResult = data ? parseAmpUsage(data) : { usage: null, error: null };
   const usage: AmpUsage | null = parsedResult.usage;
@@ -101,19 +120,23 @@ export function useAmpUsage() {
     : null;
 
   // 合并解析错误和执行错误
-  const error: AmpError | null = parsedError || execAmpError;
-  const isLoading = execLoading || !pathDetected || (!hasInitialFetch && !shouldExecute);
+  const error: AmpError | null = enabled ? parsedError || execAmpError : null;
+  const isLoading = enabled ? execLoading || !pathDetected || (!hasInitialFetch && !shouldExecute) : false;
 
   // 重新验证（手动刷新）
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     setShouldExecute(true);
     await execRevalidate();
     setShouldExecute(false);
-  }, [execRevalidate]);
+  }, [enabled, execRevalidate]);
 
   return {
     isLoading,
-    usage,
+    usage: enabled ? usage : null,
     error,
     revalidate,
   };

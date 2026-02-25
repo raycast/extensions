@@ -1,5 +1,3 @@
-# GitHub Copilot Custom Instructions
-
 ## Project Context
 
 This is a Raycast extension for controlling Music Assistant, a home music server system. The extension provides menu bar controls and commands for music playback, player selection, and volume control.
@@ -11,7 +9,7 @@ This is a Raycast extension for controlling Music Assistant, a home music server
 - **Always write unit tests** - Don't forget tests like a "junior developer"
 - **Proper test organization**: Put client tests in client test files, command-specific tests in command test files
 - **Clean test files**: Remove unused imports, variables, and mock configurations
-- **Focus on critical path**: Test business logic thoroughly (61% coverage target, not 100%)
+- **Focus on critical path**: Test business logic thoroughly (~69% coverage target, not 100%)
 - **REST API testing**: Test `sendCommand()` comprehensively; individual wrapper methods inherit coverage
 - **Regression tests**: Add tests for any bugs found to prevent recurrence
 - **Test error cases**: Always test both success and failure scenarios
@@ -22,6 +20,7 @@ This is a Raycast extension for controlling Music Assistant, a home music server
 - **Clean imports**: Group and organize import statements properly
 - **No scattered imports**: Consolidate related imports together
 - **Remove unused code**: Clean up unused variables, imports, and dependencies
+- **Auto-generated Preferences**: Do NOT manually define a `Preferences` interface - Raycast auto-generates `Preferences` type in `raycast-env.d.ts` from `package.json`. Manual definitions can become out of sync. Use `getPreferenceValues<Preferences>()` directly; the type is auto-imported from the generated file.
 
 ### API Integration Patterns
 
@@ -55,6 +54,7 @@ This extension uses the Music Assistant REST API (NOT WebSocket) for simpler, mo
 - **Client**: `src/external-code/music-assistant-api.ts` - Sends REST API calls
 - **Wrapper**: `src/api-command.ts` - Handles initialization and cleanup
 - **Interface**: `src/music-assistant-client.ts` - High-level business logic
+- **API Documentation**: `commands.json` - Complete Music Assistant API command reference with parameters, return types, and descriptions
 
 ### Key Implementation Details
 
@@ -64,6 +64,26 @@ This extension uses the Music Assistant REST API (NOT WebSocket) for simpler, mo
 - No local caching maintained (each call is independent)
 - Volume commands clamp values to 0-100 range
 - Use `player_id` parameter for player-specific commands
+
+### Available API Commands
+
+The `commands.json` file contains extracted API documentation with all available Music Assistant commands, organized by category:
+
+- **Auth**: Authentication, user management, token operations
+- **Config**: Core controllers, providers, players, DSP configuration
+- **Music**: Library items (albums, artists, tracks, playlists, podcasts, radio), favorites, playback tracking
+- **Player**: Player control, queue management, volume, playback state
+- **Metadata**: Enhanced metadata, lyrics, language preferences
+- **Logging**: Application logs (admin only)
+
+Each command entry includes:
+
+- Command path (e.g., `player/cmd/play`, `music/artists/library_items`)
+- Summary and detailed description
+- Parameters with types and descriptions
+- Return type
+- Authentication requirements
+- Required role (if admin-only)
 
 ## Development Workflow
 
@@ -123,7 +143,7 @@ This extension uses the Music Assistant REST API (NOT WebSocket) for simpler, mo
 
 ## Test Coverage Strategy
 
-### Current Coverage: 61% statements, 55% branches, 28% functions
+### Current Coverage: 69.15% statements, 53.73% branches, 67% functions
 
 **Why not 100% coverage?**
 
@@ -133,16 +153,17 @@ This extension uses the Music Assistant REST API (NOT WebSocket) for simpler, mo
 
 **Full Coverage (100%)**
 
-- api-command.ts, music-assistant-client.ts, command implementations (next-song, play-pause)
+- api-command.ts, music-assistant-client.ts (99.15%), command implementations (next-song, play-pause)
+- use-selected-player-id.ts, play-pause.tsx
 
 **Strategic Coverage (20-80%)**
 
 - music-assistant-api.ts: Only `sendCommand()` and error handling tested (20%)
-- use-selected-player-id.ts: Core logic tested, some edge cases untested (80%)
+- next-song.tsx, volume-up.tsx, volume-down.tsx: Core logic tested, some branches untested (57-60%)
 
 **No Coverage (0%) - By Design**
 
-- UI components (menu-bar.tsx, set-active-player.tsx, set-volume.tsx)
+- UI components (manage-player-groups.tsx - 5%, menu-bar.tsx - 0%)
 
 See TESTING.md for detailed coverage breakdown and rationale.
 

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kitty",
+  "title": "Kitty",
+  "description": "Control Kitty terminal via its remote control protocol",
+  "icon": "extension-icon.png",
+  "author": "jerome_soyer",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "socketPath",
+      "title": "Socket Path",
+      "description": "Path to the Kitty remote control socket. Leave empty to auto-detect /tmp/kitty-socket-{pid}",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "commands": [
+    {
+      "name": "new-kitty-window",
+      "title": "New Kitty Window",
+      "subtitle": "Kitty",
+      "description": "Open a new Kitty OS window",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-kitty-tab",
+      "title": "New Kitty Tab",
+      "subtitle": "Kitty",
+      "description": "Open a new tab in the active Kitty window",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-kitty-tabs",
+      "title": "Search Kitty Tabs",
+      "subtitle": "Kitty",
+      "description": "Search and focus Kitty tabs across all windows",
+      "mode": "view"
+    },
+    {
+      "name": "open-kitty-launch-config",
+      "title": "Open Kitty Launch Configuration",
+      "subtitle": "Kitty",
+      "description": "Manage and launch multi-tab/split configurations",
+      "mode": "view"
+    },
+    {
+      "name": "open-with-kitty",
+      "title": "Open with Kitty",
+      "subtitle": "Kitty",
+      "description": "Open the selected Finder folder in Kitty",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

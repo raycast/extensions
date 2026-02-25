@@ -1,13 +1,25 @@
 import { List } from "@raycast/api";
 import { ZaiUsage, ZaiError, ZaiLimitEntry } from "./types";
-import { formatResetTime } from "./fetcher";
-import { renderErrorDetail, renderNoDataDetail, getLoadingAccessory, getNoDataAccessory } from "../agents/ui";
+import type { Accessory } from "../agents/types";
+import { formatResetTime } from "../agents/format";
+import {
+  renderErrorOrNoData,
+  formatErrorOrNoData,
+  getLoadingAccessory,
+  getNoDataAccessory,
+  generatePieIcon,
+} from "../agents/ui";
 
-function formatUsageValue(entry: ZaiLimitEntry): string {
+function getRemainingNumericPercent(entry: ZaiLimitEntry | undefined | null): number | undefined {
+  if (!entry) return undefined;
   if (entry.remaining != null && entry.usage != null && entry.usage > 0) {
-    return `${Math.round(((entry.usage - entry.remaining) / entry.usage) * 100)}%`;
+    return Math.round((entry.remaining / entry.usage) * 100);
   }
-  return `${entry.percentage}%`;
+  return 100 - entry.percentage;
+}
+
+function formatRemainingPercent(entry: ZaiLimitEntry): string {
+  return `${getRemainingNumericPercent(entry) ?? 0}%`;
 }
 
 function formatRemainingText(entry: ZaiLimitEntry): string {
@@ -17,46 +29,43 @@ function formatRemainingText(entry: ZaiLimitEntry): string {
   if (entry.currentValue != null) {
     return `${entry.currentValue}`;
   }
-  return `${entry.percentage}%`;
+  return `${100 - entry.percentage}%`;
 }
 
 export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | null): string {
-  if (error) {
-    return `z.ai Usage\nStatus: Error\nType: ${error.type}\nMessage: ${error.message}`;
-  }
-  if (!usage) {
-    return "z.ai Usage\nStatus: No data available";
-  }
+  const fallback = formatErrorOrNoData("z.ai", usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as ZaiUsage;
 
   let text = "z.ai Usage";
 
-  if (usage.planName) {
-    text += `\nPlan: ${usage.planName}`;
+  if (u.planName) {
+    text += `\nPlan: ${u.planName}`;
   }
 
-  if (usage.tokenLimit) {
-    text += `\n\nToken Limit (${usage.tokenLimit.windowDescription}): ${formatRemainingText(usage.tokenLimit)}`;
-    text += `\n${formatUsageValue(usage.tokenLimit)}`;
-    if (usage.tokenLimit.resetTime) {
-      text += `\nResets In: ${formatResetTime(usage.tokenLimit.resetTime)}`;
+  if (u.tokenLimit) {
+    text += `\n\nToken Limit (${u.tokenLimit.windowDescription}): ${formatRemainingText(u.tokenLimit)}`;
+    text += `\n${formatRemainingPercent(u.tokenLimit)}`;
+    if (u.tokenLimit.resetTime) {
+      text += `\nResets In: ${formatResetTime(u.tokenLimit.resetTime)}`;
     }
-    if (usage.tokenLimit.usageDetails.length > 0) {
+    if (u.tokenLimit.usageDetails.length > 0) {
       text += "\n\nPer-Model Usage:";
-      for (const detail of usage.tokenLimit.usageDetails) {
+      for (const detail of u.tokenLimit.usageDetails) {
         text += `\n  ${detail.modelCode}: ${detail.usage}`;
       }
     }
   }
 
-  if (usage.timeLimit) {
-    text += `\n\nTime Limit (${usage.timeLimit.windowDescription}): ${formatRemainingText(usage.timeLimit)}`;
-    text += `\n${formatUsageValue(usage.timeLimit)}`;
-    if (usage.timeLimit.resetTime) {
-      text += `\nResets In: ${formatResetTime(usage.timeLimit.resetTime)}`;
+  if (u.timeLimit) {
+    text += `\n\nTime Limit (${u.timeLimit.windowDescription}): ${formatRemainingText(u.timeLimit)}`;
+    text += `\n${formatRemainingPercent(u.timeLimit)}`;
+    if (u.timeLimit.resetTime) {
+      text += `\nResets In: ${formatResetTime(u.timeLimit.resetTime)}`;
     }
-    if (usage.timeLimit.usageDetails.length > 0) {
+    if (u.timeLimit.usageDetails.length > 0) {
       text += "\n\nPer-Model Usage:";
-      for (const detail of usage.timeLimit.usageDetails) {
+      for (const detail of u.timeLimit.usageDetails) {
         text += `\n  ${detail.modelCode}: ${detail.usage}`;
       }
     }
@@ -66,30 +75,26 @@ export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | nul
 }
 
 export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null): React.ReactNode {
-  if (error) {
-    return renderErrorDetail(error);
-  }
-
-  if (!usage) {
-    return renderNoDataDetail();
-  }
+  const fallback = renderErrorOrNoData(usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as ZaiUsage;
 
   return (
     <List.Item.Detail.Metadata>
-      {usage.planName && <List.Item.Detail.Metadata.Label title="Plan" text={usage.planName} />}
+      {u.planName && <List.Item.Detail.Metadata.Label title="Plan" text={u.planName} />}
 
-      {usage.tokenLimit && (
+      {u.tokenLimit && (
         <>
-          {usage.planName && <List.Item.Detail.Metadata.Separator />}
+          {u.planName && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
-            title={`Token Limit (${usage.tokenLimit.windowDescription})`}
-            text={formatUsageValue(usage.tokenLimit)}
+            title={`Token Limit (${u.tokenLimit.windowDescription})`}
+            text={formatRemainingPercent(u.tokenLimit)}
           />
-          <List.Item.Detail.Metadata.Label title="Remaining" text={formatRemainingText(usage.tokenLimit)} />
-          {usage.tokenLimit.resetTime && (
-            <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(usage.tokenLimit.resetTime)} />
+          <List.Item.Detail.Metadata.Label title="Remaining" text={formatRemainingText(u.tokenLimit)} />
+          {u.tokenLimit.resetTime && (
+            <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.tokenLimit.resetTime)} />
           )}
-          {usage.tokenLimit.usageDetails.map((detail) => (
+          {u.tokenLimit.usageDetails.map((detail) => (
             <List.Item.Detail.Metadata.Label
               key={detail.modelCode}
               title={`  ${detail.modelCode}`}
@@ -99,18 +104,18 @@ export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null):
         </>
       )}
 
-      {usage.timeLimit && (
+      {u.timeLimit && (
         <>
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
-            title={`Time Limit (${usage.timeLimit.windowDescription})`}
-            text={formatUsageValue(usage.timeLimit)}
+            title={`Time Limit (${u.timeLimit.windowDescription})`}
+            text={formatRemainingPercent(u.timeLimit)}
           />
-          <List.Item.Detail.Metadata.Label title="Remaining" text={formatRemainingText(usage.timeLimit)} />
-          {usage.timeLimit.resetTime && (
-            <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(usage.timeLimit.resetTime)} />
+          <List.Item.Detail.Metadata.Label title="Remaining" text={formatRemainingText(u.timeLimit)} />
+          {u.timeLimit.resetTime && (
+            <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.timeLimit.resetTime)} />
           )}
-          {usage.timeLimit.usageDetails.map((detail) => (
+          {u.timeLimit.usageDetails.map((detail) => (
             <List.Item.Detail.Metadata.Label
               key={detail.modelCode}
               title={`  ${detail.modelCode}`}
@@ -123,11 +128,7 @@ export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null):
   );
 }
 
-export function getZaiAccessory(
-  usage: ZaiUsage | null,
-  error: ZaiError | null,
-  isLoading: boolean,
-): { text: string; tooltip?: string } {
+export function getZaiAccessory(usage: ZaiUsage | null, error: ZaiError | null, isLoading: boolean): Accessory {
   if (isLoading) {
     return getLoadingAccessory("z.ai");
   }
@@ -152,15 +153,17 @@ export function getZaiAccessory(
   const parts: string[] = [];
 
   if (usage.tokenLimit) {
-    parts.push(`Tokens: ${formatUsageValue(usage.tokenLimit)}`);
+    parts.push(`Tokens: ${formatRemainingPercent(usage.tokenLimit)}`);
   }
   if (usage.timeLimit) {
-    parts.push(`Time: ${formatUsageValue(usage.timeLimit)}`);
+    parts.push(`Time: ${formatRemainingPercent(usage.timeLimit)}`);
   }
 
-  const tokenText = usage.tokenLimit ? formatUsageValue(usage.tokenLimit) : "—";
+  const tokenText = usage.tokenLimit ? formatRemainingPercent(usage.tokenLimit) : "—";
+  const numericPercent = getRemainingNumericPercent(usage.tokenLimit ?? usage.timeLimit);
 
   return {
+    icon: numericPercent !== undefined ? generatePieIcon(numericPercent) : undefined,
     text: tokenText,
     tooltip: parts.join(" | ") || "No limits available",
   };

@@ -11,6 +11,7 @@ export interface Display {
 }
 
 const STORAGE_KEY = "known_displays";
+const QUICK_CONNECT_KEY = "quick_connect_display";
 const MIRROR_SECTION_NAME = "Mirror or extend to";
 
 // AppleScript to scan available displays from System Settings dropdown
@@ -174,4 +175,19 @@ export async function markDisplayConnected(name: string): Promise<void> {
     display.lastConnected = Date.now();
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(displays));
   }
+}
+
+// --- Quick Connect ---
+
+export async function getQuickConnectDisplay(): Promise<string | undefined> {
+  const stored = await LocalStorage.getItem<string>(QUICK_CONNECT_KEY);
+  return stored || undefined;
+}
+
+export async function setQuickConnectDisplay(name: string): Promise<void> {
+  await LocalStorage.setItem(QUICK_CONNECT_KEY, name);
+}
+
+export async function clearQuickConnectDisplay(): Promise<void> {
+  await LocalStorage.removeItem(QUICK_CONNECT_KEY);
 }

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-rsync-extension",
+  "version": "1.0.5",
+  "title": "Rsync File Transfer",
+  "description": "Transfer files between local and remote servers using rsync with SSH config integration",
+  "icon": "icon.png",
+  "author": "dytsou",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload",
+      "title": "Upload Files Via Rsync",
+      "description": "Upload local files to a remote server using rsync",
+      "mode": "view"
+    },
+    {
+      "name": "download",
+      "title": "Download Files Via Rsync",
+      "description": "Download files from a remote server using rsync",
+      "mode": "view"
+    },
+    {
+      "name": "browse",
+      "title": "Browse Remote Files",
+      "description": "Browse and list files on a remote server",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rsyncHumanReadable",
+      "type": "checkbox",
+      "title": "Human-readable file sizes",
+      "label": "Human-readable file sizes (-h)",
+      "description": "Display file sizes in KB, MB, GB format",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "rsyncProgress",
+      "type": "checkbox",
+      "title": "Show progress",
+      "label": "Show progress (-P)",
+      "description": "Show transfer progress and support partial transfers",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "rsyncDelete",
+      "type": "checkbox",
+      "title": "Delete extraneous files",
+      "label": "Delete extraneous files (--delete)",
+      "description": "Delete files in destination that don't exist in source (use with caution)",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.2",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.10",
+    "@types/react": "19.0.10",
+    "@vitest/ui": "^4.0.17",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "react": "^19.0.0",
+    "typescript": "^5.2.2",
+    "vitest": "^4.0.17"
+  },
+  "overrides": {
+    "@types/react": "19.0.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest --run",
+    "test:watch": "vitest"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

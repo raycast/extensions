@@ -76,7 +76,7 @@ test("parseAntigravityCommandModelConfigsResponse supports fallback payload", as
 });
 
 test("formatResetTime supports ISO and epoch values", async () => {
-  const { formatResetTime } = await import("./parser");
+  const { formatResetTime } = await import("../agents/format");
 
   const originalNow = Date.now;
   Date.now = () => new Date("2026-01-01T00:00:00Z").getTime();
