@@ -44,7 +44,7 @@ function DatePickerScreen({ onDateSelected }: { onDateSelected: (date: string) =
       />
       <Form.Description text="Select a past date to browse news archives (you can go back up to July 9, 2025).
 
-And contrary to what Raycast states in the dropdown menu above, no, you cannot browse tomorrow's news..." />
+And contrary to what is stated in the dropdown menu above, no, you cannot browse tomorrow's news..." />
     </Form>
   );
 }
@@ -118,6 +118,14 @@ function ArticleListScreen({
       parseResponse: async (response) => {
         if (!response.ok) throw new Error("Failed to load categories");
         return response.json();
+      },
+      onData: (data) => {
+        const worldCategory = data?.categories?.find(
+          (cat: any) => cat.categoryName.toLowerCase() === "world"
+        );
+        if (worldCategory) {
+          setSelectedCategory(worldCategory.id);
+        }
       },
       execute: !!selectedBatch,
     }

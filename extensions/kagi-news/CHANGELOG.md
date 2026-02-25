@@ -5,6 +5,7 @@
 - Migrated to the new API, which Kagi News is now focusing on, so no more use of the static JSON files
 - New 'Time Travel' command to access Kagi News archives for a specific date
 - New favorite system for the 'Daily News' command to pin your categories of interest at the top of the Cmd+P menu
+- Improve the main article view so that the listed references link directly to the articles, similar to the listed sources in the right column
 - Added the missing Simplified Chinese language 
 - Renamed the "On this Day" section to "Today in History", as it appears on the official website 
 

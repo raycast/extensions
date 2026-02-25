@@ -116,6 +116,32 @@ export function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "");
 }
 
+// Transforms [domain#N] labels to link the real article sources
+export function linkify(text: string | undefined, sources: Source[]): string {
+  if (!text || !sources || sources.length === 0) return text || "";
+
+  let linkedText = text;
+
+  const sourceMap: { [key: string]: string } = {};
+  const domainCounts: { [key: string]: number } = {};
+
+  sources.forEach((source) => {
+    const domain = getDomain(source.url);
+    domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+    const label = `${domain}#${domainCounts[domain]}`;
+    sourceMap[label] = source.url;
+  });
+
+  return linkedText.replace(/\[([^\]]+#\d+)\]/g, (match, label) => {
+    const url = sourceMap[label];
+    if (url) {
+      return `[[${label}]](${url}) `;
+    }
+    return match;
+  });
+}
+
+
 // ============================================================================
 // Data Transformation
 // ============================================================================
@@ -125,7 +151,7 @@ export function storiesToArticles(stories: StoryResponse[]): Article[] {
   return stories.map((story) => {
     const sources: Source[] =
       story.articles?.map((article) => ({
-        name: article.title.length > 50 ? article.title.substring(0, 50) + "..." : article.title,
+        name: article.title.length > 100 ? article.title.substring(0, 100) + "..." : article.title,
         url: article.link,
       })) || [];
 
@@ -143,7 +169,7 @@ export function storiesToArticles(stories: StoryResponse[]): Article[] {
       businessAnglePoints: story.business_angle_points || [],
       businessAngleText: story.business_angle_text,
       category: story.category || "",
-      culinarSignificance: story.culinary_significance,
+      culinarySignificance: story.culinary_significance,
       designPrinciples: story.design_principles,
       destinationHighlights: story.destination_highlights,
       didYouKnow: story.did_you_know,

@@ -2,7 +2,7 @@
 
 import { Detail, getPreferenceValues } from "@raycast/api";
 import { Article, Source } from "../interfaces";
-import { getDomain } from "../utils";
+import { getDomain, linkify } from "../utils";
 
 interface ArticleDetailProps {
   article: Article;
@@ -39,7 +39,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
   }
 
   // Summary must always appear after title (or title + primary image)
-  markdown += `\n\n## Summary\n${article.summary || ""}`;
+  markdown += `\n\n## Summary\n${linkify(article.summary, visibleSources) || ""}`;
 
   // KAGI NEWS OFFICIAL ORDER
 
@@ -47,7 +47,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
   if (preferences.showTalkingPoints && highlights.length > 0) {
     markdown += `\n\n## Highlights\n`;
     highlights.forEach((highlight) => {
-      markdown += `- ${highlight}\n`;
+      markdown += `- ${linkify(highlight, visibleSources)}\n`;
     });
   }
 
@@ -79,19 +79,19 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(perspectives) && perspectives.length > 0) {
       markdown += `\n\n## Perspectives\n`;
       perspectives.forEach((perspective) => {
-        markdown += `- ${perspective.text}\n`;
+        markdown += `- ${linkify(perspective.text, visibleSources)}\n`;
       });
     }
   }
 
   // Historical Background
   if (preferences.showHistoricalBackground && article.historicalBackground) {
-    markdown += `\n\n## Historical Background\n${article.historicalBackground}`;
+    markdown += `\n\n## Historical Background\n${linkify(article.historicalBackground, visibleSources)}`;
   }
 
   // Humanitarian Impact
   if (preferences.showHumanitarianImpact && article.humanitarianImpact) {
-    markdown += `\n\n## Humanitarian Impact\n${article.humanitarianImpact}`;
+    markdown += `\n\n## Humanitarian Impact\n${linkify(article.humanitarianImpact, visibleSources)}`;
   }
 
   // Technical Details
@@ -100,14 +100,14 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(details) && details.length > 0) {
       markdown += `\n\n## Technical Details\n`;
       details.forEach((detail) => {
-        markdown += `- ${detail}\n`;
+        markdown += `- ${linkify(detail, visibleSources)}\n`;
       });
     }
   }
 
   // Business Angle
   if (preferences.showBusinessAngleText && article.businessAngleText) {
-    markdown += `\n\n## Business Angle\n${article.businessAngleText}`;
+    markdown += `\n\n## Business Angle\n${linkify(article.businessAngleText, visibleSources)}`;
   }
 
   if (preferences.showBusinessAnglePoints && article.businessAnglePoints) {
@@ -115,7 +115,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(points) && points.length > 0) {
       markdown += `\n\n## Business Angle Points\n`;
       points.forEach((point) => {
-        markdown += `- ${point}\n`;
+        markdown += `- ${linkify(point, visibleSources)}\n`;
       });
     }
   }
@@ -126,7 +126,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(significance) && significance.length > 0) {
       markdown += `\n\n## Scientific Significance\n`;
       significance.forEach((sig) => {
-        markdown += `- ${sig}\n`;
+        markdown += `- ${linkify(sig, visibleSources)}\n`;
       });
     }
   }
@@ -137,7 +137,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(advisory) && advisory.length > 0) {
       markdown += `\n\n## Travel Advisory\n`;
       advisory.forEach((item) => {
-        markdown += `- ${item}\n`;
+        markdown += `- ${linkify(item, visibleSources)}\n`;
       });
     }
   }
@@ -148,24 +148,24 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(stats) && stats.length > 0) {
       markdown += `\n\n## Performance Statistics\n`;
       stats.forEach((stat) => {
-        markdown += `- ${stat}\n`;
+        markdown += `- ${linkify(stat, visibleSources)}\n`;
       });
     }
   }
 
   // League Standings
   if (preferences.showLeagueStandings && article.leagueStandings) {
-    markdown += `\n\n## League Standings\n${article.leagueStandings}`;
+    markdown += `\n\n## League Standings\n${linkify(article.leagueStandings, visibleSources)}`;
   }
 
   // Design Principles
   if (preferences.showDesignPrinciples && article.designPrinciples) {
-    markdown += `\n\n## Design Principles\n${article.designPrinciples}`;
+    markdown += `\n\n## Design Principles\n${linkify(article.designPrinciples, visibleSources)}`;
   }
 
   // User Experience Impact
   if (preferences.showUserExperienceImpact && article.userExperienceImpact) {
-    markdown += `\n\n## Experience Impact\n${article.userExperienceImpact}`;
+    markdown += `\n\n## Experience Impact\n${linkify(article.userExperienceImpact, visibleSources)}`;
   }
 
   // Gameplay Mechanics
@@ -174,7 +174,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(mechanics) && mechanics.length > 0) {
       markdown += `\n\n## Gameplay Mechanics\n`;
       mechanics.forEach((mechanic) => {
-        markdown += `- ${mechanic}\n`;
+        markdown += `- ${linkify(mechanic, visibleSources)}\n`;
       });
     }
   }
@@ -185,14 +185,14 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(impacts) && impacts.length > 0) {
       markdown += `\n\n## Industry Impact\n`;
       impacts.forEach((impact) => {
-        markdown += `- ${impact}\n`;
+        markdown += `- ${linkify(impact, visibleSources)}\n`;
       });
     }
   }
 
   // Technical Specifications
   if (preferences.showTechnicalSpecifications && article.technicalSpecifications) {
-    markdown += `\n\n## Technical Specifications\n${article.technicalSpecifications}`;
+    markdown += `\n\n## Technical Specifications\n${linkify(article.technicalSpecifications, visibleSources)}`;
   }
 
   // Timeline of Events
@@ -201,7 +201,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(timeline) && timeline.length > 0) {
       markdown += `\n\n## Timeline\n`;
       timeline.forEach((event) => {
-        markdown += `- **${event.date}**: ${event.content}\n`;
+        markdown += `- **${event.date}**: ${linkify(event.content, visibleSources)}\n`;
       });
     }
   }
@@ -212,7 +212,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(reactions) && reactions.length > 0) {
       markdown += `\n\n## International Reactions\n`;
       reactions.forEach((reaction) => {
-        markdown += `- ${reaction}\n`;
+        markdown += `- ${linkify(reaction, visibleSources)}\n`;
       });
     }
   }
@@ -223,7 +223,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(qna) && qna.length > 0) {
       markdown += `\n\n## Quick Questions\n`;
       qna.forEach((item) => {
-        markdown += `**${item.question}**\n\n${item.answer}\n\n`;
+        markdown += `**${item.question}**\n\n${linkify(item.answer, visibleSources)}\n\n`;
       });
     }
   }
@@ -234,46 +234,44 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(items) && items.length > 0) {
       markdown += `\n\n## Action Items\n`;
       items.forEach((item) => {
-        markdown += `- ${item}\n`;
+        markdown += `- ${linkify(item, visibleSources)}\n`;
       });
     }
   }
 
   // Did You Know?
   if (preferences.showDidYouKnow && article.didYouKnow) {
-    markdown += `\n\n## Did You Know?\n${article.didYouKnow}`;
+    markdown += `\n\n## Did You Know?\n${linkify(article.didYouKnow, visibleSources)}`;
   }
 
-  // ===== OTHER SECTIONS NOT IN THE OFFICIAL KAGI NEWS WEBSITE =====
-
   // Culinary Significance
-  if (preferences.showCulinarySignificance && article.culinarSignificance) {
-    markdown += `\n\n## Culinary Significance\n${article.culinarSignificance}`;
+  if (preferences.showCulinarySignificance && article.culinarySignificance) {
+    markdown += `\n\n## Culinary Significance\n${linkify(article.culinarySignificance, visibleSources)}`;
   }
 
   // Destination Highlights
   if (preferences.showDestinationHighlights && article.destinationHighlights) {
-    markdown += `\n\n## Destination Highlights\n${article.destinationHighlights}`;
+    markdown += `\n\n## Destination Highlights\n${linkify(article.destinationHighlights, visibleSources)}`;
   }
 
   // DIY Tips
   if (preferences.showDiyTips && article.diyTips) {
-    markdown += `\n\n## DIY Tips\n${article.diyTips}`;
+    markdown += `\n\n## DIY Tips\n${linkify(article.diyTips, visibleSources)}`;
   }
 
   // Economic Implications
   if (preferences.showEconomicImplications && article.economicImplications) {
-    markdown += `\n\n## Economic Implications\n${article.economicImplications}`;
+    markdown += `\n\n## Economic Implications\n${linkify(article.economicImplications, visibleSources)}`;
   }
 
   // Future Outlook
   if (preferences.showFutureOutlook && article.futureOutlook) {
-    markdown += `\n\n## Future Outlook\n${article.futureOutlook}`;
+    markdown += `\n\n## Future Outlook\n${linkify(article.futureOutlook, visibleSources)}`;
   }
 
   // Geopolitical Context
   if (preferences.showGeopoliticalContext && article.geopoliticalContext) {
-    markdown += `\n\n## Geopolitical Context\n${article.geopoliticalContext}`;
+    markdown += `\n\n## Geopolitical Context\n${linkify(article.geopoliticalContext, visibleSources)}`;
   }
 
   // Key Players
@@ -282,14 +280,14 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     if (Array.isArray(players) && players.length > 0) {
       markdown += `\n\n## Key Players\n`;
       players.forEach((player) => {
-        markdown += `- ${player}\n`;
+        markdown += `- ${linkify(player, visibleSources)}\n`;
       });
     }
   }
 
   // Location
   if (preferences.showLocation && article.location) {
-    markdown += `\n\n## Location\n${article.location}`;
+    markdown += `\n\n## Location\n${linkify(article.location, visibleSources)}`;
   }
 
   return (

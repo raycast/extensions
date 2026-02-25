@@ -52,7 +52,7 @@ export interface Article {
   leagueStandings?: string;
   location?: string;
   performanceStatistics?: string[];
-  perspectives?: Array<{ text: string; sources: Source[] }>;
+  perspectives?: Array<{ text: string; sources?: Source[] }>;
   primary_image?: { url: string; caption: string; credit: string };
   quote?: string;
   quoteAttribution?: string;
