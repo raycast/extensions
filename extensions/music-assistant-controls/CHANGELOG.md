@@ -20,24 +20,6 @@
 - **Add to Queue** - All items can be added to active player's queue to play next
 - **Previous Song command** - Navigate backward through the queue with a dedicated "Previous Song" command that mirrors the existing "Next Song" functionality
 
-### ✨ New Features
-
-- **Current Track command** - View now-playing track with large album artwork (300x300px) and detailed metadata
-- **Shuffle toggle** - Quick button to toggle shuffle mode (OFF ↔ ON) with visual feedback
-- **Repeat mode cycling** - Cycle through repeat modes (OFF → ONE → ALL → OFF) with status display
-- **Add to Favorites** - One-click button to add current track to favorites with heart icon
-- **Add to Playlist** - Dropdown menu to select from available playlists and add current track instantly
-- **Track metadata display** - Shows track title, artist, album, duration, queue name, and player state
-- **Mute Toggle Command** - Dedicated command to toggle mute state on the active player with visual feedback showing state changes (MUTED/UNMUTED)
-- **Music Library Hub Command** - Comprehensive library exploration with unified search, browse, and queue management
-  - **Search Tab** - Full-text search across entire library (artists, albums, tracks, playlists) with 50-item limit
-  - **Browse Tab** - Drill-down navigation through Artists, Albums, and Playlists with pagination
-  - **Recently Played Tab** - Quick access to 30 recently played items
-  - **Queue Manager Tab** - View, reorder, remove, or clear items from active queue
-- **Queue Controls** - Manage shuffle and repeat modes directly from queue manager
-- **Add to Queue** - All items can be added to active player's queue to play next
-- **Previous Song command** - Navigate backward through the queue with a dedicated "Previous Song" command that mirrors the existing "Next Song" functionality
-
 ## [Player Grouping and Menu Bar Management] - 2026-02-24
 
 ### ✨ New Features
