@@ -337,6 +337,21 @@ function runGitWorktreeAdd(
 
 export const createWorktreeCancelledError = CANCELLED_ERROR;
 
+const DEFAULT_REMOTE = "origin";
+
+/** Set branch upstream to origin/branch so push works from the worktree (e.g. in Cursor). */
+async function setBranchUpstream(repoPath: string, branch: string, onLog?: (text: string) => void): Promise<void> {
+  try {
+    await execFileAsync("git", ["branch", "--set-upstream-to", `${DEFAULT_REMOTE}/${branch}`, branch], {
+      cwd: repoPath,
+      maxBuffer: 1024 * 1024,
+    });
+    onLog?.(`Upstream set to ${DEFAULT_REMOTE}/${branch} (push will work from the worktree).\n`);
+  } catch {
+    // No remote or other git config issue; don't fail the whole operation
+  }
+}
+
 export async function createWorktreeFromBase(
   repoPath: string,
   newBranchName: string,
@@ -369,7 +384,11 @@ export async function createWorktreeFromBase(
     } else {
       onLog?.(`Creating branch "${branch}" and worktree at ${absWorktree}…\n`);
     }
-    return runGitWorktreeAdd(absRepo, ["-b", branch, absWorktree, startPoint], { onLog, signal });
+    const result = await runGitWorktreeAdd(absRepo, ["-b", branch, absWorktree, startPoint], { onLog, signal });
+    if (result.success) {
+      await setBranchUpstream(absRepo, branch, onLog);
+    }
+    return result;
   } catch (err: unknown) {
     const e = err as { message?: string; stderr?: string; stdout?: string };
     const parts = [e.message, e.stderr, e.stdout].filter(Boolean) as string[];
