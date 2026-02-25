@@ -700,20 +700,19 @@ export class MusicAssistantApi {
     // Configure shuffle setting on the the queue.
     this.playerQueueCommand(queueId, "shuffle", { shuffle_enabled });
   }
-  public queueCommandShuffleToggle(queueId: string) {
+  public queueCommandShuffleToggle(queueId: string, currentShuffleEnabled: boolean) {
     // Toggle shuffle mode for a queue
-    this.queueCommandShuffle(queueId, !this.queues[queueId].shuffle_enabled);
+    this.queueCommandShuffle(queueId, !currentShuffleEnabled);
   }
   public queueCommandRepeat(queueId: string, repeat_mode: RepeatMode) {
     // Configure repeat setting on the the queue.
     this.playerQueueCommand(queueId, "repeat", { repeat_mode });
   }
-  public queueCommandRepeatToggle(queueId: string) {
+  public queueCommandRepeatToggle(queueId: string, currentRepeatMode: RepeatMode) {
     // Toggle repeat mode of a queue
-    const queue = this.queues[queueId];
-    if (this.queues[queueId].repeat_mode == RepeatMode.OFF) {
+    if (currentRepeatMode == RepeatMode.OFF) {
       this.queueCommandRepeat(queueId, RepeatMode.ONE);
-    } else if (this.queues[queueId].repeat_mode == RepeatMode.ONE) {
+    } else if (currentRepeatMode == RepeatMode.ONE) {
       this.queueCommandRepeat(queueId, RepeatMode.ALL);
     } else {
       this.queueCommandRepeat(queueId, RepeatMode.OFF);
@@ -725,9 +724,9 @@ export class MusicAssistantApi {
       dont_stop_the_music_enabled,
     });
   }
-  public queueCommandDontStopTheMusicToggle(queueId: string) {
+  public queueCommandDontStopTheMusicToggle(queueId: string, currentDontStopTheMusic: boolean) {
     // Toggle dont_stop_the_music mode of a queue
-    this.queueCommandDontStopTheMusic(queueId, !this.queues[queueId].dont_stop_the_music_enabled);
+    this.queueCommandDontStopTheMusic(queueId, !currentDontStopTheMusic);
   }
   public playerQueueCommand(queue_id: string, command: string, args?: Record<string, any>): Promise<void> {
     /*

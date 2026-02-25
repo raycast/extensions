@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, openExtensionPreferences, Image } from "@raycast/api";
+import { Icon, MenuBarExtra, Image } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { Player, PlayerQueue } from "./external-code/interfaces";
 import MusicAssistantClient from "./music-assistant-client";

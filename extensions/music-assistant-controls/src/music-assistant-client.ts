@@ -801,28 +801,30 @@ export default class MusicAssistantClient {
    * Toggle shuffle mode on a queue
    *
    * @param queueId - The queue ID to toggle shuffle on
+   * @param currentShuffleEnabled - The current shuffle state
    * @throws {Error} When the API command fails
    * @example
    * ```typescript
-   * await client.toggleShuffle("queue-123");
+   * await client.toggleShuffle("queue-123", true);
    * ```
    */
-  async toggleShuffle(queueId: string): Promise<void> {
-    await executeApiCommand(async (api) => await api.queueCommandShuffleToggle(queueId));
+  async toggleShuffle(queueId: string, currentShuffleEnabled: boolean): Promise<void> {
+    await executeApiCommand(async (api) => await api.queueCommandShuffleToggle(queueId, currentShuffleEnabled));
   }
 
   /**
    * Cycle through repeat modes: OFF → ONE → ALL → OFF
    *
    * @param queueId - The queue ID to cycle repeat mode on
+   * @param currentRepeatMode - The current repeat mode
    * @throws {Error} When the API command fails
    * @example
    * ```typescript
-   * await client.cycleRepeatMode("queue-123");
+   * await client.cycleRepeatMode("queue-123", RepeatMode.OFF);
    * ```
    */
-  async cycleRepeatMode(queueId: string): Promise<void> {
-    await executeApiCommand(async (api) => await api.queueCommandRepeatToggle(queueId));
+  async cycleRepeatMode(queueId: string, currentRepeatMode: RepeatMode): Promise<void> {
+    await executeApiCommand(async (api) => await api.queueCommandRepeatToggle(queueId, currentRepeatMode));
   }
 
   /**

@@ -40,7 +40,7 @@ export default function CurrentTrackCommand() {
     if (!queueData) return;
     try {
       const wasEnabled = queueData.shuffle_enabled;
-      await client.toggleShuffle(queueData.queue_id);
+      await client.toggleShuffle(queueData.queue_id, wasEnabled);
       await showToast({
         style: Toast.Style.Success,
         title: "Shuffle Toggled",
@@ -63,9 +63,9 @@ export default function CurrentTrackCommand() {
   const cycleRepeat = async () => {
     if (!queueData) return;
     try {
-      await client.cycleRepeatMode(queueData.queue_id);
-      const nextMode =
-        queueData.repeat_mode === RepeatMode.OFF ? "ONE" : queueData.repeat_mode === RepeatMode.ONE ? "ALL" : "OFF";
+      const currentMode = queueData.repeat_mode;
+      await client.cycleRepeatMode(queueData.queue_id, currentMode);
+      const nextMode = currentMode === RepeatMode.OFF ? "ONE" : currentMode === RepeatMode.ONE ? "ALL" : "OFF";
       await showToast({
         style: Toast.Style.Success,
         title: "Repeat Mode Changed",
