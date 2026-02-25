@@ -107,7 +107,7 @@ export default function CurrentTrackCommand() {
       await showToast({
         style: Toast.Style.Success,
         title: wasFavorite ? "Removed from Favorites" : "Added to Favorites",
-        message: queueData.current_item?.name,
+        message: queueData?.current_item?.name,
       });
       await refreshCurrentTrackState();
     } catch (error) {
@@ -153,7 +153,8 @@ export default function CurrentTrackCommand() {
     return <Detail isLoading={queueIdLoading} markdown="# Loading...\n\nFetching your player selection..." />;
   }
 
-  const isCurrentTrackFavorite = resolvedCurrentItem?.favorite ?? queueData?.current_item?.media_item?.favorite ?? false;
+  const isCurrentTrackFavorite =
+    resolvedCurrentItem?.favorite ?? queueData?.current_item?.media_item?.favorite ?? false;
 
   // Build markdown content for the detail view (left column with album art and title)
   const buildMarkdown = (): string => {
