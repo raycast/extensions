@@ -10,6 +10,7 @@ export interface BrowserTab {
   tabIndex: number;
   title: string;
   url: string;
+  windowName?: string;
 }
 
 /** Bundle IDs → JXA application names for supported browsers */
@@ -50,11 +51,37 @@ export async function getBrowserTabs(bundleId: string): Promise<BrowserTab[]> {
       tabIndex: number;
       title: string;
       url: string;
+      windowName?: string;
     }>;
 
     return tabs.map((t) => ({ ...t, bundleId, appName }));
   } catch {
     return [];
+  }
+}
+
+/** Bring a browser window to front without changing the active tab. */
+export async function focusBrowserWindow(
+  bundleId: string,
+  windowIndex: number,
+): Promise<boolean> {
+  const appName = SUPPORTED_BROWSERS[bundleId];
+  if (!appName) return false;
+
+  const script = `
+    const app = Application(${JSON.stringify(appName)});
+    app.windows[${windowIndex}].index = 1;
+    app.activate();
+  `;
+
+  try {
+    await execFileAsync("osascript", ["-l", "JavaScript", "-e", script], {
+      encoding: "utf8",
+      timeout: 5000,
+    });
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -71,6 +98,64 @@ export async function switchToTab(
     bundleId === "com.apple.Safari"
       ? safariSwitchScript(appName, windowIndex, tabIndex)
       : chromiumSwitchScript(appName, windowIndex, tabIndex);
+
+  try {
+    await execFileAsync("osascript", ["-l", "JavaScript", "-e", script], {
+      encoding: "utf8",
+      timeout: 5000,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Close a specific tab in a browser window. */
+export async function closeTab(
+  bundleId: string,
+  windowIndex: number,
+  tabIndex: number,
+  windowName?: string,
+  tabUrl?: string,
+): Promise<boolean> {
+  const appName = SUPPORTED_BROWSERS[bundleId];
+  if (!appName) return false;
+
+  const script = `
+    const app = Application(${JSON.stringify(appName)});
+    const win = app.windows[${windowIndex}];
+    ${windowName != null ? `if (win.title() !== ${JSON.stringify(windowName)}) throw new Error("window mismatch");` : ""}
+    const tab = win.tabs[${tabIndex}];
+    ${tabUrl != null ? `if (tab.url() !== ${JSON.stringify(tabUrl)}) throw new Error("tab mismatch");` : ""}
+    tab.close();
+  `;
+
+  try {
+    await execFileAsync("osascript", ["-l", "JavaScript", "-e", script], {
+      encoding: "utf8",
+      timeout: 5000,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Close an entire browser window. */
+export async function closeBrowserWindow(
+  bundleId: string,
+  windowIndex: number,
+  windowName?: string,
+): Promise<boolean> {
+  const appName = SUPPORTED_BROWSERS[bundleId];
+  if (!appName) return false;
+
+  const script = `
+    const app = Application(${JSON.stringify(appName)});
+    const win = app.windows[${windowIndex}];
+    ${windowName != null ? `if (win.title() !== ${JSON.stringify(windowName)}) throw new Error("window mismatch");` : ""}
+    win.close();
+  `;
 
   try {
     await execFileAsync("osascript", ["-l", "JavaScript", "-e", script], {
@@ -101,6 +186,7 @@ function chromiumTabsScript(appName: string): string {
     const windows = app.windows();
     for (let wi = 0; wi < windows.length; wi++) {
       try {
+        const windowName = windows[wi].title() || "";
         const windowTabs = windows[wi].tabs();
         for (let ti = 0; ti < windowTabs.length; ti++) {
           try {
@@ -108,7 +194,8 @@ function chromiumTabsScript(appName: string): string {
               windowIndex: wi,
               tabIndex: ti,
               title: windowTabs[ti].title(),
-              url: windowTabs[ti].url()
+              url: windowTabs[ti].url(),
+              windowName: windowName
             });
           } catch(e) {}
         }

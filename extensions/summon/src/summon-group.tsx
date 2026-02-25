@@ -16,7 +16,7 @@ import {
   getApplications,
   Cache,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   getGroups,
   getGroupByName,
@@ -39,6 +39,9 @@ import {
   isSupportedBrowser,
   getBrowserTabs,
   switchToTab,
+  focusBrowserWindow,
+  closeTab,
+  closeBrowserWindow,
   getDomain,
   BrowserTab,
 } from "./utils/browser-tabs";
@@ -288,6 +291,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     () => new Map(readCache<[string, string][]>("appPaths") ?? []),
   );
   const { push } = useNavigation();
+  const pollCooldownRef = useRef(0);
+  const pollVersionRef = useRef(0);
 
   function reload() {
     setGroups(getGroups());
@@ -360,6 +365,30 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     })();
   }, []);
 
+  // Poll browser tabs so new/closed tabs appear quickly
+  const browserBundleIdKey = [...browserBundleIds].sort().join(",");
+
+  useEffect(() => {
+    if (!browserBundleIdKey) return;
+    const ids = browserBundleIdKey.split(",");
+    const id = setInterval(async () => {
+      if (Date.now() < pollCooldownRef.current) return;
+      const version = pollVersionRef.current;
+      try {
+        const results = await Promise.all(
+          ids.map((bid) => getBrowserTabs(bid)),
+        );
+        if (version !== pollVersionRef.current) return;
+        const allTabs = results.flat();
+        setBrowserTabs(allTabs);
+        writeCache("browserTabs", allTabs);
+      } catch {
+        // Non-critical
+      }
+    }, 2000);
+    return () => clearInterval(id);
+  }, [browserBundleIdKey]);
+
   async function handleSummon(group: Group) {
     try {
       const hudMessage = await summonGroup(group);
@@ -409,6 +438,21 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     await popToRoot({ clearSearchBar: true });
   }
 
+  async function handleFocusBrowserWindow(tab: BrowserTab) {
+    const ok = await focusBrowserWindow(tab.bundleId, tab.windowIndex);
+    if (!ok) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to switch window",
+      });
+      return;
+    }
+    const label = tab.windowName || tab.appName;
+    await showHUD(`Switched to ${label}`);
+    await closeMainWindow({ clearRootSearch: true });
+    await popToRoot({ clearSearchBar: true });
+  }
+
   async function handleSwitchTab(tab: BrowserTab) {
     const ok = await switchToTab(tab.bundleId, tab.windowIndex, tab.tabIndex);
     if (!ok) {
@@ -421,6 +465,64 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     await showHUD(`Switched to ${tab.title}`);
     await closeMainWindow({ clearRootSearch: true });
     await popToRoot({ clearSearchBar: true });
+  }
+
+  async function handleCloseTab(tab: BrowserTab) {
+    pollVersionRef.current++;
+    pollCooldownRef.current = Date.now() + 2500;
+    let snapshot: BrowserTab[] = [];
+    setBrowserTabs((prev) => {
+      snapshot = prev;
+      return prev.filter(
+        (t) =>
+          !(
+            t.bundleId === tab.bundleId &&
+            t.windowIndex === tab.windowIndex &&
+            t.tabIndex === tab.tabIndex
+          ),
+      );
+    });
+    const ok = await closeTab(
+      tab.bundleId,
+      tab.windowIndex,
+      tab.tabIndex,
+      tab.windowName,
+      tab.url,
+    );
+    if (!ok) {
+      setBrowserTabs(snapshot);
+      pollCooldownRef.current = 0;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to close tab",
+      });
+    }
+  }
+
+  async function handleCloseBrowserWindow(tab: BrowserTab) {
+    pollVersionRef.current++;
+    pollCooldownRef.current = Date.now() + 2500;
+    let snapshot: BrowserTab[] = [];
+    setBrowserTabs((prev) => {
+      snapshot = prev;
+      return prev.filter(
+        (t) =>
+          !(t.bundleId === tab.bundleId && t.windowIndex === tab.windowIndex),
+      );
+    });
+    const ok = await closeBrowserWindow(
+      tab.bundleId,
+      tab.windowIndex,
+      tab.windowName,
+    );
+    if (!ok) {
+      setBrowserTabs(snapshot);
+      pollCooldownRef.current = 0;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to close window",
+      });
+    }
   }
 
   // Non-browser windows (browsers are replaced by their tabs)
@@ -526,6 +628,54 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
             />
           );
         })}
+        {[...tabsByWindow.entries()].map(([windowKey, tabs]) => {
+          const first = tabs[0];
+          const appPath = appPaths.get(first.bundleId);
+          const windowNum = first.windowIndex + 1;
+          const browserCount = new Set(
+            [...tabsByWindow.keys()].filter((k) =>
+              k.startsWith(first.bundleId + "-"),
+            ),
+          ).size;
+          const windowName = first.windowName;
+          const windowLabel = windowName
+            ? windowName
+            : browserCount > 1
+              ? `Window ${windowNum}`
+              : first.appName;
+          return (
+            <List.Item
+              key={`bw-${windowKey}`}
+              title={windowLabel}
+              subtitle={
+                windowName || browserCount > 1 ? first.appName : undefined
+              }
+              icon={appPath ? { fileIcon: appPath } : Icon.Globe}
+              accessories={[{ text: `${tabs.length} tabs` }]}
+              keywords={[
+                first.appName,
+                windowName || "",
+                `window ${windowNum}`,
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Switch to Window"
+                    icon={Icon.ArrowRight}
+                    onAction={() => handleFocusBrowserWindow(first)}
+                  />
+                  <Action
+                    title="Close Window"
+                    icon={Icon.XMarkCircle}
+                    style={Action.Style.Destructive}
+                    onAction={() => handleCloseBrowserWindow(first)}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
       {[...tabsByWindow.entries()].map(([windowKey, tabs]) => {
         const first = tabs[0];
@@ -536,13 +686,19 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
             k.startsWith(first.bundleId + "-"),
           ),
         ).size;
-        const title =
-          browserCount > 1
+        const windowName = first.windowName;
+        const title = windowName
+          ? `${first.appName} — ${windowName}`
+          : browserCount > 1
             ? `${first.appName} — Window ${windowNum}`
             : first.appName;
 
         return (
-          <List.Section key={windowKey} title={title} subtitle={`${tabs.length} tabs`}>
+          <List.Section
+            key={windowKey}
+            title={title}
+            subtitle={`${tabs.length} tabs`}
+          >
             {tabs.map((tab) => {
               const domain = getDomain(tab.url);
               return (
@@ -558,6 +714,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
                         title="Switch to Tab"
                         icon={Icon.ArrowRight}
                         onAction={() => handleSwitchTab(tab)}
+                      />
+                      <Action
+                        title="Close Tab"
+                        icon={Icon.XMarkCircle}
+                        style={Action.Style.Destructive}
+                        onAction={() => handleCloseTab(tab)}
+                        shortcut={{ modifiers: ["cmd"], key: "d" }}
                       />
                     </ActionPanel>
                   }
