@@ -261,7 +261,10 @@ class ThreadSearchIndex {
 
     for (const searchTerm of searchTerms) {
       for (const property of properties) {
-        const results = this.fuse.search({ [`searchFields.${property}`]: searchTerm } as Fuse.Expression);
+        const expression = { [`searchFields.${property}`]: searchTerm } as unknown as Parameters<
+          Fuse<SearchIndexItem>["search"]
+        >[0];
+        const results = this.fuse.search(expression);
         for (const result of results) {
           if (result.score == null) continue;
           const match = getOrCreateMatch(result.item.id);
@@ -708,7 +711,7 @@ export function ChatListView({
       ...(chat.unreadCount > 0 ? [{ text: `${chat.unreadCount} unread` }] : []),
       ...(chat.isPinned ? [{ icon: Icon.Pin }] : []),
       ...(chat.isMuted ? [{ icon: Icon.SpeakerOff }] : []),
-      ...(chat.isArchived ? [{ icon: Icon.Archive }] : []),
+      ...(chat.isArchived ? [{ icon: Icon.Box }] : []),
       ...(lastActivity ? [{ date: lastActivity }] : []),
     ];
 
@@ -822,7 +825,7 @@ export function ChatListView({
               <Action.Push title="Show Details" icon={Icon.Info} target={<ChatDetails chat={chat} />} />
               <Action
                 title={chat.isArchived ? "Unarchive" : "Archive"}
-                icon={chat.isArchived ? Icon.Tray : Icon.Archive}
+                icon={chat.isArchived ? Icon.Tray : Icon.Box}
                 onAction={() => handleArchiveChat(chat, !chat.isArchived)}
               />
             </ActionPanel.Section>
@@ -838,7 +841,7 @@ export function ChatListView({
                 onAction={() => refreshIndex("full")}
               />
               {showSmartSections && (
-                <Action title="Reset Smart Ranking" icon={Icon.Repeat} onAction={() => resetRanking()} />
+                <Action title="Reset Smart Ranking" icon={Icon.Repeat} onAction={() => resetRanking(chat)} />
               )}
               {showSmartSections && (
                 <Action title="Clear Recent Chats" icon={Icon.Trash} onAction={() => setRecentChatIDs([])} />
@@ -1082,11 +1085,11 @@ function MessageActions({
         )}
       </ActionPanel.Section>
       <ActionPanel.Section title="Message">
-        <Action.Push
-          title="Reply to Message"
-          icon={Icon.ArrowTurnDown}
-          target={<ComposeMessageForm chat={chat} replyToMessageID={messageID} />}
-        />
+          <Action.Push
+            title="Reply to Message"
+            icon={Icon.ArrowDown}
+            target={<ComposeMessageForm chat={chat} replyToMessageID={messageID} />}
+          />
         <Action.Push title="New Message" icon={Icon.Pencil} target={<ComposeMessageForm chat={chat} />} />
         {message.isSender && message.text && (
           <Action.Push
@@ -1276,12 +1279,16 @@ function EditMessageForm({ chat, message }: { chat: BeeperDesktop.Chat; message:
 
 export function ReminderForm({ chat }: { chat: BeeperDesktop.Chat }) {
   const { pop } = useNavigation();
-  const { handleSubmit, itemProps } = useForm<{ remindAt: Date; dismissOnIncoming: boolean }>({
+  const { handleSubmit, itemProps } = useForm<{ remindAt: Date | null; dismissOnIncoming: boolean }>({
     initialValues: {
       remindAt: new Date(Date.now() + 60 * 60 * 1000),
       dismissOnIncoming: false,
     },
     onSubmit: async (values) => {
+      if (!values.remindAt) {
+        await showHUD("Pick a reminder date");
+        return;
+      }
       const remindAtMs = values.remindAt.getTime();
       const toast = await showToast({ style: Toast.Style.Animated, title: "Setting reminder" });
       try {
@@ -1321,7 +1328,7 @@ export function ChatDetails({ chat }: { chat: BeeperDesktop.Chat }) {
   });
 
   const participantLines = useMemo(() => {
-    const participants = data?.participants.items ?? [];
+    const participants = data?.participants?.items ?? [];
     if (participants.length === 0) return "No participants available.";
     return participants
       .map((participant) => {
@@ -1329,7 +1336,7 @@ export function ChatDetails({ chat }: { chat: BeeperDesktop.Chat }) {
         return `- ${name}`;
       })
       .join("\n");
-  }, [data?.participants.items]);
+  }, [data?.participants?.items]);
 
   return (
     <Detail

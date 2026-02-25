@@ -295,7 +295,7 @@ function MessageSearchActions({
         />
         <Action.Push
           title="Reply to Message"
-          icon={Icon.ArrowTurnDown}
+          icon={Icon.ArrowDown}
           target={<ComposeMessageById chatID={message.chatID} replyToMessageID={messageID} />}
         />
         <Action

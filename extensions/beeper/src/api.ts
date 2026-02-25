@@ -105,10 +105,13 @@ export const focusApp = async (
   }
 };
 
-export const retrieveChat = async (chatID: string, options?: { maxParticipantCount?: number | null }) => {
-  return getBeeperDesktop().get(`/v1/chats/${encodeURIComponent(chatID)}`, {
+export const retrieveChat = async (
+  chatID: string,
+  options?: { maxParticipantCount?: number | null },
+): Promise<BeeperDesktop.Chat> => {
+  return (await getBeeperDesktop().get(`/v1/chats/${encodeURIComponent(chatID)}`, {
     query: options,
-  });
+  })) as BeeperDesktop.Chat;
 };
 
 export const archiveChat = async (chatID: string, archived?: boolean) => {
@@ -179,27 +182,37 @@ export type GlobalSearchResponse = {
   };
 };
 
-const normalizeCursorResponse = <T>(result: {
-  items?: T[];
-  hasMore?: boolean;
-  newestCursor?: string | null;
-  oldestCursor?: string | null;
-  cursor?: string | null;
-  nextCursor?: string | null;
-}): CursorResponse<T> => ({
-  items: result.items ?? [],
-  hasMore: result.hasMore,
-  newestCursor: result.newestCursor,
-  oldestCursor: result.oldestCursor,
-  cursor: result.cursor,
-  nextCursor: result.nextCursor,
-});
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const getOptionalNullableString = (value: unknown) => (typeof value === "string" || value === null ? value : undefined);
+
+const getOptionalBoolean = (value: unknown) => (typeof value === "boolean" ? value : undefined);
+
+const getItemsFromResponse = <T>(response: unknown): T[] => {
+  if (Array.isArray(response)) return response as T[];
+  if (isRecord(response) && Array.isArray(response.items)) return response.items as T[];
+  return [];
+};
+
+const normalizeUnknownCursorResponse = <T>(result: unknown): CursorResponse<T> => {
+  if (!isRecord(result)) return { items: [] };
+  const items = Array.isArray(result.items) ? (result.items as T[]) : [];
+  return {
+    items,
+    hasMore: getOptionalBoolean(result.hasMore),
+    newestCursor: getOptionalNullableString(result.newestCursor),
+    oldestCursor: getOptionalNullableString(result.oldestCursor),
+    cursor: getOptionalNullableString(result.cursor),
+    nextCursor: getOptionalNullableString(result.nextCursor),
+  };
+};
 
 const getAccessTokenValue = () => getAccessToken().token;
 
 const getAuthHeaders = () => ({ Authorization: `Bearer ${getAccessTokenValue()}` });
 
-const requestJSON = async <T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> => {
+const requestJSON = async <T>(input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]): Promise<T> => {
   const response = await fetch(input, init);
   if (!response.ok) {
     const text = await response.text();
@@ -269,20 +282,14 @@ export const getServeAssetURL = (url: string) => {
 
 export const listAccounts = async (): Promise<BeeperDesktop.Account[]> => {
   const response = await getBeeperDesktop().get("/v1/accounts");
-  if (Array.isArray(response)) {
-    return response as BeeperDesktop.Account[];
-  }
-  if (response?.items && Array.isArray(response.items)) {
-    return response.items as BeeperDesktop.Account[];
-  }
-  return [];
+  return getItemsFromResponse<BeeperDesktop.Account>(response);
 };
 
 export const searchContacts = async (accountID: string, query: string) => {
   const response = await getBeeperDesktop().get(`/v1/accounts/${encodeURIComponent(accountID)}/contacts`, {
     query: { query },
   });
-  return response?.items && Array.isArray(response.items) ? (response.items as BeeperDesktop.User[]) : [];
+  return getItemsFromResponse<BeeperDesktop.User>(response);
 };
 
 export const listChats = async (params?: {
@@ -291,7 +298,7 @@ export const listChats = async (params?: {
   direction?: "after" | "before";
 }): Promise<CursorResponse<BeeperDesktop.Chat>> => {
   const response = await getBeeperDesktop().get("/v1/chats", { query: params });
-  return normalizeCursorResponse(response);
+  return normalizeUnknownCursorResponse<BeeperDesktop.Chat>(response);
 };
 
 export const searchChats = async (params: {
@@ -306,9 +313,10 @@ export const searchChats = async (params: {
   query?: string;
   type?: "single" | "group" | "channel" | "any";
   unreadOnly?: boolean;
+  limit?: number;
 }) => {
   const response = await getBeeperDesktop().get("/v1/chats/search", { query: params });
-  return normalizeCursorResponse(response);
+  return normalizeUnknownCursorResponse<BeeperDesktop.Chat>(response);
 };
 
 export const createChat = async (body: {
@@ -328,7 +336,7 @@ export const listChatMessages = async (
   const response = await getBeeperDesktop().get(`/v1/chats/${encodeURIComponent(chatID)}/messages`, {
     query: params,
   });
-  return normalizeCursorResponse(response);
+  return normalizeUnknownCursorResponse<BeeperDesktop.Message>(response);
 };
 
 export const searchMessages = async (params: {
@@ -347,7 +355,7 @@ export const searchMessages = async (params: {
   limit?: number;
 }): Promise<CursorResponse<BeeperDesktop.Message>> => {
   const response = await getBeeperDesktop().get("/v1/messages/search", { query: params });
-  return normalizeCursorResponse(response);
+  return normalizeUnknownCursorResponse<BeeperDesktop.Message>(response);
 };
 
 export const searchAll = async (params: { query: string }): Promise<GlobalSearchResponse> => {
