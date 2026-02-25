@@ -4,14 +4,6 @@ const DEFAULT_ZO_API_BASE_URL = "https://api.zo.computer";
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
 
-export type AppConfig = {
-  apiKey: string;
-  zoApiBaseUrl: string;
-  requestTimeoutMs: number;
-  maxRetries: number;
-  enableChatStreaming: boolean;
-};
-
 function parseNumberSetting(value: string | undefined, fallback: number, min: number): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < min) {
@@ -35,7 +27,7 @@ export class AppConfigManager {
     return getPreferenceValues<Preferences>();
   }
 
-  static getConfig(): AppConfig {
+  static getConfig() {
     const preferences = AppConfigManager.readPreferences();
 
     return {
