@@ -57,9 +57,7 @@ function ErrorEmptyView(props: { error: Error; onRefresh: () => Promise<void> })
       description={description}
       actions={
         <ActionPanel>
-          {isAuth && (
-            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          )}
+          {isAuth && <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />}
           <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={props.onRefresh} />
         </ActionPanel>
       }

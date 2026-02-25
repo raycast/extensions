@@ -101,7 +101,9 @@ class CacheManager {
     if (!this._isFetchingBackground) return;
     this.remainingPagesToken++;
     this.loadMoreToken++;
-    logger.log(`[CacheManager] Background fetch aborted (remainingPages token: ${this.remainingPagesToken}, loadMore token: ${this.loadMoreToken})`);
+    logger.log(
+      `[CacheManager] Background fetch aborted (remainingPages token: ${this.remainingPagesToken}, loadMore token: ${this.loadMoreToken})`,
+    );
     this.setFetchingBackground(false);
   }
 

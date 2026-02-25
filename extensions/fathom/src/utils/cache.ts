@@ -185,7 +185,6 @@ export async function getAllCachedMeetings(): Promise<CachedMeetingData[]> {
   try {
     const all = await LocalStorage.allItems();
     const prefix = CACHE_CONFIG.MEETINGS.KEY_PREFIX;
-    const now = Date.now();
     const ttl = CACHE_CONFIG.MEETINGS.TTL;
     const actionItemsTtl = CACHE_CONFIG.ACTION_ITEMS.TTL;
 
@@ -357,7 +356,12 @@ export function searchCachedMeetings(cachedMeetings: CachedMeetingData[], query:
 
   const results = cachedMeetings.filter((cached) => {
     const meeting = cached.meeting as { title?: string; meetingTitle?: string };
-    const searchableText = [meeting.title || "", meeting.meetingTitle || "", cached.summary || "", cached.transcript || ""]
+    const searchableText = [
+      meeting.title || "",
+      meeting.meetingTitle || "",
+      cached.summary || "",
+      cached.transcript || "",
+    ]
       .join(" ")
       .toLowerCase();
 
