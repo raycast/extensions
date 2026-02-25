@@ -533,6 +533,8 @@ function getCheckoutInstructions(
 <details>
 <summary>📋 Quick checkout commands</summary>
 
+**Don't have the repository yet?**
+
 \`\`\`bash
 BRANCH="${branch}"
 FORK_URL="${forkUrl}"
@@ -543,6 +545,22 @@ git clone -n --depth=1 --filter=tree:0 -b $BRANCH $FORK_URL
 cd $REPO_NAME
 git sparse-checkout set --no-cone "extensions/$EXTENSION_NAME"
 git checkout
+cd "extensions/$EXTENSION_NAME"
+npm install && npm run dev
+\`\`\`
+
+**Already have the repository cloned?**
+
+\`\`\`bash
+BRANCH="${branch}"
+FORK_URL="${forkUrl}"
+EXTENSION_NAME="${extensionFolder}"
+REPO_NAME="${repoName}"
+
+git remote add $REPO_NAME $FORK_URL 2>/dev/null || git remote set-url $REPO_NAME $FORK_URL
+git fetch --filter=tree:0 --no-tags $REPO_NAME $BRANCH
+git sparse-checkout add "extensions/$EXTENSION_NAME"
+git checkout $REPO_NAME/$BRANCH -- "extensions/$EXTENSION_NAME"
 cd "extensions/$EXTENSION_NAME"
 npm install && npm run dev
 \`\`\`
