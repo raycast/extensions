@@ -2,23 +2,33 @@
 A powerful Raycast extension that integrates with Everything Search by voidtools to provide lightning-fast file system search and navigation on Windows. Transform your file discovery workflow with instant search results and comprehensive directory browsing capabilities.
 
 > **Attribution**: File search on servers ported from [anastasiy_safari/raycast-everything-ftp](https://github.com/anastasiuspernat/everything-search) <br>
-> **Attribution**: File search through CLI ported from [dougfernando/everything-raycast-extension](https://github.com/dougfernando/everything-raycast-extension)
+> **Attribution**: File search through CLI ported from [dougfernando/everything-raycast-extension](https://github.com/dougfernando/everything-raycast-extension) <br>
 
 ## 📦 Prerequisites
 
-1. **Install Everything CLI**: Install the command-line interface for Everything
-    - Download from [voidtools.com](https://www.voidtools.com/downloads/#cli)
-    - Or install via winget:
-   ```bash
-   winget install --id=voidtools.Everything.Cli -e
-   ```
+**In order to use this extension, you need to have Everything Search installed on your Windows system**
 
-2. **Install Everything Desktop App**: Ensure Everything is installed and running (for indexing)
-   - Download from [voidtools.com](https://www.voidtools.com/)
-   - Or install via winget: 
-   ```bash
-   winget install voidtools.Everything
-   ```
+### 1. Install Everything Desktop App
+
+Download from [voidtools.com](https://www.voidtools.com/downloads/) or install via winget:
+
+```bash
+winget install voidtools.Everything
+```
+
+### 2. Install Everything CLI (optional)
+
+The extension uses the Everything CLI tool (`es.exe`) for searching. If it's not found on your system, the extension will **automatically prompt you to download and install it**.
+
+To install manually instead:
+
+- Download from [voidtools.com](https://www.voidtools.com/downloads/#cli)</br>
+or
+- Install via winget:
+
+```bash
+winget install --id=voidtools.Everything.Cli -e
+```
 
 ## 🛠️ Configuration
 
@@ -59,5 +69,14 @@ Configure the servers in the extension settings using the following format:
 ]
 ```
 
-## 📝 Notes
-The extension leverages Everything CLI's powerful search capabilities, so in theory, every `es.exe` command-line argument for filtering should work through the search interface.
+## ⚠️ SDK Search (Experimental)
+The extension includes an experimental feature to utilize the Everything SDK module for searching. Eventually this will be swithced to be the default search method. If you experience any issues, please disable this option in the preferences and report the problem on GitHub.
+
+### Updating bundled SDK binaries (maintainers)
+The prebuilt native SDK binaries are kept under `assets/native` and version-controlled.
+
+Fetch/update them from the source repository with:
+
+```bash
+npm run fetch-sdk-binaries
+```
