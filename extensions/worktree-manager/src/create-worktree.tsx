@@ -13,13 +13,8 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import * as path from "path";
-import {
-  createWorktreeCancelledError,
-  getAllWorktrees,
-  createWorktreeFromBase,
-  type WorktreeItem,
-} from "./lib/git";
-import { expandRoots, type Preferences } from "./lib/preferences";
+import { createWorktreeCancelledError, getAllWorktrees, createWorktreeFromBase, type WorktreeItem } from "./lib/git";
+import { expandRoots } from "./lib/preferences";
 
 /** ~100px height: show last N lines (API has no height/rows; approximate by line count) */
 const LOG_TAIL_LINES = 6;
@@ -112,13 +107,10 @@ export default function Command() {
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
     try {
-      const result = await createWorktreeFromBase(
-        baseWorktree.repoRoot,
-        worktreeName,
-        pathToUse,
-        baseWorktree.branch,
-        { onLog: (text) => setLog((prev) => prev + text), signal }
-      );
+      const result = await createWorktreeFromBase(baseWorktree.repoRoot, worktreeName, pathToUse, baseWorktree.branch, {
+        onLog: (text) => setLog((prev) => prev + text),
+        signal,
+      });
       if (result.success) {
         setCreateSuccess(true);
         toast.style = Toast.Style.Success;
@@ -186,11 +178,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           {isSubmitting ? (
-            <Action
-              title="Cancel"
-              icon={Icon.XMarkCircle}
-              onAction={() => abortControllerRef.current?.abort()}
-            />
+            <Action title="Cancel" icon={Icon.XMarkCircle} onAction={() => abortControllerRef.current?.abort()} />
           ) : (
             <Action.SubmitForm title="Create Worktree" onSubmit={handleSubmit} icon={Icon.Plus} />
           )}
@@ -199,12 +187,7 @@ export default function Command() {
     >
       <Form.Dropdown id="base" title="Base" storeValue>
         {baseItems.map((item) => (
-          <Form.Dropdown.Item
-            key={item.value}
-            value={item.value}
-            title={item.title}
-            keywords={item.keywords}
-          />
+          <Form.Dropdown.Item key={item.value} value={item.value} title={item.title} keywords={item.keywords} />
         ))}
       </Form.Dropdown>
       <Form.TextField id="worktreeName" title="Worktree Name" placeholder="e.g. my-new-worktree" />

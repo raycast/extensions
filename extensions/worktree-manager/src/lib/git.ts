@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
+import { trash } from "@raycast/api";
 
 const execFileAsync = promisify(execFile);
 
@@ -52,9 +53,7 @@ function getMainRepoPath(worktreePath: string): string | null {
     const commondirPath = path.join(gitDir, "commondir");
     if (fs.existsSync(commondirPath)) {
       const common = fs.readFileSync(commondirPath, "utf-8").trim();
-      const mainGitDir = path.isAbsolute(common)
-        ? common
-        : path.resolve(path.dirname(commondirPath), common);
+      const mainGitDir = path.isAbsolute(common) ? common : path.resolve(path.dirname(commondirPath), common);
       return path.dirname(mainGitDir);
     }
     return path.dirname(gitDir);
@@ -234,11 +233,10 @@ async function getDefaultRemote(repoPath: string): Promise<string | null> {
 async function getUpstreamRef(repoPath: string, localBranch: string): Promise<string | null> {
   if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) return null;
   try {
-    const { stdout } = await execFileAsync(
-      "git",
-      ["rev-parse", "--abbrev-ref", `${localBranch}@{upstream}`],
-      { cwd: path.resolve(repoPath), maxBuffer: 1024 * 1024 }
-    );
+    const { stdout } = await execFileAsync("git", ["rev-parse", "--abbrev-ref", `${localBranch}@{upstream}`], {
+      cwd: path.resolve(repoPath),
+      maxBuffer: 1024 * 1024,
+    });
     const ref = stdout.trim();
     return ref && !ref.includes("@") ? ref : null;
   } catch {
@@ -255,9 +253,7 @@ export async function createWorktree(
     return { success: false, error: "Repository not found" };
   }
   const absRepo = path.resolve(repoPath);
-  const absWorktree = path.isAbsolute(worktreePath)
-    ? worktreePath
-    : path.resolve(path.dirname(absRepo), worktreePath);
+  const absWorktree = path.isAbsolute(worktreePath) ? worktreePath : path.resolve(path.dirname(absRepo), worktreePath);
   if (branch.trim() === "") {
     return { success: false, error: "Branch is required" };
   }
@@ -357,9 +353,7 @@ export async function createWorktreeFromBase(
   if (!base) return { success: false, error: "Base branch is required" };
   const branch = newBranchName.trim().replace(/[/\\]/g, "-");
   if (!branch) return { success: false, error: "Worktree name is required" };
-  const absWorktree = path.isAbsolute(worktreePath)
-    ? worktreePath
-    : path.resolve(path.dirname(absRepo), worktreePath);
+  const absWorktree = path.isAbsolute(worktreePath) ? worktreePath : path.resolve(path.dirname(absRepo), worktreePath);
   try {
     if (signal?.aborted) return { success: false, error: CANCELLED_ERROR };
     onLog?.("Checking if branch exists…\n");
@@ -398,7 +392,7 @@ export async function removeWorktree(
       maxBuffer: 1024 * 1024,
     });
     if (fs.existsSync(worktreePath)) {
-      fs.rmSync(worktreePath, { recursive: true, force: true });
+      await trash(worktreePath);
     }
     return { success: true };
   } catch (err: unknown) {

@@ -13,7 +13,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import * as path from "path";
 import { getAllWorktrees, removeWorktree, type WorktreeItem } from "./lib/git";
-import { expandRoots, type Preferences } from "./lib/preferences";
+import { expandRoots } from "./lib/preferences";
 
 async function fetchWorktrees(): Promise<WorktreeItem[]> {
   const prefs = getPreferenceValues<Preferences>();
@@ -61,10 +61,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
     >
       {!hasRoots && (
-        <List.EmptyView
-          title="No root paths configured"
-          description="Set Root path in Extension Preferences (⌘,)."
-        />
+        <List.EmptyView title="No root paths configured" description="Set Root path in Extension Preferences (⌘,)." />
       )}
       {hasRoots && error && (
         <List.EmptyView
@@ -85,10 +82,7 @@ export default function Command() {
         />
       )}
       {hasRoots && !error && worktrees.length > 0 && filtered.length === 0 && searchText.trim() && (
-        <List.EmptyView
-          title="No results"
-          description={`No worktrees match "${searchText.trim()}"`}
-        />
+        <List.EmptyView title="No results" description={`No worktrees match "${searchText.trim()}"`} />
       )}
       {hasRoots &&
         !error &&

@@ -1,12 +1,6 @@
 import * as os from "os";
 import * as path from "path";
 
-export interface Preferences {
-  roots: string;
-  openWith: string;
-  defaultWorktreePath?: string;
-}
-
 export function expandRoots(rootsStr: string): string[] {
   if (!rootsStr?.trim()) return [];
   const home = os.homedir();
