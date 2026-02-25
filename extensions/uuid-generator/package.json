@@ -22,7 +22,7 @@
   "commands": [
     {
       "name": "generate",
-      "title": "Generate Uuids",
+      "title": "Generate UUIDs",
       "description": "Copy generated UUIDs to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -36,7 +36,7 @@
     },
     {
       "name": "generateV5",
-      "title": "Generate V5 Uuids",
+      "title": "Generate V5 UUIDs",
       "description": "Copy generated UUIDs V5 to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -67,7 +67,7 @@
     },
     {
       "name": "generateV7",
-      "title": "Generate V7 Uuids",
+      "title": "Generate V7 UUIDs",
       "description": "Copy generated UUIDs V7 to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -92,7 +92,7 @@
     },
     {
       "name": "generateUlid",
-      "title": "Generate Ulids",
+      "title": "Generate ULIDs",
       "description": "Copy generated ULIDs to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -106,7 +106,7 @@
     },
     {
       "name": "generateTypeID",
-      "title": "Generate Typeids",
+      "title": "Generate TypeIDs",
       "description": "Copy generated TypeIDs to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -126,7 +126,7 @@
     },
     {
       "name": "parseTypeID",
-      "title": "Parse Typeids",
+      "title": "Parse TypeIDs",
       "description": "Parse TypeID and copy resulting UUID to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -140,7 +140,7 @@
     },
     {
       "name": "formatUuid",
-      "title": "Format Uuid",
+      "title": "Format UUID",
       "description": "Format UUID without dashes into standard UUID format and copy to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -154,7 +154,7 @@
     },
     {
       "name": "packTypeID",
-      "title": "Pack Type Id",
+      "title": "Pack TypeID",
       "description": "Convert a UUID to a packed Type ID with a suffix",
       "mode": "no-view",
       "arguments": [
