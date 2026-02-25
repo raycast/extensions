@@ -19,3 +19,6 @@ npm-debug.log*
 .idea/
 *.swp
 *.swo
+
+# Local PR helper (not part of the extension)
+PR_DESCRIPTION.md
