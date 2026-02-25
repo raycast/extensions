@@ -12,7 +12,7 @@ export interface Source {
 
 export interface CategoryItem {
   id: string;
-  categoryName: string;
+  name: string;
 }
 
 export interface BatchItem {
