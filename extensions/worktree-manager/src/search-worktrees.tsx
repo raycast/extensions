@@ -3,10 +3,8 @@ import { useCachedPromise } from "@raycast/utils";
 import * as path from "path";
 import { getAllWorktrees, type WorktreeItem } from "./lib/git";
 import { expandRoots, type Preferences } from "./lib/preferences";
-import { USE_MOCK_DATA, MOCK_WORKTREES } from "./lib/mocks";
 
 async function fetchWorktrees(): Promise<WorktreeItem[]> {
-  if (USE_MOCK_DATA) return MOCK_WORKTREES;
   const prefs = getPreferenceValues<Preferences>();
   const roots = expandRoots(prefs.roots ?? "");
   if (roots.length === 0) return [];
@@ -18,7 +16,7 @@ export default function Command() {
   const { data: worktrees, isLoading, error, revalidate } = useCachedPromise(fetchWorktrees);
 
   const roots = expandRoots(preferences.roots);
-  const hasRoots = USE_MOCK_DATA || roots.length > 0;
+  const hasRoots = roots.length > 0;
 
   return (
     <List

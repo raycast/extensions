@@ -13,10 +13,8 @@ import { useCachedPromise } from "@raycast/utils";
 import * as path from "path";
 import { getAllWorktrees, getBranches, createWorktree } from "./lib/git";
 import { expandRoots, type Preferences } from "./lib/preferences";
-import { USE_MOCK_DATA, MOCK_REPOS, MOCK_BRANCHES } from "./lib/mocks";
 
 async function fetchRepoRoots(): Promise<{ path: string; name: string }[]> {
-  if (USE_MOCK_DATA) return MOCK_REPOS;
   const prefs = getPreferenceValues<Preferences>();
   const roots = expandRoots(prefs.roots ?? "");
   if (roots.length === 0) return [];
@@ -45,7 +43,7 @@ function getDefaultWorktreePath(prefs: Preferences, repoPath: string, branch: st
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
   const roots = expandRoots(prefs.roots ?? "");
-  const hasRoots = USE_MOCK_DATA || roots.length > 0;
+  const hasRoots = roots.length > 0;
   const {
     data: repos = [],
     isLoading: reposLoading,
@@ -59,10 +57,6 @@ export default function Command() {
       setBranches([]);
       return;
     }
-    if (USE_MOCK_DATA) {
-      setBranches(MOCK_BRANCHES);
-      return;
-    }
     getBranches(repoPath)
       .then(setBranches)
       .catch(() => setBranches([]));
@@ -73,13 +67,6 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "Select repo and branch",
-      });
-      return;
-    }
-    if (USE_MOCK_DATA) {
-      showToast({
-        style: Toast.Style.Success,
-        title: "Mock mode – no worktree created",
       });
       return;
     }
@@ -129,7 +116,7 @@ export default function Command() {
       </Form>
     );
   }
-  if (!USE_MOCK_DATA && repoItems.length === 0 && !reposLoading) {
+  if (repoItems.length === 0 && !reposLoading) {
     return (
       <Form>
         <Form.Description
