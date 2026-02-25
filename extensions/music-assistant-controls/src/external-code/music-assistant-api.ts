@@ -553,24 +553,11 @@ export class MusicAssistantApi {
     });
   }
   public async removeItemFromFavorites(media_type: MediaType, library_item_id: string | number): Promise<void> {
-    // Add an item (uri or mediaitem) to the favorites.
+    // Remove a library item from favorites.
     return this.sendCommand("music/favorites/remove_item", {
       media_type,
       library_item_id,
     });
-  }
-
-  public toggleFavorite(item: MediaItemType) {
-    // Toggle favorite for a media item
-    if (item.favorite) {
-      this.removeItemFromFavorites(item.media_type, item.item_id);
-      // optimistically set the value
-      item.favorite = false;
-    } else {
-      this.addItemToFavorites(item);
-      // optimistically set the value
-      item.favorite = true;
-    }
   }
 
   public browse(path?: string): Promise<MediaItemType[]> {
