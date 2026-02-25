@@ -4,7 +4,7 @@ const DEFAULT_WHISPER_URL = "https://whisper.quentinvedrenne.com";
 const MAX_DURATION_SECONDS = 7 * 86400; // 7 days
 
 function getWhisperUrl(): string {
-  const { serverUrl } = getPreferenceValues<{ serverUrl?: string }>();
+  const { serverUrl } = getPreferenceValues<Preferences>();
   return serverUrl?.trim() || DEFAULT_WHISPER_URL;
 }
 
