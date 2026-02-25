@@ -1,5 +1,11 @@
 # proton-pass Changelog
 
+## [Improvements] - 2026-02-25
+
+- Add optional background refresh preference to control cache refresh behavior
+- Add optional web integration to preselect items matching the active browser tab URL
+- Clarify project documentation as independent `proton-pass` implementation
+
 ## [Improvements] - 2026-02-23
 
 - Fix: Remove macOS quarantine attribute from auto-downloaded CLI binary so it executes correctly on first use
