@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import MusicAssistantClient from "../src/music-assistant-client";
 import { getSelectedQueueID } from "../src/use-selected-player-id";
-import { PlayerQueue, RepeatMode, PlayerState } from "../src/external-code/interfaces";
+import { MediaType, PlayerQueue, RepeatMode, PlayerState, Track } from "../src/external-code/interfaces";
 
 // Mock dependencies
 jest.mock("@raycast/api");
@@ -12,20 +12,54 @@ const mockShowToast = showToast as jest.MockedFunction<typeof showToast>;
 const MockMusicAssistantClient = MusicAssistantClient as jest.MockedClass<typeof MusicAssistantClient>;
 const mockGetSelectedQueueID = getSelectedQueueID as jest.MockedFunction<typeof getSelectedQueueID>;
 
+const mockTrackMediaItem: Track = {
+  item_id: "track-1",
+  provider: "library",
+  name: "Test Track",
+  uri: "spotify:track:123",
+  is_playable: true,
+  media_type: MediaType.TRACK,
+  provider_mappings: [],
+  metadata: {},
+  favorite: false,
+  timestamp_added: 0,
+  timestamp_modified: 0,
+  duration: 180,
+  artists: [],
+  album: {
+    item_id: "album-1",
+    provider: "library",
+    name: "Test Album",
+    uri: "spotify:album:1",
+    is_playable: false,
+    media_type: MediaType.ALBUM,
+    available: true,
+  },
+};
+
 // Mock queue data
 const mockQueueData: PlayerQueue = {
   queue_id: "test-queue-123",
+  active: true,
   display_name: "Living Room",
+  available: true,
+  items: 1,
   state: PlayerState.PLAYING,
   shuffle_enabled: false,
+  dont_stop_the_music_enabled: false,
   repeat_mode: RepeatMode.OFF,
+  elapsed_time: 0,
+  elapsed_time_last_updated: 0,
+  radio_source: [],
   current_item: {
+    queue_id: "test-queue-123",
+    queue_item_id: "queue-item-1",
     name: "Test Track",
-    uri: "spotify:track:123",
     duration: 180,
-    artists: [{ name: "Test Artist" }],
-    album: { name: "Test Album" },
-  } as any,
+    sort_index: 0,
+    available: true,
+    media_item: mockTrackMediaItem,
+  },
 };
 
 describe("current-track command", () => {
@@ -39,15 +73,16 @@ describe("current-track command", () => {
       toggleShuffle: jest.fn(),
       cycleRepeatMode: jest.fn(),
       toggleFavorite: jest.fn(),
+      getItemByUri: jest.fn(),
       addTracksToPlaylist: jest.fn(),
       getLibraryPlaylists: jest.fn(),
       getQueueAlbumArt: jest.fn(),
       formatDuration: jest.fn(),
       getRepeatText: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<MusicAssistantClient>;
 
     MockMusicAssistantClient.mockImplementation(() => mockClientInstance);
-    mockShowToast.mockResolvedValue();
+    mockShowToast.mockResolvedValue({ style: Toast.Style.Success, title: "Mock Toast" } as Toast);
   });
 
   describe("shuffle toggle", () => {
@@ -55,9 +90,12 @@ describe("current-track command", () => {
       const queueWithShuffleOff = { ...mockQueueData, shuffle_enabled: false };
       mockClientInstance.toggleShuffle.mockResolvedValue(undefined);
 
-      await mockClientInstance.toggleShuffle(queueWithShuffleOff.queue_id);
+      await mockClientInstance.toggleShuffle(queueWithShuffleOff.queue_id, queueWithShuffleOff.shuffle_enabled);
 
-      expect(mockClientInstance.toggleShuffle).toHaveBeenCalledWith(queueWithShuffleOff.queue_id);
+      expect(mockClientInstance.toggleShuffle).toHaveBeenCalledWith(
+        queueWithShuffleOff.queue_id,
+        queueWithShuffleOff.shuffle_enabled,
+      );
       expect(mockClientInstance.toggleShuffle).toHaveBeenCalledTimes(1);
     });
 
@@ -65,7 +103,7 @@ describe("current-track command", () => {
       const error = new Error("Failed to toggle shuffle");
       mockClientInstance.toggleShuffle.mockRejectedValue(error);
 
-      await expect(mockClientInstance.toggleShuffle("test-queue")).rejects.toThrow("Failed to toggle shuffle");
+      await expect(mockClientInstance.toggleShuffle("test-queue", false)).rejects.toThrow("Failed to toggle shuffle");
     });
   });
 
@@ -73,35 +111,43 @@ describe("current-track command", () => {
     it("should cycle repeat mode through OFF → ONE → ALL → OFF", async () => {
       mockClientInstance.cycleRepeatMode.mockResolvedValue(undefined);
 
-      await mockClientInstance.cycleRepeatMode(mockQueueData.queue_id);
+      await mockClientInstance.cycleRepeatMode(mockQueueData.queue_id, mockQueueData.repeat_mode);
 
-      expect(mockClientInstance.cycleRepeatMode).toHaveBeenCalledWith(mockQueueData.queue_id);
+      expect(mockClientInstance.cycleRepeatMode).toHaveBeenCalledWith(mockQueueData.queue_id, mockQueueData.repeat_mode);
     });
 
     it("should handle repeat mode cycle errors gracefully", async () => {
       const error = new Error("Failed to cycle repeat mode");
       mockClientInstance.cycleRepeatMode.mockRejectedValue(error);
 
-      await expect(mockClientInstance.cycleRepeatMode("test-queue")).rejects.toThrow("Failed to cycle repeat mode");
+      await expect(mockClientInstance.cycleRepeatMode("test-queue", RepeatMode.OFF)).rejects.toThrow(
+        "Failed to cycle repeat mode",
+      );
     });
   });
 
   describe("toggle favorites", () => {
     it("should toggle current track favorite status", async () => {
+      const mediaItem = mockQueueData.current_item?.media_item;
+      expect(mediaItem).toBeDefined();
+      if (!mediaItem) throw new Error("Expected media item to be defined");
+
       mockClientInstance.toggleFavorite.mockResolvedValue(true);
 
-      await mockClientInstance.toggleFavorite(mockQueueData.current_item as any);
+      await mockClientInstance.toggleFavorite(mediaItem);
 
-      expect(mockClientInstance.toggleFavorite).toHaveBeenCalledWith(mockQueueData.current_item);
+      expect(mockClientInstance.toggleFavorite).toHaveBeenCalledWith(mediaItem);
     });
 
     it("should handle toggle favorites errors gracefully", async () => {
+      const mediaItem = mockQueueData.current_item?.media_item;
+      expect(mediaItem).toBeDefined();
+      if (!mediaItem) throw new Error("Expected media item to be defined");
+
       const error = new Error("Failed to toggle favorites");
       mockClientInstance.toggleFavorite.mockRejectedValue(error);
 
-      await expect(mockClientInstance.toggleFavorite(mockQueueData.current_item as any)).rejects.toThrow(
-        "Failed to toggle favorites",
-      );
+      await expect(mockClientInstance.toggleFavorite(mediaItem)).rejects.toThrow("Failed to toggle favorites");
     });
   });
 
@@ -109,10 +155,10 @@ describe("current-track command", () => {
     it("should add current track to specified playlist", async () => {
       mockClientInstance.addTracksToPlaylist.mockResolvedValue(undefined);
 
-      await mockClientInstance.addTracksToPlaylist("playlist-123", [mockQueueData.current_item.uri]);
+      await mockClientInstance.addTracksToPlaylist("playlist-123", [mockTrackMediaItem.uri]);
 
       expect(mockClientInstance.addTracksToPlaylist).toHaveBeenCalledWith("playlist-123", [
-        mockQueueData.current_item.uri,
+        mockTrackMediaItem.uri,
       ]);
     });
 
@@ -133,7 +179,9 @@ describe("current-track command", () => {
         { item_id: "2", name: "Workout", uri: "spotify:playlist:2" },
       ];
 
-      mockClientInstance.getLibraryPlaylists.mockResolvedValue(mockPlaylists as any);
+      mockClientInstance.getLibraryPlaylists.mockResolvedValue(
+        mockPlaylists as unknown as Awaited<ReturnType<MusicAssistantClient["getLibraryPlaylists"]>>,
+      );
 
       const result = await mockClientInstance.getLibraryPlaylists(undefined, 20, 0);
 
@@ -215,6 +263,8 @@ describe("current-track command", () => {
       mockClientInstance.getPlayerQueue.mockResolvedValue(mockQueueData);
 
       const queueId = await mockGetSelectedQueueID();
+      expect(queueId).toBeDefined();
+      if (!queueId) throw new Error("Expected queue ID to be defined");
       const queueData = await mockClientInstance.getPlayerQueue(queueId);
 
       expect(queueData).toEqual(mockQueueData);
