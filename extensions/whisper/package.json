@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "whisper",
+  "title": "Whisper",
+  "description": "Share passwords, API keys, and private notes securely. Whisper creates encrypted links that expire or self-destruct after viewing.",
+  "icon": "whisper-icon.png",
+  "author": "quentinved",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "whisper",
+      "title": "Whisper",
+      "subtitle": "Whisper",
+      "description": "Quickly create an encrypted secret link",
+      "keywords": [
+        "secret",
+        "password",
+        "encrypt",
+        "share",
+        "link",
+        "secure"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "secret [1h] [false]",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "whisper-form",
+      "title": "Create Secret",
+      "subtitle": "Whisper",
+      "description": "Create an encrypted secret link with a form",
+      "keywords": [
+        "secret",
+        "password",
+        "encrypt",
+        "share",
+        "link",
+        "secure"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Whisper Server URL",
+      "type": "textfield",
+      "required": false,
+      "default": "https://whisper.quentinvedrenne.com",
+      "description": "URL of the Whisper server (for self-hosted instances)"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-secret",
+      "title": "Create Secret Link",
+      "description": "Create an encrypted, expiring link for sharing a secret securely"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
+    "eslint": "10.0.2",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
