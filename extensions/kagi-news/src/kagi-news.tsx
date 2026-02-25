@@ -15,7 +15,7 @@ export default function Command() {
   const [selectedCategory, setSelectedCategory] = useCachedState<string>("selected-category", "");
 
   const { categories, isLoading: loadingCategories, error: categoriesError } = useCategories();
-  const { favorites, isFavorite, toggleFavorite } = useFavoriteCategories();
+  const { isFavorite, toggleFavorite } = useFavoriteCategories();
 
   const {
     articles,

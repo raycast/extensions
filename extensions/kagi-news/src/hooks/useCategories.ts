@@ -15,7 +15,7 @@ export function useCategories() {
         const json = await response.json();
 
         // Transform API response to Category format
-        const categories: Category[] = json.categories.map((cat: any) => ({
+        const categories: Category[] = json.categories.map((cat: { categoryName: string; id: string }) => ({
           name: cat.categoryName,
           id: cat.id, // Use the UUID from the API
         }));

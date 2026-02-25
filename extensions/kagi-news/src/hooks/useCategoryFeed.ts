@@ -46,7 +46,7 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
     : "";
 
   // Fetch stories or Today in History data
-  const { isLoading: loadingContent, data: contentData, error: contentError } = useFetch<any>(
+  const { isLoading: loadingContent, data: contentData, error: contentError } = useFetch<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>(
     contentUrl,
     {
       parseResponse: async (response) => {

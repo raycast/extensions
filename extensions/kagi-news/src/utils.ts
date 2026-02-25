@@ -120,7 +120,7 @@ export function stripHtml(html: string): string {
 export function linkify(text: string | undefined, sources: Source[]): string {
   if (!text || !sources || sources.length === 0) return text || "";
 
-  let linkedText = text;
+  const linkedText = text;
 
   const sourceMap: { [key: string]: string } = {};
   const domainCounts: { [key: string]: number } = {};

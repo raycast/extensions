@@ -11,6 +11,17 @@ import { EventDetail } from "./views/EventDetail";
 import { stripHtml, formatDateForAPI } from "./utils";
 import { CategoryItem } from "./interfaces";
 
+
+interface BatchCategoryResponse {
+  id: string;
+  categoryName: string;
+}
+
+interface BatchCategoriesData {
+  categories: BatchCategoryResponse[];
+}
+
+
 // Date Picker Component
 function DatePickerScreen({ onDateSelected }: { onDateSelected: (date: string) => void }) {
   const today = new Date();
@@ -24,7 +35,7 @@ function DatePickerScreen({ onDateSelected }: { onDateSelected: (date: string) =
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            onSubmit={(values: any) => {
+            onSubmit={(values: { dateInput: Date }) => {
               const selectedDateObj = values.dateInput as Date;
               if (selectedDateObj) {
                 onDateSelected(formatDateForAPI(selectedDateObj));
@@ -59,7 +70,7 @@ function BatchSelectorScreen({
   onBatchSelected: (batchId: string) => void;
   onBackToDate: () => void;
 }) {
-  const preferences = getPreferenceValues() as any;
+  const preferences = getPreferenceValues<Preferences>();
   const { batches, isLoading: loadingBatches, error: batchesError } = useBatchesByDate(
     confirmedDate,
     preferences.language || "en"
@@ -107,10 +118,10 @@ function ArticleListScreen({
   selectedBatch: string;
   onBackToBatches: () => void;
 }) {
-  const preferences = getPreferenceValues() as any;
+  const preferences = getPreferenceValues<Preferences>();
   const [selectedCategory, setSelectedCategory] = useCachedState<string>("time-travel-selected-category", "");
 
-  const { data: categoriesData, isLoading: loadingCategories } = useFetch<any>(
+  const { data: categoriesData, isLoading: loadingCategories } = useFetch<BatchCategoriesData>(
     selectedBatch
       ? `https://kite.kagi.com/api/batches/${selectedBatch}/categories?lang=${preferences.language || "en"}`
       : "",
@@ -121,7 +132,7 @@ function ArticleListScreen({
       },
       onData: (data) => {
         const worldCategory = data?.categories?.find(
-          (cat: any) => cat.categoryName.toLowerCase() === "world"
+          (cat: BatchCategoryResponse) => cat.categoryName.toLowerCase() === "world"
         );
         if (worldCategory) {
           setSelectedCategory(worldCategory.id);
@@ -132,7 +143,7 @@ function ArticleListScreen({
   );
 
   const categories: CategoryItem[] =
-    categoriesData?.categories?.map((cat: any) => ({
+    categoriesData?.categories?.map((cat: BatchCategoryResponse) => ({
       id: cat.id,
       name: cat.categoryName,
     })) || [];
