@@ -25,13 +25,6 @@
       "subtitle": "Quick References",
       "description": "Search and browse Fechin/reference cheat sheets",
       "mode": "view"
-    },
-    {
-      "name": "update-references",
-      "title": "Update References",
-      "subtitle": "Quick References",
-      "description": "Download the latest reference data",
-      "mode": "view"
     }
   ],
   "dependencies": {

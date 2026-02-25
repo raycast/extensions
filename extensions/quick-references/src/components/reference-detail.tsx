@@ -7,6 +7,7 @@ interface ReferenceDetailProps {
   markdown: string;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  onUpdate?: () => void;
 }
 
 export function ReferenceDetail({
@@ -14,6 +15,7 @@ export function ReferenceDetail({
   markdown,
   isFavorite,
   onToggleFavorite,
+  onUpdate,
 }: ReferenceDetailProps) {
   return (
     <Detail
@@ -24,6 +26,7 @@ export function ReferenceDetail({
           entry={entry}
           isFavorite={isFavorite}
           onToggleFavorite={onToggleFavorite}
+          onUpdate={onUpdate}
         />
       }
       metadata={

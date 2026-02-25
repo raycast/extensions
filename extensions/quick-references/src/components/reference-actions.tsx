@@ -7,6 +7,7 @@ interface ReferenceActionPanelProps {
   onToggleFavorite: () => void;
   detailTarget?: React.ReactElement;
   onOpen?: () => void;
+  onUpdate?: () => void;
 }
 
 export function ReferenceActionPanel({
@@ -15,6 +16,7 @@ export function ReferenceActionPanel({
   onToggleFavorite,
   detailTarget,
   onOpen,
+  onUpdate,
 }: ReferenceActionPanelProps) {
   return (
     <ActionPanel>
@@ -42,6 +44,14 @@ export function ReferenceActionPanel({
         shortcut={{ modifiers: ["cmd"], key: "f" }}
         onAction={onToggleFavorite}
       />
+      {onUpdate && (
+        <Action
+          title="Update References"
+          icon={Icon.ArrowClockwise}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+          onAction={onUpdate}
+        />
+      )}
     </ActionPanel>
   );
 }

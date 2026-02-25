@@ -85,7 +85,7 @@ function parseMarkdownFile(
     link,
   };
 
-  return { index, content: content.trim() };
+  return { index, content: sanitizeContent(content.trim()) };
 }
 
 function slugFromFilename(filename: string): string {
@@ -172,6 +172,26 @@ function trimSnippet(snippet: string): string {
   const innerLines = lines.slice(1, lines.length - 1); // drop fences
   const truncated = innerLines.slice(0, MAX_SNIPPET_LINES);
   return truncated.join("\n").trim();
+}
+
+function sanitizeContent(content: string): string {
+  return content
+    .split("\n")
+    .map((line) => {
+      // Remove standalone annotation lines: {.shortcuts}, {.marker-none}, etc.
+      if (/^\s*\{[.#][a-zA-Z][-a-zA-Z0-9 .#]*\}\s*$/.test(line)) {
+        return "";
+      }
+      // Remove annotations from code fence openings: ```html {.wrap} -> ```html
+      line = line.replace(/^(```\S*)\s*\{[.#][^}]*\}/, "$1");
+      // Remove class/id annotations from headings and inline content
+      line = line.replace(/\s*\{[.#][a-zA-Z][-a-zA-Z0-9 .#]*\}/g, "");
+      // Remove custom Hexo theme HTML tags: <yel>, </pur>, <shell>, etc.
+      line = line.replace(/<\/?(yel|pur|shell|motion|operator)>/gi, "");
+      return line;
+    })
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n");
 }
 
 function cleanWhitespace(value: string): string {
