@@ -2,8 +2,17 @@ import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/ap
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import MusicAssistantClient from "./music-assistant-client";
 import { getSelectedQueueID } from "./use-selected-player-id";
-import { Album, RepeatMode, Track } from "./external-code/interfaces";
+import { Album, Track } from "./external-code/interfaces";
 import { commandOrControlShortcut } from "./shortcuts";
+import {
+  formatAlbumTypeLabel,
+  getCurrentTrackMarkdown,
+  getFavoriteActionTitle,
+  getFavoriteToastTitle,
+  getNextRepeatModeLabel,
+  getShuffleToastMessage,
+  getTrackPositionLabel,
+} from "./current-track-helpers";
 
 export default function CurrentTrackCommand() {
   const client = new MusicAssistantClient();
@@ -56,7 +65,7 @@ export default function CurrentTrackCommand() {
       await showToast({
         style: Toast.Style.Success,
         title: "Shuffle Toggled",
-        message: wasEnabled ? "Shuffle disabled" : "Shuffle enabled",
+        message: getShuffleToastMessage(wasEnabled),
       });
       await refreshCurrentTrackState();
     } catch (error) {
@@ -77,11 +86,10 @@ export default function CurrentTrackCommand() {
     try {
       const currentMode = queueData.repeat_mode;
       await client.cycleRepeatMode(queueData.queue_id, currentMode);
-      const nextMode = currentMode === RepeatMode.OFF ? "ONE" : currentMode === RepeatMode.ONE ? "ALL" : "OFF";
       await showToast({
         style: Toast.Style.Success,
         title: "Repeat Mode Changed",
-        message: `Repeat mode set to ${nextMode}`,
+        message: `Repeat mode set to ${getNextRepeatModeLabel(currentMode)}`,
       });
       await refreshCurrentTrackState();
     } catch (error) {
@@ -106,7 +114,7 @@ export default function CurrentTrackCommand() {
       await client.toggleFavorite(mediaItem);
       await showToast({
         style: Toast.Style.Success,
-        title: wasFavorite ? "Removed from Favorites" : "Added to Favorites",
+        title: getFavoriteToastTitle(wasFavorite),
         message: queueData?.current_item?.name,
       });
       await refreshCurrentTrackState();
@@ -158,24 +166,7 @@ export default function CurrentTrackCommand() {
 
   // Build markdown content for the detail view (left column with album art and title)
   const buildMarkdown = (): string => {
-    if (!queueData?.current_item) {
-      return "# No Track Playing\n\nNo track is currently playing on the selected player.";
-    }
-
-    const item = queueData.current_item;
-    const albumArt = client.getQueueAlbumArt(queueData);
-
-    let markdown = "";
-
-    // Album artwork
-    if (albumArt) {
-      markdown += `![Album Art](${albumArt}?raycast-width=220&raycast-height=220)\n\n`;
-    }
-
-    // Track title
-    markdown += `# ${item.name}\n\n`;
-
-    return markdown;
+    return getCurrentTrackMarkdown(queueData?.current_item?.name, queueData ? client.getQueueAlbumArt(queueData) : undefined);
   };
 
   /**
@@ -199,23 +190,7 @@ export default function CurrentTrackCommand() {
     // Type guard to check if album has full metadata (Album type vs ItemMapping)
     const albumItem = trackItem?.album && "metadata" in trackItem.album ? (trackItem.album as Album) : null;
 
-    // Helper to format album type for display
-    const formatAlbumType = (type: string): string => {
-      return type.charAt(0).toUpperCase() + type.slice(1);
-    };
-
-    // Helper to format track position - only available for Track media type
-    const getTrackPosition = (): string | null => {
-      if (!trackItem) return null;
-      const parts: string[] = [];
-      if (trackItem.disc_number) {
-        parts.push(`Disc ${trackItem.disc_number}`);
-      }
-      if (trackItem.track_number) {
-        parts.push(`Track ${trackItem.track_number}`);
-      }
-      return parts.length > 0 ? parts.join(", ") : null;
-    };
+    const trackPosition = getTrackPositionLabel(trackItem);
 
     return (
       <Detail.Metadata>
@@ -228,10 +203,10 @@ export default function CurrentTrackCommand() {
         {albumItem?.year && <Detail.Metadata.Label title="Year" text={albumItem.year.toString()} />}
 
         {albumItem?.album_type && (
-          <Detail.Metadata.Label title="Album Type" text={formatAlbumType(albumItem.album_type)} />
+          <Detail.Metadata.Label title="Album Type" text={formatAlbumTypeLabel(albumItem.album_type)} />
         )}
 
-        {getTrackPosition() && <Detail.Metadata.Label title="Position" text={getTrackPosition()!} />}
+        {trackPosition && <Detail.Metadata.Label title="Position" text={trackPosition} />}
 
         {albumItem?.metadata?.genres && albumItem.metadata.genres.length > 0 && (
           <Detail.Metadata.TagList title="Genres">
@@ -279,7 +254,7 @@ export default function CurrentTrackCommand() {
               {queueData.current_item && (
                 <ActionPanel.Section title="Track Actions">
                   <Action
-                    title={isCurrentTrackFavorite ? "Remove from Favorites" : "Add to Favorites"}
+                    title={getFavoriteActionTitle(isCurrentTrackFavorite)}
                     icon={Icon.Heart}
                     onAction={toggleFavorite}
                     shortcut={commandOrControlShortcut("f")}
