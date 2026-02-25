@@ -1,5 +1,14 @@
 # Oracle Cloud Changelog
 
+## [Manage Email Domains and Approved Senders] - {PR_MERGE_DATE}
+
+- view email domains
+    1. create email domain
+    2. delete email domain
+- view approved senders
+    1. create approved sender
+    2. delete approved sender
+
 ## [Manage Vaults, Secrets, Versions and Bundle] - 2026-01-01
 
 - view vaults

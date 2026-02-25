@@ -22,10 +22,28 @@
     },
     {
       "name": "email-delivery",
-      "title": "Manage Email Delivery",
+      "title": "Manage Email Domains and Approved Senders",
       "subtitle": "Oracle Cloud",
       "description": "Manage Email Delivery",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "view",
+          "type": "dropdown",
+          "placeholder": "View",
+          "required": true,
+          "data": [
+            {
+              "title": "Email Domains",
+              "value": "email-domains"
+            },
+            {
+              "title": "Approved Senders",
+              "value": "approved-senders"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "nosql-database",
