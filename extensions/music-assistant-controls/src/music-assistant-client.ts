@@ -794,6 +794,100 @@ export default class MusicAssistantClient {
     );
   }
 
+  // Queue Control Methods for Current Track Command & Library Management
+
+  /**
+   * Toggle shuffle mode on a queue
+   *
+   * @param queueId - The queue ID to toggle shuffle on
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * await client.toggleShuffle("queue-123");
+   * ```
+   */
+  async toggleShuffle(queueId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.queueCommandShuffleToggle(queueId));
+  }
+
+  /**
+   * Cycle through repeat modes: OFF → ONE → ALL → OFF
+   *
+   * @param queueId - The queue ID to cycle repeat mode on
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * await client.cycleRepeatMode("queue-123");
+   * ```
+   */
+  async cycleRepeatMode(queueId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.queueCommandRepeatToggle(queueId));
+  }
+
+  /**
+   * Add a media item to favorites
+   *
+   * @param item - The media item or URI to add to favorites
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * await client.addToFavorites(track);
+   * ```
+   */
+  async addToFavorites(item: string | MediaItemType): Promise<void> {
+    await executeApiCommand(async (api) => await api.addItemToFavorites(item));
+  }
+
+  /**
+   * Format duration from seconds to mm:ss format
+   *
+   * @param seconds - Duration in seconds
+   * @returns Formatted duration string (mm:ss)
+   * @example
+   * ```typescript
+   * const duration = client.formatDuration(225); // "3:45"
+   * ```
+   */
+  formatDuration(seconds?: number): string {
+    if (!seconds) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  }
+
+  /**
+   * Get the display text for shuffle state
+   *
+   * @param shuffleEnabled - Whether shuffle is enabled
+   * @returns Display text for shuffle button
+   * @example
+   * ```typescript
+   * const text = client.getShuffleText(true); // "Shuffle: ON"
+   * ```
+   */
+  getShuffleText(shuffleEnabled: boolean): string {
+    return shuffleEnabled ? "Shuffle: ON" : "Shuffle: OFF";
+  }
+
+  /**
+   * Get the display text for repeat mode
+   *
+   * @param repeatMode - The current repeat mode
+   * @returns Display text for repeat button
+   * @example
+   * ```typescript
+   * const text = client.getRepeatText(RepeatMode.ALL); // "Repeat: ALL"
+   * ```
+   */
+  getRepeatText(repeatMode: RepeatMode): string {
+    const modeMap = {
+      [RepeatMode.OFF]: "OFF",
+      [RepeatMode.ONE]: "ONE",
+      [RepeatMode.ALL]: "ALL",
+    };
+    return `Repeat: ${modeMap[repeatMode]}`;
+  }
+
   // Library and Search Methods
 
   /**
@@ -858,6 +952,21 @@ export default class MusicAssistantClient {
    */
   async getLibraryPlaylists(search?: string, limit = 20, offset = 0): Promise<Playlist[]> {
     return await executeApiCommand(async (api) => await api.getLibraryPlaylists(undefined, search, limit, offset));
+  }
+
+  /**
+   * Add tracks to a playlist
+   *
+   * @param playlistId - The playlist ID to add tracks to
+   * @param trackUris - Array of track URIs to add
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * await client.addTracksToPlaylist("playlist-123", ["track-uri-1"]);
+   * ```
+   */
+  async addTracksToPlaylist(playlistId: string | number, trackUris: string[]): Promise<void> {
+    await executeApiCommand(async (api) => await api.addPlaylistTracks(playlistId, trackUris));
   }
 
   /**

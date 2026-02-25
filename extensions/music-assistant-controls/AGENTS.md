@@ -183,26 +183,6 @@ See TESTING.md for detailed coverage breakdown and rationale.
 - ❌ `useCallback` - Not available in Raycast
 - ➡️ Use `useCachedPromise` with `execute` parameter instead to control when fetches happen
 
-### useCachedState Best Practice
-
-```typescript
-// Persist data between command invocations
-const [cachedQueues, setCachedQueues] = useCachedState<PlayerQueue[]>("menu-bar-queues", []);
-
-// Update cache when fresh data arrives
-const { isLoading, revalidate } = useCachedPromise(
-  async () => {
-    const data = await fetchQueues();
-    setCachedQueues(data); // Update cache
-    return data;
-  },
-  [],
-  { execute: isBackgroundRefresh },
-);
-
-// Always use cached data for display
-const displayQueues = cachedQueues || [];
-```
 
 ## Menu Bar Command Architecture
 

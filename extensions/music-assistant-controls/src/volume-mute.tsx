@@ -14,11 +14,11 @@ export default async function main() {
 
     // Get current player
     const player = await client.getPlayer(selectedPlayerID);
-    
+
     if (!client.supportsMuteControl(player)) {
       // Fallback: use volume control to simulate mute
       const currentVolume = player.volume_level ?? 0;
-      
+
       if (currentVolume > 0) {
         // Mute by setting volume to 0
         await client.setVolume(selectedPlayerID, 0);

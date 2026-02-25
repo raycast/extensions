@@ -4,6 +4,12 @@
 
 ### ✨ New Features
 
+- **Current Track command** - View now-playing track with large album artwork (300x300px) and detailed metadata
+- **Shuffle toggle** - Quick button to toggle shuffle mode (OFF ↔ ON) with visual feedback
+- **Repeat mode cycling** - Cycle through repeat modes (OFF → ONE → ALL → OFF) with status display
+- **Add to Favorites** - One-click button to add current track to favorites with heart icon
+- **Add to Playlist** - Dropdown menu to select from available playlists and add current track instantly
+- **Track metadata display** - Shows track title, artist, album, duration, queue name, and player state
 - **Mute Toggle Command** - Dedicated command to toggle mute state on the active player with visual feedback showing state changes (MUTED/UNMUTED)
 - **Music Library Hub Command** - Comprehensive library exploration with unified search, browse, and queue management
   - **Search Tab** - Full-text search across entire library (artists, albums, tracks, playlists) with 50-item limit
@@ -16,6 +22,10 @@
 
 ### 🎨 UI/UX Enhancements
 
+- **Large album artwork** - Centered 300x300px album cover for immersive viewing experience in Current Track command
+- **Keyboard shortcuts** - Quick access with Cmd+S (shuffle), Cmd+R (repeat), Cmd+F (favorites), Cmd+P (playlists)
+- **Real-time state display** - Shows current shuffle and repeat settings with descriptive text
+- **Automatic refresh** - Updates display when track changes or actions are performed
 - Tab-based navigation for intuitive switching between search, browse, and queue features
 - Breadcrumb navigation in browse tab for easy back navigation
 - Pagination support for large result sets (20 items per page in browse)
