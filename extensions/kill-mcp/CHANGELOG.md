@@ -1,6 +1,6 @@
 # Kill MCP Changelog
 
-## [Unreleased]
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Auto-refresh: Process list now updates automatically every 5 seconds

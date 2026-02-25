@@ -84,7 +84,7 @@ export default function MCPServerDetail({ process, onKill }: MCPServerDetailProp
 | Resource | Usage | Status |
 |----------|-------|--------|
 | **RAM** | ${formatRAMUsage(process.ramUsageMB)} (${process.ramPercentage.toFixed(2)}%) | ${ramStatus.color} ${ramStatus.text} |
-|| **CPU** | ${process.cpuPercentage.toFixed(2)}% | ${getCPUStatus(process.cpuPercentage)} |
+| **CPU** | ${process.cpuPercentage.toFixed(2)}% | ${getCPUStatus(process.cpuPercentage)} |
 
 ## Command
 

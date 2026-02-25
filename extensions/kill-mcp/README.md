@@ -12,8 +12,7 @@ A Raycast extension to view and manage MCP (Model Context Protocol) servers runn
 
 ## Screenshots
 
-![Main List View](./metadata/screenshot-1.png)
-![Detail View](./metadata/screenshot-2.png)
+![Main List View](./metadata/kill-mcp-1.png)
 
 ## Installation
 

@@ -144,32 +144,14 @@ export function getMCPConfigs(): MCPConfig[] {
   return configs;
 }
 
-// Get CPU usage for a specific PID using top (instant measurement)
-function getInstantCPU(pid: number): number {
-  try {
-    // Use top with 1 sample to get instant CPU usage
-    // -l 1: one sample, -pid: specific process, -stats pid,cpu: only PID and CPU
-    const topOutput = execSync(`top -l 1 -pid ${pid} -stats cpu`, {
-      encoding: "utf-8",
-      timeout: 1000,
-    }).trim();
 
-    // Parse output: look for CPU percentage
-    // Format is typically: "CPU: X.X%"
-    const lines = topOutput.split("\n");
-    for (const line of lines) {
-      const cpuMatch = line.match(/([\d.]+)/);
-      if (cpuMatch) {
-        const cpu = parseFloat(cpuMatch[1]);
-        if (!isNaN(cpu)) {
-          return cpu;
-        }
       }
     }
   } catch {
-    // top failed, fallback to 0
+    // ps failed, cpuMap stays empty
   }
-  return 0;
+
+  return cpuMap;
 }
 
 // Get running MCP processes
@@ -194,14 +176,16 @@ export function getMCPProcesses(): MCPProcess[] {
     }
   }
 
+  // Generic commands that are too broad to use alone for matching
+  const GENERIC_COMMANDS = new Set(["node", "python", "python3", "npx", "uvx", "deno"]);
+
   try {
     // Get all processes with memory info using ps
-    // Format: PID PPID %MEM RSS(KB) ELAPSED COMMAND
+    // Format: PID PPID %CPU %MEM RSS(KB) ELAPSED COMMAND
     // Using etime (elapsed time) instead of lstart for more robust parsing across locales
     // etime format: [[DD-]HH:]MM:SS (e.g., "5-12:34:56" or "12:34" or "1:23:45")
-    // Note: We removed %cpu from ps because it's cumulative, we'll get instant CPU separately
     const psOutput = execSync(
-      `ps -eo pid,ppid,%mem,rss,etime,command | grep -E "(node|python|npx|uvx|deno)" | grep -v "grep"`,
+      `ps -eo pid,ppid,pcpu,%mem,rss,etime,command | grep -E "(node|python|npx|uvx|deno)" | grep -v "grep"`,
       { encoding: "utf-8", maxBuffer: 10 * 1024 * 1024 }
     ).trim();
 
@@ -209,33 +193,61 @@ export function getMCPProcesses(): MCPProcess[] {
 
     const lines = psOutput.split("\n");
 
+    // Collect candidate processes first (without CPU from top)
+    interface Candidate {
+      pid: number;
+      ppid: number;
+      cpuPercent: number;
+      memPercent: string;
+      rssKB: number;
+      etime: string;
+      fullCommand: string;
+    }
+    const candidates: Candidate[] = [];
+
     for (const line of lines) {
-      // Parse ps output with etime format (no %cpu)
-      // Groups: (1)PID (2)PPID (3)%MEM (4)RSS (5)ETIME (6)COMMAND
-      const match = line.match(/^\s*(\d+)\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d-:]+)\s+(.+)$/);
+      // Parse ps output with pcpu field added
+      // Groups: (1)PID (2)PPID (3)%CPU (4)%MEM (5)RSS (6)ETIME (7)COMMAND
+      const match = line.match(/^\s*(\d+)\s+(\d+)\s+([\d.]+)\s+([\d.]+)\s+(\d+)\s+([\d-:]+)\s+(.+)$/);
 
       if (!match) continue;
 
-      const [, pidStr, ppidStr, memPercent, rssKB, etime, fullCommand] = match;
+      const [, pidStr, ppidStr, cpuPercent, memPercent, rssKB, etime, fullCommand] = match;
       const pid = parseInt(pidStr, 10);
       const ppid = parseInt(ppidStr, 10);
-      const ramMB = Math.round(parseInt(rssKB, 10) / 1024);
 
-      // Check if this looks like an MCP server process
+      if (!isValidPID(pid)) continue;
+
       const isMCPProcess = isMCPServerProcess(fullCommand, configs);
-
       if (!isMCPProcess) continue;
+
+      candidates.push({
+        pid,
+        ppid,
+        cpuPercent: parseFloat(cpuPercent),
+        memPercent,
+        rssKB: parseInt(rssKB, 10),
+        etime,
+        fullCommand,
+      });
+    }
+
+    for (const { pid, ppid, cpuPercent, memPercent, rssKB, etime, fullCommand } of candidates) {
+      const ramMB = Math.round(rssKB / 1024);
 
       // Try to find the server name from config
       let serverName = "Unknown MCP Server";
       let source: MCPProcess["source"] = "unknown";
       let configPath: string | undefined;
 
-      // Check against known MCP commands
+      // Check against known MCP commands — strict matching to avoid false positives
       for (const [cmdPattern, info] of knownMCPCommands) {
+        const cmdBase = cmdPattern.split(" ")[0];
+        const isGeneric = GENERIC_COMMANDS.has(cmdBase);
+
         if (
           fullCommand.includes(cmdPattern) ||
-          cmdPattern.split(" ").some((part) => fullCommand.includes(part))
+          (!isGeneric && cmdPattern.split(" ").some((part) => part.length > 3 && fullCommand.includes(part)))
         ) {
           serverName = info.name;
           source = info.source;
@@ -254,9 +266,6 @@ export function getMCPProcesses(): MCPProcess[] {
         source = determineSourceFromParent(ppid);
       }
 
-      // Get instant CPU usage (this is slower but more accurate)
-      const cpuPercentage = getInstantCPU(pid);
-
       processes.push({
         pid,
         name: serverName,
@@ -264,7 +273,7 @@ export function getMCPProcesses(): MCPProcess[] {
         fullCommand,
         ramUsageMB: ramMB,
         ramPercentage: parseFloat(memPercent),
-        cpuPercentage,
+        cpuPercentage: cpuPercent,
         source,
         configPath,
         startTime: formatElapsedTime(etime),
@@ -290,8 +299,12 @@ function isMCPServerProcess(command: string, configs: MCPConfig[]): boolean {
   for (const config of configs) {
     for (const serverConfig of Object.values(config.servers)) {
       if (command.includes(serverConfig.command)) {
-        // Check args too if present
-        if (serverConfig.args?.some((arg) => command.includes(arg))) {
+        // If no args configured, command match alone is sufficient
+        if (!serverConfig.args || serverConfig.args.length === 0) {
+          return true;
+        }
+        // If args are configured, at least one must match
+        if (serverConfig.args.some((arg) => command.includes(arg))) {
           return true;
         }
       }
@@ -339,6 +352,7 @@ function extractServerName(command: string): string {
 
 // Try to determine source from parent process
 function determineSourceFromParent(ppid: number): MCPProcess["source"] {
+  if (!isValidPID(ppid)) return "unknown";
   try {
     const parentCmd = execSync(`ps -p ${ppid} -o command=`, { encoding: "utf-8" })
       .trim()
