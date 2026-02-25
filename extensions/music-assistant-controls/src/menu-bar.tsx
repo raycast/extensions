@@ -182,25 +182,6 @@ export default function Command() {
           ))}
         </MenuBarExtra.Section>
       )}
-
-      {/* Refresh */}
-      {queuesData && queuesData.length > 0 ? (
-        <MenuBarExtra.Section>
-          <MenuBarExtra.Item
-            title="Refresh"
-            icon={Icon.RotateAntiClockwise}
-            onAction={() => {
-              revalidate();
-            }}
-          />
-        </MenuBarExtra.Section>
-      ) : (
-        <MenuBarExtra.Item
-          title="Fix configuration"
-          icon={Icon.WrenchScrewdriver}
-          onAction={openExtensionPreferences}
-        />
-      )}
     </MenuBarExtra>
   );
 }
