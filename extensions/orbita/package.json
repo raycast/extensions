@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "orbita",
-  "title": "Órbita - Manual do Usuário",
-  "description": "Follow the posts in the Órbita, the Brazilian hacker news maintained by the Manual do Usuário",
+  "title": "Órbita",
+  "description": "Follow the posts in the Órbita, the Brazilian hacker news",
   "icon": "mdu-icon.png",
   "author": "tcelestino",
   "platforms": [
@@ -16,9 +16,9 @@
   "commands": [
     {
       "name": "orbita",
-      "title": "Órbita - Manual do Usuário",
-      "subtitle": "Follow the posts in the Órbita by Manual do Usuário",
-      "description": "All posts from the Órbita, the Brazilian hacker news maintained by the Manual do Usuário",
+      "title": "Órbita",
+      "subtitle": "Follow the posts in the Órbita",
+      "description": "All posts from the Órbita, the Brazilian hacker news",
       "mode": "view"
     }
   ],
