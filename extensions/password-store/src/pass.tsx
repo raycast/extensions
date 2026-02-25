@@ -61,7 +61,7 @@ export function InsertPasswordPrompt({ onPasswordCreate }: PasswordMakerProps) {
       }
     >
       <Form.TextField title="Path" {...itemProps.passwordPath} />
-      <Form.TextField title="Password" {...itemProps.password} />
+      <Form.PasswordField title="Password" {...itemProps.password} />
       <Form.TextArea title="Metadata" {...itemProps.metadata} />
     </Form>
   );
@@ -174,7 +174,7 @@ export default function Command(): JSX.Element {
                       title: "Are you sure you want to delete this password file with its metadata?",
                     });
                     if (isConfirmed) {
-                      mutate(runPassCmd(["rm", password.value], "y"));
+                      mutate(runPassCmd(["rm", "--force", password.value]));
                     }
                   }}
                 />
