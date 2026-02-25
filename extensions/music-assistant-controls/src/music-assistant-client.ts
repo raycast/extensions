@@ -15,6 +15,7 @@ import {
   QueueOption,
   RepeatMode,
   MediaItemType,
+  MediaItemTypeOrItemMapping,
 } from "./external-code/interfaces";
 
 /**
@@ -1058,7 +1059,11 @@ export default class MusicAssistantClient {
    * await client.playMedia(track, "queue-123", QueueOption.NEXT);
    * ```
    */
-  async playMedia(media: MediaItemType, queueId: string, option = QueueOption.NEXT): Promise<void> {
+  async playMedia(
+    media: MediaItemTypeOrItemMapping | MediaItemTypeOrItemMapping[] | string | string[],
+    queueId: string,
+    option = QueueOption.NEXT,
+  ): Promise<void> {
     return await executeApiCommand(async (api) => await api.playMedia(media, option, false, undefined, queueId));
   }
 
@@ -1074,7 +1079,7 @@ export default class MusicAssistantClient {
    */
   async queueCommandClear(queueId: string): Promise<void> {
     return await executeApiCommand(async (api) => {
-      api.queueCommandClear(queueId);
+      await api.queueCommandClear(queueId);
     });
   }
 
@@ -1091,7 +1096,7 @@ export default class MusicAssistantClient {
    */
   async queueCommandDelete(queueId: string, itemIdOrIndex: string | number): Promise<void> {
     return await executeApiCommand(async (api) => {
-      api.queueCommandDelete(queueId, itemIdOrIndex);
+      await api.queueCommandDelete(queueId, itemIdOrIndex);
     });
   }
 
@@ -1109,7 +1114,7 @@ export default class MusicAssistantClient {
    */
   async queueCommandMoveItem(queueId: string, queueItemId: string, posShift: number): Promise<void> {
     return await executeApiCommand(async (api) => {
-      api.queueCommandMoveItem(queueId, queueItemId, posShift);
+      await api.queueCommandMoveItem(queueId, queueItemId, posShift);
     });
   }
 
@@ -1141,7 +1146,7 @@ export default class MusicAssistantClient {
    */
   async queueCommandShuffle(queueId: string, shuffleEnabled: boolean): Promise<void> {
     return await executeApiCommand(async (api) => {
-      api.queueCommandShuffle(queueId, shuffleEnabled);
+      await api.queueCommandShuffle(queueId, shuffleEnabled);
     });
   }
 
@@ -1158,7 +1163,7 @@ export default class MusicAssistantClient {
    */
   async queueCommandRepeat(queueId: string, repeatMode: RepeatMode): Promise<void> {
     return await executeApiCommand(async (api) => {
-      api.queueCommandRepeat(queueId, repeatMode);
+      await api.queueCommandRepeat(queueId, repeatMode);
     });
   }
 }

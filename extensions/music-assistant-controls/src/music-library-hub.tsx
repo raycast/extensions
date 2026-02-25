@@ -16,6 +16,11 @@ import { getSelectedQueueID } from "./use-selected-player-id";
 
 type Tab = "search" | "browse" | "recent" | "queue";
 type BrowseView = "artists" | "albums" | "playlists" | "artist-detail" | "album-detail" | "playlist-detail";
+type BrowseResult =
+  | { type: "artists"; items: Artist[] }
+  | { type: "albums"; items: Album[] }
+  | { type: "playlists"; items: Playlist[] }
+  | { type: "tracks"; items: Track[] };
 
 interface BreadcrumbState {
   view: BrowseView;
@@ -314,30 +319,36 @@ function BrowseTab({
   const pageSize = 20;
 
   // Determine what to fetch based on browse state
-  const { isLoading, data, revalidate } = useCachedPromise(
-    async (state: BrowseView, artistId?: string, albumId?: string, playlistId?: string) => {
-      const offset = page * pageSize;
+  const fetchBrowseData = async (
+    state: BrowseView,
+    artistId: string | undefined,
+    albumId: string | undefined,
+    playlistId: string | undefined,
+    pageNumber: number,
+  ): Promise<BrowseResult> => {
+    const offset = pageNumber * pageSize;
 
-      switch (state) {
-        case "artists":
-          return { type: "artists" as const, items: await client.getLibraryArtists(undefined, pageSize, offset) };
-        case "albums":
-          return { type: "albums" as const, items: await client.getLibraryAlbums(undefined, pageSize, offset) };
-        case "playlists":
-          return { type: "playlists" as const, items: await client.getLibraryPlaylists(undefined, pageSize, offset) };
-        case "artist-detail":
-          if (!artistId) throw new Error("Artist ID required");
-          return { type: "albums" as const, items: await client.getArtistAlbums(artistId, "library") };
-        case "album-detail":
-          if (!albumId) throw new Error("Album ID required");
-          return { type: "tracks" as const, items: await client.getAlbumTracks(albumId, "library") };
-        case "playlist-detail":
-          if (!playlistId) throw new Error("Playlist ID required");
-          return { type: "tracks" as const, items: await client.getPlaylistTracks(playlistId, "library") };
-        default:
-          return { type: "artists" as const, items: [] };
-      }
-    },
+    switch (state) {
+      case "artists":
+        return { type: "artists", items: await client.getLibraryArtists(undefined, pageSize, offset) };
+      case "albums":
+        return { type: "albums", items: await client.getLibraryAlbums(undefined, pageSize, offset) };
+      case "playlists":
+        return { type: "playlists", items: await client.getLibraryPlaylists(undefined, pageSize, offset) };
+      case "artist-detail":
+        if (!artistId) throw new Error("Artist ID required");
+        return { type: "albums", items: await client.getArtistAlbums(artistId, "library") };
+      case "album-detail":
+        if (!albumId) throw new Error("Album ID required");
+        return { type: "tracks", items: await client.getAlbumTracks(albumId, "library") };
+      case "playlist-detail":
+        if (!playlistId) throw new Error("Playlist ID required");
+        return { type: "tracks", items: await client.getPlaylistTracks(playlistId, "library") };
+    }
+  };
+
+  const { isLoading, data, revalidate } = useCachedPromise(
+    fetchBrowseData,
     [browseState.view, browseState.artist?.item_id, browseState.album?.item_id, browseState.playlist?.item_id, page],
     {
       keepPreviousData: true,
@@ -416,7 +427,7 @@ function BrowseTab({
           browseState.view === "album-detail" ||
           browseState.view === "playlist-detail") && (
           <List.Item
-            title="← Back"
+            title="Back"
             icon={Icon.ArrowLeft}
             actions={
               <ActionPanel>
@@ -545,7 +556,7 @@ function BrowseTab({
 
         {!isLoading &&
           data?.type === "artists" &&
-          (data.items as Artist[]).map((artist) => (
+          data.items.map((artist) => (
             <List.Item
               key={artist.item_id}
               title={artist.name}
@@ -569,7 +580,7 @@ function BrowseTab({
 
         {!isLoading &&
           data?.type === "albums" &&
-          (data.items as Album[]).map((album) => (
+          data.items.map((album) => (
             <List.Item
               key={album.item_id}
               title={album.name}
@@ -597,7 +608,7 @@ function BrowseTab({
 
         {!isLoading &&
           data?.type === "playlists" &&
-          (data.items as Playlist[]).map((playlist) => (
+          data.items.map((playlist) => (
             <List.Item
               key={playlist.item_id}
               title={playlist.name}
@@ -621,7 +632,7 @@ function BrowseTab({
 
         {!isLoading &&
           data?.type === "tracks" &&
-          (data.items as Track[]).map((track) => (
+          data.items.map((track) => (
             <List.Item
               key={track.item_id}
               title={track.name}
@@ -668,7 +679,7 @@ function RecentlyPlayedTab({ client }: { client: MusicAssistantClient }) {
     }
 
     try {
-      await client.playMedia(item as unknown as MediaItemType, queueId, QueueOption.NEXT);
+      await client.playMedia(item, queueId, QueueOption.NEXT);
       await showToast({
         style: Toast.Style.Success,
         title: "Added to Queue",

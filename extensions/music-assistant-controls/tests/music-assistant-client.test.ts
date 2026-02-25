@@ -1624,6 +1624,18 @@ describe("MusicAssistantClient", () => {
 
         expect(mockApi.queueCommandClear).toHaveBeenCalledWith("queue-123");
       });
+
+      it("should propagate API errors when clearing queue", async () => {
+        const mockApi = {
+          queueCommandClear: jest.fn().mockRejectedValue(new Error("clear failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandClear("queue-123")).rejects.toThrow("clear failed");
+      });
     });
 
     describe("queueCommandDelete", () => {
@@ -1653,6 +1665,18 @@ describe("MusicAssistantClient", () => {
         await client.queueCommandDelete("queue-123", 5);
 
         expect(mockApi.queueCommandDelete).toHaveBeenCalledWith("queue-123", 5);
+      });
+
+      it("should propagate API errors when deleting queue item", async () => {
+        const mockApi = {
+          queueCommandDelete: jest.fn().mockRejectedValue(new Error("delete failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandDelete("queue-123", "item-456")).rejects.toThrow("delete failed");
       });
     });
 
@@ -1697,6 +1721,18 @@ describe("MusicAssistantClient", () => {
         await client.queueCommandMoveItem("queue-123", "item-456", 0);
 
         expect(mockApi.queueCommandMoveItem).toHaveBeenCalledWith("queue-123", "item-456", 0);
+      });
+
+      it("should propagate API errors when moving queue item", async () => {
+        const mockApi = {
+          queueCommandMoveItem: jest.fn().mockRejectedValue(new Error("move failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandMoveItem("queue-123", "item-456", -1)).rejects.toThrow("move failed");
       });
     });
 
@@ -1750,6 +1786,18 @@ describe("MusicAssistantClient", () => {
 
         expect(mockApi.queueCommandShuffle).toHaveBeenCalledWith("queue-123", false);
       });
+
+      it("should propagate API errors when toggling shuffle", async () => {
+        const mockApi = {
+          queueCommandShuffle: jest.fn().mockRejectedValue(new Error("shuffle failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandShuffle("queue-123", true)).rejects.toThrow("shuffle failed");
+      });
     });
 
     describe("queueCommandRepeat", () => {
@@ -1793,6 +1841,18 @@ describe("MusicAssistantClient", () => {
         await client.queueCommandRepeat("queue-123", "off" as any);
 
         expect(mockApi.queueCommandRepeat).toHaveBeenCalledWith("queue-123", "off");
+      });
+
+      it("should propagate API errors when setting repeat mode", async () => {
+        const mockApi = {
+          queueCommandRepeat: jest.fn().mockRejectedValue(new Error("repeat failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandRepeat("queue-123", "all" as any)).rejects.toThrow("repeat failed");
       });
     });
   });
