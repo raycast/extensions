@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uuid-generator",
-  "title": "UUID Generator",
+  "title": "Uuid Generator",
   "description": "A quick way to generate UUIDs without opening the browser",
   "icon": "command-icon.png",
   "author": "jmaeso",
@@ -22,7 +22,7 @@
   "commands": [
     {
       "name": "generate",
-      "title": "Generate UUIDs",
+      "title": "Generate Uuids",
       "description": "Copy generated UUIDs to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -36,7 +36,7 @@
     },
     {
       "name": "generateV5",
-      "title": "Generate V5 UUIDs",
+      "title": "Generate V5 Uuids",
       "description": "Copy generated UUIDs V5 to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -67,7 +67,7 @@
     },
     {
       "name": "generateV7",
-      "title": "Generate V7 UUIDs",
+      "title": "Generate V7 Uuids",
       "description": "Copy generated UUIDs V7 to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -92,7 +92,7 @@
     },
     {
       "name": "generateUlid",
-      "title": "Generate ULIDs",
+      "title": "Generate Ulids",
       "description": "Copy generated ULIDs to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -106,7 +106,7 @@
     },
     {
       "name": "generateTypeID",
-      "title": "Generate TypeIDs",
+      "title": "Generate Typeids",
       "description": "Copy generated TypeIDs to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -126,7 +126,7 @@
     },
     {
       "name": "parseTypeID",
-      "title": "Parse TypeIDs",
+      "title": "Parse Typeids",
       "description": "Parse TypeID and copy resulting UUID to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -140,7 +140,7 @@
     },
     {
       "name": "formatUuid",
-      "title": "Format UUID",
+      "title": "Format Uuid",
       "description": "Format UUID without dashes into standard UUID format and copy to the clipboard",
       "mode": "no-view",
       "arguments": [
@@ -154,7 +154,7 @@
     },
     {
       "name": "packTypeID",
-      "title": "Pack Type ID",
+      "title": "Pack Type Id",
       "description": "Convert a UUID to a packed Type ID with a suffix",
       "mode": "no-view",
       "arguments": [

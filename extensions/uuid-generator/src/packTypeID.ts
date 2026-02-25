@@ -1,6 +1,6 @@
 import { Clipboard, getPreferenceValues, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { TypeID } from "typeid-js";
-import { v4 as uuidv4, parse as parseUuid } from "uuid"; // Import UUID parsing function
+import { parse as parseUuid } from "uuid"; // Import UUID parsing function
 
 /**
  * Given a suffix and UUID, generates a 'packed type ID'.
@@ -25,8 +25,8 @@ export default async (props: LaunchProps<{ arguments: Arguments.PackTypeID }>) =
     // Parse the UUID to get its binary representation
     const parsedUuid = parseUuid(uuid);
 
-    // Use TypeID.fromUUID to convert the UUID to a TypeID with the given suffix
-    const packedId = TypeID.fromUUID(suffix, parsedUuid).toString();
+    // Use TypeID.fromUUIDBytes to convert the UUID to a TypeID with the given suffix
+    const packedId = TypeID.fromUUIDBytes(suffix, parsedUuid).toString();
 
     // Apply case formatting if needed
     const formattedResult = upperCaseLetters ? packedId.toUpperCase() : packedId;
@@ -40,7 +40,6 @@ export default async (props: LaunchProps<{ arguments: Arguments.PackTypeID }>) =
 
     const action = defaultAction === "copy" ? "Copied" : "Pasted";
     await showHUD(`✅ ${action} packed type ID: ${formattedResult}`);
-
   } catch (e) {
     const errorMessage = (e as { message: string }).message;
 
