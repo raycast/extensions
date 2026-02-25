@@ -20,17 +20,6 @@
 - **Add to Queue** - All items can be added to active player's queue to play next
 - **Previous Song command** - Navigate backward through the queue with a dedicated "Previous Song" command that mirrors the existing "Next Song" functionality
 
-### 🎨 UI/UX Enhancements
-
-- **Large album artwork** - Centered 300x300px album cover for immersive viewing experience in Current Track command
-- **Keyboard shortcuts** - Quick access with Cmd+S (shuffle), Cmd+R (repeat), Cmd+F (favorites), Cmd+P (playlists)
-- **Real-time state display** - Shows current shuffle and repeat settings with descriptive text
-- **Automatic refresh** - Updates display when track changes or actions are performed
-- Tab-based navigation for intuitive switching between search, browse, and queue features
-- Breadcrumb navigation in browse tab for easy back navigation
-- Pagination support for large result sets (20 items per page in browse)
-- Visual feedback with toasts for all operations (add to queue, remove, clear, etc.)
-- Color-coded icons for different media types (artists, albums, tracks, playlists)
 
 ### ⚡ Performance & Reliability
 
