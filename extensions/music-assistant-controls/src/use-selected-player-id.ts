@@ -1,8 +1,9 @@
 import { showToast, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import type { PlayerQueue } from "./external-code/interfaces";
 
 export const selectedPlayerKey = "queue_id";
-export type StoredQueue = { queue_id: string };
+export type StoredQueue = Pick<PlayerQueue, "queue_id">;
 export async function storeSelectedQueueID(queue_id: string) {
   return LocalStorage.setItem(selectedPlayerKey, JSON.stringify({ queue_id }));
 }

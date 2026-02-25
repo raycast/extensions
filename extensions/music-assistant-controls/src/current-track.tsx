@@ -196,10 +196,7 @@ export default function CurrentTrackCommand() {
     return (
       <Detail.Metadata>
         {trackItem?.artists && trackItem.artists.length > 0 && (
-          <Detail.Metadata.Label
-            title="Artist"
-            text={trackItem.artists.map((a: { name: string }) => a.name).join(", ")}
-          />
+          <Detail.Metadata.Label title="Artist" text={trackItem.artists.map((artist) => artist.name).join(", ")} />
         )}
 
         {trackItem?.album && <Detail.Metadata.Label title="Album" text={trackItem.album.name} />}
