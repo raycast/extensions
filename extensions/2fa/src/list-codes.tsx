@@ -12,10 +12,10 @@ import {
   popToRoot,
 } from "@raycast/api";
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const TOTP_PERIOD = 30;
 
 import { existsSync } from "fs";
@@ -37,7 +37,7 @@ async function getTfaPath(): Promise<string> {
 
   // Fallback to which
   try {
-    const { stdout } = await execAsync("/usr/bin/which 2fa");
+    const { stdout } = await execFileAsync("/usr/bin/which", ["2fa"]);
     const path = stdout.trim();
     if (path && existsSync(path)) {
       return path;
@@ -104,8 +104,14 @@ function getAccountIcon(name: string): { source: Icon; tintColor: Color } {
 
 async function getAccounts(): Promise<TwoFAAccount[]> {
   const tfaPath = await getTfaPath();
-  const { stdout } = await execAsync(tfaPath);
-  const lines = stdout.trim().split("\n");
+  const { stdout } = await execFileAsync(tfaPath, []);
+  const trimmed = stdout.trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  const lines = trimmed.split("\n");
 
   return lines.map((line) => {
     const match = line.match(/^(\d+)\s+(.+)$/);
@@ -118,7 +124,7 @@ async function getAccounts(): Promise<TwoFAAccount[]> {
 
 async function getCodeForAccount(name: string): Promise<string> {
   const tfaPath = await getTfaPath();
-  const { stdout } = await execAsync(`${tfaPath} ${name}`);
+  const { stdout } = await execFileAsync(tfaPath, [name]);
   return stdout.trim();
 }
 
@@ -200,61 +206,69 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search 2FA accounts...">
-      <List.Section
-        title="2FA Codes"
-        subtitle={`Refreshing in ${secondsRemaining}s`}
-      >
-        {accounts.map((account) => {
-          const accountIcon = getAccountIcon(account.name);
-          return (
-            <List.Item
-              key={account.name}
-              icon={accountIcon}
-              title={account.name}
-              subtitle={formatCode(account.code)}
-              accessories={[
-                {
-                  tag: {
-                    value: formatCode(account.code),
-                    color: Color.PrimaryText,
+      {!isLoading && accounts.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Key}
+          title="No 2FA Accounts Found"
+          description="Add your first account using the 'Add 2FA Account' command or run '2fa -add <name>' in terminal."
+        />
+      ) : (
+        <List.Section
+          title="2FA Codes"
+          subtitle={`Refreshing in ${secondsRemaining}s`}
+        >
+          {accounts.map((account) => {
+            const accountIcon = getAccountIcon(account.name);
+            return (
+              <List.Item
+                key={account.name}
+                icon={accountIcon}
+                title={account.name}
+                subtitle={formatCode(account.code)}
+                accessories={[
+                  {
+                    tag: {
+                      value: formatCode(account.code),
+                      color: Color.PrimaryText,
+                    },
                   },
-                },
-                {
-                  tag: {
-                    value: timerDisplay.text,
-                    color: timerDisplay.color,
+                  {
+                    tag: {
+                      value: timerDisplay.text,
+                      color: timerDisplay.color,
+                    },
+                    icon: {
+                      source: timerDisplay.icon,
+                      tintColor: timerDisplay.color,
+                    },
                   },
-                  icon: {
-                    source: timerDisplay.icon,
-                    tintColor: timerDisplay.color,
-                  },
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Copy Code"
-                    icon={{
-                      source: Icon.CopyClipboard,
-                      tintColor: Color.Green,
-                    }}
-                    onAction={() => copyCode(account)}
-                  />
-                  <Action
-                    title="Refresh Codes"
-                    icon={{
-                      source: Icon.ArrowClockwise,
-                      tintColor: Color.Blue,
-                    }}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={loadAccounts}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Copy Code"
+                      icon={{
+                        source: Icon.CopyClipboard,
+                        tintColor: Color.Green,
+                      }}
+                      onAction={() => copyCode(account)}
+                    />
+                    <Action
+                      title="Refresh Codes"
+                      icon={{
+                        source: Icon.ArrowClockwise,
+                        tintColor: Color.Blue,
+                      }}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={loadAccounts}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
     </List>
   );
 }

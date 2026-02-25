@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - 2025-02-25
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -11,9 +11,8 @@
   - Copy code to clipboard with a single action
   - Search and filter accounts
   - Unique icons and colors for each account
+  - Empty state when no accounts are configured
 
 - **Add 2FA Account**: Add new accounts via the Raycast interface
-  - Support for 6, 7, and 8 digit codes
-  - Support for both TOTP (time-based) and HOTP (counter-based) codes
   - Base32 secret key validation
   - Automatic navigation to account list after adding

@@ -10,10 +10,10 @@ import {
   LaunchType,
 } from "@raycast/api";
 import { useState } from "react";
-import { exec } from "child_process";
+import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 import { existsSync } from "fs";
 
@@ -34,7 +34,7 @@ async function getTfaPath(): Promise<string> {
 
   // Fallback to which
   try {
-    const { stdout } = await execAsync("/usr/bin/which 2fa");
+    const { stdout } = await execFileAsync("/usr/bin/which", ["2fa"]);
     const path = stdout.trim();
     if (path && existsSync(path)) {
       return path;
@@ -51,8 +51,6 @@ async function getTfaPath(): Promise<string> {
 interface FormValues {
   keyname: string;
   secret: string;
-  digits: string;
-  hotp: boolean;
 }
 
 export default function Command() {
@@ -100,17 +98,32 @@ export default function Command() {
     setIsLoading(true);
 
     try {
-      // Build the command with flags
-      const flags: string[] = [];
-      if (values.digits === "7") flags.push("-7");
-      if (values.digits === "8") flags.push("-8");
-      if (values.hotp) flags.push("-hotp");
-
       const tfaPath = await getTfaPath();
-      const flagsStr = flags.length > 0 ? flags.join(" ") + " " : "";
-      const command = `echo "${values.secret.replace(/\s/g, "").toUpperCase()}" | ${tfaPath} -add ${flagsStr}${values.keyname}`;
+      const args = ["-add", values.keyname.trim()];
+      const secret = values.secret.replace(/\s/g, "").toUpperCase();
 
-      await execAsync(command);
+      // Use spawn to safely pipe secret via stdin without shell interpolation
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(tfaPath, args, { stdio: ["pipe", "pipe", "pipe"] });
+        let stderr = "";
+
+        child.stderr.on("data", (data) => {
+          stderr += data.toString();
+        });
+
+        child.on("close", (code) => {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error(stderr || `Process exited with code ${code}`));
+          }
+        });
+
+        child.on("error", reject);
+
+        child.stdin.write(secret + "\n");
+        child.stdin.end();
+      });
 
       await showToast({
         style: Toast.Style.Success,
@@ -174,25 +187,6 @@ export default function Command() {
         error={secretError}
         onChange={(value) => validateSecret(value)}
         onBlur={(event) => validateSecret(event.target.value)}
-      />
-
-      <Form.Separator />
-
-      <Form.Dropdown id="digits" title="Code Length" defaultValue="6">
-        <Form.Dropdown.Item
-          value="6"
-          title="6 digits (default)"
-          icon={Icon.Number06}
-        />
-        <Form.Dropdown.Item value="7" title="7 digits" icon={Icon.Number07} />
-        <Form.Dropdown.Item value="8" title="8 digits" icon={Icon.Number08} />
-      </Form.Dropdown>
-
-      <Form.Checkbox
-        id="hotp"
-        label="HOTP (counter-based)"
-        info="Use HOTP instead of TOTP (time-based). Most services use TOTP."
-        defaultValue={false}
       />
 
       <Form.Description

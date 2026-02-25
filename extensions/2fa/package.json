@@ -2,8 +2,11 @@
   "name": "2fa",
   "title": "2FA Codes",
   "description": "Generate 2FA TOTP codes using the 2fa CLI",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "suraj_lama",
+  "categories": [
+    "Security"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,10 +28,10 @@
     "@raycast/api": "^1.93.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "~22.13.4",
     "@types/react": "^19.0.8",
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.3",
     "typescript": "^5.7.3"
   },
   "scripts": {
