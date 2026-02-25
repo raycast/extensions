@@ -38,7 +38,7 @@ export async function findFFmpegPath(minimumVersion = 6.0): Promise<{ path: stri
 
   const { ffmpeg_path: custom } = getPreferenceValues();
   const stored = await LocalStorage.getItem<string>("ffmpeg-path");
-  const whichPath = await which("ffmpeg").catch(() => null);
+  const whichPath = which.sync("ffmpeg", { nothrow: true });
 
   console.log(`custom: ${custom}`);
   console.log(`stored: ${stored}`);
