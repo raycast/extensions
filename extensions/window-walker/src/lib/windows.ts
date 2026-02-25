@@ -361,11 +361,9 @@ export function refreshWindowListCache(): WindowInfo[] {
   cachedWindowList = windows;
   cacheTimestamp = Date.now();
 
-  // Schedule background icon extraction for windows without cached icons
+  // Extract icons for windows without cached icons (synchronous for immediate display)
   if (windowsNeedingIcons.length > 0) {
-    setTimeout(() => {
-      extractMissingIcons(windowsNeedingIcons);
-    }, 100);
+    extractMissingIcons(windowsNeedingIcons);
   }
 
   return windows;
