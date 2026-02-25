@@ -6,29 +6,29 @@ A powerful Raycast extension that integrates with Everything Search by voidtools
 
 ## 📦 Prerequisites
 
-**In order to use this extension, you need to have Everything Search installed on your Windows system**
-
-### 1. Install Everything Desktop App
-
-Download from [voidtools.com](https://www.voidtools.com/downloads/) or install via winget:
+You must have the **Everything** desktop app installed before using this extension. Download it from [voidtools.com](https://www.voidtools.com/downloads/) or install via winget:
 
 ```bash
 winget install voidtools.Everything
 ```
 
-### 2. Install Everything CLI (optional)
+The extension also requires the Everything CLI (`es.exe`) to perform searches. If it's not found on your system, the extension will **automatically download and install it** for you — no manual setup needed.
 
-The extension uses the Everything CLI tool (`es.exe`) for searching. If it's not found on your system, the extension will **automatically prompt you to download and install it**.
-
-To install manually instead:
-
-- Download from [voidtools.com](https://www.voidtools.com/downloads/#cli)</br>
-or
-- Install via winget:
+If you prefer to install the CLI manually, you can grab it from [voidtools.com](https://www.voidtools.com/downloads/#cli) or via winget:
 
 ```bash
 winget install --id=voidtools.Everything.Cli -e
 ```
+
+## 🔄 Updating the CLI
+
+When the CLI is auto-installed by the extension, it is placed in:
+
+```
+%LOCALAPPDATA%\Microsoft\WindowsApps
+```
+
+This directory is already on your system `PATH`, so `es.exe` will be available globally. If you need to update or replace the CLI binary, swap the file at that location.
 
 ## 🛠️ Configuration
 
