@@ -101,7 +101,7 @@ function Actions({
   preferences: Preferences.SearchColors;
   name: string;
   shade: string;
-  value: string;
+  hexValue: string;
   hexValue: string;
 }) {
   let sections = [
