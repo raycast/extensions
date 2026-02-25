@@ -1,9 +1,9 @@
 import { Icon, MenuBarExtra, openExtensionPreferences, Image } from "@raycast/api";
-import { useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { Player, PlayerQueue } from "./external-code/interfaces";
 import MusicAssistantClient from "./music-assistant-client";
 import { useEffect, useState } from "react";
-import { selectedPlayerKey, StoredQueue } from "./use-selected-player-id";
+import { getStoredQueue, storeSelectedQueueID } from "./use-selected-player-id";
 
 export default function Command() {
   const client = new MusicAssistantClient();
@@ -24,7 +24,9 @@ export default function Command() {
     },
   );
 
-  const { value: storedQueueId, setValue: storeQueueId } = useLocalStorage<StoredQueue>(selectedPlayerKey);
+  const { data: storedQueueId, revalidate: revalidateStoredQueueId } = useCachedPromise(getStoredQueue, [], {
+    keepPreviousData: true,
+  });
 
   const [title, setTitle] = useState<string>();
 
@@ -39,7 +41,7 @@ export default function Command() {
     }
   }, [storedQueueId, queuesData, playersData, client, title]);
 
-  const selectPlayerForMenuBar = (queue: PlayerQueue) => {
+  const selectPlayerForMenuBar = async (queue: PlayerQueue) => {
     const selection = client.createQueueSelection(queue);
 
     if (selection.title) {
@@ -47,7 +49,8 @@ export default function Command() {
     }
 
     if (storedQueueId?.queue_id !== selection.queueId) {
-      storeQueueId({ queue_id: selection.queueId });
+      await storeSelectedQueueID(selection.queueId);
+      revalidateStoredQueueId();
     }
   };
 
@@ -72,7 +75,7 @@ export default function Command() {
                 : Icon.Music
             }
             title={client.getQueueCurrentSong(activeDisplayQueue)}
-            onAction={() => selectPlayerForMenuBar(activeDisplayQueue)}
+            onAction={async () => await selectPlayerForMenuBar(activeDisplayQueue)}
           />
           <MenuBarExtra.Item
             title="Next"
@@ -174,7 +177,7 @@ export default function Command() {
               }
               title={queue.display_name}
               subtitle={client.getQueueCurrentSong(queue)}
-              onAction={() => selectPlayerForMenuBar(queue)}
+              onAction={async () => await selectPlayerForMenuBar(queue)}
             />
           ))}
         </MenuBarExtra.Section>
