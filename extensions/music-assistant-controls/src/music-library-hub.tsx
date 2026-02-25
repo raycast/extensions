@@ -48,17 +48,24 @@ export default function MusicLibraryHubCommand() {
     <List
       navigationTitle="Music Library Hub"
       searchBarPlaceholder="Search your library..."
-      searchText={activeTab === "search" ? searchQuery : ""}
-      onSearchTextChange={activeTab === "search" ? setSearchQuery : () => {}}
+      searchText={searchQuery}
+      onSearchTextChange={setSearchQuery}
       throttle
     >
-      <List.Section title="Tabs">
+      {/* Tab navigation - always at the top */}
+      <List.Section title="Browse By">
         <List.Item
-          title="Browse"
+          title="Artists & Albums"
           icon={Icon.Folder}
           actions={
             <ActionPanel>
-              <Action title="Switch to Browse" onAction={() => setActiveTab("browse")} />
+              <Action
+                title="View"
+                onAction={() => {
+                  setSearchQuery("");
+                  setActiveTab("browse");
+                }}
+              />
             </ActionPanel>
           }
         />
@@ -67,7 +74,13 @@ export default function MusicLibraryHubCommand() {
           icon={Icon.Clock}
           actions={
             <ActionPanel>
-              <Action title="Switch to Recently Played" onAction={() => setActiveTab("recent")} />
+              <Action
+                title="View"
+                onAction={() => {
+                  setSearchQuery("");
+                  setActiveTab("recent");
+                }}
+              />
             </ActionPanel>
           }
         />
@@ -76,20 +89,33 @@ export default function MusicLibraryHubCommand() {
           icon={Icon.List}
           actions={
             <ActionPanel>
-              <Action title="Switch to Queue Manager" onAction={() => setActiveTab("queue")} />
+              <Action
+                title="View"
+                onAction={() => {
+                  setSearchQuery("");
+                  setActiveTab("queue");
+                }}
+              />
             </ActionPanel>
           }
         />
       </List.Section>
 
-      {activeTab === "search" && (
+      {/* Show search results if there's a search query */}
+      {debouncedSearchQuery && debouncedSearchQuery.trim().length > 0 && (
         <SearchTab client={client} searchQuery={debouncedSearchQuery} onTabChange={setActiveTab} />
       )}
-      {activeTab === "browse" && (
-        <BrowseTab client={client} browseState={browseState} setBrowseState={setBrowseState} />
-      )}
-      {activeTab === "recent" && <RecentlyPlayedTab client={client} />}
-      {activeTab === "queue" && <QueueManagerTab client={client} />}
+
+      {/* Tab content - hidden when actively searching */}
+      {!debouncedSearchQuery || debouncedSearchQuery.trim().length === 0 ? (
+        <>
+          {activeTab === "browse" && (
+            <BrowseTab client={client} browseState={browseState} setBrowseState={setBrowseState} />
+          )}
+          {activeTab === "recent" && <RecentlyPlayedTab client={client} />}
+          {activeTab === "queue" && <QueueManagerTab client={client} />}
+        </>
+      ) : null}
     </List>
   );
 }
