@@ -1,6 +1,6 @@
 # Password Store Changelog
 
-## [Improvements] - 2026-02-24
+## [Improvements] - {PR_MERGE_DATE}
 - Able to insert password via `pass insert`
 - Able to generate password via `pass generate`
 - Able to rename password via `pass mv`

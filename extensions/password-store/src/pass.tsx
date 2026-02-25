@@ -3,18 +3,16 @@ import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { glob } from "glob";
 import { getOptionIcon, getPasswordIcon } from "./utils/icons.util";
 import { getLastUsedPassword } from "./utils/password.util";
-import { runCmd } from "./utils/cmd.util";
+import { runCmd, runPassCmd } from "./utils/cmd.util";
 import { performAction } from "./utils/action.util";
 import { Option, Password, PasswordMakerProps, InsertPasswordForm, RenamePasswordProps } from "./interfaces";
 import url from "url";
-import os from "os";
 
 export function RenamePasswordPrompt({ onPasswordRename, oldName }: RenamePasswordProps) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<{ renamed: string }>({
     onSubmit: function (toBeSubmitted) {
-      const cmd = `pass mv ${oldName} ${toBeSubmitted.renamed}`;
-      onPasswordRename(runCmd(cmd), {
+      onPasswordRename(runPassCmd(["mv", oldName, toBeSubmitted.renamed]), {
         optimisticUpdate(data) {
           return data ? data.filter((pass) => pass.value != oldName) : [];
         },
@@ -44,15 +42,8 @@ export function InsertPasswordPrompt({ onPasswordCreate }: PasswordMakerProps) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<InsertPasswordForm>({
     onSubmit: function (toBeSubmitted) {
-      const isWindows = os.platform() === "win32";
-      // pass `toBeSubmitted.password` and `toBeSubmitted.metadata` to `pass insert -m` command uninteractively to each supported platform.
-      const windowsCmd = `'{0}\n{1}\n' -f "${toBeSubmitted.password}", "${toBeSubmitted.metadata}" | pass insert -m ${toBeSubmitted.passwordPath}`;
-      const unixCmd = `printf "%s\n%s\n" "${toBeSubmitted.password}" "${toBeSubmitted.metadata ? toBeSubmitted.metadata : ""}" | pass insert -m ${toBeSubmitted.passwordPath}`;
-      // if its not windows, it is assumed to be a unix-like system. So far raycast is available on MacOS, Linux and Windows.
-      const cmd = isWindows ? windowsCmd : unixCmd;
-      // run `cmd` via `runCmd` helper function and wrap that inside `onPasswordCreate` in order to perform Optimistic Update.
-      // By default it will call the hook (`UsePromise`) again after an update
-      onPasswordCreate(runCmd(cmd));
+      const input = `${toBeSubmitted.password}\n${toBeSubmitted.metadata ?? ""}\n`;
+      onPasswordCreate(runPassCmd(["insert", "-m", toBeSubmitted.passwordPath], input));
       pop();
     },
     validation: {
@@ -69,9 +60,9 @@ export function InsertPasswordPrompt({ onPasswordCreate }: PasswordMakerProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField title="path" {...itemProps.passwordPath} />
-      <Form.TextField title="password" {...itemProps.password} />
-      <Form.TextArea title="metadata" {...itemProps.metadata} />
+      <Form.TextField title="Path" {...itemProps.passwordPath} />
+      <Form.TextField title="Password" {...itemProps.password} />
+      <Form.TextArea title="Metadata" {...itemProps.metadata} />
     </Form>
   );
 }
@@ -82,11 +73,7 @@ export function GeneratePasswordPrompt({ onPasswordCreate }: PasswordMakerProps)
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<{ passwordPath: string }>({
     onSubmit: function (toBeSubmitted) {
-      // prepare the command to generate a pseudo-random password
-      const cmd = `pass generate ${toBeSubmitted.passwordPath}`;
-      // run `cmd` via `runCmd` helper function and wrap that inside `onPasswordCreate` in order to perform Optimistic Update.
-      // By default it will call the hook (`UsePromise`) again after an update
-      onPasswordCreate(runCmd(cmd));
+      onPasswordCreate(runPassCmd(["generate", toBeSubmitted.passwordPath]));
       // pop back to list view
       pop();
     },
@@ -103,7 +90,7 @@ export function GeneratePasswordPrompt({ onPasswordCreate }: PasswordMakerProps)
         </ActionPanel>
       }
     >
-      <Form.TextField title="password path" {...itemProps.passwordPath} />
+      <Form.TextField title="Password Path" {...itemProps.passwordPath} />
     </Form>
   );
 }
@@ -186,15 +173,8 @@ export default function Command(): JSX.Element {
                     const isConfirmed = await confirmAlert({
                       title: "Are you sure you want to delete this password file with its metadata?",
                     });
-                    const cmd = `echo 'y' | pass rm ${password.value}`;
                     if (isConfirmed) {
-                      // deleting password entries must be through `pass` with `pass remove`
-                      // the mutate function is a function that gets called when an update occurs and how should the UI behave when it occurs
-                      mutate(runCmd(cmd), {
-                        optimisticUpdate(data) {
-                          return data ? data.filter((pass) => pass.value != password.value) : [];
-                        },
-                      });
+                      mutate(runPassCmd(["rm", password.value], "y"));
                     }
                   }}
                 />
