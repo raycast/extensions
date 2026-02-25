@@ -1,6 +1,6 @@
 # PBR Assistant Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-02-25
 
 - Initial release of PBR Assistant
 - Added comprehensive IOR (Index of Refraction) values database
