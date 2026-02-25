@@ -406,21 +406,21 @@ async function fetchClaudeUsage(
 export function useClaudeUsage(enabled = true) {
   const [usage, setUsage] = useState<ClaudeUsage | null>(null);
   const [error, setError] = useState<ClaudeError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(enabled);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!enabled);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const requestIdRef = useRef(0);
 
   const fetchData = useCallback(async () => {
-    if (!enabled) {
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
-    }
+    const requestId = ++requestIdRef.current;
 
     setIsLoading(true);
     setError(null);
 
     const { credentials, error: credentialsError } = readClaudeCredentials();
     if (!credentials) {
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
       setUsage(null);
       setError(credentialsError);
       setIsLoading(false);
@@ -429,27 +429,42 @@ export function useClaudeUsage(enabled = true) {
     }
 
     const result = await fetchClaudeUsage(credentials);
+    if (requestId !== requestIdRef.current) {
+      return;
+    }
     setUsage(result.usage);
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, [enabled]);
+  }, []);
 
   useEffect(() => {
-    if (!hasInitialFetch) {
-      fetchData();
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setUsage(null);
+      setError(null);
+      setIsLoading(false);
+      setHasInitialFetch(false);
+      return;
     }
-  }, [hasInitialFetch, fetchData]);
+
+    if (!hasInitialFetch) {
+      void fetchData();
+    }
+  }, [enabled, hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
   }, [enabled, fetchData]);
 
   return {
-    isLoading,
-    usage,
-    error,
+    isLoading: enabled ? isLoading : false,
+    usage: enabled ? usage : null,
+    error: enabled ? error : null,
     revalidate,
   };
 }
