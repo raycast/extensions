@@ -10,7 +10,7 @@
 
 import { Detail, getPreferenceValues, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import crypto from "crypto";
-import { execaCommand, ExecaReturnValue } from "execa";
+import { execaCommand, ExecaError } from "execa";
 import { fileTypeFromFile } from "file-type";
 import fs from "fs";
 import path from "path";
@@ -150,7 +150,7 @@ export default function RunCommand(actionType: ActionType) {
   async function execCmdToFile(
     exeCmd: (filePath: string, str: string) => Promise<void>,
     filePath: string,
-    str: string
+    str: string,
   ): Promise<void> {
     console.log(`execCmdToFile: ${filePath}`);
     const fileName = path.basename(filePath);
@@ -322,11 +322,11 @@ export default function RunCommand(actionType: ActionType) {
     } catch (error) {
       fs.rmdirSync(targetPath);
 
-      const err = error as ExecaReturnValue;
+      const err = error as ExecaError;
       console.error(`ZipExtract error: ${JSON.stringify(err, null, 4)}`);
       let errorLog = `### ⚠️ Error \n\n `;
       errorLog += `\`\`\` \n\n`;
-      errorLog += `${err.stderr} \n\n`;
+      errorLog += `${err.stderr ?? err.message} \n\n`;
       errorLog += `\`\`\` \n\n`;
       setMarkdown((prev) => prev + errorLog);
     }
@@ -369,7 +369,6 @@ export default function RunCommand(actionType: ActionType) {
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markdown]);
 
   return <Detail markdown={markdown} />;
