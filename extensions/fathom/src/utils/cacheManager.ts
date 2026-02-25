@@ -6,16 +6,17 @@
  * - Shares cached data across all components
  * - Provides event-based updates when cache changes
  * - Handles cache invalidation and refresh
+ * - Supports aborting background fetches
  */
 
 import { showToast, Toast } from "@raycast/api";
-import { listAllMeetings } from "../fathom/api";
+import { listMeetings } from "../fathom/api";
 import type { MeetingFilter, Meeting } from "../types/Types";
 import {
-  cacheMeeting,
+  cacheMeetingsBatch,
   getAllCachedMeetings,
   pruneCache,
-  updateCacheMetadata,
+  updateCacheMetadataFromMeetings,
   getCacheMetadata,
   type CachedMeetingData,
 } from "./cache";
@@ -26,6 +27,7 @@ import { logger } from "@chrismessina/raycast-logger";
 const CACHE_SIZE = 500; // Keep all meetings (auto-paginated from API)
 
 type CacheListener = (meetings: CachedMeetingData[]) => void;
+type FetchingListener = (isFetching: boolean) => void;
 
 class CacheManager {
   private cachedMeetings: CachedMeetingData[] = [];
@@ -33,28 +35,29 @@ class CacheManager {
   private isLoading = false;
   private isCaching = false;
   private listeners = new Set<CacheListener>();
+  private fetchingListeners = new Set<FetchingListener>();
   private lastApiDataHash: string | null = null;
   private lastFetchTime = 0;
   private lastCacheUpdateTime = 0;
-  private CACHE_STALE_THRESHOLD = 5 * 60 * 1000; // 5 minutes - fetch fresh data if cache is older
+  private CACHE_STALE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
   private FETCH_COOLDOWN = 5000; // 5 seconds minimum between fetches
-  private nextCursor: string | undefined = undefined; // Pagination cursor for loading more
-  private hasMoreMeetings = true; // Whether more meetings are available
+  private nextCursor: string | undefined = undefined;
+  private hasMoreMeetings = true;
   private isLoadingMore = false;
 
-  /**
-   * Subscribe to cache updates
-   */
+  // Separate abort tokens for each fetch path so they don't cancel each other
+  private remainingPagesToken = 0;
+  private loadMoreToken = 0;
+  private _isFetchingBackground = false;
+
+  // ─── Subscriptions ────────────────────────────────────────────────────────
+
   subscribe(listener: CacheListener): () => void {
     this.listeners.add(listener);
     logger.log(`[CacheManager] Subscriber added (total: ${this.listeners.size})`);
-
-    // Immediately notify with current data if loaded
     if (this.isLoaded) {
       listener(this.cachedMeetings);
     }
-
-    // Return unsubscribe function
     return () => {
       this.listeners.delete(listener);
       logger.log(`[CacheManager] Subscriber removed (total: ${this.listeners.size})`);
@@ -62,40 +65,69 @@ class CacheManager {
   }
 
   /**
-   * Notify all listeners of cache updates
+   * Subscribe to background-fetch state changes (true = fetching, false = idle).
+   * Lets the UI show/hide a Stop action.
    */
+  subscribeFetching(listener: FetchingListener): () => void {
+    this.fetchingListeners.add(listener);
+    // Immediately notify with current state
+    listener(this._isFetchingBackground);
+    return () => {
+      this.fetchingListeners.delete(listener);
+    };
+  }
+
   private notifyListeners(): void {
     logger.log(`[CacheManager] Notifying ${this.listeners.size} listeners`);
     this.listeners.forEach((listener) => listener(this.cachedMeetings));
   }
 
-  /**
-   * Check if the cache is stale (needs fresh data from API)
-   */
-  isCacheStale(): boolean {
-    if (!this.lastCacheUpdateTime) return true;
-    const age = Date.now() - this.lastCacheUpdateTime;
-    return age > this.CACHE_STALE_THRESHOLD;
+  private setFetchingBackground(value: boolean): void {
+    if (this._isFetchingBackground === value) return;
+    this._isFetchingBackground = value;
+    this.fetchingListeners.forEach((l) => l(value));
+  }
+
+  isFetchingBackground(): boolean {
+    return this._isFetchingBackground;
   }
 
   /**
-   * Get cache age in minutes for display
+   * Abort any in-progress background fetch.
+   * The current page request will finish (HTTP can't be cancelled),
+   * but no further pages will be fetched and the cache won't be updated.
    */
+  stopBackgroundFetch(): void {
+    if (!this._isFetchingBackground) return;
+    this.remainingPagesToken++;
+    this.loadMoreToken++;
+    logger.log(`[CacheManager] Background fetch aborted (remainingPages token: ${this.remainingPagesToken}, loadMore token: ${this.loadMoreToken})`);
+    this.setFetchingBackground(false);
+  }
+
+  // ─── Staleness ────────────────────────────────────────────────────────────
+
+  isCacheStale(): boolean {
+    if (!this.lastCacheUpdateTime) return true;
+    return Date.now() - this.lastCacheUpdateTime > this.CACHE_STALE_THRESHOLD;
+  }
+
   getCacheAgeMinutes(): number {
     if (!this.lastCacheUpdateTime) return 0;
     return Math.round((Date.now() - this.lastCacheUpdateTime) / 60000);
   }
+
+  // ─── Load from storage ────────────────────────────────────────────────────
+
   async loadCache(): Promise<CachedMeetingData[]> {
     if (this.isLoaded) {
       logger.log(`[CacheManager] Cache already loaded (${this.cachedMeetings.length} meetings)`);
       return this.cachedMeetings;
     }
 
-    // Prevent concurrent loads
     if (this.isLoading) {
       logger.log("[CacheManager] Cache load already in progress, waiting...");
-      // Wait for the current load to complete with timeout
-      const maxWaitTime = 30000; // 30 seconds max wait
+      const maxWaitTime = 30000;
       const startTime = Date.now();
       while (this.isLoading) {
         if (Date.now() - startTime > maxWaitTime) {
@@ -117,7 +149,6 @@ class CacheManager {
       this.isLoaded = true;
       logger.log(`[CacheManager] Loaded ${cached.length} cached meetings`);
 
-      // Restore last cache update time from metadata (persists across process restarts)
       const metadata = await getCacheMetadata();
       if (metadata) {
         this.lastCacheUpdateTime = metadata.lastUpdated;
@@ -135,16 +166,11 @@ class CacheManager {
     }
   }
 
-  /**
-   * Fetch meetings from API and cache them (deduplicated)
-   * @param filter - Meeting filter options
-   * @param options - Additional options
-   * @param options.force - If true, bypasses cooldown and data hash checks to ensure fresh data
-   */
+  // ─── Fetch & Cache ────────────────────────────────────────────────────────
+
   async fetchAndCache(filter: MeetingFilter = {}, options: { force?: boolean } = {}): Promise<Meeting[]> {
     const { force = false } = options;
 
-    // Check cooldown to prevent rapid re-fetches (unless forced)
     const now = Date.now();
     const timeSinceLastFetch = now - this.lastFetchTime;
 
@@ -155,90 +181,133 @@ class CacheManager {
       return this.cachedMeetings.map((cached) => cached.meeting as Meeting);
     }
 
-    // When forced, clear the data hash so new results always get cached
     if (force) {
       logger.log("[CacheManager] Forced fetch - clearing data hash for fresh results");
       this.lastApiDataHash = null;
     }
 
-    // Create a unique key for this filter
     const filterKey = JSON.stringify(filter);
     const requestKey = `fetch-meetings:${filterKey}`;
 
     logger.log(`[CacheManager] Fetch request for filter: ${filterKey}`);
-
-    // Update last fetch time
     this.lastFetchTime = now;
 
-    // Use the global queue to deduplicate requests
     const result = await globalQueue.enqueue(
       requestKey,
       async () => {
-        let progressToast: Toast | undefined;
+        logger.log(`[CacheManager] Fetching first page for: ${filterKey}`);
 
-        try {
-          logger.log(`[CacheManager] Fetching all meetings for: ${filterKey}`);
+        const firstPage = await listMeetings(filter);
+        const firstPageMeetings = firstPage.items;
+        const firstPageCursor = firstPage.nextCursor;
 
-          // Show progress toast during pagination
-          progressToast = await showToast({
-            style: Toast.Style.Animated,
-            title: "Fetching meetings from Fathom API...",
+        logger.log(`[CacheManager] First page: ${firstPageMeetings.length} meetings`);
+
+        // Cache and display first page immediately
+        await this.cacheApiResults(firstPageMeetings);
+
+        // Background-fetch remaining pages without blocking the UI
+        if (firstPageCursor) {
+          this.nextCursor = firstPageCursor;
+          this.hasMoreMeetings = true;
+          this.fetchRemainingPages(filter, firstPageCursor, firstPageMeetings).catch((err) => {
+            logger.error("[CacheManager] Background fetch error:", err);
           });
-
-          const result = await listAllMeetings(
-            filter,
-            (fetched) => {
-              if (progressToast) {
-                progressToast.title = `Fetching from Fathom API... (${fetched} downloaded)`;
-              }
-            },
-            5, // Fetch first 5 pages (~50 meetings)
-          );
-
-          // Store cursor for incremental loading
-          this.nextCursor = result.nextCursor;
-          this.hasMoreMeetings = !!result.nextCursor;
-
-          if (progressToast) {
-            progressToast.title = `Saving ${result.meetings.length} meetings to local cache...`;
-          }
-
-          // Cache the results
-          await this.cacheApiResults(result.meetings);
+        } else {
+          this.nextCursor = undefined;
+          this.hasMoreMeetings = false;
           this.lastCacheUpdateTime = Date.now();
-
-          // Persist cache update time to survive process restarts
-          await updateCacheMetadata();
-
-          if (progressToast) {
-            progressToast.style = Toast.Style.Success;
-            progressToast.title = `${result.meetings.length} meetings ready — cached locally`;
-            if (this.hasMoreMeetings) {
-              progressToast.message = "Scroll to the bottom to load older meetings";
-            }
-          }
-
-          return result.meetings;
-        } catch (error) {
-          // Hide or update toast on error
-          if (progressToast) {
-            progressToast.hide();
-          }
-          throw error;
+          await updateCacheMetadataFromMeetings(this.cachedMeetings);
         }
+
+        return firstPageMeetings;
       },
-      1, // Priority: 1 (normal)
+      1,
     );
 
     return result;
   }
 
   /**
-   * Cache API results (deduplicated by data hash)
+   * Background-fetch pages 2–5 and merge them into the cache progressively.
+   * Respects abort tokens — stops immediately if stopBackgroundFetch() is called.
    */
+  private async fetchRemainingPages(
+    filter: MeetingFilter,
+    startCursor: string,
+    alreadyCached: Meeting[],
+  ): Promise<void> {
+    const token = this.remainingPagesToken;
+    this.setFetchingBackground(true);
+
+    const progressToast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Fetching more meetings... (${alreadyCached.length} loaded)`,
+      primaryAction: {
+        title: "Stop Fetching Meetings",
+        onAction: () => this.stopBackgroundFetch(),
+      },
+    });
+
+    try {
+      // Page-by-page so we can check the abort token between pages
+      let cursor: string | undefined = startCursor;
+      const additionalMeetings: Meeting[] = [];
+      let pageNum = 0;
+      const MAX_BACKGROUND_PAGES = 4;
+
+      while (cursor && pageNum < MAX_BACKGROUND_PAGES) {
+        // Check abort token before each page request
+        if (this.remainingPagesToken !== token) {
+          logger.log("[CacheManager] Background fetch aborted — stopping");
+          progressToast.hide();
+          return;
+        }
+
+        pageNum++;
+        const page = await listMeetings({ ...filter, cursor });
+        additionalMeetings.push(...page.items);
+        cursor = page.nextCursor;
+
+        const totalSoFar = alreadyCached.length + additionalMeetings.length;
+        progressToast.title = `Fetching more meetings... (${totalSoFar} loaded)`;
+        logger.log(`[CacheManager] Background page ${pageNum}: ${page.items.length} meetings (total: ${totalSoFar})`);
+      }
+
+      // Final abort check before writing
+      if (this.remainingPagesToken !== token) {
+        logger.log("[CacheManager] Background fetch aborted before write — discarding results");
+        progressToast.hide();
+        return;
+      }
+
+      this.nextCursor = cursor;
+      this.hasMoreMeetings = !!cursor;
+
+      const allMeetings = [...alreadyCached, ...additionalMeetings];
+      await this.cacheApiResults(allMeetings);
+      this.lastCacheUpdateTime = Date.now();
+      await updateCacheMetadataFromMeetings(this.cachedMeetings);
+
+      progressToast.style = Toast.Style.Success;
+      progressToast.title = `${allMeetings.length} meetings ready`;
+      progressToast.primaryAction = undefined;
+      if (this.hasMoreMeetings) {
+        progressToast.message = "Scroll to the bottom to load older meetings";
+      }
+    } catch (error) {
+      progressToast.hide();
+      throw error;
+    } finally {
+      if (this.remainingPagesToken === token) {
+        this.setFetchingBackground(false);
+      }
+    }
+  }
+
+  // ─── Cache writes ─────────────────────────────────────────────────────────
+
   private async cacheApiResults(meetings: Meeting[]): Promise<void> {
-    // Create a hash of meeting IDs to detect if the set of meetings has changed
-    // Only use recordingId (immutable) to avoid invalidation from timestamp updates
     const dataHash = meetings
       .map((m) => m.recordingId)
       .sort()
@@ -258,29 +327,26 @@ class CacheManager {
     this.lastApiDataHash = dataHash;
 
     try {
-      const totalMeetings = meetings.length;
-      logger.log(`[CacheManager] Caching ${totalMeetings} meetings`);
+      logger.log(`[CacheManager] Caching ${meetings.length} meetings`);
 
-      // Cache each meeting sequentially
-      for (const meeting of meetings) {
-        await cacheMeeting(
-          meeting.recordingId,
-          meeting,
-          meeting.summaryText,
-          meeting.transcriptText,
-          meeting.actionItems,
-        );
-      }
+      // Batch write — all meetings in parallel, index updated once
+      await cacheMeetingsBatch(
+        meetings.map((m) => ({
+          meetingId: m.recordingId,
+          meeting: m,
+          summary: m.summaryText,
+          transcript: m.transcriptText,
+          actionItems: m.actionItems,
+        })),
+      );
 
-      // Prune old entries to maintain cache size
       await pruneCache(CACHE_SIZE);
 
-      // Reload cached meetings
+      // Reload from storage to get the authoritative merged set
       const cached = await getAllCachedMeetings();
       this.cachedMeetings = cached;
       logger.log(`[CacheManager] Cache updated, now have ${cached.length} meetings`);
 
-      // Notify all subscribers
       this.notifyListeners();
     } catch (error) {
       logger.error("[CacheManager] Error caching meetings:", error);
@@ -290,9 +356,8 @@ class CacheManager {
     }
   }
 
-  /**
-   * Load more meetings from the next page (incremental pagination)
-   */
+  // ─── Load More ────────────────────────────────────────────────────────────
+
   async loadMoreMeetings(filter: MeetingFilter = {}): Promise<void> {
     if (this.isLoadingMore) {
       logger.log("[CacheManager] loadMoreMeetings already in progress");
@@ -301,51 +366,68 @@ class CacheManager {
 
     if (!this.hasMoreMeetings || !this.nextCursor) {
       logger.log("[CacheManager] No more meetings to load");
-      await showToast({
-        style: Toast.Style.Success,
-        title: "All meetings loaded",
-      });
+      await showToast({ style: Toast.Style.Success, title: "All meetings loaded" });
       return;
     }
 
     const cursor = this.nextCursor;
+    const token = ++this.loadMoreToken;
     const requestKey = `load-more-meetings:${cursor}:${JSON.stringify(filter)}`;
 
     await globalQueue.enqueue(
       requestKey,
       async () => {
         this.isLoadingMore = true;
-        try {
-          const progressToast = await showToast({
-            style: Toast.Style.Animated,
-            title: "Fetching older meetings from Fathom...",
-          });
+        this.setFetchingBackground(true);
 
+        const progressToast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Fetching older meetings...",
+          primaryAction: {
+            title: "Stop Fetching Meetings",
+            onAction: () => this.stopBackgroundFetch(),
+          },
+        });
+
+        try {
           logger.log(`[CacheManager] Loading more meetings from cursor: ${cursor}`);
 
-          const result = await listAllMeetings(
-            { ...filter, cursor },
-            (fetched) => {
-              progressToast.title = `Fetching older meetings from Fathom... (${fetched} downloaded)`;
-            },
-            5, // Fetch next 5 pages (~50 more meetings)
-          );
+          let pageCursor: string | undefined = cursor;
+          const fetched: Meeting[] = [];
+          let pageNum = 0;
+          const MAX_PAGES = 5;
 
-          // Update cursor for next load
-          this.nextCursor = result.nextCursor;
-          this.hasMoreMeetings = !!result.nextCursor;
+          while (pageCursor && pageNum < MAX_PAGES) {
+            if (this.loadMoreToken !== token) {
+              logger.log("[CacheManager] loadMore aborted — stopping");
+              progressToast.hide();
+              return;
+            }
 
-          progressToast.title = `Saving ${result.meetings.length} meetings to local cache...`;
+            pageNum++;
+            const page = await listMeetings({ ...filter, cursor: pageCursor });
+            fetched.push(...page.items);
+            pageCursor = page.nextCursor;
+            progressToast.title = `Fetching older meetings... (${fetched.length} downloaded)`;
+            logger.log(`[CacheManager] loadMore page ${pageNum}: ${page.items.length} meetings`);
+          }
 
-          // Cache the new results (will merge with existing)
-          await this.cacheApiResults(result.meetings);
+          if (this.loadMoreToken !== token) {
+            logger.log("[CacheManager] loadMore aborted before write — discarding");
+            progressToast.hide();
+            return;
+          }
+
+          this.nextCursor = pageCursor;
+          this.hasMoreMeetings = !!pageCursor;
+
+          await this.cacheApiResults(fetched);
           this.lastCacheUpdateTime = Date.now();
-
-          // Persist cache update time to survive process restarts
-          await updateCacheMetadata();
+          await updateCacheMetadataFromMeetings(this.cachedMeetings);
 
           progressToast.style = Toast.Style.Success;
-          progressToast.title = `${result.meetings.length} older meetings cached locally`;
+          progressToast.title = `${fetched.length} older meetings loaded`;
+          progressToast.primaryAction = undefined;
           progressToast.message = this.hasMoreMeetings ? "Scroll to the bottom to load more" : "All meetings loaded";
         } catch (error) {
           await showContextualError(error, {
@@ -355,47 +437,34 @@ class CacheManager {
           throw error;
         } finally {
           this.isLoadingMore = false;
+          if (this.loadMoreToken === token) {
+            this.setFetchingBackground(false);
+          }
         }
       },
       1,
     );
   }
 
-  /**
-   * Check if more meetings are available to load
-   */
-  hasMore(): boolean {
-    return this.hasMoreMeetings;
-  }
+  // ─── Refresh ──────────────────────────────────────────────────────────────
 
-  /**
-   * Refresh cache by fetching from API
-   */
   async refreshCache(filter: MeetingFilter = {}): Promise<void> {
-    let progressToast: Toast | undefined;
+    const progressToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Refreshing meetings...",
+    });
 
     try {
-      progressToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Refreshing meetings...",
-      });
-
-      // Clear the last data hash and cursor to force fresh fetch
       this.lastApiDataHash = null;
       this.nextCursor = undefined;
       this.hasMoreMeetings = true;
 
       await this.fetchAndCache(filter, { force: true });
 
-      if (progressToast) {
-        progressToast.style = Toast.Style.Success;
-        progressToast.title = "Meetings refreshed";
-      }
+      progressToast.style = Toast.Style.Success;
+      progressToast.title = "Meetings refreshed";
     } catch (error) {
-      // Hide the animated toast on error (error toast will be shown separately)
-      if (progressToast) {
-        progressToast.hide();
-      }
+      progressToast.hide();
       await showContextualError(error, {
         action: "refresh meetings",
         fallbackTitle: "Failed to Refresh Meetings",
@@ -404,29 +473,21 @@ class CacheManager {
     }
   }
 
-  /**
-   * Get current cached meetings
-   */
+  // ─── Accessors ────────────────────────────────────────────────────────────
+
+  hasMore(): boolean {
+    return this.hasMoreMeetings;
+  }
+
   getCachedMeetings(): CachedMeetingData[] {
     return this.cachedMeetings;
   }
 
-  /**
-   * Check if cache is loaded
-   */
   isCacheLoaded(): boolean {
     return this.isLoaded;
   }
 
-  /**
-   * Get cache stats for debugging
-   */
-  getStats(): {
-    loaded: boolean;
-    caching: boolean;
-    count: number;
-    listeners: number;
-  } {
+  getStats(): { loaded: boolean; caching: boolean; count: number; listeners: number } {
     return {
       loaded: this.isLoaded,
       caching: this.isCaching,
@@ -440,4 +501,4 @@ class CacheManager {
 const cacheManager = new CacheManager();
 
 export { cacheManager };
-export type { CacheListener };
+export type { CacheListener, FetchingListener };
