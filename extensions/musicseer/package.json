@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "musicseer",
+  "title": "MusicSeer",
+  "description": "Search by song title to instantly view lyrics, or enter remembered lyrics to quickly find the song's title, utilizing the Genius Lyrics API.",
+  "icon": "command-icon-v2.png",
+  "author": "tkdkid1000",
+  "contributors": [
+    "johnstclair",
+    "ryanlauderbach",
+    "jacperegrinedavies",
+    "kendaniels"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "♫ Get Lyrics for Current Playing Track",
+      "description": "Search lyrics with the Genius API.",
+      "mode": "view"
+    },
+    {
+      "name": "manual-search",
+      "title": "Manual Track Search",
+      "description": "Manually search songs by title and artist with the Genius API.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "lyric-search",
+      "title": "Search by Lyric",
+      "description": "Search for song titles using remembered lyrics with the Genius API.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "manage-prompts",
+      "title": "Manage Interpretation Prompts",
+      "description": "Add, edit, delete, and reset lyric interpretation prompts.",
+      "mode": "view"
+    },
+    {
+      "name": "current-artist-bio",
+      "title": "♫ Get Info for Current Artist",
+      "description": "Auto-detect the currently playing song and open the matching artist info from Genius.",
+      "mode": "view"
+    },
+    {
+      "name": "manual-artist-bio-search",
+      "title": "Manual Artist Info Search",
+      "description": "Search for artist info by song title or artist name.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Artist or song",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "current-album-bio",
+      "title": "♫ Get Info for Current Album",
+      "description": "Auto-detect the currently playing song and open the matching album info from Genius.",
+      "mode": "view"
+    },
+    {
+      "name": "manual-album-bio-search",
+      "title": "Manual Album Info Search",
+      "description": "Search for album info by song title, artist, or album name.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Album, artist, or song",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "now-playing-menubar",
+      "title": "Now Playing Menu Bar Item",
+      "description": "Show currently playing track and artist in the macOS menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "menuBarTitleTemplate",
+          "type": "textfield",
+          "required": false,
+          "title": "Menu Bar Title Template",
+          "description": "Available variables: {track}, {artist}, {album}. Example: {track} — {artist}",
+          "default": "{track} — {artist}"
+        },
+        {
+          "name": "showAlbumArtwork",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Album Artwork",
+          "description": "Toggle album artwork visibility in the Raycast menu bar.",
+          "label": "Show album artwork in menu bar",
+          "default": true
+        }
+      ],
+      "interval": "10s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.6",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.35.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
