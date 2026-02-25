@@ -20,6 +20,13 @@
   - **Add to Queue** - All items can be added to active player's queue to play next
 - **Previous Song command** - Navigate backward through the queue with a dedicated "Previous Song" command that mirrors the existing "Next Song" functionality
 
+### 🎨 UI/UX Enhancements
+
+- **Set Active Player command** - Now shows all available players organized by groups and standalone players
+  - Filters to show only controllable players (standalone players and group leaders)
+  - Group leaders display member count in subtitle
+  - Shows currently playing track or player status
+
 ## [Player Grouping and Menu Bar Management] - 2026-02-24
 
 ### ✨ New Features
