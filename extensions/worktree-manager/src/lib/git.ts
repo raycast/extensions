@@ -263,7 +263,73 @@ export async function createWorktree(
     }
     return { success: true };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
+    const e = err as { message?: string; stderr?: string; stdout?: string };
+    const parts = [e.message, e.stderr, e.stdout].filter(Boolean) as string[];
+    const message = parts.length > 0 ? parts.join("\n").trim() : String(err);
+    return { success: false, error: message };
+  }
+}
+
+export async function createWorktreeFromBase(
+  repoPath: string,
+  newBranchName: string,
+  worktreePath: string,
+  baseBranch: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!fs.existsSync(repoPath) || !isGitRepo(repoPath)) {
+    return { success: false, error: "Repository not found" };
+  }
+  const absRepo = path.resolve(repoPath);
+  const base = (baseBranch ?? "").trim();
+  if (!base) return { success: false, error: "Base branch is required" };
+  const branch = newBranchName.trim().replace(/[/\\]/g, "-");
+  if (!branch) return { success: false, error: "Worktree name is required" };
+  const absWorktree = path.isAbsolute(worktreePath)
+    ? worktreePath
+    : path.resolve(path.dirname(absRepo), worktreePath);
+  try {
+    const branchExists = await hasLocalBranch(absRepo, branch);
+    if (branchExists) {
+      await execFileAsync("git", ["worktree", "add", absWorktree, branch], {
+        cwd: absRepo,
+        maxBuffer: 1024 * 1024,
+      });
+    } else {
+      await execFileAsync("git", ["worktree", "add", "-b", branch, absWorktree, base], {
+        cwd: absRepo,
+        maxBuffer: 1024 * 1024,
+      });
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    const e = err as { message?: string; stderr?: string; stdout?: string };
+    const parts = [e.message, e.stderr, e.stdout].filter(Boolean) as string[];
+    const message = parts.length > 0 ? parts.join("\n").trim() : String(err);
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Removes a worktree (unregisters it and deletes the folder).
+ * Run from the main repo; does not remove the main worktree.
+ */
+export async function removeWorktree(
+  repoRoot: string,
+  worktreePath: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await execFileAsync("git", ["worktree", "remove", worktreePath, "--force"], {
+      cwd: repoRoot,
+      maxBuffer: 1024 * 1024,
+    });
+    if (fs.existsSync(worktreePath)) {
+      fs.rmSync(worktreePath, { recursive: true, force: true });
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    const e = err as { message?: string; stderr?: string; stdout?: string };
+    const parts = [e.message, e.stderr, e.stdout].filter(Boolean) as string[];
+    const message = parts.length > 0 ? parts.join("\n").trim() : String(err);
     return { success: false, error: message };
   }
 }

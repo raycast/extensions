@@ -1,7 +1,16 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import * as path from "path";
-import { getAllWorktrees, type WorktreeItem } from "./lib/git";
+import { getAllWorktrees, removeWorktree, type WorktreeItem } from "./lib/git";
 import { expandRoots, type Preferences } from "./lib/preferences";
 
 async function fetchWorktrees(): Promise<WorktreeItem[]> {
@@ -67,6 +76,39 @@ export default function Command() {
                 />
                 <Action.ShowInFinder path={wt.path} />
                 <Action.CopyToClipboard title="Copy Path" content={wt.path} />
+                {!wt.isMain && (
+                  <Action
+                    title="Remove Worktree"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() =>
+                      Alert.alert({
+                        title: "Remove worktree?",
+                        message: `This will remove the worktree and delete the folder:\n${wt.path}`,
+                        primaryAction: {
+                          title: "Remove",
+                          style: Alert.ActionStyle.Destructive,
+                          onAction: async () => {
+                            const toast = await showToast({
+                              style: Toast.Style.Animated,
+                              title: "Removing worktree…",
+                            });
+                            const result = await removeWorktree(wt.repoRoot, wt.path);
+                            if (result.success) {
+                              toast.style = Toast.Style.Success;
+                              toast.title = "Worktree removed";
+                              revalidate();
+                            } else {
+                              toast.style = Toast.Style.Failure;
+                              toast.title = "Failed to remove";
+                              toast.message = result.error;
+                            }
+                          },
+                        },
+                      })
+                    }
+                  />
+                )}
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
               </ActionPanel>
             }
