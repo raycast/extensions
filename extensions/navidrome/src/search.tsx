@@ -3,6 +3,7 @@ import {
   Action,
   List,
   Icon,
+  Image,
   Color,
   LocalStorage,
   showToast,
@@ -217,7 +218,7 @@ function ArtistItem({
         artist.coverArt
           ? {
               source: getCoverArtUrl(artist.coverArt),
-              mask: "RoundedRectangle",
+              mask: Image.Mask.RoundedRectangle,
             }
           : Icon.PersonCircle
       }
@@ -268,7 +269,10 @@ function AlbumItem({
     <List.Item
       icon={
         album.coverArt
-          ? { source: getCoverArtUrl(album.coverArt), mask: "RoundedRectangle" }
+          ? {
+              source: getCoverArtUrl(album.coverArt),
+              mask: Image.Mask.RoundedRectangle,
+            }
           : Icon.Music
       }
       title={album.name}
@@ -315,7 +319,10 @@ function SongItem({ song, onAction }: { song: Song; onAction: () => void }) {
     <List.Item
       icon={
         song.coverArt
-          ? { source: getCoverArtUrl(song.coverArt), mask: "RoundedRectangle" }
+          ? {
+              source: getCoverArtUrl(song.coverArt),
+              mask: Image.Mask.RoundedRectangle,
+            }
           : Icon.Music
       }
       title={song.title}
