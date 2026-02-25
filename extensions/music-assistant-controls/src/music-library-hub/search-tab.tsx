@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { MediaItemType, QueueOption } from "../external-code/interfaces";
 import MusicAssistantClient from "../music-assistant-client";
 import { getSelectedQueueID } from "../use-selected-player-id";
+import { commandOrControlShortcut } from "../shortcuts";
 import { LibraryTab } from "./types";
 
 interface SearchTabProps {
@@ -103,7 +104,7 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
                   <Action
                     title="Back to Tabs"
                     icon={Icon.ArrowLeft}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    shortcut={commandOrControlShortcut("t")}
                     onAction={() => onTabChange("search")}
                   />
                 </ActionPanel>
@@ -128,7 +129,7 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
                   <Action
                     title="Back to Tabs"
                     icon={Icon.ArrowLeft}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    shortcut={commandOrControlShortcut("t")}
                     onAction={() => onTabChange("search")}
                   />
                 </ActionPanel>
@@ -153,7 +154,7 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
                   <Action
                     title="Back to Tabs"
                     icon={Icon.ArrowLeft}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    shortcut={commandOrControlShortcut("t")}
                     onAction={() => onTabChange("search")}
                   />
                 </ActionPanel>
@@ -177,7 +178,7 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
                   <Action
                     title="Back to Tabs"
                     icon={Icon.ArrowLeft}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    shortcut={commandOrControlShortcut("t")}
                     onAction={() => onTabChange("search")}
                   />
                 </ActionPanel>

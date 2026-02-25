@@ -842,6 +842,41 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Remove a media item from favorites
+   *
+   * @param item - The media item to remove from favorites
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * await client.removeFromFavorites(track);
+   * ```
+   */
+  async removeFromFavorites(item: MediaItemType): Promise<void> {
+    await executeApiCommand(async (api) => await api.removeItemFromFavorites(item.media_type, item.item_id));
+  }
+
+  /**
+   * Toggle favorite state for a media item
+   *
+   * @param item - The media item to toggle favorite state for
+   * @returns Promise that resolves to the new favorite state
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * const isNowFavorite = await client.toggleFavorite(track);
+   * ```
+   */
+  async toggleFavorite(item: MediaItemType): Promise<boolean> {
+    if (item.favorite) {
+      await this.removeFromFavorites(item);
+      return false;
+    }
+
+    await this.addToFavorites(item);
+    return true;
+  }
+
+  /**
    * Format duration from seconds to mm:ss format
    *
    * @param seconds - Duration in seconds
@@ -892,6 +927,21 @@ export default class MusicAssistantClient {
   }
 
   // Library and Search Methods
+
+  /**
+   * Get a media item by URI
+   *
+   * @param uri - Media item URI
+   * @returns Promise with full media item details
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * const item = await client.getItemByUri("spotify://track/123");
+   * ```
+   */
+  async getItemByUri(uri: string): Promise<MediaItemType> {
+    return await executeApiCommand(async (api) => await api.getItemByUri(uri));
+  }
 
   /**
    * Perform global search for media items across all providers

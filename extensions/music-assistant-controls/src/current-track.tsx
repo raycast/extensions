@@ -1,36 +1,48 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import MusicAssistantClient from "./music-assistant-client";
 import { getSelectedQueueID } from "./use-selected-player-id";
 import { Album, RepeatMode, Track } from "./external-code/interfaces";
+import { commandOrControlShortcut } from "./shortcuts";
 
 export default function CurrentTrackCommand() {
   const client = new MusicAssistantClient();
 
-  const { isLoading: queueIdLoading, data: storedQueueId } = useCachedPromise(
-    async () => await getSelectedQueueID(),
-    [],
-  );
-
-  // If no queue selected, getSelectedQueueID already redirects to set-active-player
-  if (!storedQueueId) {
-    return <Detail isLoading={queueIdLoading} markdown="# Loading...\n\nFetching your player selection..." />;
-  }
+  const { isLoading: queueIdLoading, data: storedQueueId } = usePromise(async () => await getSelectedQueueID(), []);
 
   const {
-    isLoading,
+    isLoading: queueLoading,
     data: queueData,
     revalidate,
-  } = useCachedPromise(
+  } = usePromise(
     async (queueId: string) => {
       // Fetch the specific queue for the selected player
       return await client.getPlayerQueue(queueId);
     },
-    [storedQueueId],
+    [storedQueueId ?? ""],
     {
-      keepPreviousData: true,
+      execute: Boolean(storedQueueId),
     },
   );
+  const currentItemUri = queueData?.current_item?.media_item?.uri;
+  const {
+    isLoading: resolvedCurrentItemLoading,
+    data: resolvedCurrentItem,
+    revalidate: revalidateResolvedCurrentItem,
+  } = usePromise(
+    async (uri: string) => {
+      // Resolve the current queue item to fresh library metadata (favorite status can be stale in queue snapshots).
+      return await client.getItemByUri(uri);
+    },
+    [currentItemUri ?? ""],
+    {
+      execute: Boolean(currentItemUri),
+    },
+  );
+
+  const refreshCurrentTrackState = async () => {
+    await Promise.all([revalidate(), currentItemUri ? revalidateResolvedCurrentItem() : Promise.resolve(undefined)]);
+  };
 
   /**
    * Toggles shuffle mode on the current queue
@@ -46,7 +58,7 @@ export default function CurrentTrackCommand() {
         title: "Shuffle Toggled",
         message: wasEnabled ? "Shuffle disabled" : "Shuffle enabled",
       });
-      revalidate();
+      await refreshCurrentTrackState();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -71,7 +83,7 @@ export default function CurrentTrackCommand() {
         title: "Repeat Mode Changed",
         message: `Repeat mode set to ${nextMode}`,
       });
-      revalidate();
+      await refreshCurrentTrackState();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -82,22 +94,26 @@ export default function CurrentTrackCommand() {
   };
 
   /**
-   * Adds the current track to favorites
-   * Shows success/failure feedback via toast notification
+   * Toggles favorite status for the current track
+   * Shows success/failure feedback via toast notification and refreshes queue data
    */
-  const addToFavorites = async () => {
-    if (!queueData?.current_item?.media_item) return;
+  const toggleFavorite = async () => {
+    const mediaItem = resolvedCurrentItem ?? queueData?.current_item?.media_item;
+    if (!mediaItem) return;
+
     try {
-      await client.addToFavorites(queueData.current_item.media_item.uri);
+      const wasFavorite = resolvedCurrentItem?.favorite ?? mediaItem.favorite;
+      await client.toggleFavorite(mediaItem);
       await showToast({
         style: Toast.Style.Success,
-        title: "Added to Favorites",
-        message: queueData.current_item.name,
+        title: wasFavorite ? "Removed from Favorites" : "Added to Favorites",
+        message: queueData.current_item?.name,
       });
+      await refreshCurrentTrackState();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Add to Favorites",
+        title: "Failed to Toggle Favorite",
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }
@@ -131,6 +147,13 @@ export default function CurrentTrackCommand() {
     keepPreviousData: true,
     initialData: [],
   });
+
+  // If no queue selected, getSelectedQueueID already redirects to set-active-player
+  if (!storedQueueId) {
+    return <Detail isLoading={queueIdLoading} markdown="# Loading...\n\nFetching your player selection..." />;
+  }
+
+  const isCurrentTrackFavorite = resolvedCurrentItem?.favorite ?? queueData?.current_item?.media_item?.favorite ?? false;
 
   // Build markdown content for the detail view (left column with album art and title)
   const buildMarkdown = (): string => {
@@ -244,7 +267,7 @@ export default function CurrentTrackCommand() {
 
   return (
     <Detail
-      isLoading={isLoading}
+      isLoading={queueIdLoading || queueLoading || (Boolean(currentItemUri) && resolvedCurrentItemLoading)}
       markdown={buildMarkdown()}
       navigationTitle="Current Track"
       metadata={buildMetadata()}
@@ -255,16 +278,16 @@ export default function CurrentTrackCommand() {
               {queueData.current_item && (
                 <ActionPanel.Section title="Track Actions">
                   <Action
-                    title="Add to Favorites"
+                    title={isCurrentTrackFavorite ? "Remove from Favorites" : "Add to Favorites"}
                     icon={Icon.Heart}
-                    onAction={addToFavorites}
-                    shortcut={{ modifiers: ["cmd"], key: "f" }}
+                    onAction={toggleFavorite}
+                    shortcut={commandOrControlShortcut("f")}
                   />
                   {playlists && playlists.length > 0 && (
                     <ActionPanel.Submenu
                       title="Add to Playlist"
                       icon={Icon.Plus}
-                      shortcut={{ modifiers: ["cmd"], key: "p" }}
+                      shortcut={commandOrControlShortcut("p")}
                     >
                       {playlists.map((playlist) => (
                         <Action
@@ -283,13 +306,13 @@ export default function CurrentTrackCommand() {
                   title="Toggle Shuffle"
                   icon={Icon.Shuffle}
                   onAction={toggleShuffle}
-                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  shortcut={commandOrControlShortcut("s")}
                 />
                 <Action
                   title="Cycle Repeat Mode"
                   icon={Icon.Repeat}
                   onAction={cycleRepeat}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={commandOrControlShortcut("r")}
                 />
               </ActionPanel.Section>
 
@@ -297,8 +320,8 @@ export default function CurrentTrackCommand() {
                 <Action
                   title="Reload"
                   icon={Icon.ArrowClockwise}
-                  onAction={revalidate}
-                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  onAction={refreshCurrentTrackState}
+                  shortcut={commandOrControlShortcut("l")}
                 />
               </ActionPanel.Section>
             </>

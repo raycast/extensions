@@ -7,7 +7,7 @@
 - **Current Track command** - View now-playing track with large album artwork and detailed metadata
   - **Shuffle toggle** - Quick button to toggle shuffle mode (OFF ↔ ON) with visual feedback
   - **Repeat mode cycling** - Cycle through repeat modes (OFF → ONE → ALL → OFF) with status display
-  - **Add to Favorites** - One-click button to add current track to favorites with heart icon
+  - **Favorites toggle** - One-click button now adds or removes the current track from favorites based on current status
   - **Add to Playlist** - Dropdown menu to select from available playlists and add current track instantly
   - **Track metadata display** - Shows track title, artist, album, duration, queue name, and player state
 - **Mute Toggle Command** - Dedicated command to toggle mute state on the active player with visual feedback showing state changes (MUTED/UNMUTED)

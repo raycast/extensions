@@ -2,6 +2,7 @@ import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast 
 import { useCachedPromise } from "@raycast/utils";
 import MusicAssistantClient from "../music-assistant-client";
 import { getSelectedQueueID } from "../use-selected-player-id";
+import { commandOrControlShortcut } from "../shortcuts";
 import { formatDuration, getNextRepeatMode } from "./helpers";
 import { QueueManagerData } from "./types";
 
@@ -182,7 +183,7 @@ export function QueueManagerTab({ client }: QueueManagerTabProps) {
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={commandOrControlShortcut("r")}
                 onAction={revalidate}
               />
             </ActionPanel>
@@ -214,26 +215,26 @@ export function QueueManagerTab({ client }: QueueManagerTabProps) {
                 <Action
                   title="Move up"
                   icon={Icon.ArrowUp}
-                  shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
+                  shortcut={commandOrControlShortcut("arrowUp")}
                   onAction={() => moveItem(item.queue_item_id, "up")}
                 />
                 <Action
                   title="Move Down"
                   icon={Icon.ArrowDown}
-                  shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
+                  shortcut={commandOrControlShortcut("arrowDown")}
                   onAction={() => moveItem(item.queue_item_id, "down")}
                 />
                 <Action
                   title="Remove from Queue"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  shortcut={commandOrControlShortcut("backspace")}
                   onAction={() => deleteItem(item.queue_item_id, item.name)}
                 />
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={commandOrControlShortcut("r")}
                   onAction={revalidate}
                 />
               </ActionPanel>

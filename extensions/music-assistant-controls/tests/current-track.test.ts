@@ -38,7 +38,7 @@ describe("current-track command", () => {
       getPlayerQueue: jest.fn(),
       toggleShuffle: jest.fn(),
       cycleRepeatMode: jest.fn(),
-      addToFavorites: jest.fn(),
+      toggleFavorite: jest.fn(),
       addTracksToPlaylist: jest.fn(),
       getLibraryPlaylists: jest.fn(),
       getQueueAlbumArt: jest.fn(),
@@ -86,20 +86,22 @@ describe("current-track command", () => {
     });
   });
 
-  describe("add to favorites", () => {
-    it("should add current track to favorites", async () => {
-      mockClientInstance.addToFavorites.mockResolvedValue(undefined);
+  describe("toggle favorites", () => {
+    it("should toggle current track favorite status", async () => {
+      mockClientInstance.toggleFavorite.mockResolvedValue(true);
 
-      await mockClientInstance.addToFavorites(mockQueueData.current_item.uri);
+      await mockClientInstance.toggleFavorite(mockQueueData.current_item as any);
 
-      expect(mockClientInstance.addToFavorites).toHaveBeenCalledWith(mockQueueData.current_item.uri);
+      expect(mockClientInstance.toggleFavorite).toHaveBeenCalledWith(mockQueueData.current_item);
     });
 
-    it("should handle add to favorites errors gracefully", async () => {
-      const error = new Error("Failed to add to favorites");
-      mockClientInstance.addToFavorites.mockRejectedValue(error);
+    it("should handle toggle favorites errors gracefully", async () => {
+      const error = new Error("Failed to toggle favorites");
+      mockClientInstance.toggleFavorite.mockRejectedValue(error);
 
-      await expect(mockClientInstance.addToFavorites("uri")).rejects.toThrow("Failed to add to favorites");
+      await expect(mockClientInstance.toggleFavorite(mockQueueData.current_item as any)).rejects.toThrow(
+        "Failed to toggle favorites",
+      );
     });
   });
 

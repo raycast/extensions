@@ -1383,6 +1383,117 @@ describe("MusicAssistantClient", () => {
       });
     });
 
+    describe("getItemByUri", () => {
+      it("should fetch media item by URI", async () => {
+        const mockItem = { item_id: "track-123", uri: "spotify://track/123", name: "Test Track" };
+        const mockApi = {
+          getItemByUri: jest.fn().mockResolvedValue(mockItem),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getItemByUri("spotify://track/123");
+
+        expect(mockApi.getItemByUri).toHaveBeenCalledWith("spotify://track/123");
+        expect(result).toEqual(mockItem);
+      });
+
+      it("should propagate API errors when fetching item by URI", async () => {
+        const mockApi = {
+          getItemByUri: jest.fn().mockRejectedValue(new Error("item lookup failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.getItemByUri("spotify://track/123")).rejects.toThrow("item lookup failed");
+      });
+    });
+
+    describe("favorites", () => {
+      it("should add an item to favorites", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: false } as any;
+        const mockApi = {
+          addItemToFavorites: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.addToFavorites(mockTrack);
+
+        expect(mockApi.addItemToFavorites).toHaveBeenCalledWith(mockTrack);
+      });
+
+      it("should remove an item from favorites", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: true } as any;
+        const mockApi = {
+          removeItemFromFavorites: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.removeFromFavorites(mockTrack);
+
+        expect(mockApi.removeItemFromFavorites).toHaveBeenCalledWith("track", "track-123");
+      });
+
+      it("should toggle favorite on when item is not currently favorite", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: false } as any;
+        const mockApi = {
+          addItemToFavorites: jest.fn().mockResolvedValue(undefined),
+          removeItemFromFavorites: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const isNowFavorite = await client.toggleFavorite(mockTrack);
+
+        expect(isNowFavorite).toBe(true);
+        expect(mockApi.addItemToFavorites).toHaveBeenCalledWith(mockTrack);
+        expect(mockApi.removeItemFromFavorites).not.toHaveBeenCalled();
+      });
+
+      it("should toggle favorite off when item is currently favorite", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: true } as any;
+        const mockApi = {
+          addItemToFavorites: jest.fn().mockResolvedValue(undefined),
+          removeItemFromFavorites: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const isNowFavorite = await client.toggleFavorite(mockTrack);
+
+        expect(isNowFavorite).toBe(false);
+        expect(mockApi.removeItemFromFavorites).toHaveBeenCalledWith("track", "track-123");
+        expect(mockApi.addItemToFavorites).not.toHaveBeenCalled();
+      });
+
+      it("should propagate API errors when removing favorites", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: true } as any;
+        const mockApi = {
+          removeItemFromFavorites: jest.fn().mockRejectedValue(new Error("remove favorites failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.toggleFavorite(mockTrack)).rejects.toThrow("remove favorites failed");
+      });
+    });
+
     describe("getLibraryArtists", () => {
       it("should fetch library artists with pagination", async () => {
         const mockArtists = [

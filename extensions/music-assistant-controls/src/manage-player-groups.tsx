@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@rayca
 import { useCachedPromise } from "@raycast/utils";
 import { Player } from "./external-code/interfaces";
 import MusicAssistantClient from "./music-assistant-client";
+import { commandOrControlShortcut } from "./shortcuts";
 import React from "react";
 
 export default function ManagePlayerGroupsCommand() {
@@ -238,7 +239,7 @@ export default function ManagePlayerGroupsCommand() {
             <Action
               title="Disband Group"
               icon={Icon.Minus}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={commandOrControlShortcut("backspace")}
               onAction={() => removeAllMembers(player.player_id, player.display_name, player.group_childs)}
             />
           </>
@@ -255,7 +256,7 @@ export default function ManagePlayerGroupsCommand() {
         <Action
           title="Reload Players"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={commandOrControlShortcut("r")}
           onAction={() => revalidate()}
         />
       </ActionPanel>
