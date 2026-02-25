@@ -17,7 +17,7 @@ import { useState } from "react";
  * - Last Unlock Interval：上一次解锁到锁屏的连续工作时间
  */
 export default function Command() {
-  const { state, metrics, isLoading, revalidate } = useLockData();
+  const { state, metrics, isLoading, revalidate } = useLockData({ eagerRefresh: true });
   const [diagnosticInfo, setDiagnosticInfo] = useState<string | null>(null);
   const [metaInfo, setMetaInfo] = useState<string | null>(null);
   const hasValidLastLockRange = metrics.lastLockStartAt > 0 && metrics.lastLockEndAt >= metrics.lastLockStartAt;

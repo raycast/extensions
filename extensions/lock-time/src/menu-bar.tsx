@@ -10,7 +10,7 @@ import { resetToday } from "./lib/storage";
  * 展开后可查看详细统计信息并执行操作。
  */
 export default function Command() {
-  const { metrics, isLoading, revalidate } = useLockData();
+  const { metrics, isLoading, revalidate } = useLockData({ eagerRefresh: true });
   const hasValidLastLockRange = metrics.lastLockStartAt > 0 && metrics.lastLockEndAt >= metrics.lastLockStartAt;
 
   // 菜单栏标题：显示今日锁屏时长

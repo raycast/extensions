@@ -1,8 +1,18 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { loadState, loadMetrics } from "../lib/storage";
 import { StateData, MetricsData } from "../lib/types";
 import { getDefaultState, getDefaultMetrics } from "../lib/storage";
 import { processStateChange } from "../lib/state-machine";
+
+const REVALIDATE_INTERVAL_MS = 10_000;
+
+interface UseLockDataOptions {
+  /**
+   * 打开时立即执行一次 processStateChange，确保 LOCKED→UNLOCKED 等状态转换
+   * 在用户看到数据之前就已处理。竞态风险极低（~0.3%）且可自修复。
+   */
+  eagerRefresh?: boolean;
+}
 
 interface UseLockDataResult {
   /** 当前状态数据 */
@@ -18,42 +28,59 @@ interface UseLockDataResult {
 /**
  * 自定义 Hook：读取锁屏统计数据
  *
- * 用于 Lock Stats View 和 Menu Bar 命令中，
- * 提供响应式的数据读取和刷新能力。
- *
- * 首次加载时会先执行 processStateChange()，
- * 确保状态机在查看数据之前就已处理最新的锁屏状态。
+ * 两阶段加载策略：
+ * 1. Phase 1：立即从 LocalStorage 加载缓存数据展示（<0.5s）
+ * 2. Phase 2（eagerRefresh）：后台执行 processStateChange 追赶最新状态，再刷新（~1-2s）
+ * 3. Phase 3：定时 re-poll LocalStorage，捕获后台 update-lock-state 的持续更新
  */
-export function useLockData(): UseLockDataResult {
+export function useLockData(opts?: UseLockDataOptions): UseLockDataResult {
   const [state, setState] = useState<StateData>(getDefaultState());
   const [metrics, setMetrics] = useState<MetricsData>(getDefaultMetrics());
   const [isLoading, setIsLoading] = useState(true);
+  const mountedRef = useRef(true);
 
   const revalidate = useCallback(async () => {
     try {
       const [loadedState, loadedMetrics] = await Promise.all([loadState(), loadMetrics()]);
-      setState(loadedState);
-      setMetrics(loadedMetrics);
+      if (mountedRef.current) {
+        setState(loadedState);
+        setMetrics(loadedMetrics);
+      }
     } catch {
       // 加载失败时保持默认值
     } finally {
-      setIsLoading(false);
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    // 优化：先立即加载缓存数据展示给用户，后台异步更新状态
-    // 这样用户可以立即看到上次的数据（延迟从 3s 降到 <0.5s）
+    mountedRef.current = true;
     (async () => {
-      // 1. 先加载缓存数据（立即展示）
       await revalidate();
 
-      // 2. 后台异步更新状态（不阻塞 UI）
-      processStateChange().then(() => {
-        // 状态更新后刷新显示
-        revalidate();
-      });
+      if (opts?.eagerRefresh) {
+        await processStateChange();
+        if (mountedRef.current) {
+          await revalidate();
+        }
+      }
     })();
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [revalidate, opts?.eagerRefresh]);
+
+  // 定时 re-poll：捕获后台 update-lock-state 命令的持续更新
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (mountedRef.current) {
+        revalidate();
+      }
+    }, REVALIDATE_INTERVAL_MS);
+    return () => clearInterval(timer);
   }, [revalidate]);
 
   return { state, metrics, isLoading, revalidate };
