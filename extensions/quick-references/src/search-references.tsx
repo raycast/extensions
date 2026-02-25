@@ -175,8 +175,11 @@ export default function Command() {
   const content = data?.content ?? {};
   const index = useMemo(() => data?.index ?? [], [data?.index]);
 
-  const matchesCategory = (item: ReferenceIndexItem) =>
-    selectedCategory === ALL_CATEGORIES || item.category === selectedCategory;
+  const matchesCategory = useCallback(
+    (item: ReferenceIndexItem) =>
+      selectedCategory === ALL_CATEGORIES || item.category === selectedCategory,
+    [selectedCategory],
+  );
 
   const categories = useMemo(() => {
     const cats = new Set(index.map((item) => item.category));
@@ -197,7 +200,7 @@ export default function Command() {
       );
     }
     return [];
-  }, [index, favorites, query, selectedCategory]);
+  }, [index, favorites, query, matchesCategory]);
 
   const recentItems = useMemo(() => {
     if (!query && recents.length > 0) {
@@ -211,7 +214,7 @@ export default function Command() {
         .slice(0, 5);
     }
     return [];
-  }, [index, recents, favorites, query, selectedCategory]);
+  }, [index, recents, favorites, query, matchesCategory]);
 
   const mainResults = useMemo(() => {
     const filtered = results.filter(({ item }) => matchesCategory(item));
@@ -223,7 +226,7 @@ export default function Command() {
       return filtered.filter(({ item }) => !excludeIds.has(item.id));
     }
     return filtered;
-  }, [results, favorites, recentItems, query, selectedCategory]);
+  }, [results, favorites, recentItems, query, matchesCategory]);
 
   const hasVisibleItems =
     favoriteItems.length > 0 ||

@@ -1,4 +1,4 @@
-# Changelog
+# Quick References Changelog
 
 ## [0.1.0] - {PR_MERGE_DATE}
 
