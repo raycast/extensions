@@ -74,6 +74,13 @@
       "subtitle": "Create, modify, and disband player sync groups",
       "description": "Manage Music Assistant player groups for synchronized playback across multiple speakers.",
       "mode": "view"
+    },
+    {
+      "name": "music-library-hub",
+      "title": "Music Library Hub",
+      "subtitle": "Music Assistant",
+      "description": "Unified search, browse, and queue management for Music Assistant library with search, browse artists/albums/playlists, recently played items, and queue manager.",
+      "mode": "view"
     }
   ],
   "preferences": [
