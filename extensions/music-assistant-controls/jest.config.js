@@ -18,7 +18,11 @@ module.exports = {
     // Exclude UI components that use Raycast UI primitives
     '!src/menu-bar.tsx',
     '!src/set-active-player.tsx',
-    '!src/set-volume.tsx'
+    '!src/set-volume.tsx',
+    '!src/current-track.tsx',
+    '!src/manage-player-groups.tsx',
+    '!src/music-library-hub.tsx',
+    '!src/music-library-hub/**/*.tsx'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
