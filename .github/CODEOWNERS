@@ -1772,8 +1772,7 @@
 /extensions/protobuf2typescript                                     @7gugu
 /extensions/proton-authenticator                                    @FareedFarag
 /extensions/proton-mail                                             @NormCopeland
-/extensions/proton-pass                                             @izyuumi
-/extensions/proton-pass-client                                      @FeernandoOFF
+/extensions/proton-pass                                             @izyuumi @FeernandoOFF
 /extensions/proton-version                                          @flavienbonvin @pernielsentikaer
 /extensions/protondb                                                @LitoMore
 /extensions/prowlarr                                                @Elcaten
