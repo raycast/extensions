@@ -143,17 +143,7 @@ export default function Chat({ launchContext }) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
 
-            {/* Windows-friendly duplicates (Raycast for Windows often maps Cmd->Ctrl, but this guarantees it) */}
-            <Action.CopyToClipboard
-              title="Copy Answer (Ctrl+C)"
-              content={message.answer ?? ""}
-              shortcut={{ modifiers: ["ctrl"], key: "c" }}
-            />
-            <Action.CopyToClipboard
-              title="Copy Prompt (Ctrl+Shift+C)"
-              content={message.prompt ?? ""}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "c" }}
-            />
+            
           </ActionPanel.Section>
         )}
 
