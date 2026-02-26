@@ -1,6 +1,6 @@
 # Navidrome Changelog
 
-## [Added Navidrome] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search (with recent searches)
 - Recently Added Albums 
