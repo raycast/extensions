@@ -10,10 +10,6 @@ A Raycast extension to view and manage MCP (Model Context Protocol) servers runn
 - **Kill processes** - Gracefully terminate or force kill MCP servers
 - **Detailed view** - See full command, configuration path, and more for each server
 
-## Screenshots
-
-![Main List View](./metadata/kill-mcp-1.png)
-
 ## Installation
 
 1. Make sure you have [Node.js](https://nodejs.org/) 16.10+ and npm 7.0+ installed
@@ -40,53 +36,9 @@ A Raycast extension to view and manage MCP (Model Context Protocol) servers runn
 
 ## Supported Applications
 
-This extension detects MCP servers from:
+The extension detects MCP servers from:
 
-- **Claude Desktop** - `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **VS Code** - `~/Library/Application Support/Code/User/mcp.json`
-- **Cursor** - `~/.cursor/mcp.json`
-- **Claude Code** - `~/.claude/settings.json`
-
-## How It Works
-
-The extension:
-
-1. Reads MCP configuration files from supported applications
-2. Scans running processes for MCP server patterns (node, python, npx, uvx)
-3. Matches running processes to configured servers
-4. Displays resource usage (RAM, CPU) for each server
-
-## Converting the Icon
-
-The extension includes an SVG icon that needs to be converted to PNG:
-
-```bash
-# Using ImageMagick
-convert assets/extension-icon.svg -resize 512x512 assets/extension-icon.png
-
-# Or using macOS sips (after opening SVG in Preview and saving as PNG)
-sips -z 512 512 assets/extension-icon.png
-```
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run in development mode with hot reload
-npm run dev
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-
-# Fix lint issues
-npm run fix-lint
-```
-
-## License
-
-MIT
+- **Claude Desktop** — `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **VS Code** — `~/Library/Application Support/Code/User/mcp.json`
+- **Cursor** — `~/.cursor/mcp.json`
+- **Claude Code** — `~/.claude/settings.json`
