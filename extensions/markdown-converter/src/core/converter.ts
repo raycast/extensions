@@ -1164,7 +1164,7 @@ function normalizeGoogleDocsHtml(html: string, context: ConversionContext): stri
     convertItalicSpansToEm(doc);
 
     return doc.body.innerHTML;
-  } catch (error) {
+  } catch {
     return html;
   }
 }
