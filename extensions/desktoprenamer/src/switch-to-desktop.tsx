@@ -108,7 +108,8 @@ function RenameSpaceForm({ space, onRename }: { space: Space; onRename: () => vo
   async function handleRename(values: { name: string }) {
     try {
       const sanitizedName = escapeAppleScriptString(values.name).replace(/~/g, "");
-      await runDesktopRenamerCommand(`rename space "${space.id}" to "${sanitizedName}"`);
+      const sanitizedId = escapeAppleScriptString(space.id);
+      await runDesktopRenamerCommand(`rename space "${sanitizedId}" to "${sanitizedName}"`);
       await showToast({ style: Toast.Style.Success, title: "Renamed space" });
       onRename();
       pop();
