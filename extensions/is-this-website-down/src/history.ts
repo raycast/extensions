@@ -3,10 +3,6 @@ import { HistoryEntry } from "./types";
 
 const STORAGE_KEY = "check-history";
 
-interface Preferences {
-  maxHistory: string;
-}
-
 function getMaxHistory(): number {
   const { maxHistory } = getPreferenceValues<Preferences>();
   const n = parseInt(maxHistory, 10);

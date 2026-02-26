@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { resolveNs } from "node:dns/promises";
 import { CheckResult, SiteStatus } from "./types";
 
-interface Preferences {
-  timeout: string;
-}
-
 function getTimeoutMs(): number {
   const { timeout } = getPreferenceValues<Preferences>();
   const seconds = parseInt(timeout, 10);
@@ -134,12 +130,20 @@ export async function checkWebsite(url: string): Promise<CheckResult> {
   const start = Date.now();
 
   try {
-    let response: Response;
-    try {
-      response = await fetchWithMethod(url, "HEAD", timeoutMs);
-    } catch {
-      // HEAD might be rejected; fall back to GET
-      response = await fetchWithMethod(url, "GET", timeoutMs);
+    const response = await fetchWithMethod(url, "HEAD", timeoutMs);
+
+    // If HEAD is rejected by the server (405), retry with GET
+    if (response.status === 405) {
+      const getResponse = await fetchWithMethod(url, "GET", timeoutMs);
+      const responseTimeMs = Date.now() - start;
+      return {
+        url,
+        status: classifyStatus(getResponse.status),
+        statusCode: getResponse.status,
+        statusText: getResponse.statusText,
+        responseTimeMs,
+        checkedAt: new Date().toISOString(),
+      };
     }
 
     const responseTimeMs = Date.now() - start;
