@@ -37,19 +37,19 @@ describe("manage-player-groups - member volume control", () => {
         display_name: "Living Room",
         volume_level: 50,
         group_childs: ["member-1", "member-2"],
-      } as Player,
+      } as unknown as Player,
       {
         player_id: "member-1",
         display_name: "Speaker 1",
         volume_level: 30,
         group_childs: [],
-      } as Player,
+      } as unknown as Player,
       {
         player_id: "member-2",
         display_name: "Speaker 2",
         volume_level: 70,
         group_childs: [],
-      } as Player,
+      } as unknown as Player,
     ];
   });
 

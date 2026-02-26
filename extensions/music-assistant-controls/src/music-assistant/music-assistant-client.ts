@@ -853,6 +853,10 @@ export default class MusicAssistantClient {
     const members = this.getGroupMembers(leader, allPlayers);
     const leaderVolume = leader.volume_level;
 
+    if (leaderVolume === undefined) {
+      throw new Error("Leader player has no volume information");
+    }
+
     // Set all members' volumes to match the leader
     const volumePromises = members
       .filter((member) => member.player_id !== leader.player_id) // Exclude the leader from syncing

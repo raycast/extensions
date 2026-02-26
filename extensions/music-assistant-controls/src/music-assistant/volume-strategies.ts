@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import MusicAssistantClient from "./music-assistant-client";
-import { Player } from "../external-code/types";
+import { Player } from "./external-code/interfaces";
 
 /**
  * Abstract base class for volume control with template methods.
