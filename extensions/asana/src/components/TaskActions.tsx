@@ -289,6 +289,12 @@ export default function TaskActions({
         />
 
         <Action.CopyToClipboard
+          title="Copy Short Task URL"
+          content={`https://app.asana.com/0/0/${task.gid}`}
+          shortcut={{ modifiers: ["cmd", "ctrl"], key: "," }}
+        />
+
+        <Action.CopyToClipboard
           title="Copy Task Name"
           content={task.name}
           shortcut={{ modifiers: ["cmd"], key: "." }}
