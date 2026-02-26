@@ -1,8 +1,9 @@
 import { showFailureToast } from "@raycast/utils";
 import { showToast, Toast, Form, ActionPanel, Action, useNavigation } from "@raycast/api";
-import MusicAssistantClient from "./music-assistant-client";
-import { getSelectedQueueID } from "./use-selected-player-id";
+import MusicAssistantClient from "./music-assistant/music-assistant-client";
+import { getSelectedQueueID } from "./player-selection/use-selected-player-id";
 import { useState } from "react";
+import { isValidVolumeInput } from "./set-volume/volume-validation";
 
 interface VolumeFormValues {
   volume: string;
@@ -13,11 +14,12 @@ function VolumeForm({ onSubmit }: { onSubmit: (volume: number) => void }) {
   const { pop } = useNavigation();
 
   function handleSubmit(values: VolumeFormValues) {
-    const volume = Number(values.volume);
-    if (isNaN(volume) || volume < 0 || volume > 100) {
+    if (!isValidVolumeInput(values.volume)) {
       setVolumeError("Enter a number between 0 and 100");
       return;
     }
+
+    const volume = Number(values.volume);
     setVolumeError(undefined);
     onSubmit(volume);
     pop();

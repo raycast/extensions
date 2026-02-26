@@ -1,18 +1,17 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { MediaItemType } from "../external-code/interfaces";
-import MusicAssistantClient from "../music-assistant-client";
-import { getSelectedQueueID } from "../use-selected-player-id";
-import { commandOrControlShortcut } from "../shortcuts";
-import { LibraryTab } from "./types";
+import { MediaItemType } from "../music-assistant/external-code/interfaces";
+import MusicAssistantClient from "../music-assistant/music-assistant-client";
+import { commandOrControlShortcut } from "../shortcuts/shortcuts";
+import { addItemToQueueNext } from "./actions";
 
 interface SearchTabProps {
   client: MusicAssistantClient;
   searchQuery: string;
-  onTabChange: (tab: LibraryTab) => void;
+  onClearSearch: () => void;
 }
 
-export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) {
+export function SearchTab({ client, searchQuery, onClearSearch }: SearchTabProps) {
   const {
     isLoading,
     data: searchResults,
@@ -32,26 +31,7 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
   );
 
   const addToQueue = async (item: MediaItemType, itemName: string) => {
-    const queueId = await getSelectedQueueID();
-    if (!queueId) {
-      return;
-    }
-
-    try {
-      await client.addToQueueNext(item, queueId);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Added to Queue",
-        message: client.formatAddToQueueNextMessage(itemName),
-      });
-      revalidate();
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Add to Queue",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
+    await addItemToQueueNext(client, item, itemName, revalidate);
   };
 
   if (!searchQuery || searchQuery.trim().length === 0) {
@@ -102,10 +82,10 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
                 <ActionPanel>
                   <Action title="Add to Queue" icon={Icon.Plus} onAction={() => addToQueue(artist, artist.name)} />
                   <Action
-                    title="Back to Tabs"
+                    title="Clear Search"
                     icon={Icon.ArrowLeft}
                     shortcut={commandOrControlShortcut("t")}
-                    onAction={() => onTabChange("search")}
+                    onAction={onClearSearch}
                   />
                 </ActionPanel>
               }
@@ -127,10 +107,10 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
                 <ActionPanel>
                   <Action title="Add to Queue" icon={Icon.Plus} onAction={() => addToQueue(album, album.name)} />
                   <Action
-                    title="Back to Tabs"
+                    title="Clear Search"
                     icon={Icon.ArrowLeft}
                     shortcut={commandOrControlShortcut("t")}
-                    onAction={() => onTabChange("search")}
+                    onAction={onClearSearch}
                   />
                 </ActionPanel>
               }
@@ -152,10 +132,10 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
                 <ActionPanel>
                   <Action title="Add to Queue" icon={Icon.Plus} onAction={() => addToQueue(track, track.name)} />
                   <Action
-                    title="Back to Tabs"
+                    title="Clear Search"
                     icon={Icon.ArrowLeft}
                     shortcut={commandOrControlShortcut("t")}
-                    onAction={() => onTabChange("search")}
+                    onAction={onClearSearch}
                   />
                 </ActionPanel>
               }
@@ -176,10 +156,10 @@ export function SearchTab({ client, searchQuery, onTabChange }: SearchTabProps) 
                 <ActionPanel>
                   <Action title="Add to Queue" icon={Icon.Plus} onAction={() => addToQueue(playlist, playlist.name)} />
                   <Action
-                    title="Back to Tabs"
+                    title="Clear Search"
                     icon={Icon.ArrowLeft}
                     shortcut={commandOrControlShortcut("t")}
-                    onAction={() => onTabChange("search")}
+                    onAction={onClearSearch}
                   />
                 </ActionPanel>
               }

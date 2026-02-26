@@ -6,7 +6,7 @@ import {
   getStoredQueue,
   selectedPlayerKey,
   type StoredQueue,
-} from "../src/use-selected-player-id";
+} from "@/player-selection/use-selected-player-id";
 
 jest.mock("@raycast/api");
 jest.mock("@raycast/utils");

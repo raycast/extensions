@@ -9,7 +9,7 @@ type CommandDefinition = {
 const IGNORED_TYPE_TOKENS = new Set(["Any", "Array", "AsyncGenerator", "None", "Sequence"]);
 
 function readFile(relativePath: string): string {
-  return fs.readFileSync(path.join(__dirname, "..", relativePath), "utf8");
+  return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
 }
 
 function getExportedInterfaceSymbols(interfacesSource: string): Set<string> {
@@ -35,7 +35,7 @@ function extractTypeTokens(typeDefinition?: string): string[] {
 describe("commands.json and interfaces.ts sync", () => {
   it("exports all model names referenced by command types", () => {
     const commands = JSON.parse(readFile("commands.json")) as CommandDefinition[];
-    const interfacesSource = readFile("src/external-code/interfaces.ts");
+    const interfacesSource = readFile("src/music-assistant/external-code/interfaces.ts");
 
     const exportedSymbols = getExportedInterfaceSymbols(interfacesSource);
     const referencedSymbols = new Set<string>();

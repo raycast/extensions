@@ -1,4 +1,4 @@
-import { Album, Artist, Playlist, PlayerQueue, QueueItem, Track } from "../external-code/interfaces";
+import { Album, Artist, Playlist, PlayerQueue, QueueItem, Track } from "../music-assistant/external-code/interfaces";
 
 export type LibraryTab = "search" | "browse" | "recent" | "queue";
 export type BrowseView = "artists" | "albums" | "playlists" | "artist-detail" | "album-detail" | "playlist-detail";

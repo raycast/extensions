@@ -22,15 +22,6 @@ export function getBrowseSubtitle(view: BrowseView, breadcrumb?: string): string
   return breadcrumb;
 }
 
-export function formatDuration(duration?: number): string {
-  if (!duration) {
-    return "";
-  }
-  return `${Math.floor(duration / 60)}:${Math.floor(duration % 60)
-    .toString()
-    .padStart(2, "0")}`;
-}
-
 export function getRecentlyPlayedIcon(uri: string) {
   if (uri.includes("artist")) return { source: Icon.Person, tintColor: Color.Blue };
   if (uri.includes("album")) return { source: Icon.Music, tintColor: Color.Green };

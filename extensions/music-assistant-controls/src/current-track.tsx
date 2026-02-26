@@ -1,18 +1,17 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
-import MusicAssistantClient from "./music-assistant-client";
-import { getSelectedQueueID } from "./use-selected-player-id";
-import { Album, Track } from "./external-code/interfaces";
-import { commandOrControlShortcut } from "./shortcuts";
+import MusicAssistantClient from "./music-assistant/music-assistant-client";
+import { getSelectedQueueID } from "./player-selection/use-selected-player-id";
+import { Album, Track } from "./music-assistant/external-code/interfaces";
+import { commandOrControlShortcut } from "./shortcuts/shortcuts";
 import {
   formatAlbumTypeLabel,
   getCurrentTrackMarkdown,
   getFavoriteActionTitle,
   getFavoriteToastTitle,
-  getNextRepeatModeLabel,
   getShuffleToastMessage,
   getTrackPositionLabel,
-} from "./current-track-helpers";
+} from "./current-track/current-track-helpers";
 
 export default function CurrentTrackCommand() {
   const client = new MusicAssistantClient();
@@ -89,7 +88,7 @@ export default function CurrentTrackCommand() {
       await showToast({
         style: Toast.Style.Success,
         title: "Repeat Mode Changed",
-        message: `Repeat mode set to ${getNextRepeatModeLabel(currentMode)}`,
+        message: `Repeat mode set to ${client.getNextRepeatModeLabel(currentMode)}`,
       });
       await refreshCurrentTrackState();
     } catch (error) {

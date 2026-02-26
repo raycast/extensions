@@ -143,7 +143,7 @@ Each command entry includes:
 
 ## Test Coverage Strategy
 
-### Current Coverage: 69.15% statements, 53.73% branches, 67% functions
+### Current Coverage: 98.24% statements, 90.85% branches, 96.75% functions, 98.89% lines
 
 **Why not 100% coverage?**
 
@@ -182,7 +182,6 @@ See TESTING.md for detailed coverage breakdown and rationale.
 - ❌ `useMemo` - Not available in Raycast
 - ❌ `useCallback` - Not available in Raycast
 - ➡️ Use `useCachedPromise` with `execute` parameter instead to control when fetches happen
-
 
 ## Menu Bar Command Architecture
 

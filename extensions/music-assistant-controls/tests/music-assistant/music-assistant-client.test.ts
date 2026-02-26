@@ -1,14 +1,14 @@
-import MusicAssistantClient from "../src/music-assistant-client";
-import executeApiCommand from "../src/api-command";
+import MusicAssistantClient from "@/music-assistant/music-assistant-client";
+import executeApiCommand from "@/music-assistant/api-command";
 import { showHUD } from "@raycast/api";
-import { storeSelectedQueueID } from "../src/use-selected-player-id";
-import { PlayerQueue, PlayerState, RepeatMode } from "../src/external-code/interfaces";
-import { StoredQueue } from "../src/use-selected-player-id";
+import { storeSelectedQueueID } from "@/player-selection/use-selected-player-id";
+import { PlayerQueue, PlayerState, RepeatMode } from "@/music-assistant/external-code/interfaces";
+import { StoredQueue } from "@/player-selection/use-selected-player-id";
 
 // Mock the dependencies
-jest.mock("../src/api-command");
+jest.mock("@/music-assistant/api-command");
 jest.mock("@raycast/api");
-jest.mock("../src/use-selected-player-id");
+jest.mock("@/player-selection/use-selected-player-id");
 
 const mockExecuteApiCommand = executeApiCommand as jest.MockedFunction<typeof executeApiCommand>;
 const mockShowHUD = showHUD as jest.MockedFunction<typeof showHUD>;
@@ -854,6 +854,45 @@ describe("MusicAssistantClient", () => {
         const compatible = client.getCompatiblePlayers(targetPlayer, allPlayers);
 
         expect(compatible).toHaveLength(0);
+      });
+    });
+
+    describe("getGroupMemberOptions", () => {
+      it("should return current members and exclude them from potential members", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          group_childs: ["member-1"],
+          can_group_with: ["airplay"],
+        } as any;
+
+        const allPlayers = [
+          targetPlayer,
+          { player_id: "member-1", can_group_with: ["airplay"], available: true, enabled: true },
+          { player_id: "member-2", can_group_with: ["airplay"], available: true, enabled: true },
+        ] as any[];
+
+        const result = client.getGroupMemberOptions(targetPlayer, allPlayers);
+
+        expect(result.currentMembers.map((p) => p.player_id)).toEqual(["member-1"]);
+        expect(result.potentialMembers.map((p) => p.player_id)).toEqual(["member-2"]);
+      });
+
+      it("should return only potential members when group has no members", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          group_childs: [],
+          can_group_with: ["airplay"],
+        } as any;
+
+        const allPlayers = [
+          targetPlayer,
+          { player_id: "member-2", can_group_with: ["airplay"], available: true, enabled: true },
+        ] as any[];
+
+        const result = client.getGroupMemberOptions(targetPlayer, allPlayers);
+
+        expect(result.currentMembers).toEqual([]);
+        expect(result.potentialMembers.map((p) => p.player_id)).toEqual(["member-2"]);
       });
     });
   });
@@ -1741,6 +1780,12 @@ describe("MusicAssistantClient", () => {
         expect(client.formatAddToQueueNextMessage("Track Name")).toBe('"Track Name" will play next');
       });
 
+      it("should format duration for empty and non-empty values", () => {
+        expect(client.formatDuration(undefined)).toBe("0:00");
+        expect(client.formatDuration(0)).toBe("0:00");
+        expect(client.formatDuration(125)).toBe("2:05");
+      });
+
       it("should map move directions to API position shifts", () => {
         expect(client.getQueueMovePositionShift("up")).toBe(-1);
         expect(client.getQueueMovePositionShift("down")).toBe(1);
@@ -1757,6 +1802,37 @@ describe("MusicAssistantClient", () => {
         expect(client.getNextRepeatMode(RepeatMode.OFF)).toBe(RepeatMode.ALL);
         expect(client.getNextRepeatMode(RepeatMode.ALL)).toBe(RepeatMode.ONE);
         expect(client.getNextRepeatMode(RepeatMode.ONE)).toBe(RepeatMode.OFF);
+      });
+
+      it("should return next repeat mode labels", () => {
+        expect(client.getNextRepeatModeLabel(RepeatMode.OFF)).toBe("ONE");
+        expect(client.getNextRepeatModeLabel(RepeatMode.ONE)).toBe("ALL");
+        expect(client.getNextRepeatModeLabel(RepeatMode.ALL)).toBe("OFF");
+      });
+
+      it("should return shuffle display text", () => {
+        expect(client.getShuffleText(true)).toBe("Shuffle: ON");
+        expect(client.getShuffleText(false)).toBe("Shuffle: OFF");
+      });
+
+      it("should return repeat display text", () => {
+        expect(client.getRepeatText(RepeatMode.OFF)).toBe("Repeat: OFF");
+        expect(client.getRepeatText(RepeatMode.ONE)).toBe("Repeat: ONE");
+        expect(client.getRepeatText(RepeatMode.ALL)).toBe("Repeat: ALL");
+      });
+
+      it("should format current media title with artist", () => {
+        const text = client.formatCurrentMediaTitle({ title: "Song", artist: "Artist" } as any, "Fallback");
+        expect(text).toBe("Song - Artist");
+      });
+
+      it("should format current media title without artist and with fallback", () => {
+        expect(client.formatCurrentMediaTitle({ title: "Song" } as any, "Fallback")).toBe("Song");
+        expect(client.formatCurrentMediaTitle(undefined, "Fallback")).toBe("Fallback");
+      });
+
+      it("should format volume transition feedback", () => {
+        expect(client.formatVolumeTransition(40, 50)).toBe("Volume 40% -> 50%");
       });
     });
 

@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import MusicAssistantClient from "../music-assistant-client";
-import { getSelectedQueueID } from "../use-selected-player-id";
-import { commandOrControlShortcut } from "../shortcuts";
-import { formatDuration } from "./helpers";
+import MusicAssistantClient from "../music-assistant/music-assistant-client";
+import { getSelectedQueueID } from "../player-selection/use-selected-player-id";
+import { commandOrControlShortcut } from "../shortcuts/shortcuts";
 import { QueueManagerData } from "./types";
 
 interface QueueManagerTabProps {
@@ -204,7 +203,7 @@ export function QueueManagerTab({ client }: QueueManagerTabProps) {
             title={`${index + 1}. ${item.name}`}
             subtitle={item.media_item ? "Available" : "Unavailable"}
             icon={item.available ? Icon.Dot : Icon.Circle}
-            accessories={[{ text: formatDuration(item.duration) }]}
+            accessories={[{ text: item.duration ? client.formatDuration(item.duration) : "" }]}
             actions={
               <ActionPanel>
                 <Action

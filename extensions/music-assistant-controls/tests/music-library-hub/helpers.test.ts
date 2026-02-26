@@ -1,6 +1,6 @@
-import { Album, Artist } from "../src/external-code/interfaces";
-import { formatDuration, getBreadcrumb, getBrowseSubtitle, getRecentlyPlayedIcon } from "../src/music-library-hub/helpers";
-import { BreadcrumbState } from "../src/music-library-hub/types";
+import { Album, Artist } from "@/music-assistant/external-code/interfaces";
+import { getBreadcrumb, getBrowseSubtitle, getRecentlyPlayedIcon } from "@/music-library-hub/helpers";
+import { BreadcrumbState } from "@/music-library-hub/types";
 
 jest.mock("@raycast/api");
 
@@ -20,12 +20,6 @@ describe("music-library-hub helpers", () => {
     expect(getBrowseSubtitle("albums")).toBe("Albums");
     expect(getBrowseSubtitle("playlists")).toBe("Playlists");
     expect(getBrowseSubtitle("album-detail", "Artist > Album")).toBe("Artist > Album");
-  });
-
-  it("formats duration safely", () => {
-    expect(formatDuration(125)).toBe("2:05");
-    expect(formatDuration(0)).toBe("");
-    expect(formatDuration(undefined)).toBe("");
   });
 
   it("maps recently played uri to icon categories", () => {

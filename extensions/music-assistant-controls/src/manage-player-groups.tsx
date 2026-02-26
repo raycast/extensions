@@ -1,9 +1,15 @@
-import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Player } from "./external-code/interfaces";
-import MusicAssistantClient from "./music-assistant-client";
-import { commandOrControlShortcut } from "./shortcuts";
+import { Player } from "./music-assistant/external-code/interfaces";
+import MusicAssistantClient from "./music-assistant/music-assistant-client";
+import { commandOrControlShortcut } from "./shortcuts/shortcuts";
 import React from "react";
+import {
+  getPlayerListIcon,
+  getPlayerListSubtitle,
+  getPlayerListTitle,
+  splitPlayersByGroupRole,
+} from "./player-management/player-list-helpers";
 
 export default function ManagePlayerGroupsCommand() {
   const client = new MusicAssistantClient();
@@ -86,44 +92,6 @@ export default function ManagePlayerGroupsCommand() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  };
-
-  const getIcon = (player: Player, isMember = false): Icon | Image.ImageLike => {
-    // For members, always show the dot (indented)
-    if (isMember) return Icon.Dot;
-
-    // Try to get album art for this player
-    const albumArt = client.getPlayerAlbumArt(player);
-    if (albumArt) {
-      return { source: albumArt, mask: Image.Mask.RoundedRectangle };
-    }
-
-    // Fallback to status icons
-    const status = client.getGroupStatus(player);
-    return status === "Standalone" ? Icon.Cd : Icon.TwoPeople;
-  };
-
-  const getTitle = (player: Player, isMember = false): string => {
-    // Indent member names to create tree-like appearance
-    if (isMember) {
-      return `    ${player.display_name}`;
-    }
-    return player.display_name;
-  };
-
-  const getSubtitle = (player: Player, isMember = false): string => {
-    // Members should only show "Group member", not their currently playing info
-    if (isMember) return "Group member";
-
-    // Show currently playing info for standalone players and group leaders
-    const nowPlaying = client.getCurrentlyPlayingSong(player);
-    if (nowPlaying) return nowPlaying;
-
-    const status = client.getGroupStatus(player);
-    if (status === "Leader") {
-      return `Group leader · ${player.group_childs.length} member(s)`;
-    }
-    return "Standalone";
   };
 
   const getAccessories = (player: Player): List.Item.Accessory[] => {
@@ -263,9 +231,7 @@ export default function ManagePlayerGroupsCommand() {
     );
   };
 
-  // Organize players for tree view
-  const groupLeaders = players?.filter((p) => client.isGroupLeader(p)) || [];
-  const standalonePlayers = players?.filter((p) => client.getGroupStatus(p) === "Standalone") || [];
+  const { groupLeaders, standalonePlayers } = splitPlayersByGroupRole(client, players);
 
   return (
     <List isLoading={isLoading} navigationTitle="Manage Player Groups" searchBarPlaceholder="Search players">
@@ -281,9 +247,9 @@ export default function ManagePlayerGroupsCommand() {
                 {/* Group Leader */}
                 <List.Item
                   key={leader.player_id}
-                  title={getTitle(leader, false)}
-                  subtitle={getSubtitle(leader, false)}
-                  icon={getIcon(leader, false)}
+                  title={getPlayerListTitle(leader)}
+                  subtitle={getPlayerListSubtitle(client, leader)}
+                  icon={getPlayerListIcon(client, leader)}
                   accessories={getAccessories(leader)}
                   actions={renderPlayerActions(leader)}
                 />
@@ -291,9 +257,9 @@ export default function ManagePlayerGroupsCommand() {
                 {members.map((member) => (
                   <List.Item
                     key={member.player_id}
-                    title={getTitle(member, true)}
-                    subtitle={getSubtitle(member, true)}
-                    icon={getIcon(member, true)}
+                    title={getPlayerListTitle(member, { isMember: true })}
+                    subtitle={getPlayerListSubtitle(client, member, { isMember: true })}
+                    icon={getPlayerListIcon(client, member, { isMember: true })}
                     accessories={getAccessories(member)}
                     actions={renderPlayerActions(member)}
                   />
@@ -310,9 +276,9 @@ export default function ManagePlayerGroupsCommand() {
           {standalonePlayers.map((player) => (
             <List.Item
               key={player.player_id}
-              title={getTitle(player, false)}
-              subtitle={getSubtitle(player, false)}
-              icon={getIcon(player, false)}
+              title={getPlayerListTitle(player)}
+              subtitle={getPlayerListSubtitle(client, player)}
+              icon={getPlayerListIcon(client, player)}
               accessories={getAccessories(player)}
               actions={renderPlayerActions(player)}
             />

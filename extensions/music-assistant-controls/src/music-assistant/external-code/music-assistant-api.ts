@@ -636,84 +636,84 @@ export class MusicAssistantApi {
       offset,
     });
   }
-  public queueCommandClear(queueId: string) {
+  public queueCommandClear(queueId: string): Promise<void> {
     // Clear all items in the queue.
-    this.playerQueueCommand(queueId, "clear");
+    return this.playerQueueCommand(queueId, "clear");
   }
-  public queueCommandPlayIndex(queueId: string, index: number | string) {
+  public queueCommandPlayIndex(queueId: string, index: number | string): Promise<void> {
     // Play item at index (or item_id) X in queue.
-    this.playerQueueCommand(queueId, "play_index", { index });
+    return this.playerQueueCommand(queueId, "play_index", { index });
   }
-  public queueCommandMoveItem(queueId: string, queue_item_id: string, pos_shift = 1) {
+  public queueCommandMoveItem(queueId: string, queue_item_id: string, pos_shift = 1): Promise<void> {
     // Move queue item x up/down the queue.
     // - queue_id: id of the queue to process this request.
     // - queue_item_id: the item_id of the queueitem that needs to be moved.
     // - pos_shift: move item x positions down if positive value
     // - pos_shift: move item x positions up if negative value
     // - pos_shift:  move item to top of queue as next item if 0
-    this.playerQueueCommand(queueId, "move_item", { queue_item_id, pos_shift });
+    return this.playerQueueCommand(queueId, "move_item", { queue_item_id, pos_shift });
   }
-  public queueCommandMoveUp(queueId: string, queue_item_id: string) {
-    this.queueCommandMoveItem(queueId, queue_item_id, -1);
+  public queueCommandMoveUp(queueId: string, queue_item_id: string): Promise<void> {
+    return this.queueCommandMoveItem(queueId, queue_item_id, -1);
   }
-  public queueCommandMoveDown(queueId: string, queue_item_id: string) {
-    this.queueCommandMoveItem(queueId, queue_item_id, 1);
+  public queueCommandMoveDown(queueId: string, queue_item_id: string): Promise<void> {
+    return this.queueCommandMoveItem(queueId, queue_item_id, 1);
   }
-  public queueCommandMoveNext(queueId: string, queue_item_id: string) {
-    this.queueCommandMoveItem(queueId, queue_item_id, 0);
+  public queueCommandMoveNext(queueId: string, queue_item_id: string): Promise<void> {
+    return this.queueCommandMoveItem(queueId, queue_item_id, 0);
   }
-  public queueCommandDelete(queueId: string, item_id_or_index: number | string) {
+  public queueCommandDelete(queueId: string, item_id_or_index: number | string): Promise<void> {
     // Delete item (by id or index) from the queue.
-    this.playerQueueCommand(queueId, "delete_item", { item_id_or_index });
+    return this.playerQueueCommand(queueId, "delete_item", { item_id_or_index });
   }
 
-  public queueCommandSeek(queueId: string, position: number) {
+  public queueCommandSeek(queueId: string, position: number): Promise<void> {
     // Handle SEEK command for given queue.
     // - position: position in seconds to seek to in the current playing item.
-    this.playerQueueCommand(queueId, "seek", { position });
+    return this.playerQueueCommand(queueId, "seek", { position });
   }
-  public queueCommandSkip(queueId: string, seconds: number) {
+  public queueCommandSkip(queueId: string, seconds: number): Promise<void> {
     // Handle SKIP command for given queue.
     // - seconds: number of seconds to skip in track. Use negative value to skip back.
-    this.playerQueueCommand(queueId, "skip", { seconds });
+    return this.playerQueueCommand(queueId, "skip", { seconds });
   }
-  public queueCommandSkipAhead(queueId: string) {
-    this.queueCommandSkip(queueId, 10);
+  public queueCommandSkipAhead(queueId: string): Promise<void> {
+    return this.queueCommandSkip(queueId, 10);
   }
-  public queueCommandSkipBack(queueId: string) {
-    this.queueCommandSkip(queueId, -10);
+  public queueCommandSkipBack(queueId: string): Promise<void> {
+    return this.queueCommandSkip(queueId, -10);
   }
-  public queueCommandShuffle(queueId: string, shuffle_enabled: boolean) {
+  public queueCommandShuffle(queueId: string, shuffle_enabled: boolean): Promise<void> {
     // Configure shuffle setting on the the queue.
-    this.playerQueueCommand(queueId, "shuffle", { shuffle_enabled });
+    return this.playerQueueCommand(queueId, "shuffle", { shuffle_enabled });
   }
-  public queueCommandShuffleToggle(queueId: string, currentShuffleEnabled: boolean) {
+  public queueCommandShuffleToggle(queueId: string, currentShuffleEnabled: boolean): Promise<void> {
     // Toggle shuffle mode for a queue
-    this.queueCommandShuffle(queueId, !currentShuffleEnabled);
+    return this.queueCommandShuffle(queueId, !currentShuffleEnabled);
   }
-  public queueCommandRepeat(queueId: string, repeat_mode: RepeatMode) {
+  public queueCommandRepeat(queueId: string, repeat_mode: RepeatMode): Promise<void> {
     // Configure repeat setting on the the queue.
-    this.playerQueueCommand(queueId, "repeat", { repeat_mode });
+    return this.playerQueueCommand(queueId, "repeat", { repeat_mode });
   }
-  public queueCommandRepeatToggle(queueId: string, currentRepeatMode: RepeatMode) {
+  public queueCommandRepeatToggle(queueId: string, currentRepeatMode: RepeatMode): Promise<void> {
     // Toggle repeat mode of a queue
     if (currentRepeatMode == RepeatMode.OFF) {
-      this.queueCommandRepeat(queueId, RepeatMode.ONE);
+      return this.queueCommandRepeat(queueId, RepeatMode.ONE);
     } else if (currentRepeatMode == RepeatMode.ONE) {
-      this.queueCommandRepeat(queueId, RepeatMode.ALL);
+      return this.queueCommandRepeat(queueId, RepeatMode.ALL);
     } else {
-      this.queueCommandRepeat(queueId, RepeatMode.OFF);
+      return this.queueCommandRepeat(queueId, RepeatMode.OFF);
     }
   }
-  public queueCommandDontStopTheMusic(queueId: string, dont_stop_the_music_enabled: boolean) {
+  public queueCommandDontStopTheMusic(queueId: string, dont_stop_the_music_enabled: boolean): Promise<void> {
     // Configure dont_stop_the_music setting on the the queue.
-    this.playerQueueCommand(queueId, "dont_stop_the_music", {
+    return this.playerQueueCommand(queueId, "dont_stop_the_music", {
       dont_stop_the_music_enabled,
     });
   }
-  public queueCommandDontStopTheMusicToggle(queueId: string, currentDontStopTheMusic: boolean) {
+  public queueCommandDontStopTheMusicToggle(queueId: string, currentDontStopTheMusic: boolean): Promise<void> {
     // Toggle dont_stop_the_music mode of a queue
-    this.queueCommandDontStopTheMusic(queueId, !currentDontStopTheMusic);
+    return this.queueCommandDontStopTheMusic(queueId, !currentDontStopTheMusic);
   }
   public playerQueueCommand(queue_id: string, command: string, args?: Record<string, any>): Promise<void> {
     /*

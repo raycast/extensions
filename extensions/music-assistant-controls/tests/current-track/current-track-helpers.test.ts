@@ -3,11 +3,10 @@ import {
   getCurrentTrackMarkdown,
   getFavoriteActionTitle,
   getFavoriteToastTitle,
-  getNextRepeatModeLabel,
   getShuffleToastMessage,
   getTrackPositionLabel,
-} from "../src/current-track-helpers";
-import { MediaType, RepeatMode, Track } from "../src/external-code/interfaces";
+} from "@/current-track/current-track-helpers";
+import { MediaType, Track } from "@/music-assistant/external-code/interfaces";
 
 function createMockTrack(overrides: Partial<Track> = {}): Track {
   return {
@@ -45,20 +44,6 @@ describe("current-track helpers", () => {
 
     it("should return enabled message when shuffle was disabled", () => {
       expect(getShuffleToastMessage(false)).toBe("Shuffle enabled");
-    });
-  });
-
-  describe("getNextRepeatModeLabel", () => {
-    it("should cycle OFF to ONE", () => {
-      expect(getNextRepeatModeLabel(RepeatMode.OFF)).toBe("ONE");
-    });
-
-    it("should cycle ONE to ALL", () => {
-      expect(getNextRepeatModeLabel(RepeatMode.ONE)).toBe("ALL");
-    });
-
-    it("should cycle ALL to OFF", () => {
-      expect(getNextRepeatModeLabel(RepeatMode.ALL)).toBe("OFF");
     });
   });
 

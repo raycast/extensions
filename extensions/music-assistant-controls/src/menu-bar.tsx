@@ -1,9 +1,9 @@
 import { Icon, MenuBarExtra, Image } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Player, PlayerQueue } from "./external-code/interfaces";
-import MusicAssistantClient from "./music-assistant-client";
+import { Player, PlayerQueue } from "./music-assistant/external-code/interfaces";
+import MusicAssistantClient from "./music-assistant/music-assistant-client";
 import { useEffect, useState } from "react";
-import { getStoredQueue, storeSelectedQueueID } from "./use-selected-player-id";
+import { getStoredQueue, storeSelectedQueueID } from "./player-selection/use-selected-player-id";
 
 export default function Command() {
   const client = new MusicAssistantClient();
@@ -62,6 +62,11 @@ export default function Command() {
   const displayableQueues = client.getDisplayableQueues(queuesData, playersData);
   const activeDisplayQueue = client.getDisplayQueueForMenuBar(activeQueue, playersData, queuesData);
   const inactiveQueues = displayableQueues.filter((q) => q.queue_id !== activeDisplayQueue?.queue_id);
+  const activePlayer = activeDisplayQueue ? getPlayerById(activeDisplayQueue.queue_id) : undefined;
+  const groupMemberOptions =
+    activePlayer && client.canFormGroup(activePlayer)
+      ? client.getGroupMemberOptions(activePlayer, playersData)
+      : undefined;
 
   return (
     <MenuBarExtra icon="transparent-logo.png" isLoading={isLoading} title={title}>
@@ -116,25 +121,11 @@ export default function Command() {
           )}
 
           {/* Group Members & Potential Members */}
-          {(() => {
-            const activePlayer = getPlayerById(activeDisplayQueue.queue_id);
-            if (!activePlayer || !client.canFormGroup(activePlayer)) return null;
-
-            const currentMembers = client
-              .getGroupMembers(activePlayer, playersData)
-              .filter((m) => m.player_id !== activePlayer.player_id);
-
-            const compatiblePlayers = client.getCompatiblePlayers(activePlayer, playersData);
-            const potentialMembers = compatiblePlayers.filter(
-              (p) => p.player_id !== activePlayer.player_id && !currentMembers.find((m) => m.player_id === p.player_id),
-            );
-
-            const hasContent = currentMembers.length > 0 || potentialMembers.length > 0;
-
-            return hasContent ? (
+          {activePlayer &&
+            groupMemberOptions &&
+            (groupMemberOptions.currentMembers.length > 0 || groupMemberOptions.potentialMembers.length > 0) && (
               <MenuBarExtra.Submenu title="Group Members" icon={Icon.TwoPeople}>
-                {/* Current Members */}
-                {currentMembers.map((member) => (
+                {groupMemberOptions.currentMembers.map((member) => (
                   <MenuBarExtra.Item
                     key={member.player_id}
                     title={member.display_name}
@@ -145,9 +136,7 @@ export default function Command() {
                     }}
                   />
                 ))}
-
-                {/* Potential Members */}
-                {potentialMembers.map((player) => (
+                {groupMemberOptions.potentialMembers.map((player) => (
                   <MenuBarExtra.Item
                     key={player.player_id}
                     title={player.display_name}
@@ -159,8 +148,7 @@ export default function Command() {
                   />
                 ))}
               </MenuBarExtra.Submenu>
-            ) : null;
-          })()}
+            )}
         </MenuBarExtra.Section>
       )}
 

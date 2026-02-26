@@ -1,4 +1,4 @@
-import { MusicAssistantApi } from "../src/external-code/music-assistant-api";
+import { MusicAssistantApi } from "@/music-assistant/external-code/music-assistant-api";
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -182,6 +182,54 @@ describe("MusicAssistantApi REST API", () => {
 
       const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
       expect(callBody.args.muted).toBe(false);
+    });
+  });
+
+  describe("queue command wrappers", () => {
+    beforeEach(() => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ result: null }),
+      } as Response);
+      api.initialize("http://localhost:8095", "test-token");
+    });
+
+    it("should send clear queue command", async () => {
+      await api.queueCommandClear("queue-1");
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(callBody).toEqual({
+        command: "player_queues/clear",
+        args: {
+          queue_id: "queue-1",
+        },
+      });
+    });
+
+    it("should send shuffle queue command", async () => {
+      await api.queueCommandShuffle("queue-1", true);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(callBody).toEqual({
+        command: "player_queues/shuffle",
+        args: {
+          queue_id: "queue-1",
+          shuffle_enabled: true,
+        },
+      });
+    });
+
+    it("should toggle repeat from OFF to ONE", async () => {
+      await api.queueCommandRepeatToggle("queue-1", "off");
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(callBody).toEqual({
+        command: "player_queues/repeat",
+        args: {
+          queue_id: "queue-1",
+          repeat_mode: "one",
+        },
+      });
     });
   });
 

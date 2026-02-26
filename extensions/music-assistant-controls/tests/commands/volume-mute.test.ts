@@ -1,14 +1,14 @@
 import { showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import MusicAssistantClient from "../src/music-assistant-client";
-import { getSelectedQueueID } from "../src/use-selected-player-id";
-import volumeMuteMain from "../src/volume-mute";
+import MusicAssistantClient from "@/music-assistant/music-assistant-client";
+import { getSelectedQueueID } from "@/player-selection/use-selected-player-id";
+import volumeMuteMain from "@/volume-mute";
 
 // Mock dependencies
 jest.mock("@raycast/api");
 jest.mock("@raycast/utils");
-jest.mock("../src/music-assistant-client");
-jest.mock("../src/use-selected-player-id");
+jest.mock("@/music-assistant/music-assistant-client");
+jest.mock("@/player-selection/use-selected-player-id");
 
 const mockShowToast = showToast as jest.MockedFunction<typeof showToast>;
 const mockShowFailureToast = showFailureToast as jest.MockedFunction<typeof showFailureToast>;

@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { ItemMapping } from "../external-code/interfaces";
-import MusicAssistantClient from "../music-assistant-client";
-import { getSelectedQueueID } from "../use-selected-player-id";
+import { ItemMapping } from "../music-assistant/external-code/interfaces";
+import MusicAssistantClient from "../music-assistant/music-assistant-client";
+import { addItemToQueueNext } from "./actions";
 import { getRecentlyPlayedIcon } from "./helpers";
 
 interface RecentlyPlayedTabProps {
@@ -19,26 +19,7 @@ export function RecentlyPlayedTab({ client }: RecentlyPlayedTabProps) {
   });
 
   const addToQueue = async (item: ItemMapping, itemName: string) => {
-    const queueId = await getSelectedQueueID();
-    if (!queueId) {
-      return;
-    }
-
-    try {
-      await client.addToQueueNext(item, queueId);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Added to Queue",
-        message: client.formatAddToQueueNextMessage(itemName),
-      });
-      revalidate();
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Add to Queue",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
+    await addItemToQueueNext(client, item, itemName, revalidate);
   };
 
   return (

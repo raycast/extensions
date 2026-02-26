@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import MusicAssistantClient from "./music-assistant-client";
+import MusicAssistantClient from "./music-assistant/music-assistant-client";
 import { BrowseTab } from "./music-library-hub/browse-tab";
 import { QueueManagerTab } from "./music-library-hub/queue-manager-tab";
 import { RecentlyPlayedTab } from "./music-library-hub/recently-played-tab";
@@ -14,6 +14,11 @@ export default function MusicLibraryHubCommand() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [browseState, setBrowseState] = useCachedState<BreadcrumbState>("browse-state", { view: "artists" });
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setDebouncedSearchQuery("");
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,7 +44,7 @@ export default function MusicLibraryHubCommand() {
               <Action
                 title="View"
                 onAction={() => {
-                  setSearchQuery("");
+                  clearSearch();
                   setActiveTab("browse");
                 }}
               />
@@ -54,7 +59,7 @@ export default function MusicLibraryHubCommand() {
               <Action
                 title="View"
                 onAction={() => {
-                  setSearchQuery("");
+                  clearSearch();
                   setActiveTab("recent");
                 }}
               />
@@ -69,7 +74,7 @@ export default function MusicLibraryHubCommand() {
               <Action
                 title="View"
                 onAction={() => {
-                  setSearchQuery("");
+                  clearSearch();
                   setActiveTab("queue");
                 }}
               />
@@ -79,7 +84,7 @@ export default function MusicLibraryHubCommand() {
       </List.Section>
 
       {debouncedSearchQuery && debouncedSearchQuery.trim().length > 0 && (
-        <SearchTab client={client} searchQuery={debouncedSearchQuery} onTabChange={setActiveTab} />
+        <SearchTab client={client} searchQuery={debouncedSearchQuery} onClearSearch={clearSearch} />
       )}
 
       {!debouncedSearchQuery || debouncedSearchQuery.trim().length === 0 ? (

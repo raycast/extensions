@@ -1,6 +1,9 @@
 import executeApiCommand from "./api-command";
 import { showHUD, getPreferenceValues } from "@raycast/api";
-import { storeSelectedQueueID, StoredQueue } from "./use-selected-player-id";
+import { storeSelectedQueueID, StoredQueue } from "../player-selection/use-selected-player-id";
+import * as menuDisplayDelegate from "./delegates/menu-display-delegate";
+import * as playerGroupingDelegate from "./delegates/player-grouping-delegate";
+import * as queueFormattingDelegate from "./delegates/queue-formatting-delegate";
 import {
   PlayerQueue,
   PlayerState,
@@ -220,14 +223,7 @@ export default class MusicAssistantClient {
    * ```
    */
   findActiveQueue(queues: PlayerQueue[], storedQueueId?: StoredQueue): PlayerQueue | undefined {
-    if (queues.length === 0) return undefined;
-
-    if (storedQueueId?.queue_id) {
-      const storedQueue = queues.find((q) => q.queue_id === storedQueueId.queue_id);
-      if (storedQueue) return storedQueue;
-    }
-
-    return queues[0];
+    return menuDisplayDelegate.findActiveQueue(queues, storedQueueId);
   }
 
   /**
@@ -245,11 +241,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getDisplayTitle(queue?: PlayerQueue): string | undefined {
-    if (!queue || queue.state !== PlayerState.PLAYING) {
-      return undefined;
-    }
-
-    return queue.current_item?.name;
+    return menuDisplayDelegate.getDisplayTitle(queue);
   }
 
   /**
@@ -266,7 +258,7 @@ export default class MusicAssistantClient {
    * ```
    */
   shouldUpdateTitle(currentTitle: string | undefined, newTitle: string | undefined): boolean {
-    return newTitle !== currentTitle;
+    return menuDisplayDelegate.shouldUpdateTitle(currentTitle, newTitle);
   }
 
   /**
@@ -284,12 +276,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getCurrentlyPlayingSong(player?: Player): string {
-    if (!player?.current_media?.title) return "";
-    const parts = [player.current_media.title];
-    if (player.current_media.artist) {
-      parts.push(player.current_media.artist);
-    }
-    return parts.join(" - ");
+    return menuDisplayDelegate.getCurrentlyPlayingSong(player);
   }
 
   /**
@@ -307,7 +294,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getQueueCurrentSong(queue?: PlayerQueue): string {
-    return queue?.current_item?.name || "";
+    return menuDisplayDelegate.getQueueCurrentSong(queue);
   }
 
   /**
@@ -385,7 +372,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getPlayPauseButtonText(state: PlayerState): string {
-    return state === PlayerState.PLAYING ? "Pause" : "Play";
+    return menuDisplayDelegate.getPlayPauseButtonText(state);
   }
 
   /**
@@ -399,7 +386,7 @@ export default class MusicAssistantClient {
    * ```
    */
   isPlaying(state: PlayerState): boolean {
-    return state === PlayerState.PLAYING;
+    return menuDisplayDelegate.isPlaying(state);
   }
 
   /**
@@ -417,10 +404,7 @@ export default class MusicAssistantClient {
    * ```
    */
   createQueueSelection(queue: PlayerQueue): { title?: string; queueId: string } {
-    return {
-      title: this.getDisplayTitle(queue),
-      queueId: queue.queue_id,
-    };
+    return menuDisplayDelegate.createQueueSelection(queue);
   }
 
   /**
@@ -440,10 +424,7 @@ export default class MusicAssistantClient {
    * ```
    */
   isDisplayablePlayer(player: Player): boolean {
-    const isGroupLeader = player.group_childs && player.group_childs.length > 0;
-    const isStandalone = !player.synced_to;
-
-    return isGroupLeader || isStandalone;
+    return menuDisplayDelegate.isDisplayablePlayer(player);
   }
 
   /**
@@ -462,10 +443,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getDisplayableQueues(queues: PlayerQueue[], players: Player[]): PlayerQueue[] {
-    return queues.filter((queue) => {
-      const player = players.find((p) => p.player_id === queue.queue_id);
-      return player && this.isDisplayablePlayer(player);
-    });
+    return menuDisplayDelegate.getDisplayableQueues(queues, players);
   }
 
   /**
@@ -489,23 +467,7 @@ export default class MusicAssistantClient {
     players: Player[],
     queues: PlayerQueue[],
   ): PlayerQueue | undefined {
-    if (!activeQueue) return undefined;
-
-    const player = players.find((p) => p.player_id === activeQueue.queue_id);
-    if (!player) return activeQueue;
-
-    // If the player is already displayable, return it as-is
-    if (this.isDisplayablePlayer(player)) {
-      return activeQueue;
-    }
-
-    // If it's a group member, find and return the group leader queue
-    if (player.synced_to) {
-      const leaderQueue = queues.find((q) => q.queue_id === player.synced_to);
-      return leaderQueue || activeQueue;
-    }
-
-    return activeQueue;
+    return menuDisplayDelegate.getDisplayQueueForMenuBar(activeQueue, players, queues);
   }
 
   /**
@@ -524,13 +486,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getGroupMembers(player: Player, allPlayers: Player[]): Player[] {
-    if (!player.group_childs || player.group_childs.length === 0) {
-      return [];
-    }
-
-    return player.group_childs
-      .map((childId) => allPlayers.find((p) => p.player_id === childId))
-      .filter((p): p is Player => p !== undefined);
+    return playerGroupingDelegate.getGroupMembers(player, allPlayers);
   }
 
   // Player Selection Logic
@@ -584,11 +540,7 @@ export default class MusicAssistantClient {
    * ```
    */
   formatSelectionMessage(displayName: string): string {
-    const isMacOS = process.platform === "darwin";
-    if (isMacOS) {
-      return `${displayName} selected, allow 10 seconds for the menubar to update!`;
-    }
-    return `${displayName} selected!`;
+    return playerGroupingDelegate.formatSelectionMessage(displayName);
   }
 
   // Volume Control Helper Methods
@@ -605,7 +557,7 @@ export default class MusicAssistantClient {
    * ```
    */
   supportsVolumeControl(player?: Player): boolean {
-    return player?.volume_control !== "none" && player?.volume_control !== undefined;
+    return playerGroupingDelegate.supportsVolumeControl(player);
   }
 
   /**
@@ -621,7 +573,7 @@ export default class MusicAssistantClient {
    * ```
    */
   supportsMuteControl(player?: Player): boolean {
-    return player?.mute_control !== "none" && player?.mute_control !== undefined;
+    return playerGroupingDelegate.supportsMuteControl(player);
   }
 
   /**
@@ -636,13 +588,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getVolumeDisplay(player?: Player): string {
-    if (!player || !this.supportsVolumeControl(player)) {
-      return "Volume: N/A";
-    }
-
-    const level = player.volume_level ?? 0;
-    const muteStatus = player.volume_muted ? " (Muted)" : "";
-    return `Volume: ${level}%${muteStatus}`;
+    return playerGroupingDelegate.getVolumeDisplay(player);
   }
 
   /**
@@ -656,13 +602,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getVolumeOptions(): Array<{ level: number; display: string }> {
-    return [
-      { level: 0, display: "Mute" },
-      { level: 25, display: "25%" },
-      { level: 50, display: "50%" },
-      { level: 75, display: "75%" },
-      { level: 100, display: "100%" },
-    ];
+    return playerGroupingDelegate.getVolumeOptions();
   }
 
   // Player Grouping Methods
@@ -727,8 +667,7 @@ export default class MusicAssistantClient {
    * ```
    */
   canFormGroup(player?: Player): boolean {
-    if (!player) return false;
-    return player.can_group_with.length > 0;
+    return playerGroupingDelegate.canFormGroup(player);
   }
 
   /**
@@ -744,8 +683,7 @@ export default class MusicAssistantClient {
    * ```
    */
   isGroupLeader(player?: Player): boolean {
-    if (!player) return false;
-    return player.group_childs.length > 0;
+    return playerGroupingDelegate.isGroupLeader(player);
   }
 
   /**
@@ -760,17 +698,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getGroupStatus(player?: Player): "Leader" | "Member" | "Standalone" {
-    if (!player) return "Standalone";
-
-    if (this.isGroupLeader(player)) {
-      return "Leader";
-    }
-
-    if (player.synced_to || player.active_group) {
-      return "Member";
-    }
-
-    return "Standalone";
+    return playerGroupingDelegate.getGroupStatus(player);
   }
 
   /**
@@ -786,13 +714,21 @@ export default class MusicAssistantClient {
    * ```
    */
   getCompatiblePlayers(targetPlayer: Player, allPlayers: Player[]): Player[] {
-    return allPlayers.filter(
-      (p) =>
-        p.player_id !== targetPlayer.player_id &&
-        p.available &&
-        p.enabled &&
-        targetPlayer.can_group_with.some((provider) => p.can_group_with.includes(provider)),
-    );
+    return playerGroupingDelegate.getCompatiblePlayers(targetPlayer, allPlayers);
+  }
+
+  /**
+   * Build grouped member data for menu and list UIs
+   *
+   * @param targetPlayer - Group leader candidate
+   * @param allPlayers - All known players
+   * @returns Current group members and compatible potential members
+   */
+  getGroupMemberOptions(
+    targetPlayer: Player,
+    allPlayers: Player[],
+  ): { currentMembers: Player[]; potentialMembers: Player[] } {
+    return playerGroupingDelegate.getGroupMemberOptions(targetPlayer, allPlayers);
   }
 
   // Queue Control Methods for Current Track Command & Library Management
@@ -887,10 +823,7 @@ export default class MusicAssistantClient {
    * ```
    */
   formatDuration(seconds?: number): string {
-    if (!seconds) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return queueFormattingDelegate.formatDuration(seconds);
   }
 
   /**
@@ -920,7 +853,7 @@ export default class MusicAssistantClient {
    * ```
    */
   formatAddToQueueNextMessage(itemName: string): string {
-    return `"${itemName}" will play next`;
+    return queueFormattingDelegate.formatAddToQueueNextMessage(itemName);
   }
 
   /**
@@ -934,9 +867,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getQueueMovePositionShift(direction: "up" | "down" | "next"): number {
-    if (direction === "up") return -1;
-    if (direction === "down") return 1;
-    return 0;
+    return queueFormattingDelegate.getQueueMovePositionShift(direction);
   }
 
   /**
@@ -951,7 +882,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getQueueMoveFeedback(direction: "up" | "down" | "next"): string {
-    return `Moved ${direction === "next" ? "to next" : direction}`;
+    return queueFormattingDelegate.getQueueMoveFeedback(direction);
   }
 
   /**
@@ -965,7 +896,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getShuffleText(shuffleEnabled: boolean): string {
-    return shuffleEnabled ? "Shuffle: ON" : "Shuffle: OFF";
+    return queueFormattingDelegate.getShuffleText(shuffleEnabled);
   }
 
   /**
@@ -979,12 +910,7 @@ export default class MusicAssistantClient {
    * ```
    */
   getRepeatText(repeatMode: RepeatMode): string {
-    const modeMap = {
-      [RepeatMode.OFF]: "OFF",
-      [RepeatMode.ONE]: "ONE",
-      [RepeatMode.ALL]: "ALL",
-    };
-    return `Repeat: ${modeMap[repeatMode]}`;
+    return queueFormattingDelegate.getRepeatText(repeatMode);
   }
 
   /**
@@ -998,13 +924,39 @@ export default class MusicAssistantClient {
    * ```
    */
   getNextRepeatMode(repeatMode: RepeatMode): RepeatMode {
-    if (repeatMode === RepeatMode.OFF) {
-      return RepeatMode.ALL;
-    }
-    if (repeatMode === RepeatMode.ALL) {
-      return RepeatMode.ONE;
-    }
-    return RepeatMode.OFF;
+    return queueFormattingDelegate.getNextRepeatMode(repeatMode);
+  }
+
+  /**
+   * Get the human-readable label for the next repeat mode in cycle order
+   *
+   * @param currentMode - The current repeat mode
+   * @returns Label for the next mode: OFF, ONE, or ALL
+   */
+  getNextRepeatModeLabel(currentMode: RepeatMode): "OFF" | "ONE" | "ALL" {
+    return queueFormattingDelegate.getNextRepeatModeLabel(currentMode);
+  }
+
+  /**
+   * Format track display text from current media info with fallback title
+   *
+   * @param currentMedia - Player current media object
+   * @param fallbackTitle - Fallback title when no media title exists
+   * @returns Formatted text "Title - Artist" or fallback title
+   */
+  formatCurrentMediaTitle(currentMedia: Player["current_media"] | undefined, fallbackTitle: string): string {
+    return queueFormattingDelegate.formatCurrentMediaTitle(currentMedia, fallbackTitle);
+  }
+
+  /**
+   * Format volume transition text for feedback messages
+   *
+   * @param previous - Previous volume value
+   * @param next - New volume value
+   * @returns Formatted text like "Volume 50% -> 60%"
+   */
+  formatVolumeTransition(previous: number, next: number): string {
+    return queueFormattingDelegate.formatVolumeTransition(previous, next);
   }
 
   // Library and Search Methods

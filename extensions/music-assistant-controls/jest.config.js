@@ -14,7 +14,7 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/polyfills.ts',
     // Exclude external code
-    '!src/external-code/**/*',
+    '!src/music-assistant/external-code/**/*',
     // Exclude UI components that use Raycast UI primitives
     '!src/menu-bar.tsx',
     '!src/set-active-player.tsx',

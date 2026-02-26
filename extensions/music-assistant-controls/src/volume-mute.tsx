@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import MusicAssistantClient from "./music-assistant-client";
-import { getSelectedQueueID } from "./use-selected-player-id";
+import MusicAssistantClient from "./music-assistant/music-assistant-client";
+import { getSelectedQueueID } from "./player-selection/use-selected-player-id";
 
 const DEFAULT_UNMUTE_VOLUME = 10;
 

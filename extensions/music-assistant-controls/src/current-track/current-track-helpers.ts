@@ -1,11 +1,7 @@
-import { RepeatMode, Track } from "./external-code/interfaces";
+import { Track } from "../music-assistant/external-code/interfaces";
 
 export function getShuffleToastMessage(wasEnabled: boolean): string {
   return wasEnabled ? "Shuffle disabled" : "Shuffle enabled";
-}
-
-export function getNextRepeatModeLabel(currentMode: RepeatMode): "OFF" | "ONE" | "ALL" {
-  return currentMode === RepeatMode.OFF ? "ONE" : currentMode === RepeatMode.ONE ? "ALL" : "OFF";
 }
 
 export function getFavoriteToastTitle(wasFavorite: boolean): string {
