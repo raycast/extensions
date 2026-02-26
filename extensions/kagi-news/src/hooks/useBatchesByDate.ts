@@ -24,7 +24,7 @@ export function useBatchesByDate(dateString: string, language: string) {
         return response.json();
       },
       execute: !!dateString,
-    }
+    },
   );
 
   const batches = useMemo(() => data?.batches || [], [data]);

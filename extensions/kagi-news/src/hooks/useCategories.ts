@@ -5,31 +5,32 @@ import { useMemo } from "react";
 import { Category } from "../interfaces";
 
 export function useCategories() {
-  const { isLoading, data: categoriesData, error } = useFetch<Category[]>(
-    "https://kite.kagi.com/api/batches/latest/categories?lang=default",
-    {
-      parseResponse: async (response): Promise<Category[]> => {
-        if (!response.ok) {
-          throw new Error("Failed to load categories");
-        }
-        const json = await response.json();
+  const {
+    isLoading,
+    data: categoriesData,
+    error,
+  } = useFetch<Category[]>("https://kite.kagi.com/api/batches/latest/categories?lang=default", {
+    parseResponse: async (response): Promise<Category[]> => {
+      if (!response.ok) {
+        throw new Error("Failed to load categories");
+      }
+      const json = await response.json();
 
-        const categories: Category[] = json.categories.map((cat: { categoryName: string; id: string }) => ({
-          name: cat.categoryName,
-          id: cat.id,
-        }));
+      const categories: Category[] = json.categories.map((cat: { categoryName: string; id: string }) => ({
+        name: cat.categoryName,
+        id: cat.id,
+      }));
 
-        if (json.hasOnThisDay) {
-          categories.push({
-            name: "Today in History",
-            id: "onthisday",
-          });
-        }
+      if (json.hasOnThisDay) {
+        categories.push({
+          name: "Today in History",
+          id: "onthisday",
+        });
+      }
 
-        return categories;
-      },
-    }
-  );
+      return categories;
+    },
+  });
 
   const categories = useMemo(() => categoriesData || [], [categoriesData]);
 

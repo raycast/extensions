@@ -162,7 +162,7 @@ export function buildReferenceMap(sources: Source[]): Map<string, { url: string;
 // Linkify markdown: [hostname#count] → [superscript](url)
 export function linkifyMarkdown(
   text: string | undefined,
-  refMap: Map<string, { url: string; refNumber: number }>
+  refMap: Map<string, { url: string; refNumber: number }>,
 ): string {
   if (!text || refMap.size === 0) return text || "";
 
@@ -204,7 +204,7 @@ export function storiesToArticles(stories: StoryResponse[]): Article[] {
       })) || [];
 
     const uniqueSources = sources.filter(
-      (source, index, self) => index === self.findIndex((s) => s.url === source.url)
+      (source, index, self) => index === self.findIndex((s) => s.url === source.url),
     );
 
     return {
@@ -250,8 +250,7 @@ export function storiesToArticles(stories: StoryResponse[]): Article[] {
       timeline: story.timeline,
       travelAdvisory: story.travel_advisory || [],
       userActionItems: story.user_action_items || [],
-      userExperienceImpact:
-        typeof story.user_experience_impact === "string" ? story.user_experience_impact : undefined,
+      userExperienceImpact: typeof story.user_experience_impact === "string" ? story.user_experience_impact : undefined,
     };
   });
 }

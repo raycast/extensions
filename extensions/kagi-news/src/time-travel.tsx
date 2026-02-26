@@ -11,7 +11,6 @@ import { EventDetail } from "./views/EventDetail";
 import { stripHtml, formatDateForAPI } from "./utils";
 import { CategoryItem } from "./interfaces";
 
-
 interface BatchCategoryResponse {
   id: string;
   categoryName: string;
@@ -68,10 +67,11 @@ function BatchSelectorScreen({
   onBackToDate: () => void;
 }) {
   const preferences = getPreferenceValues<Preferences>();
-  const { batches, isLoading: loadingBatches, error: batchesError } = useBatchesByDate(
-    confirmedDate,
-    preferences.language || "en"
-  );
+  const {
+    batches,
+    isLoading: loadingBatches,
+    error: batchesError,
+  } = useBatchesByDate(confirmedDate, preferences.language || "en");
 
   return (
     <List isLoading={loadingBatches}>
@@ -108,13 +108,7 @@ function BatchSelectorScreen({
 }
 
 // Article List Component
-function ArticleListScreen({
-  selectedBatch,
-  onBackToBatches,
-}: {
-  selectedBatch: string;
-  onBackToBatches: () => void;
-}) {
+function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: string; onBackToBatches: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
   const [selectedCategory, setSelectedCategory] = useCachedState<string>("time-travel-selected-category", "");
 
@@ -129,14 +123,14 @@ function ArticleListScreen({
       },
       onData: (data) => {
         const worldCategory = data?.categories?.find(
-          (cat: BatchCategoryResponse) => cat.categoryName.toLowerCase() === "world"
+          (cat: BatchCategoryResponse) => cat.categoryName.toLowerCase() === "world",
         );
         if (worldCategory) {
           setSelectedCategory(worldCategory.id);
         }
       },
       execute: !!selectedBatch,
-    }
+    },
   );
 
   const categories: CategoryItem[] =
@@ -281,8 +275,6 @@ export default function Command() {
         />
       );
     case "articles":
-      return (
-        <ArticleListScreen selectedBatch={selectedBatch} onBackToBatches={handleBackToBatches} />
-      );
+      return <ArticleListScreen selectedBatch={selectedBatch} onBackToBatches={handleBackToBatches} />;
   }
 }

@@ -37,26 +37,27 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
   const contentUrl = !categoryId
     ? "" // Don't fetch if no category selected
     : isOnThisDay
-    ? `https://kite.kagi.com/api/batches/latest/onthisday?lang=${encodeURIComponent(language)}`
-    : batchId
-    ? `https://kite.kagi.com/api/batches/${encodeURIComponent(batchId)}/categories/${encodeURIComponent(
-        categoryId
-      )}/stories?lang=${encodeURIComponent(language)}&limit=50`
-    : "";
+      ? `https://kite.kagi.com/api/batches/latest/onthisday?lang=${encodeURIComponent(language)}`
+      : batchId
+        ? `https://kite.kagi.com/api/batches/${encodeURIComponent(batchId)}/categories/${encodeURIComponent(
+            categoryId,
+          )}/stories?lang=${encodeURIComponent(language)}&limit=50`
+        : "";
 
   // Fetch stories or Today in History data
-  const { isLoading: loadingContent, data: contentData, error: contentError } = useFetch<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>(
-    contentUrl,
-    {
-      parseResponse: async (response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch content: ${response.status}`);
-        }
-        return response.json();
-      },
-      execute: contentUrl !== "",
-    }
-  );
+  const {
+    isLoading: loadingContent,
+    data: contentData,
+    error: contentError,
+  } = useFetch<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>(contentUrl, {
+    parseResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch content: ${response.status}`);
+      }
+      return response.json();
+    },
+    execute: contentUrl !== "",
+  });
 
   // Transform data into articles and events
   const { articles, events } = useMemo(() => {

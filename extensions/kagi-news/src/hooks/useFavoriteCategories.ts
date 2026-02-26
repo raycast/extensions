@@ -15,7 +15,7 @@ export function useFavoriteCategories() {
         setFavorites(updated);
       }
     },
-    [favorites, setFavorites]
+    [favorites, setFavorites],
   );
 
   const removeFavorite = useCallback(
@@ -23,13 +23,10 @@ export function useFavoriteCategories() {
       const updated = favorites.filter((id) => id !== categoryId);
       setFavorites(updated);
     },
-    [favorites, setFavorites]
+    [favorites, setFavorites],
   );
 
-  const isFavorite = useCallback(
-    (categoryId: string) => favorites.includes(categoryId),
-    [favorites]
-  );
+  const isFavorite = useCallback((categoryId: string) => favorites.includes(categoryId), [favorites]);
 
   const toggleFavorite = useCallback(
     async (categoryId: string) => {
@@ -39,7 +36,7 @@ export function useFavoriteCategories() {
         await addFavorite(categoryId);
       }
     },
-    [isFavorite, removeFavorite, addFavorite]
+    [isFavorite, removeFavorite, addFavorite],
   );
 
   return {

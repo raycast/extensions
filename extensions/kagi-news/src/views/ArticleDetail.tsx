@@ -298,19 +298,10 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
             {visibleSources.map((source, index) => {
               const refNumber = index + 1;
               const url = new URL(source.url);
-              const displayHost = url.hostname.startsWith("www.")
-                ? url.hostname.slice(4)
-                : url.hostname;
+              const displayHost = url.hostname.startsWith("www.") ? url.hostname.slice(4) : url.hostname;
               const title = `${refNumber}. ${displayHost}`;
               const text = source.name && source.name.trim().length > 0 ? source.name : undefined;
-              return (
-                <Detail.Metadata.Link
-                  key={source.url}
-                  title={title}
-                  target={source.url}
-                  text={text || ""}
-                />
-              );
+              return <Detail.Metadata.Link key={source.url} title={title} target={source.url} text={text || ""} />;
             })}
           </Detail.Metadata>
         ) : undefined
