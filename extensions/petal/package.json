@@ -36,11 +36,37 @@
     },
     {
       "name": "select-model",
-      "title": "Select Model",
+      "title": "Switch Model",
       "subtitle": "Petal",
-      "description": "Select Petal model for deep-link workflows",
+      "description": "Switch transcription model in Petal",
       "mode": "view",
       "icon": "petal-icon.png"
+    },
+    {
+      "name": "copy-last-transcription",
+      "title": "Copy Last Transcription",
+      "subtitle": "Petal",
+      "description": "Copy the latest Petal transcription to clipboard",
+      "mode": "no-view",
+      "icon": "petal-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "historyDir",
+      "title": "History Directory",
+      "description": "Folder where Petal stores history.json and transcript files.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Documents/petal/history"
+    },
+    {
+      "name": "modelsDir",
+      "title": "Models Directory",
+      "description": "Folder where Petal stores downloaded model files.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Documents/petal/models"
     }
   ],
   "dependencies": {

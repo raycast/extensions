@@ -1,7 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { useMemo } from "react";
+import { Action, ActionPanel, Color, Icon, List, Toast, openCommandPreferences, showToast } from "@raycast/api";
 import { useHistoryRecords } from "./hooks";
-import { PETAL_HISTORY_DIR } from "./utils";
+import { getHistoryDirectoryPath, modelIconForModelID } from "./utils";
 
 function formatDate(value: Date) {
   return new Intl.DateTimeFormat(undefined, {
@@ -21,22 +20,20 @@ function truncate(value: string, max = 120) {
 }
 
 export default function Command() {
+  const historyDirectory = getHistoryDirectoryPath();
   const { records, isLoading, error, revalidate } = useHistoryRecords();
-  const latestTranscript = useMemo(
-    () => records.find((record) => record.transcript.trim().length > 0)?.transcript,
-    [records],
-  );
 
   if (error) {
     return (
       <List>
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          title="Unable to read Petal history"
+          title="Unable to read history"
           description={error.message}
           actions={
             <ActionPanel>
-              <Action.Open title="Open History Folder" target={PETAL_HISTORY_DIR} />
+              <Action.Open title="Open History Folder" target={historyDirectory} />
+              <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
             </ActionPanel>
           }
         />
@@ -45,14 +42,15 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search Petal transcription history">
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search transcriptions">
       {!isLoading && records.length === 0 && (
         <List.EmptyView
           title="No history entries"
           description="Run at least one Petal transcription, then refresh."
           actions={
             <ActionPanel>
-              <Action.Open title="Open History Folder" target={PETAL_HISTORY_DIR} />
+              <Action.Open title="Open History Folder" target={historyDirectory} />
+              <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
               <Action
                 title="Refresh History"
                 icon={Icon.ArrowClockwise}
@@ -67,17 +65,15 @@ export default function Command() {
       )}
       {records.map((record) => {
         const transcript = record.transcript.trim();
-        const mode = record.preferredVariant?.mode ?? record.entry.transcriptionMode ?? "unknown";
         const chars = record.preferredVariant?.characterCount ?? record.entry.characterCount ?? transcript.length;
         const title = transcript.length > 0 ? truncate(transcript, 90) : "(Transcript file missing)";
 
         return (
           <List.Item
             key={record.entry.id}
-            icon={Icon.TextDocument}
+            icon={modelIconForModelID(record.entry.modelID)}
             title={title}
-            subtitle={record.entry.modelID}
-            accessories={[{ text: mode }, { text: `${chars} chars` }, { date: record.date }]}
+            accessories={[{ text: `${chars} chars` }, { date: record.date }]}
             detail={
               <List.Item.Detail
                 markdown={
@@ -86,14 +82,12 @@ export default function Command() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Timestamp" text={formatDate(record.date)} />
-                    <List.Item.Detail.Metadata.Label title="Model" text={record.entry.modelID} />
-                    <List.Item.Detail.Metadata.Label title="Mode" text={mode} />
                     <List.Item.Detail.Metadata.Label title="Characters" text={String(chars)} />
                     {record.transcriptPath && (
                       <List.Item.Detail.Metadata.Label title="Transcript File" text={record.transcriptPath} />
                     )}
                     {record.audioPath && <List.Item.Detail.Metadata.Label title="Audio File" text={record.audioPath} />}
-                    <List.Item.Detail.Metadata.Label title="History Folder" text={PETAL_HISTORY_DIR} />
+                    <List.Item.Detail.Metadata.Label title="History Folder" text={historyDirectory} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -101,32 +95,22 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.CopyToClipboard
-                    title="Copy Transcript"
-                    content={transcript}
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                  />
+                  <Action.CopyToClipboard title="Copy Transcript" content={transcript} />
                   <Action.Paste
                     title="Paste Transcript"
                     content={transcript}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                   />
-                  {latestTranscript && (
-                    <Action.CopyToClipboard
-                      title="Copy Latest Transcript"
-                      content={latestTranscript}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
-                    />
-                  )}
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   {record.transcriptPath && <Action.Open title="Open Transcript File" target={record.transcriptPath} />}
                   {record.audioPath && <Action.Open title="Open Audio File" target={record.audioPath} />}
                   <Action.ShowInFinder
                     title="Show History Folder"
-                    path={PETAL_HISTORY_DIR}
+                    path={historyDirectory}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                   />
+                  <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
                   <Action
                     title="Refresh History"
                     icon={Icon.ArrowClockwise}

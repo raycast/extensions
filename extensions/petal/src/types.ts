@@ -39,6 +39,7 @@ export interface PetalModel {
   name: string;
   summary: string;
   provider: string;
+  icon: string;
   size?: string;
   supportsSmart: boolean;
   recommended?: boolean;

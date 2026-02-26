@@ -1,14 +1,17 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, openCommandPreferences, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
   PETAL_MODELS,
   checkPetalInstallation,
+  getModelsDirectoryPath,
   openPetalDeepLink,
   readDefaultString,
   writeDefaultString,
 } from "./utils";
 
 export default function Command() {
+  const modelsDirectory = getModelsDirectoryPath();
+
   const {
     data: selectedModelID,
     isLoading,
@@ -19,13 +22,13 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Select model for Petal deep-link runs">
+    <List isLoading={isLoading} searchBarPlaceholder="Switch model">
       {PETAL_MODELS.map((model) => {
         const isSelected = model.id === selectedModelID;
         return (
           <List.Item
             key={model.id}
-            icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
+            icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : model.icon}
             title={model.name}
             subtitle={model.provider}
             accessories={[
@@ -45,6 +48,7 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label title="Supports Smart" text={model.supportsSmart ? "Yes" : "No"} />
                     <List.Item.Detail.Metadata.Label title="Selected" text={isSelected ? "Yes" : "No"} />
                     {model.size && <List.Item.Detail.Metadata.Label title="Size" text={model.size} />}
+                    <List.Item.Detail.Metadata.Label title="Models Folder" text={modelsDirectory} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -53,21 +57,21 @@ export default function Command() {
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action
-                    title="Select Model"
+                    title="Switch Model"
                     icon={Icon.Check}
                     onAction={async () => {
                       const installed = await checkPetalInstallation();
                       if (!installed) return;
 
                       await writeDefaultString("selected_model_id", model.id);
-                      await showToast({ style: Toast.Style.Success, title: `Selected ${model.name}` });
+                      await showToast({ style: Toast.Style.Success, title: `Switched to ${model.name}` });
                       await revalidate();
                     }}
                   />
                   <Action
-                    title="Select Model and Run Setup"
+                    title="Switch Model and Run Setup"
                     icon={Icon.Hammer}
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                     onAction={async () => {
                       const installed = await checkPetalInstallation();
                       if (!installed) return;
@@ -76,13 +80,17 @@ export default function Command() {
                       await openPetalDeepLink("setup");
                       await showToast({
                         style: Toast.Style.Success,
-                        title: `Selected ${model.name}`,
+                        title: `Switched to ${model.name}`,
                         message: "Triggered petal://setup",
                       });
                       await revalidate();
                     }}
                   />
                   <Action.CopyToClipboard title="Copy Model Id" content={model.id} />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action.ShowInFinder title="Show Models Folder" path={modelsDirectory} />
+                  <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

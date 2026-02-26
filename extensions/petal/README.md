@@ -7,9 +7,15 @@ Control the Petal macOS app from Raycast.
 - Start Recording
 - Stop Recording
 - Search History
-- Select Model
+- Switch Model
+- Copy Last Transcription
 
 ## Requirements
 
 - Petal must be installed: https://github.com/Aayush9029/petal/releases/latest
-- Petal history is read from `~/Documents/petal/history/history.json`
+- Petal history defaults to `~/Documents/petal/history/history.json`
+
+## Preferences
+
+- History Directory
+- Models Directory
