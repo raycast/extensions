@@ -6,6 +6,22 @@ export type Skill = {
   source: string;
 };
 
+export type AuditProvider = "agent-trust-hub" | "socket" | "snyk";
+
+export type AuditStatus = "pass" | "warn" | "fail" | "unknown";
+
+export type SkillAudit = {
+  provider: AuditProvider;
+  status: AuditStatus;
+  url?: string;
+};
+
+export const AUDIT_PROVIDER_LABELS: Record<AuditProvider, string> = {
+  "agent-trust-hub": "Gen Agent Trust Hub",
+  socket: "Socket",
+  snyk: "Snyk",
+};
+
 export type SearchResponse = {
   query: string;
   searchType: string;
@@ -39,7 +55,8 @@ export function normalizeAllowedTools(tools: string | string[] | undefined): str
   return [tools];
 }
 
-export const API_BASE_URL = "https://skills.sh/api";
+export const SKILLS_BASE_URL = "https://skills.sh";
+export const API_BASE_URL = `${SKILLS_BASE_URL}/api`;
 const REPO_URL = "https://github.com/raycast/extensions";
 
 export function parseFrontmatter(content: string): { frontmatter: SkillFrontmatter; body: string } {

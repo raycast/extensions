@@ -1,22 +1,53 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { Skill, SkillFrontmatter, buildInstallCommand, formatInstalls, normalizeAllowedTools } from "../shared";
+import {
+  type AuditStatus,
+  type SkillAudit,
+  type SkillFrontmatter,
+  AUDIT_PROVIDER_LABELS,
+  buildInstallCommand,
+  formatInstalls,
+  normalizeAllowedTools,
+  Skill,
+  SKILLS_BASE_URL,
+} from "../shared";
 import { useSkillContent } from "../hooks/useSkillContent";
-import { useRepoStats, RepoStats } from "../hooks/useRepoStats";
+import { useRepoStats, type RepoStats } from "../hooks/useRepoStats";
+import { useSkillAudits } from "../hooks/useSkillAudits";
+import { type SkillAuditsAvailability } from "../utils/skill-audits";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
+import { OpenSecurityAuditActions } from "./actions/OpenSecurityAuditActions";
 
-function InlineDetail({
-  skill,
-  content,
-  frontmatter,
-  isLoading,
-  stats,
-}: {
+const AUDIT_STATUS_META: Record<AuditStatus, { emoji: string; label: string }> = {
+  pass: { emoji: "✅", label: "Pass" },
+  warn: { emoji: "⚠️", label: "Warn" },
+  fail: { emoji: "🛑", label: "Fail" },
+  unknown: { emoji: "", label: "Unknown" },
+};
+
+function formatAuditStatus(status: AuditStatus): string {
+  const { emoji, label } = AUDIT_STATUS_META[status];
+  return emoji ? `${emoji} ${label}` : label;
+}
+
+function getAuditFallbackText(isLoading: boolean, availability?: SkillAuditsAvailability): string {
+  if (isLoading) return "Loading...";
+  if (availability === "parse-error") return "Unable to parse";
+  if (availability === "fetch-error") return "Unable to fetch";
+  return "Not available";
+}
+
+interface InlineDetailProps {
   skill: Skill;
   content: string | undefined;
   frontmatter: SkillFrontmatter;
   isLoading: boolean;
   stats: RepoStats | undefined;
-}) {
+  audits: SkillAudit[];
+  isAuditsLoading: boolean;
+  availability?: SkillAuditsAvailability;
+}
+
+function InlineDetail({ skill, content, frontmatter, isLoading, stats, audits, isAuditsLoading, availability }: InlineDetailProps) {
   const installCommand = buildInstallCommand(skill);
   const allowedTools = normalizeAllowedTools(frontmatter["allowed-tools"]);
 
@@ -89,8 +120,32 @@ ${installCommand}
           <List.Item.Detail.Metadata.Link
             title="View on Skills"
             text={`${skill.source}/${skill.skillId}`}
-            target={`https://skills.sh/${skill.source}/${skill.skillId}`}
+            target={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}
           />
+          <List.Item.Detail.Metadata.Separator />
+          {audits.length > 0 ? (
+            audits.map((audit) =>
+              audit.url ? (
+                <List.Item.Detail.Metadata.Link
+                  key={audit.provider}
+                  title={AUDIT_PROVIDER_LABELS[audit.provider]}
+                  text={formatAuditStatus(audit.status)}
+                  target={audit.url}
+                />
+              ) : (
+                <List.Item.Detail.Metadata.Label
+                  key={audit.provider}
+                  title={AUDIT_PROVIDER_LABELS[audit.provider]}
+                  text={formatAuditStatus(audit.status)}
+                />
+              ),
+            )
+          ) : (
+            <List.Item.Detail.Metadata.Label
+              title="Security Audits"
+              text={getAuditFallbackText(isAuditsLoading, availability)}
+            />
+          )}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Install Command" text={installCommand} />
         </List.Item.Detail.Metadata>
@@ -108,6 +163,14 @@ interface SkillListItemProps {
 }
 
 export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onToggleDetail }: SkillListItemProps) {
+  const {
+    result: auditResult,
+    audits,
+    isLoading: isAuditsLoading,
+    availability,
+  } = useSkillAudits(skill, {
+    shouldFetch: isSelected,
+  });
   const title = rank != null ? `#${rank} ${skill.name}` : skill.name;
   const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
   const { stats } = useRepoStats(skill, isSelected);
@@ -126,11 +189,20 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
       accessories={isShowingDetail ? [] : [{ text: formatInstalls(skill.installs), icon: Icon.Download }]}
       id={skill.id}
       detail={
-        <InlineDetail skill={skill} content={content} frontmatter={frontmatter} isLoading={isLoading} stats={stats} />
+        <InlineDetail
+          skill={skill}
+          content={content}
+          frontmatter={frontmatter}
+          isLoading={isLoading}
+          stats={stats}
+          audits={audits}
+          isAuditsLoading={isAuditsLoading}
+          availability={availability}
+        />
       }
       actions={
         <ActionPanel>
-          <InstallSkillAction skill={skill} />
+          <InstallSkillAction skill={skill} prefetchedAuditResult={auditResult} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
@@ -140,10 +212,11 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
           <Action.OpenInBrowser title="Open Repository" url={`https://github.com/${skill.source}`} icon={Icon.Globe} />
           <Action.OpenInBrowser
             title="Open Skills"
-            url={`https://skills.sh/${skill.source}/${skill.skillId}`}
+            url={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}
             icon={Icon.Link}
             shortcut={Keyboard.Shortcut.Common.Open}
           />
+          <OpenSecurityAuditActions audits={audits} />
           <Action
             title={isShowingDetail ? "Hide Detail Panel" : "Show Detail Panel"}
             icon={Icon.Sidebar}

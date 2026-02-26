@@ -1,5 +1,11 @@
 # Changelog
 
+## [Security Audits Data] - {PR_MERGE_DATE}
+
+- Parse security audit data from skills.sh and show their status in the skill's details
+- Warn before installing skills with failed security audits
+- Added actions to open the security audit links
+
 ## [Fix allowed-tools TypeError] - 2026-03-09
 
 - Fix crash when SKILL.md contains single-value allowed-tools (e.g., `allowed-tools: Bash`)
