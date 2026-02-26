@@ -1,5 +1,10 @@
 # MXroute Changelog
 
+## [Toggle Domain Mail Hosting Status] - {PR_MERGE_DATE}
+
+- Enable or Disable mail hosting in "Domains"
+- Open Webmail
+
 ## [Show Email Account Usage] - 2026-02-16
 
 - Show MB Usage in "Email Accounts"
