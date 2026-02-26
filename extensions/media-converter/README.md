@@ -34,11 +34,23 @@
 You can also set defaults in extension preferences:
 
 - **Default Image Output Format**: default output format for image conversions.
-- **Default Image Quality**: detailed image quality default used when loading the form (`Lossless (when supported)`, `100` to `0`, plus `PNG-24`, `PNG-8`, `TIFF Deflate`, `TIFF LZW`).
+- **Default JPG Quality**: default JPG quality (`0` to `100`, step `5`).
+- **Default WEBP Quality**: default WEBP quality (`Lossless (when supported)` or `0` to `100`, step `5`).
+- **Default PNG Variant**: default PNG variant (`PNG-24` or `PNG-8`).
+- **Default HEIC Quality (macOS only)**: default HEIC quality (`0` to `100`, step `5`).
+- **Default TIFF Compression**: default TIFF compression (`Deflate` or `LZW`).
+- **Default AVIF Quality**: default AVIF quality (`0` to `100`, step `5`).
 - **Default Video Output Format**: default output format for video conversions.
 - **Default Video Quality Preset**: preset used in simple mode (`lowest`, `low`, `medium`, `high`, `highest`).
 
 You can still override all values in the Convert Media form every time you run a conversion.
+
+#### For Contributors
+
+Image preference definitions are maintained in `src/config/image-preferences.json` and synced into `package.json`.
+
+- Run `npm run generate:image-preferences` to write image preference entries into `package.json`.
+- Run `npm run check:image-preferences` to verify `package.json` is in sync with `src/config/image-preferences.json`.
 
 ### ✨ Ask Media Converter
 
