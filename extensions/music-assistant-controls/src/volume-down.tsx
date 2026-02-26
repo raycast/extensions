@@ -6,6 +6,6 @@ export default async function main() {
   if (!selectedPlayerID) return;
 
   const client = new MusicAssistantClient();
-  const controller = await client.createVolumeController(selectedPlayerID)
+  const controller = await client.createVolumeController(selectedPlayerID);
   return await controller.volumeDown();
 }
