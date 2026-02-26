@@ -15,7 +15,6 @@ export interface Preferences {
   openFolderAsDefault?: boolean;
   minCharsToSearch?: string;
   maxResults?: string;
-  customCliArgs?: string;
   useRegex?: boolean;
   useSdk?: boolean;
 }
