@@ -1,5 +1,5 @@
 # Kaneo Changelog
 
-## [Added Kaneo] - {PR_MERGE_DATE}
+## [Added Kaneo] - 2026-02-26
 
 Added Kaneo extension
