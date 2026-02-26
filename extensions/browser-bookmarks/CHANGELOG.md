@@ -1,5 +1,20 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fix] - 2026-02-18
+
+- Updated bundled `sql-wasm.wasm` to match upgraded `sql.js` v1.13.0, fixing `TypeError: a is not a function` crash in Firefox, LibreWolf, and Zen bookmark hooks
+
+## [Support for Vivaldi Snapshot Browser] - 2026-02-17
+
+- Added support for `Vivaldi Snapshot` browser.
+
+## [Bug Fixes] - 2026-02-12
+
+- Fixed permission errors (EPERM) when accessing Chrome and Arc browser Local State files ([#16481](https://github.com/raycast/extensions/issues/16481))
+- Improved error handling for file access operations to gracefully handle permission restrictions
+- Fixed dependency conflicts by downgrading ESLint to version 9 for compatibility with existing plugins
+- Fixed linting issues by removing unused catch variables and invalid ESLint rule references
+
 ## [Support for Helium Browser] - 2025-12-08
 
 - Added support for `Helium` browser.

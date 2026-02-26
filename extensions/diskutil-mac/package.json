@@ -4,7 +4,7 @@
   "title": "Diskutil",
   "description": "View your disks and volumes. An implementation of the macOS 'diskutil' command with quicker access to functionality, providing a better overview and a more user-friendly interface.",
   "icon": "extension-icon.png",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "Globolo",
   "categories": [
     "Developer Tools",

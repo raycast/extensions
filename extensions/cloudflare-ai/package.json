@@ -1,0 +1,160 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudflare-ai",
+  "title": "Cloudflare Workers AI",
+  "description": "Interact with Cloudflare Workers AI directly in your Raycast window",
+  "icon": "extension-icon.png",
+  "author": "dharmin_nagar",
+  "contributors": [
+    "code-parth"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "query-cloudflare-ai",
+      "title": "Query Cloudflare AI",
+      "description": "Ask questions to Cloudflare AI models",
+      "mode": "view"
+    },
+    {
+      "name": "conversations",
+      "title": "View Conversations",
+      "description": "View and manage your Cloudflare AI conversation history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accountId",
+      "type": "textfield",
+      "required": true,
+      "title": "Account ID",
+      "description": "Your Cloudflare Account ID",
+      "placeholder": "Enter your Cloudflare Account ID"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Cloudflare API Token with Workers AI permissions",
+      "placeholder": "Enter your API Token"
+    },
+    {
+      "name": "defaultModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Model",
+      "description": "Default AI model to use",
+      "default": "@cf/meta/llama-3.1-8b-instruct",
+      "data": [
+        {
+          "title": "Llama 3.3 70B Instruct FP8",
+          "value": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+        },
+        {
+          "title": "Llama 3.1 70B Instruct",
+          "value": "@cf/meta/llama-3.1-70b-instruct"
+        },
+        {
+          "title": "Llama 3.1 8B Instruct (Recommended)",
+          "value": "@cf/meta/llama-3.1-8b-instruct"
+        },
+        {
+          "title": "Llama 3.1 8B Instruct FP8",
+          "value": "@cf/meta/llama-3.1-8b-instruct-fp8"
+        },
+        {
+          "title": "Llama 3 8B Instruct",
+          "value": "@cf/meta/llama-3-8b-instruct"
+        },
+        {
+          "title": "Llama 3 8B Instruct AWQ",
+          "value": "@cf/meta/llama-3-8b-instruct-awq"
+        },
+        {
+          "title": "Llama 2 7B Chat FP16",
+          "value": "@cf/meta/llama-2-7b-chat-fp16"
+        },
+        {
+          "title": "Mistral 7B Instruct v0.1",
+          "value": "@cf/mistral/mistral-7b-instruct-v0.1"
+        },
+        {
+          "title": "Mistral 7B Instruct v0.2",
+          "value": "@cf/mistral/mistral-7b-instruct-v0.2-lora"
+        },
+        {
+          "title": "Mistral Nemo 12B Instruct",
+          "value": "@cf/mistral/mistral-nemo-12b-instruct-2407-lora"
+        },
+        {
+          "title": "Qwen 1.5 7B Chat AWQ",
+          "value": "@cf/qwen/qwen1.5-7b-chat-awq"
+        },
+        {
+          "title": "Qwen 1.5 14B Chat AWQ",
+          "value": "@cf/qwen/qwen1.5-14b-chat-awq"
+        },
+        {
+          "title": "GPT OSS 120B",
+          "value": "@cf/openai/gpt-oss-120b"
+        },
+        {
+          "title": "Gemma 7B Instruct",
+          "value": "@cf/google/gemma-7b-it-lora"
+        },
+        {
+          "title": "Granite 8B Code Instruct",
+          "value": "@cf/ibm/granite-8b-code-instruct-128k"
+        },
+        {
+          "title": "DeepSeek Coder 6.7B Instruct",
+          "value": "@cf/deepseek-ai/deepseek-coder-6.7b-instruct-awq"
+        },
+        {
+          "title": "DeepSeek Math 7B Instruct",
+          "value": "@cf/deepseek-ai/deepseek-math-7b-instruct"
+        },
+        {
+          "title": "Hermes 2 Pro Mistral 7B",
+          "value": "@hf/nousresearch/hermes-2-pro-mistral-7b"
+        },
+        {
+          "title": "Starling LM 7B Beta",
+          "value": "@hf/nexusflow/starling-lm-7b-beta"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "@types/uuid": "^10.0.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

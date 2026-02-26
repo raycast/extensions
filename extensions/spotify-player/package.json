@@ -41,7 +41,8 @@
     "CaffeineCat",
     "AdrianKokot",
     "validate",
-    "xmok"
+    "xmok",
+    "hugodemenez"
   ],
   "pastContributors": [
     "bkeys818",
@@ -492,7 +493,7 @@
           "name": "description",
           "placeholder": "Playlist description",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },

@@ -51,7 +51,7 @@ type Input = {
   calendarId?: string;
 };
 
-const preferences: ExtensionPreferences = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   if (!input.attendees) {
@@ -107,6 +107,7 @@ const tool = async (input: Input) => {
       calendarId: input.calendarId || "primary",
       requestBody,
       conferenceDataVersion: input.addGoogleMeetLink ? 1 : undefined,
+      sendUpdates: preferences.sendInvitations as "all" | "externalOnly" | "none",
     });
     return {
       id: event.data.id,

@@ -4,12 +4,17 @@ import type { Drive } from "../types";
 interface DriveDropdownProps {
   oneDriveDrives: Drive[];
   sharepointSites: [string, Drive[]][];
+  selectedDriveId: string | null;
   onDriveChange: (driveId: string) => void;
 }
 
-export function DriveDropdown({ oneDriveDrives, sharepointSites, onDriveChange }: DriveDropdownProps) {
+export function DriveDropdown({ oneDriveDrives, sharepointSites, selectedDriveId, onDriveChange }: DriveDropdownProps) {
   return (
-    <List.Dropdown tooltip="Select a drive or document library to browse" storeValue onChange={onDriveChange}>
+    <List.Dropdown
+      tooltip="Select a drive or document library to browse"
+      value={selectedDriveId ?? undefined}
+      onChange={onDriveChange}
+    >
       {oneDriveDrives.map((drive) => (
         <List.Dropdown.Item key={drive.id} title={drive.name} value={drive.id} icon={Icon.Person} />
       ))}

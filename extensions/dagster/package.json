@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dagster",
+  "title": "Dagster",
+  "description": "Browse Dagster assets, materializations, and runs",
+  "icon": "icon.png",
+  "author": "b-per",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-assets",
+      "title": "Assets",
+      "subtitle": "Dagster",
+      "description": "Browse Dagster assets and view materializations",
+      "mode": "view"
+    },
+    {
+      "name": "list-runs",
+      "title": "Recent Runs",
+      "subtitle": "Dagster",
+      "description": "View recent Dagster pipeline runs",
+      "mode": "view"
+    },
+    {
+      "name": "list-jobs",
+      "title": "Jobs",
+      "subtitle": "Dagster",
+      "description": "Browse Dagster jobs, manage schedules, and trigger runs",
+      "mode": "view"
+    },
+    {
+      "name": "run-status",
+      "title": "Run Status",
+      "subtitle": "Dagster",
+      "description": "Show the status of the last 10 runs",
+      "mode": "no-view",
+      "interval": "10m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-assets",
+      "title": "Get Assets",
+      "description": "Fetch Dagster assets with group and last materialization time, optionally filtered by name or group"
+    },
+    {
+      "name": "get-runs",
+      "title": "Get Runs",
+      "description": "Fetch recent Dagster runs, optionally filtered by status or job name"
+    },
+    {
+      "name": "get-run-errors",
+      "title": "Get Run Errors",
+      "description": "Fetch error events (step failures, run failures) for a specific Dagster run"
+    },
+    {
+      "name": "get-asset-materializations",
+      "title": "Get Asset Materializations",
+      "description": "Fetch materialization history for a Dagster asset including timestamps, status, duration, and metadata"
+    },
+    {
+      "name": "get-jobs",
+      "title": "Get Jobs",
+      "description": "Fetch Dagster jobs with their schedules and last run status"
+    },
+    {
+      "name": "materialize-asset",
+      "title": "Materialize Asset",
+      "description": "Trigger materialization of a Dagster asset, optionally including upstream or downstream dependencies"
+    },
+    {
+      "name": "launch-job",
+      "title": "Launch Job",
+      "description": "Launch a Dagster job run"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "dagsterUrl",
+      "title": "Dagster URL",
+      "description": "Base URL of your Dagster instance (e.g. https://dagster.example.com)",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "extraHeaders",
+      "title": "Extra Headers",
+      "description": "JSON object of extra HTTP headers (e.g. {\"CF-Access-Client-Id\": \"...\"})",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "username",
+      "title": "Username",
+      "description": "Basic auth username (optional)",
+      "required": false
+    },
+    {
+      "type": "password",
+      "name": "password",
+      "title": "Password",
+      "description": "Basic auth password (optional)",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.3",
+    "@types/react": "^19.2.13",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

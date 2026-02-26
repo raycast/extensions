@@ -1,7 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
 import { ActiveTab, SupportedBrowser } from "./types";
 
-const SUPPORTED_BROWSERS: SupportedBrowser[] = ["Safari", "Google Chrome", "Arc"];
+const SUPPORTED_BROWSERS: SupportedBrowser[] = ["Safari", "Google Chrome", "Arc", "Dia"];
 
 /**
  * Get the frontmost application name
@@ -65,6 +65,31 @@ async function getArcTab(): Promise<ActiveTab> {
 }
 
 /**
+ * Get the active tab from Dia
+ */
+async function getDiaTab(): Promise<ActiveTab> {
+  const script = `
+    tell application "Dia"
+      tell front window
+        set tabTitle to ""
+        set tabURL to ""
+        repeat with t in tabs
+          if isFocused of t is true then
+            set tabTitle to title of t
+            set tabURL to URL of t
+            exit repeat
+          end if
+        end repeat
+      end tell
+    end tell
+    return tabTitle & "|||" & tabURL
+  `;
+  const result = await runAppleScript(script);
+  const [title, url] = result.split("|||");
+  return { title: title.trim(), url: url.trim() };
+}
+
+/**
  * Check if the given app name is a supported browser
  */
 function isSupportedBrowser(appName: string): appName is SupportedBrowser {
@@ -95,6 +120,9 @@ export async function getActiveTabFromFrontmostBrowser(): Promise<{
       break;
     case "Arc":
       tab = await getArcTab();
+      break;
+    case "Dia":
+      tab = await getDiaTab();
       break;
   }
 

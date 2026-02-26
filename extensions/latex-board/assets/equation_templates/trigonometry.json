@@ -1,0 +1,48 @@
+{
+  "Trigonometric Functions": {
+    "Sine": " \\sin x ",
+    "Cosine": " \\cos x ",
+    "Tangent": " \\tan x ",
+    "Cosecant": " \\csc x ",
+    "Secant": " \\sec x ",
+    "Cotangent": " \\cot x "
+  },
+  "Trigonometric Definitions": {
+    "Cosecant Definition": " \\csc \\theta = \\frac{1}{\\sin \\theta} ",
+    "Secant Definition": " \\sec \\theta = \\frac{1}{\\cos \\theta} ",
+    "Cotangent Definition": " \\cot \\theta = \\frac{1}{\\tan \\theta} = \\frac{\\cos \\theta}{\\sin \\theta} "
+  },
+  "Trigonometric Identities": {
+    "Identity 1": " \\sin^2 \\theta + \\cos^2 \\theta =1 ",
+    "Identity 2": " \\sin (\\alpha \\pm \\beta) = \\sin \\alpha \\cos \\beta \\pm \\cos \\alpha \\sin \\beta ",
+    "Identity 3": " \\displaystyle \\tan (x \\pm y) =\\frac{\\tan x \\pm \\tan y}{1 \\mp \\tan x \\tan y} "
+  },
+  "Inverse Trigonometric Functions": {
+    "Arcsine 1": " \\arcsin x ",
+    "Arccosine 1": " \\arccos x ",
+    "Arctangent 1": " \\arctan x ",
+    "Arcsine 2": " \\mathrm{Arcsin} x ",
+    "Arccosine 2": " \\mathrm{Arcsin} x ",
+    "Arctangent 2": " \\mathrm{Arcsin} x ",
+    "Arcsine 3": " \\arcsin \\theta = \\sin^{-1} \\theta ",
+    "Arccosine 3": " \\arccos \\theta = \\cos^{-1} \\theta ",
+    "Arctangent 3": " \\arctan \\theta = \\tan^{-1} \\theta "
+  },
+  "Hyperbolic Functions": {
+    "Hyperbolic Sine": " \\sinh x ",
+    "Hyperbolic Cosine": " \\cosh x ",
+    "Hyperbolic Tangent": " \\tanh x ",
+    "Hyperbolic Cotangent": " \\coth x "
+  },
+  "Hyperbolic Definitions": {
+    "Sinh Definition": " \\displaystyle \\sinh x = \\frac{e^x - e^{-x}}{2} ",
+    "Cosh Definition": " \\displaystyle \\cosh x = \\frac{e^x + e^{-x}}{2} ",
+    "Tanh Definition": " \\displaystyle \\tanh = \\frac{\\sinh x}{\\cosh x} ",
+    "Coth Definition": " \\displaystyle \\coth = \\frac{1}{\\tanh x} "
+  },
+  "Inverse Hyperbolic Functions": {
+    "Inverse Sinh": " \\sinh^{-1} x = \\ln \\left( x + \\sqrt{x^2 + 1} \\right) ",
+    "Inverse Cosh": " \\cosh^{-1} x = \\ln \\left( x \\pm \\sqrt{x^2 - 1} \\right) ",
+    "Inverse Tanh": " \\displaystyle \\tanh = \\frac{1}{2} \\ln \\left( \\frac{1 + x}{1 - x} \\right) "
+  }
+}

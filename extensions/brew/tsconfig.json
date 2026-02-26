@@ -3,7 +3,7 @@
   "display": "Node 16",
   "include": ["src/**/*", "raycast-env.d.ts", "eslint.config.mjs"],
   "compilerOptions": {
-    "lib": ["es2020", "dom"],
+    "lib": ["es2022", "dom"],
     "module": "commonjs",
     "target": "es2020",
     "strict": true,

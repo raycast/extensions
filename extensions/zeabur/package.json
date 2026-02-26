@@ -64,6 +64,13 @@
       "subtitle": "Zeabur",
       "description": "See your Zeabur deployments at a glance",
       "mode": "menu-bar"
+    },
+    {
+      "name": "ai-hub",
+      "title": "AI Hub",
+      "subtitle": "Zeabur",
+      "description": "View AI Hub balance and usage",
+      "mode": "view"
     }
   ],
   "preferences": [

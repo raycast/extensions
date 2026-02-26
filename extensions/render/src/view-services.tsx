@@ -1,13 +1,15 @@
 import {
   ActionPanel,
+  Color,
   Detail,
   Icon,
   List,
   showToast,
   Action,
   Toast,
+  getPreferenceValues,
 } from '@raycast/api';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import Service, {
   AuthError,
   DeployResponse,
@@ -17,6 +19,7 @@ import Service, {
 import {
   getCommitUrl,
   getDeployStatusIcon,
+  getDeployStatusColor,
   getDeployUrl,
   getKey,
   getServiceUrl,
@@ -26,10 +29,115 @@ import {
   formatCommit,
   getDomainIcon,
   getServiceIcon,
+  isDeployInProgress,
 } from './utils';
 import { useCachedPromise, useLocalStorage } from '@raycast/utils';
 
 const renderService = new Service(getKey());
+
+const { defaultAction } = getPreferenceValues();
+
+interface ServiceActionsProps {
+  service: ServiceResponse;
+  isPinned: boolean;
+  onPinAction: () => void;
+}
+
+function ServiceActions({
+  service,
+  isPinned,
+  onPinAction,
+}: ServiceActionsProps) {
+  const showDetailsAction = (
+    <Action.Push
+      key="details"
+      icon={Icon.BlankDocument}
+      title="Show Details"
+      target={<ServiceView service={service} />}
+      shortcut={{ modifiers: ['cmd'], key: 'i' }}
+    />
+  );
+
+  const showDeploysAction = (
+    <Action.Push
+      key="deploys"
+      icon={Icon.Hammer}
+      title="Show Deploys"
+      target={<DeployListView service={service} />}
+      shortcut={{ modifiers: ['cmd'], key: 'd' }}
+    />
+  );
+
+  const openInRenderAction = (
+    <Action.OpenInBrowser
+      key="render"
+      title="Open in Render"
+      url={getServiceUrl(service)}
+      shortcut={{ modifiers: ['cmd'], key: 'r' }}
+    />
+  );
+
+  const secondaryActions = [
+    showDetailsAction,
+    showDeploysAction,
+    openInRenderAction,
+  ];
+  const primaryAction =
+    secondaryActions.find(
+      (a) =>
+        (defaultAction === 'showDetails' && a.key === 'details') ||
+        (defaultAction === 'showDeploys' && a.key === 'deploys') ||
+        (defaultAction === 'openInRender' && a.key === 'render'),
+    ) || showDetailsAction;
+
+  const orderedActions = [
+    primaryAction,
+    ...secondaryActions.filter((a) => a.key !== primaryAction.key),
+  ];
+
+  return (
+    <ActionPanel>
+      {orderedActions}
+      <Action.OpenInBrowser
+        title="Open Repo"
+        url={service.repo}
+        shortcut={{ modifiers: ['cmd'], key: 'g' }}
+      />
+      <Action
+        icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+        title={isPinned ? 'Unpin Service' : 'Pin Service'}
+        shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
+        onAction={onPinAction}
+      />
+    </ActionPanel>
+  );
+}
+
+function getServiceStatusTag(
+  service: ServiceResponse,
+  deploy: DeployResponse | null | undefined,
+  isLoading: boolean,
+): { value: string; color: Color } | null {
+  // Service-level suspended takes priority
+  if (service.suspended === 'suspended') {
+    return { value: 'Suspended', color: Color.SecondaryText };
+  }
+
+  // Loading state
+  if (isLoading && !deploy) {
+    return { value: '...', color: Color.SecondaryText };
+  }
+
+  // Deploy status
+  if (deploy) {
+    return {
+      value: formatDeployStatus(deploy.status),
+      color: getDeployStatusColor(deploy.status),
+    };
+  }
+
+  return null;
+}
 
 export default function Command() {
   const {
@@ -78,6 +186,72 @@ export default function Command() {
       keepPreviousData: true,
     },
   );
+
+  const [deployStatuses, setDeployStatuses] = useState<
+    Record<string, DeployResponse | null>
+  >({});
+  const [isLoadingStatuses, setIsLoadingStatuses] = useState(false);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fetchDeployStatuses = useCallback(async () => {
+    if (services.length === 0) return;
+
+    setIsLoadingStatuses(true);
+    const statuses: Record<string, DeployResponse | null> = {};
+
+    await Promise.all(
+      services.map(async (service) => {
+        const deploy = await renderService.getLatestDeploy(service.id);
+        statuses[service.id] = deploy;
+      }),
+    );
+
+    setDeployStatuses(statuses);
+    setIsLoadingStatuses(false);
+
+    return statuses;
+  }, [services]);
+
+  // Initial fetch and polling setup
+  useEffect(() => {
+    if (services.length === 0) return;
+
+    // Initial fetch
+    fetchDeployStatuses().then((statuses) => {
+      if (!statuses) return;
+
+      // Check if any deploys are in progress
+      const hasInProgress = Object.values(statuses).some(
+        (deploy) => deploy && isDeployInProgress(deploy.status),
+      );
+
+      // Start polling if there are in-progress deploys
+      if (hasInProgress && !pollingRef.current) {
+        pollingRef.current = setInterval(async () => {
+          const newStatuses = await fetchDeployStatuses();
+
+          // Stop polling if no more in-progress deploys
+          if (newStatuses) {
+            const stillInProgress = Object.values(newStatuses).some(
+              (deploy) => deploy && isDeployInProgress(deploy.status),
+            );
+            if (!stillInProgress && pollingRef.current) {
+              clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
+          }
+        }, 5000);
+      }
+    });
+
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+  }, [services, fetchDeployStatuses]);
+
   const isLoading = isLoadingOwners || isLoadingServices || isLoadingPinned;
 
   const pinnedServices = useMemo(() => {
@@ -126,38 +300,22 @@ export default function Command() {
               subtitle={formatServiceType(service)}
               accessories={[
                 { icon: Icon.Pin },
+                ...(() => {
+                  const tag = getServiceStatusTag(
+                    service,
+                    deployStatuses[service.id],
+                    isLoadingStatuses,
+                  );
+                  return tag ? [{ tag }] : [];
+                })(),
                 { date: new Date(service.updatedAt) },
               ]}
               actions={
-                <ActionPanel>
-                  <Action.Push
-                    icon={Icon.BlankDocument}
-                    title="Show Details"
-                    target={<ServiceView service={service} />}
-                  />
-                  <Action.Push
-                    icon={Icon.Hammer}
-                    title="Show Deploys"
-                    target={<DeployListView service={service} />}
-                    shortcut={{ modifiers: ['cmd'], key: 'd' }}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open in Render"
-                    url={getServiceUrl(service)}
-                    shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open Repo"
-                    url={service.repo}
-                    shortcut={{ modifiers: ['cmd'], key: 'g' }}
-                  />
-                  <Action
-                    icon={Icon.PinDisabled}
-                    title="Unpin Service"
-                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
-                    onAction={() => unpinService(service.id)}
-                  />
-                </ActionPanel>
+                <ServiceActions
+                  service={service}
+                  isPinned={true}
+                  onPinAction={() => unpinService(service.id)}
+                />
               }
             />
           ))}
@@ -172,37 +330,23 @@ export default function Command() {
                 icon={getServiceIcon(service)}
                 title={service.name}
                 subtitle={formatServiceType(service)}
-                accessories={[{ date: new Date(service.updatedAt) }]}
+                accessories={[
+                  ...(() => {
+                    const tag = getServiceStatusTag(
+                      service,
+                      deployStatuses[service.id],
+                      isLoadingStatuses,
+                    );
+                    return tag ? [{ tag }] : [];
+                  })(),
+                  { date: new Date(service.updatedAt) },
+                ]}
                 actions={
-                  <ActionPanel>
-                    <Action.Push
-                      icon={Icon.BlankDocument}
-                      title="Show Details"
-                      target={<ServiceView service={service} />}
-                    />
-                    <Action.Push
-                      icon={Icon.Hammer}
-                      title="Show Deploys"
-                      target={<DeployListView service={service} />}
-                      shortcut={{ modifiers: ['cmd'], key: 'd' }}
-                    />
-                    <Action.OpenInBrowser
-                      title="Open in Render"
-                      url={getServiceUrl(service)}
-                      shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                    />
-                    <Action.OpenInBrowser
-                      title="Open Repo"
-                      url={service.repo}
-                      shortcut={{ modifiers: ['cmd'], key: 'g' }}
-                    />
-                    <Action
-                      icon={Icon.Pin}
-                      title="Pin Service"
-                      shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
-                      onAction={() => pinService(service.id)}
-                    />
-                  </ActionPanel>
+                  <ServiceActions
+                    service={service}
+                    isPinned={false}
+                    onPinAction={() => pinService(service.id)}
+                  />
                 }
               />
             ))}
@@ -302,10 +446,6 @@ function ServiceView(props: ServiceProps) {
   );
 }
 
-interface ServiceProps {
-  service: ServiceResponse;
-}
-
 function DeployListView(props: ServiceProps) {
   const { service } = props;
 
@@ -334,9 +474,16 @@ function DeployListView(props: ServiceProps) {
       {deploys.map((deploy) => (
         <List.Item
           key={deploy.id}
-          icon={getDeployStatusIcon(deploy.status)}
+          icon={{
+            source: getDeployStatusIcon(deploy.status),
+            tintColor: getDeployStatusColor(deploy.status),
+          }}
           title={formatCommit(deploy.commit.message)}
-          accessories={[{ date: new Date(deploy.finishedAt) }]}
+          accessories={
+            deploy.finishedAt
+              ? [{ date: new Date(deploy.finishedAt) }]
+              : [{ text: formatDeployStatus(deploy.status) }]
+          }
           actions={
             <ActionPanel>
               <Action.Push
@@ -370,10 +517,14 @@ interface DeployProps {
 function DeployView(props: DeployProps) {
   const { service, deploy } = props;
 
+  const dateString = deploy.finishedAt
+    ? formatDate(new Date(deploy.finishedAt))
+    : 'In progress';
+
   const markdown = `
   # ${formatCommit(deploy.commit.message)}
 
-  ${formatDate(new Date(deploy.finishedAt))}
+  ${dateString}
 
   **Status**: ${formatDeployStatus(deploy.status)}
   `;

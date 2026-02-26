@@ -28,6 +28,20 @@
       "description": "View amount of hours logged today",
       "interval": "15m",
       "mode": "menu-bar"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Active Timer",
+      "subtitle": "Kimai",
+      "description": "Stop the currently running time entry",
+      "mode": "no-view"
+    },
+    {
+      "name": "timesheets",
+      "title": "Manage Timesheets",
+      "subtitle": "Kimai",
+      "description": "List, edit and delete recent time tracking sessions",
+      "mode": "view"
     }
   ],
   "preferences": [

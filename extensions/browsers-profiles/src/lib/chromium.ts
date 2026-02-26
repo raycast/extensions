@@ -53,15 +53,28 @@ export const getChromiumProfiles = (filter: string[]) => {
       return null;
     }
 
-    const directories = fs.readdirSync(path);
+    const profileDirectories = Object.keys(infoCacheData);
 
     const browserProfiles: BrowserProfile[] = [];
 
-    directories.forEach((directory: string) => {
-      const preferences = `${path}/${directory}/Preferences`;
-      const file = fs.readFileSync(preferences, "utf-8");
-      const profile = JSON.parse(file);
-      const profileName = profile.profile.name;
+    profileDirectories.forEach((directory: string) => {
+      let profile;
+      try {
+        const preferencesPath = `${path}/${directory}/Preferences`;
+        if (!fs.existsSync(preferencesPath)) {
+          return;
+        }
+        const file = fs.readFileSync(preferencesPath, "utf-8");
+        profile = JSON.parse(file);
+      } catch {
+        return;
+      }
+
+      const profileName = profile?.profile?.name;
+      if (!profileName) {
+        return;
+      }
+
       const profileLabel = infoCacheData[directory]?.name || profileName;
 
       browserProfiles.push({

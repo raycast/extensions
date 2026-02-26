@@ -1,5 +1,15 @@
 # raycast-ollama Changelog
 
+## [Improvement and Fix] - 2026-02-02
+
+- [Improvement] Command "Manage Models": added "Load Model on Memory" action, which loads the model on memory with no expiration date.
+- [Improvement] Command "Manage Models" and "Loaded Models": added "Unload Model From Memory" action, which unload the model from memory.
+- [Improvement] Command "Manage Models" and "Loaded Models": added "Context Length" information for loaded models.
+- [Improvement] Command "Manage Models" and "Loaded Models": dates are now formatted according to user locale.
+- [Improvement] Command "Manage Models" and "Loaded Models": implemented minor UI enhancements.
+- [Improvement] Command "Translate": now implements the TranslateGemma prompt, featuring source and target language selection via a dropdown menu. We recommend using the TranslateGemma model for this command.
+- [Fix] Fixed various bugs.
+
 ## [Improvement] - 2025-11-24
 
 - [Improvement] New Liquid Glass Icon.
@@ -26,7 +36,7 @@
 
 - New Command 'Loaded Models': lists currently models loaded on memory. Data are auto updated every 3 seconds.
 - Command 'Manage Models': model currently loaded in memory flagged with tag 'In Memory'.
-- Command 'Manage Models': added Action 'Update Model', pull selected model from registry updating it. 
+- Command 'Manage Models': added Action 'Update Model', pull selected model from registry updating it.
 - Command 'Manage Models': added Action 'Model Library', open Ollama Library Web page for listing available models.
 - Command 'Chat with Ollama': modified copy keybinds to 'cmd+shift+c' from 'cmd+c'.
 

@@ -68,4 +68,5 @@ github-copilot
 cursor-agents
 circleback
 sound-search
+linkinize
 pieces-raycast

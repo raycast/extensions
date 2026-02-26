@@ -1,37 +1,21 @@
-import { fetchGranolaData } from "./fetchData";
-import { NoteData } from "./types";
+import { useState, useEffect, useRef } from "react";
+import { fetchGranolaData, getSharedDocuments } from "./fetchData";
+import { NoteData, Doc } from "./types";
 import { toError } from "./errorUtils";
 
-/**
- * Type guard to validate if the fetched data matches NoteData shape
- * Checks for required fields and their types to ensure runtime safety
- */
 function isNoteData(data: unknown): data is NoteData {
   if (typeof data !== "object" || data === null) return false;
-
   const obj = data as Record<string, unknown>;
-
-  // Check required fields
   if (typeof obj.isLoading !== "boolean") return false;
   if (!("data" in obj)) return false;
   if (typeof obj.revalidate !== "function") return false;
-
-  // If data exists, validate it's a GetDocumentsResponse shape
   if (obj.data !== undefined && obj.data !== null) {
     if (typeof obj.data !== "object") return false;
     const responseData = obj.data as Record<string, unknown>;
-
-    // Check if docs is an array (when present)
-    if ("docs" in responseData && responseData.docs !== undefined) {
-      if (!Array.isArray(responseData.docs)) return false;
-    }
-
-    // Check if deleted is an array (when present)
-    if ("deleted" in responseData && responseData.deleted !== undefined) {
-      if (!Array.isArray(responseData.deleted)) return false;
-    }
+    if ("docs" in responseData && responseData.docs !== undefined && !Array.isArray(responseData.docs)) return false;
+    if ("deleted" in responseData && responseData.deleted !== undefined && !Array.isArray(responseData.deleted))
+      return false;
   }
-
   return true;
 }
 
@@ -44,59 +28,69 @@ export interface GranolaDataState {
 
 /**
  * Shared hook for loading Granola notes from API
- * Panels are loaded on-demand using useDocumentPanels hook when needed
- * Large fields (notes_markdown, people) are stripped immediately in fetchGranolaData
- * to reduce memory usage before data flows through the component tree
+ * Fetches both owned and shared documents in parallel
  */
 export function useGranolaData(): GranolaDataState {
+  const [sharedDocs, setSharedDocs] = useState<Doc[] | null>(null);
+  const sharedFetchStarted = useRef(false);
+
+  let fetchResult: unknown;
+  let fetchError: Error | undefined;
+
   try {
-    const fetchResult: unknown = fetchGranolaData("get-documents");
-
-    // Validate the fetched data shape at runtime
-    if (!isNoteData(fetchResult)) {
-      return {
-        noteData: null,
-        isLoading: false,
-        hasError: true,
-        error: new Error("Invalid data shape returned from Granola API. Expected NoteData structure."),
-      };
-    }
-
-    // Data is already transformed (stripped) in fetchGranolaData, so we can use it directly
-    // This avoids keeping references to the original data with large fields
-    const noteData: NoteData = fetchResult;
-
-    // Check loading state
-    if (!noteData?.data && noteData.isLoading === true) {
-      return {
-        noteData,
-        isLoading: true,
-        hasError: false,
-      };
-    }
-
-    // Check for no data state
-    if (!noteData?.data && noteData.isLoading === false) {
-      return {
-        noteData,
-        isLoading: false,
-        hasError: true,
-        error: new Error("No data available"),
-      };
-    }
-
-    // Success state
-    return {
-      noteData,
-      isLoading: false,
-      hasError: false,
-    };
+    fetchResult = fetchGranolaData("get-documents");
   } catch (error) {
+    fetchError = toError(error);
+  }
+
+  const isValidData = fetchResult && isNoteData(fetchResult);
+  const noteData: NoteData | null = isValidData ? (fetchResult as NoteData) : null;
+  const ownedDocs = noteData?.data?.docs || [];
+
+  useEffect(() => {
+    if (sharedFetchStarted.current) return;
+    sharedFetchStarted.current = true;
+
+    let cancelled = false;
+    getSharedDocuments()
+      .then((docs) => !cancelled && setSharedDocs(docs))
+      .catch(() => !cancelled && setSharedDocs([]));
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (fetchError) {
+    return { noteData: null, isLoading: false, hasError: true, error: fetchError };
+  }
+
+  if (!isValidData || !noteData) {
     return {
       noteData: null,
       isLoading: false,
       hasError: true,
-      error: toError(error),
+      error: new Error("Invalid data shape returned from Granola API. Expected NoteData structure."),
     };
   }
+
+  if (noteData.isLoading) {
+    return { noteData, isLoading: true, hasError: false };
+  }
+
+  if (!noteData.data) {
+    return { noteData, isLoading: false, hasError: true, error: new Error("No data available") };
+  }
+
+  // Merge and deduplicate: owned docs take precedence over shared docs
+  const ownedDocIds = new Set(ownedDocs.map((doc) => doc.id));
+  const uniqueSharedDocs = (sharedDocs || []).filter((doc) => !ownedDocIds.has(doc.id));
+  const mergedDocs = [...ownedDocs, ...uniqueSharedDocs];
+
+  const mergedNoteData: NoteData = {
+    ...noteData,
+    data: { ...noteData.data, docs: mergedDocs },
+  };
+
+  return { noteData: mergedNoteData, isLoading: false, hasError: false };
 }

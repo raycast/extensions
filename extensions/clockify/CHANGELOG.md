@@ -1,5 +1,13 @@
 # Clockify Changelog
 
+## [Add menu bar timer] - 2026-01-16
+
+- Added a menu bar command that shows the current timer counting up.
+- Allows stopping the timer directly from the menu bar.
+- Menu bar timer automatically updates when a timer is started or stopped from other menus.
+- Fixed timer display to update properly even when the menu bar is not focused.
+- Updated the menu bar timer to use a monospace font for better readability.
+
 ## [Time Entry Management] - 2026-01-14
 
 - Add "Stop Timer at" action to stop running timer at a specific past time

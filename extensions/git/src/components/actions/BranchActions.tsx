@@ -37,7 +37,10 @@ export function BranchCkeckoutAction(context: RepositoryContext & NavigationCont
     if (confirmed) {
       try {
         if (isRemote) {
-          await context.gitManager.checkoutRemoteBranch(context.branch.name, context.branch.upstream!.fullName);
+          await context.gitManager.checkoutRemoteBranch(
+            context.branch.name,
+            `${context.branch.remote}/${context.branch.name}`,
+          );
         } else {
           await context.gitManager.checkoutLocalBranch(context.branch.name);
         }

@@ -3,13 +3,13 @@ import type { CopilotInternalUserResponse, CopilotUsage, QuotaSnapshot } from ".
 /**
  * Calculates the consumed percentage from a quota snapshot
  * Uses percent_remaining directly from the API
- * @returns Percentage consumed (0-100), capped at 100%
+ * @returns Percentage consumed (0-<current value>), NOT capped at 100% since copilot allows overages.
  */
 const getConsumedPercentage = (snapshot: QuotaSnapshot | undefined): number => {
   if (!snapshot || snapshot.unlimited) return 0;
 
   if (snapshot.percent_remaining !== undefined) {
-    return Math.min(100, 100 - snapshot.percent_remaining);
+    return Math.max(0, 100 - snapshot.percent_remaining);
   }
 
   return 0;

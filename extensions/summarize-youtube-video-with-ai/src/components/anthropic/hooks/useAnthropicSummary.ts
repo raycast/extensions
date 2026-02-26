@@ -1,10 +1,10 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect } from "react";
 import { ANTHROPIC_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
 import type { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
+import { getAnthropicClient } from "../../../utils/sdkClients";
 
 type GetAnthropicSummaryProps = {
   transcript?: string;
@@ -12,12 +12,7 @@ type GetAnthropicSummaryProps = {
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useAnthropicSummary = async ({
-  transcript,
-  setSummaryIsLoading,
-  setSummary,
-}: GetAnthropicSummaryProps) => {
-  const abortController = new AbortController();
+export const useAnthropicSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetAnthropicSummaryProps) => {
   const preferences = getPreferenceValues() as AnthropicPreferences;
   const { anthropicApiToken, language, anthropicModel, creativity } = preferences;
 
@@ -31,13 +26,11 @@ export const useAnthropicSummary = async ({
     return;
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
-    const anthropic = new Anthropic({
-      apiKey: anthropicApiToken,
-    });
+    const abortController = new AbortController();
+    const anthropic = getAnthropicClient(anthropicApiToken);
 
     setSummaryIsLoading(true);
 

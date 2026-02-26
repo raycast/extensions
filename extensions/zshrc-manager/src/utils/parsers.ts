@@ -127,3 +127,229 @@ export function parseSources(content: string): ReadonlyArray<{ path: string }> {
   }
   return result;
 }
+
+/**
+ * Parses PATH modifications from zshrc content
+ * Matches: export PATH="...", path+=(...), PATH="..."
+ * @param content The raw content to parse
+ * @returns Array of PATH objects with entry and type (export, append, prepend)
+ */
+export function parsePathEntries(
+  content: string,
+): ReadonlyArray<{ entry: string; type: "export" | "append" | "prepend" | "set" }> {
+  const result: Array<{ entry: string; type: "export" | "append" | "prepend" | "set" }> = [];
+
+  // Match export PATH="..."
+  const exportRegex = /^(?:\s*)export\s+PATH\s*=\s*["']?(.+?)["']?(?:\s*)$/gm;
+  let match: RegExpExecArray | null;
+  while ((match = exportRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "export" });
+    }
+  }
+
+  // Match path+=(...) - zsh array append
+  const appendRegex = /^(?:\s*)path\+=\s*\(([^)]+)\)(?:\s*)$/gm;
+  while ((match = appendRegex.exec(content)) !== null) {
+    if (match[1]) {
+      const paths = match[1].split(/\s+/).filter((p) => p.trim());
+      paths.forEach((p) => {
+        result.push({ entry: p.trim(), type: "append" });
+      });
+    }
+  }
+
+  // Match path=(...) - zsh array set (replaces entire path)
+  const setRegex = /^(?:\s*)path=\s*\(([^)]+)\)(?:\s*)$/gm;
+  while ((match = setRegex.exec(content)) !== null) {
+    if (match[1]) {
+      const paths = match[1].split(/\s+/).filter((p) => p.trim());
+      paths.forEach((p) => {
+        result.push({ entry: p.trim(), type: "set" });
+      });
+    }
+  }
+
+  // Match PATH="$PATH:..."
+  const pathModifyRegex = /^(?:\s*)PATH\s*=\s*["']?\$PATH:(.+?)["']?(?:\s*)$/gm;
+  while ((match = pathModifyRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "append" });
+    }
+  }
+
+  // Match PATH="...:$PATH"
+  const pathPrependRegex = /^(?:\s*)PATH\s*=\s*["']?(.+?):\$PATH["']?(?:\s*)$/gm;
+  while ((match = pathPrependRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "prepend" });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parses FPATH modifications from zshrc content
+ * @param content The raw content to parse
+ * @returns Array of FPATH objects with entry and type
+ */
+export function parseFpathEntries(
+  content: string,
+): ReadonlyArray<{ entry: string; type: "export" | "append" | "prepend" | "set" }> {
+  const result: Array<{ entry: string; type: "export" | "append" | "prepend" | "set" }> = [];
+
+  // Match export FPATH="..."
+  const exportRegex = /^(?:\s*)export\s+FPATH\s*=\s*["']?(.+?)["']?(?:\s*)$/gm;
+  let match: RegExpExecArray | null;
+  while ((match = exportRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "export" });
+    }
+  }
+
+  // Match fpath+=(...) - zsh array append
+  const appendRegex = /^(?:\s*)fpath\+=\s*\(([^)]+)\)(?:\s*)$/gm;
+  while ((match = appendRegex.exec(content)) !== null) {
+    if (match[1]) {
+      const paths = match[1].split(/\s+/).filter((p) => p.trim());
+      paths.forEach((p) => {
+        result.push({ entry: p.trim(), type: "append" });
+      });
+    }
+  }
+
+  // Match fpath=(...) - zsh array set (replaces entire fpath)
+  const setRegex = /^(?:\s*)fpath=\s*\(([^)]+)\)(?:\s*)$/gm;
+  while ((match = setRegex.exec(content)) !== null) {
+    if (match[1]) {
+      const paths = match[1].split(/\s+/).filter((p) => p.trim());
+      paths.forEach((p) => {
+        result.push({ entry: p.trim(), type: "set" });
+      });
+    }
+  }
+
+  // Match FPATH="$FPATH:..."
+  const fpathModifyRegex = /^(?:\s*)FPATH\s*=\s*["']?\$FPATH:(.+?)["']?(?:\s*)$/gm;
+  while ((match = fpathModifyRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "append" });
+    }
+  }
+
+  // Match FPATH="...:$FPATH" - prepend pattern
+  const fpathPrependRegex = /^(?:\s*)FPATH\s*=\s*["']?(.+?):\$FPATH["']?(?:\s*)$/gm;
+  while ((match = fpathPrependRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "prepend" });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Keybinding result type
+ */
+export interface KeybindingResult {
+  key: string;
+  command: string;
+  widget?: string | undefined;
+  keymap?: string | undefined;
+}
+
+/**
+ * Parses keybindings (bindkey) from zshrc content
+ * Supports:
+ * - Basic: bindkey "key" command
+ * - String replacement: bindkey -s "key" "replacement"
+ * - Keymap-specific: bindkey -M keymap "key" command
+ * - Combined: bindkey -M keymap -s "key" "replacement"
+ *
+ * @param content The raw content to parse
+ * @returns Array of keybinding objects with key, command, optional widget, and optional keymap
+ */
+export function parseKeybindings(content: string): ReadonlyArray<KeybindingResult> {
+  const result: Array<KeybindingResult> = [];
+  const seen = new Set<string>();
+
+  // Helper to add unique results (avoid duplicates from multiple regex matches)
+  const addResult = (entry: KeybindingResult) => {
+    const key = `${entry.keymap || ""}:${entry.key}:${entry.command}:${entry.widget || ""}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(entry);
+    }
+  };
+
+  // Match bindkey -M keymap -s "key" "replacement" (keymap-specific string replacement)
+  // Uses separate patterns for quoted and unquoted keys to avoid greedy matching
+  const keymapStringQuotedRegex = /^(?:\s*)bindkey\s+-M\s+(\S+)\s+-s\s+(['"])([^'"]+)\2\s+(['"])([^'"]+)\4(?:\s*)$/gm;
+  let match: RegExpExecArray | null;
+  while ((match = keymapStringQuotedRegex.exec(content)) !== null) {
+    if (match[1] && match[3] && match[5]) {
+      addResult({
+        key: match[3],
+        command: match[5].trim(),
+        widget: "string-replacement",
+        keymap: match[1],
+      });
+    }
+  }
+
+  // Match bindkey -M keymap "key" command (keymap-specific binding with quoted key)
+  const keymapQuotedRegex = /^(?:\s*)bindkey\s+-M\s+(\S+)\s+(['"])([^'"]+)\2\s+(\S+)(?:\s*)$/gm;
+  while ((match = keymapQuotedRegex.exec(content)) !== null) {
+    if (match[1] && match[3] && match[4]) {
+      addResult({
+        key: match[3],
+        command: match[4].trim(),
+        keymap: match[1],
+      });
+    }
+  }
+
+  // Match bindkey -M keymap key command (keymap-specific binding with unquoted key)
+  // Unquoted key must not start with a quote
+  const keymapUnquotedRegex = /^(?:\s*)bindkey\s+-M\s+(\S+)\s+([^'"\s]\S*)\s+(\S+)(?:\s*)$/gm;
+  while ((match = keymapUnquotedRegex.exec(content)) !== null) {
+    if (match[1] && match[2] && match[3]) {
+      addResult({
+        key: match[2],
+        command: match[3].trim(),
+        keymap: match[1],
+      });
+    }
+  }
+
+  // Match bindkey -s "key" "replacement" (string replacement with quoted args)
+  const bindkeyStringQuotedRegex = /^(?:\s*)bindkey\s+-s\s+(['"])([^'"]+)\1\s+(['"])([^'"]+)\3(?:\s*)$/gm;
+  while ((match = bindkeyStringQuotedRegex.exec(content)) !== null) {
+    if (match[2] && match[4]) {
+      addResult({ key: match[2], command: match[4].trim(), widget: "string-replacement" });
+    }
+  }
+
+  // Match bindkey "key" command (basic with quoted key)
+  // Exclude all known bindkey flags: -M (keymap), -s (string), -r (remove), -R (range),
+  // -L (list), -l (widgets), -e (emacs), -v (viins), -a (vicmd), -d (delete), -p (prefix), -N (new widget)
+  const bindkeyQuotedRegex = /^(?:\s*)bindkey\s+(?!-[MsrRLlevaAdpN])(['"])([^'"]+)\1\s+(\S+)(?:\s*)$/gm;
+  while ((match = bindkeyQuotedRegex.exec(content)) !== null) {
+    if (match[2] && match[3]) {
+      addResult({ key: match[2], command: match[3].trim() });
+    }
+  }
+
+  // Match bindkey key command (basic with unquoted key, must not have flags)
+  // Unquoted key must not start with a quote
+  // Exclude all known bindkey flags (same as above)
+  const bindkeyUnquotedRegex = /^(?:\s*)bindkey\s+(?!-[MsrRLlevaAdpN])([^'"\s]\S*)\s+(\S+)(?:\s*)$/gm;
+  while ((match = bindkeyUnquotedRegex.exec(content)) !== null) {
+    if (match[1] && match[2]) {
+      addResult({ key: match[1], command: match[2].trim() });
+    }
+  }
+
+  return result;
+}

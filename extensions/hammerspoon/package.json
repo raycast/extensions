@@ -3,7 +3,7 @@
   "name": "hammerspoon",
   "title": "Hammerspoon",
   "description": "Control Hammerspoon from Raycast",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "icon": "icon-prod.png",
   "author": "bjrmatos",
   "contributors": [
@@ -17,6 +17,28 @@
     "node": ">=22.14"
   },
   "commands": [
+    {
+      "name": "open-configuration-file",
+      "title": "Open Configuration File",
+      "description": "Open the Hammerspoon configuration file",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "configFilePath",
+          "title": "Configuration File Path",
+          "description": "Path to the Hammerspoon configuration file. Defaults to hs.configdir/init.lua",
+          "type": "file",
+          "required": false
+        },
+        {
+          "name": "editorApp",
+          "title": "Editor Application",
+          "description": "Application to use when opening the configuration file. If not set it uses the default application for the .lua file type.",
+          "type": "appPicker",
+          "required": false
+        }
+      ]
+    },
     {
       "name": "reload-configuration-file",
       "title": "Reload Configuration File",
@@ -50,6 +72,12 @@
       "title": "Open Documentation",
       "description": "Displays the Hammerspoon documentation panel and focuses it",
       "mode": "no-view"
+    },
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "description": "Search Hammerspoon Documentation",
+      "mode": "view"
     },
     {
       "name": "restart",
@@ -90,7 +118,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "dev-mode": "zx publish.mjs dev",
     "publish": "zx publish.mjs"
   },
   "platforms": [

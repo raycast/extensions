@@ -39,7 +39,7 @@ async function getFirefoxProfiles() {
         try {
           const profileDirectory = readdirSync(`${FIREFOX_FOLDER}/${path}`);
           return profileDirectory.includes("places.sqlite");
-        } catch (error) {
+        } catch {
           return false;
         }
       }
@@ -146,7 +146,9 @@ export default function useFirefoxBookmarks(enabled: boolean) {
       }
 
       const buffer = new Uint8Array(await read(`${FIREFOX_FOLDER}/${profile}/places.sqlite`));
-      const wasmBinary = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinary =
+        wasmBinaryBuffer instanceof Uint8Array ? wasmBinaryBuffer.buffer : new Uint8Array(wasmBinaryBuffer).buffer;
       const SQL = await initSqlJs({ wasmBinary });
       const db = new SQL.Database(buffer);
 

@@ -1,5 +1,27 @@
 # System Monitor Changelog
 
+## [Added Temperature Monitoring] - 2026-02-19
+
+- Added temperature view under CPU section
+- CPU temperature displayed in menu bar dropdown
+
+## [New Additions & Chore] - 2026-02-02
+- Added customisable tags for menubar entries
+    - Universal tags
+        - `<BR>` for line breaks
+        - `<MODE>` for display mode(toggles between "Free" and "Used")
+    - Module specific tags can be seen by hovering over the preferences text box
+- Made Loading tags use `…` consistently instead of `...`
+- Updated free and used preference to be per-module for cpu, memory, disk and battery usage
+- Removed displaymode field from menubar
+
+
+## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
+
+- Add a preference to toggle between free and used display modes for CPU, Memory and more (ref: [Issue #24612](https://github.com/raycast/extensions/issues/24612)).
+- Modernize extension to use latest Raycast configuration.
+- Add README.md.
+
 ## [New Additions] - 2025-08-05
 
 - Add a new preference option for the `Menubar System Monitor` command to customize the menu bar icon.

@@ -1,5 +1,12 @@
 # Google Gemini Changelog
 
+## [New models & SDK Migration] - 2026-01-19
+
+- 🆕 New Model: Gemini 3.0 Flash
+- 🆕 New Model: Gemini 3.0 Pro
+- 🛠️ Migrated to the official TypeScript/JavaScript SDK for Gemini and Vertex AI. (`@google/genai`)
+- ⚠️ Removed pre-Gemini 2.0 models, due to lack of support.
+
 ## [Maintenance] - 2026-01-01
 
 - 🪟 Add support for Windows platform.

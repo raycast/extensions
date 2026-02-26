@@ -336,7 +336,10 @@ export async function fetchResourceCounts(
     listBuildTriggers,
   } = await import("./utils/gcpApi");
 
-  // Run all count queries in parallel using REST APIs for better performance
+  // Run all count queries in parallel using REST APIs for better performance.
+  // Use fields/maxResults/pageSize to fetch only names and cap results,
+  // avoiding loading full resource objects just for counting.
+  const countLimit = 500;
   const [
     computeResult,
     storageResult,
@@ -347,14 +350,23 @@ export async function fetchResourceCounts(
     cloudfunctionsResult,
     cloudbuildResult,
   ] = await Promise.allSettled([
-    listComputeInstances(gcloudPath, projectId),
-    listStorageBuckets(gcloudPath, projectId),
+    listComputeInstances(gcloudPath, projectId, undefined, {
+      fields: "items/*/instances/name",
+      maxResults: countLimit,
+    }),
+    listStorageBuckets(gcloudPath, projectId, {
+      fields: "items(name)",
+      maxResults: countLimit,
+    }),
     getProjectIamPolicy(gcloudPath, projectId),
-    listVpcNetworks(gcloudPath, projectId),
-    listSecrets(gcloudPath, projectId),
-    listCloudRunServices(gcloudPath, projectId),
-    listCloudFunctions(gcloudPath, projectId),
-    listBuildTriggers(gcloudPath, projectId),
+    listVpcNetworks(gcloudPath, projectId, {
+      fields: "items(name)",
+      maxResults: countLimit,
+    }),
+    listSecrets(gcloudPath, projectId, { pageSize: countLimit }),
+    listCloudRunServices(gcloudPath, projectId, { pageSize: countLimit }),
+    listCloudFunctions(gcloudPath, projectId, undefined, { pageSize: countLimit }),
+    listBuildTriggers(gcloudPath, projectId, { pageSize: countLimit }),
   ]);
 
   const getArrayCount = (result: PromiseSettledResult<unknown[]>): number => {

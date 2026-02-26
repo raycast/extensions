@@ -9,27 +9,28 @@ import {
   LaunchType,
 } from "@raycast/api";
 
-import { format } from "sql-formatter";
+import { format, SqlLanguage } from "sql-formatter";
 
 // format sql
-export function formatSQL(text: string) {
+export async function formatSQL(text: string) {
   const trimmedText = text.trim();
   let output = "";
   try {
     if (!validateSQL(trimmedText)) {
-      showToastMessage();
+      await showToastMessage();
       return;
     }
 
-    const { tabWidth, keywordCase } = getPreferenceValues<Preferences>();
+    const { tabWidth, keywordCase, language } = getPreferenceValues<Preferences>();
     const options = {
       tabWidth: tabWidth === "tab" ? 8 : parseInt(tabWidth as string),
       keywordCase: keywordCase,
+      language: language as SqlLanguage,
     };
 
     output = format(trimmedText, options);
   } catch (error) {
-    showToastMessage();
+    await showToastMessage("Format SQL error: " + error);
     return;
   }
   return output;
@@ -37,8 +38,8 @@ export function formatSQL(text: string) {
 
 // copy or auto paste output
 export async function copyFormattedSQL(result: string) {
-  const { autopaste } = getPreferenceValues<Preferences>();
-  if (autopaste) {
+  const { autoPaste } = getPreferenceValues<Preferences>();
+  if (autoPaste) {
     await Clipboard.paste(result);
     if (environment.launchType === LaunchType.Background) {
       await showHUD("✅ Pasted to foremost application");
@@ -140,7 +141,7 @@ const sqlKeywords = new Set([
   "WHERE",
 ]);
 
-// validate input string whether it is a sql
+// validate input string whether it is a SQL
 function validateSQL(sql: string) {
   // convert sql to uppercase to perform case-insensitive comparison
   const upperCaseSQL = sql.toUpperCase();
@@ -157,9 +158,9 @@ function validateSQL(sql: string) {
 }
 
 // show error toast message
-function showToastMessage() {
-  showToast({
+async function showToastMessage(text: string = "Please copy a valid SQL clause") {
+  await showToast({
     style: Toast.Style.Failure,
-    title: "Please copy a valid SQL clause",
+    title: text,
   });
 }

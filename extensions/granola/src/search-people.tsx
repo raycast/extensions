@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Icon, Color, Image } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, Image } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
 import { usePeople } from "./utils/usePeople";
 import { Person, Document, Doc } from "./utils/types";
@@ -7,6 +7,7 @@ import { getDocumentsByIds } from "./utils/fetchData";
 import { NoteListItem } from "./components/NoteComponents";
 import { useFavicon } from "./utils/toolHelpers";
 import { formatLastMeetingLabel, sortPeople, type PeopleSortOption } from "./utils/searchUtils";
+import { mapColorToHex } from "./utils/iconMapper";
 
 type SortOption = PeopleSortOption;
 
@@ -123,7 +124,7 @@ function PersonMeetingsList({ person }: { person: Person }) {
     >
       {meetings.length === 0 ? (
         <List.EmptyView
-          icon={{ source: Icon.Document, tintColor: Color.Blue }}
+          icon={{ source: Icon.Document, tintColor: mapColorToHex("default") }}
           title="No Meetings Found"
           description={`No meetings found with ${person.name}.`}
         />
@@ -161,7 +162,7 @@ function PersonListItem({ person }: { person: Person }) {
       icon={
         person.avatar
           ? { source: person.avatar, mask: Image.Mask.Circle }
-          : favicon || { source: Icon.PersonCircle, tintColor: Color.Blue }
+          : favicon || { source: Icon.PersonCircle, tintColor: mapColorToHex("default") }
       }
       accessories={accessories}
       actions={

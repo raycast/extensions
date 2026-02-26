@@ -109,6 +109,9 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   return todos.map(todo => {
     const props = todo.properties();
 
+    let areaTags = '';
+    const areaRef = props.area;
+
     let project = null;
     const projectRef = props.project;
     if (projectRef) {
@@ -118,6 +121,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       if (projectAreaRef) {
         const areaProps = projectAreaRef.properties();
         projectArea = { id: areaProps.id, name: areaProps.name };
+        areaTags = projectAreaRef.tagNames() || '';
       }
       project = {
         id: projectProps.id,
@@ -131,10 +135,10 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     }
 
     let area = null;
-    const areaRef = props.area;
     if (areaRef && !projectRef) {
       const areaProps = areaRef.properties();
       area = { id: areaProps.id, name: areaProps.name };
+      areaTags = areaRef.tagNames() || '';
     }
 
     return {
@@ -143,6 +147,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       status: props.status,
       notes: props.notes,
       tags: todo.tagNames(),
+      areaTags: areaTags || null,
       dueDate: props.dueDate ? props.dueDate.toISOString() : null,
       activationDate: props.activationDate ? props.activationDate.toISOString() : null,
       isProject: props.pcls === "project",
@@ -208,6 +213,15 @@ export const deleteProject = (projectId: string) =>
 // Uses properties() batching to minimize Apple Event overhead
 const mapTagJxa = `tag => tag.name()`;
 
+const mapTagWithHierarchyJxa = `tag => {
+  const props = tag.properties();
+  const parentRef = props.parentTag;
+  return {
+    name: props.name,
+    parent: parentRef ? parentRef.name() : null
+  };
+}`;
+
 const mapProjectTodoJxa = `todo => {
   const props = todo.properties();
   return {
@@ -266,108 +280,62 @@ const mapAreaJxa = `area => {
   };
 }`;
 
-export const getTags = (): Promise<string[]> =>
-  executeJxa(
-    `
-  const things = Application('${preferences.thingsAppIdentifier}');
-  return things.tags().map(${mapTagJxa});
-`,
-    'Get tags',
-  );
-
-export const getProjects = async (): Promise<Project[]> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-    return things.projects().map(${mapProjectJxa});
-  `,
-    'Get projects',
-  );
+export type TagWithParent = {
+  name: string;
+  parent: string | null;
 };
 
-export const getAreas = async (): Promise<Area[]> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-    return things.areas().map(${mapAreaJxa});
-  `,
-    'Get areas',
-  );
-};
-
-export const getTagsProjectsAndAreas = async (): Promise<{
+type CollectionMap = {
   tags: string[];
+  tagsWithHierarchy: TagWithParent[];
   projects: Project[];
   areas: Area[];
-}> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-
-    const tags = things.tags().map(${mapTagJxa});
-    const projects = things.projects().map(${mapProjectJxa});
-    const areas = things.areas().map(${mapAreaJxa});
-
-    return { tags, projects, areas };
-  `,
-    'Get tags, projects, and areas',
-  );
+  lists: List[];
 };
 
-export const getListsAndTags = async (): Promise<{ lists: List[]; tags: string[] }> => {
-  const { tags, projects, areas } = await getTagsProjectsAndAreas();
+const jxaFetches = [
+  { name: 'tags', needs: ['tags'], expr: `things.tags().map(${mapTagJxa})` },
+  { name: 'tagsWithHierarchy', needs: ['tagsWithHierarchy'], expr: `things.tags().map(${mapTagWithHierarchyJxa})` },
+  { name: 'projects', needs: ['projects', 'lists'], expr: `things.projects().map(${mapProjectJxa})` },
+  { name: 'areas', needs: ['areas', 'lists'], expr: `things.areas().map(${mapAreaJxa})` },
+];
 
+export async function getCollections<K extends keyof CollectionMap>(...keys: K[]): Promise<Pick<CollectionMap, K>> {
+  const keySet = new Set<string>(keys);
+
+  const script = [
+    `const things = Application('${preferences.thingsAppIdentifier}');`,
+    `const result = {};`,
+    ...jxaFetches
+      .filter(({ needs }) => needs.some((k) => keySet.has(k)))
+      .map(({ name, expr }) => `result.${name} = ${expr};`),
+    `return result;`,
+  ].join('\n');
+
+  const raw = await executeJxa(script, `Get ${keys.join(', ')}`);
+
+  return Object.fromEntries(
+    keys.map((key) => [key, key === 'lists' ? organizeLists(raw.projects, raw.areas) : raw[key]]),
+  ) as Pick<CollectionMap, K>;
+}
+
+function organizeLists(projects: Project[] = [], areas: Area[] = []): List[] {
   const projectsWithoutAreas = projects
     .filter((project) => !project.area)
     .map((project) => ({ ...project, type: 'project' as const }));
 
-  const organizedAreasAndProjects: { name: string; id: string; type: 'area' | 'project' }[] = [];
+  const organizedAreasAndProjects: List[] = [];
   areas.forEach((area) => {
-    organizedAreasAndProjects.push({
-      ...area,
-      type: 'area' as const,
-    });
+    organizedAreasAndProjects.push({ ...area, type: 'area' as const });
 
     const associatedProjects = projects
       .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({
-        ...project,
-        type: 'project' as const,
-      }));
-    organizedAreasAndProjects.push(...associatedProjects);
-  });
-
-  const lists = [...projectsWithoutAreas, ...organizedAreasAndProjects];
-
-  return { lists, tags };
-};
-
-export const getLists = async (): Promise<List[]> => {
-  const projects = (await getProjects()) || [];
-  const areas = (await getAreas()) || [];
-
-  const projectsWithoutAreas = projects
-    .filter((project) => !project.area)
-    .map((project) => ({ ...project, type: 'project' as const }));
-
-  const organizedAreasAndProjects: { name: string; id: string; type: 'area' | 'project' }[] = [];
-  areas.forEach((area) => {
-    organizedAreasAndProjects.push({
-      ...area,
-      type: 'area' as const,
-    });
-
-    const associatedProjects = projects
-      .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({
-        ...project,
-        type: 'project' as const,
-      }));
+      .map((project) => ({ ...project, type: 'project' as const }));
     organizedAreasAndProjects.push(...associatedProjects);
   });
 
   return [...projectsWithoutAreas, ...organizedAreasAndProjects];
-};
+}
 
 export async function silentlyOpenThingsURL(url: string) {
   const asyncExec = promisify(exec);
