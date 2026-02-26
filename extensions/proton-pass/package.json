@@ -5,6 +5,9 @@
   "description": "Search and manage your Proton Pass items, generate passwords, and get TOTP codes.",
   "icon": "extension-icon.png",
   "author": "izyuumi",
+  "contributors": [
+    "FeernandoOFF"
+  ],
   "platforms": [
     "macOS"
   ],
