@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "petal",
   "title": "Petal - Offline Voice to Text",
-  "description": "Start and stop Petal recordings, search history, and switch models from Raycast.",
+  "description": "Control Petal from Raycast: start/stop recording, search history, switch models, and copy the last transcription.",
   "icon": "petal-icon.png",
   "author": "aayush9029",
   "categories": [
@@ -71,7 +71,7 @@
   ],
   "dependencies": {
     "@raycast/api": "1.104.7",
-    "@raycast/utils": "1.19.1"
+    "@raycast/utils": "2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",
