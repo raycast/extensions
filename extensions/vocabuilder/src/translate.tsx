@@ -18,11 +18,6 @@ import { buildTranslationDetailMarkdown } from "./lib/markdown";
 import { getHistory, saveTranslation } from "./lib/storage";
 import { Translation } from "./lib/types";
 
-interface Preferences {
-  geminiApiKey: string;
-  readClipboardOnOpen?: boolean;
-}
-
 const SECRET_PREFIX_RE = /^(sk-|ghp_|github_pat_|xox[baprs]-|AKIA|ASIA|AIza)/i;
 
 function isSafeClipboardSuggestion(raw: string): boolean {
@@ -50,7 +45,7 @@ function getUserFacingErrorMessage(errorCode: string): string {
 
 export default function Translate() {
   const { geminiApiKey, readClipboardOnOpen } =
-    getPreferenceValues<Preferences>();
+    getPreferenceValues<Preferences.Translate>();
   const { push } = useNavigation();
 
   const [searchText, setSearchText] = useState("");
