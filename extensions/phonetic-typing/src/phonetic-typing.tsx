@@ -1,10 +1,6 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-interface Preferences {
-  language: string;
-}
-
 const LANGUAGES = [
   { code: "am", name: "Amharic", native: "አማርኛ" },
   { code: "ar", name: "Arabic", native: "العربية" },
@@ -51,7 +47,7 @@ async function fetchSuggestions(text: string, langCode: string): Promise<string[
 }
 
 export default function PhoneticTyping() {
-  const { language: defaultLang } = getPreferenceValues<Preferences>();
+  const { language: defaultLang } = getPreferenceValues<Preferences.PhoneticTyping>();
   const [searchText, setSearchText] = useState("");
   const [lang, setLang] = useState(defaultLang);
   const [suggestions, setSuggestions] = useState<string[]>([]);
