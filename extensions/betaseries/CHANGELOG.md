@@ -1,6 +1,6 @@
 # Betaseries Changelog
 
-## [New Episodes Menu Bar + Planning Fix] - {PR_MERGE_DATE}
+## [New Episodes Menu Bar + Planning Fix] - 2026-02-26
 
 - Added **New Episodes Menu Bar** command to see newly released unwatched episodes directly from the macOS menu bar, with a badge showing how many are available.
 - Notifications are sent only for episodes that have already been released, are still unwatched, and are considered recent (to avoid old episodes triggering alerts).
