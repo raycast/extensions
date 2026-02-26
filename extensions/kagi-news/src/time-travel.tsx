@@ -27,7 +27,7 @@ function DatePickerScreen({ onDateSelected }: { onDateSelected: (date: string) =
   today.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  const minDate = new Date("1970-01-01");
+  const minDate = new Date("2025-07-08");
 
   return (
     <Form
