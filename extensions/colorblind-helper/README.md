@@ -4,7 +4,7 @@ Pick any color from your screen and get a human-readable description with colorb
 
 ![Colorblind Helper Screenshot](images/Screenshot.png)
 
-![Colorblind Helper Demo](images/colorblindhelper.gif)
+![Colorblind Helper Demo](images/colorblind-helper.gif)
 
 ## Features
 

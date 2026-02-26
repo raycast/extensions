@@ -1,7 +1,19 @@
 import namer from "color-namer";
 import { simulateColorblind, colorDistance, COLORBLIND_TYPES } from "./colorblind-sim";
-import { rgbToHsl, getLightnessDescriptor, getBriefQualifier, getSimpleColorName } from "./hsl-utils";
-import type { ColorDescription, ConfusionWarning, ColorblindSimulation, HSL, PickedColor, RGB } from "./types";
+import {
+  rgbToHsl,
+  getLightnessDescriptor,
+  getBriefQualifier,
+  getSimpleColorName,
+} from "./hsl-utils";
+import type {
+  ColorDescription,
+  ConfusionWarning,
+  ColorblindSimulation,
+  HSL,
+  PickedColor,
+  RGB,
+} from "./types";
 
 /** Threshold for the redmean color distance to trigger a confusion warning. */
 const CONFUSION_DISTANCE_THRESHOLD = 50;
