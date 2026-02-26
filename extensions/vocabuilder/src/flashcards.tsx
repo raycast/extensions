@@ -1,26 +1,66 @@
-import { Action, ActionPanel, Color, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useReducer } from "react";
+import { buildFlashcardDetailMarkdown } from "./lib/markdown";
 import { getSessionCards, saveFlashcardProgress } from "./lib/storage";
 import { FlashcardProgress, Rating, Translation } from "./lib/types";
 
-// ─── SM-2 Algorithm ──────────────────────────────────────────────────────────
-//
-// TODO: Implement SM-2 spaced repetition algorithm.
-//
-//   AGAIN: repetitions=0, interval=1, EF=max(1.3, EF-0.2)
-//   GOOD:  repetitions++; interval = rep<2 ? (rep===1 ? 6 : 1) : round(prev*EF)
-//   EASY:  same as GOOD; interval=round(interval*1.3); EF=min(2.5, EF+0.15)
-//
-//   nextReviewDate = now + interval * 86_400_000
-//   Do NOT mutate `progress` — return a new object.
-//
+/**
+ * TODO: Implement the SM-2 spaced repetition update.
+ *
+ * - `again`: repetitions=0, interval=1, EF=max(1.3, EF-0.2)
+ * - `good`: repetitions++, interval = rep<2 ? (rep===1 ? 6 : 1) : round(prev*EF)
+ * - `easy`: same as `good`; interval=round(interval*1.3); EF=min(2.5, EF+0.15)
+ *
+ * `nextReviewDate` should be `now + interval * 86_400_000`.
+ * Return a new object and do not mutate `progress`.
+ */
 function updateProgress(
   progress: FlashcardProgress,
   rating: Rating,
   now: number,
 ): FlashcardProgress {
-  void rating; // remove when implementing
-  return { ...progress, nextReviewDate: now + progress.interval * 86_400_000 };
+  const dayMs = 86_400_000;
+  const previousRepetitions = progress.repetitions;
+  const previousInterval = progress.interval;
+  const previousEaseFactor = progress.easeFactor;
+
+  let repetitions: number;
+  let interval: number;
+  let easeFactor: number;
+
+  if (rating === "again") {
+    repetitions = 0;
+    interval = 1;
+    easeFactor = Math.max(1.3, previousEaseFactor - 0.2);
+  } else {
+    repetitions = previousRepetitions + 1;
+    interval =
+      previousRepetitions < 2
+        ? previousRepetitions === 1
+          ? 6
+          : 1
+        : Math.round(previousInterval * previousEaseFactor);
+
+    if (rating === "easy") {
+      interval = Math.round(interval * 1.3);
+      easeFactor = Math.min(2.5, previousEaseFactor + 0.15);
+    }
+  }
+
+  return {
+    ...progress,
+    repetitions,
+    interval,
+    easeFactor,
+    nextReviewDate: now + interval * dayMs,
+  };
 }
 
 function freshProgress(word: string): FlashcardProgress {
@@ -33,8 +73,7 @@ function freshProgress(word: string): FlashcardProgress {
   };
 }
 
-// ─── State machine ────────────────────────────────────────────────────────────
-
+/** Study state phases for the flashcard session reducer. */
 type Phase = "loading" | "studying" | "done";
 
 interface StudyState {
@@ -99,8 +138,7 @@ const initialState: StudyState = {
   easyCount: 0,
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
+/** Flashcard review command view. */
 export default function Flashcards() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -115,16 +153,22 @@ export default function Flashcards() {
     const existing =
       state.progressMap.get(card.word) ?? freshProgress(card.word);
     const updated = updateProgress(existing, rating, Date.now());
-    await saveFlashcardProgress(updated);
+    const saved = await saveFlashcardProgress(updated);
+    if (!saved) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Flashcard storage is corrupted",
+        message: "Progress was not saved to avoid overwriting existing data.",
+      });
+      return;
+    }
     dispatch({ type: "rate", rating, updated });
   }
 
-  // ── Loading ──
   if (state.phase === "loading") {
     return <List isLoading searchBarPlaceholder="" />;
   }
 
-  // ── Done / empty ──
   if (state.phase === "done") {
     const total = state.againCount + state.goodCount + state.easyCount;
     const description =
@@ -141,21 +185,12 @@ export default function Flashcards() {
     );
   }
 
-  // ── Studying ──
   const card = state.sessionCards[state.currentIndex];
   const progress = state.progressMap.get(card.word);
   const isNew = !progress || progress.repetitions === 0;
   const position = `${state.currentIndex + 1} / ${state.sessionCards.length}`;
 
-  const detailMarkdown = `# ${card.word}
-
-**${card.partOfSpeech}** · ${card.translation}
-
----
-
-*${card.example}*
-
-${card.exampleTranslation}`;
+  const detailMarkdown = buildFlashcardDetailMarkdown(card);
 
   return (
     <List isShowingDetail={state.revealed} searchBarPlaceholder="">

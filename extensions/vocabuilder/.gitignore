@@ -4,9 +4,6 @@ node_modules/
 # Build output
 dist/
 
-# Bun
-bun.lockb
-
 # macOS
 .DS_Store
 .AppleDouble

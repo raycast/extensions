@@ -8,57 +8,123 @@ import {
 } from "./types";
 
 const STORAGE_KEY = "vocabuilder-history";
+const HISTORY_CORRUPT_BACKUP_KEY = `${STORAGE_KEY}-corrupt-backup`;
+const FLASHCARD_KEY = "vocabuilder-flashcards";
+const FLASHCARD_CORRUPT_BACKUP_KEY = `${FLASHCARD_KEY}-corrupt-backup`;
+
+async function backupCorruptedStorage(
+  sourceKey: string,
+  backupKey: string,
+  raw: string,
+  error: unknown,
+): Promise<void> {
+  const existingBackup = await LocalStorage.getItem<string>(backupKey);
+  if (!existingBackup) {
+    await LocalStorage.setItem(backupKey, raw);
+  }
+  console.error(
+    `[storage] Corrupted data detected for "${sourceKey}". Refusing to overwrite existing data.`,
+    error,
+  );
+}
+
+async function parseStoredArray<T>(
+  sourceKey: string,
+  backupKey: string,
+  raw: string,
+  schema: z.ZodType<T[]>,
+): Promise<T[] | null> {
+  try {
+    return schema.parse(JSON.parse(raw));
+  } catch (error) {
+    await backupCorruptedStorage(sourceKey, backupKey, raw, error);
+    return null;
+  }
+}
 
 export async function getHistory(): Promise<Translation[]> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return [];
-  try {
-    return z.array(TranslationSchema).parse(JSON.parse(raw));
-  } catch {
-    return [];
-  }
+  const parsed = await parseStoredArray(
+    STORAGE_KEY,
+    HISTORY_CORRUPT_BACKUP_KEY,
+    raw,
+    z.array(TranslationSchema),
+  );
+  return parsed ?? [];
 }
 
-export async function saveTranslation(t: Translation): Promise<void> {
-  const history = await getHistory();
+export async function saveTranslation(t: Translation): Promise<boolean> {
+  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
+  const history = raw
+    ? await parseStoredArray(
+        STORAGE_KEY,
+        HISTORY_CORRUPT_BACKUP_KEY,
+        raw,
+        z.array(TranslationSchema),
+      )
+    : [];
+  if (!history) return false;
+
   const updated = [t, ...history.filter((h) => h.word !== t.word)];
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  return true;
 }
 
-export async function deleteTranslation(id: string): Promise<void> {
-  const history = await getHistory();
+export async function deleteTranslation(id: string): Promise<boolean> {
+  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
+  const history = raw
+    ? await parseStoredArray(
+        STORAGE_KEY,
+        HISTORY_CORRUPT_BACKUP_KEY,
+        raw,
+        z.array(TranslationSchema),
+      )
+    : [];
+  if (!history) return false;
+
   const updated = history.filter((h) => h.id !== id);
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  return true;
 }
 
 export async function clearHistory(): Promise<void> {
   await LocalStorage.removeItem(STORAGE_KEY);
 }
 
-const FLASHCARD_KEY = "vocabuilder-flashcards";
-
-export async function getFlashcardProgress(): Promise<
-  Map<string, FlashcardProgress>
-> {
+async function getFlashcardProgress(): Promise<Map<string, FlashcardProgress>> {
   const raw = await LocalStorage.getItem<string>(FLASHCARD_KEY);
   if (!raw) return new Map();
-  try {
-    const arr = z.array(FlashcardProgressSchema).parse(JSON.parse(raw));
-    return new Map(arr.map((p) => [p.word, p]));
-  } catch {
-    return new Map();
-  }
+  const arr = await parseStoredArray(
+    FLASHCARD_KEY,
+    FLASHCARD_CORRUPT_BACKUP_KEY,
+    raw,
+    z.array(FlashcardProgressSchema),
+  );
+  return new Map((arr ?? []).map((p) => [p.word, p]));
 }
 
 export async function saveFlashcardProgress(
   progress: FlashcardProgress,
-): Promise<void> {
-  const map = await getFlashcardProgress();
+): Promise<boolean> {
+  const raw = await LocalStorage.getItem<string>(FLASHCARD_KEY);
+  const arr = raw
+    ? await parseStoredArray(
+        FLASHCARD_KEY,
+        FLASHCARD_CORRUPT_BACKUP_KEY,
+        raw,
+        z.array(FlashcardProgressSchema),
+      )
+    : [];
+  if (!arr) return false;
+
+  const map = new Map(arr.map((p) => [p.word, p]));
   map.set(progress.word, progress);
   await LocalStorage.setItem(FLASHCARD_KEY, JSON.stringify([...map.values()]));
+  return true;
 }
 
-export interface SessionData {
+interface SessionData {
   sessionCards: Translation[];
   progressMap: Map<string, FlashcardProgress>;
 }

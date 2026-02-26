@@ -1,9 +1,9 @@
-import { z } from "zod";
 import {
   GeminiApiResponseSchema,
   GeminiResponse,
   GeminiResponseSchema,
 } from "./types";
+import { asJsonStringLiteral, normalizeWordInput } from "./input";
 
 const MODEL = "gemini-2.5-flash-lite";
 const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -13,7 +13,12 @@ export async function translateWord(
   apiKey: string,
   signal?: AbortSignal,
 ): Promise<GeminiResponse> {
-  const prompt = `Translate the English word "${word}" to Ukrainian.
+  const normalizedWord = normalizeWordInput(word);
+  if (!normalizedWord) {
+    throw new Error("INVALID_WORD_INPUT");
+  }
+
+  const prompt = `Translate the English word ${asJsonStringLiteral(normalizedWord)} to Ukrainian.
 Respond ONLY with valid JSON in this exact format:
 {
   "translation": "Ukrainian word",
@@ -22,11 +27,14 @@ Respond ONLY with valid JSON in this exact format:
   "exampleTranslation": "English translation of the example"
 }`;
 
-  const url = `${BASE_URL}/${MODEL}:generateContent?key=${apiKey}`;
+  const url = `${BASE_URL}/${MODEL}:generateContent`;
 
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
     }),
@@ -38,9 +46,7 @@ Respond ONLY with valid JSON in this exact format:
   }
 
   if (!response.ok) {
-    throw new Error(
-      `Gemini API error: ${response.status} ${response.statusText}`,
-    );
+    throw new Error("GEMINI_REQUEST_FAILED");
   }
 
   // Validate the outer Gemini API response shape
@@ -48,7 +54,7 @@ Respond ONLY with valid JSON in this exact format:
   const raw = apiData.candidates[0]?.content.parts[0]?.text ?? "";
 
   if (!raw) {
-    throw new Error("Empty response from Gemini API");
+    throw new Error("GEMINI_EMPTY_RESPONSE");
   }
 
   // Strip markdown code fences if present
@@ -60,16 +66,7 @@ Respond ONLY with valid JSON in this exact format:
   try {
     // Validate the translation JSON shape
     return GeminiResponseSchema.parse(JSON.parse(cleaned));
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      throw new Error(
-        `Unexpected translation format: ${err.issues.map((i) => i.message).join(", ")}`,
-        { cause: err },
-      );
-    }
-    throw new Error(
-      `Failed to parse Gemini response: ${cleaned.slice(0, 100)}`,
-      { cause: err },
-    );
+  } catch {
+    throw new Error("GEMINI_INVALID_RESPONSE");
   }
 }

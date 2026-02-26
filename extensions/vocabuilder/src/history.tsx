@@ -10,6 +10,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { buildTranslationDetailMarkdown } from "./lib/markdown";
 import { clearHistory, deleteTranslation, getHistory } from "./lib/storage";
 import { Translation } from "./lib/types";
 
@@ -53,7 +54,16 @@ export default function History() {
     });
     if (!confirmed) return;
 
-    await deleteTranslation(id);
+    const deleted = await deleteTranslation(id);
+    if (!deleted) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "History storage is corrupted",
+        message: "Delete skipped to avoid overwriting existing data.",
+      });
+      return;
+    }
+
     setHistory((prev) => prev.filter((t) => t.id !== id));
     await showToast({ style: Toast.Style.Success, title: "Deleted" });
   }
@@ -98,7 +108,7 @@ export default function History() {
             ]}
             detail={
               <List.Item.Detail
-                markdown={`## ${item.word}\n\n**${item.translation}** *(${item.partOfSpeech})*\n\n---\n\n**Example:**\n\n> ${item.example}\n\n*${item.exampleTranslation}*`}
+                markdown={buildTranslationDetailMarkdown(item)}
               />
             }
             actions={
