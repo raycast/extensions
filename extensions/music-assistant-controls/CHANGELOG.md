@@ -1,6 +1,6 @@
 # Music Assistant Controls Changelog
 
-## [Enhanced Volume Control & Current Track Features] - {PR_MERGE_DATE}
+## [Big update with many features] - {PR_MERGE_DATE}
 
 ### ✨ New Features
 
