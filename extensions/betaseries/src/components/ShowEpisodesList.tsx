@@ -1,4 +1,10 @@
-import { List, showToast, Toast } from "@raycast/api";
+import {
+  LaunchType,
+  List,
+  launchCommand,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
@@ -74,6 +80,10 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
       showToast({
         style: Toast.Style.Success,
         title: "Episode marked as watched",
+      });
+      await launchCommand({
+        name: "new-episodes-menubar",
+        type: LaunchType.Background,
       });
     } catch (error) {
       console.error(error);
