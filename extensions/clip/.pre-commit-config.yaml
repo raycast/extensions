@@ -1,0 +1,54 @@
+repos:
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        stages:
+          - pre-commit
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.34.0
+    hooks:
+      - id: eslint
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        args:
+          - --allow-multiple-documents
+          - --unsafe
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+        args:
+          - --maxkb=1024
+        stages:
+          - pre-commit
+      - id: requirements-txt-fixer
+      - id: check-merge-conflict
+      - id: debug-statements
+  - repo: local
+    hooks:
+      - id: dockerfile-lint
+        name: lint Dockerfile
+        entry: ./scripts/hadolint.sh
+        language: system
+      - id: check-extension
+        name: check ipynb
+        args:
+          - ipynb
+        entry: ./scripts/check_extension.sh
+        language: script
+      - id: validate-commit-msg
+        name: commit message is valid
+        args:
+          - --negate
+        entry: ^(build|ci|docs|feat|fix|perf|refactor|style|test|revert|hotfix|ops|chore)\([\w,\.,\-,\(,\),\/]+\)(!?)(:)\s{1}([\w,\W,:]+)$
+        language: pygrep
+        stages:
+          - commit-msg
+      - id: tsc-check
+        name: TypeScript type check
+        entry: npx tsc --noEmit
+        language: system
+        pass_filenames: false
+        files: \.(ts|tsx)$

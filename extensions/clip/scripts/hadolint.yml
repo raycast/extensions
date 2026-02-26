@@ -1,0 +1,8 @@
+ignored:
+  - DL3003 # Ok with `cd` for one liner
+  - DL3006 # Ok to have image tag
+  - DL3008 # Ok to not pin package version.
+  - DL3013 # As long as ppl are using requirements.txt with package version or poetry lock, it will be fine
+  - DL3020 # ADD / COPY are all accepted
+  - DL3022 # Ok to copy directly from existed image
+  - SC2086 # Ok without double quotes, build fast fail fast

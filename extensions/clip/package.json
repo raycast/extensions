@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "author": "benbenbang",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "description": "Shorten a URL using your preferred service",
+      "mode": "view",
+      "name": "shorten-url",
+      "title": "Shorten URL"
+    },
+    {
+      "description": "View previously shortened URLs",
+      "mode": "view",
+      "name": "shorten-history",
+      "title": "URL History"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.0.0",
+    "@raycast/utils": "^1.0.0"
+  },
+  "description": "Shorten URLs using multiple services (bit.ly, cutt.ly, tinyurl, is.gd, v.gd)",
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.18"
+  },
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "name": "raycast-clip",
+  "preferences": [
+    {
+      "description": "API token from https://app.bitly.com/settings/api/",
+      "name": "bitlyApiKey",
+      "required": false,
+      "title": "Bit.ly API Key",
+      "type": "password"
+    },
+    {
+      "description": "API key from https://cutt.ly/edit",
+      "name": "cuttlyApiKey",
+      "required": false,
+      "title": "Cutt.ly API Key",
+      "type": "password"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "title": "CLIP - URL Shortener"
+}
