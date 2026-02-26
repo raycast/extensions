@@ -165,11 +165,6 @@ export default function Chat({ launchContext }) {
               content={fullChatText}
               shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
             />
-            <Action.CopyToClipboard
-              title="Copy Entire Chat (Transcript) (Ctrl+Shift+E)"
-              content={fullChatText}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "e" }}
-            />
           </ActionPanel.Section>
         )}
         <Action
