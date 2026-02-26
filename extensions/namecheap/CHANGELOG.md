@@ -1,6 +1,6 @@
 # Namecheap Changelog
 
-## [Fix Error when no DNS Hosts + Modernize] - {PR_MERGE_DATE}
+## [Fix Error when no DNS Hosts + Modernize] - 2026-02-26
 
 - Fix error when a domain has no dns hosts
 - Modernize to use latest Raycast configuration
