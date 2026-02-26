@@ -1,6 +1,6 @@
-import { Album, Artist } from "@/music-assistant/external-code/interfaces";
-import { getBreadcrumb, getBrowseSubtitle, getRecentlyPlayedIcon } from "@/music-library-hub/helpers";
-import { BreadcrumbState } from "@/music-library-hub/types";
+import { Album, Artist } from "../../src/music-assistant/external-code/interfaces";
+import { getBreadcrumb, getBrowseSubtitle, getRecentlyPlayedIcon } from "../../src/music-library-hub/helpers";
+import { BreadcrumbState } from "../../src/music-library-hub/types";
 
 jest.mock("@raycast/api");
 

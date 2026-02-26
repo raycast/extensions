@@ -1,12 +1,12 @@
 import { Icon } from "@raycast/api";
-import MusicAssistantClient from "@/music-assistant/music-assistant-client";
-import { Player } from "@/music-assistant/external-code/interfaces";
+import MusicAssistantClient from "../../src/music-assistant/music-assistant-client";
+import { Player } from "../../src/music-assistant/external-code/interfaces";
 import {
   getPlayerListIcon,
   getPlayerListSubtitle,
   getPlayerListTitle,
   splitPlayersByGroupRole,
-} from "@/player-management/player-list-helpers";
+} from "../../src/player-management/player-list-helpers";
 
 jest.mock("@raycast/api");
 

@@ -1,4 +1,4 @@
-import { commandOrControlShortcut } from "@/shortcuts/shortcuts";
+import { commandOrControlShortcut } from "../../src/shortcuts/shortcuts";
 
 describe("commandOrControlShortcut", () => {
   it("maps command to macOS and control to windows", () => {

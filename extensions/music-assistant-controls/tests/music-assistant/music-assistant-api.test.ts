@@ -1,4 +1,5 @@
-import { MusicAssistantApi } from "@/music-assistant/external-code/music-assistant-api";
+import { MusicAssistantApi } from "../../src/music-assistant/external-code/music-assistant-api";
+import { RepeatMode } from "../../src/music-assistant/external-code/interfaces";
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -220,7 +221,7 @@ describe("MusicAssistantApi REST API", () => {
     });
 
     it("should toggle repeat from OFF to ONE", async () => {
-      await api.queueCommandRepeatToggle("queue-1", "off");
+      await api.queueCommandRepeatToggle("queue-1", RepeatMode.OFF);
 
       const callBody = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
       expect(callBody).toEqual({

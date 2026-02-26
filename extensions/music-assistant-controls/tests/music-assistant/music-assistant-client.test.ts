@@ -1,14 +1,14 @@
-import MusicAssistantClient from "@/music-assistant/music-assistant-client";
-import executeApiCommand from "@/music-assistant/api-command";
+import MusicAssistantClient from "../../src/music-assistant/music-assistant-client";
+import executeApiCommand from "../../src/music-assistant/api-command";
 import { showHUD } from "@raycast/api";
-import { storeSelectedQueueID } from "@/player-selection/use-selected-player-id";
-import { PlayerQueue, PlayerState, RepeatMode } from "@/music-assistant/external-code/interfaces";
-import { StoredQueue } from "@/player-selection/use-selected-player-id";
+import { storeSelectedQueueID } from "../../src/player-selection/use-selected-player-id";
+import { PlayerQueue, PlayerState, RepeatMode } from "../../src/music-assistant/external-code/interfaces";
+import { StoredQueue } from "../../src/player-selection/use-selected-player-id";
 
 // Mock the dependencies
-jest.mock("@/music-assistant/api-command");
+jest.mock("../../src/music-assistant/api-command");
 jest.mock("@raycast/api");
-jest.mock("@/player-selection/use-selected-player-id");
+jest.mock("../../src/player-selection/use-selected-player-id");
 
 const mockExecuteApiCommand = executeApiCommand as jest.MockedFunction<typeof executeApiCommand>;
 const mockShowHUD = showHUD as jest.MockedFunction<typeof showHUD>;

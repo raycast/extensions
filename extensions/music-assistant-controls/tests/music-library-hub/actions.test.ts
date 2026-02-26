@@ -1,11 +1,11 @@
 import { showToast, Toast } from "@raycast/api";
-import MusicAssistantClient from "@/music-assistant/music-assistant-client";
-import { MediaType } from "@/music-assistant/external-code/interfaces";
-import { addItemToQueueNext } from "@/music-library-hub/actions";
-import { getSelectedQueueID } from "@/player-selection/use-selected-player-id";
+import MusicAssistantClient from "../../src/music-assistant/music-assistant-client";
+import { MediaType } from "../../src/music-assistant/external-code/interfaces";
+import { addItemToQueueNext } from "../../src/music-library-hub/actions";
+import { getSelectedQueueID } from "../../src/player-selection/use-selected-player-id";
 
 jest.mock("@raycast/api");
-jest.mock("@/player-selection/use-selected-player-id");
+jest.mock("../../src/player-selection/use-selected-player-id");
 
 const mockShowToast = showToast as jest.MockedFunction<typeof showToast>;
 const mockGetSelectedQueueID = getSelectedQueueID as jest.MockedFunction<typeof getSelectedQueueID>;

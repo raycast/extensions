@@ -5,8 +5,8 @@ import {
   getFavoriteToastTitle,
   getShuffleToastMessage,
   getTrackPositionLabel,
-} from "@/current-track/current-track-helpers";
-import { MediaType, Track } from "@/music-assistant/external-code/interfaces";
+} from "../../src/current-track/current-track-helpers";
+import { MediaType, Track } from "../../src/music-assistant/external-code/interfaces";
 
 function createMockTrack(overrides: Partial<Track> = {}): Track {
   return {

@@ -1,4 +1,4 @@
-import { isValidVolumeInput } from "@/set-volume/volume-validation";
+import { isValidVolumeInput } from "../../src/set-volume/volume-validation";
 
 describe("set-volume/volume-validation", () => {
   it("accepts valid volume inputs", () => {

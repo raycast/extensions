@@ -1,14 +1,14 @@
 import { showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import MusicAssistantClient from "@/music-assistant/music-assistant-client";
-import { getSelectedQueueID } from "@/player-selection/use-selected-player-id";
-import volumeUpMain from "@/volume-up";
+import MusicAssistantClient from "../../src/music-assistant/music-assistant-client";
+import { getSelectedQueueID } from "../../src/player-selection/use-selected-player-id";
+import volumeUpMain from "../../src/volume-up";
 
 // Mock dependencies
 jest.mock("@raycast/api");
 jest.mock("@raycast/utils");
-jest.mock("@/music-assistant/music-assistant-client");
-jest.mock("@/player-selection/use-selected-player-id");
+jest.mock("../../src/music-assistant/music-assistant-client");
+jest.mock("../../src/player-selection/use-selected-player-id");
 
 const mockShowToast = showToast as jest.MockedFunction<typeof showToast>;
 const mockShowFailureToast = showFailureToast as jest.MockedFunction<typeof showFailureToast>;
@@ -26,7 +26,7 @@ describe("volume-up command", () => {
     } as any;
 
     MockMusicAssistantClient.mockImplementation(() => mockClientInstance);
-    mockShowToast.mockResolvedValue();
+    mockShowToast.mockResolvedValue({} as any);
   });
 
   it("should execute volume up command and show before/after feedback", async () => {
