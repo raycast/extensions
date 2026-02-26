@@ -3,7 +3,7 @@
   "name": "auth0-management",
   "title": "Auth0 Management",
   "description": "Search and manage Auth0 users across multiple tenants",
-  "icon": "auth0-512.png",
+  "icon": "auth0-512-transparent.png",
   "author": "ray_tan",
   "platforms": [
     "macOS",
