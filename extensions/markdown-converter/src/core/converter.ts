@@ -1304,7 +1304,7 @@ function normalizeWordHtml(html: string, context: ConversionContext): string {
     convertItalicSpansToEm(doc);
 
     return doc.body.innerHTML;
-  } catch (error) {
+  } catch {
     return html;
   }
 }
