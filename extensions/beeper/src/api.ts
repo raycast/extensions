@@ -182,11 +182,9 @@ export type GlobalSearchResponse = {
   };
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 
-const getOptionalNullableString = (value: unknown) =>
-  typeof value === "string" || value === null ? value : undefined;
+const getOptionalNullableString = (value: unknown) => (typeof value === "string" || value === null ? value : undefined);
 
 const getOptionalBoolean = (value: unknown) => (typeof value === "boolean" ? value : undefined);
 
@@ -213,10 +211,7 @@ const getAccessTokenValue = () => getAccessToken().token;
 
 const getAuthHeaders = () => ({ Authorization: `Bearer ${getAccessTokenValue()}` });
 
-const requestJSON = async <T>(
-  input: Parameters<typeof fetch>[0],
-  init?: Parameters<typeof fetch>[1],
-): Promise<T> => {
+const requestJSON = async <T>(input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]): Promise<T> => {
   const response = await fetch(input, init);
   if (!response.ok) {
     const text = await response.text();
