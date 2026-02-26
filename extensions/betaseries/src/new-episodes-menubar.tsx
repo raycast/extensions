@@ -423,22 +423,6 @@ async function buildMenuBarState(): Promise<MenuBarState> {
     a.showTitle.localeCompare(b.showTitle),
   );
 
-  if (environment.launchType === LaunchType.Background) {
-    for (const episode of episodesToNotify) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: "New Episode Released",
-        message: `${episode.showTitle} - ${episode.code}`,
-        primaryAction: {
-          title: "Open Episode",
-          onAction: () => {
-            void open(episode.url);
-          },
-        },
-      });
-    }
-  }
-
   const storageUpdates: Promise<void>[] = [
     setStoredNumberIds(
       PENDING_EPISODE_IDS_KEY,
@@ -575,6 +559,20 @@ async function buildMenuBarStateForBackground(): Promise<MenuBarState> {
   const episodesToNotify = visibleEpisodes.filter(
     (episode) => !previousPendingEpisodeIdsSet.has(episode.id),
   );
+
+  for (const episode of episodesToNotify) {
+    await showToast({
+      style: Toast.Style.Success,
+      title: "New Episode Released",
+      message: `${episode.showTitle} - ${episode.code}`,
+      primaryAction: {
+        title: "Open Episode",
+        onAction: () => {
+          void open(episode.url);
+        },
+      },
+    });
+  }
 
   await Promise.all([
     setStoredNumberIds(
