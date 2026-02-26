@@ -52,8 +52,8 @@ async function enforcePinnedVolumes(type: IOType) {
       if (Math.abs(currentPct - targetPct) >= 2) {
         await setVol(device.id, targetPct / 100);
       }
-    } catch {
-      // Device may not support volume
+    } catch (err) {
+      console.error(`Failed to enforce volume for ${device.name} (${device.uid}):`, err);
     }
   }
 }
