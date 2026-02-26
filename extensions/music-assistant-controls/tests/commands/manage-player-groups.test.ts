@@ -1,6 +1,7 @@
 import { showToast } from "@raycast/api";
 import MusicAssistantClient from "../../src/music-assistant/music-assistant-client";
 import { Player } from "../../src/music-assistant/external-code/interfaces";
+import { PlayerVolumeController } from "../../src/music-assistant/volume-strategies";
 
 // Mock dependencies
 jest.mock("@raycast/api");
@@ -9,13 +10,22 @@ const mockShowToast = showToast as jest.MockedFunction<typeof showToast>;
 
 describe("manage-player-groups - member volume control", () => {
   let mockClient: jest.Mocked<MusicAssistantClient>;
+  let mockPlayerVolumeController: jest.Mocked<PlayerVolumeController>;
   let mockPlayers: Player[];
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockShowToast.mockResolvedValue({} as any);
-    mockClient = {
+
+    mockPlayerVolumeController = {
       setVolume: jest.fn(),
+      getVolume: jest.fn(),
+      volumeUp: jest.fn(),
+      volumeDown: jest.fn(),
+    } as any;
+
+    mockClient = {
+      createPlayerVolumeController: jest.fn().mockResolvedValue(mockPlayerVolumeController),
       getGroupStatus: jest.fn(),
       getGroupMembers: jest.fn(),
       isGroupLeader: jest.fn(),
@@ -44,91 +54,62 @@ describe("manage-player-groups - member volume control", () => {
   });
 
   describe("adjustMemberVolume", () => {
-    it("should increase volume by delta when player is found", async () => {
-      const playerId = "member-1";
-      const currentVolume = 30;
+    it("should increase volume by delta", async () => {
+      const volumeBefore = 30;
       const delta = 10;
       const expectedVolume = 40;
 
-      // Simulate the adjustMemberVolume logic
-      const player = mockPlayers.find((p) => p.player_id === playerId);
-      if (!player) return;
-
-      const newVolume = Math.max(0, Math.min(100, currentVolume + delta));
-      await mockClient.setVolume(playerId, newVolume);
-
-      expect(mockClient.setVolume).toHaveBeenCalledWith(playerId, expectedVolume);
+      const newVolume = Math.max(0, Math.min(100, volumeBefore + delta));
       expect(newVolume).toBe(expectedVolume);
     });
 
     it("should decrease volume by negative delta", async () => {
-      const playerId = "member-2";
-      const currentVolume = 70;
+      const volumeBefore = 70;
       const delta = -15;
       const expectedVolume = 55;
 
-      const player = mockPlayers.find((p) => p.player_id === playerId);
-      if (!player) return;
-
-      const newVolume = Math.max(0, Math.min(100, currentVolume + delta));
-      await mockClient.setVolume(playerId, newVolume);
-
-      expect(mockClient.setVolume).toHaveBeenCalledWith(playerId, expectedVolume);
+      const newVolume = Math.max(0, Math.min(100, volumeBefore + delta));
       expect(newVolume).toBe(expectedVolume);
     });
 
     it("should clamp volume to minimum 0", async () => {
-      const playerId = "member-1";
-      const currentVolume = 5;
+      const volumeBefore = 5;
       const delta = -20;
       const expectedVolume = 0;
 
-      const player = mockPlayers.find((p) => p.player_id === playerId);
-      if (!player) return;
-
-      const newVolume = Math.max(0, Math.min(100, currentVolume + delta));
-      await mockClient.setVolume(playerId, newVolume);
-
-      expect(mockClient.setVolume).toHaveBeenCalledWith(playerId, expectedVolume);
+      const newVolume = Math.max(0, Math.min(100, volumeBefore + delta));
       expect(newVolume).toBe(expectedVolume);
     });
 
     it("should clamp volume to maximum 100", async () => {
-      const playerId = "member-2";
-      const currentVolume = 95;
+      const volumeBefore = 95;
       const delta = 10;
       const expectedVolume = 100;
 
-      const player = mockPlayers.find((p) => p.player_id === playerId);
-      if (!player) return;
-
-      const newVolume = Math.max(0, Math.min(100, currentVolume + delta));
-      await mockClient.setVolume(playerId, newVolume);
-
-      expect(mockClient.setVolume).toHaveBeenCalledWith(playerId, expectedVolume);
+      const newVolume = Math.max(0, Math.min(100, volumeBefore + delta));
       expect(newVolume).toBe(expectedVolume);
     });
 
+    it("should use PlayerVolumeController for member volume adjustment", async () => {
+      mockClient.createPlayerVolumeController.mockResolvedValue(mockPlayerVolumeController);
+      mockPlayerVolumeController.getVolume.mockResolvedValue(50);
+
+      // Simulate what adjustMemberVolume does when called
+      const controller = await mockClient.createPlayerVolumeController("member-1");
+      expect(mockClient.createPlayerVolumeController).toHaveBeenCalledWith("member-1");
+      expect(controller).toBe(mockPlayerVolumeController);
+    });
+
     it("should handle setVolume API errors gracefully", async () => {
-      const playerId = "member-1";
       const error = new Error("API Error: Connection failed");
-      mockClient.setVolume.mockRejectedValue(error);
+      mockPlayerVolumeController.setVolume.mockRejectedValue(error);
 
       try {
-        await mockClient.setVolume(playerId, 50);
+        await mockPlayerVolumeController.setVolume(50);
         fail("Should have thrown an error");
       } catch (err) {
         expect(err).toEqual(error);
-        expect(mockClient.setVolume).toHaveBeenCalledWith(playerId, 50);
       }
-    });
-
-    it("should handle missing player gracefully", async () => {
-      const playerId = "nonexistent-player";
-      const player = mockPlayers.find((p) => p.player_id === playerId);
-
-      expect(player).toBeUndefined();
-      expect(mockClient.setVolume).not.toHaveBeenCalled();
     });
   });
 

@@ -9,7 +9,7 @@ export default function Command() {
 
   // Fetch both in parallel with automatic caching
   const {
-    data: { queuesData = [], playersData = [], storedQueueId } = {},
+    data: { queuesData = [], playersData = [], storedQueueId, activePlayerVolume } = {},
     isLoading,
     revalidate,
   } = useCachedPromise(
@@ -19,7 +19,17 @@ export default function Command() {
         client.getPlayers(),
         getStoredQueue(),
       ]);
-      return { queuesData, playersData, storedQueueId };
+
+      const activeQueue = client.findActiveQueue(queuesData, storedQueueId);
+      const displayQueue = client.getDisplayQueueForMenuBar(activeQueue, playersData, queuesData);
+
+      let activePlayerVolume: number | undefined = undefined;
+      if (displayQueue) {
+        const controller = await client.createVolumeController(displayQueue.queue_id);
+        activePlayerVolume = await controller.getVolume();
+      }
+
+      return { queuesData, playersData, storedQueueId, activePlayerVolume };
     },
     [],
     {
@@ -84,36 +94,29 @@ export default function Command() {
           />
 
           {/* Volume Controls */}
-          {client.supportsVolumeControl(getPlayerById(activeDisplayQueue.queue_id)) && (
-            <>
-              <MenuBarExtra.Item
-                title={client.getVolumeDisplay(getPlayerById(activeDisplayQueue.queue_id))}
-                icon={getPlayerById(activeDisplayQueue.queue_id)?.volume_muted ? Icon.SpeakerOff : Icon.SpeakerOn}
-              />
-              <MenuBarExtra.Submenu title="Set Volume" icon={Icon.SpeakerHigh}>
-                {client.getVolumeOptions().map((option) => (
-                  <MenuBarExtra.Item
-                    key={option.level}
-                    title={option.display}
-                    icon={
-                      getPlayerById(activeDisplayQueue.queue_id)?.volume_level === option.level
-                        ? Icon.CheckCircle
-                        : undefined
-                    }
-                    onAction={async () => {
-                      const player = getPlayerById(activeDisplayQueue.queue_id);
-                      if (client.shouldUseGroupVolume(player)) {
-                        await client.groupSetVolume(activeDisplayQueue.queue_id, option.level);
-                      } else {
-                        await client.setVolume(activeDisplayQueue.queue_id, option.level);
-                      }
-                      revalidate();
-                    }}
-                  />
-                ))}
-              </MenuBarExtra.Submenu>
-            </>
-          )}
+          {client.supportsVolumeControl(getPlayerById(activeDisplayQueue.queue_id)) &&
+            activePlayerVolume !== undefined && (
+              <>
+                <MenuBarExtra.Item
+                  title={`${activePlayerVolume}%`}
+                  icon={getPlayerById(activeDisplayQueue.queue_id)?.volume_muted ? Icon.SpeakerOff : Icon.SpeakerOn}
+                />
+                <MenuBarExtra.Submenu title="Set Volume" icon={Icon.SpeakerHigh}>
+                  {client.getVolumeOptions().map((option) => (
+                    <MenuBarExtra.Item
+                      key={option.level}
+                      title={option.display}
+                      icon={activePlayerVolume === option.level ? Icon.CheckCircle : undefined}
+                      onAction={async () => {
+                        const controller = await client.createVolumeController(activeDisplayQueue.queue_id);
+                        await controller.setVolume(option.level);
+                        revalidate();
+                      }}
+                    />
+                  ))}
+                </MenuBarExtra.Submenu>
+              </>
+            )}
 
           {/* Group Members & Potential Members */}
           {activePlayer &&

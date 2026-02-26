@@ -121,6 +121,7 @@ API commands:
 - ✅ `useCachedState` - Persists state across command invocations
 - ✅ `useLocalStorage` - Stores user preferences and selections
 - ✅ `usePromise` - One-off async operations
+- ✅ `useForm` - Form state management with integrated validation
 - ✅ Standard React: `useState`, `useEffect`
 
 ### Unsupported / Anti-patterns
@@ -128,6 +129,97 @@ API commands:
 - ❌ `useMemo`, `useCallback` - Not available in Raycast
 - ❌ `useCachedPromise` with `execute: true` always - Will refetch on every menu bar open
 - ➡️ Use `execute: isBackgroundRefresh` instead to control when fetches happen
+- ❌ Manual form state management with useState - Use `useForm` instead
+
+## Form Handling with useForm
+
+The `useForm` hook from `@raycast/utils` provides a high-level interface for handling forms with built-in validation and error display.
+
+### Basic Pattern
+
+```typescript
+import { useForm } from "@raycast/utils";
+import { Form, ActionPanel, Action } from "@raycast/api";
+
+interface FormValues {
+  volume: string;
+}
+
+export default function SetVolumeCommand() {
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit(values) {
+      // values are automatically validated before this is called
+      console.log("Valid volume:", values.volume);
+    },
+    initialValues: {
+      volume: "50",
+    },
+    validation: {
+      volume: (value) => {
+        // Return error message string, or undefined/null if valid
+        const num = Number(value);
+        if (!value) return "Volume is required";
+        if (isNaN(num)) return "Enter a number";
+        if (num < 0 || num > 100) return "Enter a number between 0 and 100";
+      },
+    },
+  });
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Set" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Volume" placeholder="0-100" {...itemProps.volume} />
+    </Form>
+  );
+}
+```
+
+### Key Features
+
+- **Automatic validation**: Form won't submit if validation fails
+- **Error display**: Validation errors appear inline on form fields
+- **Type-safe**: Full TypeScript support with generic type parameter
+- **Integrated state**: `itemProps` handles field state automatically
+- **No manual error handling**: Just return error string from validation function
+
+### Validation
+
+Validation rules are functions that:
+
+- Receive the field value
+- Return `undefined` or `null` if valid
+- Return an error string if invalid
+
+```typescript
+validation: {
+  email: (value) => {
+    if (!value) return "Email is required";
+    if (!value.includes("@")) return "Enter a valid email";
+  },
+  age: (value) => {
+    const num = Number(value);
+    if (isNaN(num)) return "Enter a number";
+    if (num < 18) return "Must be 18 or older";
+  },
+}
+```
+
+### Return Value
+
+`useForm` returns:
+
+- **`handleSubmit`**: Pass to `Action.SubmitForm.onSubmit` - handles validation before calling your `onSubmit`
+- **`itemProps`**: Spread onto form fields: `<Form.TextField {...itemProps.fieldName} />`
+- **`values`**: Current form values (updates in real-time)
+- **`setValue`**: Programmatically set a field value
+- **`setValidationError`**: Programmatically set a field error
+- **`focus`**: Programmatically focus a field
+- **`reset`**: Reset form to initial values
 
 ## Menu Bar Command Architecture
 
@@ -200,3 +292,6 @@ export default function MenuBar() {
 - ❌ Very long titles in menu bar items
 - ❌ Ignoring `environment.launchType` in menu bar commands
 - ❌ Modifying README.md (it's published on store)
+- ❌ Managing form state manually with `useState` - Use `useForm` instead
+- ❌ Separating form fields from form validation logic - Keep them in one `useForm` definition
+- ❌ Creating separate form component files for simple forms - Keep commands self-contained

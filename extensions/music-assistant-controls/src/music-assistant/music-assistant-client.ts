@@ -4,6 +4,7 @@ import { storeSelectedQueueID, StoredQueue } from "../player-selection/use-selec
 import * as menuDisplayDelegate from "./delegates/menu-display-delegate";
 import * as playerGroupingDelegate from "./delegates/player-grouping-delegate";
 import * as queueFormattingDelegate from "./delegates/queue-formatting-delegate";
+import { VolumeController, GroupVolumeController, PlayerVolumeController } from "./volume-strategies";
 import {
   PlayerQueue,
   PlayerState,
@@ -216,6 +217,57 @@ export default class MusicAssistantClient {
    */
   async volumeMute(playerId: string, muted: boolean): Promise<void> {
     await executeApiCommand(async (api) => await api.playerCommandVolumeMute(playerId, muted));
+  }
+
+  /**
+   * Create a volume controller (strategy pattern) for the specified player
+   *
+   * Returns the appropriate controller based on player state:
+   * - GroupVolumeController for group leaders with members
+   * - PlayerVolumeController for standalone players or group members
+   *
+   * @param playerId - The unique identifier of the player
+   * @returns VolumeController instance ready to execute volume commands
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * const controller = await client.createVolumeController("living-room-player");
+   * await controller.volumeUp();
+   * ```
+   */
+  async createVolumeController(playerId: string): Promise<VolumeController> {
+    const player = await this.getPlayer(playerId);
+    const useGroupVolume = this.shouldUseGroupVolume(player);
+
+    if (useGroupVolume) {
+      return new GroupVolumeController(player.player_id, this);
+    } else {
+      const targetId = this.getVolumeControlPlayer(player);
+      if (!targetId) {
+        throw new Error("Unable to determine volume control target");
+      }
+      return new PlayerVolumeController(targetId, this);
+    }
+  }
+
+  /**
+   * Create a PlayerVolumeController for explicit individual volume control.
+   * Use this when you explicitly want to control a single player's volume,
+   * even if the player is a group leader. For automatic group/individual routing,
+   * use createVolumeController() instead.
+   *
+   * @param playerId - The unique identifier of the player to control individually
+   * @returns PlayerVolumeController instance for individual volume control
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * // Explicitly control individual speaker in a group
+   * const controller = await client.createPlayerVolumeController("speaker-1");
+   * await controller.volumeUp();
+   * ```
+   */
+  async createPlayerVolumeController(playerId: string): Promise<PlayerVolumeController> {
+    return new PlayerVolumeController(playerId, this);
   }
 
   /**

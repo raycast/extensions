@@ -98,16 +98,11 @@ export default function ManagePlayerGroupsCommand() {
       const player = (players || []).find((p) => p.player_id === playerId);
       if (!player) return;
 
-      const currentVolume = player.volume_level ?? 0;
-      const newVolume = Math.max(0, Math.min(100, currentVolume + delta));
+      const volumeBefore = player.volume_level ?? 0;
+      const newVolume = Math.max(0, Math.min(100, volumeBefore + delta));
 
-      await client.setVolume(playerId, newVolume);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Volume Updated",
-        message: `${displayName}: ${newVolume}%`,
-      });
-      revalidate();
+      const controller = await client.createPlayerVolumeController(playerId);
+      await controller.setVolume(newVolume);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
