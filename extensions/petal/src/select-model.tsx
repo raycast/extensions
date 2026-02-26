@@ -86,7 +86,7 @@ export default function Command() {
                       await revalidate();
                     }}
                   />
-                  <Action.CopyToClipboard title="Copy Model Id" content={model.id} />
+                  <Action.CopyToClipboard title="Copy Model ID" content={model.id} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.ShowInFinder title="Show Models Folder" path={modelsDirectory} />
