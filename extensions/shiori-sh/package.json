@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shiori-sh",
+  "title": "Shiori",
+  "description": "Search, save, and manage your Shiori bookmarks. Mark links as read, delete them, save from clipboard, and track unread count in the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "bookmarks",
+    "read-it-later",
+    "links",
+    "reading list"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Shiori API key (starts with shk_). Get one at shiori.sh → Settings → API."
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "description": "Browse, filter, and manage your saved Shiori links",
+      "mode": "view",
+      "keywords": [
+        "bookmarks",
+        "saved",
+        "reading list"
+      ]
+    },
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "description": "Save a URL to your Shiori library",
+      "mode": "no-view",
+      "keywords": [
+        "bookmark",
+        "add",
+        "new"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": true,
+          "placeholder": "https://example.com"
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "placeholder": "Custom title (optional)"
+        }
+      ]
+    },
+    {
+      "name": "save-tab",
+      "title": "Save Current Tab",
+      "description": "Save the currently open browser tab to Shiori",
+      "mode": "no-view",
+      "keywords": [
+        "bookmark",
+        "browser",
+        "tab",
+        "page"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Unread Links",
+      "description": "Show unread Shiori link count in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.0.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

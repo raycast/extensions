@@ -122,7 +122,6 @@
 /extensions/asoiaf                                                  @xmok
 /extensions/aspect-raytio                                           @ickas
 /extensions/asset-catalog-extractor                                 @chrismessina @pernielsentikaer
-/extensions/associated-press                                        @Dammmien
 /extensions/asyncapi                                                @smoya
 /extensions/at-profile                                              @chrismessina @pedrecal
 /extensions/atlassian-data-center                                   @tofrankie
@@ -212,7 +211,6 @@
 /extensions/blurhash                                                @freaktion-craft
 /extensions/bmrks                                                   @raunofreiberg @peduarte @almoce @xmok
 /extensions/bmw                                                     @aesign
-/extensions/bnf-search-tool                                         @myusualonewastaken
 /extensions/board-game-geek                                         @ghall89
 /extensions/bob                                                     @ViGeng @natsustan @xxxbrian @WangEdward
 /extensions/bonjour                                                 @that70schris
@@ -2093,6 +2091,7 @@
 /extensions/shell-history                                           @koinzhang
 /extensions/shelve                                                  @michaelreinhard1
 /extensions/shiori                                                  @namiwang
+/extensions/shiori-sh                                               @0xdhrv
 /extensions/ship24-client                                           @tsyganov-ivan
 /extensions/shlink                                                  @Xeretis
 /extensions/shodan                                                  @Owanesh

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Inline Detail Panel] - 2026-02-26
+
+- Replace push-to-detail views with inline detail panels across all commands
+- Toggle detail panel visibility with Cmd+D
+- Lazy-load skill content only for the selected item
+
 ## [Install & Remove Skills] - 2026-02-17
 
 - Install skills directly from search and trending commands

@@ -6,6 +6,9 @@ import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 export default function Command() {
   const { skills, isLoading, error, revalidate } = useInstalledSkills();
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isShowingDetail, setIsShowingDetail] = useState(true);
+  const toggleDetail = () => setIsShowingDetail((prev) => !prev);
 
   if (error && skills.length === 0) {
     return (
@@ -34,6 +37,8 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search installed skills..."
+      onSelectionChange={setSelectedId}
+      isShowingDetail={filteredSkills.length > 0 && isShowingDetail}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Agent" value={selectedAgent} storeValue onChange={setSelectedAgent}>
           <List.Dropdown.Item title={`All Agents (${skills.length})`} value="all" />
@@ -56,7 +61,14 @@ export default function Command() {
       ) : (
         <List.Section title="Installed Skills" subtitle={`${filteredSkills.length} skills`}>
           {filteredSkills.map((skill) => (
-            <InstalledSkillListItem key={skill.name} skill={skill} onUpdate={revalidate} />
+            <InstalledSkillListItem
+              key={skill.name}
+              skill={skill}
+              isSelected={selectedId === skill.name}
+              isShowingDetail={isShowingDetail}
+              onToggleDetail={toggleDetail}
+              onUpdate={revalidate}
+            />
           ))}
         </List.Section>
       )}

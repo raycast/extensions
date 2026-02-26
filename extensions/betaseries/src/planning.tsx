@@ -33,6 +33,23 @@ interface PlanningItem {
   code?: string;
 }
 
+function isUpcomingOrToday(date: string): boolean {
+  if (!date) return false;
+
+  const normalizedDate = date.length >= 10 ? date.slice(0, 10) : date;
+  const parsedDate = new Date(normalizedDate);
+  if (Number.isNaN(parsedDate.getTime())) return false;
+
+  const today = new Date();
+  const startOfToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+
+  return parsedDate >= startOfToday;
+}
+
 export default function Command() {
   const { token, isLoading: isTokenLoading, setToken, logout } = useAuthToken();
   const tokenAvailable = Boolean(token);
@@ -45,7 +62,7 @@ export default function Command() {
     { planning?: PlanningItem[]; episodes?: PlanningItem[] } | PlanningItem[],
     MemberPlanning[],
     MemberPlanning[]
-  >(buildBetaSeriesUrl("/planning/member"), {
+  >(buildBetaSeriesUrl("/planning/member", { unseen: "true" }), {
     headers: getHeaders(token),
     execute: tokenAvailable && !isTokenLoading,
     initialData: [],
@@ -124,32 +141,34 @@ export default function Command() {
         title="Nothing in planning"
         description="No upcoming episodes were found."
       />
-      {items.map((item) => (
-        <List.Item
-          key={`${item.episode_id}-${item.show_id}-${item.code}-${item.date}`}
-          title={item.show_title || "Unknown Show"}
-          subtitle={`${item.code || `S${item.season}E${item.episode}`} - ${item.title || "Episode"}`}
-          accessories={[{ text: item.date || "" }]}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Mark as Watched"
-                icon={Icon.CheckCircle}
-                onAction={() => handleMarkAsWatched(item.episode_id)}
-              />
-              <Action.OpenInBrowser
-                url={`https://www.betaseries.com/episode/${item.show_title}/${item.code}`}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-              />
-              <Action
-                title="Logout"
-                icon={Icon.XMarkCircle}
-                onAction={() => void handleLogout()}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {items
+        .filter((item) => isUpcomingOrToday(item.date))
+        .map((item) => (
+          <List.Item
+            key={`${item.episode_id}-${item.show_id}-${item.code}-${item.date}`}
+            title={item.show_title || "Unknown Show"}
+            subtitle={`${item.code || `S${item.season}E${item.episode}`} - ${item.title || "Episode"}`}
+            accessories={[{ text: item.date || "" }]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Mark as Watched"
+                  icon={Icon.CheckCircle}
+                  onAction={() => handleMarkAsWatched(item.episode_id)}
+                />
+                <Action.OpenInBrowser
+                  url={`https://www.betaseries.com/episode/${item.show_title}/${item.code}`}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                />
+                <Action
+                  title="Logout"
+                  icon={Icon.XMarkCircle}
+                  onAction={() => void handleLogout()}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 }
