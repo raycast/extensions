@@ -47,12 +47,7 @@ export function getTargetLabel(target: HtmlTarget): string {
 /**
  * All available output targets for UI rendering.
  */
-export const HTML_TARGETS: readonly HtmlTarget[] = [
-  "html",
-  "google-docs",
-  "word",
-  "slack",
-] as const;
+export const HTML_TARGETS: readonly HtmlTarget[] = ["html", "google-docs", "word", "slack"] as const;
 
 /**
  * Default styles for Google Docs compatibility.
@@ -82,8 +77,7 @@ const GOOGLE_DOCS_STYLES = {
   th: "border:1px solid #000000;padding:5pt;",
   td: "border:1px solid #000000;padding:5pt;",
   // Block elements
-  blockquote:
-    "border-left:4px solid #d0d0d0;margin-left:0;padding-left:16px;color:#666666;font-style:italic;",
+  blockquote: "border-left:4px solid #d0d0d0;margin-left:0;padding-left:16px;color:#666666;font-style:italic;",
 } as const;
 
 /**
@@ -114,8 +108,7 @@ const WORD_STYLES = {
   th: "border:1pt solid #000000;padding:5pt;font-weight:bold;background-color:#D9E2F3;",
   td: "border:1pt solid #000000;padding:5pt;",
   // Block elements
-  blockquote:
-    "border-left:4pt solid #5B9BD5;margin-left:0;padding-left:12pt;color:#595959;font-style:italic;",
+  blockquote: "border-left:4pt solid #5B9BD5;margin-left:0;padding-left:12pt;color:#595959;font-style:italic;",
 } as const;
 
 type StyleMap = typeof GOOGLE_DOCS_STYLES;
@@ -128,10 +121,7 @@ type ElementName = keyof StyleMap;
  * @param target - The target application
  * @returns The inline style string, or empty string for generic HTML
  */
-export function getElementStyle(
-  element: ElementName,
-  target: HtmlTarget,
-): string {
+export function getElementStyle(element: ElementName, target: HtmlTarget): string {
   switch (target) {
     case "google-docs":
       return GOOGLE_DOCS_STYLES[element] || "";
@@ -151,10 +141,7 @@ export function getElementStyle(
  * @param target - The target application
  * @returns Complete HTML document or fragment
  */
-export function wrapHtmlForTarget(
-  bodyHtml: string,
-  target: HtmlTarget,
-): string {
+export function wrapHtmlForTarget(bodyHtml: string, target: HtmlTarget): string {
   switch (target) {
     case "word":
       // Word requires specific xmlns declarations for proper paste

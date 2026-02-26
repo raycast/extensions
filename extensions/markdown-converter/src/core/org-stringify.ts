@@ -24,9 +24,7 @@ export function toOrg(tree: Node): string {
   if (!("children" in tree)) {
     return "";
   }
-  return (
-    serializeChildren((tree as Parent).children, { depth: 0 }).trim() + "\n"
-  );
+  return serializeChildren((tree as Parent).children, { depth: 0 }).trim() + "\n";
 }
 
 function serializeChildren(nodes: Node[], ctx: Context): string {
@@ -90,10 +88,7 @@ function serializeNode(node: Node, ctx: Context): string {
       let content = "";
       for (const child of item.children) {
         if (child.type === "paragraph") {
-          content += serializeChildren(
-            (child as import("mdast").Paragraph).children,
-            ctx,
-          );
+          content += serializeChildren((child as import("mdast").Paragraph).children, ctx);
         } else if (child.type === "list") {
           content += "\n" + serializeNode(child, ctx);
         } else {
@@ -189,9 +184,7 @@ function serializeNode(node: Node, ctx: Context): string {
  */
 function serializeTable(node: import("mdast").Table, ctx: Context): string {
   const rows = node.children.map((row) => {
-    const cells = row.children.map((cell) =>
-      serializeChildren(cell.children, ctx).trim(),
-    );
+    const cells = row.children.map((cell) => serializeChildren(cell.children, ctx).trim());
     return "| " + cells.join(" | ") + " |";
   });
 

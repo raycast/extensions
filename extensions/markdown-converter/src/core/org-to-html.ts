@@ -3,11 +3,7 @@
  * Converts Org syntax to styled HTML for pasting into rich text editors.
  */
 
-import {
-  HtmlTarget,
-  getElementStyle,
-  wrapHtmlForTarget,
-} from "./html-targets.js";
+import { HtmlTarget, getElementStyle, wrapHtmlForTarget } from "./html-targets.js";
 
 /**
  * Options for Org to HTML conversion.
@@ -42,9 +38,7 @@ function parseHeadingTags(headingText: string): {
   tags: string[];
 } {
   // Match tags at the end: :tag1:tag2: (must end with colon)
-  const tagMatch = headingText.match(
-    /\s+(:[a-zA-Z0-9_@#%]+(?::[a-zA-Z0-9_@#%]+)*:)\s*$/,
-  );
+  const tagMatch = headingText.match(/\s+(:[a-zA-Z0-9_@#%]+(?::[a-zA-Z0-9_@#%]+)*:)\s*$/);
   if (tagMatch) {
     const tagString = tagMatch[1];
     // Extract individual tags (split by : and filter empty)
@@ -62,9 +56,7 @@ function renderTags(tags: string[], target: HtmlTarget): string {
   if (tags.length === 0) return "";
 
   const style = getTagStyle(target);
-  return tags
-    .map((tag) => `<span style="${style}">${escapeHtml(tag)}</span>`)
-    .join(" ");
+  return tags.map((tag) => `<span style="${style}">${escapeHtml(tag)}</span>`).join(" ");
 }
 
 /**
@@ -107,10 +99,7 @@ function stripPropertyDrawers(org: string): string {
  * @param options - Conversion options including target application
  * @returns HTML string optimized for the target application
  */
-export function convertOrgToHtml(
-  org: string,
-  options: OrgToHtmlOptions = {},
-): string {
+export function convertOrgToHtml(org: string, options: OrgToHtmlOptions = {}): string {
   if (!org || typeof org !== "string") {
     return "";
   }
@@ -137,9 +126,7 @@ export function convertOrgToHtml(
     if (paragraphLines.length > 0) {
       const pStyle = getElementStyle("p", target);
       const pStyleAttr = pStyle ? ` style="${pStyle}"` : "";
-      const content = paragraphLines
-        .map((l) => convertInlineFormatting(l, target))
-        .join(" ");
+      const content = paragraphLines.map((l) => convertInlineFormatting(l, target)).join(" ");
       htmlLines.push(`<p${pStyleAttr}>${content}</p>`);
       paragraphLines = [];
     }
@@ -176,18 +163,14 @@ export function convertOrgToHtml(
         const codeStyle =
           "font-family:'Consolas','Courier New',monospace;font-size:11pt;line-height:1.5;margin:12pt 0;";
         const escapedLines = codeBlockContent.map(escapeHtml);
-        htmlLines.push(
-          `<p style="${codeStyle}">${escapedLines.join("<br>")}</p>`,
-        );
+        htmlLines.push(`<p style="${codeStyle}">${escapedLines.join("<br>")}</p>`);
       } else {
         const preStyle = getElementStyle("pre", target);
         const codeStyle = getElementStyle("code", target);
         const preStyleAttr = preStyle ? ` style="${preStyle}"` : "";
         const codeStyleAttr = codeStyle ? ` style="${codeStyle}"` : "";
         const escapedCode = codeBlockContent.map(escapeHtml).join("\n");
-        htmlLines.push(
-          `<pre${preStyleAttr}><code${codeStyleAttr}>${escapedCode}</code></pre>`,
-        );
+        htmlLines.push(`<pre${preStyleAttr}><code${codeStyleAttr}>${escapedCode}</code></pre>`);
       }
       inCodeBlock = false;
       continue;
@@ -229,9 +212,7 @@ export function convertOrgToHtml(
     }
 
     // Standalone timestamp lines: [2026-01-14 Wed 11:49] or <2026-01-14 Wed>
-    const timestampLineMatch = line.match(
-      /^\s*([[<]\d{4}-\d{2}-\d{2}( [A-Za-z]{2,3})?( \d{1,2}:\d{2})?[\]>])\s*$/,
-    );
+    const timestampLineMatch = line.match(/^\s*([[<]\d{4}-\d{2}-\d{2}( [A-Za-z]{2,3})?( \d{1,2}:\d{2})?[\]>])\s*$/);
     if (timestampLineMatch) {
       flushParagraph();
       flushList();
@@ -328,24 +309,17 @@ function convertInlineFormatting(text: string, target: HtmlTarget): string {
 
   // Extract links first (before escaping)
   // Links with description: [[url][text]]
-  result = result.replace(
-    /\[\[([^\]]+)\]\[([^\]]+)\]\]/g,
-    (_, url, linkText) => {
-      const style = getElementStyle("a", target);
-      const styleAttr = style ? ` style="${style}"` : "";
-      return addPlaceholder(
-        `<a href="${escapeHtml(url)}"${styleAttr}>${escapeHtml(linkText)}</a>`,
-      );
-    },
-  );
+  result = result.replace(/\[\[([^\]]+)\]\[([^\]]+)\]\]/g, (_, url, linkText) => {
+    const style = getElementStyle("a", target);
+    const styleAttr = style ? ` style="${style}"` : "";
+    return addPlaceholder(`<a href="${escapeHtml(url)}"${styleAttr}>${escapeHtml(linkText)}</a>`);
+  });
 
   // Links without description: [[url]]
   result = result.replace(/\[\[([^\]]+)\]\]/g, (_, url) => {
     const style = getElementStyle("a", target);
     const styleAttr = style ? ` style="${style}"` : "";
-    return addPlaceholder(
-      `<a href="${escapeHtml(url)}"${styleAttr}>${escapeHtml(url)}</a>`,
-    );
+    return addPlaceholder(`<a href="${escapeHtml(url)}"${styleAttr}>${escapeHtml(url)}</a>`);
   });
 
   // Inline code first (before escaping, so we can escape the code content properly)
@@ -398,20 +372,14 @@ function convertInlineFormatting(text: string, target: HtmlTarget): string {
  * @param target - Target application for styling
  * @param ordered - Whether this is an ordered (numbered) list
  */
-function renderList(
-  items: string[],
-  target: HtmlTarget,
-  ordered: boolean = false,
-): string {
+function renderList(items: string[], target: HtmlTarget, ordered: boolean = false): string {
   const tag = ordered ? "ol" : "ul";
   const listStyle = getElementStyle(tag as "ul", target);
   const liStyle = getElementStyle("li", target);
   const listStyleAttr = listStyle ? ` style="${listStyle}"` : "";
   const liStyleAttr = liStyle ? ` style="${liStyle}"` : "";
 
-  const listHtml = items
-    .map((item) => `<li${liStyleAttr}>${item}</li>`)
-    .join("\n");
+  const listHtml = items.map((item) => `<li${liStyleAttr}>${item}</li>`).join("\n");
 
   return `<${tag}${listStyleAttr}>\n${listHtml}\n</${tag}>`;
 }

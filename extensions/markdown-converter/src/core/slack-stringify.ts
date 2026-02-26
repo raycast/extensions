@@ -33,9 +33,7 @@ export function toSlack(tree: Node): string {
   if (!("children" in tree)) {
     return "";
   }
-  return (
-    serializeChildren((tree as Parent).children, { depth: 0 }).trim() + "\n"
-  );
+  return serializeChildren((tree as Parent).children, { depth: 0 }).trim() + "\n";
 }
 
 /**
@@ -45,10 +43,7 @@ export function toSlack(tree: Node): string {
  * @returns Escaped text safe for Slack
  */
 function escapeSlack(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function serializeChildren(nodes: Node[], ctx: Context): string {
@@ -117,10 +112,7 @@ function serializeNode(node: Node, ctx: Context): string {
       let content = "";
       for (const child of item.children) {
         if (child.type === "paragraph") {
-          content += serializeChildren(
-            (child as import("mdast").Paragraph).children,
-            ctx,
-          );
+          content += serializeChildren((child as import("mdast").Paragraph).children, ctx);
         } else if (child.type === "list") {
           content += "\n" + serializeNode(child, ctx);
         } else {

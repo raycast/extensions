@@ -41,10 +41,7 @@ export class RaycastClipboardAdapter implements ClipboardAdapter {
         if (content && typeof content === "string" && content.trim()) {
           // Check if it actually contains HTML tags
           if (content.includes("<") && content.includes(">")) {
-            debugLog(
-              `Found HTML content (${content.length} chars):`,
-              content.substring(0, 200) + "...",
-            );
+            debugLog(`Found HTML content (${content.length} chars):`, content.substring(0, 200) + "...");
 
             return content;
           }
@@ -61,12 +58,7 @@ export class RaycastClipboardAdapter implements ClipboardAdapter {
           encoding: "utf8",
         });
 
-        debugLog(
-          "Default content:",
-          typeof defaultContent,
-          defaultContent.length,
-          defaultContent.substring(0, 100),
-        );
+        debugLog("Default content:", typeof defaultContent, defaultContent.length, defaultContent.substring(0, 100));
       } catch (error) {
         debugLog("Default pbpaste failed:", error);
       }

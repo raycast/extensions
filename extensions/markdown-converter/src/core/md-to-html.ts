@@ -10,11 +10,7 @@ import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 import rehypeStringify from "rehype-stringify";
 import type { Root as HastRoot, Element, ElementContent } from "hast";
-import {
-  HtmlTarget,
-  getElementStyle,
-  wrapHtmlForTarget,
-} from "./html-targets.js";
+import { HtmlTarget, getElementStyle, wrapHtmlForTarget } from "./html-targets.js";
 
 /**
  * Options for Markdown to HTML conversion.
@@ -40,9 +36,7 @@ export function stripYamlFrontMatter(markdown: string): string {
 
   // Find the closing delimiter (--- or ...)
   // Must be on its own line after the opening ---
-  const closingMatch = markdown.match(
-    /^---\r?\n[\s\S]*?\r?\n(---|\.\.\.)\r?\n/,
-  );
+  const closingMatch = markdown.match(/^---\r?\n[\s\S]*?\r?\n(---|\.\.\.)\r?\n/);
   if (closingMatch) {
     return markdown.slice(closingMatch[0].length);
   }
@@ -59,10 +53,7 @@ export function stripYamlFrontMatter(markdown: string): string {
  * @param options - Conversion options including target application
  * @returns HTML string optimized for the target application
  */
-export function convertMarkdownToHtml(
-  markdown: string,
-  options: MdToHtmlOptions = {},
-): string {
+export function convertMarkdownToHtml(markdown: string, options: MdToHtmlOptions = {}): string {
   if (!markdown || typeof markdown !== "string") {
     return "";
   }
@@ -101,10 +92,7 @@ export function convertMarkdownToHtml(
  * @param options - Conversion options including target application
  * @returns HTML string with paragraph structure
  */
-export function convertPlainTextToHtml(
-  text: string,
-  options: MdToHtmlOptions = {},
-): string {
+export function convertPlainTextToHtml(text: string, options: MdToHtmlOptions = {}): string {
   // Treat plain text as Markdown - it's a superset, so this just works
   return convertMarkdownToHtml(text, options);
 }
@@ -122,10 +110,7 @@ function addTargetStyles(options: { target: HtmlTarget }) {
         addStyleToElement(node, target, listDepth);
 
         // For Google Docs, wrap table cell content in p>span with explicit font-weight
-        if (
-          target === "google-docs" &&
-          (node.tagName === "td" || node.tagName === "th")
-        ) {
+        if (target === "google-docs" && (node.tagName === "td" || node.tagName === "th")) {
           wrapCellContentForGoogleDocs(node);
         }
       }
@@ -159,11 +144,7 @@ const STYLED_ELEMENTS = new Set([
 /**
  * Adds inline style to an element based on target.
  */
-function addStyleToElement(
-  element: Element,
-  target: HtmlTarget,
-  listDepth: number,
-): void {
+function addStyleToElement(element: Element, target: HtmlTarget, listDepth: number): void {
   const tagName = element.tagName.toLowerCase();
 
   if (!STYLED_ELEMENTS.has(tagName)) {
@@ -192,19 +173,14 @@ function addStyleToElement(
   let style = getElementStyle(tagName as StyledElementName, target);
 
   // For Word, adjust list styles based on nesting depth
-  if (
-    target === "word" &&
-    (tagName === "ul" || tagName === "ol" || tagName === "li")
-  ) {
+  if (target === "word" && (tagName === "ul" || tagName === "ol" || tagName === "li")) {
     style = getWordListStyle(tagName, listDepth);
   }
 
   if (style) {
     element.properties = element.properties || {};
     const existingStyle = (element.properties.style as string) || "";
-    element.properties.style = existingStyle
-      ? `${existingStyle};${style}`
-      : style;
+    element.properties.style = existingStyle ? `${existingStyle};${style}` : style;
   }
 }
 
@@ -240,10 +216,7 @@ function visitNodesWithDepth(
     for (const child of node.children) {
       // Calculate depth: increment when this node IS a list container
       let childDepth = listDepth;
-      if (
-        child.type === "element" &&
-        (child.tagName === "ul" || child.tagName === "ol")
-      ) {
+      if (child.type === "element" && (child.tagName === "ul" || child.tagName === "ol")) {
         childDepth = listDepth + 1;
       }
 
@@ -251,11 +224,7 @@ function visitNodesWithDepth(
       visitor(child as ElementContent, childDepth);
 
       // Recurse with the same depth (children of lists inherit list depth)
-      visitNodesWithDepth(
-        child as HastRoot | ElementContent,
-        childDepth,
-        visitor,
-      );
+      visitNodesWithDepth(child as HastRoot | ElementContent, childDepth, visitor);
     }
   }
 }

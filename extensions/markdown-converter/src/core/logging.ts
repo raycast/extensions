@@ -4,12 +4,7 @@
  */
 
 type LogLevel = "debug" | "info" | "warn" | "error";
-type LogComponent =
-  | "converter"
-  | "clipboard"
-  | "dom-parser"
-  | "chrome-popup"
-  | "raycast-ui";
+type LogComponent = "converter" | "clipboard" | "dom-parser" | "chrome-popup" | "raycast-ui";
 
 // Simple standardized logging function
 // Creates consistent [mdconv:component] patterns for easy scanning
@@ -25,12 +20,7 @@ import { debugConfig } from "./env.js";
  * @param message - Log message content
  * @param data - Optional additional data to include in the log
  */
-export function mdlog(
-  level: LogLevel,
-  component: LogComponent,
-  message: string,
-  data?: unknown,
-): void {
+export function mdlog(level: LogLevel, component: LogComponent, message: string, data?: unknown): void {
   // Skip debug logs in production/test environments
   if (level === "debug") {
     if (debugConfig.isTest) return;
@@ -38,8 +28,7 @@ export function mdlog(
   }
 
   const prefix = `[mdconv:${component}]`;
-  const logMessage =
-    data !== undefined ? `${prefix} ${message}` : `${prefix} ${message}`;
+  const logMessage = data !== undefined ? `${prefix} ${message}` : `${prefix} ${message}`;
 
   switch (level) {
     case "debug":

@@ -12,8 +12,7 @@ export default async function ConvertClipboard() {
       await showHUD("✗ No rich text found in clipboard");
     }
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     await showHUD(`✗ Conversion failed: ${errorMessage}`);
   }
 }

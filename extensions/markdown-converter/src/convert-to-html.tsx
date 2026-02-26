@@ -4,10 +4,7 @@
  */
 import { Clipboard, showHUD } from "@raycast/api";
 import { detectInputFormat, getFormatLabel } from "./core/format-detection.js";
-import {
-  convertMarkdownToHtml,
-  convertPlainTextToHtml,
-} from "./core/md-to-html.js";
+import { convertMarkdownToHtml, convertPlainTextToHtml } from "./core/md-to-html.js";
 import { convertOrgToHtml } from "./core/org-to-html.js";
 import { HtmlTarget } from "./core/html-targets.js";
 
@@ -52,8 +49,7 @@ export default async function ConvertToHtml() {
 
     await showHUD(`✓ Converted ${formatLabel} to HTML`);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     await showHUD(`✗ Conversion failed: ${errorMessage}`);
   }
 }

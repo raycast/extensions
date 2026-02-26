@@ -34,8 +34,7 @@ export default async function ConvertToSlack() {
 
     await showHUD(`✓ Converted ${formatLabel} to Slack mrkdwn`);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     await showHUD(`✗ Conversion failed: ${errorMessage}`);
   }
 }

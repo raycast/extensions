@@ -106,9 +106,7 @@ export class RaycastDOMParserAdapter implements DOMParserAdapter {
           clone.textContent = this.textContent;
           if (deep) {
             this.childNodes.forEach((child: any) => {
-              clone.appendChild(
-                child.cloneNode ? child.cloneNode(true) : child,
-              );
+              clone.appendChild(child.cloneNode ? child.cloneNode(true) : child);
             });
           }
           return clone;

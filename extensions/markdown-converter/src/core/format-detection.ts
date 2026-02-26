@@ -117,8 +117,7 @@ export function detectInputFormat(text: string): DetectedFormat {
   if (/:[a-zA-Z0-9_@#%]+(?::[a-zA-Z0-9_@#%]+)*:\s*$/m.test(text)) orgScore += 5;
 
   // Org timestamps: [2026-01-14 Wed] or <2026-01-14 Wed>
-  if (/[[<]\d{4}-\d{2}-\d{2}( [A-Za-z]{2,3})?( \d{1,2}:\d{2})?[\]>]/.test(text))
-    orgScore += 3;
+  if (/[[<]\d{4}-\d{2}-\d{2}( [A-Za-z]{2,3})?( \d{1,2}:\d{2})?[\]>]/.test(text)) orgScore += 3;
 
   // === LOW-CONFIDENCE / AMBIGUOUS PATTERNS (1 point each) ===
   // These appear in both formats but lean one way

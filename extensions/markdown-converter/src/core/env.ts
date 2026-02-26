@@ -9,9 +9,7 @@
 function getProcessEnv(): Record<string, string | undefined> {
   if (typeof globalThis !== "undefined") {
     const g = globalThis as Record<string, unknown>;
-    const proc = g.process as
-      | { env: Record<string, string | undefined> }
-      | undefined;
+    const proc = g.process as { env: Record<string, string | undefined> } | undefined;
     if (proc?.env) return proc.env;
   }
   return {};
@@ -34,9 +32,7 @@ export const debugConfig = {
 
   /** Enable clipboard debugging in Raycast adapter */
   get clipboardDebug(): boolean {
-    return ["1", "true", "TRUE"].includes(
-      getProcessEnv().MDCONV_DEBUG_CLIPBOARD ?? "",
-    );
+    return ["1", "true", "TRUE"].includes(getProcessEnv().MDCONV_DEBUG_CLIPBOARD ?? "");
   },
 
   /** Check if running in test environment */
@@ -85,8 +81,7 @@ export function createUtf8Env(baseLocale?: string): Record<string, string> {
 
   // Derive base locale from LC_ALL or default to en_US
   // Handle complex Raycast locales like "en_US-u-hc-h12-u-ca-gregory-u-nu-latn"
-  const derivedLocale =
-    baseLocale || currentLcAll?.split("-")[0]?.split(".")[0] || "en_US";
+  const derivedLocale = baseLocale || currentLcAll?.split("-")[0]?.split(".")[0] || "en_US";
   const utf8Locale = `${derivedLocale}.UTF-8`;
 
   // Debug logging for locale normalization

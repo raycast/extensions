@@ -2,19 +2,15 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    // Raycast defaults
-    "target": "es2021",
-    "jsx": "react-jsx",
+    "lib": ["ES2023"],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "outDir": "dist",
-
-    "module": "commonjs",
-    "strict": true,
-    // Override: shared converter code needs DOM types (uses linkedom at runtime)
-    "lib": ["es2021", "DOM", "DOM.Iterable"]
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
   }
 }
