@@ -440,28 +440,6 @@ describe("MusicAssistantClient", () => {
       });
     });
 
-    describe("shouldUpdateTitle", () => {
-      it("should return true when new title is different", () => {
-        const result = client.shouldUpdateTitle("Old Song", "New Song");
-        expect(result).toBe(true);
-      });
-
-      it("should return false when titles are the same", () => {
-        const result = client.shouldUpdateTitle("Same Song", "Same Song");
-        expect(result).toBe(false);
-      });
-
-      it("should return true when new title is undefined and current title exists", () => {
-        const result = client.shouldUpdateTitle("Current Song", undefined);
-        expect(result).toBe(true);
-      });
-
-      it("should return false when both titles are undefined", () => {
-        const result = client.shouldUpdateTitle(undefined, undefined);
-        expect(result).toBe(false);
-      });
-    });
-
     describe("getPlayPauseButtonText", () => {
       it("should return Pause when playing", () => {
         const result = client.getPlayPauseButtonText(PlayerState.PLAYING);

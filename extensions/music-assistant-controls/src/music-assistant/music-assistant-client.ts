@@ -245,23 +245,6 @@ export default class MusicAssistantClient {
   }
 
   /**
-   * Determines if the title should be updated based on current and new titles
-   *
-   * @param currentTitle - The currently displayed title
-   * @param newTitle - The new title to potentially display
-   * @returns True if the title should be updated, false otherwise
-   * @example
-   * ```typescript
-   * if (client.shouldUpdateTitle(currentTitle, newTitle)) {
-   *   setTitle(newTitle);
-   * }
-   * ```
-   */
-  shouldUpdateTitle(currentTitle: string | undefined, newTitle: string | undefined): boolean {
-    return menuDisplayDelegate.shouldUpdateTitle(currentTitle, newTitle);
-  }
-
-  /**
    * Gets the currently playing song from a player's media info
    *
    * Extracts song title and artist from player.current_media and formats them.

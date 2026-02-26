@@ -20,10 +20,6 @@ export function getDisplayTitle(queue?: PlayerQueue): string | undefined {
   return queue.current_item?.name;
 }
 
-export function shouldUpdateTitle(currentTitle: string | undefined, newTitle: string | undefined): boolean {
-  return newTitle !== currentTitle;
-}
-
 export function getCurrentlyPlayingSong(player?: Player): string {
   if (!player?.current_media?.title) return "";
   const parts = [player.current_media.title];

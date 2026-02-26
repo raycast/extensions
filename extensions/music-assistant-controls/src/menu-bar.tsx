@@ -1,59 +1,42 @@
-import { Icon, MenuBarExtra, Image, environment, LaunchType } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Icon, MenuBarExtra, Image, LaunchType, launchCommand } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { Player, PlayerQueue } from "./music-assistant/external-code/interfaces";
 import MusicAssistantClient from "./music-assistant/music-assistant-client";
-import { useEffect } from "react";
 import { getStoredQueue, storeSelectedQueueID } from "./player-selection/use-selected-player-id";
 
 export default function Command() {
   const client = new MusicAssistantClient();
-  const isBackgroundRefresh = environment.launchType === LaunchType.Background;
 
   // Fetch both in parallel with automatic caching
   const {
-    data: { queuesData = [], playersData = [] } = {},
+    data: { queuesData = [], playersData = [], storedQueueId } = {},
     isLoading,
     revalidate,
   } = useCachedPromise(
     async () => {
-      const [queuesData, playersData] = await Promise.all([client.getActiveQueues(), client.getPlayers()]);
-      return { queuesData, playersData };
+      const [queuesData, playersData, storedQueueId] = await Promise.all([
+        client.getActiveQueues(),
+        client.getPlayers(),
+        getStoredQueue(),
+      ]);
+      return { queuesData, playersData, storedQueueId };
     },
     [],
     {
       keepPreviousData: true,
-      execute: isBackgroundRefresh,
     },
   );
 
-  const { data: storedQueueId, revalidate: revalidateStoredQueueId } = useCachedPromise(getStoredQueue, [], {
-    keepPreviousData: true,
-    execute: isBackgroundRefresh,
-  });
-
-  const [title, setTitle] = useCachedState<string>("menu-bar-title");
-
-  useEffect(() => {
-    const activeQueue = client.findActiveQueue(queuesData, storedQueueId);
-    const displayQueue = client.getDisplayQueueForMenuBar(activeQueue, playersData, queuesData);
-
-    const newTitle = client.getDisplayTitle(displayQueue);
-
-    if (client.shouldUpdateTitle(title, newTitle)) {
-      setTitle(newTitle);
-    }
-  }, [storedQueueId, queuesData, playersData]);
+  const activeQueue = client.findActiveQueue(queuesData, storedQueueId);
+  const displayQueue = client.getDisplayQueueForMenuBar(activeQueue, playersData, queuesData);
+  const title = client.getDisplayTitle(displayQueue);
 
   const selectPlayerForMenuBar = async (queue: PlayerQueue) => {
     const selection = client.createQueueSelection(queue);
 
-    if (selection.title) {
-      setTitle(selection.title);
-    }
-
     if (storedQueueId?.queue_id !== selection.queueId) {
       await storeSelectedQueueID(selection.queueId);
-      revalidateStoredQueueId();
+      revalidate();
     }
   };
 
@@ -61,7 +44,6 @@ export default function Command() {
     return playersData.find((p) => p.player_id === playerId);
   };
 
-  const activeQueue = client.findActiveQueue(queuesData, storedQueueId);
   const displayableQueues = client.getDisplayableQueues(queuesData, playersData);
   const activeDisplayQueue = client.getDisplayQueueForMenuBar(activeQueue, playersData, queuesData);
   const inactiveQueues = displayableQueues.filter((q) => q.queue_id !== activeDisplayQueue?.queue_id);
@@ -83,7 +65,12 @@ export default function Command() {
                 : Icon.Music
             }
             title={client.getQueueCurrentSong(activeDisplayQueue)}
-            onAction={async () => await selectPlayerForMenuBar(activeDisplayQueue)}
+            onAction={async () =>
+              await launchCommand({
+                name: "current-track",
+                type: LaunchType.UserInitiated,
+              })
+            }
           />
           <MenuBarExtra.Item
             title="Next"
