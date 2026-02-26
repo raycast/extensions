@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import MusicAssistantClient from "../music-assistant-client";
 import { getSelectedQueueID } from "../use-selected-player-id";
 import { commandOrControlShortcut } from "../shortcuts";
-import { formatDuration, getNextRepeatMode } from "./helpers";
+import { formatDuration } from "./helpers";
 import { QueueManagerData } from "./types";
 
 interface QueueManagerTabProps {
@@ -58,14 +58,14 @@ export function QueueManagerTab({ client }: QueueManagerTabProps) {
   const moveItem = async (itemId: string, direction: "up" | "down" | "next") => {
     if (!queueId) return;
 
-    const posShift = direction === "up" ? -1 : direction === "down" ? 1 : 0;
+    const posShift = client.getQueueMovePositionShift(direction);
 
     try {
       await client.queueCommandMoveItem(queueId, itemId, posShift);
       await showToast({
         style: Toast.Style.Success,
         title: "Item Moved",
-        message: `Moved ${direction === "next" ? "to next" : direction}`,
+        message: client.getQueueMoveFeedback(direction),
       });
       revalidate();
     } catch (error) {
@@ -131,7 +131,7 @@ export function QueueManagerTab({ client }: QueueManagerTabProps) {
   const cycleRepeat = async () => {
     if (!queueId || !queueData?.queue) return;
 
-    const nextMode = getNextRepeatMode(queueData.queue.repeat_mode);
+    const nextMode = client.getNextRepeatMode(queueData.queue.repeat_mode);
 
     try {
       await client.queueCommandRepeat(queueId, nextMode);

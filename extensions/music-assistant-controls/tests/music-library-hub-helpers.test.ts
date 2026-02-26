@@ -1,11 +1,5 @@
-import { Album, Artist, RepeatMode } from "../src/external-code/interfaces";
-import {
-  formatDuration,
-  getBreadcrumb,
-  getBrowseSubtitle,
-  getNextRepeatMode,
-  getRecentlyPlayedIcon,
-} from "../src/music-library-hub/helpers";
+import { Album, Artist } from "../src/external-code/interfaces";
+import { formatDuration, getBreadcrumb, getBrowseSubtitle, getRecentlyPlayedIcon } from "../src/music-library-hub/helpers";
 import { BreadcrumbState } from "../src/music-library-hub/types";
 
 jest.mock("@raycast/api");
@@ -26,12 +20,6 @@ describe("music-library-hub helpers", () => {
     expect(getBrowseSubtitle("albums")).toBe("Albums");
     expect(getBrowseSubtitle("playlists")).toBe("Playlists");
     expect(getBrowseSubtitle("album-detail", "Artist > Album")).toBe("Artist > Album");
-  });
-
-  it("cycles repeat mode OFF -> ALL -> ONE -> OFF", () => {
-    expect(getNextRepeatMode(RepeatMode.OFF)).toBe(RepeatMode.ALL);
-    expect(getNextRepeatMode(RepeatMode.ALL)).toBe(RepeatMode.ONE);
-    expect(getNextRepeatMode(RepeatMode.ONE)).toBe(RepeatMode.OFF);
   });
 
   it("formats duration safely", () => {

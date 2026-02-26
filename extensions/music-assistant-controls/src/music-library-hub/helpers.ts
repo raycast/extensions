@@ -1,5 +1,4 @@
 import { Color, Icon } from "@raycast/api";
-import { RepeatMode } from "../external-code/interfaces";
 import { BreadcrumbState, BrowseView } from "./types";
 
 export function getBreadcrumb(state: BreadcrumbState): string | undefined {
@@ -21,16 +20,6 @@ export function getBrowseSubtitle(view: BrowseView, breadcrumb?: string): string
   if (view === "albums") return "Albums";
   if (view === "playlists") return "Playlists";
   return breadcrumb;
-}
-
-export function getNextRepeatMode(repeatMode: RepeatMode): RepeatMode {
-  if (repeatMode === RepeatMode.OFF) {
-    return RepeatMode.ALL;
-  }
-  if (repeatMode === RepeatMode.ALL) {
-    return RepeatMode.ONE;
-  }
-  return RepeatMode.OFF;
 }
 
 export function formatDuration(duration?: number): string {

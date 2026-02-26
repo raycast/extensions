@@ -166,7 +166,10 @@ export default function CurrentTrackCommand() {
 
   // Build markdown content for the detail view (left column with album art and title)
   const buildMarkdown = (): string => {
-    return getCurrentTrackMarkdown(queueData?.current_item?.name, queueData ? client.getQueueAlbumArt(queueData) : undefined);
+    return getCurrentTrackMarkdown(
+      queueData?.current_item?.name,
+      queueData ? client.getQueueAlbumArt(queueData) : undefined,
+    );
   };
 
   /**

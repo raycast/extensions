@@ -2,7 +2,7 @@ import MusicAssistantClient from "../src/music-assistant-client";
 import executeApiCommand from "../src/api-command";
 import { showHUD } from "@raycast/api";
 import { storeSelectedQueueID } from "../src/use-selected-player-id";
-import { PlayerQueue, PlayerState } from "../src/external-code/interfaces";
+import { PlayerQueue, PlayerState, RepeatMode } from "../src/external-code/interfaces";
 import { StoredQueue } from "../src/use-selected-player-id";
 
 // Mock the dependencies
@@ -1718,6 +1718,45 @@ describe("MusicAssistantClient", () => {
         await client.playMedia(mockTrack as any, "queue-123", "add" as any);
 
         expect(mockApi.playMedia).toHaveBeenCalledWith(mockTrack, "add", false, undefined, "queue-123");
+      });
+    });
+
+    describe("queue helper methods", () => {
+      it("should add media to queue with NEXT option", async () => {
+        const mockTrack = { item_id: "track-1", name: "Test Track" };
+        const mockApi = {
+          playMedia: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.addToQueueNext(mockTrack as any, "queue-123");
+
+        expect(mockApi.playMedia).toHaveBeenCalledWith(mockTrack, "next", false, undefined, "queue-123");
+      });
+
+      it("should format add-to-queue message", () => {
+        expect(client.formatAddToQueueNextMessage("Track Name")).toBe('"Track Name" will play next');
+      });
+
+      it("should map move directions to API position shifts", () => {
+        expect(client.getQueueMovePositionShift("up")).toBe(-1);
+        expect(client.getQueueMovePositionShift("down")).toBe(1);
+        expect(client.getQueueMovePositionShift("next")).toBe(0);
+      });
+
+      it("should return move feedback text for each direction", () => {
+        expect(client.getQueueMoveFeedback("up")).toBe("Moved up");
+        expect(client.getQueueMoveFeedback("down")).toBe("Moved down");
+        expect(client.getQueueMoveFeedback("next")).toBe("Moved to next");
+      });
+
+      it("should cycle repeat mode OFF -> ALL -> ONE -> OFF", () => {
+        expect(client.getNextRepeatMode(RepeatMode.OFF)).toBe(RepeatMode.ALL);
+        expect(client.getNextRepeatMode(RepeatMode.ALL)).toBe(RepeatMode.ONE);
+        expect(client.getNextRepeatMode(RepeatMode.ONE)).toBe(RepeatMode.OFF);
       });
     });
 

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { MediaItemType, QueueOption } from "../external-code/interfaces";
+import { MediaItemType } from "../external-code/interfaces";
 import MusicAssistantClient from "../music-assistant-client";
 import { getSelectedQueueID } from "../use-selected-player-id";
 import { getBreadcrumb, getBrowseSubtitle } from "./helpers";
@@ -63,11 +63,11 @@ export function BrowseTab({ client, browseState, setBrowseState }: BrowseTabProp
     }
 
     try {
-      await client.playMedia(item, queueId, QueueOption.NEXT);
+      await client.addToQueueNext(item, queueId);
       await showToast({
         style: Toast.Style.Success,
         title: "Added to Queue",
-        message: `"${itemName}" will play next`,
+        message: client.formatAddToQueueNextMessage(itemName),
       });
       revalidate();
     } catch (error) {

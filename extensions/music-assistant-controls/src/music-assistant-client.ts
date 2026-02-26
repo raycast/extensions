@@ -894,6 +894,67 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Add an item to play next on the given queue
+   *
+   * @param media - Media item or mapping to enqueue
+   * @param queueId - Target queue ID
+   * @returns Promise that resolves when the item is queued
+   * @example
+   * ```typescript
+   * await client.addToQueueNext(track, "queue-123");
+   * ```
+   */
+  async addToQueueNext(media: MediaItemTypeOrItemMapping, queueId: string): Promise<void> {
+    await this.playMedia(media, queueId, QueueOption.NEXT);
+  }
+
+  /**
+   * Format the user-facing success message for add-to-queue-next actions
+   *
+   * @param itemName - Display name of the queued media item
+   * @returns Formatted success message
+   * @example
+   * ```typescript
+   * const message = client.formatAddToQueueNextMessage("Track Name");
+   * // => "\"Track Name\" will play next"
+   * ```
+   */
+  formatAddToQueueNextMessage(itemName: string): string {
+    return `"${itemName}" will play next`;
+  }
+
+  /**
+   * Convert a queue move direction into the API position shift value
+   *
+   * @param direction - Desired move direction
+   * @returns Position shift for queueCommandMoveItem
+   * @example
+   * ```typescript
+   * const shift = client.getQueueMovePositionShift("up"); // -1
+   * ```
+   */
+  getQueueMovePositionShift(direction: "up" | "down" | "next"): number {
+    if (direction === "up") return -1;
+    if (direction === "down") return 1;
+    return 0;
+  }
+
+  /**
+   * Build user-facing text for queue move actions
+   *
+   * @param direction - Direction used for move action
+   * @returns Formatted move confirmation text
+   * @example
+   * ```typescript
+   * const message = client.getQueueMoveFeedback("next");
+   * // => "Moved to next"
+   * ```
+   */
+  getQueueMoveFeedback(direction: "up" | "down" | "next"): string {
+    return `Moved ${direction === "next" ? "to next" : direction}`;
+  }
+
+  /**
    * Get the display text for shuffle state
    *
    * @param shuffleEnabled - Whether shuffle is enabled
@@ -924,6 +985,26 @@ export default class MusicAssistantClient {
       [RepeatMode.ALL]: "ALL",
     };
     return `Repeat: ${modeMap[repeatMode]}`;
+  }
+
+  /**
+   * Get the next repeat mode in the OFF -> ALL -> ONE -> OFF cycle
+   *
+   * @param repeatMode - Current repeat mode
+   * @returns Next repeat mode
+   * @example
+   * ```typescript
+   * const next = client.getNextRepeatMode(RepeatMode.OFF); // RepeatMode.ALL
+   * ```
+   */
+  getNextRepeatMode(repeatMode: RepeatMode): RepeatMode {
+    if (repeatMode === RepeatMode.OFF) {
+      return RepeatMode.ALL;
+    }
+    if (repeatMode === RepeatMode.ALL) {
+      return RepeatMode.ONE;
+    }
+    return RepeatMode.OFF;
   }
 
   // Library and Search Methods
