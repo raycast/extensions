@@ -46,6 +46,25 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search Petal transcription history">
+      {!isLoading && records.length === 0 && (
+        <List.EmptyView
+          title="No history entries"
+          description="Run at least one Petal transcription, then refresh."
+          actions={
+            <ActionPanel>
+              <Action.Open title="Open History Folder" target={PETAL_HISTORY_DIR} />
+              <Action
+                title="Refresh History"
+                icon={Icon.ArrowClockwise}
+                onAction={async () => {
+                  await revalidate();
+                  await showToast({ style: Toast.Style.Success, title: "History refreshed" });
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {records.map((record) => {
         const transcript = record.transcript.trim();
         const mode = record.preferredVariant?.mode ?? record.entry.transcriptionMode ?? "unknown";

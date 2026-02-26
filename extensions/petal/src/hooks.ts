@@ -35,7 +35,11 @@ function preferredVariant(entry: TranscriptHistoryEntry) {
 function readTranscript(entry: TranscriptHistoryEntry, variant: TranscriptHistoryVariant | null) {
   const transcriptPath = resolveHistoryPath(variant?.transcriptRelativePath ?? entry.transcriptRelativePath ?? null);
   if (transcriptPath && existsSync(transcriptPath)) {
-    return { transcript: readFileSync(transcriptPath, "utf8"), transcriptPath };
+    try {
+      return { transcript: readFileSync(transcriptPath, "utf8"), transcriptPath };
+    } catch {
+      return { transcript: "", transcriptPath: null };
+    }
   }
 
   if (entry.transcript) {
