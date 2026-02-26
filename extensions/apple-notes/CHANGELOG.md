@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [Bug Fix Update] - {PR_MERGE_DATE}
+## [Bug Fix Update] - 2026-02-26
 
 - Fix `get-note-content` and `update-note` timing out when Notes is not already running by using a longer AppleScript timeout.
 - Fix AI tool failures caused by UUID note IDs by resolving them to x-coredata IDs before calling AppleScript.
