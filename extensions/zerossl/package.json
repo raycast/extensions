@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zerossl",
   "title": "ZeroSSL",
-  "description": "",
+  "description": "Manage ZeroSSL Certificates",
   "icon": "zerossl_icon.png",
   "author": "xmok",
   "platforms": [
@@ -27,7 +27,13 @@
     {
       "name": "manage-certificates",
       "title": "Manage Certificates",
-      "description": "",
+      "description": "List Certificates",
+      "mode": "view"
+    },
+    {
+      "name": "validate-csr",
+      "title": "Validate CSR",
+      "description": "Validate CSR",
       "mode": "view"
     }
   ],
