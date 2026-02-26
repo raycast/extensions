@@ -10,16 +10,29 @@ export default async function main() {
   try {
     const client = new MusicAssistantClient();
 
-    // Get current volume before
-    const playerBefore = await client.getPlayer(selectedPlayerID);
-    const volumeBefore = playerBefore.volume_level ?? 0;
+    // Get the selected player
+    const selectedPlayer = await client.getPlayer(selectedPlayerID);
+
+    // Check if we should use group volume (for group leaders with members)
+    const useGroupVolume = client.shouldUseGroupVolume(selectedPlayer);
+
+    // Get volume before
+    const volumeBefore = useGroupVolume ? (selectedPlayer.group_volume ?? 0) : (selectedPlayer.volume_level ?? 0);
 
     // Execute volume up
-    await client.volumeUp(selectedPlayerID);
+    if (useGroupVolume) {
+      await client.groupVolumeUp(selectedPlayer.player_id);
+    } else {
+      const volumeControlPlayerId = client.getVolumeControlPlayer(selectedPlayer);
+      if (!volumeControlPlayerId) {
+        throw new Error("Unable to determine volume control target");
+      }
+      await client.volumeUp(volumeControlPlayerId);
+    }
 
-    // Get new volume after
+    // Get volume after
     const playerAfter = await client.getPlayer(selectedPlayerID);
-    const volumeAfter = playerAfter.volume_level ?? 0;
+    const volumeAfter = useGroupVolume ? (playerAfter.group_volume ?? 0) : (playerAfter.volume_level ?? 0);
 
     await showToast({
       style: Toast.Style.Success,

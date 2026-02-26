@@ -30,7 +30,8 @@ export function getPlayerListSubtitle(
   options?: { isMember?: boolean },
 ): string {
   if (options?.isMember) {
-    return "Group member";
+    const volume = player.volume_level ?? 0;
+    return `Group member · Volume: ${volume}%`;
   }
 
   const nowPlaying = client.getCurrentlyPlayingSong(player);

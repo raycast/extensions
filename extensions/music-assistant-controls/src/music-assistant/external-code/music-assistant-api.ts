@@ -800,6 +800,37 @@ export class MusicAssistantApi {
     return this.playerCommandVolumeMute(playerId, !this.players[playerId].volume_muted);
   }
 
+  public async playerCommandGroupVolume(playerId: string, volume_level: number): Promise<void> {
+    /*
+      Set the group volume for a group player.
+    */
+    volume_level = Math.max(volume_level, 0);
+    volume_level = Math.min(volume_level, 100);
+
+    await this.sendCommand("players/cmd/group_volume", {
+      player_id: playerId,
+      volume_level,
+    });
+  }
+
+  public playerCommandGroupVolumeUp(playerId: string): Promise<void> {
+    /*
+      Increase the group volume for a group player.
+    */
+    return this.sendCommand("players/cmd/group_volume_up", {
+      player_id: playerId,
+    });
+  }
+
+  public playerCommandGroupVolumeDown(playerId: string): Promise<void> {
+    /*
+      Decrease the group volume for a group player.
+    */
+    return this.sendCommand("players/cmd/group_volume_down", {
+      player_id: playerId,
+    });
+  }
+
   public playerCommandGroup(playerId: string, target_player: string): Promise<void> {
     /*
       Handle GROUP command for given player.
@@ -878,28 +909,6 @@ export class MusicAssistantApi {
       player_id,
       ...args,
     });
-  }
-
-  // PlayerGroup related functions/commands
-
-  public playerCommandGroupVolume(playerId: string, newVolume: number) {
-    /*
-      Send VOLUME_SET command to given playergroup.
-
-      Will send the new (average) volume level to group child's.
-        - playerId: player_id of the playergroup to handle the command.
-        - newVolume: volume level (0..100) to set on the player.
-    */
-    this.playerCommand(playerId, "group_volume", {
-      volume_level: newVolume,
-    });
-    this.players[playerId].group_volume = newVolume;
-  }
-  public playerCommandGroupVolumeUp(playerId: string): Promise<void> {
-    return this.playerCommand(playerId, "group_volume_up");
-  }
-  public playerCommandGroupVolumeDown(playerId: string): Promise<void> {
-    return this.playerCommand(playerId, "group_volume_down");
   }
 
   public async createPlayerGroup(

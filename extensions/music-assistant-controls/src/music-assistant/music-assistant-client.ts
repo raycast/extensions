@@ -161,6 +161,49 @@ export default class MusicAssistantClient {
   }
 
   /**
+   * Increase the group volume on a group leader player
+   *
+   * @param groupLeaderId - The unique identifier of the group leader
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.groupVolumeUp("group-leader-id");
+   * ```
+   */
+  async groupVolumeUp(groupLeaderId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandGroupVolumeUp(groupLeaderId));
+  }
+
+  /**
+   * Decrease the group volume on a group leader player
+   *
+   * @param groupLeaderId - The unique identifier of the group leader
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.groupVolumeDown("group-leader-id");
+   * ```
+   */
+  async groupVolumeDown(groupLeaderId: string): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandGroupVolumeDown(groupLeaderId));
+  }
+
+  /**
+   * Set the group volume on a group leader player
+   *
+   * @param groupLeaderId - The unique identifier of the group leader
+   * @param volume - The volume level to set (0-100)
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.groupSetVolume("group-leader-id", 75);
+   * ```
+   */
+  async groupSetVolume(groupLeaderId: string, volume: number): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandGroupVolume(groupLeaderId, volume));
+  }
+
+  /**
    * Set the mute state on the specified player
    *
    * @param playerId - The unique identifier of the player to control
@@ -682,6 +725,88 @@ export default class MusicAssistantClient {
    */
   getGroupStatus(player?: Player): "Leader" | "Member" | "Standalone" {
     return playerGroupingDelegate.getGroupStatus(player);
+  }
+
+  /**
+   * Gets the effective player ID for volume control
+   *
+   * When a player is part of a group (synced to another player),
+   * returns the group leader's ID for group-level volume control.
+   * For standalone players or group leaders, returns the player's own ID.
+   *
+   * @param player - The player to get volume control target for
+   * @returns The player ID to use for volume control
+   * @example
+   * ```typescript
+   * // For a member of a group
+   * const speaker = { player_id: "speaker-1", synced_to: "leader-1" };
+   * const target = client.getVolumeControlPlayer(speaker);
+   * // Returns: "leader-1" (the group leader)
+   *
+   * // For a standalone player
+   * const standalone = { player_id: "speaker-2", synced_to: null };
+   * const target = client.getVolumeControlPlayer(standalone);
+   * // Returns: "speaker-2" (the player itself)
+   * ```
+   */
+  getVolumeControlPlayer(player?: Player): string | undefined {
+    if (!player) return undefined;
+
+    const status = this.getGroupStatus(player);
+
+    // If player is part of a group, control the group volume via the synced-to player
+    if (status === "Member") {
+      return player.synced_to || player.active_group;
+    }
+
+    // For standalone players and leaders, control their own volume
+    return player.player_id;
+  }
+
+  /**
+   * Determines whether a player should be controlled via group volume commands
+   *
+   * @param player - The player to check
+   * @returns True if the player is a group leader with members
+   * @example
+   * ```typescript
+   * const leader = { player_id: "leader-1", group_childs: ["member-1"] };
+   * if (client.shouldUseGroupVolume(leader)) {
+   *   // Use group volume commands
+   * }
+   * ```
+   */
+  shouldUseGroupVolume(player?: Player): boolean {
+    if (!player) return false;
+    return this.isGroupLeader(player) && player.group_childs.length > 0;
+  }
+
+  /**
+   * Syncs volume of all group members to match the group leader's volume
+   *
+   * @param leader - The group leader player
+   * @param allPlayers - Array of all available players to find members
+   * @throws {Error} When the API command fails
+   * @example
+   * ```typescript
+   * await client.syncMembersWithLeader(leaderPlayer, allPlayers);
+   * // All members now have the same volume as the leader
+   * ```
+   */
+  async syncMembersWithLeader(leader: Player, allPlayers: Player[]): Promise<void> {
+    if (!this.isGroupLeader(leader)) {
+      throw new Error("Player is not a group leader");
+    }
+
+    const members = this.getGroupMembers(leader, allPlayers);
+    const leaderVolume = leader.volume_level;
+
+    // Set all members' volumes to match the leader
+    const volumePromises = members
+      .filter((member) => member.player_id !== leader.player_id) // Exclude the leader from syncing
+      .map((member) => this.setVolume(member.player_id, leaderVolume));
+
+    await Promise.all(volumePromises);
   }
 
   /**

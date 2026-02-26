@@ -1,11 +1,11 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import MusicAssistantClient from "./music-assistant/music-assistant-client";
 import { useCachedPromise } from "@raycast/utils";
+import { Player } from "./music-assistant/external-code/interfaces";
 import {
-  getPlayerListIcon,
   getPlayerListSubtitle,
   splitPlayersByGroupRole,
-} from "./player-management/player-list-helpers";
+} from "./music-assistant/delegates/player-list-display-delegate";
 
 export default function SetActivePlayerCommand() {
   const client = new MusicAssistantClient();
@@ -18,11 +18,25 @@ export default function SetActivePlayerCommand() {
     initialData: [],
   });
 
+  const getPlayerListIcon = (player: Player, options?: { isMember?: boolean }): Icon | Image.ImageLike => {
+    if (options?.isMember) {
+      return Icon.Dot;
+    }
+
+    const albumArtUrl = client.getPlayerAlbumArt(player);
+    if (albumArtUrl) {
+      return { source: albumArtUrl, mask: Image.Mask.RoundedRectangle };
+    }
+
+    const status = client.getGroupStatus(player);
+    return status === "Standalone" ? Icon.Cd : Icon.TwoPeople;
+  };
+
   const select = async (player_id: string, display_name: string) => {
     await client.selectPlayer(player_id, display_name);
   };
 
-  const { groupLeaders, standalonePlayers } = splitPlayersByGroupRole(client, players);
+  const { groupLeaders, standalonePlayers } = splitPlayersByGroupRole(players);
 
   return (
     <List isLoading={isLoading} navigationTitle="Set Active Player" searchBarPlaceholder="Search your players">
@@ -33,8 +47,8 @@ export default function SetActivePlayerCommand() {
             <List.Item
               key={player.player_id}
               title={player.display_name}
-              subtitle={getPlayerListSubtitle(client, player)}
-              icon={getPlayerListIcon(client, player)}
+              subtitle={getPlayerListSubtitle(player)}
+              icon={getPlayerListIcon(player)}
               actions={
                 <ActionPanel>
                   <Action title="Select" onAction={() => select(player.player_id, player.display_name)} />
@@ -53,8 +67,8 @@ export default function SetActivePlayerCommand() {
             <List.Item
               key={player.player_id}
               title={player.display_name}
-              subtitle={getPlayerListSubtitle(client, player)}
-              icon={getPlayerListIcon(client, player)}
+              subtitle={getPlayerListSubtitle(player)}
+              icon={getPlayerListIcon(player)}
               actions={
                 <ActionPanel>
                   <Action title="Select" onAction={() => select(player.player_id, player.display_name)} />

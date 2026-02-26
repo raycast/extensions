@@ -873,6 +873,120 @@ describe("MusicAssistantClient", () => {
         expect(result.potentialMembers.map((p) => p.player_id)).toEqual(["member-2"]);
       });
     });
+
+    describe("getVolumeControlPlayer", () => {
+      it("should return the synced_to player ID when player is a group member", () => {
+        const member = {
+          player_id: "member-1",
+          synced_to: "leader-1",
+          group_childs: [],
+        } as any;
+
+        expect(client.getVolumeControlPlayer(member)).toBe("leader-1");
+      });
+
+      it("should return the active_group when synced_to is not set", () => {
+        const member = {
+          player_id: "member-1",
+          synced_to: undefined,
+          active_group: "group-1",
+          group_childs: [],
+        } as any;
+
+        expect(client.getVolumeControlPlayer(member)).toBe("group-1");
+      });
+
+      it("should return the player's own ID when player is standalone", () => {
+        const standalone = {
+          player_id: "speaker-1",
+          synced_to: undefined,
+          active_group: undefined,
+          group_childs: [],
+        } as any;
+
+        expect(client.getVolumeControlPlayer(standalone)).toBe("speaker-1");
+      });
+
+      it("should return the player's own ID when player is a group leader", () => {
+        const leader = {
+          player_id: "leader-1",
+          synced_to: undefined,
+          group_childs: ["member-1", "member-2"],
+        } as any;
+
+        expect(client.getVolumeControlPlayer(leader)).toBe("leader-1");
+      });
+
+      it("should return undefined when player is undefined", () => {
+        expect(client.getVolumeControlPlayer(undefined)).toBeUndefined();
+      });
+    });
+
+    describe("syncMembersWithLeader", () => {
+      it("should sync all members' volumes to match leader volume", async () => {
+        const leader = {
+          player_id: "leader-1",
+          volume_level: 75,
+          group_childs: ["member-1", "member-2"],
+        } as any;
+
+        const member1 = { player_id: "member-1", volume_level: 50 } as any;
+        const member2 = { player_id: "member-2", volume_level: 30 } as any;
+        const allPlayers = [leader, member1, member2];
+
+        const mockSetVolume = jest.spyOn(client, "setVolume").mockResolvedValue(undefined);
+        const mockGetGroupMembers = jest.spyOn(client, "getGroupMembers").mockReturnValue([leader, member1, member2]);
+
+        await client.syncMembersWithLeader(leader, allPlayers);
+
+        expect(mockGetGroupMembers).toHaveBeenCalledWith(leader, allPlayers);
+        expect(mockSetVolume).toHaveBeenCalledWith("member-1", 75);
+        expect(mockSetVolume).toHaveBeenCalledWith("member-2", 75);
+        expect(mockSetVolume).toHaveBeenCalledTimes(2);
+
+        mockSetVolume.mockRestore();
+        mockGetGroupMembers.mockRestore();
+      });
+
+      it("should throw error when player is not a group leader", async () => {
+        const standalone = {
+          player_id: "speaker-1",
+          group_childs: [],
+        } as any;
+
+        const allPlayers = [standalone];
+
+        await expect(client.syncMembersWithLeader(standalone, allPlayers)).rejects.toThrow(
+          "Player is not a group leader",
+        );
+      });
+
+      it("should handle empty members list gracefully", async () => {
+        const leader = {
+          player_id: "leader-1",
+          volume_level: 75,
+          group_childs: ["member-1"],
+        } as any;
+
+        const member = {
+          player_id: "member-1",
+          volume_level: 50,
+        } as any;
+
+        const allPlayers = [leader, member];
+
+        const mockGetGroupMembers = jest.spyOn(client, "getGroupMembers").mockReturnValue([leader]);
+        const mockSetVolume = jest.spyOn(client, "setVolume").mockResolvedValue(undefined);
+
+        await client.syncMembersWithLeader(leader, allPlayers);
+
+        expect(mockGetGroupMembers).toHaveBeenCalledWith(leader, allPlayers);
+        expect(mockSetVolume).not.toHaveBeenCalled();
+
+        mockGetGroupMembers.mockRestore();
+        mockSetVolume.mockRestore();
+      });
+    });
   });
 
   // Menu Bar Display Logic Tests

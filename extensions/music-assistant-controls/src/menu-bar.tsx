@@ -101,7 +101,12 @@ export default function Command() {
                         : undefined
                     }
                     onAction={async () => {
-                      await client.setVolume(activeDisplayQueue.queue_id, option.level);
+                      const player = getPlayerById(activeDisplayQueue.queue_id);
+                      if (client.shouldUseGroupVolume(player)) {
+                        await client.groupSetVolume(activeDisplayQueue.queue_id, option.level);
+                      } else {
+                        await client.setVolume(activeDisplayQueue.queue_id, option.level);
+                      }
                       revalidate();
                     }}
                   />

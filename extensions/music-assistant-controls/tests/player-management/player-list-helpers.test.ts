@@ -1,99 +1,129 @@
-import { Icon } from "@raycast/api";
-import MusicAssistantClient from "../../src/music-assistant/music-assistant-client";
 import { Player } from "../../src/music-assistant/external-code/interfaces";
 import {
-  getPlayerListIcon,
-  getPlayerListSubtitle,
   getPlayerListTitle,
+  getPlayerListSubtitle,
+  getPlayerAlbumArtUrl,
   splitPlayersByGroupRole,
-} from "../../src/player-management/player-list-helpers";
-
-jest.mock("@raycast/api");
+} from "../../src/music-assistant/delegates/player-list-display-delegate";
 
 function createPlayer(overrides?: Partial<Player>): Player {
   return {
     player_id: "player-1",
     display_name: "Living Room",
     group_childs: [],
+    volume_level: 0,
+    synced_to: null,
+    active_group: null,
+    current_media: undefined,
+    can_group_with: [],
     ...overrides,
   } as unknown as Player;
 }
 
-describe("player-list-helpers", () => {
-  let mockClient: jest.Mocked<MusicAssistantClient>;
+describe("player-list-display-delegate", () => {
+  describe("getPlayerListTitle", () => {
+    it("returns player display name for non-members", () => {
+      const player = createPlayer({ display_name: "Kitchen" });
+      expect(getPlayerListTitle(player)).toBe("Kitchen");
+    });
 
-  beforeEach(() => {
-    mockClient = {
-      getPlayerAlbumArt: jest.fn(),
-      getGroupStatus: jest.fn(),
-      getCurrentlyPlayingSong: jest.fn(),
-      isGroupLeader: jest.fn(),
-    } as unknown as jest.Mocked<MusicAssistantClient>;
+    it("returns indented display name for members", () => {
+      const player = createPlayer({ display_name: "Kitchen" });
+      expect(getPlayerListTitle(player, { isMember: true })).toBe("    Kitchen");
+    });
   });
 
-  it("returns dot icon for member rows", () => {
-    const icon = getPlayerListIcon(mockClient, createPlayer(), { isMember: true });
-    expect(icon).toBe(Icon.Dot);
+  describe("getPlayerListSubtitle", () => {
+    it("returns member subtitle with volume level", () => {
+      const player = createPlayer({ volume_level: 75 });
+      const subtitle = getPlayerListSubtitle(player, { isMember: true });
+      expect(subtitle).toBe("Group member · Volume: 75%");
+    });
+
+    it("handles null volume level for member", () => {
+      const player = createPlayer({ volume_level: null } as any);
+      const subtitle = getPlayerListSubtitle(player, { isMember: true });
+      expect(subtitle).toBe("Group member · Volume: 0%");
+    });
+
+    it("returns now playing song when available", () => {
+      const player = createPlayer({
+        current_media: {
+          title: "Test Song",
+          artist: "Test Artist",
+        } as any,
+      });
+      const subtitle = getPlayerListSubtitle(player);
+      expect(subtitle).toBe("Test Song - Test Artist");
+    });
+
+    it("returns leader subtitle for group leader", () => {
+      const player = createPlayer({ group_childs: ["member-1", "member-2"] });
+      const subtitle = getPlayerListSubtitle(player);
+      expect(subtitle).toBe("Group leader · 2 member(s)");
+    });
+
+    it("returns standalone subtitle for standalone player", () => {
+      const player = createPlayer();
+      const subtitle = getPlayerListSubtitle(player);
+      expect(subtitle).toBe("Standalone");
+    });
   });
 
-  it("returns album art icon when available", () => {
-    mockClient.getPlayerAlbumArt.mockReturnValue("https://example.com/art.jpg");
+  describe("getPlayerAlbumArtUrl", () => {
+    it("returns image URL when available", () => {
+      const player = createPlayer({
+        current_media: {
+          image_url: "https://example.com/art.jpg",
+        } as any,
+      });
+      expect(getPlayerAlbumArtUrl(player)).toBe("https://example.com/art.jpg");
+    });
 
-    const icon = getPlayerListIcon(mockClient, createPlayer());
+    it("returns undefined when no current media", () => {
+      const player = createPlayer({ current_media: undefined });
+      expect(getPlayerAlbumArtUrl(player)).toBeUndefined();
+    });
 
-    expect(icon).toEqual({ source: "https://example.com/art.jpg", mask: "rounded-rectangle" });
+    it("returns undefined when no image URL", () => {
+      const player = createPlayer({
+        current_media: { title: "Song" } as any,
+      });
+      expect(getPlayerAlbumArtUrl(player)).toBeUndefined();
+    });
+
+    it("handles undefined player", () => {
+      expect(getPlayerAlbumArtUrl(undefined)).toBeUndefined();
+    });
   });
 
-  it("falls back to status icon when no album art is available", () => {
-    mockClient.getPlayerAlbumArt.mockReturnValue(undefined);
-    mockClient.getGroupStatus.mockReturnValue("Standalone");
+  describe("splitPlayersByGroupRole", () => {
+    it("separates group leaders from standalone players", () => {
+      const players = [
+        createPlayer({ player_id: "leader-1", group_childs: ["member-1"] }),
+        createPlayer({ player_id: "member-1" }),
+        createPlayer({ player_id: "standalone-1" }),
+      ];
 
-    expect(getPlayerListIcon(mockClient, createPlayer())).toBe(Icon.Cd);
+      const result = splitPlayersByGroupRole(players);
 
-    mockClient.getGroupStatus.mockReturnValue("Leader");
-    expect(getPlayerListIcon(mockClient, createPlayer())).toBe(Icon.TwoPeople);
-  });
+      expect(result.groupLeaders).toHaveLength(1);
+      expect(result.groupLeaders[0].player_id).toBe("leader-1");
+      expect(result.standalonePlayers).toHaveLength(2);
+    });
 
-  it("formats member and non-member titles", () => {
-    const player = createPlayer({ display_name: "Kitchen" });
-    expect(getPlayerListTitle(player)).toBe("Kitchen");
-    expect(getPlayerListTitle(player, { isMember: true })).toBe("    Kitchen");
-  });
+    it("handles undefined players", () => {
+      const result = splitPlayersByGroupRole(undefined);
 
-  it("returns member subtitle for member rows", () => {
-    const subtitle = getPlayerListSubtitle(mockClient, createPlayer(), { isMember: true });
-    expect(subtitle).toBe("Group member");
-  });
+      expect(result.groupLeaders).toHaveLength(0);
+      expect(result.standalonePlayers).toHaveLength(0);
+    });
 
-  it("returns now playing subtitle when available", () => {
-    mockClient.getCurrentlyPlayingSong.mockReturnValue("Song - Artist");
+    it("handles empty players array", () => {
+      const result = splitPlayersByGroupRole([]);
 
-    const subtitle = getPlayerListSubtitle(mockClient, createPlayer());
-    expect(subtitle).toBe("Song - Artist");
-  });
-
-  it("returns status subtitle when nothing is playing", () => {
-    mockClient.getCurrentlyPlayingSong.mockReturnValue("");
-    mockClient.getGroupStatus.mockReturnValue("Leader");
-
-    const leaderSubtitle = getPlayerListSubtitle(mockClient, createPlayer({ group_childs: ["member-1"] }));
-    expect(leaderSubtitle).toBe("Group leader · 1 member(s)");
-
-    mockClient.getGroupStatus.mockReturnValue("Standalone");
-    const standaloneSubtitle = getPlayerListSubtitle(mockClient, createPlayer());
-    expect(standaloneSubtitle).toBe("Standalone");
-  });
-
-  it("splits players into leaders and standalone players", () => {
-    const players = [createPlayer({ player_id: "leader" }), createPlayer({ player_id: "standalone" })];
-    mockClient.isGroupLeader.mockImplementation((player) => player.player_id === "leader");
-    mockClient.getGroupStatus.mockImplementation((player) =>
-      player.player_id === "standalone" ? "Standalone" : "Leader",
-    );
-
-    const result = splitPlayersByGroupRole(mockClient, players);
-
-    expect(result.groupLeaders.map((p) => p.player_id)).toEqual(["leader"]);
-    expect(result.standalonePlayers.map((p) => p.player_id)).toEqual(["standalone"]);
+      expect(result.groupLeaders).toHaveLength(0);
+      expect(result.standalonePlayers).toHaveLength(0);
+    });
   });
 });

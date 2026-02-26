@@ -1,9 +1,15 @@
 # Music Assistant Controls Changelog
 
-## [Current Track & Queue Management] - {PR_MERGE_DATE}
+## [Enhanced Volume Control & Current Track Features] - {PR_MERGE_DATE}
 
 ### ✨ New Features
 
+- **Individual member volume adjustment** - Control volume of each speaker independently within a player group
+  - **Volume display** - See current volume level of each group member in the Manage Player Groups command
+  - **Group volume** - Volume commands control the group level when applicable
+  - **Fine-grained adjustments** - Individual volume control in the player groups command
+  - **Sync Members with Leader** - Synchronize all group member volumes to the leader's level
+  - **Real-time feedback** - Volume changes provide immediate confirmation toast notifications
 - **Current Track command** - View now-playing track with large album artwork and detailed metadata
   - **Shuffle toggle** - Quick button to toggle shuffle mode (OFF ↔ ON) with visual feedback
   - **Repeat mode cycling** - Cycle through repeat modes (OFF → ONE → ALL → OFF) with status display
@@ -22,11 +28,14 @@
 
 ### 🎨 UI/UX Enhancements
 
+- **Member volume indicators** - Manage Player Groups displays each member's volume percentage in the subtitle with fine-grained controls
+- **Leader volume controls** - Group leaders get sophisticated volume management with group-wide and individual member controls
 - **Set Active Player command** - Now shows all available players organized by groups and standalone players
   - Filters to show only controllable players (standalone players and group leaders)
   - Group leaders display member count in subtitle
   - Shows currently playing track or player status
-- **Unused section** - Removed the refresh button from the menu bar as it refreshes every 10 seconds.
+- **Intuitive controls** - Keyboard shortcuts (Cmd/Ctrl + = and Cmd/Ctrl + −) for quick volume balancing across grouped speakers
+- **Set Volume pre-fills current level** - Volume form now displays the current volume (group or individual) instead of always showing 50
 
 ## [Player Grouping and Menu Bar Management] - 2026-02-24
 
