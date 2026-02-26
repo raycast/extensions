@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import md5 from "md5";
 
-
 export interface Artist {
   id: string;
   name: string;
