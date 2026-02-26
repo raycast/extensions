@@ -3,20 +3,57 @@ import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@r
 import { useForm, FormValidation } from "@raycast/utils";
 import dedent from "dedent";
 import { handleAuthFlow } from "./utils/auth";
+import { getTelegramErrorMessage } from "./utils/errors";
 
 interface AuthCodeFormValues {
   code: string;
 }
 
+interface AuthPasswordFormValues {
+  password: string;
+}
+
 export default function Authenticate() {
-  const [needsCode, setNeedsCode] = useState(false);
+  const [authStep, setAuthStep] = useState<"setup" | "code" | "password">("setup");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { handleSubmit, itemProps } = useForm<AuthCodeFormValues>({
+  const codeForm = useForm<AuthCodeFormValues>({
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const result = await handleAuthFlow(values.code);
+        const result = await handleAuthFlow({ code: values.code });
+        if (result.success) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Successfully authenticated with Telegram",
+          });
+          await popToRoot();
+          return;
+        }
+
+        if (result.needsPassword) {
+          setAuthStep("password");
+        }
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Authentication Failed",
+          message: getTelegramErrorMessage(error),
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    validation: {
+      code: FormValidation.Required,
+    },
+  });
+
+  const passwordForm = useForm<AuthPasswordFormValues>({
+    onSubmit: async (values) => {
+      setIsSubmitting(true);
+      try {
+        const result = await handleAuthFlow({ password: values.password });
         if (result.success) {
           await showToast({
             style: Toast.Style.Success,
@@ -28,14 +65,14 @@ export default function Authenticate() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Authentication Failed",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
+          message: getTelegramErrorMessage(error),
         });
       } finally {
         setIsSubmitting(false);
       }
     },
     validation: {
-      code: FormValidation.Required,
+      password: FormValidation.Required,
     },
   });
 
@@ -43,7 +80,9 @@ export default function Authenticate() {
     try {
       const result = await handleAuthFlow();
       if (result.needsCode) {
-        setNeedsCode(true);
+        setAuthStep("code");
+      } else if (result.needsPassword) {
+        setAuthStep("password");
       } else if (result.success) {
         await showToast({
           style: Toast.Style.Success,
@@ -55,12 +94,38 @@ export default function Authenticate() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Authentication Failed",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+        message: getTelegramErrorMessage(error),
       });
     }
   };
 
-  if (!needsCode) {
+  const handleResendCode = async () => {
+    setIsSubmitting(true);
+    try {
+      const result = await handleAuthFlow({ forceResendCode: true });
+      if (result.needsCode) {
+        setAuthStep("code");
+      } else if (result.needsPassword) {
+        setAuthStep("password");
+      } else if (result.success) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Successfully authenticated with Telegram",
+        });
+        await popToRoot();
+      }
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Authentication Failed",
+        message: getTelegramErrorMessage(error),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (authStep === "setup") {
     return (
       <Form
         actions={
@@ -94,12 +159,38 @@ export default function Authenticate() {
     );
   }
 
+  if (authStep === "password") {
+    return (
+      <Form
+        isLoading={isSubmitting}
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm icon={Icon.ArrowRight} title="Verify Password" onSubmit={passwordForm.handleSubmit} />
+          </ActionPanel>
+        }
+      >
+        <Form.PasswordField
+          title="2-Step Verification Password"
+          info="Enter your Telegram 2-Step Verification password"
+          placeholder="Password"
+          {...passwordForm.itemProps.password}
+        />
+      </Form>
+    );
+  }
+
   return (
     <Form
       isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.ArrowRight} title="Verify Code" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.ArrowRight} title="Verify Code" onSubmit={codeForm.handleSubmit} />
+          <Action
+            icon={Icon.Repeat}
+            title="Resend Verification Code"
+            onAction={handleResendCode}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
         </ActionPanel>
       }
     >
@@ -107,8 +198,9 @@ export default function Authenticate() {
         title="Verification Code"
         info="Enter the verification code sent to your Telegram app"
         placeholder="12345"
-        {...itemProps.code}
+        {...codeForm.itemProps.code}
       />
+      <Form.Description title="Need a New Code?" text="Didn't get a code? Press ⌘R to resend." />
     </Form>
   );
 }
