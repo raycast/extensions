@@ -3,7 +3,6 @@ import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@r
 import { useForm, FormValidation } from "@raycast/utils";
 import dedent from "dedent";
 import { handleAuthFlow } from "./utils/auth";
-import { getTelegramErrorMessage } from "./utils/errors";
 
 interface AuthCodeFormValues {
   code: string;
@@ -11,6 +10,10 @@ interface AuthCodeFormValues {
 
 interface AuthPasswordFormValues {
   password: string;
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unknown error occurred";
 }
 
 export default function Authenticate() {
@@ -38,7 +41,7 @@ export default function Authenticate() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Authentication Failed",
-          message: getTelegramErrorMessage(error),
+          message: getErrorMessage(error),
         });
       } finally {
         setIsSubmitting(false);
@@ -65,7 +68,7 @@ export default function Authenticate() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Authentication Failed",
-          message: getTelegramErrorMessage(error),
+          message: getErrorMessage(error),
         });
       } finally {
         setIsSubmitting(false);
@@ -94,7 +97,7 @@ export default function Authenticate() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Authentication Failed",
-        message: getTelegramErrorMessage(error),
+        message: getErrorMessage(error),
       });
     }
   };
@@ -118,7 +121,7 @@ export default function Authenticate() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Authentication Failed",
-        message: getTelegramErrorMessage(error),
+        message: getErrorMessage(error),
       });
     } finally {
       setIsSubmitting(false);
