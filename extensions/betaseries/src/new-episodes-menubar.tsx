@@ -33,10 +33,6 @@ const UNSEEN_FETCH_MAX_ATTEMPTS = 2;
 const RETRY_BASE_DELAY_MS = 500;
 const NOTIFICATION_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
-type Preferences = {
-  showMenubarDebug?: boolean;
-};
-
 type AlertEpisode = {
   id: number;
   showId: number;
@@ -611,7 +607,7 @@ async function buildMenuBarStateForBackground(): Promise<MenuBarState> {
 }
 
 export default function Command() {
-  const { showMenubarDebug = false } = getPreferenceValues<Preferences>();
+  const { showMenubarDebug = false } = getPreferenceValues();
   const { data, isLoading, mutate } = usePromise(buildMenuBarState, []);
 
   const [locallyDiscardedEpisodeIds, setLocallyDiscardedEpisodeIds] = useState<
