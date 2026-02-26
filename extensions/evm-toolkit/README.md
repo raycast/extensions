@@ -2,8 +2,6 @@
 
 A [Raycast](https://raycast.com) extension for EVM power users. Copy an address, transaction hash, or block number into your clipboard and instantly open block explorers, read contract source code, check portfolio balances, look up wallet analytics, or simulate transactions across 24+ networks.
 
-![Screenshot of the extension](./metadata/evm-toolkit-1.png)
-
 ## Commands
 
 ### Open Explorer
