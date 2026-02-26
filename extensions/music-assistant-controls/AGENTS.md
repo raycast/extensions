@@ -221,6 +221,65 @@ validation: {
 - **`focus`**: Programmatically focus a field
 - **`reset`**: Reset form to initial values
 
+## Navigation Architecture
+
+Raycast provides two navigation patterns via the `useNavigation()` hook:
+
+### Navigation Stack (Push/Pop Pattern)
+
+```typescript
+import { useNavigation } from "@raycast/api";
+
+export default function Home() {
+  const { push } = useNavigation();
+
+  return (
+    <List>
+      <List.Item
+        title="Details"
+        actions={
+          <ActionPanel>
+            <Action title="View" onAction={() => push(<Details />)} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+
+function Details() {
+  const { pop } = useNavigation();
+
+  return (
+    <Detail
+      markdown="Details here"
+      actions={
+        <ActionPanel>
+          <Action title="Back" onAction={pop} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+### Push/Pop Characteristics
+
+- **Push**: Adds a new view to the stack
+- **Pop**: Removes current view and returns to previous one
+- **ESC**: Automatically pops (built-in behavior)
+- **Idiomatic**: Follows Raycast's default navigation paradigm
+- **Limitations**: Switching between sibling views requires popping to root and re-pushing
+
+### When to Consider Tabs Instead
+
+For hub-like interfaces with multiple browsable sections:
+
+- Use **local state (tabs)** when: Users switch frequently between sections, state should persist during switches, search/filtering spans all sections
+- Use **push/pop** when: Deep hierarchical navigation, each section is independent, clear parent-child relationships
+
+This project uses a **tabs approach** for the Music Library Hub because users frequently switch between Browse, Recently Played, and Queue Manager, and switching should preserve their position in each section.
+
 ## Menu Bar Command Architecture
 
 Menu bar commands have a **different lifecycle** than regular commands.
