@@ -22,9 +22,9 @@
     "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.13.4",
-    "eslint": "^10.0.1",
+    "eslint": "^8.57.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3"
   },
