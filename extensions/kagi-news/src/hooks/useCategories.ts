@@ -1,4 +1,4 @@
-// Hook to fetch news categories from the latest batch for the daily news command
+// Hook to fetch news categories from the latest batch (used for the daily news command)
 
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
@@ -14,13 +14,11 @@ export function useCategories() {
         }
         const json = await response.json();
 
-        // Transform API response to Category format
         const categories: Category[] = json.categories.map((cat: { categoryName: string; id: string }) => ({
           name: cat.categoryName,
-          id: cat.id, // Use the UUID from the API
+          id: cat.id,
         }));
 
-        // Add synthetic "Today in History" category if available
         if (json.hasOnThisDay) {
           categories.push({
             name: "Today in History",

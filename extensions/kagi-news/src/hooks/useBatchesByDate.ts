@@ -1,4 +1,4 @@
-// Hook to fetch available news batches for a specific date (used by time-travel command)
+// Hook to fetch available news batches for a specific date (used by the time-travel command)
 
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";

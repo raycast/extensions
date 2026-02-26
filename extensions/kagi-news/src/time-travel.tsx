@@ -21,7 +21,6 @@ interface BatchCategoriesData {
   categories: BatchCategoryResponse[];
 }
 
-
 // Date Picker Component
 function DatePickerScreen({ onDateSelected }: { onDateSelected: (date: string) => void }) {
   const today = new Date();
@@ -53,9 +52,7 @@ function DatePickerScreen({ onDateSelected }: { onDateSelected: (date: string) =
         max={today}
         min={minDate}
       />
-      <Form.Description text="Select a past date to browse news archives (you can go back up to July 9, 2025).
-
-And contrary to what is stated in the dropdown menu above, no, you cannot browse tomorrow's news..." />
+      <Form.Description text="Select a past date to browse the news archives, which begin on July 9, 2025." />
     </Form>
   );
 }
@@ -148,7 +145,7 @@ function ArticleListScreen({
       name: cat.categoryName,
     })) || [];
 
-  // Sort categories alphabetically (no favorites for time-travel)
+  // Sort categories alphabetically (no favorites yet for time-travel)
   const sortedCategories = categories.sort((a, b) => a.name.localeCompare(b.name));
 
   const {

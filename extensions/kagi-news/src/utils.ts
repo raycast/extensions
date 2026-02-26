@@ -25,7 +25,7 @@ interface StoryArticle {
   link: string;
 }
 
-interface StoryResponse {
+export interface StoryResponse {
   id?: string;
   cluster_number?: number;
   title: string;
@@ -101,46 +101,94 @@ export function formatDateForAPI(date: Date | null | undefined): string {
   return `${year}-${month}-${day}`;
 }
 
-// Extract clean domain name from URL (removes www prefix)
-export function getDomain(url: string): string {
-  try {
-    const domain = new URL(url).hostname;
-    return domain.replace("www.", "");
-  } catch {
-    return url;
-  }
-}
-
 // Remove HTML tags from string
 export function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "");
 }
 
-// Transforms [domain#N] labels to link the real article sources
-export function linkify(text: string | undefined, sources: Source[]): string {
-  if (!text || !sources || sources.length === 0) return text || "";
+// ============================================================================
+// Reference System
+// ============================================================================
 
-  const linkedText = text;
+// Helper: Convert number to superscript
+function numberToSuperscript(num: number): string {
+  const superscriptMap: { [key: string]: string } = {
+    "0": "⁰",
+    "1": "¹",
+    "2": "²",
+    "3": "³",
+    "4": "⁴",
+    "5": "⁵",
+    "6": "⁶",
+    "7": "⁷",
+    "8": "⁸",
+    "9": "⁹",
+  };
 
-  const sourceMap: { [key: string]: string } = {};
-  const domainCounts: { [key: string]: number } = {};
+  return String(num)
+    .split("")
+    .map((digit) => superscriptMap[digit])
+    .join("");
+}
 
-  sources.forEach((source) => {
-    const domain = getDomain(source.url);
-    domainCounts[domain] = (domainCounts[domain] || 0) + 1;
-    const label = `${domain}#${domainCounts[domain]}`;
-    sourceMap[label] = source.url;
+// Build reference map: [hostname#count] → { url, refNumber }
+// Maintains API order (no sorting)
+export function buildReferenceMap(sources: Source[]): Map<string, { url: string; refNumber: number }> {
+  const refMap = new Map<string, { url: string; refNumber: number }>();
+  const domainCounts = new Map<string, number>();
+
+  sources.forEach((source, index) => {
+    try {
+      let hostname = new URL(source.url).hostname;
+      // Remove www. prefix for consistent key matching with markdown references
+      hostname = hostname.replace(/^www\./, "");
+
+      const count = (domainCounts.get(hostname) || 0) + 1;
+      domainCounts.set(hostname, count);
+
+      const key = `${hostname}#${count}`;
+      refMap.set(key, {
+        url: source.url,
+        refNumber: index + 1,
+      });
+    } catch {
+      // Skip invalid URLs
+    }
   });
 
-  return linkedText.replace(/\[([^\]]+#\d+)\]/g, (match, label) => {
-    const url = sourceMap[label];
-    if (url) {
-      return `[[${label}]](${url}) `;
+  return refMap;
+}
+
+// Linkify markdown: [hostname#count] → [superscript](url)
+export function linkifyMarkdown(
+  text: string | undefined,
+  refMap: Map<string, { url: string; refNumber: number }>
+): string {
+  if (!text || refMap.size === 0) return text || "";
+
+  return text.replace(/\[([^\]#]+)#(\d+)\]/g, (match, hostname, count) => {
+    const key = `${hostname}#${count}`;
+    let ref = refMap.get(key);
+
+    // If exact match not found, try flexible matching (I encountered issues with some references, so this makes it work..)
+    if (!ref) {
+      for (const [mapKey, mapValue] of refMap.entries()) {
+        const mapDomain = mapKey.split("#")[0];
+        if (mapDomain.includes(hostname) || hostname.includes(mapDomain.split(".").slice(-2).join("."))) {
+          ref = mapValue;
+          break;
+        }
+      }
     }
+
+    if (ref) {
+      const superscript = numberToSuperscript(ref.refNumber);
+      return `[${superscript}](${ref.url}) `; // Add spacing between reference numbers
+    }
+
     return match;
   });
 }
-
 
 // ============================================================================
 // Data Transformation

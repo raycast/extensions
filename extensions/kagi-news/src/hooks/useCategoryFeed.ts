@@ -1,9 +1,9 @@
-// Hook to fetch stories/events for a selected category
+// Hook to fetch stories and events for a selected category
 
 import { useFetch } from "@raycast/utils";
 import { useMemo, useState, useEffect } from "react";
 import { HistoricalEvent } from "../interfaces";
-import { getLatestBatch, storiesToArticles } from "../utils";
+import { getLatestBatch, storiesToArticles, StoryResponse } from "../utils";
 
 export function useCategoryFeed(categoryId: string, language: string, providedBatchId?: string) {
   const isOnThisDay = categoryId === "onthisday";
@@ -11,7 +11,6 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
   const [isLoadingBatch, setIsLoadingBatch] = useState(!providedBatchId);
   const [batchError, setBatchError] = useState<string | null>(null);
 
-  // Only fetch batch if not provided
   useEffect(() => {
     if (providedBatchId) {
       return;

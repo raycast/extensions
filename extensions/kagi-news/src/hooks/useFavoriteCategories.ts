@@ -1,4 +1,4 @@
-// Hook to manage favorite categories for the daily news command
+// Hook to manage favorite categories (only used for the daily news command right now)
 
 import { useCachedState } from "@raycast/utils";
 import { useCallback } from "react";
