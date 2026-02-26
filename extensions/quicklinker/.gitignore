@@ -4,3 +4,5 @@ build/
 raycast-env.d.ts
 .DS_Store
 .claude/
+docs/
+CLAUDE.md
