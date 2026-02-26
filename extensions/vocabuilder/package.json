@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vocabuilder",
   "title": "VocaBuilder",
   "description": "Translate English words to Ukrainian and build your vocabulary",
@@ -8,7 +9,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "packageManager": "npm@10",
   "commands": [
     {
       "name": "translate",
@@ -62,7 +62,8 @@
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
-    "lint:fix": "ray lint --fix",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

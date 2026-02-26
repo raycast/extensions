@@ -33,7 +33,7 @@ function updateProgress(
 
   let repetitions: number;
   let interval: number;
-  let easeFactor: number;
+  let easeFactor = previousEaseFactor;
 
   if (rating === "again") {
     repetitions = 0;
