@@ -1,12 +1,13 @@
-import { Icon, MenuBarExtra, Image } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Icon, MenuBarExtra, Image, environment, LaunchType } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Player, PlayerQueue } from "./music-assistant/external-code/interfaces";
 import MusicAssistantClient from "./music-assistant/music-assistant-client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getStoredQueue, storeSelectedQueueID } from "./player-selection/use-selected-player-id";
 
 export default function Command() {
   const client = new MusicAssistantClient();
+  const isBackgroundRefresh = environment.launchType === LaunchType.Background;
 
   // Fetch both in parallel with automatic caching
   const {
@@ -21,14 +22,16 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
+      execute: isBackgroundRefresh,
     },
   );
 
   const { data: storedQueueId, revalidate: revalidateStoredQueueId } = useCachedPromise(getStoredQueue, [], {
     keepPreviousData: true,
+    execute: isBackgroundRefresh,
   });
 
-  const [title, setTitle] = useState<string>();
+  const [title, setTitle] = useCachedState<string>("menu-bar-title");
 
   useEffect(() => {
     const activeQueue = client.findActiveQueue(queuesData, storedQueueId);
@@ -39,7 +42,7 @@ export default function Command() {
     if (client.shouldUpdateTitle(title, newTitle)) {
       setTitle(newTitle);
     }
-  }, [storedQueueId, queuesData, playersData, client, title]);
+  }, [storedQueueId, queuesData, playersData]);
 
   const selectPlayerForMenuBar = async (queue: PlayerQueue) => {
     const selection = client.createQueueSelection(queue);
