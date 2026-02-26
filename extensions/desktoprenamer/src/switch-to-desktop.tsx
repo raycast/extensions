@@ -1,6 +1,6 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast, Form, useNavigation, open } from "@raycast/api";
-import { usePromise, runAppleScript } from "@raycast/utils";
-import { runDesktopRenamerCommand, checkDesktopRenamerRunning, escapeAppleScriptString } from "./utils";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, Form, useNavigation } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { runDesktopRenamerCommand, escapeAppleScriptString, runDesktopRenamerScript } from "./utils";
 
 interface Space {
   id: string;
@@ -10,13 +10,9 @@ interface Space {
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(async () => {
+  const { data, isLoading, revalidate } = usePromise<() => Promise<string | null>>(async () => {
     try {
-      const isRunning = await checkDesktopRenamerRunning();
-      if (!isRunning) {
-        throw new Error("DesktopRenamer is not running");
-      }
-      return await runAppleScript(`
+      return await runDesktopRenamerScript(`
         tell application "DesktopRenamer"
           set allSpaces to get all spaces
           set currentName to get current space name
@@ -24,22 +20,7 @@ export default function Command() {
         end tell
       `);
     } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Command Failed",
-        message: "Is DesktopRenamer running?",
-        primaryAction: {
-          title: "Open DesktopRenamer",
-          onAction: async () => {
-            try {
-              await open("/Applications/DesktopRenamer.app");
-            } catch {
-              await showToast({ style: Toast.Style.Failure, title: "Failed to launch app" });
-            }
-          },
-        },
-      });
-      return "";
+      return null;
     }
   });
 
