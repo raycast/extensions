@@ -209,6 +209,6 @@
     "test:run": "vitest run"
   },
   "platforms": [
-    "macOS"
+    "Windows", "macOS"
   ]
 }
