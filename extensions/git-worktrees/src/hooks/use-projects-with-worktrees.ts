@@ -1,12 +1,10 @@
-import type { BareRepository } from "#/config/types";
-import { findProjects } from "#/helpers/file";
+import type { Project } from "#/config/types";
+import { getWorktrees } from "#/helpers/file";
 import { getPreferences } from "#/helpers/raycast";
 import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
 import { useRef } from "react";
 
-type ProjectItem = BareRepository & { id: string };
-
-export const useProjects = () => {
+export const useProjectsWithWorktrees = () => {
   const { projectsPath, enableProjectsFrequencySorting } = getPreferences();
 
   const abortable = useRef<AbortController | undefined>(undefined);
@@ -15,18 +13,15 @@ export const useProjects = () => {
     data: incomingData,
     isLoading,
     revalidate,
-  } = useCachedPromise(
-    async (searchDir) => {
-      const repos = await findProjects(searchDir);
-      return repos.map((repo) => ({ ...repo, id: repo.fullPath }));
-    },
-    [projectsPath],
-    { initialData: [], keepPreviousData: true, abortable },
-  );
+  } = useCachedPromise((searchDir) => getWorktrees(searchDir, { signal: abortable.current?.signal }), [projectsPath], {
+    initialData: [],
+    keepPreviousData: true,
+    abortable,
+  });
 
   let data = incomingData ?? [];
-  let visitProject: ((item: ProjectItem) => Promise<void>) | undefined;
-  let resetProjectRanking: ((item: ProjectItem) => Promise<void>) | undefined;
+  let visitProject: ((item: Project) => Promise<void>) | undefined;
+  let resetProjectRanking: ((item: Project) => Promise<void>) | undefined;
 
   if (enableProjectsFrequencySorting) {
     const {
