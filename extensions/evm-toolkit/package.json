@@ -88,6 +88,20 @@
       "mode": "no-view"
     },
     {
+      "name": "eip",
+      "title": "Open EIP",
+      "description": "Open an Ethereum Improvement Proposal by its number",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "eip",
+          "type": "text",
+          "placeholder": "EIP number",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "simulate",
       "title": "Simulate Transaction",
       "description": "Open a prefilled Tenderly simulation page for a transaction",

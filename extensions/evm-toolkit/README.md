@@ -52,6 +52,16 @@ Opens an address's blockchain analytics on [Arkham Intel](https://intel.arkm.com
 
 Only addresses are accepted. Network-agnostic: Arkham covers all EVM chains automatically.
 
+### Open EIP
+
+Opens an [Ethereum Improvement Proposal](https://eips.ethereum.org/) page by its number.
+
+1. Trigger **Open EIP** in Raycast
+2. Enter the EIP number (1 to 5 digits)
+3. Press Enter
+
+The EIP number is used to open `https://eips.ethereum.org/EIPS/eip-{number}` directly in your browser.
+
 ### Simulate Transaction
 
 Opens a prefilled transaction simulation on [Tenderly](https://dashboard.tenderly.co/simulator/new).

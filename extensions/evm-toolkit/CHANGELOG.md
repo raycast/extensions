@@ -4,5 +4,6 @@
 - Open Code: view verified contract source code in a web IDE via deth.net
 - Open Profile: open an account's portfolio on DeBank
 - Open Intel: open an address's analytics on Arkham Intel
+- Open EIP: open the page for the given EIP
 - Simulate Transaction: prefill and open a Tenderly simulation page
 - 24 supported EVM networks with configurable default preference
