@@ -87,3 +87,15 @@ export function extractCVEs(text: string): string[] {
   const matches = text.match(/CVE-\d{4}-\d+/gi);
   return matches ? [...new Set(matches.map((m) => m.toUpperCase()))] : [];
 }
+
+export function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>?/gm, "") // Remove HTML tags
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+}

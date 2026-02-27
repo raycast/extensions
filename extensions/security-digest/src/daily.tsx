@@ -13,7 +13,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { XMLParser } from "fast-xml-parser";
 import { SecurityItem, Category, OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
-import { categorizeItem, mergeCVEItems } from "./utils";
+import { categorizeItem, mergeCVEItems, stripHtml } from "./utils";
 import SummaryView from "./Summary";
 
 const cache = new Cache();
@@ -123,12 +123,13 @@ export default function DailyDigest() {
                     item.link?.["@_href"] ||
                     item.link ||
                     "";
-                  const content =
+                  const content = stripHtml(
                     item.description?._text ||
-                    item.description ||
-                    item.content?._text ||
-                    item.summary?._text ||
-                    "";
+                      item.description ||
+                      item.content?._text ||
+                      item.summary?._text ||
+                      "",
+                  );
 
                   feedItems.push({
                     title: String(title),

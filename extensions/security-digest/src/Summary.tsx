@@ -8,8 +8,10 @@ import {
 } from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import { SecurityItem } from "./types";
+import { stripHtml } from "./utils";
 
 export default function SummaryView({ item }: { item: SecurityItem }) {
+  const cleanContent = stripHtml(item.content);
   const canAccessAI = environment.canAccess(AI);
 
   const prompt = `Summarize the following security news item for a security professional. 
@@ -18,7 +20,7 @@ Keep it concise and professional.
 
 Title: ${item.title}
 Source: ${item.source}
-Content: ${item.content}`;
+Content: ${cleanContent}`;
 
   const { data, isLoading, error } = useAI(prompt, {
     execute: canAccessAI,
@@ -62,7 +64,7 @@ ${isLoading ? "Generating summary..." : data}
 
 ---
 ## Original Content
-${item.content}
+${cleanContent}
 
 [Read full article](${item.link})
   `;
