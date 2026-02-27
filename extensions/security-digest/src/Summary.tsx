@@ -7,7 +7,6 @@ import {
   Color,
   Cache,
   getPreferenceValues,
-  List,
 } from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import { SecurityItem } from "./types";
@@ -96,40 +95,38 @@ ${cleanContent}
   `;
 
   return (
-    <List isLoading={isActuallyLoading}>
-      <Detail
-        markdown={markdown}
-        isLoading={isActuallyLoading}
-        navigationTitle={`${item.title} - ${t("summary_title", undefined, lang)}`}
-        metadata={
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="Source" text={item.source} />
-            <Detail.Metadata.Label
-              title="Date"
-              text={item.pubDate.toLocaleDateString()}
+    <Detail
+      markdown={markdown}
+      isLoading={isActuallyLoading}
+      navigationTitle={`${item.title} - ${t("summary_title", undefined, lang)}`}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Source" text={item.source} />
+          <Detail.Metadata.Label
+            title="Date"
+            text={item.pubDate.toLocaleDateString()}
+          />
+          <Detail.Metadata.TagList title="Category">
+            <Detail.Metadata.TagList.Item
+              text={item.category}
+              color={getCategoryColor(item.category)}
             />
-            <Detail.Metadata.TagList title="Category">
-              <Detail.Metadata.TagList.Item
-                text={item.category}
-                color={getCategoryColor(item.category)}
-              />
-            </Detail.Metadata.TagList>
-          </Detail.Metadata>
-        }
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser
-              url={item.link}
-              title={t("action_open_browser", undefined, lang)}
-            />
-            <Action.CopyToClipboard
-              title="Copy Summary"
-              content={displayData || ""}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
+          </Detail.Metadata.TagList>
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            url={item.link}
+            title={t("action_open_browser", undefined, lang)}
+          />
+          <Action.CopyToClipboard
+            title="Copy Summary"
+            content={displayData || ""}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }
 
