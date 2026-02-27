@@ -1,0 +1,113 @@
+{
+  "name": "token-watcher",
+  "title": "Token Watcher",
+  "description": "Monitor Claude Code and OpenAI Codex token usage and rate limits",
+  "icon": "icon.png",
+  "author": "Daneel_Olivaw",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Token Watcher Menu Bar",
+      "subtitle": "Token Usage",
+      "description": "Show token usage and rate limits in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "token-watcher",
+      "title": "Token Watcher",
+      "subtitle": "Token Usage",
+      "description": "View rate limits, usage, and per-project cost breakdown",
+      "mode": "view"
+    },
+    {
+      "name": "token-watcher-projects",
+      "title": "Token Watcher Projects",
+      "subtitle": "Per-Project Usage",
+      "description": "View token usage and cost breakdown per project",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableClaude",
+      "title": "Enable Claude",
+      "label": "Claude Code",
+      "description": "Show Claude Code usage and rate limits",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableCodex",
+      "title": "Enable Codex",
+      "label": "OpenAI Codex",
+      "description": "Show OpenAI Codex usage and rate limits",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "credentialsPath",
+      "title": "Claude Credentials Path",
+      "description": "Path to Claude credentials file",
+      "type": "textfield",
+      "default": "~/.claude/.credentials.json",
+      "required": false
+    },
+    {
+      "name": "codexCredentialsPath",
+      "title": "Codex Credentials Path",
+      "description": "Path to Codex auth file",
+      "type": "textfield",
+      "default": "~/.codex/auth.json",
+      "required": false
+    },
+    {
+      "name": "menuBarDisplay",
+      "title": "Menu Bar Display",
+      "description": "Show remaining capacity or current usage in the menu bar",
+      "type": "dropdown",
+      "default": "remaining",
+      "required": false,
+      "data": [
+        { "title": "Remaining %", "value": "remaining" },
+        { "title": "Usage %", "value": "usage" }
+      ]
+    },
+    {
+      "name": "defaultModel",
+      "title": "Default Model",
+      "description": "Default model for cost calculation",
+      "type": "dropdown",
+      "default": "opus",
+      "required": false,
+      "data": [
+        { "title": "Opus", "value": "opus" },
+        { "title": "Sonnet", "value": "sonnet" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
