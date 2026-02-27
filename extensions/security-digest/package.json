@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "security-digest",
+  "title": "Security Digest",
+  "description": "Daily cybersecurity news digest with AI-powered summaries. Aggregates RSS feeds from top security sources, categorizes content, and merges CVE-related articles.",
+  "icon": "shield-icon.png",
+  "author": "gandli",
+  "categories": [
+    "News",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "daily",
+      "title": "Daily Security Digest",
+      "description": "View today's cybersecurity news digest",
+      "mode": "view"
+    },
+    {
+      "name": "sources",
+      "title": "Manage Sources",
+      "description": "Configure RSS sources and OPML feeds",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "opmlUrl",
+      "title": "OPML URL",
+      "description": "URL to an OPML file with RSS feeds (e.g., CyberSecurityRSS)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "hoursBack",
+      "title": "Time Window (hours)",
+      "description": "How many hours back to fetch news",
+      "type": "textfield",
+      "default": "24",
+      "required": true
+    },
+    {
+      "name": "maxItems",
+      "title": "Max Items",
+      "description": "Maximum number of items to display",
+      "type": "textfield",
+      "default": "50",
+      "required": true
+    },
+    {
+      "name": "maxFeeds",
+      "title": "Max Feeds",
+      "description": "Maximum number of feeds to fetch",
+      "type": "textfield",
+      "default": "20",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "fast-xml-parser": "^5.4.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.10.0",
+    "@types/react": "18.2.79",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "@types/react": "18.2.79"
+  },
+  "version": "0.0.1"
+}
