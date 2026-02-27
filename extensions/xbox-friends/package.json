@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xbox-friends",
+  "title": "Xbox Friends",
+  "description": "See which Xbox Live friends are online and what they're playing",
+  "icon": "command-icon.png",
+  "author": "maxpaolucci",
+  "categories": ["Fun"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Xbox Friends",
+      "description": "See which Xbox Live friends are online and what they're playing",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "OpenXBL API Key",
+      "description": "Get your free API key at xbl.io",
+      "type": "password",
+      "required": true,
+      "placeholder": "your-xbl-api-key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.4",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
