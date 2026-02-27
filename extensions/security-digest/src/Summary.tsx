@@ -9,18 +9,17 @@ import {
 import { useAI } from "@raycast/utils";
 import { SecurityItem } from "./types";
 import { stripHtml } from "./utils";
+import { t } from "./i18n";
 
 export default function SummaryView({ item }: { item: SecurityItem }) {
   const cleanContent = stripHtml(item.content);
   const canAccessAI = environment.canAccess(AI);
 
-  const prompt = `Summarize the following security news item for a security professional. 
-Highlight the key threat, affected systems (if any), and recommended actions.
-Keep it concise and professional.
-
-Title: ${item.title}
-Source: ${item.source}
-Content: ${cleanContent}`;
+  const prompt = t("summary_prompt", {
+    title: item.title,
+    source: item.source ?? "Unknown",
+    content: cleanContent,
+  });
 
   const { data, isLoading, error } = useAI(prompt, {
     execute: canAccessAI,
@@ -29,11 +28,11 @@ Content: ${cleanContent}`;
   if (error) {
     return (
       <Detail
-        markdown={`# AI Error\n\n${error}`}
+        markdown={`# ${t("summary_error_title")}\n\n${error}`}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
-              title="Check Raycast AI Status"
+              title={t("summary_check_status")}
               url="https://status.raycast.com"
             />
           </ActionPanel>
@@ -45,11 +44,11 @@ Content: ${cleanContent}`;
   if (!canAccessAI) {
     return (
       <Detail
-        markdown="# AI Access Required\n\nThis feature requires **Raycast Pro**. Please upgrade to use built-in AI summaries."
+        markdown={`# ${t("summary_pro_required")}\n\n${t("summary_pro_desc")}`}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
-              title="Upgrade to Raycast Pro"
+              title={t("summary_upgrade_btn")}
               url="https://www.raycast.com/pro"
             />
           </ActionPanel>
@@ -59,21 +58,21 @@ Content: ${cleanContent}`;
   }
 
   const markdown = `
-# AI Summary
-${isLoading ? "Generating summary..." : data}
+# ${t("summary_title")}
+${isLoading ? t("summary_loading") : data}
 
 ---
-## Original Content
+## ${t("summary_original")}
 ${cleanContent}
 
-[Read full article](${item.link})
+[${t("summary_read_full")}](${item.link})
   `;
 
   return (
     <Detail
       markdown={markdown}
       isLoading={isLoading}
-      navigationTitle={`${item.title} - AI Summary`}
+      navigationTitle={`${item.title} - ${t("summary_title")}`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Source" text={item.source} />
@@ -91,7 +90,10 @@ ${cleanContent}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={item.link} />
+          <Action.OpenInBrowser
+            url={item.link}
+            title={t("action_open_browser")}
+          />
           <Action.CopyToClipboard title="Copy Summary" content={data || ""} />
         </ActionPanel>
       }

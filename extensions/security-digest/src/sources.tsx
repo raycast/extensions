@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
+import { t } from "./i18n";
 
 export default function ManageSources() {
   const [feeds, setFeeds] = useState<OPMLFeed[]>([]);
@@ -103,28 +104,31 @@ export default function ManageSources() {
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Add Feed" onSubmit={addFeed} />
+            <Action.SubmitForm
+              title={t("sources_save_btn")}
+              onSubmit={addFeed}
+            />
             <Action title="Cancel" onAction={() => setShowForm(false)} />
           </ActionPanel>
         }
       >
         <Form.TextField
           id="title"
-          title="Feed Title"
+          title={t("sources_feed_name")}
           placeholder="e.g., Krebs on Security"
           value={newFeed.title}
           onChange={(v) => setNewFeed({ ...newFeed, title: v })}
         />
         <Form.TextField
           id="url"
-          title="RSS URL"
+          title={t("sources_feed_url")}
           placeholder="https://example.com/feed.xml"
           value={newFeed.url}
           onChange={(v) => setNewFeed({ ...newFeed, url: v })}
         />
         <Form.TextField
           id="category"
-          title="Category (optional)"
+          title={t("sources_feed_category")}
           placeholder="e.g., Threat Intel"
           value={newFeed.category}
           onChange={(v) => setNewFeed({ ...newFeed, category: v })}
@@ -134,12 +138,15 @@ export default function ManageSources() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={t("sources_search_placeholder")}
+    >
       <List.EmptyView
         title="No feeds configured"
         description="Add feeds manually or load from OPML"
       />
-      <List.Section title={`${feeds.length} feeds`}>
+      <List.Section title={t("items_count", { count: feeds.length })}>
         {feeds.map((feed, index) => (
           <List.Item
             key={`${feed.url}-${index}`}
@@ -163,11 +170,14 @@ export default function ManageSources() {
       </List.Section>
       <List.Section title="Actions">
         <List.Item
-          title="Add New Feed"
+          title={t("sources_add_title")}
           icon={Icon.Plus}
           actions={
             <ActionPanel>
-              <Action title="Add Feed" onAction={() => setShowForm(true)} />
+              <Action
+                title={t("sources_add_title")}
+                onAction={() => setShowForm(true)}
+              />
             </ActionPanel>
           }
         />
@@ -186,7 +196,7 @@ export default function ManageSources() {
           icon={Icon.ArrowClockwise}
           actions={
             <ActionPanel>
-              <Action title="Reset" onAction={loadFeeds} />
+              <Action title={t("action_refresh")} onAction={loadFeeds} />
             </ActionPanel>
           }
         />

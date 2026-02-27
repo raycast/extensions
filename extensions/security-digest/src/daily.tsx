@@ -15,6 +15,7 @@ import { SecurityItem, Category, OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
 import { categorizeItem, mergeCVEItems, stripHtml } from "./utils";
 import SummaryView from "./Summary";
+import { t } from "./i18n";
 
 const cache = new Cache();
 const xmlParser = new XMLParser({
@@ -34,11 +35,11 @@ const CATEGORY_COLORS: Record<Category, Color> = {
   news: Color.Green,
 };
 
-const CATEGORY_LABELS: Record<Category, string> = {
-  vulnerability: "🛡️ Vulnerability",
-  intelligence: "🔥 Intelligence",
-  news: "📰 News",
-};
+const getCategoryLabels = (): Record<Category, string> => ({
+  vulnerability: t("cat_vulnerability"),
+  intelligence: t("cat_intelligence"),
+  news: t("cat_news"),
+});
 
 export default function DailyDigest() {
   const [items, setItems] = useState<SecurityItem[]>([]);
@@ -194,20 +195,22 @@ export default function DailyDigest() {
     "news",
   ];
 
+  const categoryLabels = getCategoryLabels();
+
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search security news..."
+      searchBarPlaceholder={t("search_placeholder")}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filter by category"
+          tooltip={t("filter_tooltip")}
           storeValue={true}
           onChange={(value) => setSelectedCategory(value as Category | "all")}
         >
           {categories.map((cat) => (
             <List.Dropdown.Item
               key={cat}
-              title={cat === "all" ? "📦 All" : CATEGORY_LABELS[cat]}
+              title={cat === "all" ? t("cat_all") : categoryLabels[cat]}
               value={cat}
             />
           ))}
@@ -217,19 +220,19 @@ export default function DailyDigest() {
       {error ? (
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title="Failed to load feeds"
+          title={t("load_error_title")}
           description={error}
         />
       ) : filteredItems.length === 0 ? (
         <List.EmptyView
           icon={Icon.Text}
-          title="No news found"
-          description="Try adjusting your time window or check your feeds"
+          title={t("no_news_title")}
+          description={t("no_news_desc")}
         />
       ) : (
         <List.Section
-          title={`${filteredItems.length} items`}
-          subtitle={`Last ${preferences.hoursBack || 24}h`}
+          title={t("items_count", { count: filteredItems.length })}
+          subtitle={t("time_window", { hours: preferences.hoursBack || 24 })}
         >
           {filteredItems.map((item, index) => (
             <List.Item
@@ -248,25 +251,25 @@ export default function DailyDigest() {
                 <ActionPanel>
                   <Action.Push
                     icon={Icon.Stars}
-                    title="Summarize with AI"
+                    title={t("action_summarize")}
                     target={<SummaryView item={item} />}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
                   <Action.OpenInBrowser
                     url={item.link}
-                    title="Open in Browser"
+                    title={t("action_open_browser")}
                   />
                   <Action.CopyToClipboard
                     content={`[${item.title}](${item.link})`}
-                    title="Copy Markdown Link"
+                    title={t("action_copy_md")}
                   />
                   <Action.CopyToClipboard
                     content={item.link}
-                    title="Copy URL"
+                    title={t("action_copy_url")}
                   />
                   <Action
                     icon={Icon.ArrowClockwise}
-                    title="Refresh"
+                    title={t("action_refresh")}
                     onAction={fetchFeeds}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />
@@ -282,9 +285,9 @@ export default function DailyDigest() {
 
 function getCategoryLabel(category: Category): string {
   const labels: Record<Category, string> = {
-    vulnerability: "CVE",
-    intelligence: "Intel",
-    news: "News",
+    vulnerability: t("label_vulnerability"),
+    intelligence: t("label_intelligence"),
+    news: t("label_news"),
   };
   return labels[category];
 }

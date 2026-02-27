@@ -56,6 +56,24 @@
       "type": "textfield",
       "default": "20",
       "required": true
+    },
+    {
+      "name": "language",
+      "title": "Language / 语言",
+      "description": "Select UI language (English/Chinese)",
+      "type": "dropdown",
+      "default": "en",
+      "required": true,
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese / 中文",
+          "value": "zh"
+        }
+      ]
     }
   ],
   "dependencies": {
