@@ -1,6 +1,6 @@
 # Everything Search Changelog
 
-## [Added ability to search through SDK] - {PR_MERGE_DATE}
+## [Added ability to search through SDK] - 2026-02-27
 - Added download dialog for Everything CLI if it's not installed
 - Added ability to search with regular expressions
 - Added ability to change max results count
