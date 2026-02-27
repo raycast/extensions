@@ -2,13 +2,8 @@ import { getPreferenceValues } from "@raycast/api";
 import type { GantryConfig } from "../lib/config/types";
 import { AVAILABLE_MODELS } from "../lib/config/models";
 
-interface GantryPreferences {
-  showAppleServices: boolean;
-  llmModel: string;
-  anthropicApiKey: string;
-  googleApiKey: string;
-  openaiApiKey: string;
-}
+export function getConfig(): GantryConfig {
+  const prefs = getPreferenceValues<Preferences>();
 
 export function getConfig(): GantryConfig {
   const prefs = getPreferenceValues<GantryPreferences>();
