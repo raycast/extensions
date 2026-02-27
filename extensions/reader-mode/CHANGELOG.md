@@ -2,7 +2,7 @@
 
 ## [SF Chronicle Support] - {PR_MERGE_DATE}
 
-## Added
+### Added
 
 - San Francisco Chronicle site config
 

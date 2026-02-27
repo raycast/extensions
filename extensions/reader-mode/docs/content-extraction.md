@@ -9,9 +9,9 @@ Reader uses a multi-stage pipeline to extract clean article content from web pag
 1. **HTML Pre-Cleaning** — Remove non-article elements before parsing
 2. **Lazy Image Resolution** — Fix lazy-loaded images
 3. **Site-Specific Configs** — Handle problematic sites with custom rules
-3. **Site-Specific Configs** — Handle problematic sites with custom rules
-4. **Readability Parsing** — Extract article content using Mozilla Readability
-5. **Markdown Conversion** — Convert HTML to Markdown with additional filtering
+4. **Site-Specific Configs** — Handle problematic sites with custom rules
+5. **Readability Parsing** — Extract article content using Mozilla Readability
+6. **Markdown Conversion** — Convert HTML to Markdown with additional filtering
 
 ---
 
@@ -21,12 +21,10 @@ These techniques are based on analysis of two mature reader mode implementations
 
 ### Safari Reader Mode
 
-
 - **Source**: [ReaderArticleFinder.js](https://github.com/dm-zharov/safari-readability/blob/main/ReaderArticleFinder.js)
 - **Key techniques**: Score-based content detection, schema.org detection, site quirks list, lazy image handling
 
 ### Reader View (Browser Extension)
-
 
 - **Source**: [index.js](https://github.com/rNeomy/reader-view/blob/master/v3/data/reader/index.js)
 - **Key techniques**: Turndown integration, multiple article detection, design mode
@@ -69,7 +67,6 @@ These elements are protected from removal even if they match negative patterns:
 
 The cleaner detects schema.org article markup:
 
-
 - `[itemprop="articleBody"]`
 - `[itemtype*="schema.org/Article"]`
 - `[itemtype*="schema.org/NewsArticle"]`
@@ -98,7 +95,6 @@ Images with placeholder `src` values (data URIs, "placeholder", "transparent", "
 
 ---
 
-### 3. Site-Specific Configs (`src/config/site-config.ts`)
 ### 3. Site-Specific Configs (`src/config/site-config.ts`)
 
 Some sites have non-standard HTML structures that require custom handling. The site config system provides:
@@ -136,9 +132,7 @@ Some sites have non-standard HTML structures that require custom handling. The s
 | And more...     | See `site-config.ts` for full list                   |
 
 #### Adding New Site Configs
-#### Adding New Site Configs
 
-To add a config for a new site, add an entry to the `SITE_CONFIGS` array in `site-config.ts`:
 To add a config for a new site, add an entry to the `SITE_CONFIGS` array in `site-config.ts`:
 
 ```typescript
