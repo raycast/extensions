@@ -250,9 +250,6 @@ export default function TokenWatcher() {
 
 // ─── Setup Screen ──────────────────────────────────────────────────────────
 
-const CLAUDE_ICON = { source: "claude-icon.png" };
-const CODEX_ICON = { source: "codex-icon.png" };
-
 function SetupScreen({
   isLoading,
   revalidate,
@@ -278,7 +275,7 @@ function SetupScreen({
       />
       <List.Section title="Get Started">
         <List.Item
-          icon={CLAUDE_ICON}
+          icon={Icon.Terminal}
           title="Set up Claude Code"
           subtitle="Run `claude` to authenticate"
           accessories={[
@@ -304,7 +301,7 @@ function SetupScreen({
           }
         />
         <List.Item
-          icon={CODEX_ICON}
+          icon={Icon.Terminal}
           title="Set up Codex"
           subtitle="Run `codex` to authenticate"
           accessories={[{ icon: Icon.Info, tooltip: "~/.codex/auth.json" }]}

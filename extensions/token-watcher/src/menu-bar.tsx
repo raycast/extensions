@@ -106,9 +106,6 @@ async function loadMenuBarData(): Promise<MenuBarData> {
   };
 }
 
-const CLAUDE_ICON = { source: "claude-icon.png" };
-const CODEX_ICON = { source: "codex-icon.png" };
-
 const DARK_GREEN: Color.Dynamic = { light: "#1a7f37", dark: "#2ea043" };
 
 function statusColor(utilization: number): Color | Color.Dynamic {
@@ -190,7 +187,7 @@ export default function MenuBar() {
           <MenuBarExtra.Item
             title="Set up Claude Code"
             subtitle="~/.claude/.credentials.json"
-            icon={CLAUDE_ICON}
+            icon={Icon.Terminal}
             onAction={() =>
               open("https://docs.anthropic.com/en/docs/claude-code/overview")
             }
@@ -198,7 +195,7 @@ export default function MenuBar() {
           <MenuBarExtra.Item
             title="Set up Codex"
             subtitle="~/.codex/auth.json"
-            icon={CODEX_ICON}
+            icon={Icon.Terminal}
             onAction={() => open("https://codex.openai.com")}
           />
           <MenuBarExtra.Item
