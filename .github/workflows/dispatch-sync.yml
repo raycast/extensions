@@ -15,6 +15,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          sparse-checkout: |
+            extensions/*/package.json
+          sparse-checkout-cone-mode: false
 
       - name: Find changed extensions and dispatch
         env:
