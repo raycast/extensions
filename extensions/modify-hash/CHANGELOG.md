@@ -1,6 +1,6 @@
 # Modify File Hash Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-02-27
 
 - Update the extension deps to the latest version.
 - Add support for Windows platform.
