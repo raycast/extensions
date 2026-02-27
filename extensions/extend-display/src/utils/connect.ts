@@ -19,10 +19,24 @@ do shell script "open -b com.apple.systempreferences /System/Library/PreferenceP
 set device to (system attribute "Device_Name")
 set mirrorSectionName to (system attribute "Mirror_Section_Name")
 
+on cleanup()
+  try
+    tell application "System Settings" to quit
+  end try
+  do shell script "open raycast://"
+  delay 0.3
+end cleanup
+
 tell application "System Events"
-  repeat until (exists window 1 of application process "System Settings")
+  set windowWait to 0
+  repeat until (exists window 1 of application process "System Settings") or windowWait >= 50
     delay 0.1
+    set windowWait to windowWait + 1
   end repeat
+  if windowWait >= 50 then
+    my cleanup()
+    error "System Settings did not open in time"
+  end if
 
   tell process "System Settings"
     set frontmost to true
@@ -49,6 +63,7 @@ tell application "System Events"
     end repeat
     
     if popUpButton is missing value then
+      my cleanup()
       error "Could not find display menu button after " & maxAttempts & " attempts"
     end if
 
@@ -56,9 +71,16 @@ tell application "System Events"
     click popUpButton
     delay 0.3
     
-    repeat until exists menu 1 of popUpButton
+    set menuWait to 0
+    repeat until exists menu 1 of popUpButton or menuWait >= 30
       delay 0.1
+      set menuWait to menuWait + 1
     end repeat
+    if menuWait >= 30 then
+      key code 53
+      my cleanup()
+      error "Display menu did not appear"
+    end if
 
     tell menu 1 of popUpButton
       set targetItem to missing value
@@ -80,6 +102,7 @@ tell application "System Events"
 
       if targetItem is missing value then
         key code 53 -- Escape
+        my cleanup()
         error "Display '" & device & "' not found in menu"
       end if
       
@@ -141,6 +164,7 @@ export async function connectToDisplay(
   // Start both simultaneously to prevent audio from switching
   try {
     const connectPromise = execFileAsync("osascript", ["-e", connectScript], {
+      timeout: 15000,
       env: {
         ...process.env,
         Device_Name: displayName,
