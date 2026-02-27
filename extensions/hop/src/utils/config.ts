@@ -39,6 +39,11 @@ interface HopHistory {
 }
 
 // Preferences interface is auto-generated from package.json by Raycast
+type Preferences = {
+  terminal: string;
+  customTerminal: string;
+  configPath: string;
+};
 
 function expandTilde(filePath: string): string {
   if (filePath.startsWith("~/")) {
