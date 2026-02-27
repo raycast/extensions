@@ -62,49 +62,46 @@ function getMainRepoPath(worktreePath: string): string | null {
   }
 }
 
+const MAX_REPO_SCAN_DEPTH = 15;
+
+function collectReposRecursive(dirPath: string, results: RepoInfo[], seenMainPaths: Set<string>, depth: number): void {
+  if (depth > MAX_REPO_SCAN_DEPTH) return;
+  if (!fs.existsSync(dirPath) || !fs.statSync(dirPath).isDirectory()) return;
+  try {
+    if (isGitRepo(dirPath)) {
+      const stat = fs.statSync(path.join(dirPath, ".git"));
+      if (stat.isFile()) {
+        const mainPath = getMainRepoPath(dirPath);
+        if (mainPath && !seenMainPaths.has(mainPath)) {
+          seenMainPaths.add(mainPath);
+          results.push({ path: mainPath });
+        }
+      } else {
+        const resolved = path.resolve(dirPath);
+        if (!seenMainPaths.has(resolved)) {
+          seenMainPaths.add(resolved);
+          results.push({ path: resolved });
+        }
+      }
+      return;
+    }
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (const ent of entries) {
+      if (!ent.isDirectory() || ent.name === ".git") continue;
+      collectReposRecursive(path.join(dirPath, ent.name), results, seenMainPaths, depth + 1);
+    }
+  } catch (err) {
+    logGitError("getReposForRoot error", dirPath, err);
+  }
+}
+
 export function getReposForRoot(rootPath: string): RepoInfo[] {
   if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {
     return [];
   }
   const results: RepoInfo[] = [];
   const seenMainPaths = new Set<string>();
-  try {
-    if (isGitRepo(rootPath)) {
-      const stat = fs.statSync(path.join(rootPath, ".git"));
-      if (stat.isFile()) {
-        const mainPath = getMainRepoPath(rootPath);
-        if (mainPath && !seenMainPaths.has(mainPath)) {
-          seenMainPaths.add(mainPath);
-          results.push({ path: mainPath });
-        }
-      } else {
-        seenMainPaths.add(rootPath);
-        results.push({ path: path.resolve(rootPath) });
-      }
-    }
-    const entries = fs.readdirSync(rootPath, { withFileTypes: true });
-    for (const ent of entries) {
-      if (!ent.isDirectory()) continue;
-      const fullPath = path.join(rootPath, ent.name);
-      if (!isGitRepo(fullPath)) continue;
-      const stat = fs.statSync(path.join(fullPath, ".git"));
-      if (stat.isFile()) {
-        const mainPath = getMainRepoPath(fullPath);
-        if (mainPath && !seenMainPaths.has(mainPath)) {
-          seenMainPaths.add(mainPath);
-          results.push({ path: mainPath });
-        }
-        continue;
-      }
-      const resolved = path.resolve(fullPath);
-      if (!seenMainPaths.has(resolved)) {
-        seenMainPaths.add(resolved);
-        results.push({ path: resolved });
-      }
-    }
-  } catch (err) {
-    logGitError("getReposForRoot error", rootPath, err);
-  }
+  collectReposRecursive(path.resolve(rootPath), results, seenMainPaths, 0);
   return results;
 }
 
