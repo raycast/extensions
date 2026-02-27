@@ -4,7 +4,7 @@
   "title": "IsDown",
   "description": "Check the status of 6000+ services and cloud providers",
   "icon": "isdown.png",
-  "author": "ntomas",
+  "author": "nunotomas",
   "categories": [
     "Developer Tools"
   ],
