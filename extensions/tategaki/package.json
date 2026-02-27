@@ -5,7 +5,7 @@
   "description": "Convert text to Japanese vertical writing",
   "icon": "extension-icon.png",
   "author": "haruka_odenkun",
-  "platforms": ["macOS"],
+  "platforms": ["macOS", "Windows"],
   "categories": [
     "Fun"
   ],
@@ -14,7 +14,6 @@
     {
       "name": "japanese-vertical-text",
       "title": "Japanese Vertical Text",
-      "subtitle": "Right-to-left vertical writing",
       "description": "Convert text to Japanese vertical writing (right-to-left columns)",
       "mode": "view"
     }
