@@ -24,6 +24,7 @@ import useChatGPTAtlasBookmarks from "./hooks/useChatGPTAtlasBookmarks";
 import useChromeBetaBookmarks from "./hooks/useChromeBetaBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
+import useCometBookmarks from "./hooks/useCometBookmarks";
 import useDiaBookmarks from "./hooks/useDiaBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
@@ -117,6 +118,7 @@ export default function Command() {
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
   const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
+  const hasComet = browsers.includes(BROWSERS_BUNDLE_ID.comet) ?? false;
   const hasDia = browsers.includes(BROWSERS_BUNDLE_ID.dia) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
@@ -143,6 +145,7 @@ export default function Command() {
   const chrome = useChromeBookmarks(hasChrome);
   const chromeBeta = useChromeBetaBookmarks(hasChromeBeta);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
+  const comet = useCometBookmarks(hasComet);
   const dia = useDiaBookmarks(hasDia);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
@@ -173,6 +176,7 @@ export default function Command() {
       ...chrome.bookmarks,
       ...chromeBeta.bookmarks,
       ...chromeDev.bookmarks,
+      ...comet.bookmarks,
       ...dia.bookmarks,
       ...edge.bookmarks,
       ...edgeCanary.bookmarks,
@@ -231,6 +235,7 @@ export default function Command() {
     chrome.bookmarks,
     chromeBeta.bookmarks,
     chromeDev.bookmarks,
+    comet.bookmarks,
     dia.bookmarks,
     edge.bookmarks,
     edgeCanary.bookmarks,
@@ -261,6 +266,7 @@ export default function Command() {
       ...chrome.folders,
       ...chromeBeta.folders,
       ...chromeDev.folders,
+      ...comet.folders,
       ...dia.folders,
       ...edge.folders,
       ...edgeCanary.folders,
@@ -289,6 +295,7 @@ export default function Command() {
     chrome.folders,
     chromeBeta.folders,
     chromeDev.folders,
+    comet.folders,
     dia.folders,
     edge.folders,
     edgeCanary.folders,
@@ -404,6 +411,9 @@ export default function Command() {
     if (hasChromeDev) {
       chromeDev.mutate();
     }
+    if (hasComet) {
+      comet.mutate();
+    }
     if (hasDia) {
       dia.mutate();
     }
@@ -501,6 +511,7 @@ export default function Command() {
         chrome.isLoading ||
         chromeBeta.isLoading ||
         chromeDev.isLoading ||
+        comet.isLoading ||
         dia.isLoading ||
         edge.isLoading ||
         edgeCanary.isLoading ||
@@ -640,6 +651,15 @@ export default function Command() {
                     profiles={chromeDev.profiles}
                     currentProfile={chromeDev.currentProfile}
                     setCurrentProfile={chromeDev.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.comet}
+                    name="Comet"
+                    icon="comet.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    profiles={comet.profiles}
+                    currentProfile={comet.currentProfile}
+                    setCurrentProfile={comet.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.dia}
