@@ -1,5 +1,11 @@
 # Browser Bookmarks Changelog
 
+## [Add Perplexity Comet Browser Support] - 2026-02-27
+
+### Added
+
+- Add support for Perplexity Comet browser
+
 ## [Bug Fix] - 2026-02-18
 
 - Updated bundled `sql-wasm.wasm` to match upgraded `sql.js` v1.13.0, fixing `TypeError: a is not a function` crash in Firefox, LibreWolf, and Zen bookmark hooks
