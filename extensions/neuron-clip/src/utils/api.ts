@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export const API_URL = "https://www.neuronapp.tech";
+export const API_URL = "https://www.app.neuronapp.tech";
 
 interface ClipResponse {
   success: boolean;
@@ -214,81 +214,6 @@ export async function getFolders(): Promise<FolderItem[]> {
     throw new Error(result.error || "Failed to load folders");
   }
   return result.folders ?? [];
-}
-
-// --- Journal ---
-interface JournalResponse {
-  success: boolean;
-  error?: string;
-  existing?: boolean;
-  noteId?: string;
-  title?: string;
-  organizationSlug?: string;
-}
-
-export async function checkJournalEntryExists(date: string): Promise<{
-  exists: boolean;
-  noteId: string | null;
-  organizationSlug: string;
-}> {
-  const preferences = getPreferenceValues<Preferences>();
-  const { apiKey } = preferences;
-  const response = await fetch(
-    `${API_URL}/api/clip/raycast/journal/check?date=${encodeURIComponent(date)}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-      },
-    },
-  );
-  const result = (await response.json()) as {
-    success: boolean;
-    error?: string;
-    exists?: boolean;
-    noteId?: string | null;
-    organizationSlug?: string;
-  };
-  if (!response.ok || !result.success) {
-    throw new Error(result.error || "Failed to check journal");
-  }
-  return {
-    exists: result.exists ?? false,
-    noteId: result.noteId ?? null,
-    organizationSlug: result.organizationSlug ?? "",
-  };
-}
-
-export async function getOrCreateJournalEntry(
-  date: string,
-  content?: string,
-): Promise<{
-  existing: boolean;
-  noteId: string;
-  title: string;
-  organizationSlug: string;
-}> {
-  const preferences = getPreferenceValues<Preferences>();
-  const { apiKey } = preferences;
-  const response = await fetch(`${API_URL}/api/clip/raycast/journal`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-    },
-    body: JSON.stringify({ date, content }),
-  });
-  const result = (await response.json()) as JournalResponse;
-  if (!response.ok || !result.success) {
-    throw new Error(result.error || "Failed to create journal entry");
-  }
-  return {
-    existing: result.existing ?? false,
-    noteId: result.noteId!,
-    title: result.title!,
-    organizationSlug: result.organizationSlug!,
-  };
 }
 
 // --- Content search (unified: notes, folders, tags) ---

@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "neuron-clip",
     "title": "Neuron",
-    "description": "Capture notes, search your knowledge base, and write daily journal entries from Raycast. Syncs with your Neuron dashboard so you can capture ideas, clip content with tags, and open or start Recall on any note without leaving the keyboard.",
+    "description": "Capture notes and search your knowledge base from Raycast. Syncs with your Neuron dashboard so you can capture ideas, clip content with tags, and open or start Recall on any note without leaving the keyboard.",
     "icon": "neuron.png",
     "author": "jay_npatel77",
     "categories": [
@@ -20,12 +20,6 @@
             "name": "search-notes",
             "title": "Search Content",
             "description": "Search notes, folders, tags and so much more.",
-            "mode": "view"
-        },
-        {
-            "name": "write-journal",
-            "title": "Write Journal Daily Note",
-            "description": "Create or append to a daily journal note for a chosen date and add markdown to your Neuron journal with timestamp.",
             "mode": "view"
         }
     ],
