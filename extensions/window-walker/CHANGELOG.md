@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-02-27
 
 ### Fixed
 
