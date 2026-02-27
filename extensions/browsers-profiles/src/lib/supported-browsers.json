@@ -5,7 +5,9 @@
       "type": "CHROMIUM",
       "title": "Google Chrome",
       "path": "/Library/Application Support/Google/Chrome",
-      "icon": "chrome.png"
+      "icon": "chrome.png",
+      "appWindows": "chrome",
+      "pathWindows": "AppData\\\\Local\\\\Google\\\\Chrome\\\\User Data"
     },
     {
       "app": "Google Chrome Dev",
@@ -19,42 +21,54 @@
       "type": "CHROMIUM",
       "title": "Google Chrome Canary",
       "path": "/Library/Application Support/Google/Chrome Canary",
-      "icon": "canary.png"
+      "icon": "canary.png",
+      "appWindows": "chrome",
+      "pathWindows": "AppData\\\\Local\\\\Google\\\\Chrome SxS\\\\User Data"
     },
     {
       "app": "Chromium",
       "type": "CHROMIUM",
       "title": "Chromium",
       "path": "/Library/Application Support/Chromium",
-      "icon": "chromium.png"
+      "icon": "chromium.png",
+      "appWindows": "chrome",
+      "pathWindows": "AppData\\\\Local\\\\Chromium\\\\User Data"
     },
     {
       "app": "Brave Browser",
       "type": "CHROMIUM",
       "title": "Brave",
       "path": "/Library/Application Support/BraveSoftware/Brave-Browser",
-      "icon": "brave.png"
+      "icon": "brave.png",
+      "appWindows": "brave",
+      "pathWindows": "AppData\\\\Local\\\\BraveSoftware\\\\Brave-Browser\\\\User Data"
     },
     {
       "app": "Microsoft Edge",
       "type": "CHROMIUM",
       "title": "Microsoft Edge",
       "path": "/Library/Application Support/Microsoft Edge",
-      "icon": "edge.png"
+      "icon": "edge.png",
+      "appWindows": "msedge",
+      "pathWindows": "AppData\\\\Local\\\\Microsoft\\\\Edge\\\\User Data"
     },
     {
       "app": "Microsoft Edge Dev",
       "type": "CHROMIUM",
       "title": "Microsoft Edge Dev",
       "path": "/Library/Application Support/Microsoft Edge Dev",
-      "icon": "edge-dev.png"
+      "icon": "edge-dev.png",
+      "appWindows": "msedge",
+      "pathWindows": "AppData\\\\Local\\\\Microsoft\\\\Edge Dev\\\\User Data"
     },
     {
       "app": "Microsoft Edge Canary",
       "type": "CHROMIUM",
       "title": "Microsoft Edge Canary",
       "path": "/Library/Application Support/Microsoft Edge Canary",
-      "icon": "edge-canary.png"
+      "icon": "edge-canary.png",
+      "appWindows": "msedge",
+      "pathWindows": "AppData\\\\Local\\\\Microsoft\\\\Edge SxS\\\\User Data"
     },
     {
       "app": "Helium",
@@ -69,6 +83,15 @@
       "title": "Arc",
       "path": "/Library/Application Support/Arc/User Data",
       "icon": "arc.png"
+    },
+    {
+      "app": "Comet",
+      "appWindows": "comet",
+      "type": "CHROMIUM",
+      "title": "Comet",
+      "path": "/Library/Application Support/Perplexity/Comet",
+      "pathWindows": "AppData\\\\Local\\\\Perplexity\\\\Comet\\\\User Data",
+      "icon": "chromium.png"
     }
   ],
   "firefox": [
@@ -77,21 +100,27 @@
       "type": "FIREFOX",
       "title": "Firefox",
       "path": "/Library/Application Support/Firefox",
-      "icon": "firefox.png"
+      "icon": "firefox.png",
+      "appWindows": "firefox",
+      "pathWindows": "AppData\\\\Roaming\\\\Mozilla\\\\Firefox"
     },
     {
       "app": "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox",
       "type": "FIREFOX",
       "title": "Firefox Developer Edition",
       "path": "/Library/Application Support/Firefox",
-      "icon": "firefox-dev.png"
+      "icon": "firefox-dev.png",
+      "appWindows": "firefox",
+      "pathWindows": "AppData\\\\Roaming\\\\Mozilla\\\\Firefox"
     },
     {
       "app": "/Applications/Firefox Nightly.app/Contents/MacOS/firefox",
       "type": "FIREFOX",
       "title": "Firefox Nightly",
       "path": "/Library/Application Support/Firefox",
-      "icon": "firefox-nightly.png"
+      "icon": "firefox-nightly.png",
+      "appWindows": "firefox",
+      "pathWindows": "AppData\\\\Roaming\\\\Mozilla\\\\Firefox"
     }
   ]
 }

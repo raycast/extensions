@@ -12,7 +12,8 @@
     "kytta",
     "emilshr",
     "chingweih",
-    "nilleb"
+    "nilleb",
+    "rogerio_araujo_costa"
   ],
   "scripts": {
     "build": "ray build",
@@ -23,7 +24,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.103.0",
+    "@raycast/api": "^1.104.7",
     "ini": "^3.0.0"
   },
   "devDependencies": {
@@ -51,13 +52,14 @@
           "name": "browsers.filter",
           "type": "textfield",
           "title": "Browsers Filter",
-          "default": "Chrome,Firefox,Brave,Edge,Chromium"
+          "default": "Chrome,Firefox,Brave,Edge,Chromium,Comet"
         }
       ]
     }
   ],
   "title": "Open Browsers Profiles",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

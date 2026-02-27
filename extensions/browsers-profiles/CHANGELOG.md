@@ -1,5 +1,13 @@
 # Raycast Browsers Profiles
 
+## [Windows support and Firefox profile fixes] - {PR_MERGE_DATE}
+
+- Add Windows support for Chromium- and Firefox-based browser profile loading.
+- Add Comet browser support on Windows.
+- Fix Chromium profile path resolution on Windows by using path-safe joins.
+- Fix Firefox duplicate listings on Windows when multiple Firefox variants are installed.
+- Use Firefox Profile Groups data to display the real user-defined Firefox profile names.
+
 ## [Add Arc browser support] - 2026-02-04
 
 - Adding Arc browser to supported browser list

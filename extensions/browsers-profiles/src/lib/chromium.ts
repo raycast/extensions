@@ -1,9 +1,10 @@
 import fs from "fs";
 import os from "os";
+import { join } from "path";
 
 import browsers from "./supported-browsers.json";
 import { sortProfiles, isBrowserEnabled } from "./utils";
-import { BrowserProfile } from "./types";
+import { BrowserProfile, Browser } from "./types";
 
 type BrowserProfiles = {
   name: string;
@@ -18,14 +19,19 @@ export const getChromiumProfiles = (filter: string[]) => {
       return null;
     }
 
-    const path = `${os.homedir()}${browser.path}`;
-    const exists = fs.existsSync(path);
+    const isWin = os.platform() === "win32";
+    const browserConfig = browser as Browser;
+    const basePath = isWin ? browserConfig.pathWindows : browser.path;
+    if (!basePath) return null;
+
+    const pathLocal = join(os.homedir(), basePath);
+    const exists = fs.existsSync(pathLocal);
 
     if (!exists) {
       return null;
     }
 
-    const localStatePath = `${path}/Local State`;
+    const localStatePath = join(pathLocal, "Local State");
     const localStateExists = fs.existsSync(localStatePath);
 
     if (!localStateExists) {
@@ -36,31 +42,43 @@ export const getChromiumProfiles = (filter: string[]) => {
     try {
       const localStateFile = fs.readFileSync(localStatePath, "utf-8");
       localState = JSON.parse(localStateFile);
-    } catch (error) {
+    } catch {
       return null;
     }
 
-    const infoCacheData = localState?.profile?.info_cache as
-      | Record<
-          string,
-          {
-            name: string;
-          }
-        >
-      | undefined;
-
-    if (!infoCacheData) {
-      return null;
-    }
+    const infoCacheData = (localState?.profile?.info_cache || {}) as Record<string, { name: string }>;
 
     const profileDirectories = Object.keys(infoCacheData);
+
+    try {
+      const entries = fs.readdirSync(pathLocal, { withFileTypes: true });
+      const foundDirs = entries
+        .filter(
+          (entry) =>
+            entry.isDirectory() &&
+            (entry.name === "Default" ||
+              /^Profile \d+$/i.test(entry.name) ||
+              /^Person \d+$/i.test(entry.name) ||
+              entry.name === "Guest Profile" ||
+              entry.name === "System Profile")
+        )
+        .map((entry) => entry.name);
+
+      foundDirs.forEach((dir) => {
+        if (!profileDirectories.includes(dir)) {
+          profileDirectories.push(dir);
+        }
+      });
+    } catch {
+      // Ignore directory read errors and rely on Local State.
+    }
 
     const browserProfiles: BrowserProfile[] = [];
 
     profileDirectories.forEach((directory: string) => {
       let profile;
       try {
-        const preferencesPath = `${path}/${directory}/Preferences`;
+        const preferencesPath = join(pathLocal, directory, "Preferences");
         if (!fs.existsSync(preferencesPath)) {
           return;
         }
@@ -75,12 +93,12 @@ export const getChromiumProfiles = (filter: string[]) => {
         return;
       }
 
-      const profileLabel = infoCacheData[directory]?.name || profileName;
+      const profileLabel = infoCacheData?.[directory]?.name || profileName;
 
       browserProfiles.push({
         type: browser.type,
         browser: browser.title,
-        app: browser.app,
+        app: isWin ? browserConfig.appWindows || browser.app : browser.app,
         path: directory,
         name: profileName,
         uid: directory,

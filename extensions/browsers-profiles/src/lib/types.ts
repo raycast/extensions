@@ -15,4 +15,6 @@ export type Browser = {
   path: string;
   icon: string;
   title: string;
+  appWindows?: string;
+  pathWindows?: string;
 };
