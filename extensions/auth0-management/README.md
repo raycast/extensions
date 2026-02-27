@@ -61,7 +61,7 @@ Repeat for each tenant you want to manage. Switch between tenants using the drop
 | **View Organizations** | Browse organizations, view members, and assign users. |
 | **View Logs** | Browse tenant logs with text search, date pickers, and time presets (last hour, 24h, 7 days, 30 days, custom range). |
 | **View Apps** | Browse Auth0 applications and their configuration (callbacks, origins, grant types, metadata). |
-| **View APIs** | Browse Auth0 APIs (resource servers), view scopes, and add, edit, or delete permissions. |
+| **View APIs** | Browse Auth0 APIs (resource servers), view scopes, and add, or edit permissions. |
 
 ## Features
 

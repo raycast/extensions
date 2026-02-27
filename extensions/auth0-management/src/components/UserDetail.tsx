@@ -2,7 +2,7 @@ import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { Organization, Role, Tenant, User } from "../utils/types";
 import { getUserOrganizations, getUserRoles } from "../utils/auth0-client";
-import { escapeTableCell, formatDateTime } from "../utils/formatting";
+import { escapeTableCell, formatDateTime, buildUserDashboardUrl } from "../utils/formatting";
 import UserLogsDetail from "./UserLogsDetail";
 
 interface UserDetailProps {
@@ -79,7 +79,7 @@ ${rolesSection}
 ${orgsSection}
 `;
 
-  const dashboardUrl = `https://${tenant.domain}/dashboard/tenant/users/${encodeURIComponent(user.user_id)}`;
+  const dashboardUrl = buildUserDashboardUrl(tenant.domain, user.user_id);
 
   return (
     <Detail

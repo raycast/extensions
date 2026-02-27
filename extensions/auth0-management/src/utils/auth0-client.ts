@@ -20,7 +20,8 @@ const clientCache: Map<string, ManagementClient> = new Map();
  * Reuses existing clients to avoid redundant token negotiations.
  */
 function getClient(config: TenantConfig): ManagementClient {
-  const cached = clientCache.get(config.domain);
+  const cacheKey = `${config.domain}:${config.clientId}:${config.clientSecret}`;
+  const cached = clientCache.get(cacheKey);
   if (cached) return cached;
 
   const client = new ManagementClient({
@@ -29,7 +30,7 @@ function getClient(config: TenantConfig): ManagementClient {
     clientSecret: config.clientSecret,
   });
 
-  clientCache.set(config.domain, client);
+  clientCache.set(cacheKey, client);
   return client;
 }
 
