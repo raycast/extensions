@@ -10,7 +10,7 @@ import {
   Cache,
 } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef } from "react";
-import fetch from "node-fetch";
+// import fetch from "node-fetch"; // Not needed - fetch is built-in
 import { XMLParser } from "fast-xml-parser";
 import { SecurityItem, Category, Preferences, OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
