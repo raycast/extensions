@@ -53,8 +53,10 @@ export default function Command() {
       if (response.status === 403 || response.status === 429) {
         const resetHeader = response.headers.get("X-RateLimit-Reset");
         const resetEpoch = resetHeader ? parseInt(resetHeader, 10) : undefined;
-        await recordRateLimit(resetEpoch);
-        throw new Error("rate limit exceeded");
+        const message = await recordRateLimit(resetEpoch);
+        await showToast({ style: Toast.Style.Failure, title: "Rate Limited", message });
+        // Return empty array so useFetch doesn't show its own error toast.
+        return [];
       }
       const resetHeader = response.headers.get("X-RateLimit-Reset");
       const resetEpoch = resetHeader ? parseInt(resetHeader, 10) : undefined;

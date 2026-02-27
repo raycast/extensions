@@ -10,8 +10,8 @@ interface UseGitHubRateLimitResult {
   checkRefreshAllowed: () => Promise<string | null>;
   /** Call after a successful fetch to persist the timestamp. */
   recordFetch: (rateLimitResetEpochSeconds?: number) => Promise<void>;
-  /** Call when a 403/429 rate limit error is received. */
-  recordRateLimit: (resetEpochSeconds?: number) => Promise<void>;
+  /** Call when a 403/429 rate limit error is received. Returns the "try again in X" message. */
+  recordRateLimit: (resetEpochSeconds?: number) => Promise<string>;
 }
 
 export function useGitHubRateLimit(): UseGitHubRateLimitResult {
@@ -52,10 +52,11 @@ export function useGitHubRateLimit(): UseGitHubRateLimitResult {
     }
   }, []);
 
-  const recordRateLimit = useCallback(async (resetEpochSeconds?: number) => {
+  const recordRateLimit = useCallback(async (resetEpochSeconds?: number): Promise<string> => {
     // Default: block for 60 minutes if we don't know the reset time
     const resetMs = resetEpochSeconds ? resetEpochSeconds * 1000 : Date.now() + 60 * 60 * 1000;
     await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(resetMs));
+    return formatTimeRemaining(resetMs - Date.now());
   }, []);
 
   return { checkRefreshAllowed, recordFetch, recordRateLimit };
