@@ -1,6 +1,6 @@
 # T3 Chat Changelog
 
-## [v1.5.0] - {PR_MERGE_DATE}
+## [v1.5.0] - 2026-02-27
 
 - Add support for Windows platform
 - Bump all dependencies to the latest
