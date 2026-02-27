@@ -1,6 +1,6 @@
 # Reader Mode Changelog
 
-## [SF Chronicle Support] - {PR_MERGE_DATE}
+## [SF Chronicle Support] - 2026-02-27
 
 ### Added
 
