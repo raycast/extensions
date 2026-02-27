@@ -1,14 +1,14 @@
-import MusicAssistantClient from "../src/music-assistant-client";
-import executeApiCommand from "../src/api-command";
+import MusicAssistantClient from "../../src/music-assistant/music-assistant-client";
+import executeApiCommand from "../../src/music-assistant/api-command";
 import { showHUD } from "@raycast/api";
-import { storeSelectedQueueID } from "../src/use-selected-player-id";
-import { PlayerQueue, PlayerState } from "../src/external-code/interfaces";
-import { StoredQueue } from "../src/use-selected-player-id";
+import { storeSelectedQueueID } from "../../src/player-selection/use-selected-player-id";
+import { PlayerQueue, PlayerState, RepeatMode } from "../../src/music-assistant/external-code/interfaces";
+import { StoredQueue } from "../../src/player-selection/use-selected-player-id";
 
 // Mock the dependencies
-jest.mock("../src/api-command");
+jest.mock("../../src/music-assistant/api-command");
 jest.mock("@raycast/api");
-jest.mock("../src/use-selected-player-id");
+jest.mock("../../src/player-selection/use-selected-player-id");
 
 const mockExecuteApiCommand = executeApiCommand as jest.MockedFunction<typeof executeApiCommand>;
 const mockShowHUD = showHUD as jest.MockedFunction<typeof showHUD>;
@@ -46,6 +46,33 @@ describe("MusicAssistantClient", () => {
       mockExecuteApiCommand.mockRejectedValue(error);
 
       await expect(client.next(playerId)).rejects.toThrow("API Error");
+    });
+  });
+
+  describe("previous", () => {
+    it("should call playerCommandPrevious with correct playerId", async () => {
+      const playerId = "test-player-123";
+      const mockApi = {
+        playerCommandPrevious: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.previous(playerId);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandPrevious).toHaveBeenCalledWith(playerId);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-123";
+      const error = new Error("API Error");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.previous(playerId)).rejects.toThrow("API Error");
     });
   });
 
@@ -156,6 +183,51 @@ describe("MusicAssistantClient", () => {
       mockExecuteApiCommand.mockRejectedValue(error);
 
       await expect(client.volumeDown(playerId)).rejects.toThrow("Volume down failed");
+    });
+  });
+
+  describe("volumeMute", () => {
+    it("should call playerCommandVolumeMute API method with correct parameters", async () => {
+      const playerId = "test-player-mute";
+      const muted = true;
+      const mockApi = {
+        playerCommandVolumeMute: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.volumeMute(playerId, muted);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeMute).toHaveBeenCalledWith(playerId, muted);
+    });
+
+    it("should handle unmute (muted=false) correctly", async () => {
+      const playerId = "test-player-mute";
+      const muted = false;
+      const mockApi = {
+        playerCommandVolumeMute: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.volumeMute(playerId, muted);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeMute).toHaveBeenCalledWith(playerId, false);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-mute";
+      const error = new Error("Volume mute failed");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.volumeMute(playerId, true)).rejects.toThrow("Volume mute failed");
     });
   });
 
@@ -368,28 +440,6 @@ describe("MusicAssistantClient", () => {
       });
     });
 
-    describe("shouldUpdateTitle", () => {
-      it("should return true when new title is different", () => {
-        const result = client.shouldUpdateTitle("Old Song", "New Song");
-        expect(result).toBe(true);
-      });
-
-      it("should return false when titles are the same", () => {
-        const result = client.shouldUpdateTitle("Same Song", "Same Song");
-        expect(result).toBe(false);
-      });
-
-      it("should return true when new title is undefined and current title exists", () => {
-        const result = client.shouldUpdateTitle("Current Song", undefined);
-        expect(result).toBe(true);
-      });
-
-      it("should return false when both titles are undefined", () => {
-        const result = client.shouldUpdateTitle(undefined, undefined);
-        expect(result).toBe(false);
-      });
-    });
-
     describe("getPlayPauseButtonText", () => {
       it("should return Pause when playing", () => {
         const result = client.getPlayPauseButtonText(PlayerState.PLAYING);
@@ -526,6 +576,31 @@ describe("MusicAssistantClient", () => {
       it("should return false when volume_control is undefined", () => {
         const player = { player_id: "test" } as any;
         const result = client.supportsVolumeControl(player);
+        expect(result).toBe(false);
+      });
+    });
+
+    describe("supportsMuteControl", () => {
+      it("should return true when player has absolute mute control", () => {
+        const player = { player_id: "test", mute_control: "absolute" } as any;
+        const result = client.supportsMuteControl(player);
+        expect(result).toBe(true);
+      });
+
+      it("should return false when player has no mute control", () => {
+        const player = { player_id: "test", mute_control: "none" } as any;
+        const result = client.supportsMuteControl(player);
+        expect(result).toBe(false);
+      });
+
+      it("should return false when player is undefined", () => {
+        const result = client.supportsMuteControl(undefined);
+        expect(result).toBe(false);
+      });
+
+      it("should return false when mute_control is undefined", () => {
+        const player = { player_id: "test" } as any;
+        const result = client.supportsMuteControl(player);
         expect(result).toBe(false);
       });
     });
@@ -757,6 +832,159 @@ describe("MusicAssistantClient", () => {
         const compatible = client.getCompatiblePlayers(targetPlayer, allPlayers);
 
         expect(compatible).toHaveLength(0);
+      });
+    });
+
+    describe("getGroupMemberOptions", () => {
+      it("should return current members and exclude them from potential members", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          group_childs: ["member-1"],
+          can_group_with: ["airplay"],
+        } as any;
+
+        const allPlayers = [
+          targetPlayer,
+          { player_id: "member-1", can_group_with: ["airplay"], available: true, enabled: true },
+          { player_id: "member-2", can_group_with: ["airplay"], available: true, enabled: true },
+        ] as any[];
+
+        const result = client.getGroupMemberOptions(targetPlayer, allPlayers);
+
+        expect(result.currentMembers.map((p) => p.player_id)).toEqual(["member-1"]);
+        expect(result.potentialMembers.map((p) => p.player_id)).toEqual(["member-2"]);
+      });
+
+      it("should return only potential members when group has no members", () => {
+        const targetPlayer = {
+          player_id: "leader-1",
+          group_childs: [],
+          can_group_with: ["airplay"],
+        } as any;
+
+        const allPlayers = [
+          targetPlayer,
+          { player_id: "member-2", can_group_with: ["airplay"], available: true, enabled: true },
+        ] as any[];
+
+        const result = client.getGroupMemberOptions(targetPlayer, allPlayers);
+
+        expect(result.currentMembers).toEqual([]);
+        expect(result.potentialMembers.map((p) => p.player_id)).toEqual(["member-2"]);
+      });
+    });
+
+    describe("getVolumeControlPlayer", () => {
+      it("should return the synced_to player ID when player is a group member", () => {
+        const member = {
+          player_id: "member-1",
+          synced_to: "leader-1",
+          group_childs: [],
+        } as any;
+
+        expect(client.getVolumeControlPlayer(member)).toBe("leader-1");
+      });
+
+      it("should return the active_group when synced_to is not set", () => {
+        const member = {
+          player_id: "member-1",
+          synced_to: undefined,
+          active_group: "group-1",
+          group_childs: [],
+        } as any;
+
+        expect(client.getVolumeControlPlayer(member)).toBe("group-1");
+      });
+
+      it("should return the player's own ID when player is standalone", () => {
+        const standalone = {
+          player_id: "speaker-1",
+          synced_to: undefined,
+          active_group: undefined,
+          group_childs: [],
+        } as any;
+
+        expect(client.getVolumeControlPlayer(standalone)).toBe("speaker-1");
+      });
+
+      it("should return the player's own ID when player is a group leader", () => {
+        const leader = {
+          player_id: "leader-1",
+          synced_to: undefined,
+          group_childs: ["member-1", "member-2"],
+        } as any;
+
+        expect(client.getVolumeControlPlayer(leader)).toBe("leader-1");
+      });
+
+      it("should return undefined when player is undefined", () => {
+        expect(client.getVolumeControlPlayer(undefined)).toBeUndefined();
+      });
+    });
+
+    describe("syncMembersWithLeader", () => {
+      it("should sync all members' volumes to match leader volume", async () => {
+        const leader = {
+          player_id: "leader-1",
+          volume_level: 75,
+          group_childs: ["member-1", "member-2"],
+        } as any;
+
+        const member1 = { player_id: "member-1", volume_level: 50 } as any;
+        const member2 = { player_id: "member-2", volume_level: 30 } as any;
+        const allPlayers = [leader, member1, member2];
+
+        const mockSetVolume = jest.spyOn(client, "setVolume").mockResolvedValue(undefined);
+        const mockGetGroupMembers = jest.spyOn(client, "getGroupMembers").mockReturnValue([leader, member1, member2]);
+
+        await client.syncMembersWithLeader(leader, allPlayers);
+
+        expect(mockGetGroupMembers).toHaveBeenCalledWith(leader, allPlayers);
+        expect(mockSetVolume).toHaveBeenCalledWith("member-1", 75);
+        expect(mockSetVolume).toHaveBeenCalledWith("member-2", 75);
+        expect(mockSetVolume).toHaveBeenCalledTimes(2);
+
+        mockSetVolume.mockRestore();
+        mockGetGroupMembers.mockRestore();
+      });
+
+      it("should throw error when player is not a group leader", async () => {
+        const standalone = {
+          player_id: "speaker-1",
+          group_childs: [],
+        } as any;
+
+        const allPlayers = [standalone];
+
+        await expect(client.syncMembersWithLeader(standalone, allPlayers)).rejects.toThrow(
+          "Player is not a group leader",
+        );
+      });
+
+      it("should handle empty members list gracefully", async () => {
+        const leader = {
+          player_id: "leader-1",
+          volume_level: 75,
+          group_childs: ["member-1"],
+        } as any;
+
+        const member = {
+          player_id: "member-1",
+          volume_level: 50,
+        } as any;
+
+        const allPlayers = [leader, member];
+
+        const mockGetGroupMembers = jest.spyOn(client, "getGroupMembers").mockReturnValue([leader]);
+        const mockSetVolume = jest.spyOn(client, "setVolume").mockResolvedValue(undefined);
+
+        await client.syncMembersWithLeader(leader, allPlayers);
+
+        expect(mockGetGroupMembers).toHaveBeenCalledWith(leader, allPlayers);
+        expect(mockSetVolume).not.toHaveBeenCalled();
+
+        mockGetGroupMembers.mockRestore();
+        mockSetVolume.mockRestore();
       });
     });
   });
@@ -1232,6 +1460,718 @@ describe("MusicAssistantClient", () => {
       expect(members[0].player_id).toBe("member-3");
       expect(members[1].player_id).toBe("member-1");
       expect(members[2].player_id).toBe("member-2");
+    });
+  });
+
+  // Library and Search Methods Tests
+  describe("Library and Search Methods", () => {
+    describe("search", () => {
+      it("should call search API with correct parameters", async () => {
+        const mockResults = {
+          artists: [{ item_id: "artist-1", name: "Test Artist" }],
+          albums: [],
+          tracks: [],
+          playlists: [],
+          radio: [],
+          podcasts: [],
+          audiobooks: [],
+        };
+        const mockApi = {
+          search: jest.fn().mockResolvedValue(mockResults),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.search("test query", 50);
+
+        expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+        expect(mockApi.search).toHaveBeenCalledWith("test query", undefined, 50);
+        expect(result).toEqual(mockResults);
+      });
+
+      it("should use default limit when not provided", async () => {
+        const mockApi = {
+          search: jest.fn().mockResolvedValue({
+            artists: [],
+            albums: [],
+            tracks: [],
+            playlists: [],
+            radio: [],
+            podcasts: [],
+            audiobooks: [],
+          }),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.search("test");
+
+        expect(mockApi.search).toHaveBeenCalledWith("test", undefined, 50);
+      });
+    });
+
+    describe("getItemByUri", () => {
+      it("should fetch media item by URI", async () => {
+        const mockItem = { item_id: "track-123", uri: "spotify://track/123", name: "Test Track" };
+        const mockApi = {
+          getItemByUri: jest.fn().mockResolvedValue(mockItem),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getItemByUri("spotify://track/123");
+
+        expect(mockApi.getItemByUri).toHaveBeenCalledWith("spotify://track/123");
+        expect(result).toEqual(mockItem);
+      });
+
+      it("should propagate API errors when fetching item by URI", async () => {
+        const mockApi = {
+          getItemByUri: jest.fn().mockRejectedValue(new Error("item lookup failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.getItemByUri("spotify://track/123")).rejects.toThrow("item lookup failed");
+      });
+    });
+
+    describe("favorites", () => {
+      it("should add an item to favorites", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: false } as any;
+        const mockApi = {
+          addItemToFavorites: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.addToFavorites(mockTrack);
+
+        expect(mockApi.addItemToFavorites).toHaveBeenCalledWith(mockTrack);
+      });
+
+      it("should remove an item from favorites", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: true } as any;
+        const mockApi = {
+          removeItemFromFavorites: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.removeFromFavorites(mockTrack);
+
+        expect(mockApi.removeItemFromFavorites).toHaveBeenCalledWith("track", "track-123");
+      });
+
+      it("should toggle favorite on when item is not currently favorite", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: false } as any;
+        const mockApi = {
+          addItemToFavorites: jest.fn().mockResolvedValue(undefined),
+          removeItemFromFavorites: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const isNowFavorite = await client.toggleFavorite(mockTrack);
+
+        expect(isNowFavorite).toBe(true);
+        expect(mockApi.addItemToFavorites).toHaveBeenCalledWith(mockTrack);
+        expect(mockApi.removeItemFromFavorites).not.toHaveBeenCalled();
+      });
+
+      it("should toggle favorite off when item is currently favorite", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: true } as any;
+        const mockApi = {
+          addItemToFavorites: jest.fn().mockResolvedValue(undefined),
+          removeItemFromFavorites: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const isNowFavorite = await client.toggleFavorite(mockTrack);
+
+        expect(isNowFavorite).toBe(false);
+        expect(mockApi.removeItemFromFavorites).toHaveBeenCalledWith("track", "track-123");
+        expect(mockApi.addItemToFavorites).not.toHaveBeenCalled();
+      });
+
+      it("should propagate API errors when removing favorites", async () => {
+        const mockTrack = { item_id: "track-123", media_type: "track", favorite: true } as any;
+        const mockApi = {
+          removeItemFromFavorites: jest.fn().mockRejectedValue(new Error("remove favorites failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.toggleFavorite(mockTrack)).rejects.toThrow("remove favorites failed");
+      });
+    });
+
+    describe("getLibraryArtists", () => {
+      it("should fetch library artists with pagination", async () => {
+        const mockArtists = [
+          { item_id: "artist-1", name: "Artist 1" },
+          { item_id: "artist-2", name: "Artist 2" },
+        ];
+        const mockApi = {
+          getLibraryArtists: jest.fn().mockResolvedValue(mockArtists),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getLibraryArtists("rock", 20, 10);
+
+        expect(mockApi.getLibraryArtists).toHaveBeenCalledWith(undefined, "rock", 20, 10);
+        expect(result).toEqual(mockArtists);
+      });
+
+      it("should use default pagination parameters", async () => {
+        const mockApi = {
+          getLibraryArtists: jest.fn().mockResolvedValue([]),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.getLibraryArtists();
+
+        expect(mockApi.getLibraryArtists).toHaveBeenCalledWith(undefined, undefined, 20, 0);
+      });
+    });
+
+    describe("getLibraryAlbums", () => {
+      it("should fetch library albums with search and pagination", async () => {
+        const mockAlbums = [{ item_id: "album-1", name: "Album 1" }];
+        const mockApi = {
+          getLibraryAlbums: jest.fn().mockResolvedValue(mockAlbums),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getLibraryAlbums("best of", 10, 5);
+
+        expect(mockApi.getLibraryAlbums).toHaveBeenCalledWith(undefined, "best of", 10, 5);
+        expect(result).toEqual(mockAlbums);
+      });
+    });
+
+    describe("getLibraryPlaylists", () => {
+      it("should fetch library playlists", async () => {
+        const mockPlaylists = [{ item_id: "playlist-1", name: "My Playlist" }];
+        const mockApi = {
+          getLibraryPlaylists: jest.fn().mockResolvedValue(mockPlaylists),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getLibraryPlaylists();
+
+        expect(mockApi.getLibraryPlaylists).toHaveBeenCalledWith(undefined, undefined, 20, 0);
+        expect(result).toEqual(mockPlaylists);
+      });
+    });
+
+    describe("getArtistAlbums", () => {
+      it("should fetch albums for a specific artist", async () => {
+        const mockAlbums = [{ item_id: "album-1", name: "Album 1" }];
+        const mockApi = {
+          getArtistAlbums: jest.fn().mockResolvedValue(mockAlbums),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getArtistAlbums("artist-123", "library");
+
+        expect(mockApi.getArtistAlbums).toHaveBeenCalledWith("artist-123", "library", true);
+        expect(result).toEqual(mockAlbums);
+      });
+    });
+
+    describe("getAlbumTracks", () => {
+      it("should fetch tracks for a specific album", async () => {
+        const mockTracks = [{ item_id: "track-1", name: "Track 1" }];
+        const mockApi = {
+          getAlbumTracks: jest.fn().mockResolvedValue(mockTracks),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getAlbumTracks("album-123", "library");
+
+        expect(mockApi.getAlbumTracks).toHaveBeenCalledWith("album-123", "library", true);
+        expect(result).toEqual(mockTracks);
+      });
+    });
+
+    describe("getPlaylistTracks", () => {
+      it("should fetch tracks for a specific playlist", async () => {
+        const mockTracks = [{ item_id: "track-1", name: "Track 1" }];
+        const mockApi = {
+          getPlaylistTracks: jest.fn().mockResolvedValue(mockTracks),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getPlaylistTracks("playlist-123", "library");
+
+        expect(mockApi.getPlaylistTracks).toHaveBeenCalledWith("playlist-123", "library", false);
+        expect(result).toEqual(mockTracks);
+      });
+    });
+
+    describe("getRecentlyPlayedItems", () => {
+      it("should fetch recently played items with default limit", async () => {
+        const mockItems = [
+          { item_id: "item-1", name: "Recently Played 1" },
+          { item_id: "item-2", name: "Recently Played 2" },
+        ];
+        const mockApi = {
+          getRecentlyPlayedItems: jest.fn().mockResolvedValue(mockItems),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getRecentlyPlayedItems();
+
+        expect(mockApi.getRecentlyPlayedItems).toHaveBeenCalledWith(30);
+        expect(result).toEqual(mockItems);
+      });
+
+      it("should fetch recently played items with custom limit", async () => {
+        const mockApi = {
+          getRecentlyPlayedItems: jest.fn().mockResolvedValue([]),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.getRecentlyPlayedItems(50);
+
+        expect(mockApi.getRecentlyPlayedItems).toHaveBeenCalledWith(50);
+      });
+    });
+
+    describe("getPlayerQueueItems", () => {
+      it("should fetch queue items with pagination", async () => {
+        const mockItems = [
+          { queue_item_id: "item-1", name: "Track 1" },
+          { queue_item_id: "item-2", name: "Track 2" },
+        ];
+        const mockApi = {
+          getPlayerQueueItems: jest.fn().mockResolvedValue(mockItems),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getPlayerQueueItems("queue-123", 50, 10);
+
+        expect(mockApi.getPlayerQueueItems).toHaveBeenCalledWith("queue-123", 50, 10);
+        expect(result).toEqual(mockItems);
+      });
+
+      it("should use default pagination parameters", async () => {
+        const mockApi = {
+          getPlayerQueueItems: jest.fn().mockResolvedValue([]),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.getPlayerQueueItems("queue-123");
+
+        expect(mockApi.getPlayerQueueItems).toHaveBeenCalledWith("queue-123", 100, 0);
+      });
+    });
+
+    describe("playMedia", () => {
+      it("should play media on queue with NEXT option by default", async () => {
+        const mockTrack = { item_id: "track-1", name: "Test Track" };
+        const mockApi = {
+          playMedia: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.playMedia(mockTrack as any, "queue-123");
+
+        expect(mockApi.playMedia).toHaveBeenCalledWith(mockTrack, "next", false, undefined, "queue-123");
+      });
+
+      it("should play media with custom queue option", async () => {
+        const mockTrack = { item_id: "track-1", name: "Test Track" };
+        const mockApi = {
+          playMedia: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.playMedia(mockTrack as any, "queue-123", "add" as any);
+
+        expect(mockApi.playMedia).toHaveBeenCalledWith(mockTrack, "add", false, undefined, "queue-123");
+      });
+    });
+
+    describe("queue helper methods", () => {
+      it("should add media to queue with NEXT option", async () => {
+        const mockTrack = { item_id: "track-1", name: "Test Track" };
+        const mockApi = {
+          playMedia: jest.fn().mockResolvedValue(undefined),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.addToQueueNext(mockTrack as any, "queue-123");
+
+        expect(mockApi.playMedia).toHaveBeenCalledWith(mockTrack, "next", false, undefined, "queue-123");
+      });
+
+      it("should format add-to-queue message", () => {
+        expect(client.formatAddToQueueNextMessage("Track Name")).toBe('"Track Name" will play next');
+      });
+
+      it("should format duration for empty and non-empty values", () => {
+        expect(client.formatDuration(undefined)).toBe("0:00");
+        expect(client.formatDuration(0)).toBe("0:00");
+        expect(client.formatDuration(125)).toBe("2:05");
+      });
+
+      it("should map move directions to API position shifts", () => {
+        expect(client.getQueueMovePositionShift("up")).toBe(-1);
+        expect(client.getQueueMovePositionShift("down")).toBe(1);
+        expect(client.getQueueMovePositionShift("next")).toBe(0);
+      });
+
+      it("should return move feedback text for each direction", () => {
+        expect(client.getQueueMoveFeedback("up")).toBe("Moved up");
+        expect(client.getQueueMoveFeedback("down")).toBe("Moved down");
+        expect(client.getQueueMoveFeedback("next")).toBe("Moved to next");
+      });
+
+      it("should cycle repeat mode OFF -> ALL -> ONE -> OFF", () => {
+        expect(client.getNextRepeatMode(RepeatMode.OFF)).toBe(RepeatMode.ALL);
+        expect(client.getNextRepeatMode(RepeatMode.ALL)).toBe(RepeatMode.ONE);
+        expect(client.getNextRepeatMode(RepeatMode.ONE)).toBe(RepeatMode.OFF);
+      });
+
+      it("should return next repeat mode labels", () => {
+        expect(client.getNextRepeatModeLabel(RepeatMode.OFF)).toBe("ONE");
+        expect(client.getNextRepeatModeLabel(RepeatMode.ONE)).toBe("ALL");
+        expect(client.getNextRepeatModeLabel(RepeatMode.ALL)).toBe("OFF");
+      });
+
+      it("should return shuffle display text", () => {
+        expect(client.getShuffleText(true)).toBe("Shuffle: ON");
+        expect(client.getShuffleText(false)).toBe("Shuffle: OFF");
+      });
+
+      it("should return repeat display text", () => {
+        expect(client.getRepeatText(RepeatMode.OFF)).toBe("Repeat: OFF");
+        expect(client.getRepeatText(RepeatMode.ONE)).toBe("Repeat: ONE");
+        expect(client.getRepeatText(RepeatMode.ALL)).toBe("Repeat: ALL");
+      });
+
+      it("should format current media title with artist", () => {
+        const text = client.formatCurrentMediaTitle({ title: "Song", artist: "Artist" } as any, "Fallback");
+        expect(text).toBe("Song - Artist");
+      });
+
+      it("should format current media title without artist and with fallback", () => {
+        expect(client.formatCurrentMediaTitle({ title: "Song" } as any, "Fallback")).toBe("Song");
+        expect(client.formatCurrentMediaTitle(undefined, "Fallback")).toBe("Fallback");
+      });
+
+      it("should format volume transition feedback", () => {
+        expect(client.formatVolumeTransition(40, 50)).toBe("Volume 40% -> 50%");
+      });
+    });
+
+    describe("queueCommandClear", () => {
+      it("should clear queue", async () => {
+        const mockApi = {
+          queueCommandClear: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandClear("queue-123");
+
+        expect(mockApi.queueCommandClear).toHaveBeenCalledWith("queue-123");
+      });
+
+      it("should propagate API errors when clearing queue", async () => {
+        const mockApi = {
+          queueCommandClear: jest.fn().mockRejectedValue(new Error("clear failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandClear("queue-123")).rejects.toThrow("clear failed");
+      });
+    });
+
+    describe("queueCommandDelete", () => {
+      it("should delete queue item by ID", async () => {
+        const mockApi = {
+          queueCommandDelete: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandDelete("queue-123", "item-456");
+
+        expect(mockApi.queueCommandDelete).toHaveBeenCalledWith("queue-123", "item-456");
+      });
+
+      it("should delete queue item by index", async () => {
+        const mockApi = {
+          queueCommandDelete: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandDelete("queue-123", 5);
+
+        expect(mockApi.queueCommandDelete).toHaveBeenCalledWith("queue-123", 5);
+      });
+
+      it("should propagate API errors when deleting queue item", async () => {
+        const mockApi = {
+          queueCommandDelete: jest.fn().mockRejectedValue(new Error("delete failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandDelete("queue-123", "item-456")).rejects.toThrow("delete failed");
+      });
+    });
+
+    describe("queueCommandMoveItem", () => {
+      it("should move item up in queue", async () => {
+        const mockApi = {
+          queueCommandMoveItem: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandMoveItem("queue-123", "item-456", -1);
+
+        expect(mockApi.queueCommandMoveItem).toHaveBeenCalledWith("queue-123", "item-456", -1);
+      });
+
+      it("should move item down in queue", async () => {
+        const mockApi = {
+          queueCommandMoveItem: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandMoveItem("queue-123", "item-456", 1);
+
+        expect(mockApi.queueCommandMoveItem).toHaveBeenCalledWith("queue-123", "item-456", 1);
+      });
+
+      it("should move item to next position", async () => {
+        const mockApi = {
+          queueCommandMoveItem: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandMoveItem("queue-123", "item-456", 0);
+
+        expect(mockApi.queueCommandMoveItem).toHaveBeenCalledWith("queue-123", "item-456", 0);
+      });
+
+      it("should propagate API errors when moving queue item", async () => {
+        const mockApi = {
+          queueCommandMoveItem: jest.fn().mockRejectedValue(new Error("move failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandMoveItem("queue-123", "item-456", -1)).rejects.toThrow("move failed");
+      });
+    });
+
+    describe("getPlayerQueue", () => {
+      it("should fetch player queue details", async () => {
+        const mockQueue = {
+          queue_id: "queue-123",
+          shuffle_enabled: true,
+          repeat_mode: "all",
+        };
+        const mockApi = {
+          getPlayerQueue: jest.fn().mockResolvedValue(mockQueue),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        const result = await client.getPlayerQueue("queue-123");
+
+        expect(mockApi.getPlayerQueue).toHaveBeenCalledWith("queue-123");
+        expect(result).toEqual(mockQueue);
+      });
+    });
+
+    describe("queueCommandShuffle", () => {
+      it("should enable shuffle", async () => {
+        const mockApi = {
+          queueCommandShuffle: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandShuffle("queue-123", true);
+
+        expect(mockApi.queueCommandShuffle).toHaveBeenCalledWith("queue-123", true);
+      });
+
+      it("should disable shuffle", async () => {
+        const mockApi = {
+          queueCommandShuffle: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandShuffle("queue-123", false);
+
+        expect(mockApi.queueCommandShuffle).toHaveBeenCalledWith("queue-123", false);
+      });
+
+      it("should propagate API errors when toggling shuffle", async () => {
+        const mockApi = {
+          queueCommandShuffle: jest.fn().mockRejectedValue(new Error("shuffle failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandShuffle("queue-123", true)).rejects.toThrow("shuffle failed");
+      });
+    });
+
+    describe("queueCommandRepeat", () => {
+      it("should set repeat mode to ALL", async () => {
+        const mockApi = {
+          queueCommandRepeat: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandRepeat("queue-123", "all" as any);
+
+        expect(mockApi.queueCommandRepeat).toHaveBeenCalledWith("queue-123", "all");
+      });
+
+      it("should set repeat mode to ONE", async () => {
+        const mockApi = {
+          queueCommandRepeat: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandRepeat("queue-123", "one" as any);
+
+        expect(mockApi.queueCommandRepeat).toHaveBeenCalledWith("queue-123", "one");
+      });
+
+      it("should set repeat mode to OFF", async () => {
+        const mockApi = {
+          queueCommandRepeat: jest.fn(),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await client.queueCommandRepeat("queue-123", "off" as any);
+
+        expect(mockApi.queueCommandRepeat).toHaveBeenCalledWith("queue-123", "off");
+      });
+
+      it("should propagate API errors when setting repeat mode", async () => {
+        const mockApi = {
+          queueCommandRepeat: jest.fn().mockRejectedValue(new Error("repeat failed")),
+        };
+
+        mockExecuteApiCommand.mockImplementation(async (command) => {
+          return command(mockApi as any);
+        });
+
+        await expect(client.queueCommandRepeat("queue-123", "all" as any)).rejects.toThrow("repeat failed");
+      });
     });
   });
 });

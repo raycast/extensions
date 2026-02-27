@@ -3,9 +3,10 @@ import { showFailureToast } from "@raycast/utils";
 import {
   storeSelectedQueueID,
   getSelectedQueueID,
+  getStoredQueue,
   selectedPlayerKey,
   type StoredQueue,
-} from "../src/use-selected-player-id";
+} from "../../src/player-selection/use-selected-player-id";
 
 jest.mock("@raycast/api");
 jest.mock("@raycast/utils");
@@ -157,6 +158,46 @@ describe("use-selected-player-id", () => {
           title: "Failed to launch set-active-player command",
         });
       }
+    });
+  });
+
+  describe("getStoredQueue", () => {
+    it("should return parsed stored queue when valid", async () => {
+      const storedData: StoredQueue = { queue_id: "stored-queue-789" };
+      mockLocalStorage.getItem.mockResolvedValue(JSON.stringify(storedData));
+
+      const result = await getStoredQueue();
+
+      expect(mockLocalStorage.getItem).toHaveBeenCalledWith(selectedPlayerKey);
+      expect(result).toEqual(storedData);
+      expect(mockShowToast).not.toHaveBeenCalled();
+    });
+
+    it("should return undefined when no stored queue exists", async () => {
+      mockLocalStorage.getItem.mockResolvedValue(undefined);
+
+      const result = await getStoredQueue();
+
+      expect(result).toBeUndefined();
+      expect(mockShowToast).not.toHaveBeenCalled();
+    });
+
+    it("should return undefined when stored queue JSON is invalid", async () => {
+      mockLocalStorage.getItem.mockResolvedValue("invalid-json");
+
+      const result = await getStoredQueue();
+
+      expect(result).toBeUndefined();
+      expect(mockShowToast).not.toHaveBeenCalled();
+    });
+
+    it("should return undefined when stored queue has no queue_id", async () => {
+      mockLocalStorage.getItem.mockResolvedValue(JSON.stringify({}));
+
+      const result = await getStoredQueue();
+
+      expect(result).toBeUndefined();
+      expect(mockShowToast).not.toHaveBeenCalled();
     });
   });
 });

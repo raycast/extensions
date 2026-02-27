@@ -1,14 +1,14 @@
 import { showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import MusicAssistantClient from "../src/music-assistant-client";
-import { getSelectedQueueID } from "../src/use-selected-player-id";
-import nextSongMain from "../src/next-song";
+import MusicAssistantClient from "../../src/music-assistant/music-assistant-client";
+import { getSelectedQueueID } from "../../src/player-selection/use-selected-player-id";
+import nextSongMain from "../../src/next-song";
 
 // Mock dependencies
 jest.mock("@raycast/api");
 jest.mock("@raycast/utils");
-jest.mock("../src/music-assistant-client");
-jest.mock("../src/use-selected-player-id");
+jest.mock("../../src/music-assistant/music-assistant-client");
+jest.mock("../../src/player-selection/use-selected-player-id");
 
 const mockShowToast = showToast as jest.MockedFunction<typeof showToast>;
 const mockShowFailureToast = showFailureToast as jest.MockedFunction<typeof showFailureToast>;
@@ -22,10 +22,11 @@ describe("next-song command", () => {
     mockClientInstance = {
       next: jest.fn(),
       getPlayer: jest.fn(),
+      formatCurrentMediaTitle: jest.fn(),
     } as any;
 
     MockMusicAssistantClient.mockImplementation(() => mockClientInstance);
-    mockShowToast.mockResolvedValue();
+    mockShowToast.mockResolvedValue({} as any);
   });
 
   it("should execute next command successfully when player is selected", async () => {
@@ -38,6 +39,7 @@ describe("next-song command", () => {
         artist: "Artist Name",
       },
     } as any);
+    mockClientInstance.formatCurrentMediaTitle.mockReturnValue("Song Title - Artist Name");
 
     await nextSongMain();
 
@@ -45,6 +47,10 @@ describe("next-song command", () => {
     expect(MockMusicAssistantClient).toHaveBeenCalledTimes(1);
     expect(mockClientInstance.next).toHaveBeenCalledWith(selectedPlayerID);
     expect(mockClientInstance.getPlayer).toHaveBeenCalledWith(selectedPlayerID);
+    expect(mockClientInstance.formatCurrentMediaTitle).toHaveBeenCalledWith(
+      { title: "Song Title", artist: "Artist Name" },
+      "Next song",
+    );
     expect(mockShowToast).toHaveBeenCalledWith({
       style: "success",
       title: "⏭️ Song Title - Artist Name",
