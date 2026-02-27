@@ -1,14 +1,18 @@
-# Security Digest
+# <img src="assets/shield-icon.png" width="32" height="32" /> Security Digest
 
-A Raycast extension for daily cybersecurity news digest with AI-powered summaries.
+A Raycast extension for daily cybersecurity news digest with optimized fetching and streamlined categorization.
+
+<p align="center">
+  <img src="metadata/1.png" width="350" alt="Security Digest Screenshot 1" />
+  <img src="metadata/2.png" width="350" alt="Security Digest Screenshot 2" />
+</p>
 
 ## Features
 
 - 📰 **Daily Digest** - Quick access to the latest security news
-- 🤖 **AI Summaries** - Optional AI-powered article summaries (OpenAI/Claude/Gemini)
-- 📂 **Smart Categorization** - Auto-categorize: Vulnerability, Threat Intel, Research, Tools, Incidents, News
+- 📂 **Smart Categorization** - Streamlined categories: Vulnerability, Intelligence, and News
 - 🔗 **CVE Merging** - Automatically merge multiple sources for the same CVE
-- ⚡ **Fast & Lightweight** - Built with Raycast's native UI components
+- ⚡ **Optimized Performance** - Chunked parallel fetching and memory-efficient RSS parsing
 
 ## Installation
 
@@ -21,22 +25,20 @@ A Raycast extension for daily cybersecurity news digest with AI-powered summarie
 
 ### Preferences
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| OPML URL | URL to OPML file with RSS feeds | Built-in feeds |
-| Time Window | Hours back to fetch news | 24 |
-| Max Items | Maximum items to display | 50 |
-| Max Feeds | Maximum feeds to fetch | 20 |
+| Setting     | Description                     | Default        |
+| ----------- | ------------------------------- | -------------- |
+| OPML URL    | URL to OPML file with RSS feeds | Built-in feeds |
+| Time Window | Hours back to fetch news        | 24             |
+| Max Items   | Maximum items to display        | 50             |
+| Max Feeds   | Maximum feeds to fetch          | 20             |
 
 ### Built-in Feeds
 
-The extension includes curated security feeds:
+The extension includes a curated list of reliable security feeds classified into three core areas:
 
-- **Vulnerability**: NVD, CISA Alerts, Exploit-DB
-- **Threat Intel**: Krebs on Security, Unit42, VirusTotal
-- **Research**: Google Project Zero, Trail of Bits, NCC Group
-- **News**: The Hacker News, BleepingComputer, Dark Reading, SecurityWeek
-- **Vendor**: Microsoft Security, Cloudflare
+- **Vulnerability**: CISA Alerts, Exploit-DB
+- **Intelligence**: Krebs on Security, Google Project Zero, Unit42, Microsoft Security, Cloudflare Blog
+- **News**: The Hacker News, BleepingComputer, Dark Reading, SANS Internet Storm Center
 
 ### Custom OPML
 
@@ -51,6 +53,7 @@ https://raw.githubusercontent.com/zer0yu/CyberSecurityRSS/master/tiny.opml
 ### Daily Security Digest
 
 View today's security news with:
+
 - Category filter dropdown
 - Search functionality
 - Quick actions: Open in Browser, Copy Markdown Link, Copy URL
@@ -58,6 +61,7 @@ View today's security news with:
 ### Manage Sources
 
 Configure your feed sources:
+
 - Add custom RSS feeds
 - Load feeds from OPML URL
 - Reset to default feeds

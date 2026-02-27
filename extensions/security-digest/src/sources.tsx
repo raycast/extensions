@@ -10,7 +10,7 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { OPMLFeed, Preferences } from "./types";
+import { OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
 
 export default function ManageSources() {
@@ -19,7 +19,7 @@ export default function ManageSources() {
   const [showForm, setShowForm] = useState(false);
   const [newFeed, setNewFeed] = useState({ title: "", url: "", category: "" });
 
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const loadFeeds = async () => {
     setIsLoading(true);

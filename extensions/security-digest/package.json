@@ -7,7 +7,7 @@
   "author": "gandli",
   "categories": [
     "News",
-    "Developer Tools"
+    "Security"
   ],
   "license": "MIT",
   "commands": [
@@ -60,8 +60,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.7",
-    "fast-xml-parser": "^5.4.1",
-    "node-fetch": "^3.3.2"
+    "fast-xml-parser": "^5.4.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -10,9 +10,8 @@ import {
   Cache,
 } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef } from "react";
-// import fetch from "node-fetch"; // Not needed - fetch is built-in
 import { XMLParser } from "fast-xml-parser";
-import { SecurityItem, Category, Preferences, OPMLFeed } from "./types";
+import { SecurityItem, Category, OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
 import { categorizeItem, mergeCVEItems } from "./utils";
 
@@ -49,7 +48,7 @@ export default function DailyDigest() {
   );
   const isFetchingRef = useRef(false);
 
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const fetchFeeds = useCallback(async () => {
     if (isFetchingRef.current) return;

@@ -20,17 +20,6 @@ export interface OPMLFeed {
   htmlUrl?: string;
 }
 
-export interface Preferences {
-  opmlUrl?: string;
-  hoursBack: number;
-  maxItems: number;
-  maxFeeds: number;
-  aiProvider?: "openai" | "claude" | "gemini" | "none";
-  openaiApiKey?: string;
-  claudeApiKey?: string;
-  geminiApiKey?: string;
-}
-
 export interface DigestSection {
   title: string;
   items: SecurityItem[];
