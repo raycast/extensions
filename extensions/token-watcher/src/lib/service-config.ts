@@ -12,7 +12,7 @@ export interface ServiceAvailability {
 }
 
 export function resolveCodexCredentialsPath(): string {
-  const prefs = getPreferenceValues<{ codexCredentialsPath?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const p = prefs.codexCredentialsPath?.trim();
   if (p) {
     return p.replace(/^~/, process.env.HOME || "");
@@ -21,11 +21,7 @@ export function resolveCodexCredentialsPath(): string {
 }
 
 export function checkServiceAvailability(): ServiceAvailability {
-  const prefs = getPreferenceValues<{
-    credentialsPath?: string;
-    enableClaude?: boolean;
-    enableCodex?: boolean;
-  }>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const claudeEnabled = prefs.enableClaude !== false;
   const codexEnabled = prefs.enableCodex !== false;

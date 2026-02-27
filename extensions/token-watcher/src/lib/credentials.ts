@@ -4,7 +4,7 @@ import type { ClaudeOAuthCredentials } from "./types";
 import { CREDENTIALS_PATH } from "./constants";
 
 function resolveCredentialsPath(): string {
-  const prefs = getPreferenceValues<{ credentialsPath?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const p = prefs.credentialsPath?.trim();
   if (p) {
     return p.replace(/^~/, process.env.HOME || "");

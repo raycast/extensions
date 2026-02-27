@@ -123,7 +123,7 @@ export default function MenuBar() {
   const openDashboard = () =>
     launchCommand({ name: "token-watcher", type: LaunchType.UserInitiated });
 
-  const prefs = getPreferenceValues<{ menuBarDisplay?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const showUsage = prefs.menuBarDisplay === "usage";
 
   // Title: show remaining/usage % for every enabled service
