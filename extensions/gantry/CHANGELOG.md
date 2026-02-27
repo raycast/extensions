@@ -1,4 +1,4 @@
-## [Initial Version] - 2026-02-27
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Browse all launchd services grouped by source (User Agents, System Agents, System Daemons)
 - Filter by health status (healthy, error, warning, unknown)
