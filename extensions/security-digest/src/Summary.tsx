@@ -5,15 +5,24 @@ import {
   AI,
   environment,
   Color,
+  Cache,
 } from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import { SecurityItem } from "./types";
 import { stripHtml } from "./utils";
 import { t } from "./i18n";
+import { useEffect, useState } from "react";
+
+const cache = new Cache();
 
 export default function SummaryView({ item }: { item: SecurityItem }) {
   const cleanContent = stripHtml(item.content);
   const canAccessAI = environment.canAccess(AI);
+  const cacheKey = `summary_${item.link}`;
+
+  const [cachedData, setCachedData] = useState<string | undefined>(() =>
+    cache.get(cacheKey),
+  );
 
   const prompt = t("summary_prompt", {
     title: item.title,
@@ -22,8 +31,18 @@ export default function SummaryView({ item }: { item: SecurityItem }) {
   });
 
   const { data, isLoading, error } = useAI(prompt, {
-    execute: canAccessAI,
+    execute: canAccessAI && !cachedData,
   });
+
+  useEffect(() => {
+    if (data && !cachedData) {
+      cache.set(cacheKey, data);
+      setCachedData(data);
+    }
+  }, [data, cacheKey, cachedData]);
+
+  const displayData = cachedData || data;
+  const isActuallyLoading = isLoading && !cachedData;
 
   if (error) {
     return (
@@ -59,7 +78,7 @@ export default function SummaryView({ item }: { item: SecurityItem }) {
 
   const markdown = `
 # ${t("summary_title")}
-${isLoading ? t("summary_loading") : data}
+${isActuallyLoading ? t("summary_loading") : displayData}
 
 ---
 ## ${t("summary_original")}
@@ -71,7 +90,7 @@ ${cleanContent}
   return (
     <Detail
       markdown={markdown}
-      isLoading={isLoading}
+      isLoading={isActuallyLoading}
       navigationTitle={`${item.title} - ${t("summary_title")}`}
       metadata={
         <Detail.Metadata>
@@ -94,7 +113,10 @@ ${cleanContent}
             url={item.link}
             title={t("action_open_browser")}
           />
-          <Action.CopyToClipboard title="Copy Summary" content={data || ""} />
+          <Action.CopyToClipboard
+            title="Copy Summary"
+            content={displayData || ""}
+          />
         </ActionPanel>
       }
     />

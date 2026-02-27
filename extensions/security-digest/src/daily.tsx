@@ -9,7 +9,7 @@ import {
   getPreferenceValues,
   Cache,
 } from "@raycast/api";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { XMLParser } from "fast-xml-parser";
 import { SecurityItem, Category, OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
@@ -50,7 +50,7 @@ export default function DailyDigest() {
   );
   const isFetchingRef = useRef(false);
 
-  const preferences = getPreferenceValues();
+  const preferences = useMemo(() => getPreferenceValues(), []);
 
   const fetchFeeds = useCallback(async () => {
     if (isFetchingRef.current) return;
