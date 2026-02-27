@@ -1,5 +1,11 @@
 # Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Window Icons**: Fixed issue where window icons would not show on first load.
+
 ## [Fixes] - 2026-01-15
 
 ### Fixed
