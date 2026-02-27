@@ -3,10 +3,6 @@ import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
-interface Preferences {
-  vergeConfigPath?: string;
-}
-
 export interface VergeGuiConfigState {
   available: boolean;
   path?: string;

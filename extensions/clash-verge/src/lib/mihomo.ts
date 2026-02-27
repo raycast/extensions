@@ -7,11 +7,6 @@ const DEFAULT_PROXY_HOST = "127.0.0.1";
 const DEFAULT_MIXED_PORT = 7897;
 const CURL_BIN = "/usr/bin/curl";
 
-interface Preferences {
-  socketPath?: string;
-  proxyHost?: string;
-}
-
 interface RawMihomoConfig {
   mode?: unknown;
   tun?: {
