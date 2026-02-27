@@ -14,6 +14,7 @@ import { XMLParser } from "fast-xml-parser";
 import { SecurityItem, Category, OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
 import { categorizeItem, mergeCVEItems } from "./utils";
+import SummaryView from "./Summary";
 
 const cache = new Cache();
 const xmlParser = new XMLParser({
@@ -244,6 +245,12 @@ export default function DailyDigest() {
               ]}
               actions={
                 <ActionPanel>
+                  <Action.Push
+                    icon={Icon.Stars}
+                    title="Summarize with AI"
+                    target={<SummaryView item={item} />}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  />
                   <Action.OpenInBrowser
                     url={item.link}
                     title="Open in Browser"

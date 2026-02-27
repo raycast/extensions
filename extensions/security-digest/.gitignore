@@ -4,3 +4,5 @@ dist/
 *.log
 .raycast/
 bun.lock
+.*/skills/
+skills-lock.json
