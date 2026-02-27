@@ -226,7 +226,7 @@ export default function RemoveQuarantine() {
 
   // ─── Loading / Ready state ────────────────────────────────────────────────
 
-  const isLoading = state.type === "selecting" || state.type === "loading";
+  const isLoading = state.type === "loading";
   const status = state.type === "ready" ? state.status : null;
   const md = status ? buildMarkdown(status) : "";
 
