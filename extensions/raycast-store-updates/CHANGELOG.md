@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Detect and display removed extensions] - {PR_MERGE_DATE}
+## [Detect and display removed extensions] - 2026-02-27
 
 - Detect extension removal PRs using the `no-review` label, removal-pattern titles, and package.json 404 confirmation
 - Expand multi-extension removal PRs into one list item per removed extension (e.g., a single PR removing two extensions now shows both)
