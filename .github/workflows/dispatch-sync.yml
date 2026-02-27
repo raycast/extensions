@@ -1,0 +1,71 @@
+name: Dispatch sync to standalone repos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "extensions/*/package.json"
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Find changed extensions and dispatch
+        env:
+          GH_TOKEN: ${{ secrets.DISPATCH_PAT }}
+        run: |
+          # Get list of changed package.json files in extensions/
+          changed=$(git diff --name-only HEAD~1 HEAD | grep '^extensions/.*/package.json$')
+
+          if [ -z "$changed" ]; then
+            echo "No extension package.json files changed."
+            exit 0
+          fi
+
+          # Get the merged PR number and URL from the commit message (best-effort)
+          PR_NUMBER=$(git log -1 --pretty=%s | grep -oE '#[0-9]+' | tr -d '#' | head -1)
+          PR_URL=""
+          if [ -n "$PR_NUMBER" ]; then
+            PR_URL="https://github.com/raycast/extensions/pull/${PR_NUMBER}"
+          fi
+
+          for pkg in $changed; do
+            # Extract extension name from package.json
+            ext_name=$(jq -r '.name' "$pkg")
+            if [ -z "$ext_name" ] || [ "$ext_name" = "null" ]; then
+              echo "Could not read name from $pkg, skipping."
+              continue
+            fi
+
+            # Derive target repo: prefix with "raycast-" unless name already starts with it
+            if echo "$ext_name" | grep -q '^raycast-'; then
+              target_repo="chrismessina/${ext_name}"
+            else
+              target_repo="chrismessina/raycast-${ext_name}"
+            fi
+
+            echo "Extension: $ext_name → dispatching to $target_repo"
+
+            # Check if the target repo exists before dispatching
+            if ! gh repo view "$target_repo" &>/dev/null; then
+              echo "  Repo $target_repo not found, skipping."
+              continue
+            fi
+
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${target_repo}/dispatches" \
+              -f event_type="upstream-sync" \
+              -F client_payload[pr_number]="${PR_NUMBER}" \
+              -F client_payload[pr_url]="${PR_URL}" \
+              -F client_payload[ext_name]="${ext_name}"
+
+            echo "  Dispatched upstream-sync to $target_repo"
+          done
