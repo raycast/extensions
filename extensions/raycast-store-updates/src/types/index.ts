@@ -35,6 +35,11 @@ interface GitHubPR {
   labels: { name: string }[];
 }
 
+interface GitHubPRFile {
+  filename: string;
+  status: "added" | "removed" | "modified" | "renamed" | "copied" | "changed" | "unchanged";
+}
+
 /** Unified item displayed in the list */
 interface StoreItem {
   id: string;
@@ -45,7 +50,7 @@ interface StoreItem {
   authorName: string;
   authorUrl: string;
   url: string;
-  type: "new" | "updated";
+  type: "new" | "updated" | "removed";
   /** For updated extensions: slug used to fetch changelog */
   extensionSlug?: string;
   /** GitHub PR URL for updated extensions */
@@ -60,6 +65,6 @@ interface StoreItem {
   extensionIcon?: string;
 }
 
-type FilterValue = "all" | "new" | "updated" | "my-updates";
+type FilterValue = "all" | "new" | "updated" | "my-updates" | "removed";
 
-export type { FeedAuthor, FeedItem, Feed, GitHubPR, StoreItem, FilterValue };
+export type { FeedAuthor, FeedItem, Feed, GitHubPR, GitHubPRFile, StoreItem, FilterValue };

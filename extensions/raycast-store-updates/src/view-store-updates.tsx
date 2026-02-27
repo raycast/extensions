@@ -87,6 +87,7 @@ export default function Command() {
   }, [filter]);
 
   const [updatedItems, setUpdatedItems] = useState<StoreItem[]>([]);
+  const [removedItems, setRemovedItems] = useState<StoreItem[]>([]);
   const [newItems, setNewItems] = useState<StoreItem[]>([]);
 
   // Read state management
@@ -122,19 +123,24 @@ export default function Command() {
     ).then((results) => setNewItems(results.filter((item): item is NonNullable<typeof item> => item !== null)));
   }, [feedData]);
 
-  // Fetch updated items from PRs (async because we need to fetch package.json for each)
+  // Fetch updated and removed items from PRs (async because we need to fetch package.json for each)
   useEffect(() => {
     if (!prsData) return;
     const newItemDates = new Map<string, string>();
     for (const item of newItems) {
       if (item.extensionSlug) newItemDates.set(item.extensionSlug, item.date);
     }
-    convertPRsToStoreItems(prsData, newItemDates).then(setUpdatedItems);
+    convertPRsToStoreItems(prsData, newItemDates).then(({ updated, removed }) => {
+      setUpdatedItems(updated);
+      setRemovedItems(removed);
+    });
   }, [prsData, newItems]);
 
   const allItems = useMemo(() => {
-    return [...newItems, ...updatedItems].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [newItems, updatedItems]);
+    return [...newItems, ...updatedItems, ...removedItems].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }, [newItems, updatedItems, removedItems]);
 
   const displayItems = useMemo(() => {
     let items: StoreItem[];
@@ -150,6 +156,9 @@ export default function Command() {
           ? updatedItems.filter((item) => (item.extensionSlug ? installedSlugs.has(item.extensionSlug) : false))
           : [];
         break;
+      case "removed":
+        items = removedItems;
+        break;
       default:
         items = allItems;
     }
@@ -157,7 +166,9 @@ export default function Command() {
     // Apply platform filter toggles
     // Extensions supporting both platforms are never filtered out.
     // These toggles only affect platform-exclusive extensions.
+    // Removed extensions are exempt — their platform data is unavailable.
     items = items.filter((item) => {
+      if (item.type === "removed") return true;
       const platforms = item.platforms ?? ["macOS"];
       const hasMac = platforms.some((p) => p.toLowerCase() === "macos");
       const hasWindows = platforms.some((p) => p.toLowerCase() === "windows");
@@ -175,7 +186,7 @@ export default function Command() {
     }
 
     return items;
-  }, [filter, newItems, updatedItems, allItems, toggles, installedSlugs, trackReadStatus, isRead]);
+  }, [filter, newItems, updatedItems, removedItems, allItems, toggles, installedSlugs, trackReadStatus, isRead]);
 
   const handleMarkAllAsRead = async () => {
     await markAllAsRead(displayItems.map((item) => item.id));
@@ -199,6 +210,7 @@ export default function Command() {
           <List.Dropdown.Item title="New" value="new" icon={Icon.StarCircle} />
           <List.Dropdown.Item title="Updates" value="updated" icon={Icon.ArrowUpCircle} />
           <List.Dropdown.Item title="My Updates" value="my-updates" icon={Icon.Person} />
+          <List.Dropdown.Item title="Removed" value="removed" icon={Icon.MinusCircle} />
         </List.Dropdown>
       }
     >
@@ -213,7 +225,9 @@ export default function Command() {
                 ? "Unable to load the feed"
                 : filter === "my-updates"
                   ? "No updates found for your installed extensions"
-                  : `No ${filter} extensions found`
+                  : filter === "removed"
+                    ? "No removed extensions found"
+                    : `No ${filter} extensions found`
           }
         />
       ) : (
