@@ -5,9 +5,6 @@ import { AVAILABLE_MODELS } from "../lib/config/models";
 export function getConfig(): GantryConfig {
   const prefs = getPreferenceValues<Preferences>();
 
-export function getConfig(): GantryConfig {
-  const prefs = getPreferenceValues<GantryPreferences>();
-
   return {
     llm: {
       apiKeys: {
@@ -21,7 +18,7 @@ export function getConfig(): GantryConfig {
 }
 
 export function getShowAppleServices(): boolean {
-  const prefs = getPreferenceValues<GantryPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   return prefs.showAppleServices;
 }
 
