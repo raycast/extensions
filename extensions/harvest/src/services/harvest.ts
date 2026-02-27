@@ -220,7 +220,7 @@ export async function refreshMenuBar() {
   try {
     await launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background });
   } catch {
-    console.log("failed to refresh menu bar or Windows");
+    console.log("failed to refresh menu bar");
   }
 }
 
