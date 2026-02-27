@@ -362,6 +362,8 @@ function ClaudeSection({
 }) {
   const { rateLimits, subscription, today, month } = service;
 
+  if (!rateLimits) return null;
+
   return (
     <List.Section title={`Claude · ${subscription.tierLabel}`}>
       <RateLimitItem

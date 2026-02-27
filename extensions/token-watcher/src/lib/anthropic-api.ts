@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import type { UsageApiResponse } from "./types";
 import { USAGE_API_URL } from "./constants";
 import { getValidAccessToken } from "./credentials";

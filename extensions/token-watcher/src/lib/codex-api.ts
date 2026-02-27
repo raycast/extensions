@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import type { CodexUsageResponse } from "./types";
 import { getCodexAccessToken } from "./codex-credentials";
 
@@ -7,7 +6,7 @@ const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
 async function doFetch(
   accessToken: string,
   accountId?: string,
-): Promise<import("node-fetch").Response> {
+): Promise<Response> {
   const headers: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
   };

@@ -1,5 +1,4 @@
 import { readFileSync, writeFileSync } from "fs";
-import fetch from "node-fetch";
 import { resolveCodexCredentialsPath } from "./service-config";
 
 const TOKEN_ENDPOINT = "https://auth.openai.com/oauth/token";
