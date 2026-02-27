@@ -197,33 +197,6 @@ export function getFinderSelection(): string | null {
   return null;
 }
 
-/**
- * Opens the macOS file chooser dialog and returns the selected path, or null if cancelled.
- * Uses spawnSync with a long timeout to wait for user interaction.
- */
-export function openFileChooser(defaultPath = "/Applications"): string | null {
-  const script = [
-    `tell application "Finder" to activate`,
-    `try`,
-    `  set f to choose file with prompt "Select a file or app to inspect:" default location POSIX file "${defaultPath}"`,
-    `  return POSIX path of f`,
-    `on error`,
-    `  return ""`,
-    `end try`,
-  ].join("\n");
-
-  const result = spawnSync("osascript", ["-e", script], {
-    encoding: "utf8",
-    timeout: 120000, // 2 min — plenty of time for the user to navigate
-  });
-
-  const chosen = (result.stdout ?? "").trim();
-  if (chosen.length > 0 && fs.existsSync(chosen)) {
-    return chosen;
-  }
-  return null;
-}
-
 export interface ParsedQuarantine {
   source: string;
   date: string;
