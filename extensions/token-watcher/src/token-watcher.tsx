@@ -961,7 +961,7 @@ function SessionItem({
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
-            title="Copy Session Id"
+            title="Copy Session ID"
             content={session.sessionId}
           />
           <Action.CopyToClipboard

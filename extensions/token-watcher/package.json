@@ -4,7 +4,10 @@
   "description": "Monitor Claude Code and OpenAI Codex token usage and rate limits",
   "icon": "icon.png",
   "author": "Daneel_Olivaw",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -73,8 +76,14 @@
       "default": "remaining",
       "required": false,
       "data": [
-        { "title": "Remaining %", "value": "remaining" },
-        { "title": "Usage %", "value": "usage" }
+        {
+          "title": "Remaining %",
+          "value": "remaining"
+        },
+        {
+          "title": "Usage %",
+          "value": "usage"
+        }
       ]
     },
     {
@@ -85,8 +94,14 @@
       "default": "opus",
       "required": false,
       "data": [
-        { "title": "Opus", "value": "opus" },
-        { "title": "Sonnet", "value": "sonnet" }
+        {
+          "title": "Opus",
+          "value": "opus"
+        },
+        {
+          "title": "Sonnet",
+          "value": "sonnet"
+        }
       ]
     }
   ],
@@ -95,10 +110,10 @@
     "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.14",
     "@types/react": "19.0.12",
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.3",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
