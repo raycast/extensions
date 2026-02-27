@@ -1,6 +1,6 @@
 # MXroute Changelog
 
-## [Toggle Domain Mail Hosting Status] - {PR_MERGE_DATE}
+## [Toggle Domain Mail Hosting Status] - 2026-02-27
 
 - Enable or Disable mail hosting in "Domains"
 - Open Webmail
