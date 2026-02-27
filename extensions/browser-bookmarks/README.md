@@ -18,5 +18,5 @@ If you have multiple profiles, you can select the one you want from the enabled 
 - Arc: `⌘` + `⇧` + `A`
 - Vivaldi: `⌘` + `⇧` + `V`
 - Prisma Access: `⌘` + `⇧` + `P`
-- Perplexity Comet: `⌘` + `⇧` + `X`
+- Perplexity Comet: `⌘` + `⇧` + `O`
 - Whale: `⌘` + `⇧` + `W`
