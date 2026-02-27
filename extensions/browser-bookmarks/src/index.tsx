@@ -656,7 +656,7 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.comet}
                     name="Comet"
                     icon="comet.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
                     profiles={comet.profiles}
                     currentProfile={comet.currentProfile}
                     setCurrentProfile={comet.setCurrentProfile}
