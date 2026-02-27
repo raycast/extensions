@@ -9,10 +9,10 @@ import {
   getPreferenceValues,
   LocalStorage,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
-import { t } from "./i18n";
+import { t, Language } from "./i18n";
 
 export default function ManageSources() {
   const [feeds, setFeeds] = useState<OPMLFeed[]>([]);
@@ -20,7 +20,8 @@ export default function ManageSources() {
   const [showForm, setShowForm] = useState(false);
   const [newFeed, setNewFeed] = useState({ title: "", url: "", category: "" });
 
-  const preferences = getPreferenceValues();
+  const preferences = useMemo(() => getPreferenceValues(), []);
+  const lang = preferences.language as Language;
 
   const loadFeeds = async () => {
     setIsLoading(true);
@@ -46,7 +47,10 @@ export default function ManageSources() {
 
   const addFeed = async () => {
     if (!newFeed.title || !newFeed.url) {
-      showToast({ style: Toast.Style.Failure, title: "Missing fields" });
+      showToast({
+        style: Toast.Style.Failure,
+        title: t("sources_toast_missing", undefined, lang),
+      });
       return;
     }
 
@@ -62,21 +66,27 @@ export default function ManageSources() {
 
     setNewFeed({ title: "", url: "", category: "" });
     setShowForm(false);
-    showToast({ style: Toast.Style.Success, title: "Feed added" });
+    showToast({
+      style: Toast.Style.Success,
+      title: t("sources_toast_added", undefined, lang),
+    });
   };
 
   const removeFeed = async (url: string) => {
     const updated = feeds.filter((f) => f.url !== url);
     setFeeds(updated);
     await LocalStorage.setItem("custom_feeds", JSON.stringify(updated));
-    showToast({ style: Toast.Style.Success, title: "Feed removed" });
+    showToast({
+      style: Toast.Style.Success,
+      title: t("sources_toast_removed", undefined, lang),
+    });
   };
 
   const loadFromOPML = async () => {
     if (!preferences.opmlUrl) {
       showToast({
         style: Toast.Style.Failure,
-        title: "No OPML URL configured",
+        title: t("sources_toast_no_url", undefined, lang),
       });
       return;
     }
@@ -88,12 +98,12 @@ export default function ManageSources() {
       await LocalStorage.setItem("custom_feeds", JSON.stringify(parsed));
       showToast({
         style: Toast.Style.Success,
-        title: `Loaded ${parsed.length} feeds`,
+        title: t("sources_toast_loaded", { count: parsed.length }, lang),
       });
     } catch (e) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load OPML",
+        title: t("sources_toast_fail", undefined, lang),
         message: String(e),
       });
     }
@@ -105,31 +115,34 @@ export default function ManageSources() {
         actions={
           <ActionPanel>
             <Action.SubmitForm
-              title={t("sources_save_btn")}
+              title={t("sources_save_btn", undefined, lang)}
               onSubmit={addFeed}
             />
-            <Action title="Cancel" onAction={() => setShowForm(false)} />
+            <Action
+              title={t("sources_cancel_btn", undefined, lang)}
+              onAction={() => setShowForm(false)}
+            />
           </ActionPanel>
         }
       >
         <Form.TextField
           id="title"
-          title={t("sources_feed_name")}
-          placeholder="e.g., Krebs on Security"
+          title={t("sources_feed_name", undefined, lang)}
+          placeholder={t("sources_name_placeholder", undefined, lang)}
           value={newFeed.title}
           onChange={(v) => setNewFeed({ ...newFeed, title: v })}
         />
         <Form.TextField
           id="url"
-          title={t("sources_feed_url")}
-          placeholder="https://example.com/feed.xml"
+          title={t("sources_feed_url", undefined, lang)}
+          placeholder={t("sources_url_placeholder", undefined, lang)}
           value={newFeed.url}
           onChange={(v) => setNewFeed({ ...newFeed, url: v })}
         />
         <Form.TextField
           id="category"
-          title={t("sources_feed_category")}
-          placeholder="e.g., Threat Intel"
+          title={t("sources_feed_category", undefined, lang)}
+          placeholder={t("sources_cat_placeholder", undefined, lang)}
           value={newFeed.category}
           onChange={(v) => setNewFeed({ ...newFeed, category: v })}
         />
@@ -140,13 +153,14 @@ export default function ManageSources() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={t("sources_search_placeholder")}
+      searchBarPlaceholder={t("sources_search_placeholder", undefined, lang)}
+      navigationTitle={t("sources_title", undefined, lang)}
     >
       <List.EmptyView
-        title="No feeds configured"
-        description="Add feeds manually or load from OPML"
+        title={t("sources_empty_title", undefined, lang)}
+        description={t("sources_empty_desc", undefined, lang)}
       />
-      <List.Section title={t("items_count", { count: feeds.length })}>
+      <List.Section title={t("items_count", { count: feeds.length }, lang)}>
         {feeds.map((feed, index) => (
           <List.Item
             key={`${feed.url}-${index}`}
@@ -158,7 +172,7 @@ export default function ManageSources() {
               <ActionPanel>
                 <Action.OpenInBrowser url={feed.url} />
                 <Action
-                  title="Remove"
+                  title={t("sources_action_remove", undefined, lang)}
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => removeFeed(feed.url)}
@@ -168,35 +182,43 @@ export default function ManageSources() {
           />
         ))}
       </List.Section>
-      <List.Section title="Actions">
+      <List.Section title={t("sources_section_actions", undefined, lang)}>
         <List.Item
-          title={t("sources_add_title")}
+          title={t("sources_add_title", undefined, lang)}
           icon={Icon.Plus}
           actions={
             <ActionPanel>
               <Action
-                title={t("sources_add_title")}
+                title={t("sources_add_title", undefined, lang)}
                 onAction={() => setShowForm(true)}
               />
             </ActionPanel>
           }
         />
         <List.Item
-          title="Load from OPML URL"
-          subtitle={preferences.opmlUrl || "Not configured"}
+          title={t("sources_load_opml", undefined, lang)}
+          subtitle={
+            preferences.opmlUrl || t("sources_not_configured", undefined, lang)
+          }
           icon={Icon.Download}
           actions={
             <ActionPanel>
-              <Action title="Load Opml" onAction={loadFromOPML} />
+              <Action
+                title={t("sources_btn_load_opml", undefined, lang)}
+                onAction={loadFromOPML}
+              />
             </ActionPanel>
           }
         />
         <List.Item
-          title="Reset to Default Feeds"
+          title={t("sources_reset_btn", undefined, lang)}
           icon={Icon.ArrowClockwise}
           actions={
             <ActionPanel>
-              <Action title={t("action_refresh")} onAction={loadFeeds} />
+              <Action
+                title={t("action_refresh", undefined, lang)}
+                onAction={loadFeeds}
+              />
             </ActionPanel>
           }
         />
