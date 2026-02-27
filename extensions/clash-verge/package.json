@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clash-verge",
+  "title": "Clash Verge",
+  "description": "Control Clash Verge network settings and proxy mode from Raycast",
+  "icon": "icon.png",
+  "author": "dx5lin",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "network",
+      "title": "Network",
+      "description": "Enable or disable System Proxy and TUN Mode",
+      "mode": "view",
+      "keywords": [
+        "clash-verge",
+        "network",
+        "system proxy",
+        "tun"
+      ]
+    },
+    {
+      "name": "proxy-mode",
+      "title": "Proxy Mode",
+      "description": "Set proxy mode to Rule, Global, or Direct",
+      "mode": "view",
+      "keywords": [
+        "clash-verge",
+        "proxy",
+        "mode",
+        "rule",
+        "global",
+        "direct"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "socketPath",
+      "title": "Mihomo Socket Path",
+      "description": "UNIX socket path for Clash Verge Mihomo API",
+      "type": "textfield",
+      "required": false,
+      "default": "/tmp/verge/verge-mihomo.sock"
+    },
+    {
+      "name": "proxyHost",
+      "title": "System Proxy Host",
+      "description": "Host used when enabling macOS system proxy",
+      "type": "textfield",
+      "required": false,
+      "default": "127.0.0.1"
+    },
+    {
+      "name": "vergeConfigPath",
+      "title": "Verge Config Path",
+      "description": "Optional path to Clash Verge verge.yaml for GUI state comparison",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
