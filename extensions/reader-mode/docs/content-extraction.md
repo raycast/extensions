@@ -9,9 +9,8 @@ Reader uses a multi-stage pipeline to extract clean article content from web pag
 1. **HTML Pre-Cleaning** — Remove non-article elements before parsing
 2. **Lazy Image Resolution** — Fix lazy-loaded images
 3. **Site-Specific Configs** — Handle problematic sites with custom rules
-4. **Site-Specific Configs** — Handle problematic sites with custom rules
-5. **Readability Parsing** — Extract article content using Mozilla Readability
-6. **Markdown Conversion** — Convert HTML to Markdown with additional filtering
+4. **Readability Parsing** — Extract article content using Mozilla Readability
+5. **Markdown Conversion** — Convert HTML to Markdown with additional filtering
 
 ---
 
@@ -98,13 +97,9 @@ Images with placeholder `src` values (data URIs, "placeholder", "transparent", "
 ### 3. Site-Specific Configs (`src/config/site-config.ts`)
 
 Some sites have non-standard HTML structures that require custom handling. The site config system provides:
-Some sites have non-standard HTML structures that require custom handling. The site config system provides:
 
 - **Custom article selectors** — Override default content detection
 - **Additional remove selectors** — Site-specific elements to remove
-- **Text pattern removal** — Remove elements by text content
-- **Inline selectors** — Convert block elements to inline for better markdown
-- **Caption formatting** — Format image captions with italic text and separated credits
 - **Text pattern removal** — Remove elements by text content
 - **Inline selectors** — Convert block elements to inline for better markdown
 - **Caption formatting** — Format image captions with italic text and separated credits
@@ -183,7 +178,6 @@ After Readability extraction, Turndown converts HTML to Markdown. Additional ele
 ### 5. Integration Flow
 
 ```text
-```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Input HTML                                │
 └─────────────────────────────────────────────────────────────────┘
@@ -197,7 +191,6 @@ After Readability extraction, Turndown converts HTML to Markdown. Additional ele
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  2. preCleanHtml()                                              │
-│     - Apply site configs                                        │
 │     - Apply site configs                                        │
 │     - Remove negative elements                                  │
 │     - Resolve lazy-loaded images                                │
