@@ -1,6 +1,6 @@
 # Music Assistant Controls Changelog
 
-## [Big update with many features] - {PR_MERGE_DATE}
+## [Big update with many features] - 2026-02-27
 
 ### ✨ New Features
 
