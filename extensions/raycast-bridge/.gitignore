@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.tgz
+.DS_Store
+*.log
+
+# claude
+.claude/worktrees/
+
+# docs
+docs/plans/
+docs/brainstorms/

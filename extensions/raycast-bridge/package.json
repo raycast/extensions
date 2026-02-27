@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-bridge",
+  "title": "Raycast Bridge",
+  "description": "Companion Raycast extension providing HTTP API for external control",
+  "icon": "icon.png",
+  "author": "desenmeng",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [],
+  "commands": [
+    {
+      "name": "start-server",
+      "title": "Start Bridge Server",
+      "description": "Starts a local HTTP server for external Raycast control",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-server",
+      "title": "Stop Bridge Server",
+      "description": "Stops the running bridge server",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Bridge Status",
+      "description": "Shows bridge server status in menu bar",
+      "mode": "menu-bar",
+      "interval": "30s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "eslint": "^10",
+    "prettier": "^3",
+    "typescript": "^5",
+    "vitest": "^4"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
