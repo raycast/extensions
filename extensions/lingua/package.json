@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lingua",
+  "title": "Lingua",
+  "description": "AI-powered translation with polish and history",
+  "icon": "command-icon.png",
+  "author": "kilerd",
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate Text",
+      "description": "Translate text using AI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiEndpoint",
+      "type": "textfield",
+      "required": true,
+      "title": "API Base URL",
+      "description": "API endpoint URL (OpenRouter, OpenAI compatible, or custom)",
+      "placeholder": "https://openrouter.ai/api/v1",
+      "default": "https://openrouter.ai/api/v1"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your API Key",
+      "placeholder": "sk-or-v1-... or sk-..."
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "required": false,
+      "title": "Model",
+      "description": "Model to use (e.g., openai/gpt-4o-mini, anthropic/claude-3.5-sonnet)",
+      "placeholder": "openai/gpt-4o-mini",
+      "default": "openai/gpt-4o-mini"
+    },
+    {
+      "name": "targetLanguage",
+      "type": "dropdown",
+      "required": false,
+      "title": "Target Language",
+      "description": "Default target language",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto Detect",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-TW"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,49 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#50E3C2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background with rounded corners -->
+  <rect width="512" height="512" rx="120" fill="url(#bg-gradient)"/>
+
+  <!-- Parrot - centered and scaled for better visibility -->
+  <g transform="translate(256, 256)">
+    <!-- Head outline -->
+    <ellipse cx="0" cy="-60" rx="70" ry="75" fill="none" stroke="white" stroke-width="16" stroke-linecap="round"/>
+
+    <!-- Crest feathers on top -->
+    <path d="M -30 -120 L -25 -140" stroke="white" stroke-width="12" stroke-linecap="round"/>
+    <path d="M 0 -130 L 0 -150" stroke="white" stroke-width="12" stroke-linecap="round"/>
+    <path d="M 30 -120 L 35 -140" stroke="white" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Curved beak pointing right -->
+    <path d="M 70 -60 Q 110 -55, 120 -45 Q 110 -35, 70 -40"
+          fill="none" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Eye -->
+    <circle cx="25" cy="-70" r="18" fill="white"/>
+    <circle cx="30" cy="-72" r="10" fill="#2C3E50"/>
+    <circle cx="34" cy="-76" r="4" fill="white"/>
+
+    <!-- Body -->
+    <path d="M -50 -10 Q -65 20, -65 60 L -65 90 Q -60 110, -40 115"
+          fill="none" stroke="white" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 50 -10 Q 65 20, 65 60 L 65 90 Q 60 110, 40 115"
+          fill="none" stroke="white" stroke-width="16" stroke-linecap="round"/>
+
+    <!-- Wing detail -->
+    <path d="M -50 30 Q -90 40, -110 70 Q -95 80, -70 70"
+          fill="none" stroke="white" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Tail feathers -->
+    <path d="M -40 115 Q -50 150, -60 180" stroke="white" stroke-width="12" stroke-linecap="round"/>
+    <path d="M -10 115 Q -15 150, -20 185" stroke="white" stroke-width="12" stroke-linecap="round"/>
+    <path d="M 20 115 Q 15 150, 10 185" stroke="white" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Perch line -->
+    <path d="M -80 115 L 80 115" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.6"/>
+  </g>
+</svg>
