@@ -5,14 +5,18 @@ A Raycast extension for daily cybersecurity news digest with optimized fetching 
 <p align="center">
   <img src="metadata/1.png" width="350" alt="Security Digest Screenshot 1" />
   <img src="metadata/2.png" width="350" alt="Security Digest Screenshot 2" />
+  <img src="metadata/3.png" width="350" alt="Security Digest Screenshot 3" />
+  <img src="metadata/4.png" width="350" alt="Security Digest Screenshot 4" />
 </p>
 
 ## Features
 
 - 📰 **Daily Digest** - Quick access to the latest security news
+- 🤖 **AI Summaries** - One-tap AI-powered summaries for security items (Raycast Pro required)
+- 🌐 **Multi-language** - Full support for English and Chinese / 支持中英文切换
 - 📂 **Smart Categorization** - Streamlined categories: Vulnerability, Intelligence, and News
 - 🔗 **CVE Merging** - Automatically merge multiple sources for the same CVE
-- ⚡ **Optimized Performance** - Chunked parallel fetching and memory-efficient RSS parsing
+- ⚡ **Optimized Performance** - Memory-efficient RSS parsing and chunked parallel fetching
 
 ## Installation
 
@@ -31,6 +35,7 @@ A Raycast extension for daily cybersecurity news digest with optimized fetching 
 | Time Window | Hours back to fetch news        | 24             |
 | Max Items   | Maximum items to display        | 50             |
 | Max Feeds   | Maximum feeds to fetch          | 20             |
+| Language    | Select UI language              | English        |
 
 ### Built-in Feeds
 
@@ -56,7 +61,7 @@ View today's security news with:
 
 - Category filter dropdown
 - Search functionality
-- Quick actions: Open in Browser, Copy Markdown Link, Copy URL
+- Quick actions: **AI Summary**, Open in Browser, Copy Markdown Link, Copy URL
 
 ### Manage Sources
 

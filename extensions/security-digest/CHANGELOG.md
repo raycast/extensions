@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 - **Simplified Categorization**: Reduced categories to a streamlined 3-set: **Vulnerabilities**, **Intelligence**, and **News**.
 - **English Localization**: Fully translated the UI and all categories into English.
 - **Raycast AI Integration**: Added a "Summarize with AI" action to news items, providing concise security insights through built-in LLMs.
+- **Multi-language Support**: Added full support for both **English** and **Chinese**, including a user preference to toggle UI language.
+- **Content Optimization**: Implemented HTML tag stripping for RSS content to ensure clean and readable AI summaries and details.
 - **Publication Guard**: Added a project-local `.npmrc` to lock the registry to official npm.
 
 ### Fixed
