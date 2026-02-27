@@ -8,24 +8,24 @@ export default async function Command() {
   const port = preferences.port;
 
   try {
-    // First, get the current system proxy status
-    const currentStatusResponse = await api(xKey, port).getSystemProxyStatus();
+    // First, get the current enhanced mode status
+    const currentStatusResponse = await api(xKey, port).getEnhancedMode();
     const isCurrentlyEnabled = currentStatusResponse.data.enabled;
 
     // Toggle the status
     const newStatus = !isCurrentlyEnabled;
-    await api(xKey, port).changeSystemProxyStatus(newStatus);
+    await api(xKey, port).changeEnhancedMode(newStatus);
 
     // Show success message
     const action = newStatus ? "Enabled" : "Disabled";
     const icon = newStatus ? EMOJI.ENABLED : EMOJI.DISABLED;
-    await showHUD(`${icon} System Proxy ${action}`);
+    await showHUD(`${icon} Enhanced Mode ${action}`);
   } catch (error) {
-    console.log("🚀 ~ toggle-proxy.ts:23 ~ Command ~ error:", error);
+    console.log("🚀 ~ toggle-enhanced-mode.ts:23 ~ Command ~ error:", error);
     // Show error message
     await showToast(
       Toast.Style.Failure,
-      "Failed to Toggle System Proxy",
+      "Failed to Toggle Enhanced Mode",
       "Please check your X-Key, port and function availability",
     );
   }
