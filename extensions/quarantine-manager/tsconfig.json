@@ -1,0 +1,9 @@
+{
+  "extends": "@raycast/tsconfig",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*", "raycast-env.d.ts"]
+}
