@@ -138,7 +138,7 @@
     "@raycast/utils": "^1.19.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/react": "^19.0.10",
     "typescript": "^5.7.3"
   },
