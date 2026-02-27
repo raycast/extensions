@@ -2,8 +2,16 @@ import { getPreferenceValues } from "@raycast/api";
 import type { GantryConfig } from "../lib/config/types";
 import { AVAILABLE_MODELS } from "../lib/config/models";
 
+interface GantryPreferences {
+  showAppleServices: boolean;
+  llmModel: string;
+  anthropicApiKey: string;
+  googleApiKey: string;
+  openaiApiKey: string;
+}
+
 export function getConfig(): GantryConfig {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<GantryPreferences>();
 
   return {
     llm: {
@@ -18,7 +26,7 @@ export function getConfig(): GantryConfig {
 }
 
 export function getShowAppleServices(): boolean {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<GantryPreferences>();
   return prefs.showAppleServices;
 }
 
