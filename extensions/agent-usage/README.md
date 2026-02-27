@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for Amp, Claude, Codex, Droid, Gemini, Kimi, Antigravity, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for Amp, Claude, Codex, Copilot, Droid, Gemini, Kimi, Antigravity, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -24,6 +24,7 @@ Track usage across your AI coding agents in one place.
 | **Amp**         | Local SQLite database     |     —      |    —     |    —    |       —       | Auto-detected from local database                                                       |
 | **Claude**      | Anthropic OAuth Usage API |     —      |    ✓     |    —    |       —       | Auto-detected after `claude` login                                                      |
 | **Codex**       | OpenAI API                |     ✓      |    —     |    —    |       ✓       | Run `codex login`, or paste token in preferences                                        |
+| **Copilot**     | GitHub Copilot internal API |    —      |    —     |    ✓    |       —       | Auto-detected from `GH_TOKEN`/`GITHUB_TOKEN`, or paste token in preferences             |
 | **Droid**       | Factory AI API            |     —      |    —     |    —    |       —       | Run `droid` command to login                                                            |
 | **Gemini**      | Local state file          |     —      |    —     |    —    |       —       | Auto-detected from local state                                                          |
 | **Kimi**        | Moonshot API              |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `kimi-for-coding`, or paste token from https://www.kimi.com/code/console   |
@@ -48,6 +49,12 @@ The indicator appears in:
 - **Menu Bar** — ⚡ prefix before the account name
 
 This works by comparing your stored account tokens with the keys configured in `~/.local/share/opencode/auth.json`.
+
+### Copilot Token
+
+1. Set `GH_TOKEN` or `GITHUB_TOKEN` with a GitHub token that has `read:user`
+2. If Raycast doesn't inherit your shell env, Agent Usage will resolve it from your login shell
+3. Optional fallback: paste a token in extension preferences (`Copilot Authorization Token`)
 
 ## Preferences
 

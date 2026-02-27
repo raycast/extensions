@@ -18,6 +18,8 @@ import { useClaudeUsage } from "./claude/fetcher";
 import { getClaudeAccessory } from "./claude/renderer";
 import { useCodexAccounts } from "./codex/fetcher";
 import { getCodexAccessory } from "./codex/renderer";
+import { useCopilotUsage } from "./copilot/fetcher";
+import { getCopilotAccessory } from "./copilot/renderer";
 import { useDroidUsage } from "./droid/fetcher";
 import { getDroidAccessory } from "./droid/renderer";
 import { useGeminiUsage } from "./gemini/fetcher";
@@ -57,6 +59,7 @@ export default function MenuBarCommand() {
   const isAmpVisible = Boolean(prefs.showAmp);
   const isClaudeVisible = Boolean(prefs.showClaude);
   const isCodexVisible = Boolean(prefs.showCodex);
+  const isCopilotVisible = Boolean(prefs.showCopilot);
   const isDroidVisible = Boolean(prefs.showDroid);
   const isGeminiVisible = Boolean(prefs.showGemini);
   const isKimiVisible = Boolean(prefs.showKimi);
@@ -66,7 +69,7 @@ export default function MenuBarCommand() {
 
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
-  const codexAccounts = useCodexAccounts(isCodexVisible);
+const copilotState = useCopilotUsage(isCopilotVisible);
   const droidState = useDroidUsage(isDroidVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
   const kimiAccounts = useKimiAccounts(isKimiVisible);
@@ -74,7 +77,7 @@ export default function MenuBarCommand() {
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
   const zaiAccounts = useZaiAccounts(isZaiVisible);
 
-  // Single-account agents - memoized to prevent unnecessary re-renders
+// Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
     () => [
       {
@@ -94,6 +97,15 @@ export default function MenuBarCommand() {
         isLoading: claudeState.isLoading,
         accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
         revalidate: claudeState.revalidate,
+      },
+      {
+        id: "copilot",
+        name: "Copilot",
+        icon: "copilot-icon.svg",
+        visible: isCopilotVisible,
+        isLoading: copilotState.isLoading,
+        accessory: getCopilotAccessory(copilotState.usage, copilotState.error, copilotState.isLoading),
+        revalidate: copilotState.revalidate,
       },
       {
         id: "droid",
@@ -126,6 +138,7 @@ export default function MenuBarCommand() {
     [
       isAmpVisible,
       isClaudeVisible,
+      isCopilotVisible,
       isDroidVisible,
       isGeminiVisible,
       isAntigravityVisible,
@@ -137,6 +150,10 @@ export default function MenuBarCommand() {
       claudeState.usage,
       claudeState.error,
       claudeState.revalidate,
+      copilotState.isLoading,
+      copilotState.usage,
+      copilotState.error,
+      copilotState.revalidate,
       droidState.isLoading,
       droidState.usage,
       droidState.error,
