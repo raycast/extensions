@@ -119,12 +119,13 @@ Content: {content}`,
 };
 
 export function t(
-  key: keyof typeof translations.en,
+  key: keyof (typeof translations)["en"],
   params?: Record<string, string | number>,
+  lang?: Language,
 ): string {
-  const preferences = getPreferenceValues();
-  const lang = (preferences.language as Language) || "en";
-  let text = translations[lang][key] || translations.en[key];
+  const preferences = !lang ? getPreferenceValues() : null;
+  const currentLang = lang || (preferences?.language as Language) || "en";
+  let text = translations[currentLang][key] || translations.en[key];
 
   if (params) {
     Object.entries(params).forEach(([k, v]) => {

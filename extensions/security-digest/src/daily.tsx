@@ -15,7 +15,7 @@ import { SecurityItem, Category, OPMLFeed } from "./types";
 import { parseOPML, fetchOPMLFromURL, getBuiltinFeeds } from "./opml";
 import { categorizeItem, mergeCVEItems, stripHtml } from "./utils";
 import SummaryView from "./Summary";
-import { t } from "./i18n";
+import { t, Language } from "./i18n";
 
 const cache = new Cache();
 const xmlParser = new XMLParser({
@@ -35,10 +35,10 @@ const CATEGORY_COLORS: Record<Category, Color> = {
   news: Color.Green,
 };
 
-const getCategoryLabels = (): Record<Category, string> => ({
-  vulnerability: t("cat_vulnerability"),
-  intelligence: t("cat_intelligence"),
-  news: t("cat_news"),
+const getCategoryLabels = (lang: Language): Record<Category, string> => ({
+  vulnerability: t("cat_vulnerability", undefined, lang),
+  intelligence: t("cat_intelligence", undefined, lang),
+  news: t("cat_news", undefined, lang),
 });
 
 export default function DailyDigest() {
@@ -195,22 +195,27 @@ export default function DailyDigest() {
     "news",
   ];
 
-  const categoryLabels = getCategoryLabels();
+  const lang = preferences.language as Language;
+  const categoryLabels = getCategoryLabels(lang);
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={t("search_placeholder")}
+      searchBarPlaceholder={t("search_placeholder", undefined, lang)}
       searchBarAccessory={
         <List.Dropdown
-          tooltip={t("filter_tooltip")}
+          tooltip={t("filter_tooltip", undefined, lang)}
           storeValue={true}
           onChange={(value) => setSelectedCategory(value as Category | "all")}
         >
           {categories.map((cat) => (
             <List.Dropdown.Item
               key={cat}
-              title={cat === "all" ? t("cat_all") : categoryLabels[cat]}
+              title={
+                cat === "all"
+                  ? t("cat_all", undefined, lang)
+                  : categoryLabels[cat]
+              }
               value={cat}
             />
           ))}
@@ -220,19 +225,23 @@ export default function DailyDigest() {
       {error ? (
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title={t("load_error_title")}
+          title={t("load_error_title", undefined, lang)}
           description={error}
         />
       ) : filteredItems.length === 0 ? (
         <List.EmptyView
           icon={Icon.Text}
-          title={t("no_news_title")}
-          description={t("no_news_desc")}
+          title={t("no_news_title", undefined, lang)}
+          description={t("no_news_desc", undefined, lang)}
         />
       ) : (
         <List.Section
-          title={t("items_count", { count: filteredItems.length })}
-          subtitle={t("time_window", { hours: preferences.hoursBack || 24 })}
+          title={t("items_count", { count: filteredItems.length }, lang)}
+          subtitle={t(
+            "time_window",
+            { hours: preferences.hoursBack || 24 },
+            lang,
+          )}
         >
           {filteredItems.map((item, index) => (
             <List.Item
@@ -244,32 +253,32 @@ export default function DailyDigest() {
                 tintColor: CATEGORY_COLORS[item.category],
               }}
               accessories={[
-                { text: getCategoryLabel(item.category) },
+                { text: getCategoryLabel(item.category, lang) },
                 { date: item.pubDate },
               ]}
               actions={
                 <ActionPanel>
                   <Action.Push
                     icon={Icon.Stars}
-                    title={t("action_summarize")}
+                    title={t("action_summarize", undefined, lang)}
                     target={<SummaryView item={item} />}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
                   <Action.OpenInBrowser
                     url={item.link}
-                    title={t("action_open_browser")}
+                    title={t("action_open_browser", undefined, lang)}
                   />
                   <Action.CopyToClipboard
                     content={`[${item.title}](${item.link})`}
-                    title={t("action_copy_md")}
+                    title={t("action_copy_md", undefined, lang)}
                   />
                   <Action.CopyToClipboard
                     content={item.link}
-                    title={t("action_copy_url")}
+                    title={t("action_copy_url", undefined, lang)}
                   />
                   <Action
                     icon={Icon.ArrowClockwise}
-                    title={t("action_refresh")}
+                    title={t("action_refresh", undefined, lang)}
                     onAction={fetchFeeds}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />
@@ -283,11 +292,8 @@ export default function DailyDigest() {
   );
 }
 
-function getCategoryLabel(category: Category): string {
-  const labels: Record<Category, string> = {
-    vulnerability: t("label_vulnerability"),
-    intelligence: t("label_intelligence"),
-    news: t("label_news"),
-  };
-  return labels[category];
+function getCategoryLabel(category: Category, lang: Language): string {
+  // Use a simple fetch here as it's called in rendering but less frequently
+  const key = `label_${category}` as Parameters<typeof t>[0];
+  return t(key, undefined, lang);
 }
