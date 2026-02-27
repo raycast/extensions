@@ -1,6 +1,6 @@
 # Battery Optimizer Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-02-27
 
 Enable "Get Battery Threshold" command for `batt` users
 
