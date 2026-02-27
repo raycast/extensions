@@ -11,6 +11,7 @@ import {
 import { ExtensionListItem } from "./components/ExtensionListItem";
 import { useReadState } from "./hooks/useReadState";
 import { useFilterToggles } from "./hooks/useFilterToggles";
+import { useGitHubRateLimit } from "./hooks/useGitHubRateLimit";
 
 // =============================================================================
 // Constants
@@ -19,7 +20,6 @@ import { useFilterToggles } from "./hooks/useFilterToggles";
 const FEED_URL = "https://www.raycast.com/store/feed.json";
 const GITHUB_PRS_URL =
   "https://api.github.com/repos/raycast/extensions/pulls?state=closed&sort=updated&direction=desc&per_page=50";
-const REFRESH_COOLDOWN_MS = 10000; // 10 seconds cooldown between refreshes
 
 // =============================================================================
 // Command
@@ -38,6 +38,8 @@ export default function Command() {
     keepPreviousData: true,
   });
 
+  const { checkRefreshAllowed, recordFetch, recordRateLimit } = useGitHubRateLimit();
+
   const {
     data: prsData,
     isLoading: prsLoading,
@@ -47,28 +49,34 @@ export default function Command() {
     headers: {
       Accept: "application/vnd.github.v3+json",
     },
+    async parseResponse(response) {
+      if (response.status === 403 || response.status === 429) {
+        const resetHeader = response.headers.get("X-RateLimit-Reset");
+        const resetEpoch = resetHeader ? parseInt(resetHeader, 10) : undefined;
+        await recordRateLimit(resetEpoch);
+        throw new Error("rate limit exceeded");
+      }
+      const resetHeader = response.headers.get("X-RateLimit-Reset");
+      const resetEpoch = resetHeader ? parseInt(resetHeader, 10) : undefined;
+      await recordFetch(resetEpoch);
+      return response.json() as Promise<GitHubPR[]>;
+    },
   });
 
-  const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
-    const now = Date.now();
-    const timeSinceLastRefresh = now - lastRefreshTime;
-
-    if (timeSinceLastRefresh < REFRESH_COOLDOWN_MS) {
-      const remainingSeconds = Math.ceil((REFRESH_COOLDOWN_MS - timeSinceLastRefresh) / 1000);
+    const blockedMessage = await checkRefreshAllowed();
+    if (blockedMessage) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Please wait before refreshing",
-        message: `Try again in ${remainingSeconds} second${remainingSeconds !== 1 ? "s" : ""}`,
+        message: blockedMessage,
       });
       return;
     }
 
     setIsRefreshing(true);
-    setLastRefreshTime(now);
-
     revalidateFeed();
     revalidatePRs();
     await showToast({

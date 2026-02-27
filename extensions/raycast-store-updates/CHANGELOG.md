@@ -7,6 +7,7 @@
 - Add "Removed" filter to the dropdown with a red minus-circle icon
 - Removed extensions show a red "Removed" type tag, "Removed" date label, and link to the PR instead of the store
 - Hide changelog, store link, and platform icons for removed extensions (data is unavailable)
+- Persist GitHub rate limit state in LocalStorage so the refresh cooldown survives between command opens; reads `X-RateLimit-Reset` header to show a precise "try again in X minutes" toast
 
 ## [Improve robustness of update handling] - 2026-02-18
 
