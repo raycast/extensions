@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sdotee",
+  "title": "S.EE",
+  "description": "Create short URLs, share text, and upload files with S.EE",
+  "icon": "extension_icon.png",
+  "author": "missuo",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-short-url",
+      "title": "Create Short URL",
+      "subtitle": "S.EE",
+      "description": "Create a shortened URL using S.EE",
+      "mode": "view"
+    },
+    {
+      "name": "create-text-share",
+      "title": "Create Text Share",
+      "subtitle": "S.EE",
+      "description": "Share text content via S.EE",
+      "mode": "view"
+    },
+    {
+      "name": "upload-file",
+      "title": "Upload File",
+      "subtitle": "S.EE",
+      "description": "Upload a file to S.EE",
+      "mode": "view"
+    },
+    {
+      "name": "quick-share",
+      "title": "Quick Share",
+      "subtitle": "S.EE",
+      "description": "Quickly share clipboard content or selected Finder file via S.EE",
+      "mode": "view"
+    },
+    {
+      "name": "manage-history",
+      "title": "Manage History",
+      "subtitle": "S.EE",
+      "description": "View and manage your S.EE sharing history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your S.EE API key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseUrl",
+      "title": "API Base URL",
+      "description": "S.EE API base URL",
+      "type": "textfield",
+      "required": false,
+      "default": "https://s.ee/api/v1"
+    },
+    {
+      "name": "defaultUrlDomain",
+      "title": "Default URL Domain",
+      "description": "Default domain for short URLs (e.g. s.ee)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultTextDomain",
+      "title": "Default Text Domain",
+      "description": "Default domain for text shares (e.g. s.ee)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultFileDomain",
+      "title": "Default File Domain",
+      "description": "Default domain for file uploads (e.g. s.ee)",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
