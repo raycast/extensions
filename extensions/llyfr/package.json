@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "llyfr",
+  "title": "Llyfr",
+  "description": "Bibliography manager",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "llyfr",
+      "title": "Llyfr",
+      "description": "Display list of papers in the local library",
+      "mode": "view",
+      "subtitle": "local bibliography manager"
+    },
+    {
+      "name": "llyfr-ads",
+      "title": "Llyfr-Ads",
+      "description": "Search papers on ADS",
+      "mode": "view",
+      "subtitle": "search and import papers from ADS",
+      "icon": "extension-icon-ads.png",
+      "preferences": [
+        {
+          "name": "api_token",
+          "title": "ADS API Token",
+          "description": "Your ADS API Token (get it from ADS -> Account -> Settings -> API Token)",
+          "type": "password",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "path",
+      "title": "Path to the bibliography",
+      "description": "Path to where all documents are stored",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "bibfile",
+      "title": "Path to the .bib file",
+      "description": "Path to the .bib file containing the bibliography",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "@retorquere/bibtex-parser": "^9.0.26"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "haykh",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Other"
+  ]
+}
