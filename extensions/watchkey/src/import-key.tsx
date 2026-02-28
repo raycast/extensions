@@ -9,7 +9,10 @@ interface FormValues {
 export default function ImportKey() {
   const { handleSubmit, itemProps } = useForm<FormValues>({
     onSubmit: async (values) => {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Importing from keychain..." });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Importing from keychain...",
+      });
       try {
         await watchkeyImport(values.service);
         toast.style = Toast.Style.Success;

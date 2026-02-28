@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Form, showToast, Toast, popToRoot, confirmAlert, Alert } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  popToRoot,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { watchkeyDelete } from "./watchkey";
 

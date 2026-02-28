@@ -9,7 +9,9 @@ export async function watchkeySet(service: string, value: string): Promise<void>
     child.stdin.end();
 
     let stderr = "";
-    child.stderr.on("data", (data: Buffer) => { stderr += data.toString(); });
+    child.stderr.on("data", (data: Buffer) => {
+      stderr += data.toString();
+    });
     child.on("close", (code) => {
       if (code === 0) resolve();
       else reject(new Error(stderr.trim() || `watchkey exited with code ${code}`));
