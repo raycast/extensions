@@ -11,7 +11,8 @@
     "ViGeng",
     "anwarulislam",
     "DanielPFitzsimmons",
-    "aleksishere"
+    "aleksishere",
+    "demaks"
   ],
   "categories": [
     "Productivity",
@@ -94,6 +95,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -194,6 +211,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -274,6 +307,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -354,6 +403,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -425,6 +490,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -496,6 +577,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -567,6 +664,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -638,6 +751,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -709,6 +838,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -780,6 +925,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -851,6 +1012,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -922,6 +1099,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -993,6 +1186,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -1072,6 +1281,22 @@
             {
               "title": "Gemini 3.0 Pro",
               "value": "gemini-3-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
             }
           ]
         },
@@ -1089,7 +1314,7 @@
           "description": "Translate all other languages to this language",
           "type": "textfield",
           "required": false,
-          "default": "English"
+          "default": "Russian"
         },
         {
           "name": "secondTargetLanguage",
@@ -1097,7 +1322,7 @@
           "description": "Translate the first target language to this language",
           "type": "textfield",
           "required": false,
-          "default": "Chinese"
+          "default": "English"
         }
       ]
     }
@@ -1157,7 +1382,23 @@
         {
           "title": "Gemini 3.0 Pro",
           "value": "gemini-3-pro-preview"
-        }
+        },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3.1 Pro Custom Tools",
+              "value": "gemini-3.1-pro-preview-customtools"
+            },
+            {
+              "title": "Gemini Flash Latest",
+              "value": "gemini-flash-latest"
+            },
+            {
+              "title": "Gemini Flash Lite Latest",
+              "value": "gemini-flash-lite-latest"
+            }
       ]
     },
     {
