@@ -170,7 +170,10 @@ export default function ManageSources() {
             accessories={[{ text: new URL(feed.url).hostname }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={feed.url} />
+                <Action.OpenInBrowser
+                  url={feed.url}
+                  title={t("action_open_browser", undefined, lang)}
+                />
                 <Action
                   title={t("sources_action_remove", undefined, lang)}
                   icon={Icon.Trash}

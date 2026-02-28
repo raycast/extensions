@@ -121,7 +121,7 @@ ${cleanContent}
             title={t("action_open_browser", undefined, lang)}
           />
           <Action.CopyToClipboard
-            title="Copy Summary"
+            title={t("action_copy_summary", undefined, lang)}
             content={displayData || ""}
           />
         </ActionPanel>

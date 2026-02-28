@@ -28,6 +28,7 @@ const translations = {
     action_copy_md: "Copy Markdown Link",
     action_copy_url: "Copy URL",
     action_refresh: "Refresh",
+    action_copy_summary: "Copy Summary",
 
     // AI Summary
     summary_title: "AI Summary",
@@ -103,6 +104,7 @@ Content: {content}`,
     action_copy_md: "复制 Markdown 链接",
     action_copy_url: "复制 URL",
     action_refresh: "刷新",
+    action_copy_summary: "复制总结",
 
     // AI 总结
     summary_title: "AI 总结",
