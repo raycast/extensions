@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-switcher",
+  "title": "App Switcher",
+  "description": "A visual app switcher showing all open apps with their windows in a grid layout",
+  "icon": "extension-icon.png",
+  "screenshots": [
+    "metadata/app-switcher-1.png",
+    "metadata/app-switcher-2.png"
+  ],
+  "author": "tarikkavaz",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Switch Apps",
+      "description": "Show all running apps and their windows",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "appOrder",
+          "type": "dropdown",
+          "title": "App Ordering",
+          "description": "How to order apps in the switcher",
+          "required": false,
+          "default": "most-recent",
+          "data": [
+            {
+              "title": "Most Recently Used",
+              "value": "most-recent"
+            },
+            {
+              "title": "Alphabetical",
+              "value": "alphabetical"
+            }
+          ]
+        },
+        {
+          "name": "iconSize",
+          "type": "dropdown",
+          "title": "Icon Size",
+          "description": "Set app icon size in the grid",
+          "required": false,
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "name": "viewMode",
+          "type": "dropdown",
+          "title": "View Mode",
+          "description": "Show apps in grid or list view",
+          "required": false,
+          "default": "grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "grid"
+            },
+            {
+              "title": "List",
+              "value": "list"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "manage-excluded",
+      "title": "Manage Excluded Apps",
+      "description": "View and manage apps excluded from the switcher",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.2",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  }
+}
