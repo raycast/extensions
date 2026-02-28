@@ -19,31 +19,106 @@
           "placeholder": "Default",
           "required": false,
           "data": [
-            { "title": "Default", "value": "default" },
-            { "title": "Mainnet", "value": "1" },
-            { "title": "Base", "value": "8453" },
-            { "title": "Arbitrum", "value": "42161" },
-            { "title": "Polygon", "value": "137" },
-            { "title": "Optimism", "value": "10" },
-            { "title": "BSC", "value": "56" },
-            { "title": "Linea", "value": "59144" },
-            { "title": "Ink", "value": "57073" },
-            { "title": "Arbitrum Nova", "value": "42170" },
-            { "title": "zkSync", "value": "324" },
-            { "title": "Avalanche", "value": "43114" },
-            { "title": "Gnosis", "value": "100" },
-            { "title": "Scroll", "value": "534352" },
-            { "title": "Celo", "value": "42220" },
-            { "title": "Mantle", "value": "5000" },
-            { "title": "Blast", "value": "81457" },
-            { "title": "Sonic", "value": "146" },
-            { "title": "Unichain", "value": "130" },
-            { "title": "Flow", "value": "747" },
-            { "title": "World Chain", "value": "480" },
-            { "title": "ApeChain", "value": "33139" },
-            { "title": "Abstract", "value": "2741" },
-            { "title": "HyperEVM", "value": "999" },
-            { "title": "Mode", "value": "34443" }
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Mainnet",
+              "value": "1"
+            },
+            {
+              "title": "Base",
+              "value": "8453"
+            },
+            {
+              "title": "Arbitrum",
+              "value": "42161"
+            },
+            {
+              "title": "Polygon",
+              "value": "137"
+            },
+            {
+              "title": "Optimism",
+              "value": "10"
+            },
+            {
+              "title": "BSC",
+              "value": "56"
+            },
+            {
+              "title": "Linea",
+              "value": "59144"
+            },
+            {
+              "title": "Ink",
+              "value": "57073"
+            },
+            {
+              "title": "Arbitrum Nova",
+              "value": "42170"
+            },
+            {
+              "title": "zkSync",
+              "value": "324"
+            },
+            {
+              "title": "Avalanche",
+              "value": "43114"
+            },
+            {
+              "title": "Gnosis",
+              "value": "100"
+            },
+            {
+              "title": "Scroll",
+              "value": "534352"
+            },
+            {
+              "title": "Celo",
+              "value": "42220"
+            },
+            {
+              "title": "Mantle",
+              "value": "5000"
+            },
+            {
+              "title": "Blast",
+              "value": "81457"
+            },
+            {
+              "title": "Sonic",
+              "value": "146"
+            },
+            {
+              "title": "Unichain",
+              "value": "130"
+            },
+            {
+              "title": "Flow",
+              "value": "747"
+            },
+            {
+              "title": "World Chain",
+              "value": "480"
+            },
+            {
+              "title": "ApeChain",
+              "value": "33139"
+            },
+            {
+              "title": "Abstract",
+              "value": "2741"
+            },
+            {
+              "title": "HyperEVM",
+              "value": "999"
+            },
+            {
+              "title": "Mode",
+              "value": "34443"
+            }
           ]
         }
       ]
@@ -66,17 +141,50 @@
           "placeholder": "Default",
           "required": false,
           "data": [
-            { "title": "Default", "value": "default" },
-            { "title": "Mainnet", "value": "1" },
-            { "title": "Base", "value": "8453" },
-            { "title": "Arbitrum", "value": "42161" },
-            { "title": "Polygon", "value": "137" },
-            { "title": "Optimism", "value": "10" },
-            { "title": "BSC", "value": "56" },
-            { "title": "Avalanche", "value": "43114" },
-            { "title": "Gnosis", "value": "100" },
-            { "title": "Blast", "value": "81457" },
-            { "title": "Sonic", "value": "146" }
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Mainnet",
+              "value": "1"
+            },
+            {
+              "title": "Base",
+              "value": "8453"
+            },
+            {
+              "title": "Arbitrum",
+              "value": "42161"
+            },
+            {
+              "title": "Polygon",
+              "value": "137"
+            },
+            {
+              "title": "Optimism",
+              "value": "10"
+            },
+            {
+              "title": "BSC",
+              "value": "56"
+            },
+            {
+              "title": "Avalanche",
+              "value": "43114"
+            },
+            {
+              "title": "Gnosis",
+              "value": "100"
+            },
+            {
+              "title": "Blast",
+              "value": "81457"
+            },
+            {
+              "title": "Sonic",
+              "value": "146"
+            }
           ]
         }
       ]
@@ -102,6 +210,12 @@
       ]
     },
     {
+      "name": "repository",
+      "title": "Open Editor",
+      "description": "Open a GitHub repository in a web IDE",
+      "mode": "no-view"
+    },
+    {
       "name": "simulate",
       "title": "Simulate Transaction",
       "description": "Open a prefilled Tenderly simulation page for a transaction",
@@ -117,36 +231,122 @@
       "required": false,
       "default": "1",
       "data": [
-        { "title": "Mainnet", "value": "1" },
-        { "title": "Base", "value": "8453" },
-        { "title": "Arbitrum", "value": "42161" },
-        { "title": "Polygon", "value": "137" },
-        { "title": "Optimism", "value": "10" },
-        { "title": "BSC", "value": "56" },
-        { "title": "Linea", "value": "59144" },
-        { "title": "Ink", "value": "57073" },
-        { "title": "Arbitrum Nova", "value": "42170" },
-        { "title": "zkSync", "value": "324" },
-        { "title": "Avalanche", "value": "43114" },
-        { "title": "Gnosis", "value": "100" },
-        { "title": "Scroll", "value": "534352" },
-        { "title": "Celo", "value": "42220" },
-        { "title": "Mantle", "value": "5000" },
-        { "title": "Blast", "value": "81457" },
-        { "title": "Sonic", "value": "146" },
-        { "title": "Unichain", "value": "130" },
-        { "title": "Flow", "value": "747" },
-        { "title": "World Chain", "value": "480" },
-        { "title": "ApeChain", "value": "33139" },
-        { "title": "Abstract", "value": "2741" },
-        { "title": "HyperEVM", "value": "999" },
-        { "title": "Mode", "value": "34443" }
+        {
+          "title": "Mainnet",
+          "value": "1"
+        },
+        {
+          "title": "Base",
+          "value": "8453"
+        },
+        {
+          "title": "Arbitrum",
+          "value": "42161"
+        },
+        {
+          "title": "Polygon",
+          "value": "137"
+        },
+        {
+          "title": "Optimism",
+          "value": "10"
+        },
+        {
+          "title": "BSC",
+          "value": "56"
+        },
+        {
+          "title": "Linea",
+          "value": "59144"
+        },
+        {
+          "title": "Ink",
+          "value": "57073"
+        },
+        {
+          "title": "Arbitrum Nova",
+          "value": "42170"
+        },
+        {
+          "title": "zkSync",
+          "value": "324"
+        },
+        {
+          "title": "Avalanche",
+          "value": "43114"
+        },
+        {
+          "title": "Gnosis",
+          "value": "100"
+        },
+        {
+          "title": "Scroll",
+          "value": "534352"
+        },
+        {
+          "title": "Celo",
+          "value": "42220"
+        },
+        {
+          "title": "Mantle",
+          "value": "5000"
+        },
+        {
+          "title": "Blast",
+          "value": "81457"
+        },
+        {
+          "title": "Sonic",
+          "value": "146"
+        },
+        {
+          "title": "Unichain",
+          "value": "130"
+        },
+        {
+          "title": "Flow",
+          "value": "747"
+        },
+        {
+          "title": "World Chain",
+          "value": "480"
+        },
+        {
+          "title": "ApeChain",
+          "value": "33139"
+        },
+        {
+          "title": "Abstract",
+          "value": "2741"
+        },
+        {
+          "title": "HyperEVM",
+          "value": "999"
+        },
+        {
+          "title": "Mode",
+          "value": "34443"
+        }
       ]
     }
   ],
-  "keywords": ["ethereum", "evm", "blockchain", "explorer", "etherscan", "web3", "toolkit"],
-  "platforms": ["macOS", "Windows"],
-  "categories": ["Developer Tools", "Web"],
+  "keywords": [
+    "ethereum",
+    "evm",
+    "blockchain",
+    "explorer",
+    "etherscan",
+    "web3",
+    "toolkit"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
   "dependencies": {
     "@raycast/api": "^1.98.0",
     "@raycast/utils": "^1.19.0"
@@ -154,12 +354,14 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/react": "^19.0.10",
+    "lefthook": "^2.1.1",
     "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
+    "lint:ci": "ray lint -I",
     "fix-lint": "ray lint --fix"
   }
 }

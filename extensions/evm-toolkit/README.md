@@ -62,6 +62,16 @@ Opens an [Ethereum Improvement Proposal](https://eips.ethereum.org/) page by its
 
 The EIP number is used to open `https://eips.ethereum.org/EIPS/eip-{number}` directly in your browser.
 
+### Open Editor
+
+Opens a GitHub repository or file in a web IDE via [github.dev](https://github.dev/).
+
+1. Copy a GitHub URL (e.g. `https://github.com/owner/repo`)
+2. Trigger **Open Editor** in Raycast
+3. Press Enter
+
+Only GitHub URLs (`https://github.com/...`) are accepted. The extension replaces `github.com` with `github.dev` and opens the result in your browser. Works with any GitHub path: repositories, files, branches, pull requests, etc.
+
 ### Simulate Transaction
 
 Opens a prefilled transaction simulation on [Tenderly](https://dashboard.tenderly.co/simulator/new).

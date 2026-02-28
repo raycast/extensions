@@ -5,5 +5,6 @@
 - Open Profile: open an account's portfolio on DeBank
 - Open Intel: open an address's analytics on Arkham Intel
 - Open EIP: open the page for the given EIP
+- Open Editor: open a GitHub repository in a web IDE via github.dev
 - Simulate Transaction: prefill and open a Tenderly simulation page
 - 24 supported EVM networks with configurable default preference
