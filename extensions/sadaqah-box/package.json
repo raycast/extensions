@@ -10,7 +10,7 @@
     "macOS",
     "Windows"
   ],
-  "categories": ["Finance", "Other"],
+  "categories": ["Finance"],
   "commands": [
     {
       "name": "dashboard",
