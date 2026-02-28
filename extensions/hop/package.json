@@ -6,8 +6,18 @@
   "icon": "icon.png",
   "author": "danmartuszewski",
   "license": "MIT",
-  "categories": ["Developer Tools", "Productivity"],
-  "keywords": ["ssh", "connect", "server", "terminal", "remote", "hop"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "ssh",
+    "connect",
+    "server",
+    "terminal",
+    "remote",
+    "hop"
+  ],
   "commands": [
     {
       "name": "index",
@@ -15,7 +25,12 @@
       "subtitle": "Hop",
       "description": "Fuzzy search and connect to SSH servers",
       "mode": "view",
-      "keywords": ["ssh", "server", "remote", "terminal"]
+      "keywords": [
+        "ssh",
+        "server",
+        "remote",
+        "terminal"
+      ]
     }
   ],
   "preferences": [
@@ -88,5 +103,8 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
