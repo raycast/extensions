@@ -9,7 +9,8 @@
     "OBQun",
     "k8scat",
     "j3lte",
-    "stelo"
+    "stelo",
+    "Sheraff"
   ],
   "categories": [
     "Productivity",
@@ -32,25 +33,67 @@
       "preferences": [
         {
           "type": "dropdown",
-          "title": "Preferred Action",
+          "title": "Default Action",
           "data": [
             {
-              "title": "Read Document",
-              "value": "read"
+              "title": "Preview",
+              "value": "preview"
             },
             {
               "title": "Open in Browser",
               "value": "open"
-            },
-            {
-              "title": "Copy to Clipboard",
-              "value": "copy"
             }
           ],
           "required": false,
-          "default": "read",
-          "name": "preferredAction",
-          "description": "Choose what you want to do with the result first"
+          "default": "preview",
+          "name": "defaultAction",
+          "description": "Choose which action appears first"
+        },
+        {
+          "type": "dropdown",
+          "title": "Language",
+          "data": [
+            {
+              "title": "English (US)",
+              "value": "en-US"
+            },
+            {
+              "title": "Espanol",
+              "value": "es"
+            },
+            {
+              "title": "Francais",
+              "value": "fr"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            },
+            {
+              "title": "Korean",
+              "value": "ko"
+            },
+            {
+              "title": "Portuguese (Brazil)",
+              "value": "pt-BR"
+            },
+            {
+              "title": "Russian",
+              "value": "ru"
+            },
+            {
+              "title": "Chinese (Simplified)",
+              "value": "zh-CN"
+            },
+            {
+              "title": "Chinese (Traditional)",
+              "value": "zh-TW"
+            }
+          ],
+          "required": false,
+          "default": "en-US",
+          "name": "language",
+          "description": "Language used for MDN search index"
         }
       ]
     }
@@ -59,8 +102,7 @@
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.16.0",
     "gray-matter": "^4.0.3",
-    "node-fetch": "^3.3.2",
-    "url-join": "^5.0.0"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

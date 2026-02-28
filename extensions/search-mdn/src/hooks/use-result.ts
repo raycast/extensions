@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import path from "node:path";
 import { escape, unescape } from "node:querystring";
 import { URL } from "node:url";
 import { useMemo, useRef } from "react";
@@ -7,7 +6,7 @@ import { useMemo, useRef } from "react";
 import { Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import type { Content, Result } from "@/types";
+import type { Result } from "@/types";
 
 import matter = require("gray-matter");
 
@@ -35,10 +34,7 @@ const cleanupContent = (raw: string, res: Result): string => {
   content = content.replace(/{{Embed(Live|Interactive)(Sample|Example)\("([^"]+)"\)}}/gim, "`See page in browser`");
 
   // fix samples like {{EmbedLiveSample(“Complete_example”, 230, 250)}}
-  content = content.replace(/{{EmbedLiveSample\("([^"]+)"(,\s?(\d+)){0,2}\)}}/gim, "`See sample - page in browser`");
-
-  // fix samples like {{EmbedLiveSample(‘Comparing different length units’, ‘100%’, 700)}}
-  content = content.replace(/{{EmbedLiveSample\("([^"]+)"(,\s?(\d+)){0,2}\)}}/gim, "`See sample - page in browser`");
+  content = content.replace(/{{EmbedLiveSample\([^)]*\)}}/gim, "`See sample - page in browser`");
 
   // {{EmbedInteractiveExample(...)}} - remove
   content = content.replace(/{{EmbedInteractiveExample\([^)]+\)}}/gim, "");
@@ -60,16 +56,16 @@ const cleanupContent = (raw: string, res: Result): string => {
 
   // Find all links and replace the href with the full url
   content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, (match, text, href) => {
-    let url = href;
-    if (href.startsWith("http")) {
+    if (/^(?:[a-z][a-z\d+.-]*:)?\/\//i.test(href) || href.startsWith("#")) {
       return match;
     }
-    if (!href.startsWith("/")) {
-      url = path.join(res.url, href);
-    } else {
-      url = path.join(new URL(res.url).origin, href);
+
+    try {
+      const resolved = new URL(href, res.url).toString();
+      return `[${text}](${resolved})`;
+    } catch {
+      return match;
     }
-    return `[${text}](${url})`;
   });
 
   // Unescape any unicode characters (because all \u characters should be treated as code)
@@ -77,6 +73,9 @@ const cleanupContent = (raw: string, res: Result): string => {
   content = content.replace(/\\u([\d\w]{4})/gim, (match, code) => {
     return unescape(escape(`\\u ${parseInt(code, 16).toString(16).toUpperCase()}`));
   });
+
+  // Remove any macro tags that still remain after specific replacements.
+  content = content.replace(/{{[^{}]+}}/gim, "");
 
   if (file.data.title) {
     content = `# ${file.data.title}\n\n${content}`;
@@ -89,7 +88,7 @@ export const useResult = (result: Result, locale: string) => {
   const abortable = useRef<AbortController>();
   const file =
     "/files" +
-    result.mdn_url.toLowerCase().replace("::", "_doublecolon_").replace(":", "_colon_").replace("/docs/", "/") +
+    result.path.toLowerCase().replace("::", "_doublecolon_").replace(":", "_colon_").replace("/docs/", "/") +
     "/index.md";
   const isEn = locale === "en-US";
   const url = `${isEn ? contentApiURL : translatedContentApiURL}${file}`;
@@ -97,9 +96,32 @@ export const useResult = (result: Result, locale: string) => {
   const { isLoading, data, revalidate, error } = useCachedPromise(
     async (url: string, result: Result) => {
       const response = await fetch(url, { signal: abortable.current?.signal });
-      const data = (await response.json()) as unknown as Content;
 
-      const content = Buffer.from(data?.content ?? "", (data?.encoding ?? "base64") as BufferEncoding).toString();
+      if (!response.ok) {
+        let message = `HTTP ${response.status} ${response.statusText}`;
+
+        try {
+          const payload = (await response.json()) as { message?: string };
+          if (typeof payload.message === "string" && payload.message.length > 0) {
+            message = `${message}: ${payload.message}`;
+          }
+        } catch {
+          // Ignore non-JSON error payloads.
+        }
+
+        throw new Error(message);
+      }
+
+      const data = (await response.json()) as { content?: string; encoding?: string };
+      if (typeof data.content !== "string") {
+        throw new Error("MDN content response did not include file content");
+      }
+
+      if (data.encoding && data.encoding !== "base64") {
+        throw new Error(`Unsupported content encoding: ${data.encoding}`);
+      }
+
+      const content = Buffer.from(data.content, "base64").toString();
 
       return cleanupContent(content, result);
     },
