@@ -12,7 +12,7 @@ import { useAI } from "@raycast/utils";
 import { SecurityItem } from "./types";
 import { stripHtml } from "./utils";
 import { t, Language } from "./i18n";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 
 const cache = new Cache();
 
@@ -23,33 +23,37 @@ export default function SummaryView({ item }: { item: SecurityItem }) {
   const canAccessAI = environment.canAccess(AI);
   const cacheKey = `summary_${item.link}`;
 
-  const [cachedData, setCachedData] = useState<string | undefined>(() =>
-    cache.get(cacheKey),
-  );
+  // Use a ref to keep track of initial cache state to avoid killing the stream
+  const hasInitialCache = useRef(!!cache.get(cacheKey));
+  const [cachedData] = useState<string | undefined>(() => cache.get(cacheKey));
 
-  const prompt = t(
-    "summary_prompt",
-    {
-      title: item.title,
-      source: item.source ?? "Unknown",
-      content: cleanContent,
-    },
-    lang,
+  const prompt = useMemo(
+    () =>
+      t(
+        "summary_prompt",
+        {
+          title: item.title,
+          source: item.source ?? "Unknown",
+          content: cleanContent,
+        },
+        lang,
+      ),
+    [item.title, item.source, cleanContent, lang],
   );
 
   const { data, isLoading, error } = useAI(prompt, {
-    execute: canAccessAI && !cachedData,
+    execute: canAccessAI && !hasInitialCache.current,
   });
 
   useEffect(() => {
-    if (data && !cachedData) {
+    // Only save to cache when loading is finished and data exists
+    if (!isLoading && data && !hasInitialCache.current) {
       cache.set(cacheKey, data);
-      setCachedData(data);
     }
-  }, [data, cacheKey, cachedData]);
+  }, [isLoading, data, cacheKey]);
 
   const displayData = cachedData || data;
-  const isActuallyLoading = isLoading && !cachedData;
+  const isActuallyLoading = isLoading && !displayData;
 
   if (error) {
     return (
@@ -85,7 +89,7 @@ export default function SummaryView({ item }: { item: SecurityItem }) {
 
   const markdown = `
 # ${t("summary_title", undefined, lang)}
-${isActuallyLoading ? t("summary_loading", undefined, lang) : displayData}
+${!displayData && isLoading ? t("summary_loading", undefined, lang) : displayData || ""}
 
 ---
 ## ${t("summary_original", undefined, lang)}
