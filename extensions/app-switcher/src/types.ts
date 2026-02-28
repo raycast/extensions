@@ -23,4 +23,3 @@ export interface AppGridItem {
   hasWindows: boolean;
   frontmost: boolean;
 }
-

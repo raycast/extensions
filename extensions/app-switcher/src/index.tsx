@@ -1,69 +1,45 @@
 import { Grid, Icon, List, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import {
-  getCachedRunningApps,
-  getRunningApps,
-  getMinimizedStatus,
-  setCachedRunningApps,
-} from "./get-running-apps";
+import { getCachedRunningApps, getRunningApps, getMinimizedStatus, setCachedRunningApps } from "./get-running-apps";
 import { getExcludedApps } from "./excluded-apps";
 import { AppActions } from "./app-actions";
-import { AppGridItem, Preferences, RunningApp } from "./types";
+import { AppGridItem, RunningApp } from "./types";
 
-function normalizeOrderPreference(
-  value: string | undefined,
-): Preferences["appOrder"] {
+function normalizeOrderPreference(value: string | undefined): Preferences.Index["appOrder"] {
   return value === "alphabetical" ? "alphabetical" : "most-recent";
 }
 
-function normalizeIconSizePreference(
-  value: string | undefined,
-): Preferences["iconSize"] {
-  if (value === "small" || value === "medium" || value === "large")
-    return value;
+function normalizeIconSizePreference(value: string | undefined): Preferences.Index["iconSize"] {
+  if (value === "small" || value === "medium" || value === "large") return value;
   return "medium";
 }
 
-function normalizeViewModePreference(
-  value: string | undefined,
-): Preferences["viewMode"] {
+function normalizeViewModePreference(value: string | undefined): Preferences.Index["viewMode"] {
   return value === "list" ? "list" : "grid";
 }
 
-function toGridItemSize(iconSize: Preferences["iconSize"]): Grid.ItemSize {
+function toGridItemSize(iconSize: Preferences.Index["iconSize"]): Grid.ItemSize {
   if (iconSize === "small") return Grid.ItemSize.Small;
   if (iconSize === "large") return Grid.ItemSize.Large;
   return Grid.ItemSize.Medium;
 }
 
-function toGridColumns(iconSize: Preferences["iconSize"]): number {
+function toGridColumns(iconSize: Preferences.Index["iconSize"]): number {
   if (iconSize === "small") return 12;
   if (iconSize === "large") return 5;
   return 7;
 }
 
 export default function AppSwitcher() {
-  const preferences = getPreferenceValues<Preferences>();
-  const appOrder = normalizeOrderPreference(
-    (preferences as { appOrder?: string }).appOrder,
-  );
-  const iconSize = normalizeIconSizePreference(
-    (preferences as { iconSize?: string }).iconSize,
-  );
-  const viewMode = normalizeViewModePreference(
-    (preferences as { viewMode?: string }).viewMode,
-  );
+  const preferences = getPreferenceValues<Preferences.Index>();
+  const appOrder = normalizeOrderPreference((preferences as { appOrder?: string }).appOrder);
+  const iconSize = normalizeIconSizePreference((preferences as { iconSize?: string }).iconSize);
+  const viewMode = normalizeViewModePreference((preferences as { viewMode?: string }).viewMode);
 
-  const {
-    data: runningApps,
-    isLoading: appsLoading,
-    revalidate,
-  } = usePromise(getRunningApps);
+  const { data: runningApps, isLoading: appsLoading, revalidate } = usePromise(getRunningApps);
 
-  const [cachedRunningApps, setCachedRunningAppsState] = useState<
-    RunningApp[] | null
-  >(null);
+  const [cachedRunningApps, setCachedRunningAppsState] = useState<RunningApp[] | null>(null);
   const [cacheLoaded, setCacheLoaded] = useState(false);
 
   useEffect(() => {
@@ -92,8 +68,7 @@ export default function AppSwitcher() {
     execute: !!visibleRunningApps,
   });
 
-  const { data: excludedApps, isLoading: excludeLoading } =
-    usePromise(getExcludedApps);
+  const { data: excludedApps, isLoading: excludeLoading } = usePromise(getExcludedApps);
 
   const enrichedApps = useMemo((): RunningApp[] | null => {
     if (!visibleRunningApps) return null;
@@ -183,9 +158,7 @@ export default function AppSwitcher() {
   if (viewMode === "list") {
     return (
       <List
-        isLoading={
-          !visibleRunningApps && (appsLoading || !cacheLoaded || excludeLoading)
-        }
+        isLoading={!visibleRunningApps && (appsLoading || !cacheLoaded || excludeLoading)}
         searchBarPlaceholder="Filter apps..."
         filtering={{ keepSectionOrder: true }}
       >
@@ -194,9 +167,7 @@ export default function AppSwitcher() {
             {activeItems.map((item) => (
               <List.Item
                 key={item.id}
-                icon={
-                  item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow
-                }
+                icon={item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow}
                 title={item.windowTitle || item.appName}
                 subtitle={item.windowTitle ? item.appName : undefined}
                 keywords={[item.appName, item.windowTitle ?? "", item.bundleId]}
@@ -211,9 +182,7 @@ export default function AppSwitcher() {
             {minimizedItems.map((item) => (
               <List.Item
                 key={item.id}
-                icon={
-                  item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow
-                }
+                icon={item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow}
                 title={item.windowTitle || item.appName}
                 subtitle={item.windowTitle ? item.appName : undefined}
                 keywords={[item.appName, item.windowTitle ?? "", item.bundleId]}
@@ -228,9 +197,7 @@ export default function AppSwitcher() {
             {noWindowItems.map((item) => (
               <List.Item
                 key={item.id}
-                icon={
-                  item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow
-                }
+                icon={item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow}
                 title={item.appName}
                 keywords={[item.appName, item.bundleId]}
                 actions={<AppActions item={item} revalidate={revalidate} />}
@@ -247,9 +214,7 @@ export default function AppSwitcher() {
       columns={toGridColumns(iconSize)}
       inset={Grid.Inset.Small}
       itemSize={toGridItemSize(iconSize)}
-      isLoading={
-        !visibleRunningApps && (appsLoading || !cacheLoaded || excludeLoading)
-      }
+      isLoading={!visibleRunningApps && (appsLoading || !cacheLoaded || excludeLoading)}
       searchBarPlaceholder="Filter apps..."
       filtering={{ keepSectionOrder: true }}
     >
@@ -258,9 +223,7 @@ export default function AppSwitcher() {
           {activeItems.map((item) => (
             <Grid.Item
               key={item.id}
-              content={
-                item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow
-              }
+              content={item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow}
               title={item.windowTitle || item.appName}
               subtitle={item.windowTitle ? item.appName : undefined}
               keywords={[item.appName, item.windowTitle ?? "", item.bundleId]}
@@ -275,9 +238,7 @@ export default function AppSwitcher() {
           {minimizedItems.map((item) => (
             <Grid.Item
               key={item.id}
-              content={
-                item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow
-              }
+              content={item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow}
               title={item.windowTitle || item.appName}
               subtitle={item.windowTitle ? item.appName : undefined}
               keywords={[item.appName, item.windowTitle ?? "", item.bundleId]}
@@ -292,9 +253,7 @@ export default function AppSwitcher() {
           {noWindowItems.map((item) => (
             <Grid.Item
               key={item.id}
-              content={
-                item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow
-              }
+              content={item.appPath ? { fileIcon: item.appPath } : Icon.AppWindow}
               title={item.appName}
               keywords={[item.appName, item.bundleId]}
               actions={<AppActions item={item} revalidate={revalidate} />}

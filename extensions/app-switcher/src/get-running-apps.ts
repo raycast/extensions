@@ -78,9 +78,7 @@ interface RunningAppsCacheEntry {
   apps: RunningApp[];
 }
 
-function isRunningAppsCacheEntry(
-  value: unknown,
-): value is RunningAppsCacheEntry {
+function isRunningAppsCacheEntry(value: unknown): value is RunningAppsCacheEntry {
   return (
     typeof value === "object" &&
     value !== null &&
