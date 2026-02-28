@@ -1,15 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { getUrlDomains, getTextDomains, getFileDomains } from "./api";
 
-export interface Preferences {
-  apiKey: string;
-  baseUrl?: string;
-  defaultUrlDomain?: string;
-  defaultTextDomain?: string;
-  defaultFileDomain?: string;
-}
-
-export function getPrefs(): Preferences {
+export function getPrefs() {
   return getPreferenceValues<Preferences>();
 }
 

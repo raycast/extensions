@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-  baseUrl?: string;
-}
-
 function getConfig() {
   const { apiKey, baseUrl } = getPreferenceValues<Preferences>();
   return {
