@@ -36,7 +36,7 @@
           "title": "Default Action",
           "data": [
             {
-              "title": "Preview",
+              "title": "Read Document",
               "value": "preview"
             },
             {
@@ -58,42 +58,42 @@
               "value": "en-US"
             },
             {
-              "title": "Espanol",
+              "title": "Español",
               "value": "es"
             },
             {
-              "title": "Francais",
+              "title": "Français",
               "value": "fr"
             },
             {
-              "title": "Japanese",
+              "title": "日本語",
               "value": "ja"
             },
             {
-              "title": "Korean",
+              "title": "한국어",
               "value": "ko"
             },
             {
-              "title": "Portuguese (Brazil)",
+              "title": "Português (Brasil)",
               "value": "pt-BR"
             },
             {
-              "title": "Russian",
+              "title": "Русский",
               "value": "ru"
             },
             {
-              "title": "Chinese (Simplified)",
+              "title": "简体中文",
               "value": "zh-CN"
             },
             {
-              "title": "Chinese (Traditional)",
+              "title": "繁體中文",
               "value": "zh-TW"
             }
           ],
           "required": false,
           "default": "en-US",
           "name": "language",
-          "description": "Language used for MDN search index"
+          "description": "Language used for MDN search results"
         }
       ]
     }
@@ -101,8 +101,7 @@
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.16.0",
-    "gray-matter": "^4.0.3",
-    "node-fetch": "^3.3.2"
+    "gray-matter": "^4.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

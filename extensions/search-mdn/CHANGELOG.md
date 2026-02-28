@@ -1,9 +1,9 @@
 # Changelog
 
-## Updated - 2026-02-28
+## Updated - {PR_MERGE_DATE}
 
 - icons to better differentiate js, html, css, svg, http, ... features from MDN guides / tutorials
-- metadata about browser compatibility using the *baseline* nomenclature, and granular browser support data
+- metadata about browser compatibility using the _baseline_ nomenclature, and granular browser support data
 - a new option to set the default action: "read document" (current) or "open in browser"
 
 ## Updated - 2024-09-06
@@ -23,13 +23,13 @@
 
 - Updated dependencies
 - Moved fetching to hooks, remove axios
-- Proper formatting of pages, removing ``{{<snippets>}}``
+- Proper formatting of pages, removing `{{<snippets>}}`
 - Fixing inline links & images
 
 ## Updated - 2022-12-18
 
 - Sync latest locale list with [MDN Web Docs Localization
-](https://developer.mozilla.org/en-US/docs/MDN/Community/Contributing/Translated_content)
+  ](https://developer.mozilla.org/en-US/docs/MDN/Community/Contributing/Translated_content)
 
 ## Updated - 2022-10-05
 

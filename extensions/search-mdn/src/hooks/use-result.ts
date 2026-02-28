@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { escape, unescape } from "node:querystring";
 import { URL } from "node:url";
 import { useMemo, useRef } from "react";

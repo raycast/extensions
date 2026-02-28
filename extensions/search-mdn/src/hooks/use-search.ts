@@ -1,97 +1,101 @@
-import { useMemo } from "react";
+import { URL } from "node:url";
+import { useRef } from "react";
 
 import { useCachedPromise } from "@raycast/utils";
 
-import { buildResultSummary, getMdnKind, toAbsoluteMdnUrl, toMdnPath } from "@/lib/mdn";
-import { fetchSearchIndex } from "@/lib/search-index";
-import type { MdnSearchIndexItem, Result } from "@/types";
+import { getMdnKind, toAbsoluteMdnUrl, toMdnPath } from "@/lib/mdn";
+import type { Result } from "@/types";
 
-const MAX_RESULTS = 200;
+type MdnSearchDocument = {
+  mdn_url?: string;
+  title?: string;
+  summary?: string;
+};
 
-function scoreResult(item: MdnSearchIndexItem, query: string): number {
-  const normalizedQuery = query.trim().toLowerCase();
-  if (!normalizedQuery) {
-    return 0;
+type MdnSearchResponse = {
+  documents?: MdnSearchDocument[];
+};
+
+const SEARCH_API_URL = "https://developer.mozilla.org/api/v1/search";
+
+function buildSearchUrl(query: string, locale: string): string | undefined {
+  if (!query) {
+    return undefined;
   }
 
-  const title = item.title.toLowerCase();
-
-  let score = 0;
-
-  if (title === normalizedQuery) {
-    score += 280;
-  } else if (title.startsWith(normalizedQuery)) {
-    score += 180;
-  } else if (title.includes(normalizedQuery)) {
-    score += 120;
-  } else {
-    const url = item.url.toLowerCase();
-    if (url.includes(normalizedQuery)) {
-      score += 90;
-    } else {
-      const terms = normalizedQuery.split(/\s+/).filter(Boolean);
-      for (const term of terms) {
-        if (title.includes(term)) {
-          score += 35;
-        }
-        if (url.includes(term)) {
-          score += 20;
-        }
-      }
-    }
-  }
-
-  return score;
+  const url = new URL(SEARCH_API_URL);
+  url.searchParams.set("q", query);
+  url.searchParams.set("sort", "best");
+  url.searchParams.set("locale", locale);
+  return url.toString();
 }
 
-function buildResult(item: MdnSearchIndexItem): Result {
-  const path = toMdnPath(item.url);
+function buildResult(document: MdnSearchDocument): Result | undefined {
+  if (typeof document.title !== "string" || typeof document.mdn_url !== "string") {
+    return undefined;
+  }
+
+  const title = document.title.trim();
+  if (!title) {
+    return undefined;
+  }
+
+  const path = toMdnPath(document.mdn_url);
+  const summary =
+    typeof document.summary === "string" && document.summary.trim().length > 0 ? document.summary.trim() : undefined;
 
   return {
     id: path,
-    title: item.title,
+    title,
     url: toAbsoluteMdnUrl(path),
     path,
-    summary: buildResultSummary(path),
+    summary,
     kind: getMdnKind(path),
   };
 }
 
-function rankAndFilter(index: MdnSearchIndexItem[], query: string): Result[] {
-  const trimmedQuery = query.trim();
-
-  if (!trimmedQuery) {
-    return index.slice(0, MAX_RESULTS).map((item) => buildResult(item));
-  }
-
-  return index
-    .map((item) => ({ item, score: scoreResult(item, trimmedQuery) }))
-    .filter((candidate) => candidate.score > 0)
-    .sort((a, b) => {
-      if (a.score !== b.score) {
-        return b.score - a.score;
-      }
-
-      return a.item.title.localeCompare(b.item.title);
-    })
-    .slice(0, MAX_RESULTS)
-    .map((candidate) => buildResult(candidate.item));
-}
-
 export const useSearch = (query: string, locale: string) => {
+  const abortable = useRef<AbortController>();
+  const searchUrl = buildSearchUrl(query.trim(), locale);
+
   const {
-    data: index,
+    data: results,
     isLoading,
     revalidate,
     error,
-  } = useCachedPromise(fetchSearchIndex, [locale], {
-    keepPreviousData: true,
-    failureToastOptions: { title: "Could not load MDN search index" },
-  });
+  } = useCachedPromise(
+    async (url: string | undefined) => {
+      if (!url) {
+        return [];
+      }
 
-  const data = useMemo(() => {
-    return rankAndFilter(index ?? [], query);
-  }, [index, query]);
+      const response = await fetch(url, { signal: abortable.current?.signal });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} ${response.statusText}`);
+      }
 
-  return { isLoading, data, revalidate, error };
+      const payload = (await response.json()) as MdnSearchResponse;
+      const documents = Array.isArray(payload.documents) ? payload.documents : [];
+      const mapped: Result[] = [];
+
+      for (const document of documents) {
+        const result = buildResult(document);
+        if (result) {
+          mapped.push(result);
+        }
+      }
+
+      return mapped;
+    },
+    [searchUrl],
+    {
+      keepPreviousData: true,
+      abortable,
+      failureToastOptions: { title: "Could not load MDN results" },
+    },
+  );
+
+  const data = searchUrl ? results ?? [] : [];
+
+  return { isLoading: Boolean(searchUrl) && isLoading, data, revalidate, error };
 };

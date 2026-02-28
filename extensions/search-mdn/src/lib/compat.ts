@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 import { Cache, Icon } from "@raycast/api";
 
 import { MDN_BASE_URL, toMdnPath } from "@/lib/mdn";
