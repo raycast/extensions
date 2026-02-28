@@ -68,18 +68,6 @@ function getMetadata(result: Result, compat: CompatMatch | null | undefined) {
 }
 
 function ResultItemComponent({ result, locale, preferredAction, compat, onReloadSearchIndex }: ResultItemProps) {
-  const previewAction = (
-    <Action.Push
-      key="preview"
-      icon={Icon.Document}
-      title="Preview"
-      target={<Details result={result} locale={locale} />}
-    />
-  );
-
-  const openAction = <Action.OpenInBrowser key="open" title="Open in Browser" url={result.url} />;
-  const orderedPrimaryActions = preferredAction === "open" ? [openAction, previewAction] : [previewAction, openAction];
-
   return (
     <List.Item
       id={result.id}
@@ -88,7 +76,25 @@ function ResultItemComponent({ result, locale, preferredAction, compat, onReload
       detail={<List.Item.Detail metadata={getMetadata(result, compat)} />}
       actions={
         <ActionPanel>
-          {orderedPrimaryActions}
+          {preferredAction === "open" ? (
+            <>
+              <Action.OpenInBrowser title="Open in Browser" url={result.url} />
+              <Action.Push
+                icon={Icon.Document}
+                title="Read Document"
+                target={<Details result={result} locale={locale} />}
+              />
+            </>
+          ) : (
+            <>
+              <Action.Push
+                icon={Icon.Document}
+                title="Read Document"
+                target={<Details result={result} locale={locale} />}
+              />
+              <Action.OpenInBrowser title="Open in Browser" url={result.url} />
+            </>
+          )}
           <Action.CopyToClipboard title="Copy URL" content={result.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
           <Action
             title="Reload Search Index"
