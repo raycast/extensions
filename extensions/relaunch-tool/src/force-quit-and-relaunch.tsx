@@ -19,16 +19,16 @@ const LAST_APP_NAME_KEY = "last-app-name";
 const WINDOWS_EXECUTABLE_SUFFIX = /\.exe$/i;
 
 type FormValues = {
-  appName: string;
+  runningApp: string;
+};
+
+type LsAppInfoEntry = {
+  asn: string;
+  name: string;
 };
 
 async function runCommand(command: string, args: string[]): Promise<void> {
   await execFileAsync(command, args);
-}
-
-async function runAppleScript(script: string): Promise<string> {
-  const { stdout } = await execFileAsync("osascript", ["-e", script]);
-  return stdout;
 }
 
 async function runPowerShell(script: string): Promise<string> {
@@ -64,6 +64,92 @@ function toWindowsExecutableName(appName: string): string {
     : `${processName}.exe`;
 }
 
+function toMacOSProcessNameCandidates(appName: string): string[] {
+  const trimmed = appName.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const withoutBundleSuffix = trimmed.replace(/\.app$/i, "");
+  const candidates = new Set<string>();
+  candidates.add(withoutBundleSuffix);
+  candidates.add(withoutBundleSuffix.replace(/_/g, " "));
+
+  return [...candidates]
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+}
+
+function toMacOSBundleName(appName: string): string {
+  const primaryCandidate = toMacOSProcessNameCandidates(appName)[0];
+  if (!primaryCandidate) {
+    return "";
+  }
+
+  return `${primaryCandidate}.app`;
+}
+
+function parseLsappinfoVisibleProcessList(output: string): LsAppInfoEntry[] {
+  const entries: LsAppInfoEntry[] = [];
+  const pattern = /ASN:([^:]+)-"([^"]+)":/g;
+  let match = pattern.exec(output);
+
+  while (match) {
+    const asn = match[1]?.trim();
+    const name = match[2]?.trim();
+
+    if (asn && name) {
+      entries.push({ asn, name });
+    }
+
+    match = pattern.exec(output);
+  }
+
+  return entries;
+}
+
+async function resolveMacOSCanonicalAppName(
+  appName: string,
+): Promise<string | undefined> {
+  const trimmed = appName.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    const { stdout } = await execFileAsync("lsappinfo", ["visibleprocesslist"]);
+    const entries = parseLsappinfoVisibleProcessList(stdout);
+    const normalizedTargets = new Set(
+      [trimmed, trimmed.replace(/_/g, " "), trimmed.replace(/ /g, "_")].map(
+        (value) => value.trim().toLowerCase(),
+      ),
+    );
+    const matchedEntry = entries.find((entry) =>
+      normalizedTargets.has(entry.name.trim().toLowerCase()),
+    );
+    if (!matchedEntry) {
+      return undefined;
+    }
+
+    const { stdout: info } = await execFileAsync("lsappinfo", [
+      "info",
+      "-only",
+      "bundlepath",
+      `ASN:${matchedEntry.asn}`,
+    ]);
+    const bundlePathMatch = info.match(/"LSBundlePath"="([^"]+)"/);
+    const bundlePath = bundlePathMatch?.[1]?.trim();
+    if (!bundlePath) {
+      return undefined;
+    }
+
+    const bundleName = path.basename(bundlePath, ".app").trim();
+    return bundleName.length > 0 ? bundleName : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function findCaseInsensitiveMatch(
   target: string,
   candidates: string[],
@@ -79,22 +165,21 @@ function findCaseInsensitiveMatch(
 }
 
 async function isAppRunningMacOS(appName: string): Promise<boolean> {
-  const script = `
-tell application "System Events"
-  set targetName to ${JSON.stringify(appName)}
-  repeat with processRef in application processes
-    try
-      if name of processRef is targetName then
-        return true
-      end if
-    end try
-  end repeat
-end tell
+  const targets = toMacOSProcessNameCandidates(appName);
+  if (targets.length === 0) {
+    return false;
+  }
 
-return false
-  `.trim();
-  const stdout = await runAppleScript(script);
-  return stdout.trim().toLowerCase() === "true";
+  for (const target of targets) {
+    try {
+      await execFileAsync("pgrep", ["-ix", target]);
+      return true;
+    } catch {
+      continue;
+    }
+  }
+
+  return false;
 }
 
 async function isAppRunningWindows(appName: string): Promise<boolean> {
@@ -150,11 +235,32 @@ async function getRunningAppNames(): Promise<string[]> {
 }
 
 async function forceQuitAppMacOS(appName: string): Promise<void> {
-  try {
-    await runCommand("pkill", ["-x", appName]);
-    return;
-  } catch {
-    await runCommand("killall", ["-9", appName]);
+  const targets = toMacOSProcessNameCandidates(appName);
+  if (targets.length === 0) {
+    throw new Error("App name is required");
+  }
+
+  const pids = new Set<string>();
+  for (const target of targets) {
+    try {
+      const { stdout } = await execFileAsync("pgrep", ["-ix", target]);
+      for (const pid of stdout
+        .split(/\r?\n/)
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0)) {
+        pids.add(pid);
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  if (pids.size === 0) {
+    throw new Error(`No running process found for ${appName}`);
+  }
+
+  for (const pid of pids) {
+    await runCommand("kill", ["-9", pid]);
   }
 }
 
@@ -201,7 +307,12 @@ async function launchApp(
   executablePath?: string,
 ): Promise<void> {
   if (process.platform === "darwin") {
-    await runCommand("open", ["-a", appName]);
+    const bundleName = toMacOSBundleName(appName);
+    if (!bundleName) {
+      throw new Error("App name is required");
+    }
+
+    await runCommand("open", ["-a", bundleName]);
     return;
   }
 
@@ -280,22 +391,22 @@ function getRunningAppsLoadFailureMessage(error: unknown): string {
     text.includes("not authorized to send apple events") ||
     text.includes("(-1743)")
   ) {
-    return "Grant Automation permission for Raycast to control System Events in macOS Settings > Privacy & Security > Automation, then run again.";
+    return "Grant Automation permission for Raycast in macOS Settings > Privacy & Security > Automation, then run again.";
   }
 
   if (text.includes("invalid index") || text.includes("(-1719)")) {
     return "System Events changed while reading processes. Try running the command again.";
   }
 
-  return "Failed to read running apps from System Events. If this keeps happening, check Raycast Automation permission for System Events.";
+  return "Failed to read running apps on macOS. Try running the command again.";
 }
 
 export default function Command() {
   const { stopTimeoutMs } =
     getPreferenceValues<Preferences.ForceQuitAndRelaunch>();
-  const [appName, setAppName] = useState<string>("");
   const [runningApps, setRunningApps] = useState<string[]>([]);
   const [selectedRunningApp, setSelectedRunningApp] = useState<string>("");
+  const [storedAppName, setStoredAppName] = useState<string>("");
 
   useEffect(() => {
     let isMounted = true;
@@ -309,7 +420,7 @@ export default function Command() {
         typeof storedAppName === "string" &&
         storedAppName.trim().length > 0
       ) {
-        setAppName(storedAppName.trim());
+        setStoredAppName(storedAppName.trim());
       }
     }
 
@@ -351,62 +462,84 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    if (!appName) {
+    if (runningApps.length === 0) {
       setSelectedRunningApp("");
       return;
     }
 
-    const directMatch = findCaseInsensitiveMatch(appName, runningApps);
-    if (directMatch) {
-      setSelectedRunningApp(directMatch);
+    const currentMatch = findCaseInsensitiveMatch(
+      selectedRunningApp,
+      runningApps,
+    );
+    if (currentMatch) {
+      if (currentMatch !== selectedRunningApp) {
+        setSelectedRunningApp(currentMatch);
+      }
       return;
     }
 
-    if (process.platform === "win32") {
-      const processName = toWindowsProcessName(appName);
-      const processMatch = findCaseInsensitiveMatch(processName, runningApps);
-      if (processMatch) {
-        setSelectedRunningApp(processMatch);
+    if (storedAppName) {
+      const directMatch = findCaseInsensitiveMatch(storedAppName, runningApps);
+      if (directMatch) {
+        setSelectedRunningApp(directMatch);
         return;
+      }
+
+      if (process.platform === "win32") {
+        const processName = toWindowsProcessName(storedAppName);
+        const processMatch = findCaseInsensitiveMatch(processName, runningApps);
+        if (processMatch) {
+          setSelectedRunningApp(processMatch);
+          return;
+        }
       }
     }
 
-    setSelectedRunningApp("");
-  }, [appName, runningApps]);
+    setSelectedRunningApp(runningApps[0] ?? "");
+  }, [runningApps, selectedRunningApp, storedAppName]);
 
   async function onSubmit(values: FormValues): Promise<void> {
-    const appName = values.appName.trim();
-    if (!appName) {
+    const selectedAppName = values.runningApp.trim();
+    if (!selectedAppName) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "App name is required",
+        title: "Running app is required",
       });
       return;
     }
 
-    await LocalStorage.setItem(LAST_APP_NAME_KEY, appName);
+    await LocalStorage.setItem(LAST_APP_NAME_KEY, selectedAppName);
+
+    const processTargetName = selectedAppName;
+    let launchTargetName = selectedAppName;
+    if (process.platform === "darwin") {
+      const canonicalName = await resolveMacOSCanonicalAppName(selectedAppName);
+      if (canonicalName) {
+        launchTargetName = canonicalName;
+      }
+    }
 
     const timeoutMs = parseTimeout(stopTimeoutMs);
     const progressToast = await showToast({
       style: Toast.Style.Animated,
-      title: `Restarting ${appName}`,
+      title: `Restarting ${selectedAppName}`,
     });
 
     try {
       let executablePath: string | undefined;
-      const runningBeforeQuit = await isAppRunning(appName);
+      const runningBeforeQuit = await isAppRunning(processTargetName);
       if (runningBeforeQuit) {
         if (process.platform === "win32") {
-          executablePath = await getWindowsExecutablePath(appName);
+          executablePath = await getWindowsExecutablePath(processTargetName);
         }
 
-        await forceQuitApp(appName);
-        await waitForStop(appName, timeoutMs);
+        await forceQuitApp(processTargetName);
+        await waitForStop(processTargetName, timeoutMs);
       }
 
-      await launchApp(appName, executablePath);
+      await launchApp(launchTargetName, executablePath);
       progressToast.style = Toast.Style.Success;
-      progressToast.title = `${appName} restarted`;
+      progressToast.title = `${selectedAppName} restarted`;
       progressToast.message = undefined;
     } catch (error) {
       progressToast.style = Toast.Style.Failure;
@@ -415,30 +548,8 @@ export default function Command() {
     }
   }
 
-  function onAppNameChange(value: string): void {
-    setAppName(value);
-
-    const directMatch = findCaseInsensitiveMatch(value, runningApps);
-    if (directMatch) {
-      setSelectedRunningApp(directMatch);
-      return;
-    }
-
-    if (process.platform === "win32") {
-      const processName = toWindowsProcessName(value);
-      const processMatch = findCaseInsensitiveMatch(processName, runningApps);
-      if (processMatch) {
-        setSelectedRunningApp(processMatch);
-        return;
-      }
-    }
-
-    setSelectedRunningApp("");
-  }
-
   function onRunningAppChange(value: string): void {
     setSelectedRunningApp(value);
-    setAppName(value);
   }
 
   return (
@@ -452,20 +563,8 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="appName"
-        title="App Name"
-        placeholder={
-          process.platform === "win32"
-            ? "notepad or notepad.exe"
-            : "Google Chrome"
-        }
-        autoFocus
-        value={appName}
-        onChange={onAppNameChange}
-      />
       <Form.Dropdown
-        id="runningApps"
+        id="runningApp"
         title="Running Apps"
         value={selectedRunningApp}
         onChange={onRunningAppChange}
