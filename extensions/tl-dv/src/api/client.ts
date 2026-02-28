@@ -1,14 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 import { ApiResponse, Recording, SearchParams, PaginatedResponse, SearchResult } from "../types";
 import { getMockRecordings, searchMockRecordings } from "../utils/mockData";
 import { API_CONSTANTS, ERROR_MESSAGES } from "../constants";
 import { validateApiResponse } from "../utils/validation";
-
-interface Preferences {
-  apiKey: string;
-  useMockData?: boolean;
-}
 
 class TldvApiClient {
   private apiKey: string;
