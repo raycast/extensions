@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "portfolio-tracker",
+  "title": "Portfolio Tracker",
+  "description": "Track value of your Stocks, ETFs, Properties, Cash, Debt and Crypto with automatic price updates over time to see your net worth",
+  "icon": "extension-icon.png",
+  "author": "filipawaits",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "portfolio",
+      "title": "Portfolio Tracker",
+      "description": "Track your investment portfolio and net worth across multiple accounts",
+      "mode": "view"
+    },
+    {
+      "name": "search-investments",
+      "title": "Search Investments",
+      "subtitle": "Portfolio Tracker",
+      "description": "Search for stocks ETFs, and funds to add to your portfolio",
+      "mode": "view"
+    },
+    {
+      "name": "fire",
+      "title": "FIRE Dashboard",
+      "subtitle": "Portfolio Tracker",
+      "description": "Financial Independence, Retire Early — track your progress to financial freedom",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseCurrency",
+      "type": "dropdown",
+      "required": true,
+      "title": "Base Currency",
+      "description": "Currency used to display total portfolio value. All holdings will be converted to this currency.",
+      "default": "GBP",
+      "data": [
+        {
+          "title": "GBP (£)",
+          "value": "GBP"
+        },
+        {
+          "title": "USD ($)",
+          "value": "USD"
+        },
+        {
+          "title": "EUR (€)",
+          "value": "EUR"
+        },
+        {
+          "title": "CHF (Fr)",
+          "value": "CHF"
+        },
+        {
+          "title": "JPY (¥)",
+          "value": "JPY"
+        },
+        {
+          "title": "CAD (C$)",
+          "value": "CAD"
+        },
+        {
+          "title": "AUD (A$)",
+          "value": "AUD"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^1.17.0",
+    "yahoo-finance2": "^3.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.4",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "lint:eslint": "eslint src/",
+    "lint:prettier": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --verbose",
+    "test:watch": "jest --watch",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
