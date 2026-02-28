@@ -128,13 +128,15 @@ export default function AppSwitcher() {
       const multiWindow = app.windows.length > 1;
 
       for (const win of app.windows) {
+        const windowIdentity = win.windowNumber ?? `idx${win.index}`;
         const item: AppGridItem = {
-          id: `${app.bundleId}-w${win.index}`,
+          id: `${app.bundleId}-w${windowIdentity}`,
           appName: app.name,
           bundleId: app.bundleId,
           appPath: app.appPath,
           windowTitle: multiWindow ? win.title || app.name : undefined,
           windowIndex: win.index,
+          windowNumber: win.windowNumber,
           minimized: win.minimized,
           hasWindows: true,
           frontmost: app.frontmost && !win.minimized,

@@ -11,19 +11,46 @@ async function switchToWindow(item: AppGridItem) {
   const name = escapeAS(item.appName);
   if (item.hasWindows && item.windowIndex >= 0) {
     const winIdx = item.windowIndex + 1; // AppleScript is 1-based
+    const title = escapeAS(item.windowTitle ?? "");
+    const windowNumber = item.windowNumber ?? -1;
     await runAppleScript(`
       tell application "System Events"
         tell process "${name}"
-          set frontmost to true
-          try
-            set value of attribute "AXMinimized" of window ${winIdx} to false
-          end try
-          try
-            perform action "AXRaise" of window ${winIdx}
-          end try
+          set targetWindow to missing value
+          if ${windowNumber} is not -1 then
+            try
+              set targetWindow to first window whose value of attribute "AXWindowNumber" is ${windowNumber}
+            end try
+          end if
+          if targetWindow is missing value and "${title}" is not "" then
+            try
+              set targetWindow to first window whose name is "${title}"
+            end try
+          end if
+          if targetWindow is missing value then
+            try
+              set targetWindow to window ${winIdx}
+            end try
+          end if
+          if targetWindow is not missing value then
+            try
+              set value of attribute "AXMinimized" of targetWindow to false
+            end try
+            set frontmost to true
+            try
+              set value of attribute "AXMain" of targetWindow to true
+            end try
+            try
+              set value of attribute "AXFocused" of targetWindow to true
+            end try
+            try
+              perform action "AXRaise" of targetWindow
+            end try
+          else
+            set frontmost to true
+          end if
         end tell
       end tell
-      tell application "${name}" to activate
     `);
   } else {
     await runAppleScript(`
@@ -46,14 +73,30 @@ async function switchToWindow(item: AppGridItem) {
 async function closeWindow(item: AppGridItem) {
   const name = escapeAS(item.appName);
   const winIdx = item.windowIndex + 1;
+  const windowNumber = item.windowNumber ?? -1;
   await runAppleScript(`
     tell application "System Events"
       tell process "${name}"
+        set targetWindow to missing value
+        if ${windowNumber} is not -1 then
+          try
+            set targetWindow to first window whose value of attribute "AXWindowNumber" is ${windowNumber}
+          end try
+        end if
+        if targetWindow is missing value then
+          try
+            set targetWindow to window ${winIdx}
+          end try
+        end if
         try
-          perform action "AXPress" of button 1 of window ${winIdx}
+          if targetWindow is not missing value then
+            perform action "AXPress" of button 1 of targetWindow
+          end if
         on error
           set frontmost to true
-          perform action "AXRaise" of window ${winIdx}
+          if targetWindow is not missing value then
+            perform action "AXRaise" of targetWindow
+          end if
           delay 0.1
           keystroke "w" using command down
         end try
@@ -65,10 +108,24 @@ async function closeWindow(item: AppGridItem) {
 async function minimizeWindow(item: AppGridItem) {
   const name = escapeAS(item.appName);
   const winIdx = item.windowIndex + 1;
+  const windowNumber = item.windowNumber ?? -1;
   await runAppleScript(`
     tell application "System Events"
       tell process "${name}"
-        set value of attribute "AXMinimized" of window ${winIdx} to true
+        set targetWindow to missing value
+        if ${windowNumber} is not -1 then
+          try
+            set targetWindow to first window whose value of attribute "AXWindowNumber" is ${windowNumber}
+          end try
+        end if
+        if targetWindow is missing value then
+          try
+            set targetWindow to window ${winIdx}
+          end try
+        end if
+        if targetWindow is not missing value then
+          set value of attribute "AXMinimized" of targetWindow to true
+        end if
       end tell
     end tell
   `);

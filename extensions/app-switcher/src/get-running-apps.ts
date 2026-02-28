@@ -2,7 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { RunningApp } from "./types";
 
-// Batch app properties + window names + resolve paths via NSWorkspace.
+// Batch app properties + per-window metadata + resolve paths via NSWorkspace.
 // Skips AXMinimized (expensive) -- phase 2 handles that in background.
 const FAST_SCRIPT = `(() => {
   ObjC.import("AppKit");
@@ -14,9 +14,6 @@ const FAST_SCRIPT = `(() => {
   var frontmosts = procs.frontmost();
   var count = names.length;
 
-  var allWinNames = null;
-  try { allWinNames = procs.windows.name(); } catch(e) {}
-
   var results = [];
   for (var i = 0; i < count; i++) {
     if (!bundleIds[i]) continue;
@@ -27,15 +24,21 @@ const FAST_SCRIPT = `(() => {
       if (url && url.path) path = ObjC.unwrap(url.path);
     } catch(e) {}
 
-    var wn;
-    if (allWinNames !== null) {
-      wn = allWinNames[i] || [];
-    } else {
-      try { wn = procs[i].windows.name(); } catch(e) { wn = []; }
-    }
+    var procWindows = [];
+    try { procWindows = procs[i].windows(); } catch(e) {}
     var windows = [];
-    for (var j = 0; j < wn.length; j++) {
-      windows.push({ title: wn[j] || "", minimized: false, index: j });
+    for (var j = 0; j < procWindows.length; j++) {
+      var win = procWindows[j];
+      var title = "";
+      var num = undefined;
+      try { title = win.name() || ""; } catch(e) {}
+      try { num = win.attributes.byName("AXWindowNumber").value(); } catch(e) {}
+      windows.push({
+        title: title,
+        minimized: false,
+        index: j,
+        windowNumber: typeof num === "number" ? num : undefined
+      });
     }
     results.push({
       name: names[i],
