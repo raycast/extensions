@@ -3,6 +3,7 @@
 ## [1.3.5] - {PR_MERGE_DATE}
 
 - fix: View Events now shows a separate row for each event on the same date (e.g. Mother's Day + Rằm). Dates with multiple events (solar + lunar, or multiple solar) no longer collapse to a single row.
+- feat: Add Windows to supported platforms (Raycast for Windows).
 
 ## [1.3.4] - 2026-02-28
 
