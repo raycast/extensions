@@ -55,7 +55,7 @@ function imagePathsForItemsInSelection(selection) {
 	for (const filePath of selection) {
 		const fileExtension = filePath.slice(filePath.lastIndexOf('.') + 1).toLowerCase();
 		if (supportedTypes[fileExtension]) {
-			imagePaths.push(filePath);
+			imagePaths.push(decodeURI(filePath));
 		}
 	}
 	return imagePaths;
@@ -63,8 +63,26 @@ function imagePathsForItemsInSelection(selection) {
 
 function run() {
 	let imagePaths = [];
+
+	const se = Application('System Events');
+	const qspaceProcesses = se.applicationProcesses.whose({ '_and': [
+		{'name': { '_beginsWith': 'QSpace' }},
+		{'frontmost': true},
+	] })();
+	if (qspaceProcesses.length == 0) {
+		return [];
+	}
+
+
 	try {
-		const qspace = Application('QSpace Pro');
+		let qspace = null;
+		try {
+			qspace = Application(qspaceProcesses[0].name());
+		} catch {
+			console.log('Neither QSpace nor QSpace Pro could be found on the system.')
+			return [];
+		}
+
 		qspace.includeStandardAdditions = true;
 
 		let selection = qspace.selectedItems.urlstr()
