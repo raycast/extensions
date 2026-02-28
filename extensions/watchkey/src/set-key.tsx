@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Toast, popToRoot } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
+import { useInstallGuard } from "./install-guard";
 import { watchkeySet } from "./watchkey";
 
 interface FormValues {
@@ -8,6 +9,8 @@ interface FormValues {
 }
 
 export default function SetKey() {
+  const { installed, installView } = useInstallGuard();
+
   const { handleSubmit, itemProps } = useForm<FormValues>({
     onSubmit: async (values) => {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Storing secret..." });
@@ -27,6 +30,8 @@ export default function SetKey() {
       value: FormValidation.Required,
     },
   });
+
+  if (!installed) return installView;
 
   return (
     <Form

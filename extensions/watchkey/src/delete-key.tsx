@@ -9,6 +9,7 @@ import {
   Alert,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
+import { useInstallGuard } from "./install-guard";
 import { watchkeyDelete } from "./watchkey";
 
 interface FormValues {
@@ -16,6 +17,8 @@ interface FormValues {
 }
 
 export default function DeleteKey() {
+  const { installed, installView } = useInstallGuard();
+
   const { handleSubmit, itemProps } = useForm<FormValues>({
     onSubmit: async (values) => {
       const confirmed = await confirmAlert({
@@ -41,6 +44,8 @@ export default function DeleteKey() {
       service: FormValidation.Required,
     },
   });
+
+  if (!installed) return installView;
 
   return (
     <Form
