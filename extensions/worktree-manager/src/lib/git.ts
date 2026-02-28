@@ -17,6 +17,8 @@ export interface WorktreeItem {
   repoName: string;
   isMain: boolean;
   repoRoot: string;
+  /** Directory mtime for "most recent first" sorting (optional). */
+  lastModifiedMs?: number;
 }
 
 interface RepoInfo {
@@ -160,18 +162,30 @@ export async function getAllWorktrees(roots: string[]): Promise<WorktreeItem[]> 
         const absPath = path.isAbsolute(wt.path) ? wt.path : path.resolve(repo.path, wt.path);
         if (seenPaths.has(absPath)) continue;
         seenPaths.add(absPath);
+        let lastModifiedMs: number | undefined;
+        try {
+          lastModifiedMs = fs.statSync(absPath).mtimeMs;
+        } catch {
+          // path may not exist in edge cases
+        }
         items.push({
           path: absPath,
           branch: wt.branch ?? "(detached)",
           repoName,
           isMain: absPath === mainPath,
           repoRoot: repo.path,
+          lastModifiedMs,
         });
       }
     }
   }
 
-  return items.sort((a, b) => a.path.localeCompare(b.path));
+  return items.sort((a, b) => {
+    const aMs = a.lastModifiedMs ?? 0;
+    const bMs = b.lastModifiedMs ?? 0;
+    if (bMs !== aMs) return bMs - aMs;
+    return a.path.localeCompare(b.path);
+  });
 }
 
 export async function getBranches(repoPath: string): Promise<string[]> {
@@ -336,16 +350,21 @@ export const createWorktreeCancelledError = CANCELLED_ERROR;
 
 const DEFAULT_REMOTE = "origin";
 
-/** Set branch upstream to origin/branch so push works from the worktree (e.g. in Cursor). */
-async function setBranchUpstream(repoPath: string, branch: string, onLog?: (text: string) => void): Promise<void> {
+/** Set branch upstream to origin/branch so push works from the worktree (e.g. in Cursor). Run from worktree dir. */
+async function setBranchUpstream(worktreePath: string, branch: string, onLog?: (text: string) => void): Promise<void> {
+  const opts = { cwd: worktreePath, maxBuffer: 1024 * 1024 };
   try {
-    await execFileAsync("git", ["branch", "--set-upstream-to", `${DEFAULT_REMOTE}/${branch}`, branch], {
-      cwd: repoPath,
-      maxBuffer: 1024 * 1024,
-    });
+    await execFileAsync("git", ["branch", "--set-upstream-to", `${DEFAULT_REMOTE}/${branch}`, branch], opts);
     onLog?.(`Upstream set to ${DEFAULT_REMOTE}/${branch} (push will work from the worktree).\n`);
-  } catch {
-    // No remote or other git config issue; don't fail the whole operation
+  } catch (err: unknown) {
+    try {
+      await execFileAsync("git", ["config", `branch.${branch}.remote`, DEFAULT_REMOTE], opts);
+      await execFileAsync("git", ["config", `branch.${branch}.merge`, `refs/heads/${branch}`], opts);
+      onLog?.(`Upstream set to ${DEFAULT_REMOTE}/${branch} (push will work from the worktree).\n`);
+    } catch {
+      const msg = err instanceof Error ? err.message : String(err);
+      onLog?.(`Note: could not set upstream (${msg}). Run "git push -u origin ${branch}" once in the worktree.\n`);
+    }
   }
 }
 
@@ -383,7 +402,7 @@ export async function createWorktreeFromBase(
     }
     const result = await runGitWorktreeAdd(absRepo, ["-b", branch, absWorktree, startPoint], { onLog, signal });
     if (result.success) {
-      await setBranchUpstream(absRepo, branch, onLog);
+      await setBranchUpstream(absWorktree, branch, onLog);
     }
     return result;
   } catch (err: unknown) {

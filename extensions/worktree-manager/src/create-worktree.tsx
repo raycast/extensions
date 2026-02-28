@@ -72,7 +72,7 @@ export default function Command() {
     revalidate,
   } = useCachedPromise(fetchWorktrees);
 
-  async function handleSubmit(values: { base: string; worktreeName: string }) {
+  async function handleSubmit(values: { base: string; worktreeName: string }, options: { openAfterCreate: boolean }) {
     const basePath = (values.base ?? "").trim();
     const worktreeName = (values.worktreeName ?? "").trim();
     if (!basePath) {
@@ -114,13 +114,18 @@ export default function Command() {
       if (result.success) {
         setCreateSuccess(true);
         toast.style = Toast.Style.Success;
-        toast.title = "Worktree created";
-        toast.primaryAction = {
-          title: "Open in Editor",
-          onAction: () => open(pathToUse, prefs.openWith),
-        };
+        toast.title = options.openAfterCreate ? "Worktree created · Opening…" : "Worktree created";
+        if (!options.openAfterCreate) {
+          toast.primaryAction = {
+            title: "Open in Editor",
+            onAction: () => open(pathToUse, prefs.openWith),
+          };
+        }
         await new Promise((r) => setTimeout(r, 600));
-        await showHUD("Worktree created");
+        await showHUD(options.openAfterCreate ? "Worktree created · Opening…" : "Worktree created");
+        if (options.openAfterCreate) {
+          await open(pathToUse, prefs.openWith);
+        }
       } else if (result.error === createWorktreeCancelledError) {
         setLog((prev) => prev + "\nCancelled by user.\n");
         toast.style = Toast.Style.Failure;
@@ -180,7 +185,22 @@ export default function Command() {
           {isSubmitting ? (
             <Action title="Cancel" icon={Icon.XMarkCircle} onAction={() => abortControllerRef.current?.abort()} />
           ) : (
-            <Action.SubmitForm title="Create Worktree" onSubmit={handleSubmit} icon={Icon.Plus} />
+            <>
+              <Action.SubmitForm
+                title="Create and Open"
+                icon={Icon.ArrowRight}
+                onSubmit={(values: { base: string; worktreeName: string }) =>
+                  handleSubmit(values, { openAfterCreate: true })
+                }
+              />
+              <Action.SubmitForm
+                title="Create Only"
+                icon={Icon.Plus}
+                onSubmit={(values: { base: string; worktreeName: string }) =>
+                  handleSubmit(values, { openAfterCreate: false })
+                }
+              />
+            </>
           )}
         </ActionPanel>
       }
