@@ -5,10 +5,6 @@ import { getRecordingSubtitle, getRecordingAccessories } from "./utils/formatter
 import { Recording } from "./types";
 import { ERROR_MESSAGES, UI_CONSTANTS } from "./constants";
 
-interface Preferences {
-  apiKey: string;
-}
-
 export default function RecentRecordings() {
   const preferences = getPreferenceValues<Preferences>();
   const { recordings, isLoading, error, hasMore, loadMore, refresh } = useTldvData();
