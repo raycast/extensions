@@ -1,5 +1,9 @@
 # CricketCast
 
+## [Add Menu Bar] - {PR_MERGE_DARE}
+
+- Menu Bar grants easy access to latest scores
+
 ## [Modernize + Better Score Error Handling] - 2025-04-14
 
 - If Scores not fetched, extension does not crash
