@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../types/preferences";
 
 let cachedAccessToken: string | undefined;
 
