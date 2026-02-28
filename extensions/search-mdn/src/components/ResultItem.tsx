@@ -1,6 +1,7 @@
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
 import { Details } from "@/components/Details";
 import { getBaselineBadge, getBrowserIcon, getCompat, readCachedCompat } from "@/lib/compat";
@@ -68,37 +69,19 @@ function getMetadata(result: Result, compat: CompatMatch | null | undefined) {
 }
 
 function ResultItemComponent({ result, locale, preferredAction, selected, onReloadSearchResults }: ResultItemProps) {
-  const [compat, setCompat] = useState<CompatMatch | null | undefined>(undefined);
-
-  useEffect(() => {
-    if (!selected || compat !== undefined) {
-      return;
-    }
-
-    const cached = readCachedCompat(result.path);
-    if (cached !== undefined) {
-      setCompat(cached);
-      return;
-    }
-
-    let cancelled = false;
-
-    const run = async () => {
-      const resolved = await getCompat(result.path);
-
-      if (cancelled) {
-        return;
+  const { data: compat } = usePromise(
+    async (path: string) => {
+      const cached = readCachedCompat(path);
+      if (cached !== undefined) {
+        return cached;
       }
 
-      setCompat(resolved ?? null);
-    };
-
-    void run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [compat, result.path, selected]);
+      const resolved = await getCompat(path);
+      return resolved ?? null;
+    },
+    [result.path],
+    { execute: selected },
+  );
 
   return (
     <List.Item
