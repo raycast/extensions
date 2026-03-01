@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
 import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser";
 import { AntigravityError, AntigravityUsage } from "./types";
+import { createSimpleHook } from "../agents/hooks";
 import {
   AntigravityProbeError,
   AntigravityProbeResult,
@@ -102,38 +102,6 @@ export function mapAntigravityError(error: unknown): AntigravityError {
   };
 }
 
-export function useAntigravityUsage() {
-  const [usage, setUsage] = useState<AntigravityUsage | null>(null);
-  const [error, setError] = useState<AntigravityError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    const result = await fetchAntigravityUsage();
-
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasInitialFetch) {
-      fetchData();
-    }
-  }, [hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    await fetchData();
-  }, [fetchData]);
-
-  return {
-    isLoading,
-    usage,
-    error,
-    revalidate,
-  };
-}
+export const useAntigravityUsage = createSimpleHook<AntigravityUsage, AntigravityError>({
+  fetcher: fetchAntigravityUsage,
+});

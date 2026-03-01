@@ -1,29 +1,33 @@
 import { List } from "@raycast/api";
 import { GeminiUsage, GeminiError } from "./types";
-import { renderErrorDetail, renderNoDataDetail, getLoadingAccessory, getNoDataAccessory } from "../agents/ui";
+import type { Accessory } from "../agents/types";
+import {
+  renderErrorOrNoData,
+  formatErrorOrNoData,
+  getLoadingAccessory,
+  getNoDataAccessory,
+  generatePieIcon,
+} from "../agents/ui";
 
 export function formatGeminiUsageText(usage: GeminiUsage | null, error: GeminiError | null): string {
-  if (error) {
-    return `Gemini Usage\nStatus: Error\nType: ${error.type}\nMessage: ${error.message}`;
-  }
-  if (!usage) {
-    return "Gemini Usage\nStatus: No data available";
-  }
+  const fallback = formatErrorOrNoData("Gemini", usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as GeminiUsage;
 
-  let text = `Gemini Usage\nEmail: ${usage.email}\nTier: ${usage.tier}`;
+  let text = `Gemini Usage\nEmail: ${u.email}\nTier: ${u.tier}`;
 
-  if (usage.proModel) {
-    text += `\n\nPro Model: ${usage.proModel.modelId}`;
-    text += `\nRemaining: ${usage.proModel.percentLeft}%`;
-    text += `\nResets In: ${usage.proModel.resetsIn}`;
+  if (u.proModel) {
+    text += `\n\nPro Model: ${u.proModel.modelId}`;
+    text += `\nRemaining: ${u.proModel.percentLeft}%`;
+    text += `\nResets In: ${u.proModel.resetsIn}`;
   } else {
     text += `\n\nPro Model: No quota data`;
   }
 
-  if (usage.flashModel) {
-    text += `\n\nFlash Model: ${usage.flashModel.modelId}`;
-    text += `\nRemaining: ${usage.flashModel.percentLeft}%`;
-    text += `\nResets In: ${usage.flashModel.resetsIn}`;
+  if (u.flashModel) {
+    text += `\n\nFlash Model: ${u.flashModel.modelId}`;
+    text += `\nRemaining: ${u.flashModel.percentLeft}%`;
+    text += `\nResets In: ${u.flashModel.resetsIn}`;
   } else {
     text += `\n\nFlash Model: No quota data`;
   }
@@ -32,25 +36,21 @@ export function formatGeminiUsageText(usage: GeminiUsage | null, error: GeminiEr
 }
 
 export function renderGeminiDetail(usage: GeminiUsage | null, error: GeminiError | null): React.ReactNode {
-  if (error) {
-    return renderErrorDetail(error);
-  }
-
-  if (!usage) {
-    return renderNoDataDetail();
-  }
+  const fallback = renderErrorOrNoData(usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as GeminiUsage;
 
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Email" text={usage.email} />
-      <List.Item.Detail.Metadata.Label title="Tier" text={usage.tier} />
+      <List.Item.Detail.Metadata.Label title="Email" text={u.email} />
+      <List.Item.Detail.Metadata.Label title="Tier" text={u.tier} />
       <List.Item.Detail.Metadata.Separator />
 
-      {usage.proModel ? (
+      {u.proModel ? (
         <>
-          <List.Item.Detail.Metadata.Label title="Pro Model" text={usage.proModel.modelId} />
-          <List.Item.Detail.Metadata.Label title="Remaining" text={`${usage.proModel.percentLeft}%`} />
-          <List.Item.Detail.Metadata.Label title="Resets In" text={usage.proModel.resetsIn} />
+          <List.Item.Detail.Metadata.Label title="Pro Model" text={u.proModel.modelId} />
+          <List.Item.Detail.Metadata.Label title="Remaining" text={`${u.proModel.percentLeft}%`} />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={u.proModel.resetsIn} />
         </>
       ) : (
         <List.Item.Detail.Metadata.Label title="Pro Model" text="No quota data" />
@@ -58,11 +58,11 @@ export function renderGeminiDetail(usage: GeminiUsage | null, error: GeminiError
 
       <List.Item.Detail.Metadata.Separator />
 
-      {usage.flashModel ? (
+      {u.flashModel ? (
         <>
-          <List.Item.Detail.Metadata.Label title="Flash Model" text={usage.flashModel.modelId} />
-          <List.Item.Detail.Metadata.Label title="Remaining" text={`${usage.flashModel.percentLeft}%`} />
-          <List.Item.Detail.Metadata.Label title="Resets In" text={usage.flashModel.resetsIn} />
+          <List.Item.Detail.Metadata.Label title="Flash Model" text={u.flashModel.modelId} />
+          <List.Item.Detail.Metadata.Label title="Remaining" text={`${u.flashModel.percentLeft}%`} />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={u.flashModel.resetsIn} />
         </>
       ) : (
         <List.Item.Detail.Metadata.Label title="Flash Model" text="No quota data" />
@@ -75,7 +75,7 @@ export function getGeminiAccessory(
   usage: GeminiUsage | null,
   error: GeminiError | null,
   isLoading: boolean,
-): { text: string; tooltip?: string } {
+): Accessory {
   if (isLoading) {
     return getLoadingAccessory("Gemini");
   }
@@ -100,11 +100,11 @@ export function getGeminiAccessory(
     return getNoDataAccessory();
   }
 
-  // Show Pro model percentage as primary indicator
   if (usage.proModel) {
     const proPercent = usage.proModel.percentLeft;
     const flashPercent = usage.flashModel?.percentLeft ?? "—";
     return {
+      icon: generatePieIcon(proPercent),
       text: `${proPercent}%`,
       tooltip: `Pro: ${proPercent}% | Flash: ${flashPercent}%`,
     };
@@ -112,6 +112,7 @@ export function getGeminiAccessory(
 
   if (usage.flashModel) {
     return {
+      icon: generatePieIcon(usage.flashModel.percentLeft),
       text: `${usage.flashModel.percentLeft}%`,
       tooltip: `Flash: ${usage.flashModel.percentLeft}%`,
     };

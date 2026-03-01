@@ -61,9 +61,10 @@ async function fetchSkillContent(skill: Skill): Promise<string | undefined> {
 /**
  * Hook to fetch and cache skill content from GitHub
  */
-export function useSkillContent(skill: Skill) {
+export function useSkillContent(skill: Skill, execute = true) {
   const { data: content, isLoading } = useCachedPromise((skill) => fetchSkillContent(skill), [skill], {
     keepPreviousData: true,
+    execute,
   });
 
   return {

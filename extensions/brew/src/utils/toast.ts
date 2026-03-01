@@ -141,6 +141,20 @@ export async function showBrewFailureToast(
 
   // Use a more specific title for lock errors
   const toastTitle = isLockError ? "Brew is Busy" : title;
+  const hasStructuredOutput = Boolean(execError.stderr || execError.stdout);
+  const rawLogOutput = [
+    `${toastTitle}`,
+    `Error type: ${error.name}`,
+    execError.code !== undefined ? `Exit code: ${execError.code}` : undefined,
+    hasStructuredOutput ? undefined : `Message: ${error.message}`,
+    execError.stderr ? `stderr:\n${execError.stderr}` : undefined,
+    execError.stdout ? `stdout:\n${execError.stdout}` : undefined,
+    isLockError
+      ? "Tip: Check Activity Monitor or run 'ps aux | grep brew' in Terminal to see what's running."
+      : undefined,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   const toastOptions: Toast.Options = {
     style: Toast.Style.Failure,
@@ -149,11 +163,7 @@ export async function showBrewFailureToast(
     primaryAction: {
       title: "Copy Logs",
       onAction: () => {
-        // For lock errors, include more context in the copied log
-        const logContent = isLockError
-          ? `${toastTitle}\n${errorMessage}\n\nTip: Check Activity Monitor or run 'ps aux | grep brew' in Terminal to see what's running.`
-          : errorMessage;
-        Clipboard.copy(logContent);
+        Clipboard.copy(rawLogOutput);
       },
     },
   };

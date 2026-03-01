@@ -1,10 +1,17 @@
 # Image Modification Changelog
 
-## [Security Updates] - {PR_MERGE_DATE}
+## [1.11.2 — QSpace Bug Fixes] - 2026-03-01
+
+- Added support for regular QSpace (the Mac App Store version), not just QSpace Pro
+- Fixed failure to operate on clipboard image copies of files with names containing spaces
+- Fixed selection detection in QSpace failing for files with names containing special characters or spaces
+- Fixed commands involving temporary files not working in QSpace
+
+## [Security Updates] - 2026-03-01
 
 - Upgraded `tar` to `7.5.7` to address dependency security advisories.
 
-## [Bug Fixes] - 2025-07-07
+## [1.11.1 — Bug Fixes] - 2025-07-07
 
 - Added support for detecting file selection in ForkLift's List and Icon views
 - Improve performance of "Apply Filter" AI Tool by supplying filter definitions
@@ -14,17 +21,17 @@
 - Fixed selection detection scripts not raising Automation permission dialogs (and thus failing without reason)
 - Fixed ForkLift script not raising Accessibility permission dialog (and thus failing without reason)
 
-## [Bug Fix] - 2025-06-29
+## [1.11.0b — Bug Fix] - 2025-06-29
 
-- Remove `-lossless` flag from `dwebp` command.
+- Removed `-lossless` flag from `dwebp` command
 
-## [Improved Selection Detection] - 2025-05-12
+## [1.11.0 — Improved Selection Detection] - 2025-05-12
 
 - Added full support for QSpace Pro
 - Added experimental support for ForkLift
 - Rewrote file selection detection scripts to improve performance
 
-## [Remove Background] - 2025-02-24
+## [1.9.1 — Remove Background] - 2025-02-24
 
 - Added 'Remove Background' command to remove the background from selected images
 - Added two new metadata images showcases AI Tools and `Remove Background` command
@@ -33,32 +40,32 @@
 - Fixed ExifTool failing to install or not recognizing current install (Resolve #16884)
 - Fixed crash when trying to generate live preview for filters on PDFs (Resolve #16971)
 
-## [✨ AI Enhancements] - 2025-02-21
+## [1.9.0b — ✨ AI Enhancements] - 2025-02-21
 
 - Add AI tool support for all image operations
 
-## [Bug Fixes & New Filters] - 2025-01-30
+## [1.9.0 — Bug Fixes & New Filters] - 2025-01-30
 
 - Improved memory management when previewing filters, reducing the likelihood of out-of-memory errors
 - Added setting to disable live filter previews
 - Added setting to hide specific filters/filter categories from the filter list
 - Added 28 new filters
 
-## [Fix WebP optimization] - 2025-01-29
+## [1.8.3 — Fix WebP optimization] - 2025-01-29
 
 - Fixed the cwebp path being incorrectly set when Optimizing WebP images
 
-## [Fix avifenc Installation] - 2024-09-11
+## [1.8.2 – Fix avifenc Installation] - 2024-09-11
 
 - Fixed an issue where the `avifenc` and `avifdec` binaries were not being installed correctly
 
-## [Lossless Setting & Improved PNG Optimization] - 2024-07-08
+## [1.8.1 – Lossless Setting & Improved PNG Optimization] - 2024-07-08
 
 - Added a "Lossless Conversions" setting for WebP and AVIF image operations, disabled by default
 - Improved PNG optimization by using PNGOUT
 - Fixed a bug where intermediate files were not being deleted after various operations
 
-## [AVIF, More File Managers, & Bug Fixes] - 2024-06-26
+## [1.8.0 — AVIF, More File Managers, & Bug Fixes] - 2024-06-26
 
 - Added support for NeoFinder and HoudahSpot
 - Added support for AVIF images
@@ -72,30 +79,30 @@
 - Fixed PDF->JPEG conversion not actually using JPEG as the output format
 - Fixed "command not found" bug when optimizing WebP images
 
-## [Webp Image Quality Fix] - 2024-06-18
+## [1.7.3 – Webp Image Quality Fix] - 2024-06-18
 
 - Fixed an issue when converting to webp degrades the quality of the image
 
-## [Bug Fix] - 2024-06-14
+## [1.7.2 — Bug Fix] - 2024-06-14
 
 - Fixed a bug where the "Flip Images Vertically" command flipped the images horizontally
 
-## [WebP Hotfix] - 2024-01-29
+## [1.7.1 – WebP Hotfix] - 2024-01-29
 
 - Fixed some commands (e.g. convert) looking for WebP binaries in the wrong location
 
-## [Strip EXIF Data, Filter Previews] - 2024-01-28
+## [1.7.0 — Strip EXIF Data, Filter Previews] - 2024-01-28
 
 - Added "Strip EXIF Data" command
 - Added real time filter previews
 - Improved selection detection when Finder/Path Finder is not the frontmost application
 - Fixed bug where converting from WebP to anything but PNG would change the file extension but not the file format
 
-## [Bug Fix] - 2023-10-05
+## [1.5.1 — Bug Fix] - 2023-10-05
 
 - Fixed a bug where the "Convert Images" command failed for image paths containing dots. (#8549)
 
-## [Create Images, In-Clipboard Modification] - 2023-07-06
+## [1.5.0 — Create Images, In-Clipboard Modification] - 2023-07-06
 
 - Added settings to individually show/hide image formats from the list of conversion formats (#7023)
 - Added settings for input source and output destination (e.g. clipboard, new file, replace original, etc.) (#6593)
@@ -104,14 +111,14 @@
 - Improved error handling for all commands, including copyable error messages
 - Generally improved the code quality of the extension
 
-## [Optimize Images, SVG Conversion, More Filters] - 2023-04-03
+## [1.4.1 – Optimize Images, SVG Conversion, More Filters] - 2023-04-03
 
-- Add "Optimize Images" command
-- Add ability to convert SVG to various image types
-- Add ability to convert images to SVG using Potrace
-- Add ability to convert PDF to various other image types
-- Add ability to rotate and flip PDFs
-- Add 13 new filters:
+- Added "Optimize Images" command
+- Added ability to convert SVG to various image types
+- Added ability to convert images to SVG using Potrace
+- Added ability to convert PDF to various other image types
+- Added ability to rotate and flip PDFs
+- Added 13 new filters:
   - Circular Screen
   - Circular Wrap
   - CMYK Halftone
@@ -127,23 +134,23 @@
   - Sharpen Luminance
 - Fix WebP operations failing due to insufficient permission
 
-## [WebP Support] - 2023-03-29
+## [1.4 — WebP Support] - 2023-03-29
 
-- Add WebP conversion support
-- Add support for running SIPS commands on WebP (via temp file)
-- Add Path Finder support (As preference toggle)
+- Added WebP conversion support
+- Added support for running SIPS commands on WebP (via temp file)
+- Added Path Finder support — As preference toggle)
 
-## [Filters] - 2023-03-22
+## [1.3 — Filters] - 2023-03-22
 
-- Add "Apply Image Filter" command
+- Added "Apply Image Filter" command
 
-## [Padding, Bug Fixes] - 2023-03-15
+## [1.2 — Padding, Bug Fixes] - 2023-03-15
 
 - Added "Pad Images" command.
 - Fixed compatibility with HEIC images and other formats. (#5238)
 
-## [Localization Fix] - 2023-03-07
+## [1.1 — Localization Fix] - 2023-03-07
 
-- Updated the way the list of supported file types are handled.
+- Updated the way the list of supported file types are handled
 
-## [Initial Version] - 2023-02-23
+## [1.0 — Initial Version] - 2023-02-23

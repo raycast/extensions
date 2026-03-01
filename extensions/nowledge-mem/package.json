@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nowledge-mem",
+  "title": "Nowledge Mem",
+  "description": "Search and browse your personal knowledge base. Find memories, save insights, and read your Working Memory briefing.",
+  "icon": "extension-icon.png",
+  "author": "wey-gu",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "memory",
+    "knowledge",
+    "ai",
+    "mcp",
+    "notes",
+    "recall"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-memories",
+      "title": "Search Memories",
+      "subtitle": "Nowledge Mem",
+      "description": "Search your Nowledge Mem knowledge base with natural language",
+      "mode": "view",
+      "keywords": [
+        "memory",
+        "knowledge",
+        "recall",
+        "nowledge"
+      ]
+    },
+    {
+      "name": "add-memory",
+      "title": "Add Memory",
+      "subtitle": "Nowledge Mem",
+      "description": "Save a quick memory to your knowledge base",
+      "mode": "view",
+      "keywords": [
+        "remember",
+        "save",
+        "note"
+      ]
+    },
+    {
+      "name": "working-memory",
+      "title": "Working Memory",
+      "subtitle": "Nowledge Mem",
+      "description": "View today's Working Memory briefing",
+      "mode": "view",
+      "keywords": [
+        "briefing",
+        "today",
+        "focus"
+      ]
+    },
+    {
+      "name": "edit-working-memory",
+      "title": "Edit Working Memory",
+      "subtitle": "Nowledge Mem",
+      "description": "Open your Working Memory in your default editor",
+      "mode": "no-view",
+      "keywords": [
+        "edit",
+        "briefing",
+        "ai-now"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "Nowledge Mem server URL",
+      "type": "textfield",
+      "required": false,
+      "default": "http://127.0.0.1:14242"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "eslint": "^10.0.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

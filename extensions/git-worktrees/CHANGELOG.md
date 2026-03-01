@@ -1,5 +1,11 @@
 # Git Worktree Changelog
 
+## [Simplify cache implementation and improve documentation] - 2026-03-01
+
+- Simplify cache implementation
+- Extract project worktrees view with abort signal support
+- Add worktree setup commands documentation to README
+
 ## [Add setup commands and refactor command/shell env execution] - 2026-02-23
 
 - Add setup commands configuration for worktrees

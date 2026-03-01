@@ -1,74 +1,28 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
-import { normalizeCodexAuthorizationHeader, resolveCodexAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
+import { resolveCodexAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
+import { httpFetch, normalizeBearerToken } from "../agents/http";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
-const REQUEST_TIMEOUT = 10000;
 
 type Preferences = Preferences.AgentUsage;
 
+const CODEX_HEADERS = {
+  Accept: "application/json",
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+};
+
 async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-
-    const response = await fetch(CODEX_USAGE_API, {
-      method: "GET",
-      headers: {
-        Authorization: normalizeCodexAuthorizationHeader(token),
-        Accept: "application/json",
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      },
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (response.status === 401) {
-      return {
-        usage: null,
-        error: {
-          type: "unauthorized",
-          message:
-            "Authorization token expired or invalid. Run 'codex login' or update the token in extension settings.",
-        },
-      };
-    }
-
-    if (!response.ok) {
-      return {
-        usage: null,
-        error: {
-          type: "unknown",
-          message: `HTTP ${response.status}: ${response.statusText}`,
-        },
-      };
-    }
-
-    const data = await response.json();
-
-    return parseCodexApiResponse(data);
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return {
-        usage: null,
-        error: {
-          type: "network_error",
-          message: "Request timeout. Please check your network connection.",
-        },
-      };
-    }
-
-    return {
-      usage: null,
-      error: {
-        type: "network_error",
-        message: error instanceof Error ? error.message : "Network request failed",
-      },
-    };
-  }
+  const { data, error } = await httpFetch({
+    url: CODEX_USAGE_API,
+    headers: { ...CODEX_HEADERS, Authorization: normalizeBearerToken(token) },
+    unauthorizedMessage:
+      "Authorization token expired or invalid. Run 'codex login' or update the token in extension settings.",
+  });
+  if (error) return { usage: null, error };
+  return parseCodexApiResponse(data);
 }
 
 function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error: CodexError | null } {
@@ -183,13 +137,16 @@ function formatDuration(seconds: number): string {
 
 export { formatDuration };
 
-export function useCodexUsage() {
+export function useCodexUsage(enabled = true) {
   const [usage, setUsage] = useState<CodexUsage | null>(null);
   const [error, setError] = useState<CodexError | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const requestIdRef = useRef(0);
 
   const fetchData = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
     setIsLoading(true);
     setError(null);
 
@@ -213,6 +170,9 @@ export function useCodexUsage() {
     }
 
     let result = await fetchCodexUsage(primaryToken);
+    if (requestId !== requestIdRef.current) {
+      return;
+    }
 
     if (
       cleanedPreferenceToken &&
@@ -223,6 +183,9 @@ export function useCodexUsage() {
       })
     ) {
       result = await fetchCodexUsage(cleanedPreferenceToken);
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
     }
 
     setUsage(result.usage);
@@ -232,19 +195,32 @@ export function useCodexUsage() {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setUsage(null);
+      setError(null);
+      setIsLoading(false);
+      setHasInitialFetch(false);
+      return;
+    }
+
     if (!hasInitialFetch) {
       fetchData();
     }
-  }, [hasInitialFetch, fetchData]);
+  }, [enabled, hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
-  }, [fetchData]);
+  }, [enabled, fetchData]);
 
   return {
-    isLoading,
-    usage,
-    error,
+    isLoading: enabled ? isLoading : false,
+    usage: enabled ? usage : null,
+    error: enabled ? error : null,
     revalidate,
   };
 }

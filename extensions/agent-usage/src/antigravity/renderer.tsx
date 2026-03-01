@@ -1,29 +1,32 @@
 import { List } from "@raycast/api";
-import { renderErrorDetail, renderNoDataDetail, getLoadingAccessory, getNoDataAccessory } from "../agents/ui";
+import {
+  renderErrorOrNoData,
+  formatErrorOrNoData,
+  getLoadingAccessory,
+  getNoDataAccessory,
+  generatePieIcon,
+} from "../agents/ui";
 import { AntigravityError, AntigravityUsage } from "./types";
+import type { Accessory } from "../agents/types";
 
 export function formatAntigravityUsageText(usage: AntigravityUsage | null, error: AntigravityError | null): string {
-  if (error) {
-    return `Antigravity Usage\nStatus: Error\nType: ${error.type}\nMessage: ${error.message}`;
-  }
-
-  if (!usage) {
-    return "Antigravity Usage\nStatus: No data available";
-  }
+  const fallback = formatErrorOrNoData("Antigravity", usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as AntigravityUsage;
 
   const lines: string[] = ["Antigravity Usage"];
 
-  if (usage.accountEmail) {
-    lines.push(`Email: ${usage.accountEmail}`);
+  if (u.accountEmail) {
+    lines.push(`Email: ${u.accountEmail}`);
   }
 
-  if (usage.accountPlan) {
-    lines.push(`Plan: ${usage.accountPlan}`);
+  if (u.accountPlan) {
+    lines.push(`Plan: ${u.accountPlan}`);
   }
 
-  appendModel(lines, "Primary", usage.primaryModel);
-  appendModel(lines, "Secondary", usage.secondaryModel);
-  appendModel(lines, "Tertiary", usage.tertiaryModel);
+  appendModel(lines, "Primary", u.primaryModel);
+  appendModel(lines, "Secondary", u.secondaryModel);
+  appendModel(lines, "Tertiary", u.tertiaryModel);
 
   return lines.join("\n");
 }
@@ -32,24 +35,20 @@ export function renderAntigravityDetail(
   usage: AntigravityUsage | null,
   error: AntigravityError | null,
 ): React.ReactNode {
-  if (error) {
-    return renderErrorDetail(error);
-  }
-
-  if (!usage) {
-    return renderNoDataDetail();
-  }
+  const fallback = renderErrorOrNoData(usage, error);
+  if (fallback !== null) return fallback;
+  const u = usage as AntigravityUsage;
 
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Email" text={usage.accountEmail || "Unknown"} />
-      <List.Item.Detail.Metadata.Label title="Plan" text={usage.accountPlan || "Unknown"} />
+      <List.Item.Detail.Metadata.Label title="Email" text={u.accountEmail || "Unknown"} />
+      <List.Item.Detail.Metadata.Label title="Plan" text={u.accountPlan || "Unknown"} />
       <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Primary", usage.primaryModel)}
+      {renderModelMetadata("Primary", u.primaryModel)}
       <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Secondary", usage.secondaryModel)}
+      {renderModelMetadata("Secondary", u.secondaryModel)}
       <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Tertiary", usage.tertiaryModel)}
+      {renderModelMetadata("Tertiary", u.tertiaryModel)}
     </List.Item.Detail.Metadata>
   );
 }
@@ -58,7 +57,7 @@ export function getAntigravityAccessory(
   usage: AntigravityUsage | null,
   error: AntigravityError | null,
   isLoading: boolean,
-): { text: string; tooltip?: string } {
+): Accessory {
   if (isLoading) {
     return getLoadingAccessory("Antigravity");
   }
@@ -91,6 +90,7 @@ export function getAntigravityAccessory(
   const secondary = usage.secondaryModel;
 
   return {
+    icon: generatePieIcon(primary.percentLeft),
     text: `${primary.percentLeft}%`,
     tooltip: secondary
       ? `${primary.label}: ${primary.percentLeft}% | ${secondary.label}: ${secondary.percentLeft}%`

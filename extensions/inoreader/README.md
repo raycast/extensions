@@ -2,11 +2,16 @@
 
 A Raycast extension that goes beyond the original Inoreader experience: it helps you read and triage faster, with a VIP system that immediately surfaces articles from priority sources, plus AI summaries generated from the full article page content.
 
+## Important
+
+This extension is only usable for users with an **Inoreader Pro** subscription, because API access is only available with the Pro plan.
+
 ## Available Commands
 
 - `My Feed` (Articles command): browse feed articles with fast keyboard actions.
 - `Saved Articles`: view saved articles.
 - `Sources`: browse followed sources and manage VIP/non-VIP status.
+- `Executive Summary`: generate an AI executive brief from your unread feed items.
 
 ## Current Features
 
@@ -14,10 +19,35 @@ A Raycast extension that goes beyond the original Inoreader experience: it helps
 - Mark a single article as read (`Mark This Item as Read`).
 - Mark the current stream as read (`Mark All as Read`).
 - Generate an AI summary from the full article page (`AI Summary`).
+- Generate an AI executive brief from unread feed items (`Executive Summary`).
 - Manage VIP status directly from `Sources`:
   - `Add Source as VIP`
   - `Remove Source from VIP`
 - Articles from VIP sources are grouped in a dedicated `VIP` section in the Articles command.
+
+## Executive Summary
+
+`Executive Summary` fetches unread articles from your main Inoreader feed and asks Raycast AI to produce a high-level executive brief.
+
+Unlike `AI Summary` (which analyzes a single article page), this command analyzes the RSS feed content (titles, source, date, URL, and preview text) from multiple unread items to highlight the most important signals.
+
+### What it does
+
+- Loads unread items from your followed feeds.
+- Builds a compact digest of the fetched unread articles.
+- Filters and prioritizes important topics through a structured AI prompt.
+- Returns a themed executive brief with source links.
+
+### Language setting
+
+- Uses the same extension preference as `AI Summary`: `AI Summary Language`
+- Default: `English`
+
+### Requirements and limits
+
+- Uses Raycast AI API (`AI.ask`), so Raycast AI access (typically Raycast Pro) is required.
+- Works on unread feed content available in RSS previews (not full-page article scraping).
+- The summary is generated from a limited number of unread items fetched/analyzed in one run.
 
 ## AI Summary
 

@@ -1,6 +1,5 @@
 import { NOT_A_WORKING_TREE_ERROR, UNTRACKED_OR_MODIFIED_FILES_ERROR } from "#/config/constants";
-import { Worktree } from "#/config/types";
-import { removeWorktreeFromCache } from "#/helpers/cache";
+import type { Worktree } from "#/config/types";
 import { pruneWorktrees, removeBranch, removeWorktree } from "#/helpers/git";
 import { Action, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import path from "node:path";
@@ -21,7 +20,6 @@ export const RemoveWorktree = ({
 
     const worktreeName = path.basename(worktree.path);
     const projectPath = path.dirname(worktree.path);
-    const projectName = path.basename(projectPath);
 
     try {
       try {
@@ -65,7 +63,7 @@ export const RemoveWorktree = ({
       toast.title = "Worktree Removed";
       toast.message = "The worktree has been removed";
 
-      removeWorktreeFromCache({ projectName, worktreeId: worktree.id, onSuccess: revalidateProjects });
+      revalidateProjects();
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to Remove";
