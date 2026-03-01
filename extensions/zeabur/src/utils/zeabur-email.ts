@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import {
   ZeaburEmailPayload,
