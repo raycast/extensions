@@ -1,6 +1,6 @@
 # Extend Display Changelog
 
-## [Set as Quick Connect] - {PR_MERGE_DATE}
+## [Set as Quick Connect] - 2026-03-01
 
 - Added "Set as Quick Connect" action to the display list (`Cmd+Shift+Q`)
 - Quick Connect display is pinned to the top of the list
