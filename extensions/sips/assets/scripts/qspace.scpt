@@ -66,7 +66,16 @@ function run() {
 	let imagePaths = [];
 
 	const windowList = ObjC.castRefToObject($.CGWindowListCopyWindowInfo($.kCGWindowListOptionOnScreenAboveWindow, $.kCGNullWindowID))
-	const appName = windowList.js.filter((win) => win.js['kCGWindowOwnerName'].js.includes("QSpace"))[0].js['kCGWindowOwnerName'].js
+	const qspaceWindow = windowList.js.find((win) => {
+		const ownerName = win.js['kCGWindowOwnerName'];
+		return ownerName && ownerName.js && ownerName.js.includes("QSpace");
+	});
+	if (!qspaceWindow) {
+		console.log('No QSpace window found on screen.');
+		return JSON.stringify([]);
+	}
+	const appName = qspaceWindow.js['kCGWindowOwnerName'].js
+
 
 	try {
 		let qspace = null;
@@ -102,7 +111,7 @@ function run() {
 		}
 	} catch (error) {
 		if (error.errorNumber === -1743) {
-			requestAutomationPermissionForApplication_('QSpace Pro');
+			requestAutomationPermissionForApplication_(appName);
 		} else {
 			console.log('Error:', error.message, 'errorNumber:', error.errorNumber, 'line:', error.line, 'column:', error.column);
 		}
