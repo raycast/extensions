@@ -41,10 +41,7 @@ sudo make install
               }
             }}
           />
-          <Action.OpenInBrowser
-            title="Open GitHub Repo"
-            url="https://github.com/Etheirystech/watchkey"
-          />
+          <Action.OpenInBrowser title="Open GitHub Repo" url="https://github.com/Etheirystech/watchkey" />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content="git clone https://github.com/Etheirystech/watchkey.git && cd watchkey && sudo make install"
