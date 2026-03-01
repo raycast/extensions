@@ -15,58 +15,30 @@
   "commands": [
     {
       "name": "index",
-      "title": "Fetch Todos",
+      "title": "Fetch all Cards",
       "subtitle": "Trello",
-      "description": "Fetch all assigned todos",
+      "description": "Fetch all assigned cards",
       "mode": "view"
     },
     {
-      "name": "searchTodos",
-      "title": "Search Todos",
+      "name": "searchCards",
+      "title": "Search Cards",
       "subtitle": "Trello",
-      "description": "Search all todos across all your boards",
+      "description": "Search all cards across all your boards",
       "mode": "view"
     },
     {
-      "name": "searchBoards",
-      "title": "Search Boards",
-      "subtitle": "Trello",
-      "description": "Search all your open boards",
-      "mode": "view"
-    },
-    {
-      "name": "createTodo",
-      "title": "Create a Todo",
+      "name": "createCard",
+      "title": "Create a Card",
       "subtitle": "Trello",
       "description": "Create a card on a selected board/list",
       "mode": "view"
     },
     {
       "name": "listCards",
-      "title": "Fetch Cards",
+      "title": "Fetch Cards per Board",
       "subtitle": "Trello",
       "description": "View all cards in a list",
-      "mode": "view"
-    },
-    {
-      "name": "fetchBoard",
-      "title": "Fetch Board",
-      "subtitle": "Trello",
-      "description": "View board info and lists",
-      "mode": "view"
-    },
-    {
-      "name": "moveCard",
-      "title": "Move Card",
-      "subtitle": "Trello",
-      "description": "Move a card to another list",
-      "mode": "view"
-    },
-    {
-      "name": "deleteCard",
-      "title": "Delete Card",
-      "subtitle": "Trello",
-      "description": "Delete a card after confirmation",
       "mode": "view"
     }
   ],
@@ -108,21 +80,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.7"
+    "@raycast/api": "^1.104.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.35.0",
-    "@types/node": "~24.3.1",
-    "@types/react": "^19.1.12",
+    "@types/node": "~25.3.3",
+    "@types/react": "^19.2.14",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^16.4.0",
+    "globals": "^17.4.0",
     "node-fetch": "^3.3.2",
-    "prettier": "3.6.2",
-    "typescript": "^5.9.2"
+    "prettier": "3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
