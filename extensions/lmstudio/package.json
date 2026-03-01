@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lmstudio",
-  "title": "lmstudio",
-  "description": "Use local AI models from lmstudio inside raycast",
+  "title": "LM Studio",
+  "description": "Use local AI models from LM Studio inside Raycast",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
