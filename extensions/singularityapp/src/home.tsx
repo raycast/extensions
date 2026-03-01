@@ -3,7 +3,6 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import {
   Task,
   Project,
-  getApiToken,
   getTasksForToday,
   getInboxTasks,
   getUpcomingTasks,
@@ -14,7 +13,7 @@ import {
   withErrorHandling,
   ApiError,
 } from "./api";
-import { TaskListItem, NoTokenView, ErrorView } from "./components/TaskList";
+import { TaskListItem, ErrorView } from "./components/TaskList";
 
 export type ViewType = "inbox" | "today" | "upcoming" | "completed" | `project_${string}`;
 
@@ -90,14 +89,13 @@ function groupTasksByDate(
   }));
 }
 
-export default function Home({ launchContext }: LaunchProps<{ launchContext?: { view: ViewType } }>) {
+function Home({ launchContext }: LaunchProps<{ launchContext?: { view: ViewType } }>) {
   const { view: preferencesView } = getPreferenceValues();
   const [view, setView] = useState<ViewType>(launchContext?.view ?? preferencesView ?? "today");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectsMap, setProjectsMap] = useState<Record<string, Project>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [hasToken, setHasToken] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
@@ -105,13 +103,6 @@ export default function Home({ launchContext }: LaunchProps<{ launchContext?: { 
     setError(null);
 
     try {
-      const token = await getApiToken();
-      if (!token) {
-        setHasToken(false);
-        setIsLoading(false);
-        return;
-      }
-
       // Load projects first
       const projectsResult = await withErrorHandling(() => getProjects(), "Failed to load projects", {
         showDetails: true,
@@ -222,14 +213,6 @@ export default function Home({ launchContext }: LaunchProps<{ launchContext?: { 
     };
   }, [view]);
 
-  if (!hasToken) {
-    return <NoTokenView />;
-  }
-
-  if (error && tasks.length === 0) {
-    return <ErrorView error={error} onRetry={loadData} />;
-  }
-
   // Group tasks by date for completed, upcoming, and project views
   const sections = useMemo(() => {
     if (view === "completed") {
@@ -243,6 +226,10 @@ export default function Home({ launchContext }: LaunchProps<{ launchContext?: { 
     }
     return [{ title: navigationTitle, tasks }];
   }, [tasks, view, navigationTitle]);
+
+  if (error && tasks.length === 0) {
+    return <ErrorView error={error} onRetry={loadData} />;
+  }
 
   return (
     <List
@@ -305,3 +292,5 @@ export default function Home({ launchContext }: LaunchProps<{ launchContext?: { 
     </List>
   );
 }
+
+export default Home;
