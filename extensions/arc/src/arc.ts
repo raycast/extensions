@@ -216,6 +216,7 @@ export async function makeNewLittleArcWindow(url: string) {
 
 // Spaces
 export async function makeNewTabWithinSpace(url: string, space: Space) {
+  await ensureArcIsRunning();
   await runAppleScript(`
     tell application "Arc"
       tell front window      
@@ -234,6 +235,7 @@ export async function selectSpace(space: Space) {
 }
 
 export async function selectSpaceById(spaceId: string) {
+  await ensureArcIsRunning();
   await runAppleScript(`
     tell application "Arc"
       tell front window
