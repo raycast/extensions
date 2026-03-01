@@ -1,6 +1,6 @@
 # Git Worktree Changelog
 
-## [Simplify cache implementation and improve documentation] - {PR_MERGE_DATE}
+## [Simplify cache implementation and improve documentation] - 2026-03-01
 
 - Simplify cache implementation
 - Extract project worktrees view with abort signal support
