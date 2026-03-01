@@ -4,7 +4,7 @@ import { trelloClient } from "./utils/trelloClient";
 import { Board } from "./Board";
 import { List as TrelloList } from "./List";
 import { TrelloCard } from "./trelloResponse.model";
-import { TodoListItem } from "./TrelloListItem";
+import { CardListItem } from "./TrelloListItem";
 
 export default function CardsForList() {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -85,7 +85,7 @@ function CardsList({ list }: { list: TrelloList }) {
     <List isLoading={loading} searchBarPlaceholder={`Cards in ${list.name}`}>
       {cards.length === 0 ? <List.EmptyView icon={Icon.Info} title="No cards found" /> : null}
       {cards.map((card) => (
-        <TodoListItem key={card.id} card={card} />
+        <CardListItem key={card.id} card={card} />
       ))}
     </List>
   );

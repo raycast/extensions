@@ -5,7 +5,7 @@ import { preferences } from "./types";
 
 const { token, apitoken, username } = getPreferenceValues<preferences>();
 
-export const returnTodos = async (searchTerm: string): Promise<TrelloFetchResponse> => {
+export const returnCards = async (searchTerm: string): Promise<TrelloFetchResponse> => {
   try {
     if (searchTerm != "") {
       const response = await fetch(
@@ -23,12 +23,12 @@ export const returnTodos = async (searchTerm: string): Promise<TrelloFetchRespon
         const json: any = await response.json();
         return json as TrelloFetchResponse;
       } catch (error) {
-        showToast(Toast.Style.Failure, "An error occured", "Could not fetch todos, check your credentials");
+        showToast(Toast.Style.Failure, "An error occured", "Could not fetch cards, check your credentials");
         return Promise.resolve([]);
       }
     }
   } catch (error) {
-    showToast(Toast.Style.Failure, "An error occured", "Could not fetch todos, check your credentials");
+    showToast(Toast.Style.Failure, "An error occured", "Could not fetch cards, check your credentials");
     return Promise.resolve([]);
   }
 };

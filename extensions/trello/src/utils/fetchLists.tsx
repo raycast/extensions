@@ -10,7 +10,7 @@ export const returnLists = async (boardId: string) => {
 
     return (await response.json()) as List[];
   } catch (error) {
-    showToast(Toast.Style.Failure, "An error occured", "Could not fetch todos, check your credentials");
+    showToast(Toast.Style.Failure, "An error occured", "Could not fetch cards, check your credentials");
     return Promise.resolve([]);
   }
 };
