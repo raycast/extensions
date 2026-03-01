@@ -47,24 +47,25 @@ function ensureCompiled(sourcePath: string, binaryPath: string): boolean {
  * Uses compiled binary for speed (~6x faster), falls back to
  * Swift interpreter if compilation fails.
  */
-function runCalendarHelper(args: string[], timeout = 30000): ReturnType<typeof spawnSync> {
+function runCalendarHelper(
+  args: string[],
+  timeout = 30000,
+): { stdout: string; stderr: string; status: number | null; error: Error | undefined } {
   const sourcePath = path.join(environment.assetsPath, "CalendarHelper.swift");
   const binaryPath = path.join(environment.supportPath, "CalendarHelper");
 
   const compiled = ensureCompiled(sourcePath, binaryPath);
 
-  if (compiled) {
-    return spawnSync(binaryPath, args, {
-      encoding: "utf-8",
-      timeout,
-    });
-  }
+  const result = compiled
+    ? spawnSync(binaryPath, args, { encoding: "utf-8", timeout })
+    : spawnSync("swift", [sourcePath, ...args], { encoding: "utf-8", timeout });
 
-  // Fallback to interpreter
-  return spawnSync("swift", [sourcePath, ...args], {
-    encoding: "utf-8",
-    timeout,
-  });
+  return {
+    stdout: String(result.stdout ?? ""),
+    stderr: String(result.stderr ?? ""),
+    status: result.status,
+    error: result.error,
+  };
 }
 
 /**
