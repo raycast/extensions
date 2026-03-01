@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-03-01
 
 - Added the send email command to send emails through Zeabur Email API.
 
