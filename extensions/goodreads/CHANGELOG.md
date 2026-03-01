@@ -1,6 +1,6 @@
 # goodreads Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-03-01
 
 - Add Windows platform support
 
