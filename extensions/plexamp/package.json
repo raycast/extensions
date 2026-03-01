@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "plexamp",
+  "title": "Plexamp",
+  "description": "Browse Plex music libraries and control Plexamp playback from Raycast.",
+  "icon": "plexamp-icon.png",
+  "author": "ken",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-media",
+      "title": "Browse Library",
+      "subtitle": "Plexamp",
+      "description": "Browse Plex music libraries and queue tracks in Plexamp.",
+      "mode": "view"
+    },
+    {
+      "name": "player-controls",
+      "title": "Now Playing",
+      "subtitle": "Plexamp",
+      "description": "Play, pause, skip, and inspect the current Plexamp queue.",
+      "mode": "view"
+    },
+    {
+      "name": "plexamp-status",
+      "title": "Plexamp Status",
+      "subtitle": "Plexamp",
+      "description": "Inspect Plexamp client details and the connected Plex music library.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tracks",
+      "title": "Search Library",
+      "subtitle": "Plexamp",
+      "description": "Search songs, albums, and artists in the selected Plex music library.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "plexampUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Plexamp URL Override",
+      "default": "http://127.0.0.1:32500",
+      "placeholder": "http://127.0.0.1:32500",
+      "description": "Optional. Override the Plexamp player endpoint used for playback control."
+    },
+    {
+      "name": "trackRatings",
+      "type": "dropdown",
+      "required": false,
+      "title": "Track Ratings",
+      "default": "fiveStars",
+      "description": "How track ratings should be displayed in Raycast.",
+      "data": [
+        {
+          "title": "5 Stars",
+          "value": "fiveStars"
+        },
+        {
+          "title": "5 Stars (Half Stars)",
+          "value": "fiveStarsHalf"
+        },
+        {
+          "title": "1 Star",
+          "value": "oneStar"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "fast-xml-parser": "^5.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
