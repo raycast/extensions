@@ -19,12 +19,12 @@ https://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scop
 
 ## Commands
 
-- Fetch Todos: cards assigned to you (all boards)
-- Search Todos: search cards across all boards
+- Fetch Cards: cards assigned to you (all boards)
+- Search Cards: search cards across all boards
 - Search Boards: browse and open your boards
 - Fetch Board: view a board’s lists and members
 - Fetch Cards: pick a board and list to view its cards
-- Create a Todo: create a card on a selected board/list
+- Create a Card: create a card on a selected board/list
 - Move Card: move a card to another list on the same board
 - Delete Card: select a list, then a card, and delete it
 
