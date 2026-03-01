@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lidarr",
+  "title": "Lidarr",
+  "description": "Manage your Lidarr music library, search and add artists, monitor downloads, and review activity.",
+  "icon": "command-icon.png",
+  "author": "kendaniels",
+  "contributors": [
+    "Aayush9029",
+    "j3lte",
+    "xjo_nd"
+  ],
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Artist Library",
+      "subtitle": "Lidarr",
+      "description": "Browse your artist collection with filtering",
+      "mode": "view"
+    },
+    {
+      "name": "search-artist",
+      "title": "Search Artist",
+      "subtitle": "Lidarr",
+      "description": "Search and add artists to your Lidarr library",
+      "mode": "view"
+    },
+    {
+      "name": "download-queue",
+      "title": "Download Queue",
+      "subtitle": "Lidarr",
+      "description": "Monitor active downloads and manage the queue",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Lidarr",
+      "description": "Review recent Lidarr activity",
+      "mode": "view"
+    },
+    {
+      "name": "instance-status",
+      "title": "Instance Status",
+      "subtitle": "Lidarr",
+      "description": "View connection status, system health, and quick actions for your Lidarr instance",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "title": "Host",
+      "required": true,
+      "description": "Lidarr host or full URL (e.g. 192.168.2.141 or http://192.168.2.141:8686)",
+      "type": "textfield",
+      "default": "localhost"
+    },
+    {
+      "name": "port",
+      "title": "Port",
+      "required": true,
+      "description": "Lidarr port (ignored if port is already included in Host)",
+      "type": "textfield",
+      "default": "8686"
+    },
+    {
+      "name": "base",
+      "title": "URL Base (Optional)",
+      "required": false,
+      "description": "Optional Lidarr URL base path (e.g. lidarr if your URL is /lidarr)",
+      "type": "textfield",
+      "default": ""
+    },
+    {
+      "name": "http",
+      "title": "Connection Type",
+      "required": true,
+      "description": "Change the connection type for the Lidarr server",
+      "type": "dropdown",
+      "default": "http",
+      "data": [
+        {
+          "value": "http",
+          "title": "HTTP"
+        },
+        {
+          "value": "https",
+          "title": "HTTPS"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "required": true,
+      "description": "The API key of the Lidarr server",
+      "type": "textfield",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.19.1",
+    "codex": "^0.2.3",
+    "date-fns": "^4.1.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format-check": "prettier --check \"src/**/*.{ts,tsx}\""
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
