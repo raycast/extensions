@@ -8,7 +8,7 @@
   "contributors": [
     "stelo",
     "Rob",
-    "syh",
+    "dev_y0ngha",
     "erayack",
     "clins1994",
     "stephlv"
@@ -91,6 +91,13 @@
       "title": "Search Emojis",
       "subtitle": "Slack",
       "description": "Search custom emojis in your Slack team.",
+      "mode": "view"
+    },
+    {
+      "name": "set-status",
+      "title": "Set Status",
+      "subtitle": "Slack",
+      "description": "Set your status.",
       "mode": "view"
     }
   ],
@@ -222,7 +229,7 @@
     "@types/lodash": "^4.17.23",
     "@types/node": "^25.2.3",
     "@types/react": "^19.2.14",
-    "eslint": "^9.39.2",
+    "eslint": "^9.39.3",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
@@ -234,8 +241,8 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "volta": {
-    "node": "20.15.1",
-    "npm": "10.7.0"
+    "node": "22.14.0",
+    "npm": "10.9.2"
   },
   "platforms": [
     "macOS",

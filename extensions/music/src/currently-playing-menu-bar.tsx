@@ -6,21 +6,18 @@ import * as TE from "fp-ts/TaskEither";
 import { handleTaskEitherError } from "./util/utils";
 import { PlayerState } from "./util/models";
 import { getPlayerState } from "./util/scripts/player-controls";
-import { useRef } from "react";
+import { useEffect, useState } from "react";
 import { formatTitle } from "./util/track";
 
 const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
 
-type FavoriteStatus = {
-  trackId: string;
-  isFavorited: boolean;
-};
-
 export default function CurrentlyPlayingMenuBarCommand() {
-  const shouldExecute = useRef<boolean>(false);
-
-  const { isLoading: isLoadingCurrentTrack, data: currentTrack } = usePromise(
+  const {
+    isLoading: isLoadingCurrentTrack,
+    data: currentTrack,
+    mutate: mutateCurrentTrack,
+  } = usePromise(
     () =>
       pipe(
         music.currentTrack.getCurrentTrack(),
@@ -30,11 +27,6 @@ export default function CurrentlyPlayingMenuBarCommand() {
         ),
       )(),
     [],
-    {
-      onData() {
-        shouldExecute.current = true;
-      },
-    },
   );
   const {
     isLoading: isLoadingPlayerState,
@@ -50,44 +42,56 @@ export default function CurrentlyPlayingMenuBarCommand() {
         ),
       )(),
     [],
-    { execute: shouldExecute.current },
-  );
-  const {
-    isLoading: isLoadingFavoriteStatus,
-    data: favoriteStatus,
-    mutate: mutateFavoriteStatus,
-  } = usePromise(
-    (trackId?: string) => {
-      if (!trackId) {
-        return Promise.resolve<FavoriteStatus | undefined>(undefined);
-      }
-
-      return pipe(
-        music.currentTrack.getFavoriteForCurrentTrackId(trackId),
-        TE.matchW(
-          () => undefined,
-          (favoriteStatus) => {
-            if (favoriteStatus === undefined) {
-              return undefined;
-            }
-
-            return {
-              trackId,
-              isFavorited: favoriteStatus.trim().toLowerCase() === "true",
-            };
-          },
-        ),
-      )();
-    },
-    [currentTrack?.id],
-    { execute: !!currentTrack },
   );
 
   const isRunning = !isLoadingCurrentTrack && !!currentTrack;
-  const isPlaying = playerState === PlayerState.PLAYING;
-  const isFavoriteStatusForCurrentTrack = favoriteStatus?.trackId === currentTrack?.id;
-  const isFavorited = isFavoriteStatusForCurrentTrack && favoriteStatus?.isFavorited === true;
-  const isLoading = isLoadingCurrentTrack || isLoadingPlayerState || isLoadingFavoriteStatus;
+  const isLoading = isLoadingCurrentTrack || isLoadingPlayerState;
+
+  // Default to playing/not-favorited while data loads to avoid flicker on open
+  const isPlaying = playerState !== undefined ? playerState === PlayerState.PLAYING : true;
+  const isFavorited = currentTrack?.favorited === "true";
+
+  const title = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName,
+        maxTextLength,
+        cleanupTitle,
+      })
+    : "";
+
+  const DROPDOWN_MAX = 40;
+  const fullTitle = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName,
+        maxTextLength: "999",
+        cleanupTitle,
+      })
+    : "";
+  const needsScroll = fullTitle.length > DROPDOWN_MAX;
+  const SEPARATOR = "   ·   ";
+  const paddedTitle = needsScroll ? fullTitle + SEPARATOR : fullTitle;
+
+  const [scrollOffset, setScrollOffset] = useState(0);
+
+  useEffect(() => {
+    setScrollOffset(0);
+  }, [currentTrack?.id]);
+
+  useEffect(() => {
+    if (!needsScroll) return;
+    const interval = setInterval(() => {
+      setScrollOffset((prev) => (prev + 1) % paddedTitle.length);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [needsScroll, paddedTitle.length]);
+
+  const dropdownTitle = needsScroll
+    ? (paddedTitle + paddedTitle).substring(scrollOffset, scrollOffset + DROPDOWN_MAX)
+    : fullTitle;
 
   if (!isRunning) {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
@@ -97,16 +101,16 @@ export default function CurrentlyPlayingMenuBarCommand() {
     return <NothingPlaying isLoading={isLoading} />;
   }
 
-  const title = formatTitle({
-    name: currentTrack.name,
-    artistName: currentTrack.artist,
-    hideArtistName,
-    maxTextLength,
-    cleanupTitle,
-  });
-
   return (
-    <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title} tooltip={title}>
+    <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title}>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          icon="icon.png"
+          title={dropdownTitle}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          onAction={() => open("music://")}
+        />
+      </MenuBarExtra.Section>
       {isPlaying && (
         <MenuBarExtra.Item
           icon={Icon.Pause}
@@ -163,7 +167,6 @@ export default function CurrentlyPlayingMenuBarCommand() {
         icon={isFavorited ? Icon.StarDisabled : Icon.Star}
         title={isFavorited ? "Unfavorite Track" : "Favorite Track"}
         onAction={() => {
-          const actionTrackId = currentTrack.id;
           const nextFavoriteState = !isFavorited;
           const toggleFavoriteAction = nextFavoriteState ? music.currentTrack.favorite : music.currentTrack.unfavorite;
 
@@ -175,27 +178,16 @@ export default function CurrentlyPlayingMenuBarCommand() {
             ),
             TE.chainFirstTaskK(
               () => () =>
-                mutateFavoriteStatus(undefined, {
+                mutateCurrentTrack(undefined, {
                   optimisticUpdate(data) {
-                    if (!data || data.trackId !== actionTrackId) {
-                      return data;
-                    }
-
-                    return { trackId: actionTrackId, isFavorited: nextFavoriteState };
+                    if (!data) return data;
+                    return { ...data, favorited: nextFavoriteState ? "true" : "false" };
                   },
                 }),
             ),
           )();
         }}
       />
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          icon="icon.png"
-          title="Open Music"
-          shortcut={Keyboard.Shortcut.Common.Open}
-          onAction={() => open("music://")}
-        />
-      </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"

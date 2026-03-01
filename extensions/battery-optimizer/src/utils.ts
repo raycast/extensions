@@ -53,7 +53,7 @@ export async function setBatteryThreshold(threshold: number, HUDMessage?: string
     let shellCommand = `${toolPath} ${writeCommand}`;
 
     // For BCLM we need to run the persist/unpersist command
-    // For BATT the limit command already persists settings
+    // For batt the limit command already persists settings
     if (batteryTool === BatteryTool.BCLM || (batteryTool === BatteryTool.BATT && persistCommand !== "")) {
       shellCommand += ` && ${toolPath} ${persistCommand}`;
     }

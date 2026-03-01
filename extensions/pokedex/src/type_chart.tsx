@@ -35,7 +35,7 @@ export default function TypeChart(props: { arguments: { search?: string } }) {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="View Full Type Details"
+                  title="View Type Details"
                   icon={Icon.Eye}
                   target={<TypeDetail type={type} allTypes={types || []} />}
                 />

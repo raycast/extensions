@@ -10,6 +10,7 @@ export const initTraktClient = () => {
     baseHeaders: {
       "Content-Type": "application/json; charset=utf-8",
       "trakt-api-version": "2",
+      "User-Agent": "trakt-manager-raycast/1.0",
     },
     api: async ({ path, method, body, headers, fetchOptions }) => {
       const accessToken = await AuthProvider.authorize();

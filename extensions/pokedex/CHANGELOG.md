@@ -1,5 +1,17 @@
 # Pokédex Changelog
 
+## [Shiny Forms] - 2026-02-21
+
+- Added *Shiny* configuration support for Pokémon sprites and artwork.
+- Improved Pokémon form handling: pixel expands all forms, official applies filtering.
+- Fixed Pokémon form type handling for multi-form species such as #773 (Silvally).
+
+## [ItemDex] - 2026-02-18
+
+- Added **Items** command to browse and filter Pokémon items by pocket, with detailed item information and multi-language support.
+- Improved consistency of Pokémon image rendering across all components.
+- Disabled **Weaknesses** command by default since weakness information is already available in Pokémon profile and form details.
+
 ## [Type Mastery] - 2026-02-13
 
 - Added **Natures** command to explore stat changes and localized names for all Pokémon natures.
@@ -32,7 +44,7 @@
 
 ## [Pokédex Mastery] - 2024-09-17
 
-- Added Weaknesses command for easy reference.
+- Added **Weaknesses** command for easy reference.
 - Expanded Pokémon details with Shapes, Type Effectiveness, and Encounter Locations.
 - Reorganized Pokémon Forms for better information presentation.
 - Updated Type Symbols to match Gen 9 designs.
@@ -57,16 +69,16 @@
 
 ## [Type & View] - 2022-03-12
 
-- Implemented type filter and split view for Moves.
-- Enhanced visual clarity with SVG icons.
-- Added a changelog to keep users informed of updates.
+- Implemented type filter and split view for Moves to enable flexible browsing and comparison.
+- Enhanced visual clarity by replacing icons with scalable SVG graphics for improved UI precision.
+- Added release changelog to keep users informed of new features and updates.
 
 ## [Moves & Abilities] - 2022-03-10
 
-- New commands for Moves and Abilities.
-- Added a new preference to show previews.
+- Added **Moves** and **Abilities** commands to browse and filter Pokémon moves and abilities with comprehensive details.
+- Added a preference to display previews for enhanced browsing experience.
 - Implemented Pokémon type filter for targeted searches.
-- Fixed Evolution chains to ensure accuracy.
+- Fixed Evolution chains to display accurate lineage information.
 
 ## [Pokémon Master] - 2022-03-02
 

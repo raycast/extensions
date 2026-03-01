@@ -9,7 +9,8 @@
     "Sclafus",
     "effektsvk",
     "wxiaoyun",
-    "lukrencijus"
+    "lukrencijus",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity",
@@ -406,15 +407,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.91.1"
+    "@raycast/api": "^1.104.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -425,6 +426,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

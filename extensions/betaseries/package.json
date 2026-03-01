@@ -53,6 +53,14 @@
       "subtitle": "BetaSeries",
       "description": "View your upcoming episodes",
       "mode": "view"
+    },
+    {
+      "name": "new-episodes-menubar",
+      "title": "New Episodes Menu Bar",
+      "subtitle": "BetaSeries",
+      "description": "Get alerts for newly released episodes from your active shows",
+      "mode": "menu-bar",
+      "interval": "1h"
     }
   ],
   "dependencies": {
@@ -83,6 +91,15 @@
       "title": "BetaSeries API Key",
       "description": "Your BetaSeries API Key (Developer Key)",
       "placeholder": "Enter your API Key"
+    },
+    {
+      "name": "showMenubarDebug",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Menu Bar",
+      "label": "Enable debug mode in New Episodes Menu Bar",
+      "description": "Show the debug submenu in the New Episodes Menu Bar command."
     }
   ],
   "platforms": [

@@ -17,6 +17,7 @@ export interface project {
   id: string;
   name: string;
   isBillableByDefault: boolean;
+  projectKey?: string;
   company?: company;
   projectStatus: projectStatus;
 }
@@ -32,6 +33,7 @@ export interface task {
   projectId: string;
   project: project;
   typeOfWorkId?: string;
+  taskIdentifier?: string;
   taskStatus: taskStatus;
 }
 
@@ -68,7 +70,8 @@ export const getProjects =
       if (searchTextIsUuid) {
         filterBy = filterBy + `id eq guid'${encodeURIComponent(searchText)}'`;
       } else {
-        filterBy = filterBy + `substringof('${encodeURIComponent(searchText.replaceAll("'", ""))}',name)`;
+        const encodedSearchText = encodeURIComponent(searchText.replaceAll("'", ""));
+        filterBy = filterBy + `(substringof('${encodedSearchText}',name) or projectKey eq '${encodedSearchText}')`;
       }
     }
 
@@ -126,7 +129,8 @@ export const getTasks =
       if (searchTextIsUuid) {
         filterBy = `${filterBy}id eq guid'${encodeURIComponent(searchText)}'`;
       } else {
-        filterBy = `${filterBy}(substringof('${encodeURIComponent(searchText.replaceAll("'", ""))}',name) or substringof('${encodeURIComponent(searchText.replaceAll("'", ""))}',project/name))`;
+        const encodedSearchText = encodeURIComponent(searchText.replaceAll("'", ""));
+        filterBy = `${filterBy}(substringof('${encodedSearchText}',name) or substringof('${encodedSearchText}',project/name) or substringof('${encodedSearchText}', taskIdentifier))`;
       }
     }
 

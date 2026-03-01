@@ -1,13 +1,9 @@
 import fs from "fs";
-import { execFile } from "child_process";
-import { promisify } from "util";
 import { getApplications, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { homedir } from "os";
-import { isMac, isWindows } from "./utils";
+import { execWithCleanEnv, isMac, isWindows } from "./utils";
 import { zedBuild } from "./preferences";
-
-const execFileAsync = promisify(execFile);
 
 export type ZedBuild = Preferences["build"];
 export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview" | "dev.zed.Zed-Dev";
@@ -144,6 +140,9 @@ end tell
  * Open a workspace with multiple paths using the Zed CLI.
  * This is required for multi-folder workspaces since the URI scheme only supports a single path.
  *
+ * Uses a clean environment to prevent Raycast's environment variables from
+ * being inherited by Zed terminals.
+ *
  * @param cliPath - Path to the Zed CLI executable
  * @param paths - Array of paths to open (supports multiple folders)
  * @param newWindow - Whether to open in a new window (default: false)
@@ -153,7 +152,7 @@ export async function openWithZedCli(cliPath: string, paths: string[], newWindow
   const args = newWindow ? ["-n", ...paths] : paths;
 
   try {
-    await execFileAsync(cliPath, args);
+    await execWithCleanEnv(cliPath, args);
   } catch (error) {
     console.error("Failed to open with Zed CLI:", error);
     throw error;

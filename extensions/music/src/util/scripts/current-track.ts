@@ -222,42 +222,50 @@ export const addToPlaylist = (playlist: string) =>
   );
 
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
-  const querystring = createQueryString({
-    id: "trackId",
-    name: "trackName",
-    artist: "trackArtist",
-    album: "trackAlbum",
-    duration: "trackDuration",
-    rating: "trackRating",
-  });
-
-  // prettier-ignore
   return pipe(
-    runScript(`
-      set output to ""
-      tell application "System Events"
-        set isNotRunning to (count of (every process whose name is "Music")) = 0
-      end tell
+    TE.tryCatch(() => getMacosVersion(), E.toError),
+    TE.chainW((version) => {
+      const favProp = isSonomaOrNewer(version.major) ? "favorited" : "loved";
+      const querystring = createQueryString({
+        id: "trackId",
+        name: "trackName",
+        artist: "trackArtist",
+        album: "trackAlbum",
+        duration: "trackDuration",
+        rating: "trackRating",
+        favorited: "trackFavorited",
+      });
 
-      if isNotRunning then
-        error
-      else
-        tell application "Music"
-          set t to (get current track)
-          set trackId to id of t
-          set trackName to name of t
-          set trackArtist to artist of t
-          set trackAlbum to album of t
-          set trackDuration to duration of t
-          set trackRating to rating of t
+      // prettier-ignore
+      return pipe(
+        runScript(`
+          set output to ""
+          tell application "System Events"
+            set isNotRunning to (count of (every process whose name is "Music")) = 0
+          end tell
 
-          set output to ${querystring}
-        end tell
-      end if
+          if isNotRunning then
+            error
+          else
+            tell application "Music"
+              set t to (get current track)
+              set trackId to id of t
+              set trackName to name of t
+              set trackArtist to artist of t
+              set trackAlbum to album of t
+              set trackDuration to duration of t
+              set trackRating to rating of t
+              set trackFavorited to ${favProp} of t
 
-      return output
-    `),
-    TE.map(parseQueryString<Track>())
+              set output to ${querystring}
+            end tell
+          end if
+
+          return output
+        `),
+        TE.map(parseQueryString<Track>()),
+      );
+    }),
   );
 };
 

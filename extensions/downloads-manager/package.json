@@ -14,7 +14,8 @@
     "clins1994",
     "0xdhrv",
     "YourMCGeek",
-    "dhaydl"
+    "dhaydl",
+    "hugodemenez"
   ],
   "categories": [
     "Productivity",
@@ -36,6 +37,15 @@
           "description": "Show hidden files in the folder",
           "required": false,
           "default": false
+        },
+        {
+          "type": "checkbox",
+          "name": "showPreview",
+          "label": "Show Preview",
+          "title": "Show Preview",
+          "description": "Show the preview of the downloaded file or folder",
+          "required": false,
+          "default": true
         },
         {
           "type": "dropdown",
@@ -202,142 +212,130 @@
   "ai": {
     "evals": [
       {
-        "input" : "@downloads-manager get my latest download",
-        "mocks" : {
-          "get-latest-download" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+        "input": "@downloads-manager get my latest download",
+        "mocks": {
+          "get-latest-download": "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-
-              },
-              "name" : "get-latest-download"
+            "callsTool": {
+              "arguments": {},
+              "name": "get-latest-download"
             }
           }
         ]
       },
       {
-        "input" : "@downloads-manager copy my latest download",
-        "mocks" : {
-          "copy-latest-download" : "Copied latest download to clipboard",
-          "get-latest-download" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+        "input": "@downloads-manager copy my latest download",
+        "mocks": {
+          "copy-latest-download": "Copied latest download to clipboard",
+          "get-latest-download": "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-
-              },
-              "name" : "get-latest-download"
+            "callsTool": {
+              "arguments": {},
+              "name": "get-latest-download"
             }
           },
           {
-            "callsTool" : {
-              "arguments" : {
-                "latestDownloadPath" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+            "callsTool": {
+              "arguments": {
+                "latestDownloadPath": "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
               },
-              "name" : "copy-latest-download"
+              "name": "copy-latest-download"
             }
           }
         ]
       },
       {
-        "input" : "@downloads-manager delete my latest download",
-        "mocks" : {
-          "delete-latest-download" : "Deleted lastest download",
-          "get-latest-download" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+        "input": "@downloads-manager delete my latest download",
+        "mocks": {
+          "delete-latest-download": "Deleted lastest download",
+          "get-latest-download": "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-
-              },
-              "name" : "get-latest-download"
+            "callsTool": {
+              "arguments": {},
+              "name": "get-latest-download"
             }
           },
           {
-            "callsTool" : {
-              "arguments" : {
-                "latestDownloadPath" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+            "callsTool": {
+              "arguments": {
+                "latestDownloadPath": "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
               },
-              "name" : "delete-latest-download"
+              "name": "delete-latest-download"
             }
           }
         ]
       },
       {
-        "input" : "@downloads-manager open my latest download",
-        "mocks" : {
-          "get-latest-download" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md",
-          "open-latest-download" : "Opened latest download"
+        "input": "@downloads-manager open my latest download",
+        "mocks": {
+          "get-latest-download": "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md",
+          "open-latest-download": "Opened latest download"
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-
-              },
-              "name" : "get-latest-download"
+            "callsTool": {
+              "arguments": {},
+              "name": "get-latest-download"
             }
           },
           {
-            "callsTool" : {
-              "arguments" : {
-                "latestDownloadPath" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
+            "callsTool": {
+              "arguments": {
+                "latestDownloadPath": "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
               },
-              "name" : "open-latest-download"
+              "name": "open-latest-download"
             }
           }
         ]
       },
       {
-        "input" : "@downloads-manager paste my latest download",
-        "mocks" : {
+        "input": "@downloads-manager paste my latest download",
+        "mocks": {
           "paste-latest-download": "Success",
-          "get-latest-download" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
+          "get-latest-download": "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-
-              },
-              "name" : "get-latest-download"
+            "callsTool": {
+              "arguments": {},
+              "name": "get-latest-download"
             }
           },
           {
-            "callsTool" : {
-              "arguments" : {
-                "latestDownloadPath" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
+            "callsTool": {
+              "arguments": {
+                "latestDownloadPath": "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
               },
-              "name" : "paste-latest-download"
+              "name": "paste-latest-download"
             }
           }
         ]
       },
       {
-        "input" : "@downloads-manager show my latest download",
-        "mocks" : {
-          "get-latest-download" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md",
-          "show-latest-download" : "Showed the latest download"
+        "input": "@downloads-manager show my latest download",
+        "mocks": {
+          "get-latest-download": "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md",
+          "show-latest-download": "Showed the latest download"
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-
-              },
-              "name" : "get-latest-download"
+            "callsTool": {
+              "arguments": {},
+              "name": "get-latest-download"
             }
           },
           {
-            "callsTool" : {
-              "arguments" : {
-                "latestDownloadPath" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
+            "callsTool": {
+              "arguments": {
+                "latestDownloadPath": "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
               },
-              "name" : "show-latest-download"
+              "name": "show-latest-download"
             }
           }
         ]
@@ -345,18 +343,18 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.9.3",
     "untildify": "^6.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^24.10.2",
-    "@types/react": "^19.2.7",
-    "eslint": "^9.39.1",
-    "prettier": "^3.7.4",
-    "react": "^19.2.1",
-    "typescript": "^5.9.3"
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "react": "^19.2.1"
   },
   "scripts": {
     "build": "ray build -e dist",
