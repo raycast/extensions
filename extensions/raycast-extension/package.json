@@ -1,0 +1,138 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-extension",
+  "title": "ZBD Wallet",
+  "description": "Run zbdw wallet commands from Raycast with structured JSON output",
+  "icon": "icon.png",
+  "author": "andrerfneves",
+  "categories": [
+    "Developer Tools",
+    "Finance"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "init",
+      "title": "zbdw Init",
+      "description": "Initialize local wallet config with API key and lightning address",
+      "mode": "view"
+    },
+    {
+      "name": "info",
+      "title": "zbdw Info",
+      "description": "Show configured lightning address, masked API key, and wallet balance",
+      "mode": "view"
+    },
+    {
+      "name": "balance",
+      "title": "zbdw Balance",
+      "description": "Get current wallet balance in sats",
+      "mode": "view"
+    },
+    {
+      "name": "receive",
+      "title": "zbdw Receive",
+      "description": "Create a Lightning invoice or static charge for incoming payments",
+      "mode": "view"
+    },
+    {
+      "name": "send",
+      "title": "zbdw Send",
+      "description": "Send payment to bolt11, lnurl, lightning address, or gamertag",
+      "mode": "view"
+    },
+    {
+      "name": "payments",
+      "title": "zbdw Payments",
+      "description": "List local payment history records tracked by zbdw",
+      "mode": "view"
+    },
+    {
+      "name": "payment",
+      "title": "zbdw Payment",
+      "description": "Get payment details by id from local history or remote lookup",
+      "mode": "view"
+    },
+    {
+      "name": "paylink",
+      "title": "zbdw Paylink",
+      "description": "Create, get, list, and cancel hosted paylinks with metadata",
+      "mode": "view"
+    },
+    {
+      "name": "withdraw",
+      "title": "zbdw Withdraw",
+      "description": "Create LNURL-withdraw links and check withdraw status",
+      "mode": "view"
+    },
+    {
+      "name": "onchain",
+      "title": "zbdw Onchain",
+      "description": "Quote, send, and track onchain payout workflows",
+      "mode": "view"
+    },
+    {
+      "name": "fetch",
+      "title": "zbdw Fetch",
+      "description": "Run L402-aware HTTP fetch with optional max sats guard",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "ZBD API Key",
+      "description": "Used as ZBD_API_KEY for zbdw",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "cliPath",
+      "title": "zbdw Path",
+      "description": "Optional absolute path override for zbdw binary",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Optional ZBD_API_BASE_URL override",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "aiBaseUrl",
+      "title": "AI Base URL",
+      "description": "Optional ZBD_AI_BASE_URL override",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "tsx --test test/**/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "verify:contracts": "node ./scripts/verify-contracts.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@zbdpay/agent-wallet": "^1.2.0",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
