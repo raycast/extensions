@@ -34,12 +34,11 @@ export function ErrorView(props: ErrorViewProps) {
   return (
     <Detail
       markdown={model.markdown}
-      navigationTitle={props.title}
       metadata={metadata}
       actions={
         <ActionPanel>
           <Action title="Back" onAction={props.onBack} />
-          <Action.CopyToClipboard title="Copy Error JSON" content={model.rawJson} />
+          <Action.CopyToClipboard title={`Copy ${props.title} Error JSON`} content={model.rawJson} />
         </ActionPanel>
       }
     />

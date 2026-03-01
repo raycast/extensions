@@ -53,7 +53,6 @@ Configure these in Raycast extension preferences:
 - One of the following available at runtime:
   - `zbdw` in PATH
   - bundled local `@zbdpay/agent-wallet` dependency (installed with this extension)
-  - internet access for `npx -y @zbdpay/agent-wallet@latest` fallback
 
 ## Local Development
 
@@ -98,7 +97,6 @@ test/
   1. use explicit `cliPath` if configured
   2. try `zbdw` from PATH
   3. fallback to bundled local `@zbdpay/agent-wallet` CLI
-  4. fallback to `npx -y @zbdpay/agent-wallet@latest`
 - If `ray lint` fails on author validation, set `package.json.author` to your real Raycast handle.
 
 ## License

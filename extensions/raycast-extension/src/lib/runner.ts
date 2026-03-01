@@ -58,7 +58,6 @@ export async function runZbdwWithPreferences(
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     ZBD_API_KEY: prefs.apiKey,
-    NPM_CONFIG_YES: "true",
   };
 
   if (prefs.apiBaseUrl) {
@@ -79,6 +78,7 @@ export async function runZbdwWithPreferences(
   }
 
   const attempts: ExecuteCliOptions[] = [];
+  let spawnError: CliExecutionError | null = null;
 
   const zbdwAttempt: ExecuteCliOptions = {
     cliPath: "zbdw",
@@ -94,6 +94,7 @@ export async function runZbdwWithPreferences(
     if (!isSpawnEnoent(error)) {
       throw error;
     }
+    spawnError = error;
   }
 
   const bundledRun = await bundledRunResolver();
@@ -114,22 +115,16 @@ export async function runZbdwWithPreferences(
     }
   }
 
-  const npxAttempt: ExecuteCliOptions = {
-    cliPath: "npx",
-    args: ["-y", "@zbdpay/agent-wallet@latest", ...args],
-    env,
-    timeoutMs,
-  };
-  attempts.push(npxAttempt);
-
-  try {
-    return await executor(npxAttempt);
-  } catch (error) {
-    if (isSpawnEnoent(error)) {
-      throw withAttemptDetails(error, attempts);
-    }
-    throw error;
+  if (spawnError) {
+    throw withAttemptDetails(spawnError, attempts);
   }
+
+  throw new CliExecutionError("spawn_failed", "Unable to execute zbdw", 1, {
+    attempts: attempts.map((attempt) => ({
+      cliPath: attempt.cliPath,
+      args: attempt.args,
+    })),
+  });
 }
 
 async function resolveBundledRunFunction(): Promise<AgentWalletRun | null> {
@@ -244,7 +239,7 @@ function asText(chunk: unknown, encodingOrCallback?: unknown): string {
 }
 
 function applyEnvOverrides(env: NodeJS.ProcessEnv): () => void {
-  const keys = ["ZBD_API_KEY", "ZBD_API_BASE_URL", "ZBD_AI_BASE_URL", "NPM_CONFIG_YES"] as const;
+  const keys = ["ZBD_API_KEY", "ZBD_API_BASE_URL", "ZBD_AI_BASE_URL"] as const;
   const previous = new Map<string, string | undefined>();
 
   for (const key of keys) {

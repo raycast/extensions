@@ -1,13 +1,24 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-extension",
-  "title": "ZBD Wallet",
+  "title": "ZBD Agent Wallet",
   "description": "Run zbdw wallet commands from Raycast with structured JSON output",
-  "icon": "icon.png",
+  "icon": "icon-agent-wallet.png",
   "author": "andrerfneves",
+  "keywords": [
+    "zbd",
+    "zbdw",
+    "wallet",
+    "lightning",
+    "bitcoin"
+  ],
   "categories": [
     "Developer Tools",
     "Finance"
+  ],
+  "screenshots": [
+    "media/1.png",
+    "media/2.png"
   ],
   "license": "MIT",
   "platforms": [
@@ -16,71 +27,171 @@
   "commands": [
     {
       "name": "init",
-      "title": "zbdw Init",
+      "title": "Setup Wallet",
+      "subtitle": "ZBD Agent Wallet",
       "description": "Initialize local wallet config with API key and lightning address",
       "mode": "view"
     },
     {
       "name": "info",
-      "title": "zbdw Info",
+      "title": "Wallet Information",
+      "subtitle": "ZBD Agent Wallet",
       "description": "Show configured lightning address, masked API key, and wallet balance",
       "mode": "view"
     },
     {
       "name": "balance",
-      "title": "zbdw Balance",
+      "title": "Wallet Balance",
+      "subtitle": "ZBD Agent Wallet",
       "description": "Get current wallet balance in sats",
       "mode": "view"
     },
     {
       "name": "receive",
-      "title": "zbdw Receive",
+      "title": "Create Receive Request",
+      "subtitle": "ZBD Agent Wallet",
       "description": "Create a Lightning invoice or static charge for incoming payments",
       "mode": "view"
     },
     {
       "name": "send",
-      "title": "zbdw Send",
+      "title": "Send Payment",
+      "subtitle": "ZBD Agent Wallet",
       "description": "Send payment to bolt11, lnurl, lightning address, or gamertag",
       "mode": "view"
     },
     {
       "name": "payments",
-      "title": "zbdw Payments",
+      "title": "Payment History",
+      "subtitle": "ZBD Agent Wallet",
       "description": "List local payment history records tracked by zbdw",
       "mode": "view"
     },
     {
       "name": "payment",
-      "title": "zbdw Payment",
+      "title": "Payment Details",
+      "subtitle": "ZBD Agent Wallet",
       "description": "Get payment details by id from local history or remote lookup",
       "mode": "view"
     },
     {
-      "name": "paylink",
-      "title": "zbdw Paylink",
-      "description": "Create, get, list, and cancel hosted paylinks with metadata",
+      "name": "paylink-create",
+      "title": "Create Paylink",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Create a hosted paylink with fixed or ranged amount and metadata",
       "mode": "view"
     },
     {
-      "name": "withdraw",
-      "title": "zbdw Withdraw",
-      "description": "Create LNURL-withdraw links and check withdraw status",
+      "name": "paylink-get",
+      "title": "Get Paylink Details",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Get paylink details by id and refresh settlement metadata",
       "mode": "view"
     },
     {
-      "name": "onchain",
-      "title": "zbdw Onchain",
-      "description": "Quote, send, and track onchain payout workflows",
+      "name": "paylink-list",
+      "title": "List Paylinks",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "List locally tracked paylinks",
+      "mode": "view"
+    },
+    {
+      "name": "paylink-cancel",
+      "title": "Cancel Paylink",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Cancel an active paylink by id",
+      "mode": "view"
+    },
+    {
+      "name": "withdraw-create",
+      "title": "Create Withdrawal Request",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Create an LNURL-withdraw request for a sats amount",
+      "mode": "view"
+    },
+    {
+      "name": "withdraw-status",
+      "title": "Check Withdrawal Status",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Check withdrawal status by withdraw id",
+      "mode": "view"
+    },
+    {
+      "name": "onchain-quote",
+      "title": "Onchain Quote",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Create onchain payout quote for amount and destination",
+      "mode": "view"
+    },
+    {
+      "name": "onchain-send",
+      "title": "Send Onchain Payout",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Send onchain payout with terms acceptance",
+      "mode": "view"
+    },
+    {
+      "name": "onchain-status",
+      "title": "Onchain Payout Status",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Check onchain payout status by payout id",
+      "mode": "view"
+    },
+    {
+      "name": "onchain-retry-claim",
+      "title": "Retry Onchain Claim",
+      "subtitle": "ZBD Agent Wallet",
+      "description": "Retry claim flow for a payout id",
       "mode": "view"
     },
     {
       "name": "fetch",
-      "title": "zbdw Fetch",
+      "title": "Run L402 Fetch",
+      "subtitle": "ZBD Agent Wallet",
       "description": "Run L402-aware HTTP fetch with optional max sats guard",
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "wallet-info",
+      "title": "Get Wallet Info",
+      "description": "Returns configured wallet identity and balance"
+    },
+    {
+      "name": "wallet-balance",
+      "title": "Get Wallet Balance",
+      "description": "Returns current wallet balance in sats"
+    },
+    {
+      "name": "send-payment",
+      "title": "Send Payment",
+      "description": "Sends sats to a Lightning destination"
+    },
+    {
+      "name": "create-receive-request",
+      "title": "Create Receive Request",
+      "description": "Creates an invoice or static receive request"
+    },
+    {
+      "name": "list-payments",
+      "title": "List Payments",
+      "description": "Lists local payment history records"
+    },
+    {
+      "name": "get-payment",
+      "title": "Get Payment",
+      "description": "Gets payment details by id"
+    },
+    {
+      "name": "create-paylink",
+      "title": "Create Paylink",
+      "description": "Creates a hosted paylink with optional metadata"
+    }
+  ],
+  "ai": {
+    "instructions": "Use this extension for ZBD wallet operations. Amount inputs are sats. Prefer read actions (wallet-info, wallet-balance, list-payments) before write actions. For send-payment, confirm destination and amount_sats are provided."
+  },
   "preferences": [
     {
       "name": "apiKey",
@@ -123,14 +234,14 @@
   },
   "dependencies": {
     "@zbdpay/agent-wallet": "^1.2.0",
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
-    "eslint": "^8.57.1",
+    "eslint": "^9.36.0",
     "prettier": "^3.5.3",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"

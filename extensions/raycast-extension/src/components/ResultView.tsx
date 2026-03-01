@@ -21,12 +21,11 @@ export function ResultView(props: ResultViewProps) {
   return (
     <Detail
       markdown={model.markdown}
-      navigationTitle={props.title}
       metadata={metadata}
       actions={
         <ActionPanel>
           <Action title="Run Again" onAction={props.onBack} />
-          <Action.CopyToClipboard title="Copy JSON" content={model.rawJson} />
+          <Action.CopyToClipboard title={`Copy ${props.title} JSON`} content={model.rawJson} />
         </ActionPanel>
       }
     />

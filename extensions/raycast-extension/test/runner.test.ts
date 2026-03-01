@@ -129,35 +129,38 @@ test("runZbdw does not fallback when cliPath is explicitly configured", async ()
   assert.equal(calls[0].cliPath, "/custom/bin/zbdw");
 });
 
-test("runZbdw falls back to npx when bundled cli is unavailable", async () => {
+test("runZbdw returns spawn details when bundled cli is unavailable", async () => {
   const calls: Array<{ cliPath: string; args: string[] }> = [];
   const prefs: ExtensionPreferences = {
     apiKey: "test-key",
   };
 
-  const result = await runZbdwWithPreferences(
-    ["info"],
-    prefs,
-    5_000,
-    async (options) => {
-      calls.push({
-        cliPath: options.cliPath,
-        args: options.args,
-      });
+  await assert.rejects(
+    () =>
+      runZbdwWithPreferences(
+        ["info"],
+        prefs,
+        5_000,
+        async (options) => {
+          calls.push({
+            cliPath: options.cliPath,
+            args: options.args,
+          });
 
-      if (options.cliPath === "zbdw") {
-        throw new CliExecutionError("spawn_failed", "spawn zbdw ENOENT", 1);
-      }
-
-      return {
-        apiKey: "***",
-      };
+          throw new CliExecutionError("spawn_failed", "spawn zbdw ENOENT", 1);
+        },
+        async () => null,
+      ),
+    (error: unknown) => {
+      assert.equal(error instanceof CliExecutionError, true);
+      const typed = error as CliExecutionError;
+      assert.equal(typed.code, "spawn_failed");
+      assert.equal(typed.message, "spawn zbdw ENOENT");
+      const attempts = typed.details?.attempts as Array<{ cliPath: string }>; 
+      assert.equal(attempts.length, 1);
+      assert.equal(attempts[0].cliPath, "zbdw");
+      return true;
     },
-    async () => null,
   );
-
-  assert.deepEqual(result, { apiKey: "***" });
-  assert.equal(calls.length, 2);
-  assert.equal(calls[1].cliPath, "npx");
-  assert.deepEqual(calls[1].args.slice(0, 2), ["-y", "@zbdpay/agent-wallet@latest"]);
+  assert.equal(calls.length, 1);
 });

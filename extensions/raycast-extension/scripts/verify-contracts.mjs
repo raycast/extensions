@@ -9,9 +9,16 @@ const required = [
   "send",
   "payments",
   "payment",
-  "paylink",
-  "withdraw",
-  "onchain",
+  "paylink-create",
+  "paylink-get",
+  "paylink-list",
+  "paylink-cancel",
+  "withdraw-create",
+  "withdraw-status",
+  "onchain-quote",
+  "onchain-send",
+  "onchain-status",
+  "onchain-retry-claim",
   "fetch",
 ];
 
@@ -42,7 +49,7 @@ if (simulateMismatchIndex >= 0) {
 
 for (const name of required) {
   if (!commandNames.includes(name)) {
-    console.error(`contract failure: missing top-level command '${name}' in manifest`);
+    console.error(`contract failure: missing required command '${name}' in manifest`);
     ok = false;
   }
 }

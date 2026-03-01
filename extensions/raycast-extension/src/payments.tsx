@@ -1,44 +1,38 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ErrorView } from "./components/ErrorView";
-import { ResultView } from "./components/ResultView";
+import { PaymentsListView } from "./components/PaymentsListView";
 import { runZbdw } from "./lib/runner";
 
 export default function PaymentsCommand() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<unknown>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [payments, setPayments] = useState<unknown[]>([]);
   const [error, setError] = useState<unknown>();
 
-  async function onSubmit() {
+  const fetchPayments = useCallback(async () => {
     setIsLoading(true);
     setError(undefined);
+
     try {
-      setResult(await runZbdw(["payments"]));
+      const response = await runZbdw(["payments"]);
+      if (Array.isArray(response)) {
+        setPayments(response);
+      } else {
+        setPayments([]);
+      }
     } catch (err) {
       setError(err);
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
-  if (result !== undefined) {
-    return <ResultView title="zbdw payments" data={result} onBack={() => setResult(undefined)} />;
-  }
+  useEffect(() => {
+    void fetchPayments();
+  }, [fetchPayments]);
 
   if (error !== undefined) {
     return <ErrorView title="zbdw payments" error={error} onBack={() => setError(undefined)} />;
   }
 
-  return (
-    <Form
-      isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Run Zbdw Payments" onSubmit={onSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text="Lists local payment history." />
-    </Form>
-  );
+  return <PaymentsListView payments={payments} isLoading={isLoading} onRefresh={() => void fetchPayments()} />;
 }
