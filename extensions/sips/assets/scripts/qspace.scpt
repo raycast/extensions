@@ -62,22 +62,16 @@ function imagePathsForItemsInSelection(selection) {
 }
 
 function run() {
+	ObjC.import("CoreGraphics");
 	let imagePaths = [];
 
-	const se = Application('System Events');
-	const qspaceProcesses = se.applicationProcesses.whose({ '_and': [
-		{'name': { '_beginsWith': 'QSpace' }},
-		{'frontmost': true},
-	] })();
-	if (qspaceProcesses.length == 0) {
-		return [];
-	}
-
+	const windowList = ObjC.castRefToObject($.CGWindowListCopyWindowInfo($.kCGWindowListOptionOnScreenAboveWindow, $.kCGNullWindowID))
+	const appName = windowList.js.filter((win) => win.js['kCGWindowOwnerName'].js.includes("QSpace"))[0].js['kCGWindowOwnerName'].js
 
 	try {
 		let qspace = null;
 		try {
-			qspace = Application(qspaceProcesses[0].name());
+			qspace = Application(appName);
 		} catch {
 			console.log('Neither QSpace nor QSpace Pro could be found on the system.')
 			return [];

@@ -3,9 +3,9 @@
 ## [1.11.2 — QSpace Bug Fixes] - {PR_MERGE_DATE}
 
 - Added support for regular QSpace (the Mac App Store version), not just QSpace Pro
-- Fixed commands involving temporary files not working in QSpace
-- Fixed selection detection in QSpace failing for files with names containing special characters
 - Fixed failure to operate on clipboard image copies of files with names containing spaces
+- Fixed selection detection in QSpace failing for files with names containing special characters or spaces
+- Fixed commands involving temporary files not working in QSpace
 
 ## [1.11.1 — Bug Fixes] - 2025-07-07
 

@@ -174,7 +174,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
 
   // Attempt to get selected images from QSpace Pro
   try {
-    if (inputMethod == ImageInputSource.QSpaceSelection || (activeApp == "QSpace Pro" || activeApp == "QSpace")) {
+    if (inputMethod == ImageInputSource.QSpaceSelection || activeApp == "QSpace Pro" || activeApp == "QSpace") {
       selectedImages = await getQSpaceSelection();
     }
   } catch (error) {
