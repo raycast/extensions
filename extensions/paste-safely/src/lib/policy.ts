@@ -1,12 +1,9 @@
-import { environment, getPreferenceValues } from "@raycast/api";
+import { environment } from "@raycast/api";
 import * as fs from "fs";
 import * as path from "path";
 import { CONFIG_FILE_NAME, createDefaultPolicy, type Policy } from "./constants";
-export type { Policy } from "./constants";
 
-type Preferences = {
-  pasteSafelyConfigPath?: string;
-};
+export type { Policy } from "./constants";
 
 const DEFAULT_POLICY: Policy = createDefaultPolicy();
 
@@ -16,53 +13,7 @@ const DEFAULT_POLICY: Policy = createDefaultPolicy();
  * Otherwise, default to the extension support directory.
  */
 export function getConfigFilePath(): string {
-  const preferences = getPreferenceValues<Preferences>();
-  const defaultPath = path.join(environment.supportPath, CONFIG_FILE_NAME);
-
-  if (preferences.pasteSafelyConfigPath?.trim()) {
-    // User specified a custom path
-    const customPath = preferences.pasteSafelyConfigPath.trim();
-
-    try {
-      // Check if path exists and get its stats
-      let stats: fs.Stats;
-      try {
-        stats = fs.statSync(customPath);
-      } catch {
-        // Path doesn't exist - fall back to default
-        console.warn(
-          `[paste-safely] Custom config path does not exist: ${customPath}. Falling back to default: ${defaultPath}`,
-        );
-        return defaultPath;
-      }
-
-      // If it's a directory, append the default filename
-      if (stats.isDirectory()) {
-        return path.join(customPath, CONFIG_FILE_NAME);
-      }
-
-      // It's a file - check if we can access it
-      try {
-        fs.accessSync(customPath, fs.constants.R_OK | fs.constants.W_OK);
-        return customPath;
-      } catch {
-        // No read/write access - fall back to default
-        console.warn(
-          `[paste-safely] Custom config path is not accessible: ${customPath}. Falling back to default: ${defaultPath}`,
-        );
-        return defaultPath;
-      }
-    } catch (error) {
-      // Any other error - fall back to default with warning
-      console.warn(
-        `[paste-safely] Invalid custom config path: ${customPath}. Falling back to default: ${defaultPath}. Error: ${String(error)}`,
-      );
-      return defaultPath;
-    }
-  }
-
-  // Default to extension support directory
-  return defaultPath;
+  return path.join(environment.supportPath, CONFIG_FILE_NAME);
 }
 
 /**
