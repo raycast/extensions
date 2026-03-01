@@ -1,6 +1,6 @@
 # CricketCast
 
-## [Add Menu Bar] - {PR_MERGE_DATE}
+## [Add Menu Bar] - 2026-03-01
 
 - Menu Bar grants easy access to latest scores
 
