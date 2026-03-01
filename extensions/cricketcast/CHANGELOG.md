@@ -1,6 +1,6 @@
 # CricketCast
 
-## [Add Menu Bar] - {PR_MERGE_DARE}
+## [Add Menu Bar] - {PR_MERGE_DATE}
 
 - Menu Bar grants easy access to latest scores
 
