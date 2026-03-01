@@ -1,6 +1,6 @@
 # GitHub Enterprise Changelog
 
-## [Add Search Repositories Feature] - {PR_MERGE_DATE}
+## [Add Search Repositories Feature] - 2026-03-01
 
 - Added new "Search Repositories" command to search across public and private repositories.
 - Added repository actions shortcuts for issues, pull requests, and actions.
