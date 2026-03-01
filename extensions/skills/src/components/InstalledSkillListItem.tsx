@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, Keyboard, List, Color } from "@raycast/api";
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { useCachedPromise } from "@raycast/utils";
 import { type InstalledSkill, parseFrontmatter } from "../shared";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";

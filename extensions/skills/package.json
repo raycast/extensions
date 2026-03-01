@@ -45,6 +45,14 @@
   ],
   "preferences": [
     {
+      "name": "customNpxPath",
+      "title": "Custom npx Path",
+      "description": "Optional custom `npx` path override for cases when the extension cannot detect it automatically.",
+      "placeholder": "e.g., /opt/homebrew/bin/npx or ~/.local/bin/npx",
+      "type": "textfield",
+      "required": false
+    },
+    {
       "name": "githubToken",
       "title": "GitHub Personal Access Token",
       "description": "Optional token to increase the GitHub API rate limit from 60 to 5,000 requests/hour.",
@@ -56,13 +64,16 @@
     "@raycast/api": "1.104.5",
     "@raycast/utils": "2.2.3",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "semver": "^7.7.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^25.2.3",
     "@types/react": "^19.2.13",
+    "@types/semver": "^7.7.1",
     "eslint": "^10.0.0",
+    "eslint-plugin-n": "^17.24.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },

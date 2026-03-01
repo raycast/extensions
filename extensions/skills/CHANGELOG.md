@@ -1,5 +1,11 @@
 # Changelog
 
+## [Improve macOS `npx` Path Resolution] - {PR_MERGE_DATE}
+
+- Run the Skills CLI without spawning a login shell by building an explicit PATH for Homebrew and common Node.js version-manager installs
+- Add a custom `npx` path preference for non-standard setups
+- Show clearer recovery guidance for `npx` and Skills CLI failures, including a shortcut to open Extension Preference
+
 ## [Fix Incomplete Agent List] - 2026-03-17
 
 - Use `skills list --json` for structured output instead of parsing ANSI text
