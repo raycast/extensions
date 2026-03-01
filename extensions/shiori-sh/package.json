@@ -86,6 +86,216 @@
       "interval": "5m"
     }
   ],
+  "tools": [
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "description": "Save a URL to the user's Shiori bookmark library. Use this when the user wants to save, bookmark, or store a link for later reading. The URL is required, title is optional."
+    },
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "description": "Search the user's Shiori bookmarks by title, URL, or domain. Returns matching links with their details. Use this when the user wants to find, look up, or search for saved bookmarks by topic or keyword."
+    },
+    {
+      "name": "mark-read",
+      "title": "Mark as Read",
+      "description": "Mark a bookmark as read. Requires the link ID. Use this when the user has finished reading an article and wants to mark it as completed."
+    },
+    {
+      "name": "mark-unread",
+      "title": "Mark as Unread",
+      "description": "Mark a bookmark as unread, moving it back to the inbox. Requires the link ID. Use this when the user wants to re-read something or keep it in their reading list."
+    },
+    {
+      "name": "delete-link",
+      "title": "Delete Link",
+      "description": "Permanently delete a bookmark from the user's Shiori library. Requires the link ID. Use this when the user explicitly wants to remove a saved link. This action cannot be undone."
+    },
+    {
+      "name": "get-unread",
+      "title": "Get Unread Links",
+      "description": "Retrieve all unread bookmarks from the user's Shiori library. Returns a list of links that haven't been read yet. Use this when the user wants to see their reading list or what they have saved to read."
+    },
+    {
+      "name": "get-recent",
+      "title": "Get Recent Links",
+      "description": "Retrieve recently saved bookmarks from the user's Shiori library. Returns the most recently added links. Use this when the user wants to see what they've saved lately."
+    }
+  ],
+  "ai": {
+    "instructions": "When the user asks to save, bookmark, search, or manage links, or asks about their reading list or unread/saved items, use the Shiori tools. Always use the appropriate tool rather than declining.",
+    "evals": [
+      {
+        "input": "@shiori-sh save this article for later: https://react.dev/learn",
+        "mocks": {
+          "save-link": {
+            "success": true,
+            "linkId": "abc123",
+            "duplicate": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-link",
+              "arguments": {
+                "url": "https://react.dev/learn"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@shiori-sh what do I have to read?",
+        "mocks": {
+          "get-unread": {
+            "success": true,
+            "links": [
+              {
+                "id": "link-1",
+                "url": "https://example.com/react-patterns",
+                "title": "Advanced React Patterns",
+                "domain": "example.com",
+                "summary": "Learn advanced patterns for building scalable React applications.",
+                "savedAt": "2026-02-28T10:00:00Z"
+              },
+              {
+                "id": "link-2",
+                "url": "https://blog.dev/typescript-tips",
+                "title": "TypeScript Tips and Tricks",
+                "domain": "blog.dev",
+                "summary": "Improve your TypeScript skills with these practical tips.",
+                "savedAt": "2026-02-27T15:30:00Z"
+              }
+            ],
+            "total": 2
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-unread"
+          }
+        ]
+      },
+      {
+        "input": "@shiori-sh find my bookmarks about React",
+        "mocks": {
+          "search-links": {
+            "success": true,
+            "links": [
+              {
+                "id": "link-1",
+                "url": "https://react.dev/learn",
+                "title": "React Documentation",
+                "domain": "react.dev",
+                "summary": "The official React documentation.",
+                "read": false,
+                "savedAt": "2026-02-28T10:00:00Z"
+              }
+            ],
+            "total": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-links",
+              "arguments": {
+                "query": "React"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@shiori-sh mark link-abc123 as read",
+        "mocks": {
+          "mark-read": {
+            "success": true,
+            "updated": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "mark-read",
+              "arguments": {
+                "linkId": "link-abc123"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@shiori-sh move link-xyz789 back to my inbox",
+        "mocks": {
+          "mark-unread": {
+            "success": true,
+            "updated": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "mark-unread",
+              "arguments": {
+                "linkId": {
+                  "includes": "xyz789"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@shiori-sh what have I saved recently?",
+        "mocks": {
+          "get-recent": {
+            "success": true,
+            "links": [
+              {
+                "id": "link-1",
+                "url": "https://example.com/article",
+                "title": "Recent Article",
+                "domain": "example.com",
+                "summary": "A recently saved article.",
+                "read": false,
+                "savedAt": "2026-03-01T09:00:00Z"
+              }
+            ],
+            "total": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-recent"
+          }
+        ]
+      },
+      {
+        "input": "@shiori-sh bookmark https://tailwindcss.com/docs with title Tailwind CSS Docs",
+        "mocks": {
+          "save-link": {
+            "success": true,
+            "linkId": "new-link-123",
+            "duplicate": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-link",
+              "arguments": {
+                "url": "https://tailwindcss.com/docs",
+                "title": "Tailwind CSS Docs"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.6",
     "@raycast/utils": "^2.2.2"
