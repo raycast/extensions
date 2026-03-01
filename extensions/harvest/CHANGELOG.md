@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Add Windows Support] - 2026-02-27
+## [Add Windows Support] - {PR_MERGE_DATE}
 
 - Added: Tested on Raycast for Windows.
 
