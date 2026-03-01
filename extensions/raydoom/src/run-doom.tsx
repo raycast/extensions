@@ -9,10 +9,16 @@ import {
   Alert,
   confirmAlert,
   closeMainWindow,
+  getPreferenceValues,
 } from "@raycast/api";
+
+interface Preferences {
+  forwardBackwardDelay: string;
+  turnStrafeDelay: string;
+}
 import { useEffect, useState, useCallback, useRef, memo } from "react";
 import { getDoomEngine, cleanupDoomEngine } from "./doom-engine";
-import { InputAction, getDoomKey } from "./input-mapper";
+import { InputAction, getDoomKey, getActionDelay } from "./input-mapper";
 import { GameConfig } from "./menu-config";
 import { startMemoryMonitoring, stopMemoryMonitoring, formatMemoryStats, getMemoryStats } from "./memory-manager";
 import type { MemoryStats } from "./memory-manager";
@@ -336,11 +342,17 @@ function Command({ config = DEFAULT_CONFIG }: RunDoomProps = {}) {
       const keyCode = getDoomKey(action);
       const engine = getDoomEngine();
 
+      // Get user-configured delays from Raycast preferences
+      const prefs = getPreferenceValues<Preferences>();
+      const forwardBackwardDelay = parseInt(prefs.forwardBackwardDelay) || 200;
+      const turnStrafeDelay = parseInt(prefs.turnStrafeDelay) || 150;
+      const delay = getActionDelay(action, forwardBackwardDelay, turnStrafeDelay);
+
       engine.queueKey(keyCode);
 
       setTimeout(() => {
         engine.queueKey(-keyCode);
-      }, 100);
+      }, delay);
     },
     [isInitialized],
   );

@@ -65,3 +65,63 @@ export const INPUT_ACTION_MAP: Record<InputAction, number> = {
 export function getDoomKey(action: InputAction): number {
   return INPUT_ACTION_MAP[action];
 }
+
+/**
+ * Default key release delays per action (ms)
+ * Movement keys: longer delay = smoother feel, less pressing needed
+ * Action/menu keys: shorter delay = more responsive
+ */
+export const ACTION_DELAYS: Record<InputAction, number> = {
+  [InputAction.MOVE_FORWARD]: 200,
+  [InputAction.MOVE_BACKWARD]: 200,
+  [InputAction.TURN_LEFT]: 250,
+  [InputAction.TURN_RIGHT]: 250,
+  [InputAction.STRAFE_LEFT]: 250,
+  [InputAction.STRAFE_RIGHT]: 250,
+  [InputAction.FIRE]: 100,
+  [InputAction.USE]: 100,
+  [InputAction.WEAPON_1]: 50,
+  [InputAction.WEAPON_2]: 50,
+  [InputAction.WEAPON_3]: 50,
+  [InputAction.WEAPON_4]: 50,
+  [InputAction.WEAPON_5]: 50,
+  [InputAction.WEAPON_6]: 50,
+  [InputAction.WEAPON_7]: 50,
+  [InputAction.ESCAPE]: 50,
+  [InputAction.ENTER]: 50,
+  [InputAction.YES]: 50,
+  [InputAction.NO]: 50,
+  [InputAction.MAP]: 50,
+  [InputAction.PAUSE]: 50,
+};
+
+// Movement actions that can be customized via preferences
+const FORWARD_BACKWARD_ACTIONS = new Set([
+  InputAction.MOVE_FORWARD,
+  InputAction.MOVE_BACKWARD,
+]);
+
+const TURN_STRAFE_ACTIONS = new Set([
+  InputAction.TURN_LEFT,
+  InputAction.TURN_RIGHT,
+  InputAction.STRAFE_LEFT,
+  InputAction.STRAFE_RIGHT,
+]);
+
+/**
+ * Get the key release delay for an action.
+ * Optionally accepts user-configured delays for movement categories.
+ */
+export function getActionDelay(
+  action: InputAction,
+  forwardBackwardDelay?: number,
+  turnStrafeDelay?: number
+): number {
+  if (forwardBackwardDelay !== undefined && FORWARD_BACKWARD_ACTIONS.has(action)) {
+    return forwardBackwardDelay;
+  }
+  if (turnStrafeDelay !== undefined && TURN_STRAFE_ACTIONS.has(action)) {
+    return turnStrafeDelay;
+  }
+  return ACTION_DELAYS[action] ?? 100;
+}

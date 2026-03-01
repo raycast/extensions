@@ -22,7 +22,18 @@ Play the classic first-person shooter DOOM directly in Raycast, rendered entirel
 
 ## Configuration
 
-No additional configuration is required. The extension works out-of-the-box with the downloaded DOOM Shareware WAD file.
+The extension works out-of-the-box with sensible defaults, but movement feel can be tuned via Raycast extension preferences.
+
+### Movement Delay Settings
+
+Open Raycast → Extensions → RayDoom → Preferences to adjust:
+
+| Preference | Default | Description |
+|---|---|---|
+| **Forward/Backward Delay (ms)** | `200` | How long W and S keys stay pressed. Higher = smoother movement, less pressing needed. |
+| **Turn/Strafe Delay (ms)** | `150` | How long A, D, Q, E keys stay pressed. |
+
+These settings apply to both **Play DOOM** and **Quick Launch** commands. Fire, weapon selection, and menu keys always use short fixed delays (50–100ms) for responsiveness.
 
 ### Technical Details
 

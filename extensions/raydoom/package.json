@@ -23,6 +23,24 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "forwardBackwardDelay",
+      "title": "Forward/Backward Delay (ms)",
+      "description": "How long W and S keys stay pressed. Higher value = smoother movement, less key pressing needed. Default: 200ms",
+      "type": "textfield",
+      "default": "200",
+      "required": false
+    },
+    {
+      "name": "turnStrafeDelay",
+      "title": "Turn/Strafe Delay (ms)",
+      "description": "How long A, D, Q, E keys stay pressed. Default: 150ms",
+      "type": "textfield",
+      "default": "250",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^1.17.0",
