@@ -1,7 +1,7 @@
 import Repository from "@/components/Repository";
 import { SEARCH_REPOSITORIES, GET_REPOSITORIES } from "@/queries/repositories";
 import { SearchRepositories, GetUserRepositories, RepositoryOwnProps } from "@/types";
-import { fetcher, plural } from "@/utils";
+import { fetcher } from "@/utils";
 import { List, popToRoot, showToast, Toast } from "@raycast/api";
 import { debounce } from "debounce";
 import { useState } from "react";
@@ -29,7 +29,7 @@ export default function Command() {
       const { search }: SearchRepositories = await fetcher({
         document: SEARCH_REPOSITORIES,
         variables: {
-          query: `${query}`,
+          query,
         },
       });
 
