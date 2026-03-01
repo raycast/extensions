@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "skill-manager",
+  "title": "Skill Manager",
+  "description": "Manage skills across coding agents with a central repository and Raycast snippets",
+  "icon": "extension-icon.png",
+  "author": "ramir_leite",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-skills",
+      "title": "List Skills",
+      "description": "View, search, and manage your coding skills",
+      "mode": "view"
+    },
+    {
+      "name": "add-skill",
+      "title": "Add Skill",
+      "description": "Add a new skill to your skills.md",
+      "mode": "view"
+    },
+    {
+      "name": "import-skill-from-github",
+      "title": "Import Skill from GitHub",
+      "description": "Import a SKILL.md file from a GitHub repository",
+      "mode": "view"
+    },
+    {
+      "name": "import-github-repo-as-skill",
+      "title": "Import GitHub Repo as Skill",
+      "description": "Transform a GitHub repository into a skill using opensrc",
+      "mode": "view"
+    },
+    {
+      "name": "sync-skills",
+      "title": "Sync Skills",
+      "description": "Merge skills to central and sync central to selected agents",
+      "mode": "view"
+    },
+    {
+      "name": "manage-agents",
+      "title": "Manage Agents",
+      "description": "View and configure detected coding agents",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "skillsFilePath",
+      "title": "Skills File Path",
+      "description": "Path to your skills.md file",
+      "type": "textfield",
+      "default": "~/skills.md",
+      "required": false
+    },
+    {
+      "name": "centralSkillsFolder",
+      "title": "Central Skills Folder",
+      "description": "Central folder for skill files (source of truth)",
+      "type": "textfield",
+      "default": "~/agents/skills",
+      "required": false
+    },
+    {
+      "name": "codexSkillsFolder",
+      "title": "Codex Skills Folder",
+      "description": "Path to .codex/skills folder",
+      "type": "textfield",
+      "default": "~/.codex/skills",
+      "required": false
+    },
+    {
+      "name": "githubToken",
+      "title": "GitHub Personal Access Token",
+      "description": "Optional token for accessing private repositories",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.14.0",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
