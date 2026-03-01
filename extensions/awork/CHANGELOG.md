@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [Improve time logging search] - {PR_MERGE_DATE}
+## [Improve time logging search] - 2026-03-01
 
 - Added search for task key and project key in time logging
 
