@@ -31,7 +31,7 @@ To get your SingularityApp API token:
 1. Log in to your [SingularityApp account](https://me.singularity-app.com/rest-tokens)
 2. Navigate to **API tokens** in side bar
 3. Generate or copy your API token
-4. Paste it into the **Set API Token** command in Raycast
+4. Paste it into the extension preferences
 
 ## Commands
 
