@@ -73,7 +73,6 @@
       "description": "Your SingularityApp API token. Get it at https://me.singularity-app.com/rest-tokens",
       "type": "password",
       "required": true
-
     }
   ],
   "dependencies": {
