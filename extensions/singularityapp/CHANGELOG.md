@@ -1,6 +1,6 @@
 # SingularityApp Changelog
 
-## [0.2.0] - {PR_MERGE_DATE}
+## [0.2.0] - 2026-03-01
 
 ### Added
 
