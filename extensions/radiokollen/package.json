@@ -1,0 +1,57 @@
+{
+  "name": "radiokollen",
+  "version": "0.1.0",
+  "description": "Sök låtspelningar i Sveriges Radio P4 med filter, perioder och historik.",
+  "type": "module",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "test": "node -e \"console.log('No standalone tests for radiokollen yet')\""
+  },
+  "dependencies": {
+    "@filipkillander/radiokollen-sdk": "^0.1.0",
+    "@raycast/api": "^1.104.6",
+    "@workspace/raycast-core": "file:../../packages/raycast-core",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.9.3"
+  },
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "title": "Radiokollen",
+  "icon": "icon.png",
+  "author": "filipkillander",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "icon": "icon.png",
+      "name": "search-radiokollen",
+      "title": "Sök Radiokollen",
+      "subtitle": "Sök i P4 med artist, label och låttitel",
+      "description": "Sök låtspelningar i alla P4-regioner med datumintervall, matchläge och partial-failure-hantering.",
+      "mode": "view"
+    },
+    {
+      "icon": "icon.png",
+      "name": "radiokollen-history",
+      "title": "Radiokollen Historik",
+      "subtitle": "Återkör tidigare sökningar",
+      "description": "Visa och återkör sparade sökningar från Radiokollen.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [],
+  "platforms": [
+    "macOS"
+  ],
+  "access": "private"
+}
