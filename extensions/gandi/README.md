@@ -1,3 +1,7 @@
+<p align="center">
+   <img src="./assets/extension-icon.png" width="150" height="150" />
+</p>
+
 # Gandi Extension for Raycast
 
 Manage your Gandi domains, DNS records, and check domain availability directly from Raycast.
@@ -60,13 +64,14 @@ Manage your Gandi domains, DNS records, and check domain availability directly f
 ## Preferences
 
 - **API Token**: Your Gandi Personal Access Token (required)
+- **Sandbox API Token**: Your Gandi Sandbox Personal Access Token (optional) [if present, the extension will use the sandbox API]
 
 ## API Permissions
 
 Your Personal Access Token should have the following permissions:
-- Domain: Read/Write access to view and manage domains
-- DNS: Read/Write access to manage DNS records
-- Certificate: Read access (optional, for future features)
+- **Domain**: Read/Write access to view and manage domains
+- **DNS**: Read/Write access to manage DNS records
+- **Certificate**: Read access (optional, for future features)
 
 ## Support
 

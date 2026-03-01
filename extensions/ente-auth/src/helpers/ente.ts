@@ -3,7 +3,7 @@ import { execSync } from "child_process";
 import fse from "fs-extra";
 import { DEFAULT_EXPORT_DIR_PATH, EXPORT_FILE_PATH } from "../constants/ente";
 
-const DEFAULT_CLI_PATH = getPreferenceValues().cliPath || "/usr/local/bin/ente";
+const DEFAULT_CLI_PATH = getPreferenceValues<Preferences>().cliPath || "/usr/local/bin/ente";
 
 export const checkEnteExportDirValue = (): boolean => {
 	const accountList = execSync(`${DEFAULT_CLI_PATH} account list`).toString();
@@ -45,13 +45,6 @@ export const checkEnteBinary = (): boolean => {
 };
 
 export const exportEnteAuthSecrets = (): boolean => {
-	try {
-		fse.removeSync(EXPORT_FILE_PATH);
-		console.log("Export file removed");
-	} catch (error) {
-		console.error("Error during removal:", error);
-	}
-
 	try {
 		execSync(`${DEFAULT_CLI_PATH} export`);
 		console.log("Export to", EXPORT_FILE_PATH);

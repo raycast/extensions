@@ -1,5 +1,23 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Razuna MCP Server] - 2026-02-03
+
+Add official Razuna MCP Server to registry.
+
+## [Update Anytype MCP Server] - 2026-01-13
+
+Update Anytype MCP Server to use the latest version of the Anytype API.
+
+## [Add Circleback MCP Server] - 2026-01-13
+
+Add official Circleback MCP Server to registry.
+
+## [Add Atono MCP Server] - 2025-12-08
+
+Add official Atono MCP Server to registry to manage projects
+
+## [Update Nuxt MCP Server URL] - 2025-11-17
+
 ## [Update Nuxt UI MCP Server URL] - 2025-09-23
 
 ## [Add Nuxt UI MCP Server] - 2025-09-10

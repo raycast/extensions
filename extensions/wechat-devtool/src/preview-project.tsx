@@ -11,10 +11,9 @@ import {
   Icon,
 } from "@raycast/api";
 
-import ProjectList from "./components/project-list";
-import ImageView from "./components/image-view";
-import { previewProject } from "./utils/command";
-import { ExtensionConfig, Project, ProjectExtraInfo } from "./types";
+import { previewProject } from "@/utils";
+import { ProjectList, ImageView } from "@/components";
+import type { ExtensionConfig, Project, ProjectExtraInfo } from "@/types";
 
 export default function PreviewProject() {
   const { push, pop } = useNavigation();
@@ -26,7 +25,7 @@ export default function PreviewProject() {
     });
 
     try {
-      const qrcodePath = await previewProject(config.cliPath, project.path, project.id);
+      const qrcodePath = await previewProject(project.path, project.id);
       /* eslint-disable @raycast/prefer-title-case */
       push(
         <ImageView

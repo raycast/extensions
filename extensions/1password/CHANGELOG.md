@@ -1,5 +1,14 @@
 # 1Password Changelog
 
+## [Chore] - 2025-11-15
+
+- Add stricter, opinionated eslint rules for clarity
+
+## [Chore] - 2025-10-14
+
+- Adopt the latest available extension template
+- Fix lints
+
 ## [Enhancements] - 2025-10-01
 
 - Added Paste actions for Login items: Paste Username, Paste Password, Paste One-time Password.

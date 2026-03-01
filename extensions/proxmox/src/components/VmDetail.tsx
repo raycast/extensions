@@ -1,12 +1,12 @@
 import { List } from "@raycast/api";
-import { PveVmStatus, type PveVm, PveVmTypes } from "../api";
-import { formatPercentage, formatShortTime, formatStorageSize } from "../utils";
+import { type PveVm, PveVmStatus, PveVmTypes } from "@/types";
+import { formatCPU, formatPercentage, formatShortTime, formatStorageSize } from "@/utils/format";
 
-function formatCPU(maxcpu: number): string {
-  return Math.round(maxcpu) + " CPU(s)";
-}
+type VmDetailProps = {
+  vm: PveVm;
+};
 
-export default function VmDetail({ vm }: { vm: PveVm }) {
+export const VmDetail = ({ vm }: VmDetailProps) => {
   const hasDetails = vm.status !== PveVmStatus.stopped;
   let cpu, memory, disk;
   if (hasDetails) {
@@ -54,4 +54,4 @@ export default function VmDetail({ vm }: { vm: PveVm }) {
       }
     />
   );
-}
+};

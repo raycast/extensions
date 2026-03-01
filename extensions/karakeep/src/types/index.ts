@@ -2,9 +2,6 @@
 export type linkMainActionType = "openInBrowser" | "viewDetail" | "edit" | "copy";
 export type textMainActionType = "viewDetail" | "edit" | "copy";
 
-// Create bookmark types
-export type createBookmarkType = "link" | "text";
-
 // Common display preferences for internal use
 interface DisplayOptions {
   displayBookmarkPreview: boolean;
@@ -24,7 +21,7 @@ interface BaseConfig {
   showWebsitePreview: boolean;
   linkMainAction: linkMainActionType;
   textMainAction: textMainActionType;
-  createBookmarkType: createBookmarkType;
+  prefillUrlFromBrowser: boolean;
 }
 
 export interface Preferences extends Partial<DisplayOptions> {
@@ -34,7 +31,7 @@ export interface Preferences extends Partial<DisplayOptions> {
   showWebsitePreview: boolean;
   linkMainAction?: linkMainActionType;
   textMainAction?: textMainActionType;
-  createBookmarkType?: createBookmarkType;
+  prefillUrlFromBrowser?: boolean;
 }
 
 export interface Config extends BaseConfig, DisplayOptions {}
@@ -42,7 +39,7 @@ export interface Config extends BaseConfig, DisplayOptions {}
 // Asset types
 export interface Asset {
   id: string;
-  assetType: "screenshot" | "image" | "pdf" | undefined;
+  assetType?: "screenshot" | "image" | "pdf";
 }
 
 // Tag related types
@@ -94,6 +91,8 @@ export interface Bookmark {
 export interface List {
   id: string;
   name: string;
+  icon?: string;
+  parentId?: string | null;
 }
 
 export interface ListDetails {
@@ -111,4 +110,5 @@ export interface GetBookmarksParams {
   cursor?: string;
   favourited?: boolean;
   archived?: boolean;
+  limit?: number;
 }

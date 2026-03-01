@@ -73,9 +73,14 @@ function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Fo
 async function getChromiumProfilesFallback(path: string) {
   if (!existsSync(path)) return { profiles: [], defaultProfile: "" };
 
-  const profiles = readdirSync(path, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && existsSync(join(path, d.name, "Bookmarks")))
-    .map((d) => ({ path: d.name, name: d.name }));
+  let profiles;
+  try {
+    profiles = readdirSync(path, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && existsSync(join(path, d.name, "Bookmarks")))
+      .map((d) => ({ path: d.name, name: d.name }));
+  } catch {
+    return { profiles: [], defaultProfile: "" };
+  }
 
   profiles.sort((a, b) => a.name.localeCompare(b.name));
   const defaultProfile = profiles.find((p) => p.path === "Default")?.path || profiles[0]?.path || "";
@@ -88,11 +93,18 @@ async function getChromiumProfiles(path: string) {
     return { profiles: [], defaultProfile: "" };
   }
 
-  const file = await read(`${path}/Local State`, "utf-8");
+  let file: string;
+  try {
+    file = await read(`${path}/Local State`, "utf-8");
+  } catch {
+    // Handle permission errors (EPERM) or other file access errors
+    return getChromiumProfilesFallback(path);
+  }
+
   let localState;
   try {
     localState = JSON.parse(file);
-  } catch (e) {
+  } catch {
     return getChromiumProfilesFallback(path);
   }
 
@@ -102,8 +114,12 @@ async function getChromiumProfiles(path: string) {
   const profiles = Object.entries(profileInfoCache)
     // Only keep profiles that have bookmarks
     .filter(([profilePath]) => {
-      const profileDirectory = readdirSync(`${path}/${profilePath}`);
-      return profileDirectory.includes("Bookmarks");
+      try {
+        const profileDirectory = readdirSync(`${path}/${profilePath}`);
+        return profileDirectory.includes("Bookmarks");
+      } catch {
+        return false;
+      }
     })
     .map(([path, profile]) => {
       return {

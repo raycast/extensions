@@ -79,7 +79,7 @@ All properties for extension or command-specific preferences. Use the [Preferenc
 | type<mark style="color:red;">\*</mark>        | The preference type. We currently support `"textfield"` and `"password"` (for secure entry), `"checkbox"`, `"dropdown"`, `"appPicker"`, `"file"`, and `"directory"`.                                                                                                                                                                                                                       |
 | required<mark style="color:red;">\*</mark>    | Indicates whether the value is required and must be entered by the user before the extension is usable.                                                                                                                                                                                                                                                                                    |
 | placeholder                                   | Text displayed in the preference's field when no value has been input.                                                                                                                                                                                                                                                                                                                     |
-| default                                       | <p>The optional default value for the field. For textfields, this is a string value; for checkboxes a boolean; for dropdowns the value of an object in the data array; for appPickers an application name, bundle ID or path.</p><p>Additionally, you can specify a different value per plaform by passing an object: <code>{ "macOS": ..., "Windows": ... }</code>`.</p>                  |
+| default                                       | <p>The optional default value for the field. For textfields, this is a string value; for checkboxes a boolean; for dropdowns the value of an object in the data array; for appPickers an application name, bundle ID or path.</p><p>Additionally, you can specify a different value per plaform by passing an object: <code>{ "macOS": ..., "Windows": ... }</code>.</p>                   |
 
 Depending on the `type` of the Preference, some additional properties can be required:
 
@@ -114,7 +114,7 @@ Depending on the `type` of the Argument, some additional properties can be requi
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | data<mark style="color:red;">\*</mark> | An array of objects with `title` and `value` properties, e.g.: `[{"title": "Item 1", "value": "1"}]` |
 
-#### Tool Properties
+## Tool Properties
 
 All properties for a tool.
 
@@ -125,7 +125,7 @@ All properties for a tool.
 | description<mark style="color:red;">\*</mark> | It helps users and the AI understand what the tool does. It will be displayed in the Store and in Preferences.                                                                                                                                                                                                                                |
 | icon                                          | <p>An optional reference to an icon file in the assets folder. Use png format with a size of at least 512 x 512 pixels. To support light and dark theme, add two icons, one with <code>@dark</code> as suffix, e.g. <code>icon.png</code> and <code>icon@dark.png</code>.</p><p>If no icon is specified, the extension icon will be used.</p> |
 
-#### AI Properties
+## AI Properties
 
 All properties for the AI capabilities of the extension. Alternatively, this object can be written in a `ai.json` (or `ai.yaml`) file at the root of the extension.
 

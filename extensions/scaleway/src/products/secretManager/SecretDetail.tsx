@@ -1,9 +1,9 @@
 import { List } from '@raycast/api'
-import type { Secret } from '@scaleway/sdk'
+import type { Secretv1beta1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 
 type SecretDetailProps = {
-  secret: Secret.v1beta1.Secret
+  secret: Secretv1beta1.Secret
 }
 
 export const SecretDetail = ({ secret }: SecretDetailProps) => (

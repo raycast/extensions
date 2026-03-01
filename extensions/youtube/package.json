@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube",
   "title": "YouTube",
-  "description": "Search Videos, Channels, and more...",
+  "description": "Search Videos, Channels, and more",
   "icon": "youtube.png",
   "author": "tonka3000",
   "contributors": [
@@ -18,7 +18,7 @@
       "name": "search-videos",
       "title": "Search Videos",
       "subtitle": "YouTube",
-      "description": "Search YouTube Videos",
+      "description": "Search YouTube videos",
       "mode": "view",
       "arguments": [
         {
@@ -33,7 +33,7 @@
       "name": "search-channel",
       "title": "Search Channels",
       "subtitle": "YouTube",
-      "description": "Search YouTube Channels",
+      "description": "Search YouTube channels",
       "mode": "view",
       "arguments": [
         {
@@ -48,8 +48,23 @@
       "name": "popular-videos",
       "title": "Popular Videos",
       "subtitle": "YouTube",
-      "description": "Show Popular YouTube Videos",
+      "description": "Show popular YouTube videos",
       "mode": "view"
+    },
+    {
+      "name": "search-live",
+      "title": "Search Live Streams",
+      "subtitle": "YouTube",
+      "description": "Search live YouTube broadcasts",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "required": false,
+          "type": "text"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -138,28 +153,21 @@
     }
   ],
   "dependencies": {
-    "@google-cloud/local-auth": "^1.0.1",
-    "@googleapis/youtube": "^2.0.0",
-    "@raycast/api": "^1.68.1",
-    "@raycast/utils": "^1.12.5",
+    "@googleapis/youtube": "^29.0.0",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
     "duration-iso-8601": "^1.1.0",
     "he": "^1.2.0",
-    "javascript-time-ago": "^2.3.10",
-    "node-fetch": "^3.0.0",
-    "uuid": "^8.3.2"
+    "javascript-time-ago": "^2.3.10"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
     "@types/he": "^1.1.2",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "@types/uuid": "^8.3.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^3.0.0",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

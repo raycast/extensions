@@ -14,7 +14,8 @@
     "jor",
     "garrill",
     "olafvanmidden",
-    "hyftar"
+    "hyftar",
+    "xmok"
   ],
   "license": "MIT",
   "platforms": [
@@ -162,31 +163,30 @@
     "Developer Tools"
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.2",
+    "@raycast/api": "^1.104.1",
     "color-convert": "^2.0.1",
     "css": "^3.0.0",
     "lodash": "^4.17.21",
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
     "@types/color-convert": "^2.0.0",
     "@types/css": "^0.0.33",
     "@types/lodash": "^4.14.188",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^3.0.2",
-    "typescript": "^4.4.3"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
     "generate": "npx tailwindcss -i ./generator/input.css -o ./generator/output.css && node ./generator/index.js"
   }
 }

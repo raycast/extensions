@@ -2,7 +2,7 @@
 
 Simple extension to convert issue tracker Ids into clickable links using HTML or Markdown.
 
-https://github.com/raycast/extensions/assets/1197514/5d06e598-6afc-41c4-9c56-bf9213eb861f
+![Tasklink Demo](./media/tasklink-demo.gif)
 
 It (currently) supports Jira-style Ids (e.g., `RAY-123`) and GitHub-style Ids (e.g., `#12345`). Is your issue tracker using a different pattern? Open a new issue or just hack a new PR :)
 

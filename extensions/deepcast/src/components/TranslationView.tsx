@@ -3,6 +3,7 @@ import { SourceLanguage, source_languages, delayedCloseWindow } from "../utils";
 
 export const TranslationView = (props: { translation: string | null; sourceLanguage?: string }) => {
   const translation = props.translation;
+  const displayedTranslation = translation ? translation.replace(/\n/g, "\n\n") : null;
   const sourceLanguage = source_languages[props.sourceLanguage as SourceLanguage] ?? "unknown language";
   const sourceLanguageMessage = `Translated from ${sourceLanguage}`;
   const { closeRaycastAfterTranslation } = getPreferenceValues<Preferences>();
@@ -34,7 +35,7 @@ export const TranslationView = (props: { translation: string | null; sourceLangu
   return (
     <Detail
       navigationTitle={sourceLanguageMessage}
-      markdown={translation}
+      markdown={displayedTranslation}
       actions={
         <ActionPanel>
           <Action title="Copy to Clipboard" onAction={handleCopyToClipboard} />

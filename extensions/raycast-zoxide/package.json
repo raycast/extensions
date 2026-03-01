@@ -36,19 +36,26 @@
       "required": true,
       "default": "Finder",
       "placeholder": "Select an application"
+    },
+    {
+      "name": "addl-paths",
+      "title": "Additional path directories",
+      "description": "Additional directories to prepend to the $PATH variable when using zoxide and other commands. Uses path syntax, e.g. `/usr/bin:/bin`.",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.97.0",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.25.1",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build",
@@ -57,5 +64,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

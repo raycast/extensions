@@ -1,6 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { seek } from "./api/seek";
+import { WinNotSupportedError } from "./helpers/script";
 
 export default async function Command() {
   await setSpotifyClient();
@@ -8,7 +9,7 @@ export default async function Command() {
   try {
     await seek(0);
     await showHUD("Replaying");
-  } catch {
-    await showHUD("No active device");
+  } catch (error) {
+    await showHUD(error instanceof WinNotSupportedError ? error.message : "No active device");
   }
 }

@@ -17,16 +17,9 @@
     "search",
     "code",
     "codesearch",
-    "code search"
+    "ai"
   ],
   "preferences": [
-    {
-      "name": "cloudToken",
-      "title": "Public code on Sourcegraph.com: Access token",
-      "description": "Configures 'Sourcegraph.com' commands - available under 'Profile' -> 'Access token' on Sourcegraph.com",
-      "required": false,
-      "type": "password"
-    },
     {
       "name": "customInstance",
       "title": "Sourcegraph connection: URL",
@@ -38,7 +31,7 @@
     {
       "name": "customInstanceToken",
       "title": "Sourcegraph connection: Access token",
-      "description": "Required to use 'Sourcegraph' commands - available under 'Profile' -> 'Access token' in Sourcegraph.",
+      "description": "If set, takes precedence over OAuth login. Available under 'Profile' -> 'Access token' in Sourcegraph.",
       "required": false,
       "type": "password"
     },
@@ -48,6 +41,13 @@
       "description": "Optional proxy to use when using a custom Sourcegraph connection - presently, only Unix domain sockets are supported.",
       "required": false,
       "type": "textfield"
+    },
+    {
+      "name": "cloudToken",
+      "title": "Public code on Sourcegraph.com: Access token",
+      "description": "Configures 'Sourcegraph.com' commands - available under 'Profile' -> 'Access token' on Sourcegraph.com",
+      "required": false,
+      "type": "password"
     },
     {
       "name": "featureSearchPatternDropdown",
@@ -69,29 +69,32 @@
   ],
   "commands": [
     {
-      "name": "searchDotCom",
-      "title": "Search Public Code",
+      "name": "deepSearchInstance",
+      "title": "Ask Deep Search",
       "subtitle": "Sourcegraph",
-      "icon": "logo-bw.png",
-      "description": "Search public repositories on Sourcegraph.com",
+      "description": "Agentic, natural language code search.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
-        "search",
-        "code",
+        "deep search",
         "code search",
-        "src"
+        "ai"
       ],
-      "preferences": [
-        {
-          "name": "cloudDefaultContext",
-          "title": "Default search context",
-          "description": "Default search context to set on all queries",
-          "placeholder": "global",
-          "required": false,
-          "type": "textfield"
-        }
-      ]
+      "disabledByDefault": false
+    },
+    {
+      "name": "deepSearchConversationsInstance",
+      "title": "Deep Search Conversations",
+      "subtitle": "Sourcegraph",
+      "description": "List and manage Deep Search conversations.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "deep search",
+        "list",
+        "history"
+      ],
+      "disabledByDefault": false
     },
     {
       "name": "searchInstance",
@@ -118,22 +121,6 @@
       ]
     },
     {
-      "name": "searchHistoryDotCom",
-      "title": "Search Public Code History",
-      "subtitle": "Sourcegraph",
-      "icon": "logo-bw.png",
-      "description": "Browse and launch recent code searches.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "search",
-        "code",
-        "search code",
-        "history",
-        "recent"
-      ]
-    },
-    {
       "name": "searchHistoryInstance",
       "title": "Code Search History",
       "subtitle": "Sourcegraph",
@@ -149,25 +136,10 @@
       ]
     },
     {
-      "name": "findNotebooksInstance",
-      "title": "Find Search Notebooks",
-      "subtitle": "Sourcegraph",
-      "description": "Browse search notebooks in Sourcegraph.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "search",
-        "notebook",
-        "snb"
-      ],
-      "disabledByDefault": true,
-      "preferences": []
-    },
-    {
       "name": "manageBatchChangesInstance",
       "title": "Manage Batch Changes",
       "subtitle": "Sourcegraph",
-      "description": "Manage batch changes in Sourcegraph.",
+      "description": "Manage Batch Changes in Sourcegraph.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
@@ -177,12 +149,53 @@
       ],
       "disabledByDefault": true,
       "preferences": []
+    },
+    {
+      "name": "searchDotCom",
+      "title": "Search Public Code",
+      "subtitle": "Sourcegraph",
+      "icon": "logo-bw.png",
+      "description": "Search public repositories on Sourcegraph.com",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "code search",
+        "src"
+      ],
+      "preferences": [
+        {
+          "name": "cloudDefaultContext",
+          "title": "Default search context",
+          "description": "Default search context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "searchHistoryDotCom",
+      "title": "Search Public Code History",
+      "subtitle": "Sourcegraph",
+      "icon": "logo-bw.png",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
+      ]
     }
   ],
   "dependencies": {
     "@apollo/client": "^3.11.10",
-    "@raycast/api": "^1.86.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2",
     "@sourcegraph/telemetry": "^0.18.0",
     "@types/uuid": "^10.0.0",
     "cross-fetch": "^4.0.0",
@@ -202,8 +215,8 @@
     "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@types/eventsource": "^1.1.15",
     "@types/luxon": "^3.4.2",
-    "@types/node": "~22.10.1",
-    "@types/react": "^18.3.12",
+    "@types/node": "~22.14.0",
+    "@types/react": "^19.1.8",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.16.0",
@@ -220,5 +233,8 @@
     "raycast-publish": ".scripts/raycast-publish.sh",
     "gql": "graphql-codegen --config graphql-codegen.yml && npm run fmt",
     "postinstall": "patch-package"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

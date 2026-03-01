@@ -14,6 +14,7 @@ export interface Application {
 
 export interface Keymap {
   title: string;
+  platforms?: string[];
   sections: Section[];
 }
 

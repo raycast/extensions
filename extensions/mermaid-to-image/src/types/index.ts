@@ -4,4 +4,5 @@ export interface Preferences {
   savePath?: string;
   customMmdcPath?: string;
   generationTimeout?: number;
+  scale?: number | string;
 }

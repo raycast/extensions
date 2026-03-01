@@ -1,5 +1,15 @@
 # Bitbucket Changelog
 
+## [Update] - 2025-11-17
+
+- Update shortcuts to be consistent across MacOS and Windows
+
+## [Update] - 2025-11-07
+
+- Bump dependencies to latest versions
+- Add Windows as a supported platform
+- Add publish script to package.json
+
 ## [Update] - 2025-09-30
 
 - Swap to API tokens, as App Passwords are no longer supported by Bitbucket.

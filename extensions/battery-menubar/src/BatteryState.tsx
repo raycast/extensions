@@ -22,6 +22,23 @@ export const getBatteryState = async () => {
   const watts = timeRemaining != null && voltage && amperage ? (voltage / 1000) * (amperage / 1000) : null;
   const temperature = batt.Temperature;
 
+  const isCharging = batt.IsCharging === true || batt.IsCharging === "Yes";
+  const isFullyCharged = batt.FullyCharged === true || batt.FullyCharged === "Yes";
+
+  let chargingStatus: "on hold" | "fully charged" | "charging" | "discharging" | "unknown";
+
+  if (isFullyCharged) {
+    chargingStatus = "fully charged";
+  } else if (connected && !isCharging) {
+    chargingStatus = "on hold";
+  } else if (isCharging) {
+    chargingStatus = "charging";
+  } else if (!connected) {
+    chargingStatus = "discharging";
+  } else {
+    chargingStatus = "unknown";
+  }
+
   const state = {
     time: Date.now(),
     capacity,
@@ -33,7 +50,9 @@ export const getBatteryState = async () => {
     minutesRemaining: timeRemaining != null ? timeRemaining % 60 : null,
     temperature,
     connected,
-    charging: connected,
+    isCharging, // New: Actual charging status
+    isFullyCharged, // New: Whether fully charged
+    chargingStatus, // New: Charging status string
     cycles,
     health,
     lowPowerMode: isLowPowerMode,

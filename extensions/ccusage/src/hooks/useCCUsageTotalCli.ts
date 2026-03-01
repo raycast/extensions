@@ -2,12 +2,18 @@ import { useExec } from "@raycast/utils";
 import { TotalUsageResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { preferences } from "../preferences";
 
 /**
  * Hook for executing `ccusage --json` command
  */
 export const useCCUsageTotalCli = () => {
-  const result = useExec("npx", ["ccusage@latest", "--json"], {
+  const useDirectCommand = preferences.useDirectCcusageCommand;
+
+  const command = useDirectCommand ? "ccusage" : "npx";
+  const args = useDirectCommand ? ["--json"] : ["ccusage@latest", "--json"];
+
+  const result = useExec(command, args, {
     ...getExecOptions(),
     parseOutput: ({ stdout }) => {
       if (!stdout) {

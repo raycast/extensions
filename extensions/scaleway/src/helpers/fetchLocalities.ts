@@ -1,4 +1,4 @@
-import type { Region, Zone } from '@scaleway/sdk'
+import type { Region, Zone } from '@scaleway/sdk-client'
 
 type RegionFetcher<T, R> = (request: R) => Promise<T[]>
 type ZoneFetcher<T, R> = (request: R) => Promise<T[]>

@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "yalishanda",
   "contributors": [
-    "xmok"
+    "xmok",
+    "markwiseman",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -58,8 +60,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.2",
     "@raycast/utils": "^2.2.1",
-    "asciilib": "^1.0.1",
-    "nanoid": "^4.0.0"
+    "asciilib": "^1.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -78,6 +79,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

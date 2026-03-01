@@ -8,7 +8,9 @@
   "author": "litomore",
   "contributors": [
     "pernielsentikaer",
-    "yusifaliyevpro"
+    "yusifaliyevpro",
+    "ivens_joris",
+    "j3lte"
   ],
   "platforms": [
     "macOS",
@@ -76,20 +78,27 @@
       "description": "Path to the Git executable file. If not set, it will use `git` as default. You may need to set this if `git` is not in your PATH environment variable. On Windows, if the path contains spaces, it will be wrapped with double quotes, e.g., `\"C:\\Program Files\\Git\\cmd\\git.exe\"`.",
       "type": "textfield",
       "required": false
+    },
+    {
+      "name": "openWith",
+      "title": "Open Extension Folder With",
+      "description": "Choose an application (typically an editor) to open the forked extension folder with.",
+      "type": "appPicker",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.7",
-    "ky": "^1.10.0",
-    "nano-spawn": "^1.0.3"
+    "@raycast/api": "^1.104.6",
+    "ky": "^1.14.3",
+    "nano-spawn": "^2.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@raycast/utils": "^2.2.1",
-    "@types/node": "^24.4.0",
-    "@types/react": "^19.1.13",
-    "eslint": "^9.35.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/utils": "^2.2.2",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   }
 }

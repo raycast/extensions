@@ -55,10 +55,6 @@ export interface ItemDetailProps {
   item: ItemResponse;
 }
 
-export interface Preferences {
-  token: string;
-}
-
 interface SearchSuccess {
   Search: ItemBase[];
   Response: 'True';

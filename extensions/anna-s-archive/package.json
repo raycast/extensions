@@ -20,38 +20,50 @@
       "name": "mirror",
       "title": "Mirror",
       "type": "dropdown",
-      "default": "https://annas-archive.org",
+      "default": "https://annas-archive.li",
       "description": "Choose a mirror to use",
       "required": false,
       "data": [
         {
-          "value": "https://annas-archive.org",
-          "title": "https://annas-archive.org"
-        },
-        {
-          "value": "https://annas-archive.se",
-          "title": "https://annas-archive.se"
-        },
-        {
           "value": "https://annas-archive.li",
           "title": "https://annas-archive.li"
+        },
+        {
+          "value": "https://annas-archive.pm",
+          "title": "https://annas-archive.pm"
+        },
+        {
+          "value": "https://annas-archive.in",
+          "title": "https://annas-archive.in"
         }
       ]
+    },
+    {
+      "name": "customMirror",
+      "title": "Custom Mirror",
+      "type": "textfield",
+      "default": "",
+      "description": "Enter a custom mirror URL to use, something like \"https://de.anna-archive.org\". Only use this if the default mirrors are not working for you. I cannot guarantee that this will work, use at your own risk.",
+      "required": false
     }
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.82.5",
-    "@raycast/utils": "^1.17.0",
-    "cheerio": "^1.0.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "cheerio": "^1.1.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "22.5.5",
-    "@types/react": "18.3.5",
-    "eslint": "^8.51.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -12,7 +12,7 @@ const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
 
   let text, color;
 
-  if (diff <= -15 || diff >= 15) {
+  if (Math.abs(diff) >= 15) {
     text = dayjs(dueDate).format('D MMM');
   } else if (diff === 0) {
     text = 'Due today';

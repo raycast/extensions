@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 type Input = {
   // Text to write to iTerm. Escape all quotes.

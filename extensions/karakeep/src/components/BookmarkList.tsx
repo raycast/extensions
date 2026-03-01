@@ -1,23 +1,27 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useBookmarkFilter } from "../hooks/useBookmarkFilter";
 import { useConfig } from "../hooks/useConfig";
+import { useEnsureScrollablePagination } from "../hooks/usePrefetchPagination";
 import { useSearchBookmarks } from "../hooks/useSearchBookmarks";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
 import { BookmarkItem } from "./BookmarkItem";
 interface BookmarkListProps {
   bookmarks: Bookmark[] | undefined;
-  hasMore?: boolean;
+  pagination?: {
+    pageSize: number;
+    hasMore: boolean;
+    onLoadMore: () => void;
+  };
   isLoading: boolean;
   error?: Error;
   onRefresh?: () => void;
   searchBarPlaceholder?: string;
   emptyViewTitle?: string;
   emptyViewDescription?: string;
-  filterFn?: (bookmark: Bookmark) => boolean;
   onSearch?: (text: string) => void;
-  loadMore?: () => void;
+  onBookmarkVisit?: (bookmark: Bookmark) => void;
 }
 function SearchBookmarkList({ searchText }: { searchText: string }) {
   const { t } = useTranslation();
@@ -26,7 +30,6 @@ function SearchBookmarkList({ searchText }: { searchText: string }) {
   return (
     <BookmarkList
       bookmarks={bookmarks}
-      hasMore={false}
       isLoading={isLoadingBookmarks}
       onRefresh={revalidateBookmarks}
       searchBarPlaceholder={t("bookmarkList.searchPlaceholder")}
@@ -38,19 +41,20 @@ function SearchBookmarkList({ searchText }: { searchText: string }) {
 
 export function BookmarkList({
   bookmarks,
-  hasMore,
+  pagination,
   isLoading,
   onRefresh,
   searchBarPlaceholder,
   emptyViewTitle,
   emptyViewDescription,
   onSearch,
-  loadMore,
+  onBookmarkVisit,
 }: BookmarkListProps) {
   const { t } = useTranslation();
   const { push } = useNavigation();
   const { config } = useConfig();
   const [searchText, setSearchText] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
 
   const defaultValues = useMemo(
     () => ({
@@ -73,11 +77,7 @@ export function BookmarkList({
     [onSearch],
   );
 
-  const onLoadMore = useCallback(() => {
-    loadMore?.();
-  }, [loadMore]);
-
-  const handleCleanCache = useCallback(() => {}, []);
+  // Pagination is handled directly by Raycast's List component
 
   const searchFilteredBookmarks = useBookmarkFilter(bookmarks || [], searchText);
 
@@ -86,14 +86,40 @@ export function BookmarkList({
     const listTitle = searchText
       ? t("bookmarkList.filterResults", { searchText, count: displayBookmarks.length })
       : t("bookmarkList.title", { count: displayBookmarks.length });
-    const hasMoreNotice = hasMore ? "..." : "";
+    const hasMoreNotice = pagination?.hasMore ? "..." : "";
 
     return {
       displayBookmarks,
       listTitle,
       hasMoreNotice,
     };
-  }, [searchFilteredBookmarks, searchText, hasMore, t]);
+  }, [searchFilteredBookmarks, searchText, pagination?.hasMore, t]);
+
+  // Best-practice fix: avoid a pagination deadlock when reopening a command.
+  // If we render only the cached first page and the list isn't scrollable, Raycast won't trigger `onLoadMore`.
+  // Prefetch one extra page once, but only when not filtering locally.
+  useEnsureScrollablePagination({
+    pagination,
+    isLoading,
+    itemCount: displayInfo.displayBookmarks.length,
+    enabled: searchText.trim().length === 0,
+  });
+
+  useEffect(() => {
+    const firstId = displayInfo.displayBookmarks[0]?.id;
+    if (!firstId) {
+      if (selectedItemId) setSelectedItemId(undefined);
+      return;
+    }
+
+    if (!selectedItemId) {
+      setSelectedItemId(firstId);
+      return;
+    }
+
+    const exists = displayInfo.displayBookmarks.some((b) => b.id === selectedItemId);
+    if (!exists) setSelectedItemId(firstId);
+  }, [displayInfo.displayBookmarks, selectedItemId]);
 
   if (!bookmarks) {
     return (
@@ -112,12 +138,10 @@ export function BookmarkList({
       isLoading={isLoading}
       isShowingDetail={displayInfo.displayBookmarks.length > 0}
       searchBarPlaceholder={searchBarPlaceholder || defaultValues.searchBarPlaceholder}
+      searchText={searchText}
       onSearchTextChange={handleSearchTextChange}
-      pagination={{
-        onLoadMore,
-        hasMore: hasMore || false,
-        pageSize: 20,
-      }}
+      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
+      pagination={pagination}
       navigationTitle={t("bookmarkList.title", { count: displayInfo.displayBookmarks.length })}
     >
       {searchText && (
@@ -143,7 +167,8 @@ export function BookmarkList({
             bookmark={bookmark}
             config={config}
             onRefresh={onRefresh || (() => {})}
-            onCleanCache={handleCleanCache}
+            onVisit={onBookmarkVisit}
+            isSelected={selectedItemId === bookmark.id}
           />
         ))}
       </List.Section>

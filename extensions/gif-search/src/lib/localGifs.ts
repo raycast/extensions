@@ -34,7 +34,6 @@ export async function save(gif: IGif, service: ServiceName, type: LocalType) {
 
 export async function remove(gif: IGif, service: ServiceName, type: LocalType) {
   const gifs = new Set(await get(service, type));
-  console.log(gif.title, service, type);
   gifs.delete(gif.id.toString());
   return LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(gifs)));
 }

@@ -1,5 +1,6 @@
 import { Sourcegraph } from "..";
 import { getProxiedFetch } from "./fetchProxy";
+import { getAPIHeaders } from "../api";
 
 export class AuthError extends Error {
   message: string;
@@ -10,14 +11,10 @@ export class AuthError extends Error {
 }
 
 async function doGQLRequest<T>(abort: AbortSignal, src: Sourcegraph, body: string): Promise<T> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    "X-Requested-With": "Raycast-Sourcegraph",
-  };
-  if (src.token) {
-    headers["Authorization"] = `token ${src.token}`;
-  }
+  const headers = getAPIHeaders(src);
+  headers["Content-Type"] = "application/json";
+  headers["Accept"] = "application/json";
+
   return new Promise<T>((resolve, reject) => {
     getProxiedFetch(src.proxy)(`${src.instance}/.api/graphql`, {
       method: "POST",

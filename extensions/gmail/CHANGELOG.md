@@ -1,6 +1,15 @@
 # Gmail Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-01-01
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+- Fix OAuth authentication for Windows by using correct `code_verifier` parameter name.
+- Fix React key prop warnings in filter submenus and metadata tag lists.
+- Fix controlled/uncontrolled search bar warnings by ensuring consistent state initialization.
+- Fix TypeScript compilation errors by updating JSX.Element types and GaxiosResponse type annotations.
+
+## [Maintenance]
 
 - Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
 

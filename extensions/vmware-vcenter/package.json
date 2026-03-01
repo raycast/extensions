@@ -3,8 +3,12 @@
   "name": "vmware-vcenter",
   "title": "VMware VCenter",
   "description": "Manage VMware vCenter",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "massimiliano_pasquini",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -103,8 +107,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2",
+    "cross-fetch": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",

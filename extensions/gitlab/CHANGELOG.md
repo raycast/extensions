@@ -1,5 +1,26 @@
 # GitLab Changelog
 
+## [Bugfix merge requests] - 2026-02-18
+
+- Update merge request list to show approvals properly
+
+## [Optimize Windows Experience] - 2025-12-05
+
+- Better milestones view
+- Add subtitles to `Recent Activities`
+- Add comments to Merge Requests
+- Add Comments to Issues
+- Add approvers count to Merge Requests
+- Show related branch in the issue list
+
+## [Show Readme] - 2025-12-03
+
+- Add "Show Readme" action to project list
+
+## [Search projects preferences] - 2025-10-23
+
+Add Search projects preference that allows to search only active projects
+
 ## [AI Extension] - 2025-09-18
 
 ## [Added support for Windows] - 2025-08-07

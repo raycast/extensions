@@ -30,7 +30,7 @@ export type SearchCallback = (input: SearchInput) => void;
  * @param props The launch props provided by the Raycast API, including the search arguments.
  * @returns A JSX.Element representing the main command.
  */
-export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+export default function Command(props: LaunchProps<{ arguments: { search: string | undefined } }>) {
   const [searchQuery, setSearchQuery] = useState<SearchInput>({ query: props.arguments.search ?? "" });
   const [previousSearchTerm, setPreviousSearchTerm] = useState<string | undefined>(searchQuery.query);
   const [searchResults, searchLoading] = useSearch(searchQuery.query, previousSearchTerm);

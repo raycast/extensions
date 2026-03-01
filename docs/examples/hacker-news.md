@@ -54,7 +54,7 @@ export default function Command() {
 
 Breaking this down:
 
-- We use a third-party dependency to parse the RSS feed and intially the parser.
+- We use a third-party dependency to parse the RSS feed and initially the parser.
 - We define our command state as a TypeScript interface.
 - We use [React's `useEffect`](https://reactjs.org/docs/hooks-effect.html) hook to parse the RSS feed after the command did mount.
 - We print the top stories to the console.

@@ -52,7 +52,20 @@ export default async function (input: Input) {
         .then(createCommit)
         .catch((error) => reject(`Failed to stage changes: ${error}`));
     } else {
-      createCommit();
+      execGit("git diff --cached --name-only")
+        .then((output) => {
+          const hasStagedChanges = output.split("\n").filter((line) => line.trim().length > 0).length > 0;
+
+          if (!hasStagedChanges) {
+            reject(
+              "No staged changes found. Stage the files you want to commit first or set stageAll to true to commit all changes.",
+            );
+            return;
+          }
+
+          createCommit();
+        })
+        .catch((error) => reject(`Failed to check staged changes: ${error}`));
     }
   });
 }

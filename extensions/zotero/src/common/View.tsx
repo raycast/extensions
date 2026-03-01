@@ -182,6 +182,15 @@ ${item.abstractNote ? "**Abstract:** " + item.abstractNote : ""}
 
 ${item.tags ? "**Tagged With:** " + item.tags.join(", ") : ""}
 
+${
+  item.notes?.length
+    ? `**Notes:**\n${item.notes
+        .slice(0, 3)
+        .map((note) => `- ${note.length > 280 ? note.slice(0, 277).trimEnd() + "..." : note}`)
+        .join("\n")}`
+    : ""
+}
+
 `;
 }
 

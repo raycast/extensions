@@ -1,3 +1,7 @@
+export type Category = {
+  name: CategoryName;
+  uuid: string;
+};
 export type CategoryName =
   | "API_CREDENTIAL"
   | "BANK_ACCOUNT"
@@ -22,47 +26,37 @@ export type CategoryName =
   | "SOFTWARE_LICENSE"
   | "SSH_KEY"
   | "WIRELESS_ROUTER";
-
-export type Category = {
-  uuid: string;
-  name: CategoryName;
-};
-
-export type Item = {
-  id: string;
-  title: string;
-  version: number;
-  vault: Vault;
-  favorite?: boolean;
-  category: CategoryName;
-  last_edited_by: string;
-  created_at: string;
-  updated_at: string;
-  additional_information: string;
-  urls?: Url[];
-  fields?: Field[];
-};
-
 export type Field = {
   id: string;
   type: string;
   value: string;
 };
-
+export type Item = {
+  additional_information: string;
+  category: CategoryName;
+  created_at: string;
+  favorite?: boolean;
+  fields?: Field[];
+  id: string;
+  last_edited_by: string;
+  title: string;
+  updated_at: string;
+  urls?: Url[];
+  vault: Vault;
+  version: number;
+};
+export type Url = {
+  href: string;
+  label?: string;
+  primary: boolean;
+};
+export type User = {
+  account_uuid: string;
+  email: string;
+  url: string;
+  user_uuid: string;
+};
 export type Vault = {
   id: string;
   name: string;
-};
-
-export type Url = {
-  label?: string;
-  primary: boolean;
-  href: string;
-};
-
-export type User = {
-  url: string;
-  email: string;
-  user_uuid: string;
-  account_uuid: string;
 };

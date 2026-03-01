@@ -1,5 +1,9 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Generate private links] - 2025-10-28
+
+- Adds an action inside "Share Meeting Link" to generate and copy a one-time use private link (⌘ + S).
+
 ## [Update] - 2025-04-14
 
 - Adds created at date to bookings, to show booking date

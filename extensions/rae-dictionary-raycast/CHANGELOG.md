@@ -1,5 +1,10 @@
 # Diccionario RAE Changelog
 
+## Update - 2025-12-01
+
+- Improved UI components
+- Enhanced word suggestions, displaying similar results if word is not found
+
 ## Update - 2025-09-03
 
 - Updated API integration

@@ -4,11 +4,10 @@ import { useState, useEffect, Fragment } from "react";
 import { Form, ActionPanel, Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-import ReadmeView from "./readme-view";
-import { REPOSITORY_TYPE, WECHAT_DEVTOOL_CLI_PATH } from "./constants";
-import { getExtensionConfig, updateExtensionConfig, createEmptyProject } from "./utils/config";
-import { detectRepositoryType } from "./utils/command";
-import { ExtensionConfig, Project, WechatProjectConfig } from "./types";
+import { ReadmeView } from "@/pages";
+import { REPOSITORY_TYPE, DEFAULT_CLI_PATH } from "@/constants";
+import { getExtensionConfig, updateExtensionConfig, createEmptyProject, detectRepositoryType } from "@/utils";
+import type { ExtensionConfig, Project, WechatProjectConfig } from "@/types";
 
 interface FormErrors {
   cliPath?: string;
@@ -25,7 +24,7 @@ interface ConfigureProjectsProps {
 export default function ConfigureProjects({ onConfigChange }: ConfigureProjectsProps) {
   const { pop, push } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const [cliPath, setCliPath] = useState(WECHAT_DEVTOOL_CLI_PATH);
+  const [cliPath, setCliPath] = useState(DEFAULT_CLI_PATH);
   const [projects, setProjects] = useState<Project[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [errorVisible, setErrorVisible] = useState(false);
@@ -208,7 +207,7 @@ export default function ConfigureProjects({ onConfigChange }: ConfigureProjectsP
   function handleReset() {
     const newProject = createEmptyProject();
 
-    setCliPath(WECHAT_DEVTOOL_CLI_PATH);
+    setCliPath(DEFAULT_CLI_PATH);
     setProjects([newProject]);
 
     showToast({
@@ -289,7 +288,7 @@ export default function ConfigureProjects({ onConfigChange }: ConfigureProjectsP
         canChooseFiles
         canChooseDirectories={false}
         allowMultipleSelection={false}
-        info={`WeChat DevTool CLI executable, typically located at "${WECHAT_DEVTOOL_CLI_PATH}"`}
+        info={`WeChat DevTool CLI executable, typically located at "${DEFAULT_CLI_PATH}"`}
         error={errorVisible ? errors.cliPath : undefined}
       />
       <Form.Separator />

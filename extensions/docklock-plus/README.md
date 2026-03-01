@@ -1,48 +1,47 @@
 # DockLock Plus
 
-**DockLock Plus** is a macOS utility that prevents the Dock from jumping between displays and adds powerful automation features for multi-monitor setups. This Raycast extension lets you control DockLock Plus directly from Raycast - move and lock your Dock, toggle "Dock follows mouse", and automate per-display behavior without leaving your keyboard.
+DockLock Plus is a powerful macOS utility designed to manage and automate Dock behavior across multiple displays.  
+It lets users control Dock placement, visibility, and movement intelligently - ensuring a consistent workflow whether using one or multiple monitors.
 
-You can download the DockLock Plus app from the Mac App Store or visit https://docklockpro.com
+Control **DockLock Plus** directly from Raycast using the official DockLock Plus CLI.  
+This extension provides fast, reliable, and fully integrated Dock management for macOS — no Apple URL schemes, no delays, and complete support for all DockLock Plus automation modes.
 
-
-A Raycast extension to control DockLock Plus via keyboard shortcuts, commands, and automations.
+You can download the DockLock Plus app from the Mac App Store or visit [https://docklockpro.com](https://docklockpro.com).  
+For CLI documentation, see [DockLock Plus CLI Reference](http://docklockpro.com/docks/cli-plus/).
 
 ## Features
 
 - **Move Dock**  
   - Move Dock up, down, left, or right one screen  
-  - Move Dock to a specific display by name
 
-- **Lock/Unlock Dock**  
-  - Enable or disable the DockLock engine  
+- **Dock Control Mode**  
+  - Lock to selected screens  
+  - Dock follows mouse  
+  - Dock follows active apps  
+  - Dock follows active window  
+  - Disable Dock control  
 
-- **Dock Follows Mouse**  
-  - Turn on/off the "Dock follows mouse" automation  
-
-- **Per-Display Locking**  
-  - Enable or disable DockLock on a chosen display  
+- **Per-Display Control**  
+  - Move Dock to a specific display by name  
+  - Allow or disallow Dock appearance per display  
 
 
 ## Commands
 
-| Command file                       | Title                                  |
-|------------------------------------|----------------------------------------|
-| `move-dock-up.tsx`                 | Move Dock Up                           |
-| `move-dock-down.tsx`               | Move Dock Down                         |
-| `move-dock-left.tsx`               | Move Dock Left                         |
-| `move-dock-right.tsx`              | Move Dock Right                        |
-| `move-to-display-by-name.tsx`      | Move Dock to Display                   |
-| `enable-dock-lock.tsx`             | Enable DockLock                        |
-| `disable-dock-lock.tsx`            | Disable DockLock                       |
-| `enable-dock-follows-mouse.tsx`    | Enable Dock Follows Mouse              |
-| `disable-dock-follows-mouse.tsx`   | Disable Dock Follows Mouse             |
-| `enable-dock-lock-on-display.tsx`  | Enable DockLock on Display             |
-| `disable-dock-lock-on-display.tsx` | Disable DockLock on Display            |
+| Command file                       | Title                                 |
+|------------------------------------|---------------------------------------|
+| `set-dock-control-mode.tsx`        | Set Dock Control Mode                 |
+| `move-dock-up.tsx`                 | Move Dock Up                          |
+| `move-dock-down.tsx`               | Move Dock Down                        |
+| `move-dock-left.tsx`               | Move Dock Left                        |
+| `move-dock-right.tsx`              | Move Dock Right                       |
+| `move-dock-to-display-by-name.tsx` | Move Dock to Display by Name          |
+| `allow-dock-on-display.tsx`        | Allow Dock on Display                 |
+| `disallow-dock-on-display.tsx`     | Disallow Dock on Display              |
 
 ## Requirements
 
-- Raycast v1.42 or later  
-- DockLock Plus installed and running  
+- DockLock Plus v2.0.6 or later
 
 ## Support
 

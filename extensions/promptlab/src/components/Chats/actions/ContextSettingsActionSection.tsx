@@ -62,7 +62,7 @@ export default function ContextSettingsActionSection(props: {
       />
 
       <Action
-        title="Allow AI To Run Commands"
+        title="Allow AI to Run Commands"
         icon={
           useAutonomousFeatures
             ? { source: Icon.CheckCircle, tintColor: Color.Green }

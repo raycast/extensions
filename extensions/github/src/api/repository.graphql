@@ -158,6 +158,17 @@ query dataForRepository($owner: String!, $name: String!) {
         title
       }
     }
+    owner {
+      ... on Organization {
+        projectsV2(first: 50) {
+          totalCount
+          nodes {
+            id
+            title
+          }
+        }
+      }
+    }
     pullRequestTemplates {
       body
     }

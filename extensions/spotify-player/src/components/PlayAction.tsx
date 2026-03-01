@@ -14,7 +14,7 @@ type PlayActionProps = {
 };
 
 export function PlayAction({ id, type, playingContext, onPlay, tracksToQueue }: PlayActionProps) {
-  const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
+  const { closeWindowOnAction } = getPreferenceValues<ExtensionPreferences>();
 
   const handlePlayAction = async () => {
     try {
@@ -43,7 +43,7 @@ export function PlayAction({ id, type, playingContext, onPlay, tracksToQueue }: 
           title: message.toLowerCase().includes("no active device") ? "No active device" : "Failed to play",
           primaryAction: {
             title: "Copy Error",
-            shortcut: { modifiers: ["cmd"], key: "t" },
+            shortcut: { macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } },
             onAction: async () => {
               await Clipboard.copy(message);
             },

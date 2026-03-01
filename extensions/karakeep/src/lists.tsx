@@ -1,5 +1,6 @@
 import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useMemo } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteList } from "./apis";
 import { BookmarkList } from "./components/BookmarkList";
 import { useConfig } from "./hooks/useConfig";
@@ -7,6 +8,7 @@ import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
+import { runWithToast } from "./utils/toast";
 
 interface ListWithCount {
   id: string;
@@ -36,27 +38,33 @@ function buildHierarchy(lists: ListWithCount[]): ListWithCount[] {
   return rootLists;
 }
 
-function ListBookmarks({ listId, listName }: { listId: string; listName: string }) {
-  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetListsBookmarks(listId);
+function ListBookmarksView({ listId, listName }: { listId: string; listName: string }) {
+  const { bookmarks, isLoading, revalidate, pagination } = useGetListsBookmarks(listId);
   const { t } = useTranslation();
 
   const handleRefresh = async () => {
-    const toast = await showToast({
-      title: "Refreshing lists",
-      message: "Please wait...",
+    await runWithToast({
+      loading: { title: t("refreshingLists"), message: t("pleaseWait") },
+      success: { title: t("listsRefreshed") },
+      failure: { title: t("refreshError") },
+      action: async () => {
+        try {
+          await revalidate();
+        } catch (error) {
+          logger.error("Failed to refresh list bookmarks", { listId, listName, error });
+          throw error;
+        }
+      },
     });
-    await revalidate();
-    toast.title = "Lists refreshed";
   };
 
   return (
     <BookmarkList
       bookmarks={bookmarks}
-      hasMore={hasMore}
       isLoading={isLoading}
       onRefresh={handleRefresh}
-      loadMore={loadNextPage}
-      searchBarPlaceholder={t("list.searchInList").replace("{name}", listName)}
+      pagination={pagination}
+      searchBarPlaceholder={t("list.searchInList", { name: listName })}
       emptyViewTitle={t("list.noBookmarks.title")}
       emptyViewDescription={t("list.noBookmarks.description")}
     />
@@ -64,53 +72,43 @@ function ListBookmarks({ listId, listName }: { listId: string; listName: string 
 }
 
 function ArchivedBookmarks() {
-  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetAllBookmarks({
+  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
     archived: true,
   });
   const { t } = useTranslation();
-  const archivedBookmarks = bookmarks?.filter((bookmark) => bookmark.archived);
 
   return (
     <BookmarkList
-      bookmarks={archivedBookmarks}
+      bookmarks={bookmarks}
       isLoading={isLoading}
-      hasMore={hasMore}
       onRefresh={revalidate}
-      loadMore={loadNextPage}
+      pagination={pagination}
       searchBarPlaceholder={t("list.searchInArchived")}
       emptyViewTitle={t("list.noArchived.title")}
       emptyViewDescription={t("list.noArchived.description")}
-      filterFn={(bookmark) => bookmark.archived}
     />
   );
 }
 
 function FavoritedBookmarks() {
-  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetAllBookmarks({
+  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
     favourited: true,
   });
   const { t } = useTranslation();
-  const favoriteBookmarks = bookmarks?.filter((bookmark) => bookmark.favourited);
   return (
     <BookmarkList
-      bookmarks={favoriteBookmarks}
+      bookmarks={bookmarks}
       isLoading={isLoading}
-      hasMore={hasMore}
       onRefresh={revalidate}
-      loadMore={loadNextPage}
+      pagination={pagination}
       searchBarPlaceholder={t("list.searchInFavorites")}
       emptyViewTitle={t("list.noFavorites.title")}
       emptyViewDescription={t("list.noFavorites.description")}
-      filterFn={(bookmark) => bookmark.favourited}
     />
   );
 }
 
-const dashboardListsPage = (listId: string) => {
-  const { config } = useConfig();
-  const { apiUrl } = config;
-  return `${apiUrl}/dashboard/lists/${listId}`;
-};
+const getDashboardListsPage = (apiUrl: string, listId: string) => `${apiUrl}/dashboard/lists/${listId}`;
 
 export default function Lists() {
   const { isLoading, lists, revalidate } = useGetAllLists();
@@ -124,29 +122,31 @@ export default function Lists() {
       const list = lists?.find((list) => list.id === id);
       const listName = list?.name;
 
-      const toast = await showToast({
-        title: t("common.deleting"),
-        style: Toast.Style.Animated,
-      });
-
       if (
         await confirmAlert({
           title: t("list.deleteList"),
-          message: t("list.deleteConfirm").replace("{name}", listName || ""),
+          message: t("list.deleteConfirm", { name: listName || "" }),
         })
       ) {
-        try {
-          await fetchDeleteList(id);
-          toast.style = Toast.Style.Success;
-          toast.message = t("common.deleteSuccess");
-          revalidate();
-        } catch (error) {
-          toast.style = Toast.Style.Failure;
-          toast.message = t("common.deleteFailed");
-        }
+        await runWithToast({
+          loading: { title: t("common.deleting") },
+          success: { title: t("common.deleteSuccess") },
+          failure: { title: t("common.deleteFailed") },
+          action: async () => {
+            try {
+              await fetchDeleteList(id);
+              await revalidate();
+            } catch (error) {
+              logger.error("Failed to delete list", { listId: id, listName, error });
+              throw error;
+            }
+          },
+        });
       } else {
-        toast.style = Toast.Style.Failure;
-        toast.message = t("common.deleteCancel");
+        await showToast({
+          title: t("common.deleteCancel"),
+          style: Toast.Style.Failure,
+        });
       }
     },
     [lists, revalidate, t],
@@ -171,10 +171,10 @@ export default function Lists() {
             <ActionPanel>
               <Action
                 title={t("list.openList")}
-                onAction={() => push(<ListBookmarks listId={list.id} listName={list.name} />)}
+                onAction={() => push(<ListBookmarksView listId={list.id} listName={list.name} />)}
                 icon={Icon.List}
               />
-              <Action.OpenInBrowser url={dashboardListsPage(list.id)} title={t("common.viewInBrowser")} />
+              <Action.OpenInBrowser url={getDashboardListsPage(apiUrl, list.id)} title={t("common.viewInBrowser")} />
               <Action.CopyToClipboard
                 title={t("common.copyId")}
                 content={list.id}
@@ -188,7 +188,7 @@ export default function Lists() {
         />
       );
     },
-    [t, push, handleDeleteList],
+    [t, push, handleDeleteList, apiUrl],
   );
 
   const hierarchicalLists = useMemo(() => (lists ? buildHierarchy(lists as ListWithCount[]) : []), [lists]);

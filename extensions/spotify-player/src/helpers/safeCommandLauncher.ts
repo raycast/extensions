@@ -13,7 +13,7 @@ export async function safeLaunchCommandInBackground(commandName: string): Promis
         // Log the error silently without showing HUD
         console.log("Silent Error:", error.message);
       } else {
-        await showHUD("Error executing command");
+        await showHUD(error.message.includes("Windows") ? error.message : "Error executing command");
       }
     } else {
       console.log("An unexpected error type occurred:", error);

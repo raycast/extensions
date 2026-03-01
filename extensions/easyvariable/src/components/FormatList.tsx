@@ -11,6 +11,9 @@ interface FormatListProps {
 }
 
 export function FormatList({ text }: FormatListProps) {
+  const isWindows = process.platform === "win32";
+  const modifierSymbol = isWindows ? "Ctrl+" : "⌘";
+
   const formats = [
     { name: "camelCase", format: formatCamelCase, example: "userName", alias: "xt" },
     { name: "PascalCase", format: formatPascalCase, example: "UserName", alias: "dt" },
@@ -34,14 +37,17 @@ export function FormatList({ text }: FormatListProps) {
           key={format.name}
           title={format.format(text)}
           subtitle={`${format.name} (${format.alias})`}
-          accessories={[{ text: `⌘${index + 1}` }]}
+          accessories={[{ text: `${modifierSymbol}${index + 1}` }]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
                 <Action
                   title="Paste"
                   icon={Icon.TextInput}
-                  shortcut={{ key: String(index + 1) as Keyboard.KeyEquivalent, modifiers: ["cmd"] }}
+                  shortcut={{
+                    macOS: { key: String(index + 1) as Keyboard.KeyEquivalent, modifiers: ["cmd"] },
+                    Windows: { key: String(index + 1) as Keyboard.KeyEquivalent, modifiers: ["ctrl"] },
+                  }}
                   onAction={async () => await Clipboard.paste(format.format(text))}
                 />
                 <Action

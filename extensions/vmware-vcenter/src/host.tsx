@@ -1,5 +1,6 @@
 import { vCenter } from "./api/vCenter";
 import { GetServer, GetServerLocalStorage, GetSelectedServer } from "./api/function";
+import { Shortcut } from "./api/shortcut";
 import { Host } from "./api/types";
 import { HostPowerStateIcon } from "./api/ui";
 import * as React from "react";
@@ -153,7 +154,7 @@ export default function Command(): JSX.Element {
     return (
       <ActionPanel title="vCenter Host">
         {!IsLoadingHosts && (
-          <Action title="Refresh" icon={Icon.Repeat} onAction={GetHosts} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+          <Action title="Refresh" icon={Icon.Repeat} onAction={GetHosts} shortcut={Shortcut.Refresh} />
         )}
         <ActionPanel.Section title="vCenter Server">
           {!IsLoadingServerLocalStorage && (

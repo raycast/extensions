@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Color,
   Detail,
   getPreferenceValues,
   openExtensionPreferences,
@@ -121,7 +122,7 @@ export default function main() {
             <Action
               title="Current Month"
               shortcut={{ modifiers: [], key: "c" }}
-              icon={{ source: { dark: "up-dark.png", light: "up.png" } }}
+              icon={{ source: { dark: "up-dark.png", light: "up.png" }, tintColor: Color.PrimaryText }}
               onAction={() => setCurrent()}
             />
             <Action.CopyToClipboard content={calendar} />
@@ -130,13 +131,13 @@ export default function main() {
             <Action
               title="Previous Month"
               shortcut={{ modifiers: [], key: "arrowLeft" }}
-              icon={{ source: { dark: "left-dark.png", light: "left.png" } }}
+              icon={{ source: { dark: "left-dark.png", light: "left.png" }, tintColor: Color.PrimaryText }}
               onAction={() => changeMonth(-1)}
             />
             <Action
               title="Next Month"
               shortcut={{ modifiers: [], key: "arrowRight" }}
-              icon={{ source: { dark: "right-dark.png", light: "right.png" } }}
+              icon={{ source: { dark: "right-dark.png", light: "right.png" }, tintColor: Color.PrimaryText }}
               onAction={() => changeMonth(1)}
             />
           </ActionPanel.Section>
@@ -144,13 +145,19 @@ export default function main() {
             <Action
               title="Previous Year"
               shortcut={{ modifiers: ["shift"], key: "arrowLeft" }}
-              icon={{ source: { dark: "double-left-dark.png", light: "double-left.png" } }}
+              icon={{
+                source: { dark: "double-left-dark.png", light: "double-left.png" },
+                tintColor: Color.PrimaryText,
+              }}
               onAction={() => changeYear(-1)}
             />
             <Action
               title="Next Year"
               shortcut={{ modifiers: ["shift"], key: "arrowRight" }}
-              icon={{ source: { dark: "double-right-dark.png", light: "double-right.png" } }}
+              icon={{
+                source: { dark: "double-right-dark.png", light: "double-right.png" },
+                tintColor: Color.PrimaryText,
+              }}
               onAction={() => changeYear(1)}
             />
           </ActionPanel.Section>

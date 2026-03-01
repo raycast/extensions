@@ -44,6 +44,13 @@
       "mode": "view"
     },
     {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "FreeAgent",
+      "description": "Create a task in FreeAgent",
+      "mode": "view"
+    },
+    {
       "name": "list-bank-transactions",
       "title": "List Bank Transactions",
       "subtitle": "FreeAgent",
@@ -81,11 +88,16 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "pull": "npx @raycast/api@latest pull-contributions",
     "build": "ray build",
     "dev": "ray develop",
     "lint:fix": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,8 +1,9 @@
 import { get } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
+import { cacheHelper } from "@/helpers/cache-helper";
 
 export function getMe() {
-  return get<Me>("/me");
+  return cacheHelper.getOrSet("me", () => get<Me>("/me"));
 }
 
 /** @see {@link https://developers.track.toggl.com/docs/api/me#response Toggl Api} */

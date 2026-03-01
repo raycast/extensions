@@ -12,8 +12,10 @@
     "JuanBanchero",
     "ramsay",
     "stelo",
-    "thomaslombart",
     "xmok"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
   "commands": [

@@ -31,7 +31,7 @@ export const parseComponentName = (componentName: string) => {
  */
 async function getComponentsFromGitHub(): Promise<SearchResult[]> {
   // GitHub API for directory listing
-  const res = await fetch("https://api.github.com/repos/shadcn/ui/contents/apps/www/content/docs/components");
+  const res = await fetch("https://api.github.com/repos/shadcn-ui/ui/contents/apps/v4/content/docs/components");
   if (!res.ok) {
     throw new Error(res.statusText);
   }
@@ -138,7 +138,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             <Action.CopyToClipboard
               icon="yarn-icon.png"
               title="Copy Add Component [Yarn]"
-              content={`npx shadcn@latest add ${searchResult.component}`}
+              content={`yarn shadcn@latest add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd"], key: "y" }}
             />
             <Action.CopyToClipboard

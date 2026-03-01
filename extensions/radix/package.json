@@ -6,13 +6,10 @@
   "icon": "icon.png",
   "author": "peduarte",
   "contributors": [
-    "emlez"
+    "emlez",
+    "ErBlack"
   ],
   "license": "MIT",
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
   "commands": [
     {
       "name": "colors",
@@ -37,20 +34,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.3"
+    "@raycast/api": "^1.31.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "gray-matter": "^4.0.3",
     "prettier": "^3.5.3",
+    "react-devtools": "^6.1.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "dev": "ray develop",
+    "publish": "ray publish",
+    "clone": "rm -rf repository && git clone https://github.com/radix-ui/website.git --single-branch --no-tags repository",
+    "generate": "node src/generate-data.mjs"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

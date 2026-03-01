@@ -85,7 +85,9 @@ export default function ProjectList() {
         );
       })}
 
-      <List.EmptyView title="There are no projects in the roadmap yet." />
+      <List.EmptyView
+        title={initiativeId ? "There are no projects in this initiative." : "There are no projects in this workspace."}
+      />
     </List>
   );
 }

@@ -1,6 +1,6 @@
 import { closeMainWindow } from "@raycast/api";
-import { createNewIncognitoWindow } from "./scripts";
 import { showFailureToast } from "@raycast/utils";
+import { createNewIncognitoWindow } from "./dia";
 
 export default async function Command() {
   try {

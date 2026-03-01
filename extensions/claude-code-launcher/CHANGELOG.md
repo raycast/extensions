@@ -1,5 +1,15 @@
 # Claude Code Launcher
 
+## [1.0.1] - 2026-01-07
+
+### Added
+- Support for Warp terminal
+
+## [Unreleased]
+
+### Added
+- Support for Ghostty terminal emulator
+
 ## [1.0.0] - 2025-09-30
 
 ### Features

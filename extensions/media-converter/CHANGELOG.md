@@ -1,5 +1,43 @@
 # Media Converter Changelog
 
+## [1.5.3] - 2026-02-25
+
+### Added
+
+- New extension preferences:
+  - `Default Image Output Format`
+  - `Default Image Quality`
+  - `Default Video Output Format`
+  - `Default Video Quality Preset (Simple Mode)`
+- `Default Image Quality` now supports detailed values (`Lossless (when supported)`, `100` to `0`, `PNG-24`, `PNG-8`, `TIFF Deflate`, `TIFF LZW`) to better match the in-form quality choices.
+
+### Fixed
+
+- In simple mode, video quality now stays aligned with the selected simple quality level when changing output format (instead of resetting to the default level).
+- Non-macOS image default output format now safely falls back from `.heic` to `.jpg` to avoid invalid dropdown states.
+- Format-specific image quality values now fall back to each format's `DEFAULT_QUALITIES` when the selected value is not applicable to the current output format.
+
+### API Changes
+
+- Added centralized image preference parsing in `getDefaultImageQuality()` to map preference values into format-specific quality settings while preserving legacy preset compatibility (`lowest` to `highest`).
+
+## [1.5.2] - 2025-10-31
+
+### Added
+
+- `Copy FFmpeg Command` action in the Converter Form, to allow the user to inspect the command or run it by themselves in terminal.
+
+### Fixed
+
+- CRF option removed from AVI as it is not actually available
+- Applied `-pix_fmt yuv420p` to all videos except `.mov` to broaden support when converting from specific/unsupported video codecs
+
+### API Changes
+
+- Simplified/centralized a `buildVideoQuality` factory for the AI tool
+  - Tidied up some logic in `convert-media.ts` (the AI tool)
+- Tidied up some unused exports (some were left because they will definitely come in handy in future updates)
+
 ## [1.5.1] - 2025-08-25
 
 ### Fixed

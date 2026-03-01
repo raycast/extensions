@@ -1,8 +1,8 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import filesize from "file-size";
-import { getPreferences } from "../preferences";
 import { SearchResult, useSearch } from "./hooks";
 import { getIcon } from "./utils";
+import { BASE_URL } from "../config";
 
 export function Search() {
   const { results, isLoading, search } = useSearch();
@@ -19,12 +19,9 @@ export function Search() {
 }
 
 function Item({ result }: { result: SearchResult }) {
-  const preferences = getPreferences();
-  const hostname = preferences.hostname;
-
   const url = result.contentType
-    ? `https://${hostname}/apps/files/?dir=${encodeURI(result.dirname)}&openfile=${result.fileId}`
-    : `https://${hostname}/apps/files/?dir=${encodeURI(result.fullpath)}&view=files`;
+    ? `${BASE_URL}/apps/files/?dir=${encodeURI(result.dirname)}&openfile=${result.fileId}`
+    : `${BASE_URL}/apps/files/?dir=${encodeURI(result.fullpath)}&view=files`;
   const approxFileSize = filesize(result.size).human("si");
 
   return (

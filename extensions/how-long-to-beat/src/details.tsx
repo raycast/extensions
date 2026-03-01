@@ -1,85 +1,33 @@
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { HowLongToBeatEntry } from "howlongtobeat";
 import { HltbSearch } from "./hltbsearch";
 import { pluralize } from "./helpers";
-import axios from "axios";
-import UserAgent from "user-agents";
 import * as cheerio from "cheerio";
+import { useGameDetailFetch } from "./useGameDetailFetch";
 
 interface DetailsProps {
   id: string;
   name: string;
 }
 
-interface DetailsState {
-  result: HowLongToBeatEntry | null;
-  isLoading: boolean;
-}
-
 export function Details(props: DetailsProps) {
   const { id, name } = props;
 
-  const [state, setState] = useState<DetailsState>({ result: null, isLoading: true });
-
-  const getDetails = useCallback(async function () {
-    try {
-      const html = await detailHtml(id);
-      const result = parseDetails(html, id);
-
-      setState((oldState) => ({
-        ...oldState,
-        result, // Update the result with the parsed data
-        isLoading: false,
-      }));
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error building detail page", message: String(error) });
-    }
-  }, []);
-
-  const getMarkdown = useCallback(() => {
-    if (state.isLoading) {
-      return "";
-    }
-
-    if (state.result === null) {
-      return "This game cannot be found...";
-    }
-
-    const { result } = state;
-
-    // Description need to be parsed before to display it.
-    const description = result.description.split("\t").shift();
-
-    return `
-<img src="${result.imageUrl}" width="150" />
-# ${result.name}
-${description}
-
-## ${pluralize(result.playableOn.length, "Platform")}
-${result.playableOn.join(", ")}
-    `;
-  }, [state]);
-
-  useEffect(() => {
-    getDetails();
-  }, []);
+  const { isLoading, data: result, markdown } = useGameDetailFetch(id);
 
   const url = `${HltbSearch.DETAIL_URL}${id}`;
 
-  const mainStoryHours = state.result?.gameplayMain || 0;
-  const mainStoryText =
-    mainStoryHours >= 1 ? `${state.result?.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
+  const mainStoryHours = result?.gameplayMain || 0;
+  const mainStoryText = mainStoryHours >= 1 ? `${result?.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
 
-  const mainExtraHours = state.result?.gameplayMainExtra || 0;
-  const mainExtraText =
-    mainExtraHours >= 1 ? `${state.result?.gameplayMainExtra} ${pluralize(mainExtraHours, "hour")}` : "-";
+  const mainExtraHours = result?.gameplayMainExtra || 0;
+  const mainExtraText = mainExtraHours >= 1 ? `${result?.gameplayMainExtra} ${pluralize(mainExtraHours, "hour")}` : "-";
 
-  const completionistsHours = state.result?.gameplayCompletionist || 0;
+  const completionistsHours = result?.gameplayCompletionist || 0;
   const completionistsText =
-    completionistsHours >= 1 ? `${state.result?.gameplayCompletionist} ${pluralize(completionistsHours, "hour")}` : "-";
+    completionistsHours >= 1 ? `${result?.gameplayCompletionist} ${pluralize(completionistsHours, "hour")}` : "-";
 
-  const metadata = !state.isLoading ? (
+  const metadata = result ? (
     <Detail.Metadata>
       <Detail.Metadata.Label title="Main Story" text={mainStoryText} />
       <Detail.Metadata.Label title="Main + Extras" text={mainExtraText} />
@@ -89,9 +37,9 @@ ${result.playableOn.join(", ")}
 
   return (
     <Detail
-      isLoading={state.isLoading}
+      isLoading={isLoading}
       navigationTitle={name}
-      markdown={getMarkdown()}
+      markdown={markdown}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" url={url} />
@@ -103,26 +51,7 @@ ${result.playableOn.join(", ")}
   );
 }
 
-async function detailHtml(gameId: string, signal?: AbortSignal): Promise<string> {
-  try {
-    const result = await axios.get(`${HltbSearch.DETAIL_URL}${gameId}`, {
-      // followRedirect: false,
-      headers: {
-        "User-Agent": new UserAgent().toString(),
-        origin: "https://howlongtobeat.com",
-        referer: "https://howlongtobeat.com",
-      },
-      timeout: 20000,
-      signal,
-    });
-    return result.data;
-  } catch (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error fetching game details:", message: String(error) });
-    throw error;
-  }
-}
-
-function parseDetails(html: string, id: string): HowLongToBeatEntry {
+export function parseDetails(html: string, id: string): HowLongToBeatEntry {
   const $ = cheerio.load(html);
   let gameName = "";
   let imageUrl = "";
@@ -131,16 +60,16 @@ function parseDetails(html: string, id: string): HowLongToBeatEntry {
   let gameplayMainExtra = 0;
   let gameplayComplete = 0;
 
-  gameName = $("div[class*=GameHeader_profile_header__]").text();
-  imageUrl = $("div[class*=GameHeader_game_image__]").find("img")[0].attribs.src;
+  gameName = $("div[class*='profile_header'].shadow_text").text();
+  imageUrl = $("div[class*='game_image']").find("img")[0]?.attribs?.src || "";
 
-  const liElements = $("div[class*=GameStats_game_times__] li");
+  const divElements = $("div[class*='game_times'] div");
 
-  const gameDescription = $(".in.back_primary.shadow_box div[class*=GameSummary_large__]").text();
+  const gameDescription = $(".in.back_primary.shadow_box div[class*='GameSummary'][class*='large']").text();
 
   let platforms: string[] = [];
 
-  $("div[class*=GameSummary_profile_info__]").each(function () {
+  $("div[class*='GameSummary'][class*='profile_info']").each(function () {
     const metaData = $(this).text();
     const platformKeyword = metaData.includes("Platforms:") ? "Platforms:" : "Platform:";
     platforms = metaData
@@ -150,7 +79,7 @@ function parseDetails(html: string, id: string): HowLongToBeatEntry {
       .map((data) => data.trim());
   });
 
-  liElements.each(function () {
+  divElements.each(function () {
     const type: string = $(this).find("h4").text();
     const time: number = parseTime($(this).find("h5").text());
     if (type.startsWith("Main Story") || type.startsWith("Single-Player") || type.startsWith("Solo")) {

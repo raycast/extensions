@@ -93,7 +93,7 @@
     "@vitest/coverage-v8": "^3.1.4",
     "@vitest/ui": "^3.1.4",
     "eslint": "^9.22.0",
-    "happy-dom": "^17.5.6",
+    "happy-dom": "^20.0.10",
     "msw": "^2.8.6",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",

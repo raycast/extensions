@@ -27,3 +27,17 @@ For enhanced functionality when capturing URLs and titles, we recommend installi
 ### Open in Browser Configuration
 
 The primary `Action` will open links in default browser. In `Preferences` you can select a secondary browser which will add a new `Action` for opening in that browser, instead. If you selected an invalid app (i.e. an app that is not a browser), link will open in default browser.
+
+## AI Assistant
+
+You can now talk to your Raindrop.io account with Raycast AI. Mention `@raindrop-io` inside Raycast AI to:
+
+- Search bookmarks with natural language queries and get back summaries that include the collection and tags.
+- Inspect the note, highlights, or excerpt of a specific bookmark.
+- Save new links by telling Raycast AI the URL together with the desired collection and tags.
+
+### Tips
+
+1. Make sure you have Raycast AI enabled on your account.
+2. When you ask to save a link, specify the collection name (e.g. "Research"). The assistant will resolve it automatically, otherwise the bookmark goes to **Unsorted**.
+3. Ask follow-up questions like "What tags did I use?" or "Add this article to the same collection"—the assistant keeps the previous tool results in the conversation.

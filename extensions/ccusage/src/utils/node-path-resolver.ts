@@ -1,6 +1,7 @@
 import { readdirSync, existsSync } from "fs";
 import { join } from "path";
 import { cpus } from "os";
+import semver from "semver";
 
 // Performance optimization: Cache expensive operations
 let cachedPaths: string | null = null;
@@ -12,11 +13,24 @@ const getAppleSiliconStatus = (): boolean => {
   return cachedIsAppleSilicon;
 };
 
+// Parse Node.js version string to comparable number using semver library
+const parseVersion = (version: string): number => {
+  const coerced = semver.coerce(version);
+  if (!coerced) return 0;
+
+  return coerced.major * 1000000 + coerced.minor * 1000 + coerced.patch;
+};
+
+const sortPathsByVersion = (paths: Array<{ path: string; version: string }>): string[] => {
+  return paths.sort((a, b) => parseVersion(b.version) - parseVersion(a.version)).map((item) => item.path);
+};
+
 export const resolveVersionManagerPaths = (): string[] => {
-  const paths: string[] = [];
+  const versionedPaths: Array<{ path: string; version: string }> = [];
+  const staticPaths: string[] = [];
   const home = process.env.HOME;
 
-  if (!home) return paths;
+  if (!home) return [];
 
   const nvmVersionsDir = join(home, ".nvm", "versions", "node");
   try {
@@ -24,7 +38,7 @@ export const resolveVersionManagerPaths = (): string[] => {
     for (const version of nodeVersions) {
       const binPath = join(nvmVersionsDir, version, "bin");
       if (existsSync(binPath)) {
-        paths.push(binPath);
+        versionedPaths.push({ path: binPath, version });
       }
     }
   } catch {
@@ -37,22 +51,24 @@ export const resolveVersionManagerPaths = (): string[] => {
     for (const version of nodeVersions) {
       const binPath = join(fnmVersionsDir, version, "installation", "bin");
       if (existsSync(binPath)) {
-        paths.push(binPath);
+        versionedPaths.push({ path: binPath, version });
       }
     }
   } catch {
     // Directory doesn't exist or no permissions - continue silently
   }
 
-  const staticPaths = [join(home, ".n", "bin"), join(home, ".volta", "bin")];
+  const staticPathCandidates = [join(home, ".n", "bin"), join(home, ".volta", "bin")];
 
-  for (const path of staticPaths) {
+  for (const path of staticPathCandidates) {
     if (existsSync(path)) {
-      paths.push(path);
+      staticPaths.push(path);
     }
   }
 
-  return paths;
+  // Sort versioned paths by version (newest first) and append static paths
+  const sortedVersionedPaths = sortPathsByVersion(versionedPaths);
+  return [...sortedVersionedPaths, ...staticPaths];
 };
 
 /**

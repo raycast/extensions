@@ -1,5 +1,4 @@
 import { Clipboard, closeMainWindow, getSelectedText, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
 import { calculateAdjustmentFactors } from "./services/calculations";
 import { FinancialIndexData } from "./types";
 import { formatDate, formatNumber } from "./utils/formatting";

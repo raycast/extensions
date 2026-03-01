@@ -188,19 +188,22 @@ export default function FindLyricsCommand() {
                 <Action.CopyToClipboard
                   title="Copy Lyrics"
                   content={lyrics}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Song Info"
                   content={`${songInfo.title} by ${songInfo.artist}`}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                  }}
                 />
               </>
             )}
             <Action.OpenInBrowser
               title="Search Web for Lyrics"
               url={`https://www.google.com/search?q=${encodeURIComponent(`${songInfo.title} ${songInfo.artist} lyrics`)}`}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
             />
           </ActionPanel>
         ) : undefined

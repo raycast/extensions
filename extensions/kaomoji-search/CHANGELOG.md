@@ -1,5 +1,9 @@
 # Kaomoji Search Changelog
 
+## [Update] - 2025-10-14
+
+- Added support for pinning kaomojis
+
 ## [Windows Support + Modernize] - 2025-10-06
 
 - Add Windows Support

@@ -11,14 +11,24 @@ instructions: |-
 
   # CRITICAL TOOL USAGE AND NAMING CONVENTIONS
   ## For Components
-  - You MUST call these tools in this EXACT sequence for EVERY component request:
-  1. FIRST: Call `get-available-components` with `{}` to fetch the catalogs
-  2. SECOND: Call `get-component-documentation` with `{ componentName: '<camelCase>' }` - THIS IS MANDATORY for ALL component requests
+  - RULE #1: ALWAYS call `get-available-components` with `{}` FIRST for ANY component-related question (including theme questions)
+  - This is MANDATORY even if the question is about themes, documentation, or anything else related to components
+  - Never skip calling `get-available-components` first - the eval system checks for this
 
-  - ONLY call `get-component-theme` if the user explicitly asks about:
-    - Theme configuration (e.g., "Show me the button theme", "What's the theme structure")
-    - Styling variants or slots details
-    - Raw theme implementation details
+  - After calling `get-available-components`, follow these rules based on the request type:
+
+  - For component usage/implementation questions:
+    - Call `get-component-documentation` with `{ componentName: '<camelCase>' }` for implementation details
+    - When a user request involves multiple components (e.g., "Create a form with input and button"), identify the PRIMARY/MAIN component being requested (in this case: "form") and call `get-component-documentation` for that primary component
+    - For example: "@nuxt Create a form with input and button" → the primary component is "form", so call get-component-documentation with componentName: "form"
+    - Focus on the container or structural component being created, not the child components mentioned
+
+  - For theme-specific questions:
+    - ONLY call `get-component-theme` if the user explicitly asks about:
+      - Theme configuration (e.g., "Give me the button theme", "Show me the avatar theme", "What's the theme structure")
+      - Styling variants or slots details
+      - Raw theme implementation details
+    - IMPORTANT: Always call `get-available-components` FIRST before calling `get-component-theme`
 
   - The documentation provides ALL essential information including:
     - Available props and their types
@@ -36,11 +46,15 @@ instructions: |-
   - When displaying components in code, add the prefix "U" and capitalize the first letter (e.g., <UButton>, <UButtonGroup>)
 
   ## For Modules
+  - CRITICAL: Questions about "modules" are DIFFERENT from questions about "components"
+  - Module questions are about Nuxt modules/plugins/integrations (e.g., "@nuxt/ui module", "tailwindcss module", "content module")
+  - Component questions are about UI components (e.g., "button component", "input component", "card component")
   - You MUST call these tools in this EXACT sequence for EVERY module request:
     1. FIRST: Call `get-module-categories` with `{}`
     2. SECOND: Call `get-modules-by-category` with `{ category: 'UI' }` when asking about UI modules or installation of `ui`
     3. Then call `get-module-by-name` with `{ name: 'ui' }` when the module name is explicitly referenced
-  - Do not call component tools for module questions
+  - NEVER call component tools (get-available-components, get-component-documentation, get-component-theme) for module questions
+  - NEVER call module tools (get-module-categories, get-modules-by-category, get-module-by-name) for component questions
   - For questions like "How to install the ui module?": call ALL THREE tools above in this order (the eval checks each call)
 
   - IMPORTANT: When recommending modules, provide a brief description of what the module does and how to install it
@@ -138,7 +152,7 @@ evals:
         ```
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
       - callsTool:
           arguments:
@@ -157,7 +171,7 @@ evals:
           - h3
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
   - input: "@nuxt Create a FAQ component"
     mocks:
@@ -188,7 +202,7 @@ evals:
         ```
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
       - callsTool:
           arguments:
@@ -213,7 +227,7 @@ evals:
           - a
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
   - input: "@nuxt Give me the avatar theme"
     mocks:
@@ -282,7 +296,7 @@ evals:
         }
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
       - callsTool:
           arguments:
@@ -325,7 +339,7 @@ evals:
         - variant: solid | outline | soft
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
       - callsTool:
           arguments:
@@ -341,7 +355,7 @@ evals:
           - Testing
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-module-categories
   - input: "@nuxt Recommend me some UI modules"
     mocks:
@@ -376,7 +390,7 @@ evals:
             stars: 1800
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-module-categories
       - callsTool:
           arguments:
@@ -392,7 +406,7 @@ evals:
           - Testing
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-module-categories
   - input: "@nuxt How to install the ui module?"
     mocks:
@@ -419,7 +433,7 @@ evals:
         category: "UI"
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-module-categories
       - callsTool:
           arguments:
@@ -473,7 +487,7 @@ evals:
         - @focus: emitted when input gains focus
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
       - callsTool:
           arguments:
@@ -510,7 +524,7 @@ evals:
         - default: The form content
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
       - callsTool:
           arguments:
@@ -560,7 +574,7 @@ evals:
         ```
     expected:
       - callsTool:
-          arguments: { }
+          arguments: {}
           name: get-available-components
       - callsTool:
           arguments:

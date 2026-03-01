@@ -9,7 +9,10 @@
     "omarshahine",
     "bendrucker",
     "damian_duchnowski",
-    "xilopaint"
+    "xilopaint",
+    "aidenkt",
+    "pernielsentikaer",
+    "kemar.christie"
   ],
   "categories": [
     "Productivity",
@@ -311,6 +314,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

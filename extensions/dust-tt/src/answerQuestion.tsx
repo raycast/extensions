@@ -1,11 +1,11 @@
+import { AgentActionPublicType, DataSourceViewType, DustAPI } from "@dust-tt/client";
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { addDustHistory } from "./history";
-import { ConnectorProviders, DUST_AGENT, AgentType, getUser } from "./utils";
 import { AskAgentQuestionForm } from "./askAgent";
 import { getDustClient, withPickedWorkspace } from "./dust_api/oauth";
-import { AgentActionPublicType, DataSourceViewType, DustAPI } from "@dust-tt/client";
-import { usePromise } from "@raycast/utils";
+import { addDustHistory } from "./history";
+import { AgentType, ConnectorProviders, DUST_AGENT, getUser } from "./utils";
 
 type DustDocument = {
   documentId: string;
@@ -279,7 +279,7 @@ export const AskDustQuestion = withPickedWorkspace(
     const dustApi = getDustClient();
 
     useEffect(() => {
-      if (question && !conversationId && !isLoadingContext && context) {
+      if (question && !conversationId && !isLoadingContext && context && dustApi) {
         const asyncAnswer = async () => {
           await answerQuestion({
             question,
@@ -369,7 +369,7 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
             icon={{
               source:
                 (document.dataSourceView?.dataSource.connectorProvider &&
-                  ConnectorProviders[document.dataSourceView?.dataSource.connectorProvider].icon) ??
+                  ConnectorProviders[document.dataSourceView?.dataSource.connectorProvider]?.icon) ??
                 Icon.Globe,
             }}
             accessories={[
@@ -377,11 +377,11 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
                 tag: {
                   color:
                     (document.dataSourceView?.dataSource.connectorProvider &&
-                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider].color) ??
+                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider]?.color) ??
                     Color.SecondaryText,
                   value:
                     (document.dataSourceView?.dataSource.connectorProvider &&
-                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider].name) ??
+                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider]?.name) ??
                     "Unknown",
                 },
               },

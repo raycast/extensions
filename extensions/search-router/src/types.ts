@@ -18,6 +18,8 @@ export interface SearchEngine {
   t: string;
   /** The URL template to use when the bang is invoked, where `{{{s}}}` is replaced by the user's query. */
   u: string;
+  /** Multiple URL templates for multi-site search. If present, overrides `u`. */
+  urls?: string[];
   /** The category of the website, if applicable. */
   c?: (typeof BANG_CATEGORIES)[number];
   /** The subcategory of the website, if applicable. */

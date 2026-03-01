@@ -1,6 +1,6 @@
 import { LaunchProps, showHUD } from "@raycast/api";
+import { changeVolumeWithHUD } from "./api/changeVolume";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
-import { changeVolume } from "./api/changeVolume";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.Volume }>) {
   // volume is a string
@@ -20,10 +20,5 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
   await setSpotifyClient();
 
-  try {
-    await changeVolume(volume);
-    await showHUD(`Volume set to ${volume}%`);
-  } catch {
-    await showHUD("No active device");
-  }
+  await changeVolumeWithHUD(volume);
 }

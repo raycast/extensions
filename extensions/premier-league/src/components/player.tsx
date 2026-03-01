@@ -1,128 +1,279 @@
-import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon, List } from "@raycast/api";
+import { useState } from "react";
+import { Player, PlayerSeasonId } from "../types";
+import { formatDate, getFlagEmoji, getProfileImg } from "../utils";
 import { usePromise } from "@raycast/utils";
-import json2md from "json2md";
-import groupBy from "lodash.groupby";
-import { getPlayerStats } from "../api";
-import { Player, PlayerAward } from "../types";
-import { awardMap, getFlagEmoji, getProfileImg } from "../utils";
+import { getPlayerInformation, getPlayerStats, getSeasons } from "../api";
+import SearchBarSeason from "./searchbar_season";
 
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+const toPercentage = (success: number = 0, unsuccess: number = 0) => {
+  const total = success + unsuccess;
+  const percent = total > 0 ? (success * 100) / total : 0;
 
-export const PlayerProfile = (player: Player) => {
-  const { data, isLoading } = usePromise(getPlayerStats, [player.id]);
+  return `${total} (${percent.toFixed(2)}%)`;
+};
 
-  const statsMap = groupBy(data, "name");
-  const stats = [
-    `Appearances: ${statsMap["appearances"]?.[0].value || 0}`,
-    `Goals: ${statsMap["goals"]?.[0].value || 0}`,
-    `Assists: ${statsMap["goal_assist"]?.[0].value || 0}`,
-  ];
+export const PlayerStats = (props: { id: PlayerSeasonId }) => {
+  const [seasonId, setSeasonId] = useState<string>();
 
-  if (player.info.position === "G" || player.info.position === "D") {
-    stats.push(`Clean sheets: ${statsMap["clean_sheet"]?.[0].value || 0}`);
-  }
+  const { data: stats, isLoading } = usePromise(
+    async (season, playerId) =>
+      season ? await getPlayerStats(season, playerId) : undefined,
+    [seasonId, props.id.playerId],
+  );
 
   return (
-    <Detail
+    <List
       isLoading={isLoading}
-      navigationTitle={`${player.name.display} | Profile & Stats`}
-      markdown={json2md([
-        { h1: player.name.display },
-        {
-          img: {
-            source: getProfileImg(player.altIds.opta),
-          },
-        },
-        {
-          h2: "Premier League Record",
-        },
-        {
-          p: stats,
-        },
-        {
-          h2: player.awards ? "Honours & Awards" : "",
-        },
-        ...Object.entries(player.awards || {})
-          .map(([key, awards]) => {
-            return [
-              {
-                h3: awardMap[key] || key,
-              },
-              {
-                ul: awards.map((award: PlayerAward) => {
-                  const month = Array.isArray(award.date)
-                    ? award.date[1]
-                    : award.date.month;
-                  return key.endsWith("MONTH")
-                    ? `${months[month - 1]} ${award.compSeason.label}`
-                    : award.compSeason.label;
-                }),
-              },
-            ];
-          })
-          .flat(),
-      ])}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Nationality"
-            icon={getFlagEmoji(player.nationalTeam?.isoCode)}
-            text={player.nationalTeam?.country}
-          />
-          <Detail.Metadata.Label
-            title="Date of Birth"
-            text={player.birth.date.label}
-          />
-          {player.height && (
-            <Detail.Metadata.Label title="Height" text={`${player.height}cm`} />
-          )}
-          <Detail.Metadata.Label title="Age" text={player.age} />
-          <Detail.Metadata.Separator />
-          {player.currentTeam && (
-            <Detail.Metadata.Label
-              title="Club"
-              text={player.currentTeam.name}
+      navigationTitle={`${stats?.player.name} | Statistics`}
+      searchBarAccessory={
+        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
+      }
+    >
+      {!stats && (
+        <List.EmptyView
+          icon="premier-league.svg"
+          title="No stats available yet"
+          description="Try a different search"
+        />
+      )}
+      {stats && (
+        <List.Section>
+          {stats?.stats.appearances && (
+            <List.Item
+              title="Appearances"
+              subtitle={stats?.stats.appearances.toFixed()}
             />
           )}
-          {player.joinDate && (
-            <Detail.Metadata.Label
-              title="Joined Date"
-              text={player.joinDate?.label}
+          {stats?.stats.goalsConceded && (
+            <List.Item
+              title="Goals Conceded"
+              subtitle={stats?.stats.goalsConceded.toFixed()}
             />
           )}
-          <Detail.Metadata.Label
-            title="Position"
-            text={player.info.positionInfo}
+          {stats?.stats.cleanSheets && (
+            <List.Item
+              title="Clean Sheets"
+              subtitle={stats?.stats.cleanSheets.toFixed()}
+            />
+          )}
+        </List.Section>
+      )}
+      {stats && (
+        <List.Section title="Attack">
+          {stats?.stats.expectedGoals && (
+            <List.Item
+              title="XG"
+              subtitle={stats?.stats.expectedGoals.toFixed(2)}
+            />
+          )}
+          {stats?.stats.expectedAssists && (
+            <List.Item
+              title="XA"
+              subtitle={stats?.stats.expectedAssists.toFixed(2)}
+            />
+          )}
+          {stats?.stats.goalsConcededInsideBox && (
+            <List.Item
+              title="Shots On Target Inside the Box"
+              subtitle={stats?.stats.goalsConcededInsideBox.toFixed()}
+            />
+          )}
+          {stats?.stats.totalTouchesInOppositionBox && (
+            <List.Item
+              title="Touches in the Opposition Box"
+              subtitle={stats?.stats.totalTouchesInOppositionBox.toFixed()}
+            />
+          )}
+        </List.Section>
+      )}
+      {stats && (
+        <List.Section title="Possession">
+          <List.Item
+            title="Passes (Completed %)"
+            subtitle={toPercentage(
+              stats?.stats?.successfulShortPasses,
+              stats?.stats?.unsuccessfulShortPasses,
+            )}
           />
-          <Detail.Metadata.Label
-            title="Shirt Number"
-            text={player.info.shirtNum?.toString()}
+          {/* <List.Item
+            title="Crosses (Completed %)"
+            subtitle={toPercentage()}
+          /> */}
+          <List.Item
+            title="Long Passes (Completed %)"
+            subtitle={toPercentage(
+              stats?.stats?.successfulLongPasses,
+              stats?.stats?.unsuccessfulLongPasses,
+            )}
           />
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://www.premierleague.com/players/${
-              player.id
-            }/${player.name.display.replace(/ /g, "-")}/overview`}
+        </List.Section>
+      )}
+      {stats && (
+        <List.Section title="Physical">
+          {stats?.stats.timePlayed && (
+            <List.Item
+              title="Minutes Played"
+              subtitle={stats?.stats.timePlayed.toFixed()}
+            />
+          )}
+          <List.Item
+            title="Dribbles (Completed %)"
+            subtitle={toPercentage(
+              stats?.stats?.successfulDribbles,
+              stats?.stats?.unsuccessfulDribbles,
+            )}
           />
-        </ActionPanel>
-      }
-    />
+          {stats?.stats.duelsWon && (
+            <List.Item
+              title="Duels Won"
+              subtitle={stats?.stats.duelsWon.toFixed()}
+            />
+          )}
+          {stats?.stats.aerialDuelsWon && (
+            <List.Item
+              title="Aerial Duels Won"
+              subtitle={stats?.stats.aerialDuelsWon.toFixed()}
+            />
+          )}
+        </List.Section>
+      )}
+      {stats && (
+        <List.Section title="Defence">
+          {stats?.stats.totalTackles && (
+            <List.Item
+              title="Total Tackles"
+              subtitle={stats?.stats.totalTackles.toFixed()}
+            />
+          )}
+          {stats?.stats.interceptions && (
+            <List.Item
+              title="Interceptions"
+              subtitle={stats?.stats.interceptions.toFixed()}
+            />
+          )}
+          {stats?.stats.blockedShots && (
+            <List.Item
+              title="Blocks"
+              subtitle={stats?.stats.blockedShots.toFixed()}
+            />
+          )}
+        </List.Section>
+      )}
+      {stats && (
+        <List.Section title="Discipline">
+          <List.Item
+            title="Red Cards"
+            subtitle={stats?.stats.straightRedCards.toFixed()}
+          />
+          <List.Item
+            title="Yellow Cards"
+            subtitle={stats?.stats.yellowCards.toFixed()}
+          />
+          {stats?.stats.totalFoulsConceded && (
+            <List.Item
+              title="Fouls"
+              subtitle={stats?.stats.totalFoulsConceded.toFixed()}
+            />
+          )}
+          {stats?.stats.offsides && (
+            <List.Item
+              title="Offsides"
+              subtitle={stats?.stats.offsides.toFixed()}
+            />
+          )}
+          {stats?.stats.ownGoalScored && (
+            <List.Item
+              title="Own Goals"
+              subtitle={stats?.stats.ownGoalScored.toFixed()}
+            />
+          )}
+        </List.Section>
+      )}
+    </List>
+  );
+};
+
+export const PlayerProfile = (props: { id: string }) => {
+  const { data: seasons } = usePromise(getSeasons);
+  const { data: player } = usePromise(
+    async (season, playerId) =>
+      season ? await getPlayerInformation(season, playerId) : undefined,
+    [seasons?.[0].seasonId, props.id],
+  );
+
+  return (
+    player && (
+      <Detail
+        navigationTitle={`${player.name.display} | Profile & Stats`}
+        markdown={`## ${player.name.display}
+<img src="${getProfileImg(props.id)}" alt="${player.name.display}" width="220" height="280" />
+`}
+        metadata={
+          <Detail.Metadata>
+            <Detail.Metadata.Label
+              title="Date of Birth"
+              text={formatDate(player.dates.birth, "yyyy-MM-dd", "dd MMM yyyy")}
+            />
+            <Detail.Metadata.Label title="Position" text={player.position} />
+            <Detail.Metadata.Label
+              title="Nationality"
+              icon={getFlagEmoji(player.country.isoCode)}
+              text={player.country.country}
+            />
+            <Detail.Metadata.Label
+              title="Place of Birth"
+              text={player.countryOfBirth}
+            />
+            <Detail.Metadata.Separator />
+            {player.height && (
+              <Detail.Metadata.Label
+                title="Height"
+                text={`${player.height}cm`}
+              />
+            )}
+            {player.weight && (
+              <Detail.Metadata.Label
+                title="Weight"
+                text={`${player.weight}kg`}
+              />
+            )}
+            <Detail.Metadata.Label
+              title="Shirt Number"
+              text={player.shirtNum?.toString()}
+            />
+            <Detail.Metadata.Label
+              title="Preferred Foot"
+              text={player.preferredFoot}
+            />
+            {player.dates.joinedClub && (
+              <Detail.Metadata.Label
+                title="Joined Date"
+                text={formatDate(
+                  player.dates.joinedClub,
+                  "yyyy-MM-dd",
+                  "dd MMM yyyy",
+                )}
+              />
+            )}
+          </Detail.Metadata>
+        }
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Player Stats"
+              icon={Icon.Info}
+              target={
+                <PlayerStats id={player.id as unknown as PlayerSeasonId} />
+              }
+            />
+            <Action.OpenInBrowser
+              url={`https://www.premierleague.com/en/players/${props.id}/${player.name.display.toLowerCase().replace(/ /g, "-")}/overview`}
+            />
+          </ActionPanel>
+        }
+      />
+    )
   );
 };
 
@@ -132,15 +283,14 @@ export const PositionSection = (players: Player[]) => {
       <Grid.Item
         key={player.id}
         title={player.name.display}
-        subtitle={player.info.positionInfo}
-        keywords={[player.info.positionInfo]}
+        keywords={[player.position]}
         content={{
-          source: getProfileImg(player.altIds.opta),
+          source: getProfileImg(player.id),
           fallback: "player-missing.png",
         }}
         accessory={{
-          icon: getFlagEmoji(player.nationalTeam?.isoCode),
-          tooltip: player.nationalTeam?.country,
+          icon: getFlagEmoji(player.country.isoCode),
+          tooltip: player.country.country,
         }}
         actions={
           <ActionPanel>

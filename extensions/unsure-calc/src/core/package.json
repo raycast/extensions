@@ -1,0 +1,8 @@
+{
+  "name": "unsure-calc-core",
+  "version": "0.1.0",
+  "description": "Shared probabilistic calculator core (tokenizer, shunting yard, evaluator, histogram)",
+  "main": "calc-core.js",
+  "types": "calc-core.d.ts",
+  "license": "MIT"
+}

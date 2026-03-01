@@ -41,7 +41,9 @@
     "nebbles",
     "alanxmay",
     "gdsmith",
-    "tama_harrison"
+    "tama_harrison",
+    "pavelas",
+    "mchoun"
   ],
   "pastContributors": [
     "pomdtr",
@@ -162,6 +164,13 @@
       "title": "Search Tabs",
       "subtitle": "Arc",
       "description": "Search and select your tabs",
+      "mode": "view"
+    },
+    {
+      "name": "search-space-tabs",
+      "title": "Search Space Tabs",
+      "subtitle": "Arc",
+      "description": "Search and select tabs in your current space",
       "mode": "view"
     },
     {

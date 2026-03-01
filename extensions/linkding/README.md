@@ -12,7 +12,7 @@ Uses Raycast to search through Linking bookmarks.
 - Search bookmarks
 - Open bookmarks in the browser
 - Copy bookmarks to clipboard
-- Create and delete bookmarks in the extension
+- Create, delete, and archive bookmarks in the extension
 - Save current browser tab
 
 ## Notice

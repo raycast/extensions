@@ -2,18 +2,19 @@ import {
   getApplications,
   MenuBarExtra,
   open,
-  openCommandPreferences,
   launchCommand,
   LaunchType,
   getPreferenceValues,
-  openExtensionPreferences,
   Icon,
+  openCommandPreferences,
+  openExtensionPreferences,
+  Keyboard,
 } from "@raycast/api";
 
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
-import { getNotificationMenuBarTitle, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
+import { getNotificationMenuBarTitle, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
@@ -55,6 +56,30 @@ function UnreadNotifications() {
     await open(`https://linear.app/${urlKey}/inbox`, linearApp);
   }
 
+  async function markAllAsRead() {
+    if (unreadNotifications.length === 0) {
+      return;
+    }
+
+    const readAt = new Date();
+
+    await mutateNotifications(
+      Promise.all(unreadNotifications.map((notification) => updateNotification({ id: notification.id, readAt }))),
+      {
+        optimisticUpdate(data) {
+          if (!data) {
+            return data;
+          }
+          return {
+            ...data,
+            notifications: data?.notifications?.map((x) => (x.readAt ? x : { ...x, readAt })),
+          };
+        },
+        shouldRevalidateAfter: true,
+      },
+    );
+  }
+
   const truncate = (text: string, maxLength: number) => {
     const ellipsis = text.length > maxLength ? "…" : "";
     return text.substring(0, maxLength).trim() + ellipsis;
@@ -74,9 +99,20 @@ function UnreadNotifications() {
         <MenuBarExtra.Item
           title="Open Inbox"
           icon="linear-app-icon.png"
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={openInbox}
         />
+        {unreadNotifications.length > 0 ? (
+          <MenuBarExtra.Item
+            title="Mark All as Read"
+            icon={Icon.CheckCircle}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "u" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+            }}
+            onAction={markAllAsRead}
+          />
+        ) : null}
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
@@ -85,13 +121,11 @@ function UnreadNotifications() {
         />
 
         {unreadNotifications.map((notification) => {
-          const title = `${getNotificationTitle(notification)} by ${
-            notification.actor ? notification.actor.displayName : "Linear"
-          }`;
-
+          // Use Linear API's title and subtitle fields for consistent notification display
+          const title = truncate(notification.subtitle, 30);
           const icon = notification.actor ? getUserIcon(notification.actor) : "linear-app-icon.png";
-          const subtitle = notification.issue?.title ? truncate(notification.issue.title, 20) : "";
-          const tooltip = `${notification.issue?.identifier}: ${notification.issue?.title}`;
+          const subtitle = truncate(notification.title, 20);
+          const tooltip = `${notification.subtitle}: ${notification.title}`;
 
           return (
             <MenuBarExtra.Item
@@ -121,10 +155,11 @@ function UnreadNotifications() {
           title="View All Notifications"
           onAction={() => launchCommand({ name: "notifications", type: LaunchType.UserInitiated })}
         />
+
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={() => openCommandPreferences()}
           alternate={
             <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />

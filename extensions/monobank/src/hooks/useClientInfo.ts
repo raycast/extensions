@@ -40,7 +40,7 @@ export function useClientInfo() {
     isLoading: isLoadingFromLS,
   } = useLocalStorage<LocalStorageUserInfoData>("clientInfo", lsInitialValue);
 
-  const { token } = getPreferenceValues<Preferences.Accounts>();
+  const { token } = getPreferenceValues<{ token?: string }>();
 
   useEffect(() => {
     if (isLoadingFromLS) return;

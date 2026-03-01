@@ -8,7 +8,10 @@
   "contributors": [
     "j3lte",
     "markusjura",
-    "fabitosh"
+    "fabitosh",
+    "geekyed",
+    "dangkhoipro",
+    "0xdhrv"
   ],
   "categories": [
     "Productivity",
@@ -35,6 +38,13 @@
       ]
     },
     {
+      "name": "create-quick-event",
+      "title": "Create Quick Event",
+      "subtitle": "Google Calendar",
+      "description": "Creates a quick event in your Google Calendar",
+      "mode": "view"
+    },
+    {
       "name": "search-contacts",
       "title": "Search Contacts",
       "description": "Search your Google Contacts",
@@ -46,7 +56,18 @@
       "title": "List Events",
       "description": "View your upcoming Google Calendar events",
       "mode": "view",
-      "subtitle": "Google Calendar"
+      "subtitle": "Google Calendar",
+      "preferences": [
+        {
+          "name": "openCommandJoinsMeeting",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Join meeting",
+          "description": "Change the default behavior when opening an event to directly join the meeting (if a meeting link is available)",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "list-calendars",
@@ -137,13 +158,36 @@
       ],
       "default": "30",
       "required": false
+    },
+    {
+      "name": "sendInvitations",
+      "title": "Send Invitations",
+      "description": "Whether to send email invitations (including meeting links) to guests when creating or editing events",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "All Guests",
+          "value": "all"
+        },
+        {
+          "title": "External Guests Only",
+          "value": "externalOnly"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ],
+      "default": "all",
+      "required": false
     }
   ],
   "dependencies": {
     "@googleapis/calendar": "^9.8.0",
     "@googleapis/people": "^3.0.9",
-    "@raycast/api": "^1.94.2",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.19.1",
+    "chrono-node": "^2.9.0",
     "date-fns": "^4.1.0",
     "humanize-duration": "^3.32.1",
     "nanoid": "^5.1.5",

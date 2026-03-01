@@ -1,5 +1,12 @@
 # Shortcuts Search Changelog
 
+## [Update] - 2025-12-25
+
+- Add support for platform-specific keymaps
+- Add application icons support
+- Fix shortcut runner
+- Improve shortcut formatting and display
+
 ## [Update] - 2024-09-18
 
 - Add command to show shortcuts for the frontmost web page

@@ -59,7 +59,10 @@ function OpenManifestInDefaultAppAction(props: { url: string }) {
       title={`Open Manifest in ${defaultApp.name}`}
       target={props.url}
       icon={{ fileIcon: defaultApp.path }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "m" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+      }}
     />
   );
 }
@@ -81,7 +84,7 @@ export default function IndexCommand() {
         const access: string | undefined = json?.access;
         const name: string = json.name;
         const link = `https://raycast.com/${owner ?? author}/${name}`;
-        const cleanedPath = file.replace("/package.json", "");
+        const cleanedPath = path.dirname(file);
 
         return {
           path: cleanedPath,
@@ -184,9 +187,7 @@ export default function IndexCommand() {
             return (
               <List.Item
                 key={index}
-                // [TODO] Raycast Windows does not support relative image path yet.
-                // Remove the condition when it is supported.
-                icon={isWindows ? undefined : `${item.path}/assets/${item.icon}`}
+                icon={path.join(item.path, "assets", item.icon)}
                 title={item.title}
                 keywords={[item.author]}
                 actions={
@@ -203,7 +204,10 @@ export default function IndexCommand() {
                       <Action.CopyToClipboard
                         title="Copy Item to Clipboard"
                         content={formatItem(item, preferences.format)}
-                        shortcut={{ modifiers: ["cmd"], key: "." }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd"], key: "." },
+                          Windows: { modifiers: ["ctrl"], key: "." },
+                        }}
                       />
                       <Action.CopyToClipboard
                         title="Copy Extension List to Clipboard"
@@ -213,7 +217,10 @@ export default function IndexCommand() {
                           preferences.separator,
                           preferences.prepend,
                         )}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "." },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "." },
+                        }}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
@@ -223,7 +230,10 @@ export default function IndexCommand() {
                       title="Open Extension Preferences"
                       onAction={openExtensionPreferences}
                       icon={Icon.Gear}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "," },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "," },
+                      }}
                     />
                   </ActionPanel>
                 }

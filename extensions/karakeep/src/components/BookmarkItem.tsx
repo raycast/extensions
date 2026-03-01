@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
 import {
   ARCHIVED_COLOR,
@@ -20,42 +21,59 @@ interface BookmarkItemProps {
   config: Config;
   onRefresh: () => void;
   onCleanCache?: () => void;
+  onVisit?: (bookmark: Bookmark) => void;
+  isSelected?: boolean;
 }
 
-function useBookmarkImages(bookmark: Bookmark) {
-  const [images, setImages] = useState({
-    screenshot: DEFAULT_SCREENSHOT_FILENAME,
-    asset: DEFAULT_SCREENSHOT_FILENAME,
-  });
+function getPreviewAssetIds(bookmark: Bookmark): { screenshotId?: string; imageAssetId?: string } {
+  const screenshotId = bookmark.assets?.find((asset) => asset.assetType === "screenshot")?.id;
+  const imageAssetId =
+    bookmark.content.type === "asset" && bookmark.content.assetType === "image" ? bookmark.content.assetId : undefined;
+  return { screenshotId, imageAssetId };
+}
+
+function useAuthenticatedAssetUrl(assetId: string | undefined, enabled: boolean) {
+  const [url, setUrl] = useState<string>(DEFAULT_SCREENSHOT_FILENAME);
+  const lastAssetIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    async function loadImages() {
-      const newImages = { ...images };
-
-      const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
-      if (screenshot?.id) {
-        try {
-          newImages.screenshot = await getScreenshot(screenshot.id);
-        } catch (error) {
-          console.error("Failed to get screenshot:", error);
-        }
-      }
-
-      if (bookmark.content.type === "asset" && bookmark.content.assetType === "image" && bookmark.content.assetId) {
-        try {
-          newImages.asset = await getScreenshot(bookmark.content.assetId);
-        } catch (error) {
-          console.error("Failed to get asset image:", error);
-        }
-      }
-
-      setImages(newImages);
+    // Reset when asset changes so we don't accidentally show a stale URL
+    // if the component gets enabled later.
+    if (assetId !== lastAssetIdRef.current) {
+      lastAssetIdRef.current = assetId;
+      setUrl(DEFAULT_SCREENSHOT_FILENAME);
     }
+  }, [assetId]);
 
-    loadImages();
-  }, [bookmark]);
+  useEffect(() => {
+    if (!enabled || !assetId) return;
 
-  return images;
+    let cancelled = false;
+    (async () => {
+      try {
+        const imageUrl = await getScreenshot(assetId);
+        if (!cancelled) {
+          setUrl(imageUrl);
+        }
+      } catch (error) {
+        logger.error("Failed to get authenticated image", { assetId, error });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [assetId, enabled]);
+
+  return url;
+}
+
+function useBookmarkImages(bookmark: Bookmark, enabled: boolean) {
+  const { screenshotId, imageAssetId } = getPreviewAssetIds(bookmark);
+  const screenshot = useAuthenticatedAssetUrl(screenshotId, enabled);
+  const asset = useAuthenticatedAssetUrl(imageAssetId, enabled);
+
+  return { screenshot, asset };
 }
 
 function useBookmarkHandlers({
@@ -77,7 +95,7 @@ function useBookmarkHandlers({
         setBookmark(latest as Bookmark);
       }
     } catch (error) {
-      console.error("Failed to fetch latest bookmark:", error);
+      logger.error("Failed to fetch latest bookmark", { bookmarkId: bookmark.id, error });
     }
   }, [bookmark.id, setBookmark]);
 
@@ -96,6 +114,7 @@ function useBookmarkHandlers({
           await fetchLatestBookmark();
         }
       } catch (error) {
+        logger.error(`Bookmark action '${action}' failed`, error);
         toast.style = Toast.Style.Failure;
         toast.message = String(error);
         if (action !== "delete") {
@@ -264,6 +283,7 @@ function BookmarkActions({
   handlers,
   images,
   t,
+  onVisit,
 }: {
   bookmark: Bookmark;
   config: Config;
@@ -272,6 +292,7 @@ function BookmarkActions({
   handlers: ReturnType<typeof useBookmarkHandlers>;
   images: ReturnType<typeof useBookmarkImages>;
   t: (key: string) => string;
+  onVisit?: (bookmark: Bookmark) => void;
 }) {
   const getMainAction = () => {
     const pushDetailAction = (
@@ -299,6 +320,7 @@ function BookmarkActions({
               url={bookmark.content.url}
               title={t("bookmark.actions.openLink")}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onOpen={() => onVisit?.(bookmark)}
             />
           );
 
@@ -321,6 +343,7 @@ function BookmarkActions({
               content={bookmark.content.text}
               title={t("bookmark.actions.copyContent")}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onCopy={() => onVisit?.(bookmark)}
             />
           );
 
@@ -385,11 +408,13 @@ function BookmarkActions({
                 url={bookmark.content.url}
                 title={t("bookmark.actions.openLink")}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
+                onOpen={() => onVisit?.(bookmark)}
               />
               <Action.CopyToClipboard
                 content={bookmark.content.url}
                 title={t("bookmark.actions.copyLink")}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
+                onCopy={() => onVisit?.(bookmark)}
               />
             </>
           )}
@@ -400,6 +425,7 @@ function BookmarkActions({
               content={bookmark.content.text}
               title={t("bookmark.actions.copyContent")}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onCopy={() => onVisit?.(bookmark)}
             />
           )}
         {bookmark.content.type === "asset" &&
@@ -457,16 +483,28 @@ function BookmarkActions({
   );
 }
 
-export function BookmarkItem({ bookmark: initialBookmark, config, onRefresh, onCleanCache }: BookmarkItemProps) {
+export function BookmarkItem({
+  bookmark: initialBookmark,
+  config,
+  onRefresh,
+  onCleanCache,
+  onVisit,
+  isSelected,
+}: BookmarkItemProps) {
   const { t } = useTranslation();
-  const images = useBookmarkImages(initialBookmark);
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
   useEffect(() => {
     setBookmark(initialBookmark);
   }, [initialBookmark]);
 
+  const shouldPrewarmPreview =
+    Boolean(isSelected) &&
+    ((bookmark.content.type === "link" && config.displayBookmarkPreview) ||
+      (bookmark.content.type === "asset" && bookmark.content.assetType === "image"));
+  const images = useBookmarkImages(bookmark, shouldPrewarmPreview);
+
   const handlers = useBookmarkHandlers({
-    bookmark: initialBookmark,
+    bookmark,
     setBookmark,
     onRefresh,
   });
@@ -534,6 +572,7 @@ export function BookmarkItem({ bookmark: initialBookmark, config, onRefresh, onC
           handlers={handlers}
           images={images}
           t={t}
+          onVisit={onVisit}
         />
       }
     />

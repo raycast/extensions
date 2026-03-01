@@ -32,6 +32,7 @@ interface Issues {
 }
 
 const fields = "summary,issuetype,status";
+const ISSUE_KEY_PATTERN = /^[A-Z][A-Z0-9]+-\d+$/i;
 
 function statusIcon(status: IssueStatus): Image {
   const icon = (source: Image.Source, tintColor?: Color.ColorLike) => ({
@@ -48,9 +49,36 @@ function statusIcon(status: IssueStatus): Image {
   }
 }
 
+/**
+ * Validates whether a string is a properly formatted issue key.
+ *
+ * A valid issue key must:
+ *  - Start with a letter (A–Z)
+ *  - Contain at least two characters before the dash (letters or digits)
+ *  - Have a dash (-) followed by one or more digits
+ *  - Be case-insensitive (e.g., "ac-23" is valid)
+ *
+ * You can test this pattern here: https://regex101.com/r/dHHMLe/1
+ *
+ * ✅ Valid examples:
+ *  - "AC-23"
+ *  - "AC2-23"
+ *  - "A2C-23"
+ *  - "ABC-123"
+ *
+ * ❌ Invalid examples:
+ *  - "A-23"   → Only one character before dash
+ *  - "2A-23"  → Does not start with a letter
+ *  - "123-23" → No letters before dash
+ *  - "-23"    → Missing prefix
+ *  - "A_C-23" → Underscore not allowed
+ *  - "A-23B"  → Suffix must be numeric
+ *
+ * @param query - The string to check.
+ * @returns True if the string matches the issue key pattern, otherwise false.
+ */
 function isIssueKey(query: string): boolean {
-  const issueKeyPattern = /^[a-z]+-[0-9]+$/i;
-  return query.match(issueKeyPattern) !== null;
+  return ISSUE_KEY_PATTERN.test(query.trim());
 }
 
 function buildJql(query: string): string {

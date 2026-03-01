@@ -1,5 +1,25 @@
 # Apple Music Changelog
 
+## [Menu Bar & Favorite Command Improvements] - 2026-02-21
+
+- `Favorite Track` and `Favorite and Add to Library` commands now close Raycast immediately, showing HUD only after Apple Music confirms the state change.
+- Menu bar favorite status is now fetched in the same AppleScript call as the track, eliminating flicker when opening the dropdown.
+- Added scrolling marquee for long track names inside the menu bar dropdown.
+- Moved "Open Music" to the top of the menu bar dropdown.
+
+## [Favorite Flow Improvements] - 2026-02-19
+
+- Added a `Favorite Track` / `Unfavorite Track` action to the menu bar command with state-aware title and icon.
+- Updated favorite actions to wait for Apple Music to confirm the favorite state change before showing success HUD.
+- Added confirmation polling with timeout for favorite/unfavorite operations to avoid premature success messages.
+- Improved confirmation resilience by retrying status checks when temporary read errors occur.
+
+## [New Menu Bar Command] - 2026-01-08
+
+- Added a new menu bar command to see currently playing track (inspired by **Spotify**) (ref: [Issue #24042](https://github.com/raycast/extensions/issues/24042))
+- Fix "Play Library" command always loading when there is no current track
+- Modernized to use latest Raycast configuration
+
 ## [New Command] - 2025-08-04
 
 - Added a new command that removes the currently playing track from the Library.

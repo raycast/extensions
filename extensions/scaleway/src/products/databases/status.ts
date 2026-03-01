@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { RDB } from '@scaleway/sdk'
+import { Rdbv1 } from '@scaleway/sdk'
 
-export const INSTANCE_STATUSES = RDB.v1.INSTANCE_TRANSIENT_STATUSES.reduce(
+export const INSTANCE_STATUSES = Rdbv1.INSTANCE_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -27,5 +27,5 @@ export const INSTANCE_STATUSES = RDB.v1.INSTANCE_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getInstanceStatusIcon = (instance: RDB.v1.Instance) =>
+export const getInstanceStatusIcon = (instance: Rdbv1.Instance) =>
   INSTANCE_STATUSES[instance.status]

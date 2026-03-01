@@ -44,10 +44,9 @@ type Input = {
 const tool = async (input: Input) => {
   const { data, error } = await resend.contacts.update({
     audienceId: input.audienceId,
-    id: input.contactId,
     ...(input.firstName !== undefined && { firstName: input.firstName }),
     ...(input.lastName !== undefined && { lastName: input.lastName }),
-    ...(input.email !== undefined && { email: input.email }),
+    ...(input.email !== undefined ? { email: input.email } : { id: input.contactId }),
     ...(input.unsubscribed !== undefined && { unsubscribed: input.unsubscribed }),
   });
 

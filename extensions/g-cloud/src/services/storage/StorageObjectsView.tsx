@@ -13,14 +13,12 @@ import {
   Form,
   Image,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { homedir } from "os";
 import { join } from "path";
 import { CloudStorageUploader } from "../../utils/FilePicker";
-import { CloudStorageDownloader } from "../../utils/FileDownloader";
 import { formatFileSize, validateFile, getFileInfo } from "../../utils/FileUtils";
 import ObjectVersionsView from "./ObjectVersionsView";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
@@ -141,8 +139,6 @@ export default function StorageObjectsView({
 
     try {
       const command = `${gcloudPath} storage ls gs://${bucketName}${prefix ? "/" + prefix : ""}`;
-
-      //console.log(`Executing list command: ${command}`);
       const { stdout, stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -161,7 +157,6 @@ export default function StorageObjectsView({
       }
 
       const lines = stdout.trim().split("\n");
-      //console.log(`Found ${lines.length} items in response`);
 
       let batchFolders: Folder[] = [];
       let batchObjects: StorageObject[] = [];
@@ -302,11 +297,6 @@ export default function StorageObjectsView({
       }
 
       setError(`${errorTitle}: ${errorMessage}`);
-
-      showFailureToast({
-        title: errorTitle,
-        message: errorMessage,
-      });
     } finally {
       setIsFetching(false);
       setIsLoading(false);
@@ -345,8 +335,6 @@ export default function StorageObjectsView({
 
       try {
         const command = `${gcloudPath} storage rm gs://${bucketName}/${fullObjectPath} --project=${projectId}`;
-
-        //console.log(`Executing delete command: ${command}`);
         const { stderr } = await execPromise(command);
 
         if (stderr && stderr.includes("ERROR")) {
@@ -376,78 +364,12 @@ export default function StorageObjectsView({
           errorMessage = `The object "${objectName}" was not found. It may have been deleted already.`;
         }
 
-        showFailureToast({
-          title: errorTitle,
-          message: errorMessage,
-        });
-      }
-    }
-  }
-
-  // This function is used indirectly through CloudStorageDownloader
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-  async function performDownload(objectName: string, downloadPath?: string) {
-    if (downloadPath) {
-      const downloadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Downloading object...",
-        message: `To: ${downloadPath}`,
-      });
-
-      try {
-        const fullObjectPath = prefix ? `${prefix}/${objectName}` : objectName;
-        const command = `${gcloudPath} storage cp gs://${bucketName}/${fullObjectPath} ${downloadPath} --project=${projectId}`;
-
-        //console.log(`Executing download command: ${command}`);
-        const { stderr } = await execPromise(command);
-
-        if (stderr && stderr.includes("ERROR")) {
-          throw new Error(stderr);
-        }
-
-        downloadingToast.hide();
         showToast({
-          style: Toast.Style.Success,
-          title: "Download complete",
-          message: `Saved to ${downloadPath}`,
-        });
-      } catch (error: unknown) {
-        downloadingToast.hide();
-        console.error("Error downloading object:", error);
-
-        let errorMessage = error instanceof Error ? error.message : String(error);
-        let errorTitle = "Failed to download object";
-
-        if (typeof errorMessage === "string") {
-          if (errorMessage.includes("Permission denied") || errorMessage.includes("403")) {
-            errorTitle = "Permission denied";
-            errorMessage = "You don't have permission to download this object.";
-          } else if (errorMessage.includes("not found") || errorMessage.includes("404")) {
-            errorTitle = "Object not found";
-            errorMessage = `The object "${objectName}" was not found.`;
-          } else if (errorMessage.includes("EACCES") || errorMessage.includes("access denied")) {
-            errorTitle = "Access denied";
-            errorMessage = `Cannot write to ${downloadPath}. Please check your file permissions.`;
-          }
-        }
-
-        showFailureToast({
+          style: Toast.Style.Failure,
           title: errorTitle,
-          message: errorMessage,
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
-    } else {
-      const safeFileName = objectName.split("/").pop() || "download";
-
-      push(
-        <CloudStorageDownloader
-          onDownload={(path) => performDownload(objectName, path)}
-          fileName={safeFileName}
-          bucketName={bucketName}
-          objectName={objectName}
-          title="Download Object"
-        />,
-      );
     }
   }
 
@@ -470,8 +392,6 @@ export default function StorageObjectsView({
         : `gs://${bucketName}/${fileInfo.name}`;
 
       const command = `${gcloudPath} storage cp ${filePath} ${destinationPath} --project=${projectId}`;
-
-      //console.log(`Executing upload command: ${command}`);
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -504,9 +424,10 @@ export default function StorageObjectsView({
         errorMessage = `Cannot read from ${filePath}. Please check your file permissions.`;
       }
 
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: errorTitle,
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -534,8 +455,6 @@ export default function StorageObjectsView({
     try {
       const tempDownloadPath = join(homedir(), "Downloads", safeFileName);
       const command = `${gcloudPath} storage cp gs://${bucketName}/${fullObjectPath} ${tempDownloadPath} --project=${projectId}`;
-
-      //console.log(`Executing download command: ${command}`);
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -568,11 +487,24 @@ export default function StorageObjectsView({
         }
       }
 
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: errorTitle,
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
+  }
+
+  function formatDateUS(dateString: string): string {
+    const date = new Date(dateString);
+    const month = (date.getMonth() + 1).toString();
+    const day = date.getDate().toString();
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hour12 = hours % 12 || 12;
+    return `${month}/${day}/${year}, ${hour12}:${minutes}:${date.getSeconds().toString().padStart(2, "0")} ${ampm}`;
   }
 
   function getContentTypeIcon(contentType: string): Image.Source {
@@ -602,8 +534,6 @@ export default function StorageObjectsView({
 
     try {
       const command = `${gcloudPath} storage objects describe gs://${bucketName}/${fullObjectPath} --format=json --project=${projectId}`;
-
-      //console.log(`Executing describe command: ${command}`);
       const { stdout, stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -620,8 +550,8 @@ export default function StorageObjectsView({
         `**Bucket:** ${bucketName}${prefix ? `/${prefix}` : ""}\n\n` +
         `**Size:** ${formatFileSize(objectData.size ? parseInt(objectData.size) : 0)}\n\n` +
         `**Content Type:** ${objectData.contentType || guessContentTypeFromName(objectName)}\n\n` +
-        `**Created:** ${objectData.timeCreated ? new Date(objectData.timeCreated).toLocaleString() : "Unknown"}\n\n` +
-        `**Updated:** ${objectData.updated ? new Date(objectData.updated).toLocaleString() : "Unknown"}\n\n` +
+        `**Created:** ${objectData.timeCreated ? formatDateUS(objectData.timeCreated) : "Unknown"}\n\n` +
+        `**Updated:** ${objectData.updated ? formatDateUS(objectData.updated) : "Unknown"}\n\n` +
         `**Storage Class:** ${objectData.storageClass || "Standard"}\n\n` +
         `**MD5 Hash:** ${objectData.md5Hash || "N/A"}\n\n`;
 
@@ -647,11 +577,11 @@ export default function StorageObjectsView({
               <Detail.Metadata.Separator />
               <Detail.Metadata.Label
                 title="Created"
-                text={objectData.timeCreated ? new Date(objectData.timeCreated).toLocaleString() : "Unknown"}
+                text={objectData.timeCreated ? formatDateUS(objectData.timeCreated) : "Unknown"}
               />
               <Detail.Metadata.Label
                 title="Updated"
-                text={objectData.updated ? new Date(objectData.updated).toLocaleString() : "Unknown"}
+                text={objectData.updated ? formatDateUS(objectData.updated) : "Unknown"}
               />
               <Detail.Metadata.Separator />
               <Detail.Metadata.Label title="MD5 Hash" text={objectData.md5Hash || "N/A"} />
@@ -704,10 +634,10 @@ export default function StorageObjectsView({
       loadingToast.hide();
       console.error("Error fetching object details:", error);
 
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to fetch object details",
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -784,8 +714,6 @@ export default function StorageObjectsView({
       await execPromise(`touch ${tempFile}`);
 
       const command = `${gcloudPath} storage cp ${tempFile} ${gcsPath} --project=${projectId}`;
-      //console.log(`Creating folder with command: ${command}`);
-
       const { stderr } = await execPromise(command);
 
       await execPromise(`rm ${tempFile}`);
@@ -814,9 +742,10 @@ export default function StorageObjectsView({
         errorMessage = "You don't have permission to create folders in this bucket.";
       }
 
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: errorTitle,
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -961,7 +890,6 @@ export default function StorageObjectsView({
             <List.Item
               key={folder.path}
               title={folder.name}
-              subtitle="Folder"
               icon={Icon.Folder}
               accessories={[{ icon: Icon.ChevronRight }]}
               actions={
@@ -989,7 +917,6 @@ export default function StorageObjectsView({
             <List.Item
               key={obj.id}
               title={obj.name}
-              subtitle={obj.contentType}
               icon={{ source: getContentTypeIcon(obj.contentType) }}
               accessories={[{ text: obj.size }]}
               detail={
@@ -998,11 +925,7 @@ export default function StorageObjectsView({
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="Name" text={obj.name} />
                       <List.Item.Detail.Metadata.Label title="Size" text={obj.size} />
-                      <List.Item.Detail.Metadata.Label title="Type" text={obj.contentType} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Last Modified"
-                        text={new Date(obj.updated).toLocaleString()}
-                      />
+                      <List.Item.Detail.Metadata.Label title="Last Modified" text={formatDateUS(obj.updated)} />
                     </List.Item.Detail.Metadata>
                   }
                 />

@@ -1,5 +1,17 @@
 # Ente Auth Changelog
 
+## [Fix import deleting export file] - 2026-02-01
+
+- Fixed import command deleting the export file before re-exporting, causing ENOENT if export fails
+- Added missing return in export command error handling
+
+## [Handle double-encoded TOTP + Maintenance] - 2025-12-02
+
+- Handle double-encoded TOTP
+- Change the "Copy Next" `shortcut` to be cross-platform
+- Remove unnecessary deps
+- Mention default values the extension uses for reference
+
 ## [Windows Support] - 2025-08-25
 
 - Added windows support

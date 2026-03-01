@@ -1,5 +1,29 @@
 # Anytype Changelog
 
+## [Windows Support] - 2026-02-23
+
+- Add support for Windows platform
+
+## [Bug Fixes & Dependency Updates] - 2026-02-14
+
+- Fix object property dropdowns interfering with each other's search results in create and update forms
+- Update dependencies to latest versions
+
+## [Terminology Updates & Enhancements] - 2025-12-15
+
+- Update to API version 2025-11-08
+- Allow updating markdown body of objects
+- Add ability to remove objects from collections
+- Add word and character count display for objects
+- Add tag creation functionality in TagSubmenu component and allow deletion of tags
+- Improve search with client-side and API-side filtering for better offline support
+- Rename "spaces" to "channels" throughout the extension to align with adjusted terminology
+- Improve handling of deleted types with fallback representations
+
+## [Fixes] - 2025-12-04
+
+- Fix quicklink not loading type, space, list, and template correctly when launching create-object command
+
 ## [Fixes] - 2025-07-09
 
 - Fix error when creating objects without linked type properties

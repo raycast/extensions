@@ -1,9 +1,10 @@
 import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ENDPOINTS, HEADERS } from "./constants/prefrences";
-import { AstronautsResponse } from "./types/astronauts";
-import AstronautDetail from "./componenets/astronaut";
-import ErrorDetail from "./componenets/error";
+
+import { AstronautsResponse } from "@/types";
+import { ENDPOINTS, HEADERS } from "@/constants/preferences";
+import AstronautDetail from "@/components/astronaut";
+import ErrorDetail from "@/components/error";
 
 export default function ASTRONAUTS() {
   const { isLoading, data, error } = useFetch(ENDPOINTS.ASTRONAUTS, {

@@ -1,5 +1,42 @@
 # Things Changelog
 
+## [Tag Filtering and Grouping] - 2026-02-23
+
+- Added tag filter dropdown to list views (matches Things native behavior)
+- Tag filtering supports full inheritance: todo → project → area tags
+- Tag filtering supports hierarchy: selecting a parent tag matches all descendants
+- Tags display with hierarchy indicator (e.g., "Work › Design")
+- Added "No Tag" filter option for untagged todos
+- Area tags and tag hierarchy are fetched inline with existing JXA calls, deferred until the list renders
+- Added preference to toggle grouping by project or area
+
+## [Reduce JXA Latency for List Fetching] - 2026-02-09
+
+- Todo list views and the menu bar command now fetch tags and lists in a single JXA call instead of two
+- The menu bar command and `get-lists` tool no longer fetch tags unnecessarily
+- The "Add New Project" form fetches tags and areas in a single JXA call instead of two
+- Consolidated collection-fetching functions into a single `getCollections` API
+
+## [JXA Performance Optimization] - 2026-01-12
+
+- Reduced JXA fetch times by ~75% using `properties()` batching to minimize Apple Event overhead
+- Removed nested area tags from todo data (tags on containing areas are no longer fetched)
+
+## [Improved Query String Creation] - 2026-01-08
+
+- Replaced the `⁠qs` package with `⁠query-string` to automatically exclude empty strings and null values when generating Things URLs
+
+## [Timeout increasing in AppleScript] - 2025-10-30
+
+- Increased timeout to 60 seconds in AppleScript
+
+## [Fix Timeout on macOS Tahoe] - 2025-10-15
+
+- Fixed timeout errors when opening "Add New To-Do" command on macOS Tahoe (26.x)
+- Consolidated concurrent JXA queries into single execution to prevent race conditions
+- Improved error reporting to show which operation timed out
+- Added operation context to all error messages for better debugging
+
 ## [Improved Project Handling] - 2025-09-09
 
 - Added Update and Delete project tools with proper Things URL scheme support

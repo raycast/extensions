@@ -28,6 +28,7 @@ export default function WorkItemListItem({ workItem, mutateWorkItemList }: WorkI
       actions={
         <ActionPanel title={workItemIdentifier}>
           <Action.Push
+            icon={Icon.BullsEye}
             title="Open Work Item"
             target={
               <WorkItemDetail

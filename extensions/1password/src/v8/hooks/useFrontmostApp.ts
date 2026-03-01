@@ -2,8 +2,8 @@ import { getFrontmostApplication } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 type FrontmostAppModel = {
-  name?: string;
   icon?: { fileIcon: string };
+  name?: string;
 };
 
 export function useFrontmostApp(isEnabled = false): FrontmostAppModel {
@@ -17,8 +17,8 @@ export function useFrontmostApp(isEnabled = false): FrontmostAppModel {
         const frontApp = await getFrontmostApplication();
 
         setApp({
-          name: frontApp.name,
           icon: frontApp.path ? { fileIcon: frontApp.path } : undefined,
+          name: frontApp.name,
         });
       } catch {
         setApp({});

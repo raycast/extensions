@@ -1,5 +1,11 @@
 # GitHub Enterprise Changelog
 
+## [Fix notification URLs for GitHub Enterprise Cloud] - 2025-11-21
+
+- Fixed notification URLs for GitHub Enterprise Cloud instances
+- Clicking on notifications from the menu bar now correctly opens the web URL instead of the API URL
+- Maintains backward compatibility with GitHub Enterprise Server
+
 ## [Chore: Fixed typo while searching for issues] - 2025-09-02
 
 ## [Add Github Notifications] - 2024-05-31

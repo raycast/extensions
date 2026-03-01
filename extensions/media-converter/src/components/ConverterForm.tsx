@@ -8,6 +8,7 @@ import {
   Icon,
   openCommandPreferences,
   getPreferenceValues,
+  Clipboard,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
@@ -18,6 +19,8 @@ import {
   OUTPUT_IMAGE_EXTENSIONS,
   type MediaType,
   type AllOutputExtension,
+  type OutputVideoExtension,
+  type OutputImageExtension,
   type QualitySettings,
   getMediaType,
   AUDIO_BITRATES,
@@ -32,7 +35,7 @@ import {
   DEFAULT_VBR_QUALITIES,
   AUDIO_COMPRESSION_LEVEL,
   type AudioCompressionLevel,
-  VIDEO_ENCODING_MODES,
+  ALLOWED_VIDEO_ENCODING_MODES,
   type VideoEncodingMode,
   VIDEO_BITRATE,
   type VideoBitrate,
@@ -138,20 +141,42 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       setCurrentFiles(processedFiles);
       setSelectedFileType(primaryFileType);
 
+      const preferredImageFormat = preferences.defaultImageOutputFormat as OutputImageExtension | undefined;
+      const sanitizedImageFormat =
+        process.platform !== "darwin" && preferredImageFormat === ".heic" ? ".jpg" : preferredImageFormat;
+      const defaultImageFormat =
+        sanitizedImageFormat && OUTPUT_IMAGE_EXTENSIONS.includes(sanitizedImageFormat)
+          ? sanitizedImageFormat
+          : (".jpg" as const);
+
+      const preferredVideoFormat = preferences.defaultVideoOutputFormat as OutputVideoExtension | undefined;
+      const defaultVideoFormat =
+        preferredVideoFormat && OUTPUT_VIDEO_EXTENSIONS.includes(preferredVideoFormat)
+          ? preferredVideoFormat
+          : (".mp4" as const);
+
       // Initialize default output format and quality based on file type
       const defaultFormat =
         primaryFileType === "image"
-          ? (".jpg" as const)
+          ? defaultImageFormat
           : primaryFileType === "audio"
             ? (".mp3" as const)
-            : (".mp4" as const);
+            : (defaultVideoFormat as AllOutputExtension);
 
       setOutputFormat(defaultFormat);
 
       if (preferences.moreConversionSettings || primaryFileType === "image") {
         setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences));
       } else {
-        setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, DEFAULT_SIMPLE_QUALITY));
+        if (primaryFileType === "video") {
+          const defaultVideoQuality =
+            (preferences.defaultVideoQualityPreset as QualityLevel | undefined) ?? DEFAULT_SIMPLE_QUALITY;
+          setSimpleQuality(defaultVideoQuality);
+          setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, defaultVideoQuality));
+        } else {
+          setSimpleQuality(DEFAULT_SIMPLE_QUALITY);
+          setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, DEFAULT_SIMPLE_QUALITY));
+        }
       }
     } catch (error) {
       const errorMessage = String(error);
@@ -233,13 +258,48 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       actions={
         <ActionPanel>
           {currentFiles && currentFiles.length > 0 && selectedFileType && (
-            <Action.SubmitForm
-              title="Convert"
-              onSubmit={handleSubmit}
-              icon={Icon.NewDocument}
-              // For some reason, this still shows up as cmd+return instead of just return, so no use for now
-              /* shortcut={{ modifiers: [], key: "return" }} */
-            />
+            <>
+              <Action.SubmitForm
+                title="Convert"
+                onSubmit={handleSubmit}
+                icon={Icon.NewDocument}
+                // For some reason, this still shows up as cmd+return instead of just return, so no use for now
+                /* shortcut={{ modifiers: [], key: "return" }} */
+              />
+              <Action
+                title="Copy FFmpeg Command"
+                icon={Icon.Clipboard}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                  windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                }}
+                onAction={async () => {
+                  if (!outputFormat || !currentQualitySetting) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Configuration incomplete",
+                      message: "Output format and quality settings must be configured",
+                    });
+                    return;
+                  }
+                  try {
+                    const command = await convertMedia(currentFiles[0], outputFormat, currentQualitySetting, true);
+                    await Clipboard.copy(command);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Command copied to clipboard",
+                      message: currentFiles.length > 1 ? "Command for the first file copied" : "FFmpeg command copied",
+                    });
+                  } catch (error) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to generate command",
+                      message: String(error),
+                    });
+                  }
+                }}
+              />
+            </>
           )}
         </ActionPanel>
       }
@@ -265,7 +325,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
               setCurrentQualitySetting(getDefaultQuality(format, preferences));
             } else {
               // Update quality settings based on current simple quality level
-              setCurrentQualitySetting(getDefaultQuality(format, preferences, DEFAULT_SIMPLE_QUALITY));
+              setCurrentQualitySetting(getDefaultQuality(format, preferences, simpleQuality));
             }
           }}
         >
@@ -648,7 +708,7 @@ function QualitySettingsComponent({
                 }}
                 info="CRF provides constant visual quality, VBR uses variable bitrate for target file size"
               >
-                {VIDEO_ENCODING_MODES.map((mode) => (
+                {(ALLOWED_VIDEO_ENCODING_MODES[outputFormat as OutputVideoExtension] || []).map((mode) => (
                   <Form.Dropdown.Item
                     key={mode}
                     value={mode}

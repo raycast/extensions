@@ -67,6 +67,7 @@ export default function Command() {
 
       return (
         <Video
+          key={bvid}
           title={title}
           cover={cover}
           url={jump_url}
@@ -117,6 +118,7 @@ export default function Command() {
 
       return (
         <Post
+          key={item.id_str}
           desc={text}
           pubdate={pub_ts}
           url={`https://www.bilibili.com/opus/${item.id_str}`}
@@ -139,6 +141,7 @@ export default function Command() {
 
       return (
         <Post
+          key={item.id_str}
           title={major.music.title}
           desc={desc.text}
           pubdate={pub_ts}
@@ -162,6 +165,7 @@ export default function Command() {
 
       return (
         <Post
+          key={item.id_str}
           title={liveDate.live_play_info.title}
           desc={liveDate.live_play_info.title}
           pubdate={pub_ts}

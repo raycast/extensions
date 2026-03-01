@@ -1,5 +1,14 @@
 # Dashlane Vault Changelog
 
+## [Added windows support] - 2025-12-24
+
+- Refactored dcli to support both windows and mac
+
+## [Improvements] - 2025-11-20
+
+- Update dependencies
+- Improve error feedback for Touch ID failure
+
 ## [Improvements] - 2025-02-04
 
 - Add Manage devices command

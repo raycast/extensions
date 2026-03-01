@@ -1,9 +1,11 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, open } from "@raycast/api";
 import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import { fileExists } from "../utils";
+import { fileExists, isMac, isWin } from "./utils";
+import { getEditorApplication } from "../utils/editor";
+import { build } from "./preferences";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -65,37 +67,73 @@ function getNLSVariable(text: string | undefined): string | undefined {
     return m[1];
   }
 }
-const cliPaths: Record<string, string> = {
-  Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
-  "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
-  Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
-  Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
-  Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
-  Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
-  "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
-  VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
-  "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
-  Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
-};
+function cliPaths(): Record<string, string> {
+  let cliPaths: Record<string, string> = {};
+
+  if (isWin) {
+    const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
+    cliPaths = {
+      Antigravity: path.join(programsFolder, "Antigravity", "bin", "antigravity.cmd"),
+      Code: path.join(programsFolder, "Microsoft VS Code", "bin", "code.cmd"),
+      "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders", "bin", "code-insiders.cmd"),
+      Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
+      Cursor: path.join(programsFolder, "cursor", "resources", "app", "bin", "cursor.cmd"),
+      Positron: path.join(programsFolder, "Positron", "bin", "positron.cmd"),
+      Trae: path.join(programsFolder, "Trae", "bin", "trae.cmd"),
+      "Trae CN": path.join(programsFolder, "Trae CN", "bin", "trae-cn.cmd"),
+      VSCodium: path.join(programsFolder, "VSCodium", "bin", "codium.cmd"),
+      "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders", "bin", "codium-insiders.cmd"),
+      Windsurf: path.join(programsFolder, "Windsurf", "bin", "windsurf.cmd"),
+    };
+  }
+
+  if (isMac) {
+    cliPaths = {
+      Antigravity: "/Applications/Antigravity.app/Contents/Resources/app/bin/antigravity",
+      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
+      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
+      Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
+      Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
+      Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
+      Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
+      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
+      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
+      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
+      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
+    };
+  }
+
+  return cliPaths;
+}
 
 export function getVSCodeCLIFilename(): string {
-  const name = cliPaths[getBuildNamePreference()];
+  const cliPathsMac = cliPaths();
+  const name = cliPathsMac[getBuildNamePreference()];
   if (!name || name.length <= 0) {
-    return cliPaths.Code;
+    return cliPathsMac.Code;
   }
   return name;
 }
 
 export class VSCodeCLI {
   private cliFilename: string;
+  private execOptions: child_process.ExecFileOptions | undefined;
   constructor(cliFilename: string) {
-    this.cliFilename = cliFilename;
+    this.cliFilename = `"${cliFilename}"`;
+    this.execOptions = isWin ? { shell: true } : undefined;
   }
+
   installExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
+    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], this.execOptions);
   }
+
   uninstallExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
+    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], this.execOptions);
+  }
+
+  async newWindow() {
+    const editorApp = await getEditorApplication(build);
+    open("", editorApp);
   }
 }
 
@@ -123,7 +161,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
               displayName = displayNameNLS;
             }
           }
-        } catch (error) {
+        } catch {
           // ignore
         }
       }
@@ -135,7 +173,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
         preview,
       };
     }
-  } catch (error) {
+  } catch {
     //
   }
 }
@@ -152,7 +190,7 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
         const extFsPath =
           typeof e.location === "string"
             ? path.join(extensionsRootFolder, e.location)
-            : e.location.fsPath ?? e.location.path;
+            : (e.location.fsPath ?? e.location.path);
         const packageFilename = path.join(extFsPath, "package.json");
         const pkgInfo = await getPackageJSONInfo(packageFilename);
         result.push({
@@ -182,6 +220,7 @@ export function getBuildNamePreference(): string {
 }
 
 const buildSchemes: Record<string, string> = {
+  Antigravity: "antigravity",
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",

@@ -1,4 +1,5 @@
 import { showToast, Toast, getPreferenceValues, getSelectedText } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { AudioManager } from "./audio/AudioManager";
 import { prepareVoiceSettings } from "./voice/settings";
 import { validateSelectedText } from "./text/validation";
@@ -29,7 +30,7 @@ export default async function Command() {
         console.log("Stopped existing audio playback");
         await showToast({
           style: Toast.Style.Success,
-          title: "⏹️ Stopped existing audio playback",
+          title: "⏹️ Stopped",
         });
         return;
       }
@@ -39,20 +40,18 @@ export default async function Command() {
     }
 
     console.log("Starting TTS command");
-    await showToast({ style: Toast.Style.Animated, title: "🔍 Checking for selected text..." });
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Reading...",
+    });
 
     const text = await getSelectedText();
     const selectedText = validateSelectedText(text);
     const { wordCount } = getTextStats(selectedText);
-    const previewText = getTextPreview(selectedText);
+    const previewText = getTextPreview(selectedText, 40);
 
     const preferences = getPreferenceValues<Preferences.SpeakSelected>();
     const settings = prepareVoiceSettings(preferences);
-
-    await showToast({
-      style: Toast.Style.Animated,
-      title: `🎙️ Processing ${wordCount} words`,
-    });
 
     const audioManager = new AudioManager({
       text: selectedText,
@@ -64,15 +63,15 @@ export default async function Command() {
 
     await showToast({
       style: Toast.Style.Success,
-      title: `▶️ Now speaking: "${previewText}"`,
+      title: `🎙️ ${wordCount} words`,
+      message: `"${previewText}"`,
     });
 
     await audioManager.streamAndPlay();
   } catch (error) {
     console.error("Command error:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `❌ ${error instanceof Error ? error.message : "Unknown error"}`,
+    await showFailureToast(error, {
+      title: "Failed to play audio",
     });
   }
 }

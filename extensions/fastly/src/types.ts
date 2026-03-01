@@ -110,12 +110,6 @@ export interface FastlyInvitationResponse {
   };
 }
 
-// Preferences interface for Raycast extension
-export interface Preferences {
-  apiToken: string;
-  customerId: string;
-}
-
 // Parameters for inviting team members
 export interface InviteTeamMemberParams {
   email: string;

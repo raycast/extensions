@@ -1,17 +1,19 @@
 import {
   getPreferenceValues,
   LocalStorage,
+  open,
   openExtensionPreferences,
   showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
 import { writeFile } from "fs/promises";
-import { join } from "path";
+import { dirname, join } from "path";
 
 export type Timer = {
   id: string;
   name: string | null;
+  tag?: string;
   start: number;
   end: number | null;
 };
@@ -20,7 +22,7 @@ export type TimerList = {
   [key: string]: Timer;
 };
 
-export async function startTimer(name: string | null = null): Promise<Timer> {
+export async function startTimer(name: string | null = null, tag?: string): Promise<Timer> {
   await stopTimer();
 
   const timerId = generateTimerId();
@@ -29,6 +31,7 @@ export async function startTimer(name: string | null = null): Promise<Timer> {
   const timer: Timer = {
     id: timerId,
     name: name,
+    tag,
     start: new Date().getTime(),
     end: null,
   };
@@ -77,6 +80,7 @@ export async function editTimer(timer: Timer): Promise<Timer | null> {
   timers[timer.id].name = timer.name;
   timers[timer.id].start = timer.start;
   timers[timer.id].end = timer.end;
+  timers[timer.id].tag = timer.tag;
 
   await LocalStorage.setItem("projecttimer.timers", JSON.stringify(timers));
 
@@ -136,7 +140,7 @@ export async function deleteTimer(timerId: string): Promise<TimerList> {
 }
 
 export async function exportTimers() {
-  const exportDirectory = getPreferenceValues<ExtensionPreferences>().exportDirectory;
+  const { exportDirectory, commaReplacement } = getPreferenceValues<ExtensionPreferences>();
   if (!exportDirectory) {
     await showToast({
       title: "Export directory not set",
@@ -156,11 +160,15 @@ export async function exportTimers() {
   const timers = await getTimers();
   toast.title = "Exporting CSV";
   const csv =
-    "id,name,start,end,duration,formatted\n" +
+    "id,name,tag,start,end,duration,formatted\n" +
     Object.values(timers)
       .map((timer) => {
         const duration = getDuration(timer);
-        return [...Object.values(timer), duration, formatDuration(duration)].join();
+        return [
+          ...Object.values(timer).map((v) => `${v}`.replaceAll(",", commaReplacement)),
+          duration,
+          formatDuration(duration),
+        ].join(",");
       })
       .join("\n");
 
@@ -171,9 +179,9 @@ export async function exportTimers() {
     toast.style = Toast.Style.Success;
     toast.title = "Exported CSV";
     toast.primaryAction = {
-      title: "Show in Finder",
+      title: getFileManagerActionTitle(),
       async onAction() {
-        await showInFinder(file);
+        await revealExportedFile(file);
       },
     };
   } catch (error) {
@@ -181,4 +189,19 @@ export async function exportTimers() {
     toast.title = "Export failed";
     toast.message = `${error}`;
   }
+}
+
+const isMacOS = process.platform === "darwin";
+
+function getFileManagerActionTitle(): string {
+  return isMacOS ? "Show in Finder" : "Open File Location";
+}
+
+async function revealExportedFile(file: string): Promise<void> {
+  if (isMacOS) {
+    await showInFinder(file);
+    return;
+  }
+
+  await open(dirname(file));
 }

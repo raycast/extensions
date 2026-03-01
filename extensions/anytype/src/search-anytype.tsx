@@ -16,7 +16,7 @@ import {
   processObject,
 } from "./utils";
 
-const searchBarPlaceholder = "Globally search objects across spaces...";
+const searchBarPlaceholder = "Globally search objects across channels...";
 
 export default function Command() {
   return (
@@ -38,6 +38,7 @@ function Search() {
   const { objects, objectsError, isLoadingObjects, mutateObjects, objectsPagination } = useGlobalSearch(
     searchText,
     types,
+    { execute: currentView === ViewType.objects || types.length > 0 }, // only execute search when viewing all objects or when specific types selected
   );
   const { spaces, spacesError, isLoadingSpaces } = useSpaces();
   const { pinnedObjects, pinnedObjectsError, isLoadingPinnedObjects, mutatePinnedObjects } = usePinnedObjects(
@@ -119,7 +120,7 @@ function Search() {
         ...processedObject.accessories,
         {
           icon: spaceIcon,
-          tooltip: `Space: ${spaces?.find((space) => space.id === object.space_id)?.name}`,
+          tooltip: `${spaces?.find((space) => space.id === object.space_id)?.object === "chat" ? "Chat" : "Space"}: ${spaces?.find((space) => space.id === object.space_id)?.name}`,
         },
       ],
     };
@@ -135,7 +136,7 @@ function Search() {
     );
   };
 
-  // Process pinned objects and filter by search term
+  // Process pinned objects
   const processedPinnedObjects = pinnedObjects?.length
     ? pinnedObjects
         .filter((object) => types.length === 0 || types.includes(object.type.key))
@@ -148,6 +149,7 @@ function Search() {
     .filter(
       (object) => !pinnedObjects?.some((pinned) => pinned.id === object.id && pinned.space_id === object.space_id),
     )
+    .filter((object) => filterObjectsBySearchTerm([object], searchText).length > 0)
     .map((object) => processObjectWithSpaceIcon(object, false));
 
   return (

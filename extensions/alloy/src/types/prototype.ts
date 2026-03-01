@@ -1,26 +1,6 @@
 import { Icon } from "@raycast/api";
 import { z } from "zod";
 
-export const PrototypeTypeEnum = z.enum([
-  "jira",
-  "front",
-  "github",
-  "helpscout",
-  "hubspot",
-  "intercom",
-  "monday",
-  "notion",
-  "raycast",
-  "zendesk",
-  "attio",
-  "linear",
-  "chrome",
-  "canny",
-  "featurebase",
-  "chatprd",
-  "other",
-]);
-
 export const PrototypeIconEnum = z.enum([
   Icon.Tag,
   Icon.Tack,
@@ -30,11 +10,9 @@ export const PrototypeIconEnum = z.enum([
   Icon.RaycastLogoPos,
 ]);
 
-export type PrototypeType = z.infer<typeof PrototypeTypeEnum>;
-
 export type PrototypeIcon = z.infer<typeof PrototypeIconEnum>;
 
-export const PrototypeTypeToIcon = (type: PrototypeType): PrototypeIcon => {
+export const PrototypeTypeToIcon = (type: string): PrototypeIcon => {
   switch (type) {
     case "jira":
       return Icon.Tag;
@@ -86,7 +64,7 @@ export const PrototypeBaseSchema = z.object({
   }),
   createdAt: z.preprocess((val) => (typeof val === "string" ? new Date(val) : val), z.date()),
   alloyUrl: z.string(),
-  type: PrototypeTypeEnum,
+  type: z.string(),
 });
 
 export const PrototypeForDetailsSchema = PrototypeBaseSchema.extend({

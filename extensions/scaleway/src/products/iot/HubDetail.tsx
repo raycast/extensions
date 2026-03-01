@@ -1,10 +1,10 @@
 import { List } from '@raycast/api'
-import type { IOT } from '@scaleway/sdk'
+import type { Iotv1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getHubStatusIcon } from './status'
 
 type HubProps = {
-  hub: IOT.v1.Hub
+  hub: Iotv1.Hub
 }
 
 export const HubDetail = ({ hub }: HubProps) => (

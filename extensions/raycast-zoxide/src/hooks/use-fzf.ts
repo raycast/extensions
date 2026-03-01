@@ -1,5 +1,5 @@
 import { useExec } from "@raycast/utils";
-import { makeUnfriendly } from "@utils/path-helpers";
+import { makeUnfriendly, pathFor } from "@utils/path-helpers";
 import { base64ShellSanitize } from "@utils/misc";
 
 export const useFzf = (filterText: string, options?: object) => {
@@ -10,7 +10,7 @@ export const useFzf = (filterText: string, options?: object) => {
       return args.stdout;
     },
     env: {
-      PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
+      PATH: pathFor("fzf"),
     },
     ...options,
   };

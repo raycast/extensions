@@ -1,23 +1,23 @@
-import { Action, Clipboard, Icon, Keyboard, showToast, Toast, showHUD } from "@raycast/api";
-import { execFileSync } from "child_process";
+import { Action, Clipboard, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
+import { execFileSync } from "node:child_process";
 
-import { ExtensionError, getCliPath, handleErrors, titleCaseWord } from "../utils";
 import { useFrontmostApp } from "../hooks/useFrontmostApp";
+import { ExtensionError, getCliPath, handleErrors, titleCaseWord } from "../utils";
 
 export function CopyToClipboard({
-  id,
-  vault_id,
-  shortcut,
-  field = "password",
   attribute,
+  field = "password",
+  id,
   isPasteAction,
+  shortcut,
+  vault_id,
 }: {
-  id: string;
+  attribute?: string;
   field?: string;
+  id: string;
+  isPasteAction?: boolean;
   shortcut: Keyboard.Shortcut;
   vault_id: string;
-  attribute?: string;
-  isPasteAction?: boolean;
 }) {
   const cliPath = getCliPath();
   const frontmostApp = useFrontmostApp(!!isPasteAction);
@@ -25,12 +25,6 @@ export function CopyToClipboard({
   return (
     <Action
       icon={isPasteAction ? (frontmostApp.icon ?? Icon.Text) : Icon.Clipboard}
-      title={
-        isPasteAction
-          ? `Paste ${titleCaseWord(field)}${frontmostApp.name ? ` to ${frontmostApp.name}` : ""}`
-          : `Copy ${titleCaseWord(field)}`
-      }
-      shortcut={shortcut}
       onAction={async () => {
         const toast = await showToast({
           style: Toast.Style.Animated,
@@ -38,6 +32,7 @@ export function CopyToClipboard({
             ? `Pasting ${field}${frontmostApp.name ? ` to ${frontmostApp.name}` : ""}...`
             : `Copying ${field}...`,
         });
+
         try {
           let stdout;
           if (attribute === "otp") {
@@ -46,9 +41,12 @@ export function CopyToClipboard({
           } else {
             const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
             const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
+
             stdout = execFileSync(cliPath, ["read", uri]);
           }
+
           const value = stdout.toString().trim();
+
           if (isPasteAction) {
             await Clipboard.paste(value);
             toast.style = Toast.Style.Success;
@@ -71,28 +69,35 @@ export function CopyToClipboard({
                 if (err.title != err.message) {
                   toast.message = err.message;
                 }
+
                 toast.title = err.title;
                 toast.primaryAction = {
-                  title: "Copy logs",
                   onAction: async (toast) => {
                     await Clipboard.copy((err as Error).message);
                     toast.hide();
                   },
+                  title: "Copy logs",
                 };
               } else if (err instanceof Error) {
                 toast.title = err.message;
                 toast.primaryAction = {
-                  title: "Copy logs",
                   onAction: async (toast) => {
                     await Clipboard.copy((err as Error).message);
                     toast.hide();
                   },
+                  title: "Copy logs",
                 };
               }
             }
           }
         }
       }}
+      shortcut={shortcut}
+      title={
+        isPasteAction
+          ? `Paste ${titleCaseWord(field)}${frontmostApp.name ? ` to ${frontmostApp.name}` : ""}`
+          : `Copy ${titleCaseWord(field)}`
+      }
     />
   );
 }

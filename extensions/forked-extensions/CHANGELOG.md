@@ -1,5 +1,28 @@
 # Raycast Fork Extensions Changelog
 
+## [Chore] - 2026-02-24
+
+- Update extension instruction
+
+## [Maintenance] - 2026-02-23
+
+- Bump nano-spawn@2.0.0
+- Bump all dependencies to the latest
+
+## [Improvements] - 2026-01-19
+
+- Add support for managing sparse-checkout directories/patterns
+- Improve fetch performance
+- Bump all dependencies to the latest
+
+## [Improvements] - 2025-12-17
+
+- Add support for opening an extension folder with a default application
+
+## [Bugfix] - 2025-11-17
+
+- Fix init repository when user path has spaces
+
 ## [Improvements] - 2025-09-29
 
 - Add support for checking if commits are ahead

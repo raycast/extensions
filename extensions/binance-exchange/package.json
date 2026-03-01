@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "binance-exchange",
+  "title": "Binance",
+  "description": "Stay on top of the crypto market and your Binance portfolio",
+  "icon": "extension-icon.png",
+  "author": "xilopaint",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-wallet",
+      "title": "My Wallet",
+      "description": "View your account balances and asset holdings",
+      "mode": "view"
+    },
+    {
+      "name": "market-prices",
+      "title": "Market Prices",
+      "description": "View real-time prices, 24h changes, and volume for all trading pairs",
+      "mode": "view"
+    },
+    {
+      "name": "my-wallet-menu-bar",
+      "title": "My Wallet Menu Bar",
+      "description": "See your Binance portfolio balance in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "displayCurrency",
+          "type": "dropdown",
+          "required": false,
+          "default": "btc",
+          "title": "Menu Bar Title",
+          "description": "Choose what to display in the menu bar title",
+          "data": [
+            { "title": "BTC Balance", "value": "btc" },
+            { "title": "USD Balance", "value": "usd" },
+            { "title": "Icon Only", "value": "icon-only" }
+          ]
+        },
+        {
+          "name": "showSpot",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Wallets to Show",
+          "label": "Spot",
+          "description": "Show Spot wallet in menu bar"
+        },
+        {
+          "name": "showCrossMargin",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Cross Margin",
+          "description": "Show Cross Margin wallet in menu bar"
+        },
+        {
+          "name": "showIsolatedMargin",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Isolated Margin",
+          "description": "Show Isolated Margin wallet in menu bar"
+        },
+        {
+          "name": "showUsdmFutures",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "USD-M Futures",
+          "description": "Show USD-M Futures wallet in menu bar"
+        },
+        {
+          "name": "showCoinmFutures",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "COIN-M Futures",
+          "description": "Show COIN-M Futures wallet in menu bar"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Binance API key. Create one at https://www.binance.com/en/my/settings/api-management"
+    },
+    {
+      "name": "apiSecret",
+      "type": "password",
+      "required": true,
+      "title": "API Secret",
+      "description": "Your Binance API secret key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

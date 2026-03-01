@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hop",
+  "title": "Hop",
+  "description": "Fast, elegant SSH connection manager. Fuzzy search and connect to servers from your hop config.",
+  "icon": "icon.png",
+  "author": "danmartuszewski",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "ssh",
+    "connect",
+    "server",
+    "terminal",
+    "remote",
+    "hop"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Connect",
+      "subtitle": "Hop",
+      "description": "Fuzzy search and connect to SSH servers",
+      "mode": "view",
+      "keywords": [
+        "ssh",
+        "server",
+        "remote",
+        "terminal"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminal",
+      "title": "Terminal Application",
+      "description": "Which terminal app to open SSH connections in",
+      "type": "dropdown",
+      "required": false,
+      "default": "terminal",
+      "data": [
+        {
+          "title": "Terminal.app",
+          "value": "terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
+        },
+        {
+          "title": "Alacritty",
+          "value": "alacritty"
+        },
+        {
+          "title": "Kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Other (specify below)",
+          "value": "other"
+        }
+      ]
+    },
+    {
+      "name": "customTerminal",
+      "title": "Custom Terminal",
+      "description": "Bundle ID (e.g., com.example.terminal) or app name when 'Other' is selected",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "configPath",
+      "title": "Config File Path",
+      "description": "Path to hop config file (leave empty for default ~/.config/hop/config.yaml)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "@raycast/utils": "^2.2.2",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

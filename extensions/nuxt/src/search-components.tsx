@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Clipboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import {
   getComponentIcon,
   getComponentTypeLabel,
   getDisplayName,
   getFormattedComponentName,
   openDocumentation,
+  fetchComponentMarkdown,
+  sanitizeComponentName,
 } from "./utils/components";
 import { getAllComponents, filterComponents, sortComponentsByName } from "./utils/search";
 import { showFailureToast } from "@raycast/utils";
@@ -13,16 +15,15 @@ import { showFailureToast } from "@raycast/utils";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const { prefix } = getPreferenceValues();
   const [components] = useState(() => {
     const comps = getAllComponents();
     setIsLoading(false);
     return comps;
   });
 
-  // Filter components based on search text
   const filteredComponents = useMemo(() => filterComponents(components, searchText, null), [components, searchText]);
 
-  // Split into sections and sort alphabetically within each
   const baseComponents = useMemo(
     () => sortComponentsByName(filteredComponents.filter((c) => c.type === "base")),
     [filteredComponents],
@@ -70,6 +71,33 @@ export default function Command() {
                     }
                   }}
                 />
+                <Action
+                  title="Copy Component Markdown"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  onAction={async () => {
+                    try {
+                      await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Fetching markdown...",
+                      });
+                      const markdown = await fetchComponentMarkdown(getFormattedComponentName(component));
+                      await Clipboard.copy(markdown);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Markdown copied to clipboard",
+                      });
+                    } catch (e) {
+                      await showFailureToast(e, { title: "Failed to copy markdown" });
+                    }
+                  }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Markdown Link"
+                  icon={Icon.Link}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  content={`https://ui.nuxt.com/raw/docs/components/${sanitizeComponentName(component.name, prefix)}.md`}
+                />
                 <Action.CopyToClipboard title="Copy Component Name" content={getFormattedComponentName(component)} />
               </ActionPanel>
             }
@@ -104,6 +132,27 @@ export default function Command() {
                       await openDocumentation(component, true);
                     } catch (error) {
                       await showFailureToast(error, { title: "Failed to open documentation" });
+                    }
+                  }}
+                />
+                <Action
+                  title="Copy Component Markdown"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  onAction={async () => {
+                    try {
+                      await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Fetching markdown...",
+                      });
+                      const markdown = await fetchComponentMarkdown(getFormattedComponentName(component));
+                      await Clipboard.copy(markdown);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Markdown copied to clipboard",
+                      });
+                    } catch (e) {
+                      await showFailureToast(e, { title: "Failed to copy markdown" });
                     }
                   }}
                 />

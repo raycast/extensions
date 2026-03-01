@@ -1,5 +1,5 @@
 import { TotalUsageResponseSchema } from "../types/usage-types";
-import { preferences } from "../preferences";
+import { getCustomNpxPath } from "../preferences";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
@@ -25,7 +25,7 @@ export default async function getTotalUsage(): Promise<{
     totalCost: number;
   }>;
 }> {
-  const npxCommand = preferences.customNpxPath || "npx";
+  const npxCommand = getCustomNpxPath() ?? "npx";
   const execOptions = getExecOptions();
 
   const { stdout } = await execAsync(`${npxCommand} ccusage@latest --json`, execOptions);

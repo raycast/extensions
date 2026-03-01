@@ -1,12 +1,13 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List, LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import Fuse from "fuse.js";
+import Fuse, { type IFuseOptions } from "fuse.js";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { Entry, Index, Preferences } from "./types";
+import React from "react";
 
 function useFuse<U>(
   items: U[] | undefined,
-  options: Fuse.IFuseOptions<U>,
+  options: IFuseOptions<U>,
   limit: number,
 ): [U[], Dispatch<SetStateAction<string>>] {
   const [query, setQuery] = useState("");
@@ -60,11 +61,11 @@ function renderOpenInActions(slug: string, entry: Entry) {
   }
 }
 
-export default function LaunchFn(props: LaunchProps<{ arguments: { slug: string } }>): JSX.Element {
+export default function LaunchFn(props: LaunchProps<{ arguments: { slug: string } }>) {
   return <SearchEntries slug={props.arguments.slug} />;
 }
 
-export function SearchEntries({ slug }: { slug: string }): JSX.Element {
+export function SearchEntries({ slug }: { slug: string }) {
   const { data: index, isLoading } = useFetch<Index>(`https://devdocs.io/docs/${slug}/index.json`);
   const [results, setQuery] = useFuse(index?.entries, { keys: ["name", "type"] }, 500);
 

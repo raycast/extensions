@@ -33,7 +33,7 @@ const JwtView = () => {
 
     const section = selected?.type;
     const definition = (selected?.type === "head" ? headerItems : dataItems).find(
-      (item) => item.key === selected?.value
+      (item) => item.key === selected?.value,
     );
 
     const markdown = showDetail
@@ -49,8 +49,8 @@ const JwtView = () => {
                   section,
                   definition,
                 }}
-              />
-            )
+              />,
+            ),
           )}" />`,
         ]
       : [];

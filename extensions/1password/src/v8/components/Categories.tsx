@@ -1,11 +1,10 @@
 import { Icon, List } from "@raycast/api";
 
-import { Error as ErrorGuide } from "./Error";
 import { CategoryName } from "../types";
 import { getCategoryIcon, useCategories } from "../utils";
+import { Error as ErrorGuide } from "./Error";
 
 export const DEFAULT_CATEGORY = "null";
-
 export function Categories({ onCategoryChange }: { onCategoryChange: (newCategory: string) => void }) {
   const { data, error, isLoading } = useCategories();
 
@@ -15,14 +14,14 @@ export function Categories({ onCategoryChange }: { onCategoryChange: (newCategor
       defaultValue={DEFAULT_CATEGORY}
       isLoading={isLoading}
       onChange={onCategoryChange}
-      tooltip="Select Category"
       storeValue
+      tooltip="Select Category"
     >
-      <List.Dropdown.Item key={"000"} icon={Icon.AppWindowGrid3x3} title="All Categories" value={DEFAULT_CATEGORY} />
+      <List.Dropdown.Item icon={Icon.AppWindowGrid3x3} key={"000"} title="All Categories" value={DEFAULT_CATEGORY} />
       {(data || []).map((category) => (
         <List.Dropdown.Item
-          key={category.uuid}
           icon={getCategoryIcon(category.name.replaceAll(" ", "_").toUpperCase() as CategoryName)}
+          key={category.uuid}
           title={category.name}
           value={category.name}
         />

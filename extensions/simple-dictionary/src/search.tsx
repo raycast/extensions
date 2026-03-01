@@ -13,6 +13,9 @@ import {
   List,
   Color,
   Keyboard,
+  getPreferenceValues,
+  Detail,
+  openCommandPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Dictionary, { GroupedEntry, Sense } from "./classes/dictionary";
@@ -24,7 +27,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
 
   const colors: Color[] = [Color.Blue, Color.Green, Color.Magenta, Color.Orange, Color.Purple, Color.Red, Color.Yellow];
 
-  const language: string = props.arguments.language;
+  const language: string = props.arguments.language || getPreferenceValues<Preferences.Search>().default_language;
   const word: string = props.arguments.word;
 
   const [groupedEntries, setGroupedEntries] = useState<GroupedEntry>({});
@@ -84,6 +87,19 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
 
     if (Object.keys(groupedEntries).length) checkFavorites();
   }, [groupedEntries, languageFull, word]);
+
+  if (!language) {
+    return (
+      <Detail
+        markdown={`Please select a language for your query or set a default one in Preferences`}
+        actions={
+          <ActionPanel>
+            <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   return (
     <List

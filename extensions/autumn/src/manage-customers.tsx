@@ -1,18 +1,24 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCachedPromise, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { autumn, AUTUMN_LIMIT } from "./autumn";
+import CreateCustomer from "./components/create-customer";
+import DeleteCustomerAction from "./components/DeleteCustomerAction";
 
 export default function ManageCustomers() {
   const {
     isLoading,
     data: customers,
     error,
-    revalidate,
+    mutate,
+    pagination,
   } = useCachedPromise(
-    async () => {
-      const { data, error } = await autumn.customers.list({ limit: AUTUMN_LIMIT });
+    () => async (options) => {
+      const { data, error } = await autumn.customers.list({ limit: AUTUMN_LIMIT, offset: options.page * AUTUMN_LIMIT });
       if (error) throw new Error(error.message);
-      return data.list;
+      return {
+        data: data.list,
+        hasMore: data.total === data.limit,
+      };
     },
     [],
     {
@@ -21,8 +27,8 @@ export default function ManageCustomers() {
   );
 
   return (
-    <List isLoading={isLoading}>
-      {!isLoading && !customers.length && error ? (
+    <List isLoading={isLoading} pagination={pagination}>
+      {!isLoading && !customers.length && !error ? (
         <List.EmptyView
           description="Create your first customer by interacting with an Autumn function via the API."
           actions={
@@ -30,8 +36,7 @@ export default function ManageCustomers() {
               <Action.Push
                 icon={Icon.AddPerson}
                 title="Create Customer"
-                target={<CreateCustomer />}
-                onPop={revalidate}
+                target={<CreateCustomer onCreate={mutate} />}
               />
             </ActionPanel>
           }
@@ -52,12 +57,19 @@ export default function ManageCustomers() {
             ]}
             actions={
               <ActionPanel>
+                {customer.id && (
+                  <Action.Push
+                    icon={Icon.Person}
+                    title="Customer Details"
+                    target={<CustomerDetails customerId={customer.id as string} />}
+                  />
+                )}
                 <Action.Push
                   icon={Icon.AddPerson}
                   title="Create Customer"
-                  target={<CreateCustomer />}
-                  onPop={revalidate}
+                  target={<CreateCustomer onCreate={mutate} />}
                 />
+                {customer.id && <DeleteCustomerAction customerId={customer.id as string} mutateCustomers={mutate} />}
               </ActionPanel>
             }
           />
@@ -67,48 +79,28 @@ export default function ManageCustomers() {
   );
 }
 
-function CreateCustomer() {
-  const { pop } = useNavigation();
-  type CreateCustomer = {
-    name: string;
-    id: string;
-    email: string;
-  };
-  const { handleSubmit, itemProps, values } = useForm<CreateCustomer>({
-    async onSubmit(values) {
-      const toast = await showToast(Toast.Style.Animated, "Creating", values.name || values.email || values.id);
-      try {
-        const { error } = await autumn.customers.create(values);
-        if (error) throw new Error(error.message);
-        toast.style = Toast.Style.Success;
-        toast.title = "Created";
-        pop();
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed";
-        toast.message = `${error}`;
-      }
+function CustomerDetails({ customerId }: { customerId: string }) {
+  const { isLoading, data: customer } = useCachedPromise(
+    async (id: string) => {
+      const { data, error } = await autumn.customers.get(id);
+      if (error) throw new Error(error.message);
+      return data;
     },
-    validation: {
-      id(value) {
-        if (!value && !values.email) return "ID or email is required";
-      },
-      email(value) {
-        if (!value && !values.id) return "ID or email is required";
-      },
-    },
-  });
+    [customerId],
+  );
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm icon={Icon.AddPerson} title="Create Customer" onSubmit={handleSubmit} />
-        </ActionPanel>
+    <Detail
+      isLoading={isLoading}
+      metadata={
+        customer && (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="ID" text={customer.id || "N/A"} />
+            <Detail.Metadata.Label title="Name" text={customer.name || "None"} />
+            <Detail.Metadata.Label title="Email" text={customer.email || "None"} />
+            <Detail.Metadata.Label title="Fingerprint" text={customer.fingerprint || "None"} />
+          </Detail.Metadata>
+        )
       }
-    >
-      <Form.TextField title="Name" {...itemProps.name} />
-      <Form.TextField title="ID" {...itemProps.id} info="Your unique identifier for the customer" />
-      <Form.TextField title="Email" {...itemProps.email} />
-    </Form>
+    />
   );
 }

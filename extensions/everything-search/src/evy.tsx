@@ -1,13 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  LaunchProps,
-} from "@raycast/api";
+import { useState, useEffect } from "react";
+import { List, ActionPanel, Action, getPreferenceValues, showToast, Toast, LaunchProps } from "@raycast/api";
 import * as ftp from "basic-ftp";
 
 /**
@@ -70,19 +62,14 @@ type Result = {
  */
 const RESULTS_PER_PAGE = 20;
 
-export default function Command({
-  arguments: args,
-}: LaunchProps<{ arguments: Arguments }>) {
+export default function Command({ arguments: args }: LaunchProps<{ arguments: Arguments }>) {
   const { serversJSON } = getPreferenceValues<Preferences>();
   let servers: Server[] = [];
 
   try {
     servers = JSON.parse(serversJSON);
   } catch {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid JSON in preferences",
-    });
+    showToast({ style: Toast.Style.Failure, title: "Invalid JSON in preferences" });
   }
 
   const [mask, setMask] = useState<string>(args.mask || "*.jpg");
@@ -214,9 +201,7 @@ export default function Command({
             allResults.push(...serverResults);
 
             if (DEBUG) {
-              console.log(
-                `Server ${srv.name} returned ${serverResults.length} results`,
-              );
+              console.log(`Server ${srv.name} returned ${serverResults.length} results`);
             }
           } catch (error) {
             console.error(`Error on server ${srv.name}:`, error);
@@ -228,28 +213,18 @@ export default function Command({
       );
 
       // Check if ANY server returned a full page - if so, there might be more results
-      const hasMore = serverResultCounts.some(
-        (count) => count === RESULTS_PER_PAGE,
-      );
+      const hasMore = serverResultCounts.some((count) => count === RESULTS_PER_PAGE);
 
       if (DEBUG) {
-        console.log(
-          `Got ${allResults.length} total results from servers:`,
-          serverResultCounts,
-        );
-        console.log(
-          `hasMore: ${hasMore} (at least one server returned ${RESULTS_PER_PAGE} results)`,
-        );
+        console.log(`Got ${allResults.length} total results from servers:`, serverResultCounts);
+        console.log(`hasMore: ${hasMore} (at least one server returned ${RESULTS_PER_PAGE} results)`);
       }
 
       setResults((prev) => (reset ? allResults : [...prev, ...allResults]));
       setPagination({ hasMore, pageSize: RESULTS_PER_PAGE });
     } catch (error) {
       console.error("Error fetching results:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error fetching results",
-      });
+      showToast({ style: Toast.Style.Failure, title: "Error fetching results" });
     } finally {
       setIsLoading(false);
     }

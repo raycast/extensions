@@ -2,14 +2,14 @@ import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import { useState } from "react";
-import { getClubs } from "./api";
+import { getClubMetadata, getClubs } from "./api";
 import SearchBarSeason from "./components/searchbar_season";
 import ClubSquad from "./components/squad";
-import { Team } from "./types";
+import { Club } from "./types";
 import { getClubLogo } from "./utils";
 
-function ClubProfile(props: Team) {
-  const { metadata } = props;
+function ClubProfile(props: Club) {
+  const { data: metadata } = usePromise(getClubMetadata, [props.id]);
   return (
     <Detail
       navigationTitle={`${props.name} | Club`}
@@ -17,45 +17,48 @@ function ClubProfile(props: Team) {
         { h1: props.name },
         {
           img: {
-            source: getClubLogo(props.altIds.opta),
+            source: getClubLogo(props.id),
           },
         },
       ])}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Stadium" text={props.grounds[0].name} />
+          <Detail.Metadata.Label title="Stadium" text={props.stadium.name} />
           <Detail.Metadata.Label
             title="Capacity"
-            text={props.grounds[0].capacity?.toString()}
+            text={props.stadium.capacity.toString()}
           />
-
+          <Detail.Metadata.Label
+            title="Established"
+            text={metadata?.club_established.toString()}
+          />
           <Detail.Metadata.Separator />
-          {metadata.communities_twitter && (
+          {metadata?.club_website && (
             <Detail.Metadata.Link
-              title="Twitter"
-              text={metadata.communities_twitter}
-              target={metadata.communities_twitter}
+              title="Website"
+              text={metadata.club_website}
+              target={metadata.club_website}
             />
           )}
-          {metadata.communities_facebook && (
-            <Detail.Metadata.Link
-              title="Facebook"
-              text={metadata.communities_facebook}
-              target={metadata.communities_facebook}
-            />
-          )}
-          {metadata.communities_instagram && (
+          {metadata?.club_instagram_handle && (
             <Detail.Metadata.Link
               title="Instagram"
-              text={metadata.communities_instagram}
-              target={metadata.communities_instagram}
+              text={metadata.club_instagram_handle}
+              target={metadata.club_instagram_handle}
             />
           )}
-          {metadata.communities_youtube && (
+          {metadata?.club_tiktok_handle && (
             <Detail.Metadata.Link
-              title="YouTube"
-              text={metadata.communities_youtube}
-              target={metadata.communities_youtube}
+              title="TikTok"
+              text={metadata.club_tiktok_handle}
+              target={metadata.club_tiktok_handle}
+            />
+          )}
+          {metadata?.club_x_handle && (
+            <Detail.Metadata.Link
+              title="X (Twitter)"
+              text={metadata.club_x_handle}
+              target={metadata.club_x_handle}
             />
           )}
         </Detail.Metadata>
@@ -65,12 +68,10 @@ function ClubProfile(props: Team) {
           <Action.Push
             title="Squad"
             icon={Icon.TwoPeople}
-            target={<ClubSquad {...props.club} />}
+            target={<ClubSquad {...props} />}
           />
           <Action.OpenInBrowser
-            url={`https://www.premierleague.com/clubs/${
-              props.id
-            }/${props.name.replace(/ /g, "-")}/overview`}
+            url={`https://www.premierleague.com/en/clubs/${props.id}/${props.name.replace(/ /g, "-")}/overview`}
           />
         </ActionPanel>
       }
@@ -89,6 +90,7 @@ export default function EPLClub() {
   return (
     <Grid
       throttle
+      columns={4}
       isLoading={isLoading}
       inset={Grid.Inset.Small}
       searchBarAccessory={
@@ -100,9 +102,9 @@ export default function EPLClub() {
           <Grid.Item
             key={team.id}
             title={team.name}
-            subtitle={team.grounds[0].name}
+            subtitle={team.stadium.name}
             content={{
-              source: getClubLogo(team.altIds.opta),
+              source: getClubLogo(team.id),
               fallback: "default.png",
             }}
             actions={
