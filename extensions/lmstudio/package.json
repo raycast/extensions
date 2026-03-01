@@ -60,9 +60,10 @@
   "author": "louison_gautreau",
   "owner": "Yonkae-corp",
   "platforms": [
-    "Windows"
+    "Windows",
+    "macOS"
   ],
   "categories": [
-    "Applications"
+    "Developer Tools"
   ]
 }
