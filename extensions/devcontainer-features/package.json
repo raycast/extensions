@@ -101,5 +101,8 @@
     "publish": "ray publish",
     "test": "vitest run",
     "test:watch": "vitest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
