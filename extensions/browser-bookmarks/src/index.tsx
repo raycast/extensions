@@ -596,7 +596,7 @@ export default function Command() {
                     availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.braveBeta}
                     name="Brave Beta"
-                    icon="brave.png"
+                    icon="brave-beta.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
                     profiles={braveBeta.profiles}
                     currentProfile={braveBeta.currentProfile}
@@ -606,7 +606,7 @@ export default function Command() {
                     availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.braveNightly}
                     name="Brave Nightly"
-                    icon="brave.png"
+                    icon="brave-nightly.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
                     profiles={braveNightly.profiles}
                     currentProfile={braveNightly.currentProfile}
@@ -676,7 +676,7 @@ export default function Command() {
                     availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
                     name="Edge Canary"
-                    icon="edge.png"
+                    icon="edgeCanary.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                     profiles={edgeCanary.profiles}
                     currentProfile={edgeCanary.currentProfile}
@@ -686,7 +686,7 @@ export default function Command() {
                     availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.edgeDev}
                     name="Edge Dev"
-                    icon="edge.png"
+                    icon="edgeDev.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                     profiles={edgeDev.profiles}
                     currentProfile={edgeDev.currentProfile}
@@ -762,6 +762,16 @@ export default function Command() {
                     profiles={vivaldi.profiles}
                     currentProfile={vivaldi.currentProfile}
                     setCurrentProfile={vivaldi.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.vivaldiSnapshot}
+                    name="Vivaldi Snapshot"
+                    icon="vivaldi.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                    profiles={vivaldiSnapshot.profiles}
+                    currentProfile={vivaldiSnapshot.currentProfile}
+                    setCurrentProfile={vivaldiSnapshot.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     availableBrowsers={availableBrowsers}

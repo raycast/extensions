@@ -1,6 +1,6 @@
 # Browser Bookmarks
 
-Integrate bookmarks from Brave, ChatGPT Atlas, Chrome, Edge, Firefox, Safari, Arc, Sidekick, Vivaldi, Prisma Access, Dia, Ghost Browser, or Helium.
+Integrate bookmarks from Brave, ChatGPT Atlas, Chrome, Dia, Edge, Firefox, Safari, Arc, Vivaldi, Vivaldi Snapshot, Zen, Whale, or Helium.
 
 ## Configuration
 
@@ -16,6 +16,7 @@ If you have multiple profiles, you can select the one you want from the enabled 
 - Firefox: `⌘` + `⇧` + `F`
 - Helium: `⌘` + `⇧` + `H`
 - Arc: `⌘` + `⇧` + `A`
-- Vivaldi: `⌘` + `⇧` + `V`
+- Vivaldi / Vivaldi Snapshot: `⌘` + `⇧` + `V`
 - Prisma Access: `⌘` + `⇧` + `P`
 - Whale: `⌘` + `⇧` + `W`
+- Zen: `⌘` + `⇧` + `Z`
