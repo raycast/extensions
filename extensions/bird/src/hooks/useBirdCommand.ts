@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useExec } from "@raycast/utils";
+import { existsSync } from "fs";
 import { cpus } from "os";
 import { useMemo, useState, useCallback } from "react";
 import { Tweet } from "../types";
@@ -10,13 +11,23 @@ const defaultBirdPath = cpus()[0].model.includes("Apple") ? "/opt/homebrew/bin/b
 const BATCH_SIZE = 20;
 const MAX_COUNT = 500;
 
+export function getBirdPath(): string {
+  const prefs = getPreferenceValues<{ birdPath?: string }>();
+  return prefs.birdPath || defaultBirdPath;
+}
+
+export function isBirdInstalled(): boolean {
+  return existsSync(getBirdPath());
+}
+
 export function useBirdCommand(command: "bookmarks" | "likes") {
-  const prefs = getPreferenceValues();
-  const birdBin = prefs.birdPath || defaultBirdPath;
+  const birdBin = getBirdPath();
+  const installed = isBirdInstalled();
   const [count, setCount] = useState(BATCH_SIZE);
 
   const { isLoading, data, error, revalidate } = useExec(birdBin, [command, "--json", "-n", String(count)], {
     keepPreviousData: true,
+    execute: installed,
   });
 
   const tweets = useMemo<Tweet[]>(() => {

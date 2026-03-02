@@ -1,9 +1,12 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
-import { useBirdCommand } from "./hooks/useBirdCommand";
+import { useBirdCommand, isBirdInstalled } from "./hooks/useBirdCommand";
+import { BirdNotInstalled } from "./components/BirdNotInstalled";
 import { TweetItem } from "./components/TweetItem";
 
 export default function LikesCommand() {
   const { data: tweets, isLoading, error, loadMore, canLoadMore, maxCount } = useBirdCommand("likes");
+
+  if (!isBirdInstalled()) return <BirdNotInstalled />;
 
   return (
     <List
