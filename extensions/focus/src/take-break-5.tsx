@@ -1,5 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import { getInstallStatus, getProfileNames, takeBreakWithProfile5, takeBreak5, isBreakRunning } from "./utils";
+import { getProfileNames, takeBreakWithProfile5, takeBreak5, isBreakRunning } from "./utils";
 import { ensureFocusIsRunning } from "./helpers";
 
 export default async function Command() {

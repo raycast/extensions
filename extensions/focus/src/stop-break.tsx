@@ -3,14 +3,14 @@ import { getProfileNames, stopBreak, stopBreakWithProfile } from "./utils";
 import { ensureFocusIsRunning } from "./helpers";
 
 export default async function Command() {
+  if (!(await ensureFocusIsRunning())) {
+    return;
+  }
+
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Stopping break...",
   });
-
-  if (!(await ensureFocusIsRunning())) {
-    return;
-  }
 
   const profiles = await getProfileNames();
   const firstProfile = profiles[0];
