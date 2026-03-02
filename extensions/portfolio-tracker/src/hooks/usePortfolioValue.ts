@@ -56,6 +56,7 @@ import {
   isDebtPaidOff,
 } from "../utils/types";
 import { getCachedPrices, getCachedFxRates } from "../services/price-cache";
+import { getTodayDateKey } from "../utils/formatting";
 import { createPortfolioError } from "../utils/errors";
 import { PropertyPriceChange, getPropertyPriceChange, getPropertyPriceChangeSync } from "../services/property-price";
 import { calculateCurrentEquity } from "../services/mortgage-calculator";
@@ -307,11 +308,23 @@ export function usePortfolioValue(portfolio: Portfolio | undefined): UsePortfoli
     }
   }, [symbols, currencies, propertyPositions, debtPositions, baseCurrency]);
 
-  // ── Trigger fetch when dependencies change ──
+  // ── Trigger fetch when dependencies change OR when the calendar day rolls over ──
+  //
+  // Problem: fetchData is a useCallback whose deps are [symbols, currencies, ...].
+  // When Raycast resumes a kept-alive extension the next day, the portfolio hasn't
+  // changed so the symbol list is referentially stable → fetchData ref is unchanged
+  // → this useEffect wouldn't re-fire → React state would still hold yesterday's
+  // CachedPrice objects even though the on-disk cache would correctly miss on the
+  // new date key.
+  //
+  // Fix: include today's date key as a dependency. When the calendar day rolls
+  // over, `today` changes, the effect re-fires, fetchData() runs, getCachedPrices
+  // finds no today-keyed cache entries, and fetches fresh from Yahoo Finance.
+  const today = getTodayDateKey();
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, today]);
 
   // ── Compute valuation from prices + FX rates + HPI data ──
 
