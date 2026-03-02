@@ -14,10 +14,6 @@ import { useState, useEffect, useCallback } from "react";
 
 import { fetchPhotoMetadata, getOrExportThumbnail, getOrExportOriginal, openPhotoInPhotos } from "./api/photos";
 
-interface Preferences {
-  photoCount: string;
-}
-
 type PhotoState = {
   id: string;
   filename: string;
@@ -41,7 +37,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function Command() {
-  const { photoCount } = getPreferenceValues<Preferences>();
+  const { photoCount } = getPreferenceValues<Preferences.SearchPhotos>();
   const count = Math.max(1, parseInt(photoCount, 10) || 24);
 
   const [photos, setPhotos] = useState<PhotoState[]>([]);
