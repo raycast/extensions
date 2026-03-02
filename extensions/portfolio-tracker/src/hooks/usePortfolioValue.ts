@@ -47,7 +47,6 @@ import {
   CachedPrice,
   CachedFxRate,
   PortfolioError,
-  ExtensionPreferences,
   ErrorType,
   AssetType,
   Position,
@@ -135,7 +134,7 @@ function propertyHPIKey(position: Position): string | null {
  * }
  */
 export function usePortfolioValue(portfolio: Portfolio | undefined): UsePortfolioValueReturn {
-  const { baseCurrency } = getPreferenceValues<ExtensionPreferences>();
+  const { baseCurrency } = getPreferenceValues<Preferences>();
 
   const [prices, setPrices] = useState<Map<string, CachedPrice>>(new Map());
   const [fxRates, setFxRates] = useState<Map<string, CachedFxRate>>(new Map());

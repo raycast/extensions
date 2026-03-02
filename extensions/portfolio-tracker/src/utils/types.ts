@@ -522,12 +522,3 @@ export interface PortfolioError {
   /** ISO 8601 timestamp */
   timestamp: string;
 }
-
-// ──────────────────────────────────────────
-// Preferences (from Raycast extension preferences)
-// ──────────────────────────────────────────
-
-/** Shape of Raycast extension preferences */
-export interface ExtensionPreferences {
-  baseCurrency: string;
-}

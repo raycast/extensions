@@ -110,7 +110,7 @@ export function formatCurrencyCompact(amount: number, currencyCode: string): str
  * formatNumber(0.1234, 4)  // "0.1234"
  */
 export function formatNumber(value: number, decimals: number = CURRENCY_DECIMALS): string {
-  return value.toLocaleString("en-US", {
+  return value.toLocaleString(undefined, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
@@ -172,7 +172,7 @@ export function formatPercent(value: number, options?: { decimals?: number; show
  */
 export function formatDate(isoString: string): string {
   const date = new Date(isoString);
-  return date.toLocaleDateString("en-GB", {
+  return date.toLocaleDateString(undefined, {
     day: "numeric",
     month: "short",
     year: "numeric",

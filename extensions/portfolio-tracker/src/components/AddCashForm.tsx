@@ -37,7 +37,7 @@
 import React from "react";
 import { Form, ActionPanel, Action, Icon, useNavigation, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
-import { AssetType, ExtensionPreferences } from "../utils/types";
+import { AssetType } from "../utils/types";
 import { CASH_CURRENCY_OPTIONS } from "../utils/constants";
 import { validateUnits, parseUnits } from "../utils/validation";
 import { getCurrencySymbol } from "../utils/formatting";
@@ -85,7 +85,7 @@ export function AddCashForm({ accountId, accountName, onConfirm }: AddCashFormPr
   void accountId;
 
   const { pop } = useNavigation();
-  const { baseCurrency } = getPreferenceValues<ExtensionPreferences>();
+  const { baseCurrency } = getPreferenceValues<Preferences>();
 
   // ── Form State ──
 
