@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { ds, OpenInDocuSeal } from "./docuseal";
 
@@ -35,6 +35,8 @@ function Submissions({templateId}: {templateId: number}) {
   }, [templateId], {initialData: []})
 
   return <List isLoading={isLoading}>
-    {!isLoading && !submissions.length ? <List.EmptyView title="There are no Submissions" description="Send an invitation to fill and complete the form" /> : submissions.map(submission => <List.Item key={submission.id} title={submission.name || ""} />)}
+    {!isLoading && !submissions.length ? <List.EmptyView title="There are no Submissions" description="Send an invitation to fill and complete the form" /> : submissions.map(submission => <List.Item key={submission.id} icon={{value: {source: Icon.CircleFilled, tintColor: submission.status==="completed" ? Color.Green : undefined}, tooltip: submission.status}} title={submission.name || submission.submitters[0].email || ""} actions={<ActionPanel>
+      <OpenInDocuSeal title="View" path={`submissions/${submission.id}`} />
+    </ActionPanel>} />)}
   </List>
 }

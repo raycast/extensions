@@ -7,8 +7,8 @@ export const ds = new DocusealApi({
     url: instance_url.includes("api.docuseal.com") ? instance_url : new URL("api", instance_url).toString()
 });
 
-export const OpenInDocuSeal = ({path}: {path: string}) => {
+export const OpenInDocuSeal = ({title="Open in DocuSeal", path}: {title?:string, path: string}) => {
     const base = instance_url.includes("api.docuseal.com") ? "https://docuseal.com" : instance_url;
     const url = new URL(path, base).toString();
-    return <Action.OpenInBrowser icon="docuseal.png" title="Open in DocuSeal" url={url} />
+    return <Action.OpenInBrowser icon="docuseal.png" title={title} url={url} />
 }
