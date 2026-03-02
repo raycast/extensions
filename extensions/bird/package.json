@@ -24,6 +24,20 @@
       "subtitle": "Bird",
       "description": "View your X/Twitter likes",
       "mode": "view"
+    },
+    {
+      "name": "whoami",
+      "title": "Who Am I",
+      "subtitle": "Bird",
+      "description": "Show your X/Twitter account info",
+      "mode": "view"
+    },
+    {
+      "name": "check",
+      "title": "Check Credentials",
+      "subtitle": "Bird",
+      "description": "Check Twitter cookie/credential availability",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -54,7 +68,6 @@
   "dependencies": {
     "@raycast/api": "^1.68.1",
     "@raycast/utils": "^1.10.0",
-    "@steipete/bird": "^0.8.0",
     "tiny-relative-date": "^1.3.0"
   },
   "devDependencies": {
