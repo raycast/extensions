@@ -96,10 +96,7 @@ export const ACTION_DELAYS: Record<InputAction, number> = {
 };
 
 // Movement actions that can be customized via preferences
-const FORWARD_BACKWARD_ACTIONS = new Set([
-  InputAction.MOVE_FORWARD,
-  InputAction.MOVE_BACKWARD,
-]);
+const FORWARD_BACKWARD_ACTIONS = new Set([InputAction.MOVE_FORWARD, InputAction.MOVE_BACKWARD]);
 
 const TURN_STRAFE_ACTIONS = new Set([
   InputAction.TURN_LEFT,
@@ -112,11 +109,7 @@ const TURN_STRAFE_ACTIONS = new Set([
  * Get the key release delay for an action.
  * Optionally accepts user-configured delays for movement categories.
  */
-export function getActionDelay(
-  action: InputAction,
-  forwardBackwardDelay?: number,
-  turnStrafeDelay?: number
-): number {
+export function getActionDelay(action: InputAction, forwardBackwardDelay?: number, turnStrafeDelay?: number): number {
   if (forwardBackwardDelay !== undefined && FORWARD_BACKWARD_ACTIONS.has(action)) {
     return forwardBackwardDelay;
   }
