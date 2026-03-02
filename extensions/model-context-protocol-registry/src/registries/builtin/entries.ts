@@ -662,6 +662,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
     },
   },
+  {
+    name: "routemesh",
+    title: "RouteMesh",
+    description:
+      "Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover.",
+    icon: "https://www.google.com/s2/favicons?domain=routeme.sh&sz=64",
+    homepage: "https://github.com/routemesh/routemesh-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@routemesh/mcp"],
+      env: {
+        ROUTEMESH_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
