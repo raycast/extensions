@@ -1,5 +1,10 @@
 # Claude Code Launcher
 
+## [1.0.2] - {PR_MERGE_DATE}
+
+### Fixed
+- Ghostty adapter now uses interactive shell (`-i` flag) so PATH entries from `~/.zshrc` (like `~/.local/bin`) are available
+
 ## [1.0.1] - 2026-01-07
 
 ### Added
