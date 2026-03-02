@@ -1,6 +1,6 @@
 # Everything Search Changelog
 
-## [Added SDK support for ARM64] - 2026-06-01
+## [Added SDK support for ARM64] - {PR_MERGE_DATE}
 - Added support for the Everything SDK on ARM64 architecture.
 
 ## [Added ability to search through SDK] - 2026-02-27
