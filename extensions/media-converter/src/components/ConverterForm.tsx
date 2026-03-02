@@ -21,6 +21,7 @@ import {
   type AllOutputExtension,
   type OutputVideoExtension,
   type OutputImageExtension,
+  type OutputAudioExtension,
   type QualitySettings,
   getMediaType,
   AUDIO_BITRATES,
@@ -155,12 +156,18 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           ? preferredVideoFormat
           : (".mp4" as const);
 
+      const preferredAudioFormat = preferences.defaultAudioOutputFormat as OutputAudioExtension | undefined;
+      const defaultAudioFormat =
+        preferredAudioFormat && OUTPUT_AUDIO_EXTENSIONS.includes(preferredAudioFormat)
+          ? preferredAudioFormat
+          : (".mp3" as const);
+
       // Initialize default output format and quality based on file type
       const defaultFormat =
         primaryFileType === "image"
           ? defaultImageFormat
           : primaryFileType === "audio"
-            ? (".mp3" as const)
+            ? defaultAudioFormat
             : (defaultVideoFormat as AllOutputExtension);
 
       setOutputFormat(defaultFormat);
@@ -173,6 +180,11 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
             (preferences.defaultVideoQualityPreset as QualityLevel | undefined) ?? DEFAULT_SIMPLE_QUALITY;
           setSimpleQuality(defaultVideoQuality);
           setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, defaultVideoQuality));
+        } else if (primaryFileType === "audio") {
+          const defaultAudioQuality =
+            (preferences.defaultAudioQualityPreset as QualityLevel | undefined) ?? DEFAULT_SIMPLE_QUALITY;
+          setSimpleQuality(defaultAudioQuality);
+          setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, defaultAudioQuality));
         } else {
           setSimpleQuality(DEFAULT_SIMPLE_QUALITY);
           setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, DEFAULT_SIMPLE_QUALITY));

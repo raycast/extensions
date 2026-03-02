@@ -627,6 +627,66 @@
       "description": "Default quality preset used only when 'More Conversion Settings (Advanced)' is OFF."
     },
     {
+      "name": "defaultAudioOutputFormat",
+      "type": "dropdown",
+      "title": "Default Audio Output Format",
+      "default": ".mp3",
+      "required": false,
+      "data": [
+        {
+          "title": ".MP3",
+          "value": ".mp3"
+        },
+        {
+          "title": ".AAC",
+          "value": ".aac"
+        },
+        {
+          "title": ".M4A",
+          "value": ".m4a"
+        },
+        {
+          "title": ".WAV",
+          "value": ".wav"
+        },
+        {
+          "title": ".FLAC",
+          "value": ".flac"
+        }
+      ],
+      "description": "Default output format for audio conversions."
+    },
+    {
+      "name": "defaultAudioQualityPreset",
+      "type": "dropdown",
+      "title": "Default Audio Quality Preset (Simple Mode)",
+      "default": "high",
+      "required": false,
+      "data": [
+        {
+          "title": "Lowest",
+          "value": "lowest"
+        },
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        },
+        {
+          "title": "Highest",
+          "value": "highest"
+        }
+      ],
+      "description": "Default quality preset used only when 'More Conversion Settings (Advanced)' is OFF."
+    },
+    {
       "name": "ffmpeg_path",
       "type": "textfield",
       "placeholder": "path/to/ffmpeg/binary",

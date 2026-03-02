@@ -12,10 +12,10 @@
   - `Default HEIC Quality (macOS only)`
   - `Default TIFF Compression`
   - `Default AVIF Quality`
+  - `Default Audio Output Format`
+  - `Default Audio Quality Preset (Simple Mode)`
   - `Default Video Output Format`
   - `Default Video Quality Preset (Simple Mode)`
-- Added `src/config/image-preferences.json` as the single source of truth for image preference metadata and value domains.
-- Added `scripts/generate-image-preferences.mjs` to generate/check image preferences in `package.json`.
 
 ### Fixed
 
@@ -25,6 +25,8 @@
 
 ### API Changes
 
+- Added `src/config/image-preferences.json` as the single source of truth for image preference metadata and value domains.
+- Added `scripts/generate-image-preferences.mjs` to generate/check image preferences in `package.json`.
 - Refactored `getDefaultImageQuality()` to resolve defaults by output format (`.jpg`, `.webp`, `.png`, `.heic`, `.tiff`, `.avif`) and validate configured values against shared domains.
 
 ## [1.5.3] - 2026-02-25
