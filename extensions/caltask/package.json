@@ -8,9 +8,40 @@
   "platforms": [
     "macOS"
   ],
-  "license": "MIT",
   "categories": [
     "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "task-history",
+      "title": "CalTask",
+      "subtitle": "Calendar",
+      "description": "Timer, upcoming events, recent history, AI search, and event management",
+      "mode": "view"
+    },
+    {
+      "name": "task-report",
+      "title": "CalTask Report",
+      "subtitle": "Calendar",
+      "description": "Generate time reports from Mac Calendar events",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "CalTask Menu Bar",
+      "subtitle": "Calendar",
+      "description": "Show current task timer in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "manage-calendars",
+      "title": "Manage Calendars",
+      "subtitle": "CalTask",
+      "description": "Toggle visible calendars and set default calendar",
+      "mode": "view"
+    }
   ],
   "preferences": [
     {
@@ -116,37 +147,6 @@
           "value": "120"
         }
       ]
-    }
-  ],
-  "commands": [
-    {
-      "name": "task-history",
-      "title": "CalTask",
-      "subtitle": "Calendar",
-      "description": "Timer, upcoming events, recent history, AI search, and event management",
-      "mode": "view"
-    },
-    {
-      "name": "task-report",
-      "title": "CalTask Report",
-      "subtitle": "Calendar",
-      "description": "Generate time reports from Mac Calendar events",
-      "mode": "view"
-    },
-    {
-      "name": "menu-bar",
-      "title": "CalTask Menu Bar",
-      "subtitle": "Calendar",
-      "description": "Show current task timer in menu bar",
-      "mode": "menu-bar",
-      "interval": "10s"
-    },
-    {
-      "name": "manage-calendars",
-      "title": "Manage Calendars",
-      "subtitle": "CalTask",
-      "description": "Toggle visible calendars and set default calendar",
-      "mode": "view"
     }
   ],
   "dependencies": {

@@ -6,14 +6,6 @@ import { CalendarInfo } from "./types";
 const VISIBLE_CALENDARS_KEY = "visible-calendars";
 const DEFAULT_CALENDAR_ID_KEY = "default-calendar-id";
 
-// ── Static preference types ────────────────────────────────────
-interface Preferences {
-  aiModel: string;
-  upcomingDays: string;
-  recentHistoryDays: string;
-  defaultEventDuration: string;
-}
-
 // ── Static preference accessors ────────────────────────────────
 
 /**

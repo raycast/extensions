@@ -1,6 +1,6 @@
 # CalTask Changelog
 
-## [Added Event Management and AI Search] - 2026-03-01
+## [Added Event Management and AI Search] - {PR_MERGE_DATE}
 
 - Added create, edit, and delete calendar events with full EventKit support
 - Added AI-powered natural language search (e.g., "meetings last week")
