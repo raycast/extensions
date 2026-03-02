@@ -33,7 +33,7 @@ export interface Article {
   businessAnglePoints?: string[];
   businessAngleText?: string;
   category: string;
-  culinarSignificance?: string;
+  culinarySignificance?: string;
   designPrinciples?: string;
   destinationHighlights?: string;
   didYouKnow?: string;
