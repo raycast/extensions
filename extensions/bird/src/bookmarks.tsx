@@ -1,9 +1,12 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
-import { useBirdCommand } from "./hooks/useBirdCommand";
+import { useBirdCommand, isBirdInstalled } from "./hooks/useBirdCommand";
+import { BirdNotInstalled } from "./components/BirdNotInstalled";
 import { TweetItem } from "./components/TweetItem";
 
 export default function BookmarksCommand() {
-  const { data: tweets, isLoading, error, loadMore, canLoadMore, maxCount } = useBirdCommand("bookmarks");
+  const { data: tweets, isLoading, error, loadMore, canLoadMore, maxCount, revalidate } = useBirdCommand("bookmarks");
+
+  if (!isBirdInstalled()) return <BirdNotInstalled />;
 
   return (
     <List
@@ -17,7 +20,13 @@ export default function BookmarksCommand() {
       ) : (
         <>
           {tweets?.map((tweet) => (
-            <TweetItem key={tweet.id} tweet={tweet} loadMore={loadMore} canLoadMore={canLoadMore} />
+            <TweetItem
+              key={tweet.id}
+              tweet={tweet}
+              loadMore={loadMore}
+              canLoadMore={canLoadMore}
+              onUnbookmark={() => revalidate()}
+            />
           ))}
           {canLoadMore && (
             <List.Item

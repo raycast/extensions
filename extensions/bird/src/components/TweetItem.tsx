@@ -1,14 +1,17 @@
-import { List, ActionPanel, Action, Icon, Image } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Image, Alert, confirmAlert, showToast, Toast } from "@raycast/api";
+import { execSync } from "child_process";
 import tinyRelativeDate from "tiny-relative-date";
 import { Tweet } from "../types";
+import { getBirdPath } from "../hooks/useBirdCommand";
 
 interface TweetItemProps {
   tweet: Tweet;
   loadMore?: () => void;
   canLoadMore?: boolean;
+  onUnbookmark?: (tweetId: string) => void;
 }
 
-export function TweetItem({ tweet, loadMore, canLoadMore }: TweetItemProps) {
+export function TweetItem({ tweet, loadMore, canLoadMore, onUnbookmark }: TweetItemProps) {
   const tweetUrl = `https://x.com/${tweet.author.username}/status/${tweet.id}`;
   const authorUrl = `https://x.com/${tweet.author.username}`;
   // Replace newlines with spaces for subtitle display
@@ -65,6 +68,36 @@ export function TweetItem({ tweet, loadMore, canLoadMore }: TweetItemProps) {
             content={tweetUrl}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
+          {onUnbookmark && (
+            <Action
+              title="Remove Bookmark"
+              icon={Icon.Bookmark}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              onAction={async () => {
+                if (
+                  await confirmAlert({
+                    title: "Remove Bookmark",
+                    message: `Remove bookmark for tweet by @${tweet.author.username}?`,
+                    primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                  })
+                ) {
+                  const toast = await showToast({ style: Toast.Style.Animated, title: "Removing bookmark…" });
+                  try {
+                    const birdBin = getBirdPath();
+                    execSync(`${birdBin} unbookmark ${tweet.id}`);
+                    toast.style = Toast.Style.Success;
+                    toast.title = "Bookmark removed";
+                    onUnbookmark(tweet.id);
+                  } catch (err) {
+                    toast.style = Toast.Style.Failure;
+                    toast.title = "Failed to remove bookmark";
+                    toast.message = err instanceof Error ? err.message : String(err);
+                  }
+                }
+              }}
+            />
+          )}
           {canLoadMore && loadMore && (
             <Action
               title="Load More"
