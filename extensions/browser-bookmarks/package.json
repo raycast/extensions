@@ -58,19 +58,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.5",
+    "@raycast/api": "^1.104.8",
     "@raycast/utils": "^2.2.2",
     "fuse.js": "^7.1.0",
     "ini": "^6.0.0",
     "simple-plist": "^1.4.0-0",
-    "sql.js": "^1.13.0"
+    "sql.js": "^1.14.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/ini": "^4.1.1",
-    "@types/node": "25.2.2",
+    "@types/node": "25.3.3",
     "@types/plist": "^3.0.5",
-    "@types/react": "19.2.13",
+    "@types/react": "19.2.14",
     "@types/sql.js": "^1.4.9",
     "eslint": "^9.0.0",
     "eslint-plugin-import": "^2.32.0",
