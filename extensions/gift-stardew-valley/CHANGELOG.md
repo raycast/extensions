@@ -1,6 +1,6 @@
 # Gift Stardew Valley Changelog
 
-## [Update for 1.6] - {PR_MERGE_DATE}
+## [Update for 1.6] - 2026-03-02
 
 - added new icon with alpha, however aimed to keep inline with the existing design.
 - Went through all characters, updating and correcting some errors. Some characters had missing elements.
