@@ -1,6 +1,6 @@
 # Inkdrop Changelog
 
-## [New Features & Improvements] - {PR_MERGE_DATE}
+## [New Features & Improvements] - 2026-03-02
 
 - Added Quick Look action for full note preview
 - Added rich actions menu: Copy Note Content, Copy Note Title, Paste Note Content, Copy Markdown Link, Copy Inkdrop Link
