@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uuid-generator",
-  "title": "Uuid Generator",
+  "title": "UUID Generator",
   "description": "A quick way to generate UUIDs without opening the browser",
   "icon": "command-icon.png",
   "author": "jmaeso",
