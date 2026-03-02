@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix custom server URL "Restart Required" alert loop after CLI binary update
+- Fix reverting to default server when custom server URL preference is removed
+
 ## [Fix Password Generation] - 2026-02-18
 
 - Fix password generation failing due to false boolean options

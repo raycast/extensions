@@ -18,7 +18,8 @@
     "marinsokol",
     "jose-elias-alvarez",
     "krambono",
-    "clins1994"
+    "clins1994",
+    "naokiiida"
   ],
   "pastContributors": [
     "pomdtr"
@@ -421,6 +422,11 @@
     }
   ],
   "dependencies": {
+    "@otplib/core": "^13.3.0",
+    "@otplib/plugin-base32-scure": "^13.3.0",
+    "@otplib/plugin-crypto-noble": "^13.3.0",
+    "@otplib/totp": "^13.3.0",
+    "@otplib/uri": "^13.3.0",
     "@raycast/api": "^1.103.3",
     "@raycast/utils": "^2.2.1",
     "execa": "^7.0.0",
