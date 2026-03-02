@@ -2,12 +2,11 @@ import { Clipboard, closeMainWindow, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 import { fetchMostRecentPhotoId, getOrExportOriginal } from "./api/photos";
-import { originalsDir } from "./utils/cache";
 
 export default async function Command() {
   try {
     const photoId = await fetchMostRecentPhotoId();
-    const origPath = await getOrExportOriginal(photoId, originalsDir());
+    const origPath = await getOrExportOriginal(photoId);
 
     await Clipboard.copy({ file: origPath });
     await closeMainWindow();

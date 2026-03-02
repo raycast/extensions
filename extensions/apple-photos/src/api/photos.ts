@@ -5,9 +5,25 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
-import { thumbnailPath, originalPath, idToFilename } from "../utils/cache";
+import { thumbnailPath, originalPath, idToFilename, thumbnailDir, originalsDir } from "../utils/cache";
 
 const execFileAsync = promisify(execFile);
+const CONVERTIBLE_IMAGE_EXTENSIONS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".heic",
+  ".heif",
+  ".tif",
+  ".tiff",
+  ".gif",
+  ".bmp",
+  ".webp",
+]);
+
+function isConvertibleImageFilename(filename: string): boolean {
+  return CONVERTIBLE_IMAGE_EXTENSIONS.has(path.extname(filename).toLowerCase());
+}
 
 export async function fetchPhotoMetadata(count = 24): Promise<{ id: string; filename: string; date: string }[]> {
   try {
@@ -34,6 +50,7 @@ async function fetchMetadataFromDB(count: number): Promise<{ id: string; filenam
       const date = new Date(parseInt(unixTs, 10) * 1000);
       return { id: `${uuid}/L0/001`, filename, date: date.toString() };
     })
+    .filter((item) => isConvertibleImageFilename(item.filename))
     .reverse();
 }
 
@@ -67,7 +84,8 @@ async function fetchMetadataFromAppleScript(count: number): Promise<{ id: string
     .map((line) => {
       const [id, filename, date] = line.split("\t");
       return { id, filename, date };
-    });
+    })
+    .filter((item) => isConvertibleImageFilename(item.filename));
 }
 
 export async function fetchMostRecentPhotoId(): Promise<string> {
@@ -109,33 +127,38 @@ async function exportAndConvert(
   try {
     await exportPhoto(photoId, tempDir);
 
-    const exported = fs.readdirSync(tempDir);
+    const exported = fs.readdirSync(tempDir).sort();
     if (exported.length === 0) {
       throw new Error(`Export produced no files for photo ${photoId}`);
     }
 
-    const srcPath = path.join(tempDir, exported[0]);
+    const sourceFilename = exported.find((filename) => isConvertibleImageFilename(filename));
+    if (!sourceFilename) {
+      throw new Error(`Export produced no convertible image files for photo ${photoId}`);
+    }
+
+    const srcPath = path.join(tempDir, sourceFilename);
     await sipsConvert(srcPath, outputPath, maxDimension);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 }
 
-export async function getOrExportThumbnail(photoId: string, destDir: string): Promise<string> {
+export async function getOrExportThumbnail(photoId: string): Promise<string> {
   const cachePath = thumbnailPath(photoId);
   if (fs.existsSync(cachePath)) {
     return cachePath;
   }
-  await exportAndConvert(photoId, destDir, cachePath, 400);
+  await exportAndConvert(photoId, thumbnailDir(), cachePath, 400);
   return cachePath;
 }
 
-export async function getOrExportOriginal(photoId: string, destDir: string): Promise<string> {
+export async function getOrExportOriginal(photoId: string): Promise<string> {
   const cachePath = originalPath(photoId);
   if (fs.existsSync(cachePath)) {
     return cachePath;
   }
-  await exportAndConvert(photoId, destDir, cachePath);
+  await exportAndConvert(photoId, originalsDir(), cachePath);
   return cachePath;
 }
 

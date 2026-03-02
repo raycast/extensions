@@ -7,7 +7,7 @@ export function idToFilename(photoId: string): string {
 }
 
 export function thumbnailDir(): string {
-  const dir = environment.supportPath;
+  const dir = path.join(environment.supportPath, "thumbnails");
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }

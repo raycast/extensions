@@ -13,7 +13,6 @@ import { runAppleScript } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 
 import { fetchPhotoMetadata, getOrExportThumbnail, getOrExportOriginal, openPhotoInPhotos } from "./api/photos";
-import { thumbnailDir, originalsDir } from "./utils/cache";
 
 interface Preferences {
   photoCount: string;
@@ -23,7 +22,6 @@ type PhotoState = {
   id: string;
   filename: string;
   date: string;
-  thumbnailPath: string | null;
 };
 
 function formatDate(dateStr: string): string {
@@ -47,12 +45,14 @@ export default function Command() {
   const count = Math.max(1, parseInt(photoCount, 10) || 24);
 
   const [photos, setPhotos] = useState<PhotoState[]>([]);
+  const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
   const [previousApp, setPreviousApp] = useState<string>("");
 
   const revalidate = useCallback(() => {
     setPhotos([]);
+    setThumbnails({});
     setIsLoading(true);
     setRefreshKey((k) => k + 1);
   }, []);
@@ -74,16 +74,16 @@ export default function Command() {
       rawItems.reverse();
 
       if (!cancelled) {
-        setPhotos(rawItems.map((item) => ({ ...item, thumbnailPath: null })));
+        setPhotos(rawItems);
+        setThumbnails({});
       }
 
-      const thumbDir = thumbnailDir();
       for (const item of rawItems) {
         if (cancelled) break;
         try {
-          const thumb = await getOrExportThumbnail(item.id, thumbDir);
+          const thumb = await getOrExportThumbnail(item.id);
           if (!cancelled) {
-            setPhotos((prev) => prev.map((p) => (p.id === item.id ? { ...p, thumbnailPath: thumb } : p)));
+            setThumbnails((prev) => (prev[item.id] === thumb ? prev : { ...prev, [item.id]: thumb }));
           }
         } catch {
           // leave as null thumbnail placeholder
@@ -101,62 +101,66 @@ export default function Command() {
 
   return (
     <Grid columns={3} isLoading={isLoading} inset={Grid.Inset.Medium} searchBarPlaceholder="Filter by filename or date">
-      {photos.map((photo) => (
-        <Grid.Item
-          key={photo.id}
-          content={photo.thumbnailPath ?? Icon.Image}
-          title={photo.filename}
-          subtitle={formatDate(photo.date)}
-          keywords={[photo.filename, formatDate(photo.date)]}
-          quickLook={photo.thumbnailPath ? { name: photo.filename, path: photo.thumbnailPath } : undefined}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action
-                  title="Copy to Clipboard"
-                  icon={Icon.Clipboard}
-                  onAction={async () => {
-                    const origPath = await getOrExportOriginal(photo.id, originalsDir());
-                    await Clipboard.copy({ file: origPath });
-                    await closeMainWindow();
-                    await showHUD("Copied to Clipboard");
-                  }}
-                />
-                <Action
-                  title={previousApp ? `Paste to ${previousApp}` : "Paste to Current App"}
-                  icon={Icon.ArrowRight}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                  onAction={async () => {
-                    const origPath = await getOrExportOriginal(photo.id, originalsDir());
-                    await Clipboard.copy({ file: origPath });
-                    await closeMainWindow();
-                    await runAppleScript(`
-                      tell application "System Events"
-                        keystroke "v" using command down
-                      end tell
-                    `);
-                  }}
-                />
-                <Action
-                  title="Open in Photos"
-                  icon={Icon.AppWindow}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  onAction={() => openPhotoInPhotos(photo.id)}
-                />
-                <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={revalidate}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+      {photos.map((photo) => {
+        const thumbnailPath = thumbnails[photo.id];
+
+        return (
+          <Grid.Item
+            key={photo.id}
+            content={thumbnailPath ?? Icon.Image}
+            title={photo.filename}
+            subtitle={formatDate(photo.date)}
+            keywords={[photo.filename, formatDate(photo.date)]}
+            quickLook={thumbnailPath ? { name: photo.filename, path: thumbnailPath } : undefined}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action
+                    title="Copy to Clipboard"
+                    icon={Icon.Clipboard}
+                    onAction={async () => {
+                      const origPath = await getOrExportOriginal(photo.id);
+                      await Clipboard.copy({ file: origPath });
+                      await closeMainWindow();
+                      await showHUD("Copied to Clipboard");
+                    }}
+                  />
+                  <Action
+                    title={previousApp ? `Paste to ${previousApp}` : "Paste to Current App"}
+                    icon={Icon.ArrowRight}
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    onAction={async () => {
+                      const origPath = await getOrExportOriginal(photo.id);
+                      await Clipboard.copy({ file: origPath });
+                      await closeMainWindow();
+                      await runAppleScript(`
+                        tell application "System Events"
+                          keystroke "v" using command down
+                        end tell
+                      `);
+                    }}
+                  />
+                  <Action
+                    title="Open in Photos"
+                    icon={Icon.AppWindow}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    onAction={() => openPhotoInPhotos(photo.id)}
+                  />
+                  {thumbnailPath ? <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} /> : null}
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={revalidate}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
       <Grid.EmptyView
         title={isLoading ? "Loading photos…" : "No photos found"}
         description={isLoading ? "Exporting thumbnails from Photos…" : ""}
