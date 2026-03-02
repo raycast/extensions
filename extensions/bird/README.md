@@ -1,4 +1,4 @@
-# X Bookmarks
+# Bird
 
 View your X/Twitter bookmarks and likes in Raycast using the [bird CLI](https://bird.fast/).
 

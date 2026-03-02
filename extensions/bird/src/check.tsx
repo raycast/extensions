@@ -1,7 +1,7 @@
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { getBirdPath, isBirdInstalled } from "./hooks/useBirdCommand";
 import { BirdNotInstalled } from "./components/BirdNotInstalled";
+import { getBirdPath, isBirdInstalled } from "./hooks/useBirdCommand";
 
 export default function CheckCommand() {
   const birdBin = getBirdPath();
@@ -24,7 +24,7 @@ export default function CheckCommand() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url="https://x.com" title="Open X/Twitter" icon={Icon.Globe} />
+          <Action.OpenInBrowser url="https://x.com" title="Open X" icon={Icon.Globe} />
         </ActionPanel>
       }
     />

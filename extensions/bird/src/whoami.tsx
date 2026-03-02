@@ -34,7 +34,7 @@ export default function WhoAmICommand() {
           <ActionPanel>
             <Action.OpenInBrowser url={`https://x.com/${user.username}`} title="Open Profile" />
             <Action.CopyToClipboard title="Copy Username" content={`@${user.username}`} icon={Icon.Person} />
-            <Action.CopyToClipboard title="Copy User ID" content={user.id} icon={Icon.Key} />
+            <Action.CopyToClipboard title="Copy User Id" content={user.id} icon={Icon.Key} />
           </ActionPanel>
         ) : undefined
       }
