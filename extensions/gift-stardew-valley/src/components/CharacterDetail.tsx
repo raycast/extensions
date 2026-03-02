@@ -1,4 +1,5 @@
 import { List } from "@raycast/api";
+import type { Character } from "../types.d";
 
 type CharacterProps = {
   character: Character;
@@ -16,8 +17,12 @@ export default function CharacterDetail({ character }: CharacterProps) {
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Loves">
-                {character.loves.map((gift, index) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={index} icon={{ source: gift.image }} text={gift.name} />
+                {character.loves.map((gift) => (
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={gift.name}
+                    icon={{ source: gift.image }}
+                    text={gift.name}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             </>
@@ -27,8 +32,12 @@ export default function CharacterDetail({ character }: CharacterProps) {
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Likes">
-                {character.likes.map((gift, index) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={index} icon={{ source: gift.image }} text={gift.name} />
+                {character.likes.map((gift) => (
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={gift.name}
+                    icon={{ source: gift.image }}
+                    text={gift.name}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             </>
@@ -38,8 +47,12 @@ export default function CharacterDetail({ character }: CharacterProps) {
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Dislikes">
-                {character.dislikes.map((gift, index) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={index} icon={{ source: gift.image }} text={gift.name} />
+                {character.dislikes.map((gift) => (
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={gift.name}
+                    icon={{ source: gift.image }}
+                    text={gift.name}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             </>
@@ -49,8 +62,12 @@ export default function CharacterDetail({ character }: CharacterProps) {
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Hates">
-                {character.hates.map((gift, index) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={index} icon={{ source: gift.image }} text={gift.name} />
+                {character.hates.map((gift) => (
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={gift.name}
+                    icon={{ source: gift.image }}
+                    text={gift.name}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             </>
