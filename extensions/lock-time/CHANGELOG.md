@@ -1,6 +1,6 @@
 # Lock Time Changelog
 
-## [Session History & Time Range] - {PR_MERGE_DATE}
+## [Session History & Time Range] - 2026-03-02
 
 - Added lock time range display for Last Lock Duration (e.g. `12:57 → 13:48`)
   - Shows lock start/end time alongside the duration, no more mental math to recall when the lock happened
@@ -14,7 +14,7 @@
 - Added `SessionDetailView` component with `Action.Push` drill-down interaction
 - Backward compatible: automatically fills default values for missing new fields in old data
 
-## [Performance Optimization] - {PR_MERGE_DATE}
+## [Performance Optimization] - 2026-03-02
 
 - Improved first-screen loading speed by 83% (from ~3s to ~0.5s)
 - Cache hit speed improved by 97% (repeated opens within 5s take <0.1s)
@@ -23,7 +23,7 @@
 - `processStateChange()`: parallelized LocalStorage read/write, conditional writes reduce unnecessary I/O
 - Manual diagnosis (Cmd+T) forces cache skip for real-time status
 
-## [Fixed Lock Detection on macOS 26] - {PR_MERGE_DATE}
+## [Fixed Lock Detection on macOS 26] - 2026-03-02
 
 - Fixed lock detection completely broken on macOS 26
   - JXA ObjC bridge cannot properly bridge `CFDictionary`, causing `CGSSessionScreenIsLocked` field to be lost
@@ -35,7 +35,7 @@
 - Upgraded detection to multi-level fallback: Swift CGSession → AppleScript → Gap Detection
 - Background no-view command logs now use `fs.appendFileSync()` to prevent async log loss
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-02
 
 - Core lock time tracking
   - Today Locked Time: cumulative lock duration for today
