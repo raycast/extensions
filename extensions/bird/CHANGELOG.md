@@ -1,6 +1,6 @@
 # Bird Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-02
 
 - Add `View Bookmarks` command to display X/Twitter bookmarks
 - Add `View Likes` command to display X/Twitter likes

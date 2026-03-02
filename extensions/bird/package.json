@@ -79,5 +79,8 @@
   },
   "overrides": {
     "@types/react": "18.2.28"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
