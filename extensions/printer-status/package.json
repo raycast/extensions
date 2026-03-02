@@ -6,7 +6,8 @@
   "icon": "printer-icon.png",
   "author": "davidyannick",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Applications"
@@ -28,6 +29,35 @@
       "description": "Retrieve current status, ink levels, page counts, and device information from the Xerox printer"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@printer-status what is the printer status",
+        "mocks": {
+          "ask-xerox": [
+            {
+              "pageCount": "12500",
+              "blackPageCount": "8000",
+              "colorPageCount": "4500",
+              "blackInkLevel": "85",
+              "cyanInkLevel": "70",
+              "magentaInkLevel": "72",
+              "yellowInkLevel": "68",
+              "modelName": "Xerox WorkCentre",
+              "serialNumber": "EXAMPLE123",
+              "printerName": "Office Printer",
+              "printerStatus": "idle"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "ask-xerox"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "printerIp",
@@ -39,18 +69,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^1.17.0",
-    "net-snmp": "^3.26.0"
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2",
+    "net-snmp": "^3.26.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/net-snmp": "^3.23.0",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@types/node": "25.3.3",
+    "@types/react": "19.2.14",
+    "eslint": "^9.16.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
