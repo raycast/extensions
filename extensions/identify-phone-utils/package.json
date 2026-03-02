@@ -5,13 +5,13 @@
   "description": "Identify the country of a phone number from its prefix, format or strip formatting — no API needed.",
   "icon": "extension-icon.png",
   "author": "degouville",
- "platforms": [
+  "platforms": [
     "macOS",
     "Windows"
   ],
   "categories": [
     "Communication",
-    "Security"
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
@@ -28,7 +28,7 @@
       "mode": "no-view"
     },
     {
-      "name": "revome-formating",
+      "name": "remove-formatting",
       "title": "Remove Formatting",
       "description": "Strip all formatting from a phone number in clipboard or selection.",
       "mode": "no-view"

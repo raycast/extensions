@@ -13,7 +13,7 @@ A [Raycast](https://raycast.com) extension that identifies the country of a phon
 | `src/extract-phone-numbers.tsx` | `view` | Extract all phone numbers from selected text or clipboard |
 | `src/lookup-country-code.tsx` | `view` | Search countries by name or dial code |
 | `src/format-in-us-format.ts` | `no-view` | Background command to format a number in US format |
-| `src/revome-formating.ts` | `no-view` | Background command to strip formatting from a number |
+| `src/remove-formatting.ts` | `no-view` | Background command to strip formatting from a number |
 
 Shared logic lives in `src/utils/phone.ts` — phone parsing, prefix matching, and formatting helpers used across commands.
 
