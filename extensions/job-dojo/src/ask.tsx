@@ -362,7 +362,7 @@ function ChatView({
       hasSentInitialQuestion.current = true;
       sendMessage(initialQuestion);
     }
-  }, []);
+  }, [initialQuestion, initialChatId, sendMessage]);
 
   const handleFollowUp = useCallback(() => {
     push(

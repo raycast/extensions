@@ -26,8 +26,9 @@ export default function AddApplicationCommand() {
   const [isExtracting, setIsExtracting] = useState(false);
   const { push } = useNavigation();
 
-  async function handleExtract() {
-    if (!url.trim()) {
+  async function handleExtract(values: { url: string }) {
+    const urlValue = values.url?.trim() ?? "";
+    if (!urlValue) {
       showToast({ style: Toast.Style.Failure, title: "Please enter a URL" });
       return;
     }
@@ -41,7 +42,7 @@ export default function AddApplicationCommand() {
         message: "This may take a moment",
       });
 
-      const extracted = await extractJobFromUrl(url.trim());
+      const extracted = await extractJobFromUrl(urlValue);
 
       showToast({
         style: Toast.Style.Success,
@@ -195,27 +196,48 @@ function ApplicationForm({ initialData }: { initialData: ExtractedJobData }) {
     );
   }
 
-  async function handleSubmit() {
+  type FormValues = {
+    company: string;
+    role: string;
+    stageId: string;
+    location: string;
+    jobUrl: string;
+    appliedAt: Date | null;
+    status: ApplicationStatus;
+    interviewFormat: string;
+    contactName: string;
+    contactEmail: string;
+    notes: string;
+    jobDescription: string;
+  };
+
+  async function handleSubmit(values: FormValues) {
     let hasError = false;
 
-    if (company.trim().length === 0) {
+    const companyVal = values.company?.trim() ?? "";
+    const roleVal = values.role?.trim() ?? "";
+    if (companyVal.length === 0) {
       setCompanyError("Company is required");
       hasError = true;
-    }
-
-    if (role.trim().length === 0) {
+    } else setCompanyError(undefined);
+    if (roleVal.length === 0) {
       setRoleError("Role is required");
       hasError = true;
-    }
-
-    if (!stageId) {
+    } else setRoleError(undefined);
+    if (!values.stageId) {
       showToast({ style: Toast.Style.Failure, title: "Stage is required" });
       hasError = true;
     }
-
-    if (jobUrlError || contactEmailError) {
+    const jobUrlInvalid = !validateUrl(values.jobUrl ?? "");
+    if (jobUrlInvalid && (values.jobUrl ?? "").trim() !== "") {
+      setJobUrlError("Invalid URL format");
       hasError = true;
-    }
+    } else setJobUrlError(undefined);
+    const emailInvalid = !validateEmail(values.contactEmail ?? "");
+    if (emailInvalid && (values.contactEmail ?? "").trim() !== "") {
+      setContactEmailError("Invalid email format");
+      hasError = true;
+    } else setContactEmailError(undefined);
 
     if (hasError) {
       showToast({
@@ -228,21 +250,27 @@ function ApplicationForm({ initialData }: { initialData: ExtractedJobData }) {
     setIsSubmitting(true);
 
     const input: CreateApplicationInput = {
-      company: company.trim(),
-      role: role.trim(),
-      stageId,
-      status,
+      company: companyVal,
+      role: roleVal,
+      stageId: values.stageId,
+      status: values.status,
     };
 
-    if (location.trim()) input.location = location.trim();
-    if (jobUrl.trim()) input.jobUrl = jobUrl.trim();
-    if (appliedAt) input.appliedAt = appliedAt.toISOString();
-    if (interviewFormat)
-      input.interviewFormat = interviewFormat as InterviewFormat;
-    if (contactName.trim()) input.contactName = contactName.trim();
-    if (contactEmail.trim()) input.contactEmail = contactEmail.trim();
-    if (notes.trim()) input.notes = notes.trim();
-    if (jobDescription.trim()) input.jobDescription = jobDescription.trim();
+    const locationVal = (values.location ?? "").trim();
+    const jobUrlVal = (values.jobUrl ?? "").trim();
+    if (locationVal) input.location = locationVal;
+    if (jobUrlVal) input.jobUrl = jobUrlVal;
+    if (values.appliedAt) input.appliedAt = values.appliedAt.toISOString();
+    if (values.interviewFormat)
+      input.interviewFormat = values.interviewFormat as InterviewFormat;
+    const contactNameVal = (values.contactName ?? "").trim();
+    const contactEmailVal = (values.contactEmail ?? "").trim();
+    if (contactNameVal) input.contactName = contactNameVal;
+    if (contactEmailVal) input.contactEmail = contactEmailVal;
+    const notesVal = (values.notes ?? "").trim();
+    const jobDescVal = (values.jobDescription ?? "").trim();
+    if (notesVal) input.notes = notesVal;
+    if (jobDescVal) input.jobDescription = jobDescVal;
 
     try {
       const application = await createApplication(input);

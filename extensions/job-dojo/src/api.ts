@@ -2,8 +2,12 @@ import { getPreferenceValues } from "@raycast/api";
 
 function getConfig(): Preferences {
   const prefs = getPreferenceValues<Preferences>();
+  const apiKey = prefs.apiKey?.trim();
+  if (!apiKey) {
+    throw new Error("API key is not set. Add it in the extension preferences.");
+  }
   return {
-    apiKey: prefs.apiKey,
+    apiKey,
     apiBaseUrl: prefs.apiBaseUrl || "https://jobdojo.app",
     modelId: prefs.modelId,
   };
