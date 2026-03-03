@@ -29,6 +29,7 @@ describe("raycast api helpers", () => {
     expect(toErrorCode("INVALID_API_KEY", "REQUEST_FAILED")).toBe(
       "INVALID_API_KEY",
     );
+    expect(toErrorCode("NOT_FOUND", "REQUEST_FAILED")).toBe("NOT_FOUND");
     expect(toErrorCode("SOMETHING_ELSE", "REQUEST_FAILED")).toBe(
       "REQUEST_FAILED",
     );

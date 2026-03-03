@@ -75,7 +75,6 @@ export default function QuickSaveCommand() {
 
   return (
     <Form
-      navigationTitle="Quick Save to Teak"
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -86,6 +85,7 @@ export default function QuickSaveCommand() {
           <SetApiKeyAction />
         </ActionPanel>
       }
+      navigationTitle="Quick Save to Teak"
     >
       <Form.TextArea
         id="content"
