@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add RouteMesh MCP Server] - 2026-03-02
+## [Add RouteMesh MCP Server] - {PR_MERGE_DATE}
 
 Add official RouteMesh MCP Server to registry for multi-chain EVM RPC access with RouteMesh routing and failover.
 
