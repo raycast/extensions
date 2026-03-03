@@ -9,7 +9,7 @@ interface PathEntryItemProps {
   onMoveUp: () => void;
   onMoveDown: () => void;
   onRemove: () => void;
-  addForm: React.ReactNode;
+  addForm: React.JSX.Element;
   onRefresh: () => void;
 }
 
