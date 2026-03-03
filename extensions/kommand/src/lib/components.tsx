@@ -57,7 +57,7 @@ export function KommandNotInstalledView() {
           <ActionPanel>
             <Action.OpenInBrowser
               title="Open Mac App Store"
-              url="https://apps.apple.com/app/kommand/id6738596907"
+              url="https://apps.apple.com/app/kommand/id6752623076"
             />
           </ActionPanel>
         }
