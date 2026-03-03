@@ -125,5 +125,8 @@
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
