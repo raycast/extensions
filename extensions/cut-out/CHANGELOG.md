@@ -1,6 +1,6 @@
 # Cut Out Changelog
 
-## [Documentation Update] - {PR_MERGE_DATE}
+## [Documentation Update] - 2026-03-03
 
 - Updated the README to clarify that Xcode (or Xcode Command Line Tools) is required to compile the Swift helper on first launch.
 
