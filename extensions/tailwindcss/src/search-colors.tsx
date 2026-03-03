@@ -53,33 +53,34 @@ export default function SearchColors() {
         .filter(([name]) => !hiddenColors.includes(name))
         .map(([name, shades]) => (
           <Grid.Section key={name} title={capitalize(name)}>
-            {Object.entries(shades).map(([shade, value]) => (
-              <Grid.Item
-                key={shade}
-                title={shade}
-                subtitle={value as string}
-                content={{
-                  color: {
-                    light: value as string,
-                    dark: value as string,
-                    adjustContrast: false,
-                  },
-                }}
-                keywords={[
-                  name,
-                  name + shade,
-                  `${name} ${shade}`,
-                  `${name}-${shade}`,
-                  value as string,
-                  (value as string).replace("#", ""),
-                  toHex(value as string),
-                  toHex(value as string).replace("#", ""),
-                ]}
-                actions={
-                  <Actions preferences={preferences} name={name} shade={shade} hexValue={toHex(value as string)} />
-                }
-              />
-            ))}
+            {Object.entries(shades).map(([shade, value]) => {
+              const hexValue = toHex(value as string);
+              return (
+                <Grid.Item
+                  key={shade}
+                  title={shade}
+                  subtitle={hexValue}
+                  content={{
+                    color: {
+                      light: hexValue,
+                      dark: hexValue,
+                      adjustContrast: false,
+                    },
+                  }}
+                  keywords={[
+                    name,
+                    name + shade,
+                    `${name} ${shade}`,
+                    `${name}-${shade}`,
+                    hexValue,
+                    hexValue.replace("#", ""),
+                  ]}
+                  actions={
+                    <Actions preferences={preferences} name={name} shade={shade} hexValue={hexValue} />
+                  }
+                />
+              );
+            })}
           </Grid.Section>
         ))}
     </Grid>
