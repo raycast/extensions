@@ -16,10 +16,10 @@ import { FieldSection, ItemField } from "../types/item-field";
  */
 function buildLoginSections(login: Login): FieldSection[] {
   const sections: FieldSection[] = [];
-  const fields: ItemField[] = [];
+  const mainLoginFields: ItemField[] = [];
 
   if (login.username) {
-    fields.push({
+    mainLoginFields.push({
       type: "text",
       id: "login.username",
       label: "Username",
@@ -28,7 +28,7 @@ function buildLoginSections(login: Login): FieldSection[] {
     });
   }
   if (login.password) {
-    fields.push({
+    mainLoginFields.push({
       type: "hidden",
       id: "login.password",
       label: "Password",
@@ -36,7 +36,7 @@ function buildLoginSections(login: Login): FieldSection[] {
     });
   }
   if (login.totp) {
-    fields.push({
+    mainLoginFields.push({
       type: "totp",
       id: "login.totp",
       label: "TOTP",
@@ -46,7 +46,7 @@ function buildLoginSections(login: Login): FieldSection[] {
     });
   }
 
-  if (fields.length > 0) sections.push({ title: "Login", fields });
+  if (mainLoginFields.length > 0) sections.push({ title: "Login", fields: mainLoginFields });
 
   if (login.uris && login.uris.length > 0) {
     const nonEmptyUris = login.uris.filter((u) => u.uri);
