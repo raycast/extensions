@@ -13,34 +13,27 @@ import {
 import { useExec, useLocalStorage } from "@raycast/utils";
 import { useCallback, useRef } from "react";
 
-interface Preferences {
-  cliPath?: string;
-  dbPath?: string;
-  resultLimit?: string;
-  fuzzy: boolean;
-}
-
 function expandTilde(p: string): string {
   if (p.startsWith("~/")) return `${process.env.HOME}${p.slice(1)}`;
   return p;
 }
 
 export function getCliPath(): string {
-  const { cliPath } = getPreferenceValues<Preferences>();
+  const { cliPath } = getPreferenceValues();
   return expandTilde(cliPath || "~/.local/bin/apple-loc");
 }
 
 export function getDbPath(): string {
-  const { dbPath } = getPreferenceValues<Preferences>();
+  const { dbPath } = getPreferenceValues();
   return expandTilde(dbPath || "~/.apple-loc/apple-loc.db");
 }
 
 export function isFuzzyEnabled(): boolean {
-  return getPreferenceValues<Preferences>().fuzzy;
+  return getPreferenceValues().fuzzy;
 }
 
 export function getResultLimit(): number | undefined {
-  const { resultLimit } = getPreferenceValues<Preferences>();
+  const { resultLimit } = getPreferenceValues();
   if (!resultLimit) return undefined;
   const n = parseInt(resultLimit, 10);
   return Number.isFinite(n) && n > 0 ? n : undefined;
