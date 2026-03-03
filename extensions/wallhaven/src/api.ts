@@ -64,7 +64,9 @@ export async function getCollectionWallpapers(
   id: number,
   page: number = 1,
 ): Promise<SearchResponse> {
-  const url = new URL(`${BASE_URL}/collections/${username}/${id}`);
+  const url = new URL(
+    `${BASE_URL}/collections/${encodeURIComponent(username)}/${id}`,
+  );
   url.searchParams.set("page", String(page));
   return fetchJSON<SearchResponse>(url.toString());
 }

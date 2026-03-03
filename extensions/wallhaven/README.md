@@ -4,27 +4,27 @@ Browse and download desktop wallpapers from [Wallhaven](https://wallhaven.cc).
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| **Search Wallpapers** | Search wallpapers with filters for category, purity, and sorting |
-| **Top Wallpapers** | Browse the top-rated wallpapers for a given time range |
-| **My Collections** | Browse and set wallpapers from your personal Wallhaven collections |
-| **Random Wallpaper** | Instantly set a random wallpaper as your desktop background |
+| Command               | Description                                                        |
+| --------------------- | ------------------------------------------------------------------ |
+| **Search Wallpapers** | Search wallpapers with filters for category, purity, and sorting   |
+| **Top Wallpapers**    | Browse the top-rated wallpapers for a given time range             |
+| **My Collections**    | Browse and set wallpapers from your personal Wallhaven collections |
+| **Random Wallpaper**  | Instantly set a random wallpaper as your desktop background        |
 
 ## Actions (Cmd+K on any wallpaper)
 
-| Action | Shortcut | Description |
-|--------|----------|-------------|
-| Set on All Desktops | `↵` | Download and set the wallpaper on every monitor |
-| Set on Current Desktop | `⇧⌘W` | Set the wallpaper only on the active desktop |
-| Preview Wallpaper | `⌘Y` | Open a detail view with full metadata and color palette |
-| Search Similar | `⇧⌘S` | Find wallpapers similar to the selected one |
-| Open in Browser | `⌘O` | Open the wallpaper's page on wallhaven.cc |
-| Download | `⌘D` | Save the full-resolution image to your download folder |
-| Copy Image to Clipboard | `⇧⌘C` | Copy the image file directly to your clipboard |
-| Copy Image URL | `⌘C` | Copy the direct download URL |
-| Copy Wallpaper ID | — | Copy the wallpaper ID for sharing |
-| Copy Color Palette | — | Copy all dominant colors as hex values |
+| Action                  | Shortcut | Description                                             |
+| ----------------------- | -------- | ------------------------------------------------------- |
+| Set on All Desktops     | `↵`      | Download and set the wallpaper on every monitor         |
+| Set on Current Desktop  | `⇧⌘W`    | Set the wallpaper only on the active desktop            |
+| Preview Wallpaper       | `⌘Y`     | Open a detail view with full metadata and color palette |
+| Search Similar          | `⇧⌘S`    | Find wallpapers similar to the selected one             |
+| Open in Browser         | `⌘O`     | Open the wallpaper's page on wallhaven.cc               |
+| Download                | `⌘D`     | Save the full-resolution image to your download folder  |
+| Copy Image to Clipboard | `⇧⌘C`    | Copy the image file directly to your clipboard          |
+| Copy Image URL          | `⌘C`     | Copy the direct download URL                            |
+| Copy Wallpaper ID       | —        | Copy the wallpaper ID for sharing                       |
+| Copy Color Palette      | —        | Copy all dominant colors as hex values                  |
 
 ## Setup
 
@@ -35,10 +35,12 @@ The extension works out of the box — just open **Search Wallpapers** and start
 ### API Key (Optional but Recommended)
 
 An API key unlocks:
+
 - **NSFW content** filtering
 - **My Collections** command
 
 To get your API key:
+
 1. Create or log in to your account at [wallhaven.cc](https://wallhaven.cc)
 2. Go to [Account Settings](https://wallhaven.cc/settings/account)
 3. Scroll to the **API Key** section and copy your key
@@ -58,12 +60,12 @@ By default, downloads are saved to `~/Downloads`. You can change this in extensi
 
 ## Preferences
 
-| Name | Required | Description |
-|------|----------|-------------|
-| API Key | No | Enables NSFW content and collections |
-| Username | No | Required for My Collections command |
-| Download Directory | No | Where to save downloaded wallpapers (default: `~/Downloads`) |
-| SFW Only | No | Always restrict results to SFW content, even when an API key is provided |
+| Name               | Required | Description                                                              |
+| ------------------ | -------- | ------------------------------------------------------------------------ |
+| API Key            | No       | Enables NSFW content and collections                                     |
+| Username           | No       | Required for My Collections command                                      |
+| Download Directory | No       | Where to save downloaded wallpapers (default: `~/Downloads`)             |
+| SFW Only           | No       | Always restrict results to SFW content, even when an API key is provided |
 
 ## Notes
 

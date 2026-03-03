@@ -126,7 +126,12 @@ export function WallpaperActions({ wallpaper }: { wallpaper: Wallpaper }) {
           title="Preview Wallpaper"
           icon={Icon.Eye}
           shortcut={{ modifiers: ["cmd"], key: "y" }}
-          target={<WallpaperPreview wallpaper={wallpaper} />}
+          target={
+            <WallpaperPreview
+              wallpaper={wallpaper}
+              actions={<WallpaperActions wallpaper={wallpaper} />}
+            />
+          }
         />
         <Action.Push
           title="Search Similar"

@@ -1,9 +1,14 @@
 import { Detail } from "@raycast/api";
 import { Wallpaper } from "../types";
-import { formatFileSize } from "../utils";
-import { WallpaperActions } from "./WallpaperActions";
+import { formatFileSize, purityColor } from "../utils";
 
-export function WallpaperPreview({ wallpaper }: { wallpaper: Wallpaper }) {
+export function WallpaperPreview({
+  wallpaper,
+  actions,
+}: {
+  wallpaper: Wallpaper;
+  actions: React.ComponentProps<typeof Detail>["actions"];
+}) {
   const markdown = `![${wallpaper.id}](${wallpaper.thumbs.original})`;
 
   return (
@@ -26,13 +31,7 @@ export function WallpaperPreview({ wallpaper }: { wallpaper: Wallpaper }) {
           <Detail.Metadata.TagList title="Purity">
             <Detail.Metadata.TagList.Item
               text={wallpaper.purity.toUpperCase()}
-              color={
-                wallpaper.purity === "sfw"
-                  ? "#4CAF50"
-                  : wallpaper.purity === "sketchy"
-                    ? "#FF9800"
-                    : "#F44336"
-              }
+              color={purityColor(wallpaper.purity)}
             />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Views" text={String(wallpaper.views)} />
@@ -58,7 +57,7 @@ export function WallpaperPreview({ wallpaper }: { wallpaper: Wallpaper }) {
           />
         </Detail.Metadata>
       }
-      actions={<WallpaperActions wallpaper={wallpaper} />}
+      actions={actions}
     />
   );
 }

@@ -3,6 +3,7 @@
 ## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
+
 - **Search Wallpapers** command with filters for category, purity, sorting, and top range
 - **Top Wallpapers** command with time range selector (1d, 3d, 1w, 1M, 3M, 6M, 1y)
 - **My Collections** command to browse personal Wallhaven collections (requires API key + username)

@@ -6,6 +6,7 @@ import { WallpaperActions } from "./WallpaperActions";
 interface WallpaperGridProps {
   wallpapers: Wallpaper[];
   isLoading: boolean;
+  /** When using onLoadMore, pass the actual hasMore value from pagination refs. Defaulting to true would cause infinite scroll past the last page. */
   hasMore?: boolean;
   onLoadMore?: () => void;
   navigationTitle?: string;
