@@ -10,7 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import {
   createPreset,
   DEFAULT_PRESETS,
@@ -21,20 +21,7 @@ import {
 } from "./presets";
 
 export default function Command() {
-  const [custom, setCustom] = useState<Preset[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  async function reload() {
-    const presets = await getCustomPresets();
-    setCustom(presets);
-  }
-
-  useEffect(() => {
-    (async () => {
-      await reload();
-      setIsLoading(false);
-    })();
-  }, []);
+  const { data: custom = [], isLoading, revalidate } = useCachedPromise(getCustomPresets);
 
   async function deletePreset(preset: Preset) {
     if (
@@ -46,7 +33,7 @@ export default function Command() {
     ) {
       const updated = custom.filter((p) => p.id !== preset.id);
       await saveCustomPresets(updated);
-      setCustom(updated);
+      revalidate();
       await showToast({ style: Toast.Style.Success, title: "Preset deleted" });
     }
   }
@@ -61,7 +48,7 @@ export default function Command() {
     const updated = [...custom];
     [updated[idx], updated[swapIdx]] = [updated[swapIdx], updated[idx]];
     await saveCustomPresets(updated);
-    setCustom(updated);
+    revalidate();
   }
 
   return (
@@ -78,7 +65,7 @@ export default function Command() {
                 <Action.Push
                   title="Edit Preset"
                   icon={Icon.Pencil}
-                  target={<PresetForm preset={preset} onSave={reload} />}
+                  target={<PresetForm preset={preset} onSave={revalidate} />}
                 />
                 <Action
                   title="Delete Preset"
@@ -107,7 +94,7 @@ export default function Command() {
                   title="Create New Preset"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  target={<PresetForm onSave={reload} />}
+                  target={<PresetForm onSave={revalidate} />}
                 />
               </ActionPanel>
             }
@@ -129,7 +116,7 @@ export default function Command() {
                   title="Create New Preset"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  target={<PresetForm onSave={reload} />}
+                  target={<PresetForm onSave={revalidate} />}
                 />
               </ActionPanel>
             }
@@ -144,7 +131,7 @@ export default function Command() {
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action.Push title="Create New Preset" icon={Icon.Plus} target={<PresetForm onSave={reload} />} />
+                <Action.Push title="Create New Preset" icon={Icon.Plus} target={<PresetForm onSave={revalidate} />} />
               </ActionPanel>
             }
           />
@@ -154,7 +141,7 @@ export default function Command() {
   );
 }
 
-function PresetForm({ preset, onSave }: { preset?: Preset; onSave: () => Promise<void> }) {
+function PresetForm({ preset, onSave }: { preset?: Preset; onSave: () => void }) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { name: string; width: string; height: string }) {
@@ -183,7 +170,7 @@ function PresetForm({ preset, onSave }: { preset?: Preset; onSave: () => Promise
       await showToast({ style: Toast.Style.Success, title: "Preset created" });
     }
 
-    await onSave();
+    onSave();
     pop();
   }
 

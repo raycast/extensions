@@ -435,7 +435,8 @@
     "Applications"
   ],
   "dependencies": {
-    "@raycast/api": "^1.73.3"
+    "@raycast/api": "^1.73.3",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
