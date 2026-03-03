@@ -1,6 +1,6 @@
 # NHK Program Search Changelog
 
-## [Update] - 2026-03-02
+## [Update] - {PR_MERGE_DATE}
 
 - Migrated from NHK Program API v2 to v3
 - Fixed logo URL handling for protocol-relative URLs
