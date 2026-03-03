@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+dist/
+*.log
+.raycast/
+bun.lock
+.*/skills/
+skills-lock.json
