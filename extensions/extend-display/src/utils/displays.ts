@@ -73,12 +73,20 @@ tell application "System Events"
     click popUpButton
     delay 0.3
     
+    -- Use try-based check instead of "exists" which throws -1700 on AXMenuButton
     set menuWait to 0
-    repeat until exists menu 1 of popUpButton or menuWait >= 30
-      delay 0.1
-      set menuWait to menuWait + 1
+    set menuReady to false
+    repeat until menuReady or menuWait >= 30
+      try
+        set menuItemCount to count of menu items of menu 1 of popUpButton
+        if menuItemCount > 0 then set menuReady to true
+      end try
+      if not menuReady then
+        delay 0.1
+        set menuWait to menuWait + 1
+      end if
     end repeat
-    if menuWait >= 30 then
+    if not menuReady then
       key code 53
       my cleanup()
       return ""
