@@ -192,8 +192,11 @@
     {
       "name": "cmux_run_mode",
       "type": "dropdown",
+    {
+      "name": "cmux_run_mode",
+      "type": "dropdown",
       "required": false,
-      "title": "cmux Run Mode",
+      "title": "Cmux Run Mode",
       "description": "Choose whether commands run in the active cmux workspace or in a newly created workspace.",
       "data": [
         {
@@ -211,14 +214,14 @@
       "name": "cmux_socket_path",
       "type": "textfield",
       "required": false,
-      "title": "cmux Socket Path",
+      "title": "Cmux Socket Path",
       "description": "Optional override for the cmux control socket path. If empty, uses CMUX_SOCKET_PATH or /tmp/cmux.sock."
     },
     {
       "name": "cmux_socket_password",
       "type": "password",
       "required": false,
-      "title": "cmux Socket Password",
+      "title": "Cmux Socket Password",
       "description": "Optional override. If unset, cmux keychain password is used in password mode."
     }
   ],
