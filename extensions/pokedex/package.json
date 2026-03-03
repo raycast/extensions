@@ -222,7 +222,11 @@
         },
         {
           "title": "Black & White Sprites",
-          "value": "pixel"
+          "value": "bw"
+        },
+        {
+          "title": "Scarlet & Violet Sprites",
+          "value": "sv"
         }
       ]
     },
@@ -237,9 +241,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
+    "@raycast/api": "^1.104.7",
     "@raycast/utils": "^2.2.2",
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "json2md": "^2.0.3",
     "lodash.debounce": "^4.0.8",
     "lodash.groupby": "^4.6.0",
@@ -256,7 +260,7 @@
     "@types/lodash.shuffle": "^4.2.9",
     "@types/lodash.uniqby": "^4.7.9",
     "@types/react": "^19.2.14",
-    "eslint": "^10.0.0",
+    "eslint": "^10.0.2",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
