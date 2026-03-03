@@ -39,7 +39,7 @@ export default function Command() {
     }
 
     getStats();
-  }, [host]);
+  }, [host, community]);
 
   const getInkIcon = (level: string | null, color: string) => {
     if (!level) return Icon.Circle;
