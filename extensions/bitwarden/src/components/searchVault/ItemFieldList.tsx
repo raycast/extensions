@@ -67,14 +67,16 @@ function ItemFieldList({ item, folderName }: ItemFieldListProps) {
               case "totp":
                 return <TotpItemField key={field.id} item={field} onToggleDetailPanel={toggleDetailPanel} />;
               default:
-                <BaseItemField
-                  key={(field as ItemField).id}
-                  id={(field as ItemField).id}
-                  label={(field as ItemField).label}
-                  displayValue={(field as ItemField).displayValue ?? (field as ItemField).value}
-                  detailValue={(field as ItemField).value}
-                  onToggleDetailPanel={toggleDetailPanel}
-                />;
+                return (
+                  <BaseItemField
+                    key={(field as ItemField).id}
+                    id={(field as ItemField).id}
+                    label={(field as ItemField).label}
+                    displayValue={(field as ItemField).displayValue ?? (field as ItemField).value}
+                    detailValue={(field as ItemField).value}
+                    onToggleDetailPanel={toggleDetailPanel}
+                  />
+                );
             }
           })}
         </List.Section>

@@ -49,14 +49,13 @@ function buildLoginSections(login: Login): FieldSection[] {
   if (fields.length > 0) sections.push({ title: "Login", fields });
 
   if (login.uris && login.uris.length > 0) {
-    const uriFields: ItemField[] = login.uris
-      .filter((u) => u.uri)
-      .map((u, i) => ({
-        type: "link",
-        id: `login.uri.${i}`,
-        label: login.uris!.length === 1 ? "URI" : `URI ${i + 1}`,
-        value: u.uri!,
-      }));
+    const nonEmptyUris = login.uris.filter((u) => u.uri);
+    const uriFields: ItemField[] = nonEmptyUris.map((u, i) => ({
+      type: "link",
+      id: `login.uri.${i}`,
+      label: nonEmptyUris.length === 1 ? "URI" : `URI ${i + 1}`,
+      value: u.uri!,
+    }));
     if (uriFields.length > 0) sections.push({ title: "URIs", fields: uriFields });
   }
 
