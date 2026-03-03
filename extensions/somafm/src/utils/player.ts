@@ -5,10 +5,6 @@ import { promisify } from "util";
 import { Station } from "../types/station";
 import { addToRecentlyPlayed } from "./storage";
 
-interface Preferences {
-  audioPlayer: "auto" | "iina" | "vlc" | "music" | "browser";
-}
-
 const execAsync = promisify(exec);
 
 async function checkPlayerInstalled(player: string): Promise<boolean> {

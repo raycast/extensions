@@ -9,13 +9,8 @@ import { getRecentlyPlayed, RecentItem, clearRecentlyPlayed } from "./utils/stor
 import { useViewMode } from "./hooks/useViewMode";
 import { useViewOptions } from "./hooks/useViewOptions";
 
-interface Preferences {
-  showStationImages: boolean;
-  defaultView: "grid" | "list";
-}
-
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.BrowseStations>();
   const [stations, setStations] = useState<Station[]>([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<RecentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);

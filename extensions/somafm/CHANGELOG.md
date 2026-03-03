@@ -3,6 +3,7 @@
 ## [Fixes] - {PR_MERGE_DATE}
 
 ### Fixed
+
 - Fixed player launch flow to avoid false failure on successful app launch.
 - Suppressed error toasts during silent station auto-refresh.
 - Fixed Menu Bar fallback action to open `browse-stations`.
@@ -11,6 +12,7 @@
 ## [Initial Version] - 2025-07-02
 
 ### Added
+
 - Browse 40+ SomaFM radio stations in Grid or List view
 - Smart media player detection (IINA, VLC, Music.app)
 - Real-time search across station names, genres, and descriptions
