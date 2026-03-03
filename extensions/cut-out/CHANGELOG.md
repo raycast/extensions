@@ -1,6 +1,6 @@
 # Cut Out Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-03-03
 
 - Added a visual Cut Out editor to remove horizontal or vertical sections from images.
 - Added `Cut out Image Section from Selection` for images selected in Finder.
