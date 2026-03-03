@@ -1,6 +1,6 @@
 # Pokédex Changelog
 
-## [Terastal Expansion] - {PR_MERGE_DATE}
+## [Terastal Expansion] - 2026-03-03
 
 - Added support for Scarlet & Violet–style sprite artwork.
 - Added Mega Evolution and Gigantamax indicator icons to Pokémon forms
