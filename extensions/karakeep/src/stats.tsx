@@ -145,7 +145,7 @@ export default function Stats() {
           "",
           `| Domain | Count |`,
           `|---|---|`,
-          ...topDomains.map((d) => `| ${d.domain} | ${d.count} |`),
+          ...topDomains.map((d) => `| ${d.domain.replace(/\|/g, "\\|")} | ${d.count} |`),
         ]
       : []),
     ...(topTags.length > 0
@@ -155,7 +155,7 @@ export default function Stats() {
           "",
           `| Tag | Count |`,
           `|---|---|`,
-          ...topTags.map((tag) => `| ${tag.name} | ${tag.count} |`),
+          ...topTags.map((tag) => `| ${tag.name.replace(/\|/g, "\\|")} | ${tag.count} |`),
         ]
       : []),
     ...(sourcesChart ? ["", `## ${t("stats.bookmarkSources")}`, "", `<img src="${sourcesChart}" />`] : []),
