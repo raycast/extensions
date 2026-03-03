@@ -89,29 +89,26 @@ const NSSCREEN_SCRIPT = [
   "JSON.stringify(r)",
 ].join(" ");
 
-export function getScreenDimensions(displayIndex = 0): ScreenDimensions {
-  try {
-    const output = execSync(`osascript -l JavaScript -e '${NSSCREEN_SCRIPT}'`, { encoding: "utf-8" }).trim();
-    const displays: { w: number; h: number }[] = JSON.parse(output);
-
-    if (displays.length === 0) {
-      return { width: 1920, height: 1080 };
-    }
-
-    const idx = Math.min(displayIndex, displays.length - 1);
-    return { width: displays[idx].w, height: displays[idx].h };
-  } catch {
-    return { width: 1920, height: 1080 };
-  }
+export interface ScreenInfo {
+  displays: ScreenDimensions[];
+  primary: ScreenDimensions;
 }
 
-export function getDisplayCount(): number {
+const DEFAULT_SCREEN: ScreenDimensions = { width: 1920, height: 1080 };
+
+export function getScreenInfo(): ScreenInfo {
   try {
     const output = execSync(`osascript -l JavaScript -e '${NSSCREEN_SCRIPT}'`, { encoding: "utf-8" }).trim();
-    const displays: unknown[] = JSON.parse(output);
-    return Math.max(displays.length, 1);
+    const raw: { w: number; h: number }[] = JSON.parse(output);
+    const displays = raw.map(({ w, h }) => ({ width: w, height: h }));
+
+    if (displays.length === 0) {
+      return { displays: [DEFAULT_SCREEN], primary: DEFAULT_SCREEN };
+    }
+
+    return { displays, primary: displays[0] };
   } catch {
-    return 1;
+    return { displays: [DEFAULT_SCREEN], primary: DEFAULT_SCREEN };
   }
 }
 
@@ -128,8 +125,7 @@ export function getCenteredCoordinates(
   };
 }
 
-export function buildRecordURL(preset: Preset, displayIndex = 0): string {
-  const screen = getScreenDimensions(displayIndex);
+export function buildRecordURL(preset: Preset, screen: ScreenDimensions, displayIndex = 0): string {
   const resolved = resolvePreset(preset, screen);
   const { x, y } = getCenteredCoordinates(resolved.width, resolved.height, screen.width, screen.height);
 
@@ -145,8 +141,7 @@ export function buildRecordURL(preset: Preset, displayIndex = 0): string {
   return `cleanshot://record-screen?${params.toString()}`;
 }
 
-export function presetFitsScreen(preset: Preset, displayIndex = 0): boolean {
+export function presetFitsScreen(preset: Preset, screen: ScreenDimensions): boolean {
   if (isRelativePreset(preset)) return true;
-  const screen = getScreenDimensions(displayIndex);
   return preset.width <= screen.width && preset.height <= screen.height;
 }

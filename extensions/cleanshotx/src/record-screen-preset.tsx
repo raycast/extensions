@@ -4,47 +4,52 @@ import {
   buildRecordURL,
   formatResolution,
   getAllPresets,
-  getDisplayCount,
-  getScreenDimensions,
+  getScreenInfo,
   Preset,
   presetFitsScreen,
   ScreenDimensions,
+  ScreenInfo,
 } from "./presets";
 
 export default function Command() {
   const [custom, setCustom] = useState<Preset[]>([]);
   const [defaults, setDefaults] = useState<Preset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [displayCount, setDisplayCount] = useState(1);
-  const [screen, setScreen] = useState<ScreenDimensions>({ width: 0, height: 0 });
+  const [screenInfo, setScreenInfo] = useState<ScreenInfo>({ displays: [], primary: { width: 0, height: 0 } });
 
   useEffect(() => {
     (async () => {
       const presets = await getAllPresets();
       setCustom(presets.custom);
       setDefaults(presets.defaults);
-      setDisplayCount(getDisplayCount());
-      setScreen(getScreenDimensions());
+      setScreenInfo(getScreenInfo());
       setIsLoading(false);
     })();
   }, []);
 
+  function displayForIndex(displayIndex: number): ScreenDimensions {
+    const { displays, primary } = screenInfo;
+    if (displays.length === 0) return primary;
+    return displays[Math.min(displayIndex, displays.length - 1)];
+  }
+
   async function recordAtPreset(preset: Preset, displayIndex = 0) {
-    if (!presetFitsScreen(preset, displayIndex)) {
+    const screen = displayForIndex(displayIndex);
+    if (!presetFitsScreen(preset, screen)) {
       await showToast({
-        style: Toast.Style.Animated,
+        style: Toast.Style.Failure,
         title: "Preset exceeds screen size",
         message: "CleanShot will clip to screen bounds",
       });
     }
 
-    const url = buildRecordURL(preset, displayIndex);
+    const url = buildRecordURL(preset, screen, displayIndex);
     await closeMainWindow();
     open(url);
   }
 
   function presetItem(preset: Preset) {
-    const fits = presetFitsScreen(preset);
+    const fits = presetFitsScreen(preset, screenInfo.primary);
     const accessories: List.Item.Accessory[] = [];
     if (!fits) {
       accessories.push({ tag: { value: "Exceeds screen", color: Color.Orange }, icon: Icon.ExclamationMark });
@@ -54,14 +59,14 @@ export default function Command() {
       <List.Item
         key={preset.id}
         title={preset.name}
-        subtitle={formatResolution(preset, screen)}
+        subtitle={formatResolution(preset, screenInfo.primary)}
         icon={Icon.Video}
         accessories={accessories}
         actions={
           <ActionPanel>
             <Action title="Record" icon={Icon.Video} onAction={() => recordAtPreset(preset)} />
-            {displayCount > 1 &&
-              Array.from({ length: displayCount }, (_, i) => (
+            {screenInfo.displays.length > 1 &&
+              Array.from({ length: screenInfo.displays.length }, (_, i) => (
                 <Action
                   key={i}
                   title={`Record on Display ${i + 1}`}
@@ -76,7 +81,8 @@ export default function Command() {
     );
   }
 
-  const screenLabel = screen.width > 0 ? `Screen: ${screen.width} × ${screen.height}` : "";
+  const { primary } = screenInfo;
+  const screenLabel = primary.width > 0 ? `Screen: ${primary.width} × ${primary.height}` : "";
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={`Search presets... ${screenLabel}`}>
