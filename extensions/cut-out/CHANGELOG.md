@@ -1,5 +1,9 @@
 # Cut Out Changelog
 
+## [Documentation Update] - {PR_MERGE_DATE}
+
+- Updated the README to clarify that Xcode (or Xcode Command Line Tools) is required to compile the Swift helper on first launch.
+
 ## [Initial Release] - 2026-03-03
 
 - Added a visual Cut Out editor to remove horizontal or vertical sections from images.

@@ -4,6 +4,12 @@ Cut Out removes a horizontal or vertical band from an image, then automatically 
 
 I built this because I had this exact workflow years ago in a screenshot software named Snagit, and after switching tools I could not find a simple equivalent. If you ever needed to remove a middle section of a screenshot without manually rebuilding the image, this is for you.
 
+## Requirements
+
+- You must have `Xcode` installed, or at least `Xcode Command Line Tools (CLT)`.
+- This extension compiles a Swift helper on first launch.
+- Without Xcode/CLT available on your machine, the extension will not work.
+
 ## What You Can Do
 
 - Remove unwanted rows or columns from an image in seconds
