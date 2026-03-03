@@ -146,8 +146,8 @@ function PresetForm({ preset, onSave }: { preset?: Preset; onSave: () => void })
 
   async function handleSubmit(values: { name: string; width: string; height: string }) {
     const name = values.name.trim();
-    const width = parseInt(values.width, 10);
-    const height = parseInt(values.height, 10);
+    const width = Number(values.width);
+    const height = Number(values.height);
 
     if (!name) {
       await showToast({ style: Toast.Style.Failure, title: "Name is required" });
