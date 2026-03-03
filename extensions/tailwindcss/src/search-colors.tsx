@@ -75,9 +75,7 @@ export default function SearchColors() {
                     hexValue,
                     hexValue.replace("#", ""),
                   ]}
-                  actions={
-                    <Actions preferences={preferences} name={name} shade={shade} hexValue={hexValue} />
-                  }
+                  actions={<Actions preferences={preferences} name={name} shade={shade} hexValue={hexValue} />}
                 />
               );
             })}
