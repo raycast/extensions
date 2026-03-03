@@ -82,7 +82,7 @@ export default function Command() {
               icon={Icon.List}
               onAction={async () => {
                 await launchCommand({
-                  name: "index",
+                  name: "browse-stations",
                   type: LaunchType.UserInitiated,
                 });
               }}

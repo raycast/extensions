@@ -1,6 +1,6 @@
 import { showHUD, closeMainWindow, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { exec, execFile } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 import { Station } from "../types/station";
 import { addToRecentlyPlayed } from "./storage";
@@ -10,7 +10,6 @@ interface Preferences {
 }
 
 const execAsync = promisify(exec);
-const execFileAsync = promisify(execFile);
 
 async function checkPlayerInstalled(player: string): Promise<boolean> {
   try {
@@ -37,6 +36,26 @@ async function getDirectStreamUrl(plsUrl: string): Promise<string | null> {
   return null;
 }
 
+async function spawnPlayer(command: string, args: string[]): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(command, args, { stdio: "ignore" });
+    let settled = false;
+
+    child.once("spawn", () => {
+      if (settled) return;
+      settled = true;
+      child.unref();
+      resolve();
+    });
+
+    child.once("error", (error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    });
+  });
+}
+
 async function launchPlayer(
   command: string,
   args: string[],
@@ -44,7 +63,7 @@ async function launchPlayer(
   playerName: string,
   toast: Toast,
 ): Promise<void> {
-  await execFileAsync(command, args);
+  await spawnPlayer(command, args);
   await addToRecentlyPlayed(station.id);
   toast.style = Toast.Style.Success;
   toast.title = `Playing ${station.title}`;
