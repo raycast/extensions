@@ -6,10 +6,10 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useAuth, streamChat, Message } from "./shared";
+import { useAuth, getCopilotToken } from "./shared";
 
 export default function Command() {
-  const preferences = getPreferenceValues<{ enableAutoPing: boolean }>();
+  const preferences = getPreferenceValues<Preferences.CopilotStatus>();
   const { ghoToken, logout } = useAuth();
   const [status, setStatus] = useState<
     "loading" | "active" | "error" | "unauthorized"
@@ -36,40 +36,15 @@ export default function Command() {
         setErrorMessage(null);
       }
 
-      const messages: Message[] = [
-        {
-          role: "user",
-          content: "Ping! Are you there? Just say 'pong' if you are.",
-        },
-      ];
-
-      let gotResponse = false;
-
-      const ac = new AbortController();
-
       try {
-        await streamChat(
-          ghoToken,
-          messages,
-          () => {
-            gotResponse = true;
-          },
-          () => {
-            if (mounted) {
-              setStatus(gotResponse ? "active" : "error");
-              setLastChecked(new Date());
-            }
-          },
-          (err) => {
-            if (mounted) {
-              setStatus("error");
-              setErrorMessage(err instanceof Error ? err.message : String(err));
-              setLastChecked(new Date());
-            }
-          },
-          ac.signal,
-          "gpt-4o",
-        );
+        // getCopilotToken is a single small JSON request — it proves both that
+        // the GHO token is valid and that the user has an active Copilot subscription.
+        // It also caches the result until expiry, so repeat checks are instant.
+        await getCopilotToken(ghoToken);
+        if (mounted) {
+          setStatus("active");
+          setLastChecked(new Date());
+        }
       } catch (e) {
         if (mounted) {
           setStatus("error");
@@ -77,9 +52,6 @@ export default function Command() {
           setLastChecked(new Date());
         }
       }
-
-      // Stop the stream early since we only needed a ping
-      setTimeout(() => ac.abort(), 2000);
     }
 
     checkStatus();
@@ -134,6 +106,7 @@ export default function Command() {
           lastChecked ? `Last checked: ${lastChecked.toLocaleTimeString()}` : ""
         }
       />
+
       {errorMessage && <MenuBarExtra.Item title={`Error: ${errorMessage}`} />}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item

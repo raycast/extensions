@@ -36,7 +36,7 @@ export default function Command() {
   const { ghoToken, deviceFlow, logout } = useAuth();
 
   const [models, setModels] = useState<CopilotModel[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>("gpt-4o");
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-4.1");
   const isCmdNPressed = useRef(false);
 
   const handleNewChat = () => {
@@ -55,7 +55,7 @@ export default function Command() {
         await LocalStorage.getItem<string>(MODEL_SESSION_KEY);
       const defaultModel =
         await LocalStorage.getItem<string>(DEFAULT_MODEL_KEY);
-      setSelectedModel(sessionModel || defaultModel || "gpt-4o");
+      setSelectedModel(sessionModel || defaultModel || "gpt-4.1");
 
       const savedChatsJson =
         await LocalStorage.getItem<string>(CHATS_SESSION_KEY);
@@ -335,7 +335,19 @@ export default function Command() {
                       <Action.CopyToClipboard
                         title="Copy Chat"
                         content={chat.messages
-                          .map((m) => `**${m.role}:** ${m.content}`)
+                          .map((m) => {
+                            const body =
+                              typeof m.content === "string"
+                                ? m.content
+                                : m.content
+                                    .map((part) =>
+                                      part.type === "text"
+                                        ? (part.text ?? "")
+                                        : "[image]",
+                                    )
+                                    .join("");
+                            return `**${m.role}:** ${body}`;
+                          })
                           .join("\n")}
                       />
                       <Action

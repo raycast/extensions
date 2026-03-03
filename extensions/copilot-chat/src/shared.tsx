@@ -249,7 +249,7 @@ export async function streamChat(
     const modelToUse =
       modelOverride ||
       (await LocalStorage.getItem<string>(DEFAULT_MODEL_KEY)) ||
-      "gpt-4o";
+      "gpt-4.1";
     const copilotToken = await getCopilotToken(ghoToken);
 
     const formattedMessages =
