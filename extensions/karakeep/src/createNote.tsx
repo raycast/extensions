@@ -2,14 +2,14 @@ import { Action, ActionPanel, Form, useNavigation, closeMainWindow } from "@rayc
 import { useCachedState } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
-
-const log = logger.child("[CreateNote]");
 import { fetchAddBookmarkToList, fetchAttachTagsToBookmark, fetchCreateBookmark } from "./apis";
 import { BookmarkDetail } from "./components/BookmarkDetail";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetAllTags } from "./hooks/useGetAllTags";
 import { useTranslation } from "./hooks/useTranslation";
 import { runWithToast } from "./utils/toast";
+
+const log = logger.child("[CreateNote]");
 
 interface FormValues {
   content: string;

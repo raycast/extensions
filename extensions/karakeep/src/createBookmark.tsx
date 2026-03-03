@@ -2,8 +2,6 @@ import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
-
-const log = logger.child("[CreateBookmark]");
 import { fetchAddBookmarkToList, fetchAttachTagsToBookmark, fetchCreateBookmark } from "./apis";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetAllTags } from "./hooks/useGetAllTags";
@@ -12,6 +10,8 @@ import { useConfig } from "./hooks/useConfig";
 import { getBrowserLink } from "./hooks/useBrowserLink";
 import { validUrl } from "./utils/url";
 import { runWithToast } from "./utils/toast";
+
+const log = logger.child("[CreateBookmark]");
 
 interface FormValues {
   url: string;

@@ -2,8 +2,6 @@ import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation
 import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
-
-const log = logger.child("[BookmarkItem]");
 import {
   ARCHIVED_COLOR,
   DEFAULT_COLOR,
@@ -17,6 +15,8 @@ import { Bookmark, Config } from "../types";
 import { getScreenshot } from "../utils/screenshot";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
+
+const log = logger.child("[BookmarkItem]");
 const { Metadata } = List.Item.Detail;
 interface BookmarkItemProps {
   bookmark: Bookmark;

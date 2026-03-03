@@ -2,13 +2,13 @@ import { Icon, List } from "@raycast/api";
 import { useCallback, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { BookmarkList } from "./components/BookmarkList";
-
-const log = logger.child("[Bookmarks]");
 import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
 import { runWithToast } from "./utils/toast";
+
+const log = logger.child("[Bookmarks]");
 
 function ListFilterDropdown({ onChange }: { onChange: (listId: string) => void }) {
   const { t } = useTranslation();
