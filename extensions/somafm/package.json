@@ -52,7 +52,7 @@
       "description": "Control playback and access favorite stations from the menu bar",
       "mode": "menu-bar",
       "interval": "10m",
-      "disabledByDefault": true
+      "disabledByDefault": false
     }
   ],
   "preferences": [
