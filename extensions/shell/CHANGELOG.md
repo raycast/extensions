@@ -1,5 +1,15 @@
 # shell Changelog
 
+## [Add cmux support] - 2026-03-03
+
+Adds support for running shell commands in `cmux`, including:
+
+- External terminal selection for `cmux`
+- Optional run mode preference (`Active Workspace` or `New Workspace`)
+- Socket path override preference
+- Keychain-first password mode support with optional extension password fallback
+- Improved failure toasts for socket/auth/workspace errors
+
 ## [Fix edit executed command] - 2026-02-16
 
 Fix edit command that was not in recent section, but on shell history.

@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { shellHistory } from "shell-history";
 import { shellEnv } from "shell-env";
-import { ChildProcess, exec } from "child_process";
+import { ChildProcess, exec, spawnSync } from "child_process";
 import { usePersistentState } from "raycast-toolkit";
 import fs from "fs";
 import { runAppleScript } from "run-applescript";
@@ -36,6 +36,9 @@ interface ShellArguments {
 interface Preferences {
   arguments_terminal: boolean;
   arguments_terminal_type: string;
+  cmux_run_mode?: "activeWorkspace" | "newWorkspace";
+  cmux_socket_path?: string;
+  cmux_socket_password?: string;
 }
 
 let cachedEnv: null | EnvType = null;
@@ -476,6 +479,296 @@ const runInTerminal = (command: string) => {
   runAppleScript(script);
 };
 
+const CMUX_APP_PATH = "/Applications/cmux.app";
+const CMUX_CLI_PATH = "/Applications/cmux.app/Contents/Resources/bin/cmux";
+const CMUX_DEFAULT_SOCKET_PATH = "/tmp/cmux.sock";
+const CMUX_BUNDLE_ID = "com.cmuxterm.app";
+const CMUX_SOCKET_MODES = {
+  cmuxOnly: "cmuxonly",
+  password: "password",
+  external: "external",
+} as const;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isSocketPath = (path: string) => {
+  try {
+    return fs.statSync(path).isSocket();
+  } catch {
+    return false;
+  }
+};
+
+const redactSecrets = (text: string, secrets: Array<string | undefined>) => {
+  let sanitized = text;
+  for (const secret of secrets) {
+    if (!secret) {
+      continue;
+    }
+    sanitized = sanitized.split(secret).join("[REDACTED]");
+  }
+  return sanitized;
+};
+
+const getCommandError = (result: { stderr?: string; stdout?: string; status: number | null }, secrets: string[] = []) => {
+  const stderr = result?.stderr?.toString().trim() || "";
+  if (stderr) {
+    return redactSecrets(stderr, secrets);
+  }
+
+  const stdout = result?.stdout?.toString().trim() || "";
+  if (stdout) {
+    return redactSecrets(stdout, secrets);
+  }
+
+  return `Process exited with code ${result?.status ?? "unknown"}`;
+};
+
+const showCmuxFailure = (title: string, message: string) => {
+  showToast({
+    style: Toast.Style.Failure,
+    title,
+    message,
+  });
+};
+
+const resolveCmuxSocketPath = (configuredSocketPath?: string) => {
+  const preferredSocketPath = configuredSocketPath?.trim();
+  if (preferredSocketPath) {
+    return preferredSocketPath;
+  }
+  if (process.env.CMUX_SOCKET_PATH?.trim()) {
+    return process.env.CMUX_SOCKET_PATH.trim();
+  }
+  return CMUX_DEFAULT_SOCKET_PATH;
+};
+
+const readCmuxSocketMode = () => {
+  const result = spawnSync("/usr/bin/defaults", ["read", CMUX_BUNDLE_ID, "socketControlMode"], {
+    encoding: "utf8",
+  });
+  if (result.status !== 0) {
+    return "";
+  }
+  return result.stdout.trim().toLowerCase();
+};
+
+const runCmuxCli = (
+  args: string[],
+  options?: {
+    socketPath?: string;
+    password?: string;
+    json?: boolean;
+  },
+) => {
+  const fullArgs: string[] = [];
+  if (options?.socketPath) {
+    fullArgs.push("--socket", options.socketPath);
+  }
+  if (options?.json) {
+    fullArgs.push("--json");
+  }
+  fullArgs.push(...args);
+
+  const env = { ...process.env };
+  if (options?.password) {
+    env.CMUX_SOCKET_PASSWORD = options.password;
+  }
+  return spawnSync(CMUX_CLI_PATH, fullArgs, { encoding: "utf8", env });
+};
+
+const getCmuxAuthAttempts = (socketMode: string, extensionPassword?: string) => {
+  const password = extensionPassword?.trim() || "";
+  if (socketMode === CMUX_SOCKET_MODES.password) {
+    return [{ password: undefined as string | undefined }, ...password ? [{ password }] : []];
+  }
+  return [{ password: undefined as string | undefined }];
+};
+
+const waitForCmuxConnection = async (socketPath: string, authAttempts: Array<{ password?: string }>) => {
+  let lastError = "";
+  for (let i = 0; i < 20; i++) {
+    if (isSocketPath(socketPath)) {
+      for (const authAttempt of authAttempts) {
+        const pingResult = runCmuxCli(["ping"], { socketPath, password: authAttempt.password });
+        if (pingResult.status === 0) {
+          return { ok: true as const, authPassword: authAttempt.password };
+        }
+        lastError = getCommandError(pingResult, [authAttempt.password ?? ""]);
+      }
+    }
+    await sleep(200);
+  }
+
+  return {
+    ok: false as const,
+    error: lastError || `Unable to connect to cmux socket at ${socketPath}`,
+  };
+};
+
+const readWorkspaceFromOutput = (rawOutput: string) => {
+  const text = rawOutput.trim();
+  if (!text) {
+    return "";
+  }
+
+  const refMatch = text.match(/workspace:\d+/);
+  if (refMatch?.[0]) {
+    return refMatch[0];
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return "";
+  }
+
+  const candidates: string[] = [];
+  const collectValues = (value: unknown) => {
+    if (value === null || value === undefined) {
+      return;
+    }
+    if (typeof value === "string") {
+      candidates.push(value.trim());
+      return;
+    }
+    if (Array.isArray(value)) {
+      for (const entry of value) {
+        collectValues(entry);
+      }
+      return;
+    }
+    if (typeof value === "object") {
+      for (const [key, entry] of Object.entries(value)) {
+        if (typeof entry === "string" && ["workspace", "workspaceRef", "workspaceId", "id", "ref"].includes(key)) {
+          candidates.push(entry.trim());
+        }
+        collectValues(entry);
+      }
+    }
+  };
+  collectValues(parsed);
+
+  const workspaceRef = candidates.find((value) => value.startsWith("workspace:"));
+  if (workspaceRef) {
+    return workspaceRef;
+  }
+
+  const uuidValue = candidates.find((value) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value),
+  );
+  return uuidValue || "";
+};
+
+const getCurrentWorkspace = (socketPath: string, authPassword?: string) => {
+  const workspaceResult = runCmuxCli(["current-workspace"], { socketPath, password: authPassword, json: true });
+  if (workspaceResult.status !== 0) {
+    return {
+      ok: false as const,
+      error: getCommandError(workspaceResult, [authPassword ?? ""]),
+    };
+  }
+  const workspace = readWorkspaceFromOutput(workspaceResult.stdout || "");
+  if (!workspace) {
+    return {
+      ok: false as const,
+      error: "Could not resolve active workspace from cmux output.",
+    };
+  }
+  return { ok: true as const, workspace };
+};
+
+const runInCmux = async (
+  command: string,
+  options?: {
+    runMode?: "activeWorkspace" | "newWorkspace";
+    socketPathPreference?: string;
+    socketPassword?: string;
+  },
+) => {
+  if (!fs.existsSync(CMUX_APP_PATH) || !fs.existsSync(CMUX_CLI_PATH)) {
+    showCmuxFailure("cmux is not installed", `Install cmux at ${CMUX_APP_PATH} before using this terminal target.`);
+    return false;
+  }
+
+  const socketMode = readCmuxSocketMode();
+  const socketPath = resolveCmuxSocketPath(options?.socketPathPreference);
+  if (socketMode === CMUX_SOCKET_MODES.cmuxOnly) {
+    showCmuxFailure(
+      "cmux socket mode blocks external clients",
+      "Set cmux socket mode to external or password in cmux settings.",
+    );
+    return false;
+  }
+
+  const launchResult = spawnSync("/usr/bin/open", ["-a", "cmux"], { encoding: "utf8" });
+  if (launchResult.status !== 0) {
+    showCmuxFailure("Could not launch cmux", getCommandError(launchResult));
+    return false;
+  }
+
+  const authAttempts = getCmuxAuthAttempts(socketMode, options?.socketPassword);
+  const connectionResult = await waitForCmuxConnection(socketPath, authAttempts);
+  if (!connectionResult.ok) {
+    showCmuxFailure(
+      "cmux is not ready",
+      connectionResult.error ||
+        "Could not authenticate to cmux. If password mode is enabled, verify keychain access or set extension password override.",
+    );
+    return false;
+  }
+
+  if ((options?.runMode ?? "activeWorkspace") === "newWorkspace") {
+    const newWorkspaceResult = runCmuxCli(["new-workspace", "--command", command], {
+      socketPath,
+      password: connectionResult.authPassword,
+    });
+    if (newWorkspaceResult.status !== 0) {
+      showCmuxFailure(
+        "Failed to run command in new cmux workspace",
+        getCommandError(newWorkspaceResult, [connectionResult.authPassword ?? ""]),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  const workspaceResult = getCurrentWorkspace(socketPath, connectionResult.authPassword);
+  if (!workspaceResult.ok) {
+    showCmuxFailure(
+      "Failed to resolve active cmux workspace",
+      `${workspaceResult.error} Try switching run mode to 'New Workspace'.`,
+    );
+    return false;
+  }
+
+  const sendResult = runCmuxCli(["send", "--workspace", workspaceResult.workspace, command], {
+    socketPath,
+    password: connectionResult.authPassword,
+  });
+  if (sendResult.status !== 0) {
+    showCmuxFailure(
+      "Failed to send command to active cmux workspace",
+      `${getCommandError(sendResult, [connectionResult.authPassword ?? ""])}. Try switching run mode to 'New Workspace' or adjust cmux socket mode.`,
+    );
+    return false;
+  }
+
+  const enterResult = runCmuxCli(["send-key", "--workspace", workspaceResult.workspace, "enter"], {
+    socketPath,
+    password: connectionResult.authPassword,
+  });
+  if (enterResult.status !== 0) {
+    showCmuxFailure(
+      "Failed to submit command in cmux",
+      getCommandError(enterResult, [connectionResult.authPassword ?? ""]),
+    );
+    return false;
+  }
+  return true;
+};
+
 export default function Command(props: { arguments?: ShellArguments }) {
   const [cmd, setCmd] = useState<string>("");
   const [history, setHistory] = useState<string[]>();
@@ -485,6 +778,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
   const kittyInstalled = fs.existsSync("/Applications/kitty.app");
   const WarpInstalled = fs.existsSync("/Applications/Warp.app");
   const GhosttyInstalled = fs.existsSync("/Applications/Ghostty.app");
+  const cmuxInstalled = fs.existsSync(CMUX_APP_PATH);
 
   const addToRecentlyUsed = (command: string) => {
     setRecentlyUsed((list) => (list.find((x) => x === command) ? list : [command, ...list].slice(0, 10)));
@@ -501,8 +795,14 @@ export default function Command(props: { arguments?: ShellArguments }) {
     }
   }, []);
 
-  const { arguments_terminal_type: terminalType, arguments_terminal: openInTerminal } =
-    getPreferenceValues<Preferences>();
+  const {
+    arguments_terminal_type: terminalType,
+    arguments_terminal: openInTerminal,
+    cmux_run_mode: cmuxRunModePreference,
+    cmux_socket_path: cmuxSocketPathPreference,
+    cmux_socket_password: cmuxSocketPassword,
+  } = getPreferenceValues<Preferences>();
+  const cmuxRunMode = cmuxRunModePreference === "newWorkspace" ? "newWorkspace" : "activeWorkspace";
   const normalizedTerminalType = (terminalType?.toLowerCase?.() ?? (isWindows ? "powershell" : "terminal")) as string;
 
   const getTerminalDisplayName = () => {
@@ -519,42 +819,50 @@ export default function Command(props: { arguments?: ShellArguments }) {
         return "Warp";
       case "ghostty":
         return "Ghostty";
+      case "cmux":
+        return "cmux";
       default:
         return "Terminal";
     }
   };
 
-  const openCommandInPreferredTerminal = (command: string) => {
+  const openCommandInPreferredTerminal = async (command: string) => {
     if (isWindows) {
       const runner = getWindowsRunner(normalizedTerminalType);
       runner(command);
-      return;
+      return true;
     }
 
     switch (normalizedTerminalType) {
       case "kitty":
         runInKitty(command);
-        break;
+        return true;
       case "iterm":
         runInIterm(command);
-        break;
+        return true;
       case "warp":
         runInWarp(command);
-        break;
+        return true;
       case "ghostty":
         runInGhostty(command);
-        break;
+        return true;
+      case "cmux":
+        return await runInCmux(command, {
+          runMode: cmuxRunMode,
+          socketPathPreference: cmuxSocketPathPreference,
+          socketPassword: cmuxSocketPassword,
+        });
       default:
         runInTerminal(command);
-        break;
+        return true;
     }
   };
 
-  const handleExternalRun = (command: string, runner: (value: string) => void) => {
+  const handleExternalRun = async (command: string, runner: (value: string) => void | Promise<boolean>) => {
     closeMainWindow();
     popToRoot();
     addToRecentlyUsed(command);
-    runner(command);
+    await Promise.resolve(runner(command));
   };
 
   useEffect(() => {
@@ -570,11 +878,22 @@ export default function Command(props: { arguments?: ShellArguments }) {
     executedArgumentRef.current = executionKey;
 
     addToRecentlyUsed(commandArgument);
-    showHUD(`Ran command in ${getTerminalDisplayName()}`);
-    openCommandInPreferredTerminal(commandArgument);
-    closeMainWindow();
-    popToRoot();
-  }, [props.arguments?.command, openInTerminal, normalizedTerminalType]);
+    (async () => {
+      const didRun = await openCommandInPreferredTerminal(commandArgument);
+      if (didRun) {
+        showHUD(`Ran command in ${getTerminalDisplayName()}`);
+      }
+      closeMainWindow();
+      popToRoot();
+    })();
+  }, [
+    props.arguments?.command,
+    openInTerminal,
+    normalizedTerminalType,
+    cmuxRunMode,
+    cmuxSocketPathPreference,
+    cmuxSocketPassword,
+  ]);
 
   if (props.arguments?.command) {
     if (openInTerminal) {
@@ -666,6 +985,21 @@ export default function Command(props: { arguments?: ShellArguments }) {
                           title="Execute in Warp.app"
                           icon={{ fileIcon: "/Applications/Warp.app" }}
                           onAction={() => handleExternalRun(command, runInWarp)}
+                        />
+                      ) : null}
+                      {cmuxInstalled ? (
+                        <Action
+                          title="Execute in cmux.app"
+                          icon={{ fileIcon: CMUX_APP_PATH }}
+                          onAction={() =>
+                            handleExternalRun(command, (cmd) =>
+                              runInCmux(cmd, {
+                                runMode: cmuxRunMode,
+                                socketPathPreference: cmuxSocketPathPreference,
+                                socketPassword: cmuxSocketPassword,
+                              }),
+                            )
+                          }
                         />
                       ) : null}
                       <Action
