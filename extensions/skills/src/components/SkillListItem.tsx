@@ -1,19 +1,21 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { useEffect } from "react";
 import {
   type AuditStatus,
-  type SkillAudit,
   type SkillFrontmatter,
   AUDIT_PROVIDER_LABELS,
   buildInstallCommand,
   formatInstalls,
   normalizeAllowedTools,
   Skill,
+  SkillAudit,
   SKILLS_BASE_URL,
 } from "../shared";
 import { useSkillContent } from "../hooks/useSkillContent";
 import { useRepoStats, type RepoStats } from "../hooks/useRepoStats";
 import { useSkillAudits } from "../hooks/useSkillAudits";
-import { type SkillAuditsAvailability } from "../utils/skill-audits";
+import { type SkillAuditsAvailabilityState } from "../utils/skill-audits";
+import { showSkillAuditErrorToast } from "../utils/skill-audit-error-toast";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
 import { OpenSecurityAuditActions } from "./actions/OpenSecurityAuditActions";
 
@@ -29,11 +31,10 @@ function formatAuditStatus(status: AuditStatus): string {
   return emoji ? `${emoji} ${label}` : label;
 }
 
-function getAuditFallbackText(isLoading: boolean, availability?: SkillAuditsAvailability): string {
+function getAuditFallbackText(isLoading: boolean, availabilityState?: SkillAuditsAvailabilityState): string {
   if (isLoading) return "Loading...";
-  if (availability === "parse-error") return "Unable to parse";
-  if (availability === "fetch-error") return "Unable to fetch";
-  return "Not available";
+  if (availabilityState === "parse-error" || availabilityState === "fetch-error") return "Unable to verify";
+  return "Pending";
 }
 
 interface InlineDetailProps {
@@ -42,12 +43,14 @@ interface InlineDetailProps {
   frontmatter: SkillFrontmatter;
   isLoading: boolean;
   stats: RepoStats | undefined;
-  audits: SkillAudit[];
-  isAuditsLoading: boolean;
-  availability?: SkillAuditsAvailability;
+  audits: {
+    results: SkillAudit[];
+    availabilityState?: SkillAuditsAvailabilityState;
+    isLoading: boolean;
+  };
 }
 
-function InlineDetail({ skill, content, frontmatter, isLoading, stats, audits, isAuditsLoading, availability }: InlineDetailProps) {
+function InlineDetail({ skill, content, frontmatter, isLoading, stats, audits }: InlineDetailProps) {
   const installCommand = buildInstallCommand(skill);
   const allowedTools = normalizeAllowedTools(frontmatter["allowed-tools"]);
 
@@ -123,19 +126,19 @@ ${installCommand}
             target={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}
           />
           <List.Item.Detail.Metadata.Separator />
-          {audits.length > 0 ? (
-            audits.map((audit) =>
+          {audits.results.length > 0 ? (
+            audits.results.map((audit) =>
               audit.url ? (
                 <List.Item.Detail.Metadata.Link
                   key={audit.provider}
-                  title={AUDIT_PROVIDER_LABELS[audit.provider]}
+                  title={`${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
                   text={formatAuditStatus(audit.status)}
                   target={audit.url}
                 />
               ) : (
                 <List.Item.Detail.Metadata.Label
                   key={audit.provider}
-                  title={AUDIT_PROVIDER_LABELS[audit.provider]}
+                  title={`${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
                   text={formatAuditStatus(audit.status)}
                 />
               ),
@@ -143,7 +146,7 @@ ${installCommand}
           ) : (
             <List.Item.Detail.Metadata.Label
               title="Security Audits"
-              text={getAuditFallbackText(isAuditsLoading, availability)}
+              text={getAuditFallbackText(audits.isLoading, audits.availabilityState)}
             />
           )}
           <List.Item.Detail.Metadata.Separator />
@@ -163,22 +166,33 @@ interface SkillListItemProps {
 }
 
 export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onToggleDetail }: SkillListItemProps) {
-  const {
-    result: auditResult,
-    audits,
-    isLoading: isAuditsLoading,
-    availability,
-  } = useSkillAudits(skill, {
-    shouldFetch: isSelected,
-  });
   const title = rank != null ? `#${rank} ${skill.name}` : skill.name;
   const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
   const { stats } = useRepoStats(skill, isSelected);
+  const audits = useSkillAudits(skill, {
+    shouldFetch: isSelected,
+  });
 
   const icon =
     rank != null
       ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
       : { source: Icon.Hammer };
+
+  useEffect(() => {
+    if (
+      isSelected &&
+      audits.errorDetails !== undefined &&
+      audits.errorDetails.skillSource === skill.source &&
+      audits.errorDetails.skillId === skill.skillId
+    ) {
+      void showSkillAuditErrorToast({
+        error: audits.error ?? new Error("Unknown error"),
+        errorDetails: audits.errorDetails,
+        skillName: skill.name,
+        onRetry: audits.revalidate,
+      });
+    }
+  }, [audits.error, audits.errorDetails, audits.revalidate, isSelected, skill.name, skill.source, skill.skillId]);
 
   return (
     <List.Item
@@ -195,14 +209,12 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
           frontmatter={frontmatter}
           isLoading={isLoading}
           stats={stats}
-          audits={audits}
-          isAuditsLoading={isAuditsLoading}
-          availability={availability}
+          audits={{ results: audits.results, availabilityState: audits.availabilityState, isLoading: audits.isLoading }}
         />
       }
       actions={
         <ActionPanel>
-          <InstallSkillAction skill={skill} prefetchedAuditResult={auditResult} />
+          <InstallSkillAction skill={skill} prefetchedAuditResult={audits.result} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
@@ -216,7 +228,7 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
             icon={Icon.Link}
             shortcut={Keyboard.Shortcut.Common.Open}
           />
-          <OpenSecurityAuditActions audits={audits} />
+          <OpenSecurityAuditActions audits={audits.results} />
           <Action
             title={isShowingDetail ? "Hide Detail Panel" : "Show Detail Panel"}
             icon={Icon.Sidebar}

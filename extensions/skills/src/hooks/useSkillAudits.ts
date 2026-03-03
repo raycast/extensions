@@ -1,7 +1,12 @@
 import { useCachedPromise } from "@raycast/utils";
 
 import { type Skill, type SkillAudit } from "../shared";
-import { type SkillAuditsAvailability, type SkillAuditsResult, fetchSkillAudits } from "../utils/skill-audits";
+import {
+  type SkillAuditErrorDetails,
+  type SkillAuditsResult,
+  SkillAuditsAvailabilityState,
+  fetchSkillAudits,
+} from "../utils/skill-audits";
 
 type UseSkillAuditsOptions = {
   shouldFetch?: boolean;
@@ -9,25 +14,32 @@ type UseSkillAuditsOptions = {
 };
 
 type UseSkillAuditsResult = {
-  result?: SkillAuditsResult;
-  audits: SkillAudit[];
-  isLoading: boolean;
+  results: SkillAudit[];
+  availabilityState?: SkillAuditsAvailabilityState;
   error?: Error;
-  availability?: SkillAuditsAvailability;
+  errorDetails?: SkillAuditErrorDetails;
+  isLoading: boolean;
+  result?: SkillAuditsResult;
+  revalidate: () => void;
 };
 
 export function useSkillAudits(skill: Skill, options?: UseSkillAuditsOptions): UseSkillAuditsResult {
-  const { data, error, isLoading } = useCachedPromise((inputSkill: Skill) => fetchSkillAudits(inputSkill), [skill], {
-    keepPreviousData: true,
-    execute: options?.shouldFetch ?? true,
-    initialData: options?.initialData,
-  });
+  const { data, error, isLoading, revalidate } = useCachedPromise(
+    (inputSkill: Skill) => fetchSkillAudits(inputSkill),
+    [skill],
+    {
+      execute: options?.shouldFetch ?? true,
+      initialData: options?.initialData,
+    },
+  );
 
   return {
-    result: data ?? undefined,
-    audits: data?.audits ?? [],
+    results: data?.audits ?? [],
+    availabilityState: data?.availabilityState,
+    error,
+    errorDetails: data?.errorDetails,
     isLoading,
-    error: error ?? undefined,
-    availability: data?.availability,
+    result: data ?? undefined,
+    revalidate,
   };
 }

@@ -1,7 +1,7 @@
 import { Action, Alert, Icon, showToast, Toast, confirmAlert } from "@raycast/api";
 import { AUDIT_PROVIDER_LABELS, type Skill } from "../../shared";
 import { useSkillAudits } from "../../hooks/useSkillAudits";
-import { type SkillAuditsAvailability, type SkillAuditsResult, fetchSkillAudits } from "../../utils/skill-audits";
+import { type SkillAuditsResult, fetchSkillAudits } from "../../utils/skill-audits";
 import { installSkill } from "../../utils/skills-cli";
 
 interface InstallSkillActionProps {
@@ -16,25 +16,27 @@ function joinWithAnd(items: string[]): string {
 }
 
 function getConfirmationMessage(auditResult: SkillAuditsResult): string {
-  const availabilityNotes: Record<SkillAuditsAvailability, string | undefined> = {
-    "fetch-error": "Security audits could not be verified due to a network or server error",
-    "parse-error": "Security audit data was found but could not be parsed reliably",
-    "not-available": "No security audit data is currently available for this skill",
-    available: undefined,
-  };
-
   const failedAudits = auditResult.audits.filter((audit) => audit.status === "fail");
   const hasFailedAudits = failedAudits.length > 0;
   const failedProviders = hasFailedAudits
     ? joinWithAnd(failedAudits.map((audit) => AUDIT_PROVIDER_LABELS[audit.provider]))
     : "";
+  const hasVerificationError =
+    auditResult.availabilityState === "fetch-error" || auditResult.availabilityState === "parse-error";
+  const hasNoAudits = auditResult.availabilityState === "not-available" && auditResult.audits.length === 0;
 
-  const reviewMessage = "Review all details before installing.";
-  return hasFailedAudits
-    ? `This skill failed security audits by ${failedProviders}. ${reviewMessage}`
-    : auditResult.availability === "available"
-      ? "This will install the skill for all supported agents."
-      : `${availabilityNotes[auditResult.availability]}. ${reviewMessage}`;
+  const reviewMessage = "Review the skill details before installing.";
+  if (hasFailedAudits) {
+    return `Security audits by ${failedProviders} failed for this skill. ${reviewMessage}`;
+  }
+  if (hasVerificationError) {
+    return `Security audit data could not be verified for this skill. ${reviewMessage}`;
+  }
+  if (hasNoAudits) {
+    return `Security audits are pending for this skill and its security status cannot be verified. ${reviewMessage}`;
+  }
+
+  return "This will install the skill for all supported agents.";
 }
 
 export function InstallSkillAction({ skill, prefetchedAuditResult }: InstallSkillActionProps) {
@@ -42,6 +44,16 @@ export function InstallSkillAction({ skill, prefetchedAuditResult }: InstallSkil
     shouldFetch: false,
     initialData: prefetchedAuditResult,
   });
+
+  const hideToastSafely = async (toast?: Awaited<ReturnType<typeof showToast>>) => {
+    if (!toast) return;
+
+    try {
+      await toast.hide();
+    } catch {
+      // Ignore toast cleanup failures so confirmation can still proceed.
+    }
+  };
 
   const executeInstall = async () => {
     const toast = await showToast({
@@ -67,36 +79,41 @@ export function InstallSkillAction({ skill, prefetchedAuditResult }: InstallSkil
     let auditResult = cachedAuditResult;
 
     if (!auditResult) {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Checking security audits...",
-        message: skill.name,
-      });
+      let loadingToast: Awaited<ReturnType<typeof showToast>> | undefined;
 
       try {
+        loadingToast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Checking security audits...",
+          message: skill.name,
+        });
+
         auditResult = await fetchSkillAudits(skill);
       } finally {
-        await loadingToast.hide();
+        await hideToastSafely(loadingToast);
       }
-    }
-
-    if (!auditResult) {
-      auditResult = {
-        audits: [],
-        availability: "fetch-error",
-      };
     }
 
     const failedAudits = auditResult.audits.filter((audit) => audit.status === "fail");
     const hasFailedAudits = failedAudits.length > 0;
+    const hasVerificationError =
+      auditResult.availabilityState === "fetch-error" || auditResult.availabilityState === "parse-error";
+    const hasNoAudits = auditResult.availabilityState === "not-available" && auditResult.audits.length === 0;
+    const requiresDestructiveConfirmation = hasFailedAudits || hasVerificationError || hasNoAudits;
     const message = [getConfirmationMessage(auditResult), `Source: ${skill.source}`].join("\n\n");
 
     const confirmed = await confirmAlert({
-      title: hasFailedAudits ? `Install unsafe "${skill.name}" skill?` : `Install "${skill.name}" skill?`,
+      title: hasFailedAudits
+        ? `Install "${skill.name}" despite failed security audits?`
+        : hasVerificationError
+          ? `Install "${skill.name}" without verified security audits?`
+          : hasNoAudits
+            ? `Install "${skill.name}" despite pending security audits?`
+            : `Install "${skill.name}"?`,
       message,
       primaryAction: {
-        title: hasFailedAudits ? "Install Anyway" : "Install",
-        style: hasFailedAudits ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
+        title: requiresDestructiveConfirmation ? "Install anyway" : "Install",
+        style: requiresDestructiveConfirmation ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
       },
     });
 
