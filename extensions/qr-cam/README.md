@@ -2,6 +2,12 @@
 
 Scan QR codes directly from your Mac webcam in Raycast.
 
+## Requirements
+
+- You must have `Xcode` installed, or at least `Xcode Command Line Tools (CLT)`.
+- This extension compiles a Swift helper on first launch.
+- Without Xcode/CLT available on your machine, the extension will not work.
+
 ## Features
 
 - Native scanner for Mac (Swift + AVFoundation + Vision).
