@@ -10,7 +10,7 @@ import {
   open,
   showToast,
 } from "@raycast/api";
-import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
 
@@ -43,6 +43,7 @@ import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
 import useZenBookmarks from "./hooks/useZenBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
+import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
 type Bookmark = {
@@ -407,10 +408,10 @@ export default function Command() {
       edge.mutate();
     }
     if (hasEdgeCanary) {
-      edge.mutate();
+      edgeCanary.mutate();
     }
     if (hasEdgeDev) {
-      edge.mutate();
+      edgeDev.mutate();
     }
     if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
@@ -539,7 +540,7 @@ export default function Command() {
         return (
           <List.Item
             key={item.id}
-            icon={getFavicon(item.url)}
+            icon={getBookmarkIcon(item.url)}
             title={item.title}
             subtitle={showDomain ? item.domain : ""}
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
