@@ -17,7 +17,9 @@ export default function Command() {
   const { data, isLoading } = useCachedPromise(getAllPresets);
   const custom = data?.custom ?? [];
   const defaults = data?.defaults ?? [];
-  const [screenInfo] = useState<ScreenInfo>(() => getScreenInfo());
+const { data: screenInfo = { displays: [DEFAULT_SCREEN], primary: DEFAULT_SCREEN } } = useCachedPromise(
+  () => Promise.resolve(getScreenInfo()),
+);
 
   function displayForIndex(displayIndex: number): ScreenDimensions {
     const { displays, primary } = screenInfo;
