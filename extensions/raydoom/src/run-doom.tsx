@@ -430,6 +430,7 @@ function Command({ config = DEFAULT_CONFIG }: RunDoomProps = {}) {
           <ActionPanel.Section title="Menu">
             <Action
               title="Enter / Select"
+              icon={Icon.Checkmark}
               shortcut={{ modifiers: [], key: "return" }}
               onAction={() => handleAction(InputAction.ENTER)}
             />
@@ -445,8 +446,8 @@ function Command({ config = DEFAULT_CONFIG }: RunDoomProps = {}) {
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               onAction={() => handleAction(InputAction.ESCAPE)}
             />
-            <Action title="Yes" shortcut={{ modifiers: [], key: "y" }} onAction={() => handleAction(InputAction.YES)} />
-            <Action title="No" shortcut={{ modifiers: [], key: "n" }} onAction={() => handleAction(InputAction.NO)} />
+            <Action title="Yes" icon={Icon.CheckCircle} shortcut={{ modifiers: [], key: "y" }} onAction={() => handleAction(InputAction.YES)} />
+            <Action title="No" icon={Icon.MinusCircle} shortcut={{ modifiers: [], key: "n" }} onAction={() => handleAction(InputAction.NO)} />
 
             <Action
               title="Stop Game"
@@ -513,36 +514,43 @@ function Command({ config = DEFAULT_CONFIG }: RunDoomProps = {}) {
           <ActionPanel.Section title="Weapons">
             <Action
               title="Weapon 1"
+              icon={Icon.Hammer}
               shortcut={{ modifiers: [], key: "1" }}
               onAction={() => handleAction(InputAction.WEAPON_1)}
             />
             <Action
               title="Weapon 2"
+              icon={Icon.BullsEye}
               shortcut={{ modifiers: [], key: "2" }}
               onAction={() => handleAction(InputAction.WEAPON_2)}
             />
             <Action
               title="Weapon 3"
+              icon={Icon.ExclamationMark}
               shortcut={{ modifiers: [], key: "3" }}
               onAction={() => handleAction(InputAction.WEAPON_3)}
             />
             <Action
               title="Weapon 4"
+              icon={Icon.Bolt}
               shortcut={{ modifiers: [], key: "4" }}
               onAction={() => handleAction(InputAction.WEAPON_4)}
             />
             <Action
               title="Weapon 5"
+              icon={Icon.Exclamationmark2}
               shortcut={{ modifiers: [], key: "5" }}
               onAction={() => handleAction(InputAction.WEAPON_5)}
             />
             <Action
               title="Weapon 6"
+              icon={Icon.Gauge}
               shortcut={{ modifiers: [], key: "6" }}
               onAction={() => handleAction(InputAction.WEAPON_6)}
             />
             <Action
               title="Weapon 7"
+              icon={Icon.Crown}
               shortcut={{ modifiers: [], key: "7" }}
               onAction={() => handleAction(InputAction.WEAPON_7)}
             />
@@ -614,7 +622,7 @@ function Command({ config = DEFAULT_CONFIG }: RunDoomProps = {}) {
             />
           </ActionPanel.Section>
 
-          <ActionPanel.Section title="Debug">
+          <ActionPanel.Section title="Diagnostics">
             <Action
               title="Copy Frame to Clipboard"
               icon={Icon.Clipboard}
