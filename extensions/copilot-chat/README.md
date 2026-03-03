@@ -12,10 +12,10 @@ Use your GitHub Copilot subscription to access powerful AI models. Students get 
 - **Quick Ask**: Ask questions directly from the Raycast command bar.
 - **Model Selection**: Switch between different Copilot models from your own github copilot account.
 
-![alt text](<./metadata/screenshot-1.png>)
-![alt text](<./metadata/screenshot-2.png>)
-![alt text](<./metadata/screenshot-3.png>)
-![alt text](<./metadata/screenshot-4.png>)
+![alt text](<./assets/screenshot-1.png>)
+![alt text](<./assets/screenshot-2.png>)
+![alt text](<./assets/screenshot-3.png>)
+![alt text](<./assets/screenshot-4.png>)
 
 ## Setup
 
