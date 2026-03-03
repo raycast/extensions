@@ -1,6 +1,6 @@
 # shell Changelog
 
-## [Add cmux support] - 2026-03-03
+## [Add cmux support] - {PR_MERGE_DATE}
 
 Adds support for running shell commands in `cmux`, including:
 
