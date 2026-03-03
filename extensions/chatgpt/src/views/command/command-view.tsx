@@ -19,6 +19,7 @@ import { Command, ChatHook } from "../../type";
 import { fetchContent } from "../../utils/cmd-input";
 import { getAppIconPath } from "../../utils/icon";
 import { resolveAuthStatus } from "../../utils/auth";
+import { resolveModelOptionForAuth } from "../../utils/model-support";
 import Ask from "../../ask";
 import { v4 as uuidv4 } from "uuid";
 import { mapCommandToModel, useCommand } from "../../hooks/useCommand";
@@ -60,6 +61,7 @@ function AuthenticatedCommandView(props: CommandLaunchProps) {
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [userInput, setUserInput] = useState<string | null>(null);
   const [userInputError, setUserInputError] = useState<string | null>(null);
+  const [effectiveModel, setEffectiveModel] = useState<string | null>(null);
   const [frontmostApp, setFrontmostApp] = useState<Application | null>(null);
 
   const requestedCommandId = props.launchContext?.commandId || "";
@@ -81,10 +83,19 @@ function AuthenticatedCommandView(props: CommandLaunchProps) {
   }, [requestedCommand]);
 
   useEffect(() => {
-    if (userInput && requestedCommand) {
-      setAiAnswer(null);
-      chat.ask(userInput, [], mapCommandToModel(requestedCommand));
+    if (!userInput || !requestedCommand) {
+      return;
     }
+
+    (async () => {
+      const auth = await resolveAuthStatus();
+      const modelOption = resolveModelOptionForAuth(requestedCommand.model, auth.provider);
+      const model = { ...mapCommandToModel(requestedCommand), option: modelOption };
+
+      setAiAnswer(null);
+      setEffectiveModel(modelOption);
+      chat.ask(userInput, [], model);
+    })();
   }, [userInput, requestedCommand]);
 
   useEffect(() => {
@@ -108,6 +119,7 @@ function AuthenticatedCommandView(props: CommandLaunchProps) {
 
   const viewBuilder = new CommandViewBuilder(
     requestedCommand,
+    effectiveModel ?? requestedCommand.model,
     chat,
     navigation,
     frontmostApp,
@@ -124,6 +136,7 @@ class CommandViewBuilder {
   totalViewWidthPx: number;
 
   command: Command;
+  displayModel: string;
   chat: ChatHook;
   navigation: Navigation;
   frontmostApp: Application | null;
@@ -133,6 +146,7 @@ class CommandViewBuilder {
 
   constructor(
     command: Command,
+    displayModel: string,
     chat: ChatHook,
     navigation: Navigation,
     frontmostApp: Application | null,
@@ -144,6 +158,7 @@ class CommandViewBuilder {
     this.iconSizePx = 17;
 
     this.command = command;
+    this.displayModel = displayModel;
     this.chat = chat;
     this.navigation = navigation;
     this.frontmostApp = frontmostApp;
@@ -176,13 +191,18 @@ class CommandViewBuilder {
       footerMessage = "Continue in Chat ⌘ + 🅹";
     }
 
+    const modelLabel =
+      this.displayModel === this.command.model
+        ? this.displayModel
+        : `${this.displayModel} (switched from ${this.command.model})`;
+
     return `${this.generateTitleSvg(this.command.name)}
 
 ${inputTemplate}
 
 ${this.aiAnswer || "..."}
 
-${this.generateStatFooterSvg(this.command.model, footerMessage, chatWidthPx, footerMessageColor)}
+${this.generateStatFooterSvg(modelLabel, footerMessage, chatWidthPx, footerMessageColor)}
 
 ${this.error ? "---" : ""}
 ${this.error || ""}`;
@@ -280,7 +300,7 @@ ${this.error || ""}`;
               conversation={{
                 id: uuidv4(),
                 chats: this.chat.data,
-                model: mapCommandToModel(this.command),
+                model: { ...mapCommandToModel(this.command), option: this.displayModel },
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 pinned: false,
