@@ -130,6 +130,7 @@ export default function Command() {
                         target={<ModelForm provider={provider} model={model} onSave={revalidate} />}
                         shortcut={{ modifiers: ["cmd"], key: "e" }}
                       />
+                      <DuplicateModelAction provider={provider} model={model} onSave={revalidate} />
                       <RemoveModelAction provider={provider} model={model} removeModel={removeModel} />
                     </ActionPanel.Section>
 
@@ -172,6 +173,22 @@ function AddNewModelAction({ provider, onSave }: { provider: Provider; onSave: (
       icon={Icon.Plus}
       target={<ModelForm provider={provider} onSave={onSave} />}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
+    />
+  );
+}
+
+function DuplicateModelAction({ provider, model, onSave }: { provider: Provider; model: Model; onSave: () => void }) {
+  const duplicatedModel: Model = {
+    ...model,
+    id: `${model.id}-copy`,
+    name: `Duplicated ${model.name}`,
+  };
+  return (
+    <Action.Push
+      title="Duplicate Model"
+      icon={Icon.Duplicate}
+      target={<ModelForm provider={provider} model={duplicatedModel} onSave={onSave} />}
+      shortcut={{ modifiers: ["cmd"], key: "d" }}
     />
   );
 }
