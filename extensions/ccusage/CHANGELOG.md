@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.2.1] - {PR_MERGE_DATE}
+
+### Fixed
+
+- `npx` path resolution for XDG-based `fnm` installs by detecting `fnm` in both legacy `~/.fnm` and `${XDG_DATA_HOME:-~/.local/share}/fnm` locations
+
 ## [v2.2.0] - 2026-02-18
 
 ### Added
