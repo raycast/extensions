@@ -1,5 +1,13 @@
 # SomaFM for Raycast Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+### Fixed
+- Fixed player launch flow to avoid false failure on successful app launch.
+- Suppressed error toasts during silent station auto-refresh.
+- Fixed Menu Bar fallback action to open `browse-stations`.
+- Fixed grouped-view keyboard shortcut indexing consistency.
+
 ## [Initial Version] - 2025-07-02
 
 ### Added
