@@ -42,7 +42,7 @@ export function useMonitorActions(apiKey: string) {
       const monitor = await response.json();
 
       // Optimistically add the new monitor to the list
-      await mutate(Promise.resolve({ data: [monitor] }), {
+      await mutate(undefined, {
         optimisticUpdate: (data) => {
           if (!data?.data) return data;
           return {
@@ -50,6 +50,7 @@ export function useMonitorActions(apiKey: string) {
             data: [...data.data, monitor],
           };
         },
+        shouldRevalidateAfter: true,
       });
 
       await showToast({
@@ -99,7 +100,7 @@ export function useMonitorActions(apiKey: string) {
         throw new Error(errorMessage);
       }
 
-      await mutate(Promise.resolve(response), {
+      await mutate(undefined, {
         optimisticUpdate: (data) => {
           if (!data?.data) return data;
           return {
@@ -107,6 +108,7 @@ export function useMonitorActions(apiKey: string) {
             data: data.data.map((monitor) => (monitor.id === monitorId ? { ...monitor, paused: true } : monitor)),
           };
         },
+        shouldRevalidateAfter: true,
       });
 
       await showToast({
@@ -154,7 +156,7 @@ export function useMonitorActions(apiKey: string) {
         throw new Error(errorMessage);
       }
 
-      await mutate(Promise.resolve(response), {
+      await mutate(undefined, {
         optimisticUpdate: (data) => {
           if (!data?.data) return data;
           return {
@@ -162,6 +164,7 @@ export function useMonitorActions(apiKey: string) {
             data: data.data.map((monitor) => (monitor.id === monitorId ? { ...monitor, paused: false } : monitor)),
           };
         },
+        shouldRevalidateAfter: true,
       });
 
       await showToast({
@@ -209,7 +212,7 @@ export function useMonitorActions(apiKey: string) {
         throw new Error(errorMessage);
       }
 
-      await mutate(Promise.resolve(response), {
+      await mutate(undefined, {
         optimisticUpdate: (data) => {
           if (!data?.data) return data;
           return {
@@ -217,6 +220,7 @@ export function useMonitorActions(apiKey: string) {
             data: data.data.filter((monitor) => monitor.id !== monitorId),
           };
         },
+        shouldRevalidateAfter: true,
       });
 
       await showToast({

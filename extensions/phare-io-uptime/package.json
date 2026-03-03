@@ -6,8 +6,8 @@
   "icon": "phare.io-black.png",
   "author": "ApopeOS",
   "categories": [
-    "Data",
-    "Web"
+    "Developer Tools",
+    "Data"
   ],
   "license": "MIT",
   "commands": [
