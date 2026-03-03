@@ -1,12 +1,12 @@
 # Kommand for Raycast
 
-Access your [Kommand](https://apps.apple.com/app/kommand/id6744135519) keyboard shortcuts library directly from Raycast.
+Access your [Kommand](https://apps.apple.com/app/kommand/id6752623076) keyboard shortcuts library directly from Raycast.
 
 ## Prerequisites
 
 This extension requires the **Kommand** macOS app to be installed. Kommand is a keyboard shortcut manager that lets you collect, organize, and quickly access shortcuts for any application.
 
-[Download Kommand from the Mac App Store](https://apps.apple.com/app/kommand/id6744135519)
+[Download Kommand from the Mac App Store](https://apps.apple.com/app/kommand/id6752623076)
 
 ## Commands
 
@@ -24,7 +24,6 @@ Displays shortcuts marked as global, which work across all applications regardle
 
 ## Features
 
-- Shortcuts grouped by category with favorites prioritized
+- Favorites pinned to the top with a ⭐ icon; global shortcuts tagged in blue across all views
 - Multi-step shortcut support (e.g. ⌘K → ⌘C)
-- Copy shortcuts to clipboard
 - Open Kommand directly from Raycast to add or edit shortcuts
