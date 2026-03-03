@@ -340,13 +340,20 @@ export default function Command() {
 
   // * Filter entries based on dropdown selection
   const filteredEntries = (entries ?? []).filter((entry) => {
-    if (filter === "all") return true;
-    if (filter === "email") return isEmailEntry(entry);
-    if (filter === "company") return isCompanyEntry(entry);
-    if (isEmailEntry(entry)) {
-      return entry.status === filter;
+    switch (filter) {
+      case "all":
+        return true;
+      case "email":
+        return isEmailEntry(entry);
+      case "company":
+        return isCompanyEntry(entry);
+      case "success":
+      case "error":
+        return isEmailEntry(entry) && entry.status === filter;
+      default: {
+        return false;
+      }
     }
-    return false; // Company entries don't have success/error status
   });
 
   async function handleRunSearch(entry: SearchHistoryEntry) {

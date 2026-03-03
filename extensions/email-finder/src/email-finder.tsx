@@ -125,8 +125,14 @@ function formatJobPeriod(job: JobHistory): string {
   return end ? `${start} - ${end}` : start;
 }
 
-// * Map backend response to EnrichedData
-function mapResponseToEnrichedData(response: EnrichPersonResponse, domain: string): EnrichedData | null {
+function safeDatePart(date: unknown): string {
+  if (date == null || typeof date !== "string") return "";
+  const part = date.split("T")[0];
+  return part ?? "";
+}
+
+// * Map backend response to EnrichedData (shared with company-employees)
+export function mapResponseToEnrichedData(response: EnrichPersonResponse, domain: string): EnrichedData | null {
   if (!response.person?.email?.email) return null;
 
   return {
@@ -489,7 +495,7 @@ export function ResultsView({
                   return (
                     <Detail.Metadata.Label
                       title="Funding"
-                      text={`${data.company.funding.latest_funding_stage} · ${data.company.funding.latest_funding_date.split("T")[0]}`}
+                      text={`${data.company.funding.latest_funding_stage} · ${safeDatePart(data.company.funding.latest_funding_date)}`}
                     />
                   );
                 }
@@ -498,7 +504,7 @@ export function ResultsView({
                   <Detail.Metadata.Label
                     key={idx}
                     title={idx === 0 ? "Funding" : ""}
-                    text={`${event.amount_printed} · ${event.stage} · ${event.raised_at.split("T")[0]}`}
+                    text={`${event.amount_printed} · ${event.stage} · ${safeDatePart(event.raised_at)}`}
                   />
                 ));
               })()}

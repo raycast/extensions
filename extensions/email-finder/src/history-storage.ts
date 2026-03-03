@@ -60,7 +60,8 @@ export async function loadSearchHistory(): Promise<SearchHistoryEntry[]> {
   if (!raw) return [];
   try {
     return JSON.parse(raw) as SearchHistoryEntry[];
-  } catch {
+  } catch (e) {
+    console.error("Failed to parse search history:", e);
     return [];
   }
 }
@@ -109,7 +110,8 @@ export async function loadCompanySearchHistory(): Promise<CompanySearchHistoryEn
   if (!raw) return [];
   try {
     return JSON.parse(raw) as CompanySearchHistoryEntry[];
-  } catch {
+  } catch (e) {
+    console.error("Failed to parse company search history:", e);
     return [];
   }
 }

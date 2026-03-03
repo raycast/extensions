@@ -181,7 +181,12 @@ export async function enrichPerson(
     }),
   });
 
-  const data = await response.json();
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Invalid response from server");
+  }
 
   // * Handle insufficient credits specifically
   if (response.status === 402 && isInsufficientCreditsError(data)) {
@@ -189,8 +194,9 @@ export async function enrichPerson(
   }
 
   // * Handle other errors
-  if (!response.ok || data.error) {
-    throw new Error(data.message || "Failed to enrich person");
+  const body = data as { error?: boolean; message?: string };
+  if (!response.ok || body.error) {
+    throw new Error(body.message || "Failed to enrich person");
   }
 
   return data as EnrichPersonResponse;
@@ -273,7 +279,12 @@ export async function searchPerson(
     }),
   });
 
-  const data = await response.json();
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Invalid response from server");
+  }
 
   // * Handle insufficient credits specifically
   if (response.status === 402 && isInsufficientCreditsError(data)) {
@@ -281,8 +292,9 @@ export async function searchPerson(
   }
 
   // * Handle other errors
-  if (!response.ok || data.error) {
-    throw new Error(data.message || "Failed to search people");
+  const body = data as { error?: boolean; message?: string };
+  if (!response.ok || body.error) {
+    throw new Error(body.message || "Failed to search people");
   }
 
   return data as SearchPersonResponse;
