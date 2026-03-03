@@ -97,8 +97,8 @@ describe("card detail model", () => {
     ).toEqual([
       { kind: "type", text: "link" },
       { kind: "favorite", text: "Not Favorited" },
-      { kind: "aiSummary", text: "No AI Summary" },
-      { kind: "aiTags", text: "No AI Tags" },
+      { kind: "aiSummary", text: "No Teak Summary" },
+      { kind: "aiTags", text: "No Teak Tags" },
     ]);
   });
 });
