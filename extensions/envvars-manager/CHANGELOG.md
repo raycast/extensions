@@ -1,6 +1,6 @@
 # Environment Variables Manager Changelog
 
-## [v1.0.0] - 2026-03-02
+## [v1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
