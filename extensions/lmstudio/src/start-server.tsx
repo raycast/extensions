@@ -70,7 +70,7 @@ export default function Command(props: { arguments: Arguments.StartServer & { mo
         setStatus("error");
         setMessage(
           `**Error:** ${err instanceof Error ? err.message : String(err)}\n\n` +
-          `Please check that:\n- LM Studio has been launched at least once\n- The \`lms\` CLI is installed (\`%USERPROFILE%\\.lmstudio\\bin\\lms.exe\`)\n- The model identifier is correct (use \`lms ls\` to list available models)`
+            `Please check that:\n- LM Studio has been launched at least once\n- The \`lms\` CLI is installed (\`%USERPROFILE%\\.lmstudio\\bin\\lms.exe\`)\n- The model identifier is correct (use \`lms ls\` to list available models)`,
         );
         addStep("❌ Failed");
       }
