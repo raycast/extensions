@@ -11,18 +11,14 @@ import {
 import { existsSync, mkdirSync, appendFileSync } from "fs";
 import { join } from "path";
 
-interface Preferences {
-  vaultPath: string;
-  dailyNotePath: string;
-}
-
 interface FormValues {
   thought: string;
 }
 
 export default function Command() {
   function handleSubmit(values: FormValues) {
-    const { vaultPath, dailyNotePath } = getPreferenceValues<Preferences>();
+    const { vaultPath, dailyNotePath } =
+      getPreferenceValues<Preferences.Capture>();
 
     const now = new Date();
     const date = now.toISOString().split("T")[0];
