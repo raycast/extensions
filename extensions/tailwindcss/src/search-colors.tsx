@@ -76,13 +76,7 @@ export default function SearchColors() {
                   toHex(value as string).replace("#", ""),
                 ]}
                 actions={
-                  <Actions
-                    preferences={preferences}
-                    name={name}
-                    shade={shade}
-                    value={value as string}
-                    hexValue={toHex(value as string)}
-                  />
+                  <Actions preferences={preferences} name={name} shade={shade} hexValue={toHex(value as string)} />
                 }
               />
             ))}
@@ -101,7 +95,6 @@ function Actions({
   preferences: Preferences.SearchColors;
   name: string;
   shade: string;
-  hexValue: string;
   hexValue: string;
 }) {
   let sections = [
