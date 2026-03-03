@@ -1,4 +1,4 @@
-import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
+import { Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
@@ -7,7 +7,12 @@ import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdated
 import { captureException } from "~/utils/development";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 
-function CopyTotpAction() {
+type CopyTotpActionProps = {
+  omitShortcut?: boolean;
+  shortcut?: Keyboard.Shortcut;
+};
+
+function CopyTotpAction({ omitShortcut, shortcut }: CopyTotpActionProps) {
   const bitwarden = useBitwarden();
   const selectedItem = useSelectedVaultItem();
   const getUpdatedVaultItem = useGetUpdatedVaultItem();
@@ -36,7 +41,11 @@ function CopyTotpAction() {
       title="Copy TOTP"
       icon={Icon.Clipboard}
       onAction={copyTotp}
-      shortcut={{ macOS: { key: "t", modifiers: ["opt"] }, Windows: { key: "t", modifiers: ["alt"] } }}
+      shortcut={
+        !omitShortcut
+          ? shortcut ?? { macOS: { key: "t", modifiers: ["opt"] }, Windows: { key: "t", modifiers: ["alt"] } }
+          : undefined
+      }
       repromptDescription={`Copying the TOTP of <${selectedItem.name}>`}
     />
   );
