@@ -1,0 +1,52 @@
+{
+  "name": "obsidian-daily-capture",
+  "title": "Obsidian Daily Capture",
+  "description": "Quickly capture thoughts into your Obsidian daily note",
+  "icon": "icon.png",
+  "author": "matthew_bidewell",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "capture",
+      "title": "Capture Thought",
+      "description": "Append a timestamped thought to today's daily note",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Vault Path",
+      "description": "Absolute path to your Obsidian vault",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "dailyNotePath",
+      "title": "Daily Note Path",
+      "description": "Path within the vault to the daily notes folder",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
