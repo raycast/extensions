@@ -66,6 +66,14 @@
       "title": "Printer IP Address",
       "description": "The IP address of your Xerox printer",
       "default": "192.168.1.10"
+    },
+    {
+      "name": "snmpCommunity",
+      "type": "textfield",
+      "required": false,
+      "title": "SNMP Community String",
+      "description": "The SNMP community string for your printer (default: public)",
+      "default": "public"
     }
   ],
   "dependencies": {

@@ -25,9 +25,9 @@ const calculatePercentage = (currentVb: snmp.Varbind, maxVb: snmp.Varbind): stri
   return current.toString();
 };
 
-export async function fetchPrinterStats(host: string): Promise<PrinterStats> {
+export async function fetchPrinterStats(host: string, community: string = "public"): Promise<PrinterStats> {
   return new Promise((resolve, reject) => {
-    const session = snmp.createSession(host, "public");
+    const session = snmp.createSession(host, community);
     const oidsList = [
       OIDS.TOTAL_PAGES,
       OIDS.BLACK_PAGES,

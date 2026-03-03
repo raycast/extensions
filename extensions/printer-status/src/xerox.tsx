@@ -6,6 +6,7 @@ import { INK_COLORS, LABELS } from "./constants";
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const host = preferences.printerIp;
+  const community = preferences.snmpCommunity || "public";
   const labels = LABELS;
 
   const [stats, setStats] = useState<PrinterStats | null>(null);
@@ -24,7 +25,7 @@ export default function Command() {
       }
 
       try {
-        const data = await fetchPrinterStats(host);
+        const data = await fetchPrinterStats(host, community);
         setStats(data);
       } catch (error) {
         showToast({
@@ -161,7 +162,6 @@ export default function Command() {
             title={labels.black}
             subtitle={`${stats.blackInkLevel}%`}
             icon={getInkIcon(stats.blackInkLevel, INK_COLORS.BLACK)}
-            accessories={[{ text: `${stats.blackInkLevel}%` }]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={`${stats.blackInkLevel}%`} title={labels.copyBlackLevel} />
@@ -174,7 +174,6 @@ export default function Command() {
             title={labels.cyan}
             subtitle={`${stats.cyanInkLevel}%`}
             icon={getInkIcon(stats.cyanInkLevel, INK_COLORS.CYAN)}
-            accessories={[{ text: `${stats.cyanInkLevel}%` }]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={`${stats.cyanInkLevel}%`} title={labels.copyCyanLevel} />
@@ -187,7 +186,6 @@ export default function Command() {
             title={labels.magenta}
             subtitle={`${stats.magentaInkLevel}%`}
             icon={getInkIcon(stats.magentaInkLevel, INK_COLORS.MAGENTA)}
-            accessories={[{ text: `${stats.magentaInkLevel}%` }]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={`${stats.magentaInkLevel}%`} title={labels.copyMagentaLevel} />
@@ -200,7 +198,6 @@ export default function Command() {
             title={labels.yellow}
             subtitle={`${stats.yellowInkLevel}%`}
             icon={getInkIcon(stats.yellowInkLevel, INK_COLORS.YELLOW)}
-            accessories={[{ text: `${stats.yellowInkLevel}%` }]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={`${stats.yellowInkLevel}%`} title={labels.copyYellowLevel} />
