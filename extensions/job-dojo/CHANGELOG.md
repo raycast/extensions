@@ -1,6 +1,6 @@
 # Job Dojo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-03
 
 - Initial release
 - Ask Job Dojo: AI-powered Q&A for interview preparation
