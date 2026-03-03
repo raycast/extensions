@@ -9,7 +9,8 @@
     "lukaszmtw",
     "erics118",
     "mlnchk",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "0xdhrv"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -412,6 +413,22 @@
       "icon": "capture-area-ai-chat.png",
       "mode": "no-view",
       "subtitle": "CleanShot X"
+    },
+    {
+      "name": "record-screen-preset",
+      "title": "Record Screen at Preset",
+      "subtitle": "CleanShot X",
+      "description": "Start a screen recording at a chosen preset resolution",
+      "icon": "record-screen.png",
+      "mode": "view"
+    },
+    {
+      "name": "manage-recording-presets",
+      "title": "Manage Recording Presets",
+      "subtitle": "CleanShot X",
+      "description": "Add, edit, and delete custom recording resolution presets",
+      "icon": "open-settings.png",
+      "mode": "view"
     }
   ],
   "categories": [
