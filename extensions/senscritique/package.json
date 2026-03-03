@@ -1,0 +1,58 @@
+{
+  "name": "senscritique",
+  "version": "1.0.0",
+  "title": "Sens Critique",
+  "description": "Search and display SensCritique ratings for movies, TV shows, books, and videogames",
+  "icon": "icon.png",
+  "author": "cyrildev",
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "sc",
+      "title": "Search SensCritique",
+      "description": "Search and display SensCritique ratings for movies, TV shows, books, and videogames",
+      "icon": "icon.png",
+      "mode": "view",
+      "keywords": [
+        "sc",
+        "sens",
+        "senscritique",
+        "movie",
+        "movies",
+        "tv",
+        "shows",
+        "series",
+        "book",
+        "books",
+        "videogame",
+        "videogames"
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.2"
+  }
+}
