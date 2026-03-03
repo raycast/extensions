@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-03-03
 
 - Improved browser handling and opening bookmarks
 - Added profile support for Vivaldi Snapshot
