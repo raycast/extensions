@@ -30,6 +30,12 @@ export interface UpdateLinksResponse {
   updated: number;
 }
 
+export interface UpdateLinkResponse {
+  success: true;
+  message: string;
+  linkId: string;
+}
+
 export interface DeleteLinkResponse {
   success: true;
   message: string;

@@ -1,5 +1,13 @@
 # Browser Bookmarks Changelog
 
+## [Improvements] - 2026-03-03
+
+- Improved browser handling and opening bookmarks
+- Added profile support for Vivaldi Snapshot
+- Fixed inconsistent icon usage for Brave and Edge variants
+- Updated dependencies to latest versions
+- Fixed formatting and code style issues
+
 ## [Bug Fix] - 2026-02-18
 
 - Updated bundled `sql-wasm.wasm` to match upgraded `sql.js` v1.13.0, fixing `TypeError: a is not a function` crash in Firefox, LibreWolf, and Zen bookmark hooks

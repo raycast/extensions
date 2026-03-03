@@ -12,7 +12,7 @@ const koffiTargets = ["win32_x64", "win32_arm64"];
 // NOTE: An arm64 Everything DLL is only available in Everything 1.5 alpha.
 const everythingDllTargets = {
   x64: { file: "Everything64.dll", sha256: "c7ab8b47f7dd4c41aa735f4ba40b35ad5460a86fa7abe0c94383f12bce33bfb6" },
-  arm64: null
+  arm64: { file: "EverythingARM64.dll", sha256: "8531ea393677dd8fd37bed7420ac93344cd458b9a1324ba65c4a75d024d61886" },
 };
 
 const EVERYTHING_SDK_ZIP_URL = "https://www.voidtools.com/Everything-SDK.zip";

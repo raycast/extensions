@@ -8,7 +8,8 @@ Browse, search, and manage AI agent skills from [Skills](https://skills.sh) dire
 - Search for specific skills
 - Filter available skills by owner
 - Install skills for all supported agents
-- View and remove installed skills
+- View, update, and remove installed skills
+- Check for skill updates with "Update available" badges
 - Filter installed skills by agent
 - View skill details inline with SKILL.md content (toggle with Cmd+D)
 - Copy install commands
@@ -26,7 +27,7 @@ View the top skills ranked by total installs. Browse skill details without leavi
 
 ### Manage Skills
 
-View and remove installed skills. Filter by agent to see which skills are available for each AI agent.
+View, update, and remove installed skills. Skills with available updates are highlighted with badges. Filter by agent to see which skills are available for each AI agent.
 
 ## Screenshots
 
