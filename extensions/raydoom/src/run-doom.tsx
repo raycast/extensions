@@ -446,8 +446,18 @@ function Command({ config = DEFAULT_CONFIG }: RunDoomProps = {}) {
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               onAction={() => handleAction(InputAction.ESCAPE)}
             />
-            <Action title="Yes" icon={Icon.CheckCircle} shortcut={{ modifiers: [], key: "y" }} onAction={() => handleAction(InputAction.YES)} />
-            <Action title="No" icon={Icon.MinusCircle} shortcut={{ modifiers: [], key: "n" }} onAction={() => handleAction(InputAction.NO)} />
+            <Action
+              title="Yes"
+              icon={Icon.CheckCircle}
+              shortcut={{ modifiers: [], key: "y" }}
+              onAction={() => handleAction(InputAction.YES)}
+            />
+            <Action
+              title="No"
+              icon={Icon.MinusCircle}
+              shortcut={{ modifiers: [], key: "n" }}
+              onAction={() => handleAction(InputAction.NO)}
+            />
 
             <Action
               title="Stop Game"
