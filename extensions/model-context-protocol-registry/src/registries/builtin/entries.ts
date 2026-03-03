@@ -667,7 +667,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "RouteMesh",
     description:
       "Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover.",
-    icon: "https://routeme.sh/favicon.ico",
+    icon: "https://routeme.sh/icon.png",
     homepage: "https://github.com/routemesh/routemesh-mcp",
     configuration: {
       command: "npx",
