@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Empty Assistant Message] - {PR_MERGE_DATE}
+## [Fix Empty Assistant Message] - 2026-03-03
 
 ### Fixed
 
