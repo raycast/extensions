@@ -2,12 +2,14 @@ import { getPreferenceValues } from "@raycast/api";
 import { UsageLimitData } from "../types/usage-types";
 import { getClaudeAccessToken } from "./keychain-access";
 import { fetchClaudeUsageLimits } from "./claude-api-client";
+import { hasClaudeOAuthToken } from "./claude-auth-mode";
 
 interface CacheState {
   data: UsageLimitData | null;
-  isLoading: boolean;
   error: Error | null;
+  isLoading: boolean;
   isStale: boolean;
+  isUsageLimitsAvailable: boolean;
   lastFetched: Date | null;
 }
 
@@ -15,9 +17,10 @@ type Listener = (state: CacheState) => void;
 
 let cacheState: CacheState = {
   data: null,
-  isLoading: true,
   error: null,
+  isLoading: true,
   isStale: false,
+  isUsageLimitsAvailable: false,
   lastFetched: null,
 };
 
@@ -36,18 +39,34 @@ const fetchUsageLimits = async (): Promise<void> => {
   const previousData = cacheState.data;
 
   try {
+    const isUsageLimitsAvailable = await hasClaudeOAuthToken();
+
+    if (!isUsageLimitsAvailable) {
+      cacheState = {
+        data: null,
+        error: null,
+        isLoading: false,
+        isStale: false,
+        isUsageLimitsAvailable: false,
+        lastFetched: null,
+      };
+      notifyListeners();
+      return;
+    }
+
     const token = await getClaudeAccessToken();
 
     if (!token) {
-      const err = new Error(
+      const error = new Error(
         "Claude Code credentials not found in keychain. Please login to Claude Code to refresh your access token.",
       );
       cacheState = {
         ...cacheState,
-        error: err,
         data: previousData,
-        isStale: previousData !== null,
+        error,
         isLoading: false,
+        isUsageLimitsAvailable: true,
+        isStale: previousData !== null,
       };
       notifyListeners();
       return;
@@ -58,29 +77,32 @@ const fetchUsageLimits = async (): Promise<void> => {
     if (limitData) {
       cacheState = {
         data: limitData,
-        isLoading: false,
         error: null,
+        isLoading: false,
+        isUsageLimitsAvailable: true,
         isStale: false,
         lastFetched: new Date(),
       };
     } else {
-      const err = new Error("Failed to fetch usage limits from API");
+      const error = new Error("Failed to fetch usage limits from API");
       cacheState = {
         ...cacheState,
-        error: err,
         data: previousData,
-        isStale: previousData !== null,
+        error,
         isLoading: false,
+        isUsageLimitsAvailable: true,
+        isStale: previousData !== null,
       };
     }
   } catch (err) {
     const error = err instanceof Error ? err : new Error("Unknown error occurred");
     cacheState = {
       ...cacheState,
-      error,
       data: previousData,
-      isStale: previousData !== null,
+      error,
       isLoading: false,
+      isUsageLimitsAvailable: cacheState.isUsageLimitsAvailable,
+      isStale: previousData !== null,
     };
   } finally {
     isFetching = false;

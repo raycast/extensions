@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.2.1] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Hide "Usage Limits" details for setups of Claude Code that are not authenticated via OAuth
+
 ## [v2.2.0] - 2026-02-18
 
 ### Added
