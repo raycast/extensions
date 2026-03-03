@@ -1,5 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import ManagePresets from "./manage-recording-presets";
 import {
   buildRecordURL,
   formatResolution,
@@ -12,20 +14,10 @@ import {
 } from "./presets";
 
 export default function Command() {
-  const [custom, setCustom] = useState<Preset[]>([]);
-  const [defaults, setDefaults] = useState<Preset[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [screenInfo, setScreenInfo] = useState<ScreenInfo>({ displays: [], primary: { width: 0, height: 0 } });
-
-  useEffect(() => {
-    (async () => {
-      const presets = await getAllPresets();
-      setCustom(presets.custom);
-      setDefaults(presets.defaults);
-      setScreenInfo(getScreenInfo());
-      setIsLoading(false);
-    })();
-  }, []);
+  const { data, isLoading } = useCachedPromise(getAllPresets);
+  const custom = data?.custom ?? [];
+  const defaults = data?.defaults ?? [];
+  const [screenInfo] = useState<ScreenInfo>(() => getScreenInfo());
 
   function displayForIndex(displayIndex: number): ScreenDimensions {
     const { displays, primary } = screenInfo;
@@ -49,7 +41,7 @@ export default function Command() {
   }
 
   function presetItem(preset: Preset) {
-    const fits = presetFitsScreen(preset, screenInfo.primary);
+    const fits = screenInfo.displays.every((display) => presetFitsScreen(preset, display));
     const accessories: List.Item.Accessory[] = [];
     if (!fits) {
       accessories.push({ tag: { value: "Exceeds screen", color: Color.Orange }, icon: Icon.ExclamationMark });
@@ -74,7 +66,7 @@ export default function Command() {
                   onAction={() => recordAtPreset(preset, i)}
                 />
               ))}
-            <Action.Push title="Manage Presets" icon={Icon.Gear} target={<ManagePresetsLink />} />
+            <Action.Push title="Manage Presets" icon={Icon.Gear} target={<ManagePresets />} />
           </ActionPanel>
         }
       />
@@ -88,18 +80,6 @@ export default function Command() {
     <List isLoading={isLoading} searchBarPlaceholder={`Search presets... ${screenLabel}`}>
       {custom.length > 0 && <List.Section title="Custom Presets">{custom.map((p) => presetItem(p))}</List.Section>}
       <List.Section title="Default Presets">{defaults.map((p) => presetItem(p))}</List.Section>
-    </List>
-  );
-}
-
-function ManagePresetsLink() {
-  return (
-    <List>
-      <List.EmptyView
-        title="Open Manage Recording Presets"
-        description="Use the separate 'Manage Recording Presets' command to add or edit presets."
-        icon={Icon.Gear}
-      />
     </List>
   );
 }
