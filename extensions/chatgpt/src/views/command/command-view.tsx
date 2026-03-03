@@ -12,20 +12,48 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useChat } from "../../hooks/useChat";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { canAccessBrowserExtension } from "../../utils/browser";
 import { PrimaryAction } from "../../actions";
 import { Command, ChatHook } from "../../type";
 import { fetchContent } from "../../utils/cmd-input";
 import { getAppIconPath } from "../../utils/icon";
+import { resolveAuthStatus } from "../../utils/auth";
 import Ask from "../../ask";
 import { v4 as uuidv4 } from "uuid";
 import { mapCommandToModel, useCommand } from "../../hooks/useCommand";
+import { AuthRequiredView } from "../auth-required";
 
 type CommandLaunchContext = { commandId?: string };
 export type CommandLaunchProps = LaunchProps<{ launchContext?: CommandLaunchContext }>;
 
 export default function CommandView(props: CommandLaunchProps) {
+  const [isAuthLoading, setAuthLoading] = useState(true);
+  const [hasAuth, setHasAuth] = useState(false);
+
+  const refreshAuth = useCallback(async () => {
+    setAuthLoading(true);
+    const status = await resolveAuthStatus();
+    setHasAuth(status.provider !== "none");
+    setAuthLoading(false);
+  }, []);
+
+  useEffect(() => {
+    refreshAuth();
+  }, [refreshAuth]);
+
+  if (isAuthLoading) {
+    return <Detail markdown="" isLoading={true} />;
+  }
+
+  if (!hasAuth) {
+    return <AuthRequiredView onAuthChange={refreshAuth} />;
+  }
+
+  return <AuthenticatedCommandView {...props} />;
+}
+
+function AuthenticatedCommandView(props: CommandLaunchProps) {
   const navigation = useNavigation();
   const commands = useCommand();
   const chat = useChat([]);

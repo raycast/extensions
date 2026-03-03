@@ -2,8 +2,11 @@ import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/
 import { useCallback, useMemo, useRef, useState } from "react";
 import say from "say";
 import { v4 as uuidv4 } from "uuid";
-import { Chat, ChatHook, Model } from "../type";
+import { Chat, ChatHook, Message, Model } from "../type";
 import { buildUserMessage, chatTransformer } from "../utils";
+import { requestCodexResponse } from "../utils/codex-responses";
+import { resolveAuthStatus } from "../utils/auth";
+import { resolveModelOptionForAuth } from "../utils/model-support";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
@@ -34,11 +37,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
   const proxy = useProxy();
-  const chatGPT = useChatGPT();
+  const chatGPT = useChatGPT({ allowMissingApiKey: true });
 
   async function ask(question: string, files: string[], model: Model) {
     clearSearchBar();
 
+    setErrorMsg(null);
+    setIsAborted(false);
     setLoading(true);
     const toast = await showToast({
       title: "Getting your answer...",
@@ -66,7 +71,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         return { apiKey: {}, params: {} };
       }
       return {
-        apiKey: { "api-key": config.apiKey },
+        apiKey: { "api-key": config.apiKey ?? "" },
         params: { "api-version": "2023-06-01-preview" },
       };
     };
@@ -74,51 +79,79 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     abortControllerRef.current = new AbortController();
     const { signal: abortSignal } = abortControllerRef.current;
 
-    await chatGPT.chat.completions
-      .create(
-        {
-          model: model.option,
-          temperature: Number(model.temperature),
-          messages: [
-            ...chatTransformer(data.reverse(), model.prompt),
-            { role: "user", content: buildUserMessage(question, files) },
-          ],
+    try {
+      const auth = await resolveAuthStatus();
+      const modelOption = resolveModelOptionForAuth(model.option, auth.provider);
+
+      const messages: Message[] = [
+        ...chatTransformer([...data].reverse(), model.prompt),
+        { role: "user", content: buildUserMessage(question, files) },
+      ];
+
+      if (auth.provider === "chatgpt" && modelOption !== model.option) {
+        toast.message = `Using ${modelOption} for ChatGPT sign-in.`;
+      }
+
+      if (auth.provider === "chatgpt" && auth.session) {
+        const answer = await requestCodexResponse({
+          accessToken: auth.session.accessToken,
+          accountId: auth.session.accountId,
+          model: modelOption,
+          messages,
+          instructions: model.prompt,
           stream: useStream,
-        },
-        {
-          httpAgent: proxy,
-          // https://github.com/openai/openai-node/blob/master/examples/azure.ts
-          // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
-          query: { ...getHeaders().params },
-          headers: { ...getHeaders().apiKey },
           signal: abortSignal,
-        },
-      )
-      .then(async (res) => {
+          httpAgent: proxy,
+          onDelta: (content) => {
+            if (!content) {
+              return;
+            }
+            chat.answer += content;
+            setStreamData({ ...chat, answer: chat.answer });
+          },
+        });
+
+        chat = { ...chat, answer };
+
         if (useStream) {
-          const stream = res as Stream<ChatCompletionChunk>;
+          setTimeout(async () => {
+            setStreamData(undefined);
+          }, 5);
+        }
+      } else {
+        if (auth.provider === "none") {
+          throw new Error("You are not signed in. Add an API key in extension preferences or sign in with ChatGPT.");
+        }
+
+        if (!chatGPT) {
+          throw new Error("OpenAI API key is missing. Add it in extension preferences.");
+        }
+
+        const response = await chatGPT.chat.completions.create(
+          {
+            model: modelOption,
+            temperature: Number(model.temperature),
+            messages,
+            stream: useStream,
+          },
+          {
+            httpAgent: proxy,
+            // https://github.com/openai/openai-node/blob/master/examples/azure.ts
+            // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
+            query: { ...getHeaders().params },
+            headers: { ...getHeaders().apiKey },
+            signal: abortSignal,
+          },
+        );
+
+        if (useStream) {
+          const stream = response as Stream<ChatCompletionChunk>;
 
           for await (const chunk of stream) {
-            try {
-              const content = chunk.choices[0]?.delta?.content;
-
-              if (content) {
-                chat.answer += chunk.choices[0].delta.content;
-                setStreamData({ ...chat, answer: chat.answer });
-              }
-            } catch (error) {
-              if (abortSignal.aborted) {
-                toast.title = "Request canceled";
-                toast.message = undefined;
-                setIsAborted(true);
-              } else {
-                const message = `Couldn't stream message: ${error}`;
-                toast.title = "Error";
-                toast.message = message;
-                setErrorMsg(message);
-              }
-              toast.style = Toast.Style.Failure;
-              setLoading(false);
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              chat.answer += content;
+              setStreamData({ ...chat, answer: chat.answer });
             }
           }
 
@@ -126,55 +159,61 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
             setStreamData(undefined);
           }, 5);
         } else {
-          const completion = res as ChatCompletion;
+          const completion = response as ChatCompletion;
           chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
         }
-        if (isAutoTTS) {
-          say.stop();
-          say.speak(chat.answer);
-        }
-        setLoading(false);
-        if (abortSignal.aborted) {
-          toast.title = "Request canceled";
-          toast.style = Toast.Style.Failure;
-          setIsAborted(true);
-        } else {
-          toast.title = "Got your answer!";
-          toast.style = Toast.Style.Success;
-        }
+      }
 
-        setData((prev) => {
-          return prev.map((a) => {
-            if (a.id === chat.id) {
-              return chat;
-            }
-            return a;
-          });
-        });
-        if (!isHistoryPaused) {
-          await history.add(chat);
-        }
-      })
-      .catch((err) => {
-        if (abortSignal.aborted) {
-          toast.title = "Request canceled";
-          toast.message = undefined;
-          setIsAborted(true);
-        } else if (err?.message) {
-          if (err.message.includes("429")) {
-            const message = "Rate limit reached for requests";
-            toast.title = "Error";
-            toast.message = message;
-            setErrorMsg(message);
-          } else {
-            toast.title = "Error";
-            toast.message = err.message;
-            setErrorMsg(err.message);
-          }
-        }
+      if (isAutoTTS) {
+        say.stop();
+        say.speak(chat.answer);
+      }
+
+      setLoading(false);
+
+      if (abortSignal.aborted) {
+        toast.title = "Request canceled";
+        toast.message = undefined;
         toast.style = Toast.Style.Failure;
-        setLoading(false);
+        setIsAborted(true);
+      } else {
+        toast.title = "Got your answer!";
+        toast.message = undefined;
+        toast.style = Toast.Style.Success;
+      }
+
+      setData((prev) => {
+        return prev.map((a) => {
+          if (a.id === chat.id) {
+            return chat;
+          }
+          return a;
+        });
       });
+
+      if (!isHistoryPaused) {
+        await history.add(chat);
+      }
+    } catch (err) {
+      if (abortSignal.aborted || isAbortError(err)) {
+        toast.title = "Request canceled";
+        toast.message = undefined;
+        setIsAborted(true);
+      } else if (err instanceof Error) {
+        if (err.message.includes("429")) {
+          const message = "Rate limit reached for requests";
+          toast.title = "Error";
+          toast.message = message;
+          setErrorMsg(message);
+        } else {
+          toast.title = "Error";
+          toast.message = err.message;
+          setErrorMsg(err.message);
+        }
+      }
+      toast.style = Toast.Style.Failure;
+      setLoading(false);
+    }
   }
 
   const abort = useCallback(() => {
@@ -219,4 +258,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       abort,
     ],
   );
+}
+
+function isAbortError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const lowerMessage = error.message.toLowerCase();
+  return error.name === "AbortError" || lowerMessage.includes("abort") || lowerMessage.includes("canceled");
 }

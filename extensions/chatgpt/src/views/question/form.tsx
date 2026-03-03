@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
 import { checkFileValidity, formats } from "../../utils";
+import { orderModelsForSelection } from "../../utils/model-support";
 import path from "node:path";
 
 export const QuestionForm = ({
@@ -29,14 +30,15 @@ export const QuestionForm = ({
   const [questionError, setQuestionError] = useState<string | undefined>();
   const [attachmentError, setAttachmentError] = useState<string | undefined>();
 
-  const separateDefaultModel = models.filter((x) => x.id !== "default");
-  const defaultModel = models.find((x) => x.id === "default") ?? DEFAULT_MODEL;
+  const orderedModels = useMemo(() => orderModelsForSelection(models), [models]);
+  const separateDefaultModel = orderedModels.filter((x) => x.id !== "default");
+  const defaultModel = orderedModels.find((x) => x.id === "default") ?? DEFAULT_MODEL;
 
   const visionMap = useMemo(() => {
     const map = new Map<string, boolean>();
-    models.forEach((m) => map.set(m.id, m.vision || false));
+    orderedModels.forEach((m) => map.set(m.id, m.vision || false));
     return map;
-  }, [models]);
+  }, [orderedModels]);
 
   const [files, setFiles] = useState<string[]>([]);
   const [enableVision, setEnableVision] = useState(visionMap.get(selectedModel) || false);

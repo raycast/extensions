@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Model, ModelHook } from "../type";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useProxy } from "./useProxy";
+import { mergeModelOptionsWithCodex } from "../utils/model-support";
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
@@ -10,7 +11,7 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Default",
   prompt: "You are a helpful assistant.",
-  option: "gpt-4o-mini",
+  option: "gpt-5.2",
   temperature: "1",
   pinned: false,
   vision: false,
@@ -20,10 +21,11 @@ export function useModel(): ModelHook {
   const [data, setData] = useState<Record<string, Model>>({});
   const [isLoading, setLoading] = useState<boolean>(true);
   const [isFetching, setFetching] = useState<boolean>(true);
-  const gpt = useChatGPT();
+  const gpt = useChatGPT({ allowMissingApiKey: true });
   const proxy = useProxy();
-  const { useAzure, isCustomModel } = getConfiguration();
-  const [option, setOption] = useState<Model["option"][]>(["gpt-4o-mini", "chatgpt-4o-latest"]);
+  const { useAzure, isCustomModel, apiKey } = getConfiguration();
+  const hasApiKey = (apiKey ?? "").trim().length > 0;
+  const [option, setOption] = useState<Model["option"][]>(mergeModelOptionsWithCodex(["gpt-5.2", "chatgpt-4o-latest"]));
   const isInitialMount = useRef(true);
 
   useEffect(() => {
@@ -32,6 +34,12 @@ export function useModel(): ModelHook {
       setFetching(false);
       return;
     }
+
+    if (!hasApiKey || !gpt) {
+      setFetching(false);
+      return;
+    }
+
     if (!useAzure) {
       gpt.models
         .list({ httpAgent: proxy })
@@ -47,7 +55,7 @@ export function useModel(): ModelHook {
               // ignore try to parse it
             }
           }
-          setOption(models.map((x) => x.id));
+          setOption(mergeModelOptionsWithCodex(models.map((x) => x.id)));
         })
         .catch(async (err) => {
           console.error(err);
@@ -74,7 +82,7 @@ export function useModel(): ModelHook {
     } else {
       setFetching(false);
     }
-  }, [gpt]);
+  }, [gpt, hasApiKey, isCustomModel, proxy, useAzure]);
 
   useEffect(() => {
     (async () => {
@@ -96,6 +104,12 @@ export function useModel(): ModelHook {
         }
         if (!modelsById[DEFAULT_MODEL.id]) {
           modelsById[DEFAULT_MODEL.id] = DEFAULT_MODEL;
+        } else if (modelsById[DEFAULT_MODEL.id].option === "gpt-4o-mini") {
+          modelsById[DEFAULT_MODEL.id] = {
+            ...modelsById[DEFAULT_MODEL.id],
+            option: DEFAULT_MODEL.option,
+            updated_at: new Date().toISOString(),
+          };
         }
         setData(modelsById);
       }

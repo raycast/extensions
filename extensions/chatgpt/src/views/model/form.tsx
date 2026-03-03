@@ -3,13 +3,26 @@ import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { CSVPrompt, Model, ModelHook } from "../../type";
 import { parse } from "csv-parse/sync";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getConfiguration } from "../../hooks/useChatGPT";
+import { AuthProvider, resolveAuthStatus } from "../../utils/auth";
+import {
+  CHATGPT_CODEX_SUPPORTED_MODELS,
+  isChatGPTCodexModelSupported,
+  orderModelOptionsForSelection,
+} from "../../utils/model-support";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
   const { pop } = useNavigation();
   const { isCustomModel } = getConfiguration();
+  const [authProvider, setAuthProvider] = useState<AuthProvider>("none");
+
+  useEffect(() => {
+    resolveAuthStatus().then((auth) => {
+      setAuthProvider(auth.provider);
+    });
+  }, []);
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
@@ -60,14 +73,34 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     initialValues: {
       name: model?.name ?? props.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
-      option: model?.option ?? "gpt-4o-mini",
+      option: model?.option ?? "gpt-5.2",
       prompt: model?.prompt ?? "You are a helpful assistant.",
       pinned: model?.pinned ?? false,
       vision: model?.vision ?? false,
     },
   });
 
-  const MODEL_OPTIONS = use.models.option;
+  const MODEL_OPTIONS = useMemo(() => {
+    if (authProvider !== "chatgpt") {
+      return orderModelOptionsForSelection(use.models.option);
+    }
+
+    const filtered = use.models.option.filter((option) => isChatGPTCodexModelSupported(option));
+    return filtered.length > 0
+      ? orderModelOptionsForSelection(filtered)
+      : orderModelOptionsForSelection([...CHATGPT_CODEX_SUPPORTED_MODELS]);
+  }, [authProvider, use.models.option]);
+
+  useEffect(() => {
+    if (isCustomModel || authProvider !== "chatgpt") {
+      return;
+    }
+
+    const currentOption = String(itemProps.option.value ?? "");
+    if (!isChatGPTCodexModelSupported(currentOption)) {
+      setValue("option", CHATGPT_CODEX_SUPPORTED_MODELS[0]);
+    }
+  }, [authProvider, isCustomModel, itemProps.option.value, setValue]);
 
   const { isLoading, data } = useFetch<CSVPrompt[]>(
     "https://raw.githubusercontent.com/awesome-chatgpt-prompts/awesome-chatgpt-prompts-github/awesome-chatgpt-prompts/prompts.csv",

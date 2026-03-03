@@ -154,10 +154,10 @@
     {
       "name": "apiKey",
       "label": "Open AI API Key",
-      "description": "Enter your personal Open AI API Key",
+      "description": "Enter your personal Open AI API Key (optional when using ChatGPT sign-in)",
       "type": "password",
       "title": "API Key",
-      "required": true
+      "required": false
     },
     {
       "name": "useStream",
