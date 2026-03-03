@@ -1,18 +1,7 @@
 import { List } from "@raycast/api";
-import { useCachedState, useExec } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
-import {
-  buildArgs,
-  cliErrorHandler,
-  getCliPath,
-  getDbPath,
-  isFuzzyEnabled,
-  parseCLIOutput,
-  PlatformDropdown,
-  ResultListItem,
-  useHistory,
-  useInfo,
-} from "./shared";
+import { isFuzzyEnabled, PlatformDropdown, ResultListItem, useHistory, useInfo, usePaginatedCLI } from "./shared";
 
 export default function LookupByTarget() {
   const [searchText, setSearchText] = useState("");
@@ -20,25 +9,13 @@ export default function LookupByTarget() {
   const [langs, setLangs] = useCachedState<string[]>("langs", []);
   const { info, isLoading: infoLoading } = useInfo();
   const { history, addToHistory, removeFromHistory } = useHistory();
-  const cliPath = getCliPath();
-  const dbPath = getDbPath();
 
-  const { data, isLoading } = useExec(
-    cliPath,
-    [
-      "lookup",
-      "--target",
-      searchText,
-      ...(isFuzzyEnabled() ? ["--fuzzy"] : []),
-      ...buildArgs({ platform: platform || undefined, langs: langs.length ? langs : undefined, db: dbPath }),
-    ],
-    {
-      execute: searchText.length > 0,
-      keepPreviousData: true,
-      parseOutput: ({ stdout }) => parseCLIOutput(stdout),
-      onError: cliErrorHandler(cliPath, dbPath),
-    },
-  );
+  const { data, isLoading, pagination } = usePaginatedCLI({
+    command: ["lookup", "--target", searchText, ...(isFuzzyEnabled() ? ["--fuzzy"] : [])],
+    platform: platform || undefined,
+    langs: langs.length ? langs : undefined,
+    execute: searchText.length > 0,
+  });
 
   return (
     <List
@@ -48,6 +25,7 @@ export default function LookupByTarget() {
       onSearchTextChange={setSearchText}
       throttle
       filtering={false}
+      pagination={pagination}
       navigationTitle={langs.length > 0 ? `Language: ${langs.join(", ")}` : undefined}
       searchBarAccessory={<PlatformDropdown info={info} isLoading={infoLoading} onChange={setPlatform} />}
     >

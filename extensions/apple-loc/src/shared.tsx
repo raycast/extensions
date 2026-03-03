@@ -10,8 +10,13 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useExec, useLocalStorage } from "@raycast/utils";
+import { useExec, useLocalStorage, usePromise } from "@raycast/utils";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { useCallback, useRef } from "react";
+
+const execFileAsync = promisify(execFile);
+const DEFAULT_PAGE_SIZE = 20;
 
 function expandTilde(p: string): string {
   if (p.startsWith("~/")) return `${process.env.HOME}${p.slice(1)}`;
@@ -118,21 +123,77 @@ export interface LocalizationResult {
 }
 
 export interface CLIOutput {
+  has_more?: boolean;
   results: LocalizationResult[];
 }
 
-export function buildArgs(opts: { db: string; platform?: string; langs?: string[] }): string[] {
-  const limit = getResultLimit();
-  const args: string[] = [...(limit ? ["--limit", String(limit)] : []), "--db", opts.db];
+export function buildArgs(opts: {
+  db: string;
+  platform?: string;
+  langs?: string[];
+  limit?: number;
+  offset?: number;
+}): string[] {
+  const args: string[] = [];
+  if (opts.limit != null) args.push("--limit", String(opts.limit));
+  if (opts.offset != null) args.push("--offset", String(opts.offset));
+  args.push("--db", opts.db);
   if (opts.platform) args.push("--platform", opts.platform);
   if (opts.langs?.length) args.push("--lang", opts.langs.join(","));
   return args;
 }
 
-export function parseCLIOutput(stdout: string): LocalizationResult[] {
-  if (!stdout.trim()) return [];
-  const parsed = JSON.parse(stdout) as CLIOutput;
-  return parsed.results;
+export function parseCLIOutput(stdout: string): CLIOutput {
+  if (!stdout.trim()) return { has_more: false, results: [] };
+  return JSON.parse(stdout) as CLIOutput;
+}
+
+async function execCLI(cliPath: string, args: string[]): Promise<string> {
+  const { stdout } = await execFileAsync(cliPath, args);
+  return stdout;
+}
+
+export interface PaginatedCLIOptions {
+  command: string[];
+  platform?: string;
+  langs?: string[];
+  execute?: boolean;
+}
+
+export function usePaginatedCLI({ command, platform, langs, execute = true }: PaginatedCLIOptions) {
+  const cliPath = getCliPath();
+  const dbPath = getDbPath();
+  const pageSize = getResultLimit() ?? DEFAULT_PAGE_SIZE;
+  const abortable = useRef<AbortController | null>(null);
+
+  const cmdKey = JSON.stringify(command);
+  const platformKey = platform ?? "";
+  const langsKey = (langs ?? []).join(",");
+
+  const { data, isLoading, pagination } = usePromise(
+    (ck: string, pk: string, lk: string) =>
+      async ({ page }: { page: number }) => {
+        const cmd = JSON.parse(ck) as string[];
+        const offset = page * pageSize;
+        const args = [
+          ...cmd,
+          ...buildArgs({
+            db: dbPath,
+            platform: pk || undefined,
+            langs: lk ? lk.split(",") : undefined,
+            limit: pageSize,
+            offset,
+          }),
+        ];
+        const stdout = await execCLI(cliPath, args);
+        const parsed = parseCLIOutput(stdout);
+        return { data: parsed.results, hasMore: parsed.has_more ?? false };
+      },
+    [cmdKey, platformKey, langsKey],
+    { execute, abortable, onError: cliErrorHandler(cliPath, dbPath) },
+  );
+
+  return { data, isLoading, pagination };
 }
 
 const HISTORY_MAX = 20;
