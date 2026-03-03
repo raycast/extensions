@@ -59,9 +59,7 @@ export async function createSecret(
     formData.set("self_destruct", "true");
   }
 
-  formData.set("source", "raycast");
-
-  const response = await fetch(`${getWhisperUrl()}/secret`, {
+  const response = await fetch(`${getWhisperUrl()}/secret?source=raycast`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: formData.toString(),
