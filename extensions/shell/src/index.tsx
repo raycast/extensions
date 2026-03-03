@@ -33,13 +33,6 @@ export interface EnvType {
 interface ShellArguments {
   command: string;
 }
-interface Preferences {
-  arguments_terminal: boolean;
-  arguments_terminal_type: string;
-  cmux_run_mode?: "activeWorkspace" | "newWorkspace";
-  cmux_socket_path?: string;
-  cmux_socket_password?: string;
-}
 
 let cachedEnv: null | EnvType = null;
 
