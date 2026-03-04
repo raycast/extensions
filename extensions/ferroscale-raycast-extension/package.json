@@ -1,0 +1,36 @@
+{
+  "name": "ferroscale-raycast-extension",
+  "version": "0.1.0",
+  "title": "Ferroscale Quick Weight",
+  "description": "Quick metal profile weight calculations from shorthand input.",
+  "icon": "icon.png",
+  "author": "nedim_perva",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-metal-weight",
+      "title": "Quick Metal Weight",
+      "description": "Calculate metal weight from shorthand input and flags.",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "categories": ["Productivity"],
+  "private": true,
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.101.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^20.19.0",
+    "@types/react": "^19.2.4",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
+}

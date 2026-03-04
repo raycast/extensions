@@ -1,0 +1,275 @@
+import type { ManualProfileDefinition } from "../types";
+
+export const MANUAL_PROFILES: ManualProfileDefinition[] = [
+  /* ---- Bars ---- */
+  {
+    id: "round_bar",
+    label: "Round Bar",
+    category: "bars",
+    mode: "manual",
+    formulaLabel: "A = π × d² / 4",
+    referenceLabel: "EN 10060",
+    dimensions: [
+      {
+        key: "diameter",
+        label: "Diameter",
+        minMm: 4,
+        maxMm: 600,
+        defaultMm: 30,
+      },
+    ],
+  },
+  {
+    id: "square_bar",
+    label: "Square Bar",
+    category: "bars",
+    mode: "manual",
+    formulaLabel: "A = a²",
+    referenceLabel: "EN 10059",
+    dimensions: [
+      { key: "side", label: "Side", minMm: 4, maxMm: 500, defaultMm: 30 },
+    ],
+  },
+  {
+    id: "flat_bar",
+    label: "Flat Bar",
+    category: "bars",
+    mode: "manual",
+    formulaLabel: "A = b × t",
+    referenceLabel: "EN 10058",
+    dimensions: [
+      { key: "width", label: "Width", minMm: 10, maxMm: 1000, defaultMm: 80 },
+      {
+        key: "thickness",
+        label: "Thickness",
+        minMm: 2,
+        maxMm: 120,
+        defaultMm: 8,
+      },
+    ],
+  },
+
+  {
+    id: "angle",
+    label: "Angle (L)",
+    category: "structural",
+    mode: "manual",
+    formulaLabel: "A = (a + b − t) × t",
+    referenceLabel: "EN 10056",
+    dimensions: [
+      { key: "legA", label: "Leg A", minMm: 15, maxMm: 300, defaultMm: 60 },
+      { key: "legB", label: "Leg B", minMm: 15, maxMm: 300, defaultMm: 60 },
+      {
+        key: "thickness",
+        label: "Thickness",
+        minMm: 2,
+        maxMm: 35,
+        defaultMm: 6,
+      },
+    ],
+  },
+
+  /* ---- Tubes ---- */
+  {
+    id: "pipe",
+    label: "Pipe / Circular Tube",
+    category: "tubes",
+    mode: "manual",
+    formulaLabel: "A = π × (OD² − ID²) / 4",
+    referenceLabel: "EN 10255 / EN 10216",
+    dimensions: [
+      {
+        key: "outerDiameter",
+        label: "Outer Diameter",
+        minMm: 10,
+        maxMm: 1200,
+        defaultMm: 60.3,
+      },
+      {
+        key: "wallThickness",
+        label: "Wall Thickness",
+        minMm: 1.2,
+        maxMm: 80,
+        defaultMm: 3.2,
+      },
+    ],
+  },
+  {
+    id: "rectangular_tube",
+    label: "Rectangular Tube",
+    category: "tubes",
+    mode: "manual",
+    formulaLabel: "A = B×H − (B−2t)×(H−2t)",
+    referenceLabel: "EN 10219 / EN 10210",
+    dimensions: [
+      {
+        key: "width",
+        label: "Width (B)",
+        minMm: 20,
+        maxMm: 500,
+        defaultMm: 120,
+      },
+      {
+        key: "height",
+        label: "Height (H)",
+        minMm: 20,
+        maxMm: 500,
+        defaultMm: 80,
+      },
+      {
+        key: "wallThickness",
+        label: "Wall Thickness",
+        minMm: 1.5,
+        maxMm: 40,
+        defaultMm: 4,
+      },
+    ],
+  },
+  {
+    id: "square_hollow",
+    label: "Square Hollow Section",
+    category: "tubes",
+    mode: "manual",
+    formulaLabel: "A = a² − (a−2t)²",
+    referenceLabel: "EN 10219 / EN 10210",
+    dimensions: [
+      { key: "side", label: "Side (a)", minMm: 20, maxMm: 500, defaultMm: 80 },
+      {
+        key: "wallThickness",
+        label: "Wall Thickness",
+        minMm: 1.5,
+        maxMm: 40,
+        defaultMm: 4,
+      },
+    ],
+  },
+
+  /* ---- Plates & Sheets ---- */
+  {
+    id: "sheet",
+    label: "Sheet",
+    category: "plates_sheets",
+    mode: "manual",
+    formulaLabel: "A = width × thickness",
+    referenceLabel: "EN 10051",
+    dimensions: [
+      {
+        key: "width",
+        label: "Width",
+        minMm: 100,
+        maxMm: 3000,
+        defaultMm: 1250,
+      },
+      {
+        key: "thickness",
+        label: "Thickness",
+        minMm: 0.4,
+        maxMm: 6,
+        defaultMm: 2,
+      },
+    ],
+  },
+  {
+    id: "plate",
+    label: "Plate",
+    category: "plates_sheets",
+    mode: "manual",
+    formulaLabel: "A = width × thickness",
+    referenceLabel: "EN 10029",
+    dimensions: [
+      {
+        key: "width",
+        label: "Width",
+        minMm: 100,
+        maxMm: 4000,
+        defaultMm: 1500,
+      },
+      {
+        key: "thickness",
+        label: "Thickness",
+        minMm: 6,
+        maxMm: 250,
+        defaultMm: 20,
+      },
+    ],
+  },
+  {
+    id: "chequered_plate",
+    label: "Chequered Plate",
+    category: "plates_sheets",
+    mode: "manual",
+    formulaLabel: "A = w × (t + pattern×0.5)",
+    referenceLabel: "EN 10363",
+    dimensions: [
+      {
+        key: "width",
+        label: "Width",
+        minMm: 100,
+        maxMm: 4000,
+        defaultMm: 1500,
+      },
+      {
+        key: "thickness",
+        label: "Base Thickness",
+        minMm: 3,
+        maxMm: 20,
+        defaultMm: 5,
+      },
+      {
+        key: "patternHeight",
+        label: "Pattern Height",
+        minMm: 1,
+        maxMm: 5,
+        defaultMm: 2,
+      },
+    ],
+  },
+  {
+    id: "expanded_metal",
+    label: "Expanded Metal",
+    category: "plates_sheets",
+    mode: "manual",
+    formulaLabel: "A = width × eff. thickness",
+    referenceLabel: "ISO 16573",
+    dimensions: [
+      {
+        key: "width",
+        label: "Width",
+        minMm: 100,
+        maxMm: 3000,
+        defaultMm: 1250,
+      },
+      {
+        key: "thickness",
+        label: "Eff. Thickness",
+        minMm: 0.5,
+        maxMm: 10,
+        defaultMm: 3,
+      },
+    ],
+  },
+  {
+    id: "corrugated_sheet",
+    label: "Corrugated Sheet",
+    category: "plates_sheets",
+    mode: "manual",
+    formulaLabel: "A = width × base thickness",
+    referenceLabel: "EN 508",
+    dimensions: [
+      {
+        key: "width",
+        label: "Cover Width",
+        minMm: 100,
+        maxMm: 3000,
+        defaultMm: 1000,
+      },
+      {
+        key: "thickness",
+        label: "Base Thickness",
+        minMm: 0.3,
+        maxMm: 3,
+        defaultMm: 0.7,
+      },
+    ],
+  },
+];
