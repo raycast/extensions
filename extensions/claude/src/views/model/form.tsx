@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelHook, CSVPrompt } from "../../type";

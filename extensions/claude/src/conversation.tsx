@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
+import { DestructiveAction, PinAction, PrimaryAction, platformShortcut } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import Ask from "./ask";
 import { useConversations } from "./hooks/useConversations";
@@ -70,7 +70,7 @@ export default function Conversation() {
             title: "Are you sure you want to clear your conversations?",
           }}
           onAction={() => conversations.clear()}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+          shortcut={platformShortcut({ modifiers: ["cmd", "shift"], key: "delete" })}
         />
       </ActionPanel.Section>
       <PreferencesActionSection />

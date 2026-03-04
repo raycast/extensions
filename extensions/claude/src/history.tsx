@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { DestructiveAction } from "./actions";
+import { DestructiveAction, platformShortcut } from "./actions";
 import { CopyActionSection } from "./actions/copy";
 import { PreferencesActionSection } from "./actions/preferences";
 import { SaveActionSection } from "./actions/save";
@@ -34,7 +34,7 @@ export default function History() {
             title: "Are you sure you want to clear your history?",
           }}
           onAction={() => history.clear()}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+          shortcut={platformShortcut({ modifiers: ["cmd", "shift"], key: "delete" })}
         />
       </ActionPanel.Section>
       <PreferencesActionSection />

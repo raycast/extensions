@@ -1,6 +1,6 @@
 import { ActionPanel, clearSearchBar, Icon, List } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
-import { DestructiveAction, PrimaryAction } from "../actions";
+import { DestructiveAction, platformShortcut, PrimaryAction } from "../actions";
 import { CopyActionSection } from "../actions/copy";
 import { FormInputActionSection } from "../actions/form-input";
 import { PreferencesActionSection } from "../actions/preferences";
@@ -64,7 +64,7 @@ export const ChatView = ({
               clearSearchBar();
               use.chats.setLoading(false);
             }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            shortcut={platformShortcut({ modifiers: ["cmd", "shift"], key: "n" })}
           />
         </ActionPanel.Section>
       )}

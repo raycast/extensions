@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { DestructiveAction } from "./actions";
+import { DestructiveAction, platformShortcut } from "./actions";
 import { CopyActionSection } from "./actions/copy";
 import { PreferencesActionSection } from "./actions/preferences";
 import { useSavedChat } from "./hooks/useSavedChat";
@@ -30,7 +30,7 @@ export default function Saved() {
             title: "Are you sure you want to clear all your saved answer from your collection?",
           }}
           onAction={() => savedChat.clear()}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+          shortcut={platformShortcut({ modifiers: ["cmd", "shift"], key: "delete" })}
         />
       </ActionPanel.Section>
       <PreferencesActionSection />
@@ -73,7 +73,7 @@ export default function Saved() {
       {savedChat.data.length === 0 ? (
         <List.EmptyView
           title="No saved answers"
-          description="Save generated question with ⌘ + S shortcut"
+          description="Save generated question with ⌘ / Ctrl + S shortcut"
           icon={Icon.Stars}
         />
       ) : (

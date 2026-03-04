@@ -1,5 +1,9 @@
 # Claude Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Feature: Added Windows support for the Claude extension, including cross-platform keyboard shortcuts and updated manifest platforms
+
 ## [Fix memory leak] - 2026-02-01
 
 - Fix: Resolved JS heap out of memory error by throttling UI updates during streaming responses

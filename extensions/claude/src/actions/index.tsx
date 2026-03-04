@@ -1,4 +1,15 @@
-import { Action, Alert, confirmAlert, Icon, Image, Keyboard } from "@raycast/api";
+import { Action, Alert, confirmAlert, environment, Icon, Image, Keyboard } from "@raycast/api";
+
+export const platformShortcut = (shortcut: Keyboard.Shortcut): Keyboard.Shortcut => {
+  if (environment.platform === "windows" && shortcut.modifiers) {
+    return {
+      ...shortcut,
+      modifiers: shortcut.modifiers.map((modifier) => (modifier === "cmd" ? "ctrl" : modifier)),
+    };
+  }
+
+  return shortcut;
+};
 
 export const PrimaryAction = ({ title, onAction }: { title: string; onAction: () => void }) => (
   <Action title={title} icon={Icon.ArrowRight} onAction={onAction} />
@@ -18,25 +29,26 @@ export const CopyToClipboardAction = (props: Action.CopyToClipboard.Props) => (
   <Action.CopyToClipboard icon={Icon.CopyClipboard} {...props} />
 );
 
-export const SaveAnswerAction = ({ onAction }: { onAction: () => void }) => (
-  <Action icon={Icon.Star} title="Save Answer" onAction={onAction} shortcut={{ modifiers: ["cmd"], key: "s" }} />
-);
+export const SaveAnswerAction = ({ onAction }: { onAction: () => void }) => {
+  const shortcut = platformShortcut({ modifiers: ["cmd"], key: "s" });
 
-export const SaveAsSnippetAction = ({ text, name }: { text: string; name: string }) => (
-  <Action.CreateSnippet
-    icon={Icon.Snippets}
-    title="Save as a Snippet"
-    snippet={{ text, name }}
-    shortcut={{ modifiers: ["cmd"], key: "n" }}
-  />
-);
+  return <Action icon={Icon.Star} title="Save Answer" onAction={onAction} shortcut={shortcut} />;
+};
+
+export const SaveAsSnippetAction = ({ text, name }: { text: string; name: string }) => {
+  const shortcut = platformShortcut({ modifiers: ["cmd"], key: "n" });
+
+  return (
+    <Action.CreateSnippet icon={Icon.Snippets} title="Save as a Snippet" snippet={{ text, name }} shortcut={shortcut} />
+  );
+};
 
 export const DestructiveAction = ({
   icon = Icon.Trash,
   title,
   dialog,
   onAction,
-  shortcut = { modifiers: ["cmd"], key: "d" },
+  shortcut = platformShortcut({ modifiers: ["cmd"], key: "d" }),
 }: {
   icon?: Image.ImageLike;
   title: string;

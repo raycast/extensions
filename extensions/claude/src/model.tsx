@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { DestructiveAction, PinAction } from "./actions";
+import { DestructiveAction, PinAction, platformShortcut } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { Model } from "./type";
@@ -18,13 +18,13 @@ export default function Model() {
     <ActionPanel>
       <Action
         title={"Edit Model"}
-        shortcut={{ modifiers: ["cmd"], key: "e" }}
+        shortcut={platformShortcut({ modifiers: ["cmd"], key: "e" })}
         icon={Icon.Pencil}
         onAction={() => push(<ModelForm model={model} use={{ models }} />)}
       />
       <Action
         title={"Create Model"}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={platformShortcut({ modifiers: ["cmd"], key: "n" })}
         icon={Icon.Plus}
         onAction={() => push(<ModelForm name={searchText} use={{ models }} />)}
       />

@@ -13,7 +13,8 @@
     "ridemountainpig",
     "abizer",
     "ridjis",
-    "mhrmsn"
+    "mhrmsn",
+    "adityavardhansharma"
   ],
   "categories": [
     "Productivity",
@@ -102,12 +103,12 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.18.0",
-    "@raycast/api": "^1.78.0",
-    "@raycast/utils": "^1.14.1",
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "latest",
     "@types/uuid": "^9.0.0",
     "cross-fetch": "^4.0.0",
     "csv-parse": "^5.5.3",
-    "raycast": "^1.0.8",
+    "raycast": "latest",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -121,13 +122,14 @@
     "typescript": "^4.4.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
