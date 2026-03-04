@@ -1,6 +1,6 @@
 # Aave Search Changelog
 
-## [1.1.6] - {PR_MERGE_DATE}
+## [1.1.6] - 2026-03-04
 
 ### Maintenance
 
