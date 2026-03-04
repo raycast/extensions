@@ -6,8 +6,7 @@
   "icon": "extension-icon.png",
   "author": "SandeepBaskaran",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Developer Tools",

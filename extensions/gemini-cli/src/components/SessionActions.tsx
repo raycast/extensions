@@ -1,10 +1,17 @@
-import { Action, ActionPanel, Icon, Keyboard, open, showToast, Toast, confirmAlert, useNavigation } from "@raycast/api";
-import { existsSync, unlinkSync } from "fs";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  open,
+  showToast,
+  Toast,
+  confirmAlert,
+  useNavigation,
+  trash,
+} from "@raycast/api";
+import { existsSync } from "fs";
 import { Session } from "../types";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execAsync = promisify(exec);
 
 interface SessionActionsProps {
   session: Session;
@@ -17,7 +24,7 @@ export function SessionActions({ session, mutate, isDetail }: SessionActionsProp
 
   // Escape spaces and special chars in project path
   const escapedPath = session.projectPath.replace(/(["\s'$`\\])/g, "\\$1");
-  const resumeCommand = `cd ${escapedPath} && gemini resume ${session.id}`;
+  const resumeCommand = `cd ${escapedPath} && gemini --resume ${session.id}`;
 
   async function handleDelete() {
     const confirmed = await confirmAlert({
@@ -34,7 +41,7 @@ export function SessionActions({ session, mutate, isDetail }: SessionActionsProp
 
     try {
       if (existsSync(session.filePath)) {
-        unlinkSync(session.filePath);
+        await trash(session.filePath);
       }
       toast.style = Toast.Style.Success;
       toast.title = "Session deleted";
@@ -49,15 +56,6 @@ export function SessionActions({ session, mutate, isDetail }: SessionActionsProp
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to delete session";
       toast.message = msg;
-    }
-  }
-
-  async function handleOpenInVSCode() {
-    try {
-      await execAsync(`code ${escapedPath}`);
-      await showToast({ style: Toast.Style.Success, title: "Opened project in VS Code" });
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "VS Code (code cli) not found in PATH" });
     }
   }
 
@@ -90,12 +88,6 @@ export function SessionActions({ session, mutate, isDetail }: SessionActionsProp
             }
             await open(session.projectPath);
           }}
-        />
-        <Action
-          title="Open Project in VS Code"
-          icon={Icon.Code}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-          onAction={handleOpenInVSCode}
         />
       </ActionPanel.Section>
 

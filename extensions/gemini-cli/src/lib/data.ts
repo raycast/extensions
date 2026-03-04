@@ -32,9 +32,10 @@ export async function getProjects(): Promise<Project[]> {
 // This prevents "JS heap out of memory" errors for extremely large session files.
 async function extractSessionMetadata(
   filePath: string,
-): Promise<{ startTime: string; lastUpdated: string; title: string; messageCount: number } | null> {
+): Promise<{ id: string | null; startTime: string; lastUpdated: string; title: string; messageCount: number } | null> {
   return new Promise((resolve) => {
     let title = "Empty Session";
+    let id: string | null = null;
     let startTime = new Date().toISOString();
     let lastUpdated = new Date().toISOString();
     let messageCount = 0;
@@ -57,6 +58,11 @@ async function extractSessionMetadata(
 
     rl.on("line", (line) => {
       // Fast matching for simple scalar fields at the top of the file
+      if (!id && line.includes('"sessionId":')) {
+        const match = line.match(/"sessionId":\s*"(.*?)"/);
+        if (match) id = match[1];
+      }
+
       if (line.includes('"startTime":')) {
         const match = line.match(/"startTime":\s*"(.*?)"/);
         if (match) startTime = match[1];
@@ -83,7 +89,8 @@ async function extractSessionMetadata(
           }
 
           if (inContent && line.includes('"text": "')) {
-            const match = line.match(/"text":\s*"(.*?)"/);
+            // Updated regex to safely handle escaped JSON sequences like \"
+            const match = line.match(/"text":\s*"((?:[^"\\]|\\.)*)"/);
             if (match) {
               // Extract text and stop looking for title
               title = match[1];
@@ -104,7 +111,7 @@ async function extractSessionMetadata(
       } catch {
         // ignore
       }
-      resolve({ startTime, lastUpdated, title, messageCount });
+      resolve({ id, startTime, lastUpdated, title, messageCount });
     });
 
     readStream.on("error", () => {
@@ -126,16 +133,16 @@ export async function getSessions(projects: Project[]): Promise<Session[]> {
 
     try {
       const files = await fs.promises.readdir(chatsDir);
-      for (const file of files) {
-        if (!file.endsWith(".json")) continue;
+      const jsonFiles = files.filter((f) => f.endsWith(".json"));
 
-        const filePath = path.join(chatsDir, file);
-        const metadata = await extractSessionMetadata(filePath);
+      const results = await Promise.all(
+        jsonFiles.map(async (file) => {
+          const filePath = path.join(chatsDir, file);
+          const metadata = await extractSessionMetadata(filePath);
+          if (!metadata) return null;
 
-        if (metadata) {
-          // Check if the title is valid before pushing to array
-          sessions.push({
-            id: file.replace("session-", "").replace(".json", ""), // Fallback ID if JSON parsing skips sessionId
+          return {
+            id: metadata.id || file.replace("session-", "").replace(".json", ""), // Fallback ID if JSON parsing skips sessionId
             projectId: project.id,
             projectName: project.name,
             projectPath: project.path,
@@ -144,8 +151,12 @@ export async function getSessions(projects: Project[]): Promise<Session[]> {
             messageCount: metadata.messageCount,
             title: metadata.title,
             filePath,
-          });
-        }
+          };
+        }),
+      );
+
+      for (const session of results) {
+        if (session) sessions.push(session);
       }
     } catch (error) {
       console.error(`Error reading chats directory ${chatsDir}:`, error);
