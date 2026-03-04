@@ -2,8 +2,6 @@
 
 ## [Add Windows Support] - {PR_MERGE_DATE}
 
-- Added: Tested on Raycast for Windows.
-
 ## [Bug Fixes] - 2026-01-19
 
 - Fix: Clearing notes when editing a time entry now properly deletes the note
