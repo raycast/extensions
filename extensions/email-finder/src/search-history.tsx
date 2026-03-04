@@ -10,7 +10,7 @@ import {
   launchCommand,
   LaunchType,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { getFavicon, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import {
   SearchHistoryEntry,
@@ -340,20 +340,13 @@ export default function Command() {
 
   // * Filter entries based on dropdown selection
   const filteredEntries = (entries ?? []).filter((entry) => {
-    switch (filter) {
-      case "all":
-        return true;
-      case "email":
-        return isEmailEntry(entry);
-      case "company":
-        return isCompanyEntry(entry);
-      case "success":
-      case "error":
-        return isEmailEntry(entry) && entry.status === filter;
-      default: {
-        return false;
-      }
+    if (filter === "all") return true;
+    if (filter === "email") return isEmailEntry(entry);
+    if (filter === "company") return isCompanyEntry(entry);
+    if (isEmailEntry(entry)) {
+      return entry.status === filter;
     }
+    return false; // Company entries don't have success/error status
   });
 
   async function handleRunSearch(entry: SearchHistoryEntry) {
@@ -415,7 +408,11 @@ export default function Command() {
             key={entry.id}
             title={entry.companyName}
             subtitle={`${entry.domain}${entry.totalEmployees ? ` · ${entry.totalEmployees} employees` : entry.employees ? ` · ${entry.employees.length} employees` : ""}`}
-            icon={entry.logoUrl ? { source: entry.logoUrl, fallback: Icon.Building } : Icon.Building}
+            icon={
+              entry.logoUrl
+                ? { source: entry.logoUrl, fallback: Icon.Building }
+                : getFavicon(`https://${entry.domain}`, { fallback: Icon.Building })
+            }
             accessories={[
               { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString() },
             ]}

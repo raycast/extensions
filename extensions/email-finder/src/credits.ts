@@ -1,5 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
 import { SUPABASE_URL } from "./supabase";
+import { getApiKey } from "./backend";
 
 // * Types
 interface CreditsResponse {
@@ -15,15 +15,12 @@ interface ErrorResponse {
 
 // * Fetch user's current credit balance
 export async function fetchCredits(): Promise<number> {
-  const { apiKey } = getPreferenceValues();
-  if (!apiKey?.trim()) {
-    throw new Error("API key not configured");
-  }
+  const apiKey = getApiKey();
 
   const response = await fetch(`${SUPABASE_URL}/functions/v1/get-credits`, {
     method: "POST",
     headers: {
-      "X-API-Key": apiKey.trim(),
+      "X-API-Key": apiKey,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({}),
@@ -41,9 +38,4 @@ export async function fetchCredits(): Promise<number> {
 // * Format credits for display
 export function formatCredits(balance: number): string {
   return `${balance} credit${balance !== 1 ? "s" : ""}`;
-}
-
-// * Check if user has enough credits
-export function hasEnoughCredits(balance: number, required: number): boolean {
-  return balance >= required;
 }

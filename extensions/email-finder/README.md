@@ -4,7 +4,7 @@ Find the verified email address of any professional.
 
 ## Setup
 
-1. Get your API key from [Email-Finder.org](https://email-finder.org)
+1. Get your API key from [Mail-Finder.org](https://mail-finder.org/)
 2. Open Raycast and run any Email Finder command
 3. Enter your API key when prompted
 

@@ -1,27 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 import { SUPABASE_URL } from "./supabase";
+import type { JobHistory, FundingEvent, EnrichedData } from "./types";
 
-// * Response types (matching existing types in email-finder.tsx)
-interface JobHistory {
-  title: string;
-  company_name: string;
-  current: boolean;
-  start_year: number;
-  start_month: number;
-  end_year: number | null;
-  end_month: number | null;
-  seniority: string;
-  logo_url?: string | null;
-  duration_in_months?: number;
-  departments?: string[];
-}
-
-interface FundingEvent {
-  amount: number;
-  amount_printed: string;
-  raised_at: string;
-  stage: string;
-  link: string;
+// * Get API key from preferences
+export function getApiKey(): string {
+  const { apiKey } = getPreferenceValues<Preferences>();
+  if (!apiKey?.trim()) {
+    throw new Error("API key not configured");
+  }
+  return apiKey.trim();
 }
 
 // * Enrich Person Response
@@ -126,23 +113,15 @@ export interface SearchPersonResponse {
   };
 }
 
-// * Error types
-export interface InsufficientCreditsError {
+// * Error types (internal)
+interface InsufficientCreditsError {
   error: true;
   error_code: "INSUFFICIENT_CREDITS";
   message: string;
   balance: number;
 }
 
-export interface ApiError {
-  error: true;
-  message: string;
-}
-
-export type BackendError = InsufficientCreditsError | ApiError;
-
-// * Check if response is an insufficient credits error
-export function isInsufficientCreditsError(data: unknown): data is InsufficientCreditsError {
+function isInsufficientCreditsError(data: unknown): data is InsufficientCreditsError {
   return (
     typeof data === "object" &&
     data !== null &&
@@ -151,13 +130,72 @@ export function isInsufficientCreditsError(data: unknown): data is InsufficientC
   );
 }
 
-// * Get API key from preferences
-function getApiKey(): string {
-  const { apiKey } = getPreferenceValues<Preferences>();
-  if (!apiKey?.trim()) {
-    throw new Error("API key not configured");
-  }
-  return apiKey.trim();
+// * Map enrich response to EnrichedData
+export function mapEnrichResponseToData(response: EnrichPersonResponse, domain: string): EnrichedData | null {
+  if (!response.person?.email?.email) return null;
+
+  return {
+    person: {
+      first_name: response.person.first_name,
+      last_name: response.person.last_name,
+      full_name: response.person.full_name,
+      headline: response.person.headline || null,
+      linkedin_url: response.person.linkedin_url || null,
+      current_job_title: response.person.current_job_title || undefined,
+      job_history: (response.person.job_history || []) as EnrichedData["person"]["job_history"],
+      mobile: response.person.mobile
+        ? {
+            status: response.person.mobile.status,
+            mobile_international: response.person.mobile.mobile_international || null,
+            mobile_country: response.person.mobile.mobile_country,
+          }
+        : null,
+      email: {
+        status: response.person.email.status,
+        email: response.person.email.email,
+        email_mx_provider: response.person.email.email_mx_provider,
+      },
+      location: response.person.location
+        ? {
+            country: response.person.location.country,
+            city: response.person.location.city,
+            state: response.person.location.state,
+            country_code: response.person.location.country_code,
+          }
+        : null,
+    },
+    company: {
+      name: response.company?.name || domain,
+      website: response.company?.website || `https://${domain}`,
+      domain: response.company?.domain || domain,
+      type: response.company?.type || null,
+      industry: response.company?.industry || "",
+      description_ai: response.company?.description_ai || null,
+      employee_range: response.company?.employee_range || "",
+      employee_count: response.company?.employee_count,
+      founded: response.company?.founded || 0,
+      linkedin_url: response.company?.linkedin_url || null,
+      twitter_url: response.company?.twitter_url || null,
+      logo_url: response.company?.logo_url || null,
+      location: response.company?.location
+        ? {
+            country: response.company.location.country,
+            city: response.company.location.city,
+            raw_address: response.company.location.raw_address,
+          }
+        : null,
+      revenue_range_printed: response.company?.revenue_range_printed || null,
+      funding: response.company?.funding
+        ? {
+            total_funding_printed: response.company.funding.total_funding_printed,
+            latest_funding_stage: response.company.funding.latest_funding_stage,
+            latest_funding_date: response.company.funding.latest_funding_date,
+            funding_events: response.company.funding.funding_events,
+          }
+        : null,
+      keywords: response.company?.keywords,
+    },
+  };
 }
 
 // * Enrich person (find email) - costs 1 credit
@@ -181,28 +219,19 @@ export async function enrichPerson(
     }),
   });
 
-  let data: unknown;
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error("Invalid response from server");
-  }
+  const data = await response.json();
 
-  // * Handle insufficient credits specifically
   if (response.status === 402 && isInsufficientCreditsError(data)) {
     throw new Error(`Insufficient credits. You have ${data.balance} credits remaining.`);
   }
 
-  // * Handle other errors
-  const body = data as { error?: boolean; message?: string };
-  if (!response.ok || body.error) {
-    throw new Error(body.message || "Failed to enrich person");
+  if (!response.ok || data.error) {
+    throw new Error(data.message || "Failed to enrich person");
   }
 
   return data as EnrichPersonResponse;
 }
 
-// * Search people by company domain - costs 1 credit
 // * Company Search Result (Clearout API)
 export interface CompanySearchResult {
   name: string;
@@ -245,11 +274,8 @@ export async function searchCompanyByName(query: string): Promise<CompanySearchR
   }
 }
 
-export async function searchPerson(
-  domain: string,
-  page: number = 1,
-  department?: string,
-): Promise<SearchPersonResponse> {
+// * Search people by company domain - costs 1 credit
+export async function searchPerson(domain: string, page: number = 1): Promise<SearchPersonResponse> {
   const apiKey = getApiKey();
 
   const filters: Record<string, unknown> = {
@@ -259,13 +285,6 @@ export async function searchPerson(
       },
     },
   };
-
-  // Add department filter if specified (used by "Load More")
-  if (department && department !== "all") {
-    filters.person_departments = {
-      include: [department],
-    };
-  }
 
   const response = await fetch(`${SUPABASE_URL}/functions/v1/spend-and-search-person`, {
     method: "POST",
@@ -279,22 +298,14 @@ export async function searchPerson(
     }),
   });
 
-  let data: unknown;
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error("Invalid response from server");
-  }
+  const data = await response.json();
 
-  // * Handle insufficient credits specifically
   if (response.status === 402 && isInsufficientCreditsError(data)) {
     throw new Error(`Insufficient credits. You have ${data.balance} credits remaining.`);
   }
 
-  // * Handle other errors
-  const body = data as { error?: boolean; message?: string };
-  if (!response.ok || body.error) {
-    throw new Error(body.message || "Failed to search people");
+  if (!response.ok || data.error) {
+    throw new Error(data.message || "Failed to search people");
   }
 
   return data as SearchPersonResponse;

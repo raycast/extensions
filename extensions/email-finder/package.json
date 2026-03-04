@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "email-finder",
-  "title": "Email Finder",
+  "title": "Mail-Finder.org",
   "description": "Find the verified email address of any professional.",
   "icon": "extension-icon-2.png",
   "author": "morrissimons",
@@ -17,8 +17,8 @@
   "commands": [
     {
       "name": "email-finder",
-      "title": "Person Email-Finder",
-      "subtitle": "Email-Finder.org",
+      "title": "Find Email",
+      "subtitle": "Mail-Finder.org",
       "description": "Search for name and domain to find an email",
       "mode": "view",
       "file": "email-finder.tsx",
@@ -45,16 +45,16 @@
     },
     {
       "name": "search-history",
-      "title": "Email Finder History",
-      "subtitle": "Email-Finder.org",
+      "title": "Search History",
+      "subtitle": "Mail-Finder.org",
       "description": "Browse past email searches, rerun them, or clear history",
       "mode": "view",
       "file": "search-history.tsx"
     },
     {
       "name": "company-employees",
-      "title": "Company Employees Search",
-      "subtitle": "Email-Finder.org",
+      "title": "Browse Employees",
+      "subtitle": "Mail-Finder.org",
       "description": "Search by company domain to list employees grouped by department",
       "mode": "view",
       "file": "company-employees.tsx",

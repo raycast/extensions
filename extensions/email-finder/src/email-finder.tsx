@@ -3,104 +3,20 @@ import { getFavicon } from "@raycast/utils";
 import { useState, useEffect, useRef } from "react";
 import { addSearchHistoryEntry } from "./history-storage";
 import { AuthGate } from "./auth";
-import { enrichPerson, EnrichPersonResponse } from "./backend";
+import { enrichPerson, EnrichPersonResponse, mapEnrichResponseToData } from "./backend";
 import { fetchCredits, formatCredits } from "./credits";
-import { EmailFinderCompanySearch } from "./company-search";
+import { CompanySearch } from "./company-search";
+import { getErrorMessage } from "./utils";
+import type { EnrichedData, JobHistory } from "./types";
 
-// * Types
-interface JobHistory {
-  title: string;
-  company_name: string;
-  current: boolean;
-  start_year: number;
-  start_month: number;
-  end_year: number | null;
-  end_month: number | null;
-  seniority: string;
-  logo_url?: string | null;
-  duration_in_months?: number;
-  departments?: string[];
-}
+export type { EnrichedData };
 
-interface PersonLocation {
-  country: string;
-  city: string;
-  state?: string;
-  country_code?: string;
-}
-
-interface PersonData {
-  first_name: string;
-  last_name: string;
-  full_name: string;
-  headline: string | null;
-  linkedin_url: string | null;
-  job_history: JobHistory[];
-  mobile: {
-    status: string;
-    mobile_international: string | null;
-    mobile_country?: string;
-  } | null;
-  email: {
-    status: string;
-    email: string;
-    email_mx_provider?: string;
-  };
-  location: PersonLocation | null;
-  current_job_title?: string;
-}
-
-interface FundingEvent {
-  amount: number;
-  amount_printed: string;
-  raised_at: string;
-  stage: string;
-  link: string;
-}
-
-interface Funding {
-  total_funding_printed: string;
-  latest_funding_stage: string;
-  latest_funding_date: string;
-  funding_events?: FundingEvent[];
-}
-
-interface CompanyData {
-  name: string;
-  website: string;
-  domain: string;
-  type: string | null;
-  industry: string;
-  description_ai: string | null;
-  employee_range: string;
-  founded: number;
-  linkedin_url: string | null;
-  twitter_url: string | null;
-  logo_url: string | null;
-  location: {
-    country: string;
-    city: string;
-    raw_address?: string;
-  } | null;
-  revenue_range_printed: string | null;
-  funding: Funding | null;
-  employee_count?: number;
-  keywords?: string[];
-}
-
-export interface EnrichedData {
-  person: PersonData;
-  company: CompanyData;
-}
-
-// * Markdown image helpers
+// * Markdown image helpers, get logos for companies from Prospeo's S3 bucket
 const COMPANY_LOGO_BASE = "https://prospeo-static-assets.s3.us-east-1.amazonaws.com/company_logo/";
 
 function resolveLogoUrl(logo: string | undefined | null): string | undefined {
   if (!logo) return undefined;
-  // If already a full URL, return as-is
   if (logo.startsWith("http://") || logo.startsWith("https://")) return logo;
-  // Otherwise, it's a filename - prefix with S3 base
   return `${COMPANY_LOGO_BASE}${logo}`;
 }
 
@@ -125,80 +41,6 @@ function formatJobPeriod(job: JobHistory): string {
   return end ? `${start} - ${end}` : start;
 }
 
-function safeDatePart(date: unknown): string {
-  if (date == null || typeof date !== "string") return "";
-  const part = date.split("T")[0];
-  return part ?? "";
-}
-
-// * Map backend response to EnrichedData (shared with company-employees)
-export function mapResponseToEnrichedData(response: EnrichPersonResponse, domain: string): EnrichedData | null {
-  if (!response.person?.email?.email) return null;
-
-  return {
-    person: {
-      first_name: response.person.first_name,
-      last_name: response.person.last_name,
-      full_name: response.person.full_name,
-      headline: response.person.headline || null,
-      linkedin_url: response.person.linkedin_url || null,
-      current_job_title: response.person.current_job_title || undefined,
-      job_history: (response.person.job_history || []) as JobHistory[],
-      mobile: response.person.mobile
-        ? {
-            status: response.person.mobile.status,
-            mobile_international: response.person.mobile.mobile_international || null,
-            mobile_country: response.person.mobile.mobile_country,
-          }
-        : null,
-      email: {
-        status: response.person.email.status,
-        email: response.person.email.email,
-        email_mx_provider: response.person.email.email_mx_provider,
-      },
-      location: response.person.location
-        ? {
-            country: response.person.location.country,
-            city: response.person.location.city,
-            state: response.person.location.state,
-            country_code: response.person.location.country_code,
-          }
-        : null,
-    },
-    company: {
-      name: response.company?.name || domain,
-      website: response.company?.website || `https://${domain}`,
-      domain: response.company?.domain || domain,
-      type: response.company?.type || null,
-      industry: response.company?.industry || "",
-      description_ai: response.company?.description_ai || null,
-      employee_range: response.company?.employee_range || "",
-      employee_count: response.company?.employee_count,
-      founded: response.company?.founded || 0,
-      linkedin_url: response.company?.linkedin_url || null,
-      twitter_url: response.company?.twitter_url || null,
-      logo_url: response.company?.logo_url || null,
-      location: response.company?.location
-        ? {
-            country: response.company.location.country,
-            city: response.company.location.city,
-            raw_address: response.company.location.raw_address,
-          }
-        : null,
-      revenue_range_printed: response.company?.revenue_range_printed || null,
-      funding: response.company?.funding
-        ? {
-            total_funding_printed: response.company.funding.total_funding_printed,
-            latest_funding_stage: response.company.funding.latest_funding_stage,
-            latest_funding_date: response.company.funding.latest_funding_date,
-            funding_events: response.company.funding.funding_events,
-          }
-        : null,
-      keywords: response.company?.keywords,
-    },
-  };
-}
-
 interface Arguments {
   firstName?: string;
   lastName?: string;
@@ -213,7 +55,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
 function EmailFinderEntry({ signOut, arguments: args }: { signOut: () => Promise<void>; arguments: Arguments }) {
   const { firstName: argFirstName, lastName: argLastName, domain: argDomain } = args;
 
-  // * If domain is provided, go directly to form
   if (argDomain) {
     return (
       <EmailFormView
@@ -225,8 +66,21 @@ function EmailFinderEntry({ signOut, arguments: args }: { signOut: () => Promise
     );
   }
 
-  // * Otherwise, show company search which uses Action.Push to navigate to form
-  return <EmailFinderCompanySearch signOut={signOut} />;
+  return (
+    <CompanySearch
+      signOut={signOut}
+      renderSelectAction={(company) => (
+        <Action.Push
+          title="Select Company"
+          icon={Icon.Check}
+          target={<EmailFormView signOut={signOut} initialDomain={company.domain} />}
+        />
+      )}
+      renderManualAction={() => (
+        <Action.Push title="Enter Domain Manually" icon={Icon.Pencil} target={<EmailFormView signOut={signOut} />} />
+      )}
+    />
+  );
 }
 
 // * Email Form View - standalone form component
@@ -246,7 +100,6 @@ export function EmailFormView({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
-  // * Fetch credits on mount
   useEffect(() => {
     fetchCredits()
       .then(setCredits)
@@ -270,7 +123,6 @@ export function EmailFormView({
   const hasAutoSubmittedRef = useRef(false);
 
   useEffect(() => {
-    // Prevent duplicate requests from React Strict Mode double-mounting
     if (hasAutoSubmittedRef.current) return;
     if (hasAllArguments) {
       hasAutoSubmittedRef.current = true;
@@ -286,13 +138,13 @@ export function EmailFormView({
     showToast({ style: Toast.Style.Animated, title: "Searching...", message: `Looking for ${firstName} ${lastName}` });
 
     try {
-      const response = await enrichPerson(firstName, lastName, domain);
+      const response: EnrichPersonResponse = await enrichPerson(firstName, lastName, domain);
 
       if (typeof response.balance === "number") {
         setCredits(response.balance);
       }
 
-      const enrichedData = mapResponseToEnrichedData(response, domain);
+      const enrichedData = mapEnrichResponseToData(response, domain);
       if (!enrichedData) {
         throw new Error("No email found for this person");
       }
@@ -307,19 +159,17 @@ export function EmailFormView({
         enrichedData,
       });
 
-      // * Push results view using Navigation API
       push(
         <ResultsView
           data={enrichedData}
           isLoading={false}
           error={undefined}
           searchParams={{ firstName, lastName, domain }}
-          credits={credits}
           signOut={signOut}
         />,
       );
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = getErrorMessage(err);
       setError(message);
       showToast({ style: Toast.Style.Failure, title: "Failed", message });
       await addSearchHistoryEntry({
@@ -393,7 +243,6 @@ export function ResultsView({
   error,
   searchParams,
   onBack,
-  credits,
   signOut,
 }: {
   data: EnrichedData | undefined;
@@ -401,7 +250,6 @@ export function ResultsView({
   error: string | undefined;
   searchParams: { firstName: string; lastName: string; domain: string };
   onBack?: () => void;
-  credits?: number | null;
   signOut?: () => Promise<void>;
 }) {
   const fullName = `${searchParams.firstName} ${searchParams.lastName}`;
@@ -415,10 +263,8 @@ export function ResultsView({
     const linkedInIcon = "https://cdn-icons-png.flaticon.com/512/174/174857.png";
     let md = "";
 
-    // * Header: Email + Verified badge
     const verifiedText = person.email.status === "VERIFIED" ? " ( Email is Verified )" : " ( Email is not Verified )";
 
-    // * Person info
     md += `## ${person.full_name}\n\n`;
     if (person.headline) md += `${person.headline}\n\n`;
 
@@ -434,7 +280,6 @@ export function ResultsView({
 
     md += `---\n\n`;
 
-    // * Experience section (top 6)
     if (person.job_history.length > 0) {
       md += `### Experience\n\n`;
       person.job_history.slice(0, 6).forEach((job) => {
@@ -456,14 +301,6 @@ export function ResultsView({
       metadata={
         !isLoading && data ? (
           <Detail.Metadata>
-            {/* Credits */}
-            {credits !== null && credits !== undefined && (
-              <>
-                <Detail.Metadata.Label title="Credits Remaining" text={formatCredits(credits)} icon={Icon.Coins} />
-                <Detail.Metadata.Separator />
-              </>
-            )}
-            {/* Company */}
             <Detail.Metadata.Label title="Company" text={data.company.name} icon={getFavicon(data.company.website)} />
             {(data.company.type || data.company.industry) && (
               <Detail.Metadata.Label
@@ -495,7 +332,7 @@ export function ResultsView({
                   return (
                     <Detail.Metadata.Label
                       title="Funding"
-                      text={`${data.company.funding.latest_funding_stage} · ${safeDatePart(data.company.funding.latest_funding_date)}`}
+                      text={`${data.company.funding.latest_funding_stage} · ${data.company.funding.latest_funding_date.split("T")[0]}`}
                     />
                   );
                 }
@@ -504,7 +341,7 @@ export function ResultsView({
                   <Detail.Metadata.Label
                     key={idx}
                     title={idx === 0 ? "Funding" : ""}
-                    text={`${event.amount_printed} · ${event.stage} · ${safeDatePart(event.raised_at)}`}
+                    text={`${event.amount_printed} · ${event.stage} · ${event.raised_at.split("T")[0]}`}
                   />
                 ));
               })()}
@@ -529,7 +366,7 @@ export function ResultsView({
             </>
           )}
           {onBack && (
-            <Action title="Close" icon={Icon.ArrowLeft} onAction={onBack} shortcut={{ modifiers: ["cmd"], key: "w" }} />
+            <Action title="Close" icon={Icon.ArrowLeft} onAction={onBack} shortcut={{ modifiers: ["cmd"], key: "b" }} />
           )}
           {signOut && <Action title="Sign out" icon={Icon.Logout} onAction={signOut} />}
         </ActionPanel>

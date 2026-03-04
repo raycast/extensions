@@ -14,7 +14,7 @@ export function AuthGate({ children }: { children: (signOut: () => Promise<void>
     return (
       <Detail
         markdown={[
-          "## Email Finder",
+          "## Mail-Finder.org",
           "",
           "To use this extension, add your **API Key** in Raycast preferences for this extension.",
           "",
