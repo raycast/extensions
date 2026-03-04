@@ -3,6 +3,7 @@
   "name": "orbit",
   "title": "Orbit",
   "description": "Control the Orbit app. Open the timeline, search your history, and jump to the settings.",
+  "access": "public",
   "icon": "extension-icon.png",
   "author": "michaelheckmann",
   "platforms": [
@@ -24,7 +25,7 @@
           "name": "query",
           "placeholder": "e.g. invoice OR receipt",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -70,7 +71,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.7",
-    "@raycast/utils": "^1.17.0",
     "chrono-node": "^2.9.0"
   },
   "devDependencies": {
