@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support] - 2026-03-04
 
 ## [Bug Fixes] - 2026-01-19
 
