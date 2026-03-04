@@ -26,11 +26,10 @@ export default async function getUsageLimits(input?: Input): Promise<{
   };
 }> {
   const token = await getClaudeAccessToken();
+  const isUsageLimitsAvailable = typeof token === "string" && token.trim().length > 0;
 
-  if (!token) {
-    throw new Error(
-      "Claude Code credentials not found in keychain. Please authenticate Claude Code first using 'claude-code auth' or similar command.",
-    );
+  if (!isUsageLimitsAvailable) {
+    throw new Error("Usage limits require Claude OAuth authentication in Claude Code.");
   }
 
   const limitData = await fetchClaudeUsageLimits(token);

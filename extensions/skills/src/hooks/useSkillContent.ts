@@ -1,14 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 
-import type { Skill } from "../shared";
-
-/**
- * Remove YAML frontmatter from markdown content
- */
-function removeFrontmatter(content: string): string {
-  const frontmatterRegex = /^---\s*\n[\s\S]*?\n---\s*\n/;
-  return content.replace(frontmatterRegex, "");
-}
+import { type Skill, removeFrontmatter } from "../shared";
 
 /**
  * Fetch skill content from GitHub, trying SKILL.md first, then README.md
@@ -69,9 +61,10 @@ async function fetchSkillContent(skill: Skill): Promise<string | undefined> {
 /**
  * Hook to fetch and cache skill content from GitHub
  */
-export function useSkillContent(skill: Skill) {
+export function useSkillContent(skill: Skill, execute = true) {
   const { data: content, isLoading } = useCachedPromise((skill) => fetchSkillContent(skill), [skill], {
     keepPreviousData: true,
+    execute,
   });
 
   return {

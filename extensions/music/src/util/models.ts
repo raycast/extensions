@@ -10,6 +10,7 @@ export interface Track {
   artist: string;
   album: string;
   duration: string;
+  favorited?: string;
   state?: PlayerState;
 }
 

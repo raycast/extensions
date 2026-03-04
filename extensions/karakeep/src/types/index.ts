@@ -39,7 +39,7 @@ export interface Config extends BaseConfig, DisplayOptions {}
 // Asset types
 export interface Asset {
   id: string;
-  assetType: "screenshot" | "image" | "pdf" | undefined;
+  assetType?: "screenshot" | "image" | "pdf";
 }
 
 // Tag related types
@@ -91,6 +91,8 @@ export interface Bookmark {
 export interface List {
   id: string;
   name: string;
+  icon?: string;
+  parentId?: string | null;
 }
 
 export interface ListDetails {

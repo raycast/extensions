@@ -634,8 +634,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                       title="Edit executed command"
                       icon={Icon.Pencil}
                       onAction={() => {
-                        const lastCommand = recentlyUsed[index] ?? "";
-                        setCmd(lastCommand ?? "");
+                        setCmd(command);
                       }}
                     />
                   ) : null}

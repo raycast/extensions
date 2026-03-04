@@ -507,6 +507,119 @@ export const DEFAULT_VBR_QUALITIES = {
   ".webm": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", quality: "good" },
 } as const;
 
+export const IMAGE_QUALITY_PRESET_MAPPINGS = {
+  ".jpg": {
+    lowest: 40,
+    low: 60,
+    medium: 80,
+    high: 90,
+    highest: 95,
+  },
+  ".heic": {
+    lowest: 40,
+    low: 60,
+    medium: 80,
+    high: 90,
+    highest: 95,
+  },
+  ".webp": {
+    lowest: 40,
+    low: 60,
+    medium: 80,
+    high: 90,
+    highest: "lossless" as const,
+  },
+  ".png": {
+    lowest: "png-8",
+    low: "png-8",
+    medium: "png-24",
+    high: "png-24",
+    highest: "png-24",
+  },
+  ".tiff": {
+    lowest: "deflate",
+    low: "deflate",
+    medium: "deflate",
+    high: "deflate",
+    highest: "deflate",
+  },
+  ".avif": {
+    lowest: 40,
+    low: 60,
+    medium: 80,
+    high: 90,
+    highest: 100,
+  },
+} as const;
+
+type ImageQualityPresetFormat = keyof typeof IMAGE_QUALITY_PRESET_MAPPINGS;
+type ImageQualityPresetMap = (typeof IMAGE_QUALITY_PRESET_MAPPINGS)[ImageQualityPresetFormat];
+
+export function getDefaultImageQuality(format: OutputImageExtension, preferences: PreferenceValues): QualitySettings {
+  const imagePreset = (preferences.defaultImageQualityPreset as string | undefined) ?? "80";
+  const mapping = (IMAGE_QUALITY_PRESET_MAPPINGS as Record<ImageQualityPresetFormat, ImageQualityPresetMap>)[format];
+  const toFormatQuality = (qualityNumber: number): QualitySettings => {
+    if (format === ".png") {
+      return {
+        [format]: qualityNumber >= 80 ? "png-24" : "png-8",
+      } as unknown as QualitySettings;
+    }
+    if (format === ".tiff") {
+      return {
+        [format]: "deflate",
+      } as unknown as QualitySettings;
+    }
+    return {
+      [format]: qualityNumber,
+    } as unknown as QualitySettings;
+  };
+
+  const legacyPreset = imagePreset as QualityLevel;
+  if (legacyPreset in (mapping ?? {})) {
+    const legacyValue = mapping?.[legacyPreset];
+    if (legacyValue !== undefined) {
+      return {
+        [format]: legacyValue,
+      } as unknown as QualitySettings;
+    }
+  }
+
+  if (imagePreset === "lossless") {
+    if (format === ".webp") {
+      return { [format]: "lossless" } as unknown as QualitySettings;
+    }
+    return toFormatQuality(100);
+  }
+
+  if (imagePreset === "png-24" || imagePreset === "png-8") {
+    if (format === ".png") {
+      return { [format]: imagePreset } as unknown as QualitySettings;
+    }
+    return {
+      [format]: DEFAULT_QUALITIES[format],
+    } as unknown as QualitySettings;
+  }
+
+  if (imagePreset === "deflate" || imagePreset === "lzw") {
+    if (format === ".tiff") {
+      return { [format]: imagePreset } as unknown as QualitySettings;
+    }
+    return {
+      [format]: DEFAULT_QUALITIES[format],
+    } as unknown as QualitySettings;
+  }
+
+  const numericPreset = Number(imagePreset);
+  if (!Number.isNaN(numericPreset) && Number.isFinite(numericPreset)) {
+    const clampedPreset = Math.max(0, Math.min(100, Math.round(numericPreset)));
+    return toFormatQuality(clampedPreset);
+  }
+
+  return {
+    [format]: DEFAULT_QUALITIES[format],
+  } as unknown as QualitySettings;
+}
+
 // =============================================================================
 // Helper Functions
 // =============================================================================
@@ -526,12 +639,16 @@ export function getDefaultQuality(
   preferences: PreferenceValues,
   qualityLevel?: QualityLevel,
 ): QualitySettings {
-  // For images or when advanced settings are enabled, use DEFAULT_QUALITIES
+  // Images use preset mapping; when advanced settings are enabled, use DEFAULT_QUALITIES.
   if (!preferences) {
     throw new Error(`fn getDefaultQuality: Provide preferences`);
   }
 
-  if (getMediaType(format) === "image" || preferences.moreConversionSettings) {
+  if (getMediaType(format) === "image") {
+    return getDefaultImageQuality(format as OutputImageExtension, preferences);
+  }
+
+  if (preferences.moreConversionSettings) {
     return {
       [format]: DEFAULT_QUALITIES[format],
     } as QualitySettings;

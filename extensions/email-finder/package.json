@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "email-finder",
+  "title": "Email Finder",
+  "description": "Find the verified email address of any professional.",
+  "icon": "extension-icon-2.png",
+  "author": "morrissimons",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "email-finder",
+      "title": "Person Email-Finder",
+      "subtitle": "Email-Finder.org",
+      "description": "Search for name and domain to find an email",
+      "mode": "view",
+      "file": "email-finder.tsx",
+      "arguments": [
+        {
+          "name": "firstName",
+          "placeholder": "first",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "lastName",
+          "placeholder": "lastname",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "domain",
+          "placeholder": "acme.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-history",
+      "title": "Email Finder History",
+      "subtitle": "Email-Finder.org",
+      "description": "Browse past email searches, rerun them, or clear history",
+      "mode": "view",
+      "file": "search-history.tsx"
+    },
+    {
+      "name": "company-employees",
+      "title": "Company Employees Search",
+      "subtitle": "Email-Finder.org",
+      "description": "Search by company domain to list employees grouped by department",
+      "mode": "view",
+      "file": "company-employees.tsx",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "acme.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Mail Finder API key (starts with mf_). Get one from your dashboard."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "@supabase/supabase-js": "^2.49.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

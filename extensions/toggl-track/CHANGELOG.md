@@ -1,5 +1,10 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2026-02-23
+
+- Reduced Menu Bar background refresh interval from 10 seconds to 3 minutes to prevent API rate limit exhaustion (240 calls/hour limit)
+- Changed default cache TTL from 0 to 30 seconds to reduce redundant API calls for project/client/tag data
+
 ## [Bug Fixes] - 2026-01-05
 
 - Fixed `Toast` causing error when MenuBar refreshed (ref: [Issue #23821](https://github.com/raycast/extensions/issues/23821))

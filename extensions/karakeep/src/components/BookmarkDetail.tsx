@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
@@ -14,6 +14,7 @@ import { useConfig } from "../hooks/useConfig";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
 import { getScreenshot } from "../utils/screenshot";
+import { runWithToast } from "../utils/toast";
 import { BookmarkEdit } from "./BookmarkEdit";
 
 interface BookmarkDetailProps {
@@ -28,8 +29,13 @@ function useBookmarkImages(bookmark: Bookmark) {
   });
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadImages() {
-      const newImages = { ...images };
+      const newImages = {
+        screenshot: DEFAULT_SCREENSHOT_FILENAME,
+        asset: DEFAULT_SCREENSHOT_FILENAME,
+      };
 
       const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
       if (screenshot?.id) {
@@ -48,10 +54,13 @@ function useBookmarkImages(bookmark: Bookmark) {
         }
       }
 
-      setImages(newImages);
+      if (!cancelled) setImages(newImages);
     }
 
     loadImages();
+    return () => {
+      cancelled = true;
+    };
   }, [bookmark]);
 
   return images;
@@ -61,22 +70,26 @@ function useToastHandler() {
   const { t } = useTranslation();
 
   return async (action: string, operation: () => Promise<void>) => {
-    const toast = await showToast({
-      title: t(`bookmark.toast.${action}.title`),
-      message: t(`bookmark.toast.${action}.loading`),
+    const result = await runWithToast({
+      loading: {
+        title: t(`bookmark.toast.${action}.title`),
+        message: t(`bookmark.toast.${action}.loading`),
+      },
+      success: {
+        title: t(`bookmark.toast.${action}.success`),
+      },
+      failure: {
+        title: t(`bookmark.toast.${action}.title`),
+      },
+      action: async () => {
+        await operation();
+      },
     });
 
-    try {
-      await operation();
-      toast.style = Toast.Style.Success;
-      toast.title = t(`bookmark.toast.${action}.success`);
-      return true;
-    } catch (error) {
-      logger.error(`Bookmark action '${action}' failed`, error);
-      toast.style = Toast.Style.Failure;
-      toast.message = String(error);
+    if (result === undefined) {
       return false;
     }
+    return true;
   };
 }
 
@@ -160,7 +173,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
 
     switch (bookmark.content.type) {
       case "link":
-        if (images.screenshot) {
+        if (images.screenshot !== DEFAULT_SCREENSHOT_FILENAME) {
           parts.push(`![${bookmark.content.title}](${images.screenshot})`);
         }
         addTitle(displayTitle);
@@ -180,7 +193,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
         const assetDisplayTitle = customTitle ? bookmark.title : fileName || t("bookmark.untitledImage");
 
         if (assetType === "image") {
-          if (images.asset) {
+          if (images.asset !== DEFAULT_SCREENSHOT_FILENAME) {
             parts.push(`\n![${fileName}](${images.asset})`);
           }
           addTitle(assetDisplayTitle || "");

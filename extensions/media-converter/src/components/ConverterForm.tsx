@@ -20,6 +20,7 @@ import {
   type MediaType,
   type AllOutputExtension,
   type OutputVideoExtension,
+  type OutputImageExtension,
   type QualitySettings,
   getMediaType,
   AUDIO_BITRATES,
@@ -140,20 +141,42 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       setCurrentFiles(processedFiles);
       setSelectedFileType(primaryFileType);
 
+      const preferredImageFormat = preferences.defaultImageOutputFormat as OutputImageExtension | undefined;
+      const sanitizedImageFormat =
+        process.platform !== "darwin" && preferredImageFormat === ".heic" ? ".jpg" : preferredImageFormat;
+      const defaultImageFormat =
+        sanitizedImageFormat && OUTPUT_IMAGE_EXTENSIONS.includes(sanitizedImageFormat)
+          ? sanitizedImageFormat
+          : (".jpg" as const);
+
+      const preferredVideoFormat = preferences.defaultVideoOutputFormat as OutputVideoExtension | undefined;
+      const defaultVideoFormat =
+        preferredVideoFormat && OUTPUT_VIDEO_EXTENSIONS.includes(preferredVideoFormat)
+          ? preferredVideoFormat
+          : (".mp4" as const);
+
       // Initialize default output format and quality based on file type
       const defaultFormat =
         primaryFileType === "image"
-          ? (".jpg" as const)
+          ? defaultImageFormat
           : primaryFileType === "audio"
             ? (".mp3" as const)
-            : (".mp4" as const);
+            : (defaultVideoFormat as AllOutputExtension);
 
       setOutputFormat(defaultFormat);
 
       if (preferences.moreConversionSettings || primaryFileType === "image") {
         setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences));
       } else {
-        setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, DEFAULT_SIMPLE_QUALITY));
+        if (primaryFileType === "video") {
+          const defaultVideoQuality =
+            (preferences.defaultVideoQualityPreset as QualityLevel | undefined) ?? DEFAULT_SIMPLE_QUALITY;
+          setSimpleQuality(defaultVideoQuality);
+          setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, defaultVideoQuality));
+        } else {
+          setSimpleQuality(DEFAULT_SIMPLE_QUALITY);
+          setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, DEFAULT_SIMPLE_QUALITY));
+        }
       }
     } catch (error) {
       const errorMessage = String(error);
@@ -302,7 +325,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
               setCurrentQualitySetting(getDefaultQuality(format, preferences));
             } else {
               // Update quality settings based on current simple quality level
-              setCurrentQualitySetting(getDefaultQuality(format, preferences, DEFAULT_SIMPLE_QUALITY));
+              setCurrentQualitySetting(getDefaultQuality(format, preferences, simpleQuality));
             }
           }}
         >

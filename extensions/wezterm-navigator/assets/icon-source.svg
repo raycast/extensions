@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4ade80"/>
+      <stop offset="100%" style="stop-color:#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+  <!-- Terminal cursor blink line -->
+  <rect x="80" y="100" width="12" height="32" rx="3" fill="url(#accent)" opacity="0.6"/>
+  <!-- Prompt symbol >_ -->
+  <text x="110" y="128" font-family="SF Mono, Menlo, monospace" font-size="28" font-weight="600" fill="url(#accent)" opacity="0.5">~$</text>
+  <!-- Bold W -->
+  <text x="256" y="340" font-family="SF Pro Display, -apple-system, Helvetica Neue, sans-serif" font-size="240" font-weight="800" fill="url(#accent)" text-anchor="middle" dominant-baseline="central">W</text>
+  <!-- Bottom terminal line -->
+  <rect x="80" y="400" width="352" height="3" rx="1.5" fill="url(#accent)" opacity="0.15"/>
+</svg>

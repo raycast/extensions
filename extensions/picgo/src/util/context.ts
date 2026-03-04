@@ -17,7 +17,7 @@ export default function () {
     if (!ctxRef.current) ctxRef.current = new PicGo();
     const ctx = ctxRef.current;
 
-    ctx.saveConfig({ "picBed.proxy": proxy.trim() });
+    ctx.saveConfig({ "picBed.proxy": proxy });
 
     const getActiveUploaderType = () => ctx.getConfig<string>("picBed.uploader");
     const getUploaderTypeList = () => ctx.uploaderConfig.listUploaderTypes();

@@ -405,7 +405,7 @@
       "type": "password",
       "title": "Authentication Token",
       "required": false,
-      "description": "You can find your unique token in Things’ settings. go to Things → Settings → General → Enable Things URLs → Manage",
+      "description": "You can find your unique token in Things' settings. go to Things → Settings → General → Enable Things URLs → Manage",
       "placeholder": "k2Zxf5M9R_lXJeP3BvOmYA"
     },
     {
@@ -425,6 +425,15 @@
           "title": "Things Beta"
         }
       ]
+    },
+    {
+      "name": "groupByProjectOrArea",
+      "type": "checkbox",
+      "title": "Display",
+      "label": "Group by Project or Area",
+      "description": "Group to-dos in lists by their project or area",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {

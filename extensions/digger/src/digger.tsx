@@ -1,6 +1,6 @@
 import { List, Clipboard, getPreferenceValues, getSelectedText, BrowserExtension } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { validateUrl } from "./utils/urlUtils";
+import { validateUrl, extractUrl } from "./utils/urlUtils";
 import { useFetchSite, LoadingProgress } from "./hooks/useFetchSite";
 import { Overview } from "./components/Overview";
 import { MetadataSemantics } from "./components/MetadataSemantics";
@@ -28,25 +28,34 @@ export default function Command(props: { arguments: Arguments }) {
 
   useEffect(() => {
     (async () => {
-      if (inputUrl && validateUrl(inputUrl)) {
-        setUrl(inputUrl);
-        return;
+      if (inputUrl) {
+        const extracted = validateUrl(inputUrl) ? inputUrl : extractUrl(inputUrl);
+        if (extracted) {
+          setUrl(extracted);
+          return;
+        }
       }
 
       if (preferences.autoLoadUrlFromClipboard) {
         const clipboardText = await Clipboard.readText();
-        if (clipboardText && validateUrl(clipboardText)) {
-          setUrl(clipboardText);
-          return;
+        if (clipboardText) {
+          const extracted = validateUrl(clipboardText) ? clipboardText : extractUrl(clipboardText);
+          if (extracted) {
+            setUrl(extracted);
+            return;
+          }
         }
       }
 
       if (preferences.autoLoadUrlFromSelectedText) {
         try {
           const selectedText = await getSelectedText();
-          if (selectedText && validateUrl(selectedText)) {
-            setUrl(selectedText);
-            return;
+          if (selectedText) {
+            const extracted = validateUrl(selectedText) ? selectedText : extractUrl(selectedText);
+            if (extracted) {
+              setUrl(extracted);
+              return;
+            }
           }
         } catch {
           // Suppress the error if Raycast didn't find any selected text
@@ -56,9 +65,12 @@ export default function Command(props: { arguments: Arguments }) {
       if (preferences.enableBrowserExtensionSupport) {
         try {
           const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-          if (tabUrl && validateUrl(tabUrl)) {
-            setUrl(tabUrl);
-            return;
+          if (tabUrl) {
+            const extracted = validateUrl(tabUrl) ? tabUrl : extractUrl(tabUrl);
+            if (extracted) {
+              setUrl(extracted);
+              return;
+            }
           }
         } catch {
           // Suppress the error if Raycast didn't find browser extension

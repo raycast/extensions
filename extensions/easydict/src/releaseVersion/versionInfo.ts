@@ -26,34 +26,24 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.11.0";
+  version = "2.11.1";
   buildNumber = 30;
-  versionDate = "2025-07-01";
+  versionDate = "2026-02-14";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### ✨ 新功能
-
-- 添加 DeepLX 翻译支持
-- 添加 Gemini 翻译支持
-
 ### 💎 改进
 
-- 更新依赖并优化稳定性
+- 在语言设置中加入挪威语（"no"）
 
 ---
 
-### ✨ New Features
-
-- Add DeepLX support
-- Add support for Gemini translation
-
 ### 💎 Improvement
 
-- Update dependencies and improve stability
+- Include Norwegian ("no") in language preferences
 `;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;

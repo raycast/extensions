@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.5] - 2026-03-01
+
+- fix: View Events now shows a separate row for each event on the same date (e.g. Mother's Day + Rằm). Dates with multiple events (solar + lunar, or multiple solar) no longer collapse to a single row.
+- feat: Add Windows to supported platforms (Raycast for Windows).
+- chore: Updated dependencies (`@raycast/api`, `@types/node`, `@types/react`, `prettier`) for compatibility and security.
+
 ## [1.3.3] - 2026-02-12
 
 - feat: Add Vietnamese day labels (T2-CN) to calendar grid for better readability.

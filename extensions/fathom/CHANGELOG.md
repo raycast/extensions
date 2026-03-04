@@ -1,5 +1,53 @@
 # Fathom for Raycast Changelog
 
+## [Instant Display, Stop Fetching & Cache Performance] - 2026-02-25
+
+### Added
+
+- **Instant meeting display**: First page of meetings appears immediately on launch; remaining pages load in the background without blocking the UI
+- **Stop Fetching**: Background fetch toasts now include a "Stop Fetching Meetings" button to abort mid-pagination
+- **HUD on copy**: Copying a meeting's share link now shows a native HUD notification confirming the copy
+
+### Changed
+
+- **Batch cache writes**: Meetings are now written to LocalStorage in parallel instead of sequentially, significantly reducing cache write time
+- **Bulk cache reads**: `getAllCachedMeetings` now uses `LocalStorage.allItems()` for a single bulk read on launch instead of N individual reads
+- **Separate abort tokens**: `fetchRemainingPages` and `loadMoreMeetings` each have their own abort token, preventing them from accidentally cancelling each other
+- **Cleaner error display**: Refactored `search-meetings` error view into `getErrorDisplay()` helper and `ErrorEmptyView` component
+
+### Fixed
+
+- **Spurious "Stopped" toast**: Fixed a token collision where triggering "Load More" would falsely abort the initial background fetch and show a green "Stopped" toast
+
+## [Lazy Pagination & Smart Cache] - 2026-02-19
+
+### Added
+
+- **Lazy pagination**: Load ~50 meetings initially, then fetch 50 more via native Raycast List pagination on scroll
+- **Smart cache refresh**: 5-minute staleness detection for automatic background refresh
+- **Full-text search**: Search across meeting titles, summaries, and transcripts
+- **Cursor-based pagination**: Maintains position across sessions for incremental loading
+- **Native pagination UX**: Removed manual "Load Older Meetings" action in favor of Raycast List pagination
+
+### Changed
+
+- **Direct HTTP API**: Removed `fathom-typescript` SDK dependency for better control
+- **Improved toast messages**: Clearer distinction between "Fetching from API" and "Saving to cache"
+- **Instant loading**: Cached meetings display immediately while fresh data loads in background
+- **Cache architecture**: New `cacheManager.ts` with pagination state and staleness tracking
+- **Removed extraneous docs**: Relocated leftover docs that are no longer relevant
+- **Pagination `pageSize`**: Corrected from `50` to `20` to match Raycast's documented intent (placeholder skeleton count, not data batch size)
+- **Pagination `hasMore` initial state**: Initialized synchronously from `cacheManager.hasMore()` so Raycast sees the correct value on first render, preventing the pagination trigger from being suppressed
+- **Updated `@raycast/api`** to `1.104.6`
+
+### Fixed
+
+- **Performance**: Eliminated redundant API calls on every search/launch with 5-min cooldown
+- **UX clarity**: Toast messages now clearly indicate what's happening (fetching vs caching vs ready)
+- **SDK issues**: Resolved SDK validation failures by using direct HTTP requests
+- **Code duplication**: Extracted shared `CachedMeetingData → Meeting` mapping into a single `toMeeting` helper in `useCachedMeetings`
+- **Redundant state**: Removed duplicate `hasMoreMeetings` state and `isLoadingMoreRef` from `search-meetings.tsx` (already handled in the hook and `cacheManager`)
+
 ## [Update] - 2026-02-10
 
 - Updated dependencies
