@@ -1,12 +1,18 @@
 # Pokédex Changelog
 
-## [Shiny Forms] - 2026-02-21
+## [Terastal Expansion] - 2026-03-03
+
+- Added support for Scarlet & Violet–style sprite artwork.
+- Added Mega Evolution and Gigantamax indicator icons to Pokémon forms
+- Removed navigation from Pokémon profile page to the Moves.
+
+## [Shiny Spectrum] - 2026-02-21
 
 - Added *Shiny* configuration support for Pokémon sprites and artwork.
-- Improved Pokémon form handling: pixel expands all forms, official applies filtering.
+- Improved Pokémon form handling — official artwork now applies proper form filtering while sprites expand all forms.
 - Fixed Pokémon form type handling for multi-form species such as #773 (Silvally).
 
-## [ItemDex] - 2026-02-18
+## [PokéBag] - 2026-02-18
 
 - Added **Items** command to browse and filter Pokémon items by pocket, with detailed item information and multi-language support.
 - Improved consistency of Pokémon image rendering across all components.

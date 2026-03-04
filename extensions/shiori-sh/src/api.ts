@@ -4,6 +4,7 @@ import {
   LinksResponse,
   CreateLinkResponse,
   UpdateLinksResponse,
+  UpdateLinkResponse,
   DeleteLinkResponse,
   ErrorResponse,
 } from "./types";
@@ -11,7 +12,7 @@ import {
 const BASE_URL = "https://www.shiori.sh";
 
 function headers(): Record<string, string> {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues();
   return {
     Authorization: `Bearer ${apiKey}`,
     "Content-Type": "application/json",
@@ -59,6 +60,20 @@ export async function updateLinks(ids: string[], read: boolean): Promise<UpdateL
   return request<UpdateLinksResponse>("/api/links", {
     method: "PATCH",
     body: JSON.stringify({ ids, read }),
+  });
+}
+
+export async function updateLinkDetails(
+  id: string,
+  title: string,
+  summary?: string | null,
+): Promise<UpdateLinkResponse> {
+  return request<UpdateLinkResponse>(`/api/links/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      title,
+      ...(summary !== undefined && { summary }),
+    }),
   });
 }
 

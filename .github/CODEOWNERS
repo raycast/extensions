@@ -473,6 +473,7 @@
 /extensions/custom-icon                                             @Ph-lo
 /extensions/custom-wordle                                           @PallavAg
 /extensions/customer-io                                             @NathanTCode
+/extensions/cut-out                                                 @lemikeone
 /extensions/cyberchef                                               @mblode @k11h-de
 /extensions/cyberduck                                               @scottaglia
 /extensions/cyberpanel                                              @xmok
@@ -633,6 +634,7 @@
 /extensions/elixir                                                  @dinocosta
 /extensions/elm-search                                              @NeoVier
 /extensions/elron                                                   @raimondlume @pernielsentikaer
+/extensions/email-finder                                            @MorrisSimons
 /extensions/email-verifier                                          @lryong @xmok
 /extensions/ember-api-documentation                                 @tdwesten
 /extensions/emissions-calculator                                    @andreaselia @pernielsentikaer
@@ -1074,6 +1076,7 @@
 /extensions/jira2git                                                @ipiranhaa
 /extensions/jisho                                                   @dmacdermott @mmtftr
 /extensions/jitsi                                                   @tjwds @ANemcov
+/extensions/job-dojo                                                @jbharwood
 /extensions/johnny-decimal                                          @x0ba
 /extensions/jokes                                                   @xmok
 /extensions/jotform                                                 @xmok
@@ -2099,7 +2102,7 @@
 /extensions/shell-history                                           @koinzhang
 /extensions/shelve                                                  @michaelreinhard1
 /extensions/shiori                                                  @namiwang
-/extensions/shiori-sh                                               @0xdhrv
+/extensions/shiori-sh                                               @0xdhrv @AlexIsMaking
 /extensions/ship24-client                                           @tsyganov-ivan
 /extensions/shlink                                                  @Xeretis
 /extensions/shodan                                                  @Owanesh
@@ -2564,6 +2567,7 @@
 /extensions/vultr                                                   @xmok
 /extensions/wakatime                                                @iammola
 /extensions/waktu-solat                                             @sayuthisobri @ezzylan
+/extensions/wallhaven                                               @devadathanmb
 /extensions/warp                                                    @joetannenbaum @theRubberDuckiee @hakob8956 @drzastwakamil @chrismessina @pernielsentikaer
 /extensions/wave                                                    @xmok
 /extensions/wayback-machine                                         @pernielsentikaer @andreaselia @j3lte @chrismessina
@@ -2709,6 +2713,7 @@
 /extensions/zipline                                                 @treyg
 /extensions/zipper-run                                              @arielconti10 @pernielsentikaer
 /extensions/znotch                                                  @zkondor
+/extensions/zo-raycast                                              @skeletor-js
 /extensions/zod-documentation                                       @danieldeichfuss
 /extensions/zodme                                                   @camib0b
 /extensions/zoo                                                     @ViGeng
