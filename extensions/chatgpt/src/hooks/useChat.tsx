@@ -113,6 +113,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         },
         requestOptions,
       );
+    let retriedWithoutReasoningEffort = false;
 
     try {
       let res: ChatCompletion | Stream<ChatCompletionChunk>;
@@ -120,6 +121,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         res = await createCompletion(Boolean(selectedReasoningEffort));
       } catch (error) {
         if (selectedReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
+          retriedWithoutReasoningEffort = true;
+          toast.title = "Reasoning effort not supported";
+          toast.message = "Retrying without effort setting...";
+          toast.style = Toast.Style.Animated;
           res = await createCompletion(false);
         } else {
           throw error;
@@ -167,10 +172,14 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       setLoading(false);
       if (abortSignal.aborted) {
         toast.title = "Request canceled";
+        toast.message = undefined;
         toast.style = Toast.Style.Failure;
         setIsAborted(true);
       } else {
         toast.title = "Got your answer!";
+        toast.message = retriedWithoutReasoningEffort
+          ? "Provider ignored the reasoning effort setting for this response."
+          : undefined;
         toast.style = Toast.Style.Success;
       }
 
