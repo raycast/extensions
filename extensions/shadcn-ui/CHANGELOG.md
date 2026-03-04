@@ -1,5 +1,11 @@
 # shadcn/ui Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Fix "search registries" command error
+- Add support for Windows platform
+- Bump all dependencies to the latest
+
 ## [Add registry items view and component installation commands] - 2025-11-26
 
 - Add registry items list view to browse all components in a registry

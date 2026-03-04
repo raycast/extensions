@@ -94,7 +94,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       onError: async (e) => {
         await showToast(CREATE_ERROR_TOAST_OPTIONS(e));
       },
-    }
+    },
   );
 
   return (

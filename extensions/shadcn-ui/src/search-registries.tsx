@@ -12,6 +12,13 @@ export interface Registry {
   domain: string;
 }
 
+interface RegistryAPIResponse {
+  name: string;
+  url: string;
+  homepage?: string;
+  description?: string;
+}
+
 /**
  * Extract the base domain from a registry URL template
  * Example: "https://reui.io/r/{name}.json" -> "https://reui.io"
@@ -34,12 +41,12 @@ async function getRegistries(): Promise<Registry[]> {
   if (!response.ok) {
     throw new Error(response.statusText);
   }
-  const data = (await response.json()) as Record<string, string>;
+  const data = (await response.json()) as Record<string, RegistryAPIResponse>;
 
-  return Object.entries(data).map(([name, url]) => ({
-    name,
-    url,
-    domain: getDomain(url),
+  return Object.entries(data).map(([key, item]) => ({
+    name: item.name || key,
+    url: item.url,
+    domain: getDomain(item.url),
   }));
 }
 
