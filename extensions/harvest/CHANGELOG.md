@@ -1,5 +1,11 @@
 # Harvest Changelog
 
+## [Improved Project Filtering With Clients Included] - 2026-03-04
+
+- Changed: Project dropdown in New Time Entry and Favorites forms now displays client name alongside project name (e.g. "Acme Corp – My Project"), allowing you to filter by client or project in a single dropdown
+- Changed: Projects are now sorted alphabetically within each client group
+- Changed: Client groups are now sorted alphabetically
+
 ## [Add Windows Support] - 2026-03-04
 
 ## [Bug Fixes] - 2026-01-19

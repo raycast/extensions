@@ -46,8 +46,11 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
   const [hours, setHours] = useState<string>(favorite?.hours ?? "");
 
   const groupedProjects = useMemo(() => {
+    // Group by client, then sort clients and projects alphabetically
     const grouped = groupBy(projects, (o) => o.client.id);
-    return Object.values(grouped);
+    return Object.values(grouped)
+      .sort((a, b) => a[0].client.name.localeCompare(b[0].client.name))
+      .map((group) => group.sort((a, b) => a.project.name.localeCompare(b.project.name)));
   }, [projects]);
 
   const tasks = useMemo(() => {
@@ -151,7 +154,7 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
                   <Form.Dropdown.Item
                     keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
-                    title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    title={`${client.name} – ${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
                     key={project.id}
                   />
                 );
