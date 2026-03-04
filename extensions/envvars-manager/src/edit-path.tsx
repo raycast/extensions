@@ -160,7 +160,7 @@ export default function EditPath() {
     }
   }
 
-  function handleMove(
+  async function handleMove(
     scope: EnvScope,
     index: number,
     direction: "up" | "down",
@@ -169,7 +169,7 @@ export default function EditPath() {
     const setEntries = scope === "User" ? setUserEntries : setMachineEntries;
     const moved = movePathEntry(entries, index, direction);
     setEntries(moved);
-    savePath(moved, scope);
+    await savePath(moved, scope);
   }
 
   async function handleRemove(scope: EnvScope, index: number, path: string) {
@@ -187,7 +187,7 @@ export default function EditPath() {
     entries.splice(index, 1);
     const reindexed = entries.map((e, i) => ({ ...e, index: i }));
     setEntries(reindexed);
-    savePath(reindexed, scope);
+    await savePath(reindexed, scope);
   }
 
   return (

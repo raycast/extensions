@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { exec } from "node:child_process";
+import { spawn } from "node:child_process";
 import { expandEnvVars } from "../utils/path-utils";
 import { PathEntry } from "../utils/types";
 
@@ -50,7 +50,7 @@ export function PathEntryItem({
               title="Open in Explorer"
               icon={Icon.Finder}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
-              onAction={() => exec(`explorer "${expanded}"`)}
+              onAction={() => spawn("explorer.exe", [expanded], { detached: true })}
             />
             {entry.index > 0 && (
               <Action
