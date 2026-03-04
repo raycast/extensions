@@ -58,7 +58,7 @@ function getStatusAccessory(status: ServiceAttributes["status"]): List.Item.Acce
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading: isSearchLoading, data: searchData } = useFetch(`${BASE_URL}/api/v1/search.json?q=${searchText}`, {
+  const { isLoading: isSearchLoading, data: searchData } = useFetch(`${BASE_URL}/api/v1/search.json?q=${encodeURIComponent(searchText)}`, {
     execute: searchText.length > 0,
     mapResult(result: SearchResult) {
       return { data: result.data };
