@@ -1,25 +1,24 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
 import ManagePresets from "./manage-recording-presets";
 import {
   buildRecordURL,
+  DEFAULT_SCREEN,
   formatResolution,
   getAllPresets,
   getScreenInfo,
   Preset,
   presetFitsScreen,
   ScreenDimensions,
-  ScreenInfo,
 } from "./presets";
 
 export default function Command() {
   const { data, isLoading } = useCachedPromise(getAllPresets);
   const custom = data?.custom ?? [];
   const defaults = data?.defaults ?? [];
-const { data: screenInfo = { displays: [DEFAULT_SCREEN], primary: DEFAULT_SCREEN } } = useCachedPromise(
-  () => Promise.resolve(getScreenInfo()),
-);
+  const { data: screenInfo = { displays: [DEFAULT_SCREEN], primary: DEFAULT_SCREEN } } = useCachedPromise(() =>
+    Promise.resolve(getScreenInfo()),
+  );
 
   function displayForIndex(displayIndex: number): ScreenDimensions {
     const { displays, primary } = screenInfo;

@@ -94,7 +94,7 @@ export interface ScreenInfo {
   primary: ScreenDimensions;
 }
 
-const DEFAULT_SCREEN: ScreenDimensions = { width: 1920, height: 1080 };
+export const DEFAULT_SCREEN: ScreenDimensions = { width: 1920, height: 1080 };
 
 export function getScreenInfo(): ScreenInfo {
   try {
