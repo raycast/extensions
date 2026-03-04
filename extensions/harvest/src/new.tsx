@@ -42,7 +42,11 @@ export default function Command({
   const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
   const [hoursError, setHoursError] = useState<string | undefined>();
   const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
-  const { showClient = false, timeFormat = "company", showClientInProject = false } = getPreferenceValues<{
+  const {
+    showClient = false,
+    timeFormat = "company",
+    showClientInProject = false,
+  } = getPreferenceValues<{
     showClient?: boolean;
     timeFormat?: "company" | "hours_minutes" | "decimal";
     showClientInProject?: boolean;
@@ -243,7 +247,9 @@ export default function Command({
                   <Form.Dropdown.Item
                     keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
-                    title={`${showClientInProject ? client.name + " – " : ""}${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    title={`${showClientInProject ? client.name + " – " : ""}${
+                      code && code !== "" ? "[" + code + "] " : ""
+                    }${project.project.name}`}
                     key={project.id}
                   />
                 );

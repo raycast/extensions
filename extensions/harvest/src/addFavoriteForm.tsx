@@ -155,7 +155,9 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
                   <Form.Dropdown.Item
                     keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
-                    title={`${showClientInProject ? client.name + " – " : ""}${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    title={`${showClientInProject ? client.name + " – " : ""}${
+                      code && code !== "" ? "[" + code + "] " : ""
+                    }${project.project.name}`}
                     key={project.id}
                   />
                 );
