@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for Perplexity Comet Browser] - {PR_MERGE_DATE}
+## [Support for Perplexity Comet Browser] - 2026-03-04
 
 - Added support for `Perplexity Comet` browser
 
