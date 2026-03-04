@@ -41,8 +41,8 @@
       "type": "textfield",
       "title": "Notes Folder Path",
       "description": "Folder where Noteman stores markdown notes",
-      "placeholder": "/Users/samueloldmark/Documents/Notman",
-      "default": "/Users/samueloldmark/Documents/Notman",
+      "placeholder": "~/Documents/Notes",
+      "default": "~/Documents/Notes",
       "required": true
     }
   ],

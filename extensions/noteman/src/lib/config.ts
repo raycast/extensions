@@ -1,11 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { expandHome } from "./fs";
 
-type Preferences = {
-  notesFolderPath: string;
-};
-
-const DEFAULT_NOTES_PATH = "/Users/samueloldmark/Documents/Notman";
+const DEFAULT_NOTES_PATH = "~/Documents/Notes";
 
 export function getNotesDirectory(): string {
   const preferences = getPreferenceValues<Preferences>();

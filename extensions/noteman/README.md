@@ -14,7 +14,7 @@ Noteman is a keyboard-first Raycast extension for local Markdown note-taking.
 Noteman stores notes in the folder from extension preferences:
 
 - **Preference**: `Notes Folder Path`
-- **Default**: `/Users/samueloldmark/Documents/Notman`
+- **Default**: `~/Documents/Notes`
 
 All files are UTF-8 `.md`.
 

@@ -1,5 +1,4 @@
-import { access, readdir, rename, stat } from "node:fs/promises";
-import { constants } from "node:fs";
+import { readdir, rename, stat } from "node:fs/promises";
 import path from "node:path";
 import {
   appendToFile,
@@ -7,7 +6,6 @@ import {
   ensureUniqueFilename,
   readFileUtf8,
   writeFileUtf8Exclusive,
-  writeFileUtf8,
 } from "./fs";
 
 export type NoteFile = {
@@ -160,10 +158,17 @@ export async function listMarkdownFileMetadata(
 
       try {
         const fileStats = await stat(filePath);
+        const shouldReadForTitle =
+          !isDailyFilename(entry.name) &&
+          !/^\d{4}-\d{2}-\d{2}\s\d{4}\s-\s.+\.md$/i.test(entry.name);
+        const contentForTitle = shouldReadForTitle
+          ? await readFileUtf8(filePath)
+          : "";
+
         return {
           path: filePath,
           filename: entry.name,
-          title: parseTitleFromContentOrFilename(filePath, ""),
+          title: parseTitleFromContentOrFilename(filePath, contentForTitle),
           mtimeMs: fileStats.mtimeMs,
           isDaily: isDailyFilename(entry.name),
           isToday: entry.name === todayFilename,
@@ -238,9 +243,14 @@ export async function createDailyIfMissing(
   const dailyPath = path.join(notesDir, dailyFilename);
 
   try {
-    await access(dailyPath, constants.F_OK);
-  } catch {
-    await writeFileUtf8(dailyPath, `# ${formatDateYYYYMMDD(date)}\n\n`);
+    await writeFileUtf8Exclusive(
+      dailyPath,
+      `# ${formatDateYYYYMMDD(date)}\n\n`,
+    );
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+      throw error;
+    }
   }
 
   return dailyPath;
