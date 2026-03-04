@@ -6,7 +6,6 @@
 
 - Update source url to use new aave-dao repo
 
-
 ## [1.1.5] - 2026-02-06
 
 ### Maintenance
