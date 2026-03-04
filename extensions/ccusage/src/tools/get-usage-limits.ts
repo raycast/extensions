@@ -1,7 +1,6 @@
 import { UsageLimitDataSchema } from "../types/usage-types";
 import { getClaudeAccessToken } from "../utils/keychain-access";
 import { fetchClaudeUsageLimits } from "../utils/claude-api-client";
-import { hasClaudeOAuthToken } from "../utils/claude-auth-mode";
 
 type Input = {
   /** Include raw reset timestamps in ISO format */
@@ -26,18 +25,11 @@ export default async function getUsageLimits(input?: Input): Promise<{
     rawTimestamp?: string;
   };
 }> {
-  const isUsageLimitsAvailable = await hasClaudeOAuthToken();
+  const token = await getClaudeAccessToken();
+  const isUsageLimitsAvailable = typeof token === "string" && token.trim().length > 0;
 
   if (!isUsageLimitsAvailable) {
     throw new Error("Usage limits require Claude OAuth authentication in Claude Code.");
-  }
-
-  const token = await getClaudeAccessToken();
-
-  if (!token) {
-    throw new Error(
-      "Claude Code credentials not found in keychain. Please authenticate Claude Code first using 'claude-code auth' or similar command.",
-    );
   }
 
   const limitData = await fetchClaudeUsageLimits(token);
