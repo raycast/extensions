@@ -5,7 +5,7 @@ import { stringToJSON } from "../utils/string-to-json-schema";
 import { preferences } from "../preferences";
 
 type Input = {
-  /** Show blocks from last N days */
+  /** When true, filters to show only recent blocks */
   recent?: boolean;
 };
 

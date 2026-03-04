@@ -132,7 +132,9 @@ export function BlocksUsage() {
       accessories={[
         { text: formatCost(activeBlock.costUSD), icon: Icon.Coins },
         { text: formatNumber(activeBlock.totalTokens), icon: Icon.Terminal, tooltip: "Total Tokens" },
-        activeBlock.isActive ? { icon: { source: Icon.CircleFilled, tintColor: Color.Green }, tooltip: "Active" } : {},
+        ...(activeBlock.isActive
+          ? [{ icon: { source: Icon.CircleFilled, tintColor: Color.Green }, tooltip: "Active" }]
+          : []),
       ]}
       detail={<List.Item.Detail metadata={renderDetailMetadata(activeBlock)} />}
       actions={
