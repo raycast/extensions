@@ -8,11 +8,6 @@ import { useState, useEffect } from "react";
 import { getGitHubClient } from "./api/githubClient";
 import { downloadGitHubContent } from "./helpers/download";
 
-interface FormValues {
-  url: string;
-  downloadPath: string[];
-}
-
 export default function Command() {
   const [downloadPath, setDownloadPath] = useState<string[]>([]);
   const [url, setUrl] = useState<string>("");
@@ -67,7 +62,7 @@ export default function Command() {
     return undefined;
   }
 
-  async function handleSubmit(values: FormValues) {
+  async function handleSubmit(values: { url: string; downloadPath: string[] }) {
     const error = validateUrl(values.url);
     if (error) {
       setUrlError(error);

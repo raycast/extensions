@@ -1,5 +1,11 @@
 # GitHub Changelog
 
+## [Add standalone Download Repository command with directory support] - {PR_MERGE_DATE}
+
+- Added "Download Repository" standalone command to download an entire repo or specific sub-directory from a GitHub URL
+- Integrated with existing GitHub authentication for private repository access
+- Implemented memory-efficient streaming zip extraction for large repositories
+
 ## [Add Pagination Support to My Starred Repositories] - 2026-01-24
 
 - My Starred Repositories: Migrated from REST API to GraphQL API for better pagination support
