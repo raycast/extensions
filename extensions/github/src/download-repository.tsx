@@ -7,8 +7,9 @@ import { useState, useEffect } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import { downloadGitHubContent } from "./helpers/download";
+import { withGitHubClient } from "./helpers/withGithubClient";
 
-export default function Command() {
+function DownloadRepository() {
   const [downloadPath, setDownloadPath] = useState<string[]>([]);
   const [url, setUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -142,3 +143,5 @@ export default function Command() {
     </Form>
   );
 }
+
+export default withGitHubClient(DownloadRepository);

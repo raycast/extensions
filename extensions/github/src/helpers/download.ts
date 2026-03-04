@@ -3,7 +3,6 @@ import os from "os";
 import path from "path";
 
 import { mkdirp } from "mkdirp";
-import fetch from "node-fetch";
 import yauzl from "yauzl";
 
 export interface ParsedUrl {
@@ -144,19 +143,25 @@ export async function downloadGitHubContent(
     const fileStream = fs.createWriteStream(tempFile);
     let downloadedBytes = 0;
 
-    for await (const chunk of response.body) {
-      const buffer = Buffer.from(chunk as ArrayBuffer);
-      downloadedBytes += buffer.length;
-      const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
+    const reader = response.body.getReader();
+    let isDone = false;
+    while (!isDone) {
+      const { done, value } = await reader.read();
+      isDone = done;
 
-      let progressMsg = `Downloading... ${downloadedMB} MB`;
-      if (repoSizeMB > 0) {
-        const percent = Math.min(Math.round((downloadedBytes / (repoSizeMB * 1024 * 1024)) * 100), 100);
-        progressMsg += ` / ${repoSizeMB} MB (${percent}%)`;
+      if (value) {
+        downloadedBytes += value.length;
+        const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
+
+        let progressMsg = `Downloading... ${downloadedMB} MB`;
+        if (repoSizeMB > 0) {
+          const percent = Math.min(Math.round((downloadedBytes / (repoSizeMB * 1024 * 1024)) * 100), 100);
+          progressMsg += ` / ${repoSizeMB} MB (${percent}%)`;
+        }
+
+        onProgress(progressMsg);
+        fileStream.write(Buffer.from(value));
       }
-
-      onProgress(progressMsg);
-      fileStream.write(buffer);
     }
 
     fileStream.end();
@@ -205,19 +210,21 @@ export async function downloadGitHubContent(
 
               const entryDir = path.dirname(entryDest);
 
-              mkdirp(entryDir).then(() => {
-                zipfile.openReadStream(entry, (err, readStream) => {
-                  if (err) return reject(err);
-                  const writeStream = fs.createWriteStream(entryDest);
-                  readStream.pipe(writeStream);
+              mkdirp(entryDir)
+                .then(() => {
+                  zipfile.openReadStream(entry, (err, readStream) => {
+                    if (err) return reject(err);
+                    const writeStream = fs.createWriteStream(entryDest);
+                    readStream.pipe(writeStream);
 
-                  writeStream.on("finish", () => {
-                    extractedCount++;
-                    zipfile.readEntry();
+                    writeStream.on("finish", () => {
+                      extractedCount++;
+                      zipfile.readEntry();
+                    });
+                    writeStream.on("error", reject);
                   });
-                  writeStream.on("error", reject);
-                });
-              });
+                })
+                .catch(reject);
             } else {
               zipfile.readEntry();
             }
