@@ -50,7 +50,9 @@ export function PathEntryItem({
               title="Open in Explorer"
               icon={Icon.Finder}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
-              onAction={() => spawn("explorer.exe", [expanded], { detached: true })}
+              onAction={() =>
+                spawn("explorer.exe", [expanded], { detached: true })
+              }
             />
             {entry.index > 0 && (
               <Action
