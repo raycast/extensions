@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
 import { FlavorText } from "../types";
+import { fixFlavorText } from "../utils";
 
 export default function Descriptions(props: {
   name: string;
@@ -36,11 +37,7 @@ export default function Descriptions(props: {
                           h1: title,
                         },
                         {
-                          p: entry.flavor_text
-                            .split("\n")
-                            .join(" ")
-                            .split("")
-                            .join(" "),
+                          p: fixFlavorText(entry.flavor_text),
                         },
                       ])}
                     />

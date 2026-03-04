@@ -109,6 +109,9 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   return todos.map(todo => {
     const props = todo.properties();
 
+    let areaTags = '';
+    const areaRef = props.area;
+
     let project = null;
     const projectRef = props.project;
     if (projectRef) {
@@ -118,6 +121,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       if (projectAreaRef) {
         const areaProps = projectAreaRef.properties();
         projectArea = { id: areaProps.id, name: areaProps.name };
+        areaTags = projectAreaRef.tagNames() || '';
       }
       project = {
         id: projectProps.id,
@@ -131,10 +135,10 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     }
 
     let area = null;
-    const areaRef = props.area;
     if (areaRef && !projectRef) {
       const areaProps = areaRef.properties();
       area = { id: areaProps.id, name: areaProps.name };
+      areaTags = areaRef.tagNames() || '';
     }
 
     return {
@@ -143,6 +147,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       status: props.status,
       notes: props.notes,
       tags: todo.tagNames(),
+      areaTags: areaTags || null,
       dueDate: props.dueDate ? props.dueDate.toISOString() : null,
       activationDate: props.activationDate ? props.activationDate.toISOString() : null,
       isProject: props.pcls === "project",
@@ -208,6 +213,15 @@ export const deleteProject = (projectId: string) =>
 // Uses properties() batching to minimize Apple Event overhead
 const mapTagJxa = `tag => tag.name()`;
 
+const mapTagWithHierarchyJxa = `tag => {
+  const props = tag.properties();
+  const parentRef = props.parentTag;
+  return {
+    name: props.name,
+    parent: parentRef ? parentRef.name() : null
+  };
+}`;
+
 const mapProjectTodoJxa = `todo => {
   const props = todo.properties();
   return {
@@ -266,8 +280,14 @@ const mapAreaJxa = `area => {
   };
 }`;
 
+export type TagWithParent = {
+  name: string;
+  parent: string | null;
+};
+
 type CollectionMap = {
   tags: string[];
+  tagsWithHierarchy: TagWithParent[];
   projects: Project[];
   areas: Area[];
   lists: List[];
@@ -275,6 +295,7 @@ type CollectionMap = {
 
 const jxaFetches = [
   { name: 'tags', needs: ['tags'], expr: `things.tags().map(${mapTagJxa})` },
+  { name: 'tagsWithHierarchy', needs: ['tagsWithHierarchy'], expr: `things.tags().map(${mapTagWithHierarchyJxa})` },
   { name: 'projects', needs: ['projects', 'lists'], expr: `things.projects().map(${mapProjectJxa})` },
   { name: 'areas', needs: ['areas', 'lists'], expr: `things.areas().map(${mapAreaJxa})` },
 ];

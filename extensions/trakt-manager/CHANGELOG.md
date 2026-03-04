@@ -1,5 +1,13 @@
 # Trakt Manager Changelog
 
+## [Fix] - 2026-03-01
+
+- Added User-Agent header to OAuth token and refresh requests to prevent authentication failures
+
+## [Fix] - 2026-02-23
+
+- Added User-Agent header to API client to fix 403 errors caused by Trakt's Cloudflare WAF blocking requests without one
+
 ## [Update] - 2025-08-18
 
 - New unified detail view across movies, shows, episodes, watchlist, history, up next & recommendations

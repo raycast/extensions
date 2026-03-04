@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
 import {
@@ -12,6 +12,7 @@ import {
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark, Config } from "../types";
+import { getScreenshot } from "../utils/screenshot";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
 const { Metadata } = List.Item.Detail;
@@ -21,28 +22,58 @@ interface BookmarkItemProps {
   onRefresh: () => void;
   onCleanCache?: () => void;
   onVisit?: (bookmark: Bookmark) => void;
+  isSelected?: boolean;
 }
 
-function useBookmarkImages(bookmark: Bookmark, config: Config) {
-  // Construct authenticated image URLs using the screenshot utility format
-  // These URLs will work in markdown with Raycast's image handling
-  const images = {
-    screenshot: DEFAULT_SCREENSHOT_FILENAME,
-    asset: DEFAULT_SCREENSHOT_FILENAME,
-  };
+function getPreviewAssetIds(bookmark: Bookmark): { screenshotId?: string; imageAssetId?: string } {
+  const screenshotId = bookmark.assets?.find((asset) => asset.assetType === "screenshot")?.id;
+  const imageAssetId =
+    bookmark.content.type === "asset" && bookmark.content.assetType === "image" ? bookmark.content.assetId : undefined;
+  return { screenshotId, imageAssetId };
+}
 
-  const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
-  if (screenshot?.id) {
-    const encodedUrl = encodeURIComponent(`/api/assets/${screenshot.id}`);
-    images.screenshot = `${config.apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
-  }
+function useAuthenticatedAssetUrl(assetId: string | undefined, enabled: boolean) {
+  const [url, setUrl] = useState<string>(DEFAULT_SCREENSHOT_FILENAME);
+  const lastAssetIdRef = useRef<string | undefined>(undefined);
 
-  if (bookmark.content.type === "asset" && bookmark.content.assetType === "image" && bookmark.content.assetId) {
-    const encodedUrl = encodeURIComponent(`/api/assets/${bookmark.content.assetId}`);
-    images.asset = `${config.apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
-  }
+  useEffect(() => {
+    // Reset when asset changes so we don't accidentally show a stale URL
+    // if the component gets enabled later.
+    if (assetId !== lastAssetIdRef.current) {
+      lastAssetIdRef.current = assetId;
+      setUrl(DEFAULT_SCREENSHOT_FILENAME);
+    }
+  }, [assetId]);
 
-  return images;
+  useEffect(() => {
+    if (!enabled || !assetId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const imageUrl = await getScreenshot(assetId);
+        if (!cancelled) {
+          setUrl(imageUrl);
+        }
+      } catch (error) {
+        logger.error("Failed to get authenticated image", { assetId, error });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [assetId, enabled]);
+
+  return url;
+}
+
+function useBookmarkImages(bookmark: Bookmark, enabled: boolean) {
+  const { screenshotId, imageAssetId } = getPreviewAssetIds(bookmark);
+  const screenshot = useAuthenticatedAssetUrl(screenshotId, enabled);
+  const asset = useAuthenticatedAssetUrl(imageAssetId, enabled);
+
+  return { screenshot, asset };
 }
 
 function useBookmarkHandlers({
@@ -458,16 +489,22 @@ export function BookmarkItem({
   onRefresh,
   onCleanCache,
   onVisit,
+  isSelected,
 }: BookmarkItemProps) {
   const { t } = useTranslation();
-  const images = useBookmarkImages(initialBookmark, config);
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
   useEffect(() => {
     setBookmark(initialBookmark);
   }, [initialBookmark]);
 
+  const shouldPrewarmPreview =
+    Boolean(isSelected) &&
+    ((bookmark.content.type === "link" && config.displayBookmarkPreview) ||
+      (bookmark.content.type === "asset" && bookmark.content.assetType === "image"));
+  const images = useBookmarkImages(bookmark, shouldPrewarmPreview);
+
   const handlers = useBookmarkHandlers({
-    bookmark: initialBookmark,
+    bookmark,
     setBookmark,
     onRefresh,
   });

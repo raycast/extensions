@@ -1,5 +1,12 @@
 # Apple Reminders Changelog
 
+## [Prevent accidental recurring reminders from AI] - 2026-02-26
+
+- Add tool confirmations for recurring reminder creation and recurrence updates so users can approve recurrence changes.
+- Tighten AI instructions to explicitly avoid recurrence unless the user asks for it.
+- Add an AI eval for one-off reminder prompts to prevent recurrence regressions.
+- Resolves: https://github.com/raycast/extensions/issues/25489
+
 ## [Fix Quick Add Reminder AI model selection] - 2026-02-10
 
 - Fix Quick Add Reminder to use user's selected AI model instead of hardcoded OpenAI GPT-4o

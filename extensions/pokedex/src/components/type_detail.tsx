@@ -128,7 +128,7 @@ export function TypeDetail({
         subtitle="Effectiveness when this type is hit by others"
       >
         <List.Item
-          title="Weak To"
+          title="Weak"
           icon={Icon.ChevronUp}
           subtitle="2x"
           accessories={defending.weakTo}
@@ -140,13 +140,13 @@ export function TypeDetail({
           accessories={defending.neutral}
         />
         <List.Item
-          title="Resistant To"
+          title="Resistant"
           icon={Icon.CircleProgress50}
           subtitle="0.5x"
           accessories={defending.resistantTo}
         />
         <List.Item
-          title="Immune To"
+          title="Immune"
           icon={Icon.XMarkCircle}
           subtitle="0x"
           accessories={defending.immuneTo}

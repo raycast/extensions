@@ -433,29 +433,60 @@ async function ensureChunkedCache<T>(
   remote: ChunkedRemote<T>,
   extractIndex: IndexExtractor<T>,
   onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
 ): Promise<void> {
-  const isValid = await isChunkedCacheValid(remote.chunkedConfig, remote.url);
+  const isValid = await isChunkedCacheValid(remote.chunkedConfig, remote.url, signal);
   if (isValid) {
     return;
   }
 
-  // Need to rebuild - download source JSON to disk WITHOUT parsing into memory
-  // This is critical to avoid heap exhaustion on initial load
-  brewLogger.log("Building chunked cache", { type: remote.chunkedConfig.type });
+  // Check if stale cache exists (for fallback on failure)
+  let hasStaleCacheIndex = false;
+  try {
+    await fs.stat(remote.chunkedConfig.indexPath);
+    await fs.stat(remote.chunkedConfig.metaPath);
+    hasStaleCacheIndex = true;
+  } catch {
+    // No stale cache available
+  }
 
-  // Download to disk only (no parsing)
-  await downloadRemoteToCache(remote.url, remote.cachePath, onProgress);
+  try {
+    // Need to rebuild - download source JSON to disk WITHOUT parsing into memory
+    // This is critical to avoid heap exhaustion on initial load
+    brewLogger.log("Building chunked cache", { type: remote.chunkedConfig.type });
 
-  // Now build the chunked cache from the downloaded file
-  // This streams through the file and writes chunks incrementally
-  await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress);
+    // Download to disk only (no parsing)
+    await downloadRemoteToCache(remote.url, remote.cachePath, onProgress, signal);
+
+    // Now build the chunked cache from the downloaded file
+    // This streams through the file and writes chunks incrementally
+    await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress, signal);
+  } catch (err) {
+    // Always re-throw abort errors - the caller handles these
+    if (err instanceof Error && err.name === "AbortError") throw err;
+
+    // For other errors, fall back to stale cache if available
+    if (hasStaleCacheIndex) {
+      brewLogger.warn("Chunked cache rebuild failed, using stale cache", {
+        type: remote.chunkedConfig.type,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      return;
+    }
+
+    // No stale cache to fall back to
+    throw err;
+  }
 }
 
 /**
  * Fetch the chunked index for formulae.
  * Builds chunked cache if it doesn't exist or is stale.
  */
-export async function fetchFormulaIndex(onProgress?: DownloadProgressCallback): Promise<CacheIndex> {
+export async function fetchFormulaIndex(
+  onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
+): Promise<CacheIndex> {
   // Check if already cached in memory
   if (formulaRemote.index) {
     return formulaRemote.index;
@@ -463,7 +494,23 @@ export async function fetchFormulaIndex(onProgress?: DownloadProgressCallback): 
 
   // Check if fetch is already in progress (deduplication)
   if (formulaRemote.indexFetch) {
-    return formulaRemote.indexFetch;
+    // Don't pass our signal to the existing build - just await it
+    try {
+      const result = await formulaRemote.indexFetch;
+      // Check abort after awaiting another caller's build
+      if (signal?.aborted) {
+        const error = new Error("Aborted");
+        error.name = "AbortError";
+        throw error;
+      }
+      return result;
+    } catch (err) {
+      // If the existing build was aborted but OUR signal is still active, retry
+      if (err instanceof Error && err.name === "AbortError" && !signal?.aborted) {
+        return fetchFormulaIndex(onProgress, signal);
+      }
+      throw err;
+    }
   }
 
   // Start fetch with deduplication
@@ -473,7 +520,7 @@ export async function fetchFormulaIndex(onProgress?: DownloadProgressCallback): 
       brewLogger.log("Waiting for existing formula chunked cache build");
       await formulaeChunkedBuildInProgress;
     } else {
-      formulaeChunkedBuildInProgress = ensureChunkedCache(formulaRemote, extractFormulaIndex, onProgress);
+      formulaeChunkedBuildInProgress = ensureChunkedCache(formulaRemote, extractFormulaIndex, onProgress, signal);
       try {
         await formulaeChunkedBuildInProgress;
       } finally {
@@ -498,7 +545,7 @@ export async function fetchFormulaIndex(onProgress?: DownloadProgressCallback): 
  * Fetch the chunked index for casks.
  * Builds chunked cache if it doesn't exist or is stale.
  */
-export async function fetchCaskIndex(onProgress?: DownloadProgressCallback): Promise<CacheIndex> {
+export async function fetchCaskIndex(onProgress?: DownloadProgressCallback, signal?: AbortSignal): Promise<CacheIndex> {
   // Check if already cached in memory
   if (caskRemote.index) {
     return caskRemote.index;
@@ -506,7 +553,23 @@ export async function fetchCaskIndex(onProgress?: DownloadProgressCallback): Pro
 
   // Check if fetch is already in progress (deduplication)
   if (caskRemote.indexFetch) {
-    return caskRemote.indexFetch;
+    // Don't pass our signal to the existing build - just await it
+    try {
+      const result = await caskRemote.indexFetch;
+      // Check abort after awaiting another caller's build
+      if (signal?.aborted) {
+        const error = new Error("Aborted");
+        error.name = "AbortError";
+        throw error;
+      }
+      return result;
+    } catch (err) {
+      // If the existing build was aborted but OUR signal is still active, retry
+      if (err instanceof Error && err.name === "AbortError" && !signal?.aborted) {
+        return fetchCaskIndex(onProgress, signal);
+      }
+      throw err;
+    }
   }
 
   // Start fetch with deduplication
@@ -516,7 +579,7 @@ export async function fetchCaskIndex(onProgress?: DownloadProgressCallback): Pro
       brewLogger.log("Waiting for existing cask chunked cache build");
       await casksChunkedBuildInProgress;
     } else {
-      casksChunkedBuildInProgress = ensureChunkedCache(caskRemote, extractCaskIndex, onProgress);
+      casksChunkedBuildInProgress = ensureChunkedCache(caskRemote, extractCaskIndex, onProgress, signal);
       try {
         await casksChunkedBuildInProgress;
       } finally {

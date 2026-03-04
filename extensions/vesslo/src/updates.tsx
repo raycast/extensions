@@ -4,7 +4,6 @@ import {
   Icon,
   List,
   open,
-  Color,
   closeMainWindow,
 } from "@raycast/api";
 import { useState, useMemo } from "react";
@@ -14,7 +13,7 @@ import {
   runBrewUpgradeInTerminal,
   runMasUpgradeInTerminal,
 } from "./utils/actions";
-import { SORT_LABELS, SortOption } from "./constants";
+import { SORT_LABELS, SortOption, getSourceColor } from "./constants";
 import { useVessloData } from "./utils/useVessloData";
 
 export default function Updates() {
@@ -25,6 +24,9 @@ export default function Updates() {
     if (!data) return [];
     return data.apps.filter(
       (app) =>
+        !app.isDeleted &&
+        !app.isSkipped &&
+        !app.isIgnored &&
         app.targetVersion !== null &&
         app.targetVersion !== undefined &&
         app.targetVersion !== "undefined" &&
@@ -55,8 +57,8 @@ export default function Updates() {
   const sparkleApps = sortedApps.filter(
     (app) => app.sources.includes("Sparkle") && !app.sources.includes("Brew"),
   );
-  const appStoreApps = sortedApps.filter((app) =>
-    app.sources.includes("App Store"),
+  const appStoreApps = sortedApps.filter(
+    (app) => app.sources.includes("App Store") && !app.sources.includes("Brew"),
   );
   const otherApps = sortedApps.filter(
     (app) =>
@@ -151,15 +153,18 @@ function UpdateListItem({ app }: { app: VessloApp }) {
   const isSparkle = app.sources.includes("Sparkle");
   const isAppStore = app.sources.includes("App Store");
 
-  // Determine source badge
-  let sourceBadge = { value: "manual", color: Color.SecondaryText };
-  if (isHomebrew) {
-    sourceBadge = { value: "brew", color: Color.Orange };
-  } else if (isAppStore) {
-    sourceBadge = { value: "appStore", color: Color.Blue };
-  } else if (isSparkle) {
-    sourceBadge = { value: "sparkle", color: Color.Green };
-  }
+  // Determine source badge using centralized constants
+  const primarySource = isHomebrew
+    ? "Brew"
+    : isAppStore
+      ? "App Store"
+      : isSparkle
+        ? "Sparkle"
+        : "Manual";
+  const sourceBadge = {
+    value: primarySource.toLowerCase(),
+    color: getSourceColor(primarySource),
+  };
 
   return (
     <List.Item
@@ -221,8 +226,12 @@ function UpdateListItem({ app }: { app: VessloApp }) {
 
           {/* General Actions */}
           <ActionPanel.Section>
-            <Action.Open title="Open App" target={app.path} />
-            <Action.ShowInFinder path={app.path} />
+            {!app.isDeleted && (
+              <>
+                <Action.Open title="Open App" target={app.path} />
+                <Action.ShowInFinder path={app.path} />
+              </>
+            )}
             {app.bundleId && (
               <Action
                 title="Open in Vesslo"

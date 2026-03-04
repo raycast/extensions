@@ -8,6 +8,21 @@
 - Session Blocks analysis: Track usage by Claude Code's 5-hour billing sessions.
 - Detailed progress indicators for data loading states.
 - Enhanced weekly view showing full date ranges.
+## [v2.2.0] - 2026-02-18
+
+### Added
+
+- New "Claude Code Stats" background command that updates Raycast command subtitle with usage data every 5 minutes
+- Configurable subtitle template with placeholders:
+  - `{dailyCost}` - Today's cost (e.g., "$1.23")
+  - `{dailyTokens}` - Today's total tokens (e.g., "2.34 MTok")
+  - `{dailyInputTokens}` - Today's input tokens
+  - `{dailyOutputTokens}` - Today's output tokens
+  - `{dailyRatio}` - Today's output/input token ratio (e.g., "1.23x")
+  - `{monthlyCost}` - This month's cost
+  - `{monthlyTokens}` - This month's total tokens
+  - `{monthlyRatio}` - This month's output/input token ratio
+  - `{usageLimit}` - 5-hour API usage limit percentage (e.g., "30%")
 
 ## [v2.1.2] - 2026-02-02
 

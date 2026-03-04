@@ -177,7 +177,10 @@ export interface PokemonForm {
 export interface PokemonFormType {
   form_name: string;
   pokemon_id: number;
+  is_mega: boolean;
+  variety: boolean;
   pokemonformnames: PokemonFormName[];
+  pokemonformtypes: PokemonType[];
 }
 
 export interface PokemonFormName {
@@ -278,4 +281,26 @@ export interface Nature {
     name: string;
     statnames: Name[];
   } | null;
+}
+
+export interface Item {
+  id: number;
+  name: string;
+  itemnames: Name[];
+  cost: number;
+  itemcategory: ItemCategory;
+  itemeffecttexts: Effect[];
+  itemflavortexts: FlavorText[];
+}
+
+export interface ItemCategory {
+  name: string;
+  item_pocket_id: number;
+  itemcategorynames: Name[];
+  itempocket: ItemPocket;
+}
+
+export interface ItemPocket {
+  name: string;
+  itempocketnames: Name[];
 }

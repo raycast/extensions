@@ -65,6 +65,8 @@ View installed plugins. You can update, uninstall, or configure them.
 | Preference | Description | Default |
 | ---------------- | -------------------------------------------------- | ------- |
 | Upload Timeout | Maximum time (in ms) to wait for upload completion. | 30000 |
+| Auto Copy URLs | Automatically copy your image URLs right after finishing uploading | true |
+| Custom Format | Use `$url` to represent the position of image URL. <br>Use `$fileName` to represent the position of file names. <br>Use `$extName` to represent the position of image extension name. <br>Ex. `[$fileName]($url)` <br> => `[img.png](https://somepath/img.png)` | `$url` |
 | Upload Proxy | Custom proxy address for uploading images (e.g., `http://127.0.0.1:7890`). | - |
 | NPM Path | Path to the NPM executable (e.g., `/usr/local/bin`). Do not include `/npm` in the path. | - |
 | NPM Proxy | Proxy address for installing plugins via NPM. | - |

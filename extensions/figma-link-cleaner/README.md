@@ -14,8 +14,8 @@ Clean and shorten Figma URLs instantly with one hotkey. Perfect for sharing clea
 
 ### Before & After
 
-| Original (~90 chars)                                                             | Cleaned (~50 chars)                               | Shortened (~21 chars)    |
-| -------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------ |
+| Original (~90 chars) | Cleaned (~50 chars) | Shortened (~21 chars) |
+|---------------------|---------------------|----------------------|
 | `https://www.figma.com/design/ABC123/My-Design?node-id=123%3A456&t=abc&fuid=999` | `https://figma.com/design/ABC123?node-id=123:456` | `https://fgma.cc/x7k9m2` |
 
 ### What Gets Removed
@@ -31,12 +31,20 @@ Clean and shorten Figma URLs instantly with one hotkey. Perfect for sharing clea
 - `node-id` (your selected layer/frame)
 - `page-id` (if present)
 
+## Setup
+
+**Set up the hotkey** (one-time):
+1. Open Raycast Settings (`Cmd+,`)
+2. Go to **Extensions** → Find **Figma Link Cleaner**
+3. Click on "Clean Figma Link" command
+4. Set hotkey to `Control+L` (or your preferred shortcut)
+
 ## Usage
 
 ### From Figma (Recommended)
 
 1. Select a layer, frame, or component in Figma
-2. Press `Control+L` (or your configured hotkey)
+2. Press `Control+L` (your configured hotkey)
 3. The cleaned/shortened link is copied to your clipboard
 4. Paste anywhere!
 
@@ -48,10 +56,10 @@ Clean and shorten Figma URLs instantly with one hotkey. Perfect for sharing clea
 
 ## Preferences
 
-| Setting                       | Description                          |
-| ----------------------------- | ------------------------------------ |
+| Setting | Description |
+|---------|-------------|
 | **Enable fgma.cc shortening** | Create ultra-short links via fgma.cc |
-| **API Key**                   | Optional authentication for fgma.cc  |
+| **API Key** | Optional authentication for fgma.cc |
 
 ## Supported URL Formats
 
@@ -68,15 +76,12 @@ Clean and shorten Figma URLs instantly with one hotkey. Perfect for sharing clea
 ## Troubleshooting
 
 ### "Accessibility permission required"
-
 Enable Raycast in System Settings → Privacy & Security → Accessibility
 
 ### "Couldn't copy from Figma"
-
 Make sure you have a layer or frame selected in Figma, then try again.
 
 ### "No Figma link found"
-
 Either select something in Figma, or copy a Figma URL to your clipboard first.
 
 ## Author

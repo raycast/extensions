@@ -1,14 +1,13 @@
 # Vesslo
 
-<p align="center">
-  <img src="assets/extension-icon.png" height="128">
-  <h1 align="center">Vesslo</h1>
-</p>
-
 🌐 **Website**: [https://vesslo.top](https://vesslo.top)
 📦 **GitHub**: [https://github.com/hjm79/Vesslo-MacAppManager](https://github.com/hjm79/Vesslo-MacAppManager)
 
 Search and manage your Vesslo app library directly from Raycast.
+
+## Demo
+
+![Vesslo Raycast Extension Demo](media/demo.gif)
 
 ## Features
 

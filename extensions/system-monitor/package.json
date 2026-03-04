@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-system-monitor",
   "title": "System Monitor",
-  "description": "Show information and usage related to CPU, memory, power and network",
+  "description": "Show information and usage related to CPU, memory, power, network and temperature",
   "icon": "command-icon.png",
   "author": "hossammourad",
   "categories": [
@@ -16,13 +16,14 @@
     "lucasmezencio",
     "ridemountainpig",
     "xmok",
-    "jadenmajid"
+    "jadenmajid",
+    "ADCAdams"
   ],
   "commands": [
     {
       "name": "system-monitor",
       "title": "System Monitor",
-      "description": "Show information and usage related to CPU, memory, power and network",
+      "description": "Show information and usage related to CPU, memory, power, network and temperature",
       "mode": "view"
     },
     {
@@ -47,7 +48,7 @@
           "title": "CPU Formatting",
           "placeholder": "<PERCENT> %",
           "default": "<PERCENT> %"
-        },    
+        },
         {
           "name": "memoryMenubarFormat",
           "description": "Options:<VALUE>,<TOTAL>,<PERCENT>",
@@ -111,7 +112,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "prebuild": "clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/temp-reader.m -framework IOKit -framework Foundation -o assets/temperature-reader"
   },
   "preferences": [
     {
@@ -220,7 +222,7 @@
       ],
       "default": "used"
     }
-    ],
+  ],
   "platforms": [
     "macOS"
   ]

@@ -3,7 +3,7 @@ import json2md from "json2md";
 import groupBy from "lodash.groupby";
 import orderBy from "lodash.orderby";
 import { FlavorText, PokemonDexNumber } from "../types";
-import { nationalDexNumber } from "../utils";
+import { fixFlavorText, nationalDexNumber } from "../utils";
 
 export default function PokedexEntries(props: {
   name: string;
@@ -85,11 +85,7 @@ export default function PokedexEntries(props: {
                           h1: title,
                         },
                         {
-                          p: entry.flavor_text
-                            .split("\n")
-                            .join(" ")
-                            .split("")
-                            .join(" "),
+                          p: fixFlavorText(entry.flavor_text),
                         },
                       ])}
                     />

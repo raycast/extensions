@@ -1,14 +1,21 @@
-import { showToast, Toast, showHUD } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { fetchCreateBookmark } from "./apis";
 import { getBrowserLink } from "./hooks/useBrowserLink";
-import { Bookmark } from "./types";
+import { Language, translations } from "./i18n";
+import { translate } from "./i18n/translate";
+import { Bookmark, Preferences } from "./types";
 
 export default async function QuickBookmark() {
+  const preferences = getPreferenceValues<Preferences>();
+  const language = (preferences.language as Language) || "en";
+  const t = (key: string, params?: Record<string, string | number | undefined>) =>
+    translate(translations[language], key, params);
+
   try {
     // Show initial toast
     const toast = await showToast({
-      title: "Getting browser URL...",
+      title: t("quickBookmark.gettingBrowserUrl"),
       style: Toast.Style.Animated,
     });
 
@@ -17,12 +24,12 @@ export default async function QuickBookmark() {
 
     if (!url) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to get browser URL";
-      toast.message = "Make sure a browser is open with an active tab";
+      toast.title = t("quickBookmark.failedToGetBrowserUrl.title");
+      toast.message = t("quickBookmark.failedToGetBrowserUrl.message");
       return;
     }
 
-    toast.title = "Creating bookmark...";
+    toast.title = t("quickBookmark.creatingBookmark");
 
     // Create the bookmark
     const payload = {
@@ -35,14 +42,14 @@ export default async function QuickBookmark() {
 
     if (!bookmark) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to create bookmark";
+      toast.title = t("quickBookmark.failedToCreateBookmark");
       return;
     }
 
-    await showHUD("✓ Bookmark created");
+    await showHUD(t("quickBookmark.successHud"));
   } catch (error) {
     await showFailureToast({
-      title: "Failed to create quick bookmark",
+      title: t("quickBookmark.failureToastTitle"),
       message: String(error),
     });
   }

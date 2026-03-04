@@ -4,8 +4,25 @@ import { promisify } from "util";
 import { getBrewPath } from "./brew";
 
 const execAsync = promisify(exec);
+export const BREW_MAX_BUFFER = 10 * 1024 * 1024;
 
 export const VESSLO_URL_SCHEME = "vesslo://";
+
+function escapeForAppleScript(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "'\\'''");
+}
+
+function isValidCaskToken(token: string): boolean {
+  return /^[A-Za-z0-9@._+-]+$/.test(token);
+}
+
+function normalizeAppStoreId(appStoreId: string): string | null {
+  const trimmed = appStoreId.trim();
+  return /^\d+$/.test(trimmed) ? trimmed : null;
+}
 
 export async function openInVesslo(bundleId: string) {
   try {
@@ -35,6 +52,7 @@ export async function runBrewUpgrade(caskName: string, appName: string) {
 
     const { stdout, stderr } = await execAsync(
       `${brewPath} upgrade --cask ${JSON.stringify(caskName)} 2>&1`,
+      { maxBuffer: BREW_MAX_BUFFER },
     );
 
     const output = stdout + stderr;
@@ -86,8 +104,18 @@ export async function runBrewUpgrade(caskName: string, appName: string) {
 }
 
 export async function runBrewUpgradeInTerminal(caskName: string) {
+  if (!isValidCaskToken(caskName)) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid cask name",
+      message: caskName.slice(0, 100),
+    });
+    return;
+  }
+
   const brewPath = getBrewPath();
   const command = `${brewPath} upgrade --cask ${caskName}`;
+  const escapedCommand = escapeForAppleScript(command);
 
   try {
     await closeMainWindow();
@@ -96,11 +124,11 @@ export async function runBrewUpgradeInTerminal(caskName: string) {
       `osascript -e 'tell application "Terminal"
         activate
         if (count of windows) > 0 then
-          do script "${command}" in front window
+          do script "${escapedCommand}" in front window
         else
           do script ""
           delay 3
-          do script "${command}" in front window
+          do script "${escapedCommand}" in front window
         end if
       end tell'`,
     );
@@ -114,7 +142,18 @@ export async function runBrewUpgradeInTerminal(caskName: string) {
 }
 
 export async function runMasUpgradeInTerminal(appStoreId: string) {
-  const command = `mas upgrade ${appStoreId}`;
+  const normalizedAppStoreId = normalizeAppStoreId(appStoreId);
+  if (!normalizedAppStoreId) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid App Store ID",
+      message: appStoreId.slice(0, 100),
+    });
+    return;
+  }
+
+  const command = `mas upgrade ${normalizedAppStoreId}`;
+  const escapedCommand = escapeForAppleScript(command);
 
   try {
     await closeMainWindow();
@@ -123,11 +162,11 @@ export async function runMasUpgradeInTerminal(appStoreId: string) {
       `osascript -e 'tell application "Terminal"
         activate
         if (count of windows) > 0 then
-          do script "${command}" in front window
+          do script "${escapedCommand}" in front window
         else
           do script ""
           delay 3
-          do script "${command}" in front window
+          do script "${escapedCommand}" in front window
         end if
       end tell'`,
     );

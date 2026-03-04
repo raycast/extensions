@@ -7,6 +7,7 @@ import {
   runBrewUpgradeInTerminal,
   runMasUpgradeInTerminal,
 } from "../utils/actions";
+import { getSourceColor } from "../constants";
 
 interface SharedAppListItemProps {
   app: VessloApp;
@@ -66,18 +67,13 @@ export function SharedAppListItem({
   if (app.targetVersion) {
     accessories.push({ tag: { value: "UPDATE", color: Color.Green } });
   }
+  if (app.isDeleted) {
+    accessories.push({ tag: { value: "DELETED", color: Color.Red } });
+  }
 
   // Source badges
   app.sources.forEach((source) => {
-    const color =
-      source === "Brew"
-        ? Color.Orange
-        : source === "App Store"
-          ? Color.Blue
-          : source === "Sparkle"
-            ? Color.Green
-            : Color.SecondaryText;
-    accessories.push({ tag: { value: source, color } });
+    accessories.push({ tag: { value: source, color: getSourceColor(source) } });
   });
 
   // Icon
@@ -93,26 +89,30 @@ export function SharedAppListItem({
       accessories={accessories}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Open title="Open App" target={app.path} />
-            <Action.ShowInFinder path={app.path} />
-          </ActionPanel.Section>
+          {!app.isDeleted && (
+            <ActionPanel.Section>
+              <Action.Open title="Open App" target={app.path} />
+              <Action.ShowInFinder path={app.path} />
+            </ActionPanel.Section>
+          )}
 
-          <ActionPanel.Section>
-            <Action
-              title="Open in Vesslo"
-              icon={Icon.Link}
-              onAction={() => app.bundleId && openInVesslo(app.bundleId)}
-            />
-            {app.bundleId && (
-              <Action.CopyToClipboard
-                title="Copy Bundle ID"
-                content={app.bundleId}
+          {app.bundleId && (
+            <ActionPanel.Section>
+              <Action
+                title="Open in Vesslo"
+                icon={Icon.Link}
+                onAction={() => openInVesslo(app.bundleId!)}
               />
-            )}
-          </ActionPanel.Section>
+              {!app.isDeleted && (
+                <Action.CopyToClipboard
+                  title="Copy Bundle ID"
+                  content={app.bundleId}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
 
-          {app.targetVersion && (
+          {!app.isDeleted && app.targetVersion && (
             <ActionPanel.Section title="Update">
               {app.sources.includes("Brew") && app.homebrewCask && (
                 <Action
@@ -139,7 +139,7 @@ export function SharedAppListItem({
                 <Action
                   title="Update Via Terminal (Mas)"
                   icon={Icon.Terminal}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                   onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
                 />
               )}

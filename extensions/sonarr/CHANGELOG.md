@@ -1,5 +1,16 @@
 # Sonarr Changelog
 
+## [Update] - 2026-02-21
+
+- Removed an unused command entirely
+- Simplified **Search Series** rows to title/year with compact metadata
+- Added lightweight genre and status tags in **Search Series** while keeping library check indicators
+- Fixed the episode and season search action flow by handling Sonarr command responses more safely
+- Improved series search reliability to avoid stale results while typing
+- Added **History** command to inspect recent grabs/imports/failures
+- Added **Blocklist** command to review blocked releases
+- Improved API error messages to surface Sonarr responses in Raycast toasts
+
 ## [Update] - 2025-11-26
 
 - Added fuzzy search filtering (e.g., "simps" finds "The Simpsons")

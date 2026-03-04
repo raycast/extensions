@@ -7,7 +7,6 @@ import {
   getProjects,
   getNote,
   withErrorHandling,
-  getApiToken,
   getProjectIcon,
   getAPIDateString,
 } from "../api";
@@ -35,12 +34,6 @@ export default function TaskUpdater({ task, projects: initialProjects, onTaskUpd
 
   useEffect(() => {
     async function load() {
-      const token = await getApiToken();
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
       if (!initialProjects) {
         const result = await withErrorHandling(() => getProjects(), "Failed to load projects");
         if (result) setProjects(result);

@@ -7,6 +7,7 @@ This Raycast extension is the perfect companion for Slack users. It allows you t
 - See unread messages,
 - Snooze notifications
 - Set your presence status
+- Set your status
 
 ## How to get an access token?
 
@@ -61,6 +62,10 @@ If you don't want to log in through OAuth, you can use an access token instead. 
 
      # Command: Search Emojis
      - emoji:read
+   
+     # Command: Set Status
+     - users.profile:write
+     - users.profile:read
    ```
 
 settings:
