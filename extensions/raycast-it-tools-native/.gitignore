@@ -1,0 +1,6 @@
+node_modules/
+.npm-cache/
+build/
+release/
+dist/
+.DS_Store
