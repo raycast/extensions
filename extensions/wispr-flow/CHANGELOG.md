@@ -1,6 +1,6 @@
 # Wispr Flow Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-03-04
 
 ### Transcription History
 - Search and browse Wispr Flow transcription history with infinite scroll
