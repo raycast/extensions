@@ -1,6 +1,6 @@
 # Cleanshot X Changelog
 
-## [Preset management commands] - {PR_MERGE_DATE}
+## [Preset management commands] - 2026-03-04
 
 - Add new commands to manage recording presets
 - Add new command to record screen at a chosen preset resolution
