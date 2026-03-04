@@ -5,7 +5,7 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 const DEFAULT_CLI = "/Applications/Hubstaff.app/Contents/MacOS/HubstaffCLI";
 
 export function getCLIPath(): string {
-  const prefs = getPreferenceValues<{ cliPath?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   return prefs.cliPath?.trim() || DEFAULT_CLI;
 }
 
