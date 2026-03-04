@@ -38,7 +38,18 @@ export default function Command() {
             onSearchTextChange={setQueryText}
             searchBarPlaceholder="Type pinyin to translate..."
         >
-            <List.Item key="result" title={result} actions={<CopyActionPanel name={result} />} />
+            {queryText.length === 0 ? (
+                <List.EmptyView
+                    title="Type pinyin to see the translation result."
+                    description="You can also add numeric tones (1-5) for tone marks."
+                />
+            ) : (
+                <>
+                    <List.Section title="Translation Result">
+                        <List.Item key="result" title={result} actions={<CopyActionPanel name={result} omitText />} />
+                    </List.Section>
+                </>
+            )}
         </List>
     );
 }

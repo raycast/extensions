@@ -52,6 +52,13 @@
   - `CHANGELOG.md`
   - `package.json`
 
+## Translation Rules
+
+- Full-string conversion uses longest-prefix matching from `assets/pinyin-translation.json`.
+- Numeric tones `1` to `5` are supported and map to Bopomofo tone marks.
+- For `j/q/x`, finals `un` and `uan` must map to `ㄩㄣ` and `ㄩㄢ` respectively.
+- Unknown characters are skipped to avoid blocking conversion.
+
 ## Agent Workflow Notes
 
 - Before release-focused changes, check `publish-guide.md`.

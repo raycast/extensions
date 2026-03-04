@@ -17,13 +17,15 @@
     {
       "name": "bopomofo-search",
       "title": "Bopomofo Search",
+      "subtitle": "Search single Zhuyin/Bopomofo characters by Pinyin",
       "description": "Search and copy Bopomofo (注音符號)",
       "mode": "view"
     },
     {
       "name": "pinyin-to-bopomofo",
       "title": "Pinyin to Bopomofo",
-      "description": "Convert full pinyin text to Bopomofo",
+      "description": "Convert Pinyin text to Bopomofo",
+      "subtitle": "Convert full Pinyin string to Zhuyin/Bopomofo",
       "mode": "view"
     }
   ],

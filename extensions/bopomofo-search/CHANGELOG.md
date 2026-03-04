@@ -1,5 +1,13 @@
 # Bopomofo Search Changelog
 
+## [Fix Pinyin Conversion Algorithm] - 2026-03-04
+
+- Fix full-string conversion for `jun/qun/xun` and `juan/quan/xuan`.
+- Add special handling so `un`/`uan` after `j`, `q`, or `x` map to `ㄩㄣ`/`ㄩㄢ`.
+- Allow spaces to separate multiple pinyin syllables in the input for separating output.
+- Add extension metadata screenshots for the Raycast Store listing.
+- Better compliance with Raycast's extension guidelines.
+
 ## [Add Pinyin Conversion Command] - 2026-03-03
 
 - Add `Pinyin to Bopomofo` command for translating full pinyin strings.
