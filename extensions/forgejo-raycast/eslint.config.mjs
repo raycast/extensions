@@ -5,7 +5,7 @@ export default defineConfig([
   ...raycast,
   {
     rules: {
-      "@raycast/prefer-title-case": "off",
+      "@raycast/prefer-title-case": "warn",
     },
   },
 ]);
