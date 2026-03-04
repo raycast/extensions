@@ -1,7 +1,7 @@
 # Mail Finder Changelog
 
 
-## [Refactor & Bug Fixes] - 2026-03-04
+## [Refactor & Bug Fixes] - {PR_MERGE_DATE}
 
 TL;DR
 Removed duplicate code (DRY), made things simpler, fixed naming confusion, better icon loading on history, bugs removed.
