@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Added Menubar Pin-to-Display] - {PR_MERGE_DATE}
+## [Added Menubar Pin-to-Display] - 2026-03-04
 
 - Click any stat in the menubar dropdown to pin it as persistent text next to the icon
 - Supports CPU, temperature, memory, battery, network, and storage
