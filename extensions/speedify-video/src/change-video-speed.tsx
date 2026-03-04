@@ -1,11 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  open,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open } from "@raycast/api";
 import { useState } from "react";
 import { exec, execFile } from "child_process";
 import { promisify } from "util";
@@ -130,10 +123,7 @@ async function findFfprobePath(): Promise<string | null> {
   return null;
 }
 
-async function getVideoDuration(
-  ffprobePath: string,
-  videoPath: string,
-): Promise<number | null> {
+async function getVideoDuration(ffprobePath: string, videoPath: string): Promise<number | null> {
   try {
     const { stdout } = await execFileAsync(ffprobePath, [
       "-v",
@@ -187,9 +177,7 @@ export default function Command() {
 
       // Validate video file format
       if (!isVideoFile(inputPath)) {
-        setVideoFileError(
-          `Invalid format. Supported: ${VIDEO_EXTENSIONS.join(", ")}`,
-        );
+        setVideoFileError(`Invalid format. Supported: ${VIDEO_EXTENSIONS.join(", ")}`);
         return;
       }
 
@@ -258,15 +246,9 @@ export default function Command() {
       const inputExtension = path.extname(inputPath);
 
       // Determine output extension based on format choice
-      const outputExtension =
-        values.outputFormat === "same"
-          ? inputExtension
-          : `.${values.outputFormat}`;
+      const outputExtension = values.outputFormat === "same" ? inputExtension : `.${values.outputFormat}`;
 
-      const outputPath = path.join(
-        outputFolder,
-        `${values.outputFileName.trim()}${outputExtension}`,
-      );
+      const outputPath = path.join(outputFolder, `${values.outputFileName.trim()}${outputExtension}`);
 
       // Check if input file exists
       if (!fs.existsSync(inputPath)) {
@@ -287,10 +269,6 @@ export default function Command() {
         });
         return;
       }
-
-      // Get input file size
-      const inputFileStats = fs.statSync(inputPath);
-      const inputFileSize = inputFileStats.size;
 
       // Find ffprobe and get input video duration
       const ffprobePath = await findFfprobePath();
@@ -348,17 +326,14 @@ export default function Command() {
       const outputFileSize = outputFileStats.size;
 
       // Calculate output duration (input duration / speed)
-      const outputDuration =
-        inputDuration !== null ? inputDuration / speed : null;
+      const outputDuration = inputDuration !== null ? inputDuration / speed : null;
 
       // Build summary message with file sizes and durations
       const summaryParts: string[] = [];
 
       summaryParts.push(`Output: ${formatFileSize(outputFileSize)}`);
       if (outputDuration !== null) {
-        summaryParts.push(
-          `${formatDuration(outputDuration)} (${outputDuration.toFixed(2)}s)`,
-        );
+        summaryParts.push(`${formatDuration(outputDuration)} (${outputDuration.toFixed(2)}s)`);
       }
 
       // Success
@@ -380,8 +355,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Processing Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -410,35 +384,17 @@ export default function Command() {
         info="Supported formats: MP4, MOV, AVI, MKV, WebM, M4V, WMV, FLV, MPEG, 3GP, OGV"
       />
 
-      <Form.Dropdown
-        id="speed"
-        title="Speed"
-        defaultValue="1"
-        info="Select the playback speed"
-      >
+      <Form.Dropdown id="speed" title="Speed" defaultValue="1" info="Select the playback speed">
         {SPEED_OPTIONS.map((option) => (
-          <Form.Dropdown.Item
-            key={option.value}
-            value={option.value}
-            title={option.title}
-          />
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
 
       <Form.Separator />
 
-      <Form.Dropdown
-        id="outputFormat"
-        title="Output Format"
-        defaultValue="same"
-        info="Choose the output video format"
-      >
+      <Form.Dropdown id="outputFormat" title="Output Format" defaultValue="same" info="Choose the output video format">
         {OUTPUT_FORMATS.map((format) => (
-          <Form.Dropdown.Item
-            key={format.value}
-            value={format.value}
-            title={format.title}
-          />
+          <Form.Dropdown.Item key={format.value} value={format.value} title={format.title} />
         ))}
       </Form.Dropdown>
 
