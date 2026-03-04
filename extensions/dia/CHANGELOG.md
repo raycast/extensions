@@ -22,7 +22,7 @@
 
 - **Open URL in Dia**: New no-view command to open a URL in Dia with argument, clipboard fallback, and Google search for non-URLs
 - **URL detection in Search**: Typing a URL shows "Open [url]" as the first result with default action to open in Dia
-- **Better default tab action**: Enter opens a new tab (faster), Cmd+Enter focuses the existing tab
+- **Tab action preference**: Choose default Enter action (Focus Existing Tab or Open in New Tab) via extension preferences. Defaults to Focus Existing Tab
 
 ## [Search Bookmarks: Open all in folder] - 2026-02-02
 

@@ -22,6 +22,26 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultTabAction",
+      "type": "dropdown",
+      "title": "Default Tab Action",
+      "description": "Action triggered when pressing Enter on a tab result",
+      "required": false,
+      "default": "focus",
+      "data": [
+        {
+          "title": "Focus Existing Tab",
+          "value": "focus"
+        },
+        {
+          "title": "Open in New Tab",
+          "value": "open"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "search",
