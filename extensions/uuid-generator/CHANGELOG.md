@@ -1,6 +1,6 @@
 # UUID Generator Changelog
 
-## [Added support for packing TypeID] - {PR_MERGE_DATE}
+## [Added support for packing TypeID] - 2026-03-04
 
 - You can now pack a UUID into a TypeID with a suffix
 
