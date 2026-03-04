@@ -151,8 +151,12 @@ export default function Command() {
     revalidateMemory();
     revalidateNetwork();
     revalidateBattery();
-    revalidateTemperature();
   }, 1000);
+
+  // Temperature reads from an external binary (IOKit HID sensors) which is
+  // slower than the in-process stats above. Polling it on its own 3s interval
+  // prevents revalidation calls from stacking up and producing stale readings.
+  useInterval(revalidateTemperature, 3000);
 
   const getPinnedTitle = (): string | undefined => {
     switch (pinnedStat) {
