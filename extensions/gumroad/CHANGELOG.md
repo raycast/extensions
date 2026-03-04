@@ -1,6 +1,6 @@
 # Gumroad Sales Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-03-04
 
 - Added price filter (All Sales, Hide $0 Sales) to View Sales command.
 - Added keyboard shortcut (Cmd + Shift + H) to toggle $0 sales visibility.
