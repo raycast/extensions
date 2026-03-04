@@ -1,6 +1,5 @@
 import { Action, ActionPanel, List, showToast } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
-import fetch from "node-fetch";
 import { RegistryItemsList } from "./components/registry-items-list";
 import { CREATE_ERROR_TOAST_OPTIONS } from "./constants";
 
