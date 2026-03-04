@@ -32,8 +32,9 @@ export class GhosttyAdapter implements TerminalAdapter {
     // --args: pass arguments to the application
     // -e: execute command flag for Ghostty
     // -l: login shell
+    // -i: interactive shell (sources ~/.zshrc — needed for PATH entries like ~/.local/bin)
     // -c: command to execute
-    await execFileAsync("open", ["-na", "Ghostty.app", "--args", "-e", userShell, "-l", "-c", command]);
+    await execFileAsync("open", ["-na", "Ghostty.app", "--args", "-e", userShell, "-l", "-i", "-c", command]);
   }
 
   /**

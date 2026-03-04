@@ -2,8 +2,29 @@ import { runAppleScript } from "@raycast/utils";
 import { Space, Tab } from "./types";
 import { findSpaceInSpaces } from "./utils";
 
+/**
+ * Ensures Arc is running and has at least one window.
+ * When Arc is not running, launching it already creates a window,
+ * so we avoid calling `make new window` in that case to prevent duplicates.
+ */
+async function ensureArcIsRunning() {
+  await runAppleScript(`
+    if application "Arc" is not running then
+      tell application "Arc" to activate
+      delay 1
+    else
+      tell application "Arc"
+        if (count of windows) is 0 then
+          make new window
+        end if
+      end tell
+    end if
+  `);
+}
+
 // Tabs
 export async function getTabs() {
+  await ensureArcIsRunning();
   const response = await runAppleScript(`
     on escape_value(this_text)
       set AppleScript's text item delimiters to "\\\\"
@@ -21,10 +42,6 @@ export async function getTabs() {
     set _output to ""
 
     tell application "Arc"
-      if (count of windows) is 0 then
-        make new window
-      end if
-
       tell first window
         set allTabs to properties of every tab
       end tell
@@ -97,12 +114,10 @@ export async function findTab(url: string) {
   return response ? (JSON.parse(response) as Tab) : undefined;
 }
 
-function runAppleScriptActionOnTab(tabId: string, action: string, activate = false) {
+async function runAppleScriptActionOnTab(tabId: string, action: string, activate = false) {
+  await ensureArcIsRunning();
   return runAppleScript(`
     tell application "Arc"
-    if (count of windows) is 0 then
-    make new window
-  end if
       set tabIndex to 1
       repeat with aTab in every tab of first window
         if id of aTab is "${tabId}" then
@@ -129,12 +144,9 @@ export async function reloadTab(tab: Tab | string) {
 }
 
 export async function makeNewTab(url: string, space?: string) {
+  await ensureArcIsRunning();
   await runAppleScript(`
     tell application "Arc"
-      if (count of windows) is 0 then
-        make new window
-      end if
-
       tell front window
         ${space ? `tell space "${space}" to focus` : ""}
         make new tab with properties {URL:"${url}"}
@@ -204,6 +216,7 @@ export async function makeNewLittleArcWindow(url: string) {
 
 // Spaces
 export async function makeNewTabWithinSpace(url: string, space: Space) {
+  await ensureArcIsRunning();
   await runAppleScript(`
     tell application "Arc"
       tell front window      
@@ -222,6 +235,7 @@ export async function selectSpace(space: Space) {
 }
 
 export async function selectSpaceById(spaceId: string) {
+  await ensureArcIsRunning();
   await runAppleScript(`
     tell application "Arc"
       tell front window
@@ -234,13 +248,11 @@ export async function selectSpaceById(spaceId: string) {
 }
 
 export async function getSpaces() {
+  await ensureArcIsRunning();
   const response = await runAppleScript(`
     set _output to ""
 
     tell application "Arc"
-      if (count of windows) is 0 then
-        make new window
-      end if
       set _space_index to 1
       
       tell front window
@@ -288,6 +300,7 @@ export async function getVersion() {
 }
 
 export async function getTabsInSpace(spaceId: string) {
+  await ensureArcIsRunning();
   const response = await runAppleScript(`
     on escape_value(this_text)
       set AppleScript's text item delimiters to "\\\\"
@@ -305,10 +318,6 @@ export async function getTabsInSpace(spaceId: string) {
     set _output to ""
 
     tell application "Arc"
-      if (count of windows) is 0 then
-        make new window
-      end if
-
       tell front window
         set _space_index to 1
         repeat with _space in spaces

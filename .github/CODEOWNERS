@@ -271,7 +271,7 @@
 /extensions/cc0-lib                                                 @0xN1
 /extensions/ccf-what                                                @CrackedPoly
 /extensions/ccfddl                                                  @ViGeng
-/extensions/ccusage                                                 @nyatinte @zhuravel @nyatinte @GarrickZ2 @pernielsentikaer
+/extensions/ccusage                                                 @nyatinte @zhuravel @nyatinte @GarrickZ2 @pernielsentikaer @raulgg
 /extensions/cdnjs                                                   @xmok
 /extensions/center                                                  @enesozturk
 /extensions/cerebras                                                @EvanZhouDev
@@ -323,7 +323,7 @@
 /extensions/claude                                                  @florisdobber @alejandrot96 @FelixLisczyk @gcordalis @rortan134 @ridemountainpig @pernielsentikaer @ridjis @mhrmsn
 /extensions/claude-code-cheatsheet                                  @harumeri
 /extensions/claude-code-config-switcher                             @WangCheng0116
-/extensions/claude-code-launcher                                    @stephendolan @ridemountainpig
+/extensions/claude-code-launcher                                    @stephendolan @ridemountainpig @artisticmedic
 /extensions/claudecast                                              @qazi0 @RoderickJDunn
 /extensions/clean-keyboard                                          @ike-gg @owain-williams @xilopaint @ridemountainpig @LitoMore
 /extensions/clean-text                                              @MoisesCervera
@@ -871,7 +871,7 @@
 /extensions/google-books                                            @Ali-Parandeh @xmok @chrismessina
 /extensions/google-calendar                                         @thomaspaulmann @j3lte @markusjura @fabitosh @geekyed @dangkhoipro @0xdhrv
 /extensions/google-calendar-quickadd                                @Baguirre03 @ridemountainpig
-/extensions/google-chrome                                           @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin @tleo19 @Tarocch1 @rsperezn @drewbabel @haydencbarnes @pernielsentikaer @j3lte @0xdhrv @xmok
+/extensions/google-chrome                                           @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin @tleo19 @Tarocch1 @rsperezn @drewbabel @haydencbarnes @pernielsentikaer @j3lte @0xdhrv @xmok @hayk94
 /extensions/google-chrome-profiles                                  @frouo @erics118 @jschmidtcordeiro
 /extensions/google-cloud-platform-search                            @klaa97 @edomora97 @hisomura @m-gentil
 /extensions/google-cloud-run                                        @BhavyaMuni
@@ -910,7 +910,7 @@
 /extensions/guerrilla-mail                                          @krsntn
 /extensions/guitar-chords                                           @GastroGeek
 /extensions/guitar-tools                                            @narghev @4fun50
-/extensions/gumroad                                                 @eddiesigner @xmok
+/extensions/gumroad                                                 @eddiesigner @xmok @SandeepBaskaran
 /extensions/gyazo-uploader                                          @udus122
 /extensions/habr-media                                              @khlebobul
 /extensions/hacker-news                                             @thomaspaulmann @GastroGeek @sxn @itsnwa @andreaselia @russellyeo
@@ -1841,7 +1841,7 @@
 /extensions/r-pkg-search                                            @gadenbuie
 /extensions/r2-uploader                                             @mazaoshe
 /extensions/rabbit-hole                                             @RobErskine
-/extensions/radarr                                                  @JohanDevl
+/extensions/radarr                                                  @JohanDevl @kendaniels
 /extensions/radicle                                                 @sebastinez
 /extensions/radix                                                   @peduarte @emlez @ErBlack
 /extensions/rae-dictionary-raycast                                  @sonirico
@@ -1867,6 +1867,7 @@
 /extensions/ray-clicker                                             @JonathanRReed
 /extensions/ray-code                                                @1weiho
 /extensions/ray-so                                                  @gt-codes @RSO @PeraSite @emlez @samuelkraft @benoitgrelard @sdorra @sebdanielsson
+/extensions/raycast-ai-custom-providers                             @Ernest0-Production
 /extensions/raycast-apple-intelligence                              @EvanZhouDev
 /extensions/raycast-arcade                                          @EvanZhouDev
 /extensions/raycast-bard-ai                                         @EvanZhouDev @Visual-Studio-Coder
@@ -2622,7 +2623,7 @@
 /extensions/wireguard                                               @sbugzu @xmok
 /extensions/wise-accounts                                           @robsel118 @imvasen
 /extensions/wise-quotes                                             @HugoLiconV
-/extensions/wispr-flow-dictionary                                   @cv087
+/extensions/wispr-flow                                              @05bmckay @cv087 @05bmckay
 /extensions/wistia                                                  @ddoria921 @xmok
 /extensions/withings-sync                                           @thebruge
 /extensions/wiz-controller                                          @shailantani

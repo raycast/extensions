@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wispr-flow",
+  "title": "Wispr Flow",
+  "description": "Search transcription history, manage your custom dictionary, and control voice recording with Wispr Flow",
+  "icon": "icon.png",
+  "author": "carterm",
+  "contributors": ["christi4nity", "mattiacolombomc"],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "The default action when pressing Enter on a transcript",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        { "title": "Copy to Clipboard", "value": "copy" },
+        { "title": "Paste to Active App", "value": "paste" }
+      ]
+    },
+    {
+      "name": "showArchived",
+      "title": "Show Archived",
+      "label": "Include archived transcripts",
+      "description": "Include archived transcripts in the list",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "minimumDuration",
+      "title": "Minimum Duration",
+      "description": "Hide transcripts shorter than this duration (in seconds). Useful for filtering out accidental triggers.",
+      "type": "textfield",
+      "required": false,
+      "default": "0"
+    },
+    {
+      "name": "confirmBeforeArchive",
+      "title": "Confirm Before Archive",
+      "label": "Show confirmation dialog before archiving",
+      "description": "Show a confirmation dialog before archiving a transcript",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "databasePath",
+      "title": "Database Path",
+      "description": "Custom path to the Wispr Flow database file. Leave empty to use the default location.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-transcripts",
+      "title": "Search Transcripts",
+      "subtitle": "Wispr Flow",
+      "description": "Search and browse your Wispr Flow transcription history",
+      "mode": "view"
+    },
+    {
+      "name": "add-word",
+      "title": "Add Word to Dictionary",
+      "subtitle": "Wispr Flow",
+      "description": "Add a word or phrase to your Wispr Flow custom vocabulary",
+      "mode": "view"
+    },
+    {
+      "name": "manage-dictionary",
+      "title": "Manage Dictionary",
+      "subtitle": "Wispr Flow",
+      "description": "View, search, edit, and delete words in your Wispr Flow dictionary",
+      "mode": "view"
+    },
+    {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "subtitle": "Wispr Flow",
+      "description": "Start Wispr Flow voice dictation",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "Wispr Flow",
+      "description": "Stop Wispr Flow voice dictation",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-app",
+      "title": "Open Wispr Flow",
+      "subtitle": "Wispr Flow",
+      "description": "Open the Wispr Flow app",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
