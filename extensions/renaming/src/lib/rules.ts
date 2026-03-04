@@ -104,7 +104,7 @@ export const applyRulesToItem = (
             case "titlecase":
               currentName = currentName.replace(
                 /\w\S*/g,
-                (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+                (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase(),
               );
               break;
           }

@@ -9,7 +9,7 @@ import {
   NumberOptions,
   ExtensionOptions,
 } from "../lib/rules";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 interface AddRuleFormProps {
   onAdd: (rule: RenameRule) => void;
@@ -89,7 +89,7 @@ export default function AddRuleForm({ onAdd, initialRule }: AddRuleFormProps) {
     }
 
     onAdd({
-      id: initialRule?.id || uuidv4(),
+      id: initialRule?.id || randomUUID(),
       type,
       options,
     } as RenameRule);

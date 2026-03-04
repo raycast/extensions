@@ -45,13 +45,29 @@ export default function AdvancedRenameCommand() {
   };
 
   const applyRename = async () => {
-    if (await confirmAlert({ title: `Rename ${previewFiles.length} files?`, primaryAction: { title: "Rename" } })) {
+    const filesToRename = previewFiles.filter((f) => f.newName && f.newName !== path.basename(f.originalPath));
+
+    if (filesToRename.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No files to rename",
+        message: "Add rules that change at least one filename.",
+      });
+      return;
+    }
+
+    if (
+      await confirmAlert({
+        title: `Rename ${filesToRename.length} files?`,
+        primaryAction: { title: "Rename" },
+      })
+    ) {
       try {
         let successCount = 0;
         const errors: string[] = [];
 
-        for (const file of previewFiles) {
-          if (file.newName && file.newName !== path.basename(file.originalPath)) {
+        for (const file of filesToRename) {
+          if (file.newName) {
             const oldPath = file.originalPath;
             const dir = path.dirname(oldPath);
             const newPath = path.join(dir, file.newName);
