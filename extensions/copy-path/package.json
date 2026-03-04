@@ -7,7 +7,8 @@
   "author": "koinzhang",
   "contributors": [
     "ridemountainpig",
-    "INCHMAN1900"
+    "INCHMAN1900",
+    "cdanyl"
   ],
   "categories": [
     "Developer Tools",
@@ -145,6 +146,28 @@
         {
           "title": "Bundle ID",
           "value": "bundleId"
+        }
+      ]
+    },
+    {
+      "name": "urlCleanupMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "URL Cleanup",
+      "description": "Optionally remove tracking parameters or strip query and fragment.",
+      "default": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Remove Tracking Params",
+          "value": "removeTracking"
+        },
+        {
+          "title": "Remove Query + Fragment",
+          "value": "removeQueryAndFragment"
         }
       ]
     }

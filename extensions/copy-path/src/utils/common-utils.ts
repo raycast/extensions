@@ -27,6 +27,7 @@ import {
   showCopyTip,
   showLastCopy,
   showTabTitle,
+  urlCleanupMode,
 } from "../types/preferences";
 import parseUrl from "parse-url";
 import * as os from "node:os";
@@ -34,6 +35,61 @@ import { firefoxBrowsers } from "./constants";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
+};
+
+const trackingParamNames = new Set([
+  "gclid",
+  "dclid",
+  "fbclid",
+  "msclkid",
+  "twclid",
+  "li_fat_id",
+  "igshid",
+  "mc_cid",
+  "mc_eid",
+  "mkt_tok",
+  "_hsenc",
+  "_hsmi",
+]);
+
+const trackingParamPrefixes = ["utm_"];
+
+const isTrackingParam = (paramName: string) => {
+  const lowered = paramName.toLowerCase();
+  if (trackingParamNames.has(lowered)) {
+    return true;
+  }
+  return trackingParamPrefixes.some((prefix) => lowered.startsWith(prefix));
+};
+
+const cleanupUrl = (rawUrl: string) => {
+  if (urlCleanupMode === "none") {
+    return rawUrl;
+  }
+  try {
+    const parsed = new URL(rawUrl);
+    if (urlCleanupMode === "removeQueryAndFragment") {
+      parsed.search = "";
+      parsed.hash = "";
+      return parsed.toString();
+    }
+    if (urlCleanupMode === "removeTracking") {
+      const params = new URLSearchParams(parsed.search);
+      const filtered = new URLSearchParams();
+      params.forEach((value, key) => {
+        if (!isTrackingParam(key)) {
+          filtered.append(key, value);
+        }
+      });
+      const filteredSearch = filtered.toString();
+      parsed.search = filteredSearch.length > 0 ? `?${filteredSearch}` : "";
+      return parsed.toString();
+    }
+  } catch (e) {
+    captureException(e);
+    console.error(e);
+  }
+  return rawUrl;
 };
 
 const copyFinderCurWindowPath = async () => {
@@ -157,8 +213,9 @@ export const copyBrowserTabUrl = async (frontmostApp: Application) => {
     return url;
   } else {
     try {
+      const resolvedUrl = cleanupUrl(url);
       // handle url
-      copyContent = parseURL(url);
+      copyContent = parseURL(resolvedUrl);
       if (showTabTitle) {
         const windowTitle = await getFocusWindowTitle(frontmostApp);
         copyContent = `${windowTitle}\n${copyContent}`;
@@ -167,8 +224,8 @@ export const copyBrowserTabUrl = async (frontmostApp: Application) => {
         await Clipboard.copy(copyContent);
       }
       await showSuccessHUD("🔗 " + copyContent);
-      await customUpdateCommandMetadata(new URL(url).hostname);
-      return url;
+      await customUpdateCommandMetadata(new URL(resolvedUrl).hostname);
+      return resolvedUrl;
     } catch (e) {
       return url;
     }
@@ -178,16 +235,14 @@ export const copyBrowserTabUrl = async (frontmostApp: Application) => {
 const parseURL = (url: string) => {
   try {
     const parsedUrl = parseUrl(url);
-    switch (copyUrlContent) {
-      case "Protocol://host/pathname": {
-        return parsedUrl.protocol + "://" + parsedUrl.resource + parsedUrl.pathname;
-      }
-      case "Protocol://host": {
-        return parsedUrl.protocol + "://" + parsedUrl.resource;
-      }
-      case "Host": {
-        return parsedUrl.resource;
-      }
+    if (copyUrlContent === "Protocol://host/pathname") {
+      return parsedUrl.protocol + "://" + parsedUrl.resource + parsedUrl.pathname;
+    }
+    if (copyUrlContent === "Protocol://host") {
+      return parsedUrl.protocol + "://" + parsedUrl.resource;
+    }
+    if (copyUrlContent === "Host") {
+      return parsedUrl.resource;
     }
   } catch (e) {
     captureException(e);
