@@ -3,17 +3,17 @@ import {
   ActionPanel,
   Alert,
   Application,
+  confirmAlert,
   Form,
   Grid,
   Icon,
-  confirmAlert,
   open,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { DrawerConfig, Folder, GridEntry } from "./types";
 import { importFromLaunchpad } from "./launchpad";
+import { DrawerConfig, Folder, GridEntry } from "./types";
 import {
   createFolderWithApp,
   extractAppFromFolder,
@@ -46,6 +46,7 @@ export function AppActionPanel({
   sectionLength,
   launchpadAvailable,
 }: AppActionPanelProps) {
+  const { pop } = useNavigation();
   const bundleId = app.bundleId ?? "";
   const isInFolder = folderId !== null;
 
@@ -101,6 +102,8 @@ export function AppActionPanel({
   function handleRemoveFromFolder() {
     if (!folderId) return;
     updateConfig(extractAppFromFolder(config, bundleId, folderId));
+    pop();
+    showToast({ style: Toast.Style.Success, title: `Removed "${app.name}" from folder` });
   }
 
   return (
@@ -275,9 +278,21 @@ export function FolderItemActionPanel({
           style={Action.Style.Destructive}
           onAction={handleDeleteFolder}
         />
-        {gridIndex > 0 && <Action title="Move Folder up" icon={Icon.ArrowUp} onAction={() => handleMove("up")} />}
+        {gridIndex > 0 && (
+          <Action
+            title="Move Folder up"
+            icon={Icon.ArrowUp}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+            onAction={() => handleMove("up")}
+          />
+        )}
         {gridIndex < config.gridOrder.length - 1 && (
-          <Action title="Move Folder Down" icon={Icon.ArrowDown} onAction={() => handleMove("down")} />
+          <Action
+            title="Move Folder Down"
+            icon={Icon.ArrowDown}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+            onAction={() => handleMove("down")}
+          />
         )}
       </ActionPanel.Section>
 

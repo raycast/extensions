@@ -1,6 +1,6 @@
 import { Application, showToast, Toast } from "@raycast/api";
 import { randomUUID } from "crypto";
-import { DrawerConfig, GridEntry, DEFAULT_CONFIG } from "./types";
+import { DEFAULT_CONFIG, DrawerConfig, GridEntry } from "./types";
 
 export function generateId(): string {
   return randomUUID();

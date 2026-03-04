@@ -1,7 +1,7 @@
-import { execSync } from "child_process";
+import { environment } from "@raycast/api";
+import { exec } from "child_process";
 import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
-import { environment } from "@raycast/api";
 
 const ICON_CACHE_DIR = join(environment.supportPath, "folder-icons");
 const CELL_SIZE = 32;
@@ -19,7 +19,6 @@ function ensureCacheDir() {
  */
 function cacheKey(appPaths: string[]): string {
   const key = appPaths.slice(0, MAX_ICONS).join("|");
-  // Simple hash to avoid long filenames
   let hash = 0;
   for (let i = 0; i < key.length; i++) {
     hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
@@ -32,7 +31,7 @@ function cacheKey(appPaths: string[]): string {
  * Uses macOS-native osascript (JXA) with AppKit — no external dependencies.
  * Returns the file path to the generated PNG.
  */
-export function generateFolderIcon(appPaths: string[]): string | null {
+export async function generateFolderIcon(appPaths: string[]): Promise<string | null> {
   if (appPaths.length === 0) return null;
 
   ensureCacheDir();
@@ -47,7 +46,6 @@ export function generateFolderIcon(appPaths: string[]): string | null {
   const paths = appPaths.slice(0, MAX_ICONS);
   const gridSize = CELL_SIZE * GRID_COLS;
 
-  // Build JXA script
   const appsJson = JSON.stringify(paths);
   const script = `
 ObjC.import("AppKit");
@@ -72,15 +70,11 @@ pngData.writeToFileAtomically(${JSON.stringify(outputPath)}, true);
 ${JSON.stringify(outputPath)};
 `;
 
-  try {
-    execSync(`osascript -l JavaScript -e ${escapeShellArg(script)}`, {
-      encoding: "utf-8",
-      timeout: 10000,
+  return new Promise((resolve) => {
+    exec(`osascript -l JavaScript -e ${escapeShellArg(script)}`, { encoding: "utf-8", timeout: 10000 }, (error) => {
+      resolve(error ? null : outputPath);
     });
-    return outputPath;
-  } catch {
-    return null;
-  }
+  });
 }
 
 function escapeShellArg(arg: string): string {

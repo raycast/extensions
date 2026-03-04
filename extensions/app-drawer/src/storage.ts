@@ -1,6 +1,6 @@
-import { useCallback, useMemo } from "react";
 import { useLocalStorage } from "@raycast/utils";
-import { DrawerConfig, DEFAULT_CONFIG } from "./types";
+import { useCallback, useMemo } from "react";
+import { DEFAULT_CONFIG, DrawerConfig } from "./types";
 import { parseConfig } from "./utils";
 
 const STORAGE_KEY = "drawer-config";

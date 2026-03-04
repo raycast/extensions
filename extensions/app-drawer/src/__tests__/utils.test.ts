@@ -1,15 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { DrawerConfig } from "../types";
+import { DEFAULT_CONFIG } from "../types";
 import {
+  createFolderWithApp,
+  extractAppFromFolder,
+  moveItem,
   parseConfig,
   reconcileApps,
   removeAppFromCurrentLocation,
-  extractAppFromFolder,
-  createFolderWithApp,
-  moveItem,
   sortByName,
 } from "../utils";
-import type { DrawerConfig } from "../types";
-import { DEFAULT_CONFIG } from "../types";
 
 // --- Helper to create mock Application objects ---
 function mockApp(bundleId: string, name: string, path = `/Applications/${name}.app`) {
