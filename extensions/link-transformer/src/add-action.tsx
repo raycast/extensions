@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Keyboard, Toast, showToast, Detail } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, Toast, showToast, Detail } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { ActionType } from "./type";
 import { addAction, readData, updateAction } from "./utils";
@@ -36,9 +36,10 @@ interface FormActionProps {
   onUpdate: (values: FormData) => Promise<boolean>;
   initialValues?: Partial<FormData>;
   submitTitle: string;
+  submitIcon?: Icon;
 }
 
-function FormAction({ onUpdate, initialValues, submitTitle }: FormActionProps) {
+function FormAction({ onUpdate, initialValues, submitTitle, submitIcon }: FormActionProps) {
   const { handleSubmit, itemProps, reset, values } = useForm<FormData>({
     initialValues: {
       name: "",
@@ -68,7 +69,7 @@ function FormAction({ onUpdate, initialValues, submitTitle }: FormActionProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={submitIcon} title={submitTitle} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -125,7 +126,7 @@ export default function AddAction({ afterUpdate }: { afterUpdate?: () => void })
     return true;
   };
 
-  return <FormAction onUpdate={handleUpdate} submitTitle="Add Action" />;
+  return <FormAction onUpdate={handleUpdate} submitTitle="Add Action" submitIcon={Icon.Plus} />;
 }
 
 export function EditAction({ id, afterUpdate }: { id: string; afterUpdate?: () => void }) {
@@ -164,6 +165,7 @@ export function EditAction({ id, afterUpdate }: { id: string; afterUpdate?: () =
         key: (action.shortcut as any)?.key || "",
       }}
       submitTitle="Update Action"
+      submitIcon={Icon.Pencil}
     />
   );
 }

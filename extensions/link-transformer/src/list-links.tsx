@@ -22,7 +22,9 @@ export default function ListLinks() {
     }
   };
 
-  const addLinkAction = <Action title="Add Link" onAction={() => push(<AddLink afterUpdate={refreshData} />)} />;
+  const addLinkAction = (
+    <Action icon={Icon.Plus} title="Add Link" onAction={() => push(<AddLink afterUpdate={refreshData} />)} />
+  );
 
   return (
     <List>
@@ -38,8 +40,13 @@ export default function ListLinks() {
               <ActionPanel.Section>
                 <Action.OpenInBrowser url={link.url} onOpen={closeExtension} />
                 {addLinkAction}
-                <Action title="Edit Link" onAction={() => push(<EditLink id={link.id} afterUpdate={refreshData} />)} />
                 <Action
+                  icon={Icon.Pencil}
+                  title="Edit Link"
+                  onAction={() => push(<EditLink id={link.id} afterUpdate={refreshData} />)}
+                />
+                <Action
+                  icon={Icon.Trash}
                   title="Delete Link"
                   onAction={() => handleDeleteLink(link.id, link.url)}
                   style={Action.Style.Destructive}

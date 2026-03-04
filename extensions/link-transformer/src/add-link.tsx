@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, Toast, showToast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { readData, processAliases, addLink, updateLink } from "./utils";
 
@@ -11,9 +11,10 @@ interface FormLinkProps {
   onUpdate: (values: FormData) => Promise<boolean>;
   initialValues?: Partial<FormData>;
   submitTitle: string;
+  submitIcon?: Icon;
 }
 
-function FormLink({ onUpdate, initialValues, submitTitle }: FormLinkProps) {
+function FormLink({ onUpdate, initialValues, submitTitle, submitIcon }: FormLinkProps) {
   const { handleSubmit, itemProps, reset } = useForm<FormData>({
     initialValues: {
       url: "",
@@ -42,7 +43,7 @@ function FormLink({ onUpdate, initialValues, submitTitle }: FormLinkProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={submitIcon} title={submitTitle} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -61,7 +62,7 @@ export default function AddLink({ afterUpdate }: { afterUpdate?: () => void }) {
     return true;
   };
 
-  return <FormLink onUpdate={handleUpdate} submitTitle="Add Link" />;
+  return <FormLink onUpdate={handleUpdate} submitTitle="Add Link" submitIcon={Icon.Plus} />;
 }
 
 export function EditLink({ id, afterUpdate }: { id: string; afterUpdate?: () => void }) {
@@ -88,6 +89,7 @@ export function EditLink({ id, afterUpdate }: { id: string; afterUpdate?: () => 
         aliases: link.aliases.join(", "),
       }}
       submitTitle="Update Link"
+      submitIcon={Icon.Pencil}
     />
   );
 }

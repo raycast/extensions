@@ -24,6 +24,7 @@ export default function ListActions() {
 
   const addActionAction = (
     <Action
+      icon={Icon.Plus}
       title="Add Action"
       onAction={() =>
         push(
@@ -60,6 +61,7 @@ export default function ListActions() {
           actions={
             <ActionPanel>
               <Action
+                icon={Icon.Pencil}
                 title="Edit Action"
                 onAction={() =>
                   push(
@@ -75,6 +77,7 @@ export default function ListActions() {
               />
               {addActionAction}
               <Action
+                icon={Icon.Trash}
                 title="Delete Action"
                 onAction={() => handleDelete(action.id, action.name)}
                 style={Action.Style.Destructive}

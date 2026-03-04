@@ -19,21 +19,18 @@
     {
       "name": "list-links",
       "title": "List Links",
-      "subtitle": "List all saved links with alias and apply custom action of your choice",
       "description": "Search your saved links by alias, then apply custom actions to transform the URL and open the result in your browser.",
       "mode": "view"
     },
     {
       "name": "list-actions",
       "title": "List Actions",
-      "subtitle": "Manage link transformation actions",
       "description": "Search and manage your custom link transformation actions.",
       "mode": "view"
     },
     {
       "name": "add-link",
       "title": "Add Link",
-      "subtitle": "Add a new link",
       "description": "Add a new link with aliases for quick access.",
       "mode": "view"
     }
