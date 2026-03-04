@@ -27,3 +27,7 @@ Displays shortcuts marked as global, which work across all applications regardle
 - Favorites pinned to the top with a ⭐ icon; global shortcuts tagged in blue across all views
 - Multi-step shortcut support (e.g. ⌘K → ⌘C)
 - Open Kommand directly from Raycast to add or edit shortcuts
+
+## Learn More
+
+[getkommand.com](https://getkommand.com) · [Mac App Store](https://apps.apple.com/app/kommand/id6752623076)
