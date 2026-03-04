@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Add Name Window Command] - {PR_MERGE_DATE}
+## [Add Name Window Command] - 2026-03-04
 
 - Add Name Window command to name the currently active Google Chrome window.
 
