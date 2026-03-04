@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xano-helper",
+  "title": "Xano Helper",
+  "description": "Quickly switch between Xano workspaces",
+  "icon": "icon.png",
+  "author": "jakespirek",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "sessionTimeout",
+      "title": "Session Timeout",
+      "description": "How long before your Xano session expires (match your Xano workspace setting)",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        { "title": "1 hour", "value": "1" },
+        { "title": "2 hours", "value": "2" },
+        { "title": "3 hours", "value": "3" },
+        { "title": "4 hours", "value": "4" },
+        { "title": "8 hours", "value": "8" },
+        { "title": "12 hours", "value": "12" },
+        { "title": "24 hours", "value": "24" }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "switch-workspace",
+      "title": "Workspace Switcher",
+      "description": "Browse and open Xano workspaces",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
