@@ -118,8 +118,21 @@ export default function AdvancedRenameCommand() {
           <List.Item
             key={rule.id}
             title={rule.type.toUpperCase()}
-            subtitle={JSON.stringify(rule.options)}
+            subtitle={`${Object.keys(rule.options).length} options`}
             icon={Icon.List}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Rule Type" text={rule.type.toUpperCase()} />
+                    <List.Item.Detail.Metadata.Separator />
+                    {Object.entries(rule.options).map(([key, value]) => (
+                      <List.Item.Detail.Metadata.Label key={key} title={key} text={String(value)} />
+                    ))}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <Action.Push
@@ -180,6 +193,17 @@ export default function AdvancedRenameCommand() {
                   </List.Item.Detail.Metadata>
                 }
               />
+            }
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Add Rule"
+                  icon={Icon.Plus}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  target={<AddRuleForm onAdd={addRule} />}
+                />
+                <Action title="Apply Rename" icon={Icon.Check} onAction={applyRename} />
+              </ActionPanel>
             }
           />
         ))}
