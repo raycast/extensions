@@ -104,9 +104,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         {
           model: model.option,
           temperature: Number(model.temperature),
-          ...(includeReasoningEffort && selectedReasoningEffort
-            ? { reasoning_effort: selectedReasoningEffort }
-            : {}),
+          ...(includeReasoningEffort && selectedReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
           messages: [
             ...chatTransformer([...data].reverse(), model.prompt),
             { role: "user", content: buildUserMessage(question, files) },
