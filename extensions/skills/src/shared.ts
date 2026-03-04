@@ -18,6 +18,7 @@ export type InstalledSkill = {
   path: string;
   agents: string[];
   agentCount: number;
+  hasUpdate?: boolean;
 };
 
 export const API_BASE_URL = "https://skills.sh/api";

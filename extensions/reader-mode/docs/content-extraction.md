@@ -38,19 +38,19 @@ The `preCleanHtml()` function removes non-article elements before Readability ru
 
 #### Negative Selectors (Elements Removed)
 
-| Category | Selectors |
-|----------|-----------|
-| **Sidebars** | `[class*="sidebar"]`, `[id*="sidebar"]` |
-| **Comments** | `[class*="comment"]`, `#disqus_thread` |
-| **Subscriptions** | `[class*="subscribe"]`, `[class*="newsletter"]`, `[aria-label*="newsletter"]` |
-| **Advertisements** | `[class*="advertisement"]`, `[class*="ad-container"]`, `[data-ad]` |
-| **Social/Sharing** | `[class*="social"]`, `[class*="share"]` |
-| **Related Content** | `[class*="related"]`, `[class*="promo"]` |
-| **Navigation** | `nav`, `[role="navigation"]`, `[class*="breadcrumb"]` |
-| **Complementary** | `[role="complementary"]` |
-| **Footer** | `[class*="footer"]` |
-| **Widgets** | `[class*="widget"]`, `[class*="toolbar"]` |
-| **Carousels** | `[class*="carousel"]`, `[class*="swiper"]`, `[class*="slider"]` |
+| Category            | Selectors                                                                     |
+| ------------------- | ----------------------------------------------------------------------------- |
+| **Sidebars**        | `[class*="sidebar"]`, `[id*="sidebar"]`                                       |
+| **Comments**        | `[class*="comment"]`, `#disqus_thread`                                        |
+| **Subscriptions**   | `[class*="subscribe"]`, `[class*="newsletter"]`, `[aria-label*="newsletter"]` |
+| **Advertisements**  | `[class*="advertisement"]`, `[class*="ad-container"]`, `[data-ad]`            |
+| **Social/Sharing**  | `[class*="social"]`, `[class*="share"]`                                       |
+| **Related Content** | `[class*="related"]`, `[class*="promo"]`                                      |
+| **Navigation**      | `nav`, `[role="navigation"]`, `[class*="breadcrumb"]`                         |
+| **Complementary**   | `[role="complementary"]`                                                      |
+| **Footer**          | `[class*="footer"]`                                                           |
+| **Widgets**         | `[class*="widget"]`, `[class*="toolbar"]`                                     |
+| **Carousels**       | `[class*="carousel"]`, `[class*="swiper"]`, `[class*="slider"]`               |
 
 #### Protected Selectors (Never Removed)
 
@@ -78,17 +78,17 @@ When detected, this is logged and can be used for enhanced extraction.
 
 Many sites use lazy loading for images, which can result in placeholder images in the extracted content. The cleaner resolves these by checking common lazy-load attributes:
 
-| Attribute | Priority |
-|-----------|----------|
-| `data-src` | 1 |
-| `data-lazy-src` | 2 |
-| `data-original` | 3 |
-| `datasrc` | 4 |
-| `original-src` | 5 |
-| `data-srcset` | 6 |
-| `data-lazy-srcset` | 7 |
-| `data-hi-res-src` | 8 |
-| `data-native-src` | 9 |
+| Attribute          | Priority |
+| ------------------ | -------- |
+| `data-src`         | 1        |
+| `data-lazy-src`    | 2        |
+| `data-original`    | 3        |
+| `datasrc`          | 4        |
+| `original-src`     | 5        |
+| `data-srcset`      | 6        |
+| `data-lazy-srcset` | 7        |
+| `data-hi-res-src`  | 8        |
+| `data-native-src`  | 9        |
 
 Images with placeholder `src` values (data URIs, "placeholder", "transparent", "blank") have their `src` replaced with the lazy-loaded URL.
 
@@ -107,24 +107,24 @@ Some sites have non-standard HTML structures that require custom handling. The s
 
 #### Supported Sites
 
-| Site | Config Applied |
-|------|----------------|
-| Wikipedia | Remove edit sections, navboxes, infoboxes, TOC |
-| Medium | Remove share buttons, audio players, response counts |
-| Substack | Remove subscribe widgets, comments |
-| NYTimes | Remove share tools, inline messages |
-| The Guardian | Remove contributions epic, ad slots |
-| BBC | Remove related topics, promo links |
-| Washington Post | Remove print-hidden elements, subscribe promos |
-| Ars Technica | Remove sidebar, related stories |
-| The Verge | Remove ad wrappers, recirculation |
-| Wired | Remove newsletter forms, related content |
-| TechCrunch | Remove newsletter embeds, related posts |
-| GitHub | Remove octicons, anchors |
-| Stack Overflow | Remove vote counts, post menus |
-| Reddit | Remove vote arrows, promoted links |
-| Vanity Fair | Caption formatting (italic text, separated credits) |
-| And more... | See `site-config.ts` for full list |
+| Site            | Config Applied                                       |
+| --------------- | ---------------------------------------------------- |
+| Wikipedia       | Remove edit sections, navboxes, infoboxes, TOC       |
+| Medium          | Remove share buttons, audio players, response counts |
+| Substack        | Remove subscribe widgets, comments                   |
+| NYTimes         | Remove share tools, inline messages                  |
+| The Guardian    | Remove contributions epic, ad slots                  |
+| BBC             | Remove related topics, promo links                   |
+| Washington Post | Remove print-hidden elements, subscribe promos       |
+| Ars Technica    | Remove sidebar, related stories                      |
+| The Verge       | Remove ad wrappers, recirculation                    |
+| Wired           | Remove newsletter forms, related content             |
+| TechCrunch      | Remove newsletter embeds, related posts              |
+| GitHub          | Remove octicons, anchors                             |
+| Stack Overflow  | Remove vote counts, post menus                       |
+| Reddit          | Remove vote arrows, promoted links                   |
+| Vanity Fair     | Caption formatting (italic text, separated credits)  |
+| And more...     | See `site-config.ts` for full list                   |
 
 #### Adding New Site Configs
 
@@ -159,7 +159,7 @@ For sites with structured image captions (like Condé Nast publications), use `c
 },
 ```
 
-This produces captions like: *Caption text.* Photo Credit.
+This produces captions like: _Caption text._ Photo Credit.
 
 ---
 
@@ -223,16 +223,16 @@ After Readability extraction, Turndown converts HTML to Markdown. Additional ele
 
 The content extraction pipeline logs key events for debugging:
 
-| Event | Description |
-|-------|-------------|
-| `clean:schema-detected` | Schema.org article markup found |
-| `clean:site-config-applied` | Site-specific config applied |
-| `clean:complete` | Pre-cleaning finished with stats |
-| `parse:start` | Readability parsing started |
-| `parse:precheck` | isProbablyReaderable result |
-| `parse:success` | Article extracted successfully |
-| `parse:markdown:start` | Markdown conversion started |
-| `parse:markdown:success` | Markdown conversion complete |
+| Event                       | Description                      |
+| --------------------------- | -------------------------------- |
+| `clean:schema-detected`     | Schema.org article markup found  |
+| `clean:site-config-applied` | Site-specific config applied     |
+| `clean:complete`            | Pre-cleaning finished with stats |
+| `parse:start`               | Readability parsing started      |
+| `parse:precheck`            | isProbablyReaderable result      |
+| `parse:success`             | Article extracted successfully   |
+| `parse:markdown:start`      | Markdown conversion started      |
+| `parse:markdown:success`    | Markdown conversion complete     |
 
 Enable verbose logging in preferences to see these events.
 

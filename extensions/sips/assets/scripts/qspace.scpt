@@ -55,16 +55,37 @@ function imagePathsForItemsInSelection(selection) {
 	for (const filePath of selection) {
 		const fileExtension = filePath.slice(filePath.lastIndexOf('.') + 1).toLowerCase();
 		if (supportedTypes[fileExtension]) {
-			imagePaths.push(filePath);
+			imagePaths.push(decodeURI(filePath));
 		}
 	}
 	return imagePaths;
 }
 
 function run() {
+	ObjC.import("CoreGraphics");
 	let imagePaths = [];
+
+	const windowList = ObjC.castRefToObject($.CGWindowListCopyWindowInfo($.kCGWindowListOptionOnScreenAboveWindow, $.kCGNullWindowID))
+	const qspaceWindow = windowList.js.find((win) => {
+		const ownerName = win.js['kCGWindowOwnerName'];
+		return ownerName && ownerName.js && ownerName.js.includes("QSpace");
+	});
+	if (!qspaceWindow) {
+		console.log('No QSpace window found on screen.');
+		return JSON.stringify([]);
+	}
+	const appName = qspaceWindow.js['kCGWindowOwnerName'].js
+
+
 	try {
-		const qspace = Application('QSpace Pro');
+		let qspace = null;
+		try {
+			qspace = Application(appName);
+		} catch {
+			console.log('Neither QSpace nor QSpace Pro could be found on the system.')
+			return [];
+		}
+
 		qspace.includeStandardAdditions = true;
 
 		let selection = qspace.selectedItems.urlstr()
@@ -90,7 +111,7 @@ function run() {
 		}
 	} catch (error) {
 		if (error.errorNumber === -1743) {
-			requestAutomationPermissionForApplication_('QSpace Pro');
+			requestAutomationPermissionForApplication_(appName);
 		} else {
 			console.log('Error:', error.message, 'errorNumber:', error.errorNumber, 'line:', error.line, 'column:', error.column);
 		}

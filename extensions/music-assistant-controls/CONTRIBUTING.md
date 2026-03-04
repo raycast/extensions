@@ -43,7 +43,7 @@ npm run test:coverage # Generate coverage report
 
 ### Overview
 
-This project has comprehensive tests for core business logic with **61% overall coverage**. We focus on testing the critical path rather than aiming for 100% coverage.
+This project has **285 tests passing** across 18 test suites with comprehensive coverage of core business logic, API interactions, and command implementations. We focus on testing the critical path rather than aiming for 100% coverage.
 
 See [TESTING.md](./TESTING.md) for detailed information about test coverage, strategy, and guidelines.
 
@@ -59,29 +59,36 @@ npm test:watch
 # Check coverage report
 npm run test:coverage
 
-# Check detailed coverage
-npm run test:coverage -- --collectCoverageFrom="src/**/*.{ts,tsx}"
-
 # Run specific test file
-npm test -- tests/music-assistant-api.test.ts
+npm test -- tests/music-assistant/music-assistant-client.test.ts
 ```
 
-### Test Coverage Summary
+### Test Files by Category
 
-| File                      | Coverage | Status |
-| ------------------------- | -------- | ------ |
-| api-command.ts            | 100%     | ✅     |
-| music-assistant-client.ts | 100%     | ✅     |
-| next-song.tsx             | 100%     | ✅     |
-| play-pause.tsx            | 100%     | ✅     |
-| interfaces.ts             | 100%     | ✅     |
-| use-selected-player-id.ts | 80.95%   | ⚠️     |
-| music-assistant-api.ts    | 20.77%   | ⚠️\*   |
-| menu-bar.tsx              | 0%       | 🔸 UI  |
-| set-active-player.tsx     | 0%       | 🔸 UI  |
-| set-volume.tsx            | 0%       | 🔸 UI  |
+**Core API & Client:**
 
-\*See [TESTING.md](./TESTING.md) for rationale on coverage decisions.
+- `music-assistant-api.test.ts` - REST API wrapper methods
+- `music-assistant-client.test.ts` - High-level client logic
+- `api-command.test.ts` - Command execution wrapper
+
+**Commands:**
+
+- `play-pause.test.ts`, `next-song.test.ts`, `previous-song.test.ts`
+- `volume-up.test.ts`, `volume-down.test.ts`, `volume-mute.test.ts`
+- `manage-player-groups.test.ts`
+
+**Features:**
+
+- `current-track-helpers.test.ts` - Track metadata and controls
+- `music-library-hub/helpers.test.ts`, `music-library-hub/actions.test.ts` - Search and browse
+- `shortcuts.test.ts` - Keyboard shortcut execution
+- `use-selected-player-id.test.ts` - Player selection
+
+**Utilities:**
+
+- `player-list-helpers.test.ts` - Player grouping delegates
+- `volume-validation.test.ts` - Input validation
+- `interfaces-sync.test.ts` - Contract verification
 
 ## Code Style
 
@@ -104,27 +111,87 @@ npm run fix-lint  # Auto-fixes most issues
 
 ```
 src/
-├── api-command.ts              # REST API command wrapper
-├── music-assistant-client.ts   # Core client logic
-├── next-song.tsx               # Next song command UI
-├── play-pause.tsx              # Play/pause command UI
-├── set-volume.tsx              # Volume control UI
-├── set-active-player.tsx       # Player selection UI
-├── menu-bar.tsx                # Menu bar component
-├── use-selected-player-id.ts   # Queue selection logic
-├── polyfills.ts                # Browser polyfills
-└── external-code/
-    ├── interfaces.ts           # Type definitions
-    └── music-assistant-api.ts  # REST API client
+│
+├── Commands (Raycast entry points)
+│   ├── play-pause.tsx                 # Toggle playback
+│   ├── next-song.tsx                  # Skip to next track
+│   ├── previous-song.tsx              # Skip to previous track
+│   ├── volume-up.tsx                  # Increase volume
+│   ├── volume-down.tsx                # Decrease volume
+│   ├── volume-mute.tsx                # Toggle mute state
+│   ├── set-volume.tsx                 # Set volume precisely (with form)
+│   ├── set-active-player.tsx          # Change active player
+│   ├── manage-player-groups.tsx       # Create/manage player groups
+│   ├── current-track.tsx              # View now-playing track details
+│   ├── music-library-hub.tsx          # Search & browse library
+│   └── menu-bar.tsx                   # Menu bar display & controls
+│
+├── Core Client Logic
+│   ├── music-assistant/
+│   │   ├── music-assistant-client.ts  # High-level client interface
+│   │   ├── external-code/
+│   │   │   ├── music-assistant-api.ts # REST API wrapper
+│   │   │   └── interfaces.ts          # Type definitions
+│   │   └── helpers/ (various helpers for specific features)
+│   ├── api-command.ts                 # Command execution wrapper
+│
+├── Player Management
+│   ├── player-management/
+│   │   └── player-list-helpers.ts     # Delegate for player operations
+│   └── player-selection/
+│       └── use-selected-player-id.ts  # Queue selection logic
+│
+├── Feature-Specific Code
+│   ├── current-track/
+│   │   └── *-helpers.ts               # Track, favorites, shuffle, repeat
+│   ├── music-library-hub/
+│   │   ├── *-helpers.ts               # Search, browse, queue
+│   │   └── *-actions.ts               # Playlist & queue actions
+│   ├── set-volume/
+│   │   └── volume-validation.ts       # Input validation
+│   └── shortcuts/
+│       └── shortcuts.ts               # Keyboard shortcut execution
+│
+└── Utilities
+    ├── polyfills.ts                   # Browser compatibility
+    └── ...other utilities
 
 tests/
-├── music-assistant-api.test.ts
-├── music-assistant-client.test.ts
-├── api-command.test.ts
-├── next-song.test.ts
-├── play-pause.test.ts
-├── set-volume.test.ts
-└── use-selected-player-id.test.ts
+├── music-assistant/                   # API & Client tests
+│   ├── music-assistant-api.test.ts
+│   ├── music-assistant-client.test.ts
+│   └── api-command.test.ts
+│
+├── commands/                          # Command tests
+│   ├── play-pause.test.ts
+│   ├── next-song.test.ts
+│   ├── previous-song.test.ts
+│   ├── volume-up.test.ts
+│   ├── volume-down.test.ts
+│   ├── volume-mute.test.ts
+│   └── manage-player-groups.test.ts
+│
+├── current-track/                     # Feature tests
+│   └── current-track-helpers.test.ts
+│
+├── music-library-hub/
+│   ├── helpers.test.ts
+│   └── actions.test.ts
+│
+├── player-management/
+│   └── player-list-helpers.test.ts
+│
+├── player-selection/
+│   └── use-selected-player-id.test.ts
+│
+├── shortcuts/
+│   └── shortcuts.test.ts
+│
+├── set-volume/
+│   └── volume-validation.test.ts
+│
+└── contracts/
+    └── interfaces-sync.test.ts        # Type synchronization check
 ```
 
 ### REST API Implementation
@@ -133,29 +200,41 @@ This extension uses the Music Assistant REST API via HTTP POST requests to `http
 
 Key files:
 
-- **src/external-code/music-assistant-api.ts** - REST API client
-- **src/api-command.ts** - Command execution wrapper
-- **src/music-assistant-client.ts** - High-level client interface
+- **src/music-assistant/external-code/music-assistant-api.ts** - REST API client with methods for all commands
+- **src/api-command.ts** - Command execution wrapper (initialization, error handling, cleanup)
+- **src/music-assistant/music-assistant-client.ts** - High-level business logic (smart routing, player groups, volume control)
 - **commands.json** - Complete API reference with all available commands, parameters, and return types
 
-Example of adding a new command:
+### Adding Commands
+
+When adding a new Music Assistant command:
+
+1. **Add wrapper method to MusicAssistantApi** (if not already present)
 
 ```typescript
-// Add method to MusicAssistantApi class
+// src/music-assistant/external-code/music-assistant-api.ts
 public async myNewCommand(playerId: string): Promise<void> {
   return this.sendCommand("players/cmd/my_command", {
     player_id: playerId,
   });
 }
+```
 
-// Add method to MusicAssistantClient class
+2. **Add business logic method to MusicAssistantClient** (if needed)
+
+```typescript
+// src/music-assistant/music-assistant-client.ts
 async myNewCommand(playerId: string): Promise<void> {
   return await executeApiCommand(async (api) =>
     await api.myNewCommand(playerId)
   );
 }
+```
 
-// Add test in tests/music-assistant-api.test.ts
+3. **Add tests**
+
+```typescript
+// tests/music-assistant/music-assistant-api.test.ts
 it("should send my_command with correct parameters", async () => {
   mockFetch.mockResolvedValueOnce({
     ok: true,
@@ -173,6 +252,24 @@ it("should send my_command with correct parameters", async () => {
     },
   });
 });
+```
+
+### Smart Volume Control Example
+
+The codebase includes sophisticated volume control that intelligently routes commands based on player state:
+
+```typescript
+// Check if we should use group volume (leaders with members) or individual volume
+const useGroupVolume = client.shouldUseGroupVolume(selectedPlayer);
+
+if (useGroupVolume) {
+  // Control entire group
+  await client.groupVolumeUp(selectedPlayer.player_id);
+} else {
+  // Control individual player or member via group leader
+  const targetId = client.getVolumeControlPlayer(selectedPlayer);
+  await client.volumeUp(targetId);
+}
 ```
 
 ### Adding Tests

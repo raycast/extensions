@@ -1,8 +1,16 @@
 # Browser Bookmarks Changelog
 
-## [Support for Perplexity Comet Browser] - 2026-02-27
+## [Support for Perplexity Comet Browser] - {PR_MERGE_DATE}
 
 - Added support for `Perplexity Comet` browser
+
+## [Improvements] - 2026-03-03
+
+- Improved browser handling and opening bookmarks
+- Added profile support for Vivaldi Snapshot
+- Fixed inconsistent icon usage for Brave and Edge variants
+- Updated dependencies to latest versions
+- Fixed formatting and code style issues
 
 ## [Bug Fix] - 2026-02-18
 

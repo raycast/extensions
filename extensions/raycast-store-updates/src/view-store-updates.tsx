@@ -11,6 +11,7 @@ import {
 import { ExtensionListItem } from "./components/ExtensionListItem";
 import { useReadState } from "./hooks/useReadState";
 import { useFilterToggles } from "./hooks/useFilterToggles";
+import { useGitHubRateLimit } from "./hooks/useGitHubRateLimit";
 
 // =============================================================================
 // Constants
@@ -19,7 +20,6 @@ import { useFilterToggles } from "./hooks/useFilterToggles";
 const FEED_URL = "https://www.raycast.com/store/feed.json";
 const GITHUB_PRS_URL =
   "https://api.github.com/repos/raycast/extensions/pulls?state=closed&sort=updated&direction=desc&per_page=50";
-const REFRESH_COOLDOWN_MS = 10000; // 10 seconds cooldown between refreshes
 
 // =============================================================================
 // Command
@@ -38,6 +38,8 @@ export default function Command() {
     keepPreviousData: true,
   });
 
+  const { checkRefreshAllowed, recordFetch, recordRateLimit } = useGitHubRateLimit();
+
   const {
     data: prsData,
     isLoading: prsLoading,
@@ -47,28 +49,36 @@ export default function Command() {
     headers: {
       Accept: "application/vnd.github.v3+json",
     },
+    async parseResponse(response) {
+      if (response.status === 403 || response.status === 429) {
+        const resetHeader = response.headers.get("X-RateLimit-Reset");
+        const resetEpoch = resetHeader ? parseInt(resetHeader, 10) : undefined;
+        const message = await recordRateLimit(resetEpoch);
+        await showToast({ style: Toast.Style.Failure, title: "Rate Limited", message });
+        // Return empty array so useFetch doesn't show its own error toast.
+        return [];
+      }
+      const resetHeader = response.headers.get("X-RateLimit-Reset");
+      const resetEpoch = resetHeader ? parseInt(resetHeader, 10) : undefined;
+      await recordFetch(resetEpoch);
+      return response.json() as Promise<GitHubPR[]>;
+    },
   });
 
-  const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
-    const now = Date.now();
-    const timeSinceLastRefresh = now - lastRefreshTime;
-
-    if (timeSinceLastRefresh < REFRESH_COOLDOWN_MS) {
-      const remainingSeconds = Math.ceil((REFRESH_COOLDOWN_MS - timeSinceLastRefresh) / 1000);
+    const blockedMessage = await checkRefreshAllowed();
+    if (blockedMessage) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Please wait before refreshing",
-        message: `Try again in ${remainingSeconds} second${remainingSeconds !== 1 ? "s" : ""}`,
+        message: blockedMessage,
       });
       return;
     }
 
     setIsRefreshing(true);
-    setLastRefreshTime(now);
-
     revalidateFeed();
     revalidatePRs();
     await showToast({
@@ -87,6 +97,7 @@ export default function Command() {
   }, [filter]);
 
   const [updatedItems, setUpdatedItems] = useState<StoreItem[]>([]);
+  const [removedItems, setRemovedItems] = useState<StoreItem[]>([]);
   const [newItems, setNewItems] = useState<StoreItem[]>([]);
 
   // Read state management
@@ -122,19 +133,24 @@ export default function Command() {
     ).then((results) => setNewItems(results.filter((item): item is NonNullable<typeof item> => item !== null)));
   }, [feedData]);
 
-  // Fetch updated items from PRs (async because we need to fetch package.json for each)
+  // Fetch updated and removed items from PRs (async because we need to fetch package.json for each)
   useEffect(() => {
     if (!prsData) return;
     const newItemDates = new Map<string, string>();
     for (const item of newItems) {
       if (item.extensionSlug) newItemDates.set(item.extensionSlug, item.date);
     }
-    convertPRsToStoreItems(prsData, newItemDates).then(setUpdatedItems);
+    convertPRsToStoreItems(prsData, newItemDates).then(({ updated, removed }) => {
+      setUpdatedItems(updated);
+      setRemovedItems(removed);
+    });
   }, [prsData, newItems]);
 
   const allItems = useMemo(() => {
-    return [...newItems, ...updatedItems].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [newItems, updatedItems]);
+    return [...newItems, ...updatedItems, ...removedItems].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }, [newItems, updatedItems, removedItems]);
 
   const displayItems = useMemo(() => {
     let items: StoreItem[];
@@ -150,6 +166,9 @@ export default function Command() {
           ? updatedItems.filter((item) => (item.extensionSlug ? installedSlugs.has(item.extensionSlug) : false))
           : [];
         break;
+      case "removed":
+        items = removedItems;
+        break;
       default:
         items = allItems;
     }
@@ -157,7 +176,9 @@ export default function Command() {
     // Apply platform filter toggles
     // Extensions supporting both platforms are never filtered out.
     // These toggles only affect platform-exclusive extensions.
+    // Removed extensions are exempt — their platform data is unavailable.
     items = items.filter((item) => {
+      if (item.type === "removed") return true;
       const platforms = item.platforms ?? ["macOS"];
       const hasMac = platforms.some((p) => p.toLowerCase() === "macos");
       const hasWindows = platforms.some((p) => p.toLowerCase() === "windows");
@@ -175,7 +196,7 @@ export default function Command() {
     }
 
     return items;
-  }, [filter, newItems, updatedItems, allItems, toggles, installedSlugs, trackReadStatus, isRead]);
+  }, [filter, newItems, updatedItems, removedItems, allItems, toggles, installedSlugs, trackReadStatus, isRead]);
 
   const handleMarkAllAsRead = async () => {
     await markAllAsRead(displayItems.map((item) => item.id));
@@ -199,6 +220,7 @@ export default function Command() {
           <List.Dropdown.Item title="New" value="new" icon={Icon.StarCircle} />
           <List.Dropdown.Item title="Updates" value="updated" icon={Icon.ArrowUpCircle} />
           <List.Dropdown.Item title="My Updates" value="my-updates" icon={Icon.Person} />
+          <List.Dropdown.Item title="Removed" value="removed" icon={Icon.MinusCircle} />
         </List.Dropdown>
       }
     >
@@ -213,7 +235,9 @@ export default function Command() {
                 ? "Unable to load the feed"
                 : filter === "my-updates"
                   ? "No updates found for your installed extensions"
-                  : `No ${filter} extensions found`
+                  : filter === "removed"
+                    ? "No removed extensions found"
+                    : `No ${filter} extensions found`
           }
         />
       ) : (

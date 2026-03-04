@@ -5,9 +5,10 @@ import TypeMetadata from "./type";
 export default function PokemonMetadata(props: {
   type?: string;
   pokemon: Pokemon;
+  mega?: boolean;
   formtypes?: PokemonType[];
 }) {
-  const { pokemon, formtypes } = props;
+  const { pokemon, mega, formtypes } = props;
 
   const Metadata =
     props.type === "detail" ? Detail.Metadata : List.Item.Detail.Metadata;
@@ -18,18 +19,21 @@ export default function PokemonMetadata(props: {
       types={formtypes || pokemon.pokemontypes}
       type="detail"
     />,
-
-    <Detail.Metadata.TagList key="abilities" title="Abilities">
-      {pokemon.pokemonabilities.map((ability) => {
-        return (
-          <Detail.Metadata.TagList.Item
-            key={ability.ability.abilitynames[0].name}
-            text={ability.ability.abilitynames[0].name}
-            color={ability.is_hidden ? Color.SecondaryText : Color.PrimaryText}
-          />
-        );
-      })}
-    </Detail.Metadata.TagList>,
+    !mega && (
+      <Detail.Metadata.TagList key="abilities" title="Abilities">
+        {pokemon.pokemonabilities.map((ability) => {
+          return (
+            <Detail.Metadata.TagList.Item
+              key={ability.ability.abilitynames[0].name}
+              text={ability.ability.abilitynames[0].name}
+              color={
+                ability.is_hidden ? Color.SecondaryText : Color.PrimaryText
+              }
+            />
+          );
+        })}
+      </Detail.Metadata.TagList>
+    ),
     <Metadata.Label
       key="height"
       title="Height"
@@ -42,5 +46,5 @@ export default function PokemonMetadata(props: {
     />,
   ];
 
-  return meta;
+  return meta.filter(Boolean);
 }

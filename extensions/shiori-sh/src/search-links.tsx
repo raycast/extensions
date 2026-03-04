@@ -1,10 +1,24 @@
-import { Action, ActionPanel, Alert, Clipboard, Color, Icon, List, confirmAlert, showToast, Toast } from "@raycast/api";
-import { getFavicon, useCachedPromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  Form,
+  Icon,
+  List,
+  confirmAlert,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { getFavicon, useCachedPromise, useForm } from "@raycast/utils";
 import { useState, useCallback } from "react";
-import { fetchLinks, updateLinks, deleteLink, createLink } from "./api";
+import { fetchLinks, updateLinks, deleteLink, createLink, updateLinkDetails } from "./api";
 import { Link } from "./types";
 
 type ReadFilter = "all" | "unread" | "read";
+type EditLinkValues = { title: string; summary: string };
 
 function timeAgo(dateString: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
@@ -31,6 +45,45 @@ function linkDetail(link: Link): string {
   }
 
   return parts.join("\n\n") || `[${link.url}](${link.url})`;
+}
+
+function EditLinkForm(props: { link: Link; onSave: (values: EditLinkValues) => Promise<void> }) {
+  const { link, onSave } = props;
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<EditLinkValues>({
+    initialValues: {
+      title: link.title ?? "",
+      summary: link.summary ?? "",
+    },
+    validation: {
+      title: (value) => {
+        const trimmed = (value ?? "").trim();
+        if (!trimmed) return "Title is required";
+        if (trimmed.length > 500) return "Title must be 500 characters or less";
+      },
+      summary: (value) => {
+        if ((value ?? "").trim().length > 2000) return "Summary must be 2000 characters or less";
+      },
+    },
+    onSubmit: async (values) => {
+      await onSave(values);
+      pop();
+    },
+  });
+
+  return (
+    <Form
+      navigationTitle="Edit Link"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Changes" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Title" placeholder="Link title" {...itemProps.title} />
+      <Form.TextArea title="Summary" placeholder="Add a summary (optional)" {...itemProps.summary} />
+    </Form>
+  );
 }
 
 export default function SearchLinks() {
@@ -116,6 +169,54 @@ export default function SearchLinks() {
     }
   }, [revalidate]);
 
+  const handleEditDetails = useCallback(
+    async (link: Link, values: EditLinkValues) => {
+      const title = values.title.trim();
+      const normalizedSummary = values.summary.trim();
+      const summary = normalizedSummary ? normalizedSummary : null;
+
+      if (!data) {
+        try {
+          await updateLinkDetails(link.id, title, summary);
+          revalidate();
+          await showToast(Toast.Style.Success, "Link updated");
+        } catch (error) {
+          await showToast(Toast.Style.Failure, "Failed to update", (error as Error).message);
+          throw error;
+        }
+        return;
+      }
+
+      const optimistic = {
+        ...data,
+        links: data.links.map((l) =>
+          l.id === link.id
+            ? {
+                ...l,
+                title,
+                summary,
+                updated_at: new Date().toISOString(),
+              }
+            : l,
+        ),
+      };
+
+      try {
+        await mutate(
+          updateLinkDetails(link.id, title, summary).then(() => optimistic),
+          {
+            optimisticUpdate: () => optimistic,
+          },
+        );
+        await showToast(Toast.Style.Success, "Link updated");
+      } catch (error) {
+        await showToast(Toast.Style.Failure, "Failed to update", (error as Error).message);
+        throw error;
+      }
+    },
+    [data, mutate, revalidate],
+  );
+
   return (
     <List
       isLoading={isLoading}
@@ -182,6 +283,12 @@ export default function SearchLinks() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 )}
+                <Action.Push
+                  title="Edit Title & Summary"
+                  icon={Icon.Pencil}
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  target={<EditLinkForm link={link} onSave={(values) => handleEditDetails(link, values)} />}
+                />
               </ActionPanel.Section>
 
               <ActionPanel.Section>

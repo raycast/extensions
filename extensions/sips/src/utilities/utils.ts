@@ -112,7 +112,14 @@ export const getSelectedImages = async (): Promise<string[]> => {
   if (inputMethod == "Clipboard") {
     // Extract images from clipboard
     try {
-      const clipboardImages = (await getClipboardImages()).split(", ");
+      const clipboardImages = (await getClipboardImages()).split(", ").reduce((acc, curr, index) => {
+        if (index == 0 || curr.startsWith("/")) {
+          acc.push(curr);
+        } else {
+          acc[acc.length - 1] = `${acc.at(-1) ?? ""}${curr}`;
+        }
+        return acc;
+      }, [] as string[]);
       await LocalStorage.setItem("itemsToRemove", clipboardImages.join(", "));
       if (clipboardImages.filter((i) => i.trim().length > 0).length > 0) {
         return clipboardImages;
@@ -125,7 +132,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
   }
 
   // Get name of frontmost application
-  let activeApp = inputMethod;
+  let activeApp: string = inputMethod;
   try {
     activeApp = (await getFrontmostApplication()).name as typeof inputMethod;
   } catch (error) {
@@ -167,12 +174,12 @@ export const getSelectedImages = async (): Promise<string[]> => {
 
   // Attempt to get selected images from QSpace Pro
   try {
-    if (inputMethod == ImageInputSource.QSpaceSelection || activeApp == "QSpace Pro") {
+    if (inputMethod == ImageInputSource.QSpaceSelection || activeApp == "QSpace Pro" || activeApp == "QSpace") {
       selectedImages = await getQSpaceSelection();
     }
   } catch (error) {
-    // Error getting images from QSpace Pro, fall back to Finder
-    console.error(`Couldn't get images from QSpace Pro: ${error}`);
+    // Error getting images from QSpace , fall back to ForkLift
+    console.error(`Couldn't get images from ${activeApp}: ${error}`);
     inputMethodError = true;
   }
 

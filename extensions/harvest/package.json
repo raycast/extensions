@@ -9,6 +9,10 @@
     "bchopson",
     "mrpunkin"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -207,8 +211,5 @@
     "publish": "npm run test:run && npx @raycast/api@latest publish",
     "test": "vitest",
     "test:run": "vitest run"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

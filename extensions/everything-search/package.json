@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "anastasiy_safari",
   "contributors": [
-    "laurynas_gailius"
+    "laurynas_gailius",
+    "marioparaschiv"
   ],
   "pastContributors": [
     "doug_fernando"
@@ -19,42 +20,6 @@
       "description": "Search files using Everything",
       "mode": "view",
       "preferences": [
-        {
-          "name": "esExePath",
-          "title": "Everything CLI Path (es.exe)",
-          "description": "Custom path to es.exe. Leave empty to use system PATH.",
-          "type": "textfield",
-          "required": false,
-          "default": "",
-          "placeholder": "C:\\Program Files\\Everything\\es.exe"
-        },
-        {
-          "name": "customCliArgs",
-          "title": "Custom CLI Arguments",
-          "description": "Additional arguments to pass to es.exe (e.g., -instance 1.5a)",
-          "type": "textfield",
-          "required": false,
-          "default": "",
-          "placeholder": "-instance 1.5a"
-        },
-        {
-          "name": "fileExplorerCommand",
-          "title": "Custom File Explorer Command",
-          "description": "Custom command to open directories. Use %s as a placeholder for the path.",
-          "type": "textfield",
-          "required": false,
-          "default": "",
-          "placeholder": "\"C:\\Program Files\\Explorer\\App.exe\" -arg %s"
-        },
-        {
-          "name": "openFolderAsDefault",
-          "title": "Open Folder as Default Action",
-          "description": "If enabled, the primary action will be to open the file's location instead of opening the file itself.",
-          "type": "checkbox",
-          "required": false,
-          "label": "Open folder instead of file",
-          "default": false
-        },
         {
           "name": "defaultSort",
           "title": "Default Sorting",
@@ -162,12 +127,74 @@
           ]
         },
         {
+          "name": "useRegex",
+          "label": "Use Regular Expressions",
+          "title": "Use Regular Expressions",
+          "description": "Enable to interpret search queries as regular expressions. Escape spaces with double quotes.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
           "name": "minCharsToSearch",
           "title": "Minimum Characters to Trigger Search",
           "description": "Number of characters required before a search is performed.",
           "type": "textfield",
           "required": false,
           "default": "3"
+        },
+        {
+          "name": "maxResults",
+          "title": "Maximum Results to Fetch",
+          "description": "Maximum number of search results to retrieve per query.",
+          "type": "textfield",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "openFolderAsDefault",
+          "title": "Open Folder as Default Action",
+          "description": "If enabled, the primary action will be to open the file's location instead of opening the file itself.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Open Folder Instead of File",
+          "default": false
+        },
+        {
+          "name": "fileExplorerCommand",
+          "title": "Custom File Explorer Command",
+          "description": "Custom command to open directories. Use %s as a placeholder for the path.",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "placeholder": "\"C:\\Program Files\\Explorer\\App.exe\" -arg %s"
+        },
+        {
+          "name": "esExePath",
+          "title": "Everything CLI Path (es.exe)",
+          "description": "Custom path to es.exe. Leave empty to use system PATH.",
+          "type": "file",
+          "required": false,
+          "default": "",
+          "placeholder": "C:\\Program Files\\Everything\\es.exe"
+        },
+        {
+          "name": "customCliArgs",
+          "title": "Custom CLI Arguments",
+          "description": "Additional arguments to pass to es.exe (e.g., -instance 1.5a)",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "placeholder": "-instance 1.5a"
+        },
+        {
+          "name": "useSdk",
+          "title": "Use SDK (Experimental)",
+          "label": "Use SDK (Experimental)",
+          "description": "Use the Everything SDK instead of es.exe CLI. Provides better performance, but may not be supported on all systems.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
         }
       ]
     },
@@ -200,9 +227,10 @@
   ],
   "preferences": [],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1",
-    "basic-ftp": "^5.0.5"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "basic-ftp": "^5.2.0",
+    "koffi": "^2.15.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -216,6 +244,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
+    "fetch-sdk-binaries": "node ./scripts/fetch-sdk-binaries.js",
     "build": "ray build",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"

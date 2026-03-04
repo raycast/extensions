@@ -1,5 +1,14 @@
 # Everything Search Changelog
 
+## [Added SDK support for ARM64] - 2026-03-02
+- Added support for the Everything SDK on ARM64 architecture.
+
+## [Added ability to search through SDK] - 2026-02-27
+- Added download dialog for Everything CLI if it's not installed
+- Added ability to search with regular expressions
+- Added ability to change max results count
+- Added experimental feature to utilize Everything SDK module for searching
+
 ## [CLI Arguments] - 2026-02-26
 - Added the ability to specify custom CLI arguments
 - Everything 1.5a is now supported through `-instance 1.5a`

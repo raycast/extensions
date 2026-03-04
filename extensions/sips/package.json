@@ -17,7 +17,10 @@
     "rotate",
     "sips"
   ],
-  "version": "1.11.1",
+  "platforms": [
+    "macOS"
+  ],
+  "version": "1.11.2",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -57,8 +60,8 @@
           "value": "HoudahSpot"
         },
         {
-          "title": "Selection in QSpace Pro",
-          "value": "QSpace Pro"
+          "title": "Selection in QSpace / QSpace Pro",
+          "value": "QSpace"
         },
         {
           "title": "Clipboard",
@@ -1065,14 +1068,14 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.0.1",
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2",
     "mathjs": "^14.5.2",
     "svgo": "^3.3.2",
-    "tar": "^7.5.7"
+    "tar": "^7.5.9"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/tar": "^6.1.13",
@@ -1085,7 +1088,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
-    "evals": "ray evals"
+    "evals": "ray evals",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
