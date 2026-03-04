@@ -7,13 +7,14 @@ import {
   open,
 } from "@raycast/api";
 import { useState } from "react";
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface FormValues {
   videoFile: string[];
@@ -134,9 +135,15 @@ async function getVideoDuration(
   videoPath: string,
 ): Promise<number | null> {
   try {
-    const { stdout } = await execAsync(
-      `"${ffprobePath}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoPath}"`,
-    );
+    const { stdout } = await execFileAsync(ffprobePath, [
+      "-v",
+      "error",
+      "-show_entries",
+      "format=duration",
+      "-of",
+      "default=noprint_wrappers=1:nokey=1",
+      videoPath,
+    ]);
     const duration = parseFloat(stdout.trim());
     return isNaN(duration) ? null : duration;
   } catch {
@@ -203,7 +210,6 @@ export default function Command() {
           title: "FFmpeg Not Found",
           message: "Please install ffmpeg: brew install ffmpeg",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -214,7 +220,6 @@ export default function Command() {
           title: "No Video Selected",
           message: "Please select a video file",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -227,7 +232,6 @@ export default function Command() {
           title: "Invalid File Format",
           message: `Please select a video file. Supported formats: ${VIDEO_EXTENSIONS.join(", ")}`,
         });
-        setIsLoading(false);
         return;
       }
 
@@ -237,7 +241,6 @@ export default function Command() {
           title: "No Output Folder",
           message: "Please select an output folder",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -247,7 +250,6 @@ export default function Command() {
           title: "No Output Filename",
           message: "Please enter an output filename",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -273,7 +275,6 @@ export default function Command() {
           title: "File Not Found",
           message: "The selected video file does not exist",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -284,7 +285,6 @@ export default function Command() {
           title: "File Already Exists",
           message: "A file with this name already exists in the output folder",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -331,11 +331,17 @@ export default function Command() {
       const audioFilter = atempoFilters.join(",");
       const videoFilter = `setpts=${videoPts}*PTS`;
 
-      // Build ffmpeg command with full path
-      const ffmpegCommand = `"${ffmpegPath}" -i "${inputPath}" -filter:v "${videoFilter}" -filter:a "${audioFilter}" -y "${outputPath}"`;
-
-      // Execute ffmpeg
-      await execAsync(ffmpegCommand);
+      // Execute ffmpeg with execFileAsync to prevent shell injection
+      await execFileAsync(ffmpegPath, [
+        "-i",
+        inputPath,
+        "-filter:v",
+        videoFilter,
+        "-filter:a",
+        audioFilter,
+        "-y",
+        outputPath,
+      ]);
 
       // Get output file size
       const outputFileStats = fs.statSync(outputPath);
@@ -347,12 +353,7 @@ export default function Command() {
 
       // Build summary message with file sizes and durations
       const summaryParts: string[] = [];
-      summaryParts.push(`Input: ${formatFileSize(inputFileSize)}`);
-      if (inputDuration !== null) {
-        summaryParts.push(
-          `${formatDuration(inputDuration)} (${inputDuration.toFixed(2)}s)`,
-        );
-      }
+
       summaryParts.push(`Output: ${formatFileSize(outputFileSize)}`);
       if (outputDuration !== null) {
         summaryParts.push(
