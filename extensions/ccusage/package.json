@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ccusage",
-  "title": "Claude Code Usage (Ccusage)",
+  "title": "Claude Code Usage (ccusage)",
   "description": "Monitor Claude Code usage with real-time tracking",
   "categories": [
     "Developer Tools"
@@ -310,7 +310,6 @@
     "es-toolkit": "^1.39.3",
     "semver": "^7.6.3",
     "ts-pattern": "^5.7.1",
-    "usehooks-ts": "^3.1.0",
     "zod": "^3.25.61"
   },
   "devDependencies": {

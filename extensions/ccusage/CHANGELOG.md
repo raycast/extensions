@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## {PR_MERGE_DATE}
+## [{PR_MERGE_DATE}]
 
 ### Added
 
