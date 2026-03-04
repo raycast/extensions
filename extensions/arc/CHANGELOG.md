@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Fixed Arc duplicate windows] - {PR_MERGE_DATE}
+## [Fixed Arc duplicate windows] - 2026-03-04
 
 - Fixed duplicate window creation when launching Arc Browser from a stopped state
 - Improved window management logic for selectTab and selectSpace commands
