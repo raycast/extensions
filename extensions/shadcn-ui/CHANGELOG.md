@@ -1,6 +1,6 @@
 # shadcn/ui Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-03-04
 
 - Fix "search registries" command error
 - Add support for Windows platform
