@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "octarine-quick-capture",
+  "title": "Octarine Quick Capture",
+  "description": "Capture journal entries and manage tasks in your Octarine daily note",
+  "icon": "icon.png",
+  "author": "ebenezergelo",
+  "license": "MIT",
+  "version": "1.0.0",
+  "preferences": [
+    {
+      "name": "workspacePaths",
+      "title": "Workspace Paths",
+      "description": "Comma or newline separated vault root paths",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "quick-thought",
+      "title": "Quick Thought",
+      "subtitle": "Octarine",
+      "icon": "icon.png",
+      "description": "Capture a quick thought to today's daily note",
+      "mode": "view"
+    },
+    {
+      "name": "task-manager",
+      "title": "Task Manager",
+      "subtitle": "Octarine",
+      "icon": "icon.png",
+      "description": "Add and tick off tasks in today's daily note",
+      "mode": "view"
+    },
+    {
+      "name": "select-workspace",
+      "title": "Select Workspace",
+      "subtitle": "Octarine",
+      "icon": "icon.png",
+      "description": "Choose which configured vault workspace to use",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
