@@ -1,38 +1,23 @@
 import { Action, ActionPanel, Color, Detail } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 
-import { CheckResult, checkNumber, formatDate } from "./api";
+import { checkNumber, formatDate } from "./api";
 
 export default function Command({ arguments: args }: { arguments: { number: string } }) {
-  const [result, setResult] = useState<CheckResult | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const input = args.number.trim();
+  const isValid = /^\d+$/.test(input);
+  const abortable = useRef<AbortController>(null);
+  const {
+    data: result,
+    isLoading,
+    error: fetchError,
+  } = usePromise(async (num: string) => checkNumber(num, abortable.current?.signal), [input], {
+    abortable,
+    execute: isValid,
+  });
 
-  useEffect(() => {
-    if (!/^\d+$/.test(input)) {
-      setError("Please enter a valid number (digits only)");
-      setIsLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-
-    checkNumber(input, controller.signal)
-      .then((data) => {
-        setResult(data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") {
-          setError(err.message);
-          setIsLoading(false);
-        }
-      });
-
-    return () => controller.abort();
-  }, [input]);
+  const error = !isValid ? "Please enter a valid number (digits only)" : fetchError?.message;
 
   if (isLoading) {
     return <Detail isLoading markdown="" />;

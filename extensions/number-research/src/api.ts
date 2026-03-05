@@ -30,14 +30,14 @@ export async function checkNumber(number: string, signal?: AbortSignal): Promise
   return (await res.json()) as CheckResult;
 }
 
-export async function fetchStats(): Promise<StatsData> {
-  const res = await fetch(`${API_BASE}/stats`);
+export async function fetchStats(signal?: AbortSignal): Promise<StatsData> {
+  const res = await fetch(`${API_BASE}/stats`, { signal });
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
   return (await res.json()) as StatsData;
 }
 
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString();
+  return new Date(iso).toLocaleString("en-US");
 }
 
 export function formatShortDate(iso: string): string {

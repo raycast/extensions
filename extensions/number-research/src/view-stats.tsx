@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 
-import { StatsData, fetchStats, formatShortDate } from "./api";
+import { fetchStats, formatShortDate } from "./api";
 
 const RANK_COLORS: Record<number, Color> = {
   0: Color.Yellow,
@@ -10,21 +11,12 @@ const RANK_COLORS: Record<number, Color> = {
 };
 
 export default function Command() {
-  const [stats, setStats] = useState<StatsData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchStats()
-      .then((data) => {
-        setStats(data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : "Failed to load stats");
-        setIsLoading(false);
-      });
-  }, []);
+  const abortable = useRef<AbortController>(null);
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = usePromise(async () => fetchStats(abortable.current?.signal), [], { abortable });
 
   return (
     <List isLoading={isLoading}>
@@ -32,7 +24,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Failed to Load Stats"
-          description={error ?? "Could not connect to numberresearch.xyz. Please try again."}
+          description={error?.message ?? "Could not connect to numberresearch.xyz. Please try again."}
         />
       )}
       {stats && (
