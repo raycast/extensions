@@ -24,7 +24,11 @@ const printIncident = (incident: StatusIncident) => [
 ];
 
 export default function Command() {
-  const { isLoading, data } = useFetch<Status>(STATUS_URL);
+  const { isLoading, data, error } = useFetch<Status>(STATUS_URL);
+
+  if (error) {
+    return <Detail markdown={`## Error loading GitHub status\n\n${error.message}`} />;
+  }
 
   return (
     <Detail
