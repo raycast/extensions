@@ -37,6 +37,23 @@ interface ShellArguments {
 let cachedEnv: null | EnvType = null;
 
 const escapePosixCommand = (command: string) => command.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+const escapeAppleScriptString = (value: string) => value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+
+const runAppleScriptSafe = async (script: string, terminalName: string) => {
+  try {
+    await runAppleScript(script);
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Failed to execute command in ${terminalName}`, error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Failed to run command in ${terminalName}`,
+      message,
+    });
+    return false;
+  }
+};
 
 const encodePowerShellString = (command: string) => Buffer.from(command, "utf16le").toString("base64");
 
@@ -45,27 +62,42 @@ const escapeForPowerShellSingleQuotes = (command: string) => command.replaceAll(
 const getPowerShellArgumentList = (escapedCommand: string) =>
   `'-NoLogo','-NoProfile','-NoExit','-Command','${escapedCommand}'`;
 
-const runDetachedPowerShellScript = (script: string) => {
+const runDetachedPowerShellScript = async (script: string, terminalName: string) => {
   if (!isWindows) {
-    return;
+    return false;
   }
 
-  exec(`powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encodePowerShellString(script)}`);
+  try {
+    exec(`powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encodePowerShellString(script)}`);
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Failed to execute command in ${terminalName}`, error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Failed to run command in ${terminalName}`,
+      message,
+    });
+    return false;
+  }
 };
 
 const runInPowerShellConsole = (command: string) => {
   const escaped = escapeForPowerShellSingleQuotes(command);
-  runDetachedPowerShellScript(`Start-Process PowerShell -ArgumentList ${getPowerShellArgumentList(escaped)}`);
+  return runDetachedPowerShellScript(
+    `Start-Process PowerShell -ArgumentList ${getPowerShellArgumentList(escaped)}`,
+    "PowerShell",
+  );
 };
 
 const runInCommandPrompt = (command: string) => {
   const escaped = escapeForPowerShellSingleQuotes(command);
-  runDetachedPowerShellScript(`Start-Process cmd -ArgumentList '/d','/k','${escaped}'`);
+  return runDetachedPowerShellScript(`Start-Process cmd -ArgumentList '/d','/k','${escaped}'`, "Command Prompt");
 };
 
 const runInPowerShell7Console = (command: string) => {
   const escaped = escapeForPowerShellSingleQuotes(command);
-  runDetachedPowerShellScript(`
+  return runDetachedPowerShellScript(`
     $candidatePaths = @(
       "${envProgramFiles}\\PowerShell\\7\\pwsh.exe",
       "${envProgramFiles}\\PowerShell\\7-preview\\pwsh.exe",
@@ -84,7 +116,7 @@ const runInPowerShell7Console = (command: string) => {
     } else {
       Start-Process PowerShell -ArgumentList ${getPowerShellArgumentList(escaped)}
     }
-  `);
+  `, "PowerShell 7");
 };
 
 const WINDOWS_RUNNERS = {
@@ -218,18 +250,19 @@ const Result = ({ cmd }: { cmd: string }) => {
   );
 };
 
-const runInKitty = (command: string) => {
-  const escaped_command = command.replaceAll('"', '\\"');
+const runInKitty = async (command: string) => {
+  const escapedCommand = escapeAppleScriptString(command);
   const script = `
     tell application "System Events"
-      do shell script "/Applications/kitty.app/Contents/MacOS/kitty -1 kitten @ launch --hold ${escaped_command}"
+      do shell script "/Applications/kitty.app/Contents/MacOS/kitty -1 kitten @ launch --hold ${escapedCommand}"
     end tell
   `;
 
-  runAppleScript(script);
+  return runAppleScriptSafe(script, "kitty");
 };
 
-const runInIterm = (command: string) => {
+const runInIterm = async (command: string) => {
+  const escapedCommand = escapeAppleScriptString(command);
   const script = `
     -- Set this property to true to open in a new window instead of a new tab
     property open_in_new_window : false
@@ -287,14 +320,15 @@ const runInIterm = (command: string) => {
     	delay 0.01
     end repeat
 
-    send_text("${command.replaceAll('"', '\\"')}")
+    send_text("${escapedCommand}")
     call_forward()
   `;
 
-  runAppleScript(script);
+  return runAppleScriptSafe(script, "iTerm");
 };
 
-const runInWarp = (command: string) => {
+const runInWarp = async (command: string) => {
+  const escapedCommand = escapeAppleScriptString(command);
   const script = `
       -- For the latest version:
       -- https://github.com/DavidMChan/custom-alfred-warp-scripts
@@ -345,6 +379,12 @@ const runInWarp = (command: string) => {
           end tell
       end send_text
 
+      on press_enter()
+          tell application "System Events"
+              key code 36
+          end tell
+      end press_enter
+
 
       -- Main
       if not is_running() then
@@ -372,14 +412,19 @@ const runInWarp = (command: string) => {
       end repeat
       delay 0.5
 
-      send_text("${command}")
+      call_forward()
+      delay 0.1
+      send_text("${escapedCommand}")
+      delay 0.05
+      press_enter()
       call_forward()
   `;
 
-  runAppleScript(script);
+  return runAppleScriptSafe(script, "Warp");
 };
 
-const runInGhostty = (command: string) => {
+const runInGhostty = async (command: string) => {
+  const escapedCommand = escapeAppleScriptString(command);
   const script = `
       -- Set this property to true to always open in a new window
       property open_in_new_window : true
@@ -427,6 +472,12 @@ const runInGhostty = (command: string) => {
           end tell
       end send_text
 
+      on press_enter()
+          tell application "System Events"
+              key code 36
+          end tell
+      end press_enter
+
 
       -- Main
       if not is_running() then
@@ -454,22 +505,27 @@ const runInGhostty = (command: string) => {
       end repeat
       delay 0.5
 
-      send_text("${command}")
+      call_forward()
+      delay 0.1
+      send_text("${escapedCommand}")
+      delay 0.05
+      press_enter()
       call_forward()
   `;
 
-  runAppleScript(script);
+  return runAppleScriptSafe(script, "Ghostty");
 };
 
-const runInTerminal = (command: string) => {
+const runInTerminal = async (command: string) => {
+  const escapedCommand = escapeAppleScriptString(command);
   const script = `
   tell application "Terminal"
-    do script "${command.replaceAll('"', '\\"')}"
+    do script "${escapedCommand}"
     activate
   end tell
   `;
 
-  runAppleScript(script);
+  return runAppleScriptSafe(script, "Terminal");
 };
 
 const CMUX_APP_PATH = "/Applications/cmux.app";
@@ -822,23 +878,18 @@ export default function Command(props: { arguments?: ShellArguments }) {
   const openCommandInPreferredTerminal = async (command: string) => {
     if (isWindows) {
       const runner = getWindowsRunner(normalizedTerminalType);
-      runner(command);
-      return true;
+      return await runner(command);
     }
 
     switch (normalizedTerminalType) {
       case "kitty":
-        runInKitty(command);
-        return true;
+        return await runInKitty(command);
       case "iterm":
-        runInIterm(command);
-        return true;
+        return await runInIterm(command);
       case "warp":
-        runInWarp(command);
-        return true;
+        return await runInWarp(command);
       case "ghostty":
-        runInGhostty(command);
-        return true;
+        return await runInGhostty(command);
       case "cmux":
         return await runInCmux(command, {
           runMode: cmuxRunMode,
@@ -846,16 +897,15 @@ export default function Command(props: { arguments?: ShellArguments }) {
           socketPassword: cmuxSocketPassword,
         });
       default:
-        runInTerminal(command);
-        return true;
+        return await runInTerminal(command);
     }
   };
 
-  const handleExternalRun = async (command: string, runner: (value: string) => void | Promise<boolean>) => {
+  const handleExternalRun = async (command: string, runner: (value: string) => Promise<boolean>) => {
     closeMainWindow();
     popToRoot();
     addToRecentlyUsed(command);
-    await Promise.resolve(runner(command));
+    await runner(command);
   };
 
   useEffect(() => {
