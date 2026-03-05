@@ -48,12 +48,20 @@ export async function searchAssets(query: string): Promise<AssetSearchResult[]> 
     return [];
   }
 
-  const response = await yf.search(query, {
-    quotesCount: SEARCH_MAX_RESULTS,
-    newsCount: 0,
-  });
+  const response = await yf.search(
+    query,
+    {
+      quotesCount: SEARCH_MAX_RESULTS,
+      newsCount: 0,
+    },
+    // Yahoo Finance occasionally changes casing on enum fields (e.g. typeDisp)
+    // which causes schema validation to throw and kills the entire search.
+    // validateResult: false lets us receive and filter the raw data ourselves.
+    { validateResult: false },
+  );
 
-  const quotes = (response.quotes ?? []) as Array<Record<string, unknown>>;
+  const raw = response as { quotes?: unknown[] };
+  const quotes = (raw.quotes ?? []) as Array<Record<string, unknown>>;
 
   return quotes
     .filter((q) => {

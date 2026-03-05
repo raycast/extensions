@@ -73,6 +73,7 @@
 ## PHASE 3: Release to Raycast Store and User Feedback Loop (In Progress)
 1. **Release to Raycast Store**: Prepare and submit the extension for review, including all necessary assets (icon, screenshots, description).
 - Complying with [instructions](https://developers.raycast.com/basics/prepare-an-extension-for-store)
+2. Improvements: when adding Stock/ETF position allow total value input instead of units, with auto-calculation of units based on current price. This is a common use case where users know how much they invested but not how many shares they bought (especially with fractional shares).
 
 ## PHASE 4: Coast FIRE and Portfolio Analytics (Future)
 1. **Fee Tracking: Account level and ETF level** Add entry for fees on Account level and on each Position level. This is a new option in the Portfolio Tracker when editing and adding accounts and positions. Check the Yahoo API response it it includes asset type for Position (only ETFs attract annual fees). It's % based, anually. FIRE setting then have an option to "Adjust growth for Account Fees" and "Adjust growth for ETF Fees" which are ON by default. When ON, FIRE SVG chart calculations subtract a sum of (account fee + position fee) from the growth rate (negative possible). Then a new SVG Chart ("Fee Tracking") is present showing the total sum of all fees (bar stacked with two values: account fees and ETF fees) shown over time, with same format at the other SVGs.

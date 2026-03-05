@@ -77,7 +77,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.7",
     "@raycast/utils": "^1.17.0",
-    "yahoo-finance2": "^3.13.0"
+    "yahoo-finance2": "^3.13.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

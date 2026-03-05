@@ -156,7 +156,7 @@ const SAMPLE_POSITIONS_PROPERTY: Position[] = [
     units: 1,
     currency: "GBP",
     assetType: AssetType.MORTGAGE,
-    mortgageData: SAMPLE_MORTGAGE_DATA,
+    mortgageData: { ...SAMPLE_MORTGAGE_DATA, sharedOwnershipPercent: 50, myEquityShare: 20000 },
     addedAt: "2023-06-15T12:00:00.000Z",
   },
   {
