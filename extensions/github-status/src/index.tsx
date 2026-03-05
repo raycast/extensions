@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Status, STATUS_URL, StatusIncident } from "./api";
+import { Status, STATUS_URL, StatusIncident } from "@/api";
 
 const colorsMap: Record<string, string> = {
   operational: Color.Green,
