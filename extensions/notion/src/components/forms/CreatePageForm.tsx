@@ -84,7 +84,10 @@ export function CreatePageForm({ mutate, launchContext, defaults, accountId }: C
   );
   const { data: users } = useUsers(activeAccountId);
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases(activeAccountId);
-  const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(visibleDatabaseProperties, activeAccountId);
+  const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(
+    visibleDatabaseProperties,
+    activeAccountId,
+  );
   const { setRecentPage } = useRecentPages();
   const hasShownNoDatabasesToast = useRef(false);
 
