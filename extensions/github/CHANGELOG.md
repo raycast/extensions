@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Improve Auto-Merge Support] - {PR_MERGE_DATE}
+## [Improve Auto-Merge Support] - 2026-03-05
 
 - Pull Requests: Fix auto-merge actions not appearing due to inverted condition
 - Pull Requests: Add merge method selection when enabling auto-merge
