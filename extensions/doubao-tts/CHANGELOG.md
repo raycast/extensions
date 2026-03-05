@@ -1,6 +1,6 @@
 # Doubao TTS Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-05
 
 - Quick Read: select text and read aloud with one command (toggle to stop)
 - Voice Selection: browse 90+ voices organized by category
