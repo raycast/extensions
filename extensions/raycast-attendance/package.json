@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-attendance",
+  "title": "Attendance",
+  "description": "Quick attendance recording from Raycast",
+  "icon": "extension-icon.png",
+  "author": "yuhgo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clock-in",
+      "title": "Clock in",
+      "subtitle": "Attendance",
+      "description": "Record clock-in",
+      "mode": "no-view"
+    },
+    {
+      "name": "clock-out",
+      "title": "Clock out",
+      "subtitle": "Attendance",
+      "description": "Record clock-out",
+      "mode": "no-view"
+    },
+    {
+      "name": "break-start",
+      "title": "Break Start",
+      "subtitle": "Attendance",
+      "description": "Record break start",
+      "mode": "no-view"
+    },
+    {
+      "name": "break-end",
+      "title": "Break End",
+      "subtitle": "Attendance",
+      "description": "Record break end",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "The base URL of the attendance API",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://your-worker.workers.dev"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "API key for authentication",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "ky": "^1.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "oxlint src/"
+  }
+}
