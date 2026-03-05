@@ -18,8 +18,7 @@ import { useState } from "react";
 import { getPiholeAPI } from "./api/client";
 import { isV6 } from "./utils";
 
-function AddListForm({ revalidate }: { revalidate: () => void }) {
-  const { pop } = useNavigation();
+export function AddListForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(values: { address: string; type: string }) {
@@ -44,8 +43,7 @@ function AddListForm({ revalidate }: { revalidate: () => void }) {
         style: Toast.Style.Success,
         title: "Subscription list added",
       });
-      revalidate();
-      pop();
+      onSuccess?.();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -95,7 +93,7 @@ export default function SubscriptionLists() {
     );
   }
 
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
   const { isLoading, data: lists, mutate, revalidate } = useCachedPromise(() => getPiholeAPI().getSubscriptionLists());
 
   async function handleDelete(address: string) {
@@ -187,7 +185,16 @@ export default function SubscriptionLists() {
                 title="Add New List"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                onAction={() => push(<AddListForm revalidate={revalidate} />)}
+                onAction={() =>
+                  push(
+                    <AddListForm
+                      onSuccess={() => {
+                        revalidate();
+                        pop();
+                      }}
+                    />,
+                  )
+                }
               />
               <Action.CopyToClipboard title="Copy URL" content={list.address} />
               <Action

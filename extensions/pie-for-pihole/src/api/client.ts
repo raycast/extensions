@@ -3,11 +3,12 @@ import type { PiholeAPI } from "./types";
 import { PiholeV5 } from "./v5";
 
 let instance: PiholeAPI | null = null;
+let cachedVersion: string | undefined;
 
 export function getPiholeAPI(): PiholeAPI {
-  if (instance) return instance;
+  const { PIHOLE_VERSION } = getPreferenceValues<Preferences>();
 
-  const { PIHOLE_VERSION } = getPreferenceValues<{ PIHOLE_VERSION?: string }>();
+  if (instance && cachedVersion === PIHOLE_VERSION) return instance;
 
   if (PIHOLE_VERSION === "v6") {
     // Lazy import to avoid loading v6 code when using v5
@@ -18,5 +19,6 @@ export function getPiholeAPI(): PiholeAPI {
     instance = new PiholeV5();
   }
 
+  cachedVersion = PIHOLE_VERSION;
   return instance;
 }

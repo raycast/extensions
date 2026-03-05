@@ -24,7 +24,9 @@ export function generateTOTP(secret: string, period = 30, digits = 6): number {
   counterBuf.writeUInt32BE(Math.floor(counter / 0x100000000), 0);
   counterBuf.writeUInt32BE(counter >>> 0, 4);
 
-  const hmac = createHmac("sha1", key).update(counterBuf).digest();
+  const hmac = createHmac("sha1", key as Uint8Array)
+    .update(counterBuf as Uint8Array)
+    .digest();
   const offset = hmac[hmac.length - 1] & 0x0f;
   const code =
     ((hmac[offset] & 0x7f) << 24) |

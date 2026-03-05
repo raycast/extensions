@@ -16,8 +16,7 @@ import { useState } from "react";
 import { getPiholeAPI } from "./api/client";
 import type { DomainEntry } from "./api/types";
 
-function AddDomainForm({ revalidate }: { revalidate: () => void }) {
-  const { pop } = useNavigation();
+export function AddDomainForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(values: { domains: string; list: string; kind: string }) {
@@ -61,8 +60,7 @@ function AddDomainForm({ revalidate }: { revalidate: () => void }) {
           message: `${domains.length - failed.length} added successfully`,
         });
       }
-      revalidate();
-      pop();
+      onSuccess?.();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -109,7 +107,7 @@ function sectionTitle(type: string, kind: string): string {
 }
 
 export default function ManageDomains() {
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
 
   const {
     isLoading,
@@ -196,7 +194,16 @@ export default function ManageDomains() {
                       title="Add New Domain"
                       icon={Icon.Plus}
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
-                      onAction={() => push(<AddDomainForm revalidate={revalidate} />)}
+                      onAction={() =>
+                        push(
+                          <AddDomainForm
+                            onSuccess={() => {
+                              revalidate();
+                              pop();
+                            }}
+                          />,
+                        )
+                      }
                     />
                     <Action
                       title="Refresh"

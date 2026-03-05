@@ -2,7 +2,7 @@ import { Action, getPreferenceValues, Icon, showToast, Toast } from "@raycast/ap
 import { getPiholeAPI } from "./api/client";
 
 export function isV6(): boolean {
-  return getPreferenceValues<{ PIHOLE_VERSION?: string }>().PIHOLE_VERSION === "v6";
+  return getPreferenceValues<Preferences>().PIHOLE_VERSION === "v6";
 }
 
 export function AddToListAction(props: { domain: string; listType: string }) {
@@ -34,13 +34,6 @@ export function AddToListAction(props: { domain: string; listType: string }) {
       icon={props.listType === "black" ? Icon.XMarkCircle : Icon.Checkmark}
     />
   );
-}
-
-export function cleanPiholeURL(url: string) {
-  return url
-    .replace(/https?:\/\//, "")
-    .replace(/\/+$/, "")
-    .replace(/\/admin\/?.*$/, "");
 }
 
 export function buildBaseURL(rawURL: string, defaultScheme: "http" | "https" = "http"): string {

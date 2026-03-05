@@ -266,7 +266,7 @@ function GroupDetail({
                         allClients={allClients}
                         groupClients={clients}
                         onAdded={onChanged}
-                      />
+                      />,
                     )
                   }
                 />
@@ -290,7 +290,7 @@ function GroupDetail({
                         allClients={allClients}
                         groupClients={clients}
                         onAdded={onChanged}
-                      />
+                      />,
                     )
                   }
                 />
@@ -337,7 +337,7 @@ function GroupDetail({
                         allDomains={allDomains}
                         groupDomains={domains}
                         onAdded={onChanged}
-                      />
+                      />,
                     )
                   }
                 />
@@ -361,7 +361,7 @@ function GroupDetail({
                         allDomains={allDomains}
                         groupDomains={domains}
                         onAdded={onChanged}
-                      />
+                      />,
                     )
                   }
                 />
@@ -516,7 +516,7 @@ export default function ManageGroupsClients() {
                           allClients={clients}
                           allDomains={domains}
                           onChanged={revalidate}
-                        />
+                        />,
                       )
                     }
                   />

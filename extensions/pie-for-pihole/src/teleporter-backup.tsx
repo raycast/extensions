@@ -27,7 +27,7 @@ export default async function TeleporterBackup() {
     const filename = `pihole-backup-${date}.zip`;
     const filepath = path.join(os.homedir(), "Downloads", filename);
 
-    fs.writeFileSync(filepath, data);
+    fs.writeFileSync(filepath, data as Uint8Array);
 
     await showToast({
       style: Toast.Style.Success,

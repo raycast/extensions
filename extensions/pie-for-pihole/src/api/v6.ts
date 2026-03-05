@@ -1,11 +1,12 @@
 import {
   type ClientDetails,
-  type domainDetails,
+  type DomainDetails,
   QueryBlockStatus,
   type QueryLog,
   type SubscriptionList,
 } from "../interfaces";
 import { SessionManager } from "./session";
+import { formatTimestamp } from "./shared";
 import type {
   ConfiguredClient,
   DomainEntry,
@@ -122,17 +123,18 @@ export class PiholeV6 implements PiholeAPI {
   async getQueryLogs(seconds: number): Promise<QueryLog[]> {
     const now = Math.floor(Date.now() / 1000);
     const from = now - seconds;
-    const data = await this.session.request<V6QueriesResponse>(`/queries?from=${from}&until=${now}&length=500`);
+    const length = Math.min(Math.max(Math.ceil((seconds / 3600) * 100), 100), 3000);
+    const data = await this.session.request<V6QueriesResponse>(`/queries?from=${from}&until=${now}&length=${length}`);
 
     return (data.queries ?? []).reverse().map((q) => ({
-      timestamp: this.formatTimestamp(q.time),
+      timestamp: formatTimestamp(q.time),
       domain: q.domain,
       client: q.client?.name || q.client?.ip || "unknown",
       blockStatus: this.parseV6Status(q.status),
     }));
   }
 
-  async getTopQueries(count: number): Promise<{ topAllowed: domainDetails[]; topBlocked: domainDetails[] }> {
+  async getTopQueries(count: number): Promise<{ topAllowed: DomainDetails[]; topBlocked: DomainDetails[] }> {
     const [allowed, blocked] = await Promise.all([
       this.session.request<V6TopDomainsResponse>(`/stats/top_domains?count=${count}`),
       this.session.request<V6TopDomainsResponse>(`/stats/top_domains?blocked=true&count=${count}`),
@@ -404,14 +406,6 @@ export class PiholeV6 implements PiholeAPI {
       config: Record<string, unknown>;
     }>("/config");
     return data.config;
-  }
-
-  private formatTimestamp(unixTimestamp: number): string {
-    const date = new Date(unixTimestamp * 1000);
-    const hours = date.getHours();
-    const minutes = "0" + date.getMinutes();
-    const seconds = "0" + date.getSeconds();
-    return hours + ":" + minutes.slice(-2) + ":" + seconds.slice(-2);
   }
 
   private parseV6Status(status: string): QueryBlockStatus {

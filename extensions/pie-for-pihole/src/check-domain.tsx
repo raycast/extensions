@@ -6,7 +6,7 @@ import { isV6 } from "./utils";
 function SearchResults({ domain, partial }: { domain: string; partial: boolean }) {
   const { isLoading, data: result } = useCachedPromise(
     (d: string, p: boolean) => getPiholeAPI().searchDomain(d, p),
-    [domain, partial]
+    [domain, partial],
   );
 
   return (

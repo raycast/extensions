@@ -26,11 +26,7 @@ export class SessionManager {
   private authPromise: Promise<string> | null = null;
 
   constructor() {
-    const { PIHOLE_URL, API_TOKEN, TOTP_SECRET } = getPreferenceValues<{
-      PIHOLE_URL: string;
-      API_TOKEN: string;
-      TOTP_SECRET?: string;
-    }>();
+    const { PIHOLE_URL, API_TOKEN, TOTP_SECRET } = getPreferenceValues<Preferences>();
     this.baseURL = `${buildBaseURL(PIHOLE_URL, "https")}/api`;
     this.password = API_TOKEN;
     this.totpSecret = TOTP_SECRET || undefined;
@@ -75,7 +71,7 @@ export class SessionManager {
     if (!response.ok) {
       if (response.status === 401) {
         throw new PiholeConnectionError(
-          "Invalid password. Check your Pi-hole password in extension preferences. If 2FA is enabled, set your TOTP secret or use an app password."
+          "Invalid password. Check your Pi-hole password in extension preferences. If 2FA is enabled, set your TOTP secret or use an app password.",
         );
       }
       throw new PiholeConnectionError(`Authentication failed (HTTP ${response.status}).`);
@@ -107,7 +103,12 @@ export class SessionManager {
     return this.authPromise;
   }
 
-  async request<T>(path: string, options?: RequestInit): Promise<T> {
+  private async executeRequest<T>(
+    path: string,
+    options: RequestInit | undefined,
+    timeoutMs: number,
+    parseResponse: (response: Response) => Promise<T>,
+  ): Promise<T> {
     let sid = await this.ensureSID();
 
     const doRequest = async (sessionId: string) => {
@@ -119,83 +120,38 @@ export class SessionManager {
       if (options?.body) {
         headers["Content-Type"] = headers["Content-Type"] ?? "application/json";
       }
-      return fetchWithTimeout(url, { ...options, headers });
+      return fetchWithTimeout(url, { ...options, headers }, timeoutMs);
     };
 
     let response = await doRequest(sid);
 
-    // On 401, re-authenticate once and retry
     if (response.status === 401) {
       this.invalidateSID();
-      sid = await this.authenticate();
+      sid = await this.ensureSID();
       response = await doRequest(sid);
     }
 
     if (!response.ok) {
       const body = await response.text().catch(() => "");
-      throw new PiholeConnectionError(`Pi-hole API error (HTTP ${response.status}): ${body}`);
+      const truncated = body.length > 200 ? body.slice(0, 200) + "..." : body;
+      throw new PiholeConnectionError(`Pi-hole API error (HTTP ${response.status}): ${truncated}`);
     }
 
-    return (await response.json()) as T;
+    return parseResponse(response);
+  }
+
+  async request<T>(path: string, options?: RequestInit): Promise<T> {
+    return this.executeRequest(path, options, 5000, (r) => r.json() as Promise<T>);
   }
 
   async requestText(path: string, options?: RequestInit): Promise<string> {
-    let sid = await this.ensureSID();
-
-    const doRequest = async (sessionId: string) => {
-      const url = `${this.baseURL}${path}`;
-      const headers: Record<string, string> = {
-        ...(options?.headers as Record<string, string>),
-        "X-FTL-SID": sessionId,
-      };
-      if (options?.body) {
-        headers["Content-Type"] = headers["Content-Type"] ?? "application/json";
-      }
-      return fetchWithTimeout(url, { ...options, headers }, 30_000);
-    };
-
-    let response = await doRequest(sid);
-
-    if (response.status === 401) {
-      this.invalidateSID();
-      sid = await this.authenticate();
-      response = await doRequest(sid);
-    }
-
-    if (!response.ok) {
-      const body = await response.text().catch(() => "");
-      throw new PiholeConnectionError(`Pi-hole API error (HTTP ${response.status}): ${body}`);
-    }
-
-    return await response.text();
+    return this.executeRequest(path, options, 30_000, (r) => r.text());
   }
 
   async requestBuffer(path: string, options?: RequestInit): Promise<Buffer> {
-    let sid = await this.ensureSID();
-
-    const doRequest = async (sessionId: string) => {
-      const url = `${this.baseURL}${path}`;
-      const headers: Record<string, string> = {
-        ...(options?.headers as Record<string, string>),
-        "X-FTL-SID": sessionId,
-      };
-      return fetchWithTimeout(url, { ...options, headers }, 30_000);
-    };
-
-    let response = await doRequest(sid);
-
-    if (response.status === 401) {
-      this.invalidateSID();
-      sid = await this.authenticate();
-      response = await doRequest(sid);
-    }
-
-    if (!response.ok) {
-      const body = await response.text().catch(() => "");
-      throw new PiholeConnectionError(`Pi-hole API error (HTTP ${response.status}): ${body}`);
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    return this.executeRequest(path, options, 30_000, async (r) => {
+      const arrayBuffer = await r.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    });
   }
 }

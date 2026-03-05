@@ -39,15 +39,15 @@ export default function QueryLogCommand() {
             item.blockStatus === QueryBlockStatus.Blocked
               ? { source: Icon.XMarkCircle, tintColor: Color.Red }
               : item.blockStatus === QueryBlockStatus.Cached
-              ? { source: Icon.MemoryChip, tintColor: Color.Blue }
-              : { source: Icon.Checkmark, tintColor: Color.Green }
+                ? { source: Icon.MemoryChip, tintColor: Color.Blue }
+                : { source: Icon.Checkmark, tintColor: Color.Green }
           }
           subtitle={`${item.client} ${
             item.blockStatus === QueryBlockStatus.Blocked
               ? "(Blocked)"
               : item.blockStatus === QueryBlockStatus.Cached
-              ? "(Local cache)"
-              : ""
+                ? "(Local cache)"
+                : ""
           }`}
           accessories={[{ text: item.timestamp }]}
           actions={

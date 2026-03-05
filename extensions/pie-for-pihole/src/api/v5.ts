@@ -8,7 +8,7 @@ import {
   type TopQueries,
 } from "../interfaces";
 import { buildBaseURL } from "../utils";
-import { fetchWithTimeout, PiholeConnectionError } from "./shared";
+import { fetchWithTimeout, formatTimestamp, PiholeConnectionError } from "./shared";
 import type { DomainEntry, NormalizedSummary, PiholeAPI, QueryTypeBreakdown } from "./types";
 
 export class PiholeV5 implements PiholeAPI {
@@ -16,10 +16,7 @@ export class PiholeV5 implements PiholeAPI {
   private token: string;
 
   constructor() {
-    const { PIHOLE_URL, API_TOKEN } = getPreferenceValues<{
-      PIHOLE_URL: string;
-      API_TOKEN: string;
-    }>();
+    const { PIHOLE_URL, API_TOKEN } = getPreferenceValues<Preferences>();
     this.baseURL = `${buildBaseURL(PIHOLE_URL, "http")}/admin/api.php`;
     this.token = API_TOKEN;
   }
@@ -54,7 +51,7 @@ export class PiholeV5 implements PiholeAPI {
     }
     const { data } = (await response.json()) as QueryLogs;
     return data.reverse().map((entry) => ({
-      timestamp: this.formatTimestamp(parseInt(entry[0])),
+      timestamp: formatTimestamp(parseInt(entry[0])),
       domain: entry[2],
       client: entry[3],
       blockStatus: this.parseBlockStatus(entry[4]),
@@ -62,8 +59,8 @@ export class PiholeV5 implements PiholeAPI {
   }
 
   async getTopQueries(count: number): Promise<{
-    topAllowed: import("../interfaces").domainDetails[];
-    topBlocked: import("../interfaces").domainDetails[];
+    topAllowed: import("../interfaces").DomainDetails[];
+    topBlocked: import("../interfaces").DomainDetails[];
   }> {
     const response = await fetchWithTimeout(this.url(`topItems=${count}`));
     if (!response.ok) {
@@ -272,14 +269,6 @@ export class PiholeV5 implements PiholeAPI {
 
   async updateDomainGroups(): Promise<never> {
     throw new PiholeConnectionError("updateDomainGroups is only available on Pi-hole v6.");
-  }
-
-  private formatTimestamp(unixTimestamp: number): string {
-    const date = new Date(unixTimestamp * 1000);
-    const hours = date.getHours();
-    const minutes = "0" + date.getMinutes();
-    const seconds = "0" + date.getSeconds();
-    return hours + ":" + minutes.slice(-2) + ":" + seconds.slice(-2);
   }
 
   private parseBlockStatus(status: string): QueryBlockStatus {

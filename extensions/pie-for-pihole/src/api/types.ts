@@ -1,4 +1,4 @@
-import type { ClientDetails, domainDetails, QueryLog, SubscriptionList } from "../interfaces";
+import type { ClientDetails, DomainDetails, QueryLog, SubscriptionList } from "../interfaces";
 
 export interface NormalizedSummary {
   status: string;
@@ -85,7 +85,7 @@ export interface DomainEntry {
 export interface PiholeAPI {
   getSummary(): Promise<NormalizedSummary>;
   getQueryLogs(seconds: number): Promise<QueryLog[]>;
-  getTopQueries(count: number): Promise<{ topAllowed: domainDetails[]; topBlocked: domainDetails[] }>;
+  getTopQueries(count: number): Promise<{ topAllowed: DomainDetails[]; topBlocked: DomainDetails[] }>;
   enable(): Promise<void>;
   disable(duration?: number): Promise<void>;
   addToList(domain: string, list: "allow" | "deny", kind?: "exact" | "regex"): Promise<void>;
