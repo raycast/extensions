@@ -12,6 +12,7 @@ const NOTION_AUTHORIZE_URL = "https://notion.oauth.raycast.com/authorize";
 const NOTION_TOKEN_URL = "https://notion.oauth.raycast.com/token";
 
 const notionClients = new Map<string, { token: string; client: Client }>();
+const notionOAuthServices = new Map<NotionAccountId, { label: string; service: OAuthService }>();
 
 function getAuthPreferences() {
   const preferences = getPreferenceValues<Preferences>();
@@ -130,6 +131,15 @@ function createOAuthService(account: NotionAccount) {
   });
 }
 
+function getCachedOAuthService(account: NotionAccount) {
+  const cached = notionOAuthServices.get(account.id);
+  if (cached && cached.label === account.label) return cached.service;
+
+  const service = createOAuthService(account);
+  notionOAuthServices.set(account.id, { label: account.label, service });
+  return service;
+}
+
 export async function getNotionClient(accountId?: NotionAccountId) {
   const { authType, internalToken } = getAuthPreferences();
 
@@ -147,6 +157,6 @@ export async function getNotionClient(accountId?: NotionAccountId) {
 
   const resolvedAccountId = accountId ?? (await getActiveAccountId());
   const account = getNotionAccount(resolvedAccountId) ?? { id: "account-1", label: "Account 1" };
-  const token = await createOAuthService(account).authorize();
+  const token = await getCachedOAuthService(account).authorize();
   return getCachedClient(account.id, token);
 }
