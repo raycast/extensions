@@ -33,9 +33,9 @@ export default function CreateBookmarkView() {
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   // User-typed new tag names that have been committed as pills
   const [newTagItems, setNewTagItems] = useState<Array<{ id: string; name: string }>>([]);
-  // Text the user is currently typing in the helper field
+  // Text the user is currently typing in the new tag field
   const [pendingInput, setPendingInput] = useState("");
-  // Ref to avoid stale closure in commitNewTag
+  // Ref to avoid stale closure in onTagIdsChange
   const selectedTagIdsRef = useRef<string[]>([]);
 
   const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
@@ -94,13 +94,10 @@ export default function CreateBookmarkView() {
     },
   });
 
-  // Commit a new tag name as a pill in the TagPicker
   function commitNewTag(name: string) {
     const trimmed = name.trim();
     if (!trimmed) return;
-    // Skip if already an existing tag (by name, case-insensitive)
     if (tags.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())) return;
-    // Skip duplicates
     if (newTagItems.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())) return;
 
     const id = `${NEW_TAG_PREFIX}${trimmed}`;

@@ -34,7 +34,7 @@ export default function CreateNoteView() {
 
   // User-typed new tag names that have been committed as pills
   const [newTagItems, setNewTagItems] = useState<Array<{ id: string; name: string }>>([]);
-  // Text the user is currently typing in the helper field
+  // Text the user is currently typing in the new tag field
   const [pendingInput, setPendingInput] = useState("");
   // Ref to keep selectedTagIds in sync inside callbacks without stale closure
   const selectedTagIdsRef = useRef<string[]>([]);
@@ -49,7 +49,6 @@ export default function CreateNoteView() {
     }
   };
 
-  // Commit a new tag name as a pill in the TagPicker
   function commitNewTag(name: string) {
     const trimmed = name.trim();
     if (!trimmed) return;
