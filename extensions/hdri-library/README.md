@@ -5,7 +5,7 @@ A Raycast extension for browsing and downloading high-quality HDRI images from [
 ## Features
 
 - **Browse HDRIs**: Search and browse the complete Poly Haven HDRI library with beautiful thumbnail previews
-- **Quick Download**: Download HDRIs in your preferred resolution (1k, 2k, 4k, 8k) and format (EXR, HDR)
+- **Quick Download**: Download HDRIs in your preferred resolution (1k, 2k, 4k, 8k) and format (EXR, HDR, JPG)
 - **Favorites**: Save your favorite HDRIs for quick access
 - **Download History**: Keep track of downloaded assets with local file paths
 - **Custom Settings**: Configure default download directory, resolution, and format preferences
@@ -25,8 +25,9 @@ A Raycast extension for browsing and downloading high-quality HDRI images from [
 ## Settings
 
 Access settings from any HDRI's action panel to configure:
+
 - **Download Directory**: Choose where files are saved (defaults to Downloads folder)
-- **Default Format**: EXR or HDR
+- **Default Format**: EXR, HDR, or JPG
 - **Default Resolution**: 1k, 2k, 4k, or 8k
 
 ## Supporting Poly Haven
@@ -36,6 +37,7 @@ Poly Haven is a **100% free, community-funded** asset library. All assets are re
 Creating high-quality assets like 16k+ resolution HDRIs, PBR textures, and 3D models is expensive and time-consuming. Poly Haven relies on community support to continue providing free assets to everyone.
 
 **Please consider supporting Poly Haven on [Patreon](https://www.patreon.com/cw/polyhaven)** to help them:
+
 - Hire more artists to create even more assets
 - Afford better equipment for higher quality scans
 - Keep the servers running and the website free for everyone

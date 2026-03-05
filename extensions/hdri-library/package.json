@@ -13,7 +13,19 @@
     "Design Tools"
   ],
   "license": "MIT",
-  "keywords": ["hdri", "hdr", "3d", "polyhaven", "environment", "lighting", "rendering", "vfx", "blender", "cinema 4d", "unreal"],
+  "keywords": [
+    "hdri",
+    "hdr",
+    "3d",
+    "polyhaven",
+    "environment",
+    "lighting",
+    "rendering",
+    "vfx",
+    "blender",
+    "cinema 4d",
+    "unreal"
+  ],
   "commands": [
     {
       "name": "find-hdri",

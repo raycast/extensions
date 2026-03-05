@@ -1,5 +1,5 @@
 import { Grid, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePromise } from "@raycast/utils";
 import { getAssets, Asset, getAssetFiles } from "./api/polyhaven";
 import DownloadView from "./DownloadView";
@@ -10,8 +10,18 @@ import { useSettings } from "./hooks/useSettings";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState("all");
-  const { data: assets, isLoading } = usePromise(getAssets, ["hdris"]);
+  const { data: assets, isLoading, error } = usePromise(getAssets, ["hdris"]);
   const { favorites, downloaded, toggleFavorite, addDownloaded } = useSavedAssets();
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Load HDRIs",
+        message: error.message,
+      });
+    }
+  }, [error]);
   const { downloadFile } = useDownload();
   const { settings } = useSettings();
 
@@ -67,7 +77,14 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {filteredAssets && filteredAssets.length === 0 && !isLoading && (
+      {error && !isLoading && (
+        <Grid.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't Load Catalog"
+          description="Check your connection and try again."
+        />
+      )}
+      {!error && filteredAssets && filteredAssets.length === 0 && !isLoading && (
         <Grid.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No HDRIs Found"

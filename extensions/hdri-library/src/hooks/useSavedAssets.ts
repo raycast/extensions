@@ -9,20 +9,28 @@ export function useSavedAssets() {
   useEffect(() => {
     Promise.all([LocalStorage.getItem<string>("favorites"), LocalStorage.getItem<string>("downloaded")]).then(
       ([favs, downs]) => {
-        if (favs) setFavorites(JSON.parse(favs));
-        if (downs) {
-          const parsedDowns = JSON.parse(downs);
-          // Migration: If it's an array, convert to object with empty paths
-          if (Array.isArray(parsedDowns)) {
-            const newDowns: Record<string, string> = {};
-            parsedDowns.forEach((id) => {
-              newDowns[id] = "";
-            });
-            setDownloaded(newDowns);
-            LocalStorage.setItem("downloaded", JSON.stringify(newDowns));
-          } else {
-            setDownloaded(parsedDowns);
+        try {
+          if (favs) setFavorites(JSON.parse(favs));
+        } catch {
+          setFavorites([]);
+        }
+        try {
+          if (downs) {
+            const parsedDowns = JSON.parse(downs);
+            // Migration: If it's an array, convert to object with empty paths
+            if (Array.isArray(parsedDowns)) {
+              const newDowns: Record<string, string> = {};
+              parsedDowns.forEach((id) => {
+                newDowns[id] = "";
+              });
+              setDownloaded(newDowns);
+              LocalStorage.setItem("downloaded", JSON.stringify(newDowns));
+            } else {
+              setDownloaded(parsedDowns);
+            }
           }
+        } catch {
+          setDownloaded({});
         }
         setIsLoading(false);
       },
