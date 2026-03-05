@@ -22,7 +22,7 @@ If you just need basic link storage without transformations, consider simpler bo
 
 1. **Add Links**: Use the "Add Link" command to save URLs with aliases.
 2. **Search Links**: Use the "Search Links" command with fuzzy search to find and open links.
-3. **Create Actions**: Use "Add Action" to define transformation code (e.g., `return url.replace('https://', '');`).
+3. **Create Actions**: Use "Add Action" to define transformation code (e.g., `url.replace('https://', '')`).
 4. **Apply Actions**: From a link, select an action to transform and open the URL.
 
 ## Installation
