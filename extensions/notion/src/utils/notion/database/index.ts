@@ -70,6 +70,8 @@ export async function fetchDatabases(accountId?: NotionAccountId) {
         (x) =>
           ({
             id: x.id,
+            parent_database_id:
+              "parent" in x && x.parent && "database_id" in x.parent ? x.parent.database_id : undefined,
             last_edited_time: new Date(x.last_edited_time).getTime(),
             title: x.title[0]?.plain_text,
             icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
@@ -261,6 +263,7 @@ export async function deleteDatabase(databaseId: string, accountId?: NotionAccou
 
 export interface Database {
   id: string;
+  parent_database_id?: string;
   last_edited_time: number;
   title: string | null;
   icon_emoji: string | null;

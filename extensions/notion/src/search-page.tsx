@@ -7,9 +7,12 @@ import { useRecentPages, useUsers, useDatabases } from "./hooks";
 import { search, type Page } from "./utils/notion";
 import { getNotionAccounts, getNotionAccountLabel } from "./utils/notion/oauth";
 
+const ALL_ACCOUNTS = "all";
+
 function Search() {
   const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
   const [searchText, setSearchText] = useState<string>("");
+  const [accountFilter, setAccountFilter] = useState<string>(ALL_ACCOUNTS);
   const accounts = getNotionAccounts();
   const primaryAccount = accounts[0];
   const secondaryAccount = accounts[1];
@@ -19,14 +22,15 @@ function Search() {
   const { data: primaryDatabases } = useDatabases(primaryAccount?.id);
   const { data: secondaryDatabases } = useDatabases(secondaryAccount?.id);
 
-  // Create a lookup map for database names
+  // Create a lookup map for database names, indexed by both data_source ID and database ID
   const databaseNameMap = new Map<string, string>();
-  primaryDatabases?.forEach((db) => {
-    if (db.title) databaseNameMap.set(db.id, db.title);
-  });
-  secondaryDatabases?.forEach((db) => {
-    if (db.title) databaseNameMap.set(db.id, db.title);
-  });
+  const indexDatabase = (db: { id: string; parent_database_id?: string; title: string | null }) => {
+    if (!db.title) return;
+    databaseNameMap.set(db.id, db.title);
+    if (db.parent_database_id) databaseNameMap.set(db.parent_database_id, db.title);
+  };
+  primaryDatabases?.forEach(indexDatabase);
+  secondaryDatabases?.forEach(indexDatabase);
 
   // Helper to enrich pages with database names
   const enrichWithDatabaseName = (page: Page): Page => {
@@ -85,14 +89,19 @@ function Search() {
   const enrichedData = data?.map(enrichWithDatabaseName);
   const enrichedRecentPages = recentPages?.map(enrichWithDatabaseName);
 
+  const filterByAccount = (page: Page) =>
+    accountFilter === ALL_ACCOUNTS || (page.accountId ?? primaryAccount?.id) === accountFilter;
+
   const sections = [
-    { title: "Recent", pages: enrichedRecentPages ?? [] },
+    { title: "Recent", pages: (enrichedRecentPages ?? []).filter(filterByAccount) },
     {
       title: "Search",
       pages:
-        enrichedData?.filter(
-          (p) => !recentPages?.some((q) => p.id === q.id && (p.accountId ?? primaryAccount?.id) === q.accountId),
-        ) ?? [],
+        enrichedData
+          ?.filter(
+            (p) => !recentPages?.some((q) => p.id === q.id && (p.accountId ?? primaryAccount?.id) === q.accountId),
+          )
+          .filter(filterByAccount) ?? [],
     },
   ];
 
@@ -104,6 +113,16 @@ function Search() {
       throttle
       pagination={pagination}
       filtering
+      searchBarAccessory={
+        hasMultipleAccounts ? (
+          <List.Dropdown tooltip="Filter by Account" value={accountFilter} onChange={setAccountFilter}>
+            <List.Dropdown.Item title="All Accounts" value={ALL_ACCOUNTS} />
+            {accounts.map((account) => (
+              <List.Dropdown.Item key={account.id} title={account.label} value={account.id} />
+            ))}
+          </List.Dropdown>
+        ) : undefined
+      }
     >
       {sections.map((section) => {
         return (
