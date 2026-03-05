@@ -19,7 +19,7 @@ export default function LookupByKey() {
 
   return (
     <List
-      isLoading={isLoading || infoLoading}
+      isLoading={isLoading}
       isShowingDetail
       searchBarPlaceholder="Lookup by source key…"
       onSearchTextChange={setSearchText}

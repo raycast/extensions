@@ -19,7 +19,7 @@ export default function SearchLocalizations() {
 
   return (
     <List
-      isLoading={isLoading || infoLoading}
+      isLoading={isLoading}
       isShowingDetail
       searchBarPlaceholder="Search Apple localizations…"
       onSearchTextChange={setSearchText}

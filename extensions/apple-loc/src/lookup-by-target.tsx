@@ -19,7 +19,7 @@ export default function LookupByTarget() {
 
   return (
     <List
-      isLoading={isLoading || infoLoading}
+      isLoading={isLoading}
       isShowingDetail
       searchBarPlaceholder="Lookup by translated text…"
       onSearchTextChange={setSearchText}
