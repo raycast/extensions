@@ -9,6 +9,7 @@
     "News"
   ],
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "commands": [
     {
       "name": "bbc-news",
