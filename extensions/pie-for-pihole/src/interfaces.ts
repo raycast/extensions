@@ -1,11 +1,17 @@
 export interface TopQueries {
-  top_queries: string;
-  top_ads: string;
+  top_queries: Record<string, number>;
+  top_ads: Record<string, number>;
 }
 
 export interface domainDetails {
   domainURL: string;
   blockCount: string;
+}
+
+export interface ClientDetails {
+  name: string;
+  ip: string;
+  count: number;
 }
 export interface SummaryInfo {
   domains_being_blocked: string;
@@ -39,7 +45,7 @@ export interface SummaryInfo {
 }
 
 export interface QueryLogs {
-  data: string[];
+  data: string[][];
 }
 
 export enum QueryBlockStatus {
@@ -65,4 +71,13 @@ export interface Relative {
   days: number;
   hours: number;
   minutes: number;
+}
+
+export interface SubscriptionList {
+  id: number;
+  address: string;
+  type: string;
+  enabled: boolean;
+  comment: string | null;
+  date_added: number;
 }
