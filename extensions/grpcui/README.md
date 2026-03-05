@@ -58,4 +58,3 @@ To bulk import services, use a JSON file with this structure:
   { "title": "My Service on staging", "url": "-plaintext staging.example.com:443" }
 ]
 ```
-

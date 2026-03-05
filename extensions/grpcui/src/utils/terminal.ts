@@ -36,7 +36,8 @@ const terminalScripts: Record<Terminal, string> = {
   Ghostty: `
     on run argv
       set service to item 1 of argv
-      do shell script "open -n -a Ghostty --args -e /bin/zsh -l -c 'grpcui " & quoted form of service & "'"
+      set cmd to "grpcui " & quoted form of service
+      do shell script "open -n -a Ghostty --args -e /bin/zsh -l -c " & quoted form of cmd
     end run
   `,
 };

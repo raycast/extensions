@@ -1,18 +1,11 @@
-import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
-import fs from "fs";
+import { ActionPanel, Form, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import fs from "fs/promises";
 import { saveService } from "./utils/storage";
 import { GrpcUiItem } from "./types";
 
 const FORMAT_EXAMPLE = `[{ "title": "My Service", "url": "localhost:9000" }, {...}]`;
 
 export default function Command() {
-  const [importedItems, setImportedItems] = useState<GrpcUiItem[] | null>(null);
-
-  const formatImportedItems = (items: GrpcUiItem[]) => {
-    return items.map((item) => `✓ ${item.title}`).join("\n");
-  };
-
   return (
     <Form
       actions={
@@ -22,18 +15,19 @@ export default function Command() {
             onSubmit={async (values: { files: string[] }) => {
               const filePath = values.files?.[0];
 
-              if (
-                !filePath ||
-                !fs.existsSync(filePath) ||
-                !fs.lstatSync(filePath).isFile() ||
-                !filePath.endsWith(".json")
-              ) {
+              if (!filePath || !filePath.endsWith(".json")) {
                 showToast({ style: Toast.Style.Failure, title: "Please select a valid JSON file" });
                 return;
               }
 
               try {
-                const file = fs.readFileSync(filePath, "utf-8");
+                const stat = await fs.lstat(filePath);
+                if (!stat.isFile()) {
+                  showToast({ style: Toast.Style.Failure, title: "Please select a valid JSON file" });
+                  return;
+                }
+
+                const file = await fs.readFile(filePath, "utf-8");
                 const parsedItemList: GrpcUiItem[] = JSON.parse(file);
                 const validItems: GrpcUiItem[] = [];
 
@@ -54,7 +48,7 @@ export default function Command() {
                   style: Toast.Style.Success,
                   title: `Imported ${validItems.length} service${validItems.length === 1 ? "" : "s"}`,
                 });
-                setImportedItems(validItems);
+                popToRoot();
               } catch {
                 showToast({ style: Toast.Style.Failure, title: "Error parsing JSON" });
               }
@@ -69,11 +63,7 @@ export default function Command() {
         title="JSON File"
         info="Array of { title, url } objects"
       />
-      {importedItems ? (
-        <Form.Description title="Imported" text={formatImportedItems(importedItems)} />
-      ) : (
-        <Form.Description title="Example" text={FORMAT_EXAMPLE} />
-      )}
+      <Form.Description title="Example" text={FORMAT_EXAMPLE} />
     </Form>
   );
 }
