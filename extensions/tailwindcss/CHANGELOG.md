@@ -1,5 +1,9 @@
 # Tailwind CSS Changelog
 
+## [Add OKLCH color support] - {PR_MERGE_DATE}
+
+- Add OKLCH color format support with copy action in Search Colors
+
 ## [Update keyboard shortcuts] - 2026-01-05
 
 - Update `Shortcut`s to be cross-platform
@@ -7,8 +11,8 @@
 - Add **README**
 - Modernize extension to use latest Raycast API
 
-
 ## [Add default action preference for Search Colors] - 2025-06-24
+
 - Add preference to configure the default action when selecting a color
 - Add more copy-to-clipboard actions
 
