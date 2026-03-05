@@ -1,5 +1,6 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import type { ReactElement } from "react";
 import { getAssetFiles, AssetFiles } from "./api/polyhaven";
 import { useDownload } from "./hooks/useDownload";
 
@@ -21,7 +22,7 @@ export default function DownloadView({ assetId, assetName, onDownload }: Downloa
   const getResolutionItems = (files: AssetFiles) => {
     if (!files.hdri) return [];
 
-    const items: JSX.Element[] = [];
+    const items: ReactElement[] = [];
 
     // Sort resolutions: 1k, 2k, 4k, 8k, 16k, etc.
     const sortedResolutions = Object.keys(files.hdri).sort((a, b) => {

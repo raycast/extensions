@@ -2,6 +2,7 @@ import { showToast, Toast, Clipboard } from "@raycast/api";
 import path from "path";
 import os from "os";
 import fs from "fs";
+import { Readable } from "stream";
 import { pipeline } from "stream/promises";
 import { useSettings } from "./useSettings";
 
@@ -55,7 +56,9 @@ export function useDownload() {
 
       const destPath = path.join(downloadDir, fileName);
       const fileStream = fs.createWriteStream(destPath);
-      await pipeline(response.body, fileStream);
+      // Cast: fetch() returns a Web API ReadableStream; Node's Readable.fromWeb accepts the stream/web type
+      const nodeReadable = Readable.fromWeb(response.body as import("stream/web").ReadableStream<Uint8Array>);
+      await pipeline(nodeReadable, fileStream);
 
       await Clipboard.copy(destPath);
       if (onComplete) onComplete(destPath);
