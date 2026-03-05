@@ -64,7 +64,8 @@ export function PageListItem({
   showTypeAccessory = false,
 }: PageListItemProps) {
   const accessories: List.Item.Accessory[] = [];
-  const pageWord = page.object.charAt(0).toUpperCase() + page.object.slice(1);
+  // Use database name if available, otherwise capitalize the object type
+  const pageWord = page.parent_database_name ?? page.object.charAt(0).toUpperCase() + page.object.slice(1);
 
   if (databaseView && databaseView.properties) {
     const properties = Object.keys(databaseView.properties).map((propId) =>

@@ -3,8 +3,8 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
 import { PageListItem } from "./components";
-import { useRecentPages, useUsers } from "./hooks";
-import { search } from "./utils/notion";
+import { useRecentPages, useUsers, useDatabases } from "./hooks";
+import { search, type Page } from "./utils/notion";
 import { getNotionAccounts, getNotionAccountLabel } from "./utils/notion/oauth";
 
 function Search() {
@@ -14,6 +14,30 @@ function Search() {
   const primaryAccount = accounts[0];
   const secondaryAccount = accounts[1];
   const hasMultipleAccounts = accounts.length > 1;
+
+  // Fetch databases to get their names
+  const { data: primaryDatabases } = useDatabases(primaryAccount?.id);
+  const { data: secondaryDatabases } = useDatabases(secondaryAccount?.id);
+
+  // Create a lookup map for database names
+  const databaseNameMap = new Map<string, string>();
+  primaryDatabases?.forEach((db) => {
+    if (db.title) databaseNameMap.set(db.id, db.title);
+  });
+  secondaryDatabases?.forEach((db) => {
+    if (db.title) databaseNameMap.set(db.id, db.title);
+  });
+
+  // Helper to enrich pages with database names
+  const enrichWithDatabaseName = (page: Page): Page => {
+    if (page.parent_database_id && !page.parent_database_name) {
+      const dbName = databaseNameMap.get(page.parent_database_id);
+      if (dbName) {
+        return { ...page, parent_database_name: dbName };
+      }
+    }
+    return page;
+  };
 
   const { data, isLoading, pagination, mutate } = useCachedPromise(
     (searchText: string, accountKeys: string) =>
@@ -57,12 +81,16 @@ function Search() {
   const { data: primaryUsers } = useUsers(primaryAccount?.id);
   const { data: secondaryUsers } = useUsers(secondaryAccount?.id, { enabled: !!secondaryAccount });
 
+  // Enrich pages with database names
+  const enrichedData = data?.map(enrichWithDatabaseName);
+  const enrichedRecentPages = recentPages?.map(enrichWithDatabaseName);
+
   const sections = [
-    { title: "Recent", pages: recentPages ?? [] },
+    { title: "Recent", pages: enrichedRecentPages ?? [] },
     {
       title: "Search",
       pages:
-        data?.filter(
+        enrichedData?.filter(
           (p) => !recentPages?.some((q) => p.id === q.id && (p.accountId ?? primaryAccount?.id) === q.accountId),
         ) ?? [],
     },

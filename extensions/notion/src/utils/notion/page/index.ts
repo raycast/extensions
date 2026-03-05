@@ -192,6 +192,7 @@ export interface Page {
   accountId?: NotionAccountId;
   parent_page_id?: string;
   parent_database_id?: string;
+  parent_database_name?: string;
   created_by?: string;
   last_edited_time?: number;
   last_edited_user?: string;
