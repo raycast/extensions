@@ -59,6 +59,9 @@ function Search() {
 
         const responses = await Promise.all(
           accounts.map(async (account) => {
+            if (cursorState[account.id] === null) {
+              return { accountId: account.id, result: { pages: [], hasMore: false, nextCursor: null } };
+            }
             const result = await search(searchText, cursorState[account.id] ?? undefined, 25, account.id);
             return { accountId: account.id, result };
           }),
