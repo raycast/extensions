@@ -63,12 +63,18 @@ const SYSTEM_COMMANDS: CustomCommand[] = [
   { name: "unshare", description: "Unshare current session", template: "", isSystem: true },
 ];
 
+/** Escape a string for safe use in YAML frontmatter (double-quoted scalar). */
+function escapeYamlValue(s: string | undefined): string {
+  if (s == null || s === undefined) return '""';
+  return '"' + String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n") + '"';
+}
+
 export default function Command() {
   const [filter, setFilter] = useState<string>("all");
   const [customCommands, setCustomCommands] = useState<CustomCommand[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadCustomCommands = () => {
+  const loadCustomCommands = async () => {
     setIsLoading(true);
     try {
       const configPath = path.join(os.homedir(), ".config", "opencode", "commands");
@@ -105,6 +111,7 @@ export default function Command() {
       }
     } catch (e) {
       console.error("Failed to load custom commands:", e);
+      await showFailureToast(e, { title: "Failed to load custom commands" });
     } finally {
       setIsLoading(false);
     }
@@ -257,9 +264,9 @@ function CommandForm({ onCreated, initialValues }: { onCreated: () => void; init
 
       const filePath = path.join(configPath, `${values.name}.md`);
       const content = `---
-description: ${values.description}
-agent: ${values.agent}
-model: ${values.model}
+description: ${escapeYamlValue(values.description)}
+agent: ${escapeYamlValue(values.agent)}
+model: ${escapeYamlValue(values.model)}
 ---
 ${values.template}`;
 

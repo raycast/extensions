@@ -21,7 +21,7 @@ const CHEATSHEET_DATA: CheatsheetItem[] = [
     category: "TUI",
   },
   { command: "/share", description: "Share current session", category: "TUI" },
-  { command: "/theme", description: "List available themes", category: "TUI" },
+  { command: "/themes", description: "List available themes", category: "TUI" },
   { command: "/thinking", description: "Toggle visibility of thinking/reasoning blocks", category: "TUI" },
   { command: "/undo", description: "Undo last message in the conversation", category: "TUI" },
   { command: "/unshare", description: "Unshare current session", category: "TUI" },
