@@ -36,7 +36,7 @@ export default function Command() {
         </ActionPanel>
       }
       markdown={`## General Status\n\n${data?.status.description ?? "Loading..."}\n\n${
-        data?.incidents.length ? ["## Incidents", ...data?.incidents.flatMap(printIncident)].join("\n\n") : ""
+        data?.incidents.length ? ["## Incidents", ...data.incidents.flatMap(printIncident)].join("\n\n") : ""
       }`}
       metadata={
         <Detail.Metadata>
