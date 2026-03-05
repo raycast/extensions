@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Fix interval schedule timing] - {PR_MERGE_DATE}
+## [Fix interval schedule timing] - 2026-03-05
 
 - Fixed interval schedule calculations so `15mins` and `30mins` now run at their correct cadence instead of effectively using hourly timing in due-check logic.
 - Refactored interval handling to use a shared interval mapping for `15mins`, `30mins`, and `hourly`, keeping next-run and due-check behavior consistent.
