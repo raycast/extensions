@@ -48,8 +48,11 @@ export function useRelations(properties: DatabaseProperty[], accountId?: NotionA
   );
 }
 
-export function useDatabases(accountId?: NotionAccountId) {
-  const value = useCachedPromise((id: NotionAccountId | undefined) => fetchDatabases(id), [accountId]);
+export function useDatabases(accountId?: NotionAccountId, options?: { enabled?: boolean }) {
+  const { enabled = true } = options ?? {};
+  const value = useCachedPromise((id: NotionAccountId | undefined) => fetchDatabases(id), [accountId], {
+    execute: enabled,
+  });
 
   return { ...value, data: value.data ?? [] };
 }
