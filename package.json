@@ -1,29 +1,25 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "book-content-viewer",
-  "title": "DNB Book Content Viewer",
-  "description": "Show book contents of \"Deutsche Nationalbibliothek\", if ISBN 10/13 exists",
+  "name": "dnb-content-viewer",
+  "title": "DNB Book Content",
+  "description": "Quick access to book contents from Deutsche Nationalbibliothek with AI-powered Klappentext generation",
   "icon": "extension-icon.png",
   "author": "wdeu",
   "version": "1.0.0",
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
-  "categories": [
-    "Data"
-  ],
+  "platforms": ["macOS"],
+  "categories": ["Data", "Productivity"],
   "license": "MIT",
+  "keywords": ["dnb", "deutsche nationalbibliothek", "isbn", "books", "library", "catalog", "table of contents", "germany", "ai", "klappentext"],
   "commands": [
     {
-           "name": "search-content",
+      "name": "search-content",
       "title": "Search Book Content",
-      "description": "Mit der ISBN zum Inhaltsverzeichnis und/oder Inhaltstext eines Buches",
-      "mode": "no-view",
+      "description": "Search for book contents in the Deutsche Nationalbibliothek using ISBN",
+      "mode": "view",
       "arguments": [
         {
           "name": "isbn",
-          "placeholder": "ISBN (10 oder 13 Ziffern)",
+          "placeholder": "ISBN-10 or ISBN-13 (e.g., 9783957577597)",
           "type": "text",
           "required": true
         }
@@ -33,23 +29,23 @@
           "name": "contentType",
           "type": "dropdown",
           "required": true,
-          "title": "Zu öffnender Inhalt",
-          "description": "Wähle, welcher Inhalt geöffnet werden soll",
+          "title": "Content to Open",
+          "description": "Choose which content should be opened (when Klappentext disabled)",
           "default": "toc",
           "data": [
-            {
-              "title": "Nur Inhaltsverzeichnis",
-              "value": "toc"
-            },
-            {
-              "title": "Nur Inhaltstext",
-              "value": "text"
-            },
-            {
-              "title": "Beides (Verzeichnis & Text)",
-              "value": "both"
-            }
+            {"title": "Table of Contents Only", "value": "toc"},
+            {"title": "Content Text Only", "value": "text"},
+            {"title": "Both (Table of Contents & Content Text)", "value": "both"}
           ]
+        },
+        {
+          "name": "generateKlappentext",
+          "type": "checkbox",
+          "title": "Klappentext generieren",
+          "label": "AI-generierten Klappentext aus Inhaltsverzeichnis erstellen",
+          "description": "Generiert automatisch einen Klappentext (max. 150 Wörter) + Suchwörter. Benötigt Raycast Pro oder BYOK.",
+          "default": false,
+          "required": false
         }
       ]
     }
