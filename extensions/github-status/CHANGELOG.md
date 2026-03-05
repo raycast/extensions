@@ -3,6 +3,7 @@
 ## [Updates] - {PR_MERGE_DATE}
 
 - Update dependencies, remove node-fetch, use @raycast/utils
+- Add AI tool to get the GitHub status
 
 ## [UI Refresh] - 2022-03-25
 
