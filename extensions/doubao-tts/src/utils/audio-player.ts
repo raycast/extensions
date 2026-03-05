@@ -155,19 +155,23 @@ export function stopExternalPlayback(): boolean {
     }
     const pidStr = readFileSync(PID_FILE, "utf8").trim();
     const pid = parseInt(pidStr, 10);
-    if (isNaN(pid)) {
+    if (isNaN(pid) || pid <= 0) {
       removePidFile();
       return false;
     }
 
     // Verify the PID belongs to afplay before killing
     try {
-      const comm = execSync(`ps -p ${pid} -o comm=`, { encoding: "utf8" }).trim();
+      const comm = execSync(`ps -p ${pid} -o comm=`, {
+        encoding: "utf8",
+        timeout: 1000, // 1 second timeout to prevent hanging
+      }).trim();
       if (!comm.includes("afplay")) {
         removePidFile();
         return false;
       }
     } catch {
+      // If ps fails (timeout, invalid PID, etc.), assume PID is invalid/stale
       removePidFile();
       return false;
     }

@@ -9,7 +9,7 @@ import {
   Icon,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { VOICE_CATEGORIES, getVoicesByCategory } from "./constants/voices";
 import { synthesizeSpeech, buildOptionsFromPrefs, getBaseModel, TTSApiError } from "./api/volcengine-tts";
 import { chunkText } from "./utils/text-chunker";
@@ -22,7 +22,27 @@ export default function ReadWithVoice() {
   const [selectedText, setSelectedText] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState("");
   const playerRef = useRef(new AudioPlayer());
+
+  const filteredCategories = useMemo(() => {
+    if (!searchText.trim()) {
+      return VOICE_CATEGORIES.map((category) => ({
+        category,
+        voices: getVoicesByCategory(category).filter((v) => v.model === currentModel),
+      })).filter((item) => item.voices.length > 0);
+    }
+
+    const searchLower = searchText.toLowerCase();
+    return VOICE_CATEGORIES.map((category) => ({
+      category,
+      voices: getVoicesByCategory(category).filter(
+        (v) =>
+          v.model === currentModel &&
+          (v.name.toLowerCase().includes(searchLower) || v.id.toLowerCase().includes(searchLower)),
+      ),
+    })).filter((item) => item.voices.length > 0);
+  }, [searchText, currentModel]);
 
   useEffect(() => {
     getSelectedText()
@@ -120,7 +140,8 @@ export default function ReadWithVoice() {
     : "No text selected";
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search voices...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search voices..." onSearchTextChange={setSearchText}>
+      <List.EmptyView icon={Icon.SpeakerOff} title="No voices found" description="Try a different search term" />
       <List.Section title="Selected Text">
         <List.Item
           title={textPreview}
@@ -129,40 +150,33 @@ export default function ReadWithVoice() {
         />
       </List.Section>
 
-      {VOICE_CATEGORIES.map((category) => {
-        const voices = getVoicesByCategory(category).filter((v) => v.model === currentModel);
-        if (voices.length === 0) return null;
-
-        return (
-          <List.Section key={category} title={category}>
-            {voices.map((voice) => (
-              <List.Item
-                key={voice.id}
-                title={voice.name}
-                subtitle={voice.id}
-                icon={voice.gender === "female" ? Icon.Female : voice.gender === "male" ? Icon.Male : Icon.Person}
-                accessories={[
-                  ...(playingVoiceId === voice.id ? [{ tag: { value: "Playing", color: "#3B82F6" } }] : []),
-                ]}
-                actions={
-                  <ActionPanel>
-                    <Action title="Read with This Voice" icon={Icon.Play} onAction={() => handleRead(voice)} />
-                    {playingVoiceId && (
-                      <Action
-                        title="Stop Playback"
-                        icon={Icon.Stop}
-                        shortcut={{ modifiers: ["cmd"], key: "." }}
-                        onAction={handleStop}
-                      />
-                    )}
-                    <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        );
-      })}
+      {filteredCategories.map(({ category, voices }) => (
+        <List.Section key={category} title={category}>
+          {voices.map((voice) => (
+            <List.Item
+              key={voice.id}
+              title={voice.name}
+              subtitle={voice.id}
+              icon={voice.gender === "female" ? Icon.Female : voice.gender === "male" ? Icon.Male : Icon.Person}
+              accessories={[...(playingVoiceId === voice.id ? [{ tag: { value: "Playing", color: "#3B82F6" } }] : [])]}
+              actions={
+                <ActionPanel>
+                  <Action title="Read with This Voice" icon={Icon.Play} onAction={() => handleRead(voice)} />
+                  {playingVoiceId && (
+                    <Action
+                      title="Stop Playback"
+                      icon={Icon.Stop}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                      onAction={handleStop}
+                    />
+                  )}
+                  <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      ))}
     </List>
   );
 }
