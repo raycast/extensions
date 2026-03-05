@@ -1,11 +1,12 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-browser-search",
-  "title": "Open Browser Search",
+  "title": "Browser Search",
   "description": "Search any website and choose which browser opens the results",
   "icon": "cmd-icon.png",
   "author": "MrBunbao",
   "categories": ["Productivity", "Web"],
+  "platforms": ["macOS"],
   "license": "MIT",
   "commands": [
     {
