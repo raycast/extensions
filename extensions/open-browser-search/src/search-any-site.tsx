@@ -2,17 +2,10 @@ import { List, ActionPanel, Action, Icon, getPreferenceValues, Clipboard, Applic
 import { useState, useEffect, useCallback } from "react";
 import { useBrowsers, findBrowserByBundleId } from "./browsers";
 import { loadSavedSites } from "./saved-sites";
-import { getSuggestionUrl, parseSuggestions, SuggestionProvider } from "./search-suggestions";
+import { getSuggestionUrl, parseSuggestions } from "./search-suggestions";
 import { fillTemplateUrl, toFullUrlIfLikely, stripDdgBang } from "./utils";
 import { SavedSite, SavedSites } from "./types";
 import { ManageSavedSitesList } from "./manage-saved-sites";
-
-interface Preferences {
-  defaultBrowser?: Application;
-  searchSuggestionsProvider: SuggestionProvider;
-  prefillFromClipboard: boolean;
-  interpretDdgBangs: boolean;
-}
 
 export default function SearchAnySite() {
   const prefs = getPreferenceValues<Preferences>();
