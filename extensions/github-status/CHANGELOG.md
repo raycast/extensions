@@ -1,5 +1,9 @@
 # Github Status
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Update dependencies, remove node-fetch, use @raycast/utils
+
 ## [UI Refresh] - 2022-03-25
 
 - Updated the interface to show the incident details

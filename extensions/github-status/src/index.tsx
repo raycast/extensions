@@ -1,51 +1,6 @@
 import { Action, ActionPanel, Color, Detail } from "@raycast/api";
-import fetch from "node-fetch";
-import { useAsync } from "react-use";
-
-interface Status {
-  components: StatusComponent[];
-  incidents: StatusIncident[];
-  status: { indicator: string; description: string };
-  scheduled_maintenances: StatusScheduledMaintenance[];
-}
-
-interface StatusIncident {
-  id: string;
-  name: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  shortlink: string;
-  incident_updates: StatusIncidentUpdate[];
-}
-
-interface StatusIncidentUpdate {
-  id: string;
-  status: string;
-  body: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface StatusScheduledMaintenance {
-  id: string;
-  name: string;
-  components: StatusComponent[];
-  shortlink: string;
-  scheduled_for: string;
-  scheduled_until: string;
-}
-
-interface StatusComponent {
-  id: string;
-  name: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  position: number;
-  description: string;
-  only_show_if_degraded: boolean;
-}
+import { useFetch } from "@raycast/utils";
+import { Status, STATUS_URL, StatusIncident } from "./api";
 
 const colorsMap: Record<string, string> = {
   operational: Color.Green,
@@ -64,37 +19,29 @@ const printIncident = (incident: StatusIncident) => [
       `- [${new Date(update.updated_at).toLocaleTimeString([], {
         hour: "numeric",
         minute: "numeric",
-      })}] ${update.body}`
+      })}] ${update.body}`,
   ),
 ];
 
 export default function Command() {
-  const data = useAsync<() => Promise<Status>>(
-    () =>
-      fetch("https://www.githubstatus.com/api/v2/summary.json").then(async (res) => {
-        return (await res.json()) as Status;
-      }),
-    []
-  );
+  const { isLoading, data } = useFetch<Status>(STATUS_URL);
 
   return (
     <Detail
-      isLoading={data.loading}
+      isLoading={isLoading}
       navigationTitle="GitHub Status Summary"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url="https://www.githubstatus.com" />
         </ActionPanel>
       }
-      markdown={`## General Status\n\n${data.value?.status.description ?? "Loading..."}\n\n${
-        data.value?.incidents.length
-          ? ["## Incidents", ...data.value?.incidents.flatMap(printIncident)].join("\n\n")
-          : ""
+      markdown={`## General Status\n\n${data?.status.description ?? "Loading..."}\n\n${
+        data?.incidents.length ? ["## Incidents", ...data?.incidents.flatMap(printIncident)].join("\n\n") : ""
       }`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Components Status">
-            {data.value?.components
+            {data?.components
               .filter((component) => component.name !== "Visit www.githubstatus.com for more information")
               .sort((a, b) => a.position - b.position)
               .map((component) => (
@@ -105,7 +52,7 @@ export default function Command() {
                 />
               ))}
           </Detail.Metadata.TagList>
-          {data.value?.scheduled_maintenances.flatMap((maintainence) => [
+          {data?.scheduled_maintenances.flatMap((maintainence) => [
             <Detail.Metadata.Separator key={`${maintainence.id}-separator`} />,
             <Detail.Metadata.Link
               key={maintainence.id}
