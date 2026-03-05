@@ -5,15 +5,18 @@
   "description": "Control Windsurf directly from Raycast - search and open recent projects, manage extensions, and launch commands.",
   "icon": "windsurf-icon.png",
   "author": "samsik_ma",
-  "categories": [
-    "Applications",
-    "Developer Tools",
-    "Productivity"
-  ],
   "keywords": [
     "windsurf",
     "vscode",
     "cascade"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -143,8 +146,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }
