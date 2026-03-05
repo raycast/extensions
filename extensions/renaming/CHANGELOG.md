@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2026-03-05
 
 ### Added
 
