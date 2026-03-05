@@ -20,7 +20,7 @@ function Search() {
 
   // Fetch databases to get their names
   const { data: primaryDatabases } = useDatabases(primaryAccount?.id);
-  const { data: secondaryDatabases } = useDatabases(secondaryAccount?.id);
+  const { data: secondaryDatabases } = useDatabases(secondaryAccount?.id, { enabled: !!secondaryAccount });
 
   // Create a lookup map for database names, indexed by both data_source ID and database ID
   const databaseNameMap = new Map<string, string>();
@@ -59,6 +59,9 @@ function Search() {
 
         const responses = await Promise.all(
           accounts.map(async (account) => {
+            if (cursorState[account.id] === null) {
+              return { accountId: account.id, result: { pages: [], hasMore: false, nextCursor: null } };
+            }
             const result = await search(searchText, cursorState[account.id] ?? undefined, 25, account.id);
             return { accountId: account.id, result };
           }),
