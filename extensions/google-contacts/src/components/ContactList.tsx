@@ -70,14 +70,14 @@ export default function ContactList({
     <List
       isLoading={isLoading}
       isShowingDetail={isDetail}
-      navigationTitle={`${contacts.length} contacts`}
+      navigationTitle="Search Contacts"
       searchBarPlaceholder="Filter contacts..."
       searchBarAccessory={<ViewModeDropdown value={viewMode} onChange={onViewModeChange} />}
     >
       <List.EmptyView
         title="No Contacts Found"
         description="Try a different search or create a new contact"
-        icon={Icon.AddressBook}
+        icon={Icon.TwoPeople}
         actions={
           <ActionPanel>
             <Action.Push title="Create Contact" icon={Icon.Plus} target={<ContactForm onSaved={onRefresh} />} />

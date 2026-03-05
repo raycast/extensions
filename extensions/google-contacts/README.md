@@ -2,6 +2,10 @@
 
 Browse, search, and manage your Google Contacts directly from Raycast — create, edit, delete, and action contacts without leaving your keyboard.
 
+![Detail View](media/detail-view.png)
+
+![Grid View](media/gallery-view.png)
+
 ## Setup
 
 This extension requires a Google Cloud OAuth Client ID. Each user creates their own — it takes about 2 minutes.
