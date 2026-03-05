@@ -26,7 +26,6 @@ import { transferMyPlayback } from "./api/transferMyPlayback";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { useMe } from "./hooks/useMe";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
-import { usePlaybackState } from "./hooks/usePlaybackState";
 import { formatMs } from "./helpers/formatMs";
 import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
@@ -39,7 +38,6 @@ import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
-  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
@@ -49,7 +47,7 @@ function NowPlayingCommand() {
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPlaying = playbackStateData?.is_playing;
+  const isPlaying = currentlyPlayingData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
@@ -288,11 +286,11 @@ function NowPlayingCommand() {
     <Detail
       markdown={markdown}
       metadata={metadata}
-      isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
+      isLoading={currentlyPlayingIsLoading}
       actions={
         <ActionPanel>
-          {isPlaying && <PauseAction onPause={() => playbackStateRevalidate()} />}
-          {!isPlaying && <PlayAction onPlay={() => playbackStateRevalidate()} />}
+          {isPlaying && <PauseAction onPause={() => currentlyPlayingRevalidate()} />}
+          {!isPlaying && <PlayAction onPlay={() => currentlyPlayingRevalidate()} />}
           {trackOrEpisodeActions}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
