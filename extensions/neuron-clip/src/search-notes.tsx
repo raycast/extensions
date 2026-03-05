@@ -1,4 +1,11 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import React, { useState, useMemo } from "react";
 import {
@@ -41,7 +48,16 @@ export default function Command() {
   const { isLoading, data } = usePromise(
     async (q: string) => searchContent(q || undefined),
     [query],
-    { execute: true },
+    {
+      execute: true,
+      onError: (error) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Search failed",
+          message: error instanceof Error ? error.message : "Try again later.",
+        });
+      },
+    },
   );
 
   const notes = data?.notes ?? [];

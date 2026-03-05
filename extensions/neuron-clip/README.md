@@ -1,6 +1,6 @@
 # Neuron Raycast Extension
 
-Capture notes, search your knowledge base, and write daily journal entries from Raycast.
+Capture notes and search your knowledge base from Raycast.
 Syncs with your [Neuron](https://www.neuronapp.tech) dashboard.
 
 ## Get your API key
@@ -15,4 +15,4 @@ Syncs with your [Neuron](https://www.neuronapp.tech) dashboard.
 4. Copy the key, then in Raycast open **Extensions → Neuron → Preferences**
 5. Paste the key into the **API Key** field and you’re done.
 
-After that, Create Note, Search Content, and Write Journal will use your Neuron account.
+After that, Create Note and Search Content will use your Neuron account.
