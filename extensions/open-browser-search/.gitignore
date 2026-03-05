@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+*.tsbuildinfo
+
+# Internal development docs
+Agent Roster.md
+research-findings.md
+architecture.md
+
+# Editor / tool configs
+.claude/

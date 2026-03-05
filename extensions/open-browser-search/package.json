@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-browser-search",
+  "title": "Open Browser Search",
+  "description": "Search any website and choose which browser opens the results",
+  "icon": "cmd-icon.png",
+  "author": "MrBunbao",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-any-site",
+      "title": "Search Websites",
+      "description": "Search any saved website with autocomplete, open results in your preferred browser",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultBrowser",
+      "title": "Default Browser",
+      "type": "appPicker",
+      "required": false,
+      "description": "The browser to open search results in by default. Leave empty to use the system default browser."
+    },
+    {
+      "name": "searchSuggestionsProvider",
+      "label": "Search Suggestions",
+      "title": "Search Suggestions",
+      "type": "dropdown",
+      "default": "ddg",
+      "required": false,
+      "description": "Search engine for autocomplete suggestions",
+      "data": [
+        { "title": "None", "value": "__NONE__" },
+        { "title": "DuckDuckGo", "value": "ddg" },
+        { "title": "Google", "value": "google" }
+      ]
+    },
+    {
+      "name": "prefillFromClipboard",
+      "title": "Other Settings",
+      "label": "Prefill search from clipboard",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Pre-fill the search field with clipboard text"
+    },
+    {
+      "name": "interpretDdgBangs",
+      "label": "Strip DuckDuckGo bangs for suggestions",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Remove DuckDuckGo bang prefixes when fetching search suggestions"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1",
+    "he": "^1.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/he": "^1.2.3",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
