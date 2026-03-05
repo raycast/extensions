@@ -27,7 +27,16 @@ export default function Command() {
   const { isLoading, data, error } = useFetch<Status>(STATUS_URL);
 
   if (error) {
-    return <Detail markdown={`## Error loading GitHub status\n\n${error.message}`} />;
+    return (
+      <Detail
+        markdown={`## Error loading GitHub status\n\n${error.message}`}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open GitHub Status in Browser" url="https://www.githubstatus.com" />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   return (
