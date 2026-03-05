@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, open, Color } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, ReactElement } from "react";
 
@@ -47,20 +47,28 @@ export function FolderFilterDropdown({
     return (
       <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={onChange}>
         <List.Dropdown.Section>
-          <List.Dropdown.Item title="All Folders" value="all" icon={Icon.Folder} />
-          <List.Dropdown.Item title="My notes" value="my-notes" icon={Icon.House} />
+          <List.Dropdown.Item
+            title="All Folders"
+            value="all"
+            icon={{ source: Icon.Folder, tintColor: mapColorToHex("default") }}
+          />
+          <List.Dropdown.Item
+            title="My notes"
+            value="my-notes"
+            icon={{ source: Icon.House, tintColor: mapColorToHex("default") }}
+          />
           {sharedNotesCount !== undefined && sharedNotesCount > 0 && (
             <List.Dropdown.Item
               title={`Shared with me (${sharedNotesCount})`}
               value="shared"
-              icon={{ source: Icon.TwoPeople, tintColor: Color.Blue }}
+              icon={{ source: Icon.TwoPeople, tintColor: mapColorToHex("default") }}
             />
           )}
           {orphanNotesCount !== undefined && orphanNotesCount > 0 && (
             <List.Dropdown.Item
               title={`Notes Not in Folders (${orphanNotesCount})`}
               value="orphans"
-              icon={{ source: Icon.Document, tintColor: Color.SecondaryText }}
+              icon={{ source: Icon.Document, tintColor: mapColorToHex("default") }}
             />
           )}
         </List.Dropdown.Section>
@@ -77,7 +85,7 @@ export function FolderFilterDropdown({
                   value={folder.id}
                   icon={{
                     source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
                   }}
                 />
               ))}
@@ -96,7 +104,7 @@ export function FolderFilterDropdown({
                   value={folder.id}
                   icon={{
                     source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
                   }}
                 />
               ))}
@@ -115,7 +123,7 @@ export function FolderFilterDropdown({
                   value={folder.id}
                   icon={{
                     source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
                   }}
                 />
               ))}
@@ -129,11 +137,15 @@ export function FolderFilterDropdown({
   return (
     <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={onChange}>
       <List.Dropdown.Section>
-        <List.Dropdown.Item title="My notes" value="my-notes" icon={Icon.House} />
+        <List.Dropdown.Item
+          title="My notes"
+          value="my-notes"
+          icon={{ source: Icon.House, tintColor: mapColorToHex("default") }}
+        />
         <List.Dropdown.Item
           title="Shared with me"
           value="shared"
-          icon={{ source: Icon.TwoPeople, tintColor: Color.Blue }}
+          icon={{ source: Icon.TwoPeople, tintColor: mapColorToHex("default") }}
         />
       </List.Dropdown.Section>
 
@@ -149,7 +161,7 @@ export function FolderFilterDropdown({
                 value={folder.id}
                 icon={{
                   source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
                 }}
               />
             ))}
@@ -168,7 +180,7 @@ export function FolderFilterDropdown({
                 value={folder.id}
                 icon={{
                   source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
                 }}
               />
             ))}
@@ -187,7 +199,7 @@ export function FolderFilterDropdown({
                 value={folder.id}
                 icon={{
                   source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
                 }}
               />
             ))}
@@ -534,7 +546,7 @@ export function NoteListItem({
   if (doc.isShared) {
     // Shared notes: TwoPeople icon only
     accessories.push({
-      icon: { source: Icon.TwoPeople, tintColor: Color.Blue },
+      icon: { source: Icon.TwoPeople, tintColor: mapColorToHex("default") },
       tooltip: doc.sharedBy ? `Shared by ${doc.sharedBy}` : "Shared with you",
     });
   } else if (noteFolder) {
@@ -542,14 +554,14 @@ export function NoteListItem({
     accessories.push({
       icon: {
         source: noteFolder.icon ? mapIconToHeroicon(noteFolder.icon.value) : getDefaultIconUrl(),
-        tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : Color.Blue,
+        tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : mapColorToHex("default"),
       },
       tooltip: `In folder: ${noteFolder.title}`,
     });
   } else {
     // Your notes not in folders: document icon only
     accessories.push({
-      icon: { source: Icon.Document, tintColor: Color.SecondaryText },
+      icon: { source: Icon.Document, tintColor: mapColorToHex("default") },
       tooltip: "Not in any folder",
     });
   }

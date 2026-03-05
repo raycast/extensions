@@ -67,6 +67,7 @@ export const SearchResult = ({ searchResult, searchText }: { searchResult: Searc
         <ActionPanel>
           <ActionPanel.Section>
             <Action title="Open Folder" onAction={openResult} />
+            <Action.OpenWith path={searchResult.originalPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             <SearchUsingSpotlightAction searchText={searchText || ""} />
           </ActionPanel.Section>
           <ActionPanel.Section>

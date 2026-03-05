@@ -62,7 +62,12 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
       await createReminder(reminder);
 
-      const formattedDueDate = dueDate ? ` due ${format(dueDate, `${isDateTime ? "PPPpp" : "PPP"}`)}` : "";
+      let formattedDueDate = "";
+      if (dueDate) {
+        // Parse the date string back to a Date object for formatting
+        const dateObj = isDateTime ? new Date(dueDate) : new Date(dueDate + "T00:00:00");
+        formattedDueDate = ` due ${format(dateObj, isDateTime ? "PPPpp" : "PPP")}`;
+      }
       const toastMessage = `Added "${title}" to ${reminderList?.title ?? "default list"}${formattedDueDate}`;
 
       await showToast({
@@ -198,9 +203,12 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
 async function askAI(prompt: string): Promise<NewReminder & { description: string }> {
   const maxRetries = 3;
+  let lastError: Error | undefined;
+
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const result = await AI.ask(prompt, { model: AI.Model.OpenAI_GPT4o });
+      // Don't specify a model - let Raycast use the user's selected model or default
+      const result = await AI.ask(prompt);
       const jsonMatch = result.match(/[{\\[]{1}([,:{}\\[\]0-9.\-+Eaeflnr-u \n\r\t]|".*?")+[}\]]{1}/gis)?.[0];
       if (!jsonMatch) {
         throw new Error("Invalid result returned from AI");
@@ -211,9 +219,15 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
       }
       return json;
     } catch (error) {
-      console.log(`Retriying AI call. Retry count: ${i}`);
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.log(`Retrying AI call. Retry count: ${i + 1}/${maxRetries}. Error: ${lastError.message}`);
+
+      // If this is the last retry, throw the error
+      if (i === maxRetries - 1) {
+        throw lastError;
+      }
     }
   }
 
-  throw new Error("Max retries reached. Unable to get a valid response from AI.");
+  throw lastError || new Error("Max retries reached. Unable to get a valid response from AI.");
 }

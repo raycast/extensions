@@ -1,5 +1,9 @@
 # Change Case Changelog
 
+## [Fix Swap Case] - 2026-02-09
+
+- Prevents pre-lowercasing of input for case-sensitive transforms: Swap Case, Alternating Case, Random Case, Lower First, and Upper First
+
 ## [Refactor and ESLint Compatibility] - 2026-01-19
 
 - Added a proper `alternatingCase` transformation alongside the existing `randomCase` option

@@ -1,5 +1,9 @@
 # cURL Changelog
 
+## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - {PR_MERGE_DATE}
+
+- Refreshed `package-lock.json` to remove stale transitive entries (including `got`/`electron`) that were no longer part of the installed dependency graph.
+
 ## [Fix: Valid POST Failing] - 2026-01-05
 
 - Fixed an issue where valid POST requests were failing (ref: [Issue #24065](https://github.com/raycast/extensions/issues/24065))

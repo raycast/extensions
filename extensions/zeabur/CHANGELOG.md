@@ -1,5 +1,9 @@
 # Zeabur Changelog
 
+## [Feature] - 2026-03-01
+
+- Added the send email command to send emails through Zeabur Email API.
+
 ## [Feature] - 2026-01-16
 
 - Added the AI Hub command to view your AI Hub balance and usage.

@@ -1,5 +1,14 @@
 # Arc Changelog
 
+## [Fixed Arc duplicate windows] - 2026-03-04
+
+- Fixed duplicate window creation when launching Arc Browser from a stopped state
+- Improved window management logic for selectTab and selectSpace commands
+
+## [Fixes] - 2026-02-01
+
+- Fixed an issue where selecting a tab would not open it due to a timing issue with closing the Raycast window.
+
 ## [New Features] - 2025-10-27
 
 - Added `Search Space Tabs` command to search and select tabs in the current space only.

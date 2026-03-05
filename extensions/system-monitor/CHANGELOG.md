@@ -1,5 +1,31 @@
 # System Monitor Changelog
 
+## [Fix Temperature Polling] - 2026-03-04
+
+- Moved temperature sensor polling to a dedicated 3s interval to prevent stale readings
+
+## [Added Menubar Pin-to-Display] - 2026-03-04
+
+- Click any stat in the menubar dropdown to pin it as persistent text next to the icon
+- Supports CPU, temperature, memory, battery, network, and storage
+- Click again to unpin
+
+## [Added Temperature Monitoring] - 2026-02-19
+
+- Added temperature view under CPU section
+- CPU temperature displayed in menu bar dropdown
+
+## [New Additions & Chore] - 2026-02-02
+- Added customisable tags for menubar entries
+    - Universal tags
+        - `<BR>` for line breaks
+        - `<MODE>` for display mode(toggles between "Free" and "Used")
+    - Module specific tags can be seen by hovering over the preferences text box
+- Made Loading tags use `…` consistently instead of `...`
+- Updated free and used preference to be per-module for cpu, memory, disk and battery usage
+- Removed displaymode field from menubar
+
+
 ## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
 
 - Add a preference to toggle between free and used display modes for CPU, Memory and more (ref: [Issue #24612](https://github.com/raycast/extensions/issues/24612)).

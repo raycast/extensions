@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fifteen-million-merits",
+  "title": "Fifteen Million Merits",
+  "description": "A persistent counter that triggers Raycast Focus mode when activity exceeds a specific threshold.",
+  "icon": "fifteen-million-merits.png",
+  "author": "alexi.build",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-ai-agent-sessions-counter",
+      "title": "Show AI Agent Sessions Counter",
+      "subtitle": "Fifteen Million Merits",
+      "description": "Displays the current number of active AI Agent sessions and focus state.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "setup-ai-agent",
+      "title": "Setup AI Agent Hooks",
+      "subtitle": "Fifteen Million Merits",
+      "description": "Configures Claude and Cursor to trigger counter when sessions start or end.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "agent",
+          "placeholder": "Select Agent",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Claude Code",
+              "value": "claude"
+            },
+            {
+              "title": "Cursor",
+              "value": "cursor"
+            },
+            {
+              "title": "Opencode",
+              "value": "opencode"
+            },
+            {
+              "title": "Codex CLI",
+              "value": "codex"
+            },
+            {
+              "title": "All Agents",
+              "value": "all"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "focusGoal",
+      "title": "Focus Goal",
+      "description": "The goal to show when Raycast Focus starts (e.g., 'Fifteen Million Merits Challenge')",
+      "type": "textfield",
+      "required": true,
+      "default": "Fifteen Million Merits Challenge"
+    },
+    {
+      "name": "focusCategories",
+      "title": "Focus Categories",
+      "description": "Comma-separated categories to block (available: gaming, messaging, news, shopping, social, streaming, travel)",
+      "type": "textfield",
+      "required": true,
+      "default": "social,news"
+    },
+    {
+      "name": "distractionThreshold",
+      "title": "Distraction Threshold",
+      "description": "Minimum active sessions needed to disable Focus Mode. At least 1 agent must be active (default).",
+      "type": "textfield",
+      "required": false,
+      "default": "1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

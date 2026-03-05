@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Fix Menu Bar Unloading Before API Fetch Completes] - 2026-02-17
+
+- Fixed the menu bar icon disappearing permanently when "Hide icon while idle" is enabled and Spotify is restarted
+- Replaced mutable ref-based execution control (`shouldExecute`) with computed reactive values (`isSpotifyActive`, `uriChanged`) so the hook re-evaluates when Spotify state changes
+- Added a loading `MenuBarExtra` to keep the menu bar mounted while data is still being fetched
+
 ## [Generate Playlist: AI Tuning and Improved Playback] - 2026-01-23
 
 - Added AI tuning with history/undo

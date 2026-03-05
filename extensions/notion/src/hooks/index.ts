@@ -34,7 +34,7 @@ export function useRelations(properties: DatabaseProperty[], accountId?: NotionA
       await Promise.all(
         properties.map(async (property) => {
           if (!isType(property, "relation")) return null;
-          const relationId = property.config.database_id;
+          const relationId = property.config.data_source_id || property.config.database_id;
           if (!relationId) return null;
           const pages = await queryDatabase(relationId, undefined, "last_edited_time", accountId);
           relationPages[relationId] = pages;

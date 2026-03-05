@@ -26,6 +26,18 @@
       "title": "Search Downloads",
       "description": "Search through your TorBox downloads",
       "mode": "view"
+    },
+    {
+      "name": "add-torrent",
+      "title": "Add Torrent",
+      "description": "Add a torrent via magnet link or .torrent file",
+      "mode": "view"
+    },
+    {
+      "name": "add-web-download",
+      "title": "Add Web Download",
+      "description": "Add a web download from supported hosters",
+      "mode": "view"
     }
   ],
   "dependencies": {

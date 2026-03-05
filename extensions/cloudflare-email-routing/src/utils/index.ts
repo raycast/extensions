@@ -45,58 +45,62 @@ export function constructRuleName(timestamp: number, label?: string, description
   return `${APP_RULE_PREFIX}${SEPARATOR}${timestamp}${SEPARATOR}${normalizedLabel}${SEPARATOR}${normalizedDescription}`;
 }
 
-export function generateRandomEmail(domain: string): string {
-  const adjectives = [
-    "happy",
-    "clever",
-    "bright",
-    "quick",
-    "calm",
-    "bold",
-    "fresh",
-    "kind",
-    "wise",
-    "cool",
-    "smart",
-    "nice",
-    "fast",
-    "warm",
-    "safe",
-    "blue",
-    "red",
-    "green",
-    "gold",
-    "silver",
-  ];
+const randomAdjectives = [
+  "happy",
+  "clever",
+  "bright",
+  "quick",
+  "calm",
+  "bold",
+  "fresh",
+  "kind",
+  "wise",
+  "cool",
+  "smart",
+  "nice",
+  "fast",
+  "warm",
+  "safe",
+  "blue",
+  "red",
+  "green",
+  "gold",
+  "silver",
+];
 
-  const nouns = [
-    "cat",
-    "dog",
-    "bird",
-    "fish",
-    "lion",
-    "bear",
-    "deer",
-    "fox",
-    "owl",
-    "bee",
-    "tree",
-    "rock",
-    "star",
-    "moon",
-    "sun",
-    "wave",
-    "wind",
-    "fire",
-    "rain",
-    "snow",
-  ];
+const randomNouns = [
+  "cat",
+  "dog",
+  "bird",
+  "fish",
+  "lion",
+  "bear",
+  "deer",
+  "fox",
+  "owl",
+  "bee",
+  "tree",
+  "rock",
+  "star",
+  "moon",
+  "sun",
+  "wave",
+  "wind",
+  "fire",
+  "rain",
+  "snow",
+];
 
-  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+export function generateRandomSlug(): string {
+  const adjective = randomAdjectives[Math.floor(Math.random() * randomAdjectives.length)];
+  const noun = randomNouns[Math.floor(Math.random() * randomNouns.length)];
   const number = Math.floor(Math.random() * 99) + 1;
 
-  return `${adjective}-${noun}-${number}@${domain}`;
+  return `${adjective}-${noun}-${number}`;
+}
+
+export function generateRandomEmail(domain: string): string {
+  return `${generateRandomSlug()}@${domain}`;
 }
 
 export function sleep(ms: number): Promise<void> {

@@ -9,7 +9,7 @@ export function ChangeCurrentBranch() {
       title="Change Current Branch"
       icon={Icon.Switch}
       target={<GitBranches checkStatus={checkStatus} />}
-      shortcut={{ key: "b", modifiers: ["cmd"] }}
+      shortcut={{ macOS: { key: "b", modifiers: ["cmd"] }, Windows: { key: "b", modifiers: ["ctrl"] } }}
     />
   );
 }

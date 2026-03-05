@@ -1,5 +1,18 @@
 # Obsidian Changelog
 
+## [AI Search Tool Content Search Parameter] - 2026-02-16
+
+- Add searchContent parameter to searchNote AI tool for controlling search mode
+- Enable content and tag search capabilities in AI tools
+- Default searchContent to true for comprehensive search including file content and tag filtering
+
+## [Custom Append Actions] - 2026-02-02
+
+- Added "Run Custom Action" command to create reusable append templates
+- Added support for dynamic date variables (e.g. `{year}`, `{date}`) in file paths
+- Added Import/Export functionality for sharing custom actions
+- Added support for "Pre-fill" or "Capture" modes in custom actions
+
 ## [New Open Workspace command, Callout Support, Copy Files Action] - 2025-12-25
 
 - Adds new Open Workspace command that shows a list of all workspaces in your vault. Requires advanced URI plugin and workspaces core plugin to be enabled

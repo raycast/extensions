@@ -206,7 +206,11 @@ export default function useZenBookmarks(enabled: boolean) {
       }
 
       const buffer = new Uint8Array(await read(dbPath));
-      const wasmBinary = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinary =
+        wasmBinaryBuffer instanceof Uint8Array
+          ? (wasmBinaryBuffer.buffer as ArrayBuffer)
+          : (new Uint8Array(wasmBinaryBuffer).buffer as ArrayBuffer);
       const SQL = await initSqlJs({ wasmBinary });
       const db = new SQL.Database(buffer);
 

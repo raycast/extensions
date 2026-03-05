@@ -1,5 +1,13 @@
 # Model Context Protocol Registry Changelog
 
+## [Add RouteMesh MCP Server] - 2026-03-05
+
+Add official RouteMesh MCP Server to registry for multi-chain EVM RPC access with RouteMesh routing and failover.
+
+## [Add Razuna MCP Server] - 2026-02-03
+
+Add official Razuna MCP Server to registry.
+
 ## [Update Anytype MCP Server] - 2026-01-13
 
 Update Anytype MCP Server to use the latest version of the Anytype API.

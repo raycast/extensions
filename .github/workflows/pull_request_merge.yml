@@ -192,4 +192,4 @@ jobs:
           color: "danger"
           text: |
             PR ${{ github.event.inputs.pr_number }} merge failed. ${{ steps.commit_changes.outputs.error }}
-            Check <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|action logs>
+            Check <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|action logs>

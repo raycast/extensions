@@ -1,6 +1,23 @@
 # Brew Changelog
 
-## [New Feature] - 2026-01-27
+## [Improvements] - 2026-02-24
+
+- Remove updating homebrew index toast from outdated command
+
+## [Bug Fix] - 2026-02-24
+
+- Improve install/uninstall/upgrade failure toasts by surfacing concise Homebrew errors instead of full auto-update logs.
+- Keep full `stderr`/`stdout` output available through the toast's `Copy Logs` action for debugging.
+
+## [Improvements] - 2026-02-19
+
+- Improve handling of abort signal when loading search command
+
+## [Improved Memory Usage] - 2026-02-16
+
+- Use chunking to significantly reduce working memory
+
+## [Metadata Detail Panel] - 2026-01-27
 
 - Added optional split-view metadata panel for search results
 - Enable "Show metadata panel in search results" in Search command preferences (default true)

@@ -1,4 +1,4 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { ReactNode, useMemo } from "react";
 import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 import {
@@ -28,7 +28,7 @@ const MAX_COST_MODELS_DISPLAY = 5;
 const MAX_TOKEN_MODELS_DISPLAY = 3;
 
 export function CostAnalysis() {
-  const { data: totalUsage, isLoading: totalLoading, error: totalError } = useTotalUsage();
+  const { data: totalUsage, monthlyCost, isLoading: totalLoading, error: totalError } = useTotalUsage();
   const { data: dailyUsage, isLoading: dailyLoading, error: dailyError } = useDailyUsage();
   const { topModels: models, isLoading: modelsLoading, error: modelsError } = useSessionUsage();
 
@@ -44,9 +44,8 @@ export function CostAnalysis() {
   );
 
   const { dailyAverage, projectedMonthlyCost } = useMemo(
-    () =>
-      totalUsage ? calculateMonthlyProjection(totalUsage.totalCost) : { dailyAverage: 0, projectedMonthlyCost: 0 },
-    [totalUsage?.totalCost],
+    () => (monthlyCost > 0 ? calculateMonthlyProjection(monthlyCost) : { dailyAverage: 0, projectedMonthlyCost: 0 }),
+    [monthlyCost],
   );
 
   const accessories: List.Item.Accessory[] = error
@@ -106,11 +105,7 @@ export function CostAnalysis() {
 
         <List.Item.Detail.Metadata.Label title="Projections" />
         <List.Item.Detail.Metadata.Label title="Daily Average" text={formatCost(dailyAverage)} />
-        <List.Item.Detail.Metadata.Label
-          title="Projected Monthly"
-          text={formatCost(projectedMonthlyCost)}
-          icon={projectedMonthlyCost > 100 ? { source: Icon.ExclamationMark, tintColor: Color.Red } : undefined}
-        />
+        <List.Item.Detail.Metadata.Label title="Projected Monthly" text={formatCost(projectedMonthlyCost)} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Cost by Model" />

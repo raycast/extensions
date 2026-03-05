@@ -1,13 +1,14 @@
 import {
   getPreferenceValues,
   LocalStorage,
+  open,
   openExtensionPreferences,
   showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
 import { writeFile } from "fs/promises";
-import { join } from "path";
+import { dirname, join } from "path";
 
 export type Timer = {
   id: string;
@@ -178,9 +179,9 @@ export async function exportTimers() {
     toast.style = Toast.Style.Success;
     toast.title = "Exported CSV";
     toast.primaryAction = {
-      title: "Show in Finder",
+      title: getFileManagerActionTitle(),
       async onAction() {
-        await showInFinder(file);
+        await revealExportedFile(file);
       },
     };
   } catch (error) {
@@ -188,4 +189,19 @@ export async function exportTimers() {
     toast.title = "Export failed";
     toast.message = `${error}`;
   }
+}
+
+const isMacOS = process.platform === "darwin";
+
+function getFileManagerActionTitle(): string {
+  return isMacOS ? "Show in Finder" : "Open File Location";
+}
+
+async function revealExportedFile(file: string): Promise<void> {
+  if (isMacOS) {
+    await showInFinder(file);
+    return;
+  }
+
+  await open(dirname(file));
 }

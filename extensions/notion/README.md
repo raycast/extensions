@@ -14,7 +14,6 @@ If you are not logging in through OAuth, you can still use the extension with an
 2. Copy the `Internal Integration Secret` (under `Secrets`)
 3. Manually give the integration access to the specific pages or databases by [adding connections to them](https://www.notion.so/help/add-and-manage-connections-with-the-api#add-connections-to-pages)
 
-
 ## Using multiple accounts
 
 You can connect two Notion accounts when using OAuth:
@@ -26,7 +25,7 @@ You can connect two Notion accounts when using OAuth:
 
 Note: Internal Integration Secret mode is single-account only.
 
-When using `@notion`, you can specify the account with the label (for example: “in Work”) and it will route to that account. If the account is ambiguous and multiple accounts are configured, it will ask which account to use.
+When using `@notion`, you can specify the account with the label (for example: "in Work") and it will route to that account. If the account is ambiguous and multiple accounts are configured, it will ask which account to use.
 
 ## I can't find the Notion page or database from Raycast
 

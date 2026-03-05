@@ -1,14 +1,15 @@
 import { List } from "@raycast/api";
 import json2md from "json2md";
-import { PokemonV2Pokemon } from "../types";
-import { filterPokemonForms, getOfficialArtworkImg } from "../utils";
+import { Pokemon } from "../types";
 import PokemonMetadata from "./metadata/pokemon";
 import WeaknessMetadata from "./metadata/weakness";
+import { getPokemonImageTag } from "../utils";
+import { filterPokemonForms } from "../utils/form";
 
 export default function PokemonForms(props: {
   id: number;
   name: string;
-  pokemons: PokemonV2Pokemon[];
+  pokemons: Pokemon[];
 }) {
   const forms = filterPokemonForms(props.id, props.pokemons);
 
@@ -20,32 +21,46 @@ export default function PokemonForms(props: {
     >
       {forms.map((form, idx) => {
         const name =
-          form.pokemon_v2_pokemonforms[0].pokemon_v2_pokemonformnames[0]
-            ?.pokemon_name ||
-          form.pokemon_v2_pokemonforms[0].pokemon_v2_pokemonformnames[0]
-            ?.name ||
+          form.pokemonforms[0].pokemonformnames[0]?.pokemon_name ||
+          form.pokemonforms[0].pokemonformnames[0]?.name ||
           props.name;
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { pokemonformnames, pokemonformtypes, ...rest } =
+          form.pokemonforms[0];
+        const formTypes =
+          pokemonformtypes.length > 0 ? pokemonformtypes : form.pokemontypes;
+
+        const accessories: List.Item.Accessory[] = [];
+        if (rest.is_mega) {
+          accessories.push({ icon: "mega-evolution-sigil.png" });
+        }
+
+        if (rest.form_name.endsWith("gmax")) {
+          accessories.push({ icon: "gigantamax-icon.png" });
+        }
+
         return (
           <List.Item
             key={idx}
             title={name}
+            accessories={accessories}
             detail={
               <List.Item.Detail
                 markdown={json2md([
                   {
-                    img: [
-                      {
-                        title: name,
-                        source: getOfficialArtworkImg(props.id, idx),
-                      },
-                    ],
+                    p: getPokemonImageTag(props.id, { idx, ...rest }),
                   },
                 ])}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <PokemonMetadata pokemon={form} />
+                    <PokemonMetadata
+                      pokemon={form}
+                      mega={rest.is_mega}
+                      formtypes={formTypes}
+                    />
                     <List.Item.Detail.Metadata.Separator />
-                    <WeaknessMetadata types={form.pokemon_v2_pokemontypes} />
+                    <WeaknessMetadata types={formTypes} />
                   </List.Item.Detail.Metadata>
                 }
               />

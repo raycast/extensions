@@ -6,7 +6,7 @@ export default async function Status() {
   try {
     const data = getStatus();
 
-    // tailscale is guaranteed to be online because getStats throws if it isn't
+    // tailscale is guaranteed to be online because getStatus throws if it isn't
 
     const magicDNSSuffix = data.MagicDNSSuffix;
     const devices = getDevices(data);

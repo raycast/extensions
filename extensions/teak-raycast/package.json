@@ -1,0 +1,66 @@
+{
+  "name": "teak-raycast",
+  "title": "Teak",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
+  "icon": "icon.png",
+  "author": "praveenjuge",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "type": "password",
+      "required": true,
+      "description": "Generate in Teak Settings > API Keys, then paste it here."
+    }
+  ],
+  "commands": [
+    {
+      "name": "quick-save",
+      "title": "Quick Save",
+      "subtitle": "Capture text or links to Teak",
+      "description": "Save text or URLs to Teak without leaving your workflow",
+      "mode": "view"
+    },
+    {
+      "name": "search-cards",
+      "title": "Search Cards",
+      "subtitle": "Find anything in your Teak vault",
+      "description": "Find any Teak card by content, tags, or metadata",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Favorites",
+      "subtitle": "Open your saved favorites fast",
+      "description": "Browse and open your favorited Teak cards",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src/__tests__ --coverage --dots"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "@types/react": "19.2.10",
+    "typescript": "^5.9.3"
+  }
+}

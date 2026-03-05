@@ -36,11 +36,23 @@ export default async function createPage({ databaseId, title, content, accountLa
 export async function confirmation(params: Input) {
   const accountId = resolveAccountIdForTool(params.accountLabel);
   const notion = await getNotionClient(accountId);
-  const database = await notion.databases.retrieve({ database_id: params.databaseId });
 
   let databaseName = params.databaseId;
-  if ("title" in database) {
-    databaseName = database.title[0].plain_text;
+
+  try {
+    const dataSource = await notion.dataSources.retrieve({ data_source_id: params.databaseId });
+    if ("title" in dataSource) {
+      databaseName = dataSource.title[0]?.plain_text ?? databaseName;
+    }
+  } catch {
+    try {
+      const database = await notion.databases.retrieve({ database_id: params.databaseId });
+      if ("title" in database && database.title[0]?.plain_text) {
+        databaseName = database.title[0].plain_text;
+      }
+    } catch {
+      // Keep the raw id when metadata lookup fails.
+    }
   }
 
   return {
