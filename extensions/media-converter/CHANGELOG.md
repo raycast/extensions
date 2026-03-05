@@ -1,6 +1,6 @@
 # Media Converter Changelog
 
-## [1.5.4] - {PR_MERGE_DATE}
+## [1.5.4] - 2026-03-05
 
 ### Added
 
