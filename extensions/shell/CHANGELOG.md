@@ -1,12 +1,12 @@
 # shell Changelog
 
-## [Add cmux support] - {PR_MERGE_DATE}
-
 ## [Fix external terminal execution consistency] - 2026-03-05
 
 - Fix Ghostty command injection so commands are entered and executed reliably.
 - Update external terminal runners to return explicit success/failure signals and only show success HUD on true execution.
 - Improve Warp/Ghostty focus + submit flow to auto-run commands instead of leaving them prefilled.
+
+## [Add cmux support] - {PR_MERGE_DATE}
 
 Adds support for running shell commands in `cmux`, including:
 
