@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-deployment-tracker",
+  "title": "Deployment Tracker",
+  "description": "Track which commit/version is deployed on each environment",
+  "icon": "extension-icon.png",
+  "version": "0.0.2",
+  "author": "YussufSassi",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "deployment-status",
+      "title": "Deployment Status",
+      "description": "See what is currently deployed on each environment",
+      "mode": "view"
+    },
+    {
+      "name": "add-deployment",
+      "title": "Add Deployment",
+      "description": "Log a new deployment to an environment",
+      "mode": "view"
+    },
+    {
+      "name": "manage-environments",
+      "title": "Manage Environments",
+      "description": "Add, edit, or remove tracked environments",
+      "mode": "view"
+    },
+    {
+      "name": "deployment-status-menubar",
+      "title": "Deployment Status Menu Bar",
+      "description": "Show current deployment status in the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "enabled",
+          "type": "checkbox",
+          "title": "Menu Bar",
+          "label": "Show deployment status in menu bar",
+          "description": "Uncheck to remove the icon from your menu bar",
+          "default": true,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
