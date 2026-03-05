@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devin",
+  "title": "Devin",
+  "description": "Launch and manage Devin sessions directly from Raycast",
+  "icon": "extension-icon.png",
+  "author": "nikhil-cognition",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "Devin API Token",
+      "description": "Your Devin personal API key (starts with apk_user_)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Custom Devin API endpoint (e.g. for enterprise or staging). Defaults to https://api.devin.ai",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.devin.ai"
+    },
+    {
+      "name": "appBaseUrl",
+      "title": "App Base URL",
+      "description": "Custom Devin web app URL (e.g. for enterprise or staging). Defaults to https://app.devin.ai",
+      "type": "textfield",
+      "required": false,
+      "default": "https://app.devin.ai"
+    },
+    {
+      "name": "userEmail",
+      "title": "Your Email",
+      "description": "Filter sessions to only show ones you created. Leave empty to show all org sessions.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "useDevinReview",
+      "title": "Open PRs in Devin Review",
+      "description": "Open pull requests in Devin Review instead of GitHub/GitLab. Uses your App Base URL.",
+      "type": "checkbox",
+      "label": "Use Devin Review",
+      "required": false,
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "new-session",
+      "title": "New Devin Session",
+      "subtitle": "Devin",
+      "description": "Launch a new Devin session with a prompt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "list-sessions",
+      "title": "List Devin Sessions",
+      "subtitle": "Devin",
+      "description": "View and manage your active Devin sessions",
+      "mode": "view"
+    },
+    {
+      "name": "ask-devin",
+      "title": "Ask Devin",
+      "subtitle": "Devin",
+      "description": "Ask Devin a quick question",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-sessions",
+      "title": "Devin Sessions Menu Bar",
+      "subtitle": "Devin",
+      "description": "Show active Devin sessions in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.4",
+    "@types/react": "19.0.8",
+    "eslint": "^8.57.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "eslint src --fix && prettier --write src",
+    "lint": "eslint src && prettier --check src",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --max-warnings=0",
+      "prettier --check"
+    ]
+  }
+}
