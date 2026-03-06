@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { formatUsdCents, getStartup, type StartupDetail } from "../lib/api";
+import { formatUsd, getStartup, type StartupDetail } from "../lib/api";
 
 type StartupDetailViewProps = {
   slug: string;
@@ -68,9 +68,9 @@ export function StartupDetailView({ slug, onReset }: StartupDetailViewProps) {
       <Detail.Metadata.Label title="Category" text={data.category ?? "-"} />
       <Detail.Metadata.Label title="On Sale" text={data.onSale ? "Yes" : "No"} />
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Label title="Revenue (30d)" text={formatUsdCents(data.revenue.last30Days)} />
-      <Detail.Metadata.Label title="MRR" text={formatUsdCents(data.revenue.mrr)} />
-      <Detail.Metadata.Label title="Asking Price" text={formatUsdCents(data.askingPrice)} />
+      <Detail.Metadata.Label title="Revenue (30d)" text={formatUsd(data.revenue.last30Days)} />
+      <Detail.Metadata.Label title="MRR" text={formatUsd(data.revenue.mrr)} />
+      <Detail.Metadata.Label title="Asking Price" text={formatUsd(data.askingPrice)} />
       <Detail.Metadata.Label title="Growth (30d)" text={formatPercent(data.growth30d)} />
       <Detail.Metadata.Label
         title="Profit Margin"

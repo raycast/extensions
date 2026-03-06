@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@ra
 import { useCachedState, usePromise, withCache } from "@raycast/utils";
 import { useMemo } from "react";
 import { StartupDetailView } from "./components/startup-detail";
-import { formatUsdCents, listStartups, type Startup } from "./lib/api";
+import { formatUsd, listStartups, type Startup } from "./lib/api";
 
 const PAGE_SIZE = 50;
 
@@ -273,7 +273,7 @@ export default function Command() {
           icon={startup.icon ?? Icon.Building}
           accessories={[
             {
-              text: formatUsdCents(startup.revenue.last30Days),
+              text: formatUsd(startup.revenue.last30Days),
               tooltip: "Revenue (30d)",
             },
             {

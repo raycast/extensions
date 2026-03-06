@@ -126,7 +126,7 @@ export async function getStartup(slug: string): Promise<StartupDetail> {
   return response.data;
 }
 
-export function formatUsdCents(value: number | null): string {
+export function formatUsd(value: number | null): string {
   if (value === null) {
     return "-";
   }
@@ -136,5 +136,5 @@ export function formatUsdCents(value: number | null): string {
     currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(value / 100);
+  }).format(value);
 }
