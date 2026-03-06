@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 - {PR_MERGE_DATE}
+## 0.2.0 - 2026-03-06
 
 - Update design for single card details page
 - Update API Endpoint
