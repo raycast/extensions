@@ -1,6 +1,6 @@
 # Kagi News Changelog
 
-## [1.3] - {PR_MERGE_DATE}
+## [1.3] - 2026-03-06
 
 - Migrated to the new API, which Kagi News is now focusing on, so no more use of the static JSON files
 - Added a new 'Time Travel' command to access Kagi News archives for a specific date, thanks to the new API
