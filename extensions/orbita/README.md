@@ -1,8 +1,8 @@
-# Órbita - Manual do Usuário
+# Órbita
 
-Raycast extension to list the latest posts from the Órbita, the Brazilian hacker news maintained by the [Manual do Usuário](https://manualdousuario.net/) by Rodrigo Ghedin.
+Raycast extension to list the latest posts from the Órbita, the Brazilian hacker news maintained.
 
-> **Note:** This project is a personal project and is not affiliated with the [Manual do Usuário](https://manualdousuario.net/). All content and rights are reserved for the [Manual do Usuário](https://manualdousuario.net/).
+> **Note:** This project is a personal project and is not affiliated with the [Órbita](https://manualdousuario.net/orbita/).
 
 ## Getting Started
 
@@ -13,7 +13,7 @@ Raycast extension to list the latest posts from the Órbita, the Brazilian hacke
 ### Installation
 
 1. Open Raycast and search for "Extensions"
-2. Search for "Órbita - Manual do Usuário" and click on "Install"
+2. Search for "Órbita" and click on "Install"
 3. Run the `orbita` command to list the latest posts from the Órbita
 
 ## License
