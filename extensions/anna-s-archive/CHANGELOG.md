@@ -1,6 +1,6 @@
 # Anna's Archive Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-03-06
 
 - Another round of domains taken down... (Fix [#26070](https://github.com/raycast/extensions/issues/26070))
 
