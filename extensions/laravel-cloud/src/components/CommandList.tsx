@@ -1,5 +1,6 @@
 import { ActionPanel, Action, List, Detail, Icon, Form, useNavigation, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 import { listCommands, runCommand, getCommand } from "../api/commands";
 import { Command } from "../types/command";
 import { getCommandStatusIcon } from "../utils/status-icons";
@@ -101,12 +102,25 @@ function RunCommandForm({ environmentId, onCommandRun }: { environmentId: string
 }
 
 function CommandDetail({ commandId }: { commandId: string }) {
-  const { data, isLoading } = useCachedPromise((id: string) => getCommand(id), [commandId]);
+  const { data, isLoading, revalidate } = useCachedPromise((id: string) => getCommand(id), [commandId]);
 
   const cmd = data?.data;
   const attrs = cmd?.attributes;
   const isRunning =
     attrs?.status === "pending" || attrs?.status === "command.created" || attrs?.status === "command.running";
+
+  const isRunningRef = useRef(isRunning);
+  isRunningRef.current = isRunning;
+
+  useEffect(() => {
+    if (!isRunning) return;
+    const interval = setInterval(() => {
+      if (isRunningRef.current) {
+        revalidate();
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isRunning, revalidate]);
 
   const markdown = attrs
     ? `# Command Output

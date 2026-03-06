@@ -31,6 +31,7 @@ export default function LogList({ environmentId, environmentName }: Props) {
   const [timeRange, setTimeRange] = useState("time:1h");
   const [logType, setLogType] = useState("type:");
   const [searchText, setSearchText] = useState("");
+  const filterValue = `${timeRange}|${logType}`;
 
   const { data, isLoading } = useCachedPromise(
     (envId: string, range: string, type: string, query: string) => {
@@ -57,23 +58,21 @@ export default function LogList({ environmentId, environmentName }: Props) {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filters"
-          value={logType === "type:" ? timeRange : logType}
+          value={filterValue}
           onChange={(value) => {
-            if (value.startsWith("time:")) {
-              setTimeRange(value);
-            } else {
-              setLogType(value);
-            }
+            const [time, type] = value.split("|");
+            setTimeRange(time);
+            setLogType(type);
           }}
         >
           <List.Dropdown.Section title="Time Range">
             {TIME_RANGES.map((range) => (
-              <List.Dropdown.Item key={range.value} title={range.title} value={range.value} />
+              <List.Dropdown.Item key={range.value} title={range.title} value={`${range.value}|${logType}`} />
             ))}
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Log Type">
             {LOG_TYPES.map((type) => (
-              <List.Dropdown.Item key={type.value} title={type.title} value={type.value} />
+              <List.Dropdown.Item key={type.value} title={type.title} value={`${timeRange}|${type.value}`} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
