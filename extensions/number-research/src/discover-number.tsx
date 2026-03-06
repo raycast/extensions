@@ -1,19 +1,16 @@
 import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useRef } from "react";
 
 import { checkNumber, formatDate } from "./api";
 
 export default function Command({ arguments: args }: { arguments: { number: string } }) {
   const input = args.number.trim();
   const isValid = /^\d+$/.test(input);
-  const abortable = useRef<AbortController>(null);
   const {
     data: result,
     isLoading,
     error: fetchError,
-  } = usePromise(async (num: string) => checkNumber(num, abortable.current?.signal), [input], {
-    abortable,
+  } = usePromise(checkNumber, [input], {
     execute: isValid,
   });
 

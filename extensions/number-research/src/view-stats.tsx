@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useRef } from "react";
 
 import { fetchStats, formatShortDate } from "./api";
 
@@ -11,12 +10,7 @@ const RANK_COLORS: Record<number, Color> = {
 };
 
 export default function Command() {
-  const abortable = useRef<AbortController>(null);
-  const {
-    data: stats,
-    isLoading,
-    error,
-  } = usePromise(async () => fetchStats(abortable.current?.signal), [], { abortable });
+  const { data: stats, isLoading, error } = usePromise(fetchStats, []);
 
   return (
     <List isLoading={isLoading}>
