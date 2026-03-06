@@ -1,6 +1,6 @@
 # Clipboard Type Changelog
 
-## [Added soft newlines preference] 2026-02-23
+## [Added soft newlines preference] {PR_MERGE_DATE}
 
 - Added a new preference to use Shift+Enter for newlines instead of Enter. Useful for apps and websites that treat Enter as submit.
 
