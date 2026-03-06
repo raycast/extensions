@@ -20,43 +20,45 @@ const SORT_OPTIONS = [
   { value: "best-deal", title: "Best Deal" },
 ] as const;
 
-const CATEGORY_OPTIONS = [
-  "all",
-  "ai",
-  "saas",
-  "developer-tools",
-  "fintech",
-  "marketing",
-  "ecommerce",
-  "productivity",
-  "design-tools",
-  "no-code",
-  "analytics",
-  "crypto-web3",
-  "education",
-  "health-fitness",
-  "social-media",
-  "content-creation",
-  "sales",
-  "customer-support",
-  "recruiting",
-  "real-estate",
-  "travel",
-  "legal",
-  "security",
-  "iot-hardware",
-  "green-tech",
-  "entertainment",
-  "games",
-  "community",
-  "news-magazines",
-  "utilities",
-  "marketplace",
-  "mobile-apps",
-] as const;
-
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
-type CategoryValue = (typeof CATEGORY_OPTIONS)[number];
+const CATEGORY_LABELS = {
+  all: "All Categories",
+  ai: "AI",
+  saas: "SaaS",
+  "developer-tools": "Developer Tools",
+  fintech: "Fintech",
+  marketing: "Marketing",
+  ecommerce: "Ecommerce",
+  productivity: "Productivity",
+  "design-tools": "Design Tools",
+  "no-code": "No-Code",
+  analytics: "Analytics",
+  "crypto-web3": "Crypto & Web3",
+  education: "Education",
+  "health-fitness": "Health & Fitness",
+  "social-media": "Social Media",
+  "content-creation": "Content Creation",
+  sales: "Sales",
+  "customer-support": "Customer Support",
+  recruiting: "Recruiting",
+  "real-estate": "Real Estate",
+  travel: "Travel",
+  legal: "Legal",
+  security: "Security",
+  "iot-hardware": "IoT Hardware",
+  "green-tech": "Green Tech",
+  entertainment: "Entertainment",
+  games: "Games",
+  community: "Community",
+  "news-magazines": "News & Magazines",
+  utilities: "Utilities",
+  marketplace: "Marketplace",
+  "mobile-apps": "Mobile Apps",
+} as const;
+
+type CategoryValue = keyof typeof CATEGORY_LABELS;
+
+const CATEGORY_VALUES = Object.keys(CATEGORY_LABELS) as CategoryValue[];
 
 type PaginatedData = {
   data: Startup[];
@@ -120,6 +122,10 @@ function subtitle(startup: Startup): string {
   }
 
   return startup.category ?? startup.country ?? "";
+}
+
+function formatCategoryLabel(category: CategoryValue): string {
+  return CATEGORY_LABELS[category];
 }
 
 function mergeStartups(existing: Startup[], incoming: Startup[]): Startup[] {
@@ -239,12 +245,12 @@ export default function Command() {
           onChange={(newValue) => setCategory(newValue as CategoryValue)}
         >
           <List.Dropdown.Item title="All Categories" value="all" />
-          {CATEGORY_OPTIONS.filter((option) => option !== "all").map((option) => (
-            <List.Dropdown.Item key={option} title={option} value={option} />
+          {CATEGORY_VALUES.filter((option) => option !== "all").map((option) => (
+            <List.Dropdown.Item key={option} title={formatCategoryLabel(option)} value={option} />
           ))}
         </List.Dropdown>
       }
-      navigationTitle={`TrustMRR List Startups • ${totalCount} total • ${selectedSortLabel}${category === "all" ? "" : ` • ${category}`}`}
+      navigationTitle={`TrustMRR List Startups • ${totalCount} total • ${selectedSortLabel}${category === "all" ? "" : ` • ${formatCategoryLabel(category)}`}`}
       actions={
         <ActionPanel>
           <SortSubmenu sort={sort} onSelectSort={setSort} />

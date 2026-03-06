@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const API_BASE = "https://trustmrr.com/api/v1";
 
-type Preferences = {
-  apiKey: string;
-};
-
 type ListParams = {
   page?: number;
   limit?: number;

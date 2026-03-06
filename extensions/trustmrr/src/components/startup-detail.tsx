@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, openCommandPreferences, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { formatUsd, getStartup, type StartupDetail } from "../lib/api";
 
@@ -107,7 +107,7 @@ export function StartupDetailView({ slug, onReset }: StartupDetailViewProps) {
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           {onReset ? <Action title="Search Another Slug" icon={Icon.MagnifyingGlass} onAction={onReset} /> : null}
-          <Action title="Edit API Key" icon={Icon.Key} onAction={() => openCommandPreferences()} />
+          <Action title="Edit API Key" icon={Icon.Key} onAction={() => openExtensionPreferences()} />
         </ActionPanel>
       }
     />

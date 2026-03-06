@@ -1,5 +1,10 @@
 # TrustMRR Changelog
 
+## Add Startup Category Labels - {PR_MERGE_DATE}
+
+- Add startup category labels to the list startups command
+- Use Raycast API best practices
+
 ## [Initial Version] - 2026-03-06
 
 Added commands:
