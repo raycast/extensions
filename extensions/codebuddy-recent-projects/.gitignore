@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Build
+.raycast/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
