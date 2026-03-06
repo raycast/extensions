@@ -27,7 +27,7 @@ export interface Article {
   id: string;
   title: string;
   summary: string;
-  sources: Source[];
+  sources?: Source[];
   uniqueDomains?: number;
   numberOfTitles?: number;
   businessAnglePoints?: string[];

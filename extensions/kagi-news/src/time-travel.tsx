@@ -5,7 +5,8 @@ import { List, Action, ActionPanel, Icon, getPreferenceValues, Form } from "@ray
 import { useState } from "react";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
 import { useFetch, useCachedState } from "@raycast/utils";
-import { useBatchesByDate, type BatchItem } from "./hooks/useBatchesByDate";
+import { useBatchesByDate } from "./hooks/useBatchesByDate";
+import type { BatchItem } from "./interfaces";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
 import { stripHtml, formatDateForAPI } from "./utils";

@@ -2,14 +2,7 @@
 
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
-
-export interface BatchItem {
-  id: string;
-  createdAt: string;
-  totalCategories: number;
-  totalClusters: number;
-  totalArticles: number;
-}
+import type { BatchItem } from "../interfaces";
 
 export function useBatchesByDate(dateString: string, language: string) {
   const { isLoading, data, error } = useFetch<{ batches: BatchItem[] }>(
