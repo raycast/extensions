@@ -50,23 +50,30 @@ export default function Command() {
     }
   }, [error]);
 
+  const refreshAction = (
+    <ActionPanel>
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowCounterClockwise}
+        onAction={() => getCredits()}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+      />
+    </ActionPanel>
+  );
+
   return (
     <List isLoading={isLoading}>
       {totalCredits != null && totalUsage != null && (
         <>
-          <List.Item title="Total Credits" accessories={[{ text: String(totalCredits) }]} />
-          <List.Item title="Total Usage" accessories={[{ text: String(totalUsage) }]} />
-          <List.Item title="Credits Left" accessories={[{ text: String(totalCredits - totalUsage) }]} />
+          <List.Item title="Total Credits" accessories={[{ text: String(totalCredits) }]} actions={refreshAction} />
+          <List.Item title="Total Usage" accessories={[{ text: String(totalUsage) }]} actions={refreshAction} />
+          <List.Item
+            title="Credits Left"
+            accessories={[{ text: String(totalCredits - totalUsage) }]}
+            actions={refreshAction}
+          />
         </>
       )}
-      <ActionPanel>
-        <Action
-          title="Refresh"
-          icon={Icon.ArrowCounterClockwise}
-          onAction={() => getCredits()}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-        />
-      </ActionPanel>
     </List>
   );
 }

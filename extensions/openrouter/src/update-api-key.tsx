@@ -54,7 +54,8 @@ export default function Command(props: LaunchProps<{ arguments: { hash: string }
         setFound(true);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        setError(error instanceof Error ? error : new Error(String(error)));
         setFound(false);
         setIsLoading(false);
       });
