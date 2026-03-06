@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fix reminders and Create Task NLP parsing] - {PR_MERGE_DATE}
+## [Fix reminders and Create Task NLP parsing] - 2026-03-06
 - Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
 - Fixed Create Task natural-language token cleanup and due-time parsing edge cases.
 
