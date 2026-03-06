@@ -35,7 +35,7 @@ export function useAuthSession() {
         throw new Error("Unauthorized: invalid or expired API token");
       }
       if (!response.ok) {
-        throw new Error(`Erreur API: ${response.status}`);
+        throw new Error(`API Error: ${response.status}`);
       }
 
       const session = (await response.json()) as Session;
