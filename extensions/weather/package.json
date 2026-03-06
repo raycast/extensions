@@ -99,7 +99,6 @@
   "dependencies": {
     "@raycast/api": "^1.104.8",
     "@raycast/utils": "^2.2.3",
-    "cross-fetch": "^4.1.0",
     "javascript-time-ago": "^2.6.4",
     "moment": "^2.30.1"
   },

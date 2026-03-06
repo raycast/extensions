@@ -1,4 +1,3 @@
-import fetch from "cross-fetch";
 import { getWindDirectionIcon } from "./icons";
 import { UnitSystem, getTemperatureUnit, getUnitSystem, getWindUnit, getWttrWindPostfix } from "./unit";
 import { clockFormat, getErrorMessage } from "./utils";
