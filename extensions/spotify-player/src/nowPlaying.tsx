@@ -38,9 +38,14 @@ import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
-  const { myDevicesData } = useMyDevices();
-  const { myPlaylistsData } = useMyPlaylists();
-  const { meData } = useMe();
+
+  // Defer secondary API calls until primary data is loaded.
+  // On initial mount only currentlyPlaying fires (1 API call).
+  // Devices, playlists, and user profile load on next render once we have track data.
+  const hasTrackData = !!currentlyPlayingData?.item;
+  const { myDevicesData } = useMyDevices({ options: { execute: hasTrackData } });
+  const { myPlaylistsData } = useMyPlaylists({ options: { execute: hasTrackData } });
+  const { meData } = useMe({ options: { execute: hasTrackData } });
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
   });
