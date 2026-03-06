@@ -44,11 +44,6 @@ export interface Ayah {
   text_uthmani: string;
 }
 
-export interface Preferences {
-  defaultReciterId: string;
-  defaultReciterName: string;
-}
-
 export interface PlayingInfo {
   surah: string;
   reciter: string;

@@ -17,7 +17,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { fetchChapters, fetchAudioFile, fetchRecitations, fetchVerseRecitations } from "./lib/api";
 import { playAudio, playVersePlaylist, isSurahCached, isVerseRangeCached } from "./lib/audio";
-import { Chapter, Recitation, Preferences } from "./types";
+import { Chapter, Recitation } from "./types";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import MemorizeSurah from "./memorize-surah";
 import { FAV_SURAH_KEY, FAV_RECITER_KEY, SURAH_VERSE_COUNTS } from "./lib/constants";

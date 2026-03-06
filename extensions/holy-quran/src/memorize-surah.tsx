@@ -13,7 +13,7 @@ import { useCachedPromise, useForm, FormValidation } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { fetchChapters, fetchVerseRecitations, fetchRecitations } from "./lib/api";
 import { playVersePlaylist } from "./lib/audio";
-import { Chapter, Preferences } from "./types";
+import { Chapter } from "./types";
 import { SURAH_VERSE_COUNTS } from "./lib/constants";
 
 interface MemorizeFormValues {

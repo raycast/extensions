@@ -3,7 +3,10 @@ import { useCachedPromise } from "@raycast/utils";
 import { stopPlayback, togglePause } from "./lib/control";
 import { PlayingInfo } from "./types";
 import { useRef, useState, useEffect } from "react";
-import { execSync } from "child_process";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 import { LOOP_SCRIPT } from "./lib/audio";
 
 export default function Command() {
@@ -30,7 +33,7 @@ export default function Command() {
       // Check if background process is still alive (if not paused)
       if (!playingInfo.isPaused) {
         try {
-          execSync(`pgrep -f "${LOOP_SCRIPT}"`);
+          await execAsync(`pgrep -f "${LOOP_SCRIPT}"`);
         } catch {
           // Process not found - recitation must have finished or was killed
           await LocalStorage.removeItem("currently_playing");

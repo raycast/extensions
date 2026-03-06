@@ -14,8 +14,8 @@ export const REPEAT_FLAG_FILE = path.join(os.tmpdir(), "quran_repeat_flag");
 async function isOffline(): Promise<boolean> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1000);
-    await fetch("https://www.google.com", { method: "HEAD", signal: controller.signal, mode: "no-cors" });
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    await fetch("https://api.quran.com", { method: "HEAD", signal: controller.signal });
     clearTimeout(timeout);
     return false;
   } catch {
