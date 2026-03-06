@@ -1,7 +1,8 @@
 # Todoist Changelog
 
-## [Fix missing reminders in Quick Add] - {PR_MERGE_DATE}
+## [Fix reminders and Create Task NLP parsing] - {PR_MERGE_DATE}
 - Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
+- Fixed Create Task natural-language token cleanup and due-time parsing edge cases that also resolve.
 
 ## [Fixing Todoist PR updates] - 2026-02-11
 - Fixed a crash in the syncRequest caused by the Todoist API returning an empty sync_status object, which led to a TypeError when reading error properties from an undefined value.
