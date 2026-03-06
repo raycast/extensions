@@ -11,7 +11,7 @@ export type ViewMode = "list" | "detail" | "grid";
 export type SortField = "first" | "last";
 
 function SearchContacts() {
-  const { defaultView } = getPreferenceValues<{ defaultView?: ViewMode }>();
+  const { defaultView } = getPreferenceValues<Preferences>();
   const [viewMode, setViewMode] = useState<ViewMode>(defaultView ?? "detail");
   const [sortField, setSortField] = useState<SortField>("first");
 

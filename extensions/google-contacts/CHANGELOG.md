@@ -1,6 +1,6 @@
 # Google Contacts Changelog
 
-## 1.0.0 — Initial Release
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search Contacts with List, Detail, and Grid view modes
 - Create Contact form with primary and additional fields

@@ -3,13 +3,7 @@ import { withAccessToken, getAccessToken } from "@raycast/utils";
 import { google } from "./oauth";
 import { createContact, searchContacts } from "./api";
 
-interface QuickAddArguments {
-  firstName: string;
-  lastName: string;
-  email?: string;
-}
-
-async function quickAddContact(props: LaunchProps<{ arguments: QuickAddArguments }>) {
+async function quickAddContact(props: LaunchProps<{ arguments: Arguments.QuickAddContact }>) {
   const { firstName, lastName, email } = props.arguments;
   const { token } = getAccessToken();
 

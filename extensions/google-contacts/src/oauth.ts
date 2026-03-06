@@ -3,10 +3,6 @@ import { OAuthService } from "@raycast/utils";
 
 const SCOPE = "https://www.googleapis.com/auth/contacts";
 
-interface Preferences {
-  googleClientId: string;
-}
-
 let _google: OAuthService | undefined;
 
 export function google(): OAuthService {

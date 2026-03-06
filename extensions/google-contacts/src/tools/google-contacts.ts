@@ -103,19 +103,29 @@ export default async function tool(input: Input) {
         updates.push("names");
       }
       if (input.email) {
-        body.emailAddresses = [{ value: input.email }];
+        const existing = current.emailAddresses ?? [];
+        body.emailAddresses = [{ value: input.email }, ...existing.slice(1)];
         updates.push("emailAddresses");
       }
       if (input.phone) {
-        body.phoneNumbers = [{ value: input.phone }];
+        const existing = current.phoneNumbers ?? [];
+        body.phoneNumbers = [{ value: input.phone }, ...existing.slice(1)];
         updates.push("phoneNumbers");
       }
       if (input.company || input.jobTitle) {
-        body.organizations = [{ name: input.company, title: input.jobTitle }];
+        const existing = current.organizations?.[0] ?? {};
+        body.organizations = [
+          {
+            ...existing,
+            ...(input.company ? { name: input.company } : {}),
+            ...(input.jobTitle ? { title: input.jobTitle } : {}),
+          },
+        ];
         updates.push("organizations");
       }
       if (input.address) {
-        body.addresses = [{ formattedValue: input.address }];
+        const existing = current.addresses ?? [];
+        body.addresses = [{ formattedValue: input.address }, ...existing.slice(1)];
         updates.push("addresses");
       }
 
