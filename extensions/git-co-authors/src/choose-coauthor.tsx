@@ -1,11 +1,18 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, confirmAlert, Color, Alert } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, confirmAlert, Color, Alert, popToRoot } from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import AddOrEditAuthor from "./add-or-edit-author";
 import { Authors } from "./types";
-import { cache, getAuthorsArrFromCache, KEY, removeAuthorFromCache } from "./utils";
+import { cache, clearAuthorsCache, getAuthorsArrFromCache, KEY, removeAuthorFromCache } from "./utils";
 
 export default function ChooseAuthor() {
   const [authors, setAuthors] = useState<Authors>(getAuthorsArrFromCache());
+  const {
+    data: sortedData,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(authors.map((author) => ({ ...author, id: author.email })));
+
   const [selectedAuthors, setSelectedAuthors] = useState<Authors>([]);
 
   useEffect(() => {
@@ -18,12 +25,19 @@ export default function ChooseAuthor() {
 
   return (
     <List searchBarPlaceholder="Dana Scully">
-      {authors.map((author) => (
+      <List.EmptyView
+        title="No co-authors yet"
+        description='Use the "Add Author" or "Load from Repo" commands to get started.'
+        icon={Icon.AddPerson}
+      />
+      {sortedData.map((author) => (
         <List.Item
           title={author.name}
           subtitle={author.email}
           icon={
-            selectedAuthors.filter((_author) => _author.email === author.email).length == 1 ? Icon.Check : Icon.Minus
+            selectedAuthors.filter((_author) => _author.email === author.email).length == 1
+              ? { source: Icon.CheckCircle, tintColor: Color.Blue }
+              : { source: Icon.Circle, tintColor: Color.SecondaryText }
           }
           key={author.email}
           actions={
@@ -32,6 +46,7 @@ export default function ChooseAuthor() {
                 title={`Select ${author.name}`}
                 icon={Icon.Check}
                 onAction={async () => {
+                  visitItem(author);
                   // If the author is already selected and the user clicks this action, we need to
                   // remove this author from the selected authors array:
                   if (selectedAuthors.filter((_author) => _author.email === author.email).length == 1) {
@@ -50,11 +65,13 @@ export default function ChooseAuthor() {
               {selectedAuthors.length > 0 && (
                 <>
                   <Action.CopyToClipboard
+                    onCopy={() => popToRoot()}
                     content={selectedAuthors
                       .map((selectedAuthor) => `Co-authored-by: ${selectedAuthor.name} <${selectedAuthor.email}>`)
                       .join("\n")}
                   />
                   <Action.Paste
+                    onPaste={() => popToRoot()}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                     content={selectedAuthors
                       .map((selectedAuthor) => `Co-authored-by: ${selectedAuthor.name} <${selectedAuthor.email}>`)
@@ -62,6 +79,14 @@ export default function ChooseAuthor() {
                   />
                 </>
               )}
+
+              <Action.Push
+                title="Add New Author"
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                target={<AddOrEditAuthor />}
+                icon={Icon.AddPerson}
+              />
+
               <Action.Push
                 title={`Edit ${author.name}`}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
@@ -84,6 +109,29 @@ export default function ChooseAuthor() {
                       onAction: () => {
                         removeAuthorFromCache(author.email);
                         showToast(Toast.Style.Success, `Removed ${author.name}`);
+                      },
+                    },
+                  });
+                }}
+              />
+              <Action
+                title="Clear Authors"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "backspace" }}
+                onAction={async () => {
+                  await confirmAlert({
+                    title: "Clear All Authors",
+                    message: `Are you sure you want to clear all co-authors?`,
+                    icon: { source: Icon.ClearFormatting, tintColor: Color.Red },
+                    primaryAction: {
+                      title: "Remove",
+                      style: Alert.ActionStyle.Destructive,
+                      onAction: () => {
+                        sortedData.forEach((item) => resetRanking(item));
+                        clearAuthorsCache();
+                        popToRoot();
+                        showToast(Toast.Style.Success, `Authors Cleared`);
                       },
                     },
                   });

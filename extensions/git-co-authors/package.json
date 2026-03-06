@@ -7,7 +7,9 @@
   "author": "nickradford",
   "contributors": [
     "pernielsentikaer",
-    "mateusjunges"
+    "mateusjunges",
+    "marcell_schuh",
+    "jonatan_bakucz"
   ],
   "categories": [
     "Developer Tools",
@@ -26,21 +28,34 @@
       "title": "Add Author",
       "description": "Add an author to the list of authors to select from",
       "mode": "view"
+    },
+    {
+      "name": "clear-authors",
+      "title": "Clear All Authors",
+      "description": "Remove all imported co-authors from the list",
+      "mode": "no-view"
+    },
+    {
+      "name": "load-co-authors",
+      "title": "Load Co-Authors from Folder",
+      "description": "Scan a folder for git repositories and load co-authors from all of them",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.0",
-    "@raycast/utils": "^1.7.0"
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.5",
+    "@types/react": "^19.2.14",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -48,5 +63,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
