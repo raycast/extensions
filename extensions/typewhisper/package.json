@@ -5,7 +5,10 @@
   "description": "Voice dictation, transcription history, and profile management for TypeWhisper",
   "icon": "icon.png",
   "author": "SeoFood",
-  "categories": ["Productivity", "Applications"],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
   "license": "MIT",
   "preferences": [
     {

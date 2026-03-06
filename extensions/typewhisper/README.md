@@ -9,13 +9,13 @@ Control [TypeWhisper](https://www.typewhisper.com) directly from Raycast - start
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| **Start Dictation** | Start or stop voice dictation with a single keystroke |
-| **Search History** | Browse and search your transcription history |
-| **Show Last Transcription** | Copy the most recent transcription to your clipboard |
-| **Switch Profile** | View and toggle TypeWhisper profiles |
-| **Transcribe File** | Transcribe an audio file (WAV, MP3, M4A, FLAC, OGG, AAC, MP4, WebM) |
+| Command                     | Description                                                         |
+| --------------------------- | ------------------------------------------------------------------- |
+| **Start Dictation**         | Start or stop voice dictation with a single keystroke               |
+| **Search History**          | Browse and search your transcription history                        |
+| **Show Last Transcription** | Copy the most recent transcription to your clipboard                |
+| **Switch Profile**          | View and toggle TypeWhisper profiles                                |
+| **Transcribe File**         | Transcribe an audio file (WAV, MP3, M4A, FLAC, OGG, AAC, MP4, WebM) |
 
 ## Configuration
 

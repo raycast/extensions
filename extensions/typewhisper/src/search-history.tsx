@@ -108,9 +108,9 @@ export default function Command() {
             }
             subtitle={entry.app_name ?? undefined}
             icon={
-              entry.app_bundle_id
+              entry.app_bundle_id && entry.app_name?.trim()
                 ? {
-                    fileIcon: `/Applications/${entry.app_name ?? "Unknown"}.app`,
+                    fileIcon: `/Applications/${entry.app_name.trim()}.app`,
                   }
                 : Icon.Microphone
             }
