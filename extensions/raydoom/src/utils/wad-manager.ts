@@ -85,6 +85,7 @@ export async function ensureWadFile(): Promise<boolean> {
     console.log("Primary download failed, trying fallback:", error);
     try {
       const response = await fetch(WAD_FALLBACK);
+      if (!response.ok) throw new Error(`Fallback download failed (HTTP ${response.status})`);
       const buffer = await response.arrayBuffer();
       validateWadBuffer(buffer); // Validate before saving
       writeFileSync(WAD_PATH, Buffer.from(buffer));

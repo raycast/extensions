@@ -11,11 +11,6 @@ import {
   closeMainWindow,
   getPreferenceValues,
 } from "@raycast/api";
-
-interface Preferences {
-  forwardBackwardDelay: string;
-  turnStrafeDelay: string;
-}
 import { useEffect, useState, useCallback, useRef, memo } from "react";
 import { getDoomEngine, cleanupDoomEngine } from "./doom-engine";
 import { InputAction, getDoomKey, getActionDelay } from "./input-mapper";

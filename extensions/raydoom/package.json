@@ -35,7 +35,7 @@
     {
       "name": "turnStrafeDelay",
       "title": "Turn/Strafe Delay (ms)",
-      "description": "How long A, D, Q, E keys stay pressed. Default: 150ms",
+      "description": "How long A, D, Q, E keys stay pressed. Default: 250ms",
       "type": "textfield",
       "default": "250",
       "required": false
