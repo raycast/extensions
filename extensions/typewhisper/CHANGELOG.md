@@ -1,6 +1,6 @@
 # TypeWhisper Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-06
 
 - Added Start Dictation command to toggle voice dictation
 - Added Search History command to browse and search transcriptions
