@@ -42,8 +42,7 @@ export class LyrionClient {
 
   private getCached(key: string): unknown[] | null {
     const entry = this.cache.get(key);
-    if (entry && Date.now() - entry.ts < LyrionClient.CACHE_TTL)
-      return entry.data;
+    if (entry && Date.now() - entry.ts < LyrionClient.CACHE_TTL) return entry.data;
     if (entry) this.cache.delete(key);
     return null;
   }
@@ -74,23 +73,12 @@ export class LyrionClient {
     return (await response.json()).result;
   }
 
-  private async globalsearchItems(
-    query: string,
-    itemId: string | null,
-    limit: number,
-  ) {
+  private async globalsearchItems(query: string, itemId: string | null, limit: number) {
     const cacheKey = `gs:${query}:${itemId ?? ""}:${limit}`;
     const cached = this.getCached(cacheKey);
     if (cached) return cached;
 
-    const params: (string | number)[] = [
-      "globalsearch",
-      "items",
-      0,
-      limit,
-      `search:${query}`,
-      "menu:jive",
-    ];
+    const params: (string | number)[] = ["globalsearch", "items", 0, limit, `search:${query}`, "menu:jive"];
     if (itemId) params.push(`item_id:${itemId}`);
     const result = await this.request("slim.request", [this.playerId, params]);
     const data = result?.item_loop ?? result?.loop_loop ?? [];
@@ -105,9 +93,7 @@ export class LyrionClient {
    * Track text format: "Track Title (Hi-Res)\nArtist - Album Title"
    */
   private static parseItem(raw: Record<string, unknown>): SearchItem {
-    const actions = raw.actions as
-      | { go?: { params?: { item_id?: string } } }
-      | undefined;
+    const actions = raw.actions as { go?: { params?: { item_id?: string } } } | undefined;
     const params = raw.params as { item_id?: string } | undefined;
 
     const hasGo = Boolean(actions?.go?.params?.item_id);
@@ -115,16 +101,11 @@ export class LyrionClient {
     const playId = hasGo ? "" : (params?.item_id ?? "");
 
     const text = raw.text as string | undefined;
-    const lines =
-      typeof text === "string"
-        ? text.split("\n")
-        : [(raw.name as string) ?? ""];
+    const lines = typeof text === "string" ? text.split("\n") : [(raw.name as string) ?? ""];
 
     const rawTitle = lines[0] ?? "";
     const qualityMatch = rawTitle.match(QUALITY_RE);
-    const quality = qualityMatch
-      ? qualityMatch[0].replace(/^\s*\(|\)$/g, "")
-      : "";
+    const quality = qualityMatch ? qualityMatch[0].replace(/^\s*\(|\)$/g, "") : "";
     const title = rawTitle.replace(QUALITY_RE, "").trim();
 
     const secondLine = lines.slice(1).join(" \u00b7 ");
@@ -159,20 +140,12 @@ export class LyrionClient {
 
   async searchGlobal(query: string, limit = 10): Promise<SearchItem[]> {
     const raw = await this.globalsearchItems(query, null, limit);
-    return (raw as Record<string, unknown>[])
-      .map(LyrionClient.parseItem)
-      .filter((i) => i.goId || i.playId);
+    return (raw as Record<string, unknown>[]).map(LyrionClient.parseItem).filter((i) => i.goId || i.playId);
   }
 
-  async getSubmenu(
-    query: string,
-    goId: string,
-    limit = SUBMENU_ITEM_LIMIT,
-  ): Promise<SearchItem[]> {
+  async getSubmenu(query: string, goId: string, limit = SUBMENU_ITEM_LIMIT): Promise<SearchItem[]> {
     const raw = await this.globalsearchItems(query, goId, limit);
-    return (raw as Record<string, unknown>[])
-      .map(LyrionClient.parseItem)
-      .filter((i) => i.goId || i.playId);
+    return (raw as Record<string, unknown>[]).map(LyrionClient.parseItem).filter((i) => i.goId || i.playId);
   }
 
   /**
@@ -189,13 +162,7 @@ export class LyrionClient {
     try {
       await this.request("slim.request", [
         this.playerId,
-        [
-          "globalsearch",
-          "playlist",
-          mode,
-          `item_id:${playId}`,
-          `search:${query}`,
-        ],
+        ["globalsearch", "playlist", mode, `item_id:${playId}`, `search:${query}`],
       ]);
       if (mode === "play") {
         await this.request("slim.request", [this.playerId, ["play"]]);
@@ -212,9 +179,7 @@ export class LyrionClient {
   async searchQobuz(query: string, limit = 5): Promise<SearchItem[]> {
     if (!this.qobuzGoId) {
       const providers = await this.searchGlobal(query, 20);
-      const qobuz = providers.find((p) =>
-        p.name.toLowerCase().includes("qobuz"),
-      );
+      const qobuz = providers.find((p) => p.name.toLowerCase().includes("qobuz"));
       if (!qobuz) return [];
       this.qobuzGoId = qobuz.goId;
     }

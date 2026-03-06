@@ -5,6 +5,9 @@
   "description": "Search and play music from Qobuz via Lyrion Music Server",
   "icon": "icon.png",
   "author": "elliot_seeds",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Media"
   ],
@@ -58,15 +61,17 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "~22.13.0",
-    "@types/react": "^19.0.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.4.0",
-    "typescript": "^5.7.0"
+    "@inquirer/prompts": "^7.10.1",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "ora": "^8.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",

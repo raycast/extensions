@@ -105,9 +105,9 @@ async function main() {
       }
 
       await drillDown(client, query, items, spinner);
-    } catch (error: any) {
+    } catch (error: unknown) {
       spinner.stop();
-      console.error("\n❌ Error:", error.message);
+      console.error("\n❌ Error:", error instanceof Error ? error.message : String(error));
     }
   }
 

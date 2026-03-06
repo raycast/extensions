@@ -21,17 +21,10 @@ const MAX_RECENT_SEARCHES = 8;
 
 function getClient(): LyrionClient {
   const prefs = getPreferenceValues<Preferences>();
-  return new LyrionClient(
-    prefs.lmsHost,
-    prefs.lmsPort ?? "9000",
-    prefs.playerId,
-  );
+  return new LyrionClient(prefs.lmsHost, prefs.lmsPort ?? "9000", prefs.playerId);
 }
 
-const PLAYBACK_LABELS: Record<
-  PlaybackMode,
-  { title: string; pastTense: string; icon: Icon }
-> = {
+const PLAYBACK_LABELS: Record<PlaybackMode, { title: string; pastTense: string; icon: Icon }> = {
   play: { title: "Play Now", pastTense: "Playing", icon: Icon.Play },
   insert: { title: "Play Next", pastTense: "Queued next", icon: Icon.Forward },
   add: {
@@ -69,14 +62,7 @@ function typeColor(type: string): Color {
   }
 }
 
-const PLACEHOLDER_PATTERNS = [
-  "/html/images/",
-  "nocover",
-  "nogenre",
-  "noplaylist",
-  "noradio",
-  "nowork",
-];
+const PLACEHOLDER_PATTERNS = ["/html/images/", "nocover", "nogenre", "noplaylist", "noradio", "nowork"];
 
 function isPlaceholder(url: string): boolean {
   const lower = url.toLowerCase();
@@ -87,12 +73,9 @@ function getCategoryIcon(name: string): Image.ImageLike {
   const lower = name.toLowerCase();
   if (lower.includes("release") || lower.includes("album"))
     return { source: "album.svg", tintColor: Color.SecondaryText };
-  if (lower.includes("artist"))
-    return { source: "artist.svg", tintColor: Color.SecondaryText };
-  if (lower.includes("song") || lower.includes("track"))
-    return { source: "track.svg", tintColor: Color.SecondaryText };
-  if (lower.includes("playlist"))
-    return { source: "playlist.svg", tintColor: Color.SecondaryText };
+  if (lower.includes("artist")) return { source: "artist.svg", tintColor: Color.SecondaryText };
+  if (lower.includes("song") || lower.includes("track")) return { source: "track.svg", tintColor: Color.SecondaryText };
+  if (lower.includes("playlist")) return { source: "playlist.svg", tintColor: Color.SecondaryText };
   return { source: "folder-music.svg", tintColor: Color.SecondaryText };
 }
 
@@ -102,16 +85,10 @@ function getFallbackIcon(item: SearchItem): Image.ImageLike {
     return { source: src, tintColor: Color.SecondaryText };
   }
   const lower = (item.title || item.name).toLowerCase();
-  if (
-    lower.includes("album") ||
-    lower.includes("release") ||
-    lower.includes("single")
-  )
+  if (lower.includes("album") || lower.includes("release") || lower.includes("single"))
     return { source: "album.svg", tintColor: Color.SecondaryText };
-  if (lower.includes("song") || lower.includes("track"))
-    return { source: "track.svg", tintColor: Color.SecondaryText };
-  if (lower.includes("playlist"))
-    return { source: "playlist.svg", tintColor: Color.SecondaryText };
+  if (lower.includes("song") || lower.includes("track")) return { source: "track.svg", tintColor: Color.SecondaryText };
+  if (lower.includes("playlist")) return { source: "playlist.svg", tintColor: Color.SecondaryText };
   return { source: "artist.svg", tintColor: Color.SecondaryText };
 }
 
@@ -142,15 +119,7 @@ function buildCopyText(item: SearchItem): string {
   return title;
 }
 
-function PlaybackActions({
-  item,
-  query,
-  client,
-}: {
-  item: SearchItem;
-  query: string;
-  client: LyrionClient;
-}) {
+function PlaybackActions({ item, query, client }: { item: SearchItem; query: string; client: LyrionClient }) {
   async function handlePlayback(mode: PlaybackMode) {
     const label = PLAYBACK_LABELS[mode];
     const toast = await showToast({
@@ -195,13 +164,7 @@ function PlaybackActions({
   );
 }
 
-function ItemDetail({
-  item,
-  client,
-}: {
-  item: SearchItem;
-  client: LyrionClient;
-}) {
+function ItemDetail({ item, client }: { item: SearchItem; client: LyrionClient }) {
   const artworkUrl = client.getArtworkUrl(item.icon, 600);
   const hasRealArtwork = artworkUrl && !isPlaceholder(artworkUrl);
 
@@ -216,19 +179,9 @@ function ItemDetail({
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Title"
-            text={item.title || item.name}
-          />
-          {item.artist && (
-            <List.Item.Detail.Metadata.Label
-              title="Artist"
-              text={item.artist}
-            />
-          )}
-          {item.album && (
-            <List.Item.Detail.Metadata.Label title="Album" text={item.album} />
-          )}
+          <List.Item.Detail.Metadata.Label title="Title" text={item.title || item.name} />
+          {item.artist && <List.Item.Detail.Metadata.Label title="Artist" text={item.artist} />}
+          {item.album && <List.Item.Detail.Metadata.Label title="Album" text={item.album} />}
 
           <List.Item.Detail.Metadata.Separator />
 
@@ -241,10 +194,7 @@ function ItemDetail({
           )}
 
           {label && (
-            <List.Item.Detail.Metadata.Label
-              title="Type"
-              text={{ value: label, color: typeColor(item.type) }}
-            />
+            <List.Item.Detail.Metadata.Label title="Type" text={{ value: label, color: typeColor(item.type) }} />
           )}
         </List.Item.Detail.Metadata>
       }
@@ -252,15 +202,7 @@ function ItemDetail({
   );
 }
 
-function SubMenuView({
-  query,
-  goId,
-  title,
-}: {
-  query: string;
-  goId: string;
-  title: string;
-}) {
+function SubMenuView({ query, goId, title }: { query: string; goId: string; title: string }) {
   const clientRef = useRef(getClient());
   const client = clientRef.current;
   const { push } = useNavigation();
@@ -292,21 +234,12 @@ function SubMenuView({
       )
     : undefined;
 
-  const baseTitle =
-    commonArtist && !title.includes(commonArtist)
-      ? `${title} - ${commonArtist}`
-      : title;
+  const baseTitle = commonArtist && !title.includes(commonArtist) ? `${title} - ${commonArtist}` : title;
 
-  const displayTitle = items?.length
-    ? `${baseTitle} (${items.length})`
-    : baseTitle;
+  const displayTitle = items?.length ? `${baseTitle} (${items.length})` : baseTitle;
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={displayTitle}
-      isShowingDetail={hasPlayableItems}
-    >
+    <List isLoading={isLoading} navigationTitle={displayTitle} isShowingDetail={hasPlayableItems}>
       {!items || items.length === 0 ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
@@ -360,34 +293,18 @@ function SubMenuView({
               accessories={hasPlayableItems ? undefined : accessories}
               keywords={[item.artist, item.album, item.quality].filter(Boolean)}
               icon={getItemIcon(item, client)}
-              detail={
-                hasPlayableItems ? (
-                  <ItemDetail item={item} client={client} />
-                ) : undefined
-              }
+              detail={hasPlayableItems ? <ItemDetail item={item} client={client} /> : undefined}
               actions={
-                <ActionPanel
-                  title={`${item.title || item.name}${qualitySuffix}`}
-                >
+                <ActionPanel title={`${item.title || item.name}${qualitySuffix}`}>
                   {item.playId ? (
-                    <PlaybackActions
-                      item={item}
-                      query={query}
-                      client={client}
-                    />
+                    <PlaybackActions item={item} query={query} client={client} />
                   ) : (
                     <>
                       <Action
                         title="Browse"
                         icon={Icon.ArrowRight}
                         onAction={() =>
-                          push(
-                            <SubMenuView
-                              query={query}
-                              goId={item.goId}
-                              title={item.title || item.name}
-                            />,
-                          )
+                          push(<SubMenuView query={query} goId={item.goId} title={item.title || item.name} />)
                         }
                       />
                       <Action.CopyToClipboard
@@ -413,17 +330,16 @@ export default function SearchQobuz() {
   const client = clientRef.current;
   const { push } = useNavigation();
 
-  const { value: recentSearches = [], setValue: setRecentSearches } =
-    useLocalStorage<string[]>(RECENT_SEARCHES_KEY, []);
+  const { value: recentSearches = [], setValue: setRecentSearches } = useLocalStorage<string[]>(
+    RECENT_SEARCHES_KEY,
+    [],
+  );
 
   const saveSearch = useCallback(
     (query: string) => {
       const trimmed = query.trim();
       if (!trimmed) return;
-      const updated = [
-        trimmed,
-        ...(recentSearches ?? []).filter((s) => s !== trimmed),
-      ].slice(0, MAX_RECENT_SEARCHES);
+      const updated = [trimmed, ...(recentSearches ?? []).filter((s) => s !== trimmed)].slice(0, MAX_RECENT_SEARCHES);
       setRecentSearches(updated);
     },
     [recentSearches, setRecentSearches],
@@ -458,12 +374,7 @@ export default function SearchQobuz() {
   const hasResults = categories && categories.length > 0;
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search Qobuz..."
-      throttle
-    >
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search Qobuz..." throttle>
       {isEmptySearch ? (
         recentSearches && recentSearches.length > 0 ? (
           <List.Section title="Recent Searches">
@@ -479,13 +390,7 @@ export default function SearchQobuz() {
                       icon={Icon.MagnifyingGlass}
                       onAction={() => {
                         saveSearch(query);
-                        push(
-                          <SearchResultsView
-                            query={query}
-                            client={client}
-                            onSearch={saveSearch}
-                          />,
-                        );
+                        push(<SearchResultsView query={query} client={client} onSearch={saveSearch} />);
                       }}
                     />
                     <Action
@@ -529,13 +434,7 @@ export default function SearchQobuz() {
                     icon={Icon.ArrowRight}
                     onAction={() => {
                       saveSearch(searchText);
-                      push(
-                        <SubMenuView
-                          query={searchText}
-                          goId={cat.goId}
-                          title={cat.name}
-                        />,
-                      );
+                      push(<SubMenuView query={searchText} goId={cat.goId} title={cat.name} />);
                     }}
                   />
                 </ActionPanel>
@@ -559,19 +458,15 @@ function SearchResultsView({
 }) {
   const { push } = useNavigation();
 
-  const { isLoading, data: categories } = usePromise(
-    async (q: string) => client.searchQobuz(q),
-    [query],
-    {
-      onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Search failed",
-          message: error instanceof Error ? error.message : String(error),
-        });
-      },
+  const { isLoading, data: categories } = usePromise(async (q: string) => client.searchQobuz(q), [query], {
+    onError: (error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Search failed",
+        message: error instanceof Error ? error.message : String(error),
+      });
     },
-  );
+  });
 
   return (
     <List isLoading={isLoading} navigationTitle={query}>
@@ -596,13 +491,7 @@ function SearchResultsView({
                   icon={Icon.ArrowRight}
                   onAction={() => {
                     onSearch(query);
-                    push(
-                      <SubMenuView
-                        query={query}
-                        goId={cat.goId}
-                        title={cat.name}
-                      />,
-                    );
+                    push(<SubMenuView query={query} goId={cat.goId} title={cat.name} />);
                   }}
                 />
               </ActionPanel>
