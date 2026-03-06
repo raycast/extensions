@@ -31,10 +31,6 @@ interface KarabinerConfig {
   [key: string]: unknown;
 }
 
-interface Preferences {
-  ruleTitle: string;
-}
-
 const CONFIG_PATH = join(homedir(), ".config/karabiner/karabiner.json");
 
 export default async function Command() {
