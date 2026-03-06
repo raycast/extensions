@@ -7,6 +7,9 @@ import { GitHubStatus, Status, STATUS_URL } from "@/api";
  */
 export default async function tool(): Promise<GitHubStatus> {
   const response = await fetch(STATUS_URL);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch GitHub status: ${response.status} ${response.statusText}`);
+  }
   const data = (await response.json()) as Status;
 
   return {
