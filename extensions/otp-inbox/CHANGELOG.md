@@ -1,6 +1,6 @@
 # OTP Inbox Changelog
 
-## [Extension Improvement] - 2026-02-13
+## [Extension Improvement] - {PR_MERGE_DATE}
 
 - Add Windows support
 
