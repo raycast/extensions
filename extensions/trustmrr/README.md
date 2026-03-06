@@ -1,6 +1,6 @@
 # TrustMRR
 
-TrustMRR Raycast extension. Browse startups directly from Raycast.
+[TrustMRR](https://trustmrr.com) Raycast extension. Browse startups directly from Raycast. 
 
 ## Commands
 
