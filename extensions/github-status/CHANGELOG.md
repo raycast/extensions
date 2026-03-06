@@ -1,6 +1,6 @@
 # Github Status
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2026-03-06
 
 - Update dependencies, remove node-fetch, use @raycast/utils
 - Add AI tool to get the GitHub status
