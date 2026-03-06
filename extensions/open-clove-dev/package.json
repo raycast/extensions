@@ -1,5 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.0.0",
   "name": "open-clove-dev",
   "title": "Open Clove Dev",
   "description": "Open Clove frontend dev apps for a worktree in your browser",
