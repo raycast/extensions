@@ -19,26 +19,13 @@ export default function EnvironmentList({ applicationId, applicationName }: Prop
   return (
     <List isLoading={isLoading} navigationTitle={applicationName}>
       {data?.data.map((env) => (
-        <EnvironmentListItem
-          key={env.id}
-          environment={env}
-          applicationId={applicationId}
-          applicationName={applicationName}
-        />
+        <EnvironmentListItem key={env.id} environment={env} applicationName={applicationName} />
       ))}
     </List>
   );
 }
 
-function EnvironmentListItem({
-  environment,
-  applicationId,
-  applicationName,
-}: {
-  environment: Environment;
-  applicationId: string;
-  applicationName: string;
-}) {
+function EnvironmentListItem({ environment, applicationName }: { environment: Environment; applicationName: string }) {
   const { attributes } = environment;
   const statusIcon = getEnvironmentStatusIcon(attributes.status);
   const instanceCount = environment.relationships?.instances?.data?.length ?? 0;
@@ -61,7 +48,6 @@ function EnvironmentListItem({
             target={
               <EnvironmentDetail
                 environmentId={environment.id}
-                applicationId={applicationId}
                 applicationName={applicationName}
                 environmentName={attributes.name}
               />

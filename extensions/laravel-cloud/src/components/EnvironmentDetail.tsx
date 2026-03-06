@@ -13,7 +13,6 @@ import EnvironmentVariables from "./EnvironmentVariables";
 
 interface Props {
   environmentId: string;
-  applicationId: string;
   applicationName: string;
   environmentName: string;
 }

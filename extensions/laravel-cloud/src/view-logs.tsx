@@ -18,14 +18,16 @@ const TIME_RANGES = [
 export default function ViewLogs() {
   const { environmentId, isLoading: selectorLoading, Dropdown } = useAppEnvSelector();
   const [timeRange, setTimeRange] = useState("1h");
+  const [searchText, setSearchText] = useState("");
 
   const { data, isLoading } = useCachedPromise(
-    (envId: string, range: string) =>
+    (envId: string, range: string, query: string) =>
       getEnvironmentLogs(envId, {
         from: getTimeRangeFrom(range),
         to: new Date().toISOString(),
+        query: query || undefined,
       }),
-    [environmentId, timeRange],
+    [environmentId, timeRange, searchText],
     { execute: !!environmentId, keepPreviousData: true },
   );
 
@@ -33,6 +35,8 @@ export default function ViewLogs() {
     <List
       isLoading={selectorLoading || isLoading}
       searchBarPlaceholder="Search logs..."
+      onSearchTextChange={setSearchText}
+      throttle
       searchBarAccessory={<Dropdown />}
     >
       <List.Section title="Time Range">

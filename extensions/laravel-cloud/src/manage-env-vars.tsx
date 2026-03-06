@@ -169,7 +169,7 @@ function AddVariableForm({ environmentId, onVariableAdded }: { environmentId: st
       }
     >
       <Form.TextField id="key" title="Key" placeholder="MY_VARIABLE" />
-      <Form.TextField id="value" title="Value" placeholder="my-value" />
+      <Form.PasswordField id="value" title="Value" placeholder="my-value" />
     </Form>
   );
 }
@@ -208,7 +208,7 @@ function EditVariableForm({
         </ActionPanel>
       }
     >
-      <Form.TextField id="value" title="Value" defaultValue={currentValue} />
+      <Form.PasswordField id="value" title="Value" defaultValue={currentValue} />
     </Form>
   );
 }
