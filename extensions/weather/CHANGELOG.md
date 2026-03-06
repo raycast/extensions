@@ -1,6 +1,6 @@
 # Weather Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-03-06
 
 - Bump all dependencies to the latest
 
