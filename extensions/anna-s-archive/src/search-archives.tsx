@@ -49,7 +49,7 @@ const Command = () => {
         <List.EmptyView
           title="Whoops! Something went wrong."
           description={
-            "An error occured! It might be that the mirror is down. Please press Enter to test the mirrors and maybe change to a different one in your extension preferences. If all are down, please copy the error message (See Actions) and report the issue."
+            "An error occurred! It might be that the mirror is down. Please press Enter to test the mirrors and maybe change to a different one in your extension preferences. If all are down, please copy the error message (See Actions) and report the issue."
           }
           icon={{ source: Icon.WifiDisabled }}
           actions={
