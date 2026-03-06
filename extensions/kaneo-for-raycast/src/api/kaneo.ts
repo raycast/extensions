@@ -54,9 +54,6 @@ export class KaneoAPI {
   async assignTask(taskId: string, assigneeId: string | null) {
     return this.request<Task>(`/api/task/assignee/${taskId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ userId: assigneeId }),
     });
   }
