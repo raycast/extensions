@@ -34,11 +34,15 @@ async function sha256Hex(input: string): Promise<string> {
     .join("");
 }
 
-export async function solveProofOfWork(word: string): Promise<{ nonce: string; timestamp: number }> {
+export async function solveProofOfWork(
+  word: string,
+  signal?: AbortSignal,
+): Promise<{ nonce: string; timestamp: number }> {
   const normalizedWord = word.toLowerCase();
   const timestamp = Date.now();
 
   for (let nonce = 0; ; nonce += 1) {
+    signal?.throwIfAborted();
     const hash = await sha256Hex(`${normalizedWord}|${timestamp}|${nonce}`);
 
     if (hash.startsWith(PROOF_OF_WORK_PREFIX)) {
@@ -63,11 +67,11 @@ export async function checkWord(word: string, signal?: AbortSignal): Promise<Che
   }
 
   const request = (async () => {
-    const { nonce, timestamp } = await solveProofOfWork(word);
+    const { nonce, timestamp } = await solveProofOfWork(normalizedWord, signal);
     const res = await fetch(`${API_BASE}/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ word, nonce, timestamp }),
+      body: JSON.stringify({ word: normalizedWord, nonce, timestamp }),
       signal,
     });
     const data = (await res.json()) as CheckResult | { error?: string };
