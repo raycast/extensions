@@ -764,7 +764,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         lastActionRef.current.date = { source: "nlp", timestamp: nlpTimestamp };
       }
     }
-  }, [parsedData.parsedDate, setValue, fromTodayEmptyView]);
+  }, [parsedData.parsedDate, parsedData.parsedDateHasTime, setValue, fromTodayEmptyView]);
 
   // Auto-update deadline based on NLP parsing - respect last action
   useEffect(() => {
