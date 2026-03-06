@@ -1,3 +1,23 @@
+interface Session {
+  session: {
+    id: string;
+    token: string;
+    userId: string;
+    createdAt: Date;
+    updatedAt: Date;
+    expiresAt: Date;
+  };
+  user?: {
+    id: string;
+    name: string;
+    image: string;
+    createdAt: Date;
+    updatedAt: Date;
+    isAnonymous: boolean;
+  };
+  expires?: string;
+}
+
 interface Project {
   id: number;
   name: string;
@@ -21,8 +41,9 @@ interface Task {
   position: number;
   createdAt: string;
   userId: string | null;
-  assigneeName: string | null;
   assigneeId: string | null;
+  assigneeName: string | null;
+  assigneeImage: string | null;
   projectId: string;
 }
 
@@ -85,6 +106,7 @@ interface CreateProjectFormValues {
 }
 
 export type {
+  Session,
   Project,
   Task,
   ProjectDetail,

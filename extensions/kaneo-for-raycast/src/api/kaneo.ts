@@ -5,32 +5,60 @@ export class KaneoAPI {
   private instanceUrl: string;
   private apiToken: string;
   private workspaceId: string;
+  private requestTimeout: number;
 
   constructor() {
     const prefs = getPreferenceValues();
     this.instanceUrl = prefs.instanceUrl;
     this.apiToken = prefs.apiToken;
     this.workspaceId = prefs.workspaceId;
+    this.requestTimeout = prefs.requestTimeout;
   }
 
-  private async request<T>(path: string, init?: RequestInit): Promise<T> {
+  private async request<T>(path: string, init?: RequestInit, timeoutMs = this.requestTimeout): Promise<T> {
     const url = `${this.instanceUrl.replace(/\/$/, "")}${path}`;
 
-    const res = await fetch(url, {
-      ...init,
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const res = await fetch(url, {
+        ...init,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiToken}`,
+          ...init?.headers,
+        },
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Kaneo API error: ${res.status} ${res.statusText}`);
+      }
+
+      if (res.status === 204) {
+        return undefined as T;
+      }
+
+      return (await res.json()) as T;
+    } catch (error) {
+      if ((error as Error).name === "AbortError") {
+        throw new Error(`Kaneo API error: request to ${path} timed out after ${timeoutMs}ms`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  async assignTask(taskId: string, assigneeId: string | null) {
+    return this.request<Task>(`/api/task/assignee/${taskId}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${this.apiToken}`,
-        ...init?.headers,
       },
+      body: JSON.stringify({ userId: assigneeId }),
     });
-
-    if (!res.ok) {
-      throw new Error(`Kaneo API error: ${res.status} ${res.statusText}`);
-    }
-
-    if (res.status === 204) return undefined as T;
-    return res.json() as Promise<T>;
   }
 
   async getProjects(workspaceId: string): Promise<Project[]> {
