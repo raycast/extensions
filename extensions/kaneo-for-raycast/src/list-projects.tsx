@@ -361,7 +361,7 @@ ${formatDate(task.createdAt)}
 
 function ProjectTasksList({ project }: { project: Project }) {
   const api = new KaneoAPI();
-  const { sort, youAsAssignee } = getPreferenceValues<{ sort: string; youAsAssignee: boolean }>();
+  const { sort, youAsAssignee } = getPreferenceValues<Preferences>();
   const {
     isLoading,
     data: dProject,
