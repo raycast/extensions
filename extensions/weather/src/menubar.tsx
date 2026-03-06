@@ -9,6 +9,7 @@ import {
   open,
   openCommandPreferences,
 } from "@raycast/api";
+import React from "react";
 import { useWeather } from "./components/hooks";
 import {
   getCurrentTemperature,
@@ -191,7 +192,7 @@ function WeatherMenuBarExtra(props: {
   icon?: Image.ImageLike | undefined;
   tooltip?: string;
   error?: string | undefined;
-}): JSX.Element {
+}): React.ReactElement {
   const error = props.error;
   return (
     <MenuBarExtra
@@ -200,7 +201,8 @@ function WeatherMenuBarExtra(props: {
       isLoading={props.isLoading}
       tooltip={error ? `Error: ${error}` : props.tooltip}
     >
-      {error ? <MenuBarExtra.Item title={`Error: ${error}`} /> : props.children}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      {error ? <MenuBarExtra.Item title={`Error: ${error}`} /> : (props.children as any)}
     </MenuBarExtra>
   );
 }
@@ -407,7 +409,7 @@ function WeatherForecastDay(props: { day: WeatherData; fullTitle: string }) {
   );
 }
 
-export default function MenuCommand(): JSX.Element {
+export default function MenuCommand(): React.ReactElement {
   const { data, error, isLoading, fetchDate } = useWeather(getDefaultQuery());
   const { title, curcon, weatherDesc, area } = getMetaData(data);
   const { showMenuText } = getAppearancePreferences();
@@ -453,7 +455,9 @@ export default function MenuCommand(): JSX.Element {
       <SunMenubarSection data={data} />
       <MoonMenubarSection data={data} />
       <MenuBarExtra.Section title="Forecast">
-        {data?.weather?.map((d) => <WeatherForecastDay key={d.date} day={d} fullTitle={title} />)}
+        {data?.weather?.map((d) => (
+          <WeatherForecastDay key={d.date} day={d} fullTitle={title} />
+        ))}
       </MenuBarExtra.Section>
       <LocationMenubarSection area={area} />
       <MenuBarExtra.Section>

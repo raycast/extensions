@@ -1,5 +1,9 @@
 # Weather Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Bump all dependencies to the latest
+
 ## [Chore: Renamed file] - 2025-04-29
 
 ## [SF Symbols] - 2024-03-04

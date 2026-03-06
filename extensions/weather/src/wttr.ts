@@ -142,7 +142,7 @@ async function toJsonOrError(response: Response): Promise<any> {
   const getJson = async (): Promise<any> => {
     try {
       return await response.json();
-    } catch (e: unknown) {
+    } catch {
       throw Error(`Server-side issue at wttr.in (${s} - invalid json). Please try again later`);
     }
   };
