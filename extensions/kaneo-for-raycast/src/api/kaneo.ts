@@ -12,7 +12,7 @@ export class KaneoAPI {
     this.instanceUrl = prefs.instanceUrl;
     this.apiToken = prefs.apiToken;
     this.workspaceId = prefs.workspaceId;
-    this.requestTimeout = prefs.requestTimeout;
+    this.requestTimeout = Number(prefs.requestTimeout);
   }
 
   private async request<T>(path: string, init?: RequestInit, timeoutMs = this.requestTimeout): Promise<T> {
