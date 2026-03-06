@@ -4,7 +4,6 @@ const API_BASE = "https://wordresearch.xyz/api";
 const PROOF_OF_WORK_PREFIX = "0000";
 const RECENT_CHECK_TTL_MS = 5000;
 
-const inFlightChecks = new Map<string, Promise<CheckResult>>();
 const recentChecks = new Map<string, { result: CheckResult; expiresAt: number }>();
 
 export interface CheckResult {
@@ -60,42 +59,26 @@ export async function checkWord(word: string, signal?: AbortSignal): Promise<Che
     return recentCheck.result;
   }
 
-  const existingCheck = inFlightChecks.get(normalizedWord);
+  const { nonce, timestamp } = await solveProofOfWork(normalizedWord, signal);
+  const res = await fetch(`${API_BASE}/check`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ word: normalizedWord, nonce, timestamp }),
+    signal,
+  });
+  const data = (await res.json()) as CheckResult | { error?: string };
 
-  if (existingCheck) {
-    return existingCheck;
+  if (!res.ok) {
+    throw new Error(("error" in data && data.error) || `Request failed (${res.status})`);
   }
 
-  const request = (async () => {
-    const { nonce, timestamp } = await solveProofOfWork(normalizedWord, signal);
-    const res = await fetch(`${API_BASE}/check`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ word: normalizedWord, nonce, timestamp }),
-      signal,
-    });
-    const data = (await res.json()) as CheckResult | { error?: string };
+  const result = data as CheckResult;
+  recentChecks.set(normalizedWord, {
+    result,
+    expiresAt: Date.now() + RECENT_CHECK_TTL_MS,
+  });
 
-    if (!res.ok) {
-      throw new Error(("error" in data && data.error) || `Request failed (${res.status})`);
-    }
-
-    const result = data as CheckResult;
-    recentChecks.set(normalizedWord, {
-      result,
-      expiresAt: Date.now() + RECENT_CHECK_TTL_MS,
-    });
-
-    return result;
-  })();
-
-  inFlightChecks.set(normalizedWord, request);
-
-  try {
-    return await request;
-  } finally {
-    inFlightChecks.delete(normalizedWord);
-  }
+  return result;
 }
 
 export async function fetchStats(signal?: AbortSignal): Promise<StatsData> {
