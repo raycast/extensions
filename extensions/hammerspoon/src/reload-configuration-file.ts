@@ -13,6 +13,7 @@ export default async function main() {
     await runAppleScript(`
       tell application "Hammerspoon"
         execute lua code "
+          ${getPreferenceValues().clearConsole ? 'hs.console.clearConsole();' : ''}
           hs.reload();
           ${getPreferenceValues().openConsole ? 'hs.openConsole();' : ''}
         "
