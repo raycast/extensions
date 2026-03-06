@@ -1,0 +1,214 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ticktick-api",
+  "title": "TickTick API",
+  "description": "Manage your TickTick tasks, projects, and focus sessions from Raycast — fully cross-platform via the TickTick REST API",
+  "icon": "extension-icon.png",
+  "author": "daniel_lankry",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your TickTick API access token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultProject",
+      "title": "Default Project ID",
+      "description": "Default project for Quick Add Task. Use 'Copy Project ID' in the Projects command to find it. Leave empty for Inbox.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. 5f3a9c1b8e7d..."
+    },
+    {
+      "name": "pomodoroLength",
+      "title": "Focus Duration (min)",
+      "description": "Pomodoro focus session length",
+      "type": "dropdown",
+      "required": false,
+      "default": "25",
+      "data": [
+        {
+          "title": "15 min",
+          "value": "15"
+        },
+        {
+          "title": "25 min",
+          "value": "25"
+        },
+        {
+          "title": "30 min",
+          "value": "30"
+        },
+        {
+          "title": "45 min",
+          "value": "45"
+        },
+        {
+          "title": "60 min",
+          "value": "60"
+        }
+      ]
+    },
+    {
+      "name": "shortBreakLength",
+      "title": "Short Break (min)",
+      "description": "Short break duration between sessions",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        {
+          "title": "5 min",
+          "value": "5"
+        },
+        {
+          "title": "10 min",
+          "value": "10"
+        }
+      ]
+    },
+    {
+      "name": "longBreakLength",
+      "title": "Long Break (min)",
+      "description": "Long break after 4 sessions",
+      "type": "dropdown",
+      "required": false,
+      "default": "15",
+      "data": [
+        {
+          "title": "15 min",
+          "value": "15"
+        },
+        {
+          "title": "20 min",
+          "value": "20"
+        },
+        {
+          "title": "30 min",
+          "value": "30"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "today",
+      "title": "Today's Tasks",
+      "subtitle": "TickTick",
+      "description": "View and manage today's tasks",
+      "mode": "view",
+      "icon": "command-today.png"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "TickTick",
+      "description": "Search across all projects",
+      "mode": "view",
+      "icon": "command-search.png"
+    },
+    {
+      "name": "projects",
+      "title": "Projects",
+      "subtitle": "TickTick",
+      "description": "Browse all projects and their tasks",
+      "mode": "view",
+      "icon": "command-projects.png"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "TickTick",
+      "description": "View tasks in your inbox",
+      "mode": "view",
+      "icon": "command-inbox.png"
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "subtitle": "TickTick",
+      "description": "Create a new task with full details",
+      "mode": "view",
+      "icon": "command-add.png"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "subtitle": "TickTick",
+      "description": "Quickly add a task from the command bar",
+      "mode": "no-view",
+      "icon": "command-quick-add.png",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Task title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "priority",
+          "placeholder": "Priority (none/low/med/high)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "project",
+          "placeholder": "Project name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "subtitle": "TickTick",
+      "description": "7-day agenda view with time slots and overdue tasks",
+      "mode": "view",
+      "icon": "command-calendar.png"
+    },
+    {
+      "name": "focus-timer",
+      "title": "Focus Timer",
+      "subtitle": "TickTick",
+      "description": "Start a Pomodoro focus session",
+      "mode": "view",
+      "icon": "command-focus.png"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Tasks",
+      "subtitle": "TickTick",
+      "description": "Show today's tasks in the menu bar with quick complete",
+      "mode": "menu-bar",
+      "icon": "command-today.png",
+      "interval": "15m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
