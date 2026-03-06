@@ -19,7 +19,7 @@ function formatRgb(hex: string): string {
 
 function formatHsl(hex: string): string {
   const hsl = toHsl(hex);
-  return hsl ? `hsl(${Math.round(hsl.h ?? 0)},${Math.round(hsl.s * 100)},${Math.round(hsl.l * 100)})` : hex;
+  return hsl ? `hsl(${Math.round(hsl.h ?? 0)},${Math.round(hsl.s * 100)}%,${Math.round(hsl.l * 100)}%)` : hex;
 }
 
 function formatOklch(hex: string): string {
