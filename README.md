@@ -110,6 +110,19 @@ For even faster access:
 2. Find **Toggle Vim Ctrl+HJKL Keys**
 3. Click **Record Hotkey** and set your preferred shortcut (e.g., `⌃⌥K`)
 
+## Behavior
+
+This extension toggles the matching rule in **all Karabiner profiles** simultaneously.
+
+If your `karabiner.json` contains multiple profiles with the same rule description, 
+all instances will be toggled to the same state for consistency.
+
+**Example HUD output with multiple profiles:** \
+`▶️ Vim Ctrl+HJKL to Arrow Keys: Enabled (3 profiles)`
+
+> 💡 If you need per-profile control, consider using unique rule descriptions 
+> for each profile (e.g., "Vim HJKL - Work Profile").
+
 ## Project Structure
 
 ```

@@ -3,7 +3,7 @@
   "name": "karabiner-elements",
   "title": "Karabiner Elements",
   "description": "Toggle Karabiner-Elements complex modifications",
-  "icon": "extension-icon.png",
+  "icon": "vim-logo.png",
   "author": "julian67",
   "platforms": [
     "macOS"

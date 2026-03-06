@@ -86,7 +86,7 @@ export default async function Command() {
     const stateIcon = newState ? "▶️" : "⏸";
     const profileInfo = matchedProfiles.length > 1 ? ` (${matchedProfiles.length} profiles)` : "";
 
-    await showHUD(`${stateIcon} ${ruleTitle}: ${newState}${profileInfo}`);
+    await showHUD(`${stateIcon} ${ruleTitle}: ${stateLabel}${profileInfo}`);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
