@@ -1,7 +1,7 @@
 {
   "name": "teak-raycast",
   "title": "Teak",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
