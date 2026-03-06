@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Detail, ActionPanel, Action, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getDeployment, getDeploymentLogs } from "../api/deployments";
@@ -10,19 +11,34 @@ interface Props {
 }
 
 export default function DeploymentDetail({ deploymentId }: Props) {
-  const { data: deploymentData, isLoading: deploymentLoading } = useCachedPromise(
-    (id: string) => getDeployment(id, "initiator"),
-    [deploymentId],
-  );
+  const {
+    data: deploymentData,
+    isLoading: deploymentLoading,
+    revalidate: revalidateDeployment,
+  } = useCachedPromise((id: string) => getDeployment(id, "initiator"), [deploymentId]);
 
   const deployment = deploymentData?.data;
   const inProgress = deployment ? isDeploymentInProgress(deployment.attributes.status) : false;
 
-  const { data: logsData, isLoading: logsLoading } = useCachedPromise(
-    (id: string) => getDeploymentLogs(id),
-    [deploymentId],
-    { execute: !!deployment },
-  );
+  const {
+    data: logsData,
+    isLoading: logsLoading,
+    revalidate: revalidateLogs,
+  } = useCachedPromise((id: string) => getDeploymentLogs(id), [deploymentId], { execute: !!deployment });
+
+  const inProgressRef = useRef(inProgress);
+  inProgressRef.current = inProgress;
+
+  useEffect(() => {
+    if (!inProgress) return;
+    const interval = setInterval(() => {
+      if (inProgressRef.current) {
+        revalidateDeployment();
+        revalidateLogs();
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [inProgress]);
 
   const attrs = deployment?.attributes;
   const statusIcon = attrs ? getDeploymentStatusIcon(attrs.status) : null;

@@ -3,10 +3,6 @@ import { ApiError } from "../types/api";
 
 const BASE_URL = "https://cloud.laravel.com/api";
 
-interface Preferences {
-  apiToken: string;
-}
-
 export class LaravelCloudError extends Error {
   status: number;
   errors?: Record<string, string[]>;

@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, Icon, Detail } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getEnvironmentLogs } from "../api/environments";
-import { LogEntry, LogType } from "../types/log";
+import { LogEntry } from "../types/log";
 import { getLogLevelIcon } from "../utils/status-icons";
 import { getTimeRangeFrom } from "../utils/dates";
 
@@ -12,34 +12,37 @@ interface Props {
 }
 
 const TIME_RANGES = [
-  { title: "Last 15 Minutes", value: "15m" },
-  { title: "Last 1 Hour", value: "1h" },
-  { title: "Last 6 Hours", value: "6h" },
-  { title: "Last 24 Hours", value: "24h" },
-  { title: "Last 7 Days", value: "7d" },
+  { title: "Last 15 Minutes", value: "time:15m" },
+  { title: "Last 1 Hour", value: "time:1h" },
+  { title: "Last 6 Hours", value: "time:6h" },
+  { title: "Last 24 Hours", value: "time:24h" },
+  { title: "Last 7 Days", value: "time:7d" },
 ];
 
-const LOG_TYPES: { title: string; value: LogType | "" }[] = [
-  { title: "All Types", value: "" },
-  { title: "Access", value: "access" },
-  { title: "Application", value: "application" },
-  { title: "Exception", value: "exception" },
-  { title: "System", value: "system" },
+const LOG_TYPES: { title: string; value: string }[] = [
+  { title: "All Types", value: "type:" },
+  { title: "Access", value: "type:access" },
+  { title: "Application", value: "type:application" },
+  { title: "Exception", value: "type:exception" },
+  { title: "System", value: "type:system" },
 ];
 
 export default function LogList({ environmentId, environmentName }: Props) {
-  const [timeRange, setTimeRange] = useState("1h");
-  const [logType, setLogType] = useState<string>("");
+  const [timeRange, setTimeRange] = useState("time:1h");
+  const [logType, setLogType] = useState("type:");
   const [searchText, setSearchText] = useState("");
 
   const { data, isLoading } = useCachedPromise(
-    (envId: string, range: string, type: string, query: string) =>
-      getEnvironmentLogs(envId, {
-        from: getTimeRangeFrom(range),
+    (envId: string, range: string, type: string, query: string) => {
+      const rangeValue = range.replace("time:", "");
+      const typeValue = type.replace("type:", "");
+      return getEnvironmentLogs(envId, {
+        from: getTimeRangeFrom(rangeValue),
         to: new Date().toISOString(),
-        type: type || undefined,
+        type: typeValue || undefined,
         query: query || undefined,
-      }),
+      });
+    },
     [environmentId, timeRange, logType, searchText],
     { keepPreviousData: true },
   );
@@ -54,8 +57,9 @@ export default function LogList({ environmentId, environmentName }: Props) {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filters"
+          value={logType === "type:" ? timeRange : logType}
           onChange={(value) => {
-            if (TIME_RANGES.some((r) => r.value === value)) {
+            if (value.startsWith("time:")) {
               setTimeRange(value);
             } else {
               setLogType(value);
@@ -69,7 +73,7 @@ export default function LogList({ environmentId, environmentName }: Props) {
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Log Type">
             {LOG_TYPES.map((type) => (
-              <List.Dropdown.Item key={type.value || "all"} title={type.title} value={type.value} />
+              <List.Dropdown.Item key={type.value} title={type.title} value={type.value} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>

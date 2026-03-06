@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { listApplications } from "../api/applications";
 import { listEnvironments } from "../api/environments";
 import { Application } from "../types/application";
@@ -49,7 +49,7 @@ export function useAppEnvSelector(): AppEnvState & {
     }
   }, [envs]);
 
-  function handleDropdownChange(value: string) {
+  const handleDropdownChange = useCallback((value: string) => {
     const [type, id] = value.split(":");
     if (type === "app") {
       setApplicationId(id);
@@ -57,26 +57,30 @@ export function useAppEnvSelector(): AppEnvState & {
     } else if (type === "env") {
       setEnvironmentId(id);
     }
-  }
+  }, []);
 
-  function Dropdown() {
-    return (
-      <List.Dropdown
-        tooltip="Select Environment"
-        onChange={handleDropdownChange}
-        value={environmentId ? `env:${environmentId}` : undefined}
-      >
-        {apps.map((app) => (
-          <List.Dropdown.Section key={app.id} title={app.attributes.name}>
-            {(applicationId === app.id ? envs : []).map((env) => (
-              <List.Dropdown.Item key={env.id} title={env.attributes.name} value={`env:${env.id}`} />
+  const Dropdown = useMemo<React.FC>(
+    () =>
+      function Dropdown() {
+        return (
+          <List.Dropdown
+            tooltip="Select Environment"
+            onChange={handleDropdownChange}
+            value={environmentId ? `env:${environmentId}` : undefined}
+          >
+            {apps.map((app) => (
+              <List.Dropdown.Section key={app.id} title={app.attributes.name}>
+                {(applicationId === app.id ? envs : []).map((env) => (
+                  <List.Dropdown.Item key={env.id} title={env.attributes.name} value={`env:${env.id}`} />
+                ))}
+                {applicationId !== app.id && <List.Dropdown.Item title="Select..." value={`app:${app.id}`} />}
+              </List.Dropdown.Section>
             ))}
-            {applicationId !== app.id && <List.Dropdown.Item title="Select..." value={`app:${app.id}`} />}
-          </List.Dropdown.Section>
-        ))}
-      </List.Dropdown>
-    );
-  }
+          </List.Dropdown>
+        );
+      },
+    [handleDropdownChange, environmentId, apps, applicationId, envs],
+  );
 
   return {
     applicationId,
