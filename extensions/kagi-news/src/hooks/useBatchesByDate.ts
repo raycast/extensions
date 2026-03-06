@@ -3,7 +3,7 @@
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 
-interface BatchItem {
+export interface BatchItem {
   id: string;
   createdAt: string;
   totalCategories: number;
@@ -17,11 +17,11 @@ export function useBatchesByDate(dateString: string, language: string) {
       ? `https://kite.kagi.com/api/batches?from=${encodeURIComponent(dateString)}T00:00:00Z&to=${encodeURIComponent(dateString)}T23:59:59Z&lang=${encodeURIComponent(language)}`
       : "",
     {
-      parseResponse: async (response) => {
+      parseResponse: async (response): Promise<{ batches: BatchItem[] }> => {
         if (!response.ok) {
           throw new Error(`Failed to fetch batches: ${response.status}`);
         }
-        return response.json();
+        return response.json() as Promise<{ batches: BatchItem[] }>;
       },
       execute: !!dateString,
     },

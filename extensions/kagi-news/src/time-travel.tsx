@@ -5,7 +5,7 @@ import { List, Action, ActionPanel, Icon, getPreferenceValues, Form } from "@ray
 import { useState } from "react";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
 import { useFetch, useCachedState } from "@raycast/utils";
-import { useBatchesByDate } from "./hooks/useBatchesByDate";
+import { useBatchesByDate, type BatchItem } from "./hooks/useBatchesByDate";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
 import { stripHtml, formatDateForAPI } from "./utils";
@@ -89,7 +89,7 @@ function BatchSelectorScreen({
           }
         />
       ) : (
-        batches.map((batch) => (
+        batches.map((batch: BatchItem) => (
           <List.Item
             key={batch.id}
             title={`${batch.totalClusters} clusters • ${batch.totalArticles} articles`}
@@ -117,9 +117,9 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
       ? `https://kite.kagi.com/api/batches/${selectedBatch}/categories?lang=${preferences.language || "en"}`
       : "",
     {
-      parseResponse: async (response) => {
+      parseResponse: async (response): Promise<BatchCategoriesData> => {
         if (!response.ok) throw new Error("Failed to load categories");
-        return response.json();
+        return response.json() as Promise<BatchCategoriesData>;
       },
       onData: (data) => {
         const worldCategory = data?.categories?.find(

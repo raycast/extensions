@@ -115,7 +115,7 @@ export default function Command() {
                 {currentCategory && (
                   <Action
                     title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
-                    icon={isFavorite(currentCategory.id) ? Icon.Star : Icon.CircleProgress0}
+                    icon={isFavorite(currentCategory.id) ? Icon.Star : Icon.CircleProgress}
                     onAction={() => toggleFavorite(currentCategory.id)}
                   />
                 )}

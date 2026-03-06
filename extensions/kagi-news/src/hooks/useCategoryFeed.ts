@@ -50,11 +50,11 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
     data: contentData,
     error: contentError,
   } = useFetch<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>(contentUrl, {
-    parseResponse: async (response) => {
+    parseResponse: async (response): Promise<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }> => {
       if (!response.ok) {
         throw new Error(`Failed to fetch content: ${response.status}`);
       }
-      return response.json();
+      return response.json() as Promise<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>;
     },
     execute: contentUrl !== "",
   });

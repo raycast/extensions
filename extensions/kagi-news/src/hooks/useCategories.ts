@@ -14,9 +14,12 @@ export function useCategories() {
       if (!response.ok) {
         throw new Error("Failed to load categories");
       }
-      const json = await response.json();
+      const json = (await response.json()) as {
+        categories: { categoryName: string; id: string }[];
+        hasOnThisDay?: boolean;
+      };
 
-      const categories: Category[] = json.categories.map((cat: { categoryName: string; id: string }) => ({
+      const categories: Category[] = json.categories.map((cat) => ({
         name: cat.categoryName,
         id: cat.id,
       }));
