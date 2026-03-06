@@ -26,7 +26,8 @@ export function withRateLimitRetry(fetchFn: FetchFn): FetchFn {
         minTimeout: 0,
         maxTimeout: 0,
         onRetry: (err, attempt) => {
-          console.log(`Rate limit retry attempt ${attempt}: ${err.message}`);
+          const message = err instanceof Error ? err.message : String(err);
+          console.log(`Rate limit retry attempt ${attempt}: ${message}`);
         },
       },
     );
