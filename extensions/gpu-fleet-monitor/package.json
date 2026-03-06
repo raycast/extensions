@@ -1,0 +1,152 @@
+{
+  "name": "gpu-fleet-monitor",
+  "title": "GPU Fleet Monitor",
+  "description": "Monitor GPU/CPU usage across SSH hosts. Connect via Ghostty, Cursor, or tmux.",
+  "version": "0.1.0",
+  "icon": "command-icon.png",
+  "author": "kazzart",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Productivity"],
+  "platforms": ["macOS"],
+  "scripts": {
+    "dev": "npx @raycast/api@latest develop",
+    "build": "npx @raycast/api@latest build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.90.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.6.0"
+  },
+  "commands": [
+    {
+      "name": "gpu-fleet",
+      "title": "GPU Fleet",
+      "description": "Monitor GPU and CPU usage across all SSH hosts",
+      "mode": "view",
+      "keywords": ["gpu", "ssh", "monitor", "fleet", "cuda"]
+    },
+    {
+      "name": "add-host",
+      "title": "Add Host",
+      "description": "Add a new SSH host from a connection string",
+      "mode": "view",
+      "keywords": ["ssh", "host", "add", "cloud"]
+    },
+    {
+      "name": "quick-connect",
+      "title": "Quick Connect Best GPU",
+      "description": "Connect to the best available free GPU host",
+      "mode": "no-view",
+      "keywords": ["gpu", "connect", "best", "free"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "title": "Terminal Application",
+      "description": "Which terminal to use for SSH connections",
+      "type": "dropdown",
+      "required": false,
+      "default": "ghostty",
+      "data": [
+        { "title": "Ghostty", "value": "ghostty" },
+        { "title": "iTerm", "value": "iterm" },
+        { "title": "Terminal", "value": "terminal" }
+      ]
+    },
+    {
+      "name": "editorApp",
+      "title": "Editor Application",
+      "description": "Which editor to use for remote SSH connections",
+      "type": "dropdown",
+      "required": false,
+      "default": "cursor",
+      "data": [
+        { "title": "Cursor", "value": "cursor" },
+        { "title": "VS Code", "value": "vscode" }
+      ]
+    },
+    {
+      "name": "workPatterns",
+      "title": "Work Host Patterns",
+      "description": "Comma-separated glob patterns to classify hosts as work (e.g. gpu-*, ml-server-*). Leave empty to use identity file matching.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "gpu-*, ml-*"
+    },
+    {
+      "name": "personalPatterns",
+      "title": "Personal Host Patterns",
+      "description": "Comma-separated glob patterns to classify hosts as personal. Leave empty to use identity file matching.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "home-server, pi-*"
+    },
+    {
+      "name": "workIdentityFiles",
+      "title": "Work Identity Files",
+      "description": "Comma-separated SSH identity file paths. Hosts using these keys are classified as work.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.ssh/work_key"
+    },
+    {
+      "name": "personalIdentityFiles",
+      "title": "Personal Identity Files",
+      "description": "Comma-separated SSH identity file paths. Hosts using these keys are classified as personal.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.ssh/personal_key"
+    },
+    {
+      "name": "excludedHosts",
+      "title": "Excluded Hosts",
+      "description": "Comma-separated hostnames to exclude from the fleet list (github.com and * are always excluded).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "git.example.com"
+    },
+    {
+      "name": "defaultIdentityFile",
+      "title": "Default Identity File for New Hosts",
+      "description": "Identity file path to use when adding new hosts via the Add Host command. Leave empty to omit.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.ssh/my_key"
+    },
+    {
+      "name": "defaultView",
+      "title": "Default View",
+      "description": "Which hosts to show by default",
+      "type": "dropdown",
+      "required": false,
+      "default": "work",
+      "data": [
+        { "title": "Work", "value": "work" },
+        { "title": "Personal", "value": "personal" },
+        { "title": "All", "value": "all" }
+      ]
+    },
+    {
+      "name": "sshTimeout",
+      "title": "SSH Timeout (seconds)",
+      "description": "Timeout for SSH connections",
+      "type": "textfield",
+      "required": false,
+      "default": "4"
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval (seconds)",
+      "description": "How often to refresh host stats",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    }
+  ]
+}
