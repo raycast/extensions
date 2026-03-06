@@ -54,7 +54,7 @@ export async function getAccounts(accessToken: string): Promise<TimelyAccount[]>
     const text = await res.text();
     throw new Error(`Timely API: ${res.status} ${res.statusText}${text ? ` - ${text}` : ""}`);
   }
-  return res.json();
+  return (await res.json()) as TimelyAccount[];
 }
 
 export async function getProjects(accessToken: string, accountId: number): Promise<TimelyProject[]> {
@@ -63,7 +63,7 @@ export async function getProjects(accessToken: string, accountId: number): Promi
     const text = await res.text();
     throw new Error(`Timely API: ${res.status} ${res.statusText}${text ? ` - ${text}` : ""}`);
   }
-  return res.json();
+  return (await res.json()) as TimelyProject[];
 }
 
 export async function getClients(accessToken: string, accountId: number): Promise<TimelyClient[]> {
@@ -72,7 +72,7 @@ export async function getClients(accessToken: string, accountId: number): Promis
     const text = await res.text();
     throw new Error(`Timely API: ${res.status} ${res.statusText}${text ? ` - ${text}` : ""}`);
   }
-  return res.json();
+  return (await res.json()) as TimelyClient[];
 }
 
 export async function getCurrentUser(accessToken: string, accountId: number): Promise<TimelyUser> {
@@ -81,7 +81,7 @@ export async function getCurrentUser(accessToken: string, accountId: number): Pr
     const text = await res.text();
     throw new Error(`Timely API: ${res.status} ${res.statusText}${text ? ` - ${text}` : ""}`);
   }
-  return res.json();
+  return (await res.json()) as TimelyUser;
 }
 
 export async function createProject(
@@ -105,7 +105,7 @@ export async function createProject(
     const text = await res.text();
     throw new Error(`Timely API: ${res.status} ${res.statusText}${text ? ` - ${text}` : ""}`);
   }
-  return res.json();
+  return (await res.json()) as TimelyProject;
 }
 
 export function projectUrl(accountId: number, projectId: number): string {
