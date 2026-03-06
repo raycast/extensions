@@ -13,6 +13,9 @@
     "macOS",
     "Windows"
   ],
+  "categories": [
+    "Developer Tools"
+  ],
   "keywords": [
     "Productivity"
   ],

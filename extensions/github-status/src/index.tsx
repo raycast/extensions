@@ -56,7 +56,7 @@ export default function Command() {
           <Detail.Metadata.TagList title="Components Status">
             {data?.components
               .filter((component) => component.name !== "Visit www.githubstatus.com for more information")
-              .sort((a, b) => a.position - b.position)
+              .toSorted((a, b) => a.position - b.position)
               .map((component) => (
                 <Detail.Metadata.TagList.Item
                   key={component.name}
@@ -65,30 +65,30 @@ export default function Command() {
                 />
               ))}
           </Detail.Metadata.TagList>
-          {data?.scheduled_maintenances.flatMap((maintainence) => [
-            <Detail.Metadata.Separator key={`${maintainence.id}-separator`} />,
+          {data?.scheduled_maintenances.flatMap((maintenance) => [
+            <Detail.Metadata.Separator key={`${maintenance.id}-separator`} />,
             <Detail.Metadata.Link
-              key={maintainence.id}
-              title="Scheduled Maintainence"
-              text={maintainence.name.replace(/^Scheduled Maintenance for /, "")}
-              target={maintainence.shortlink}
+              key={maintenance.id}
+              title="Scheduled Maintenance"
+              text={maintenance.name.replace(/^Scheduled Maintenance for /, "")}
+              target={maintenance.shortlink}
             />,
             <Detail.Metadata.Label
-              key={`${maintainence.id}-scheduled`}
+              key={`${maintenance.id}-scheduled`}
               title="Scheduled for"
-              text={`${new Date(maintainence.scheduled_for).toLocaleString([], {
+              text={`${new Date(maintenance.scheduled_for).toLocaleString([], {
                 month: "long",
                 day: "numeric",
                 hour: "numeric",
                 minute: "numeric",
-              })} to ${new Date(maintainence.scheduled_until).toLocaleString([], {
+              })} to ${new Date(maintenance.scheduled_until).toLocaleString([], {
                 hour: "numeric",
                 minute: "numeric",
               })}`}
             />,
-            maintainence.components.length ? (
-              <Detail.Metadata.TagList key={`${maintainence.id}-components`} title="Affected Components">
-                {maintainence.components.map((component) => (
+            maintenance.components.length ? (
+              <Detail.Metadata.TagList key={`${maintenance.id}-components`} title="Affected Components">
+                {maintenance.components.map((component) => (
                   <Detail.Metadata.TagList.Item
                     key={component.name}
                     text={component.name}
