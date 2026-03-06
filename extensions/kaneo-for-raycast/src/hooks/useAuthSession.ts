@@ -2,11 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { Session } from "../types";
 
-interface Preferences {
-  apiToken: string;
-  instanceUrl: string;
-}
-
 export function useAuthSession() {
   const prefs = getPreferenceValues<Preferences>();
   const [sessionData, setSessionData] = useCachedState<Session | null>("auth-session", null);
