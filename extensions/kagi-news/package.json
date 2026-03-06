@@ -1,5 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
   "name": "kagi-news",
   "title": "Kagi News",
   "description": "Read and explore Kagi News articles and sources seamlessly in Raycast",
