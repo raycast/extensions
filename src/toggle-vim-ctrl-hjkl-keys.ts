@@ -40,24 +40,26 @@ export default async function Command() {
     const data = await readFile(CONFIG_PATH, "utf8");
     const config: KarabinerConfig = JSON.parse(data);
 
-    let found = false;
+    const matchedProfiles: string[] = [];
     let wasEnabled = false;
+    let firstMatch = true;
 
     for (const profile of config.profiles) {
       if (!profile.complex_modifications?.rules) continue;
 
       for (const rule of profile.complex_modifications.rules) {
         if (rule.description === ruleTitle) {
-          wasEnabled = rule.enabled !== false; // undefined or true = enabled
-          rule.enabled = !wasEnabled;
-          found = true;
+          if (firstMatch) {
+            wasEnabled = rule.enabled !== false; // undefined or true = enabled
+            firstMatch = false;
+          }
           break;
         }
       }
-      if (found) break;
+      if (!firstMatch) break;
     }
 
-    if (!found) {
+    if (firstMatch) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Rule Not Found",
@@ -66,10 +68,25 @@ export default async function Command() {
       return;
     }
 
+    const newState = !wasEnabled;
+    for (const profile of config.profiles) {
+      if (!profile.complex_modifications?.rules) continue;
+
+      for (const rule of profile.complex_modifications.rules) {
+        if (rule.description === ruleTitle) {
+          rule.enabled = newState;
+          matchedProfiles.push(profile.name);
+        }
+      }
+    }
+
     await writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), "utf8");
 
-    const newState = wasEnabled ? "Disabled" : "Enabled";
-    await showHUD(`${wasEnabled ? "⏸" : "▶️"} ${ruleTitle}: ${newState}`);
+    const stateLabel = newState ? "Enabled" : "Disabled";
+    const stateIcon = newState ? "▶️" : "⏸";
+    const profileInfo = matchedProfiles.length > 1 ? ` (${matchedProfiles.length} profiles)` : "";
+
+    await showHUD(`${stateIcon} ${ruleTitle}: ${newState}${profileInfo}`);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
