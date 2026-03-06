@@ -1,6 +1,6 @@
 # Single Disk Eject Changelog
 
-## [Dependency update] {PR_MERGE_DATE}
+## [Dependency update] - {PR_MERGE_DATE}
 - Updated dependencies
   - Updated to Node.js 22 and latest Raycast API (v1.103.10)
   - Migrated to new Toast and Action APIs
