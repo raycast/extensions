@@ -49,7 +49,3 @@ Form-based container creation with support for:
 - Port mappings, environment variables, volume mounts
 - Resource limits (CPU, memory)
 - Flags: detach, auto-remove, Rosetta, read-only, init, SSH forwarding
-
-### Container Status (Menu Bar)
-
-Persistent menu bar icon showing the number of running containers. Click to see stacks grouped by network — click any container to toggle start/stop. Quick links to open the full extension or run a new container.

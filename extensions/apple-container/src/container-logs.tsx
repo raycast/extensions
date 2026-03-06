@@ -1,6 +1,6 @@
 import { Detail, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { CONTAINER_BIN, Container } from "./lib/container";
+import { CONTAINER_BIN, APPLE_EPOCH_OFFSET, Container } from "./lib/container";
 import { relativeTime, statusIcon, formatCpus, formatMemory } from "./lib/format";
 import { useStreamingLogs } from "./lib/hooks";
 import { useState, useMemo } from "react";
@@ -40,7 +40,7 @@ export default function ContainerLogs({ name, container }: { name: string; conta
       return {
         status: info.status || "",
         image: config.image?.reference || "",
-        startedAt: info.startedDate ? new Date((info.startedDate + 978307200) * 1000).toISOString() : undefined,
+        startedAt: info.startedDate ? new Date((info.startedDate + APPLE_EPOCH_OFFSET) * 1000).toISOString() : undefined,
         cpus: Number(resources.cpus || 0),
         memoryInBytes: Number(resources.memoryInBytes || 0),
         networkName: configNets[0]?.network || "",

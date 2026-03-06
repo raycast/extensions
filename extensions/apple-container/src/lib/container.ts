@@ -6,7 +6,7 @@ const execFileAsync = promisify(execFile);
 export const CONTAINER_BIN = "/usr/local/bin/container";
 
 // Seconds between Unix epoch (1970-01-01) and Apple CFAbsoluteTime epoch (2001-01-01)
-const APPLE_EPOCH_OFFSET = 978307200;
+export const APPLE_EPOCH_OFFSET = 978307200;
 
 export interface Container {
   name: string;
