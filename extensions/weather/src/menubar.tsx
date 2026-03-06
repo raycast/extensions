@@ -58,22 +58,13 @@ function launchWeatherCommandWithDate(context: LaunchContextDay) {
   launchCommand({ name: "index", type: LaunchType.UserInitiated, context: context });
 }
 
-function getAppearancePreferences(): { showMenuIcon: boolean; showMenuText: boolean } {
-  const prefs = getPreferenceValues();
-  const showMenuText = prefs.showmenutext as boolean | true;
-  const showMenuIcon = prefs.showmenuicon as boolean | true;
-  return {
-    showMenuIcon,
-    showMenuText,
-  };
-}
+const prefs = getPreferenceValues<Preferences.Menubar>();
 
 function getWeatherMenuIcon(curcon: WeatherConditions | undefined): string {
-  const { showMenuIcon, showMenuText } = getAppearancePreferences();
-  if (!showMenuIcon && !showMenuText) {
+  if (!prefs.showmenuicon && !prefs.showmenutext) {
     return WeatherIcons.Cloud;
   }
-  if (!showMenuIcon) {
+  if (!prefs.showmenuicon) {
     return "";
   }
   return curcon ? getWeatherCodeIcon(curcon.weatherCode) : "weather.png";
@@ -412,15 +403,13 @@ function WeatherForecastDay(props: { day: WeatherData; fullTitle: string }) {
 export default function MenuCommand(): React.ReactElement {
   const { data, error, isLoading, fetchDate } = useWeather(getDefaultQuery());
   const { title, curcon, weatherDesc, area } = getMetaData(data);
-  const { showMenuText } = getAppearancePreferences();
-
   const temp = getCurrentTemperature(curcon);
 
   return (
     <WeatherMenuBarExtra
       data={data}
       error={error}
-      title={showMenuText ? temp : undefined}
+      title={prefs.showmenutext ? temp : undefined}
       icon={{ source: getWeatherMenuIcon(curcon), tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip={weatherDesc}
