@@ -43,7 +43,7 @@ export function useAuthSession() {
       setSessionData(session);
       setLastToken(apiToken);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(errorMessage);
       setSessionData(null);
     } finally {
