@@ -1,5 +1,5 @@
 import { Action, getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
+
 import { openInApp } from "./ui";
 
 export function EditorActions({ repoPath }: { repoPath: string }) {

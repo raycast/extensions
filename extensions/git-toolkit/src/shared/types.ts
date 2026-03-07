@@ -1,13 +1,3 @@
-import { Application } from "@raycast/api";
-
-export interface Preferences {
-  projectPaths: string;
-  editorApp: Application;
-  editorAppAlt: Application;
-  terminalApp: Application;
-  maxParallelProcesses: string;
-}
-
 export type RepoStatus = "idle" | "pulling" | "updated" | "up-to-date" | "dirty" | "error";
 
 export interface Repo {

@@ -1,3 +1,3 @@
-# Git Tookit Changelog
+# Git Toolkit Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

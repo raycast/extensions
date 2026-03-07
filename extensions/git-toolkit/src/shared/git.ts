@@ -4,7 +4,7 @@ import { readdirSync, existsSync, statSync } from "fs";
 import { join, basename } from "path";
 import { homedir } from "os";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, ProjectGroup, Repo, RepoStatus } from "./types";
+import { ProjectGroup, Repo, RepoStatus } from "./types";
 
 const execFileAsync = promisify(execFile);
 

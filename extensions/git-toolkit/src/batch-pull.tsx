@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, List, Toast, showToast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Preferences, Repo, RepoStatus, ProjectGroup } from "./shared/types";
+import { Repo, RepoStatus, ProjectGroup } from "./shared/types";
 import { getProjectGroups, countRepos, scanRepos, pullRepo, parallelPull } from "./shared/git";
 import { getStatusIcon, getStatusTag } from "./shared/ui";
 import { EditorActions, OpenInTerminal, CopyBranchName } from "./shared/actions";

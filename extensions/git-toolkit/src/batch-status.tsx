@@ -10,7 +10,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Preferences, ProjectGroup } from "./shared/types";
+import { ProjectGroup } from "./shared/types";
 import { getProjectGroups, countRepos, scanRepos, isDirty, getAheadBehind, pullRepo } from "./shared/git";
 import { EditorActions, OpenInTerminal, CopyBranchName } from "./shared/actions";
 
