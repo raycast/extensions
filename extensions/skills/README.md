@@ -11,7 +11,8 @@ Browse, search, and manage AI agent skills from [Skills](https://skills.sh) dire
 - View, update, and remove installed skills
 - Check for skill updates with "Update available" badges
 - Filter installed skills by agent
-- View skill details inline with SKILL.md content (toggle with Cmd+D)
+- View skill details inline with SKILL.md content, including description, license, compatibility, and allowed tools (toggle with Cmd+D)
+- See GitHub star counts in the detail panel
 - Copy install commands
 - Quick access to GitHub repositories
 

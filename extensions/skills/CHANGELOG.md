@@ -1,5 +1,11 @@
 # Changelog
 
+## [Rich Skill Metadata] - {PR_MERGE_DATE}
+
+- Display description, license, compatibility, and allowed tools from SKILL.md frontmatter in the detail panel
+- Show GitHub star count alongside install count
+- Show skill description as list item subtitle when the detail panel is hidden
+
 ## [Update Skills] - 2026-03-01
 
 - Check for available skill updates on launch
