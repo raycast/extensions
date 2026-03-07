@@ -1,6 +1,6 @@
 # HideMyEmail Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-03-17
 
 - Updated response message upon failed login
 
