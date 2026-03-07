@@ -1,4 +1,4 @@
-## [Initial Version] - 2026-03-04
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added a Raycast command for comparing two pasted lists line by line.
 - Added case-sensitive and case-insensitive comparison modes.
