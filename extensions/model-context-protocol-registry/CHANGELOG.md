@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Sanity MCP Server] - 2026-03-07
+
+Add official Sanity MCP Server to registry for direct access to Sanity projects.
+
 ## [Add RouteMesh MCP Server] - 2026-03-05
 
 Add official RouteMesh MCP Server to registry for multi-chain EVM RPC access with RouteMesh routing and failover.
