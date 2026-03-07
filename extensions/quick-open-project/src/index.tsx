@@ -149,7 +149,7 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 
 function open(app: string, path: string) {
   if (process.platform === "win32") {
-    spawn("cmd", ["/c", "start", "", app, path], { detached: true });
+    spawn("cmd", ["/c", "start", "", app, path], { detached: true, stdio: "ignore" }).unref();
   } else {
     spawn("open", ["-a", app, path]);
   }
