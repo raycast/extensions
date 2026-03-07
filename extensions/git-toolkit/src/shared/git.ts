@@ -85,13 +85,21 @@ export async function isDirty(repoPath: string): Promise<boolean> {
   }
 }
 
-export async function getAheadBehind(repoPath: string): Promise<{ ahead: number; behind: number }> {
+export async function getAheadBehind(
+  repoPath: string,
+): Promise<{ ahead: number; behind: number; noUpstream: boolean }> {
   try {
     const { stdout } = await git(repoPath, "rev-list", "--left-right", "--count", "HEAD...@{upstream}");
     const [ahead, behind] = stdout.trim().split(/\s+/).map(Number);
-    return { ahead: ahead || 0, behind: behind || 0 };
+    return { ahead: ahead || 0, behind: behind || 0, noUpstream: false };
   } catch {
-    return { ahead: 0, behind: 0 };
+    // Check if it's specifically a no-upstream error
+    try {
+      await git(repoPath, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}");
+      return { ahead: 0, behind: 0, noUpstream: false };
+    } catch {
+      return { ahead: 0, behind: 0, noUpstream: true };
+    }
   }
 }
 

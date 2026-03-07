@@ -43,7 +43,7 @@
       "title": "Editor",
       "description": "The editor app to use when opening a project",
       "type": "appPicker",
-      "required": true
+      "required": false
     },
     {
       "name": "editorAppAlt",

@@ -14,7 +14,7 @@ import { ProjectGroup } from "./shared/types";
 import { getProjectGroups, countRepos, scanRepos, isDirty, getAheadBehind, pullRepo } from "./shared/git";
 import { EditorActions, OpenInTerminal, CopyBranchName } from "./shared/actions";
 
-type StatusCategory = "dirty" | "diverged" | "ahead" | "behind" | "clean";
+type StatusCategory = "dirty" | "diverged" | "ahead" | "behind" | "no-upstream" | "clean";
 
 interface StatusRepo {
   name: string;
@@ -23,14 +23,16 @@ interface StatusRepo {
   dirty: boolean;
   ahead: number;
   behind: number;
+  noUpstream: boolean;
   category: StatusCategory;
 }
 
-function categorize(dirty: boolean, ahead: number, behind: number): StatusCategory {
+function categorize(dirty: boolean, ahead: number, behind: number, noUpstream: boolean): StatusCategory {
   if (dirty) return "dirty";
   if (ahead > 0 && behind > 0) return "diverged";
   if (ahead > 0) return "ahead";
   if (behind > 0) return "behind";
+  if (noUpstream) return "no-upstream";
   return "clean";
 }
 
@@ -44,6 +46,8 @@ function getStatusIcon(category: StatusCategory) {
       return { source: Icon.ArrowUp, tintColor: Color.Blue };
     case "behind":
       return { source: Icon.ArrowDown, tintColor: Color.Purple };
+    case "no-upstream":
+      return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
     case "clean":
       return { source: Icon.CheckCircle, tintColor: Color.Green };
   }
@@ -78,7 +82,8 @@ function StatusList({ group }: { group: ProjectGroup }) {
                 dirty: dirtyResult,
                 ahead: abResult.ahead,
                 behind: abResult.behind,
-                category: categorize(dirtyResult, abResult.ahead, abResult.behind),
+                noUpstream: abResult.noUpstream,
+                category: categorize(dirtyResult, abResult.ahead, abResult.behind, abResult.noUpstream),
               } as StatusRepo;
             }),
           );
@@ -101,48 +106,55 @@ function StatusList({ group }: { group: ProjectGroup }) {
       if (isPulling) return;
       setIsPulling(true);
       const repo = repos[index];
-      const toast = await showToast({ style: Toast.Style.Animated, title: `Pulling ${repo.name}...` });
-      const result = await pullRepo(repo.path);
+      try {
+        const toast = await showToast({ style: Toast.Style.Animated, title: `Pulling ${repo.name}...` });
+        const result = await pullRepo(repo.path);
 
-      // Re-scan this repo's status after pull
-      const [dirtyResult, abResult] = await Promise.all([isDirty(repo.path), getAheadBehind(repo.path)]);
-      setRepos((prev) => {
-        const next = [...prev];
-        next[index] = {
-          ...next[index],
-          dirty: dirtyResult,
-          ahead: abResult.ahead,
-          behind: abResult.behind,
-          category: categorize(dirtyResult, abResult.ahead, abResult.behind),
-        };
-        return next;
-      });
+        // Re-scan this repo's status after pull
+        const [dirtyResult, abResult] = await Promise.all([isDirty(repo.path), getAheadBehind(repo.path)]);
+        setRepos((prev) => {
+          const next = [...prev];
+          next[index] = {
+            ...next[index],
+            dirty: dirtyResult,
+            ahead: abResult.ahead,
+            behind: abResult.behind,
+            noUpstream: abResult.noUpstream,
+            category: categorize(dirtyResult, abResult.ahead, abResult.behind, abResult.noUpstream),
+          };
+          return next;
+        });
 
-      if (result.status === "error") {
-        toast.style = Toast.Style.Failure;
-        toast.title = `Failed to pull ${repo.name}`;
-        toast.message = result.error;
-      } else if (result.status === "dirty") {
-        toast.style = Toast.Style.Failure;
-        toast.title = `${repo.name} has uncommitted changes`;
-      } else if (result.status === "updated") {
-        toast.style = Toast.Style.Success;
-        toast.title = `${repo.name} updated`;
-      } else {
-        toast.style = Toast.Style.Success;
-        toast.title = `${repo.name} already up to date`;
+        if (result.status === "error") {
+          toast.style = Toast.Style.Failure;
+          toast.title = `Failed to pull ${repo.name}`;
+          toast.message = result.error;
+        } else if (result.status === "dirty") {
+          toast.style = Toast.Style.Failure;
+          toast.title = `${repo.name} has uncommitted changes`;
+        } else if (result.status === "updated") {
+          toast.style = Toast.Style.Success;
+          toast.title = `${repo.name} updated`;
+        } else {
+          toast.style = Toast.Style.Success;
+          toast.title = `${repo.name} already up to date`;
+        }
+      } catch (error) {
+        showToast({ style: Toast.Style.Failure, title: "Pull failed", message: String(error) });
+      } finally {
+        setIsPulling(false);
       }
-      setIsPulling(false);
     },
     [repos, isPulling],
   );
 
-  const sectionOrder: StatusCategory[] = ["dirty", "diverged", "ahead", "behind", "clean"];
+  const sectionOrder: StatusCategory[] = ["dirty", "diverged", "ahead", "behind", "no-upstream", "clean"];
   const sectionTitles: Record<StatusCategory, string> = {
     dirty: "Dirty",
     diverged: "Diverged",
     ahead: "Ahead",
     behind: "Behind",
+    "no-upstream": "No Upstream",
     clean: "Clean",
   };
 
@@ -151,8 +163,11 @@ function StatusList({ group }: { group: ProjectGroup }) {
     if (repo.dirty) accessories.push({ tag: { value: "dirty", color: Color.Yellow } });
     if (repo.ahead > 0) accessories.push({ tag: { value: `↑${repo.ahead}`, color: Color.Blue } });
     if (repo.behind > 0) accessories.push({ tag: { value: `↓${repo.behind}`, color: Color.Purple } });
-    if (!repo.dirty && repo.ahead === 0 && repo.behind === 0)
+    if (repo.noUpstream) {
+      accessories.push({ tag: { value: "no upstream", color: Color.SecondaryText } });
+    } else if (!repo.dirty && repo.ahead === 0 && repo.behind === 0) {
       accessories.push({ tag: { value: "clean", color: Color.Green } });
+    }
 
     return (
       <List.Item

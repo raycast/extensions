@@ -9,7 +9,7 @@ Batch git operations across multiple project groups.
 Pull all git repos in a project group with a single action.
 
 - **Parallel Execution** — Configurable concurrency for fast batch operations
-- **Smart Retry** — Retries with `--ff-only` up to 3 times, falls back to normal `git pull`
+- **Safe Pull** — Uses `--ff-only` to avoid unexpected merge commits; diverged repos are reported as errors
 - **Status Overview** — Results grouped by status: Failed, Uncommitted Changes, Updated, Up to Date
 - **Dirty Repo Detection** — Skips repos with uncommitted changes to avoid conflicts
 
@@ -58,7 +58,7 @@ View the git status of all repos in a project group at a glance.
 | Name | Description | Required |
 | --- | --- | --- |
 | Project Paths | Comma-separated paths to project directories | Yes |
-| Editor | Primary editor app for opening projects | Yes |
+| Editor | Primary editor app for opening projects | No |
 | Alternate Editor | Secondary editor app | No |
 | Terminal App | Terminal app for opening projects | No |
 | Max Parallel Processes | Maximum concurrent git pull processes (default: 10) | No |
