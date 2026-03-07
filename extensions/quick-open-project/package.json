@@ -10,7 +10,12 @@
     "bjw-s",
     "pernielsentikaer",
     "mattts",
-    "canac"
+    "canac",
+    "Logan-8f"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [

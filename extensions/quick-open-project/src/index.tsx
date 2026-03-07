@@ -156,7 +156,11 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 }
 
 function open(app: string, path: string) {
-  spawn("open", ["-a", app, path], { env: {} });
+  if (process.platform === "win32") {
+    spawn("cmd", ["/c", "start", "", app, path], { detached: true });
+  } else {
+    spawn("open", ["-a", app, path]);
+  }
 }
 
 export default function Command() {
