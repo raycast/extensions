@@ -5,7 +5,6 @@ import {
   List,
   closeMainWindow,
   environment,
-  Application,
   Action,
   Keyboard,
   getPreferenceValues,
@@ -19,14 +18,6 @@ import { useMemo, useState } from "react";
 import fuzzysort = require("fuzzysort");
 import config = require("parse-git-config");
 import gh = require("parse-github-url");
-
-interface Preferences {
-  paths: string;
-  includeWorkspaces: boolean;
-  editorApp: Application;
-  editorAppAlt: Application;
-  terminalApp: Application;
-}
 
 interface Remote {
   url: string;
@@ -100,7 +91,7 @@ function searchProjects(query?: string): {
   projects: ProjectList;
 } {
   const projectList = useMemo(() => {
-    const projectPaths = getPreferenceValues<Preferences>()
+    const projectPaths = getPreferenceValues<Preferences.Index>()
       .paths.split(",")
       .map((s) => s.trim());
     const projects = projectPaths
@@ -113,7 +104,7 @@ function searchProjects(query?: string): {
       .filter(
         (path) =>
           statSync(path)?.isDirectory() ||
-          (getPreferenceValues<Preferences>().includeWorkspaces &&
+          (getPreferenceValues<Preferences.Index>().includeWorkspaces &&
             statSync(path)?.isFile() &&
             path.endsWith(".code-workspace")),
       )
@@ -167,9 +158,9 @@ function open(app: string, path: string) {
 export default function Command() {
   const [searchQuery, setSearchQuery] = useState<string>();
   const { projects } = searchProjects(searchQuery);
-  const editorApp = getPreferenceValues<Preferences>().editorApp;
-  const editorAppAlt = getPreferenceValues<Preferences>().editorAppAlt;
-  const terminalApp = getPreferenceValues<Preferences>().terminalApp;
+  const editorApp = getPreferenceValues<Preferences.Index>().editorApp!;
+  const editorAppAlt = getPreferenceValues<Preferences.Index>().editorAppAlt;
+  const terminalApp = getPreferenceValues<Preferences.Index>().terminalApp!;
 
   return (
     <List onSearchTextChange={setSearchQuery} selectedItemId={projects[0] ? projects[0].fullPath : ""}>
@@ -255,7 +246,7 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
               <Action.ShowInFinder
-                title={"Open in Finder"}
+                title={process.platform === "win32" ? "Open in File Explorer" : "Open in Finder"}
                 key="finder"
                 onShow={() => updateFrecency(searchQuery, project)}
                 path={project.fullPath}
