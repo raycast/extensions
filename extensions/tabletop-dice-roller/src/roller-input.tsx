@@ -69,6 +69,10 @@ export default function Roll() {
         </ActionPanel>
       }
     >
+      <Form.Description
+        title="Supported Expressions"
+        text="Use dice notation (e.g., 1d20) with +, -, *, / operators. Example: 2d6 + 3d4 - 1"
+      />
       <Form.TextField id="name" title="Dice Roll" placeholder="Enter dice notation (e.g., 1d20 + 5)" />
       {history.length > 0 && (
         <>
