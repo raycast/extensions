@@ -64,7 +64,7 @@ export async function scanRepos(groupPath: string): Promise<Repo[]> {
       try {
         if (statSync(fullPath).isDirectory() && existsSync(join(fullPath, ".git"))) {
           const branch = await getBranch(fullPath);
-          return { name: entry, path: fullPath, status: "idle" as const, branch };
+          return { name: entry, path: fullPath, status: "idle" as RepoStatus, branch };
         }
       } catch {
         // skip invalid entries
