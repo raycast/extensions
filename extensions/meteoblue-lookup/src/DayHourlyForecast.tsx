@@ -84,7 +84,6 @@ export function DayHourlyForecast({
                 ? "Now"
                 : itemDate.toLocaleDateString([], {
                     weekday: "short",
-                    hour: "2-digit",
                   });
 
             return (
