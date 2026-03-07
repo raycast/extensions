@@ -73,7 +73,7 @@ export function InstalledSkillListItem({
     <List.Item
       title={skill.name}
       subtitle={isShowingDetail ? undefined : agentsText}
-      icon={{ source: Icon.Hammer, tintColor: Color.Purple }}
+      icon={{ source: Icon.Hammer, tintColor: skill.hasUpdate ? Color.Orange : Color.Purple }}
       accessories={
         isShowingDetail
           ? []
@@ -110,7 +110,7 @@ export function InstalledSkillListItem({
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            {skill.hasUpdate && <UpdateSkillAction onUpdate={onUpdate} />}
+            {skill.hasUpdate && <UpdateSkillAction skillName={skill.name} onUpdate={onUpdate} />}
             <RemoveSkillAction skill={skill} onRemove={onUpdate} />
           </ActionPanel.Section>
           <Action

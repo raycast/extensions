@@ -119,6 +119,13 @@ export async function checkForUpdates(): Promise<string[]> {
 }
 
 /**
+ * Update a single installed skill by name.
+ */
+export async function updateSkill(skillName: string): Promise<void> {
+  await execWithPath(`${SKILLS_CLI} update ${shellEscape(skillName)} -y`);
+}
+
+/**
  * Update all installed skills.
  */
 export async function updateAllSkills(): Promise<void> {

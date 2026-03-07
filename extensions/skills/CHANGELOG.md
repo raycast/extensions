@@ -1,5 +1,11 @@
 # Changelog
 
+## [Per-Skill Update] - {PR_MERGE_DATE}
+
+- Highlight outdated skills with an orange hammer icon in the installed skills list
+- Show individual "Updates Available" section with count when updates exist
+- Update a single skill directly from its action panel (Cmd+Shift+U)
+
 ## [Fix Duplicate Audit Error Toast] - 2026-03-11
 
 - Fix error toast showing twice when re-selecting a skill with a failed audit fetch
