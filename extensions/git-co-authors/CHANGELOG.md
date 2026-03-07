@@ -1,6 +1,6 @@
 # Github Co-Authors Changelog
 
-## [Update] - 2026-03-06
+## [Update] - {PR_MERGE_DATE}
 - Updated Choose Co-Author action with: frecency based sorting, and empty list view
 - New action for loading authors from folders
 - New action for clearing authors
