@@ -1,13 +1,14 @@
 import { Action, ActionPanel, Grid, Icon, Image } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
-import { getDisplayName, getPhotoUrl, getPrimaryEmail } from "../helpers";
-import { Person } from "../types";
-import { SortField, ViewMode } from "../search-contacts";
+import { getDisplayName, getPhotoUrl, getPrimaryEmail, groupByLetter, SortField } from "../helpers";
+import { ContactGroup, Person } from "../types";
+import { ViewMode } from "../search-contacts";
 import ContactActions from "./ContactActions";
 import ContactForm from "./ContactForm";
 
 interface ContactGridProps {
   contacts: Person[];
+  groups: ContactGroup[];
   isLoading: boolean;
   viewMode: ViewMode;
   sortField: SortField;
@@ -26,28 +27,6 @@ function ViewModeDropdown({ value, onChange }: { value: ViewMode; onChange: (val
       <Grid.Dropdown.Item title="Grid" value="grid" icon={Icon.AppWindowGrid3x3} />
     </Grid.Dropdown>
   );
-}
-
-function groupByLetter(contacts: Person[], sortField: SortField): [string, Person[]][] {
-  const groups: Record<string, Person[]> = {};
-  for (const contact of contacts) {
-    let key: string;
-    if (sortField === "last") {
-      const lastName = contact.names?.[0]?.familyName;
-      const ch = lastName ? lastName.charAt(0).toUpperCase() : "";
-      key = /[A-Z]/.test(ch) ? ch : "#";
-    } else {
-      const name = getDisplayName(contact);
-      const ch = name.charAt(0).toUpperCase();
-      key = /[A-Z]/.test(ch) ? ch : "#";
-    }
-    (groups[key] ??= []).push(contact);
-  }
-  return Object.entries(groups).sort(([a], [b]) => {
-    if (a === "#") return 1;
-    if (b === "#") return -1;
-    return a.localeCompare(b);
-  });
 }
 
 export default function ContactGrid({

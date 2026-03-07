@@ -104,6 +104,30 @@ export function matchesSearch(person: Person, query: string): boolean {
   );
 }
 
+export type SortField = "first" | "last";
+
+export function groupByLetter(contacts: Person[], sortField: SortField): [string, Person[]][] {
+  const groups: Record<string, Person[]> = {};
+  for (const contact of contacts) {
+    let key: string;
+    if (sortField === "last") {
+      const lastName = contact.names?.[0]?.familyName;
+      const ch = lastName ? lastName.charAt(0).toUpperCase() : "";
+      key = /[A-Z]/.test(ch) ? ch : "#";
+    } else {
+      const name = getDisplayName(contact);
+      const ch = name.charAt(0).toUpperCase();
+      key = /[A-Z]/.test(ch) ? ch : "#";
+    }
+    (groups[key] ??= []).push(contact);
+  }
+  return Object.entries(groups).sort(([a], [b]) => {
+    if (a === "#") return 1;
+    if (b === "#") return -1;
+    return a.localeCompare(b);
+  });
+}
+
 export function matchesGroup(person: Person, groupResourceName: string): boolean {
   if (!groupResourceName || groupResourceName === "all") return true;
   return (

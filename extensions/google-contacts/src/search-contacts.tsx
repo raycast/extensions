@@ -3,12 +3,12 @@ import { getPreferenceValues } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { google } from "./oauth";
 import { SortOrder } from "./api";
+import { SortField } from "./helpers";
 import { useContacts, useContactGroups } from "./hooks";
 import ContactList from "./components/ContactList";
 import ContactGrid from "./components/ContactGrid";
 
 export type ViewMode = "list" | "detail" | "grid";
-export type SortField = "first" | "last";
 
 function SearchContacts() {
   const { defaultView } = getPreferenceValues<Preferences>();

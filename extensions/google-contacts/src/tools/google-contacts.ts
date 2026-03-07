@@ -4,24 +4,50 @@ import { google } from "../oauth";
 type Input = {
   /** The operation to perform on Google Contacts */
   operation: "search" | "get" | "create" | "update" | "delete";
-  /** Search query string (for search operation) */
+
+  /**
+   * Search query string (for search operation).
+   * If a search returns no results, try a shorter or partial query (e.g. first 3-4 characters of the name)
+   * to leverage prefix matching. For example, search "Fran" instead of "Fransisco".
+   */
   query?: string;
-  /** Contact resource name, e.g. "people/c12345" (for get, update, delete) */
+
+  /** Contact resource name, e.g. "people/c12345" (for get, update, delete). Use the search operation first to find the resourceName. */
   resourceName?: string;
+
   /** First name (for create, update) */
   firstName?: string;
   /** Last name (for create, update) */
   lastName?: string;
+
   /** Email address (for create, update) */
   email?: string;
+  /**
+   * Whether to "add" the email as an additional entry or "replace" the primary email.
+   * Defaults to "add". Use "replace" only when the user explicitly wants to change/update an existing email.
+   */
+  emailAction?: "add" | "replace";
+
   /** Phone number (for create, update) */
   phone?: string;
+  /**
+   * Whether to "add" the phone number as an additional entry or "replace" the primary phone number.
+   * Defaults to "add". Use "replace" only when the user explicitly wants to change/update an existing number.
+   */
+  phoneAction?: "add" | "replace";
+
   /** Company name (for create, update) */
   company?: string;
   /** Job title (for create, update) */
   jobTitle?: string;
+
   /** Street address (for create, update) */
   address?: string;
+  /**
+   * Whether to "add" the address as an additional entry or "replace" the primary address.
+   * Defaults to "add". Use "replace" only when the user explicitly wants to change/update an existing address.
+   */
+  addressAction?: "add" | "replace";
 };
 
 export const confirmation = async (input: Input) => {
@@ -49,8 +75,8 @@ export const confirmation = async (input: Input) => {
         { name: "Contact", value: input.resourceName ?? "unknown" },
         ...(input.firstName ? [{ name: "First Name", value: input.firstName }] : []),
         ...(input.lastName ? [{ name: "Last Name", value: input.lastName }] : []),
-        ...(input.email ? [{ name: "Email", value: input.email }] : []),
-        ...(input.phone ? [{ name: "Phone", value: input.phone }] : []),
+        ...(input.email ? [{ name: `Email (${input.emailAction ?? "add"})`, value: input.email }] : []),
+        ...(input.phone ? [{ name: `Phone (${input.phoneAction ?? "add"})`, value: input.phone }] : []),
       ],
     };
   }
@@ -68,7 +94,16 @@ export default async function tool(input: Input) {
         const contacts = await fetchAllContacts(token);
         return contacts.slice(0, 30);
       }
-      return await searchContacts(token, input.query);
+      const results = await searchContacts(token, input.query);
+      if (results.length === 0) {
+        return {
+          results: [],
+          suggestion:
+            `No contacts found for "${input.query}". ` +
+            `Try a shorter or partial query (e.g. the first 3–4 characters of the name) to leverage prefix matching.`,
+        };
+      }
+      return results;
     }
 
     case "get": {
@@ -104,12 +139,20 @@ export default async function tool(input: Input) {
       }
       if (input.email) {
         const existing = current.emailAddresses ?? [];
-        body.emailAddresses = [{ value: input.email }, ...existing.slice(1)];
+        if (input.emailAction === "replace") {
+          body.emailAddresses = [{ value: input.email }, ...existing.slice(1)];
+        } else {
+          body.emailAddresses = [...existing, { value: input.email }];
+        }
         updates.push("emailAddresses");
       }
       if (input.phone) {
         const existing = current.phoneNumbers ?? [];
-        body.phoneNumbers = [{ value: input.phone }, ...existing.slice(1)];
+        if (input.phoneAction === "replace") {
+          body.phoneNumbers = [{ value: input.phone }, ...existing.slice(1)];
+        } else {
+          body.phoneNumbers = [...existing, { value: input.phone }];
+        }
         updates.push("phoneNumbers");
       }
       if (input.company || input.jobTitle) {
@@ -125,7 +168,11 @@ export default async function tool(input: Input) {
       }
       if (input.address) {
         const existing = current.addresses ?? [];
-        body.addresses = [{ formattedValue: input.address }, ...existing.slice(1)];
+        if (input.addressAction === "replace") {
+          body.addresses = [{ formattedValue: input.address }, ...existing.slice(1)];
+        } else {
+          body.addresses = [...existing, { formattedValue: input.address }];
+        }
         updates.push("addresses");
       }
 
