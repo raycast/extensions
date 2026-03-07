@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bucket",
+  "title": "Bucket Bookmarks",
+  "description": "Search, save, and organize your Bucket bookmarks with powerful search and AI organization",
+  "icon": "icon.png",
+  "author": "miracleio",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "bookmarks",
+    "productivity",
+    "web",
+    "organization",
+    "search",
+    "save",
+    "folders",
+    "tags"
+  ],
+  "commands": [
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Bucket",
+      "description": "Search and open your Bucket bookmarks with fuzzy matching",
+      "mode": "view"
+    },
+    {
+      "name": "save-bookmark",
+      "title": "Save Bookmark",
+      "subtitle": "Bucket",
+      "description": "Save a URL as a bookmark with auto-detection from clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Bucket Menu Bar",
+      "description": "Quick access to recent bookmarks from your menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "connect-device",
+      "title": "Connect Device",
+      "subtitle": "Bucket",
+      "description": "Pair your device with Bucket using a secure pairing code",
+      "mode": "view"
+    },
+    {
+      "name": "manage-auth",
+      "title": "Manage Authentication",
+      "subtitle": "Bucket",
+      "description": "View and manage your Bucket authentication status",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "authMethod",
+      "title": "Authentication Method",
+      "description": "Choose how to authenticate with Bucket",
+      "type": "dropdown",
+      "required": true,
+      "default": "device",
+      "data": [
+        {
+          "title": "Device Connection (Recommended)",
+          "value": "device"
+        },
+        {
+          "title": "API Token",
+          "value": "apiKey"
+        }
+      ]
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Bucket API token (only needed if using API Token auth method)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
