@@ -48,6 +48,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Paddle](https://github.com/PaddleHQ/paddle-mcp-server) | Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API. |
 | [Perplexity](https://github.com/ppl-ai/modelcontextprotocol) | An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research. |
 | [Prisma](https://www.prisma.io/docs/postgres/integrations/mcp-server) | An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure. |
+| [Sanity](https://www.sanity.io/docs/ai/mcp-server) | Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules. |
 | [Sentry](https://mcp.sentry.dev/) | This service provides a Model Context Provider (MCP) for interacting with Sentry's API. |
 | [Shopify Dev](https://github.com/Shopify/dev-mcp) | MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs. |
 | [Slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) | This service provides a Model Context Provider (MCP) for interacting with Slack's API. |
