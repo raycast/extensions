@@ -27,7 +27,7 @@ export default function ChooseAuthor() {
     <List searchBarPlaceholder="Dana Scully">
       <List.EmptyView
         title="No co-authors yet"
-        description='Use the "Add Author" or "Load from Repo" commands to get started.'
+        description='Use the "Add Author" or "Load Co-Authors from Folder" commands to get started.'
         icon={Icon.AddPerson}
       />
       {sortedData.map((author) => (
