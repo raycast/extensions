@@ -190,7 +190,7 @@ function StatusList({ group }: { group: ProjectGroup }) {
   };
 
   return (
-    <List isLoading={isLoading} navigationTitle={group.name}>
+    <List isLoading={isLoading || isPulling} navigationTitle={group.name}>
       {!isLoading &&
         sectionOrder
           .filter((cat) => repos.some((r) => r.category === cat))
