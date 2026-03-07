@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "harmony-remote",
+  "version": "0.1.0",
+  "title": "Harmony Remote",
+  "description": "Quick shortcuts for your Logitech Harmony Hub — activities and volume, no menus",
+  "icon": "extension-icon.png",
+  "author": "chad_walters",
+  "categories": [
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "harmony-remote",
+      "title": "Harmony Remote",
+      "description": "Your configured Harmony Hub shortcuts",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "setup-hub",
+      "title": "Setup Harmony Hub",
+      "description": "Discover your hub and configure shortcuts",
+      "mode": "view",
+      "icon": "setup-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "commandHoldTime",
+      "type": "textfield",
+      "required": false,
+      "title": "Command Hold Time (ms)",
+      "description": "Duration to hold each button press in milliseconds",
+      "default": "100"
+    },
+    {
+      "name": "commandDelay",
+      "type": "textfield",
+      "required": false,
+      "title": "Repeat Delay (ms)",
+      "description": "Delay between repeated commands (volume steps)",
+      "default": "50"
+    }
+  ],
+  "dependencies": {
+    "@harmonyhub/client-ws": "^1.0.9",
+    "@harmonyhub/discover": "^1.0.9",
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^1.10.1",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "19.0.10",
+    "@types/ws": "^8.5.14",
+    "eslint": "^8.51.0",
+    "jest": "^30.2.0",
+    "prettier": "^3.0.3",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest"
+  }
+}
