@@ -1,11 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface ExtensionPreferences {
-  apiKey: string;
-}
-
 export function getApiKey() {
-  const { apiKey } = getPreferenceValues<ExtensionPreferences>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   const trimmedApiKey = apiKey.trim();
 
   if (!trimmedApiKey) {

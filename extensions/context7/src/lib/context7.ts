@@ -125,6 +125,10 @@ async function requestJson<T>(url: URL, signal?: AbortSignal, redirectCount = 0)
 
   const payload = await parsePayload(response);
 
+  if (response.status === 202) {
+    throw toContext7ApiError(response, payload);
+  }
+
   if (response.status === 301 && redirectCount < MAX_REDIRECTS) {
     const redirectUrl = getRedirectUrl(payload);
 

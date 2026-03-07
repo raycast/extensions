@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { searchContext } from "./lib/context7";
@@ -49,7 +49,13 @@ export function SearchDocumentationView(props: { libraryId?: string }) {
           }
 
           setResults([]);
-          setErrorMessage(toErrorMessage(error));
+          const message = toErrorMessage(error);
+          setErrorMessage(message);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Search failed",
+            message,
+          });
         } finally {
           setIsLoading(false);
         }
@@ -131,6 +137,10 @@ function normalizeSourceUrl(source?: string) {
 
   if (source.startsWith("http://") || source.startsWith("https://")) {
     return source;
+  }
+
+  if (source.startsWith("/")) {
+    return `https://context7.com${source}`;
   }
 
   return `https://${source}`;
