@@ -39,7 +39,7 @@ export function getStatusTag(status: RepoStatus): { value: string; color: Color 
 export function openInApp(appPath: string, projectPath: string) {
   const child =
     process.platform === "win32"
-      ? spawn("cmd", ["/c", "start", "", appPath, projectPath], { detached: true })
+      ? spawn("cmd", ["/c", "start", "", "/d", projectPath, appPath, projectPath], { detached: true })
       : spawn("open", ["-a", appPath, projectPath]);
 
   child.on("error", (err) => {

@@ -79,9 +79,14 @@ function PullProgress({ group }: { group: ProjectGroup }) {
   const pullSingle = useCallback(
     async (index: number) => {
       if (isPulling) return;
-      updateRepo(index, "pulling");
-      const result = await pullRepo(repos[index].path);
-      updateRepo(index, result.status, result.error);
+      setIsPulling(true);
+      try {
+        updateRepo(index, "pulling");
+        const result = await pullRepo(repos[index].path);
+        updateRepo(index, result.status, result.error);
+      } finally {
+        setIsPulling(false);
+      }
     },
     [repos, isPulling, updateRepo],
   );
