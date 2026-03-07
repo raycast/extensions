@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2026-03-07
 
 - We reached 3400+ icons!
 - Bump all dependencies to the latest
