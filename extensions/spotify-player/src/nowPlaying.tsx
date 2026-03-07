@@ -206,7 +206,7 @@ function NowPlayingCommand() {
           onAction={async () => {
             try {
               await skipToNext();
-              await triggerMenuBarRefresh();
+              triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to next");
                 await popToRoot();
@@ -236,7 +236,7 @@ function NowPlayingCommand() {
           onAction={async () => {
             try {
               await skipToPrevious();
-              await triggerMenuBarRefresh();
+              triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to previous");
                 await popToRoot();

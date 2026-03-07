@@ -10,7 +10,6 @@ export async function getCurrentlyPlaying() {
     if (response) {
       return {
         ...response,
-        is_playing: response.is_playing,
         item: response.item as unknown as EpisodeObject | TrackObject,
       };
     }

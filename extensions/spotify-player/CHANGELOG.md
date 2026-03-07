@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Rate Limiting from Spotify API Changes] - 2026-03-06
+## [Fix Rate Limiting from Spotify API Changes] - {PR_MERGE_DATE}
 
 - Added 429 Retry-After middleware — all API calls now automatically retry on rate limit with proper backoff
 - Reduced menu bar polling interval from 10s to 30s, current-track from 30s to 1m
