@@ -132,10 +132,7 @@ export default function Chat({ launchContext }) {
         {/* NEW: Copy actions for the currently selected message */}
         {message && (
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy Answer"
-              content={message.answer ?? ""}
-            />
+            <Action.CopyToClipboard title="Copy Answer" content={message.answer ?? ""} />
             <Action.CopyToClipboard
               title="Copy Prompt"
               content={message.prompt ?? ""}
