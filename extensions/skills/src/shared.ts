@@ -60,6 +60,10 @@ export function parseFrontmatter(content: string): { frontmatter: SkillFrontmatt
           (frontmatter as Record<string, unknown>)[key] = items;
         }
         continue;
+      } else if (value === "|" || value === ">" || value === "|-" || value === ">-") {
+        // block scalar — multi-line body parsing is not supported, skip this key
+        i++;
+        continue;
       } else if (value.startsWith("[") && value.endsWith("]")) {
         // Inline array: [item1, item2, item3]
         const items = value

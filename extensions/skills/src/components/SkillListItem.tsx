@@ -1,12 +1,22 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { Skill, buildInstallCommand, formatInstalls } from "../shared";
+import { Skill, SkillFrontmatter, buildInstallCommand, formatInstalls } from "../shared";
 import { useSkillContent } from "../hooks/useSkillContent";
-import { useRepoStats } from "../hooks/useRepoStats";
+import { useRepoStats, RepoStats } from "../hooks/useRepoStats";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
 
-function InlineDetail({ skill, isSelected }: { skill: Skill; isSelected: boolean }) {
-  const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
-  const { stats } = useRepoStats(skill, isSelected);
+function InlineDetail({
+  skill,
+  content,
+  frontmatter,
+  isLoading,
+  stats,
+}: {
+  skill: Skill;
+  content: string | undefined;
+  frontmatter: SkillFrontmatter;
+  isLoading: boolean;
+  stats: RepoStats | undefined;
+}) {
   const installCommand = buildInstallCommand(skill);
 
   const markdown = isLoading
@@ -41,8 +51,16 @@ ${installCommand}
             text={formatInstalls(skill.installs)}
             icon={Icon.Download}
           />
-          {stats?.stars != null && (
-            <List.Item.Detail.Metadata.Label title="GitHub Stars" text={formatInstalls(stats.stars)} icon={Icon.Star} />
+          {stats?.rateLimited ? (
+            <List.Item.Detail.Metadata.Label title="GitHub Stars" text="Rate limited" icon={Icon.Warning} />
+          ) : (
+            stats?.stars != null && (
+              <List.Item.Detail.Metadata.Label
+                title="GitHub Stars"
+                text={formatInstalls(stats.stars)}
+                icon={Icon.Star}
+              />
+            )
           )}
           {frontmatter.license && (
             <List.Item.Detail.Metadata.Label title="License" text={frontmatter.license} icon={Icon.Document} />
@@ -90,7 +108,8 @@ interface SkillListItemProps {
 
 export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onToggleDetail }: SkillListItemProps) {
   const title = rank != null ? `#${rank} ${skill.name}` : skill.name;
-  const { frontmatter } = useSkillContent(skill, isSelected);
+  const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
+  const { stats } = useRepoStats(skill, isSelected);
 
   const icon =
     rank != null
@@ -105,7 +124,9 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
       icon={icon}
       accessories={isShowingDetail ? [] : [{ text: formatInstalls(skill.installs), icon: Icon.Download }]}
       id={skill.id}
-      detail={<InlineDetail skill={skill} isSelected={isSelected} />}
+      detail={
+        <InlineDetail skill={skill} content={content} frontmatter={frontmatter} isLoading={isLoading} stats={stats} />
+      }
       actions={
         <ActionPanel>
           <InstallSkillAction skill={skill} />
