@@ -1,5 +1,8 @@
+# List Comparison Changelog
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- 0.1.0
 - Added a Raycast command for comparing two pasted lists line by line.
 - Added case-sensitive and case-insensitive comparison modes.
 - Added focused result views for summary, A-only items, B-only items, and shared items.

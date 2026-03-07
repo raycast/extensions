@@ -1,20 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  LaunchProps,
-  List,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 
-import {
-  buildSummaryText,
-  compareLists,
-  ComparisonResult,
-  CompareFormValues,
-  parseList,
-} from "./lib/compare";
+import { buildSummaryText, compareLists, ComparisonResult, CompareFormValues, parseList } from "./lib/compare";
 
 type ComparisonResultsViewProps = {
   result: ComparisonResult;
@@ -29,9 +16,7 @@ type ResultActionsProps = {
   fullReport: string;
 };
 
-export default function CompareListsCommand(
-  props: LaunchProps<{ draftValues: CompareFormValues }>,
-) {
+export default function CompareListsCommand(props: LaunchProps<{ draftValues: CompareFormValues }>) {
   const { push } = useNavigation();
   const [values, setValues] = useState<CompareFormValues>({
     listA: props.draftValues?.listA ?? "",
@@ -47,14 +32,8 @@ export default function CompareListsCommand(
   }
 
   function handleSubmit(submittedValues: CompareFormValues) {
-    const parsedA = parseList(
-      submittedValues.listA,
-      submittedValues.caseSensitive,
-    );
-    const parsedB = parseList(
-      submittedValues.listB,
-      submittedValues.caseSensitive,
-    );
+    const parsedA = parseList(submittedValues.listA, submittedValues.caseSensitive);
+    const parsedB = parseList(submittedValues.listB, submittedValues.caseSensitive);
 
     if (parsedA.uniqueCount === 0 && parsedB.uniqueCount === 0) {
       const errorMessage = "Enter at least one item in List A or List B";
@@ -66,11 +45,7 @@ export default function CompareListsCommand(
     clearErrors();
     push(
       <ComparisonResultsView
-        result={compareLists(
-          submittedValues.listA,
-          submittedValues.listB,
-          submittedValues.caseSensitive,
-        )}
+        result={compareLists(submittedValues.listA, submittedValues.listB, submittedValues.caseSensitive)}
       />,
     );
   }
@@ -159,11 +134,7 @@ function ComparisonResultsView({ result }: ComparisonResultsViewProps) {
         subtitle={formatItemCount(result.onlyInA.length)}
         detail={
           <List.Item.Detail
-            markdown={buildItemsMarkdown(
-              "Only in List A",
-              result.onlyInA,
-              "No unique items were found only in List A",
-            )}
+            markdown={buildItemsMarkdown("Only in List A", result.onlyInA, "No unique items were found only in List A")}
           />
         }
         actions={
@@ -182,11 +153,7 @@ function ComparisonResultsView({ result }: ComparisonResultsViewProps) {
         subtitle={formatItemCount(result.onlyInB.length)}
         detail={
           <List.Item.Detail
-            markdown={buildItemsMarkdown(
-              "Only in List B",
-              result.onlyInB,
-              "No unique items were found only in List B",
-            )}
+            markdown={buildItemsMarkdown("Only in List B", result.onlyInB, "No unique items were found only in List B")}
           />
         }
         actions={
@@ -205,11 +172,7 @@ function ComparisonResultsView({ result }: ComparisonResultsViewProps) {
         subtitle={formatItemCount(result.inBoth.length)}
         detail={
           <List.Item.Detail
-            markdown={buildItemsMarkdown(
-              "In Both Lists",
-              result.inBoth,
-              "No shared items were found in both lists",
-            )}
+            markdown={buildItemsMarkdown("In Both Lists", result.inBoth, "No shared items were found in both lists")}
           />
         }
         actions={
@@ -267,35 +230,15 @@ function ResultActions({
 }
 
 function buildSummaryMarkdown(result: ComparisonResult) {
-  return ["# Summary", "", "```text", buildSummaryText(result), "```"].join(
-    "\n",
-  );
+  return ["# Summary", "", "```text", buildSummaryText(result), "```"].join("\n");
 }
 
-function buildItemsMarkdown(
-  title: string,
-  items: string[],
-  emptyMessage: string,
-) {
+function buildItemsMarkdown(title: string, items: string[], emptyMessage: string) {
   if (items.length === 0) {
-    return [
-      `# ${title}`,
-      "",
-      `Count: ${items.length}`,
-      "",
-      `_${emptyMessage}_`,
-    ].join("\n");
+    return [`# ${title}`, "", `Count: ${items.length}`, "", `_${emptyMessage}_`].join("\n");
   }
 
-  return [
-    `# ${title}`,
-    "",
-    `Count: ${items.length}`,
-    "",
-    "```text",
-    items.join("\n"),
-    "```",
-  ].join("\n");
+  return [`# ${title}`, "", `Count: ${items.length}`, "", "```text", items.join("\n"), "```"].join("\n");
 }
 
 function formatItemCount(count: number) {

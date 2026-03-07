@@ -1,12 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  buildSummaryText,
-  compareLists,
-  formatDifference,
-  parseList,
-} from "./compare";
+import { buildSummaryText, compareLists, formatDifference, parseList } from "./compare";
 
 test("matches items case-insensitively when the checkbox is off", () => {
   const result = compareLists("Apple", "apple", false);

@@ -21,10 +21,7 @@ export type ComparisonResult = {
   difference: number;
 };
 
-function normalizeLine(
-  line: string,
-  caseSensitive: boolean,
-): { key: string; display: string } | null {
+function normalizeLine(line: string, caseSensitive: boolean): { key: string; display: string } | null {
   const display = line.trim();
   if (!display) {
     return null;
@@ -57,11 +54,7 @@ export function parseList(input: string, caseSensitive: boolean): ParsedList {
   };
 }
 
-export function compareLists(
-  listA: string,
-  listB: string,
-  caseSensitive: boolean,
-): ComparisonResult {
+export function compareLists(listA: string, listB: string, caseSensitive: boolean): ComparisonResult {
   const parsedA = parseList(listA, caseSensitive);
   const parsedB = parseList(listB, caseSensitive);
 
