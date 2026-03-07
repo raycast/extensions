@@ -1,6 +1,6 @@
 # Changelog
 
-## [Rich Skill Metadata] - {PR_MERGE_DATE}
+## [Rich Skill Metadata] - 2026-03-07
 
 - Display description, license, compatibility, and allowed tools from SKILL.md frontmatter in the detail panel
 - Show GitHub star count alongside install count
