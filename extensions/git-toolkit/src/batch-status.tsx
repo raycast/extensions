@@ -52,6 +52,7 @@ function getStatusIcon(category: StatusCategory) {
 function StatusList({ group }: { group: ProjectGroup }) {
   const [repos, setRepos] = useState<StatusRepo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPulling, setIsPulling] = useState(false);
   const hasStarted = useRef(false);
 
   useEffect(() => {
@@ -97,6 +98,8 @@ function StatusList({ group }: { group: ProjectGroup }) {
 
   const pullSingle = useCallback(
     async (index: number) => {
+      if (isPulling) return;
+      setIsPulling(true);
       const repo = repos[index];
       const toast = await showToast({ style: Toast.Style.Animated, title: `Pulling ${repo.name}...` });
       const result = await pullRepo(repo.path);
@@ -129,8 +132,9 @@ function StatusList({ group }: { group: ProjectGroup }) {
         toast.style = Toast.Style.Success;
         toast.title = `${repo.name} already up to date`;
       }
+      setIsPulling(false);
     },
-    [repos],
+    [repos, isPulling],
   );
 
   const sectionOrder: StatusCategory[] = ["dirty", "diverged", "ahead", "behind", "clean"];

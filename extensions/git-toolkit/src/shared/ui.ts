@@ -1,4 +1,4 @@
-import { Icon, Color, closeMainWindow } from "@raycast/api";
+import { Icon, Color, Toast, closeMainWindow, showToast } from "@raycast/api";
 import { spawn } from "child_process";
 import { RepoStatus } from "./types";
 
@@ -37,10 +37,14 @@ export function getStatusTag(status: RepoStatus): { value: string; color: Color 
 }
 
 export function openInApp(appPath: string, projectPath: string) {
-  if (process.platform === "win32") {
-    spawn("cmd", ["/c", "start", "", appPath, projectPath], { detached: true });
-  } else {
-    spawn("open", ["-a", appPath, projectPath]);
-  }
+  const child =
+    process.platform === "win32"
+      ? spawn("cmd", ["/c", "start", "", appPath, projectPath], { detached: true })
+      : spawn("open", ["-a", appPath, projectPath]);
+
+  child.on("error", (err) => {
+    showToast({ style: Toast.Style.Failure, title: "Failed to open app", message: String(err) });
+  });
+
   closeMainWindow();
 }

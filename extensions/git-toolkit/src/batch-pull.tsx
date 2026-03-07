@@ -10,8 +10,8 @@ function PullProgress({ group }: { group: ProjectGroup }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isPulling, setIsPulling] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
-  const prefs = getPreferenceValues<Preferences>();
-  const maxParallel = Math.max(1, parseInt(prefs.maxParallelProcesses) || 10);
+  const prefsRef = useRef(getPreferenceValues<Preferences>());
+  const maxParallel = Math.max(1, parseInt(prefsRef.current.maxParallelProcesses) || 10);
 
   const updateRepo = useCallback((index: number, status: RepoStatus, error?: string) => {
     setRepos((prev) => {
@@ -78,16 +78,18 @@ function PullProgress({ group }: { group: ProjectGroup }) {
 
   const pullSingle = useCallback(
     async (index: number) => {
+      if (isPulling) return;
       updateRepo(index, "pulling");
       const result = await pullRepo(repos[index].path);
       updateRepo(index, result.status, result.error);
     },
-    [repos, updateRepo],
+    [repos, isPulling, updateRepo],
   );
 
   const retryAll = useCallback(async () => {
+    if (isPulling) return;
     await startPull(repos);
-  }, [repos, startPull]);
+  }, [repos, isPulling, startPull]);
 
   const isDone = !isLoading && !isPulling;
   const sectionOrder: RepoStatus[] = ["error", "dirty", "updated", "up-to-date", "pulling", "idle"];
