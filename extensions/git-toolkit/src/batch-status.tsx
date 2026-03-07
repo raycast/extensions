@@ -59,32 +59,37 @@ function StatusList({ group }: { group: ProjectGroup }) {
     hasStarted.current = true;
 
     async function load() {
-      const scanned = await scanRepos(group.path);
-      const prefs = getPreferenceValues<Preferences>();
-      const maxParallel = parseInt(prefs.maxParallelProcesses) || 10;
+      try {
+        const scanned = await scanRepos(group.path);
+        const prefs = getPreferenceValues<Preferences>();
+        const maxParallel = parseInt(prefs.maxParallelProcesses) || 10;
 
-      const results: StatusRepo[] = [];
-      for (let i = 0; i < scanned.length; i += maxParallel) {
-        const batch = scanned.slice(i, i + maxParallel);
-        const batchResults = await Promise.all(
-          batch.map(async (repo) => {
-            const [dirtyResult, abResult] = await Promise.all([isDirty(repo.path), getAheadBehind(repo.path)]);
-            return {
-              name: repo.name,
-              path: repo.path,
-              branch: repo.branch,
-              dirty: dirtyResult,
-              ahead: abResult.ahead,
-              behind: abResult.behind,
-              category: categorize(dirtyResult, abResult.ahead, abResult.behind),
-            } as StatusRepo;
-          }),
-        );
-        results.push(...batchResults);
+        const results: StatusRepo[] = [];
+        for (let i = 0; i < scanned.length; i += maxParallel) {
+          const batch = scanned.slice(i, i + maxParallel);
+          const batchResults = await Promise.all(
+            batch.map(async (repo) => {
+              const [dirtyResult, abResult] = await Promise.all([isDirty(repo.path), getAheadBehind(repo.path)]);
+              return {
+                name: repo.name,
+                path: repo.path,
+                branch: repo.branch,
+                dirty: dirtyResult,
+                ahead: abResult.ahead,
+                behind: abResult.behind,
+                category: categorize(dirtyResult, abResult.ahead, abResult.behind),
+              } as StatusRepo;
+            }),
+          );
+          results.push(...batchResults);
+        }
+
+        setRepos(results);
+      } catch (error) {
+        showToast({ style: Toast.Style.Failure, title: "Failed to scan repos", message: String(error) });
+      } finally {
+        setIsLoading(false);
       }
-
-      setRepos(results);
-      setIsLoading(false);
     }
 
     load();

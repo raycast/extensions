@@ -29,6 +29,7 @@ function PullProgress({ group }: { group: ProjectGroup }) {
       const total = targets.length;
       setProgress({ done: 0, total });
 
+      const results = new Map<number, { status: RepoStatus; error?: string }>();
       targets.forEach((r) => updateRepo(r.index, "pulling"));
 
       const toast = await showToast({
@@ -39,21 +40,15 @@ function PullProgress({ group }: { group: ProjectGroup }) {
 
       await parallelPull(targets, maxParallel, (index, status, error) => {
         updateRepo(index, status, error);
+        results.set(index, { status, error });
         done++;
         setProgress({ done, total });
         toast.message = `${done}/${total}`;
       });
 
-      const finalRepos = await new Promise<Repo[]>((resolve) => {
-        setRepos((prev) => {
-          resolve(prev);
-          return prev;
-        });
-      });
-
-      const updated = finalRepos.filter((r) => r.status === "updated").length;
-      const failed = finalRepos.filter((r) => r.status === "error").length;
-      const dirty = finalRepos.filter((r) => r.status === "dirty").length;
+      const updated = Array.from(results.values()).filter((r) => r.status === "updated").length;
+      const failed = Array.from(results.values()).filter((r) => r.status === "error").length;
+      const dirty = Array.from(results.values()).filter((r) => r.status === "dirty").length;
 
       toast.style = failed > 0 ? Toast.Style.Failure : Toast.Style.Success;
       toast.title = `Done: ${updated} updated, ${failed} failed, ${dirty} skipped`;
@@ -68,10 +63,15 @@ function PullProgress({ group }: { group: ProjectGroup }) {
     if (hasStarted.current) return;
     hasStarted.current = true;
     async function load() {
-      const scanned = await scanRepos(group.path);
-      setRepos(scanned);
-      setIsLoading(false);
-      startPull(scanned);
+      try {
+        const scanned = await scanRepos(group.path);
+        setRepos(scanned);
+        setIsLoading(false);
+        startPull(scanned);
+      } catch (error) {
+        setIsLoading(false);
+        showToast({ style: Toast.Style.Failure, title: "Failed to scan repos", message: String(error) });
+      }
     }
     load();
   }, []);
