@@ -1,11 +1,11 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useAppEnvSelector } from "./components/AppEnvSelector";
+import { useAppEnvSelector } from "./components/app-env-selector";
 import { listDeployments } from "./api/deployments";
 import { Deployment } from "./types/deployment";
 import { getDeploymentStatusIcon, getDeploymentStatusLabel } from "./utils/status-icons";
 import { timeAgo } from "./utils/dates";
-import DeploymentDetail from "./components/DeploymentDetail";
+import DeploymentDetail from "./components/deployment-detail";
 
 export default function ViewDeployments() {
   const { environmentId, isLoading: selectorLoading, Dropdown } = useAppEnvSelector();

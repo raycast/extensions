@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, Icon, Detail } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { useAppEnvSelector } from "./components/AppEnvSelector";
+import { useAppEnvSelector } from "./components/app-env-selector";
 import { getEnvironmentLogs } from "./api/environments";
 import { LogEntry } from "./types/log";
 import { getLogLevelIcon } from "./utils/status-icons";

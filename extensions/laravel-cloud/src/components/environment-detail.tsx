@@ -4,12 +4,12 @@ import { getEnvironment, startEnvironment, stopEnvironment } from "../api/enviro
 import { triggerDeployment } from "../api/deployments";
 import { getEnvironmentStatusIcon } from "../utils/status-icons";
 import { formatDate } from "../utils/dates";
-import DeploymentList from "./DeploymentList";
-import DomainList from "./DomainList";
-import InstanceList from "./InstanceList";
-import CommandList from "./CommandList";
-import LogList from "./LogList";
-import EnvironmentVariables from "./EnvironmentVariables";
+import DeploymentList from "./deployment-list";
+import DomainList from "./domain-list";
+import InstanceList from "./instance-list";
+import CommandList from "./command-list";
+import LogList from "./log-list";
+import EnvironmentVariables from "./environment-variables";
 
 interface Props {
   environmentId: string;

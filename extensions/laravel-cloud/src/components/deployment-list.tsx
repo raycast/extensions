@@ -4,7 +4,7 @@ import { listDeployments } from "../api/deployments";
 import { Deployment } from "../types/deployment";
 import { getDeploymentStatusIcon, getDeploymentStatusLabel } from "../utils/status-icons";
 import { timeAgo } from "../utils/dates";
-import DeploymentDetail from "./DeploymentDetail";
+import DeploymentDetail from "./deployment-detail";
 
 interface Props {
   environmentId: string;

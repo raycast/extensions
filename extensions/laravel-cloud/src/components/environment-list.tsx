@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { listEnvironments } from "../api/environments";
 import { Environment } from "../types/environment";
 import { getEnvironmentStatusIcon } from "../utils/status-icons";
-import EnvironmentDetail from "./EnvironmentDetail";
+import EnvironmentDetail from "./environment-detail";
 
 interface Props {
   applicationId: string;

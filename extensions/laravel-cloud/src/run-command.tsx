@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, Detail, Icon, Form, useNavigation, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useAppEnvSelector } from "./components/AppEnvSelector";
+import { useAppEnvSelector } from "./components/app-env-selector";
 import { listCommands, runCommand, getCommand } from "./api/commands";
 import { Command } from "./types/command";
 import { getCommandStatusIcon } from "./utils/status-icons";

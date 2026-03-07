@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useAppEnvSelector } from "./components/AppEnvSelector";
+import { useAppEnvSelector } from "./components/app-env-selector";
 import { listInstances } from "./api/instances";
 import {
   listBackgroundProcesses,

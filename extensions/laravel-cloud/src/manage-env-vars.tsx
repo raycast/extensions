@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { useAppEnvSelector } from "./components/AppEnvSelector";
+import { useAppEnvSelector } from "./components/app-env-selector";
 import { getEnvironment, addEnvironmentVariables, deleteEnvironmentVariables } from "./api/environments";
 import { EnvironmentVariable } from "./types/environment";
 

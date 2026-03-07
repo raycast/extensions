@@ -5,7 +5,7 @@ import { listApplications } from "./api/applications";
 import { Application } from "./types/application";
 import { getRegionLabel } from "./utils/regions";
 import { timeAgo } from "./utils/dates";
-import EnvironmentList from "./components/EnvironmentList";
+import EnvironmentList from "./components/environment-list";
 
 export default function SearchApplications() {
   const [searchText, setSearchText] = useState("");
