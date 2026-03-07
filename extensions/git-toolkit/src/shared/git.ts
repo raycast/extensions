@@ -100,20 +100,8 @@ export async function pullRepo(repoPath: string): Promise<{ status: RepoStatus; 
     return { status: "dirty" };
   }
 
-  // Try fast-forward first
   try {
     const { stdout, stderr } = await git(repoPath, "pull", "--ff-only");
-    const output = stdout + stderr;
-    if (output.includes("Already up to date") || output.includes("Already up-to-date")) {
-      return { status: "up-to-date" };
-    }
-    return { status: "updated" };
-  } catch {
-    // --ff-only failed (diverged or network error), fallback to normal pull
-  }
-
-  try {
-    const { stdout, stderr } = await git(repoPath, "pull");
     const output = stdout + stderr;
     if (output.includes("Already up to date") || output.includes("Already up-to-date")) {
       return { status: "up-to-date" };
