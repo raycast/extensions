@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Sanity MCP Server] - 2026-03-07
+## [Add Sanity MCP Server] - {PR_MERGE_DATE}
 
 Add official Sanity MCP Server to registry for direct access to Sanity projects.
 
