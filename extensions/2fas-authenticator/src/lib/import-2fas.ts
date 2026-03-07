@@ -1,0 +1,124 @@
+import { createDecipheriv, pbkdf2Sync, randomUUID } from "crypto";
+import { readFileSync } from "fs";
+import type { VaultService } from "./vault";
+
+interface TwoFASService {
+  name: string;
+  secret: string;
+  otp: {
+    issuer?: string;
+    account?: string;
+    digits: number;
+    period: number;
+    algorithm: string;
+    tokenType: string;
+  };
+  order?: { position: number };
+}
+
+interface TwoFASExport {
+  schemaVersion: number;
+  services?: TwoFASService[];
+  servicesEncrypted?: string;
+  reference?: string;
+}
+
+export class InvalidPasswordError extends Error {
+  constructor() {
+    super("Invalid export password");
+    this.name = "InvalidPasswordError";
+  }
+}
+
+export class InvalidFormatError extends Error {
+  constructor(detail: string) {
+    super(`Invalid 2FAS export: ${detail}`);
+    this.name = "InvalidFormatError";
+  }
+}
+
+function decryptPayload(encoded: string, password: string): string {
+  const parts = encoded.split(":");
+  if (parts.length !== 3) {
+    throw new InvalidFormatError("expected data:salt:iv format");
+  }
+  const [dataB64, saltB64, ivB64] = parts;
+  const data = Buffer.from(dataB64, "base64");
+  const salt = Buffer.from(saltB64, "base64");
+  const iv = Buffer.from(ivB64, "base64");
+
+  const key = pbkdf2Sync(password, salt, 10000, 32, "sha256");
+
+  const tagStart = data.length - 16;
+  const ciphertext = data.subarray(0, tagStart);
+  const tag = data.subarray(tagStart);
+
+  const decipher = createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(tag);
+  const decrypted = Buffer.concat([
+    decipher.update(ciphertext),
+    decipher.final(),
+  ]);
+  return decrypted.toString("utf-8");
+}
+
+function normalizeAlgorithm(alg: string): "SHA1" | "SHA256" | "SHA512" {
+  const upper = alg.toUpperCase();
+  if (upper === "SHA256" || upper === "SHA-256") return "SHA256";
+  if (upper === "SHA512" || upper === "SHA-512") return "SHA512";
+  return "SHA1";
+}
+
+function mapService(svc: TwoFASService): VaultService | null {
+  const tokenType = svc.otp.tokenType?.toUpperCase();
+  if (tokenType !== "TOTP") return null;
+  if (!svc.secret) return null;
+
+  return {
+    id: randomUUID(),
+    name: svc.name,
+    issuer: svc.otp.issuer || "",
+    account: svc.otp.account || "",
+    secret: svc.secret,
+    algorithm: normalizeAlgorithm(svc.otp.algorithm),
+    digits: svc.otp.digits || 6,
+    period: svc.otp.period || 30,
+  };
+}
+
+export function parse2FASExport(
+  filePath: string,
+  password?: string,
+): VaultService[] {
+  const raw = readFileSync(filePath, "utf-8");
+  let data: TwoFASExport;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new InvalidFormatError("not valid JSON");
+  }
+
+  if (!data.schemaVersion) {
+    throw new InvalidFormatError("missing schemaVersion");
+  }
+
+  let services: TwoFASService[] = [];
+
+  if (data.servicesEncrypted) {
+    if (!password) {
+      throw new InvalidPasswordError();
+    }
+    try {
+      const decrypted = decryptPayload(data.servicesEncrypted, password);
+      services = JSON.parse(decrypted);
+    } catch {
+      throw new InvalidPasswordError();
+    }
+  } else if (data.services) {
+    services = data.services;
+  } else {
+    throw new InvalidFormatError("no services found");
+  }
+
+  return services.map(mapService).filter((s): s is VaultService => s !== null);
+}
