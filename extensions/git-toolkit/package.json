@@ -20,6 +20,13 @@
       "subtitle": "Git Toolkit",
       "description": "Scan and pull all git repositories in configured directories",
       "mode": "view"
+    },
+    {
+      "name": "batch-status",
+      "title": "Batch Status",
+      "subtitle": "Git Toolkit",
+      "description": "View git status of all repositories in a project group",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -45,6 +52,14 @@
       "description": "The alternate editor app to use when opening a project",
       "type": "appPicker",
       "required": false
+    },
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "description": "The terminal app to use when opening a project",
+      "type": "appPicker",
+      "required": false,
+      "default": "/System/Applications/Utilities/Terminal.app"
     },
     {
       "name": "maxParallelProcesses",
