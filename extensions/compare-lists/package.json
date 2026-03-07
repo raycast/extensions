@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "compare-lists",
+  "title": "List Comparison",
+  "description": "Compare two pasted lists and inspect items unique to either list or shared between both",
+  "version": "0.1.0",
+  "icon": "icon.png",
+  "author": "gokhan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "compare",
+    "lists",
+    "difference",
+    "intersection",
+    "clipboard"
+  ],
+  "commands": [
+    {
+      "name": "compare-lists",
+      "title": "Compare Lists",
+      "description": "Paste two lists and compare unique and shared items",
+      "mode": "view",
+      "keywords": [
+        "difference",
+        "intersection",
+        "set",
+        "shared"
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "test": "tsx --test src/lib/compare.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
