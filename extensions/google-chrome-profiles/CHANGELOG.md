@@ -5,6 +5,12 @@
 - Add Google Chrome Canary support via a new Browser preference dropdown
 - Show informative toast when "Open Profile with Context" is launched without a quicklink context
 
+## [Feature] - 2026-03-01
+
+- Add "New Window" action to open a new Chrome window for a profile
+- Available from the profile list via `⌘ ⇧ ↵` or from within a profile's bookmarks view
+- Opens directly via CLI without focusing existing windows (tiling WM friendly)
+
 ## [Feature] - 2026-01-23
 
 - Bring the profile window to front instead of adding a new tab
