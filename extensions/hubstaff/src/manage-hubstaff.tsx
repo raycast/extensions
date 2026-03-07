@@ -12,8 +12,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   hubstaff,
   getStatusAsync,
-  fetchProjects,
-  getTasks,
+  fetchProjectsAsync,
+  getTasksAsync,
   formatCacheAge,
   getCacheTimestamp,
   ensureHubstaffInstalled,
@@ -112,7 +112,7 @@ function ProjectList() {
       }
     }
     if (!cached) {
-      const fresh = fetchProjects();
+      const fresh = await fetchProjectsAsync();
       setProjects(fresh);
       await LocalStorage.setItem(PROJECTS_CACHE_KEY, JSON.stringify(fresh));
       await LocalStorage.setItem(PROJECTS_CACHE_TIME_KEY, String(Date.now()));
@@ -124,7 +124,7 @@ function ProjectList() {
 
   const refreshProjects = useCallback(async () => {
     await showToast(Toast.Style.Animated, "Refreshing projects...");
-    const fresh = fetchProjects();
+    const fresh = await fetchProjectsAsync();
     setProjects(fresh);
     await LocalStorage.setItem(PROJECTS_CACHE_KEY, JSON.stringify(fresh));
     await LocalStorage.setItem(PROJECTS_CACHE_TIME_KEY, String(Date.now()));
@@ -155,7 +155,7 @@ function ProjectList() {
       active_project: {
         id: project.id,
         name: project.name,
-        tracked_today: status.active_project?.tracked_today ?? "0:00:00",
+        tracked_today: "0:00:00",
       },
     };
     setStatus(newStatus);
@@ -291,9 +291,10 @@ function TaskList({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const t = getTasks(project.id);
-    setTasks(t);
-    setIsLoading(false);
+    getTasksAsync(project.id).then((t) => {
+      setTasks(t);
+      setIsLoading(false);
+    });
   }, [project.id]);
 
   return (

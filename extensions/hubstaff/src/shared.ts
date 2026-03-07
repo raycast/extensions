@@ -68,21 +68,36 @@ export function getStatusAsync(): Promise<Status> {
   });
 }
 
-export function fetchProjects(): Project[] {
+function hubstaffAsync(args: string[]): Promise<string> {
+  const cli = getCLIPath();
+  return new Promise((resolve) => {
+    execFile(cli, args, { timeout: 5000 }, (err, stdout, stderr) => {
+      if (err) {
+        resolve((stdout || stderr || String(err)).trim());
+        return;
+      }
+      resolve((stdout || "").trim());
+    });
+  });
+}
+
+export async function fetchProjectsAsync(): Promise<Project[]> {
   try {
-    const orgs = JSON.parse(hubstaff(["organizations"]));
+    const orgs = JSON.parse(await hubstaffAsync(["organizations"]));
     const orgId = orgs.organizations?.[0]?.id;
     if (!orgId) return [];
-    const result = JSON.parse(hubstaff(["projects", String(orgId)]));
+    const result = JSON.parse(await hubstaffAsync(["projects", String(orgId)]));
     return result.projects ?? [];
   } catch {
     return [];
   }
 }
 
-export function getTasks(projectId: number): Task[] {
+export async function getTasksAsync(projectId: number): Promise<Task[]> {
   try {
-    const result = JSON.parse(hubstaff(["tasks", String(projectId)]));
+    const result = JSON.parse(
+      await hubstaffAsync(["tasks", String(projectId)]),
+    );
     return result.tasks ?? [];
   } catch {
     return [];

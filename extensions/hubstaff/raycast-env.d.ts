@@ -28,3 +28,4 @@ declare namespace Arguments {
   /** Arguments passed to the `manage-hubstaff` command */
   export type ManageHubstaff = {}
 }
+
