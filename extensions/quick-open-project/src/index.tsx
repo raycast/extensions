@@ -48,8 +48,9 @@ class Project {
   constructor(path: string) {
     this.fullPath = path;
     this.displayPath = path;
-    if (path.startsWith(homedir())) {
-      this.displayPath = path.replace(homedir(), "~");
+    const home = homedir().replaceAll("\\", "/");
+    if (path.startsWith(home)) {
+      this.displayPath = path.replace(home, "~");
     }
     const parts = path.split("/");
     this.name = parts[parts.length - 1];
