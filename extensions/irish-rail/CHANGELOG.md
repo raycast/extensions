@@ -1,6 +1,6 @@
 # Irish Rail Changelog
 
-## [1.1.0] - 2026-03-07
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
 - Support for intermediate destinations: trains now appear when your destination is any stop along the route, not just the final terminus
