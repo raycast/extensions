@@ -5,20 +5,33 @@ import { getPiholeAPI } from "./api/client";
 import { QueryBlockStatus } from "./interfaces";
 import { AddToListAction } from "./utils";
 
+const PAGE_SIZE = 100;
+
 export default function QueryLogCommand() {
   const [timeRange, setTimeRange] = useState("3600");
 
   const {
     isLoading,
     data: queryLogs,
+    pagination,
     revalidate,
-  } = useCachedPromise((range) => getPiholeAPI().getQueryLogs(parseInt(range)), [timeRange], {
-    keepPreviousData: true,
-  });
+  } = useCachedPromise(
+    (range: string) => async (options: { page: number; cursor?: number }) => {
+      const result = await getPiholeAPI().getQueryLogs(parseInt(range), PAGE_SIZE, options.cursor);
+      return {
+        data: result.data,
+        hasMore: result.hasMore,
+        cursor: result.cursor,
+      };
+    },
+    [timeRange],
+    { keepPreviousData: true },
+  );
 
   return (
     <List
       isLoading={isLoading}
+      pagination={pagination}
       navigationTitle="Query Log"
       searchBarPlaceholder="Search for domains"
       searchBarAccessory={

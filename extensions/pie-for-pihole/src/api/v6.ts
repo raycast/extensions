@@ -1,10 +1,4 @@
-import {
-  type ClientDetails,
-  type DomainDetails,
-  QueryBlockStatus,
-  type QueryLog,
-  type SubscriptionList,
-} from "../interfaces";
+import { type ClientDetails, type DomainDetails, QueryBlockStatus, type SubscriptionList } from "../interfaces";
 import { SessionManager } from "./session";
 import { formatTimestamp } from "./shared";
 import type {
@@ -14,6 +8,7 @@ import type {
   Group,
   NetworkDevice,
   NormalizedSummary,
+  PaginatedQueryLogs,
   PiholeAPI,
   QueryTypeBreakdown,
   SystemInfo,
@@ -69,6 +64,7 @@ interface V6Query {
 
 interface V6QueriesResponse {
   queries: V6Query[];
+  cursor?: number;
 }
 
 interface V6TopDomainsResponse {
@@ -120,18 +116,28 @@ export class PiholeV6 implements PiholeAPI {
     };
   }
 
-  async getQueryLogs(seconds: number): Promise<QueryLog[]> {
+  async getQueryLogs(seconds: number, pageSize = 100, cursor?: number): Promise<PaginatedQueryLogs> {
     const now = Math.floor(Date.now() / 1000);
     const from = now - seconds;
-    const length = Math.min(Math.max(Math.ceil((seconds / 3600) * 100), 100), 3000);
-    const data = await this.session.request<V6QueriesResponse>(`/queries?from=${from}&until=${now}&length=${length}`);
+    let url = `/queries?from=${from}&until=${now}&length=${pageSize}`;
+    if (cursor !== undefined) {
+      url += `&cursor=${cursor}`;
+    }
+    const data = await this.session.request<V6QueriesResponse>(url);
+    const queries = (data.queries ?? [])
+      .sort((a, b) => b.time - a.time)
+      .map((q) => ({
+        timestamp: formatTimestamp(q.time),
+        domain: q.domain,
+        client: q.client?.name || q.client?.ip || "unknown",
+        blockStatus: this.parseV6Status(q.status),
+      }));
 
-    return (data.queries ?? []).reverse().map((q) => ({
-      timestamp: formatTimestamp(q.time),
-      domain: q.domain,
-      client: q.client?.name || q.client?.ip || "unknown",
-      blockStatus: this.parseV6Status(q.status),
-    }));
+    return {
+      data: queries,
+      hasMore: data.cursor != null && (data.queries?.length ?? 0) >= pageSize,
+      cursor: data.cursor,
+    };
   }
 
   async getTopQueries(count: number): Promise<{ topAllowed: DomainDetails[]; topBlocked: DomainDetails[] }> {

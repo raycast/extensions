@@ -82,9 +82,15 @@ export interface DomainEntry {
   groups: string[];
 }
 
+export interface PaginatedQueryLogs {
+  data: QueryLog[];
+  hasMore: boolean;
+  cursor?: number;
+}
+
 export interface PiholeAPI {
   getSummary(): Promise<NormalizedSummary>;
-  getQueryLogs(seconds: number): Promise<QueryLog[]>;
+  getQueryLogs(seconds: number, pageSize?: number, cursor?: number): Promise<PaginatedQueryLogs>;
   getTopQueries(count: number): Promise<{ topAllowed: DomainDetails[]; topBlocked: DomainDetails[] }>;
   enable(): Promise<void>;
   disable(duration?: number): Promise<void>;

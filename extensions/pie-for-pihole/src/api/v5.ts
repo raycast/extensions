@@ -1,15 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
-import {
-  type ClientDetails,
-  QueryBlockStatus,
-  type QueryLog,
-  type QueryLogs,
-  type SummaryInfo,
-  type TopQueries,
-} from "../interfaces";
+import { type ClientDetails, QueryBlockStatus, type QueryLogs, type SummaryInfo, type TopQueries } from "../interfaces";
 import { buildBaseURL } from "../utils";
 import { fetchWithTimeout, formatTimestamp, PiholeConnectionError } from "./shared";
-import type { DomainEntry, NormalizedSummary, PiholeAPI, QueryTypeBreakdown } from "./types";
+import type { DomainEntry, NormalizedSummary, PaginatedQueryLogs, PiholeAPI, QueryTypeBreakdown } from "./types";
 
 export class PiholeV5 implements PiholeAPI {
   private baseURL: string;
@@ -44,18 +37,25 @@ export class PiholeV5 implements PiholeAPI {
     };
   }
 
-  async getQueryLogs(seconds: number): Promise<QueryLog[]> {
-    const response = await fetchWithTimeout(this.url(`getAllQueries=${seconds}`));
+  async getQueryLogs(seconds: number): Promise<PaginatedQueryLogs> {
+    const now = Math.floor(Date.now() / 1000);
+    const from = now - seconds;
+    const response = await fetchWithTimeout(this.url(`getAllQueries&from=${from}&until=${now}`));
     if (!response.ok) {
       throw new PiholeConnectionError("Failed to fetch query logs from Pi-hole.");
     }
     const { data } = (await response.json()) as QueryLogs;
-    return data.reverse().map((entry) => ({
-      timestamp: formatTimestamp(parseInt(entry[0])),
-      domain: entry[2],
-      client: entry[3],
-      blockStatus: this.parseBlockStatus(entry[4]),
-    }));
+    return {
+      data: data
+        .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
+        .map((entry) => ({
+          timestamp: formatTimestamp(parseInt(entry[0])),
+          domain: entry[2],
+          client: entry[3],
+          blockStatus: this.parseBlockStatus(entry[4]),
+        })),
+      hasMore: false,
+    };
   }
 
   async getTopQueries(count: number): Promise<{
