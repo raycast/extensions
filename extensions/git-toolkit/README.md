@@ -19,7 +19,7 @@ View the git status of all repos in a project group at a glance.
 
 - **Ahead/Behind Tracking** — Shows how many commits each repo is ahead or behind its upstream
 - **Dirty Detection** — Highlights repos with uncommitted changes
-- **Section Grouping** — Repos sorted by status: Dirty, Diverged, Ahead, Behind, Clean
+- **Section Grouping** — Repos sorted by status: Dirty, Diverged, Ahead, Behind, No Upstream, Clean
 - **Quick Pull** — Pull a single repo directly from the status view
 
 ## Setup

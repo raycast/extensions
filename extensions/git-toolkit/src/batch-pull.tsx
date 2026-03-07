@@ -24,36 +24,41 @@ function PullProgress({ group }: { group: ProjectGroup }) {
   const startPull = useCallback(
     async (repoList: Repo[]) => {
       setIsPulling(true);
-      const targets = repoList.map((r, i) => ({ ...r, index: i }));
-      let done = 0;
-      const total = targets.length;
-      setProgress({ done: 0, total });
+      try {
+        const targets = repoList.map((r, i) => ({ ...r, index: i }));
+        let done = 0;
+        const total = targets.length;
+        setProgress({ done: 0, total });
 
-      const results = new Map<number, { status: RepoStatus; error?: string }>();
-      targets.forEach((r) => updateRepo(r.index, "pulling"));
+        const results = new Map<number, { status: RepoStatus; error?: string }>();
+        targets.forEach((r) => updateRepo(r.index, "pulling"));
 
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Pulling ${group.name}...`,
-        message: `0/${total}`,
-      });
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: `Pulling ${group.name}...`,
+          message: `0/${total}`,
+        });
 
-      await parallelPull(targets, maxParallel, (index, status, error) => {
-        updateRepo(index, status, error);
-        results.set(index, { status, error });
-        done++;
-        setProgress({ done, total });
-        toast.message = `${done}/${total}`;
-      });
+        await parallelPull(targets, maxParallel, (index, status, error) => {
+          updateRepo(index, status, error);
+          results.set(index, { status, error });
+          done++;
+          setProgress({ done, total });
+          toast.message = `${done}/${total}`;
+        });
 
-      const updated = Array.from(results.values()).filter((r) => r.status === "updated").length;
-      const failed = Array.from(results.values()).filter((r) => r.status === "error").length;
-      const dirty = Array.from(results.values()).filter((r) => r.status === "dirty").length;
+        const updated = Array.from(results.values()).filter((r) => r.status === "updated").length;
+        const failed = Array.from(results.values()).filter((r) => r.status === "error").length;
+        const dirty = Array.from(results.values()).filter((r) => r.status === "dirty").length;
 
-      toast.style = failed > 0 ? Toast.Style.Failure : Toast.Style.Success;
-      toast.title = `Done: ${updated} updated, ${failed} failed, ${dirty} skipped`;
-      toast.message = undefined;
-      setIsPulling(false);
+        toast.style = failed > 0 ? Toast.Style.Failure : Toast.Style.Success;
+        toast.title = `Done: ${updated} updated, ${failed} failed, ${dirty} skipped`;
+        toast.message = undefined;
+      } catch (error) {
+        showToast({ style: Toast.Style.Failure, title: "Batch pull failed", message: String(error) });
+      } finally {
+        setIsPulling(false);
+      }
     },
     [group.name, maxParallel, updateRepo],
   );
