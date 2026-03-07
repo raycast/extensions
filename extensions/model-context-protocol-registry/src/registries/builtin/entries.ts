@@ -334,6 +334,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "sanity",
+    title: "Sanity",
+    description:
+      "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
+    icon: "sanity.svg",
+    homepage: "https://www.sanity.io/docs/ai/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sanity.io", "--transport", "http-only"],
+    },
+  },
+  {
     name: "sentry",
     title: "Sentry",
     description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
