@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Icon,
-  launchCommand,
-  LaunchType,
-  MenuBarExtra,
-  open,
-  showHUD,
-} from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, open, showHUD } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getBookmarks, Bookmark } from "./lib/api";
 
@@ -22,16 +15,10 @@ export default function BucketMenuBar() {
   });
 
   const recent = (bookmarks ?? []).slice(0, MAX_ITEMS);
-  const featured = (bookmarks ?? [])
-    .filter((b) => b.featured)
-    .slice(0, MAX_ITEMS);
+  const featured = (bookmarks ?? []).filter((b) => b.featured).slice(0, MAX_ITEMS);
 
   return (
-    <MenuBarExtra
-      icon={Icon.Bookmark}
-      tooltip="Bucket Bookmarks"
-      isLoading={isLoading}
-    >
+    <MenuBarExtra icon={Icon.Bookmark} tooltip="Bucket Bookmarks" isLoading={isLoading}>
       <MenuBarExtra.Item
         title="Save from Clipboard"
         icon={Icon.Plus}

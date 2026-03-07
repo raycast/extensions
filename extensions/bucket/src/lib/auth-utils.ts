@@ -1,14 +1,4 @@
-import {
-  getPreferenceValues,
-  LocalStorage,
-  showToast,
-  Toast,
-} from "@raycast/api";
-
-interface Preferences {
-  apiToken?: string;
-  authMethod: "apiKey" | "device";
-}
+import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 
 export async function isAuthenticated(): Promise<boolean> {
   const prefs = getPreferenceValues<Preferences>();

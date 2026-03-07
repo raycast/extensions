@@ -1,21 +1,7 @@
 import React from "react";
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  createBookmark,
-  getFolders,
-  Folder,
-  moveBookmarksToFolder,
-} from "./lib/api";
+import { createBookmark, getFolders, Folder, moveBookmarksToFolder } from "./lib/api";
 
 export default function SaveBookmark() {
   const [isLoading, setIsLoading] = useState(false);
@@ -64,11 +50,9 @@ export default function SaveBookmark() {
 
       // Move to folder if selected
       if (values.folderId && bookmark._id) {
-        await moveBookmarksToFolder(values.folderId, [bookmark._id]).catch(
-          () => {
-            // Non-fatal — bookmark is saved, just not in folder
-          },
-        );
+        await moveBookmarksToFolder(values.folderId, [bookmark._id]).catch(() => {
+          // Non-fatal — bookmark is saved, just not in folder
+        });
       }
 
       await showHUD("✅ Bookmark saved!");
@@ -89,11 +73,7 @@ export default function SaveBookmark() {
       navigationTitle="Save Bookmark"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Bookmark"
-            icon={Icon.Bookmark}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Save Bookmark" icon={Icon.Bookmark} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -106,26 +86,13 @@ export default function SaveBookmark() {
         info={clipboardUrl ? "Detected from clipboard" : undefined}
       />
       <Form.TextField id="title" title="Title" placeholder="Optional title" />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional description"
-      />
-      <Form.TextField
-        id="tags"
-        title="Tags"
-        placeholder="Comma-separated tags, e.g. design, tools"
-      />
+      <Form.TextArea id="description" title="Description" placeholder="Optional description" />
+      <Form.TextField id="tags" title="Tags" placeholder="Comma-separated tags, e.g. design, tools" />
       {folders.length > 0 && (
         <Form.Dropdown id="folderId" title="Folder" defaultValue="">
           <Form.Dropdown.Item value="" title="No folder" />
           {folders.map((f) => (
-            <Form.Dropdown.Item
-              value={f._id}
-              title={f.name}
-              icon={f.icon ?? Icon.Folder}
-              key={f._id}
-            />
+            <Form.Dropdown.Item value={f._id} title={f.name} icon={f.icon ?? Icon.Folder} key={f._id} />
           ))}
         </Form.Dropdown>
       )}

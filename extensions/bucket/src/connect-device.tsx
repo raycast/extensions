@@ -20,13 +20,22 @@ export default function ConnectDevice() {
   const [code, setCode] = useState<string | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<
-    "initializing" | "pending" | "approved" | "rejected" | "expired"
-  >("initializing");
+  const [status, setStatus] = useState<"initializing" | "pending" | "approved" | "rejected" | "expired">(
+    "initializing",
+  );
   const { pop } = useNavigation();
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     initializeDeviceConnection();
+
+    // Cleanup: cancel any pending timers when component unmounts
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, []);
 
   async function initializeDeviceConnection() {
@@ -95,7 +104,7 @@ export default function ConnectDevice() {
           await showHUD("✅ Device connected successfully!");
 
           // Close the view after a short delay
-          setTimeout(() => {
+          timerRef.current = setTimeout(() => {
             pop();
           }, 1000);
           return;
@@ -123,11 +132,11 @@ export default function ConnectDevice() {
 
         // Still pending, continue polling
         attempts++;
-        setTimeout(poll, 5000);
+        timerRef.current = setTimeout(poll, 5000);
       } catch (err) {
         console.error("Polling error:", err);
         attempts++;
-        setTimeout(poll, 5000);
+        timerRef.current = setTimeout(poll, 5000);
       }
     };
 
@@ -156,9 +165,7 @@ export default function ConnectDevice() {
     }
 
     // Pending state
-    const formattedCode = code
-      ? `${code.slice(0, 3)}-${code.slice(3)}`
-      : "------";
+    const formattedCode = code ? `${code.slice(0, 3)}-${code.slice(3)}` : "------";
 
     return `# 🔗 Connect Your Device
 
@@ -190,19 +197,9 @@ This window will automatically close once the connection is approved.`;
       markdown={getMarkdown()}
       actions={
         <ActionPanel>
-          {url && status === "pending" && (
-            <Action
-              title="Open Web App"
-              icon={Icon.Globe}
-              onAction={() => open(url)}
-            />
-          )}
+          {url && status === "pending" && <Action title="Open Web App" icon={Icon.Globe} onAction={() => open(url)} />}
           {code && status === "pending" && (
-            <Action.CopyToClipboard
-              title="Copy Code"
-              content={code}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
+            <Action.CopyToClipboard title="Copy Code" content={code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           )}
           {(status === "rejected" || status === "expired" || error) && (
             <Action

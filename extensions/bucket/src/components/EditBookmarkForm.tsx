@@ -1,31 +1,13 @@
 import React from "react";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { Bookmark, updateBookmark } from "../lib/api";
 
-export default function EditBookmarkForm({
-  bookmark,
-  onSave,
-}: {
-  bookmark: Bookmark;
-  onSave: () => void;
-}) {
+export default function EditBookmarkForm({ bookmark, onSave }: { bookmark: Bookmark; onSave: () => void }) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(values: {
-    title: string;
-    description: string;
-    tags: string;
-    isPrivate: boolean;
-  }) {
+  async function handleSubmit(values: { title: string; description: string; tags: string; isPrivate: boolean }) {
     setIsLoading(true);
     try {
       await updateBookmark(bookmark._id, {
@@ -67,12 +49,7 @@ export default function EditBookmarkForm({
       }
     >
       <Form.Description title="URL" text={bookmark.url} />
-      <Form.TextField
-        id="title"
-        title="Title"
-        defaultValue={bookmark.title ?? ""}
-        placeholder="Bookmark title"
-      />
+      <Form.TextField id="title" title="Title" defaultValue={bookmark.title ?? ""} placeholder="Bookmark title" />
       <Form.TextArea
         id="description"
         title="Description"
@@ -85,11 +62,7 @@ export default function EditBookmarkForm({
         defaultValue={(bookmark.tags ?? []).join(", ")}
         placeholder="Comma-separated tags"
       />
-      <Form.Checkbox
-        id="isPrivate"
-        label="Private"
-        defaultValue={bookmark.isPrivate ?? false}
-      />
+      <Form.Checkbox id="isPrivate" label="Private" defaultValue={bookmark.isPrivate ?? false} />
     </Form>
   );
 }

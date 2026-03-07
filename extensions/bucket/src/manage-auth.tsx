@@ -38,8 +38,7 @@ export default function ManageAuth() {
   async function handleDisconnect() {
     const confirmed = await confirmAlert({
       title: "Disconnect Device",
-      message:
-        "Are you sure you want to disconnect this device? You'll need to reconnect to use Bucket.",
+      message: "Are you sure you want to disconnect this device? You'll need to reconnect to use Bucket.",
       primaryAction: {
         title: "Disconnect",
         style: Alert.ActionStyle.Destructive,
@@ -83,19 +82,13 @@ export default function ManageAuth() {
             subtitle="Connect your device or add an API token"
             actions={
               <ActionPanel>
-                <Action
-                  title="Connect Device"
-                  icon={Icon.Link}
-                  onAction={() => push(<ConnectDevice />)}
-                />
+                <Action title="Connect Device" icon={Icon.Link} onAction={() => push(<ConnectDevice />)} />
                 <Action
                   title="Open Preferences"
                   icon={Icon.Gear}
                   onAction={() => {
                     // This will open Raycast preferences
-                    showHUD(
-                      "Open Raycast Preferences → Extensions → Bucket to add an API token",
-                    );
+                    showHUD("Open Raycast Preferences → Extensions → Bucket to add an API token");
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "," }}
                 />
@@ -121,11 +114,7 @@ export default function ManageAuth() {
                   onAction={handleDisconnect}
                 />
               ) : (
-                <Action
-                  title="Connect Device"
-                  icon={Icon.Link}
-                  onAction={() => push(<ConnectDevice />)}
-                />
+                <Action title="Connect Device" icon={Icon.Link} onAction={() => push(<ConnectDevice />)} />
               )}
             </ActionPanel>
           }
@@ -156,10 +145,7 @@ export default function ManageAuth() {
           subtitle="Create a token in the web app"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Web App"
-                url="https://bucket.aevr.space/settings"
-              />
+              <Action.OpenInBrowser title="Open Web App" url="https://bucket.aevr.space/settings" />
             </ActionPanel>
           }
         />

@@ -14,22 +14,12 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import {
-  deleteBookmark,
-  Bookmark,
-  getBookmarks,
-  updateBookmark,
-  triggerOrganize,
-} from "./lib/api";
+import { deleteBookmark, Bookmark, getBookmarks, updateBookmark, triggerOrganize } from "./lib/api";
 import EditBookmarkForm from "./components/EditBookmarkForm";
 
 export default function SearchBookmarks() {
   const [searchText, setSearchText] = useState("");
-  const {
-    data: bookmarks,
-    isLoading,
-    revalidate,
-  } = useCachedPromise(getBookmarks, [], { keepPreviousData: true });
+  const { data: bookmarks, isLoading, revalidate } = useCachedPromise(getBookmarks, [], { keepPreviousData: true });
 
   const filtered = (bookmarks ?? []).filter((b) => {
     const q = searchText.toLowerCase();
@@ -107,19 +97,14 @@ export default function SearchBookmarks() {
       throttle
     >
       {filtered.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No bookmarks found"
-          description="Try a different search or save a new bookmark."
-        />
+        <List.EmptyView title="No bookmarks found" description="Try a different search or save a new bookmark." />
       ) : (
         filtered.map((bookmark) => (
           <BookmarkItem
             bookmark={bookmark}
             onDelete={handleDelete}
             onToggleFeatured={handleToggleFeatured}
-            onEdit={() =>
-              push(<EditBookmarkForm bookmark={bookmark} onSave={revalidate} />)
-            }
+            onEdit={() => push(<EditBookmarkForm bookmark={bookmark} onSave={revalidate} />)}
             onOrganize={handleOrganize}
             key={bookmark._id}
           />
@@ -189,9 +174,7 @@ function BookmarkItem({
               shortcut={{ modifiers: ["cmd"], key: "e" }}
             />
             <Action
-              title={
-                bookmark.featured ? "Remove from Featured" : "Mark as Featured"
-              }
+              title={bookmark.featured ? "Remove from Featured" : "Mark as Featured"}
               icon={Icon.Star}
               onAction={() => onToggleFeatured(bookmark)}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
