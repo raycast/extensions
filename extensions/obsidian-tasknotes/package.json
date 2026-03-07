@@ -1,0 +1,141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-tasknotes",
+  "title": "Obsidian TaskNotes",
+  "description": "Bring TaskNotes task management to Raycast with natural language parsing. Create, view, and manage your Obsidian tasks using everyday language—no complex syntax required.",
+  "icon": "icon.png",
+  "author": "rodi01",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "port",
+      "type": "textfield",
+      "title": "API Port",
+      "description": "Port for the TaskNotes API endpoint (default: 8080)",
+      "default": "8080",
+      "required": true
+    },
+    {
+      "name": "defaultLocale",
+      "type": "textfield",
+      "title": "Default Locale",
+      "description": "Locale to use for new tasks (e.g. en, pt, es)",
+      "default": "en",
+      "required": true
+    },
+    {
+      "name": "AuthToken",
+      "type": "password",
+      "title": "Auth Token",
+      "description": "Optional bearer token to authenticate requests to the TaskNotes API",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "defaultStatus",
+      "type": "dropdown",
+      "title": "Default Status",
+      "description": "Default status to apply to quick-add tasks",
+      "default": "open",
+      "required": false,
+      "data": [
+        {
+          "title": "None",
+          "value": ""
+        },
+        {
+          "title": "Open",
+          "value": "open"
+        },
+        {
+          "title": "In Progress",
+          "value": "in-progress"
+        },
+        {
+          "title": "Done",
+          "value": "done"
+        }
+      ]
+    },
+    {
+      "name": "defaultTags",
+      "type": "textfield",
+      "title": "Default Tags (Optional)",
+      "description": "Default tags to add to tasks (comma-separated, e.g. personal, project)",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "defaultContexts",
+      "type": "textfield",
+      "title": "Default Contexts (Optional)",
+      "description": "Default contexts to add to tasks (comma-separated, e.g. work, home)",
+      "default": "",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "tasknotes-create-task",
+      "title": "Create Task",
+      "description": "Create a task on Obsidian using TaskNotes",
+      "mode": "view"
+    },
+    {
+      "name": "tasknotes-quick-add-task",
+      "title": "Quick Add Task",
+      "description": "Quickly add a task in Obsidian TaskNotes using natural language",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "task",
+          "type": "text",
+          "required": true,
+          "placeholder": "Buy groceries tomorrow at 3pm @home #errands high priority"
+        }
+      ]
+    },
+    {
+      "name": "tasknotes-my-tasks",
+      "title": "My TaskNotes",
+      "description": "List and manage your TaskNotes tasks",
+      "mode": "view"
+    },
+    {
+      "name": "tasknotes-menu-bar",
+      "title": "TaskNotes Menu Bar",
+      "description": "Show your TaskNotes tasks in the menu bar for quick access",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@date-fns/utc": "^2.1.1",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^1.17.0",
+    "@types/lodash": "^4.17.20",
+    "date-fns": "^4.1.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
